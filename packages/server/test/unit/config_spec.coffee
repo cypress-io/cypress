@@ -478,6 +478,9 @@ describe "lib/config", ->
     it "viewportHeight=660", ->
       @defaults "viewportHeight", 660
 
+    it "userAgent=null", ->
+      @defaults("userAgent", null)
+
     it "baseUrl=null", ->
       @defaults "baseUrl", null
 

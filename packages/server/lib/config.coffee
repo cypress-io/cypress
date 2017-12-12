@@ -42,8 +42,9 @@ configKeys = toWords """
   screenshotOnHeadlessFailure     defaultCommandTimeout
   testFiles                       execTimeout
   trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  viewportWidth                   requestTimeout
-  viewportHeight                  responseTimeout
+  userAgent                       requestTimeout
+  viewportWidth                   responseTimeout
+  viewportHeight
   videoRecording
   videoCompression
   videoUploadOnPasses
@@ -57,6 +58,7 @@ defaults = {
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
+  userAgent:                     null
   isTextTerminal:                false
   reporter:                      "spec"
   reporterOptions:               null
