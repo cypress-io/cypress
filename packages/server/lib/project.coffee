@@ -116,7 +116,7 @@ class Project extends EE
         )
         .then =>
           Promise.join(
-            @watchSupportFile(cfg)
+            @checkSupportFile(cfg)
             @watchPluginsFile(cfg, options)
           )
 
@@ -168,24 +168,12 @@ class Project extends EE
     .then ->
       process.chdir(localCwd)
 
-  watchSupportFile: (cfg) ->
+  checkSupportFile: (cfg) ->
     if supportFile = cfg.supportFile
       fs.pathExists(supportFile)
       .then (found) =>
         if not found
           errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
-
-        relativePath = path.relative(cfg.projectRoot, cfg.supportFile)
-        if cfg.watchForFileChanges isnt false
-          options = {
-            onChange: _.bind(@server.onTestFileChange, @server, relativePath)
-          }
-        preprocessor.getFile(relativePath, cfg, options)
-        ## ignore errors b/c we're just setting up the watching. errors
-        ## are handled by the spec controller
-        .catch ->
-    else
-      Promise.resolve()
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
