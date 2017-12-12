@@ -6,8 +6,6 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import AutosizeInput from 'react-input-autosize'
 
-import selectorHelperModel from './selector-helper-model'
-
 const defaultCopyText = 'Copy to clipboard'
 
 // mouseleave fires when entering a child element, so make sure we're
@@ -28,10 +26,11 @@ class Footer extends Component {
   @observable showingMethodPicker = false
 
   render () {
-    const selectorText = `cy.${selectorHelperModel.method.name}('${selectorHelperModel.selector || selectorHelperModel.method.example}')`
+    const { model } = this.props
+    const selectorText = `cy.${model.method.name}('${model.selector || model.method.example}')`
 
     return (
-      <div className={`selector-helper method-${selectorHelperModel.method.name}`}>
+      <div className={`selector-helper method-${model.method.name}`}>
         <p>Click on an element to view its selector or type in a selector to view the elements it matches</p>
         <div className='selector-scroll-wrap'>
           <div className='selector'>
@@ -49,12 +48,12 @@ class Footer extends Component {
               <AutosizeInput
                 ref={(node) => this._input = node}
                 className={cs('selector-input', {
-                  'empty': !selectorHelperModel[`${selectorHelperModel.method.name}Selector`],
+                  'empty': !model[`${model.method.name}Selector`],
                 })}
-                name={`${selectorHelperModel.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
-                value={selectorHelperModel.selector}
+                name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
+                value={model.selector}
                 onChange={this._updateSelector}
-                placeholder={selectorHelperModel.method.example}
+                placeholder={model.method.example}
               />
               <span className='syntax-string'>{'\''}</span>
               <span className='syntax-operator'>)</span>
@@ -72,10 +71,10 @@ class Footer extends Component {
             </Tooltip>
           </div>
           <div className={cs('info', {
-            'is-invalid': !selectorHelperModel.isValid || !selectorHelperModel.numElements,
+            'is-invalid': !model.isValid || !model.numElements,
           })}>
-            <div className='spacer'>cy.{selectorHelperModel.method.name}({'\''}</div>
-            {selectorHelperModel.playgroundInfo}
+            <div className='spacer'>cy.{model.method.name}({'\''}</div>
+            {model.info}
           </div>
         </div>
         <button className='close' onClick={this._toggleSelectorHelper}>
@@ -88,7 +87,7 @@ class Footer extends Component {
   componentDidMount () {
     // focuses input when user changes method
     this._disposeAutorun = autorun(() => {
-      selectorHelperModel.method.name
+      this.props.model.method.name
       this._input.focus()
     })
 
@@ -101,16 +100,18 @@ class Footer extends Component {
   }
 
   _methodSelector () {
+    const { model } = this.props
+
     return (
       <span className={cs('method', {
         'is-showing': this.showingMethodPicker,
       })}>
-        <span className='syntax-method' onClick={this._toggleMethodPicker}>{selectorHelperModel.method.name}</span>
+        <span className='syntax-method' onClick={this._toggleMethodPicker}>{model.method.name}</span>
         <div className='method-picker'>
-          {_.map(selectorHelperModel.methods, (method) => (
+          {_.map(model.methods, (method) => (
             <div
               key={method.name}
-              className={cs({ 'is-chosen': selectorHelperModel.method.name === method.name })}
+              className={cs({ 'is-chosen': model.method.name === method.name })}
               onClick={() => this._setMethod(method)}
             >{method.name}</div>
           ))}
@@ -132,13 +133,13 @@ class Footer extends Component {
   }
 
   @action _setMethod (method) {
-    if (method.name !== selectorHelperModel.method.name) {
-      selectorHelperModel.setMethod(method)
+    if (method.name !== this.props.model.method.name) {
+      this.props.model.setMethod(method)
     }
   }
 
   _setHighlight = (isShowing) => () => {
-    selectorHelperModel.setShowingHighlight(isShowing)
+    this.props.model.setShowingHighlight(isShowing)
   }
 
   _copyToClipboard = () => {
@@ -160,13 +161,14 @@ class Footer extends Component {
   }
 
   _toggleSelectorHelper = () => {
-    selectorHelperModel.toggleEnabled()
+    this.props.model.toggleEnabled()
   }
 
   _updateSelector = (e) => {
-    selectorHelperModel.setShowInfo(true)
-    selectorHelperModel.setSelector(e.target.value)
-    selectorHelperModel.setShowingHighlight(true)
+    const { model } = this.props
+    model.setShowInfo(true)
+    model.setSelector(e.target.value)
+    model.setShowingHighlight(true)
   }
 }
 

@@ -17,7 +17,7 @@ const Footer = observer(({ state }) => {
     <footer className={cs({
       'showing-selector-helper': selectorHelperModel.isEnabled,
     })}>
-      <SelectorHelper />
+      <SelectorHelper model={selectorHelperModel} />
       <div className='controls'>
         <Tooltip
           title={selectorHelperModel.isEnabled ? 'Close Selector Helper' : 'Open Selector Helper'}
