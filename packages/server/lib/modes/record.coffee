@@ -15,7 +15,7 @@ Project    = require("../project")
 Stats      = require("../stats")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
-debug      = require("debug")("cypress:server")
+debug      = require("debug")("cypress:server:record")
 commitInfo = require("@cypress/commit-info")
 la         = require("lazy-ass")
 check      = require("check-more-types")
@@ -109,8 +109,15 @@ getHeadlessRunOptions = (options, integrationFolder, specName) ->
   _.merge({}, options, opts)
 
 module.exports = {
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, specs,
-  parallel, parallelId) ->
+  generateProjectBuildId: (options) ->
+    {
+      projectId, projectPath, projectName,
+      recordKey,
+      group, groupId,
+      specPattern, specs,
+      parallel, parallelId
+    } = options
+
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
@@ -401,10 +408,19 @@ module.exports = {
           combineStats = ->
             Stats.combine(specStats.map(R.prop("stats")))
 
-          @generateProjectBuildId(projectId, projectPath, projectName, key,
-            options.group, options.groupId,
-            specPattern, specs,
-            options.parallel, options.parallelId)
+          projectBuildOptions = {
+            projectId,
+            projectPath,
+            projectName,
+            recordKey: key,
+            group: options.group,
+            groupId: options.groupId,
+            specPattern,
+            specs,
+            parallel: options.parallel,
+            parallelId: options.parallelId
+          }
+          @generateProjectBuildId(projectBuildOptions)
           .then (buildId) =>
             if buildId
               debug("build id %s", buildId)
