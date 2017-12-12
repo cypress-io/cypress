@@ -21,7 +21,7 @@ class SelectorHelperModel {
     return this.method.name === 'get' ? this.getSelector : this.containsSelector
   }
 
-  @computed get playgroundInfo () {
+  @computed get info () {
     if (!this.isValid) {
       return 'Invalid selector'
     }
