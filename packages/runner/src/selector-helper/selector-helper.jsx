@@ -31,7 +31,7 @@ class Footer extends Component {
     const selectorText = `cy.${selectorHelperModel.method.name}('${selectorHelperModel.selector || selectorHelperModel.method.example}')`
 
     return (
-      <div className='selector-helper'>
+      <div className={`selector-helper method-${selectorHelperModel.method.name}`}>
         <p>Click on an element to view its selector or type in a selector to view the elements it matches</p>
         <div className='selector-scroll-wrap'>
           <div className='selector'>
@@ -48,7 +48,10 @@ class Footer extends Component {
               <span className='syntax-string'>{'\''}</span>
               <AutosizeInput
                 ref={(node) => this._input = node}
-                className='selector-input'
+                className={cs('selector-input', {
+                  'empty': !selectorHelperModel[`${selectorHelperModel.method.name}Selector`],
+                })}
+                name={`${selectorHelperModel.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
                 value={selectorHelperModel.selector}
                 onChange={this._updateSelector}
                 placeholder={selectorHelperModel.method.example}
@@ -123,7 +126,6 @@ class Footer extends Component {
 
   @action _setMethod (method) {
     if (method.name !== selectorHelperModel.method.name) {
-      selectorHelperModel.clearSelector()
       selectorHelperModel.setMethod(method)
     }
     this._setShowingMethodPicker(false)

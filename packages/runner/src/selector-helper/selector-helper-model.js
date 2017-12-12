@@ -8,13 +8,18 @@ const methods = [
 class SelectorHelperModel {
   methods = methods
 
-  @observable selector = ''
+  @observable getSelector = ''
+  @observable containsSelector = ''
   @observable isEnabled = false
   @observable isShowingHighlight = false
   @observable isValid = true
   @observable numElements = 0
   @observable method = methods[0]
   @observable showInfo = true
+
+  @computed get selector () {
+    return this.method.name === 'get' ? this.getSelector : this.containsSelector
+  }
 
   @computed get playgroundInfo () {
     if (!this.isValid) {
@@ -30,9 +35,7 @@ class SelectorHelperModel {
     this.isEnabled = !this.isEnabled
 
     if (!this.isEnabled) {
-      this.selector = null
       this.isShowingHighlight = false
-      this.resetMethod()
     }
   }
 
@@ -41,12 +44,11 @@ class SelectorHelperModel {
   }
 
   @action setSelector (selector) {
-    this.selector = selector
-  }
-
-  @action clearSelector () {
-    this.selector = ''
-    this.numElements = 0
+    if (this.method.name === 'get') {
+      this.getSelector = selector
+    } else {
+      this.containsSelector = selector
+    }
   }
 
   @action setNumElements (numElements) {
