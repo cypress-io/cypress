@@ -91,10 +91,13 @@ class Footer extends Component {
       selectorHelperModel.method.name
       this._input.focus()
     })
+
+    document.body.addEventListener('click', this._onOutsideClick, false)
   }
 
   componentWillUnmount () {
     this._disposeAutorun()
+    document.body.removeEventListern('click', this._onOutsideClick)
   }
 
   _methodSelector () {
@@ -116,6 +119,10 @@ class Footer extends Component {
     )
   }
 
+  _onOutsideClick = () => {
+    this._setShowingMethodPicker(false)
+  }
+
   _toggleMethodPicker = () => {
     this._setShowingMethodPicker(!this.showingMethodPicker)
   }
@@ -128,7 +135,6 @@ class Footer extends Component {
     if (method.name !== selectorHelperModel.method.name) {
       selectorHelperModel.setMethod(method)
     }
-    this._setShowingMethodPicker(false)
   }
 
   _setHighlight = (isShowing) => () => {
