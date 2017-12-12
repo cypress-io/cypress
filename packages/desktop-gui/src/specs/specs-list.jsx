@@ -45,7 +45,7 @@ class Specs extends Component {
                 : null
             }
           </div>
-          <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-link ${allActiveClass}`}>
+          <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-default ${allActiveClass}`}>
             <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
           Run All Tests
           </a>

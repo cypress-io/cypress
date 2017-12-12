@@ -51,8 +51,7 @@ describe "Specs List", ->
       @openProject.resolve(@config)
 
     it "displays modal", ->
-      cy
-        .contains(".modal", "To help you get started").should("be.visible")
+      cy.contains(".modal", "To help you get started").should("be.visible")
 
     it "displays the scaffolded files", ->
       cy.get(".folder-preview-onboarding").within ->
@@ -100,7 +99,7 @@ describe "Specs List", ->
       it "has play icon", ->
         cy
           .contains(".btn", "Run All Tests")
-            .find("i").should("have.class", "fa-play")
+          .find("i").should("have.class", "fa-play")
 
       it "triggers browser launch on click of button", ->
         cy
@@ -136,18 +135,18 @@ describe "Specs List", ->
     context "collapsing specs", ->
       it "sets folder collapsed when clicked", ->
         cy.get(".folder:first").should("have.class", "folder-expanded")
-        cy.get(".folder .folder-display-name:first").click({ force: true })
+        cy.get(".folder .folder-display-name:first").click()
         cy.get(".folder:first").should("have.class", "folder-collapsed")
 
       it "hides children when folder clicked", ->
         cy.get(".file").should("have.length", 7)
-        cy.get(".folder .folder-display-name:first").click({ force: true })
+        cy.get(".folder .folder-display-name:first").click()
         cy.get(".file").should("have.length", 2)
 
       it "sets folder expanded when clicked twice", ->
-        cy.get(".folder .folder-display-name:first").click({ force: true })
+        cy.get(".folder .folder-display-name:first").click()
         cy.get(".folder:first").should("have.class", "folder-collapsed")
-        cy.get(".folder .folder-display-name:first").click({ force: true })
+        cy.get(".folder .folder-display-name:first").click()
         cy.get(".folder:first").should("have.class", "folder-expanded")
 
       it "hides children for every folder collapsed", ->
@@ -185,11 +184,11 @@ describe "Specs List", ->
         cy.get(lastExpandedFolderSelector).click()
         cy.get(".file").should("have.length", 0)
 
-    context "Filtering specs", ->
+    context "Searching specs", ->
       beforeEach ->
         cy.get("#search-input").type("new")
-      
-      it "should display only one spec", -> 
+
+      it "should display only one spec", ->
         cy.get(".list-as-table .file")
           .should("have.length", 1)
           .and("contain", "account_new_spec.coffee")
@@ -209,8 +208,7 @@ describe "Specs List", ->
         cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
       it "closes then launches browser on click of file", ->
-        cy
-          .get("@firstSpec")
+        cy.get("@firstSpec")
           .click()
           .then ->
             expect(@ipc.closeBrowser).to.be.called
@@ -220,8 +218,7 @@ describe "Specs List", ->
             expect(launchArgs[0].spec).to.equal("cypress/integration/app_spec.coffee")
 
       it "adds 'active' class on click", ->
-        cy
-          .get("@firstSpec")
+        cy.get("@firstSpec")
           .should("not.have.class", "active")
           .click()
           .should("have.class", "active")
@@ -275,15 +272,13 @@ describe "Specs List", ->
       @openProject.resolve(@config)
 
     it "updates spec list selected on specChanged", ->
-      cy
-        .get(".file a")
+      cy.get(".file a")
         .contains("a", "app_spec.coffee").as("firstSpec")
         .then ->
           @ipc.onSpecChanged.yield(null, "integration/app_spec.coffee")
-        .get("@firstSpec").should("have.class", "active")
+      cy.get("@firstSpec").should("have.class", "active")
         .then ->
           @ipc.onSpecChanged.yield(null, "integration/accounts/account_new_spec.coffee")
-        .get("@firstSpec").should("not.have.class", "active")
-      cy
-        .contains("a", "account_new_spec.coffee")
-          .should("have.class", "active")
+      cy.get("@firstSpec").should("not.have.class", "active")
+      cy.contains("a", "account_new_spec.coffee")
+        .should("have.class", "active")
