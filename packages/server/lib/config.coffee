@@ -2,6 +2,7 @@ _        = require("lodash")
 path     = require("path")
 Promise  = require("bluebird")
 fs       = require("fs-extra")
+deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 errors   = require("./errors")
@@ -12,11 +13,16 @@ v        = require("./util/validation")
 log      = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
-## cypress following by _
+## cypress followed by _
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
+oneOrMoreSpacesRe = /\s+/
 
-toWords = (str) -> str.trim().split(/\s+/)
+toWords = (str) ->
+  str.trim().split(oneOrMoreSpacesRe)
+
+isCypressEnvLike = (key) ->
+  cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
@@ -27,7 +33,7 @@ configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
   chromeWebSecurity               integrationFolder
-  environmentVariables            pluginsFile
+  env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
   port                            supportFolder
@@ -45,16 +51,13 @@ configKeys = toWords """
   waitForAnimations
 """
 
-isCypressEnvLike = (key) ->
-  cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
-
 defaults = {
   port:                          null
   hosts:                         null
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
-  isTextTerminal:                    false
+  isTextTerminal:                false
   reporter:                      "spec"
   reporterOptions:               null
   clientRoute:                   "/__/"
@@ -184,21 +187,25 @@ module.exports = {
 
     _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
 
-    _.each @whitelist(options), (val, key) ->
+    _
+    .chain(@whitelist(options))
+    .omit("env")
+    .each (val, key) ->
       resolved[key] = "cli"
       config[key] = val
       return
+    .value()
 
     if url = config.baseUrl
       ## always strip trailing slashes
       config.baseUrl = _.trimEnd(url, "/")
 
-    _.defaults config, defaults
+    _.defaults(config, defaults)
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
-    config.environmentVariables = @parseEnv(config, resolved)
-    config.env = process.env["CYPRESS_ENV"]
+    config.env = @parseEnv(config, options.env, resolved)
+    config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
 
     ## when headless
@@ -229,6 +236,32 @@ module.exports = {
     obj.resolved = @resolveConfigValues(config, defaults, resolved)
 
     return obj
+
+  updateWithPluginValues: (cfg, overrides = {}) ->
+    ## diff the overrides with cfg
+    ## including nested objects (env)
+    diffs = deepDiff(cfg, overrides, true)
+
+    setResolvedOn = (resolvedObj, obj) ->
+      _.each obj, (val, key) ->
+        if _.isObject(val)
+          ## recurse setting overrides
+          ## inside of this nested objected
+          setResolvedOn(resolvedObj[key], val)
+        else
+          ## override the resolved value
+          resolvedObj[key] = {
+            value: val
+            from: "plugin"
+          }
+
+    ## for each override go through
+    ## and change the resolved values of cfg
+    ## to point to the plugin
+    setResolvedOn(cfg.resolved, diffs)
+
+    ## merge cfg into overrides
+    _.defaultsDeep(diffs, cfg)
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
     ## pick out only the keys found in configKeys
@@ -418,8 +451,8 @@ module.exports = {
 
     return obj
 
-  parseEnv: (cfg, resolved = {}) ->
-    envVars = resolved.environmentVariables = {}
+  parseEnv: (cfg, envCLI, resolved = {}) ->
+    envVars = resolved.env = {}
 
     resolveFrom = (from, obj = {}) ->
       _.each obj, (val, key) ->
@@ -431,7 +464,7 @@ module.exports = {
     envCfg  = cfg.env ? {}
     envFile = cfg.envFile ? {}
     envProc = @getProcessEnvVars(process.env) ? {}
-    envCLI  = cfg.environmentVariables ? {}
+    envCLI  = envCLI ? {}
 
     matchesConfigKey = (key) ->
       if _.has(cfg, key)

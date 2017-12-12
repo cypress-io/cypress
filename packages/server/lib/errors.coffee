@@ -251,7 +251,7 @@ API = {
 
         Your pluginsFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The pluginsFile must be a .js or .coffee file.
 
-        Correct your cypress.json, create or fix the file, or set pluginsFile to false if a plugins file is not necessary for your project.
+        Please fix this, or set 'pluginsFile' to 'false' if a plugins file is not necessary for your project.
 
         #{if arg2 then "The following error was thrown:" else ""}
 
@@ -273,13 +273,13 @@ API = {
 
         We invoked the function exported by '#{arg1}', but it threw an error.
 
-        This is likely an error in the code of the plugins file itself.
+        The following error was thrown:
 
         #{chalk.yellow(arg2)}
         """.trim()
       when "PLUGINS_ERROR"
         """
-        The following error was thrown by a plugin. We've stopped running your tests because this likely interrupts behavior critical to them.
+        The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
         #{chalk.yellow(arg1)}
         """.trim()
