@@ -80,9 +80,7 @@ class Footer extends Component {
             }
           </div>
         </div>
-        <button className='close' onClick={this._toggleSelectorHelper}>
-          <i className='fa fa-remove' />
-        </button>
+        <button className='close' onClick={this._toggleSelectorHelper}>x</button>
       </div>
     )
   }
