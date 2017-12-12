@@ -15,7 +15,7 @@ module.exports = async (pluginConfig, options) => {
    * 2. We can use `semantic-release`'s fallback strategy, searching for a matching git tag,
    *    but we must update the git tag format to be compatible with the monorepo workflow.
    **/
-  if (!result.gitHead) {
+  if (result && !result.gitHead) {
     return {
       ...result,
       ...await getVersionHead(null, await gitTag(result.version))
