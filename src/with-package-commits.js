@@ -1,3 +1,4 @@
+const debug = require('debug')('semantic-release:commit-analyzer');
 const pkgUp = require('pkg-up');
 const { getCommitFiles, getGitRoot } = require('./git-utils');
 const overrideOption = require('./override-option');
@@ -17,10 +18,19 @@ const withFiles = async commits => {
 
 const withPackageCommits = async commits => {
   const packagePath = await getPackagePath();
+  debug('Filter commits by package path: "%s"', packagePath);
   const commitsWithFiles = await withFiles(commits);
 
   return commitsWithFiles.filter(
-    ({ files }) => files.some(path => path.includes(packagePath))
+    ({ files, subject }) => {
+      const matchingPath = files.find(path => path.indexOf(packagePath) === 0);
+
+      if (matchingPath) {
+        debug('Including commit "%s" because it modified package file "%s".', subject, matchingPath);
+      }
+
+      return !!matchingPath;
+    }
   );
 };
 
