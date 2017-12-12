@@ -99,6 +99,7 @@ module.exports = {
     debugReturnedBuild = (info) ->
       debug("received API response with buildId %s", info.buildId)
       debug("and list of specs to run", info.specs)
+      debug("entire response", info)
 
     body = _.pick(options, [
       "projectId"
@@ -150,9 +151,9 @@ module.exports = {
       ## and version of the browser we're
       ## about to be running on
       { displayName, version } = browser
-      
+
       system.info()
-      .then (systemInfo) ->        
+      .then (systemInfo) ->
         instanceOptions = {
           spec:           options.spec
           browserName:    displayName

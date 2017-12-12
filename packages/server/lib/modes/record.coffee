@@ -157,8 +157,9 @@ module.exports = {
         specPattern
         parallelId
       }
+      # TODO do not leave console.logs ⚠️
       # console.log('createRunOptions')
-      console.log(createRunOptions)
+      # console.log(createRunOptions)
 
       api.createRun(createRunOptions)
       .catch (err) ->
@@ -303,6 +304,39 @@ module.exports = {
       ## dont log exceptions if we have a 503 status code
       logException(err) unless err.statusCode is 503
 
+  restoreOutputAfterTests: ->
+    headless.allDone()
+    stdout.restore()
+
+  uploadArtifacts: (instanceId, stats, captured) ->
+    debug("uploading asserts for instance", instanceId)
+
+    didUploadAssets = false
+
+    @uploadAssets(instanceId, stats, captured.toString())
+    .then (ret) ->
+      didUploadAssets = ret isnt null
+    .return(stats)
+    .finally =>
+      if didUploadAssets
+        debug("uploading stdout for instance", instanceId)
+        @uploadStdout(instanceId, captured.toString())
+
+  # when test run finished and we get test stats
+  # we need to upload test results and clean up
+  afterTestRun: (instanceId, captured) -> (stats = {}) =>
+    debug("finished headless run with %d failed %s",
+      stats.failures, pluralize("test", stats.failures, true))
+
+    Promise.resolve()
+    .then () =>
+      ## if we got a instanceId then attempt to
+      ## upload these assets
+      if instanceId
+        @uploadArtifacts(instanceId, stats, captured)
+    .finally @restoreOutputAfterTests
+    .return(stats)
+
   run: (options) ->
     { projectPath, browser } = options
 
@@ -372,6 +406,11 @@ module.exports = {
             specPattern, specs,
             options.parallel, options.parallelId)
           .then (buildId) =>
+            if buildId
+              debug("build id %s", buildId)
+            else
+              debug("did not generate build id for project")
+
             # the common machineId will be initialized by the
             # first created instance
             commonMachineId = null
@@ -411,8 +450,7 @@ module.exports = {
                 else
                   @createInstance(buildId, specName, commonMachineId, browser)
 
-              newInstance()
-              .then (instance = {}) =>
+              runSpecForInstance = (instance = {}) =>
                 la(isInstanceInfo(instance), "invalid new instance info", instance)
 
                 {instanceId, machineId} = instance
@@ -421,8 +459,6 @@ module.exports = {
                 if not commonMachineId and machineId
                   commonMachineId = machineId
                   debug("remembering common machine %s id for instance", machineId)
-
-                didUploadAssets       = false
 
                 headlessRunOptions = getHeadlessRunOptions(options, integrationFolder, specName)
 
@@ -433,29 +469,10 @@ module.exports = {
                 .tapCatch (e) ->
                   debug("headless run error")
                   debug(e)
-                .then (stats = {}) =>
-                  debug("finished headless run with %d failed %s",
-                    stats.failures, pluralize("test", stats.failures, true))
-                  ## if we got a instanceId then attempt to
-                  ## upload these assets
-                  if instanceId
-                    debug("uploading asserts for instance", instanceId)
-                    @uploadAssets(instanceId, stats, captured.toString())
-                    .then (ret) ->
-                      didUploadAssets = ret isnt null
-                    .return(stats)
-                    .finally =>
-                      headless.allDone()
+                .then @afterTestRun(instanceId, captured)
 
-                      if didUploadAssets
-                        stdout.restore()
-                        debug("uploading stdout for instance", instanceId)
-                        @uploadStdout(instanceId, captured.toString())
-
-                  else
-                    stdout.restore()
-                    headless.allDone()
-                    return stats
+              newInstance()
+              .then runSpecForInstance
               .then saveSpecStats
               .then startNextSpecIfNeeded
 
