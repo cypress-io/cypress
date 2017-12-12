@@ -61,7 +61,9 @@ describe "lib/plugins/index", ->
 
     describe "loaded message", ->
       beforeEach ->
-        @ipc.on.withArgs("loaded").yields([{
+        @config = {}
+
+        @ipc.on.withArgs("loaded").yields(@config, [{
           event: "some:event"
           callbackId: 0
         }])
@@ -81,16 +83,29 @@ describe "lib/plugins/index", ->
           expect(value).to.equal("value")
 
     describe "load:error message", ->
-      beforeEach ->
-        @ipc.on.withArgs("load:error").yields("PLUGINS_FILE_ERROR", "path/to/pluginsFile.js", "error message")
+      context "PLUGINS_FILE_ERROR", ->
+        beforeEach ->
+          @ipc.on.withArgs("load:error").yields("PLUGINS_FILE_ERROR", "path/to/pluginsFile.js", "error message stack")
 
-      it "rejects plugins.init", ->
-        plugins.init({ pluginsFile: "cypress-plugin" })
-        .catch (err) =>
-          expect(err.message).to.contain("The plugins file is missing or invalid")
-          expect(err.message).to.contain("path/to/pluginsFile.js")
-          expect(err.message).to.contain("The following error was thrown")
-          expect(err.message).to.contain("error message")
+        it "rejects plugins.init", ->
+          plugins.init({ pluginsFile: "cypress-plugin" })
+          .catch (err) =>
+            expect(err.message).to.contain("The plugins file is missing or invalid")
+            expect(err.message).to.contain("path/to/pluginsFile.js")
+            expect(err.message).to.contain("The following error was thrown")
+            expect(err.message).to.contain("error message stack")
+
+      context "PLUGINS_FUNCTION_ERROR", ->
+        beforeEach ->
+          @ipc.on.withArgs("load:error").yields("PLUGINS_FUNCTION_ERROR", "path/to/pluginsFile.js", "error message stack")
+
+        it "rejects plugins.init", ->
+          plugins.init({ pluginsFile: "cypress-plugin" })
+          .catch (err) =>
+            expect(err.message).to.contain("The function exported by the plugins file threw an error.")
+            expect(err.message).to.contain("path/to/pluginsFile.js")
+            expect(err.message).to.contain("The following error was thrown:")
+            expect(err.message).to.contain("error message stack")
 
     describe "error message", ->
       beforeEach ->

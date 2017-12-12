@@ -13,7 +13,7 @@ import App from './app'
 const createProps = () => ({
   config: {
     browsers: [],
-    env: 'tst',
+    cypressEnv: 'tst',
     integrationFolder: '',
     numTestsKeptInMemory: 1,
     projectName: '',
