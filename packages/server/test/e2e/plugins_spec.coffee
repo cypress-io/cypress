@@ -6,7 +6,7 @@ workingPreprocessor = Fixtures.projectPath("working-preprocessor")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
 
 describe "e2e plugins", ->
-  e2e.setup({npmInstall: true})
+  e2e.setup()
 
   it "passes", ->
     e2e.exec(@, {

@@ -51,14 +51,15 @@ Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/
 
 
   ✓ is another spec
+  ✓ is another spec
 
-  1 passing
+  2 passing
 
 
   (Tests Finished)
 
-  - Tests:           1
-  - Passes:          1
+  - Tests:           2
+  - Passes:          2
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds
