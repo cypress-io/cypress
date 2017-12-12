@@ -7,12 +7,8 @@
       padding: 6px 8px;
       position: relative;
 
-      p {
-        font-size: 12px;
-        padding-right: 20px;
-      }
-
       .selector {
+        font-size: 1em;
         align-items: center;
         display: flex;
         position: relative;
@@ -40,11 +36,15 @@
       .selector-input {
         input {
           border: solid 1px #d3d3d3;;
-          color: #50a160;
+          color: #428BCA;
           max-width: 160px;
           min-width: 26px;
           outline: none;
-          padding: 2px 4px;
+          padding: 8px 10px 7px;
+          font-weight: 500;
+          border-radius: 6px;
+          box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+          font-family: Consolas, Monaco, 'Andale Mono', monospace;
 
           // https://github.com/JedWatson/react-input-autosize#csp-and-the-ie-clear-indicator
           &::-ms-clear { display: none; }
@@ -61,6 +61,18 @@
 
       .method {
         position: relative;
+
+        button {
+          background-color: #fff;
+          color: #565554;
+          padding: 8px 5px 7px;
+          border-color: #ccc;
+          font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
+          &:focus, &:active {
+            outline: 0;
+          }
+        }
 
         .syntax-method {
           cursor: pointer;
@@ -98,7 +110,6 @@
               color: #f8f8f8;
             }
           }
-
         }
 
         &.is-showing .method-picker {
@@ -107,15 +118,16 @@
       }
 
       .copy-to-clipboard {
-        background: #e3e3e3;
-        border: solid 1px #d3d3d3;
-        border-radius: 3px;
+        background: #eee;
+        border: solid 1px #ddd;
+        border-radius: 6px;
         color: #333;
         margin-left: 4px;
-        padding: 3px 6px;
+        padding: 8px 10px 7px;
 
         &:hover {
-          background: #d3d3d3;
+          background: #eee;
+          color: #333;
         }
       }
 

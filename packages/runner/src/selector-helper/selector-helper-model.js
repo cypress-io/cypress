@@ -1,8 +1,8 @@
 import { action, computed, observable } from 'mobx'
 
 const methods = [
-  { name: 'get', example: '.foo' },
-  { name: 'contains', example: 'Lorem ipsum' },
+  { name: 'get', example: '' },
+  { name: 'contains', example: '' },
 ]
 
 class SelectorHelperModel {
@@ -26,9 +26,15 @@ class SelectorHelperModel {
       return 'Invalid selector'
     }
 
-    if (!this.showInfo || !this.selector) return ''
+    return this.numElements === 1 ? '1 matched element' : `${this.numElements} matched elements`
+  }
 
-    return this.numElements === 1 ? '1 element' : `${this.numElements} elements`
+  @computed get playgroundText () {
+    if (!this.isValid) {
+      return 'x'
+    }
+
+    return this.numElements
   }
 
   @action toggleEnabled () {

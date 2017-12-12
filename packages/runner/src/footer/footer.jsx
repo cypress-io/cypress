@@ -20,7 +20,7 @@ const Footer = observer(({ state }) => {
       <SelectorHelper />
       <div className='controls'>
         <Tooltip
-          title={selectorHelperModel.isEnabled ? 'Close Selector Helper' : 'Open Selector Helper'}
+          title='Select an element in your app to see a suggested selector'
         >
           <button onClick={toggleSelectorHelper}>
             <i className='fa fa-mouse-pointer' />
