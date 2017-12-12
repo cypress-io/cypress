@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import cs from 'classnames'
-import { action, observable } from 'mobx'
+import { action, autorun, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
@@ -47,6 +47,7 @@ class Footer extends Component {
               <span className='syntax-operator'>(</span>
               <span className='syntax-string'>{'\''}</span>
               <AutosizeInput
+                ref={(node) => this._input = node}
                 className='selector-input'
                 value={selectorHelperModel.selector}
                 onChange={this._updateSelector}
@@ -79,6 +80,18 @@ class Footer extends Component {
         </button>
       </div>
     )
+  }
+
+  componentDidMount () {
+    // focuses input when user changes method
+    this._disposeAutorun = autorun(() => {
+      selectorHelperModel.method.name
+      this._input.focus()
+    })
+  }
+
+  componentWillUnmount () {
+    this._disposeAutorun()
   }
 
   _methodSelector () {
