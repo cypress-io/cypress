@@ -156,6 +156,7 @@ class Footer extends Component {
   }
 
   _updateSelector = (e) => {
+    selectorHelperModel.setShowInfo(true)
     selectorHelperModel.setSelector(e.target.value)
     selectorHelperModel.setShowingHighlight(true)
   }

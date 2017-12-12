@@ -209,7 +209,7 @@ export default class AutIframe {
   }
 
   toggleSelectorHelper = (isEnabled) => {
-    selectorHelperModel.clearSelector()
+    selectorHelperModel.setShowInfo(false)
 
     const $body = this._body()
     if (!$body) return
@@ -260,6 +260,7 @@ export default class AutIframe {
       $body,
       showTooltip: true,
       onClick: () => {
+        selectorHelperModel.setShowInfo(false)
         selectorHelperModel.setNumElements(1)
         selectorHelperModel.resetMethod()
         selectorHelperModel.setSelector(selector)

@@ -14,13 +14,14 @@ class SelectorHelperModel {
   @observable isValid = true
   @observable numElements = 0
   @observable method = methods[0]
+  @observable showInfo = true
 
   @computed get playgroundInfo () {
     if (!this.isValid) {
       return 'Invalid selector'
     }
 
-    if (!this.selector) return ''
+    if (!this.showInfo || !this.selector) return ''
 
     return this.numElements === 1 ? '1 element' : `${this.numElements} elements`
   }
@@ -62,6 +63,10 @@ class SelectorHelperModel {
 
   @action resetMethod () {
     this.method = methods[0]
+  }
+
+  @action setShowInfo (showInfo) {
+    this.showInfo = showInfo
   }
 }
 
