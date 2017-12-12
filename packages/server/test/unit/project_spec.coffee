@@ -139,7 +139,7 @@ describe "lib/project", ->
   context "#open", ->
     beforeEach ->
       @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
-      @sandbox.stub(@project, "watchSupportFile").resolves()
+      @sandbox.stub(@project, "checkSupportFile").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(Server.prototype, "open").resolves([])
@@ -158,9 +158,9 @@ describe "lib/project", ->
       @project.open().then =>
         expect(@project.scaffold).to.be.calledWith(@config)
 
-    it "calls #watchSupportFile with server config when scaffolding is finished", ->
+    it "calls #checkSupportFile with server config when scaffolding is finished", ->
       @project.open().then =>
-        expect(@project.watchSupportFile).to.be.calledWith(@config)
+        expect(@project.checkSupportFile).to.be.calledWith(@config)
 
     it "calls #getConfig options", ->
       opts = {}
@@ -316,7 +316,7 @@ describe "lib/project", ->
 
       expect(stub).to.be.calledOnce
 
-  context "#watchSupportFile", ->
+  context "#checkSupportFile", ->
     beforeEach ->
       @sandbox.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
@@ -328,30 +328,13 @@ describe "lib/project", ->
       }
 
     it "does nothing when {supportFile: false}", ->
-      @project.watchSupportFile({supportFile: false})
+      ret = @project.checkSupportFile({supportFile: false})
 
-      expect(preprocessor.getFile).not.to.be.called
-
-    it "calls preprocessor.getFile with relative path to file", ->
-      @project.watchSupportFile(@config)
-      .then () =>
-        expect(preprocessor.getFile).to.be.calledWith("foo/bar.js", @config)
-
-    it "calls server.onTestFileChange when file changes", ->
-      @project.watchSupportFile(@config)
-      .then () =>
-        preprocessor.getFile.firstCall.args[2].onChange()
-        expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
-
-    it "does not add change listener when {watchForFileChanges: false}", ->
-      @config.watchForFileChanges = false
-      @project.watchSupportFile(@config)
-      .then () =>
-        expect(preprocessor.getFile.firstCall.args[2]).to.be.undefined
+      expect(ret).to.be.undefined
 
     it "throws when support file does not exist", ->
       fs.pathExists.resolves(false)
-      @project.watchSupportFile(@config)
+      @project.checkSupportFile(@config)
       .catch (e) ->
         expect(e.message).to.include("The support file is missing or invalid.")
 
