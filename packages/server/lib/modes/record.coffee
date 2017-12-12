@@ -38,6 +38,59 @@ warn = (message) ->
   la(check.unemptyString(message), "missing warning message", message)
   console.log("Warning:", message)
 
+getProjectId = (projectPath) ->
+  la(check.unemptyString(projectPath), "missing project path", projectPath)
+  Project.id(projectPath)
+  .catch ->
+    errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
+
+checkFoundSpecs = (specPattern, specs) ->
+  la(check.maybe.string(specPattern), "invalid spec pattern", specPattern)
+  la(check.strings(specs), "could not discover list of specs", specs)
+
+  if check.empty(specs)
+    console.log("⚠️  cannot find any specs")
+    if specPattern
+      console.log("matching spec pattern", specPattern)
+    # should we exit with error?
+  else
+    debug("found %s for pattern %s", pluralize("spec", specs.length, true), specPattern)
+    debug(specs)
+
+getRecordKey = (options) ->
+  options.key or process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
+
+grabNextSpecFromApi = (buildId, parallelId) ->
+  debug("asking to lock next spec for build %s", buildId)
+  la(check.unemptyString(buildId), "missing buildId")
+  la(check.unemptyString(parallelId), "missing parallelId")
+
+  api.grabNextSpecForBuild({buildId, parallelId})
+  .catch (err) ->
+    errors.warning("DASHBOARD_CANNOT_GRAB_NEXT_SPEC", err)
+
+    ## dont log exceptions if we have a 503 status code
+    if err.statusCode isnt 503
+      logException(err)
+      .return(null)
+    else
+      null
+
+getNextSpecFn = ({buildId, parallel, parallelId, specs}) ->
+  if parallel and parallelId and buildId
+    # ask API for next spec to run
+    getNextSpec = () =>
+      debug("asking API for next spec for build %s", buildId)
+      grabNextSpecFromApi(buildId, parallelId)
+  else
+    # iterate over specs ourselves using async function
+    getNextItem = listToFunction(specs)
+
+    getNextSpec = () ->
+      Promise.resolve(getNextItem())
+
+  getNextSpec
+
 module.exports = {
   generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, specs,
   parallel, parallelId) ->
@@ -106,20 +159,6 @@ module.exports = {
             ## and return null
             logException(err)
             .return(null)
-
-  # hmm, is this a good name for a function that locks next spec to run
-  grabNextSpec: (buildId, parallelId) ->
-    debug("asking to lock next spec for build %s", buildId)
-    api.grabNextSpecForBuild({buildId, parallelId})
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_GRAB_NEXT_SPEC", err)
-
-      ## dont log exceptions if we have a 503 status code
-      if err.statusCode isnt 503
-        logException(err)
-        .return(null)
-      else
-        null
 
   createInstance: (buildId, spec, machineId, browser) ->
     debug("creating instance for build %s", buildId)
@@ -253,6 +292,7 @@ module.exports = {
     ## default browser
     browser ?= "electron"
 
+    ## TODO split captured output per spec!
     captured = stdout.capture()
 
     ## if we are using the ci flag that means
@@ -277,15 +317,16 @@ module.exports = {
     else
       options.parallelId = null
 
-    isParallelRun = options.parallel and options.parallelId
+    # isParallelRun = options.parallel and options.parallelId
 
-    Project.add(projectPath)
-    .then ->
-      Project.id(projectPath)
-      .catch ->
-        errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
+    Promise.resolve()
+    .then () ->
+      Project.add(projectPath)
+    .then () ->
+      getProjectId(projectPath)
     .then (projectId) =>
       ## store the projectId for later use
+      debug("project id %s", projectId)
       options.projectId = projectId
 
       Project.config(projectPath)
@@ -299,17 +340,9 @@ module.exports = {
         specPattern = options.spec
         Project.findSpecs(cfg, specPattern)
         .then (specs) =>
-          la(check.strings(specs), "could not discover list of specs", specs)
-          if check.empty(specs)
-            console.log("⚠️  cannot find any specs")
-            if specPattern
-              console.log("matching spec pattern", specPattern)
-            # should we exit with error?
-          else
-            debug("found %s for pattern %s", pluralize("spec", specs.length, true), specPattern)
-            debug(specs)
+          checkFoundSpecs(specPattern, specs)
 
-          key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
+          key = getRecordKey(options)
 
           # TODO combine inidividual stats if we need to
           specStats = []
@@ -326,22 +359,21 @@ module.exports = {
             # first created instance
             commonMachineId = null
 
-            if isParallelRun and buildId
-              getNextSpec = () =>
-                debug("asking API for next spec for build %s", buildId)
-                @grabNextSpec(buildId, options.parallelId)
-            else
-              # iterate over specs ourselves using async function
-              getNextItem = listToFunction(specs)
-
-              getNextSpec = () ->
-                Promise.resolve(getNextItem())
+            getNextSpec = getNextSpecFn({
+              parallel: options.parallel,
+              parallelId: options.parallelId,
+              buildId,
+              specs
+            })
+            la(check.fn(getNextSpec), "could not decide how to get next spec")
 
             startNextSpecIfNeeded = ->
               getNextSpec()
               .then (nextSpec) ->
                 if nextSpec
                   testNextSpec(nextSpec)
+                else
+                  debug("nothing left to test")
 
             # specName wrt project integration folder
             testNextSpec = (specName) =>
@@ -357,6 +389,7 @@ module.exports = {
               newInstance = () =>
                 ## bail if we dont have a buildId
                 if not buildId
+                  debug("we don't have a build ID")
                   Promise.resolve({})
                 else
                   @createInstance(buildId, specName, commonMachineId, browser)
@@ -384,7 +417,8 @@ module.exports = {
 
                 # makes sure we have Bluebird promise all the way
                 Promise.resolve()
-                .then () -> headless.run(options)
+                .then () ->
+                  headless.run(options)
                 .tapCatch (e) ->
                   debug("headless run error")
                   debug(e)

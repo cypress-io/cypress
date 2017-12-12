@@ -578,7 +578,6 @@ class Project extends EE
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 
   @findSpecsFromProjectConfig = (config, specPattern) ->
-    debug("finding specs for project %s", projectPath)
     la(check.unemptyString(config.projectRoot), "config is missing project root", config)
 
     ## if we have a spec pattern
@@ -598,6 +597,7 @@ class Project extends EE
     la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
 
     if check.unemptyString(projectPathOrConfig)
+      debug("finding specs for project %s", projectPathOrConfig)
       getConfig = () ->
         Project(projectPathOrConfig)
         .getConfig()
