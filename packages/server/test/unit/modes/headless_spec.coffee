@@ -33,7 +33,7 @@ describe "lib/modes/headless", ->
 
       options = {
         port: 8080
-        environmentVariables: {foo: "bar"}
+        env: {foo: "bar"}
         projectPath: "/_test-output/path/to/project/foo"
       }
 
@@ -43,7 +43,7 @@ describe "lib/modes/headless", ->
       expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
         port: 8080
         projectPath: "/_test-output/path/to/project/foo"
-        environmentVariables: {foo: "bar"}
+        env: {foo: "bar"}
       }, {
         morgan: false
         socketId: 1234

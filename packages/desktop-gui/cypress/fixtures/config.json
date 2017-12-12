@@ -27,9 +27,9 @@
   "clientUrlDisplay": "http://localhost:2020",
   "commandTimeout": 4000,
   "cypressHostUrl": "http://localhost:2020",
-  "env": "development",
-  "environmentVariables": {
-    
+  "cypressEnv": "development",
+  "env": {
+
   },
   "execTimeout": 60000,
   "fileServerFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
@@ -40,7 +40,7 @@
   "isHeadless": false,
   "isNewProject": false,
   "javascripts": [
-    
+
   ],
   "morgan": true,
   "namespace": "__cypress",
@@ -108,7 +108,7 @@
       "from": "default",
       "value": 4000
     },
-    "environmentVariables": {
+    "env": {
       "fileServerFolder": {
         "from": "default",
         "value": ""

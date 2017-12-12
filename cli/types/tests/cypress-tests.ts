@@ -57,3 +57,84 @@ namespace CypressLogsTest {
     message: ['foo', 'bar'],
   })
 }
+
+cy.wrap({ foo: [1, 2, 3] })
+  .its('foo')
+  .each((s: number) => {
+    s
+  })
+
+cy.wrap({ foo: ['bar', 'baz'] })
+  .its('foo')
+  .then(([first, second]) => {
+    first // $ExpectType string
+  })
+  .spread((first: string, second: string) => {
+    first // $ExpectType string
+    // return first as string
+  })
+  .each((s: string) => {
+    s // $ExpectType string
+  })
+  .then(s => {
+    s // $ExpectType string[]
+  })
+
+cy.get('.someSelector')
+  .each(($el, index, list) => {
+    $el // $ExpectType JQuery<HTMLElement>
+    index // $ExpectType number
+    list // $ExpectType HTMLElement[]
+  })
+
+cy.wrap(['bar', 'baz'])
+  .spread((first, second) => {
+    first // $ExpectType any
+  })
+
+cy.wrap({ foo: 'bar' })
+  .then(s => {
+    s // $ExpectType { foo: string; }
+    return s
+  })
+  .then(s => {
+    s // $ExpectType { foo: string; }
+  })
+  .then(s => s.foo)
+  .then(s => {
+    s // $ExpectType string
+  })
+
+cy.wait(['@foo', '@bar'])
+  .then(([first, second]) => {
+    first // $ExpectType WaitXHR
+  })
+
+cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
+  .then(subject => {
+    subject // $ExpectType { foo: string; }[]
+  })
+  .then(([first, second]) => {
+    first // $ExpectType { foo: string; }
+  })
+  .then(subject => {
+    subject // $ExpectType { foo: string; }[]
+  })
+  .then(([first, second]) => {
+    return first.foo + second.foo
+  })
+  .then(subject => {
+    subject // $ExpectType string
+  })
+
+  cy.wrap([1, 2, 3]).each((num: number, i, array) => {
+    return new Cypress.Promise((resolve) => {
+      setTimeout(() => {
+        resolve()
+      }, num * 100)
+    })
+  })
+
+cy.stub().withArgs('').log(false).as('foo')
+
+cy.spy().withArgs('').log(false).as('foo')
