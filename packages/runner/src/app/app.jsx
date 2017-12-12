@@ -123,7 +123,6 @@ App.propTypes = {
       majorVersion: PropTypes.string.isRequired,
       version: PropTypes.string.isRequired,
     })).isRequired,
-    cypressEnv: PropTypes.string.isRequired,
     integrationFolder: PropTypes.string.isRequired,
     numTestsKeptInMemory: PropTypes.number.isRequired,
     projectName: PropTypes.string.isRequired,

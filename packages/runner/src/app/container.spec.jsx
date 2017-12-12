@@ -14,7 +14,6 @@ import Container, { automationElementId } from './container'
 const createProps = () => ({
   config: {
     browsers: [],
-    cypressEnv: 'test',
     integrationFolder: '',
     numTestsKeptInMemory: 1,
     projectName: '',
