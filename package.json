@@ -4,6 +4,9 @@
   "description": "Plugins for `semantic-release` allowing it to be used with a monorepo.",
   "main": "index.js",
   "scripts": {
+    "format": "prettier --write --single-quote --trailing-comma es5",
+    "format:all": "yarn format \"./**/*.js\"",
+    "precommit": "lint-staged",
     "test": "echo \"No test specified\" && exit 0"
   },
   "license": "MIT",
@@ -18,7 +21,16 @@
     "read-pkg": "^3.0.0"
   },
   "devDependencies": {
+    "husky": "^0.14.3",
+    "lint-staged": "^6.0.0",
+    "prettier": "^1.9.2",
     "semantic-release": "^11.0.0",
     "semantic-release-github-pr": "^1.1.1"
+  },
+  "lint-staged": {
+    "*.js": [
+      "yarn format",
+      "git add"
+    ]
   }
 }
