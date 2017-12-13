@@ -71,17 +71,27 @@ module.exports = {
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)
 
-  _getArgs: (browserArgs = []) ->
-    args = defaultArgs.concat(browserArgs)
+  _getArgs: (options = {}) ->
+    args = defaultArgs.concat(options.browserArgs)
 
     if os.platform() is "linux"
       args.push("--disable-gpu")
       args.push("--no-sandbox")
 
+    if ua = options.userAgent
+      args.push("--user-agent=#{ua}")
+
+    if ps = options.proxyServer
+      args.push("--proxy-server=#{ps}")
+
+    if options.chromeWebSecurity is false
+      args.push("--disable-web-security")
+      args.push("--allow-running-insecure-content")
+
     args
 
   open: (browserName, url, options = {}, automation) ->
-    args = @_getArgs(options.browserArgs)
+    args = @_getArgs(options)
 
     Promise.all([
       ## ensure that we have a chrome profile dir
@@ -96,13 +106,6 @@ module.exports = {
       ## this overrides any previous user-data-dir args
       ## by being the last one
       args.push("--user-data-dir=#{dir}")
-
-      if ps = options.proxyServer
-        args.push("--proxy-server=#{ps}")
-
-      if options.chromeWebSecurity is false
-        args.push("--disable-web-security")
-        args.push("--allow-running-insecure-content")
 
       log("launch in chrome: %s, %s", url, args)
       utils.launch(browserName, url, args)

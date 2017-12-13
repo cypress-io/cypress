@@ -55,11 +55,21 @@ describe "lib/browsers/electron", ->
     beforeEach ->
       @sandbox.stub(menu, "set")
       @sandbox.stub(electron, "_setProxy").resolves()
+      @sandbox.stub(electron, "_setUserAgent")
 
     it "sets dev tools in menu", ->
       electron._launch(@win, @url, @options)
       .then ->
         expect(menu.set).to.be.calledWith({withDevTools: true})
+
+    it "sets user agent if options.userAgent", ->
+      electron._launch(@win, @url, @options)
+      .then ->
+        expect(electron._setUserAgent).not.to.be.called
+      .then =>
+        electron._launch(@win, @url, {userAgent: "foo"})
+      .then =>
+        expect(electron._setUserAgent).to.be.calledWith(@win.webContents, "foo")
 
     it "sets proxy if options.proxyServer", ->
       electron._launch(@win, @url, @options)
