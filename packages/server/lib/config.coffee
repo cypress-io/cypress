@@ -122,6 +122,7 @@ validationRules = {
   screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
   trashAssetsBeforeHeadlessRuns: v.isBoolean
+  userAgent: v.isString
   videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
   videoUploadOnPasses: v.isBoolean

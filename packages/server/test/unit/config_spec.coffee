@@ -199,6 +199,15 @@ describe "lib/config", ->
           @setup({integrationFolder: true})
           @expectValidationFails("be a string")
 
+      context "userAgent", ->
+        it "passes if a string", ->
+          @setup({userAgent: "_tests"})
+          @expectValidationPasses()
+
+        it "fails if not a string", ->
+          @setup({userAgent: true})
+          @expectValidationFails("be a string")
+
       context "numTestsKeptInMemory", ->
         it "passes if a number", ->
           @setup({numTestsKeptInMemory: 10})
