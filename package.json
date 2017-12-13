@@ -7,7 +7,7 @@
     "format": "prettier --write --single-quote --trailing-comma es5",
     "format:all": "yarn format \"./**/*.js\"",
     "precommit": "lint-staged",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "jest"
   },
   "license": "MIT",
   "peerDependencies": {
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "husky": "^0.14.3",
+    "jest": "^21.2.1",
     "lint-staged": "^6.0.0",
     "prettier": "^1.9.2",
     "semantic-release": "^11.0.0",
