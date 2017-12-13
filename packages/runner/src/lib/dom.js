@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
-import getUniqueSelector from 'unique-selector'
+import getUniqueSelector from '@cypress/unique-selector'
 
 import selectorHelperHighlight from '../selector-helper/highlight'
 
@@ -326,7 +326,9 @@ function getOuterSize (el) {
 }
 
 function getBestSelector (el) {
-  return getUniqueSelector(el)
+  return getUniqueSelector(el, {
+    selectorTypes: ['ID', 'Class', 'Tag', 'Attributes', 'NthChild'],
+  })
 }
 
 function isInViewport (win, el) {
