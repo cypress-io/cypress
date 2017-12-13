@@ -54,8 +54,7 @@ class Footer extends Component {
               name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
               value={model.selector}
               onChange={this._updateSelector}
-            />
-            <span>{'\''}</span>
+            /><span>{'\''}</span>
             <span>)</span>
           </div>
           <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
@@ -106,11 +105,13 @@ class Footer extends Component {
         </button>
         <div className='method-picker'>
           {_.map(model.methods, (method) => (
-            <div
-              key={method}
-              className={cs({ 'is-chosen': model.method === method })}
-              onClick={() => this._setMethod(method)}
-            >{method}</div>
+            model.method !== method ?
+              <div
+                key={method}
+                className={cs({ 'is-chosen': model.method === method })}
+                onClick={() => this._setMethod(method)}
+              >cy.{method}</div> :
+              null
           ))}
         </div>
       </span>

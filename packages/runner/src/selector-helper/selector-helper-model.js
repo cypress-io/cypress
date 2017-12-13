@@ -5,8 +5,8 @@ const methods = ['get', 'contains']
 class SelectorHelperModel {
   methods = methods
 
-  @observable getSelector = ''
-  @observable containsSelector = ''
+  @observable getSelector = 'body'
+  @observable containsSelector = 'Hello, World'
   @observable isEnabled = false
   @observable isShowingHighlight = false
   @observable isValid = true
