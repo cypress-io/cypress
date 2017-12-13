@@ -107,11 +107,11 @@ export default class State {
     this.height = height
   }
 
-  updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
-    this.windowWidth = windowWidth
-    this.windowHeight = windowHeight
-    this.absoluteReporterWidth = reporterWidth
-    this.headerHeight = headerHeight
+  @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+    if (windowWidth != null) this.windowWidth = windowWidth
+    if (windowHeight != null) this.windowHeight = windowHeight
+    if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
+    if (headerHeight != null) this.headerHeight = headerHeight
   }
 
   clearMessage () {

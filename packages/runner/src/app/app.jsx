@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { action, observable } from 'mobx'
+import { observable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
@@ -12,7 +12,6 @@ import windowUtil from '../lib/window-util'
 import State from '../lib/state'
 
 import Header from '../header/header'
-import Footer from '../footer/footer'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import Resizer from './resizer'
@@ -41,7 +40,6 @@ class App extends Component {
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
           />
-          <Footer state={this.props.state} />
         </div>
         <RunnerWrap
           className='container'
@@ -78,14 +76,14 @@ class App extends Component {
     const $header = $(findDOMNode(this.refs.header))
     const $reporterWrap = $(this.refs.reporterWrap)
 
-    this._onWindowResize = action('window:resize', () => {
+    this._onWindowResize = () => {
       state.updateWindowDimensions({
         windowWidth: $window.width(),
         windowHeight: $window.height(),
         reporterWidth: $reporterWrap.outerWidth(),
         headerHeight: $header.outerHeight(),
       })
-    })
+    }
 
     $window.on('resize', this._onWindowResize).trigger('resize')
   }

@@ -34,46 +34,44 @@ class Footer extends Component {
         'has-selector': !!model.selector,
         'no-elements': !model.isValid || !model.numElements,
       })}>
-        <div className='selector-scroll-wrap'>
-          <div className='selector'>
-            <div
-              ref={(node) => this._selectorWrap = node}
-              className='wrap'
-              onMouseOver={this._setHighlight(true)}
-              onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
-            >
-              <span>cy</span>
-              <span>.</span>
-              {this._methodSelector()}
-              <span>(</span>
-              <span>{'\''}</span>
-              <AutosizeInput
-                ref={(node) => this._input = node}
-                className={cs('selector-input', {
-                  'empty': !model[`${model.method}Selector`],
-                })}
-                name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
-                value={model.selector}
-                onChange={this._updateSelector}
-              />
-              <span>{'\''}</span>
-              <span>)</span>
-            </div>
-            <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-            <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
-              <button
-                ref={(node) => this._copyButton = node}
-                className='copy-to-clipboard'
-                onClick={this._copyToClipboard}
-                onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
-              >
-                <i className='fa fa-copy' />
-              </button>
-            </Tooltip>
-            <Tooltip title={model.infoHelp}>
-              <span className='info num-elements'>{model.info}</span>
-            </Tooltip>
+        <div className='selector'>
+          <div
+            ref={(node) => this._selectorWrap = node}
+            className='wrap'
+            onMouseOver={this._setHighlight(true)}
+            onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
+          >
+            <span>cy</span>
+            <span>.</span>
+            {this._methodSelector()}
+            <span>(</span>
+            <span>{'\''}</span>
+            <AutosizeInput
+              ref={(node) => this._input = node}
+              className={cs('selector-input', {
+                'empty': !model[`${model.method}Selector`],
+              })}
+              name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
+              value={model.selector}
+              onChange={this._updateSelector}
+            />
+            <span>{'\''}</span>
+            <span>)</span>
           </div>
+          <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
+          <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
+            <button
+              ref={(node) => this._copyButton = node}
+              className='copy-to-clipboard'
+              onClick={this._copyToClipboard}
+              onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
+            >
+              <i className='fa fa-copy' />
+            </button>
+          </Tooltip>
+          <Tooltip title={model.infoHelp}>
+            <span className='info num-elements'>{model.info}</span>
+          </Tooltip>
         </div>
         <button className='close' onClick={this._toggleSelectorHelper}>x</button>
       </div>
@@ -92,7 +90,7 @@ class Footer extends Component {
 
   componentWillUnmount () {
     this._disposeAutorun()
-    document.body.removeEventListern('click', this._onOutsideClick)
+    document.body.removeEventListener('click', this._onOutsideClick)
   }
 
   _methodSelector () {

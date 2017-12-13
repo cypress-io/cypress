@@ -1,6 +1,11 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Tooltip from '@cypress/react-tooltip'
+import { $ } from '@packages/driver'
+
+import SelectorHelper from '../selector-helper/selector-helper'
+import selectorHelperModel from '../selector-helper/selector-helper-model'
 
 @observer
 export default class Header extends Component {
@@ -13,19 +18,39 @@ export default class Header extends Component {
   render () {
     const { width, height, displayScale, defaults, isLoadingUrl, url, highlightUrl } = this.props.state
     const { showingViewportMenu } = this.state
+    const { state } = this.props
 
     return (
-      <header>
-        <div
-          className={cs('url-container', {
-            loading: isLoadingUrl,
-            highlighted: highlightUrl,
-          })}
-        >
-          <input className='url' value={url} readOnly onClick={this._openUrl} />
-          <span className='loading-container'>
-            ...loading <i className='fa fa-spinner fa-spin fa-pulse'></i>
-          </span>
+      <header
+        ref='header'
+        className={cs({
+          'showing-selector-helper': selectorHelperModel.isEnabled,
+        })}
+      >
+        <div className='sel-url-wrap'>
+          <Tooltip
+            title='Select an element in your app to see a suggested selector'
+            wrapperClassName='selector-helper-toggle-tooltip-wrapper'
+          >
+            <button
+              className='selector-helper-toggle'
+              onClick={this._toggleSelectorHelper}
+              disabled={state.isLoading || state.isRunning}
+            >
+              <i className='fa fa-mouse-pointer' />
+            </button>
+          </Tooltip>
+          <div
+            className={cs('url-container', {
+              'loading': isLoadingUrl,
+              'highlighted': highlightUrl,
+            })}
+          >
+            <input className='url' value={url} readOnly onClick={this._openUrl} />
+            <span className='loading-container'>
+              ...loading <i className='fa fa-spinner fa-spin fa-pulse'></i>
+            </span>
+          </div>
         </div>
         <ul className='menu'>
           <li className={cs('viewport-info', { open: showingViewportMenu })}>
@@ -51,8 +76,26 @@ export default class Header extends Component {
             </div>
           </li>
         </ul>
+        <SelectorHelper model={selectorHelperModel} />
       </header>
     )
+  }
+
+  componentDidMount () {
+    this.previousSelectorHelperEnabled = selectorHelperModel.isEnabled
+  }
+
+  componentDidUpdate () {
+    if (selectorHelperModel.isEnabled !== this.previousSelectorHelperEnabled) {
+      this.props.state.updateWindowDimensions({
+        headerHeight: $(this.refs.header).outerHeight(),
+      })
+      this.previousSelectorHelperEnabled = selectorHelperModel.isEnabled
+    }
+  }
+
+  _toggleSelectorHelper = () => {
+    selectorHelperModel.toggleEnabled()
   }
 
   _openUrl = () => {
