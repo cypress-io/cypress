@@ -1,9 +1,6 @@
 import { action, computed, observable } from 'mobx'
 
-const methods = [
-  { name: 'get', example: '' },
-  { name: 'contains', example: '' },
-]
+const methods = ['get', 'contains']
 
 class SelectorHelperModel {
   methods = methods
@@ -15,13 +12,12 @@ class SelectorHelperModel {
   @observable isValid = true
   @observable numElements = 0
   @observable method = methods[0]
-  @observable showInfo = true
 
   @computed get selector () {
-    return this.method.name === 'get' ? this.getSelector : this.containsSelector
+    return this.method === 'get' ? this.getSelector : this.containsSelector
   }
 
-  @computed get info () {
+  @computed get playgroundInfo () {
     if (!this.isValid) {
       return 'Invalid selector'
     }
@@ -50,7 +46,7 @@ class SelectorHelperModel {
   }
 
   @action setSelector (selector) {
-    if (this.method.name === 'get') {
+    if (this.method === 'get') {
       this.getSelector = selector
     } else {
       this.containsSelector = selector
@@ -71,10 +67,6 @@ class SelectorHelperModel {
 
   @action resetMethod () {
     this.method = methods[0]
-  }
-
-  @action setShowInfo (showInfo) {
-    this.showInfo = showInfo
   }
 }
 

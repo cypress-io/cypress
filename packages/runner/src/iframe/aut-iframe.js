@@ -209,8 +209,6 @@ export default class AutIframe {
   }
 
   toggleSelectorHelper = (isEnabled) => {
-    selectorHelperModel.setShowInfo(false)
-
     const $body = this._body()
     if (!$body) return
 
@@ -260,7 +258,6 @@ export default class AutIframe {
       $body,
       showTooltip: true,
       onClick: () => {
-        selectorHelperModel.setShowInfo(false)
         selectorHelperModel.setNumElements(1)
         selectorHelperModel.resetMethod()
         selectorHelperModel.setSelector(selector)
@@ -292,7 +289,7 @@ export default class AutIframe {
     let $el
 
     try {
-      if (selectorHelperModel.method.name === 'contains') {
+      if (selectorHelperModel.method === 'contains') {
         const Cypress = eventManager.getCypress()
         $el = contents.find(Cypress.dom.getContainsSelector(selector))
         if ($el.length) {

@@ -27,10 +27,10 @@ class Footer extends Component {
 
   render () {
     const { model } = this.props
-    const selectorText = `cy.${model.method.name}('${model.selector || model.method.example}')`
+    const selectorText = `cy.${model.method}('${model.selector}')`
 
     return (
-      <div className={`selector-helper method-${model.method.name}`}>
+      <div className={`selector-helper method-${model.method}`}>
         <div className='selector-scroll-wrap'>
           <div className='selector'>
             <div
@@ -47,12 +47,11 @@ class Footer extends Component {
               <AutosizeInput
                 ref={(node) => this._input = node}
                 className={cs('selector-input', {
-                  'empty': !model[`${model.method.name}Selector`],
+                  'empty': !model[`${model.method}Selector`],
                 })}
                 name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
                 value={model.selector}
                 onChange={this._updateSelector}
-                placeholder={model.method.example}
               />
               <span>{'\''}</span>
               <span>)</span>
@@ -69,10 +68,10 @@ class Footer extends Component {
               </button>
             </Tooltip>
             {
-              selectorHelperModel.selector ?
-                <Tooltip title={selectorHelperModel.playgroundInfo}>
-                  <div className={`command-has-num-elements ${(!selectorHelperModel.isValid || !selectorHelperModel.numElements) ? 'command-has-no-elements' : 'command-has-multiple-elements'}`}>
-                    <span className='command-num-elements'>{selectorHelperModel.playgroundText}</span>
+              model.selector ?
+                <Tooltip title={model.playgroundInfo}>
+                  <div className={`command-has-num-elements ${(!model.isValid || !model.numElements) ? 'command-has-no-elements' : 'command-has-multiple-elements'}`}>
+                    <span className='command-num-elements'>{model.playgroundText}</span>
                   </div>
                 </Tooltip> :
                 null
@@ -87,7 +86,7 @@ class Footer extends Component {
   componentDidMount () {
     // focuses input when user changes method
     this._disposeAutorun = autorun(() => {
-      this.props.model.method.name
+      this.props.model.method
       this._input.focus()
     })
 
@@ -107,16 +106,16 @@ class Footer extends Component {
         'is-showing': this.showingMethodPicker,
       })}>
         <button onClick={this._toggleMethodPicker}>
-          {model.method.name}
+          {model.method}
           <i className='fa fa-caret-down fa-fw'></i>
         </button>
         <div className='method-picker'>
           {_.map(model.methods, (method) => (
             <div
-              key={method.name}
-              className={cs({ 'is-chosen': model.method.name === method.name })}
+              key={method}
+              className={cs({ 'is-chosen': model.method === method })}
               onClick={() => this._setMethod(method)}
-            >{method.name}</div>
+            >{method}</div>
           ))}
         </div>
       </span>
@@ -137,7 +136,7 @@ class Footer extends Component {
   }
 
   @action _setMethod (method) {
-    if (method.name !== this.props.model.method.name) {
+    if (method !== this.props.model.method) {
       this.props.model.setMethod(method)
     }
   }
@@ -170,7 +169,6 @@ class Footer extends Component {
 
   _updateSelector = (e) => {
     const { model } = this.props
-    model.setShowInfo(true)
     model.setSelector(e.target.value)
     model.setShowingHighlight(true)
   }
