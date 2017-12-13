@@ -31,7 +31,7 @@ In `package.json`:
     "analyzeCommits": "semantic-release-monorepo",
     "generateNotes": "semantic-release-monorepo",
     "getLastRelease": "semantic-release-monorepo",
-    "publish": ["semantic-release-monorepo/npm", "semantic-release-monorepo/github"]
+    "publish": ["@semantic-release/npm", "semantic-release-monorepo/github"]
   }
 }
 ```
