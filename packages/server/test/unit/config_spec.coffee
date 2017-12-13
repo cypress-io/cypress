@@ -382,6 +382,24 @@ describe "lib/config", ->
           @setup({watchForFileChanges: 42})
           @expectValidationFails("be a boolean")
 
+      context "blacklistHosts", ->
+        it "passes if a string", ->
+          @setup({blacklistHosts: "google.com"})
+          @expectValidationPasses()
+
+        it "passes if an array of strings", ->
+          @setup({blacklistHosts: ["google.com"]})
+          @expectValidationPasses()
+
+        it "fails if not a string or array", ->
+          @setup({blacklistHosts: 5})
+          @expectValidationFails("be a string or an array of string")
+
+        it "fails if not an array of strings", ->
+          @setup({blacklistHosts: [5]})
+          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("the value was: [5]")
+
   context ".resolveConfigValues", ->
     beforeEach ->
       @expected = (obj) ->
@@ -540,6 +558,9 @@ describe "lib/config", ->
 
     it "supportFile=false", ->
       @defaults "supportFile", false, {supportFile: false}
+
+    it "blacklistHosts=null", ->
+      @defaults("blacklistHosts", null)
 
     it "resets numTestsKeptInMemory to 0 when headless", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
