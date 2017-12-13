@@ -3,6 +3,7 @@
 @import 'lib/fonts';
 @import 'node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 @import 'lib/base';
+@import 'lib/shared';
 @import '!(lib)*/**/!(selector-helper.scss)';
 
 @import '../../reporter/src/main-runner';

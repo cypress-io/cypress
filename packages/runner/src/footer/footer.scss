@@ -131,6 +131,14 @@
         }
       }
 
+      .info {
+        display: none;
+      }
+
+      &.has-selector .info {
+        display: block;
+      }
+
       .close {
         background: none;
         border: none;
@@ -143,22 +151,6 @@
         &:hover,
         &:focus {
           color: #111;
-        }
-      }
-
-      .info {
-        color: #50a160;
-        display: flex;
-        font-size: 12px;
-        margin-top: 4px;
-
-        &.is-invalid {
-          color: $error;
-        }
-
-        .spacer {
-          margin-right: 11px;
-          visibility: hidden;
         }
       }
     }

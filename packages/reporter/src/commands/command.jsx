@@ -80,12 +80,12 @@ class Command extends Component {
             'command-is-event': !!model.event,
             'command-is-invisible': model.visible != null && !model.visible,
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
-            'command-has-no-elements': !model.numElements,
-            'command-has-multiple-elements': model.numElements > 1,
             'command-other-pinned': this._isOtherCommandPinned(),
             'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
             'command-scaled': message && message.length > 100,
+            'no-elements': !model.numElements,
+            'multiple-elements': model.numElements > 1,
           }
         )}
         onMouseOver={() => this._snapshot(true)}
@@ -105,7 +105,7 @@ class Command extends Component {
               <i className='fa fa-thumb-tack'></i>
             </span>
             <span className='command-method'>
-              <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
+              <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
             </span>
             <span className='command-message'>
               {model.referencesAlias ? <AliasesReferences model={model} /> : <Message model={model} />}
@@ -116,7 +116,7 @@ class Command extends Component {
                 <i className='command-invisible fa fa-eye-slash'></i>
               </Tooltip>
               <Tooltip placement='top' title={`${model.numElements} matched elements`}>
-                <span className='command-num-elements'>{model.numElements}</span>
+                <span className='num-elements'>{model.numElements}</span>
               </Tooltip>
             </span>
           </div>

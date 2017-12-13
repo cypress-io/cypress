@@ -30,7 +30,10 @@ class Footer extends Component {
     const selectorText = `cy.${model.method}('${model.selector}')`
 
     return (
-      <div className={`selector-helper method-${model.method}`}>
+      <div className={cs('selector-helper', `method-${model.method}`, {
+        'has-selector': !!model.selector,
+        'no-elements': !model.isValid || !model.numElements,
+      })}>
         <div className='selector-scroll-wrap'>
           <div className='selector'>
             <div
@@ -67,15 +70,9 @@ class Footer extends Component {
                 <i className='fa fa-copy' />
               </button>
             </Tooltip>
-            {
-              model.selector ?
-                <Tooltip title={model.playgroundInfo}>
-                  <div className={`command-has-num-elements ${(!model.isValid || !model.numElements) ? 'command-has-no-elements' : 'command-has-multiple-elements'}`}>
-                    <span className='command-num-elements'>{model.playgroundText}</span>
-                  </div>
-                </Tooltip> :
-                null
-            }
+            <Tooltip title={model.infoHelp}>
+              <span className='info num-elements'>{model.info}</span>
+            </Tooltip>
           </div>
         </div>
         <button className='close' onClick={this._toggleSelectorHelper}>x</button>
