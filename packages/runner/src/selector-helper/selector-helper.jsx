@@ -66,6 +66,12 @@ class Footer extends Component {
               <i className='fa fa-copy' />
             </button>
           </Tooltip>
+          <Tooltip title='Print to console'>
+            <button
+              className='print-to-console'>
+              <i className='fa fa-terminal' />
+            </button>
+          </Tooltip>
           <Tooltip title={model.infoHelp}>
             <span className='info num-elements'>{model.info}</span>
           </Tooltip>

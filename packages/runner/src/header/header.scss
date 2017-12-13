@@ -191,11 +191,12 @@
       }
     }
 
-    .copy-to-clipboard {
+    .copy-to-clipboard, .print-to-console {
       background: #fff;
       border: 0;
       color: #565554;
       padding: 8px 5px 7px;
+      margin-right: 5px;
 
       &:hover, &:focus, &:active {
         box-shadow: none;
