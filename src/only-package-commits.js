@@ -1,7 +1,7 @@
-const debug = require('debug')('semantic-release:commit-analyzer');
+const debug = require('debug')('semantic-release:monorepo');
 const pkgUp = require('pkg-up');
+
 const { getCommitFiles, getGitRoot } = require('./git-utils');
-const overrideOption = require('./override-option');
 
 const getPackagePath = async () => {
   const path = await pkgUp();
@@ -18,24 +18,24 @@ const withFiles = async commits => {
   );
 };
 
-const withPackageCommits = async commits => {
+const onlyPackageCommits = async commits => {
   const packagePath = await getPackagePath();
   debug('Filter commits by package path: "%s"', packagePath);
   const commitsWithFiles = await withFiles(commits);
 
   return commitsWithFiles.filter(({ files, subject }) => {
-    const matchingPath = files.find(path => path.indexOf(packagePath) === 0);
+    const packageFile = files.find(path => path.indexOf(packagePath) === 0);
 
-    if (matchingPath) {
+    if (packageFile) {
       debug(
         'Including commit "%s" because it modified package file "%s".',
         subject,
-        matchingPath
+        packageFile
       );
     }
 
-    return !!matchingPath;
+    return !!packageFile;
   });
 };
 
-module.exports = overrideOption('commits', withPackageCommits);
+module.exports = onlyPackageCommits;

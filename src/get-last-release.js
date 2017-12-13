@@ -1,6 +1,6 @@
 const { getLastRelease } = require('@semantic-release/npm');
 const getVersionHead = require('semantic-release/lib/get-version-head');
-const gitTag = require('./git-tag');
+const gitTag = require('./version-to-git-tag');
 
 module.exports = async (pluginConfig, options) => {
   const result = await getLastRelease(pluginConfig, options);

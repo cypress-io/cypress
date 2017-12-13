@@ -2,7 +2,7 @@
   "name": "semantic-release-monorepo",
   "version": "0.0.0-development",
   "description": "Plugins for `semantic-release` allowing it to be used with a monorepo.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "format": "prettier --write --single-quote --trailing-comma es5",
     "format:all": "yarn format \"./**/*.js\"",
