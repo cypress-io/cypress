@@ -10,10 +10,8 @@ const withGitTag = require('./src/with-git-tag');
 
 module.exports = {
   analyzeCommits: withPackageCommits(commitAnalyzer),
-  generateNotes: compose(
-    withGitTag,
-    withVersion,
-    withPackageCommits
-  )(releaseNotesGenerator),
+  generateNotes: compose(withGitTag, withVersion, withPackageCommits)(
+    releaseNotesGenerator
+  ),
   getLastRelease,
 };

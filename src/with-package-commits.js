@@ -10,10 +10,12 @@ const getPackagePath = async () => {
 };
 
 const withFiles = async commits => {
-  return Promise.all(commits.map(async commit => {
-    const files = await getCommitFiles(commit.hash);
-    return { ...commit, files };
-  }));
+  return Promise.all(
+    commits.map(async commit => {
+      const files = await getCommitFiles(commit.hash);
+      return { ...commit, files };
+    })
+  );
 };
 
 const withPackageCommits = async commits => {
@@ -21,17 +23,19 @@ const withPackageCommits = async commits => {
   debug('Filter commits by package path: "%s"', packagePath);
   const commitsWithFiles = await withFiles(commits);
 
-  return commitsWithFiles.filter(
-    ({ files, subject }) => {
-      const matchingPath = files.find(path => path.indexOf(packagePath) === 0);
+  return commitsWithFiles.filter(({ files, subject }) => {
+    const matchingPath = files.find(path => path.indexOf(packagePath) === 0);
 
-      if (matchingPath) {
-        debug('Including commit "%s" because it modified package file "%s".', subject, matchingPath);
-      }
-
-      return !!matchingPath;
+    if (matchingPath) {
+      debug(
+        'Including commit "%s" because it modified package file "%s".',
+        subject,
+        matchingPath
+      );
     }
-  );
+
+    return !!matchingPath;
+  });
 };
 
 module.exports = overrideOption('commits', withPackageCommits);

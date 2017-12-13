@@ -3,7 +3,7 @@ const overrideOption = require('./override-option');
 
 const withVersion = async nextRelease => ({
   ...nextRelease,
-  version: await gitTag(nextRelease.version)
+  version: await gitTag(nextRelease.version),
 });
 
 module.exports = overrideOption('nextRelease', withVersion);

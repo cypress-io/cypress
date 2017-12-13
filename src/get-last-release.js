@@ -18,7 +18,7 @@ module.exports = async (pluginConfig, options) => {
   if (result && !result.gitHead) {
     return {
       ...result,
-      ...await getVersionHead(null, await gitTag(result.version))
+      ...(await getVersionHead(null, await gitTag(result.version))),
     };
   }
 
