@@ -41,8 +41,6 @@ class Footer extends Component {
             onMouseOver={this._setHighlight(true)}
             onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
           >
-            <span>cy</span>
-            <span>.</span>
             {this._methodSelector()}
             <span>(</span>
             <span>{'\''}</span>
@@ -78,7 +76,7 @@ class Footer extends Component {
   }
 
   componentDidMount () {
-    // focuses input when user changes method
+    // focus input when user changes method
     this._disposeAutorun = autorun(() => {
       this.props.model.method
       this._input.focus()
@@ -100,8 +98,8 @@ class Footer extends Component {
         'is-showing': this.showingMethodPicker,
       })}>
         <button onClick={this._toggleMethodPicker}>
-          {model.method}
-          <i className='fa fa-caret-down fa-fw'></i>
+          <i className='fa fa-caret-down'></i>{' '}
+          cy.{model.method}
         </button>
         <div className='method-picker'>
           {_.map(model.methods, (method) => (
