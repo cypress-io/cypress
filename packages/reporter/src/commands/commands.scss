@@ -355,36 +355,6 @@
     display: inline-block;
   }
 
-  .command-num-elements {
-    border-radius: 5px;
-    color: #fff;
-    display: none;
-    font-size: 85%;
-    line-height: 1;
-    margin-left: 5px;
-    padding: 1px 4px;
-    text-align: center;
-    vertical-align: baseline;
-    white-space: nowrap;
-  }
-
-  .command-has-num-elements.command-has-no-elements .command-num-elements,
-  .command-has-num-elements.command-has-multiple-elements .command-num-elements {
-    display: inline;
-  }
-
-  .command-name-assert.command-has-num-elements .command-num-elements {
-    display: none;
-  }
-
-  .command-has-no-elements .command-num-elements {
-    background-color: #CC4239;
-  }
-
-  .command-has-multiple-elements .command-num-elements {
-    background-color: #476fc9;
-  }
-
   .command-pin {
     color: #999;
     display: none;
@@ -459,4 +429,34 @@
       flex-wrap: nowrap;
     }
   }
+}
+
+.command-num-elements {
+  border-radius: 5px;
+  color: #fff;
+  display: none;
+  font-size: 85%;
+  line-height: 1;
+  margin-left: 5px;
+  padding: 1px 4px;
+  text-align: center;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.command-has-num-elements.command-has-no-elements .command-num-elements,
+.command-has-num-elements.command-has-multiple-elements .command-num-elements {
+  display: inline;
+}
+
+.command-name-assert.command-has-num-elements .command-num-elements {
+  display: none;
+}
+
+.command-has-no-elements .command-num-elements {
+  background-color: #CC4239;
+}
+
+.command-has-multiple-elements .command-num-elements {
+  background-color: #476fc9;
 }

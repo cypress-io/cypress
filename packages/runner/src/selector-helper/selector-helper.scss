@@ -6,6 +6,7 @@
 $cy-tooltip-background-color: #333;
 $cy-tooltip-color: #e3e3e3;
 $cy-tooltip-border-color: #333;
+
 @import 'node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 
 .highlight {
@@ -14,6 +15,5 @@ $cy-tooltip-border-color: #333;
 }
 
 .tooltip {
-  font-family: Consolas, Monaco, 'Andale Mono', monospace;
-  max-width: 100%;
+  max-width: 400px !important;
 }

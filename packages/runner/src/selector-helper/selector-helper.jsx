@@ -31,7 +31,6 @@ class Footer extends Component {
 
     return (
       <div className={`selector-helper method-${model.method.name}`}>
-        <p>Click on an element to view its selector or type in a selector to view the elements it matches</p>
         <div className='selector-scroll-wrap'>
           <div className='selector'>
             <div
@@ -40,11 +39,11 @@ class Footer extends Component {
               onMouseOver={this._setHighlight(true)}
               onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
             >
-              <span className='syntax-object'>cy</span>
-              <span className='syntax-operator'>.</span>
+              <span>cy</span>
+              <span>.</span>
               {this._methodSelector()}
-              <span className='syntax-operator'>(</span>
-              <span className='syntax-string'>{'\''}</span>
+              <span>(</span>
+              <span>{'\''}</span>
               <AutosizeInput
                 ref={(node) => this._input = node}
                 className={cs('selector-input', {
@@ -55,8 +54,8 @@ class Footer extends Component {
                 onChange={this._updateSelector}
                 placeholder={model.method.example}
               />
-              <span className='syntax-string'>{'\''}</span>
-              <span className='syntax-operator'>)</span>
+              <span>{'\''}</span>
+              <span>)</span>
             </div>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
             <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
@@ -69,17 +68,18 @@ class Footer extends Component {
                 <i className='fa fa-copy' />
               </button>
             </Tooltip>
-          </div>
-          <div className={cs('info', {
-            'is-invalid': !model.isValid || !model.numElements,
-          })}>
-            <div className='spacer'>cy.{model.method.name}({'\''}</div>
-            {model.info}
+            {
+              selectorHelperModel.selector ?
+                <Tooltip title={selectorHelperModel.playgroundInfo}>
+                  <div className={`command-has-num-elements ${(!selectorHelperModel.isValid || !selectorHelperModel.numElements) ? 'command-has-no-elements' : 'command-has-multiple-elements'}`}>
+                    <span className='command-num-elements'>{selectorHelperModel.playgroundText}</span>
+                  </div>
+                </Tooltip> :
+                null
+            }
           </div>
         </div>
-        <button className='close' onClick={this._toggleSelectorHelper}>
-          <i className='fa fa-remove' />
-        </button>
+        <button className='close' onClick={this._toggleSelectorHelper}>x</button>
       </div>
     )
   }
@@ -106,7 +106,10 @@ class Footer extends Component {
       <span className={cs('method', {
         'is-showing': this.showingMethodPicker,
       })}>
-        <span className='syntax-method' onClick={this._toggleMethodPicker}>{model.method.name}</span>
+        <button onClick={this._toggleMethodPicker}>
+          {model.method.name}
+          <i className='fa fa-caret-down fa-fw'></i>
+        </button>
         <div className='method-picker'>
           {_.map(model.methods, (method) => (
             <div
@@ -124,7 +127,8 @@ class Footer extends Component {
     this._setShowingMethodPicker(false)
   }
 
-  _toggleMethodPicker = () => {
+  _toggleMethodPicker = (e) => {
+    e.preventDefault()
     this._setShowingMethodPicker(!this.showingMethodPicker)
   }
 
