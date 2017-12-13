@@ -149,7 +149,7 @@ module.exports = {
     if options.hosts
       args.push("--hosts=#{options.hosts}")
 
-    if options.debug
+    if options.headed
       args.push("--headed")
 
     if options.reporter
@@ -158,7 +158,8 @@ module.exports = {
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    if browser = (env.BROWSER or options.browser)
+    ## prefer options if set, else use env
+    if browser = (options.browser or env.BROWSER)
       args.push("--browser=#{browser}")
 
     if options.config
