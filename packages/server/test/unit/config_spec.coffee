@@ -632,6 +632,7 @@ describe "lib/config", ->
             env:                        { }
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
+            userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "json", from: "cli" },
             reporterOptions:            { value: null, from: "default" },
             baseUrl:                    { value: null, from: "default" },
@@ -688,6 +689,7 @@ describe "lib/config", ->
           expect(cfg.resolved).to.deep.eq({
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
+            userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "spec", from: "default" },
             reporterOptions:            { value: null, from: "default" },
             baseUrl:                    { value: "http://localhost:8080", from: "config" },
