@@ -76,7 +76,12 @@ if (shortSha) {
 const env = {
   CYPRESS_BINARY_VERSION: binary,
 }
-const commitMessageInstructions = getInstallJson(npm, env, platform)
+const commitMessageInstructions = getInstallJson(
+  npm,
+  env,
+  platform,
+  shortNpmVersion
+)
 const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
 const footer = 'Use tool `commit-message-install` to install from above block'
 let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
