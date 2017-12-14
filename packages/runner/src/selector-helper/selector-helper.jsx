@@ -34,7 +34,8 @@ class Footer extends Component {
     return (
       <div className={cs('selector-helper', `method-${model.method}`, {
         'has-selector': !!model.selector,
-        'no-elements': !model.isValid || !model.numElements,
+        'no-elements': !model.numElements,
+        'invalid-selector': !model.isValid,
       })}>
         <div className='selector'>
           <button className='highlight-toggle'>

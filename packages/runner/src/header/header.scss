@@ -86,6 +86,25 @@
     width: 100%;
     color: #565554;
 
+    &.invalid-selector, &.no-elements {
+      .selector-input {
+        input {
+          color: #E74C41;
+
+          &:focus, &:active {
+            border: 1px solid lighten(#E74C41, 20%);
+            box-shadow: 0 0 0 0.1rem rgba(255,0,0,.25);
+          }
+        }
+      }
+    }
+
+    &.no-elements, &.invalid-selector {
+      .num-elements {
+        background-color: #CC4239;
+      }
+    }
+
     .selector {
       font-size: 1em;
       align-items: center;
@@ -95,6 +114,9 @@
 
     .num-elements {
       margin-right: 5px;
+      margin-left: 0;
+      font-size: 100%;
+      padding: 4px 6px;
     }
 
     .selector,
@@ -119,7 +141,7 @@
     .selector-input {
       input {
         border: 0;
-        color: #428BCA;
+        color: #476fc9;
         max-width: 100%;
         min-width: 2px;
         outline: none;
@@ -129,10 +151,6 @@
         font-size: 1em;
         border-radius: 6px;
 
-        &:hover {
-
-        }
-
         &:focus {
           border: 1px solid #80bdff;
           box-shadow: 0 0 0 0.1rem rgba(0,123,255,.25);
@@ -140,8 +158,6 @@
 
         // https://github.com/JedWatson/react-input-autosize#csp-and-the-ie-clear-indicator
         &::-ms-clear { display: none; }
-
-
       }
     }
 
