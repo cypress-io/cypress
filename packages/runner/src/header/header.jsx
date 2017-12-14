@@ -55,8 +55,8 @@ export default class Header extends Component {
         <ul className='menu'>
           <li className={cs('viewport-info', { open: showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
-              <i className='fa fa-fw'></i>
               {width} x {height} <span className='viewport-scale'>({displayScale}%)</span>
+              <i className='fa fa-fw fa-info-circle'></i>
             </button>
             <div className='viewport-menu'>
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{defaults.width}px</strong> by <strong>{defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>

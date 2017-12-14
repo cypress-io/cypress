@@ -41,7 +41,7 @@
     user-select: none;
 
     &:focus {
-      background: none;
+      background: #e9e9e9;
     }
 
     &:hover {
@@ -50,6 +50,7 @@
 
     &:active {
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      background: #e9e9e9;
     }
 
     &[disabled],
@@ -67,7 +68,7 @@
     }
 
     .selector-helper-toggle {
-      background-color: #fff;
+      background-color: #e9e9e9;
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
     }
 
@@ -78,7 +79,7 @@
   }
 
   .selector-helper {
-    background-color: #fff;
+    background-color: #f8f8f8;
     display: none;
     padding: 5px 8px;
     position: relative;
@@ -101,7 +102,7 @@
     .wrap {
       align-items: center;
        // needs a background to hide the copy-to-clipboard backer input
-      background: #fff;
+      background: #f8f8f8;
       display: flex;
       padding: 0 6px;
     }
@@ -118,13 +119,18 @@
         max-width: 100%;
         min-width: 2px;
         outline: none;
-        padding: 8px 0 7px;
+        padding: 6px 8px 6px 9px;
         font-family: $font-mono;
-        border-bottom: 1px solid transparent;
+        border: 1px solid #ced4da;
         font-size: 1em;
 
-        &:focus, &:hover {
-          border-bottom: 1px solid #428BCA;
+        &:hover {
+
+        }
+
+        &:focus {
+          border: 1px solid #80bdff;
+          box-shadow: 0 0 0 0.1rem rgba(0,123,255,.25);
         }
 
         // https://github.com/JedWatson/react-input-autosize#csp-and-the-ie-clear-indicator
@@ -153,6 +159,10 @@
         font-family: $font-mono;
         font-size: 1em;
 
+        &:hover {
+          color: #111;
+        }
+
         &:focus, &:active {
           outline: 0;
           box-shadow: none;
@@ -165,14 +175,16 @@
       }
 
       .method-picker {
-        background: #fff;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        background: #f8f8f8;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         display: none;
         font-size: 12px;
         padding: 3px;
         position: absolute;
-        top: 100%;
+        top: 110%;
         left: 7px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
 
         div {
           cursor: pointer;
@@ -196,16 +208,28 @@
 
     .copy-to-clipboard, .print-to-console {
       background: #fff;
-      border: 0;
+      border: 1px solid #ced4da;
       color: #565554;
-      padding: 8px 5px 7px;
-      margin-right: 5px;
+      padding: 6px 8px;
+      font-size: 0.9em;
 
       &:hover, &:focus, &:active {
         box-shadow: none;
         color: #333;
         outline: 0;
+        background-color: #f8f8f8;
       }
+    }
+
+    .copy-to-clipboard {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .print-to-console {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left: 0;
     }
 
     .info {
@@ -300,6 +324,7 @@
   .viewport-info {
     margin-top: 1px;
     margin-right: 5px;
+    margin-left: 5px;
     position: relative;
 
     button {
@@ -310,6 +335,11 @@
       padding: 0;
       text-shadow: 0 1px 1px #FFF;
 
+      i {
+        font-size: 0.9em;
+        margin-left: 5px;
+      }
+
       &:active {
         box-shadow: none;
       }
@@ -317,15 +347,6 @@
       &:hover {
         color :#333;
       }
-
-      i {
-        @extend .#{$fa-css-prefix}-caret-down;
-        margin-right: 3px;
-      }
-    }
-
-    &.open button i {
-      @extend .#{$fa-css-prefix}-caret-up;
     }
   }
 
