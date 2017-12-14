@@ -126,7 +126,7 @@ module.exports = {
   options: (ctx, options = {}) ->
     _.defaults(options, {
       project: e2ePath
-      timeout: if options.debug then 3000000 else 120000
+      timeout: if options.exit is false then 3000000 else 120000
     })
 
     ctx.timeout(options.timeout)
@@ -167,6 +167,9 @@ module.exports = {
 
     if options.env
       args.push("--env", options.env)
+
+    if options.exit?
+      args.push("--exit", options.exit)
 
     return args
 
