@@ -482,9 +482,12 @@ module.exports = {
                 Promise.resolve()
                 .then () ->
                   headless.run(headlessRunOptions)
-                .tapCatch (e) ->
+                .catch (e) ->
+                  # cannot find Bluebird's tapCatch is not a function
+                  # so have to use regular catch and throw
                   debug("headless run error")
                   debug(e)
+                  throw e
                 .then @afterTestRun(instanceId, captured)
 
               newInstance()
