@@ -235,12 +235,20 @@
       margin-right: 5px;
     }
 
-    .copy-to-clipboard, .print-to-console {
+    button.copy-to-clipboard, button.print-to-console {
       background: #fff;
       border: 1px solid #ced4da;
       color: #565554;
       padding: 6px 8px;
       font-size: 0.9em;
+
+      &:disabled, &:disabled:hover, &:disabled:focus, &:disabled:active {
+        cursor: not-allowed;
+        outline: 0;
+        opacity: 0.65;
+        background-color: #fff;
+        color: #565554;
+      }
 
       &:hover, &:focus, &:active {
         box-shadow: none;
@@ -250,12 +258,12 @@
       }
     }
 
-    .copy-to-clipboard {
+    button.copy-to-clipboard {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
 
-    .print-to-console {
+    button.print-to-console {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
       border-left: 0;
