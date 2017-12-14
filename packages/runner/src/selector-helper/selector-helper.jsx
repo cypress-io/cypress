@@ -76,6 +76,7 @@ class Footer extends Component {
               ref={(node) => this._copyButton = node}
               className='copy-to-clipboard'
               onClick={this._copyToClipboard}
+              disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
             >
               <i className='fa fa-copy' />
@@ -86,6 +87,7 @@ class Footer extends Component {
               ref={(node) => this._copyButton = node}
               className='print-to-console'
               onClick={this._printToConsole}
+              disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
             >
               <i className='fa fa-terminal' />
