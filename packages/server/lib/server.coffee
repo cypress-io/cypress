@@ -176,11 +176,16 @@ class Server
 
             log("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
 
+            ## if we are currently matching then we're
+            ## not making a direct connection anyway
+            ## so we only need to check this if we
+            ## have blacklist hosts and are not matching.
+            ##
             ## if we have blacklisted hosts lets
             ## see if this matches - if so then
             ## we cannot allow it to make a direct
             ## connection
-            if blacklistHosts
+            if blacklistHosts and not isMatching
               isMatching = blacklist.matches(urlToCheck, blacklistHosts)
 
               log("HTTPS request #{urlToCheck} matches blacklist?", isMatching)

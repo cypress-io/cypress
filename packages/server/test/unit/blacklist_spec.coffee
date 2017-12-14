@@ -37,6 +37,7 @@ describe "lib/util/blacklist", ->
     matchesArray("http://mac.apple.com/", false)
 
     matchesStr("https://localhost:6666/foo", "localhost:6666", true)
+    matchesStr("https://localhost:6666/foo", "localhost:5555", false)
 
   it "returns the matched host", ->
     matchesHost("https://shop.apple.com:443/foo", "shop.apple.com")
