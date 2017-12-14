@@ -326,7 +326,7 @@ describe('<Command />', () => {
 
     it('the <FlashOnClick /> has a pinned snapshot and console print message', () => {
       const component = shallow(<Command model={model()} />)
-      expect(component.find('FlashOnClick')).to.have.prop('message', 'Pinned snapshot and printed output to your console!')
+      expect(component.find('FlashOnClick')).to.have.prop('message', 'Printed output to your console')
     })
 
     it('renders the number', () => {

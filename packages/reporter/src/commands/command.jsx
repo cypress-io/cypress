@@ -92,7 +92,7 @@ class Command extends Component {
         onMouseOut={() => this._snapshot(false)}
       >
         <FlashOnClick
-          message='Pinned snapshot and printed output to your console!'
+          message='Printed output to your console'
           onClick={this._onClick}
           shouldShowMessage={this._shouldShowClickMessage}
         >
