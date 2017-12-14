@@ -28,11 +28,11 @@ const cliOptions = minimist(process.argv, {
   },
 })
 
-const shorten = (s) =>
-  s.substr(0, 7)
+const shorten = (s) => s.substr(0, 7)
 
 const getShortCommit = () => {
-  const sha = process.env.APPVEYOR_REPO_COMMIT ||
+  const sha =
+    process.env.APPVEYOR_REPO_COMMIT ||
     process.env.CIRCLE_SHA1 ||
     process.env.BUILDKITE_COMMIT
   if (sha) {
@@ -98,9 +98,12 @@ if (process.env.APPVEYOR) {
 
 console.log('commit message')
 console.log(message)
-bump.run(message, cliOptions.provider)
-.catch((e) => {
+
+const onError = (e) => {
   console.error('could not bump test projects')
   console.error(e)
   process.exit(1)
-})
+}
+bump
+.runTestProjects(message, cliOptions.provider, shortNpmVersion)
+.catch(onError)

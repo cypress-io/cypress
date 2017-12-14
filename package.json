@@ -89,7 +89,7 @@
     "lazy-ass": "^1.6.0",
     "lint-staged": "^4.1.3",
     "lodash": "^4.17.4",
-    "make-empty-github-commit": "^1.1.2",
+    "make-empty-github-commit": "^1.2.0",
     "mocha": "^3.5.0",
     "mocha-junit-reporter": "^1.13.0",
     "mocha-multi-reporters": "^1.1.5",
