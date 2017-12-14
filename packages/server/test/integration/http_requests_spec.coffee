@@ -2646,54 +2646,6 @@ describe "Routes", ->
           expectedHeader(responses[3], "localhost:6666")
           expectedHeader(responses[4], "*adwords.com")
 
-    context "extra http request headers", ->
-      beforeEach ->
-        @setup({
-          initialUrl: "http://localhost:3333/"
-          config: {
-            extraRequestHeaders: {
-              "x-foo-bar": "baz"
-              "some": "override"
-            }
-          }
-        })
-
-      it "sets and overrides extra request headers", ->
-        nock("http://localhost:3333")
-        .matchHeader("x-foo-bar", "baz")
-        .matchHeader("some", "override")
-        .matchHeader("another", "one")
-        .get("/headers")
-        .reply(200)
-
-        @rp({
-          url: "http://localhost:3333/headers"
-          headers: {
-            some: "thing"
-            another: "one"
-          }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      it "does not set extra request headers for domains not matching", ->
-        # nock("http://localhost:3322")
-        # .matchHeader("some", "thing")
-        # .matchHeader("another", "one")
-        # .get("/headers")
-        # .reply(200)
-
-        @rp({
-          # url: "https://mail.google.com/"
-          url: "https://localhost:3322/headers"
-          headers: {
-            some: "thing"
-            another: "one"
-          }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
   context "POST *", ->
     beforeEach ->
       @setup("http://localhost:8000")
