@@ -311,6 +311,10 @@ const eventManager = {
     })
   },
 
+  emit (event, ...args) {
+    localBus.emit(event, ...args)
+  },
+
   on (event, ...args) {
     localBus.on(event, ...args)
   },

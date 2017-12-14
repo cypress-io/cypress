@@ -6,6 +6,8 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import AutosizeInput from 'react-input-autosize'
 
+import eventManager from '../lib/event-manager'
+
 const defaultCopyText = 'Copy to clipboard'
 
 // mouseleave fires when entering a child element, so make sure we're
@@ -68,7 +70,11 @@ class Footer extends Component {
           </Tooltip>
           <Tooltip title='Print to console'>
             <button
-              className='print-to-console'>
+              ref={(node) => this._copyButton = node}
+              className='print-to-console'
+              onClick={this._printToConsole}
+              onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
+            >
               <i className='fa fa-terminal' />
             </button>
           </Tooltip>
@@ -161,6 +167,10 @@ class Footer extends Component {
 
   _resetCopyText = () => {
     this._setCopyText(defaultCopyText)
+  }
+
+  _printToConsole = () => {
+    eventManager.emit('print:selector:elements:to:console')
   }
 
   _toggleSelectorHelper = () => {

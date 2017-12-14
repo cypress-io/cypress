@@ -348,11 +348,34 @@ function scrollIntoView (win, el) {
   el.scrollIntoView()
 }
 
+const sizzleRe = /sizzle/i
+
+function getElementsForSelector ({ root, selector, method, cypressDom }) {
+  let $el = null
+
+  try {
+    if (method === 'contains') {
+      $el = root.find(cypressDom.getContainsSelector(selector))
+      if ($el.length) {
+        $el = cypressDom.getFirstDeepestElement($el)
+      }
+    } else {
+      $el = root.find(selector)
+    }
+  } catch (err) {
+    // if not a sizzle error, ignore it and let $el be null
+    if (!sizzleRe.test(err.stack)) throw err
+  }
+
+  return $el
+}
+
 export default {
   addElementBoxModelLayers,
   addHitBoxLayer,
   addOrUpdateSelectorHelperHighlight,
   getBestSelector,
+  getElementsForSelector,
   getOuterSize,
   scrollIntoView,
 }

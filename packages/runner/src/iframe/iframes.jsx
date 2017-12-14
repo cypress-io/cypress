@@ -57,6 +57,8 @@ export default class Iframes extends Component {
       this._run(this.props.config, specPath)
     })
 
+    eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
+
     this._disposers.push(autorun(() => {
       this.autIframe.toggleSelectorHelper(selectorHelperModel.isEnabled)
     }))
@@ -160,6 +162,10 @@ export default class Iframes extends Component {
     if (cb) {
       cb()
     }
+  }
+
+  _printSelectorElementsToConsole = () => {
+    this.autIframe.printSelectorElementsToConsole()
   }
 
   componentWillUnmount () {
