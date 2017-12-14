@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import { action } from 'mobx'
+
 import eventManager from '../lib/event-manager'
+import selectorHelperModel from '../selector-helper/selector-helper-model'
 
 export default class IframeModel {
   constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
@@ -37,6 +39,7 @@ export default class IframeModel {
     this.state.isLoading = false
     this.state.isRunning = true
     this.state.resetUrl()
+    selectorHelperModel.setEnabled(false)
     this._reset()
     this._clearMessage()
   }

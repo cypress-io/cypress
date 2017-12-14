@@ -34,7 +34,11 @@ class SelectorHelperModel {
   }
 
   @action toggleEnabled () {
-    this.isEnabled = !this.isEnabled
+    this.setEnabled(!this.isEnabled)
+  }
+
+  @action setEnabled (isEnabled) {
+    this.isEnabled = isEnabled
 
     if (!this.isEnabled) {
       this.isShowingHighlight = false
