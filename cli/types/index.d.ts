@@ -1232,9 +1232,207 @@ declare namespace Cypress {
     cancable: boolean
   }
 
+  // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
   interface Chainer<Subject> {
+    // chai
+    (chainer: 'be.a', value: string): Chainable<Subject>
+    (chainer: 'be.a.string'): Chainable<Subject>
+    (chainer: 'be.above', value: number): Chainable<Subject>
+    (chainer: 'be.an', value: string): Chainable<Subject>
+    (chainer: 'be.at.least', value: number): Chainable<Subject>
+    (chainer: 'be.below', value: number): Chainable<Subject>
+    (chainer: 'be.active'): Chainable<Subject>
+    (chainer: 'be.arguments'): Chainable<Subject>
+    (chainer: 'be.approximately', value: number, delta: number): Chainable<Subject>
+    (chainer: 'be.closeTo', value: number, delta: number): Chainable<Subject>
+    (chainer: 'be.empty'): Chainable<Subject>
+    (chainer: 'be.instanceOf', value: any): Chainable<Subject>
+    (chainer: 'be.false'): Chainable<Subject>
+    (chainer: 'be.greaterThan', value: number): Chainable<Subject>
+    (chainer: 'be.gt', value: number): Chainable<Subject>
+    (chainer: 'be.gte', value: number): Chainable<Subject>
+    (chainer: 'be.lessThan', value: number): Chainable<Subject>
+    (chainer: 'be.lt', value: number): Chainable<Subject>
+    (chainer: 'be.lte', value: number): Chainable<Subject>
+    (chainer: 'be.ok'): Chainable<Subject>
+    (chainer: 'be.true'): Chainable<Subject>
+    (chainer: 'be.undefined'): Chainable<Subject>
+    (chainer: 'be.within', start: number, end: number): Chainable<Subject>
+    (chainer: 'change', value: object, property: string): Chainable<Subject>
+    (chainer: 'contain', value: any): Chainable<Subject>
+    (chainer: 'decrease', value: object, property: string): Chainable<Subject>
+    (chainer: 'deep.equal', value: Subject): Chainable<Subject>
+    (chainer: 'exist'): Chainable<Subject>
+    (chainer: 'eq', value: any): Chainable<Subject>
+    (chainer: 'eql', value: any): Chainable<Subject>
+    (chainer: 'equal', value: any): Chainable<Subject>
+    (chainer: 'have.any.keys', ...value: any[]): Chainable<Subject>
+    (chainer: 'have.deep.property', value: string, match?: any): Chainable<Subject>
+    (chainer: 'have.length', value: number): Chainable<Subject>
+    (chainer: 'have.length.greaterThan', value: number): Chainable<Subject>
+    (chainer: 'have.length.gt', value: number): Chainable<Subject>
+    (chainer: 'have.length.gte', value: number): Chainable<Subject>
+    (chainer: 'have.length.lessThan', value: number): Chainable<Subject>
+    (chainer: 'have.length.lt', value: number): Chainable<Subject>
+    (chainer: 'have.length.lte', value: number): Chainable<Subject>
+    (chainer: 'have.members', value: any[]): Chainable<Subject>
+    (chainer: 'have.ownProperty', value: string): Chainable<Subject>
+    (chainer: 'have.property', value: string, match?: any): Chainable<Subject>
+    (chainer: 'have.string', value: string): Chainable<Subject>
+    (chainer: 'have.key', value: string): Chainable<Subject>
+    (chainer: 'have.keys', ...value: any[]): Chainable<Subject>
+    (chainer: 'include', value: any): Chainable<Subject>
+    (chainer: 'include.members', value: any[]): Chainable<Subject>
+    (chainer: 'increase', value: object, property: string): Chainable<Subject>
+    (chainer: 'match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'respondTo', value: string): Chainable<Subject>
+    (chainer: 'satisfy', fn: (val: any) => boolean): Chainable<Subject>
+    (chainer: 'throw', value: string | RegExp): Chainable<Subject>
+    // tslint:disable-next-line ban-types
+    (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+
+    // chai.not
+    (chainer: 'not.be.a', value: string): Chainable<Subject>
+    (chainer: 'not.be.a.string'): Chainable<Subject>
+    (chainer: 'not.be.above', value: number): Chainable<Subject>
+    (chainer: 'not.be.an', value: string): Chainable<Subject>
+    (chainer: 'not.be.at.least', value: number): Chainable<Subject>
+    (chainer: 'not.be.below', value: number): Chainable<Subject>
+    (chainer: 'not.be.active'): Chainable<Subject>
+    (chainer: 'not.be.arguments'): Chainable<Subject>
+    (chainer: 'not.be.approximately', value: number, delta: number): Chainable<Subject>
+    (chainer: 'not.be.closeTo', value: number, delta: number): Chainable<Subject>
+    (chainer: 'not.be.empty'): Chainable<Subject>
+    (chainer: 'not.be.instanceOf', value: any): Chainable<Subject>
+    (chainer: 'not.be.false'): Chainable<Subject>
+    (chainer: 'not.be.greaterThan', value: number): Chainable<Subject>
+    (chainer: 'not.be.gt', value: number): Chainable<Subject>
+    (chainer: 'not.be.gte', value: number): Chainable<Subject>
+    (chainer: 'not.be.lessThan', value: number): Chainable<Subject>
+    (chainer: 'not.be.lt', value: number): Chainable<Subject>
+    (chainer: 'not.be.lte', value: number): Chainable<Subject>
+    (chainer: 'not.be.ok'): Chainable<Subject>
+    (chainer: 'not.be.true'): Chainable<Subject>
+    (chainer: 'not.be.undefined'): Chainable<Subject>
+    (chainer: 'not.be.within', start: number, end: number): Chainable<Subject>
+    (chainer: 'not.change', value: object, property: string): Chainable<Subject>
+    (chainer: 'not.contain', value: any): Chainable<Subject>
+    (chainer: 'not.decrease', value: object, property: string): Chainable<Subject>
+    (chainer: 'not.deep.equal', value: Subject): Chainable<Subject>
+    (chainer: 'not.exist'): Chainable<Subject>
+    (chainer: 'not.eq', value: any): Chainable<Subject>
+    (chainer: 'not.eql', value: any): Chainable<Subject>
+    (chainer: 'not.equal', value: any): Chainable<Subject>
+    (chainer: 'not.have.any.keys', ...value: any[]): Chainable<Subject>
+    (chainer: 'not.have.deep.property', value: string, match?: any): Chainable<Subject>
+    (chainer: 'not.have.length', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.greaterThan', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.gt', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.gte', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.lessThan', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.lt', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.lte', value: number): Chainable<Subject>
+    (chainer: 'not.have.members', value: any[]): Chainable<Subject>
+    (chainer: 'not.have.ownProperty', value: string): Chainable<Subject>
+    (chainer: 'not.have.property', value: string, match?: any): Chainable<Subject>
+    (chainer: 'not.have.string', value: string): Chainable<Subject>
+    (chainer: 'not.have.key', value: string): Chainable<Subject>
+    (chainer: 'not.have.keys', ...value: any[]): Chainable<Subject>
+    (chainer: 'not.include', value: any): Chainable<Subject>
+    (chainer: 'not.include.members', value: any[]): Chainable<Subject>
+    (chainer: 'not.increase', value: object, property: string): Chainable<Subject>
+    (chainer: 'not.match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'not.respondTo', value: string): Chainable<Subject>
+    (chainer: 'not.satisfy', fn: (val: any) => boolean): Chainable<Subject>
+    (chainer: 'not.throw', value: string | RegExp): Chainable<Subject>
+    // tslint:disable-next-line ban-types
+    (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+
+    // sinon-chai
+    (chainer: 'be.always.calledWithNew'): Chainable<Subject>
+    (chainer: 'be.always.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'always.returned', value: any): Chainable<Subject>
+    (chainer: 'be.called'): Chainable<Subject>
+    (chainer: 'be.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'be.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'be.calledOn', context: any): Chainable<Subject>
+    (chainer: 'be.calledOnce'): Chainable<Subject>
+    (chainer: 'be.calledThrice'): Chainable<Subject>
+    (chainer: 'be.calledTwice'): Chainable<Subject>
+    (chainer: 'be.calledWithExactly', ...args: any[]): Chainable<Subject>
+    (chainer: 'be.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'be.calledWithNew'): Chainable<Subject>
+    (chainer: 'have.always.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    (chainer: 'have.callCount', value: number): Chainable<Subject>
+    (chainer: 'have.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    (chainer: 'returned', value: any): Chainable<Subject>
+
+    // sinon-chai.not
+    (chainer: 'not.be.always.calledWithNew'): Chainable<Subject>
+    (chainer: 'not.be.always.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'not.always.returned', value: any): Chainable<Subject>
+    (chainer: 'not.be.called'): Chainable<Subject>
+    (chainer: 'not.be.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'not.be.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'not.be.calledOn', context: any): Chainable<Subject>
+    (chainer: 'not.be.calledOnce'): Chainable<Subject>
+    (chainer: 'not.be.calledThrice'): Chainable<Subject>
+    (chainer: 'not.be.calledTwice'): Chainable<Subject>
+    (chainer: 'not.be.calledWithExactly', ...args: any[]): Chainable<Subject>
+    (chainer: 'not.be.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'not.be.calledWithNew'): Chainable<Subject>
+    (chainer: 'not.have.always.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    (chainer: 'not.have.callCount', value: number): Chainable<Subject>
+    (chainer: 'not.have.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    (chainer: 'not.returned', value: any): Chainable<Subject>
+
+    // jquery-chai
+    (chainer: 'be.checked'): Chainable<Subject>
+    (chainer: 'be.disabled'): Chainable<Subject>
+    (chainer: 'be.empty'): Chainable<Subject>
+    (chainer: 'be.enabled'): Chainable<Subject>
+    (chainer: 'be.hidden'): Chainable<Subject>
+    (chainer: 'be.selected'): Chainable<Subject>
+    (chainer: 'be.visible'): Chainable<Subject>
+    (chainer: 'contain', value: string): Chainable<Subject>
+    (chainer: 'exist'): Chainable<Subject>
+    (chainer: 'have.attr', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.class', value: string): Chainable<Subject>
+    (chainer: 'have.css', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.data', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.decendants', selector: string): Chainable<Subject>
+    (chainer: 'have.html', value: string): Chainable<Subject>
+    (chainer: 'have.id', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.prop', value: string, match?: any): Chainable<Subject>
+    (chainer: 'have.text', value: string): Chainable<Subject>
+    (chainer: 'have.value', value: string): Chainable<Subject>
+    (chainer: 'match', value: string): Chainable<Subject>
+
+    // jquery-chai.not
+    (chainer: 'not.be.checked'): Chainable<Subject>
+    (chainer: 'not.be.disabled'): Chainable<Subject>
+    (chainer: 'not.be.empty'): Chainable<Subject>
+    (chainer: 'not.be.enabled'): Chainable<Subject>
+    (chainer: 'not.be.hidden'): Chainable<Subject>
+    (chainer: 'not.be.selected'): Chainable<Subject>
+    (chainer: 'not.be.visible'): Chainable<Subject>
+    (chainer: 'not.contain', value: string): Chainable<Subject>
+    (chainer: 'not.exist'): Chainable<Subject>
+    (chainer: 'not.have.attr', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.class', value: string): Chainable<Subject>
+    (chainer: 'not.have.css', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.data', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.decendants', selector: string): Chainable<Subject>
+    (chainer: 'not.have.html', value: string): Chainable<Subject>
+    (chainer: 'not.have.id', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.prop', value: string, match?: any): Chainable<Subject>
+    (chainer: 'not.have.text', value: string): Chainable<Subject>
+    (chainer: 'not.have.value', value: string): Chainable<Subject>
+    (chainer: 'not.match', value: string): Chainable<Subject>
+
+    // fallback
     (chainers: string, value?: any): Chainable<Subject>
-    (chainers: string, method: string, value: any): Chainable<Subject>
+    (chainers: string, value: any, match: any): Chainable<Subject>
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
