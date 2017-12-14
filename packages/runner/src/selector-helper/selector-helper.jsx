@@ -37,6 +37,9 @@ class Footer extends Component {
         'no-elements': !model.isValid || !model.numElements,
       })}>
         <div className='selector'>
+          <button className='highlight-toggle'>
+            <i className='fa fa-mouse-pointer'></i>
+          </button>
           <div
             ref={(node) => this._selectorWrap = node}
             className='wrap'
@@ -58,6 +61,15 @@ class Footer extends Component {
             <span>)</span>
           </div>
           <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
+          <Tooltip title={model.infoHelp}>
+            <span className='info num-elements'>
+              {
+                model.isValid ?
+                  `${model.numElements}` :
+                  <i className='fa fa-exclamation-triangle'></i>
+              }
+            </span>
+          </Tooltip>
           <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
             <button
               ref={(node) => this._copyButton = node}
@@ -77,9 +89,6 @@ class Footer extends Component {
             >
               <i className='fa fa-terminal' />
             </button>
-          </Tooltip>
-          <Tooltip title={model.infoHelp}>
-            <span className='info num-elements'>{model.info}</span>
           </Tooltip>
         </div>
         <button className='close' onClick={this._toggleSelectorHelper}>x</button>

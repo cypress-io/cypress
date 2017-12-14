@@ -41,7 +41,7 @@
     user-select: none;
 
     &:focus {
-      background: #e9e9e9;
+      background: transparent;
     }
 
     &:hover {
@@ -81,7 +81,7 @@
   .selector-helper {
     background-color: #f8f8f8;
     display: none;
-    padding: 5px 8px;
+    padding: 8px;
     position: relative;
     width: 100%;
     color: #565554;
@@ -91,6 +91,10 @@
       align-items: center;
       display: flex;
       position: relative;
+    }
+
+    .num-elements {
+      margin-right: 5px;
     }
 
     .selector,
@@ -123,6 +127,7 @@
         font-family: $font-mono;
         border: 1px solid #ced4da;
         font-size: 1em;
+        border-radius: 6px;
 
         &:hover {
 
@@ -153,7 +158,7 @@
 
       button {
         border: 0;
-        background-color: #fff;
+        background-color: #f8f8f8;
         color: #565554;
         padding: 5px 0 4px;
         font-family: $font-mono;
@@ -204,6 +209,14 @@
       &.is-showing .method-picker {
         display: block;
       }
+    }
+
+    .highlight-toggle {
+      background: #fff;
+      border: 1px solid #ced4da;
+      color: #565554;
+      padding: 6px 12px;
+      margin-right: 5px;
     }
 
     .copy-to-clipboard, .print-to-console {

@@ -17,14 +17,6 @@ class SelectorHelperModel {
     return this.method === 'get' ? this.getSelector : this.containsSelector
   }
 
-  @computed get info () {
-    if (!this.isValid) {
-      return 'x'
-    }
-
-    return this.numElements
-  }
-
   @computed get infoHelp () {
     if (!this.isValid) {
       return 'Invalid selector'
