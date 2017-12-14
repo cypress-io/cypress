@@ -29,7 +29,7 @@ export default class Header extends Component {
       >
         <div className='sel-url-wrap'>
           <Tooltip
-            title='Select an element in your app to see a suggested selector'
+            title='Open Selector Playground'
             wrapperClassName='selector-helper-toggle-tooltip-wrapper'
           >
             <button
@@ -37,7 +37,7 @@ export default class Header extends Component {
               onClick={this._toggleSelectorHelper}
               disabled={state.isLoading || state.isRunning}
             >
-              <i className='fa fa-mouse-pointer' />
+              <i className='fa fa-chevron-down' />
             </button>
           </Tooltip>
           <div
