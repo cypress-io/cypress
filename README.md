@@ -25,6 +25,24 @@ Extend one or more of the presets depending on the nature of the package:
 }
 ```
 
+You can relax rules
+
+```js
+// .eslintrc
+{
+  "extends": [
+    "plugin:cypress-dev/general"
+  ],
+  "rules": {
+    "comma-dangle": "off",
+    "no-debugger": "warn"
+  },
+  "env": {
+    "node": true
+  }
+}
+```
+
 ## Presets
 
 ### general
