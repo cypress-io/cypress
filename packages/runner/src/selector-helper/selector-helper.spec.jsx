@@ -9,8 +9,6 @@ import AutosizeInput from 'react-input-autosize'
 import eventManager from '../lib/event-manager'
 import SelectorHelper from './selector-helper'
 
-const event = { preventDefault () {} }
-
 const createModel = (props) => _.extend({
   method: 'get',
   methods: ['get', 'contains'],
