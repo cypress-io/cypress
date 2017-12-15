@@ -120,7 +120,9 @@ class SelectorHelper extends Component {
       (this.props.model.isEnabled !== this._previousIsEnabled)
       || (this.props.model.method !== this._previousMethod)
     ) {
-      this._focusAndSelectInputText()
+      if (this.props.model.isEnabled) {
+        this._focusAndSelectInputText()
+      }
       this._previousIsEnabled = this.props.model.isEnabled
       this._previousMethod = this.props.model.method
     }
