@@ -39,7 +39,9 @@ class SelectorHelper extends Component {
         'invalid-selector': !model.isValid,
       })}>
         <div className='selector'>
-          <button className='highlight-toggle'>
+          <button
+            className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
+            onClick={this._toggleSelectorHelper}>
             <i className='fa fa-mouse-pointer'></i>
           </button>
           <div

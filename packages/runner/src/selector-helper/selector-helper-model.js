@@ -7,6 +7,7 @@ class SelectorHelperModel {
 
   @observable getSelector = 'body'
   @observable containsSelector = 'Hello, World'
+  @observable isOpen = false
   @observable isEnabled = false
   @observable isShowingHighlight = false
   @observable isValid = true
@@ -35,6 +36,16 @@ class SelectorHelperModel {
     if (!this.isEnabled) {
       this.isShowingHighlight = false
     }
+  }
+
+  @action toggleOpen () {
+    this.setOpen(!this.isOpen)
+  }
+
+  @action setOpen (isOpen) {
+    this.isOpen = isOpen
+
+    this.setEnabled(this.isOpen)
   }
 
   @action setShowingHighlight (isShowingHighlight) {

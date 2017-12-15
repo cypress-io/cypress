@@ -19,18 +19,18 @@ export default class Header extends Component {
       <header
         ref='header'
         className={cs({
-          'showing-selector-helper': selectorHelperModel.isEnabled,
+          'showing-selector-helper': selectorHelperModel.isOpen,
         })}
       >
         <div className='sel-url-wrap'>
           <Tooltip
             title='Open Selector Playground'
-            visible={selectorHelperModel.isEnabled ? false : null}
+            visible={selectorHelperModel.isOpen ? false : null}
             wrapperClassName='selector-helper-toggle-tooltip-wrapper'
           >
             <button
               className='selector-helper-toggle'
-              onClick={this._toggleSelectorHelper}
+              onClick={this._toggleHelperOpen}
               disabled={state.isLoading || state.isRunning}
             >
               <i className='fa fa-chevron-down' />
@@ -81,6 +81,7 @@ export default class Header extends Component {
     this.previousSelectorHelperEnabled = selectorHelperModel.isEnabled
   }
 
+
   componentDidUpdate () {
     if (selectorHelperModel.isEnabled !== this.previousSelectorHelperEnabled) {
       this.props.state.updateWindowDimensions({
@@ -88,6 +89,10 @@ export default class Header extends Component {
       })
       this.previousSelectorHelperEnabled = selectorHelperModel.isEnabled
     }
+  }
+
+  _toggleHelperOpen = () => {
+    selectorHelperModel.toggleOpen()
   }
 
   _toggleSelectorHelper = () => {

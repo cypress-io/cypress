@@ -240,6 +240,10 @@
       color: #565554;
       padding: 6px 12px;
       margin-right: 5px;
+
+      &.active {
+        color: #4971C6;
+      }
     }
 
     button.copy-to-clipboard, button.print-to-console {
