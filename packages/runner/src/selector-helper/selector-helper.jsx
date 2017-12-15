@@ -43,7 +43,7 @@ class SelectorHelper extends Component {
             title='Click an element to see a suggested selector'>
             <button
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
-              onClick={this._toggleSelectorHelper}>
+              onClick={this._toggleEnablingSelectorHelper}>
               <span className='fa-stack'>
                 <i className='fa fa-square-o fa-stack-1x'></i>
                 <i className='fa fa-mouse-pointer fa-stack-1x'></i>
@@ -103,7 +103,7 @@ class SelectorHelper extends Component {
           <i className='fa fa-question-circle'></i>{' '}
           Learn more
         </a>
-        <button className='close' onClick={this._toggleSelectorHelper}>x</button>
+        <button className='close' onClick={this._toggleHelperOpen}>x</button>
       </div>
     )
   }
@@ -213,8 +213,12 @@ class SelectorHelper extends Component {
     this._setPrintText(defaultPrintText)
   }
 
-  _toggleSelectorHelper = () => {
+  _toggleEnablingSelectorHelper = () => {
     this.props.model.toggleEnabled()
+  }
+
+  _toggleHelperOpen = () => {
+    this.props.model.toggleOpen()
   }
 
   _updateSelector = (e) => {
