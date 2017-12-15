@@ -36,7 +36,10 @@ const getShortCommit = () => {
     process.env.CIRCLE_SHA1 ||
     process.env.BUILDKITE_COMMIT
   if (sha) {
-    return shorten(sha)
+    return {
+      sha,
+      short: shorten(sha),
+    }
   }
 }
 
@@ -66,9 +69,9 @@ const shortNpmVersion = getJustVersion(npm)
 console.log('short NPM version', shortNpmVersion)
 
 let subject = `Testing new ${platform} Cypress version ${shortNpmVersion}`
-const shortSha = getShortCommit()
-if (shortSha) {
-  subject += ` ${shortSha}`
+const commitInfo = getShortCommit()
+if (commitInfo) {
+  subject += ` ${commitInfo.short}`
 }
 
 // instructions for installing this binary
@@ -80,7 +83,8 @@ const commitMessageInstructions = getInstallJson(
   npm,
   env,
   platform,
-  shortNpmVersion
+  shortNpmVersion, // use as version as branch name on test projects
+  commitInfo && commitInfo.sha
 )
 const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
 const footer = 'Use tool `commit-message-install` to install from above block'
