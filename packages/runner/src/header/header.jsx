@@ -48,7 +48,7 @@ export default class Header extends Component {
           </div>
         </div>
         <ul className='menu'>
-          <li className={cs('viewport-info', { open: this.showingViewportMenu })}>
+          <li className={cs('viewport-info', { 'open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
               {state.width} x {state.height} <span className='viewport-scale'>({state.displayScale}%)</span>
               <i className='fa fa-fw fa-info-circle'></i>
@@ -98,6 +98,6 @@ export default class Header extends Component {
   }
 
   @action _toggleViewportMenu = () => {
-    this.showingViewportMenu = !this.state.showingViewportMenu
+    this.showingViewportMenu = !this.showingViewportMenu
   }
 }
