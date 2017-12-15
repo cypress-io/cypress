@@ -27,16 +27,6 @@ describe('<SelectorHelper />', () => {
     expect(component).to.have.className('method-get')
   })
 
-  it('renders with has-selector class when selector is set', () => {
-    const component = shallow(<SelectorHelper model={createModel()} />)
-    expect(component).to.have.className('has-selector')
-  })
-
-  it('renders without has-selector class when selector is not set', () => {
-    const component = shallow(<SelectorHelper model={createModel({ selector: '' })} />)
-    expect(component).not.to.have.className('has-selector')
-  })
-
   it('renders with invalid-selector class when selector is invalid', () => {
     const component = shallow(<SelectorHelper model={createModel({ isValid: false })} />)
     expect(component).to.have.className('invalid-selector')
