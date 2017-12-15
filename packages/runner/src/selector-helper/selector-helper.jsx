@@ -40,11 +40,14 @@ class SelectorHelper extends Component {
       })}>
         <div className='selector'>
           <Tooltip
-            title='Select an element to see a suggested selector'>
+            title='Click an element to see a suggested selector'>
             <button
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
               onClick={this._toggleSelectorHelper}>
-              <i className='fa fa-mouse-pointer'></i>
+              <span className='fa-stack'>
+                <i className='fa fa-square-o fa-stack-1x'></i>
+                <i className='fa fa-mouse-pointer fa-stack-1x'></i>
+              </span>
             </button>
           </Tooltip>
           <div
@@ -96,8 +99,9 @@ class SelectorHelper extends Component {
             </button>
           </Tooltip>
         </div>
-        <a href='https://on.cypress.io/selector-playground-info' target="_blank" rel="noopener noreferrer">
-          <i className='fa fa-info-circle selector-info'></i>
+        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank" rel="noopener noreferrer">
+          <i className='fa fa-question-circle'></i>{' '}
+          Learn more
         </a>
         <button className='close' onClick={this._toggleSelectorHelper}>x</button>
       </div>

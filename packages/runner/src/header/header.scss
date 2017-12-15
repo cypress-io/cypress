@@ -29,7 +29,7 @@
     cursor: pointer;
     border-radius: 0;
     display: block;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 500;
     line-height: 1.4;
     outline: 0;
@@ -110,13 +110,14 @@
       align-items: center;
       display: flex;
       position: relative;
-      width: calc(100% - 40px);
+      width: calc(100% - 115px);
     }
 
     .selector-info {
       position: absolute;
       right: 30px;
-      top: 35%;
+      top: 23%;
+      color: #4971C6;
     }
 
     .num-elements {
@@ -235,18 +236,36 @@
     }
 
     .highlight-toggle {
-      background: #fff;
-      border: 1px solid #ced4da;
-      color: #565554;
-      padding: 6px 12px;
+      background: #f8f8f8;
+      border: 0;
+      padding: 0;
       margin-right: 5px;
+      color: #767574;
+      padding-left: 3px;
 
-      &.active {
+      &.active, &:active {
+        box-shadow: none;
         color: #4971C6;
       }
 
       &:focus {
-        outline: 0; 
+        outline: 0;
+      }
+
+      .fa-stack {
+        font-size: 14px;
+      }
+
+      .fa-square-o {
+        top: 0px;
+        left: 0px;
+        font-size: 22px;
+      }
+
+      .fa-mouse-pointer {
+        left: 1.5px;
+        top: -1px;
+        font-size: 10px;
       }
     }
 
@@ -297,10 +316,14 @@
       position: absolute;
       top: 0;
       right: 5px;
+      font-weight: bold;
 
       &:hover,
-      &:focus {
+      &:focus,
+      &:active {
         color: #333;
+        outline: 0;
+        box-shadow: none;
       }
     }
   }

@@ -33,7 +33,7 @@ export default class Header extends Component {
               onClick={this._toggleHelperOpen}
               disabled={state.isLoading || state.isRunning}
             >
-              <i className='fa fa-chevron-down' />
+              <i className='fa fa-crosshairs' />
             </button>
           </Tooltip>
           <div
