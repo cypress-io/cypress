@@ -17,6 +17,7 @@ origin       = require("./util/origin")
 connect      = require("./util/connect")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
+blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
@@ -133,7 +134,7 @@ class Server
 
   createServer: (app, config, request) ->
     new Promise (resolve, reject) =>
-      {port, fileServerFolder, socketIoRoute, baseUrl} = config
+      {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
       @_server  = http.createServer(app)
       @_wsProxy = httpProxy.createProxyServer()
@@ -174,6 +175,20 @@ class Server
             word = if isMatching then "does" else "does not"
 
             log("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+
+            ## if we are currently matching then we're
+            ## not making a direct connection anyway
+            ## so we only need to check this if we
+            ## have blacklist hosts and are not matching.
+            ##
+            ## if we have blacklisted hosts lets
+            ## see if this matches - if so then
+            ## we cannot allow it to make a direct
+            ## connection
+            if blacklistHosts and not isMatching
+              isMatching = blacklist.matches(urlToCheck, blacklistHosts)
+
+              log("HTTPS request #{urlToCheck} matches blacklist?", isMatching)
 
             ## make a direct connection only if
             ## our req url does not match the origin policy

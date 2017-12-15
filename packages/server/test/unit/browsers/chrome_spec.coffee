@@ -34,3 +34,15 @@ describe "lib/browsers/chrome", ->
       args = chrome._getArgs()
 
       expect(args).not.to.include("--no-sandbox")
+
+    it "adds user agent when options.userAgent", ->
+      args = chrome._getArgs({
+        userAgent: "foo"
+      })
+
+      expect(args).to.include("--user-agent=foo")
+
+    it "does not add user agent", ->
+      args = chrome._getArgs()
+
+      expect(args).not.to.include("--user-agent=foo")
