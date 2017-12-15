@@ -723,6 +723,7 @@ workflows:
             branches:
               only:
                 - develop
+                - add-sha-to-commit-message
           requires:
             - build
       - build-binary:
@@ -730,6 +731,7 @@ workflows:
             branches:
               only:
                 - develop
+                - add-sha-to-commit-message
           requires:
             - build
       - test-next-version:
@@ -737,6 +739,7 @@ workflows:
             branches:
               only:
                 - develop
+                - add-sha-to-commit-message
           requires:
             - build-npm-package
             - build-binary
