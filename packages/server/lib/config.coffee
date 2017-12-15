@@ -62,6 +62,7 @@ defaults = {
   isTextTerminal:                false
   reporter:                      "spec"
   reporterOptions:               null
+  blacklistHosts:                null
   clientRoute:                   "/__/"
   xhrRoute:                      "/xhrs/"
   socketIoRoute:                 "/__socket.io"
@@ -103,6 +104,7 @@ defaults = {
 validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
+  blacklistHosts: v.isStringOrArrayOfStrings
   chromeWebSecurity: v.isBoolean
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject

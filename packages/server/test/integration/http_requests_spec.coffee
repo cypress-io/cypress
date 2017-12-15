@@ -2610,6 +2610,42 @@ describe "Routes", ->
 
           expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
 
+    context "blacklisted hosts", ->
+      beforeEach ->
+        @setup({
+          config: {
+            blacklistHosts: [
+              "*.google.com"
+              "shop.apple.com"
+              "cypress.io"
+              "localhost:6666"
+              "*adwords.com"
+            ]
+          }
+        })
+
+      it "returns 503 and custom headers for all hosts", ->
+        expectedHeader = (res, val) ->
+          expect(res.headers["x-cypress-matched-blacklisted-host"]).to.eq(val)
+
+        Promise.all([
+          @rp("https://mail.google.com/f")
+          @rp("http://shop.apple.com/o")
+          @rp("https://cypress.io")
+          @rp("https://localhost:6666/o")
+          @rp("https://some.adwords.com")
+        ])
+        .spread (responses...) ->
+          _.every responses, (res) ->
+            expect(res.statusCode).to.eq(503)
+            expect(res.body).to.be.empty
+
+          expectedHeader(responses[0], "*.google.com")
+          expectedHeader(responses[1], "shop.apple.com")
+          expectedHeader(responses[2], "cypress.io")
+          expectedHeader(responses[3], "localhost:6666")
+          expectedHeader(responses[4], "*adwords.com")
+
   context "POST *", ->
     beforeEach ->
       @setup("http://localhost:8000")
