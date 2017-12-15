@@ -96,6 +96,9 @@ class Footer extends Component {
             </button>
           </Tooltip>
         </div>
+        <a href='#' onClick={this._openSelectorLink}>
+          <i className='fa fa-info-circle selector-info'></i>
+        </a>
         <button className='close' onClick={this._toggleSelectorHelper}>x</button>
       </div>
     )
@@ -114,6 +117,11 @@ class Footer extends Component {
   componentWillUnmount () {
     this._disposeAutorun()
     document.body.removeEventListener('click', this._onOutsideClick)
+  }
+
+  _openSelectorLink = (e) => {
+    e.preventDefault()
+    window.open('https://on.cypress.io/selector-playground-info')
   }
 
   _methodSelector () {

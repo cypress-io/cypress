@@ -110,6 +110,13 @@
       align-items: center;
       display: flex;
       position: relative;
+      width: calc(100% - 40px);
+    }
+
+    .selector-info {
+      position: absolute;
+      right: 30px;
+      top: 35%;
     }
 
     .num-elements {
