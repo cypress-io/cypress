@@ -86,11 +86,11 @@ class Footer extends Component {
           </Tooltip>
           <Tooltip title={this.printText} updateCue={`${selectorText}${this.printText}`}>
             <button
-              ref={(node) => this._copyButton = node}
+              ref={(node) => this._printButton = node}
               className='print-to-console'
               onClick={this._printToConsole}
               disabled={!model.numElements || !model.isValid}
-              onMouseOut={fixMouseOut(this._resetPrintText, () => this._copyButton)}
+              onMouseOut={fixMouseOut(this._resetPrintText, () => this._printButton)}
             >
               <i className='fa fa-terminal' />
             </button>
