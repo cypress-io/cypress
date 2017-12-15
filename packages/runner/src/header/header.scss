@@ -244,6 +244,10 @@
       &.active {
         color: #4971C6;
       }
+
+      &:focus {
+        outline: 0; 
+      }
     }
 
     button.copy-to-clipboard, button.print-to-console {

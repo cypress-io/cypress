@@ -39,11 +39,14 @@ class SelectorHelper extends Component {
         'invalid-selector': !model.isValid,
       })}>
         <div className='selector'>
-          <button
-            className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
-            onClick={this._toggleSelectorHelper}>
-            <i className='fa fa-mouse-pointer'></i>
-          </button>
+          <Tooltip
+            title='Select an element to see a suggested selector'>
+            <button
+              className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
+              onClick={this._toggleSelectorHelper}>
+              <i className='fa fa-mouse-pointer'></i>
+            </button>
+          </Tooltip>
           <div
             className='wrap'
             onMouseOver={this._setHighlight(true)}
