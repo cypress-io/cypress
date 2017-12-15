@@ -54,9 +54,7 @@ class Footer extends Component {
             <span>{'\''}</span>
             <AutosizeInput
               ref={(node) => this._input = node}
-              className={cs('selector-input', {
-                'empty': !model[`${model.method}Selector`],
-              })}
+              className='selector-input'
               name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
               value={model.selector}
               onChange={this._updateSelector}
@@ -66,10 +64,9 @@ class Footer extends Component {
           <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
           <Tooltip title={model.infoHelp}>
             <span className='info num-elements'>
-              {
-                model.isValid ?
-                  `${model.numElements}` :
-                  <i className='fa fa-exclamation-triangle'></i>
+              {model.isValid ?
+                model.numElements :
+                <i className='fa fa-exclamation-triangle'></i>
               }
             </span>
           </Tooltip>
@@ -96,7 +93,7 @@ class Footer extends Component {
             </button>
           </Tooltip>
         </div>
-        <a href='#' onClick={this._openSelectorLink}>
+        <a href='https://on.cypress.io/selector-playground-info' target="_blank" rel="noopener noreferrer">
           <i className='fa fa-info-circle selector-info'></i>
         </a>
         <button className='close' onClick={this._toggleSelectorHelper}>x</button>
@@ -119,13 +116,9 @@ class Footer extends Component {
     document.body.removeEventListener('click', this._onOutsideClick)
   }
 
-  _openSelectorLink = (e) => {
-    e.preventDefault()
-    window.open('https://on.cypress.io/selector-playground-info')
-  }
-
   _methodSelector () {
     const { model } = this.props
+    const methods = _.filter(model.methods, (method) => method !== model.method)
 
     return (
       <span className={cs('method', {
@@ -136,14 +129,10 @@ class Footer extends Component {
           cy.{model.method}
         </button>
         <div className='method-picker'>
-          {_.map(model.methods, (method) => (
-            model.method !== method ?
-              <div
-                key={method}
-                className={cs({ 'is-chosen': model.method === method })}
-                onClick={() => this._setMethod(method)}
-              >cy.{method}</div> :
-              null
+          {_.map(methods, (method) => (
+            <div key={method} onClick={() => this._setMethod(method)}>
+              cy.{method}
+            </div>
           ))}
         </div>
       </span>
@@ -154,8 +143,7 @@ class Footer extends Component {
     this._setShowingMethodPicker(false)
   }
 
-  _toggleMethodPicker = (e) => {
-    e.preventDefault()
+  _toggleMethodPicker = () => {
     this._setShowingMethodPicker(!this.showingMethodPicker)
   }
 
