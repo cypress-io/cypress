@@ -214,15 +214,21 @@ export default class AutIframe {
     const clearHighlight = this._clearHighlight.bind(this, false)
 
     if (isEnabled) {
+      $body.on('mouseenter', this._resetShowHighlight)
       $body.on('mousemove', this._onSelectorMouseMove)
       $body.on('mouseleave', clearHighlight)
     } else {
+      $body.off('mouseenter', this._resetShowHighlight)
       $body.off('mousemove', this._onSelectorMouseMove)
       $body.off('mouseleave', clearHighlight)
       if (this._highlightedEl) {
         this._clearHighlight()
       }
     }
+  }
+
+  _resetShowHighlight = () => {
+    selectorHelperModel.setShowingHighlight(false)
   }
 
   _onSelectorMouseMove = (e) => {

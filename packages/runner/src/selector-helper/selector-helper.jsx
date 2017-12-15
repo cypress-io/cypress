@@ -44,10 +44,8 @@ class Footer extends Component {
             <i className='fa fa-mouse-pointer'></i>
           </button>
           <div
-            ref={(node) => this._selectorWrap = node}
             className='wrap'
             onMouseOver={this._setHighlight(true)}
-            onMouseOut={fixMouseOut(this._setHighlight(false), () => this._selectorWrap)}
           >
             {this._methodSelector()}
             <span>(</span>
@@ -58,6 +56,7 @@ class Footer extends Component {
               name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
               value={model.selector}
               onChange={this._updateSelector}
+              onFocus={this._setHighlight(true)}
             /><span>{'\''}</span>
             <span>)</span>
           </div>

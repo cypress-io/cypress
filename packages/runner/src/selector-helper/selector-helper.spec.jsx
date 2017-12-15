@@ -54,13 +54,6 @@ describe('<SelectorHelper />', () => {
     expect(model.setShowingHighlight).to.be.calledWith(true)
   })
 
-  it('hides highlight when mousing out from selector', () => {
-    const model = createModel()
-    const component = shallow(<SelectorHelper model={model} />)
-    component.find('.wrap').simulate('mouseout', { relatedTarget: { parentNode: {} } })
-    expect(model.setShowingHighlight).to.be.calledWith(false)
-  })
-
   it('updates selector and shows highlight when input changes', () => {
     const model = createModel()
     const component = shallow(<SelectorHelper model={model} />)
