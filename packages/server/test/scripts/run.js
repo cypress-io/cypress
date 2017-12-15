@@ -87,6 +87,7 @@ if (env.VERBOSE === '1') {
       'nock.*',
       '-nock.common',
       '-nock.scope',
+      '-nock.interceptor',
       'socket.io:*',
       'xvfb-maybe',
     ])

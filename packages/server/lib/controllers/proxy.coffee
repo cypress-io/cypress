@@ -9,6 +9,7 @@ logger        = require("../logger")
 cors          = require("../util/cors")
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
+blacklist     = require("../util/blacklist")
 networkFailures = require("../util/network_failures")
 
 redirectRe  = /^30(1|2|3|7|8)$/
@@ -54,6 +55,16 @@ module.exports = {
       ## requesting the cypress app and we need to redirect to the
       ## root path that serves the app
       return res.redirect(config.clientRoute)
+
+    ## if we have black listed hosts
+    if blh = config.blacklistHosts
+      ## and url matches any of our blacklisted hosts
+      if matched = blacklist.matches(req.proxiedUrl, blh)
+        ## then bail and return with 503
+        ## and set a custom header
+        res.set("x-cypress-matched-blacklisted-host", matched)
+
+        return res.status(503).end()
 
     thr = through (d) -> @queue(d)
 

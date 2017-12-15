@@ -228,8 +228,11 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project, headed) ->
+  listenForProjectEnd: (project, headed, exit) ->
     new Promise (resolve) ->
+      return if exit is false
+
+
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
         ## early too: (Ended Early: true)
@@ -303,9 +306,9 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath, exit } = options
 
-    @listenForProjectEnd(project, headed)
+    @listenForProjectEnd(project, headed, exit)
     .then (obj) =>
       if end
         obj.video = name
@@ -463,6 +466,7 @@ module.exports = {
       .then (started) =>
         Promise.props({
           stats:      @waitForTestsToFinishRunning({
+            exit:                 options.exit
             headed:               options.headed
             project:              options.project
             videoCompression:     options.videoCompression
@@ -523,6 +527,7 @@ module.exports = {
               videoRecording:       config.videoRecording
               videoCompression:     config.videoCompression
               videoUploadOnPasses:  config.videoUploadOnPasses
+              exit:                 options.exit
               spec:                 options.spec
               headed:               options.headed
               browser:              options.browser
