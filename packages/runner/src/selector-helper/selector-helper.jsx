@@ -9,6 +9,7 @@ import AutosizeInput from 'react-input-autosize'
 import eventManager from '../lib/event-manager'
 
 const defaultCopyText = 'Copy to clipboard'
+const defaultPrintText = 'Print to console'
 
 // mouseleave fires when entering a child element, so make sure we're
 // actually leaving the button and not just hovering over a child
@@ -25,6 +26,7 @@ const fixMouseOut = (fn, getTarget) => (e) => {
 @observer
 class Footer extends Component {
   @observable copyText = defaultCopyText
+  @observable printText = defaultPrintText
   @observable showingMethodPicker = false
 
   render () {
@@ -82,18 +84,21 @@ class Footer extends Component {
               <i className='fa fa-copy' />
             </button>
           </Tooltip>
-          <Tooltip title='Print to console'>
+          <Tooltip title={this.printText} updateCue={`${selectorText}${this.printText}`}>
             <button
               ref={(node) => this._copyButton = node}
               className='print-to-console'
               onClick={this._printToConsole}
               disabled={!model.numElements || !model.isValid}
-              onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
+              onMouseOut={fixMouseOut(this._resetPrintText, () => this._copyButton)}
             >
               <i className='fa fa-terminal' />
             </button>
           </Tooltip>
         </div>
+        <a href='#' onClick={this._openSelectorLink}>
+          <i className='fa fa-info-circle selector-info'></i>
+        </a>
         <button className='close' onClick={this._toggleSelectorHelper}>x</button>
       </div>
     )
@@ -112,6 +117,11 @@ class Footer extends Component {
   componentWillUnmount () {
     this._disposeAutorun()
     document.body.removeEventListener('click', this._onOutsideClick)
+  }
+
+  _openSelectorLink = (e) => {
+    e.preventDefault()
+    window.open('https://on.cypress.io/selector-playground-info')
   }
 
   _methodSelector () {
@@ -183,6 +193,15 @@ class Footer extends Component {
 
   _printToConsole = () => {
     eventManager.emit('print:selector:elements:to:console')
+    this._setPrintText('Printed!')
+  }
+
+  @action _setPrintText (text) {
+    this.printText = text
+  }
+
+  _resetPrintText = () => {
+    this._setPrintText(defaultPrintText)
   }
 
   _toggleSelectorHelper = () => {
