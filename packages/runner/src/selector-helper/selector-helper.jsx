@@ -58,16 +58,16 @@ class Footer extends Component {
               onFocus={this._setHighlight(true)}
             /><span>{'\''}</span>
             <span>)</span>
+            <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
+            <Tooltip title={model.infoHelp}>
+              <span className='info num-elements'>
+                {model.isValid ?
+                  model.numElements :
+                  <i className='fa fa-exclamation-triangle'></i>
+                }
+              </span>
+            </Tooltip>
           </div>
-          <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-          <Tooltip title={model.infoHelp}>
-            <span className='info num-elements'>
-              {model.isValid ?
-                model.numElements :
-                <i className='fa fa-exclamation-triangle'></i>
-              }
-            </span>
-          </Tooltip>
           <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
             <button
               ref={(node) => this._copyButton = node}
