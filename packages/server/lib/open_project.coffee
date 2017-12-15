@@ -49,6 +49,7 @@ create = ->
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
+          options.userAgent         = cfg.userAgent
           options.proxyServer       = cfg.proxyUrl
           options.chromeWebSecurity = cfg.chromeWebSecurity
 

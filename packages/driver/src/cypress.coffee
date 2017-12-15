@@ -119,13 +119,13 @@ class $Cypress
       longStackTraces: config.isInteractive
     })
 
-    {environmentVariables, remote} = config
+    {env, remote} = config
 
-    config = _.omit(config, "environmentVariables", "remote")
+    config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
 
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
-    @env = $SetterGetter.create(environmentVariables)
+    @env = $SetterGetter.create(env)
 
     @Cookies = $Cookies.create(config.namespace, d)
 

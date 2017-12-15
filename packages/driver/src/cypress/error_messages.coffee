@@ -204,9 +204,6 @@ module.exports = {
     invalid_argument: "#{cmd('each')} must be passed a callback function."
     non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: '{{subject}}'"
 
-  env:
-    variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
-
   exec:
     failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
 
@@ -789,7 +786,7 @@ module.exports = {
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
     fromApp: """
-      This error originated from *your* application code, not from Cypress.
+      This error originated from your application code, not from Cypress.
 
       When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -799,7 +796,7 @@ module.exports = {
     """
 
     fromSpec: """
-      This error originated from *your* test code, not from Cypress.
+      This error originated from your test code, not from Cypress.
 
       When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
     """

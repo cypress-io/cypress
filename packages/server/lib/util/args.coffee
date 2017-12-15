@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exitWithCode hosts browser headless outputPath group groupId".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exitWithCode hosts browser headless outputPath group groupId exit".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 everythingAfterFirstEqualRe = /=(.+)/
@@ -75,7 +75,6 @@ module.exports = {
         "run-project": "runProject"
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
-        "env":         "environmentVariables"
         "headless":    "isTextTerminal"
         "exit-with-code":   "exitWithCode"
         "reporter-options": "reporterOptions"
@@ -89,7 +88,6 @@ module.exports = {
     options = _
     .chain(options)
     .defaults(whitelisted)
-    .extend({env: process.env["CYPRESS_ENV"]})
     .mapValues(coerce)
     .value()
 
@@ -107,9 +105,9 @@ module.exports = {
       backup("hosts", options)
       options.hosts = parseNestedValues(hosts)
 
-    if envs = options.environmentVariables
-      backup("environmentVariables", options)
-      options.environmentVariables = parseNestedValues(envs)
+    if envs = options.env
+      backup("env", options)
+      options.env = parseNestedValues(envs)
 
     if ro = options.reporterOptions
       backup("reporterOptions", options)

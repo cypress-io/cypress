@@ -20,7 +20,7 @@ Check your test file for errors.
 
 https://on.cypress.io/cannot-execute-commands-outside-test
 
-This error originated from *your* test code, not from Cypress.
+This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 

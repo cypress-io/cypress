@@ -19,9 +19,8 @@ Thanks for taking the time to contribute! :smile:
 
 - [CI Status](#ci-status)
 - [Code of Conduct](#code-of-conduct)
-- [Contributing Bug Reports & Feature Requests](#contributing-bug-reports--feature-requests)
-  - [Bug Reports](#bug-reports)
-  - [Feature Requests](#feature-requests)
+- [Bug Reports](#bug-reports)
+- [Feature Requests](#feature-requests)
 - [Writing Code](#writing-code)
   - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
   - [Requirements](#requirements)
@@ -31,7 +30,9 @@ Thanks for taking the time to contribute! :smile:
   - [Packages](#packages)
 - [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
+  - [Branches](#branches)
   - [Pull Requests](#pull-requests)
+  - [Testing](#testing)
 - [Deployment](#deployment)
 
 ## CI status
@@ -52,19 +53,17 @@ Build status | Description
 
 All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Contributing Bug Reports & Feature Requests
-
-### Bug Reports
-
-This article describes how to open an effective bug report so we can get your issue fixed or help you work around it.
+## Bug Reports
 
 **The most important things to do are:**
 
-- Search existing [issues](https://github.com/cypress-io/cypress/issues) for your problem
-- Check the list of common fixes below
-- Make sure we support your setup
-- Gather debugging information
-- Explain how to reproduce the issue
+- Search existing [issues](https://github.com/cypress-io/cypress/issues) for your problem.
+- Check the list of [common fixes](#common-fixes) below.
+- Make sure we [support your setup](#supported-issues).
+- [Gather debugging information](#getting-more-information).
+- [Explain how to reproduce the issue](#reproducibility).
+
+Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
 
 If you have a feature request (not a bug), see [Feature Requests](#feature-requests).
 
@@ -76,16 +75,16 @@ Before filing a bug, make sure you are up to date. Your issue may have already b
 
 ### Supported Issues
 
-Before filing a bug, make sure you're filing an issue against something we support. See our [System Requirements](https://on.cypress.io/installing-cypress#system-requirements).
+Before filing a bug, make sure you are filing an issue against something we support. See our [System Requirements](https://on.cypress.io/installing-cypress#system-requirements).
 
-### Getting More Information
+### Getting more information
 
-For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it doesn't, this information can help us figure out and resolve an issue.
+For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it does not, this information can help us figure out and resolve an issue.
 
-- For issues in the web browser, check the JavaScript console and your Network tab in your DevTools
+- For issues in the web browser, check the JavaScript console and your Network tab in your DevTools.
 - Click on any command in the Command Log where the failure occurred, this will log more information about the error to the JavaScript console.
-- Use Cypress' [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
-- Ask other Cypress users for help in our [gitter channel](https://gitter.im/cypress-io/cypress).
+- Use Cypress [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
+- Ask other Cypress users for help in our [chat](https://on.cypress.io/chat).
 
 ### Reproducibility
 
@@ -96,44 +95,30 @@ The most important part of your issue is instructions on how to reproduce the is
 
 **It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
 
-### Open an Issue
-
-If you're up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you're ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
-
 ## Feature Requests
-
-Have a feature you'd like to see in Cypress? This describes how to file an effective feature request.
 
 **The most important things to do are:**
 
-- Understand our [roadmap](https://on.cypress.io/roadmap)
-- Make sure your feature makes sense in the project
-- Align your expectations around timelines and priorities
-- Describe your problem, not your solution
+- Understand our [roadmap](https://on.cypress.io/roadmap).
+- Make sure your feature makes sense in the project.
+- [Align your expectations around timelines and priorities.](#setting-expectations)
+- [Describe your problem, not your solution](#describe-problems)
 
-### Understand our roadmap
-
-We have a cohesive vision for Cypress in the long term and a general [roadmap](https://on.cypress.io/roadmap) that extends into the future. While the specifics of how we get there are flexible, many milestones are well-established.
-
-Feature requests are an important part of what we plan in our roadmap, but we ultimately build only features which make sense as part of the long term plan.
+If you think your feature might be a good fit for our roadmap, has reasonable expectations about it, and has a good description of the problem you are trying to solve, you are ready to [open a feature request](https://github.com/cypress-io/cypress/issues/new).
 
 ### Setting Expectations
 
-We have a lot of users and a small team. Even if your feature is something we're interested in and a good fit for where we want the product to go, it may take us a long time to get around to building it.
+We have a lot of users and a small team. Even if your feature is something we are interested in and a good fit for where we want the product to go, it may take us a long time to get around to building it.
 
-If you want a concrete timeline, you can [contact us](mailto:support@cypress.io) to pay for some control over our roadmap.
+If you want a concrete timeline, you can [contact us](mailto:support@cypress.io) to pay for some control over our [roadmap](https://on.cypress.io/roadmap).
 
 ### Describe Problems
 
-When you file a feature request, we need you to **describe the problem you're facing first**, not just your desired solution.
+When you file a feature request, we need you to **describe the problem you are facing first**, not just your desired solution.
 
 Often, your problem may have a lot in common with other similar problems. If we understand your use case we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
 
 Also, your proposed solution may not be compatible with the direction we want to take the product, but we may be able to come up with another solution which has approximately the same effect and does fit into the product direction.
-
-### Open an Issue
-
-If you think your feature might be a good fit for our roadmap, has reasonable expectations about it, and has a good description of the problem you're trying to solve, you're ready to [open a feature request](https://github.com/cypress-io/cypress/issues/new).
 
 ## Writing code
 

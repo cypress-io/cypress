@@ -100,7 +100,7 @@ deploy = {
     .then (task) ->
       switch task
         when "run"
-          bump.run()
+          bump.runTestProjects()
         when "version"
           ask.whichVersion(meta.distDir(""))
           .then (v) ->
