@@ -102,17 +102,24 @@ class Footer extends Component {
   }
 
   componentDidMount () {
-    // focus input when user changes method
-    this._disposeAutorun = autorun(() => {
-      this.props.model.method
-      this._input.focus()
-    })
+    this._previousIsEnabled = this.props.model.isEnabled
+    this._previousMethod = this.props.model.method
 
     document.body.addEventListener('click', this._onOutsideClick, false)
   }
 
+  componentDidUpdate () {
+    if (
+      (this.props.model.isEnabled !== this._previousIsEnabled)
+      || (this.props.model.method !== this._previousMethod)
+    ) {
+      this._focusAndSelectInputText()
+      this._previousIsEnabled = this.props.model.isEnabled
+      this._previousMethod = this.props.model.method
+    }
+  }
+
   componentWillUnmount () {
-    this._disposeAutorun()
     document.body.removeEventListener('click', this._onOutsideClick)
   }
 
@@ -137,6 +144,11 @@ class Footer extends Component {
         </div>
       </span>
     )
+  }
+
+  _focusAndSelectInputText () {
+    this._input.focus()
+    this._input.select()
   }
 
   _onOutsideClick = () => {

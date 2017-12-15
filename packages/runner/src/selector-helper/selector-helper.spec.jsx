@@ -88,7 +88,7 @@ describe('<SelectorHelper />', () => {
 
   describe('method picker', () => {
     it('opens when clicking method', () => {
-      const component = shallow(<SelectorHelper model={createModel()} />)
+      const component = mount(<SelectorHelper model={createModel()} />)
       component.find('.method button').simulate('click')
       expect(component.find('.method')).to.have.className('is-showing')
     })
@@ -105,7 +105,7 @@ describe('<SelectorHelper />', () => {
 
     it('sets method when selected', () => {
       const model = createModel()
-      const component = shallow(<SelectorHelper model={model} />)
+      const component = mount(<SelectorHelper model={model} />)
       component.find('.method button').simulate('click')
       component.find('.method-picker > div').first().simulate('click')
       expect(model.setMethod).to.be.calledWith('contains')
