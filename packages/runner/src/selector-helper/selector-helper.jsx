@@ -24,7 +24,7 @@ const fixMouseOut = (fn, getTarget) => (e) => {
 }
 
 @observer
-class Footer extends Component {
+class SelectorHelper extends Component {
   @observable copyText = defaultCopyText
   @observable printText = defaultPrintText
   @observable showingMethodPicker = false
@@ -213,4 +213,4 @@ class Footer extends Component {
   }
 }
 
-export default Footer
+export default SelectorHelper
