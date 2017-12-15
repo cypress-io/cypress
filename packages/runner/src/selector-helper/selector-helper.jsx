@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import cs from 'classnames'
-import { action, autorun, observable } from 'mobx'
+import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'

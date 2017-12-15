@@ -3,6 +3,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 import driver from '@packages/driver'
+import Tooltip from '@cypress/react-tooltip'
 
 import selectorHelperModel from '../selector-helper/selector-helper-model'
 
@@ -51,6 +52,18 @@ describe('<Header />', () => {
       selectorHelperModel.isEnabled = true
       component.update()
       expect(state.updateWindowDimensions).to.be.calledWith({ headerHeight: 42 })
+    })
+
+    it('does not show tooltip if selector helper is enabled', () => {
+      selectorHelperModel.isEnabled = true
+      const component = shallow(<Header state={getState()} />)
+      expect(component.find(Tooltip)).to.have.prop('visible', false)
+    })
+
+    it('uses default tooltip visibility if selector helper is disabled', () => {
+      selectorHelperModel.isEnabled = false
+      const component = shallow(<Header state={getState()} />)
+      expect(component.find(Tooltip)).to.have.prop('visible', null)
     })
   })
 

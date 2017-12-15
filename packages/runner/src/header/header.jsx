@@ -25,6 +25,7 @@ export default class Header extends Component {
         <div className='sel-url-wrap'>
           <Tooltip
             title='Open Selector Playground'
+            visible={selectorHelperModel.isEnabled ? false : null}
             wrapperClassName='selector-helper-toggle-tooltip-wrapper'
           >
             <button
