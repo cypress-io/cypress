@@ -120,7 +120,7 @@ module.exports = {
       ## bail if we're not registered to this event
       return if not plugins.has("before:browser:launch")
 
-      plugins.execute("before:browser:launch", browserName, args)
+      plugins.execute("before:browser:launch", options.browser, args)
       .then (newArgs) ->
         debug("got user args for 'before:browser:launch'", newArgs)
 

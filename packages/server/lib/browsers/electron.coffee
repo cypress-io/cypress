@@ -114,7 +114,7 @@ module.exports = {
         ## bail if we're not registered to this event
         return options if not plugins.has("before:browser:launch")
 
-        plugins.execute("before:browser:launch", browserName, options)
+        plugins.execute("before:browser:launch", options.browser, options)
         .then (newOptions) ->
           return newOptions ? options
     .then (options) =>

@@ -34,6 +34,14 @@ getBrowser = (name) ->
     when "electron"
       require("./electron")
 
+find = (browser, browsers = []) ->
+  _.find(browsers, { name: browser })
+
+getByName = (browser) ->
+  utils.getBrowsers()
+  .then (browsers = []) ->
+    find(browser, browsers)
+
 process.once "exit", kill
 
 module.exports = {
@@ -43,10 +51,9 @@ module.exports = {
 
   close: kill
 
-  getByName: (browser) ->
-    utils.getBrowsers()
-    .then (browsers = []) ->
-      _.find(browsers, { name: browser })
+  find
+
+  getByName
 
   open: (name, options = {}, automation) ->
     kill(true)
@@ -59,6 +66,10 @@ module.exports = {
       if not browser = getBrowser(name)
         names = _.map(options.browsers, "name").join(", ")
         return errors.throw("BROWSER_NOT_FOUND", name, names)
+
+      ## set the current browser object on options
+      ## so we can pass it down
+      options.browser = find(name, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
