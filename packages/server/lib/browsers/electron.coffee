@@ -1,15 +1,16 @@
 _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
+plugins       = require("../plugins")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
 savedState    = require("../saved_state")
 
 module.exports = {
-  _defaultOptions: (state, options) ->
+  _defaultOptions: (projectPath, state, options) ->
     _this = @
 
-    _.defaults({}, options, {
+    defaults = {
       x: state.browserX
       y: state.browserY
       width: state.browserWidth or 1280
@@ -30,27 +31,34 @@ module.exports = {
       onNewWindow: (e, url) ->
         _win = @
 
-        _this._launchChild(e, url, _win, state, options)
+        _this._launchChild(e, url, _win, projectPath, state, options)
         .then (child) ->
           ## close child on parent close
           _win.on "close", ->
             if not child.isDestroyed()
               child.close()
-    })
+    }
 
-  _render: (url, state, options = {}) ->
-    options = @_defaultOptions(state, options)
+    ## what we're doing is stripping down options
+    ## to only be keys we've found in our defaults
+    ## and then setting those to the defaults here
+    _
+    .chain(options)
+    .pick(_.keys(defaults))
+    .defaults(defaults)
+    .value()
 
-    win = Windows.create(options)
+  _render: (url, projectPath, options = {}) ->
+    win = Windows.create(projectPath, options)
 
     @_launch(win, url, options)
 
-  _launchChild: (e, url, parent, state, options) ->
+  _launchChild: (e, url, parent, projectPath, state, options) ->
     e.preventDefault()
 
     [parentX, parentY] = parent.getPosition()
 
-    options = @_defaultOptions(state, options)
+    options = @_defaultOptions(projectPath, state, options)
 
     _.extend(options, {
       x: parentX + 100
@@ -59,7 +67,7 @@ module.exports = {
       onPaint: null ## dont capture paint events
     })
 
-    win = Windows.create(options)
+    win = Windows.create(projectPath, options)
 
     ## needed by electron since we prevented default and are creating
     ## our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
@@ -93,11 +101,28 @@ module.exports = {
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
-    savedState(options.projectPath)
+    { projectPath } = options
+
+    savedState(projectPath)
     .then (state) ->
       state.get()
     .then (state) =>
-      @_render(url, state, options)
+      ## get our electron default options
+      options = @_defaultOptions(projectPath, state, options)
+
+      ## get the GUI window defaults now
+      options = Windows.defaults(options)
+
+      Promise
+      .try =>
+        ## bail if we're not registered to this event
+        return options if not plugins.has("before:browser:launch")
+
+        plugins.execute("before:browser:launch", browserName, options)
+        .then (newOptions) ->
+          return newOptions ? options
+    .then (options) =>
+      @_render(url, projectPath, options)
       .then (win) =>
         a = Windows.automation(win)
 
