@@ -66,14 +66,14 @@ describe('<Command />', () => {
       expect(component).to.have.className('command-has-num-elements')
     })
 
-    it('renders with the has-no-elements class when numElements is 0', () => {
+    it('renders with the no-elements class when numElements is 0', () => {
       const component = shallow(<Command model={model({ numElements: 0 })} />)
-      expect(component).to.have.className('command-has-no-elements')
+      expect(component).to.have.className('no-elements')
     })
 
-    it('renders with the has-multiple-elements class when numElements is more than 1', () => {
+    it('renders with the multiple-elements class when numElements is more than 1', () => {
       const component = shallow(<Command model={model({ numElements: 2 })} />)
-      expect(component).to.have.className('command-has-multiple-elements')
+      expect(component).to.have.className('multiple-elements')
     })
 
     it('renders with the other-pinned class when another command is pinned', () => {
@@ -304,12 +304,12 @@ describe('<Command />', () => {
   context('elements', () => {
     it('renders the number of elements', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
-      expect(component.find('.command-num-elements')).to.have.text('3')
+      expect(component.find('.num-elements')).to.have.text('3')
     })
 
     it('renders a tooltip for the number of elements', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
-      expect(component.find('Tooltip').at(1).find('.command-num-elements')).to.exist
+      expect(component.find('Tooltip').at(1).find('.num-elements')).to.exist
     })
 
     it('renders the number of elements tooltip with the right title', () => {
