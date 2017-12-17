@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { action, observable } from 'mobx'
+import { observable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
@@ -76,14 +76,14 @@ class App extends Component {
     const $header = $(findDOMNode(this.refs.header))
     const $reporterWrap = $(this.refs.reporterWrap)
 
-    this._onWindowResize = action('window:resize', () => {
+    this._onWindowResize = () => {
       state.updateWindowDimensions({
         windowWidth: $window.width(),
         windowHeight: $window.height(),
         reporterWidth: $reporterWrap.outerWidth(),
         headerHeight: $header.outerHeight(),
       })
-    })
+    }
 
     $window.on('resize', this._onWindowResize).trigger('resize')
   }
@@ -121,7 +121,6 @@ App.propTypes = {
       majorVersion: PropTypes.string.isRequired,
       version: PropTypes.string.isRequired,
     })).isRequired,
-    cypressEnv: PropTypes.string.isRequired,
     integrationFolder: PropTypes.string.isRequired,
     numTestsKeptInMemory: PropTypes.number.isRequired,
     projectName: PropTypes.string.isRequired,

@@ -101,6 +101,10 @@
 
     > span {
       display: flex;
+
+      &:last-child button {
+        border-right: 1px solid #ddd;
+      }
     }
 
     .paused-label {
@@ -118,6 +122,8 @@
 
       &.fa-repeat {
         font-size: 112%;
+        position: relative;
+        top: 1px;
       }
     }
 
