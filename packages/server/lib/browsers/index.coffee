@@ -52,7 +52,6 @@ module.exports = {
     kill(true)
     .then ->
       _.defaults(options, {
-        browserArgs: []
         onBrowserOpen: ->
         onBrowserClose: ->
       })

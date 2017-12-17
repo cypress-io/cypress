@@ -256,7 +256,7 @@ module.exports = {
 
     win = @create(projectPath, options)
 
-    debug("creating electron window with options:", options)
+    debug("creating electron window with options %o", options)
 
     windows[options.type] = win
 

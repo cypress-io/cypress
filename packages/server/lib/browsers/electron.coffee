@@ -1,6 +1,7 @@
 _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
+debug         = require("debug")("cypress:server:browsers")
 plugins       = require("../plugins")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
@@ -39,14 +40,7 @@ module.exports = {
               child.close()
     }
 
-    ## what we're doing is stripping down options
-    ## to only be keys we've found in our defaults
-    ## and then setting those to the defaults here
-    _
-    .chain(options)
-    .pick(_.keys(defaults))
-    .defaults(defaults)
-    .value()
+    _.defaultsDeep({}, options, defaults)
 
   _render: (url, projectPath, options = {}) ->
     win = Windows.create(projectPath, options)
@@ -77,6 +71,8 @@ module.exports = {
 
   _launch: (win, url, options) ->
     menu.set({withDevTools: true})
+
+    debug("launching electron browser window to url %s with options %o", url, options)
 
     Promise
     .try =>

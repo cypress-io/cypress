@@ -11,7 +11,7 @@ httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
-log          = require("debug")("cypress:server:server")
+debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
@@ -149,7 +149,7 @@ class Server
           reject @portInUseErr(port)
 
       onUpgrade = (req, socket, head) =>
-        log("Got UPGRADE request from %s", req.url)
+        debug("Got UPGRADE request from %s", req.url)
 
         @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
 
@@ -164,7 +164,7 @@ class Server
           upgrade.call(@_server, req, socket, head)
 
       @_server.on "connect", (req, socket, head) =>
-        log("Got CONNECT request from %s", req.url)
+        debug("Got CONNECT request from %s", req.url)
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -174,7 +174,7 @@ class Server
 
             word = if isMatching then "does" else "does not"
 
-            log("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+            debug("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
 
             ## if we are currently matching then we're
             ## not making a direct connection anyway
@@ -188,7 +188,7 @@ class Server
             if blacklistHosts and not isMatching
               isMatching = blacklist.matches(urlToCheck, blacklistHosts)
 
-              log("HTTPS request #{urlToCheck} matches blacklist?", isMatching)
+              debug("HTTPS request #{urlToCheck} matches blacklist?", isMatching)
 
             ## make a direct connection only if
             ## our req url does not match the origin policy
@@ -246,7 +246,7 @@ class Server
 
         @isListening = true
 
-        log("Server listening on port %s", port)
+        debug("Server listening on port %s", port)
 
         @_server.removeListener "error", onError
 
@@ -286,7 +286,7 @@ class Server
       fileServer: @_remoteFileServer
     })
 
-    log("Getting remote state: %o", props)
+    debug("Getting remote state: %o", props)
 
     return props
 
@@ -391,6 +391,8 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
+              debug("received response for resolving url %o", details)
+
               if isOk and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
@@ -445,7 +447,7 @@ class Server
 
   _onDomainSet: (fullyQualifiedUrl) ->
     l = (type, url) ->
-      log("Setting %s %s", type, url)
+      debug("Setting %s %s", type, url)
 
     ## if this isn't a fully qualified url
     ## or if this came to us as <root> in our tests

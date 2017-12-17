@@ -94,7 +94,7 @@ module.exports = {
       .return(extensionDest)
 
   _getArgs: (options = {}) ->
-    args = defaultArgs.concat(options.browserArgs)
+    args = [].concat(defaultArgs)
 
     if os.platform() is "linux"
       args.push("--disable-gpu")

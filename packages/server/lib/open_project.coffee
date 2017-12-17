@@ -49,8 +49,10 @@ create = ->
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
+          options.proxyUrl          = cfg.proxyUrl
           options.userAgent         = cfg.userAgent
           options.proxyServer       = cfg.proxyUrl
+          options.socketIoRoute     = cfg.socketIoRoute
           options.chromeWebSecurity = cfg.chromeWebSecurity
 
           options.url = url
@@ -61,10 +63,6 @@ create = ->
           ## been defined here
           if am = options.automationMiddleware
             automation.use(am)
-
-          ## merge options into config
-          ## without mutating cfg
-          options = _.extend({}, cfg, options)
 
           do relaunchBrowser = ->
             log "launching project in browser #{browserName}"
