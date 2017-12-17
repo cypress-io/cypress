@@ -78,25 +78,20 @@ export default class Header extends Component {
   }
 
   componentDidMount () {
-    this.previousSelectorHelperEnabled = selectorHelperModel.isEnabled
+    this.previousSelectorHelperOpen = selectorHelperModel.isOpen
   }
 
-
   componentDidUpdate () {
-    if (selectorHelperModel.isEnabled !== this.previousSelectorHelperEnabled) {
+    if (selectorHelperModel.isOpen !== this.previousSelectorHelperOpen) {
       this.props.state.updateWindowDimensions({
         headerHeight: $(this.refs.header).outerHeight(),
       })
-      this.previousSelectorHelperEnabled = selectorHelperModel.isEnabled
+      this.previousSelectorHelperOpen = selectorHelperModel.isOpen
     }
   }
 
   _toggleHelperOpen = () => {
     selectorHelperModel.toggleOpen()
-  }
-
-  _toggleSelectorHelper = () => {
-    selectorHelperModel.toggleEnabled()
   }
 
   _openUrl = () => {

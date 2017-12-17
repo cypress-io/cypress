@@ -17,13 +17,13 @@ const getState = (props) => _.extend({
 }, props)
 
 describe('<Header />', () => {
-  it('has showing-selector-helper class if selector helper is enabled', () => {
-    selectorHelperModel.isEnabled = true
+  it('has showing-selector-helper class if selector helper is open', () => {
+    selectorHelperModel.isOpen = true
     expect(shallow(<Header state={getState()} />)).to.have.className('showing-selector-helper')
   })
 
   it('does not showing-selector-helper class if selector helper is disabled', () => {
-    selectorHelperModel.isEnabled = false
+    selectorHelperModel.isOpen = false
     expect(shallow(<Header state={getState()} />)).not.to.have.className('showing-selector-helper')
   })
 
@@ -39,29 +39,29 @@ describe('<Header />', () => {
     })
 
     it('toggles the selector helper on click', () => {
-      selectorHelperModel.toggleEnabled = sinon.spy()
+      selectorHelperModel.toggleOpen = sinon.spy()
       const component = shallow(<Header state={getState()} />)
       component.find('.selector-helper-toggle').simulate('click')
-      expect(selectorHelperModel.toggleEnabled).to.be.called
+      expect(selectorHelperModel.toggleOpen).to.be.called
     })
 
     it('updates window dimensions after selector helper is toggled', () => {
-      selectorHelperModel.isEnabled = false
+      selectorHelperModel.isOpen = false
       const state = getState()
       const component = shallow(<Header state={state} />)
-      selectorHelperModel.isEnabled = true
+      selectorHelperModel.isOpen = true
       component.update()
       expect(state.updateWindowDimensions).to.be.calledWith({ headerHeight: 42 })
     })
 
-    it('does not show tooltip if selector helper is enabled', () => {
-      selectorHelperModel.isEnabled = true
+    it('does not show tooltip if selector helper is open', () => {
+      selectorHelperModel.isOpen = true
       const component = shallow(<Header state={getState()} />)
       expect(component.find(Tooltip)).to.have.prop('visible', false)
     })
 
-    it('uses default tooltip visibility if selector helper is disabled', () => {
-      selectorHelperModel.isEnabled = false
+    it('uses default tooltip visibility if selector helper is closed', () => {
+      selectorHelperModel.isOpen = false
       const component = shallow(<Header state={getState()} />)
       expect(component.find(Tooltip)).to.have.prop('visible', null)
     })
