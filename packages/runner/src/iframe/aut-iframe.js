@@ -286,7 +286,9 @@ export default class AutIframe {
       return
     }
 
-    const $el = this.getElements()
+    const Cypress = eventManager.getCypress()
+
+    const $el = this.getElements(Cypress.dom)
 
     selectorHelperModel.setValidity(!!$el)
 
@@ -306,7 +308,7 @@ export default class AutIframe {
     })
   }
 
-  getElements () {
+  getElements (cypressDom) {
     const contents = this._contents()
     const selector = selectorHelperModel.selector
 
@@ -316,30 +318,30 @@ export default class AutIframe {
       selector,
       method: selectorHelperModel.method,
       root: contents,
-      cypressDom: eventManager.getCypress().dom,
+      cypressDom,
     })
   }
 
   printSelectorElementsToConsole () {
     logger.clearLog()
 
-    const $el = this.getElements()
+    const Cypress = eventManager.getCypress()
+
+    const $el = this.getElements(Cypress.dom)
 
     const command = `cy.${selectorHelperModel.method}('${selectorHelperModel.selector}')`
 
     if (!$el) {
-      logger.logFormatted({
+      return logger.logFormatted({
         Command: command,
-        Elements: 'None found (invalid selector)',
+        Yielded: 'Nothing',
       })
     }
 
-    const elementsText = $el && $el.length ? 'Elements' : 'Element'
-
     logger.logFormatted({
       Command: command,
-      '# elements': $el.length,
-      [elementsText]: $el.get(),
+      Elements: $el.length,
+      Yielded: Cypress.dom.getElements($el),
     })
   }
 }
