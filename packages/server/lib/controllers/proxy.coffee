@@ -4,8 +4,8 @@ concat        = require("concat-stream")
 through       = require("through")
 Promise       = require("bluebird")
 accept        = require("http-accept")
+debug         = require("debug")("cypress:server:proxy")
 cwd           = require("../cwd")
-logger        = require("../logger")
 cors          = require("../util/cors")
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
@@ -33,7 +33,14 @@ setCookie = (res, key, val, domainName) ->
 
 module.exports = {
   handle: (req, res, config, getRemoteState, request) ->
-    logger.info("cookies are", req.cookies)
+    remoteState = getRemoteState()
+
+    debug("handling proxied request %o", {
+      url: req.url
+      proxiedUrl: req.proxiedUrl
+      cookies: req.cookies
+      remoteState
+    })
 
     ## if we have an unload header it means
     ## our parent app has been navigated away
@@ -41,10 +48,6 @@ module.exports = {
     ## to the clientRoute
     if req.cookies["__cypress.unload"]
       return res.redirect config.clientRoute
-
-    remoteState = getRemoteState()
-
-    logger.info({"handling request", url: req.url, proxiedUrl: req.proxiedUrl, remoteState: remoteState})
 
     ## when you access cypress from a browser which has not
     ## had its proxy setup then req.url will match req.proxiedUrl
@@ -120,7 +123,7 @@ module.exports = {
     getErrorHtml = (err, filePath) =>
       status = err.status ? 500
 
-      logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
+      debug("request failed %o", { url: remoteUrl, status: status, err: err.message })
 
       urlStr = filePath ? remoteUrl
 
@@ -133,7 +136,7 @@ module.exports = {
       ## turn off __cypress.initial by setting false here
       setCookies(false, wantsInjection)
 
-      logger.info "received request response"
+      debug("received request response for #{remoteUrl} %o", { headers })
 
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
@@ -214,7 +217,7 @@ module.exports = {
         ## set cookies to initial=true
         setCookies(true)
 
-        logger.info "redirecting to new url", status: statusCode, url: newUrl
+        debug("redirecting to new url %o", { status: statusCode, url: newUrl })
 
         ## finally redirect our user agent back to our domain
         ## by making this an absolute-path-relative redirect

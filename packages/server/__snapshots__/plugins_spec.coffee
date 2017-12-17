@@ -111,3 +111,32 @@ Started video recording: /foo/bar/.projects/plugin-config/cypress/videos/abc123.
   (All Done)
 
 `
+
+exports['e2e plugins works with user extensions 1'] = `Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
+  (Tests Starting)
+
+
+  ✓ can inject text from an extension
+
+  1 passing
+
+
+  (Tests Finished)
+
+  - Tests:           1
+  - Passes:          1
+  - Failures:        0
+  - Pending:         0
+  - Duration:        10 seconds
+  - Screenshots:     0
+  - Video Recorded:  false
+  - Cypress Version: 1.2.3
+
+
+  (All Done)
+
+`

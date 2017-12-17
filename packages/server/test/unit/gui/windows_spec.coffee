@@ -39,10 +39,10 @@ describe "lib/gui/windows", ->
 
   context ".create", ->
     it "opens dev tools if saved state is open", ->
-      Windows.create({devTools: true})
+      Windows.create("/foo/", {devTools: true})
       expect(@win.webContents.openDevTools).to.be.called
 
-      Windows.create({})
+      Windows.create("/foo/", {})
       expect(@win.webContents.openDevTools).not.to.be.calledTwice
 
     ## TODO: test everything else going on in this method!
