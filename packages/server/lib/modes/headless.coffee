@@ -495,9 +495,9 @@ module.exports = {
         })
 
   ready: (options = {}) ->
-    log("headless mode ready with options %j", options)
+    debug("headless mode ready with options %j", options)
     if options.spec
-      log("spec", options.spec)
+      debug("spec", options.spec)
 
     id = @getId()
 
