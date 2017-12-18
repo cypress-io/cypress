@@ -2,7 +2,7 @@ import { action, computed, observable } from 'mobx'
 
 const methods = ['get', 'contains']
 
-class SelectorHelperModel {
+class SelectorPlaygroundModel {
   methods = methods
 
   @observable getSelector = 'body'
@@ -77,4 +77,4 @@ class SelectorHelperModel {
   }
 }
 
-export default new SelectorHelperModel()
+export default new SelectorPlaygroundModel()

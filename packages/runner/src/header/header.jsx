@@ -5,8 +5,8 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { $ } from '@packages/driver'
 
-import SelectorHelper from '../selector-helper/selector-helper'
-import selectorHelperModel from '../selector-helper/selector-helper-model'
+import SelectorPlayground from '../selector-playground/selector-playground'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 @observer
 export default class Header extends Component {
@@ -19,18 +19,18 @@ export default class Header extends Component {
       <header
         ref='header'
         className={cs({
-          'showing-selector-helper': selectorHelperModel.isOpen,
+          'showing-selector-playground': selectorPlaygroundModel.isOpen,
         })}
       >
         <div className='sel-url-wrap'>
           <Tooltip
             title='Open Selector Playground'
-            visible={selectorHelperModel.isOpen ? false : null}
-            wrapperClassName='selector-helper-toggle-tooltip-wrapper'
+            visible={selectorPlaygroundModel.isOpen ? false : null}
+            wrapperClassName='selector-playground-toggle-tooltip-wrapper'
           >
             <button
-              className='selector-helper-toggle'
-              onClick={this._toggleHelperOpen}
+              className='selector-playground-toggle'
+              onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning}
             >
               <i className='fa fa-crosshairs' />
@@ -72,26 +72,26 @@ export default class Header extends Component {
             </div>
           </li>
         </ul>
-        <SelectorHelper model={selectorHelperModel} />
+        <SelectorPlayground model={selectorPlaygroundModel} />
       </header>
     )
   }
 
   componentDidMount () {
-    this.previousSelectorHelperOpen = selectorHelperModel.isOpen
+    this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
   }
 
   componentDidUpdate () {
-    if (selectorHelperModel.isOpen !== this.previousSelectorHelperOpen) {
+    if (selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen) {
       this.props.state.updateWindowDimensions({
         headerHeight: $(this.refs.header).outerHeight(),
       })
-      this.previousSelectorHelperOpen = selectorHelperModel.isOpen
+      this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     }
   }
 
-  _toggleHelperOpen = () => {
-    selectorHelperModel.toggleOpen()
+  _togglePlaygroundOpen = () => {
+    selectorPlaygroundModel.toggleOpen()
   }
 
   _openUrl = () => {

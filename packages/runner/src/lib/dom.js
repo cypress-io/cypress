@@ -3,7 +3,7 @@ import { $ } from '@packages/driver'
 import getUniqueSelector from '@cypress/unique-selector'
 import Promise from 'bluebird'
 
-import selectorHelperHighlight from '../selector-helper/highlight'
+import selectorPlaygroundHighlight from '../selector-playground/highlight'
 
 const resetStyles = `
   border: none !important
@@ -130,26 +130,26 @@ function addElementBoxModelLayers ($el, body) {
 }
 
 function getOrCreateSelectorHelperDom ($body) {
-  let $container = $body.find('.__cypress-selector-helper')
+  let $container = $body.find('.__cypress-selector-playground')
 
   if ($container.length) {
-    const shadowRoot = $container.find('.__cypress-selector-helper-shadow-root-container')[0].shadowRoot
+    const shadowRoot = $container.find('.__cypress-selector-playground-shadow-root-container')[0].shadowRoot
 
     return Promise.resolve({
       $container,
       shadowRoot,
       $reactContainer: $(shadowRoot).find('.react-container'),
-      $cover: $container.find('.__cypress-selector-helper-cover'),
+      $cover: $container.find('.__cypress-selector-playground-cover'),
     })
   }
 
   $container = $('<div />')
-  .addClass('__cypress-selector-helper')
+  .addClass('__cypress-selector-playground')
   .css({ position: 'static' })
   .appendTo($body)
 
   const $shadowRootContainer = $('<div />')
-  .addClass('__cypress-selector-helper-shadow-root-container')
+  .addClass('__cypress-selector-playground-shadow-root-container')
   .css({ position: 'static' })
   .appendTo($container)
 
@@ -160,10 +160,10 @@ function getOrCreateSelectorHelperDom ($body) {
   .appendTo(shadowRoot)
 
   const $cover = $('<div />')
-  .addClass('__cypress-selector-helper-cover')
+  .addClass('__cypress-selector-playground-cover')
   .appendTo($container)
 
-  return Promise.try(() => fetch('/__cypress/runner/cypress_selector_helper.css'))
+  return Promise.try(() => fetch('/__cypress/runner/cypress_selector_playground.css'))
   .then((result) => {
     return result.text()
   })
@@ -177,11 +177,11 @@ function getOrCreateSelectorHelperDom ($body) {
   })
 }
 
-function addOrUpdateSelectorHelperHighlight ({ $el, $body, selector, showTooltip, onClick }) {
+function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
   getOrCreateSelectorHelperDom($body)
   .then(({ $container, shadowRoot, $reactContainer, $cover }) => {
     if (!$el) {
-      selectorHelperHighlight.unmount($reactContainer[0])
+      selectorPlaygroundHighlight.unmount($reactContainer[0])
       $cover.off('click')
       $container.remove()
       return
@@ -213,7 +213,7 @@ function addOrUpdateSelectorHelperHighlight ({ $el, $body, selector, showTooltip
       .on('click', onClick)
     }
 
-    selectorHelperHighlight.render($reactContainer[0], {
+    selectorPlaygroundHighlight.render($reactContainer[0], {
       selector,
       appendTo: shadowRoot,
       boundary: $body[0],
@@ -388,7 +388,7 @@ function getElementsForSelector ({ root, selector, method, cypressDom }) {
 export default {
   addElementBoxModelLayers,
   addHitBoxLayer,
-  addOrUpdateSelectorHelperHighlight,
+  addOrUpdateSelectorPlaygroundHighlight,
   getBestSelector,
   getElementsForSelector,
   getOuterSize,
