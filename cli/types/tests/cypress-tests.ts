@@ -138,3 +138,17 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
 cy.stub().withArgs('').log(false).as('foo')
 
 cy.spy().withArgs('').log(false).as('foo')
+
+cy.wrap('foo').then(subject => {
+  subject // $ExpectType string
+  return cy.wrap(subject)
+}).then(subject => {
+  subject // $ExpectType string
+})
+
+cy.wrap('foo').then(subject => {
+  subject // $ExpectType string
+  return Promise.resolve(subject)
+}).then(subject => {
+  subject // $ExpectType string
+})
