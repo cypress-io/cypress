@@ -4,7 +4,7 @@ _          = require("lodash")
 os         = require("os")
 cp         = require("child_process")
 path       = require("path")
-{ EventEmitter } = require("events")
+EE         = require("events")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
@@ -34,6 +34,7 @@ cypress    = require("#{root}lib/cypress")
 Project    = require("#{root}lib/project")
 Server     = require("#{root}lib/server")
 Reporter   = require("#{root}lib/reporter")
+utils      = require("#{root}lib/browsers/utils")
 browsers   = require("#{root}lib/browsers")
 Watchers   = require("#{root}lib/watchers")
 openProject   = require("#{root}lib/open_project")
@@ -79,6 +80,7 @@ describe "lib/cypress", ->
     @pristinePath = Fixtures.projectPath("pristine")
     @noScaffolding = Fixtures.projectPath("no-scaffolding")
     @pluginConfig = Fixtures.projectPath("plugin-config")
+    @pluginBrowser = Fixtures.projectPath("plugin-browser")
     @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
@@ -666,6 +668,56 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
+    describe "plugins", ->
+      beforeEach ->
+        browsers.open.restore()
+
+        ee = new EE()
+        ee.kill = ->
+          ee.emit("exit")
+        ee.close = ->
+          ee.emit("closed")
+        ee.isDestroyed = -> false
+        ee.loadURL = ->
+
+        @sandbox.stub(utils, "launch").resolves(ee)
+        @sandbox.stub(Windows, "create").returns(ee)
+        @sandbox.stub(Windows, "automation")
+
+      context "before:browser:launch", ->
+        it "chrome", ->
+          cypress.start([
+            "--run-project=#{@pluginBrowser}"
+            "--browser=chrome"
+          ])
+          .then =>
+            args = utils.launch.firstCall.args
+
+            expect(args[0]).to.eq("chrome")
+
+            browserArgs = args[2]
+
+            expect(browserArgs).to.have.length(6)
+
+            expect(browserArgs.slice(0, 4)).to.deep.eq([
+              "chrome", "foo", "bar", "baz"
+            ])
+
+            @expectExitWith(0)
+
+        it "electron", ->
+          cypress.start([
+            "--run-project=#{@pluginBrowser}"
+            "--browser=electron"
+          ])
+          .then =>
+            expect(Windows.create).to.be.calledWith(@pluginBrowser, {
+              browser: "electron"
+              foo: "bar"
+            })
+
+            @expectExitWith(0)
+
     describe "--port", ->
       beforeEach ->
         headless.listenForProjectEnd.resolves({failures: 0})
@@ -1173,7 +1225,7 @@ describe "lib/cypress", ->
         })
 
     it "sends warning when baseUrl cannot be verified", ->
-      bus = new EventEmitter()
+      bus = new EE()
       event = { sender: { send: @sandbox.stub() } }
       warning = { message: "Blah blah baseUrl blah blah" }
       open = @sandbox.stub(Server.prototype, "open").resolves([2121, warning])

@@ -279,7 +279,7 @@ class Socket
         ## cb is always the last argument
         cb = args.pop()
 
-        log("backend:request", eventName, cb, args)
+        log("backend:request", { eventName, args })
 
         backendRequest = ->
           switch eventName

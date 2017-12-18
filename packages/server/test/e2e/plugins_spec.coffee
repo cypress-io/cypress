@@ -1,6 +1,7 @@
 e2e      = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
+pluginExtension = Fixtures.projectPath("plugin-extension")
 pluginConfig = Fixtures.projectPath("plugin-config")
 workingPreprocessor = Fixtures.projectPath("working-preprocessor")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
@@ -30,6 +31,15 @@ describe "e2e plugins", ->
       env: "foo=foo,bar=bar"
       config: "pageLoadTimeout=10000"
       project: pluginConfig
+      snapshot: true
+      expectedExitCode: 0
+    })
+
+  it "works with user extensions", ->
+    e2e.exec(@, {
+      browser: "chrome"
+      spec: "app_spec.coffee"
+      project: pluginExtension
       snapshot: true
       expectedExitCode: 0
     })

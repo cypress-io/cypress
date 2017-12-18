@@ -126,7 +126,7 @@ module.exports = {
   options: (ctx, options = {}) ->
     _.defaults(options, {
       project: e2ePath
-      timeout: if options.debug then 3000000 else 120000
+      timeout: if options.exit is false then 3000000 else 120000
     })
 
     ctx.timeout(options.timeout)
@@ -149,7 +149,7 @@ module.exports = {
     if options.hosts
       args.push("--hosts=#{options.hosts}")
 
-    if options.debug
+    if options.headed
       args.push("--headed")
 
     if options.reporter
@@ -158,7 +158,8 @@ module.exports = {
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    if browser = (env.BROWSER or options.browser)
+    ## prefer options if set, else use env
+    if browser = (options.browser or env.BROWSER)
       args.push("--browser=#{browser}")
 
     if options.config
@@ -166,6 +167,9 @@ module.exports = {
 
     if options.env
       args.push("--env", options.env)
+
+    if options.exit?
+      args.push("--exit", options.exit)
 
     return args
 

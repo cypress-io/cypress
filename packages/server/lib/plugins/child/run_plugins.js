@@ -60,6 +60,9 @@ const execute = (ipc, event, ids, args = []) => {
     case 'file:preprocessor':
       preprocessor.wrap(ipc, invoke, ids, args)
       return
+    case 'before:browser:launch':
+      util.wrapChildPromise(ipc, invoke, ids, args)
+      return
     default:
       log('unexpected execute message:', event, args)
       return

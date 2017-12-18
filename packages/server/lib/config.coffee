@@ -42,8 +42,9 @@ configKeys = toWords """
   screenshotOnHeadlessFailure     defaultCommandTimeout
   testFiles                       execTimeout
   trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  viewportWidth                   requestTimeout
-  viewportHeight                  responseTimeout
+  userAgent                       requestTimeout
+  viewportWidth                   responseTimeout
+  viewportHeight
   videoRecording
   videoCompression
   videoUploadOnPasses
@@ -57,9 +58,11 @@ defaults = {
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
+  userAgent:                     null
   isTextTerminal:                false
   reporter:                      "spec"
   reporterOptions:               null
+  blacklistHosts:                null
   clientRoute:                   "/__/"
   xhrRoute:                      "/xhrs/"
   socketIoRoute:                 "/__socket.io"
@@ -101,6 +104,7 @@ defaults = {
 validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
+  blacklistHosts: v.isStringOrArrayOfStrings
   chromeWebSecurity: v.isBoolean
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject
@@ -120,6 +124,7 @@ validationRules = {
   screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
   trashAssetsBeforeHeadlessRuns: v.isBoolean
+  userAgent: v.isString
   videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
   videoUploadOnPasses: v.isBoolean
