@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
 import getUniqueSelector from '@cypress/unique-selector'
+import Promise from 'bluebird'
 
 import selectorHelperHighlight from '../selector-helper/highlight'
 
@@ -128,84 +129,98 @@ function addElementBoxModelLayers ($el, body) {
   return container
 }
 
-function addOrUpdateSelectorHelperHighlight ({ $el, $body, selector, showTooltip, onClick }) {
+function getOrCreateSelectorHelperDom ($body) {
   let $container = $body.find('.__cypress-selector-helper')
-  let $shadowRootContainer
-  let shadowRoot
-  let $reactContainer
-  let $cover
 
   if ($container.length) {
-    shadowRoot = $container.find('.__cypress-selector-helper-shadow-root-container')[0].shadowRoot
-    $reactContainer = $(shadowRoot).find('.react-container')
-    $cover = $container.find('.__cypress-selector-helper-cover')
-  } else {
-    $container = $('<div />')
-    .addClass('__cypress-selector-helper')
-    .css({ position: 'static' })
-    .appendTo($body)
+    const shadowRoot = $container.find('.__cypress-selector-helper-shadow-root-container')[0].shadowRoot
 
-    $shadowRootContainer = $('<div />')
-    .addClass('__cypress-selector-helper-shadow-root-container')
-    .css({ position: 'static' })
-    .appendTo($container)
-
-    shadowRoot = $shadowRootContainer[0].attachShadow({ mode: 'open' })
-
-    $('<link rel="stylesheet" href="/__cypress/runner/cypress_selector_helper.css" />').
-    appendTo(shadowRoot)
-
-    $reactContainer = $('<div />')
-    .addClass('react-container')
-    .appendTo(shadowRoot)
-
-    $cover = $('<div />')
-    .addClass('__cypress-selector-helper-cover')
-    .appendTo($container)
+    return Promise.resolve({
+      $container,
+      shadowRoot,
+      $reactContainer: $(shadowRoot).find('.react-container'),
+      $cover: $container.find('.__cypress-selector-helper-cover'),
+    })
   }
 
-  if (!$el) {
-    selectorHelperHighlight.unmount($reactContainer[0])
-    $cover.off('click')
-    $container.remove()
-    return
-  }
+  $container = $('<div />')
+  .addClass('__cypress-selector-helper')
+  .css({ position: 'static' })
+  .appendTo($body)
 
-  const borderSize = 2
+  const $shadowRootContainer = $('<div />')
+  .addClass('__cypress-selector-helper-shadow-root-container')
+  .css({ position: 'static' })
+  .appendTo($container)
 
-  const styles = $el.map((__, el) => {
-    const $el = $(el)
-    const offset = $el.offset()
+  const shadowRoot = $shadowRootContainer[0].attachShadow({ mode: 'open' })
 
-    return {
-      position: 'absolute',
-      margin: 0,
-      padding: 0,
-      width: $el.outerWidth(),
-      height: $el.outerHeight(),
-      top: offset.top - borderSize,
-      left: offset.left - borderSize,
-      transform: $el.css('transform'),
-      zIndex: getZIndex($el),
-    }
-  }).get()
+  const $reactContainer = $('<div />')
+  .addClass('react-container')
+  .appendTo(shadowRoot)
 
-  if (styles.length === 1) {
-    $cover
-    .css(styles[0])
-    .off('click')
-    .on('click', onClick)
-  }
+  const $cover = $('<div />')
+  .addClass('__cypress-selector-helper-cover')
+  .appendTo($container)
 
-  selectorHelperHighlight.render($reactContainer[0], {
-    selector,
-    appendTo: shadowRoot,
-    boundary: $body[0],
-    showTooltip,
-    styles,
+  return Promise.try(() => fetch('/__cypress/runner/cypress_selector_helper.css'))
+  .then((result) => {
+    return result.text()
   })
+  .then((content) => {
+    $('<style />', { html: content }).prependTo(shadowRoot)
+    return { $container, shadowRoot, $reactContainer, $cover }
+  })
+  .catch((error) => {
+    console.error('Selector playground failed to load styles:', error) // eslint-disable-line no-console
+    return { $container, shadowRoot, $reactContainer, $cover }
+  })
+}
 
-  return $container
+function addOrUpdateSelectorHelperHighlight ({ $el, $body, selector, showTooltip, onClick }) {
+  getOrCreateSelectorHelperDom($body)
+  .then(({ $container, shadowRoot, $reactContainer, $cover }) => {
+    if (!$el) {
+      selectorHelperHighlight.unmount($reactContainer[0])
+      $cover.off('click')
+      $container.remove()
+      return
+    }
+
+    const borderSize = 2
+
+    const styles = $el.map((__, el) => {
+      const $el = $(el)
+      const offset = $el.offset()
+
+      return {
+        position: 'absolute',
+        margin: 0,
+        padding: 0,
+        width: $el.outerWidth(),
+        height: $el.outerHeight(),
+        top: offset.top - borderSize,
+        left: offset.left - borderSize,
+        transform: $el.css('transform'),
+        zIndex: getZIndex($el),
+      }
+    }).get()
+
+    if (styles.length === 1) {
+      $cover
+      .css(styles[0])
+      .off('click')
+      .on('click', onClick)
+    }
+
+    selectorHelperHighlight.render($reactContainer[0], {
+      selector,
+      appendTo: shadowRoot,
+      boundary: $body[0],
+      showTooltip,
+      styles,
+    })
+  })
 }
 
 function createLayer ($el, attr, color, container, dimensions) {
