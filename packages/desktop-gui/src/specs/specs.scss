@@ -11,48 +11,53 @@
     position: relative;
     display: block;
     width: 100%;
-    height: 50px;
-    background: #F9F9F9;
+    height: 42px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
   }
 
   .search {
-    padding: 10px 5px 10px 15px;
+    padding: 8px 5px 7px 15px;
     padding-right: 5px;
-    margin-right: 10px;
+    margin-right: 15px;
     display: inline-block;
     position: relative;
-    width: calc(100% - 150px);
+    width: calc(100% - 140px);
 
     label {
       position: absolute;
-      left: 25px;
+      left: 22px;
       top: 47%;
       max-width: 100%;
-      font-weight: bold;
+      color: #757575;
       transform: translate(0, -50%);
     }
 
     #clear {
       text-decoration: none;
       position: absolute;
-      right: 18px;
+      right: 10px;
       top: 50%;
       transform: translate(0, -50%);
       color: #b3b3b3;
     }
 
     input[type=text] {
-      padding-left: 35px;
-      border-radius: 20px;
-      border: solid 1px lighten($color: #000000, $amount: 80%);
+      padding-left: 30px;
+      border-radius: 0;
+      border: 0;
+      border-bottom: 2px solid transparent;
       width: 100%;
-      height: 30px;
+      height: 26px;
       line-height: 30px;
+      background-color: #f5f5f5;
+      transition: border-color 0.25s ease;
 
       &:focus {
         outline: none;
-        border: 1px solid lighten($color: blue, $amount: 60%);
-        box-shadow: 0 0 10px #719ECE;
+        border-bottom: 2px solid #ddd;
+        box-shadow: none;
+        background-color: #f5f5f5;
       }
     }
   }
@@ -60,10 +65,9 @@
   .all-tests {
     position: relative;
     display: inline;
-    font-size: 14px;
+    font-size: 13px;
     color: #637eb9;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding: 5px 10px;
 
     &:hover, &:focus {
       color: #38589c;
@@ -84,7 +88,7 @@
     }
 
     i {
-      font-size: 12px;
+      font-size: 10px;
       position: relative;
       top: -1px;
     }
@@ -125,7 +129,7 @@
 
     i.folder-collapse-icon {
       display: inline-block;
-      margin-right: 0px;
+      margin-right: 4px;
     }
 
     &>div>div {
@@ -222,7 +226,7 @@
 
       i {
         display: none;
-        margin-right: 0;
+        margin-right: 5px;
       }
 
       i.folder-collapse-icon {

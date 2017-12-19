@@ -35,7 +35,7 @@ class Specs extends Component {
             <input
               id="search-input"
               type="text"
-              placeholder="Search here"
+              placeholder="Search..."
               value={this.state.search}
               onChange={this.updateSearchTerms.bind(this)}
               onKeyUp={this.executeSearchAction.bind(this)} />
