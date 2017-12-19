@@ -89,47 +89,47 @@ const downloadFromUrl = (options) => {
     progress(req, {
       throttle: options.throttle,
     })
-      .on('response', (response) => {
-        // start counting now once we've gotten
-        // response headers
-        started = new Date()
+    .on('response', (response) => {
+      // start counting now once we've gotten
+      // response headers
+      started = new Date()
 
-        // if our status code does not start with 200
-        if (!/^2/.test(response.statusCode)) {
-          debug('response code %d', response.statusCode)
+      // if our status code does not start with 200
+      if (!/^2/.test(response.statusCode)) {
+        debug('response code %d', response.statusCode)
 
-          const err = new Error(
-            stripIndent`
+        const err = new Error(
+          stripIndent`
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
         `
-          )
+        )
 
-          reject(err)
-        }
+        reject(err)
+      }
+    })
+    .on('error', reject)
+    .on('progress', (state) => {
+      // total time we've elapsed
+      // starting on our first progress notification
+      const elapsed = new Date() - started
+
+      const eta = util.calculateEta(state.percent, elapsed)
+
+      // send up our percent and seconds remaining
+      options.onProgress(state.percent, util.secsRemaining(eta))
+    })
+    // save this download here
+    .pipe(fs.createWriteStream(options.downloadDestination))
+    .on('finish', () => {
+      debug('downloading finished')
+
+      resolve({
+        filename: options.downloadDestination,
+        downloaded: true,
       })
-      .on('error', reject)
-      .on('progress', (state) => {
-        // total time we've elapsed
-        // starting on our first progress notification
-        const elapsed = new Date() - started
-
-        const eta = util.calculateEta(state.percent, elapsed)
-
-        // send up our percent and seconds remaining
-        options.onProgress(state.percent, util.secsRemaining(eta))
-      })
-      // save this download here
-      .pipe(fs.createWriteStream(options.downloadDestination))
-      .on('finish', () => {
-        debug('downloading finished')
-
-        resolve({
-          filename: options.downloadDestination,
-          downloaded: true,
-        })
-      })
+    })
   })
 }
 
@@ -181,13 +181,13 @@ const start = (options) => {
 
   // make sure our 'dist' installation dir exists
   return info
-    .ensureInstallationDir()
-    .then(() => {
-      return download(options)
-    })
-    .catch((err) => {
-      return prettyDownloadErr(err, options.version)
-    })
+  .ensureInstallationDir()
+  .then(() => {
+    return download(options)
+  })
+  .catch((err) => {
+    return prettyDownloadErr(err, options.version)
+  })
 }
 
 module.exports = {

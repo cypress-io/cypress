@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
@@ -60,7 +60,7 @@
     "check-more-types": "^2.24.0",
     "cloudflare-cli": "^2.1.0",
     "coffeelint": "^1.16.0",
-    "commit-message-install": "^1.7.0",
+    "commit-message-install": "^1.10.0",
     "common-tags": "^1.4.0",
     "console.table": "^0.9.1",
     "debug": "^2.6.8",

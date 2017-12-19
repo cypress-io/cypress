@@ -47,7 +47,7 @@ module.exports = {
           reject(_.extend(new Error(err.message), err))
           return
 
-        log("promise resolved for id", invocationId)
+        log("promise resolved for id '#{invocationId}' with value", value)
         resolve(value)
 
       ipc.on("promise:fulfilled:#{invocationId}", handler)

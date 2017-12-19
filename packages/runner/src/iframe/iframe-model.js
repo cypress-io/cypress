@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import { action } from 'mobx'
+
 import eventManager from '../lib/event-manager'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class IframeModel {
   constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
@@ -24,7 +26,7 @@ export default class IframeModel {
     }))
 
     eventManager.on('url:changed', action('url:changed', this._updateUrl))
-    eventManager.on('page:loading', action('page:loading', this._updateLoading))
+    eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
 
     eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
     eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
@@ -34,8 +36,10 @@ export default class IframeModel {
   }
 
   _beforeRun = () => {
+    this.state.isLoading = false
     this.state.isRunning = true
-    this.state.reset()
+    this.state.resetUrl()
+    selectorPlaygroundModel.setEnabled(false)
     this._reset()
     this._clearMessage()
   }
@@ -56,8 +60,8 @@ export default class IframeModel {
     this.state.url = url
   }
 
-  _updateLoading = (isLoading) => {
-    this.state.isLoading = isLoading
+  _updateLoadingUrl = (isLoadingUrl) => {
+    this.state.isLoadingUrl = isLoadingUrl
   }
 
   _clearMessage = () => {
