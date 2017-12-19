@@ -720,6 +720,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
     then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
 
