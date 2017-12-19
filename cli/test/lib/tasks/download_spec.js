@@ -66,16 +66,16 @@ describe('download', function () {
 
   it('sets options.version to response x-version', function () {
     nock('https://aws.amazon.com')
-      .get('/some.zip')
-      .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
+    .get('/some.zip')
+    .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
 
     nock('https://download.cypress.io')
-      .get('/desktop')
-      .query(true)
-      .reply(302, undefined, {
-        Location: 'https://aws.amazon.com/some.zip',
-        'x-version': '0.11.1',
-      })
+    .get('/desktop')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/some.zip',
+      'x-version': '0.11.1',
+    })
 
     return download.start(this.options).then(() => {
       expect(this.options.version).to.eq('0.11.1')
@@ -86,16 +86,16 @@ describe('download', function () {
     this.options.version = '0.13.0'
 
     nock('https://aws.amazon.com')
-      .get('/some.zip')
-      .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
+    .get('/some.zip')
+    .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
 
     nock('https://download.cypress.io')
-      .get('/desktop/0.13.0')
-      .query(true)
-      .reply(302, undefined, {
-        Location: 'https://aws.amazon.com/some.zip',
-        'x-version': '0.13.0',
-      })
+    .get('/desktop/0.13.0')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/some.zip',
+      'x-version': '0.13.0',
+    })
 
     return download.start(this.options).then(() => {
       expect(this.options.version).to.eq('0.13.0')
@@ -114,14 +114,14 @@ describe('download', function () {
     this.sandbox.stub(info, 'ensureInstallationDir').rejects(err)
 
     return download
-      .start(this.options)
-      .then(() => {
-        throw new Error('should have caught')
-      })
-      .catch((err) => {
-        logger.error(err)
+    .start(this.options)
+    .then(() => {
+      throw new Error('should have caught')
+    })
+    .catch((err) => {
+      logger.error(err)
 
-        snapshot('download status errors', normalize(ctx.stdout.toString()))
-      })
+      snapshot('download status errors', normalize(ctx.stdout.toString()))
+    })
   })
 })

@@ -1,10 +1,14 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
+import getUniqueSelector from '@cypress/unique-selector'
+import Promise from 'bluebird'
+
+import selectorPlaygroundHighlight from '../selector-playground/highlight'
 
 const resetStyles = `
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  border: none !important
+  margin: 0 !important
+  padding: 0 !important
 `
 
 function addHitBoxLayer (coords, body) {
@@ -18,52 +22,52 @@ function addHitBoxLayer (coords, body) {
   const dotHeight = 4
   const dotWidth = 4
 
-  const top  = coords.y - height / 2
+  const top = coords.y - height / 2
   const left = coords.x - width / 2
 
-  const dotTop  = height / 2 - dotHeight / 2
+  const dotTop = height / 2 - dotHeight / 2
   const dotLeft = width / 2 - dotWidth / 2
 
-  const box = $('<div>', {
+  const box = $('<div class="__cypress-highlight">', {
     style: `
       ${resetStyles}
-      position: absolute;
-      top: ${top}px;
-      left: ${left}px;
-      width: ${width}px;
-      height: ${height}px;
-      background-color: red;
-      border-radius: 5px;
-      box-shadow: 0 0 5px #333;
-      z-index: 2147483647;
+      position: absolute
+      top: ${top}px
+      left: ${left}px
+      width: ${width}px
+      height: ${height}px
+      background-color: red
+      border-radius: 5px
+      box-shadow: 0 0 5px #333
+      z-index: 2147483647
     `,
   })
   const wrapper = $('<div>', { style: `${resetStyles} position: relative` }).appendTo(box)
   $('<div>', {
     style: `
       ${resetStyles}
-      position: absolute;
-      top: ${dotTop}px;
-      left: ${dotLeft}px;
-      height: ${dotHeight}px;
-      width: ${dotWidth}px;
-      height: ${dotHeight}px;
-      background-color: pink;
-      border-radius: 5px;
+      position: absolute
+      top: ${dotTop}px
+      left: ${dotLeft}px
+      height: ${dotHeight}px
+      width: ${dotWidth}px
+      height: ${dotHeight}px
+      background-color: pink
+      border-radius: 5px
   `,
   }).appendTo(wrapper)
 
   return box.appendTo(body)
 }
 
-function addElementBoxModelLayers (el, body) {
+function addElementBoxModelLayers ($el, body) {
   if (body == null) {
     body = $('body')
   }
 
-  const dimensions = getElementDimensions(el)
+  const dimensions = getElementDimensions($el)
 
-  const container = $('<div>')
+  const container = $('<div class="__cypress-highlight">')
 
   const layers = {
     Content: '#9FC4E7',
@@ -97,7 +101,7 @@ function addElementBoxModelLayers (el, body) {
 
     // if attr is margin then we need to additional
     // subtract what the actual marginTop + marginLeft
-    // values are, since offset disregards margin compconstely
+    // values are, since offset disregards margin completely
     if (attr === 'Margin') {
       obj.top -= dimensions.marginTop
       obj.left -= dimensions.marginLeft
@@ -107,7 +111,7 @@ function addElementBoxModelLayers (el, body) {
     // so we dont create unnecessary layers
     if (dimensionsMatchPreviousLayer(obj, container)) return
 
-    return createLayer(el, attr, color, container, obj)
+    return createLayer($el, attr, color, container, obj)
   })
 
   container.appendTo(body)
@@ -125,25 +129,119 @@ function addElementBoxModelLayers (el, body) {
   return container
 }
 
-function createLayer (el, attr, color, container, dimensions) {
-  const transform = el.css('transform')
+function getOrCreateSelectorHelperDom ($body) {
+  let $container = $body.find('.__cypress-selector-playground')
+
+  if ($container.length) {
+    const shadowRoot = $container.find('.__cypress-selector-playground-shadow-root-container')[0].shadowRoot
+
+    return Promise.resolve({
+      $container,
+      shadowRoot,
+      $reactContainer: $(shadowRoot).find('.react-container'),
+      $cover: $container.find('.__cypress-selector-playground-cover'),
+    })
+  }
+
+  $container = $('<div />')
+  .addClass('__cypress-selector-playground')
+  .css({ position: 'static' })
+  .appendTo($body)
+
+  const $shadowRootContainer = $('<div />')
+  .addClass('__cypress-selector-playground-shadow-root-container')
+  .css({ position: 'static' })
+  .appendTo($container)
+
+  const shadowRoot = $shadowRootContainer[0].attachShadow({ mode: 'open' })
+
+  const $reactContainer = $('<div />')
+  .addClass('react-container')
+  .appendTo(shadowRoot)
+
+  const $cover = $('<div />')
+  .addClass('__cypress-selector-playground-cover')
+  .appendTo($container)
+
+  return Promise.try(() => fetch('/__cypress/runner/cypress_selector_playground.css'))
+  .then((result) => {
+    return result.text()
+  })
+  .then((content) => {
+    $('<style />', { html: content }).prependTo(shadowRoot)
+    return { $container, shadowRoot, $reactContainer, $cover }
+  })
+  .catch((error) => {
+    console.error('Selector playground failed to load styles:', error) // eslint-disable-line no-console
+    return { $container, shadowRoot, $reactContainer, $cover }
+  })
+}
+
+function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
+  getOrCreateSelectorHelperDom($body)
+  .then(({ $container, shadowRoot, $reactContainer, $cover }) => {
+    if (!$el) {
+      selectorPlaygroundHighlight.unmount($reactContainer[0])
+      $cover.off('click')
+      $container.remove()
+      return
+    }
+
+    const borderSize = 2
+
+    const styles = $el.map((__, el) => {
+      const $el = $(el)
+      const offset = $el.offset()
+
+      return {
+        position: 'absolute',
+        margin: 0,
+        padding: 0,
+        width: $el.outerWidth(),
+        height: $el.outerHeight(),
+        top: offset.top - borderSize,
+        left: offset.left - borderSize,
+        transform: $el.css('transform'),
+        zIndex: getZIndex($el),
+      }
+    }).get()
+
+    if (styles.length === 1) {
+      $cover
+      .css(styles[0])
+      .off('click')
+      .on('click', onClick)
+    }
+
+    selectorPlaygroundHighlight.render($reactContainer[0], {
+      selector,
+      appendTo: shadowRoot,
+      boundary: $body[0],
+      showTooltip,
+      styles,
+    })
+  })
+}
+
+function createLayer ($el, attr, color, container, dimensions) {
+  const transform = $el.css('transform')
 
   const css = {
     transform,
     width: dimensions.width,
     height: dimensions.height,
     position: 'absolute',
-    zIndex: getZIndex(el),
+    zIndex: getZIndex($el),
     backgroundColor: color,
     opacity: 0.6,
   }
 
   return $('<div>')
-    .css(css)
-    .attr('data-top', dimensions.top)
-    .attr('data-left', dimensions.left)
-    .attr('data-layer', attr)
-    .prependTo(container)
+  .css(css)
+  .attr('data-top', dimensions.top)
+  .attr('data-left', dimensions.left)
+  .attr('data-layer', attr)
+  .prependTo(container)
 }
 
 function dimensionsMatchPreviousLayer (obj, container) {
@@ -242,8 +340,57 @@ function getOuterSize (el) {
   }
 }
 
-export {
+function getBestSelector (el) {
+  return getUniqueSelector(el, {
+    selectorTypes: ['ID', 'Class', 'Tag', 'Attributes', 'NthChild'],
+  })
+}
+
+function isInViewport (win, el) {
+  let rect = el.getBoundingClientRect()
+
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= $(win).height() &&
+    rect.right <= $(win).width()
+  )
+}
+
+function scrollIntoView (win, el) {
+  if (!el || isInViewport(win, el)) return
+
+  el.scrollIntoView()
+}
+
+const sizzleRe = /sizzle/i
+
+function getElementsForSelector ({ root, selector, method, cypressDom }) {
+  let $el = null
+
+  try {
+    if (method === 'contains') {
+      $el = root.find(cypressDom.getContainsSelector(selector))
+      if ($el.length) {
+        $el = cypressDom.getFirstDeepestElement($el)
+      }
+    } else {
+      $el = root.find(selector)
+    }
+  } catch (err) {
+    // if not a sizzle error, ignore it and let $el be null
+    if (!sizzleRe.test(err.stack)) throw err
+  }
+
+  return $el
+}
+
+export default {
   addElementBoxModelLayers,
   addHitBoxLayer,
+  addOrUpdateSelectorPlaygroundHighlight,
+  getBestSelector,
+  getElementsForSelector,
   getOuterSize,
+  scrollIntoView,
 }

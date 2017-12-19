@@ -3,7 +3,6 @@ _ = require("lodash")
 moment = require("moment")
 
 $Location = require("./location")
-$dom = require("../dom")
 $errorMessages = require("./error_messages")
 
 tagOpen     = /\[([a-z\s='"-]+)\]/g
@@ -163,6 +162,8 @@ module.exports = {
     "{" + str.join(", ") + "}"
 
   stringifyActual: (value) ->
+    $dom = require("../dom")
+
     switch
       when $dom.isDom(value)
         $dom.stringify(value, "short")

@@ -15,7 +15,10 @@ describe "lib/browsers/electron", ->
   beforeEach ->
     @url = "https://foo.com"
     @state = {}
-    @options = {}
+    @options = {
+      some: "var"
+      projectPath: "/foo/"
+    }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
       close: @sandbox.stub()
@@ -42,7 +45,18 @@ describe "lib/browsers/electron", ->
     it "calls render with url, state, and options", ->
       electron.open("electron", @url, @options, @automation)
       .then =>
-        expect(electron._render).to.be.calledWith(@url, @state, @options)
+        options = electron._defaultOptions(@options.projectPath, @state, @options)
+
+        options = Windows.defaults(options)
+
+        keys = _.keys(electron._render.firstCall.args[2])
+
+        expect(_.keys(options)).to.deep.eq(keys)
+
+        expect(electron._render).to.be.calledWith(
+          @url,
+          @options.projectPath,
+        )
 
     it "returns custom object emitter interface", ->
       electron.open("electron", @url, @options, @automation)
@@ -93,50 +107,50 @@ describe "lib/browsers/electron", ->
   context "._render", ->
     beforeEach ->
       @newWin = {}
-      @newOptions = {}
 
       @sandbox.stub(menu, "set")
       @sandbox.stub(electron, "_setProxy").resolves()
       @sandbox.stub(electron, "_launch").resolves()
-      @sandbox.stub(electron, "_defaultOptions").withArgs(@options).returns(@newOptions)
-      @sandbox.stub(Windows, "create").withArgs(@newOptions).returns(@newWin)
+      @sandbox.stub(Windows, "create")
+      .withArgs(@options.projectPath, @options)
+      .returns(@newWin)
 
     it "creates window instance and calls launch with window", ->
-      electron._render(@url, @state, @options)
+      electron._render(@url, @options.projectPath, @options)
       .then =>
-        expect(Windows.create).to.be.calledWith(@options)
-        expect(electron._launch).to.be.calledWith(@newWin, @url, @newOptions)
+        expect(Windows.create).to.be.calledWith(@options.projectPath, @options)
+        expect(electron._launch).to.be.calledWith(@newWin, @url, @options)
 
   context "._defaultOptions", ->
     beforeEach ->
       @sandbox.stub(menu, "set")
 
     it "uses default width if there isn't one saved", ->
-      opts = electron._defaultOptions(@state, @options)
+      opts = electron._defaultOptions("/foo", @state, @options)
       expect(opts.width).to.eq(1280)
 
     it "uses saved width if there is one", ->
-      opts = electron._defaultOptions({browserWidth: 1024}, @options)
+      opts = electron._defaultOptions("/foo", {browserWidth: 1024}, @options)
       expect(opts.width).to.eq(1024)
 
     it "uses default height if there isn't one saved", ->
-      opts = electron._defaultOptions(@state, @options)
+      opts = electron._defaultOptions("/foo", @state, @options)
       expect(opts.height).to.eq(720)
 
     it "uses saved height if there is one", ->
-      opts = electron._defaultOptions({browserHeight: 768}, @options)
+      opts = electron._defaultOptions("/foo", {browserHeight: 768}, @options)
       expect(opts.height).to.eq(768)
 
     it "uses saved x if there is one", ->
-      opts = electron._defaultOptions({browserX: 200}, @options)
+      opts = electron._defaultOptions("/foo", {browserX: 200}, @options)
       expect(opts.x).to.eq(200)
 
     it "uses saved y if there is one", ->
-      opts = electron._defaultOptions({browserY: 300}, @options)
+      opts = electron._defaultOptions("/foo", {browserY: 300}, @options)
       expect(opts.y).to.eq(300)
 
     it "tracks browser state", ->
-      opts = electron._defaultOptions({browserY: 300}, @options)
+      opts = electron._defaultOptions("/foo", {browserY: 300}, @options)
 
       args = _.pick(opts.trackState, "width", "height", "x", "y", "devTools")
 
@@ -149,7 +163,7 @@ describe "lib/browsers/electron", ->
       })
 
     it ".onFocus", ->
-      opts = electron._defaultOptions(@state, @options)
+      opts = electron._defaultOptions("/foo", @state, @options)
       opts.onFocus()
       expect(menu.set).to.be.calledWith({withDevTools: true})
 
@@ -158,7 +172,7 @@ describe "lib/browsers/electron", ->
         @sandbox.stub(electron, "_launchChild").resolves(@win)
 
       it "passes along event, url, parent window and options", ->
-        opts = electron._defaultOptions(@state, @options)
+        opts = electron._defaultOptions(@options.projectPath, @state, @options)
 
         event = {}
         parentWindow = {
@@ -167,7 +181,9 @@ describe "lib/browsers/electron", ->
 
         opts.onNewWindow.call(parentWindow, event, @url)
 
-        expect(electron._launchChild).to.be.calledWith(event, @url, parentWindow, @state, @options)
+        expect(electron._launchChild).to.be.calledWith(
+          event, @url, parentWindow, @options.projectPath, @state, @options
+        )
 
   ## TODO: these all need to be updated
   context.skip "._launchChild", ->
