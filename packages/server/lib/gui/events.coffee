@@ -112,7 +112,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "window:open"
-      Windows.open(arg)
+      Windows.open(options.projectPath, arg)
       .then(send)
       .catch(sendErr)
 
