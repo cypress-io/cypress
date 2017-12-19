@@ -12,6 +12,8 @@ savedState    = require("#{root}../lib/saved_state")
 
 describe "lib/gui/windows", ->
   beforeEach ->
+    Windows.reset()
+
     @win = new EE()
     @win.loadURL = @sandbox.stub()
     @win.destroy = @sandbox.stub()
@@ -22,6 +24,9 @@ describe "lib/gui/windows", ->
     @win.isDestroyed = @sandbox.stub().returns(false)
 
     @sandbox.stub(Windows, "_newBrowserWindow").returns(@win)
+
+  afterEach ->
+    Windows.reset()
 
   context ".getBrowserAutomation", ->
     beforeEach ->
@@ -45,9 +50,6 @@ describe "lib/gui/windows", ->
   context ".open", ->
     beforeEach ->
       @sandbox.stub(Windows, "create").returns(@win)
-
-    afterEach ->
-      @win?.emit("closed")
 
     it "sets default options", ->
       options = {
