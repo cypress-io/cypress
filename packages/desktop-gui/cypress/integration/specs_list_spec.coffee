@@ -51,8 +51,7 @@ describe "Specs List", ->
       @openProject.resolve(@config)
 
     it "displays modal", ->
-      cy
-        .contains(".modal", "To help you get started").should("be.visible")
+      cy.contains(".modal", "To help you get started").should("be.visible")
 
     it "displays the scaffolded files", ->
       cy.get(".folder-preview-onboarding").within ->
@@ -100,7 +99,7 @@ describe "Specs List", ->
       it "has play icon", ->
         cy
           .contains(".btn", "Run All Tests")
-            .find("i").should("have.class", "fa-play")
+          .find("i").should("have.class", "fa-play")
 
       it "triggers browser launch on click of button", ->
         cy
@@ -185,14 +184,31 @@ describe "Specs List", ->
         cy.get(lastExpandedFolderSelector).click()
         cy.get(".file").should("have.length", 0)
 
+    context "Searching specs", ->
+      beforeEach ->
+        cy.get("#search-input").type("new")
+
+      it "should display only one spec", ->
+        cy.get(".list-as-table .file")
+          .should("have.length", 1)
+          .and("contain", "account_new_spec.coffee")
+
+      it "should display the same number of open folders", ->
+        cy.get(".list-as-table .folder")
+          .should("have.length", 10)
+
+      it "should clear the search if the user press ESC key", ->
+        cy.get("#search-input").type("{esc}")
+          .should("have.value", "")
+        cy.get(".list-as-table .file")
+          .should("have.length", 7)
 
     context "click on spec", ->
       beforeEach ->
         cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
       it "closes then launches browser on click of file", ->
-        cy
-          .get("@firstSpec")
+        cy.get("@firstSpec")
           .click()
           .then ->
             expect(@ipc.closeBrowser).to.be.called
@@ -202,8 +218,7 @@ describe "Specs List", ->
             expect(launchArgs[0].spec).to.equal("cypress/integration/app_spec.coffee")
 
       it "adds 'active' class on click", ->
-        cy
-          .get("@firstSpec")
+        cy.get("@firstSpec")
           .should("not.have.class", "active")
           .click()
           .should("have.class", "active")
@@ -257,15 +272,13 @@ describe "Specs List", ->
       @openProject.resolve(@config)
 
     it "updates spec list selected on specChanged", ->
-      cy
-        .get(".file a")
+      cy.get(".file a")
         .contains("a", "app_spec.coffee").as("firstSpec")
         .then ->
           @ipc.onSpecChanged.yield(null, "integration/app_spec.coffee")
-        .get("@firstSpec").should("have.class", "active")
+      cy.get("@firstSpec").should("have.class", "active")
         .then ->
           @ipc.onSpecChanged.yield(null, "integration/accounts/account_new_spec.coffee")
-        .get("@firstSpec").should("not.have.class", "active")
-      cy
-        .contains("a", "account_new_spec.coffee")
-          .should("have.class", "active")
+      cy.get("@firstSpec").should("not.have.class", "active")
+      cy.contains("a", "account_new_spec.coffee")
+        .should("have.class", "active")
