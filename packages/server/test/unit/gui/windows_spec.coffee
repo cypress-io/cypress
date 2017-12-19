@@ -69,7 +69,7 @@ describe "lib/gui/windows", ->
 
         expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
 
-    it "uses user.getLoginUrl() when GITHUB_LOGIN", ->
+    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
       options = {
         type: "GITHUB_LOGIN"
       }
@@ -78,38 +78,32 @@ describe "lib/gui/windows", ->
       url2 = "https://github.com?code=code123"
 
       @sandbox.stub(user, "getLoginUrl").resolves(url)
+
       @sandbox.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
 
       Windows.open("/path/to/project", options)
-      .then (win) =>
+      .then (code) =>
+        expect(code).to.eq("code123")
         expect(options.type).eq("GITHUB_LOGIN")
         expect(@win.loadURL).to.be.calledWith(url)
-
-    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      url = "https://github.com?code=code123"
-
-      @sandbox.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url)
-
-      Windows.open("/path/to/project", options)
-      .then (code) ->
-        expect(code).to.eq("code123")
 
     it "resolves with code on GITHUB_LOGIN for did-get-redirect-request", ->
       options = {
         type: "GITHUB_LOGIN"
       }
 
-      url = "https://github.com?code=code123"
+      url = "https://github.com/login"
+      url2 = "https://github.com?code=code123"
 
-      @sandbox.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url)
+      @sandbox.stub(user, "getLoginUrl").resolves(url)
+
+      @sandbox.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
 
       Windows.open("/path/to/project", options)
-      .then (code) ->
+      .then (code) =>
         expect(code).to.eq("code123")
+        expect(options.type).eq("GITHUB_LOGIN")
+        expect(@win.loadURL).to.be.calledWith(url)
 
   context ".create", ->
     it "opens dev tools if saved state is open", ->
