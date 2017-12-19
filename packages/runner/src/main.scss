@@ -4,6 +4,6 @@
 @import 'node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 @import 'lib/base';
 @import 'lib/shared';
-@import '!(lib)*/**/!(selector-helper.scss)';
+@import '!(lib)*/**/!(selector-playground.scss)';
 
 @import '../../reporter/src/main-runner';
