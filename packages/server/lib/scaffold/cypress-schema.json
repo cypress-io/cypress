@@ -47,6 +47,31 @@
       "type": "boolean",
       "default": true,
       "description": "Whether Cypress will watch and restart tests on test file changes"
+    },
+    "defaultCommandTimeout": {
+      "type": "number",
+      "default": 4000,
+      "description": "Time, in milliseconds, to wait until most DOM based commands are considered timed out"
+    },
+    "execTimeout": {
+      "type": "number",
+      "default": 60000,
+      "description": "Time, in milliseconds, to wait for a system command to finish executing during a cy.exec() command"
+    },
+    "pageLoadTimeout": {
+      "type": "number",
+      "default": 60000,
+      "description": "Time, in milliseconds, to wait for page transition events or cy.visit(), cy.go(), cy.reload() commands to fire their page load events"
+    },
+    "requestTimeout": {
+      "type": "number",
+      "default": 5000,
+      "description": "Time, in milliseconds, to wait for an XHR request to go out in a cy.wait() command"
+    },
+    "responseTimeout": {
+      "type": "number",
+      "default": 30000,
+      "description": "Time, in milliseconds, to wait until a response in a cy.request(), cy.wait(), cy.fixture(), cy.getCookie(), cy.getCookies(), cy.setCookie(), cy.clearCookie(), cy.clearCookies(), and cy.screenshot() commands"
     }
   }
 }
