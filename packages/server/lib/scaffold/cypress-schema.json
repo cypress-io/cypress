@@ -160,6 +160,16 @@
       "type": "number",
       "default": 1000,
       "description": "Default width in pixels for the application under tests’ viewport. (Override with cy.viewport() command)"
+    },
+    "animationDistanceThreshold":	{
+      "type": "number",
+      "default": 5,
+      "description": "The distance in pixels an element must exceed over time to be considered animating"
+    },
+    "waitForAnimations": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to wait for elements to finish animating before executing commands"
     }
   }
 }
