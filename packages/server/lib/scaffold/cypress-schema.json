@@ -72,6 +72,41 @@
       "type": "number",
       "default": 30000,
       "description": "Time, in milliseconds, to wait until a response in a cy.request(), cy.wait(), cy.fixture(), cy.getCookie(), cy.getCookies(), cy.setCookie(), cy.clearCookie(), cy.clearCookies(), and cy.screenshot() commands"
+    },
+    "fileServerFolder":	{
+      "type": "string",
+      "default": "root project folder",
+      "description": "Path to folder where application files will attempt to be served from"
+    },
+    "fixturesFolder": {
+      "type": ["string", "boolean"],
+      "default": "cypress/fixtures",
+      "description": "Path to folder containing fixture files (Pass false to disable)"
+    },
+    "integrationFolder": {
+      "type": "string",
+      "default": "cypress/integration",
+      "description": "Path to folder containing integration test files"
+    },
+    "pluginsFile": {
+      "type": ["string", "boolean"],
+      "default": "cypress/plugins/index.js",
+      "description": "Path to plugins file. (Pass false to disable)"
+    },
+    "screenshotsFolder": {
+      "type": "string",
+      "default": "cypress/screenshots",
+      "description": "Path to folder where screenshots will be saved from cy.screenshot() command or after a headless or CI run’s test failure"
+    },
+    "supportFile": {
+      "type": ["script", "boolean"],
+      "default": "cypress/support/index.js",
+      "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)"
+    },
+    "videosFolder":	{
+      "type": "string",
+      "default": "cypress/videos",
+      "description": "Path to folder where videos will be saved after a headless or CI run"
     }
   }
 }
