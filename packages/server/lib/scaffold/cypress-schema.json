@@ -150,6 +150,16 @@
       },
       "default": null,
       "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blacklistHosts"
+    },
+    "viewportHeight":	{
+      "type": "number",
+      "default": 660,
+      "description": "Default height in pixels for the application under tests’ viewport (Override with cy.viewport() command)"
+    },
+    "viewportWidth": {
+      "type": "number",
+      "default": 1000,
+      "description": "Default width in pixels for the application under tests’ viewport. (Override with cy.viewport() command)"
     }
   }
 }
