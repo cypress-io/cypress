@@ -13,6 +13,11 @@ log      = require("../log")
 
 fs = Promise.promisifyAll(fs)
 
+# TODO move default cypress.json out from here into scaffolding for example
+defaultCypressConfig = {
+  "$schema": "./cypress/cypress-schema.json"
+}
+
 flattenCypress = (obj) ->
   if cypress = obj.cypress
     return cypress
@@ -96,8 +101,9 @@ module.exports =
     file = @_pathToFile(projectRoot, "cypress.json")
 
     fs.readJsonAsync(file)
-    .catch {code: "ENOENT"}, =>
-      @_write(file, {})
+    .catch { code: "ENOENT" }, =>
+      log("writing default cypress.json file to", file)
+      @_write(file, defaultCypressConfig)
     .then (json = {}) =>
       changed = @_applyRewriteRules(json)
 
