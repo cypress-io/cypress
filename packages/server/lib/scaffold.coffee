@@ -70,6 +70,11 @@ isNewProject = (integrationFolder) ->
 module.exports = {
   isNewProject
 
+  cypressSchemaFile: (folder, config) ->
+    log("cypress schema json into #{folder}")
+
+    @_copy("cypress-schema.json", folder, config)
+
   integration: (folder, config) ->
     log("integration folder #{folder}")
 
@@ -122,6 +127,9 @@ module.exports = {
 
     @_assertInFileTree(dest, config)
 
+    log("copying file", file)
+    log("from: %s", src)
+    log("to: %s", dest)
     fs.copyAsync(src, dest)
 
   integrationExampleSize
@@ -160,6 +168,9 @@ module.exports = {
     files = [
       getFilePath(config.integrationFolder, "example_spec.js")
     ]
+
+    cypressFolder = path.dirname(config.integrationFolder)
+    files.push(getFilePath(cypressFolder, "cypress-schema.json"))
 
     if config.fixturesFolder
       files = files.concat([
