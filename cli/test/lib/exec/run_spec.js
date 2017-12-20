@@ -39,16 +39,17 @@ describe('exec run', function () {
 
   context('.start', function () {
     beforeEach(function () {
-      this.sandbox.stub(spawn, 'start')
+      this.sandbox.stub(spawn, 'start').resolves()
       this.sandbox.stub(verify, 'start').resolves()
     })
 
     describe('group and group-id', () => {
       it('spawns with --group true', function () {
-        return run.start({ group: true })
+        return run.start({ group: true, dev: true })
         .then(() => {
           expect(spawn.start).to.be.calledWith(
-            ['--run-project', process.cwd(), '--group', true]
+            ['--run-project', process.cwd(), '--group', true],
+            { dev: true }
           )
         })
       })

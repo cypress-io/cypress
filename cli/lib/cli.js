@@ -15,7 +15,7 @@ const parseOpts = (opts) => {
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed',
-    'group', 'groupId', 'global')
+    'group', 'groupId', 'global', 'dev')
 
   if (opts.project) {
     opts.project = path.resolve(opts.project)
@@ -46,6 +46,7 @@ const descriptions = {
   headed: 'displays the Electron browser instead of running headlessly',
   group: 'flag to group individual runs by using common --group-id',
   groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
+  dev: 'runs cypress in development and bypasses binary check',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -117,6 +118,7 @@ module.exports = {
     .option('-P, --project <project-path>', text('project'))
     .option('--group', text('group'), coerceFalse)
     .option('--group-id <group-id>', text('groupId'))
+    .option('--dev', text('dev'))
     .action((opts) => {
       debug('running Cypress')
       require('./exec/run')
@@ -135,6 +137,7 @@ module.exports = {
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('-P, --project <project path>', text('project'))
     .option('--global', text('global'))
+    .option('--dev', text('dev'))
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')

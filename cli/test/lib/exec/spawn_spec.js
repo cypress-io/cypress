@@ -37,6 +37,15 @@ describe('exec spawn', function () {
       })
     })
 
+    it('uses npm command when running in dev mode', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start('--foo', { dev: true, foo: 'bar' })
+      .then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('npm', ['run', 'dev', '--foo'], { foo: 'bar' })
+      })
+    })
+
     it('starts xvfb when needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
