@@ -118,7 +118,7 @@ module.exports = {
     .option('-P, --project <project-path>', text('project'))
     .option('--group', text('group'), coerceFalse)
     .option('--group-id <group-id>', text('groupId'))
-    .option('--dev', text('dev'))
+    .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress')
       require('./exec/run')
@@ -137,7 +137,7 @@ module.exports = {
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('-P, --project <project path>', text('project'))
     .option('--global', text('global'))
-    .option('--dev', text('dev'))
+    .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')
