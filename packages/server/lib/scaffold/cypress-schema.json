@@ -170,6 +170,11 @@
       "type": "boolean",
       "default": true,
       "description": "Whether to wait for elements to finish animating before executing commands"
+    },
+    "projectId": {
+      "type": "string",
+      "default": null,
+      "description": "A 6 character string to identify this project with Dashboard service. See https://on.cypress.io/dashboard-service#Identification"
     }
   }
 }
