@@ -392,6 +392,9 @@ class Project extends EE
     ## if we're in headed mode add these other scaffolding
     ## tasks
     if not cfg.isTextTerminal
+      cypressFolder = path.dirname(cfg.integrationFolder)
+      scaffoldLog("cypress folder %s", cypressFolder)
+      push(scaffold.cypressSchemaFile(cypressFolder, cfg))
       push(scaffold.integration(cfg.integrationFolder, cfg))
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
 

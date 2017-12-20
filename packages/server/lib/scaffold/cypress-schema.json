@@ -1,0 +1,52 @@
+{
+  "title": "JSON schema for https://cypress.io test runner cypress.json file. Details at https://on.cypress.io/configuration",
+  "type": "object",
+  "properties": {
+    "baseUrl" : {
+      "type": "string",
+      "description": "Url used as prefix for cy.visit() or cy.request() command’s url. Example http://localhost:3030 or https://test.my-domain.com"
+    },
+    "env": {
+      "type": "object",
+      "description": "Any values to be set as environment variables",
+      "body": {}
+    },
+    "ignoreTestFiles": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      },
+      "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match."
+    },
+    "numTestsKeptInMemory": {
+      "type": "number",
+      "default": 50,
+      "description": "The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run."
+    },
+    "port": {
+      "type": "number",
+      "default": null,
+      "description": "Port used to host Cypress. Normally this is a randomly generated port"
+    },
+    "reporter": {
+      "type": "string",
+      "default": "spec",
+      "description": "The reporter used when running headlessly or in CI. See https://on.cypress.io/reporters"
+    },
+    "reporterOptions": {
+      "type": "object",
+      "default": null,
+      "description": "The reporter options used. Supported options depend on the reporter. See https://on.cypress.io/reporters#Reporter-Options"
+    },
+    "screenshotOnHeadlessFailure": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to take a screenshot on test failure when running headlessly or in CI"
+    },
+    "watchForFileChanges": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will watch and restart tests on test file changes"
+    }
+  }
+}
