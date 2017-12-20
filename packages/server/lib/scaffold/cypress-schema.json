@@ -107,6 +107,21 @@
       "type": "string",
       "default": "cypress/videos",
       "description": "Path to folder where videos will be saved after a headless or CI run"
+    },
+    "screenshotOnHeadlessFailure": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will automatically take a screenshot when a test fails when running tests headlessly or in CI."
+    },
+    "screenshotsFolder": {
+      "type": "string",
+      "default": "cypress/screenshots",
+      "description": "Path to folder where screenshots will be saved from `cy.screenshot()` command or after a headless run’s test failure. See https://on.cypress.io/screenshot"
+    },
+    "trashAssetsBeforeHeadlessRuns": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs."
     }
   }
 }
