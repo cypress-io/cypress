@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
+const path = require('path')
 const Promise = require('bluebird')
 const devNull = require('dev-null')
 const debug = require('debug')('cypress:cli')
@@ -35,8 +36,8 @@ module.exports = {
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          cypressPath = 'npm'
-          args.unshift('run', 'dev')
+          cypressPath = 'node'
+          args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
         debug('spawning Cypress %s', cypressPath)
