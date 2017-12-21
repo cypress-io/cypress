@@ -309,7 +309,7 @@ They will outline development and test procedures. When in doubt just look at th
 Cypress documentation lives in separate repository with its own dependencies and build tools.
 See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
-## Commiting Code
+## Committing Code
 
 ### Branches
 
