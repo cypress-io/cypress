@@ -1,32 +1,45 @@
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
+const tty = require('tty')
 const path = require('path')
 const Promise = require('bluebird')
-const devNull = require('dev-null')
 const debug = require('debug')('cypress:cli')
 
+const util = require('../util')
 const info = require('../tasks/info')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
-function getStdio () {
-  // https://github.com/cypress-io/cypress/issues/717
-  // need to switch this else windows crashes
-  if (os.platform() === 'win32') {
-    return ['inherit', 'pipe', 'pipe']
+const isXvfbOrLibudevRe = /^(Xlib|libudev)/
+
+function needsStderrPipe (needsXvfb) {
+  return needsXvfb && os.platform() === 'linux'
+}
+
+function getStdio (needsXvfb) {
+  // https://github.com/cypress-io/cypress/issues/921
+  if (needsStderrPipe(needsXvfb)) {
+    // returning pipe here so we can massage stderr
+    // and remove garbage from Xlib and libuv
+    // due to starting the XVFB process on linux
+    return ['inherit', 'inherit', 'pipe']
   }
 
-  return ['inherit', 'inherit', 'ignore']
+  return 'inherit'
 }
 
 module.exports = {
   start (args, options = {}) {
+    const needsXvfb = xvfb.isNeeded()
+
+    debug('needs XVFB?', needsXvfb)
+
     args = [].concat(args)
 
     _.defaults(options, {
       detached: false,
-      stdio: getStdio(),
+      stdio: getStdio(needsXvfb),
     })
 
     const spawn = () => {
@@ -64,9 +77,17 @@ module.exports = {
         child.on('close', resolve)
         child.on('error', reject)
 
-        // if these are defined then we manually pipe for windows
-        child.stdout && child.stdout.pipe(process.stdout)
-        child.stderr && child.stderr.pipe(devNull())
+        // if this is defined then we are manually piping for linux
+        // to filter out the garbage
+        child.stderr && child.stderr.on('data', (data) => {
+          // bail if this is a line from xlib or libudev
+          if (isXvfbOrLibudevRe.test(data.toString())) {
+            return
+          }
+
+          // else pass it along!
+          process.stderr.write(data)
+        })
 
         if (options.detached) {
           child.unref()
@@ -76,9 +97,6 @@ module.exports = {
 
     const userFriendlySpawn = () =>
       spawn().catch(throwFormErrorText(errors.unexpected))
-
-    const needsXvfb = xvfb.isNeeded()
-    debug('needs XVFB?', needsXvfb)
 
     if (needsXvfb) {
       return xvfb.start()
