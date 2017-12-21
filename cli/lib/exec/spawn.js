@@ -73,6 +73,19 @@ module.exports = {
           process.env.DEBUG_COLORS = 1
           process.env.MOCHA_COLORS = 1
         }
+
+        // if we needed to pipe stderr and we're currently
+        // a tty on stderr
+        if (needsStderrPipe(needsXvfb) && tty.isatty(2)) {
+          // then force stderr tty
+          //
+          // this is necessary because we want our child
+          // electron browser to behave _THE SAME WAY_ as
+          // if we aren't using pipe. pipe is necessary only
+          // to filter out garbage on stderr -____________-
+          process.env.FORCE_STDERR_TTY = 1
+        }
+
         const child = cp.spawn(cypressPath, args, options)
         child.on('close', resolve)
         child.on('error', reject)

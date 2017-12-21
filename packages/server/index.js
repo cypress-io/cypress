@@ -1,3 +1,6 @@
+// override tty if we're being forced to
+require('./lib/util/tty').override()
+
 // if we are running in electron
 // we must hack around busted timers
 if (process.versions.electron) {
