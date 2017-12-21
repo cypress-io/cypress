@@ -46,6 +46,20 @@ module.exports = {
         // strip dev out of child process options
         options = _.omit(options, 'dev')
 
+        // when running in electron in windows
+        // it never supports color but we're
+        // going to force it anyway as long
+        // as our parent cli process can support
+        // colors!
+        //
+        // also when we are in linux and using the 'pipe'
+        // option our process.stderr.isTTY will not be true
+        // which ends up disabling the colors =(
+        if (util.supportsColor()) {
+          process.env.FORCE_COLOR = 1
+          process.env.DEBUG_COLORS = 1
+          process.env.MOCHA_COLORS = 1
+        }
         const child = cp.spawn(cypressPath, args, options)
         child.on('close', resolve)
         child.on('error', reject)
