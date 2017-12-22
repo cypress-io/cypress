@@ -2,6 +2,7 @@ require('../../spec_helper')
 
 const cp = require('child_process')
 const os = require('os')
+const path = require('path')
 
 const info = require(`${lib}/tasks/info`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -40,9 +41,11 @@ describe('exec spawn', function () {
     it('uses npm command when running in dev mode', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
+      const p = path.resolve('..', 'scripts', 'start.js')
+
       return spawn.start('--foo', { dev: true, foo: 'bar' })
       .then(() => {
-        expect(cp.spawn).to.be.calledWithMatch('npm', ['run', 'dev', '--foo'], { foo: 'bar' })
+        expect(cp.spawn).to.be.calledWithMatch('node', [p, '--foo'], { foo: 'bar' })
       })
     })
 

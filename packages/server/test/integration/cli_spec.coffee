@@ -33,14 +33,14 @@ describe "CLI Interface", ->
     @currentTest.timeout(20000)
 
   it "writes out ping value and exits", (done) ->
-    cp.exec "npm start -- --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
+    cp.exec "npm run dev -- --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
       expect(clean(stdout)).to.eq("12345")
       done()
 
   it "writes out package.json and exits", (done) ->
-    cp.exec "npm start -- --return-pkg", {env: env}, (err, stdout, stderr) ->
+    cp.exec "npm run dev -- --return-pkg", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
       json = JSON.parse(clean(stdout))
@@ -59,16 +59,16 @@ describe "CLI Interface", ->
       beforeEach ->
         ## run the start script directly
         ## instead of going through npm wrapper
-        @start = pkg.scripts.start
+        @dev = pkg.scripts.dev
 
       it "exits with code 22", (done) ->
-        s = cp.exec("#{@start} --exit-with-code=22")
+        s = cp.exec("#{@dev} --exit-with-code=22")
         s.on "close", (code) ->
           expect(code).to.eq(22)
           done()
 
       it "exits with code 0", (done) ->
-        s = cp.exec("#{@start} --exit-with-code=0")
+        s = cp.exec("#{@dev} --exit-with-code=0")
         s.on "close", (code) ->
           expect(code).to.eq(0)
           done()
@@ -88,13 +88,13 @@ describe "CLI Interface", ->
 
       it "npm slurps up or not exit value on failure", (done) ->
         expectedCode = if isNpmSlurpingCode() then 1 else 10
-        s = cp.exec("npm start -- --exit-with-code=10")
+        s = cp.exec("npm run dev -- --exit-with-code=10")
         s.on "close", (code) ->
           expect(code).to.eq(expectedCode)
           done()
 
       it "npm passes on 0 exit code", (done) ->
-        s = cp.exec("npm start -- --exit-with-code=0")
+        s = cp.exec("npm run dev -- --exit-with-code=0")
         s.on "close", (code) ->
           expect(code).to.eq(0)
           done()
