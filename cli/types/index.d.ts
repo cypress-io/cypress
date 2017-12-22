@@ -294,9 +294,32 @@ declare namespace Cypress {
      * Click a DOM element.
      *
      * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').click()          // Click on button
+     *    cy.focused().click()              // Click on el with focus
+     *    cy.contains('Welcome').click()    // Click on first el containing 'Welcome'
      */
     click(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Click a DOM element at specific corner / side.
+     *
+     * @param {String} position The position where the click should be issued. The `center` position is the default position.
+     * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').click('topRight')
+     */
     click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/click
+     * @example
+     *    // The click below will be issued inside of the element
+     *    // (15px from the left and 40px from the top).
+     *    cy.get('button').click(15, 40)
+     */
     click(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
@@ -812,6 +835,14 @@ declare namespace Cypress {
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     * @example
+     *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
+     *    cy.location().then((loc) => {})   // Yields location object as first arg
+     */
     then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
 
     /**
@@ -905,19 +936,26 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/window
      * @example window
-     * ```ts
-     * cy.visit('http://localhost:8080/app')
-     * cy.window().then(function(win){
-     *   // win is the remote window
-     *   // of the page at: http://localhost:8080/app
-     * })
-     * ```
+     *    cy.visit('http://localhost:8080/app')
+     *    cy.window().then(function(win){
+     *      // win is the remote window
+     *      // of the page at: http://localhost:8080/app
+     *    })
      */
     window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
 
     /**
      * Scopes all subsequent cy commands to within this element. Useful when working within a particular group of elements such as a `<form>`.
      * @see https://on.cypress.io/within
+     * @example
+     *    cy.get('form').within(($form) => {
+     *      // cy.get() will only search for elements within form,
+     *      // not within the entire document
+     *      cy.get('input[name="username"]').type('john')
+     *      cy.get('input[name="password"]').type('password')
+     *      cy.root().submit()
+     *    })
+     *
      */
     within(fn: (currentSubject: Subject) => void): Chainable<Subject>
     within(options: Partial<Loggable>, fn: (currentSubject?: Subject) => void): Chainable<Subject> // inconsistent argument order
