@@ -220,8 +220,23 @@ declare namespace Cypress {
      * Check checkbox(es) or radio(s). This element must be an `<input>` with type `checkbox` or `radio`.
      *
      * @see https://on.cypress.io/check
+     * @example
+     *    // Check checkbox element
+     *    cy.get('[type="checkbox"]').check()
+     *    // Check first radio element
+     *    cy.get('[type="radio"]').first().check()
      */
     check(options?: Partial<CheckOptions>): Chainable<Subject>
+    /**
+     * Check checkbox(es) or radio(s). This element must be an `<input>` with type `checkbox` or `radio`.
+     *
+     * @see https://on.cypress.io/check
+     * @example
+     *    // Select the radio with the value of ‘US’
+     *    cy.get('[type="radio"]').check('US')
+     *    // Check the checkboxes with the values ‘ga’ and ‘ca’
+     *    cy.get('[type="checkbox"]').check(['ga', 'ca'])
+     */
     check(value: string | string[], options?: Partial<CheckOptions>): Chainable<Subject>
 
     /**
@@ -306,6 +321,15 @@ declare namespace Cypress {
      * Get the DOM element containing the text. DOM elements can contain more than the desired text and still match. Additionally, Cypress prefers some DOM elements over the deepest element found.
      *
      * @see https://on.cypress.io/contains
+     * @example
+     *    // Yield el in .nav containing 'About'
+     *    cy.get('.nav').contains('About')
+     *    // Yield first el in document containing 'Hello'
+     *    cy.contains('Hello')
+     *    // you can use regular expression
+     *    cy.contains(/^b\w+/)
+     *    // yields <ul>...</ul>
+     *    cy.contains('ul', 'apples')
      */
     contains(content: string | number | RegExp): Chainable<Subject>
     contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
@@ -358,6 +382,11 @@ declare namespace Cypress {
      * Get A DOM element at a specific index in an array of elements.
      *
      * @see https://on.cypress.io/eq
+     * @param {Number} index A number indicating the index to find the element at within an array of elements. A negative number counts index from the end of the list.
+     * @example
+     *    cy.get('tbody>tr').eq(0)    // Yield first 'tr' in 'tbody'
+     *    cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
+     *    cy.get('li').eq(-2) // Yields second from last 'li' element
      */
     eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
@@ -379,6 +408,8 @@ declare namespace Cypress {
      * Get the descendent DOM elements of a specific selector.
      *
      * @see https://on.cypress.io/find
+     * @example
+     *    cy.get('.article').find('footer') // Yield 'footer' within '.article'
      */
     find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
@@ -796,6 +827,8 @@ declare namespace Cypress {
      * @see https://on.cypress.io/type
      * @example
      *    cy.get('input').type('Hello, World')
+     *    // type "hello" + press Enter
+     *    cy.get('input').type('hello{enter}')
      */
     type(text: string, options?: Partial<TypeOptions>): Chainable<Subject>
 
@@ -1302,6 +1335,13 @@ declare namespace Cypress {
     (chainer: 'be.undefined'): Chainable<Subject>
     (chainer: 'be.within', start: number, end: number): Chainable<Subject>
     (chainer: 'change', value: object, property: string): Chainable<Subject>
+    /**
+     * Check if current element contains given text
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    cy.get('.greeting').should('contain', 'world')
+     */
     (chainer: 'contain', value: any): Chainable<Subject>
     (chainer: 'decrease', value: object, property: string): Chainable<Subject>
     (chainer: 'deep.equal', value: Subject): Chainable<Subject>
