@@ -204,8 +204,17 @@ declare namespace Cypress {
      * Assign an alias for later use. Reference the alias later within a
      * [cy.get()](https://on.cypress.io/get) or
      * [cy.wait()](https://on.cypress.io/wait) command with a `@` prefix.
+     * You can alias DOM elements, routes, stubs and spies.
      *
      * @see https://on.cypress.io/as
+     * @see https://on.cypress.io/variables-and-aliases
+     * @see https://on.cypress.io/get
+     * @example
+     *    // Get the aliased ‘todos’ elements
+     *    cy.get('ul#todos').as('todos')
+     *    //...hack hack hack...
+     *    // later retrieve the todos
+     *    cy.get('@todos')
      */
     as(alias: string): Chainable<Subject>
 
@@ -660,8 +669,20 @@ declare namespace Cypress {
      * Reload the page.
      *
      * @see https://on.cypress.io/reload
+     * @example
+     *    cy.reload()
      */
     reload(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    /**
+     * Reload the page without cache
+     *
+     * @see https://on.cypress.io/reload
+     * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
+     * @example
+     *    // Reload the page without using the cache
+     *    cy.visit('http://localhost:3000/admin')
+     *    cy.reload(true)
+     */
     reload(forceReload: boolean): Chainable<Window>
 
     /**
