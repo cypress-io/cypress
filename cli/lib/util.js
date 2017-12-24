@@ -42,7 +42,7 @@ const util = {
   supportsColor () {
     // we only care about stderr supporting color
     // since thats what our DEBUG logs use
-    return supportsColor.stderr
+    return Boolean(supportsColor.stderr)
   },
 
   cwd () {
