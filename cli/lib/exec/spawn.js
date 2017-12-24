@@ -11,7 +11,7 @@ const info = require('../tasks/info')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
-const isXvfbOrLibudevRe = /^(Xlib|libudev)/
+const isXlibOrLibudevRe = /^(Xlib|libudev)/
 
 function needsStderrPipe (needsXvfb) {
   return needsXvfb && os.platform() === 'linux'
@@ -94,7 +94,7 @@ module.exports = {
         // to filter out the garbage
         child.stderr && child.stderr.on('data', (data) => {
           // bail if this is a line from xlib or libudev
-          if (isXvfbOrLibudevRe.test(data.toString())) {
+          if (isXlibOrLibudevRe.test(data.toString())) {
             return
           }
 
