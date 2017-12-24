@@ -22,7 +22,14 @@ module.exports = {
   start () {
     debug('Starting XVFB')
     return xvfb.startAsync()
-    .catch(throwFormErrorText(errors.missingXvfb))
+    .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
+    .catch((err) => {
+      if (err.known) {
+        throw err
+      }
+
+      return throwFormErrorText(errors.missingXvfb)(err)
+    })
   },
 
   stop () {
