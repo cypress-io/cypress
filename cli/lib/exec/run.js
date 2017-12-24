@@ -84,12 +84,6 @@ const processRunOptions = (options = {}) => {
   return args
 }
 
-const run = (options) => () => {
-  const args = processRunOptions(options)
-  debug('run to spawn.start args %j', args)
-  return spawn.start(args)
-}
-
 module.exports = {
   processRunOptions,
   // resolves with the number of failed tests
@@ -102,7 +96,21 @@ module.exports = {
       project: process.cwd(),
     })
 
+    function run () {
+      const args = processRunOptions(options)
+
+      debug('run to spawn.start args %j', args)
+
+      return spawn.start(args, {
+        dev: options.dev,
+      })
+    }
+
+    if (options.dev) {
+      return run()
+    }
+
     return verify.start()
-    .then(run(options))
+    .then(run)
   },
 }

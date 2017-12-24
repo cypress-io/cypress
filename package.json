@@ -8,7 +8,8 @@
     "node": ">=6.5.0"
   },
   "scripts": {
-    "start": "node ./scripts/start.js",
+    "start": "node ./cli/bin/cypress open --dev --global",
+    "dev": "node ./scripts/start.js",
     "watch": "npm run all watch",
     "deps": "deps-ok",
     "prebuild": "npm run deps",
