@@ -1,32 +1,45 @@
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
+const tty = require('tty')
 const path = require('path')
 const Promise = require('bluebird')
-const devNull = require('dev-null')
 const debug = require('debug')('cypress:cli')
 
+const util = require('../util')
 const info = require('../tasks/info')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
-function getStdio () {
-  // https://github.com/cypress-io/cypress/issues/717
-  // need to switch this else windows crashes
-  if (os.platform() === 'win32') {
-    return ['inherit', 'pipe', 'pipe']
+const isXlibOrLibudevRe = /^(Xlib|libudev)/
+
+function needsStderrPipe (needsXvfb) {
+  return needsXvfb && os.platform() === 'linux'
+}
+
+function getStdio (needsXvfb) {
+  // https://github.com/cypress-io/cypress/issues/921
+  if (needsStderrPipe(needsXvfb)) {
+    // returning pipe here so we can massage stderr
+    // and remove garbage from Xlib and libuv
+    // due to starting the XVFB process on linux
+    return ['inherit', 'inherit', 'pipe']
   }
 
-  return ['inherit', 'inherit', 'ignore']
+  return 'inherit'
 }
 
 module.exports = {
   start (args, options = {}) {
+    const needsXvfb = xvfb.isNeeded()
+
+    debug('needs XVFB?', needsXvfb)
+
     args = [].concat(args)
 
     _.defaults(options, {
       detached: false,
-      stdio: getStdio(),
+      stdio: getStdio(needsXvfb),
     })
 
     const spawn = () => {
@@ -46,13 +59,48 @@ module.exports = {
         // strip dev out of child process options
         options = _.omit(options, 'dev')
 
+        // when running in electron in windows
+        // it never supports color but we're
+        // going to force it anyway as long
+        // as our parent cli process can support
+        // colors!
+        //
+        // also when we are in linux and using the 'pipe'
+        // option our process.stderr.isTTY will not be true
+        // which ends up disabling the colors =(
+        if (util.supportsColor()) {
+          process.env.FORCE_COLOR = 1
+          process.env.DEBUG_COLORS = 1
+          process.env.MOCHA_COLORS = 1
+        }
+
+        // if we needed to pipe stderr and we're currently
+        // a tty on stderr
+        if (needsStderrPipe(needsXvfb) && tty.isatty(2)) {
+          // then force stderr tty
+          //
+          // this is necessary because we want our child
+          // electron browser to behave _THE SAME WAY_ as
+          // if we aren't using pipe. pipe is necessary only
+          // to filter out garbage on stderr -____________-
+          process.env.FORCE_STDERR_TTY = 1
+        }
+
         const child = cp.spawn(cypressPath, args, options)
         child.on('close', resolve)
         child.on('error', reject)
 
-        // if these are defined then we manually pipe for windows
-        child.stdout && child.stdout.pipe(process.stdout)
-        child.stderr && child.stderr.pipe(devNull())
+        // if this is defined then we are manually piping for linux
+        // to filter out the garbage
+        child.stderr && child.stderr.on('data', (data) => {
+          // bail if this is a line from xlib or libudev
+          if (isXlibOrLibudevRe.test(data.toString())) {
+            return
+          }
+
+          // else pass it along!
+          process.stderr.write(data)
+        })
 
         if (options.detached) {
           child.unref()
@@ -62,9 +110,6 @@ module.exports = {
 
     const userFriendlySpawn = () =>
       spawn().catch(throwFormErrorText(errors.unexpected))
-
-    const needsXvfb = xvfb.isNeeded()
-    debug('needs XVFB?', needsXvfb)
 
     if (needsXvfb) {
       return xvfb.start()
