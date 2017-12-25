@@ -9,6 +9,8 @@
   },
   "scripts": {
     "start": "node ./cli/bin/cypress open --dev --global",
+    "cypress:open": "node ./cli/bin/cypress open --dev --global",
+    "cypress:run": "node ./cli/bin/cypress run --dev",
     "dev": "node ./scripts/start.js",
     "watch": "npm run all watch",
     "deps": "deps-ok",
