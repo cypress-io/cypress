@@ -234,7 +234,6 @@ module.exports = {
     new Promise (resolve) ->
       return if exit is false
 
-
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
         ## early too: (Ended Early: true)

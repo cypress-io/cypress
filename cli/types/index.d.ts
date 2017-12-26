@@ -30,7 +30,7 @@ declare namespace Cypress {
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
 
-  interface   CommandOptions {
+  interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
   }
   interface ObjectLike {
@@ -104,6 +104,12 @@ declare namespace Cypress {
     Promise: Bluebird.BluebirdStatic
     /**
      * Cypress version string. i.e. "1.1.2"
+     * @see https://on.cypress.io/version
+     * @example
+     *    expect(Cypress.version).to.be.a('string')
+     *    if (Cypress.version === '1.2.0') {
+     *       // test something specific
+     *    }
      */
     version: string
 
@@ -198,8 +204,17 @@ declare namespace Cypress {
      * Assign an alias for later use. Reference the alias later within a
      * [cy.get()](https://on.cypress.io/get) or
      * [cy.wait()](https://on.cypress.io/wait) command with a `@` prefix.
+     * You can alias DOM elements, routes, stubs and spies.
      *
      * @see https://on.cypress.io/as
+     * @see https://on.cypress.io/variables-and-aliases
+     * @see https://on.cypress.io/get
+     * @example
+     *    // Get the aliased ‘todos’ elements
+     *    cy.get('ul#todos').as('todos')
+     *    //...hack hack hack...
+     *    // later retrieve the todos
+     *    cy.get('@todos')
      */
     as(alias: string): Chainable<Subject>
 
@@ -214,8 +229,23 @@ declare namespace Cypress {
      * Check checkbox(es) or radio(s). This element must be an `<input>` with type `checkbox` or `radio`.
      *
      * @see https://on.cypress.io/check
+     * @example
+     *    // Check checkbox element
+     *    cy.get('[type="checkbox"]').check()
+     *    // Check first radio element
+     *    cy.get('[type="radio"]').first().check()
      */
     check(options?: Partial<CheckOptions>): Chainable<Subject>
+    /**
+     * Check checkbox(es) or radio(s). This element must be an `<input>` with type `checkbox` or `radio`.
+     *
+     * @see https://on.cypress.io/check
+     * @example
+     *    // Select the radio with the value of ‘US’
+     *    cy.get('[type="radio"]').check('US')
+     *    // Check the checkboxes with the values ‘ga’ and ‘ca’
+     *    cy.get('[type="checkbox"]').check(['ga', 'ca'])
+     */
     check(value: string | string[], options?: Partial<CheckOptions>): Chainable<Subject>
 
     /**
@@ -264,9 +294,32 @@ declare namespace Cypress {
      * Click a DOM element.
      *
      * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').click()          // Click on button
+     *    cy.focused().click()              // Click on el with focus
+     *    cy.contains('Welcome').click()    // Click on first el containing 'Welcome'
      */
     click(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Click a DOM element at specific corner / side.
+     *
+     * @param {String} position The position where the click should be issued. The `center` position is the default position.
+     * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').click('topRight')
+     */
     click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/click
+     * @example
+     *    // The click below will be issued inside of the element
+     *    // (15px from the left and 40px from the top).
+     *    cy.get('button').click(15, 40)
+     */
     click(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
@@ -300,6 +353,15 @@ declare namespace Cypress {
      * Get the DOM element containing the text. DOM elements can contain more than the desired text and still match. Additionally, Cypress prefers some DOM elements over the deepest element found.
      *
      * @see https://on.cypress.io/contains
+     * @example
+     *    // Yield el in .nav containing 'About'
+     *    cy.get('.nav').contains('About')
+     *    // Yield first el in document containing 'Hello'
+     *    cy.contains('Hello')
+     *    // you can use regular expression
+     *    cy.contains(/^b\w+/)
+     *    // yields <ul>...</ul>
+     *    cy.contains('ul', 'apples')
      */
     contains(content: string | number | RegExp): Chainable<Subject>
     contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
@@ -352,6 +414,11 @@ declare namespace Cypress {
      * Get A DOM element at a specific index in an array of elements.
      *
      * @see https://on.cypress.io/eq
+     * @param {Number} index A number indicating the index to find the element at within an array of elements. A negative number counts index from the end of the list.
+     * @example
+     *    cy.get('tbody>tr').eq(0)    // Yield first 'tr' in 'tbody'
+     *    cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
+     *    cy.get('li').eq(-2) // Yields second from last 'li' element
      */
     eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
@@ -373,6 +440,8 @@ declare namespace Cypress {
      * Get the descendent DOM elements of a specific selector.
      *
      * @see https://on.cypress.io/find
+     * @example
+     *    cy.get('.article').find('footer') // Yield 'footer' within '.article'
      */
     find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
@@ -403,15 +472,46 @@ declare namespace Cypress {
      * Get the DOM element that is currently focused.
      *
      * @see https://on.cypress.io/focused
+     * @example
+     *    // Get the element that is focused
+     *    cy.focused().then(function($el) {
+     *       // do something with $el
+     *    })
+     *    // Blur the element with focus
+     *    cy.focused().blur()
+     *    // Make an assertion on the focused element
+     *    cy.focused().should('have.attr', 'name', 'username')
      */
     focused(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
 
     /**
-     * Get one or more DOM elements by selector or alias.
+     * Get one or more DOM elements by node name: input, button, etc.
      * @see https://on.cypress.io/get
+     * @example
+     *    cy.get('input').should('be.disabled')
+     *    cy.get('button').should('be.visible')
      */
     get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get one or more DOM elements by selector.
+     * The querying behavior of this command matches exactly how $(…) works in jQuery.
+     * @see https://on.cypress.io/get
+     * @example
+     *    cy.get('.list>li')    // Yield the <li>'s in <.list>
+     *    cy.get('ul li:first').should('have.class', 'active')
+     *    cy.get('.dropdown-menu').click()
+     */
     get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get one or more DOM elements by alias.
+     * @see https://on.cypress.io/get#Alias
+     * @example
+     *    // Get the aliased ‘todos’ elements
+     *    cy.get('ul#todos').as('todos')
+     *    //...hack hack hack...
+     *    //later retrieve the todos
+     *    cy.get('@todos')
+     */
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
@@ -592,8 +692,20 @@ declare namespace Cypress {
      * Reload the page.
      *
      * @see https://on.cypress.io/reload
+     * @example
+     *    cy.reload()
      */
     reload(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    /**
+     * Reload the page without cache
+     *
+     * @see https://on.cypress.io/reload
+     * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
+     * @example
+     *    // Reload the page without using the cache
+     *    cy.visit('http://localhost:3000/admin')
+     *    cy.reload(true)
+     */
     reload(forceReload: boolean): Chainable<Window>
 
     /**
@@ -723,6 +835,14 @@ declare namespace Cypress {
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     * @example
+     *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
+     *    cy.location().then((loc) => {})   // Yields location object as first arg
+     */
     then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
 
     /**
@@ -757,10 +877,10 @@ declare namespace Cypress {
      * Type into a DOM element.
      *
      * @see https://on.cypress.io/type
-     * @example type
-     * ```ts
-     * cy.get('input').type('Hello, World')
-     * ```
+     * @example
+     *    cy.get('input').type('Hello, World')
+     *    // type "hello" + press Enter
+     *    cy.get('input').type('hello{enter}')
      */
     type(text: string, options?: Partial<TypeOptions>): Chainable<Subject>
 
@@ -795,10 +915,10 @@ declare namespace Cypress {
      * @param {string} url The URL to visit. If relative uses `baseUrl`
      * @param {VisitOptions} [options] Pass in an options object to change the default behavior of `cy.visit()`
      * @see https://on.cypress.io/visit
-     * @example visit
-     * ```ts
-     * cy.visit('http://localhost:3000')
-     * ```
+     * @example
+     *    cy.visit('http://localhost:3000')
+     *    cy.visit('/somewhere') // opens ${baseUrl}/somewhere
+     *
      */
     visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
 
@@ -816,19 +936,26 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/window
      * @example window
-     * ```ts
-     * cy.visit('http://localhost:8080/app')
-     * cy.window().then(function(win){
-     *   // win is the remote window
-     *   // of the page at: http://localhost:8080/app
-     * })
-     * ```
+     *    cy.visit('http://localhost:8080/app')
+     *    cy.window().then(function(win){
+     *      // win is the remote window
+     *      // of the page at: http://localhost:8080/app
+     *    })
      */
     window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
 
     /**
      * Scopes all subsequent cy commands to within this element. Useful when working within a particular group of elements such as a `<form>`.
      * @see https://on.cypress.io/within
+     * @example
+     *    cy.get('form').within(($form) => {
+     *      // cy.get() will only search for elements within form,
+     *      // not within the entire document
+     *      cy.get('input[name="username"]').type('john')
+     *      cy.get('input[name="password"]').type('password')
+     *      cy.root().submit()
+     *    })
+     *
      */
     within(fn: (currentSubject: Subject) => void): Chainable<Subject>
     within(options: Partial<Loggable>, fn: (currentSubject?: Subject) => void): Chainable<Subject> // inconsistent argument order
@@ -1235,6 +1362,12 @@ declare namespace Cypress {
   }
 
   // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
+  /**
+   * @see https://on.cypress.io/should
+   *
+   * @interface Chainer
+   * @template Subject
+   */
   interface Chainer<Subject> {
     // chai
     (chainer: 'be.a', value: string): Chainable<Subject>
@@ -1261,15 +1394,38 @@ declare namespace Cypress {
     (chainer: 'be.undefined'): Chainable<Subject>
     (chainer: 'be.within', start: number, end: number): Chainable<Subject>
     (chainer: 'change', value: object, property: string): Chainable<Subject>
+    /**
+     * Check if current element contains given text
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    cy.get('.greeting').should('contain', 'world')
+     */
     (chainer: 'contain', value: any): Chainable<Subject>
     (chainer: 'decrease', value: object, property: string): Chainable<Subject>
     (chainer: 'deep.equal', value: Subject): Chainable<Subject>
+    /**
+     * Check if current element exists in the DOM
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    // retry until navigation is added to the DOM
+     *    cy.get('nav').should('exist')
+     */
     (chainer: 'exist'): Chainable<Subject>
     (chainer: 'eq', value: any): Chainable<Subject>
     (chainer: 'eql', value: any): Chainable<Subject>
     (chainer: 'equal', value: any): Chainable<Subject>
     (chainer: 'have.any.keys', ...value: any[]): Chainable<Subject>
     (chainer: 'have.deep.property', value: string, match?: any): Chainable<Subject>
+    /**
+     * Check if current subject has expected length
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    // retry until we find 3 matching <li.selected>
+     *    cy.get('li.selected').should('have.length', 3)
+     */
     (chainer: 'have.length', value: number): Chainable<Subject>
     (chainer: 'have.length.greaterThan', value: number): Chainable<Subject>
     (chainer: 'have.length.gt', value: number): Chainable<Subject>
@@ -1321,6 +1477,14 @@ declare namespace Cypress {
     (chainer: 'not.contain', value: any): Chainable<Subject>
     (chainer: 'not.decrease', value: object, property: string): Chainable<Subject>
     (chainer: 'not.deep.equal', value: Subject): Chainable<Subject>
+    /**
+     * Check if current element does not exists in the DOM
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    // retry until loading spinner no longer exists
+     *    cy.get('#loading').should('not.exist')
+     */
     (chainer: 'not.exist'): Chainable<Subject>
     (chainer: 'not.eq', value: any): Chainable<Subject>
     (chainer: 'not.eql', value: any): Chainable<Subject>
@@ -1389,16 +1553,38 @@ declare namespace Cypress {
     (chainer: 'not.returned', value: any): Chainable<Subject>
 
     // jquery-chai
+    /**
+     * Check if state of an element
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    // retry until our radio is checked
+     *    cy.get(':radio').should('be.checked')
+     */
     (chainer: 'be.checked'): Chainable<Subject>
     (chainer: 'be.disabled'): Chainable<Subject>
     (chainer: 'be.empty'): Chainable<Subject>
     (chainer: 'be.enabled'): Chainable<Subject>
     (chainer: 'be.hidden'): Chainable<Subject>
     (chainer: 'be.selected'): Chainable<Subject>
+    /**
+     * Check if current subject is visible
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    cy.get('#result').should('be.visible')
+     */
     (chainer: 'be.visible'): Chainable<Subject>
     (chainer: 'contain', value: string): Chainable<Subject>
     (chainer: 'exist'): Chainable<Subject>
     (chainer: 'have.attr', value: string, match?: string): Chainable<Subject>
+    /**
+     * Check if current subject has a class
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    cy.get('#result').should('have.class', 'success')
+     */
     (chainer: 'have.class', value: string): Chainable<Subject>
     (chainer: 'have.css', value: string, match?: string): Chainable<Subject>
     (chainer: 'have.data', value: string, match?: string): Chainable<Subject>
@@ -1407,6 +1593,14 @@ declare namespace Cypress {
     (chainer: 'have.id', value: string, match?: string): Chainable<Subject>
     (chainer: 'have.prop', value: string, match?: any): Chainable<Subject>
     (chainer: 'have.text', value: string): Chainable<Subject>
+    /**
+     * Check if current subject element has expected value
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    // retry until this textarea has the correct value
+     *    cy.get('textarea').should('have.value', 'foo bar baz')
+     */
     (chainer: 'have.value', value: string): Chainable<Subject>
     (chainer: 'match', value: string): Chainable<Subject>
 
@@ -1418,6 +1612,14 @@ declare namespace Cypress {
     (chainer: 'not.be.hidden'): Chainable<Subject>
     (chainer: 'not.be.selected'): Chainable<Subject>
     (chainer: 'not.be.visible'): Chainable<Subject>
+    /**
+     * Check if current element does not have text value
+     * @see https://on.cypress.io/should
+     * @see https://on.cypress.io/assertions
+     * @example
+     *    // retry until this span does not contain 'click me'
+     *    cy.get('a').parent('span.help').should('not.contain', 'click me')
+     */
     (chainer: 'not.contain', value: string): Chainable<Subject>
     (chainer: 'not.exist'): Chainable<Subject>
     (chainer: 'not.have.attr', value: string, match?: string): Chainable<Subject>
@@ -1525,10 +1727,24 @@ declare namespace Cypress {
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
 
   // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
-  type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
+  type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>
 }
 
-// global variables added by Cypress when it runs
+/**
+ * Global variables `cy` added by Cypress with all API commands.
+ * @see https://on.cypress.io/api
+ * @example
+ *    cy.get('button').click()
+ *    cy.get('.result').contains('Expected text')
+ */
 declare const cy: Cypress.Chainable<undefined>
+/**
+ * Global variable `Cypress` holds common utilities and constants.
+ * @see https://on.cypress.io/api
+ * @example
+ *    Cypress.config("pageLoadTimeout") // => 60000
+ *    Cypress.version // => "1.4.0"
+ *    Cypress._ // => Lodash _
+ */
 declare const Cypress: Cypress.Cypress
