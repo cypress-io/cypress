@@ -1,0 +1,13 @@
+language: node_js
+cache:
+  directories:
+    - ~/.npm
+notifications:
+  email: true
+node_js:
+  - '8'
+after_success:
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

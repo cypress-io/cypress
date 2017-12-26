@@ -1,7 +1,7 @@
 {
   "name": "cypress-vue-unit-test",
   "description": "A little helper to unit test Vue components in the Cypress.io E2E test runner",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/bahmutov/cypress-vue-unit-test/issues",
   "config": {
@@ -60,7 +60,8 @@
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "npm run unit",
     "unit": "mocha src/*-spec.js",
-    "unused-deps": "dependency-check --unused --no-dev ."
+    "unused-deps": "dependency-check --unused --no-dev .",
+    "semantic-release": "semantic-release"
   },
   "release": {
     "analyzeCommits": "simple-commit-message"
@@ -75,6 +76,7 @@
     "nsp": "3.1.0",
     "pre-git": "3.16.0",
     "prettier-standard": "8.0.0",
-    "standard": "10.0.3"
+    "standard": "10.0.3",
+    "semantic-release": "^11.0.2"
   }
 }
