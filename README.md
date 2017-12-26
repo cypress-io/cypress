@@ -214,6 +214,111 @@ because it is really running!
 
 ![Reverse input](images/reverse-spec.gif)
 
+### Component example
+
+Let us test a complex example. Let us test a [single file Vue component](https://vuejs.org/v2/guide/single-file-components.html). Here is the [Hello.vue](Hello.vue) file
+
+```
+<template>
+  <p>{{ greeting }} World!</p>
+</template>
+
+<script>
+export default {
+  data () {
+    return {
+      greeting: 'Hello'
+    }
+  }
+}
+</script>
+
+<style scoped>
+p {
+  font-size: 2em;
+  text-align: center;
+}
+</style>
+```
+
+How do we load this Vue file into the testing code? Using [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor#readme) and [vue-loader](https://github.com/vuejs/vue-loader).
+You can use [cypress/plugins/index.js](cypress/plugins/index.js) to load `.vue` files
+using `vue-loader`.
+
+```js
+// cypress/plugins/index.js
+const webpack = require('@cypress/webpack-preprocessor')
+const webpackOptions = {
+  module: {
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      }
+    ]
+  }
+}
+
+const options = {
+  // send in the options from your webpack.config.js, so it works the same
+  // as your app's code
+  webpackOptions,
+  watchOptions: {}
+}
+
+module.exports = on => {
+  on('file:preprocessor', webpack(options))
+}
+```
+
+Install dev dependencies
+
+```shell
+npm i -D @cypress/webpack-preprocessor \
+  vue-loader vue-template-compiler css-loader
+```
+
+And write a test
+
+```js
+import Hello from '../../components/Hello.vue'
+const mountVue = require('cypress-vue-unit-test')
+
+/* eslint-env mocha */
+describe('Hello.vue', () => {
+  beforeEach(mountVue(Hello))
+
+  it('shows hello', () => {
+    cy.contains('Hello World!')
+  })
+})
+```
+
+Do you want to interact with the component? Full power! Do you want
+to have multiple components? Sure!
+
+```js
+import Hello from '../../components/Hello.vue'
+const mountVue = require('cypress-vue-unit-test')
+describe('Several components', () => {
+  const template = `
+    <div>
+      <hello></hello>
+      <hello></hello>
+      <hello></hello>
+    </div>
+  `
+  const components = {
+    hello: Hello
+  }
+  beforeEach(mountVue({ template, components }))
+
+  it('greets the world 3 times', () => {
+    cy.get('p').should('have.length', 3)
+  })
+})
+```
+
 [cypress.io]: https://www.cypress.io/
 
 ### Small print
