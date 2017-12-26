@@ -319,6 +319,75 @@ describe('Several components', () => {
 })
 ```
 
+### Spying example
+
+Button counter component is used in several Vue doc examples
+
+```
+<template>
+  <button v-on:click="incrementCounter">{{ counter }}</button>
+</template>
+
+<script>
+  export default {
+    data () {
+      return {
+        counter: 0
+      }
+    },
+
+    methods: {
+      incrementCounter: function () {
+        this.counter += 1
+        this.$emit('increment')
+      }
+    }
+  }
+</script>
+
+<style scoped>
+button {
+  margin: 5px 10px;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+</style>
+```
+
+Let us test it - how do we ensure the event is emitted when the button is clicked?
+Simple - let us spy on the event, [spying and stubbing is built into Cypress](https://on.cypress.io/stubs-spies-and-clocks)
+
+```js
+import ButtonCounter from '../../components/ButtonCounter.vue'
+const mountVue = require('cypress-vue-unit-test')
+
+/* eslint-env mocha */
+describe('ButtonCounter', () => {
+  beforeEach(mountVue(ButtonCounter))
+
+  it('starts with zero', () => {
+    cy.contains('button', '0')
+  })
+
+  it('increments the counter on click', () => {
+    cy.get('button').click().click().click().contains('3')
+  })
+
+  it('emits "increment" event on click', () => {
+    const spy = cy.spy()
+    Cypress.vue.$on('increment', spy)
+    cy.get('button').click().click().then(() => {
+      expect(spy).to.be.calledTwice
+    })
+  })
+})
+```
+
+The component is really updating the counter in response to the click
+and is emitting an event.
+
+![Spying test](images/spy-spec.png)
+
 [cypress.io]: https://www.cypress.io/
 
 ### Small print
