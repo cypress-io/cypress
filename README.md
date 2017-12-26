@@ -294,8 +294,8 @@ describe('Hello.vue', () => {
 })
 ```
 
-Do you want to interact with the component? Full power! Do you want
-to have multiple components? Sure!
+Do you want to interact with the component? Go ahead! Do you want
+to have multiple components? No problem!
 
 ```js
 import Hello from '../../components/Hello.vue'
