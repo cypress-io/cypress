@@ -958,7 +958,7 @@ declare namespace Cypress {
      *
      */
     within(fn: (currentSubject: Subject) => void): Chainable<Subject>
-    within(options: Partial<Loggable>, fn: (currentSubject?: Subject) => void): Chainable<Subject> // inconsistent argument order
+    within(options: Partial<Loggable>, fn: (currentSubject: Subject) => void): Chainable<Subject> // inconsistent argument order
 
     /**
      * Yield the object passed into `.wrap()`.

@@ -152,3 +152,11 @@ cy.wrap('foo').then(subject => {
 }).then(subject => {
   subject // $ExpectType string
 })
+
+cy.get('body').within(body => {
+  body // $ExpectType JQuery<HTMLBodyElement>
+})
+
+cy.get('body').within({ log: false }, body => {
+  body // $ExpectType JQuery<HTMLBodyElement>
+})
