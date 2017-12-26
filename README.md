@@ -148,6 +148,72 @@ describe('Declarative rendering', () => {
 
 ![List tested](images/list-spec.png)
 
+### Handling User Input
+
+The next section in the Vue docs starts with [reverse message example](https://vuejs.org/v2/guide/#Handling-User-Input).
+
+```html
+<div id="app-5">
+  <p>{{ message }}</p>
+  <button v-on:click="reverseMessage">Reverse Message</button>
+</div>
+```
+```js
+var app5 = new Vue({
+  el: '#app-5',
+  data: {
+    message: 'Hello Vue.js!'
+  },
+  methods: {
+    reverseMessage: function () {
+      this.message = this.message.split('').reverse().join('')
+    }
+  }
+})
+```
+
+We can write the test the same way
+
+```js
+const mountVue = require('cypress-vue-unit-test')
+
+/* eslint-env mocha */
+describe('Handling User Input', () => {
+  // Example from https://vuejs.org/v2/guide/#Handling-User-Input
+  const template = `
+    <div>
+      <p>{{ message }}</p>
+      <button v-on:click="reverseMessage">Reverse Message</button>
+    </div>
+  `
+
+  const data = {
+    message: 'Hello Vue.js!'
+  }
+
+  const methods = {
+    reverseMessage: function () {
+      this.message = this.message.split('').reverse().join('')
+    }
+  }
+
+  beforeEach(mountVue({ template, data, methods }))
+
+  it('reverses text', () => {
+    cy.contains('Hello Vue')
+    cy.get('button').click()
+    cy.contains('!sj.euV olleH')
+  })
+})
+```
+
+Take a look at the video of the test. When you hover over the `CLICK` step
+the test runner is showing *before* and *after* DOM snapshots. Not only that,
+the application is fully functioning, you can interact with the application
+because it is really running!
+
+![Reverse input](images/reverse-input.gif)
+
 [cypress.io]: https://www.cypress.io/
 
 ### Small print
