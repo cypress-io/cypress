@@ -85,6 +85,9 @@
     "vue": "2.5.13"
   },
   "standard": {
-    "globals": [ "Cypress", "cy" ]
+    "globals": [
+      "Cypress",
+      "cy"
+    ]
   }
 }
