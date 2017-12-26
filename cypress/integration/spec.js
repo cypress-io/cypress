@@ -21,7 +21,7 @@ describe('Declarative rendering', () => {
 
   it('changes message if data changes', () => {
     // mounted Vue instance is available under Cypress.vue
-    Cypress.vue.$data.message = 'Vue rocks!'
+    Cypress.vue.message = 'Vue rocks!'
     cy.contains('Vue rocks!')
   })
 })

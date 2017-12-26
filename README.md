@@ -18,6 +18,8 @@ npm install --save-dev cypress-vue-unit-test
 
 ## Use
 
+### The intro example
+
 Take a look at the first Vue v2 example:
 [Declarative Rendering](https://vuejs.org/v2/guide/#Declarative-Rendering).
 The code is pretty simple
@@ -68,7 +70,7 @@ describe('Declarative rendering', () => {
 
   it('changes message if data changes', () => {
     // mounted Vue instance is available under Cypress.vue
-    Cypress.vue.$data.message = 'Vue rocks!'
+    Cypress.vue.message = 'Vue rocks!'
     cy.contains('Vue rocks!')
   })
 })
@@ -80,6 +82,71 @@ the reference `Cypress.vue.$data` and via GUI. The full power of the
 [Cypress API](https://on.cypress.io/api) is available.
 
 ![Hello world tested](images/spec.png)
+
+### The list example
+
+There is a list example next in the Vue docs.
+
+```html
+<div id="app-4">
+  <ol>
+    <li v-for="todo in todos">
+      {{ todo.text }}
+    </li>
+  </ol>
+</div>
+```
+```js
+var app4 = new Vue({
+  el: '#app-4',
+  data: {
+    todos: [
+      { text: 'Learn JavaScript' },
+      { text: 'Learn Vue' },
+      { text: 'Build something awesome' }
+    ]
+  }
+})
+```
+
+Let's test it. Simple.
+
+```js
+const mountVue = require('cypress-vue-unit-test')
+
+/* eslint-env mocha */
+describe('Declarative rendering', () => {
+  // List example from https://vuejs.org/v2/guide/#Declarative-Rendering
+  const template = `
+    <ol>
+      <li v-for="todo in todos">
+        {{ todo.text }}
+      </li>
+    </ol>
+  `
+
+  const data = {
+    todos: [
+      { text: 'Learn JavaScript' },
+      { text: 'Learn Vue' },
+      { text: 'Build something awesome' }
+    ]
+  }
+
+  beforeEach(mountVue({ template, data }))
+
+  it('shows 3 items', () => {
+    cy.get('li').should('have.length', 3)
+  })
+
+  it('can add an item', () => {
+    Cypress.vue.todos.push({ text: 'Test using Cypress' })
+    cy.get('li').should('have.length', 4)
+  })
+})
+```
+
+![List tested](images/list-spec.png)
 
 [cypress.io]: https://www.cypress.io/
 
