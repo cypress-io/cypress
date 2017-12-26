@@ -212,7 +212,7 @@ the test runner is showing *before* and *after* DOM snapshots. Not only that,
 the application is fully functioning, you can interact with the application
 because it is really running!
 
-![Reverse input](images/reverse-input.gif)
+![Reverse input](images/reverse-spec.gif)
 
 [cypress.io]: https://www.cypress.io/
 
