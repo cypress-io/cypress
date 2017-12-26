@@ -42,8 +42,21 @@ function deleteCachedConstructors (component) {
   Cypress._.values(component.components).forEach(deleteConstructor)
 }
 
+const vueHtml = `
+<html>
+<head></head>
+<body>
+  <script src="../node_modules/vue/dist/vue.js"></script>
+  <div id="app"></div>
+</body>
+</html>
+`
+
 const mountVue = component => () => {
-  cy.visit('index.html')
+  cy.document().then(document => {
+    document.write(vueHtml)
+    document.close()
+  })
   cy
     .window()
     .its('Vue')

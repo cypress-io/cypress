@@ -13,10 +13,75 @@
 Requires [Node](https://nodejs.org/en/) version 6 or above.
 
 ```sh
-npm install --save cypress-vue-unit-test
+npm install --save-dev cypress-vue-unit-test
 ```
 
 ## Use
+
+Take a look at the first Vue v2 example:
+[Declarative Rendering](https://vuejs.org/v2/guide/#Declarative-Rendering).
+The code is pretty simple
+
+```html
+<div id="app">
+  {{ message }}
+</div>
+```
+```js
+var app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello Vue!'
+  }
+})
+```
+It shows the message when running in the browser
+```
+Hello Vue!
+```
+
+Let's test it in [Cypress.io][cypress.io] (for the current version see
+[cypress/integration/spec.js](cypress/integration/spec.js)).
+
+```js
+const mountVue = require('cypress-vue-unit-test')
+
+/* eslint-env mocha */
+describe('Declarative rendering', () => {
+  // Vue code from https://vuejs.org/v2/guide/#Declarative-Rendering
+  const template = `
+    <div id="app">
+      {{ message }}
+    </div>
+  `
+
+  const data = {
+    message: 'Hello Vue!'
+  }
+
+  // that's all you need to do
+  beforeEach(mountVue({ template, data }))
+
+  it('shows hello', () => {
+    cy.contains('Hello Vue!')
+  })
+
+  it('changes message if data changes', () => {
+    // mounted Vue instance is available under Cypress.vue
+    Cypress.vue.$data.message = 'Vue rocks!'
+    cy.contains('Vue rocks!')
+  })
+})
+```
+
+Fire up Cypress test runner and have real browser (Electron, Chrome) load
+Vue and mount your test code and be able to interact with the instance through
+the reference `Cypress.vue.$data` and via GUI. The full power of the
+[Cypress API](https://on.cypress.io/api) is available.
+
+![Hello world tested](images/spec.png)
+
+[cypress.io]: https://www.cypress.io/
 
 ### Small print
 
