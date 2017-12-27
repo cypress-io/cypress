@@ -91,14 +91,15 @@ const getPageHTML = options => {
 }
 
 const mountVue = (component, options = {}) => () => {
-  cy.document().then(document => {
-    const vueHtml = getPageHTML(options)
-    document.write(vueHtml)
-    document.close()
-  })
+  const vueHtml = getPageHTML(options)
+  const document = cy.state('document')
+  document.write(vueHtml)
+  document.close()
 
+  // TODO: do not log out "its(Vue)" command
+  // but it currently does not support it
   cy
-    .window()
+    .window({ log: false })
     .its('Vue')
     .then(Vue => {
       deleteCachedConstructors(component)
