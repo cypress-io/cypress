@@ -47,20 +47,16 @@ declare namespace Cypress {
      * Lodash library
      *
      * @see https://on.cypress.io/_
-     * @example _
-     * ```ts
-     * Cypress._.keys(obj)
-     * ```
+     * @example
+     *    Cypress._.keys(obj)
      */
     _: _.LoDashStatic
     /**
      * jQuery library
      *
      * @see https://on.cypress.io/$
-     * @example $
-     * ```ts
-     * Cypress.$('p')
-     * ```
+     * @example
+     *    Cypress.$('p')
      */
     $: JQueryStatic
     /**
@@ -68,10 +64,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/blob
      * @see https://github.com/nolanlawson/blob-util
-     * @example Blob
-     * ```ts
-     * Cypress.Blob.method()
-     * ```
+     * @example
+     *    Cypress.Blob.method()
      */
     Blob: BlobUtil.BlobUtilStatic
     /**
@@ -85,10 +79,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/moment
      * @see http://momentjs.com/
-     * @example moment
-     * ```ts
-     * const todaysDate = Cypress.moment().format("MMM DD, YYYY")
-     * ```
+     * @example
+     *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
      */
     moment: (...args: any[]) => any // perhaps we want to add moment as a dependency for types?
     /**
@@ -96,10 +88,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/promise
      * @see https://github.com/petkaantonov/bluebird
-     * @example Promise
-     * ```ts
-     * new Cypress.Promise((resolve, reject) => { ... })
-     * ```
+     * @example
+     *   new Cypress.Promise((resolve, reject) => { ... })
      */
     Promise: Bluebird.BluebirdStatic
     /**
@@ -117,10 +107,8 @@ declare namespace Cypress {
      * OS platform name, from Node `os.platform()`
      *
      * @see https://nodejs.org/api/os.html#os_os_platform
-     * @example platform
-     * ```ts
-     * Cypress.platform // "darwin"
-     * ```
+     * @example
+     *    Cypress.platform // "darwin"
      */
     platform: string
 
@@ -128,10 +116,8 @@ declare namespace Cypress {
      * CPU architecture, from Node `os.arch()`
      *
      * @see https://nodejs.org/api/os.html#os_os_arch
-     * @example arch
-     * ```ts
-     * Cypress.arch // "x64"
-     * ```
+     * @example
+     *    Cypress.arch // "x64"
      */
     arch: string
 
@@ -386,12 +372,10 @@ declare namespace Cypress {
      * Get the window.document of the page that is currently active.
      *
      * @see https://on.cypress.io/document
-     * @example document
-     * ```ts
-     * cy.document()
-     *   .its('contentType')
-     *   .should('eq', 'text/html')
-     * ```
+     * @example
+     *    cy.document()
+     *      .its('contentType')
+     *      .should('eq', 'text/html')
      */
     document(options?: Partial<Loggable>): Chainable<Document>
 
@@ -935,7 +919,7 @@ declare namespace Cypress {
      * Get the window object of the page that is currently active.
      *
      * @see https://on.cypress.io/window
-     * @example window
+     * @example
      *    cy.visit('http://localhost:8080/app')
      *    cy.window().then(function(win){
      *      // win is the remote window
@@ -1375,7 +1359,7 @@ declare namespace Cypress {
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
-     * cy.wrap('foo').should('be.a', 'string')
+     *    cy.wrap('foo').should('be.a', 'string')
      * @see http://chaijs.com/api/bdd/#method_a
      * @see https://on.cypress.io/assertions
      */
@@ -1384,7 +1368,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('be.above', 5)
+     *    cy.wrap(6).should('be.above', 5)
      * @see http://chaijs.com/api/bdd/#method_above
      * @see https://on.cypress.io/assertions
      */
@@ -1394,7 +1378,7 @@ declare namespace Cypress {
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
-     * cy.wrap({ foo: 'bar' }).should('be.an', 'object')
+     *    cy.wrap({ foo: 'bar' }).should('be.an', 'object')
      * @alias a
      * @see http://chaijs.com/api/bdd/#method_a
      * @see https://on.cypress.io/assertions
@@ -1404,7 +1388,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('be.at.least', 5)
+     *    cy.wrap(6).should('be.at.least', 5)
      * @see http://chaijs.com/api/bdd/#method_least
      * @see https://on.cypress.io/assertions
      */
@@ -1413,7 +1397,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('be.below', 5)
+     *    cy.wrap(4).should('be.below', 5)
      * @see http://chaijs.com/api/bdd/#method_below
      * @see https://on.cypress.io/assertions
      */
@@ -1421,7 +1405,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is an `arguments` object.
      * @example
-     * cy.wrap(arguments).should('be.arguments')
+     *    cy.wrap(arguments).should('be.arguments')
      * @see http://chaijs.com/api/bdd/#method_arguments
      * @see https://on.cypress.io/assertions
      */
@@ -1429,7 +1413,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(5.1).should('be.approximately', 5, 0.5)
+     *    cy.wrap(5.1).should('be.approximately', 5, 0.5)
      * @alias closeTo
      * @see http://chaijs.com/api/bdd/#method_closeto
      * @see https://on.cypress.io/assertions
@@ -1438,7 +1422,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(5.1).should('be.closeTo', 5, 0.5)
+     *    cy.wrap(5.1).should('be.closeTo', 5, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
      * @see https://on.cypress.io/assertions
      */
@@ -1446,8 +1430,8 @@ declare namespace Cypress {
     /**
      * When the target is a string or array, .empty asserts that the target’s length property is strictly (===) equal to 0
      * @example
-     * cy.wrap([]).should('be.empty')
-     * cy.wrap('').should('be.empty')
+     *    cy.wrap([]).should('be.empty')
+     *    cy.wrap('').should('be.empty')
      * @see http://chaijs.com/api/bdd/#method_empty
      * @see https://on.cypress.io/assertions
      */
@@ -1455,7 +1439,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is an instance of the given `constructor`.
      * @example
-     * cy.wrap([1, 2]).should('be.instanceOf', Array)
+     *    cy.wrap([1, 2]).should('be.instanceOf', Array)
      * @see http://chaijs.com/api/bdd/#method_instanceof
      * @see https://on.cypress.io/assertions
      */
@@ -1463,7 +1447,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is strictly (`===`) equal to `false`.
      * @example
-     * cy.wrap(false).should('be.false')
+     *    cy.wrap(false).should('be.false')
      * @see http://chaijs.com/api/bdd/#method_false
      * @see https://on.cypress.io/assertions
      */
@@ -1472,7 +1456,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('be.greaterThan', 5)
+     *    cy.wrap(6).should('be.greaterThan', 5)
      * @alias above
      * @see http://chaijs.com/api/bdd/#method_above
      * @see https://on.cypress.io/assertions
@@ -1482,7 +1466,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('be.gt', 5)
+     *    cy.wrap(6).should('be.gt', 5)
      * @alias above
      * @see http://chaijs.com/api/bdd/#method_above
      * @see https://on.cypress.io/assertions
@@ -1492,7 +1476,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('be.gte', 5)
+     *    cy.wrap(6).should('be.gte', 5)
      * @alias least
      * @see http://chaijs.com/api/bdd/#method_least
      * @see https://on.cypress.io/assertions
@@ -1502,7 +1486,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('be.lessThan', 5)
+     *    cy.wrap(4).should('be.lessThan', 5)
      * @alias below
      * @see http://chaijs.com/api/bdd/#method_below
      * @see https://on.cypress.io/assertions
@@ -1512,7 +1496,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('be.lt', 5)
+     *    cy.wrap(4).should('be.lt', 5)
      * @alias below
      * @see http://chaijs.com/api/bdd/#method_below
      * @see https://on.cypress.io/assertions
@@ -1522,7 +1506,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('be.lte', 5)
+     *    cy.wrap(4).should('be.lte', 5)
      * @alias most
      * @see http://chaijs.com/api/bdd/#method_most
      * @see https://on.cypress.io/assertions
@@ -1531,7 +1515,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
-     * cy.wrap(1).should('be.ok')
+     *    cy.wrap(1).should('be.ok')
      * @see http://chaijs.com/api/bdd/#method_ok
      * @see https://on.cypress.io/assertions
      */
@@ -1539,7 +1523,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is strictly (`===`) equal to true.
      * @example
-     * cy.wrap(true).should('be.true')
+     *    cy.wrap(true).should('be.true')
      * @see http://chaijs.com/api/bdd/#method_true
      * @see https://on.cypress.io/assertions
      */
@@ -1547,7 +1531,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is strictly (`===`) equal to undefined.
      * @example
-     * cy.wrap(undefined).should('be.undefined')
+     *    cy.wrap(undefined).should('be.undefined')
      * @see http://chaijs.com/api/bdd/#method_undefined
      * @see https://on.cypress.io/assertions
      */
@@ -1556,7 +1540,7 @@ declare namespace Cypress {
      * Asserts that the target is a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('be.within', 5, 10)
+     *    cy.wrap(6).should('be.within', 5, 10)
      * @see http://chaijs.com/api/bdd/#method_within
      * @see https://on.cypress.io/assertions
      */
@@ -1566,10 +1550,10 @@ declare namespace Cypress {
      * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
      * However, it’s often best to assert that `subject` is equal to its expected value.
      * @example
-     * let dots = ''
-     * function addDot() { dots += '.' }
-     * function getDots() { return dots }
-     * cy.wrap(addDot).should('change', getDots)
+     *    let dots = ''
+     *    function addDot() { dots += '.' }
+     *    function getDots() { return dots }
+     *    cy.wrap(addDot).should('change', getDots)
      * @see http://chaijs.com/api/bdd/#method_change
      * @see https://on.cypress.io/assertions
      */
@@ -1577,9 +1561,9 @@ declare namespace Cypress {
     /**
      * When two arguments are provided, `.change` asserts that the value of the given object `subject`'s `prop` property is different before invoking the target function compared to afterward.
      * @example
-     * const myObj = { dots: '' }
-     * function addDot() { myObj.dots += '.' }
-     * cy.wrap(addDot).should('change', myObj, 'dots')
+     *    const myObj = { dots: '' }
+     *    function addDot() { myObj.dots += '.' }
+     *    cy.wrap(addDot).should('change', myObj, 'dots')
      * @see http://chaijs.com/api/bdd/#method_change
      * @see https://on.cypress.io/assertions
      */
@@ -1587,7 +1571,7 @@ declare namespace Cypress {
     /**
      * When the target is a string, `.include` asserts that the given string val is a substring of the target.
      * @example
-     * cy.wrap('tester').should('contain', 'test')
+     *    cy.wrap('tester').should('contain', 'test')
      * @alias include
      * @see http://chaijs.com/api/bdd/#method_include
      * @see https://on.cypress.io/assertions
@@ -1597,10 +1581,10 @@ declare namespace Cypress {
      * When one argument is provided, `.decrease` asserts that the given function `subject` returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
      * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
-     * let val = 1
-     * function subtractTwo() { val -= 2 }
-     * function getVal() { return val }
-     * cy.wrap(subtractTwo).should('decrease', getVal)
+     *    let val = 1
+     *    function subtractTwo() { val -= 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(subtractTwo).should('decrease', getVal)
      * @see http://chaijs.com/api/bdd/#method_decrease
      * @see https://on.cypress.io/assertions
      */
@@ -1608,10 +1592,10 @@ declare namespace Cypress {
     /**
      * When two arguments are provided, `.decrease` asserts that the value of the given object `subject`'s `prop` property is lesser after invoking the target function compared to beforehand.
      * @example
-     * let val = 1
-     * function subtractTwo() { val -= 2 }
-     * function getVal() { return val }
-     * cy.wrap(subtractTwo).should('decrease', getVal)
+     *    let val = 1
+     *    function subtractTwo() { val -= 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(subtractTwo).should('decrease', getVal)
      * @see http://chaijs.com/api/bdd/#method_decrease
      * @see https://on.cypress.io/assertions
      */
@@ -1619,7 +1603,7 @@ declare namespace Cypress {
     /**
      * Causes all `.equal`, `.include`, `.members`, `.keys`, and `.property` assertions that follow in the chain to use deep equality instead of strict (`===`) equality. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
-     * cy.wrap({ a: 1 }).should('deep.equal', { a: 1 })
+     *    cy.wrap({ a: 1 }).should('deep.equal', { a: 1 })
      * @see http://chaijs.com/api/bdd/#method_deep
      * @see https://on.cypress.io/assertions
      */
@@ -1627,7 +1611,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(1).should('exist')
+     *    cy.wrap(1).should('exist')
      * @see http://chaijs.com/api/bdd/#method_exist
      * @see https://on.cypress.io/assertions
      */
@@ -1635,7 +1619,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is strictly (`===`) equal to the given `val`.
      * @example
-     * cy.wrap(1).should('eq', 1)
+     *    cy.wrap(1).should('eq', 1)
      * @alias equal
      * @see http://chaijs.com/api/bdd/#method_equal
      * @see https://on.cypress.io/assertions
@@ -1644,7 +1628,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is deeply equal to the given `obj`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
-     * cy.wrap({a: 1}).should('eql', {a: 1}).and('not.equal', {a: 1})
+     *    cy.wrap({a: 1}).should('eql', {a: 1}).and('not.equal', {a: 1})
      * @see http://chaijs.com/api/bdd/#method_eql
      * @see https://on.cypress.io/assertions
      */
@@ -1652,7 +1636,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is strictly (`===`) equal to the given `val`.
      * @example
-     * cy.wrap(1).should('equal', 1)
+     *    cy.wrap(1).should('equal', 1)
      * @see http://chaijs.com/api/bdd/#method_equal
      * @see https://on.cypress.io/assertions
      */
@@ -1660,7 +1644,7 @@ declare namespace Cypress {
     /**
      * Causes all `.keys` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
      * @example
-     * cy.wrap({ a: 1, b: 2 }).should('have.all.keys', 'a', 'b')
+     *    cy.wrap({ a: 1, b: 2 }).should('have.all.keys', 'a', 'b')
      * @see http://chaijs.com/api/bdd/#method_all
      * @see https://on.cypress.io/assertions
      */
@@ -1668,7 +1652,7 @@ declare namespace Cypress {
     /**
      * Causes all `.keys` assertions that follow in the chain to only require that the target have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
      * @example
-     * cy.wrap({ a: 1, b: 2 }).should('have.any.keys', 'a')
+     *    cy.wrap({ a: 1, b: 2 }).should('have.any.keys', 'a')
      * @see http://chaijs.com/api/bdd/#method_any
      * @see https://on.cypress.io/assertions
      */
@@ -1676,7 +1660,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target has a property with the given key `name`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
-     * cy.wrap({ x: {a: 1 }}).should('have.deep.property', 'x', { a: 1 })
+     *    cy.wrap({ x: {a: 1 }}).should('have.deep.property', 'x', { a: 1 })
      * @see http://chaijs.com/api/bdd/#method_property
      * @see https://on.cypress.io/assertions
      */
@@ -1684,8 +1668,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is equal to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length', 3)
-     * cy.wrap('foo').should('have.length', 3)
+     *    cy.wrap([1, 2, 3]).should('have.length', 3)
+     *    cy.wrap('foo').should('have.length', 3)
      * @alias lengthOf
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
@@ -1694,8 +1678,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is greater than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length.greaterThan', 2)
-     * cy.wrap('foo').should('have.length.greaterThan', 2)
+     *    cy.wrap([1, 2, 3]).should('have.length.greaterThan', 2)
+     *    cy.wrap('foo').should('have.length.greaterThan', 2)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -1703,8 +1687,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is greater than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length.gt', 2)
-     * cy.wrap('foo').should('have.length.gt', 2)
+     *    cy.wrap([1, 2, 3]).should('have.length.gt', 2)
+     *    cy.wrap('foo').should('have.length.gt', 2)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -1712,8 +1696,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is greater than or equal to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length.gte', 2)
-     * cy.wrap('foo').should('have.length.gte', 2)
+     *    cy.wrap([1, 2, 3]).should('have.length.gte', 2)
+     *    cy.wrap('foo').should('have.length.gte', 2)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -1721,8 +1705,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is less than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length.lessThan', 4)
-     * cy.wrap('foo').should('have.length.lessThan', 4)
+     *    cy.wrap([1, 2, 3]).should('have.length.lessThan', 4)
+     *    cy.wrap('foo').should('have.length.lessThan', 4)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -1730,8 +1714,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is less than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length.lt', 4)
-     * cy.wrap('foo').should('have.length.lt', 4)
+     *    cy.wrap([1, 2, 3]).should('have.length.lt', 4)
+     *    cy.wrap('foo').should('have.length.lt', 4)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -1739,8 +1723,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is less than or equal to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length.lte', 4)
-     * cy.wrap('foo').should('have.length.lte', 4)
+     *    cy.wrap([1, 2, 3]).should('have.length.lte', 4)
+     *    cy.wrap('foo').should('have.length.lte', 4)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -1748,7 +1732,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target array has the same members as the given array `set`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.members', [2, 1, 3])
+     *    cy.wrap([1, 2, 3]).should('have.members', [2, 1, 3])
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
@@ -1756,7 +1740,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target array has the same members as the given array where order matters.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.ordered.members', [1, 2, 3])
+     *    cy.wrap([1, 2, 3]).should('have.ordered.members', [1, 2, 3])
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
@@ -1764,8 +1748,8 @@ declare namespace Cypress {
     /**
      * Causes all `.property` and `.include` assertions that follow in the chain to ignore inherited properties.
      * @example
-     * Object.prototype.b = 2
-     * cy.wrap({ a: 1 }).should('have.property', 'a').and('not.have.ownProperty', 'b')
+     *    Object.prototype.b = 2
+     *    cy.wrap({ a: 1 }).should('have.property', 'a').and('not.have.ownProperty', 'b')
      * @see http://chaijs.com/api/bdd/#method_ownproperty
      * @see https://on.cypress.io/assertions
      */
@@ -1773,8 +1757,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target has a property with the given key `name`.
      * @example
-     * cy.wrap({ a: 1 }).should('have.property', 'a')
-     * cy.wrap({ a: 1 }).should('have.property', 'a', 1)
+     *    cy.wrap({ a: 1 }).should('have.property', 'a')
+     *    cy.wrap({ a: 1 }).should('have.property', 'a', 1)
      * @see http://chaijs.com/api/bdd/#method_property
      * @see https://on.cypress.io/assertions
      */
@@ -1782,7 +1766,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target string contains the given substring `str`.
      * @example
-     * cy.wrap('foobar').should('have.string', 'bar')
+     *    cy.wrap('foobar').should('have.string', 'bar')
      * @see http://chaijs.com/api/bdd/#method_string
      * @see https://on.cypress.io/assertions
      */
@@ -1790,7 +1774,7 @@ declare namespace Cypress {
     /**
      * When the target is a string, `.include` asserts that the given string `val` is a substring of the target.
      * @example
-     * cy.wrap('foobar').should('include', 'foo')
+     *    cy.wrap('foobar').should('include', 'foo')
      * @see http://chaijs.com/api/bdd/#method_include
      * @see https://on.cypress.io/assertions
      */
@@ -1798,7 +1782,7 @@ declare namespace Cypress {
     /**
      * When the target is a string, `.include` asserts that the given string `val` is a substring of the target.
      * @example
-     * cy.wrap([1, 2, 3]).should('include.members', [1, 2])
+     *    cy.wrap([1, 2, 3]).should('include.members', [1, 2])
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
@@ -1809,10 +1793,10 @@ declare namespace Cypress {
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
      * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      * @example
-     * let val = 1
-     * function addTwo() { val += 2 }
-     * function getVal() { return val }
-     * cy.wrap(addTwo).should('increase', getVal)
+     *    let val = 1
+     *    function addTwo() { val += 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(addTwo).should('increase', getVal)
      * @see http://chaijs.com/api/bdd/#method_increase
      * @see https://on.cypress.io/assertions
      */
@@ -1820,7 +1804,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target matches the given regular expression `re`.
      * @example
-     * cy.wrap('foobar').should('match', /^foo/)
+     *    cy.wrap('foobar').should('match', /^foo/)
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
@@ -1828,10 +1812,10 @@ declare namespace Cypress {
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target has a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example
-     * class Cat {
-     *   meow() {}
-     * }
-     * cy.wrap(new Cat()).should('respondTo', 'meow')
+     *    class Cat {
+     *      meow() {}
+     *    }
+     *    cy.wrap(new Cat()).should('respondTo', 'meow')
      * @see http://chaijs.com/api/bdd/#method_respondto
      * @see https://on.cypress.io/assertions
      */
@@ -1839,7 +1823,7 @@ declare namespace Cypress {
     /**
      * Invokes the given `matcher` function with the target being passed as the first argument, and asserts that the value returned is truthy.
      * @example
-     * cy.wrap(1).should('satisfy', (num) => num > 0)
+     *    cy.wrap(1).should('satisfy', (num) => num > 0)
      * @see http://chaijs.com/api/bdd/#method_satisfy
      * @see https://on.cypress.io/assertions
      */
@@ -1848,10 +1832,10 @@ declare namespace Cypress {
      * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
      * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
      * @example
-     * function badFn() { throw new TypeError('Illegal salmon!') }
-     * cy.wrap(badFn).should('throw')
-     * cy.wrap(badFn).should('throw', 'salmon')
-     * cy.wrap(badFn).should('throw', /salmon/)
+     *    function badFn() { throw new TypeError('Illegal salmon!') }
+     *    cy.wrap(badFn).should('throw')
+     *    cy.wrap(badFn).should('throw', 'salmon')
+     *    cy.wrap(badFn).should('throw', /salmon/)
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
@@ -1860,10 +1844,10 @@ declare namespace Cypress {
      * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
      * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
      * @example
-     * function badFn() { throw new TypeError('Illegal salmon!') }
-     * cy.wrap(badFn).should('throw')
-     * cy.wrap(badFn).should('throw', 'salmon')
-     * cy.wrap(badFn).should('throw', /salmon/)
+     *    function badFn() { throw new TypeError('Illegal salmon!') }
+     *    cy.wrap(badFn).should('throw')
+     *    cy.wrap(badFn).should('throw', 'salmon')
+     *    cy.wrap(badFn).should('throw', /salmon/)
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
@@ -1876,7 +1860,7 @@ declare namespace Cypress {
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
-     * cy.wrap('foo').should('not.be.a', 'number')
+     *    cy.wrap('foo').should('not.be.a', 'number')
      * @see http://chaijs.com/api/bdd/#method_a
      * @see https://on.cypress.io/assertions
      */
@@ -1885,7 +1869,7 @@ declare namespace Cypress {
      * Asserts that the target is a not number or not a date greater than the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('not.be.above', 10)
+     *    cy.wrap(6).should('not.be.above', 10)
      * @see http://chaijs.com/api/bdd/#method_above
      * @see https://on.cypress.io/assertions
      */
@@ -1895,7 +1879,7 @@ declare namespace Cypress {
      * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
      * https://github.com/chaijs/type-detect.
      * @example
-     * cy.wrap('foo').should('not.be.an', 'object')
+     *    cy.wrap('foo').should('not.be.an', 'object')
      * @alias a
      * @see http://chaijs.com/api/bdd/#method_a
      * @see https://on.cypress.io/assertions
@@ -1905,7 +1889,7 @@ declare namespace Cypress {
      * Asserts that the target is not a number or not a `n` date greater than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('not.be.at.least', 10)
+     *    cy.wrap(6).should('not.be.at.least', 10)
      * @see http://chaijs.com/api/bdd/#method_least
      * @see https://on.cypress.io/assertions
      */
@@ -1914,7 +1898,7 @@ declare namespace Cypress {
      * Asserts that the target is not a number or not a `n` date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('not.be.below', 1)
+     *    cy.wrap(4).should('not.be.below', 1)
      * @see http://chaijs.com/api/bdd/#method_below
      * @see https://on.cypress.io/assertions
      */
@@ -1922,7 +1906,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not an `arguments` object.
      * @example
-     * cy.wrap(1).should('not.be.arguments')
+     *    cy.wrap(1).should('not.be.arguments')
      * @see http://chaijs.com/api/bdd/#method_arguments
      * @see https://on.cypress.io/assertions
      */
@@ -1930,7 +1914,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is a not number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(5.1).should('not.be.approximately', 6, 0.5)
+     *    cy.wrap(5.1).should('not.be.approximately', 6, 0.5)
      * @alias closeTo
      * @see http://chaijs.com/api/bdd/#method_closeto
      * @see https://on.cypress.io/assertions
@@ -1939,7 +1923,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(5.1).should('not.be.closeTo', 6, 0.5)
+     *    cy.wrap(5.1).should('not.be.closeTo', 6, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
      * @see https://on.cypress.io/assertions
      */
@@ -1947,8 +1931,8 @@ declare namespace Cypress {
     /**
      * When the target is a not string or array, .empty asserts that the target’s length property is strictly (===) equal to 0
      * @example
-     * cy.wrap([1]).should('not.be.empty')
-     * cy.wrap('foo').should('not.be.empty')
+     *    cy.wrap([1]).should('not.be.empty')
+     *    cy.wrap('foo').should('not.be.empty')
      * @see http://chaijs.com/api/bdd/#method_empty
      * @see https://on.cypress.io/assertions
      */
@@ -1956,7 +1940,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not an instance of the given `constructor`.
      * @example
-     * cy.wrap([1, 2]).should('not.be.instanceOf', String)
+     *    cy.wrap([1, 2]).should('not.be.instanceOf', String)
      * @see http://chaijs.com/api/bdd/#method_instanceof
      * @see https://on.cypress.io/assertions
      */
@@ -1964,7 +1948,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not strictly (`===`) equal to `false`.
      * @example
-     * cy.wrap(true).should('not.be.false')
+     *    cy.wrap(true).should('not.be.false')
      * @see http://chaijs.com/api/bdd/#method_false
      * @see https://on.cypress.io/assertions
      */
@@ -1973,7 +1957,7 @@ declare namespace Cypress {
      * Asserts that the target is a not number or a date greater than the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('be.greaterThan', 7)
+     *    cy.wrap(6).should('be.greaterThan', 7)
      * @alias above
      * @see http://chaijs.com/api/bdd/#method_above
      * @see https://on.cypress.io/assertions
@@ -1983,7 +1967,7 @@ declare namespace Cypress {
      * Asserts that the target is a not number or a date greater than the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('not.be.gt', 7)
+     *    cy.wrap(6).should('not.be.gt', 7)
      * @alias above
      * @see http://chaijs.com/api/bdd/#method_above
      * @see https://on.cypress.io/assertions
@@ -1993,7 +1977,7 @@ declare namespace Cypress {
      * Asserts that the target is a not number or a `n` date greater than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(6).should('not.be.gte', 7)
+     *    cy.wrap(6).should('not.be.gte', 7)
      * @alias least
      * @see http://chaijs.com/api/bdd/#method_least
      * @see https://on.cypress.io/assertions
@@ -2003,7 +1987,7 @@ declare namespace Cypress {
      * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('not.be.lessThan', 3)
+     *    cy.wrap(4).should('not.be.lessThan', 3)
      * @alias below
      * @see http://chaijs.com/api/bdd/#method_below
      * @see https://on.cypress.io/assertions
@@ -2013,7 +1997,7 @@ declare namespace Cypress {
      * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('not.be.lt', 3)
+     *    cy.wrap(4).should('not.be.lt', 3)
      * @alias below
      * @see http://chaijs.com/api/bdd/#method_below
      * @see https://on.cypress.io/assertions
@@ -2023,7 +2007,7 @@ declare namespace Cypress {
      * Asserts that the target is not a number or a date less than or equal to the given number or date n respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(4).should('not.be.lte', 3)
+     *    cy.wrap(4).should('not.be.lte', 3)
      * @alias most
      * @see http://chaijs.com/api/bdd/#method_most
      * @see https://on.cypress.io/assertions
@@ -2032,7 +2016,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
-     * cy.wrap(0).should('not.be.ok')
+     *    cy.wrap(0).should('not.be.ok')
      * @see http://chaijs.com/api/bdd/#method_ok
      * @see https://on.cypress.io/assertions
      */
@@ -2040,7 +2024,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not strictly (`===`) equal to true.
      * @example
-     * cy.wrap(false).should('not.be.true')
+     *    cy.wrap(false).should('not.be.true')
      * @see http://chaijs.com/api/bdd/#method_true
      * @see https://on.cypress.io/assertions
      */
@@ -2048,7 +2032,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not strictly (`===`) equal to undefined.
      * @example
-     * cy.wrap(true).should('not.be.undefined')
+     *    cy.wrap(true).should('not.be.undefined')
      * @see http://chaijs.com/api/bdd/#method_undefined
      * @see https://on.cypress.io/assertions
      */
@@ -2057,7 +2041,7 @@ declare namespace Cypress {
      * Asserts that the target is not a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(3).should('not.be.within', 5, 10)
+     *    cy.wrap(3).should('not.be.within', 5, 10)
      * @see http://chaijs.com/api/bdd/#method_within
      * @see https://on.cypress.io/assertions
      */
@@ -2067,10 +2051,10 @@ declare namespace Cypress {
      * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
      * However, it’s often best to assert that `subject` is equal to its expected value.
      * @example
-     * let dots = ''
-     * function addDot() { dots += '.' }
-     * function getDots() { return dots }
-     * cy.wrap(() => {}).should('not.change', getDots)
+     *    let dots = ''
+     *    function addDot() { dots += '.' }
+     *    function getDots() { return dots }
+     *    cy.wrap(() => {}).should('not.change', getDots)
      * @see http://chaijs.com/api/bdd/#method_change
      * @see https://on.cypress.io/assertions
      */
@@ -2078,9 +2062,9 @@ declare namespace Cypress {
     /**
      * When two arguments are provided, `.change` asserts that the value of the given object `subject`'s `prop` property is different before invoking the target function compared to afterward.
      * @example
-     * const myObj = { dots: '' }
-     * function addDot() { myObj.dots += '.' }
-     * cy.wrap(() => {}).should('not.change', myObj, 'dots')
+     *    const myObj = { dots: '' }
+     *    function addDot() { myObj.dots += '.' }
+     *    cy.wrap(() => {}).should('not.change', myObj, 'dots')
      * @see http://chaijs.com/api/bdd/#method_change
      * @see https://on.cypress.io/assertions
      */
@@ -2088,7 +2072,7 @@ declare namespace Cypress {
     /**
      * When the target is a string, `.include` asserts that the given string val is a substring of the target.
      * @example
-     * cy.wrap('tester').should('not.contain', 'foo')
+     *    cy.wrap('tester').should('not.contain', 'foo')
      * @alias include
      * @see http://chaijs.com/api/bdd/#method_include
      * @see https://on.cypress.io/assertions
@@ -2098,10 +2082,10 @@ declare namespace Cypress {
      * When one argument is provided, `.decrease` asserts that the given function `subject` does not returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
      * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
-     * let val = 1
-     * function subtractTwo() { val -= 2 }
-     * function getVal() { return val }
-     * cy.wrap(() => {}).should('not.decrease', getVal)
+     *    let val = 1
+     *    function subtractTwo() { val -= 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(() => {}).should('not.decrease', getVal)
      * @see http://chaijs.com/api/bdd/#method_decrease
      * @see https://on.cypress.io/assertions
      */
@@ -2109,9 +2093,9 @@ declare namespace Cypress {
     /**
      * When two arguments are provided, `.decrease` asserts that the value of the given object `subject`'s `prop` property is not lesser after invoking the target function compared to beforehand.
      * @example
-     * const myObj = { val: 1 }
-     * function subtractTwo() { myObj.val -= 2 }
-     * cy.wrap(() => {}).should('not.decrease', myObj, 'val')
+     *    const myObj = { val: 1 }
+     *    function subtractTwo() { myObj.val -= 2 }
+     *    cy.wrap(() => {}).should('not.decrease', myObj, 'val')
      * @see http://chaijs.com/api/bdd/#method_decrease
      * @see https://on.cypress.io/assertions
      */
@@ -2119,7 +2103,7 @@ declare namespace Cypress {
     /**
      * Causes all `.equal`, `.include`, `.members`, `.keys`, and `.property` assertions that follow in the chain to not use deep equality instead of strict (`===`) equality. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
-     * cy.wrap({ a: 1 }).should('not.deep.equal', { b: 1 })
+     *    cy.wrap({ a: 1 }).should('not.deep.equal', { b: 1 })
      * @see http://chaijs.com/api/bdd/#method_deep
      * @see https://on.cypress.io/assertions
      */
@@ -2127,7 +2111,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     * cy.wrap(null).should('not.exist')
+     *    cy.wrap(null).should('not.exist')
      * @see http://chaijs.com/api/bdd/#method_exist
      * @see https://on.cypress.io/assertions
      */
@@ -2135,7 +2119,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not strictly (`===`) equal to the given `val`.
      * @example
-     * cy.wrap(1).should('not.eq', 2)
+     *    cy.wrap(1).should('not.eq', 2)
      * @alias equal
      * @see http://chaijs.com/api/bdd/#method_equal
      * @see https://on.cypress.io/assertions
@@ -2144,7 +2128,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not deeply equal to the given `obj`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
-     * cy.wrap({a: 1}).should('not.eql', {c: 1}).and('not.equal', {a: 1})
+     *    cy.wrap({a: 1}).should('not.eql', {c: 1}).and('not.equal', {a: 1})
      * @see http://chaijs.com/api/bdd/#method_eql
      * @see https://on.cypress.io/assertions
      */
@@ -2152,7 +2136,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target is not strictly (`===`) equal to the given `val`.
      * @example
-     * cy.wrap(1).should('not.equal', 2)
+     *    cy.wrap(1).should('not.equal', 2)
      * @see http://chaijs.com/api/bdd/#method_equal
      * @see https://on.cypress.io/assertions
      */
@@ -2160,7 +2144,7 @@ declare namespace Cypress {
     /**
      * Causes all `.keys` assertions that follow in the chain to not require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
      * @example
-     * cy.wrap({ a: 1, b: 2 }).should('not.have.all.keys', 'c', 'd')
+     *    cy.wrap({ a: 1, b: 2 }).should('not.have.all.keys', 'c', 'd')
      * @see http://chaijs.com/api/bdd/#method_all
      * @see https://on.cypress.io/assertions
      */
@@ -2168,7 +2152,7 @@ declare namespace Cypress {
     /**
      * Causes all `.keys` assertions that follow in the chain to only require that the target not have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
      * @example
-     * cy.wrap({ a: 1, b: 2 }).should('not.have.any.keys', 'c')
+     *    cy.wrap({ a: 1, b: 2 }).should('not.have.any.keys', 'c')
      * @see http://chaijs.com/api/bdd/#method_any
      * @see https://on.cypress.io/assertions
      */
@@ -2176,7 +2160,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target does not have a property with the given key `name`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
-     * cy.wrap({ x: {a: 1 }}).should('not.have.deep.property', 'y', { a: 1 })
+     *    cy.wrap({ x: {a: 1 }}).should('not.have.deep.property', 'y', { a: 1 })
      * @see http://chaijs.com/api/bdd/#method_property
      * @see https://on.cypress.io/assertions
      */
@@ -2184,7 +2168,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is not equal to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.have.length', 2)
+     *    cy.wrap([1, 2, 3]).should('not.have.length', 2)
      * cy.wrap('foo').should('not.have.length', 2)
      * @alias lengthOf
      * @see http://chaijs.com/api/bdd/#method_lengthof
@@ -2194,8 +2178,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is not greater than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.have.length.greaterThan', 4)
-     * cy.wrap('foo').should('not.have.length.greaterThan', 4)
+     *    cy.wrap([1, 2, 3]).should('not.have.length.greaterThan', 4)
+     *    cy.wrap('foo').should('not.have.length.greaterThan', 4)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -2203,8 +2187,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is not greater than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.have.length.gt', 4)
-     * cy.wrap('foo').should('not.have.length.gt', 4)
+     *    cy.wrap([1, 2, 3]).should('not.have.length.gt', 4)
+     *    cy.wrap('foo').should('not.have.length.gt', 4)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -2212,8 +2196,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is not greater than or equal to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.have.length.gte', 4)
-     * cy.wrap('foo').should('not.have.length.gte', 4)
+     *    cy.wrap([1, 2, 3]).should('not.have.length.gte', 4)
+     *    cy.wrap('foo').should('not.have.length.gte', 4)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -2221,8 +2205,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is less than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('have.length.lessThan', 2)
-     * cy.wrap('foo').should('have.length.lessThan', 2)
+     *    cy.wrap([1, 2, 3]).should('have.length.lessThan', 2)
+     *    cy.wrap('foo').should('have.length.lessThan', 2)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -2230,8 +2214,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is not less than to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.have.length.lt', 2)
-     * cy.wrap('foo').should('not.have.length.lt', 2)
+     *    cy.wrap([1, 2, 3]).should('not.have.length.lt', 2)
+     *    cy.wrap('foo').should('not.have.length.lt', 2)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -2239,8 +2223,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is not less than or equal to the given number `n`.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.have.length.let', 2)
-     * cy.wrap('foo').should('not.have.length.lte', 2)
+     *    cy.wrap([1, 2, 3]).should('not.have.length.let', 2)
+     *    cy.wrap('foo').should('not.have.length.lte', 2)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
@@ -2248,7 +2232,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target array does not have the same members as the given array `set`.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.have.members', [4, 5, 6])
+     *    cy.wrap([1, 2, 3]).should('not.have.members', [4, 5, 6])
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
@@ -2256,7 +2240,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target array does not have the same members as the given array where order matters.
      * @example
-     * cy.wrap([1, 2, 3]).should('not. have.ordered.members', [4, 5, 6])
+     *    cy.wrap([1, 2, 3]).should('not. have.ordered.members', [4, 5, 6])
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
@@ -2264,8 +2248,8 @@ declare namespace Cypress {
     /**
      * Causes all `.property` and `.include` assertions that follow in the chain to ignore inherited properties.
      * @example
-     * Object.prototype.b = 2
-     * cy.wrap({ a: 1 }).should('have.property', 'a').and('not.have.ownProperty', 'b')
+     *    Object.prototype.b = 2
+     *    cy.wrap({ a: 1 }).should('have.property', 'a').and('not.have.ownProperty', 'b')
      * @see http://chaijs.com/api/bdd/#method_ownproperty
      * @see https://on.cypress.io/assertions
      */
@@ -2273,8 +2257,8 @@ declare namespace Cypress {
     /**
      * Asserts that the target has a property with the given key `name`.
      * @example
-     * cy.wrap({ a: 1 }).should('not.have.property', 'b')
-     * cy.wrap({ a: 1 }).should('not.have.property', 'b', 1)
+     *    cy.wrap({ a: 1 }).should('not.have.property', 'b')
+     *    cy.wrap({ a: 1 }).should('not.have.property', 'b', 1)
      * @see http://chaijs.com/api/bdd/#method_property
      * @see https://on.cypress.io/assertions
      */
@@ -2282,7 +2266,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target string does not contains the given substring `str`.
      * @example
-     * cy.wrap('foobar').should('not.have.string', 'baz')
+     *    cy.wrap('foobar').should('not.have.string', 'baz')
      * @see http://chaijs.com/api/bdd/#method_string
      * @see https://on.cypress.io/assertions
      */
@@ -2290,7 +2274,7 @@ declare namespace Cypress {
     /**
      * When the target is a string, `.include` asserts that the given string `val` is not a substring of the target.
      * @example
-     * cy.wrap('foobar').should('not.include', 'baz')
+     *    cy.wrap('foobar').should('not.include', 'baz')
      * @see http://chaijs.com/api/bdd/#method_include
      * @see https://on.cypress.io/assertions
      */
@@ -2298,7 +2282,7 @@ declare namespace Cypress {
     /**
      * When the target is a string, `.include` asserts that the given string `val` is not a substring of the target.
      * @example
-     * cy.wrap([1, 2, 3]).should('not.include.members', [4, 5])
+     *    cy.wrap([1, 2, 3]).should('not.include.members', [4, 5])
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
@@ -2309,10 +2293,10 @@ declare namespace Cypress {
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
      * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      * @example
-     * let val = 1
-     * function addTwo() { val += 2 }
-     * function getVal() { return val }
-     * cy.wrap(() => {}).should('not.increase', getVal)
+     *    let val = 1
+     *    function addTwo() { val += 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(() => {}).should('not.increase', getVal)
      * @see http://chaijs.com/api/bdd/#method_increase
      * @see https://on.cypress.io/assertions
      */
@@ -2320,7 +2304,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target does not match the given regular expression `re`.
      * @example
-     * cy.wrap('foobar').should('not.match', /baz$/)
+     *    cy.wrap('foobar').should('not.match', /baz$/)
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
@@ -2328,10 +2312,10 @@ declare namespace Cypress {
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target does not have a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example
-     * class Cat {
-     *   meow() {}
-     * }
-     * cy.wrap(new Cat()).should('not.respondTo', 'bark')
+     *    class Cat {
+     *      meow() {}
+     *    }
+     *    cy.wrap(new Cat()).should('not.respondTo', 'bark')
      * @see http://chaijs.com/api/bdd/#method_respondto
      * @see https://on.cypress.io/assertions
      */
@@ -2339,7 +2323,7 @@ declare namespace Cypress {
     /**
      * Invokes the given `matcher` function with the target being passed as the first argument, and asserts that the value returned is falsy.
      * @example
-     * cy.wrap(1).should('not.satisfy', (num) => num < 0)
+     *    cy.wrap(1).should('not.satisfy', (num) => num < 0)
      * @see http://chaijs.com/api/bdd/#method_satisfy
      * @see https://on.cypress.io/assertions
      */
@@ -2348,10 +2332,10 @@ declare namespace Cypress {
      * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
      * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
      * @example
-     * function badFn() { console.log('Illegal salmon!') }
-     * cy.wrap(badFn).should('not.throw')
-     * cy.wrap(badFn).should('not.throw', 'salmon')
-     * cy.wrap(badFn).should('not.throw', /salmon/)
+     *    function badFn() { console.log('Illegal salmon!') }
+     *    cy.wrap(badFn).should('not.throw')
+     *    cy.wrap(badFn).should('not.throw', 'salmon')
+     *    cy.wrap(badFn).should('not.throw', /salmon/)
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
@@ -2360,10 +2344,10 @@ declare namespace Cypress {
      * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
      * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
      * @example
-     * function badFn() { console.log('Illegal salmon!') }
-     * cy.wrap(badFn).should('not.throw')
-     * cy.wrap(badFn).should('not.throw', 'salmon')
-     * cy.wrap(badFn).should('not.throw', /salmon/)
+     *    function badFn() { console.log('Illegal salmon!') }
+     *    cy.wrap(badFn).should('not.throw')
+     *    cy.wrap(badFn).should('not.throw', 'salmon')
+     *    cy.wrap(badFn).should('not.throw', /salmon/)
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
@@ -2586,7 +2570,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is checked, using `.is(':checked')`.
      * @example
-     * cy.get('#result').should('be.checked')
+     *    cy.get('#result').should('be.checked')
      * @see http://chaijs.com/plugins/chai-jquery/#checked
      * @see https://on.cypress.io/assertions
      */
@@ -2594,7 +2578,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is disabled, using `.is(':disabled')`.
      * @example
-     * cy.get('#result').should('be.disabled')
+     *    cy.get('#result').should('be.disabled')
      * @see http://chaijs.com/plugins/chai-jquery/#disabled
      * @see https://on.cypress.io/assertions
      */
@@ -2602,7 +2586,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is empty, using `.is(':empty')`. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
-     * cy.get('#result').should('be.empty')
+     *    cy.get('#result').should('be.empty')
      * @see http://chaijs.com/plugins/chai-jquery/#empty
      * @see https://on.cypress.io/assertions
      */
@@ -2610,7 +2594,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is enabled, using `.is(':enabled')`.
      * @example
-     * cy.get('#result').should('be.enabled')
+     *    cy.get('#result').should('be.enabled')
      * @see http://chaijs.com/plugins/chai-jquery/#enabled
      * @see https://on.cypress.io/assertions
      */
@@ -2618,7 +2602,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is hidden, using `.is(':hidden')`.
      * @example
-     * cy.get('#result').should('be.hidden')
+     *    cy.get('#result').should('be.hidden')
      * @see http://chaijs.com/plugins/chai-jquery/#hidden
      * @see https://on.cypress.io/assertions
      */
@@ -2626,7 +2610,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is selected, using `.is(':selected')`.
      * @example
-     * cy.get('#result').should('be.selected')
+     *    cy.get('#result').should('be.selected')
      * @see http://chaijs.com/plugins/chai-jquery/#selected
      * @see https://on.cypress.io/assertions
      */
@@ -2634,7 +2618,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is visible, using `.is(':visible')`.
      * @example
-     * cy.get('#result').should('be.visible')
+     *    cy.get('#result').should('be.visible')
      * @see http://chaijs.com/plugins/chai-jquery/#visible
      * @see https://on.cypress.io/assertions
      */
@@ -2642,7 +2626,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection contains the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
      * @example
-     * cy.get('#result').should('contain', 'text')
+     *    cy.get('#result').should('contain', 'text')
      * @see http://chaijs.com/plugins/chai-jquery/#containtext
      * @see https://on.cypress.io/assertions
      */
@@ -2650,7 +2634,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection is not empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
-     * cy.get('#result').should('exist')
+     *    cy.get('#result').should('exist')
      * @see http://chaijs.com/plugins/chai-jquery/#exist
      * @see https://on.cypress.io/assertions
      */
@@ -2658,8 +2642,8 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection has the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('have.attr', 'role')
-     * cy.get('#result').should('have.attr', 'role', 'menu')
+     *    cy.get('#result').should('have.attr', 'role')
+     *    cy.get('#result').should('have.attr', 'role', 'menu')
      * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2667,7 +2651,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection has the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('have.class', 'success')
+     *    cy.get('#result').should('have.class', 'success')
      * @see http://chaijs.com/plugins/chai-jquery/#classclassname
      * @see https://on.cypress.io/assertions
      */
@@ -2675,7 +2659,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection has the given CSS property, using `.css()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('have.css', 'display', 'none')
+     *    cy.get('#result').should('have.css', 'display', 'none')
      * @see http://chaijs.com/plugins/chai-jquery/#cssname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2683,7 +2667,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection has the given data value, using `.data()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('have.data', 'foo', 'bar')
+     *    cy.get('#result').should('have.data', 'foo', 'bar')
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2691,7 +2675,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection contains at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
-     * cy.get('#result').should('have.descendants', 'h1')
+     *    cy.get('#result').should('have.descendants', 'h1')
      * @see http://chaijs.com/plugins/chai-jquery/#descendantsselector
      * @see https://on.cypress.io/assertions
      */
@@ -2699,7 +2683,7 @@ declare namespace Cypress {
     /**
      * Assert that the html of the first element of the selection is equal to the given html, using `.html()`.
      * @example
-     * cy.get('#result').should('have.html', '<em>John Doe</em>')
+     *    cy.get('#result').should('have.html', '<em>John Doe</em>')
      * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
      * @see https://on.cypress.io/assertions
      */
@@ -2707,7 +2691,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection has the given id, using `.attr('id')`.
      * @example
-     * cy.get('#result').should('have.id', 'result')
+     *    cy.get('#result').should('have.id', 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
@@ -2715,8 +2699,8 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection has the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('have.prop', 'disabled')
-     * cy.get('#result').should('have.prop', 'disabled', false)
+     *    cy.get('#result').should('have.prop', 'disabled')
+     *    cy.get('#result').should('have.prop', 'disabled', false)
      * @see http://chaijs.com/plugins/chai-jquery/#propname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2724,7 +2708,7 @@ declare namespace Cypress {
     /**
      * Assert that the text of the first element of the selection is equal to the given text, using `.text()`.
      * @example
-     * cy.get('#result').should('have.text', 'John Doe')
+     *    cy.get('#result').should('have.text', 'John Doe')
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
@@ -2732,7 +2716,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection has the given value, using `.val()`.
      * @example
-     * cy.get('textarea').should('have.value', 'foo bar baz')
+     *    cy.get('textarea').should('have.value', 'foo bar baz')
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
@@ -2740,7 +2724,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection matches a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
-     * cy.get('#result').should('match', ':empty')
+     *    cy.get('#result').should('match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
@@ -2750,7 +2734,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is not checked, using `.is(':checked')`.
      * @example
-     * cy.get('#result').should('not.be.checked')
+     *    cy.get('#result').should('not.be.checked')
      * @see http://chaijs.com/plugins/chai-jquery/#checked
      * @see https://on.cypress.io/assertions
      */
@@ -2758,7 +2742,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is not disabled, using `.is(':disabled')`.
      * @example
-     * cy.get('#result').should('not.be.disabled')
+     *    cy.get('#result').should('not.be.disabled')
      * @see http://chaijs.com/plugins/chai-jquery/#disabled
      * @see https://on.cypress.io/assertions
      */
@@ -2766,7 +2750,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is not empty, using `.is(':empty')`. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
-     * cy.get('#result').should('not.be.empty')
+     *    cy.get('#result').should('not.be.empty')
      * @see http://chaijs.com/plugins/chai-jquery/#empty
      * @see https://on.cypress.io/assertions
      */
@@ -2774,7 +2758,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is not enabled, using `.is(':enabled')`.
      * @example
-     * cy.get('#result').should('not.be.enabled')
+     *    cy.get('#result').should('not.be.enabled')
      * @see http://chaijs.com/plugins/chai-jquery/#enabled
      * @see https://on.cypress.io/assertions
      */
@@ -2782,7 +2766,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is not hidden, using `.is(':hidden')`.
      * @example
-     * cy.get('#result').should('not.be.hidden')
+     *    cy.get('#result').should('not.be.hidden')
      * @see http://chaijs.com/plugins/chai-jquery/#hidden
      * @see https://on.cypress.io/assertions
      */
@@ -2790,7 +2774,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is not selected, using `.is(':selected')`.
      * @example
-     * cy.get('#result').should('not.be.selected')
+     *    cy.get('#result').should('not.be.selected')
      * @see http://chaijs.com/plugins/chai-jquery/#selected
      * @see https://on.cypress.io/assertions
      */
@@ -2798,7 +2782,7 @@ declare namespace Cypress {
     /**
      * Assert that at least one element of the selection is not visible, using `.is(':visible')`.
      * @example
-     * cy.get('#result').should('not.be.visible')
+     *    cy.get('#result').should('not.be.visible')
      * @see http://chaijs.com/plugins/chai-jquery/#visible
      * @see https://on.cypress.io/assertions
      */
@@ -2806,7 +2790,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection does not contain the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
      * @example
-     * cy.get('#result').should('not.contain', 'text')
+     *    cy.get('#result').should('not.contain', 'text')
      * @see http://chaijs.com/plugins/chai-jquery/#containtext
      * @see https://on.cypress.io/assertions
      */
@@ -2814,7 +2798,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection is empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
-     * cy.get('#result').should('not.exist')
+     *    cy.get('#result').should('not.exist')
      * @see http://chaijs.com/plugins/chai-jquery/#exist
      * @see https://on.cypress.io/assertions
      */
@@ -2822,8 +2806,8 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection does not have the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('not.have.attr', 'role')
-     * cy.get('#result').should('not.have.attr', 'role', 'menu')
+     *    cy.get('#result').should('not.have.attr', 'role')
+     *    cy.get('#result').should('not.have.attr', 'role', 'menu')
      * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2831,7 +2815,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection does not have the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('not.have.class', 'success')
+     *    cy.get('#result').should('not.have.class', 'success')
      * @see http://chaijs.com/plugins/chai-jquery/#classclassname
      * @see https://on.cypress.io/assertions
      */
@@ -2839,7 +2823,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection does not have the given CSS property, using `.css()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('not.have.css', 'display', 'none')
+     *    cy.get('#result').should('not.have.css', 'display', 'none')
      * @see http://chaijs.com/plugins/chai-jquery/#cssname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2847,7 +2831,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection does not have the given data value, using `.data()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('not.have.data', 'foo', 'bar')
+     *    cy.get('#result').should('not.have.data', 'foo', 'bar')
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2855,7 +2839,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection does not contain at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
-     * cy.get('#result').should('not.have.descendants', 'h1')
+     *    cy.get('#result').should('not.have.descendants', 'h1')
      * @see http://chaijs.com/plugins/chai-jquery/#descendantsselector
      * @see https://on.cypress.io/assertions
      */
@@ -2863,7 +2847,7 @@ declare namespace Cypress {
     /**
      * Assert that the html of the first element of the selection is not equal to the given html, using `.html()`.
      * @example
-     * cy.get('#result').should('not.have.html', '<em>John Doe</em>')
+     *    cy.get('#result').should('not.have.html', '<em>John Doe</em>')
      * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
      * @see https://on.cypress.io/assertions
      */
@@ -2871,7 +2855,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection does not have the given id, using `.attr('id')`.
      * @example
-     * cy.get('#result').should('not.have.id', 'result')
+     *    cy.get('#result').should('not.have.id', 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
@@ -2879,8 +2863,8 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection does not have the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
-     * cy.get('#result').should('not.have.prop', 'disabled')
-     * cy.get('#result').should('not.have.prop', 'disabled', false)
+     *    cy.get('#result').should('not.have.prop', 'disabled')
+     *    cy.get('#result').should('not.have.prop', 'disabled', false)
      * @see http://chaijs.com/plugins/chai-jquery/#propname-value
      * @see https://on.cypress.io/assertions
      */
@@ -2888,7 +2872,7 @@ declare namespace Cypress {
     /**
      * Assert that the text of the first element of the selection is not equal to the given text, using `.text()`.
      * @example
-     * cy.get('#result').should('not.have.text', 'John Doe')
+     *    cy.get('#result').should('not.have.text', 'John Doe')
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
@@ -2896,7 +2880,7 @@ declare namespace Cypress {
     /**
      * Assert that the first element of the selection does not have the given value, using `.val()`.
      * @example
-     * cy.get('textarea').should('not.have.value', 'foo bar baz')
+     *    cy.get('textarea').should('not.have.value', 'foo bar baz')
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
@@ -2904,7 +2888,7 @@ declare namespace Cypress {
     /**
      * Assert that the selection does not match a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
-     * cy.get('#result').should('not.match', ':empty')
+     *    cy.get('#result').should('not.match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
@@ -2923,28 +2907,28 @@ declare namespace Cypress {
      * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
      * Just be sure _not_ to include any code that has side effects in your callback function. The callback function will be retried over and over again until no assertions within it throw.
      * @example
-     * cy
-     *   .get('p')
-     *   .should(($p) => {
-     *     // should have found 3 elements
-     *     expect($p).to.have.length(3)
+     *    cy
+     *      .get('p')
+     *      .should(($p) => {
+     *        // should have found 3 elements
+     *        expect($p).to.have.length(3)
      *
-     *     // make sure the first contains some text content
-     *     expect($p.first()).to.contain('Hello World')
+     *        // make sure the first contains some text content
+     *        expect($p.first()).to.contain('Hello World')
      *
-     *     // use jquery's map to grab all of their classes
-     *     // jquery's map returns a new jquery object
-     *     const classes = $p.map((i, el) => {
-     *       return Cypress.$(el).attr('class')
-     *     })
+     *        // use jquery's map to grab all of their classes
+     *        // jquery's map returns a new jquery object
+     *        const classes = $p.map((i, el) => {
+     *          return Cypress.$(el).attr('class')
+     *        })
      *
-     *     // call classes.get() to make this a plain array
-     *     expect(classes.get()).to.deep.eq([
-     *       'text-primary',
-     *       'text-danger',
-     *       'text-default'
-     *     ])
-     *   })
+     *        // call classes.get() to make this a plain array
+     *        expect(classes.get()).to.deep.eq([
+     *          'text-primary',
+     *          'text-danger',
+     *          'text-default'
+     *        ])
+     *      })
      * @see https://on.cypress.io/should
      */
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
