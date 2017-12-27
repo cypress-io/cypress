@@ -50,9 +50,14 @@ const getPageHTML = options => {
     return options.html
   }
   const vue = getVuePath(options)
+
+  // note: add "base" tag to force loading static assets
+  // from the server, not from the "spec" file URL
   const vueHtml = stripIndent`
     <html>
-      <head></head>
+      <head>
+        <base href="/" />
+      </head>
       <body>
         <div id="app"></div>
         <script src="${vue}"></script>
