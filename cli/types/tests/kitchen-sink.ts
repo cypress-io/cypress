@@ -1468,3 +1468,10 @@ describe('Kitchen Sink', function() {
     })
   })
 })
+
+cy.wrap('foo').then(subject => {
+  subject // $ExpectType string
+  return cy.wrap(subject)
+}).then(subject => {
+  subject // $ExpectType string
+})

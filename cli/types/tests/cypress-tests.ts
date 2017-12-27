@@ -135,6 +135,8 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
     })
   })
 
+  cy.get('something').should('have.length', 1)
+
 cy.stub().withArgs('').log(false).as('foo')
 
 cy.spy().withArgs('').log(false).as('foo')
