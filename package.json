@@ -49,7 +49,7 @@
   },
   "scripts": {
     "ban": "ban",
-    "deps": "deps-ok && dependency-check --no-dev . --entry cypress/plugins/index.js",
+    "deps": "deps-ok && dependency-check --no-dev .",
     "issues": "git-issues",
     "license": "license-checker --production --onlyunknown --csv",
     "lint": "standard --verbose --fix src/*.js",
@@ -60,7 +60,7 @@
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "npm run cy:run",
     "unit": "mocha src/*-spec.js",
-    "unused-deps": "dependency-check --unused --no-dev .",
+    "unused-deps": "dependency-check --unused --no-dev . --entry cypress/plugins/index.js",
     "semantic-release": "semantic-action pre && npm publish && semantic-action post",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
