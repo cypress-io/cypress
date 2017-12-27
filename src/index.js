@@ -67,8 +67,6 @@ const mountVue = (component, options = {}) => () => {
     const vueHtml = getPageHTML(options)
     document.write(vueHtml)
     document.close()
-    console.log('wrote html')
-    console.log(vueHtml)
   })
   cy
     .window()
@@ -81,17 +79,3 @@ const mountVue = (component, options = {}) => () => {
 }
 
 module.exports = mountVue
-
-// export const loadAndMountMyComponent = VueComponent => () => {
-//   cy.visit('index.html')
-//   cy
-//     .window()
-//     .its('Vue')
-//     .then(Vue => {
-//       deleteCachedConstructors(VueComponent)
-//       // TODO go through ITS components and delete their constructors
-//       // wonder if there is unified list
-//       Cypress.vue = new Vue(VueComponent).$mount('#app')
-//       copyStyles(VueComponent)
-//     })
-// }

@@ -1,4 +1,8 @@
-const webpack = require('@cypress/webpack-preprocessor')
+// https://github.com/cypress-io/cypress-webpack-preprocessor
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+
+// Cypress webpack options or just require from
+// an existing webpack.config.js
 const webpackOptions = {
   module: {
     rules: [
@@ -11,12 +15,9 @@ const webpackOptions = {
 }
 
 const options = {
-  // send in the options from your webpack.config.js, so it works the same
-  // as your app's code
-  webpackOptions,
-  watchOptions: {}
+  webpackOptions
 }
 
 module.exports = on => {
-  on('file:preprocessor', webpack(options))
+  on('file:preprocessor', webpackPreprocessor(options))
 }
