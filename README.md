@@ -466,6 +466,12 @@ describe('Hello.vue', () => {
 })
 ```
 
+## Related info
+
+- [Testing Vue web applications with Vuex data store & REST backend](https://www.cypress.io/blog/2017/11/28/testing-vue-web-application-with-vuex-data-store-and-rest-backend/)
+- [Why Cypress?](https://on.cypress.io/why-cypress)
+- [Cypress API](https://on.cypress.io/api)
+
 ### Small print
 
 Author: Gleb Bahmutov &lt;gleb.bahmutov@gmail.com&gt; &copy; 2017
