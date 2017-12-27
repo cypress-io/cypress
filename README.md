@@ -5,7 +5,7 @@
 [![NPM][npm-icon] ][npm-url]
 
 [![Build status][ci-image] ][ci-url]
-[![Cypress dashboard][cypress-dashboard] ][cypress-badge]
+[![Cypress dashboard][cypress-badge] ][cypress-dashboard]
 [![semantic-release][semantic-image] ][semantic-url]
 [![js-standard-style][standard-image]][standard-url]
 
