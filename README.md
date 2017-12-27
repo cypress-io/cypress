@@ -56,6 +56,17 @@ const options = {
 beforeEach(mountVue(/* my Vue code */, options))
 ```
 
+* `base` - specify `<base href=...>` path. Useful to get static assets work,
+but might prevent relative HTTP references from working (like path to Vue.js
+from `../../node_modules/vue/dist/vue.js` for example)
+
+```js
+const options = {
+  base: '/'
+}
+beforeEach(mountVue(/* my Vue code */, options))
+```
+
 * `html` - custom test HTML to inject instead of default one. Good
 place to load additional libraries, polyfills and styles.
 
@@ -465,6 +476,11 @@ describe('Hello.vue', () => {
   })
 })
 ```
+
+## FAQ
+
+- If your component's static assets are not loading, you probably need
+to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmutov/cypress-vue-unit-test/issues/4)
 
 ## Related info
 

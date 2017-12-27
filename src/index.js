@@ -53,11 +53,34 @@ const getPageHTML = options => {
 
   // note: add "base" tag to force loading static assets
   // from the server, not from the "spec" file URL
+  if (options.base) {
+    if (vue.startsWith('.')) {
+      console.error(
+        'You are using base tag %s and relative Vue path %s',
+        options.base,
+        vue
+      )
+      console.error('the relative path might NOT work')
+      console.error(
+        'maybe pass Vue url using "https://unpkg.com/vue/dist/vue.js"'
+      )
+    }
+    return stripIndent`
+      <html>
+        <head>
+          <base href="${options.base}" />
+        </head>
+        <body>
+          <div id="app"></div>
+          <script src="${vue}"></script>
+        </body>
+      </html>
+    `
+  }
+
   const vueHtml = stripIndent`
     <html>
-      <head>
-        <base href="/" />
-      </head>
+      <head></head>
       <body>
         <div id="app"></div>
         <script src="${vue}"></script>

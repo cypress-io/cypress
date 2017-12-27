@@ -45,3 +45,21 @@ describe('Pass window HTML to use', () => {
     cy.window().its('Vue.version').should('be.a', 'string')
   })
 })
+
+describe('Pass Vue.js url and base tag', () => {
+  const options = {
+    vue: 'https://unpkg.com/vue',
+    base: '/'
+  }
+
+  const component = { template, data }
+  beforeEach(mountVue(component, options))
+
+  it('shows hello', () => {
+    cy.contains('Hello Vue!')
+  })
+
+  it('has version', () => {
+    cy.window().its('Vue.version').should('be.a', 'string')
+  })
+})
