@@ -5,6 +5,7 @@
 [![NPM][npm-icon] ][npm-url]
 
 [![Build status][ci-image] ][ci-url]
+[![Cypress dashboard][cypress-dashboard] ][cypress-badge]
 [![semantic-release][semantic-image] ][semantic-url]
 [![js-standard-style][standard-image]][standard-url]
 
@@ -511,3 +512,5 @@ OTHER DEALINGS IN THE SOFTWARE.
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
 [standard-url]: http://standardjs.com/
+[cypress-badge]: https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
+[cypress-dashboard]: https://dashboard.cypress.io/#/projects/134ej7
