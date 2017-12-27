@@ -30,6 +30,7 @@
   },
   "files": [
     "src/*.js",
+    "preprocessor/*.js",
     "!src/*-spec.js"
   ],
   "homepage": "https://github.com/bahmutov/cypress-vue-unit-test#readme",
@@ -52,10 +53,10 @@
     "deps": "deps-ok && dependency-check --no-dev .",
     "issues": "git-issues",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "standard --verbose --fix src/*.js",
+    "lint": "standard --verbose --fix src/*.js preprocessor/*.js",
     "prelint": "npm run pretty",
     "pretest": "npm run lint",
-    "pretty": "prettier-standard 'src/*.js'",
+    "pretty": "prettier-standard 'src/*.js' 'preprocessor/*.js'",
     "secure": "nsp check",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "npm run cy:run",

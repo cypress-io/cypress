@@ -4,7 +4,7 @@ const { stripIndent } = require('common-tags')
 // and "losing" styles when the next test starts
 const stylesCache = new Map()
 
-function copyStyles (component) {
+const copyStyles = component => {
   let styles
   if (stylesCache.has(component)) {
     styles = stylesCache.get(component)
@@ -35,7 +35,7 @@ function copyStyles (component) {
 
 const deleteConstructor = comp => delete comp._Ctor
 
-function deleteCachedConstructors (component) {
+const deleteCachedConstructors = component => {
   if (!component.components) {
     return
   }
@@ -68,6 +68,7 @@ const mountVue = (component, options = {}) => () => {
     document.write(vueHtml)
     document.close()
   })
+
   cy
     .window()
     .its('Vue')

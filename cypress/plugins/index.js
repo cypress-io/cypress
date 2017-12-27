@@ -1,23 +1,17 @@
-// https://github.com/cypress-io/cypress-webpack-preprocessor
-const webpackPreprocessor = require('@cypress/webpack-preprocessor')
-
-// Cypress webpack options or just require from
-// an existing webpack.config.js
-const webpackOptions = {
-  module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader'
-      }
-    ]
-  }
-}
-
-const options = {
-  webpackOptions
-}
+// default webpack file preprocessor is good for simple cases
+const { onFileDefaultPreprocessor } = require('../../preprocessor/webpack')
 
 module.exports = on => {
-  on('file:preprocessor', webpackPreprocessor(options))
+  on('file:preprocessor', onFileDefaultPreprocessor)
 }
+
+/*
+  for more complex cases, when the project already includes webpack.config.js
+
+  const {
+    onFilePreprocessor
+  } = require('cypress-vue-unit-test/preprocessor/webpack')
+  module.exports = on => {
+    on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
+  }
+*/

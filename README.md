@@ -289,58 +289,8 @@ p {
 </style>
 ```
 
-How do we load this Vue file into the testing code? Using [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor#readme) and [vue-loader](https://github.com/vuejs/vue-loader).
-You can use [cypress/plugins/index.js](cypress/plugins/index.js) to load `.vue` files
-using `vue-loader`.
-
-```js
-// cypress/plugins/index.js
-const webpack = require('@cypress/webpack-preprocessor')
-const webpackOptions = {
-  module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader'
-      }
-    ]
-  }
-}
-
-const options = {
-  // send in the options from your webpack.config.js, so it works the same
-  // as your app's code
-  webpackOptions,
-  watchOptions: {}
-}
-
-module.exports = on => {
-  on('file:preprocessor', webpack(options))
-}
-```
-
-Install dev dependencies
-
-```shell
-npm i -D @cypress/webpack-preprocessor \
-  vue-loader vue-template-compiler css-loader
-```
-
-And write a test
-
-```js
-import Hello from '../../components/Hello.vue'
-const mountVue = require('cypress-vue-unit-test')
-
-/* eslint-env mocha */
-describe('Hello.vue', () => {
-  beforeEach(mountVue(Hello))
-
-  it('shows hello', () => {
-    cy.contains('Hello World!')
-  })
-})
-```
+**note** to learn how to load Vue component files in Cypress, see
+[Bundling](#bundling) section.
 
 Do you want to interact with the component? Go ahead! Do you want
 to have multiple components? No problem!
@@ -437,6 +387,83 @@ and is emitting an event.
 ![Spying test](images/spy-spec.png)
 
 [cypress.io]: https://www.cypress.io/
+
+## Bundling
+
+How do we load this Vue file into the testing code? Using webpack preprocessor.
+
+### Short way
+
+Your project probably already has `webpack.config.js` setup to transpile
+`.vue` files. To load these files in the Cypress tests, grab the webpack
+processor included in this module, and load it from the `cypress/plugins/index.js`
+file.
+
+```js
+const {
+  onFilePreprocessor
+} = require('cypress-vue-unit-test/preprocessor/webpack')
+module.exports = on => {
+  on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
+}
+```
+
+Cypress should be able to import `.vue` files in the tests
+
+### Manual
+
+Using [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor#readme) and [vue-loader](https://github.com/vuejs/vue-loader).
+You can use [cypress/plugins/index.js](cypress/plugins/index.js) to load `.vue` files
+using `vue-loader`.
+
+```js
+// cypress/plugins/index.js
+const webpack = require('@cypress/webpack-preprocessor')
+const webpackOptions = {
+  module: {
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      }
+    ]
+  }
+}
+
+const options = {
+  // send in the options from your webpack.config.js, so it works the same
+  // as your app's code
+  webpackOptions,
+  watchOptions: {}
+}
+
+module.exports = on => {
+  on('file:preprocessor', webpack(options))
+}
+```
+
+Install dev dependencies
+
+```shell
+npm i -D @cypress/webpack-preprocessor \
+  vue-loader vue-template-compiler css-loader
+```
+
+And write a test
+
+```js
+import Hello from '../../components/Hello.vue'
+const mountVue = require('cypress-vue-unit-test')
+
+/* eslint-env mocha */
+describe('Hello.vue', () => {
+  beforeEach(mountVue(Hello))
+
+  it('shows hello', () => {
+    cy.contains('Hello World!')
+  })
+})
+```
 
 ### Small print
 
