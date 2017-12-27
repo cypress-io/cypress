@@ -93,5 +93,8 @@
       "Cypress",
       "cy"
     ]
+  },
+  "dependencies": {
+    "common-tags": "1.6.0"
   }
 }

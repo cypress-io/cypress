@@ -1,4 +1,4 @@
-/* global Cypress, cy */
+const { stripIndent } = require('common-tags')
 
 // having weak reference to styles prevents garbage collection
 // and "losing" styles when the next test starts
@@ -42,20 +42,33 @@ function deleteCachedConstructors (component) {
   Cypress._.values(component.components).forEach(deleteConstructor)
 }
 
-const vueHtml = `
-<html>
-<head></head>
-<body>
-  <script src="../node_modules/vue/dist/vue.js"></script>
-  <div id="app"></div>
-</body>
-</html>
-`
+const getVuePath = options =>
+  options.vue || options.vuePath || '../node_modules/vue/dist/vue.js'
 
-const mountVue = component => () => {
+const getPageHTML = options => {
+  if (options.html) {
+    return options.html
+  }
+  const vue = getVuePath(options)
+  const vueHtml = stripIndent`
+    <html>
+      <head></head>
+      <body>
+        <div id="app"></div>
+        <script src="${vue}"></script>
+      </body>
+    </html>
+  `
+  return vueHtml
+}
+
+const mountVue = (component, options = {}) => () => {
   cy.document().then(document => {
+    const vueHtml = getPageHTML(options)
     document.write(vueHtml)
     document.close()
+    console.log('wrote html')
+    console.log(vueHtml)
   })
   cy
     .window()

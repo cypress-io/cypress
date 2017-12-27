@@ -24,6 +24,48 @@ npm install --save-dev cypress-vue-unit-test
 
 ## Use
 
+Before each test, inject your component to test
+
+```js
+const mountVue = require('cypress-vue-unit-test')
+describe('My Vue', () => {
+  beforeEach(mountVue(/* my Vue code */, /* options */))
+  it('renders', () => {
+    // Any Cypress command
+    // Cypress.vue is the mounted component reference
+  })
+})
+```
+
+See examples below for details.
+
+### Options
+
+See [cypress/integration/options-spec.js](cypress/integration/options-spec.js)
+for examples of options.
+
+* `vue` - path or URL to the Vue library to load. By default, will
+try to load `../node_modules/vue/dist/vue.js`, but you can pass your
+own path or URL.
+
+```js
+const options = {
+  vue: 'https://unpkg.com/vue'
+}
+beforeEach(mountVue(/* my Vue code */, options))
+```
+
+* `html` - custom test HTML to inject instead of default one. Good
+place to load additional libraries, polyfills and styles.
+
+```js
+const vue = '../node_modules/vue/dist/vue.js'
+const options = {
+  html: `<div id="app"></div><script src="${vue}"></script>`
+}
+beforeEach(mountVue(/* my Vue code */, options))
+```
+
 ### The intro example
 
 Take a look at the first Vue v2 example:
