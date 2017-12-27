@@ -8,7 +8,8 @@ notifications:
 node_js:
   - '8'
 script:
-  - npm test -- --record
+  - npm run lint
+  - npm run cy:run -- --record
 after_success:
   - npm run semantic-release
 branches:
