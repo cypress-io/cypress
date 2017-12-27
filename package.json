@@ -66,20 +66,21 @@
     "cy:run": "cypress run"
   },
   "release": {
-    "analyzeCommits": "simple-commit-message"
+    "analyzeCommits": "simple-commit-message",
+    "generateNotes": "github-post-release"
   },
   "devDependencies": {
-    "@cypress/webpack-preprocessor": "1.1.1",
     "ban-sensitive-files": "1.9.2",
     "css-loader": "0.28.7",
     "cypress": "1.4.0",
     "dependency-check": "2.9.2",
     "deps-ok": "1.2.1",
     "git-issues": "1.3.1",
+    "github-post-release": "1.13.1",
     "license-checker": "15.0.0",
     "mocha": "4.0.1",
     "nsp": "3.1.0",
-    "pre-git": "3.16.0",
+    "pre-git": "3.17.0",
     "prettier-standard": "8.0.0",
     "semantic-action": "1.1.0",
     "simple-commit-message": "3.3.2",
@@ -95,6 +96,7 @@
     ]
   },
   "dependencies": {
+    "@cypress/webpack-preprocessor": "1.1.1",
     "common-tags": "1.6.0"
   }
 }
