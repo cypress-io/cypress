@@ -4,20 +4,20 @@ const withPackageCommits = require('./only-package-commits');
 const versionToGitTag = require('./version-to-git-tag');
 
 const {
-  filterCommits,
   mapNextReleaseVersion,
   mapLastReleaseVersionToLastReleaseGitTag,
   mapNextReleaseVersionToNextReleaseGitTag,
+  mapCommits,
 } = require('./options-transforms');
 
 async function generateNotes(pluginConf, options) {
   return releaseNotesGenerator(
     pluginConf,
     await pipeP(
-      filterCommits(withPackageCommits),
       mapLastReleaseVersionToLastReleaseGitTag(versionToGitTag),
       mapNextReleaseVersionToNextReleaseGitTag(versionToGitTag),
-      mapNextReleaseVersion(versionToGitTag)
+      mapNextReleaseVersion(versionToGitTag),
+      mapCommits(withPackageCommits)
     )(options)
   );
 }

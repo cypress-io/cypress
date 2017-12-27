@@ -1,7 +1,7 @@
 const { pipeP } = require('ramda');
 const commitAnalyzer = require('@semantic-release/commit-analyzer');
 const readPkg = require('read-pkg');
-const { filterCommits } = require('./options-transforms');
+const { mapCommits } = require('./options-transforms');
 const onlyPackageCommits = require('./only-package-commits');
 
 // Async version of Ramda's `tap`
@@ -26,7 +26,7 @@ async function analyzeCommits(pluginConf, options) {
   return commitAnalyzer(
     pluginConf,
     await pipeP(
-      filterCommits(onlyPackageCommits),
+      mapCommits(onlyPackageCommits),
       tapA(logFilteredCommitCount(logger))
     )(options)
   );
