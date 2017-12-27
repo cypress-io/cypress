@@ -49,7 +49,7 @@
   },
   "scripts": {
     "ban": "ban",
-    "deps": "deps-ok && dependency-check --no-dev .",
+    "deps": "deps-ok && dependency-check --no-dev . --entry cypress/plugins/index.js",
     "issues": "git-issues",
     "license": "license-checker --production --onlyunknown --csv",
     "lint": "standard --verbose --fix src/*.js",
