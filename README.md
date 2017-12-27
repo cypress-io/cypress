@@ -1,6 +1,6 @@
 # cypress-vue-unit-test
 
-> A little helper to unit test Vue components in the Cypress.io E2E test runner
+> A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner
 
 [![NPM][npm-icon] ][npm-url]
 
@@ -11,7 +11,7 @@
 
 ## TLDR
 
-* What is this? This package allows you to use Cypress test runner to unit test your Vue components with zero effort.
+* What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your Vue components with zero effort.
 
 * How is this different from [vue-test-utils](https://vue-test-utils.vuejs.org/en/)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/).
 
@@ -20,7 +20,7 @@
 Requires [Node](https://nodejs.org/en/) version 6 or above.
 
 ```sh
-npm install --save-dev cypress-vue-unit-test
+npm install --save-dev cypress cypress-vue-unit-test
 ```
 
 ## Use
