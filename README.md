@@ -13,7 +13,7 @@
 
 * What is this? This package allows you to use Cypress test runner to unit test your Vue components with zero effort.
 
-* How is this different from [vue-test-utils](https://vue-test-utils.vuejs.org/en/)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: live GUI, full API, screen recording, CI support, cross-platform.
+* How is this different from [vue-test-utils](https://vue-test-utils.vuejs.org/en/)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/).
 
 ## Install
 
