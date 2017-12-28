@@ -124,7 +124,7 @@ beforeEach(mountVue({}, { extensions }))
 ```
 
 See [Vue plugin docs](https://vuejs.org/v2/guide/plugins.html)
-and [plugin-spec.js](cypress/integrstion/plugin-spec.js)
+and [plugin-spec.js](cypress/integration/plugin-spec.js)
 
 * `mixin` (alias `mixins`) - list of global mixins
 
@@ -148,7 +148,7 @@ it('calls mixin "created" method', () => {
 ```
 
 See [Vue global mixin docs](https://vuejs.org/v2/guide/mixins.html#Global-Mixin)
-and [mixin-spec.js](cypress/integrstion/mixin-spec.js)
+and [mixin-spec.js](cypress/integration/mixin-spec.js)
 
 ### The intro example
 
