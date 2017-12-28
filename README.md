@@ -109,6 +109,23 @@ const extensions = {
 beforeEach(mountVue({ template, data }, { extensions }))
 ```
 
+See [Vue component docs](https://vuejs.org/v2/api/#Vue-component),
+[message-list-spec.js](cypress/integration/message-list-spec.js)
+
+* `use` - list of plugins
+
+```js
+const use = [MyPlugin]
+// extend Vue with plugins
+const extensions = {
+  use
+}
+beforeEach(mountVue({}, { extensions }))
+```
+
+See [Vue plugin docs](https://vuejs.org/v2/guide/plugins.html)
+and [plugin-spec.js](cypress/integrstion/plugin-spec.js)
+
 ### The intro example
 
 Take a look at the first Vue v2 example:

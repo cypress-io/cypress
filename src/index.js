@@ -99,6 +99,15 @@ const registerGlobalComponents = (Vue, options) => {
   }
 }
 
+const installPlugins = (Vue, options) => {
+  const plugins = Cypress._.get(options, 'extensions.use')
+  if (Cypress._.isArray(plugins)) {
+    plugins.forEach(plugin => {
+      Vue.use(plugin)
+    })
+  }
+}
+
 const mountVue = (component, options = {}) => () => {
   const vueHtml = getPageHTML(options)
   const document = cy.state('document')
@@ -111,6 +120,7 @@ const mountVue = (component, options = {}) => () => {
     .window({ log: false })
     .its('Vue')
     .then(Vue => {
+      installPlugins(Vue, options)
       registerGlobalComponents(Vue, options)
       deleteCachedConstructors(component)
       Cypress.vue = new Vue(component).$mount('#app')
