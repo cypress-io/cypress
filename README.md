@@ -110,9 +110,9 @@ beforeEach(mountVue({ template, data }, { extensions }))
 ```
 
 See [Vue component docs](https://vuejs.org/v2/api/#Vue-component),
-[message-list-spec.js](cypress/integration/message-list-spec.js)
+[global-components-spec.js](cypress/integration/global-components-spec.js)
 
-* `use` - list of plugins
+* `use` (alias `plugins`) - list of plugins
 
 ```js
 const use = [MyPlugin]
@@ -125,6 +125,30 @@ beforeEach(mountVue({}, { extensions }))
 
 See [Vue plugin docs](https://vuejs.org/v2/guide/plugins.html)
 and [plugin-spec.js](cypress/integrstion/plugin-spec.js)
+
+* `mixin` (alias `mixins`) - list of global mixins
+
+```js
+const MyMixin = {
+  // we have to use original Sinon to create a spy
+  // because we are outside a test function
+  // and cannot use "cy.spy"
+  created: Cypress.sinon.spy()
+}
+const mixin = [MyMixin]
+// extend Vue with mixins
+const extensions = {
+  mixin
+}
+beforeEach(mountVue({}, { extensions }))
+
+it('calls mixin "created" method', () => {
+  expect(MyMixin.created).to.have.been.calledOnce
+})
+```
+
+See [Vue global mixin docs](https://vuejs.org/v2/guide/mixins.html#Global-Mixin)
+and [mixin-spec.js](cypress/integrstion/mixin-spec.js)
 
 ### The intro example
 

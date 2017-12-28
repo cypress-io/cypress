@@ -100,10 +100,23 @@ const registerGlobalComponents = (Vue, options) => {
 }
 
 const installPlugins = (Vue, options) => {
-  const plugins = Cypress._.get(options, 'extensions.use')
+  const plugins =
+    Cypress._.get(options, 'extensions.use') ||
+    Cypress._.get(options, 'extensions.plugins')
   if (Cypress._.isArray(plugins)) {
     plugins.forEach(plugin => {
       Vue.use(plugin)
+    })
+  }
+}
+
+const installMixins = (Vue, options) => {
+  const mixins =
+    Cypress._.get(options, 'extensions.mixin') ||
+    Cypress._.get(options, 'extensions.mixins')
+  if (Cypress._.isArray(mixins)) {
+    mixins.forEach(mixin => {
+      Vue.mixin(mixin)
     })
   }
 }
@@ -120,6 +133,7 @@ const mountVue = (component, options = {}) => () => {
     .window({ log: false })
     .its('Vue')
     .then(Vue => {
+      installMixins(Vue, options)
       installPlugins(Vue, options)
       registerGlobalComponents(Vue, options)
       deleteCachedConstructors(component)
