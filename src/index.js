@@ -121,7 +121,25 @@ const installMixins = (Vue, options) => {
   }
 }
 
-const mountVue = (component, options = {}) => () => {
+const isOptionName = name =>
+  ['vue', 'html', 'vuePath', 'base', 'extensions'].includes(name)
+
+const isOptions = object => Object.keys(object).every(isOptionName)
+
+const isConstructor = object => object && object._compiled
+
+// the double function allows mounting a component quickly
+// beforeEach(mountVue(component, options))
+const mountVue = (component, optionsOrProps = {}) => () => {
+  let options = {}
+  let props = {}
+
+  if (isOptions(optionsOrProps)) {
+    options = optionsOrProps
+  } else {
+    props = optionsOrProps
+  }
+
   const vueHtml = getPageHTML(options)
   const document = cy.state('document')
   document.write(vueHtml)
@@ -129,7 +147,7 @@ const mountVue = (component, options = {}) => () => {
 
   // TODO: do not log out "its(Vue)" command
   // but it currently does not support it
-  cy
+  return cy
     .window({ log: false })
     .its('Vue')
     .then(Vue => {
@@ -137,8 +155,15 @@ const mountVue = (component, options = {}) => () => {
       installPlugins(Vue, options)
       registerGlobalComponents(Vue, options)
       deleteCachedConstructors(component)
-      Cypress.vue = new Vue(component).$mount('#app')
-      copyStyles(component)
+
+      if (isConstructor(component)) {
+        const Cmp = Vue.extend(component)
+        Cypress.vue = new Cmp(props).$mount('#app')
+        copyStyles(Cmp)
+      } else {
+        Cypress.vue = new Vue(component).$mount('#app')
+        copyStyles(component)
+      }
     })
 }
 
