@@ -78,6 +78,37 @@ const options = {
 beforeEach(mountVue(/* my Vue code */, options))
 ```
 
+### Global Vue extensions
+
+You can pass extensions (global components, mixins, modules to use)
+when mounting Vue component. Use `{ extensions: { ... }}` object inside
+the `options`.
+
+* `components` - object of 'id' and components to register globally.
+
+```js
+// two different components, each gets "numbers" list
+// into its property "messages"
+const template = `
+  <div>
+    <message-list :messages="numbers"/>
+    <a-list :messages="numbers"/>
+  </div>
+`
+// our top level data
+const data = () => ({ numbers: ['uno', 'dos'] })
+// register same component globally under different names
+const components = {
+  'message-list': MessageList,
+  'a-list': MessageList
+}
+// extend Vue with global components
+const extensions = {
+  components
+}
+beforeEach(mountVue({ template, data }, { extensions }))
+```
+
 ### The intro example
 
 Take a look at the first Vue v2 example:

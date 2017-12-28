@@ -90,6 +90,15 @@ const getPageHTML = options => {
   return vueHtml
 }
 
+const registerGlobalComponents = (Vue, options) => {
+  const globalComponents = Cypress._.get(options, 'extensions.components')
+  if (Cypress._.isPlainObject(globalComponents)) {
+    Cypress._.forEach(globalComponents, (component, id) => {
+      Vue.component(id, component)
+    })
+  }
+}
+
 const mountVue = (component, options = {}) => () => {
   const vueHtml = getPageHTML(options)
   const document = cy.state('document')
@@ -102,6 +111,7 @@ const mountVue = (component, options = {}) => () => {
     .window({ log: false })
     .its('Vue')
     .then(Vue => {
+      registerGlobalComponents(Vue, options)
       deleteCachedConstructors(component)
       Cypress.vue = new Vue(component).$mount('#app')
       copyStyles(component)
