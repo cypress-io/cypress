@@ -12,7 +12,7 @@ import SnapshotControls from './snapshot-controls'
 import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
-import selectorHelperModel from '../selector-helper/selector-helper-model'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import windowUtil from '../lib/window-util'
 
 @observer
@@ -60,11 +60,11 @@ export default class Iframes extends Component {
     eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
 
     this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorHelper(selectorHelperModel.isEnabled)
+      this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
     }))
 
     this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorHighlight(selectorHelperModel.isShowingHighlight)
+      this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
     }))
 
     eventManager.start(this.props.config, specPath)

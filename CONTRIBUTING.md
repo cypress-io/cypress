@@ -180,6 +180,10 @@ option to see more details.
 
 This outputs a lot of debugging lines. To focus on an individual module run with `DEBUG=cypress:launcher` for instance.
 
+When running `npm start` this routes through the CLI and eventually calls `npm run dev` with the proper arguments. This enables Cypress day to day development to match the logic of the built binary + CLI integration.
+
+If you want to bypass the CLI entirely you can use the `npm run dev` task and pass arguments directly.
+
 #### Tasks
 
 Each package is responsible for building itself and testing itself and can do so using whatever tools are appropriate, but each conforms to a standard set of npm scripts so that building, watching, testing, etc. can be orchestrated from the root of this repo. Here are the npm scripts supported and what they mean:
@@ -309,7 +313,7 @@ They will outline development and test procedures. When in doubt just look at th
 Cypress documentation lives in separate repository with its own dependencies and build tools.
 See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
-## Commiting Code
+## Committing Code
 
 ### Branches
 

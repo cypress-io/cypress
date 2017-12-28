@@ -1,4 +1,5 @@
 exports['errors individual has the following errors 1'] = [
+  "nonZeroExitCodeXvfb",
   "missingXvfb",
   "missingApp",
   "missingDependency",

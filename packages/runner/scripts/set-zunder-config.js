@@ -16,9 +16,9 @@ module.exports = function setZunderConfig (zunder) {
         watch: ['src/**/*.scss', '../reporter/src/**/*.scss'],
         output: 'cypress_runner.css',
       },
-      'src/selector-helper/selector-helper.scss': {
-        watch: ['src/selector-helper/*.scss'],
-        output: 'cypress_selector_helper.css',
+      'src/selector-playground/selector-playground.scss': {
+        watch: ['src/selector-playground/*.scss'],
+        output: 'cypress_selector_playground.css',
       },
     },
   })

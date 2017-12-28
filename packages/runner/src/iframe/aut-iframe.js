@@ -6,12 +6,12 @@ import dom from '../lib/dom'
 import eventManager from '../lib/event-manager'
 import logger from '../lib/logger'
 import visitFailure from './visit-failure'
-import selectorHelperModel from '../selector-helper/selector-helper-model'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class AutIframe {
   constructor (config) {
     this.config = config
-    this.debouncedToggleSelectorHelper = _.debounce(this.toggleSelectorHelper, 300)
+    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create () {
@@ -81,7 +81,7 @@ export default class AutIframe {
     this._insertBodyStyles(body, bodyStyles)
     $html.append(body)
 
-    this.debouncedToggleSelectorHelper(selectorHelperModel.isEnabled)
+    this.debouncedToggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
   }
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
@@ -207,7 +207,7 @@ export default class AutIframe {
     this._contents() && this._contents().find('.__cypress-highlight').remove()
   }
 
-  toggleSelectorHelper = (isEnabled) => {
+  toggleSelectorPlayground = (isEnabled) => {
     const $body = this._body()
     if (!$body) return
 
@@ -228,7 +228,7 @@ export default class AutIframe {
   }
 
   _resetShowHighlight = () => {
-    selectorHelperModel.setShowingHighlight(false)
+    selectorPlaygroundModel.setShowingHighlight(false)
   }
 
   _onSelectorMouseMove = (e) => {
@@ -238,12 +238,12 @@ export default class AutIframe {
     let el = e.target
     let $el = $(el)
 
-    const $ancestorHighlight = $el.closest('.__cypress-selector-helper')
+    const $ancestorHighlight = $el.closest('.__cypress-selector-playground')
     if ($ancestorHighlight.length) {
       $el = $ancestorHighlight
     }
 
-    if ($ancestorHighlight.length || $el.hasClass('__cypress-selector-helper')) {
+    if ($ancestorHighlight.length || $el.hasClass('__cypress-selector-playground')) {
       const $highlight = $el
       $highlight.css('display', 'none')
       el = this._document().elementFromPoint(e.clientX, e.clientY)
@@ -257,15 +257,15 @@ export default class AutIframe {
 
     const selector = dom.getBestSelector(el)
 
-    dom.addOrUpdateSelectorHelperHighlight({
+    dom.addOrUpdateSelectorPlaygroundHighlight({
       $el,
       selector,
       $body,
       showTooltip: true,
       onClick: () => {
-        selectorHelperModel.setNumElements(1)
-        selectorHelperModel.resetMethod()
-        selectorHelperModel.setSelector(selector)
+        selectorPlaygroundModel.setNumElements(1)
+        selectorPlaygroundModel.resetMethod()
+        selectorPlaygroundModel.setSelector(selector)
       },
     })
   }
@@ -274,7 +274,7 @@ export default class AutIframe {
     const $body = this._body()
     if (!$body) return
 
-    dom.addOrUpdateSelectorHelperHighlight({ $el: null, $body })
+    dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
     if (this._highlightedEl) {
       this._highlightedEl = null
     }
@@ -290,19 +290,19 @@ export default class AutIframe {
 
     const $el = this.getElements(Cypress.dom)
 
-    selectorHelperModel.setValidity(!!$el)
+    selectorPlaygroundModel.setValidity(!!$el)
 
     if ($el) {
-      selectorHelperModel.setNumElements($el.length)
+      selectorPlaygroundModel.setNumElements($el.length)
 
       if ($el.length) {
         dom.scrollIntoView(this._window(), $el[0])
       }
     }
 
-    dom.addOrUpdateSelectorHelperHighlight({
+    dom.addOrUpdateSelectorPlaygroundHighlight({
       $el: $el && $el.length ? $el : null,
-      selector: selectorHelperModel.selector,
+      selector: selectorPlaygroundModel.selector,
       $body: this._body(),
       showTooltip: false,
     })
@@ -310,13 +310,13 @@ export default class AutIframe {
 
   getElements (cypressDom) {
     const contents = this._contents()
-    const selector = selectorHelperModel.selector
+    const selector = selectorPlaygroundModel.selector
 
     if (!contents || !selector) return
 
     return dom.getElementsForSelector({
       selector,
-      method: selectorHelperModel.method,
+      method: selectorPlaygroundModel.method,
       root: contents,
       cypressDom,
     })
@@ -329,7 +329,7 @@ export default class AutIframe {
 
     const $el = this.getElements(Cypress.dom)
 
-    const command = `cy.${selectorHelperModel.method}('${selectorHelperModel.selector}')`
+    const command = `cy.${selectorPlaygroundModel.method}('${selectorPlaygroundModel.selector}')`
 
     if (!$el) {
       return logger.logFormatted({

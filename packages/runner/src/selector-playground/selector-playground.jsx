@@ -24,7 +24,7 @@ const fixMouseOut = (fn, getTarget) => (e) => {
 }
 
 @observer
-class SelectorHelper extends Component {
+class SelectorPlayground extends Component {
   @observable copyText = defaultCopyText
   @observable printText = defaultPrintText
   @observable showingMethodPicker = false
@@ -34,7 +34,7 @@ class SelectorHelper extends Component {
     const selectorText = `cy.${model.method}('${model.selector}')`
 
     return (
-      <div className={cs('selector-helper', `method-${model.method}`, {
+      <div className={cs('selector-playground', `method-${model.method}`, {
         'no-elements': !model.numElements,
         'invalid-selector': !model.isValid,
       })}>
@@ -43,7 +43,7 @@ class SelectorHelper extends Component {
             title='Click an element to see a suggested selector'>
             <button
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
-              onClick={this._toggleEnablingSelectorHelper}>
+              onClick={this._toggleEnablingSelectorPlayground}>
               <span className='fa-stack'>
                 <i className='fa fa-square-o fa-stack-1x'></i>
                 <i className='fa fa-mouse-pointer fa-stack-1x'></i>
@@ -60,7 +60,7 @@ class SelectorHelper extends Component {
             <AutosizeInput
               ref={(node) => this._input = node}
               className='selector-input'
-              name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector helper */}
+              name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector playground */}
               value={model.selector}
               onChange={this._updateSelector}
               onFocus={this._setHighlight(true)}
@@ -103,7 +103,7 @@ class SelectorHelper extends Component {
           <i className='fa fa-question-circle'></i>{' '}
           Learn more
         </a>
-        <button className='close' onClick={this._toggleHelperOpen}>x</button>
+        <button className='close' onClick={this._togglePlaygroundOpen}>x</button>
       </div>
     )
   }
@@ -213,11 +213,11 @@ class SelectorHelper extends Component {
     this._setPrintText(defaultPrintText)
   }
 
-  _toggleEnablingSelectorHelper = () => {
+  _toggleEnablingSelectorPlayground = () => {
     this.props.model.toggleEnabled()
   }
 
-  _toggleHelperOpen = () => {
+  _togglePlaygroundOpen = () => {
     this.props.model.toggleOpen()
   }
 
@@ -228,4 +228,4 @@ class SelectorHelper extends Component {
   }
 }
 
-export default SelectorHelper
+export default SelectorPlayground

@@ -33,6 +33,15 @@ const missingApp = {
   `,
 }
 
+const nonZeroExitCodeXvfb = {
+  description: 'XVFB exited with a non zero exit code.',
+  solution: stripIndent`
+    There was a problem spawning Xvfb.
+
+    This is likely a problem with your system, permissions, or installation of Xvfb.
+    `,
+}
+
 const missingXvfb = {
   description: 'Your system is missing the dependency: XVFB',
   solution: stripIndent`
@@ -168,6 +177,7 @@ module.exports = {
   formErrorText,
   throwFormErrorText,
   errors: {
+    nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
     missingDependency,

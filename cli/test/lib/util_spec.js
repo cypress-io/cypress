@@ -1,8 +1,10 @@
 require('../spec_helper')
 
+const snapshot = require('snap-shot-it')
+const supportsColor = require('supports-color')
+
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
-const snapshot = require('snap-shot-it')
 
 describe('util', function () {
   beforeEach(function () {
@@ -10,7 +12,7 @@ describe('util', function () {
     this.sandbox.stub(logger, 'error')
   })
 
-  context('stdoutLineMatches', () => {
+  context('.stdoutLineMatches', () => {
     const { stdoutLineMatches } = util
 
     it('is a function', () => {
@@ -41,7 +43,7 @@ describe('util', function () {
     })
   })
 
-  context('normalizeModuleOptions', () => {
+  context('.normalizeModuleOptions', () => {
     const { normalizeModuleOptions } = util
 
     it('does not change other properties', () => {
@@ -87,6 +89,21 @@ describe('util', function () {
         },
       }
       snapshot('reporter_options_as_object', normalizeModuleOptions(options))
+    })
+  })
+
+  context('.supportsColor', function () {
+    it('is true on obj return for stderr', function () {
+      const obj = {}
+      this.sandbox.stub(supportsColor, 'stderr').value(obj)
+
+      expect(util.supportsColor()).to.be.true
+    })
+
+    it('is false on false return for stderr', function () {
+      this.sandbox.stub(supportsColor, 'stderr').value(false)
+
+      expect(util.supportsColor()).to.be.false
     })
   })
 

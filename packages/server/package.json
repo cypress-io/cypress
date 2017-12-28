@@ -5,8 +5,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "server": "node index.js --mode server",
+    "start": "node ../../cli/bin/cypress open --dev --global",
+    "dev": "node index.js",
     "repl": "node repl.js",
     "clean-deps": "rm -rf node_modules",
     "test": "node ./test/scripts/run.js",
@@ -151,6 +151,7 @@
     "sinon-as-promised": "3.0.1",
     "string-to-stream": "^1.0.1",
     "strip-ansi": "^3.0.1",
+    "supports-color": "^5.1.0",
     "syntax-error": "^1.1.4",
     "tar-fs": "^1.11.1",
     "through": "2.3.6",

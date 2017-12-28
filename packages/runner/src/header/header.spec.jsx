@@ -5,7 +5,7 @@ import sinon from 'sinon'
 import driver from '@packages/driver'
 import Tooltip from '@cypress/react-tooltip'
 
-import selectorHelperModel from '../selector-helper/selector-helper-model'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 import Header from './header'
 
@@ -17,51 +17,51 @@ const getState = (props) => _.extend({
 }, props)
 
 describe('<Header />', () => {
-  it('has showing-selector-helper class if selector helper is open', () => {
-    selectorHelperModel.isOpen = true
-    expect(shallow(<Header state={getState()} />)).to.have.className('showing-selector-helper')
+  it('has showing-selector-playground class if selector playground is open', () => {
+    selectorPlaygroundModel.isOpen = true
+    expect(shallow(<Header state={getState()} />)).to.have.className('showing-selector-playground')
   })
 
-  it('does not showing-selector-helper class if selector helper is disabled', () => {
-    selectorHelperModel.isOpen = false
-    expect(shallow(<Header state={getState()} />)).not.to.have.className('showing-selector-helper')
+  it('does not showing-selector-playground class if selector playground is disabled', () => {
+    selectorPlaygroundModel.isOpen = false
+    expect(shallow(<Header state={getState()} />)).not.to.have.className('showing-selector-playground')
   })
 
-  describe('selector helper button', () => {
+  describe('selector playground button', () => {
     it('is disabled if tests are loading', () => {
       const component = shallow(<Header state={getState({ isLoading: true })} />)
-      expect(component.find('.selector-helper-toggle')).to.be.disabled
+      expect(component.find('.selector-playground-toggle')).to.be.disabled
     })
 
     it('is disabled if tests are running', () => {
       const component = shallow(<Header state={getState({ isRunning: true })} />)
-      expect(component.find('.selector-helper-toggle')).to.be.disabled
+      expect(component.find('.selector-playground-toggle')).to.be.disabled
     })
 
-    it('toggles the selector helper on click', () => {
-      selectorHelperModel.toggleOpen = sinon.spy()
+    it('toggles the selector playground on click', () => {
+      selectorPlaygroundModel.toggleOpen = sinon.spy()
       const component = shallow(<Header state={getState()} />)
-      component.find('.selector-helper-toggle').simulate('click')
-      expect(selectorHelperModel.toggleOpen).to.be.called
+      component.find('.selector-playground-toggle').simulate('click')
+      expect(selectorPlaygroundModel.toggleOpen).to.be.called
     })
 
-    it('updates window dimensions after selector helper is toggled', () => {
-      selectorHelperModel.isOpen = false
+    it('updates window dimensions after selector playground is toggled', () => {
+      selectorPlaygroundModel.isOpen = false
       const state = getState()
       const component = shallow(<Header state={state} />)
-      selectorHelperModel.isOpen = true
+      selectorPlaygroundModel.isOpen = true
       component.update()
       expect(state.updateWindowDimensions).to.be.calledWith({ headerHeight: 42 })
     })
 
-    it('does not show tooltip if selector helper is open', () => {
-      selectorHelperModel.isOpen = true
+    it('does not show tooltip if selector playground is open', () => {
+      selectorPlaygroundModel.isOpen = true
       const component = shallow(<Header state={getState()} />)
       expect(component.find(Tooltip)).to.have.prop('visible', false)
     })
 
-    it('uses default tooltip visibility if selector helper is closed', () => {
-      selectorHelperModel.isOpen = false
+    it('uses default tooltip visibility if selector playground is closed', () => {
+      selectorPlaygroundModel.isOpen = false
       const component = shallow(<Header state={getState()} />)
       expect(component.find(Tooltip)).to.have.prop('visible', null)
     })
