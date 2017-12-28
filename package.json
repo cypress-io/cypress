@@ -93,7 +93,8 @@
   "standard": {
     "globals": [
       "Cypress",
-      "cy"
+      "cy",
+      "expect"
     ]
   },
   "dependencies": {

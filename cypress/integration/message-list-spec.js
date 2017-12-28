@@ -57,6 +57,10 @@ describe('MessageList under message-list name', () => {
 
   beforeEach(mountVue({ template, data, components }))
 
+  it('starts with two items', () => {
+    expect(Cypress.vue.messages).to.deep.equal(['uno', 'dos'])
+  })
+
   it('shows two items at the start', () => {
     getItems().should('have.length', 2)
   })
