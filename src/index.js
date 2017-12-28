@@ -164,6 +164,8 @@ const mountVue = (component, optionsOrProps = {}) => () => {
         Cypress.vue = new Vue(component).$mount('#app')
         copyStyles(component)
       }
+
+      return Cypress.vue
     })
 }
 

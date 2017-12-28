@@ -47,4 +47,27 @@ describe('Message', () => {
       })
     })
   })
+
+  describe('Events', () => {
+    it('calls handleClick when click on message', () => {
+      // need to spy on the _original_ method before it gets
+      // passed to the Vue.extend and gets into private closuer
+      const spy = cy.spy(Message.methods, 'handleClick')
+      createCmp({ message: 'Cat' })
+      cy.get('.message').click().then(() => {
+        expect(spy).to.be.calledOnce
+      })
+    })
+
+    it('triggers a message-clicked event clicked', () => {
+      createCmp({ message: 'Cat' }).then(() => {
+        const stub = cy.spy()
+        Cypress.vue.$on('message-clicked', stub)
+        cy.get('.message').click().then(() => {
+          expect(stub).to.be.called.once
+          expect(stub).to.be.calledWith('Cat')
+        })
+      })
+    })
+  })
 })
