@@ -26,7 +26,7 @@
     "lint-staged": "^6.0.0",
     "prettier": "^1.9.2",
     "semantic-release": "^11.1.0",
-    "semantic-release-github-pr": "^1.1.1"
+    "semantic-release-github-pr": "^2.0.0"
   },
   "lint-staged": {
     "*.js": [

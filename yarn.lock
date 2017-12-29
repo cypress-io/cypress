@@ -25,20 +25,6 @@
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@semantic-release/error/-/error-2.1.0.tgz#44771f676f5b148da309111285a97901aa95a6e0"
 
-"@semantic-release/github@^2.0.0":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@semantic-release/github/-/github-2.2.1.tgz#230180e05acb1b25be7cab00a2d1aba0222303cc"
-  dependencies:
-    "@semantic-release/error" "^2.1.0"
-    debug "^3.1.0"
-    fs-extra "^5.0.0"
-    github "^13.0.0"
-    globby "^7.1.1"
-    lodash "^4.17.4"
-    mime "^2.0.3"
-    p-reduce "^1.0.0"
-    parse-github-url "^1.0.1"
-
 "@semantic-release/github@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@semantic-release/github/-/github-3.0.0.tgz#364bec879b4bc0955635866585514df0b4e640c0"
@@ -3154,15 +3140,16 @@ sax@^1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release-github-pr@^1.1.1:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/semantic-release-github-pr/-/semantic-release-github-pr-1.1.2.tgz#be0a186f15a8983fe73be3b777fbf3c8f50564db"
+semantic-release-github-pr@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/semantic-release-github-pr/-/semantic-release-github-pr-2.0.0.tgz#bc33d5c6e9b66ccef161b02217faefa00fede6c8"
   dependencies:
-    "@semantic-release/github" "^2.0.0"
     execa "^0.8.0"
     github "^12.1.0"
     parse-github-url "^1.0.1"
+    ramda "^0.25.0"
     read-pkg "^3.0.0"
+    semantic-release-plugin-decorators "^1.2.0"
 
 semantic-release@^11.1.0:
   version "11.1.0"
