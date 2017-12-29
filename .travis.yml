@@ -7,5 +7,5 @@ before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$PATH"
 after_success:
-  - npx semantic-release-github-pr
+  - "[[ $TRAVIS_PULL_REQUEST != 'false' ]] && npx semantic-release-github-pr --debug"
   - npx semantic-release --debug
