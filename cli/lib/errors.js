@@ -51,7 +51,7 @@ const missingXvfb = {
 
       ${requiredDependenciesUrl}
 
-    If you using Docker, we provide containers with all required dependencies installed.
+    If you are using Docker, we provide containers with all required dependencies installed.
     `,
 }
 
@@ -65,7 +65,7 @@ const missingDependency = {
 
       ${requiredDependenciesUrl}
 
-    If you using Docker, we provide containers with all required dependencies installed.
+    If you are using Docker, we provide containers with all required dependencies installed.
   `,
 }
 
