@@ -1,7 +1,10 @@
-const debug = require('debug')('semantic-release:monorepo');
+const { pipeP } = require('ramda');
 const pkgUp = require('pkg-up');
+const readPkg = require('read-pkg');
+const debug = require('debug')('semantic-release:monorepo');
 
 const { getCommitFiles, getGitRoot } = require('./git-utils');
+const { mapCommits } = require('./options-transforms');
 
 const getPackagePath = async () => {
   const path = await pkgUp();
@@ -38,4 +41,32 @@ const onlyPackageCommits = async commits => {
   });
 };
 
-module.exports = onlyPackageCommits;
+// Async version of Ramda's `tap`
+const tapA = fn => async x => {
+  await fn(x);
+  return x;
+};
+
+const logFilteredCommitCount = logger => async ({ commits }) => {
+  const { name } = await readPkg();
+
+  logger.log(
+    'Found %s commits for package %s since last release',
+    commits.length,
+    name
+  );
+};
+
+const withOnlyPackageCommits = plugin => async (pluginConfig, config) => {
+  const { logger } = config;
+
+  return plugin(
+    pluginConfig,
+    await pipeP(
+      mapCommits(onlyPackageCommits),
+      tapA(logFilteredCommitCount(logger))
+    )(config)
+  );
+};
+
+module.exports = withOnlyPackageCommits;
