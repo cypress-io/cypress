@@ -6,50 +6,74 @@ Apply [`semantic-release`'s](https://github.com/semantic-release/semantic-releas
 ## Why
 The default configuration of `semantic-release` assumes a one-to-one relationship between a Github repository and an `npm` package.
 
-This plugin allows using `semantic-release` with a single Github repository containing many `npm` packages.
+This set of plugins allows using `semantic-release` with a single Github repository containing many `npm` packages.
 
 ## How
-Rather than attributing all commits to a single package, this plugin will automatically assign commits to packages based on the files that a commit touched. 
+Instead of attributing all commits to a single package, commits are assigned to packages based on the files that a commit touched.
 
-If a commit touched a file within a package's root, it will be considered for that package's next release. Yes, this means a single commit could belong to multiple packages.
+If a commit touched a file in or below a package's root, it will be considered for that package's next release. A single commit can belong to multiple packages.
 
 A push may release multiple package versions. In order to avoid version collisions, git tags are namespaced using the given package's name: `<package-name>-<version>`.
 
-## Configuration
-This package is a complement to `semantic-release`. It is assumed the user is already fully familiar with that package and its workflow.
-
 ## Install
 ```bash
-npm install -D semantic-release-monorepo
+npm install -D semantic-release semantic-release-monorepo
 ```
 
 ## Usage
-In `package.json`:
+Run `semantic-release-monorepo` for the package in the current working directory:
+```bash
+npx semantic-release -e -semantic-release-monorepo
+```
+It helps to think about `semantic-releaase-monorepo` as a variation on `semantic-release`'s default behavior, using the latter's plugin system to adapt it to work with a monorepo. 
+
+### With Lerna
+Run `semantic-release-monorepo` for each package in a monorepo managed by [`lerna`](https://github.com/lerna/lerna):
+```bash
+lerna exec --concurrency 1 -- npx semantic-release -e -semantic-release-monorepo
+```
+
+## Configuration
+The set of plugins in this package wrap other `semantic-release` plugins to modify their behavior. By default, the same plugin configuration as `semantic-release` is used, but any plugin configuration should be compatible.
+
+### Release config
+Plugins can be configured in the [release config](https://github.com/semantic-release/semantic-release#plugins), with one important caveat:
+
+Due to limitations in how plugins may be composed ([discussion](https://github.com/semantic-release/semantic-release/issues/550)), `semantic-release-monorepo` must unfortunately "hard-code" the set of plugins it wraps: `analyze-commits`, `generateNotes`, `getLastRelease` and `publish`.
+
+Users may still want to define a custom versions of the plugin set, or want to pass options to the default versions. To work around this problem, set the desired plugin configuration under the `monorepo` property  instead.
+
+#### Example of use with non-default set of plugins
+`package.json`
 ```json
 {
   "release": {
-    "analyzeCommits": "semantic-release-monorepo",
-    "generateNotes": "semantic-release-monorepo",
-    "getLastRelease": "semantic-release-monorepo",
-    "publish": ["@semantic-release/npm", "semantic-release-monorepo/github"]
+    "verifyConditions": ["@semantic-release/git"],
+    "monorepo": {
+      "analyzeCommits": {
+        "format": "atom"
+      },
+      "generateNotes": "myNotesGenerator",
+      "getLastRelease": "@semantic-release/git",
+      "publish": ["@semantic-release/npm", "@semantic-release/git"]
+    }  
   }
 }
 ```
+### Advanced
+The set of `semantic-release-monorepo` plugins wrap the default `semantic-release` workflow, augmenting it to work with a monorepo.
 
-## What each plugin does
-All `semantic-release-monorepo` plugins wrap the default `semantic-release` workflow, augmenting it to work with a monorepo.
-
-### analyzeCommits
+#### analyzeCommits
 * Filters the repo commits to only include those that touched files in the given monorepo package.
 
-### generateNotes
+#### generateNotes
 * Filters the repo commits to only include those that touched files in the given monorepo package.
 
 * Maps the `gitTag` fields of `lastRelease` and `nextRelease` to use the [monorepo git tag format](#how).
 
 * Maps the `version` field of `nextRelease` to use the [monorepo git tag format](#how). The wrapped (default) `generateNotes` implementation uses `version` as the header for the release notes. Since all release notes end up in the same Github repository, using just the version as a header introduces ambiguity.
 
-### getLastRelease
+#### getLastRelease
 Addresses multiple problems identifying the last release for a monorepo package:
 
   1. The wrapped (default) `getLastRelease` plugin uses `gitHead` from the `npm` package metadata to identify the last release. However, `npm` doesn't publish `gitHead` as part of a package's metadata unless its `package.json` and the repo's `.git` are in the same folder (never true for a monorepo). 
@@ -57,5 +81,5 @@ Addresses multiple problems identifying the last release for a monorepo package:
   
   2. We can use `semantic-release`'s fallback strategy, searching for a git tag matching the latest `npm` version, but we must map the git tag to the [monorepo git tag format](#how).
 
-### publish (Github)
+#### publish
 * Maps the `gitTag` field of `nextRelease` to use the [monorepo git tag format](#how).

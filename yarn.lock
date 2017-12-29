@@ -3151,6 +3151,13 @@ semantic-release-github-pr@^2.0.0:
     read-pkg "^3.0.0"
     semantic-release-plugin-decorators "^1.2.0"
 
+semantic-release-plugin-decorators@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/semantic-release-plugin-decorators/-/semantic-release-plugin-decorators-1.2.0.tgz#7371b14f67c2aa78d559adc3433679e304e7ade6"
+  dependencies:
+    import-from "^2.1.0"
+    lodash "^4.17.4"
+
 semantic-release@^11.1.0:
   version "11.1.0"
   resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-11.1.0.tgz#db0316065d7612d1db5a2e26aaa0c3f7edebb6c3"
@@ -3574,6 +3581,10 @@ uid-number@^0.0.6:
 universalify@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/universalify/-/universalify-0.1.1.tgz#fa71badd4437af4c148841e3b3b165f9e9e590b7"
+
+url-join@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/url-join/-/url-join-2.0.2.tgz#c072756967ad24b8b59e5741551caac78f50b8b7"
 
 url-parse-lax@^3.0.0:
   version "3.0.0"
