@@ -1,13 +1,14 @@
 {
   "name": "cypress-react-unit-test",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "Unit test React components using Cypress",
   "main": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack -d",
     "cy:open": "cypress open",
-    "transpile": "tsc"
+    "transpile": "tsc",
+    "semantic-release": "semantic-action pre && npm run transpile && npm publish && semantic-action post"
   },
   "files": [
     "dist",
@@ -30,8 +31,10 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "cypress": "^1.4.1",
+    "github-post-release": "^1.13.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "semantic-action": "^1.1.0",
     "standard": "^10.0.3",
     "typescript": "^2.6.2",
     "webpack": "^3.10.0"
@@ -42,5 +45,13 @@
       "cy",
       "expect"
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bahmutov/cypress-react-unit-test.git"
+  },
+  "release": {
+    "analyzeCommits": "simple-commit-message",
+    "generateNotes": "github-post-release"
   }
 }
