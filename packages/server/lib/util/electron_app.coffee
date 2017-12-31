@@ -1,4 +1,6 @@
-appReady = ->
+Promise = require("bluebird")
+
+ready = ->
   app = require("electron").app
 
   waitForReady = ->

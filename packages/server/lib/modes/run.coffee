@@ -544,7 +544,7 @@ module.exports = {
                 @allDone()
 
   run: (options) ->
-    electronApp()
+    electronApp
     .ready()
     .then =>
       @ready(options)
