@@ -6,7 +6,7 @@ chalk      = require("chalk")
 human      = require("human-interval")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
-debug      = require("debug")("cypress:server:headless")
+debug      = require("debug")("cypress:server:run")
 ss         = require("../screenshots")
 user       = require("../user")
 stats      = require("../stats")
@@ -488,9 +488,10 @@ module.exports = {
         })
 
   ready: (options = {}) ->
-    debug("headless mode ready with options %j", options)
+    debug("run mode ready with options %j", options)
+
     if options.spec
-      debug("spec", options.spec)
+      debug("spec pattern given", options.spec)
 
     socketId = random.id()
 
