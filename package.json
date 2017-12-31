@@ -1,15 +1,15 @@
 {
   "name": "cypress-react-unit-test",
   "version": "1.0.0",
-  "description": "",
+  "description": "Unit test React components using Cypress",
   "main": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack -d",
     "cy:open": "cypress open"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["react", "cypress", "cypress-io", "test", "testing"],
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^1.1.2",
