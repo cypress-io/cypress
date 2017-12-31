@@ -151,12 +151,13 @@ module.exports = {
           options.mode = "record"
 
         when options.runProject
-          ## go into headless mode when told to run
-          options.mode = "headless"
+          ## go into run mode when running
+          ## until completion + exit
+          options.mode = "run"
 
         else
-          ## set the default mode as headed
-          options.mode ?= "headed"
+          ## set the default mode as interactive
+          options.mode ?= "interactive"
 
       ## remove mode from options
       mode    = options.mode
@@ -229,14 +230,15 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      when "headless"
+      when "run"
         ## run headlessly and exit
+        ## with num of failures
         @runElectron(mode, options)
         .get("failures")
         .then(exit)
         .catch(exitErr)
 
-      when "headed"
+      when "interactive"
         @runElectron(mode, options)
 
       when "record"
