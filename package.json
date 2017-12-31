@@ -2,7 +2,8 @@
   "name": "cypress-react-unit-test",
   "version": "0.0.0-development",
   "description": "Unit test React components using Cypress",
-  "main": "lib",
+  "main": "dist",
+  "module": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack -d",
