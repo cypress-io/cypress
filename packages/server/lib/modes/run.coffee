@@ -5,7 +5,6 @@ path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
 Promise    = require("bluebird")
-random     = require("randomstring")
 pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:headless")
 ss         = require("../screenshots")
@@ -16,11 +15,12 @@ errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
-progress   = require("../util/progress_bar")
+Windows    = require("../gui/windows")
 trash      = require("../util/trash")
+random     = require("../util/random")
+progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
-Windows    = require("../gui/windows")
 electronApp = require("../util/electron_app")
 
 fs = Promise.promisifyAll(fs)
@@ -47,13 +47,6 @@ collectTestResults = (obj) ->
 
 module.exports = {
   collectTestResults
-
-  getId: ->
-    ## return a random id
-    random.generate({
-      length: 5
-      capitalization: "lowercase"
-    })
 
   getProjectId: (project, id) ->
     ## if we have an ID just use it
@@ -260,13 +253,13 @@ module.exports = {
       project.once("exitEarlyWithErr", onEarlyExit)
 
   waitForBrowserToConnect: (options = {}) ->
-    { project, id, timeout } = options
+    { project, socketId, timeout } = options
 
     attempts = 0
 
     do waitForBrowserToConnect = =>
       Promise.join(
-        @waitForSocketConnection(project, id)
+        @waitForSocketConnection(project, socketId)
         @launchBrowser(options)
       )
       .timeout(timeout ? 30000)
@@ -298,14 +291,14 @@ module.exports = {
       fn = (socketId) ->
         if socketId is id
           ## remove the event listener if we've connected
-          project.removeListener "socket:connected", fn
+          project.removeListener("socket:connected", fn)
 
           ## resolve the promise
           resolve()
 
       ## when a socket connects verify this
       ## is the one that matches our id!
-      project.on "socket:connected", fn
+      project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
     { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath, exit } = options
@@ -445,7 +438,7 @@ module.exports = {
         if !videosFolder
           throw new Error("Missing videoFolder for recording")
 
-        id2       = @getId()
+        id2       = random.id()
         name      = path.join(videosFolder, id2 + ".mp4")
         cname     = path.join(videosFolder, id2 + "-compressed.mp4")
         recording = @createRecording(name)
@@ -482,10 +475,10 @@ module.exports = {
           }),
 
           connection: @waitForBrowserToConnect({
-            id:          options.id
             spec:        options.spec
             headed:      options.headed
             project:     options.project
+            socketId:    options.socketId
             webSecurity: options.webSecurity
             projectPath: options.projectPath
             write
@@ -499,7 +492,7 @@ module.exports = {
     if options.spec
       debug("spec", options.spec)
 
-    id = @getId()
+    socketId = random.id()
 
     { projectPath } = options
 
@@ -508,7 +501,7 @@ module.exports = {
     .then =>
       ## open this project without
       ## adding it to the global cache
-      @openProject(id, options)
+      @openProject(socketId, options)
       .call("getProject")
       .then (project) =>
         Promise.all([
@@ -530,7 +523,7 @@ module.exports = {
           .then =>
             @runTests({
               projectPath
-              id:                   id
+              socketId:             socketId
               project:              project
               videosFolder:         config.videosFolder
               videoRecording:       config.videoRecording
