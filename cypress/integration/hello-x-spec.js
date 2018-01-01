@@ -11,11 +11,10 @@ describe('HelloX component', () => {
 })
 
 describe('HelloState component', () => {
-  it('works', () => {
+  it('changes state', () => {
     mount(<HelloState />)
-    cy.contains('Hello Spider-man!').then(() => {
-      Cypress.component.setState({ name: 'React' })
-    })
+    cy.contains('Hello Spider-man!')
+    Cypress.component().invoke('setState', {name: 'React'})
     cy.contains('Hello React!')
   })
 })
