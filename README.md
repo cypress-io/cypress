@@ -23,6 +23,8 @@ describe('HelloState component', () => {
 })
 ```
 
+![Unit testing React components](images/demo.png)
+
 ## Examples
 
 * [cypress/integration/hello-world-spec.js](cypress/integration/hello-world-spec.js) - testing the simplest React component from [src/hello-world.jsx](src/hello-world.jsx)
