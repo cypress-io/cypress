@@ -1,4 +1,4 @@
-# cypress-react-unit-test
+# cypress-react-unit-test [![Build Status](https://travis-ci.org/bahmutov/cypress-react-unit-test.svg?branch=master)](https://travis-ci.org/bahmutov/cypress-react-unit-test)
 
 > Unit test React components using Cypress
 
