@@ -27,6 +27,9 @@ describe('HelloState component', () => {
 
 ## Examples
 
-* [cypress/integration/hello-world-spec.js](cypress/integration/hello-world-spec.js) - testing the simplest React component from [src/hello-world.jsx](src/hello-world.jsx)
-* [cypress/integration/hello-x-spec.js](cypress/integration/hello-x-spec.js) - testing React component with props and state [src/hello-x.jsx](src/hello-x.jsx)
-* [bahmutov/calculator](https://github.com/bahmutov/calculator) tests multiple components
+All components are in [src](src) folder. All tests are in [cypress/integration](cypress/integration) folder.
+
+* [hello-world-spec.js](cypress/integration/hello-world-spec.js) - testing the simplest React component from [hello-world.jsx](src/hello-world.jsx)
+* [hello-x-spec.js](cypress/integration/hello-x-spec.js) - testing React component with props and state [hello-x.jsx](src/hello-x.jsx)
+* [counter-spec.js](cypress/integration/counter-spec.js) clicks on the component and confirms the result
+* separate repo [bahmutov/calculator](https://github.com/bahmutov/calculator) tests multiple components
