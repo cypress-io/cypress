@@ -15,6 +15,9 @@ describe('HelloState component', () => {
     mount(<HelloState />)
     cy.contains('Hello Spider-man!')
     Cypress.component().invoke('setState', {name: 'React'})
+    Cypress.component().its('state').should('deep.equal', {
+      name: 'React'
+    })
     cy.contains('Hello React!')
   })
 })
