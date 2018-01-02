@@ -14,12 +14,12 @@ const gitTag = require('./version-to-git-tag');
 const withVersionHead = plugin => async (pluginConfig, options) => {
   const release = await plugin(pluginConfig, options);
 
-  if (release && !release.gitHead) {
-    return {
-      ...release,
-      ...(await getVersionHead(null, await gitTag(release.version))),
-    };
-  }
+  // TODO: Don't trust result of `plugin` for now since its likely
+  // `@semantic-release/npm` returning the wrong information.
+  return {
+    ...release,
+    ...(await getVersionHead(null, await gitTag(release.version))),
+  };
 };
 
 module.exports = withVersionHead;
