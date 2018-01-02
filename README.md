@@ -1,4 +1,4 @@
-# cypress-react-unit-test [![Build Status](https://travis-ci.org/bahmutov/cypress-react-unit-test.svg?branch=master)](https://travis-ci.org/bahmutov/cypress-react-unit-test)
+# cypress-react-unit-test [![Build Status](https://travis-ci.org/bahmutov/cypress-react-unit-test.svg?branch=master)](https://travis-ci.org/bahmutov/cypress-react-unit-test) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah)
 
 > Unit test React components using Cypress
 
@@ -37,3 +37,10 @@ All components are in [src](src) folder. All tests are in [cypress/integration](
 * [counter-spec.js](cypress/integration/counter-spec.js) clicks on the component and confirms the result
 * [stateless-spec.js](cypress/integration/stateless-spec.js) shows testing a stateless component from [stateless.jsx](src/stateless.jsx)
 * separate repo [bahmutov/calculator](https://github.com/bahmutov/calculator) tests multiple components
+
+## Related tools
+
+Same feature for unit testing components from other framesworks using Cypress
+
+* [cypress-vue-unit-test](https://github.com/bahmutov/cypress-vue-unit-test) for Vue.js
+* [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test) for Hyperapp
