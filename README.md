@@ -36,7 +36,10 @@ All components are in [src](src) folder. All tests are in [cypress/integration](
 * [hello-x-spec.js](cypress/integration/hello-x-spec.js) - testing React component with props and state [hello-x.jsx](src/hello-x.jsx)
 * [counter-spec.js](cypress/integration/counter-spec.js) clicks on the component and confirms the result
 * [stateless-spec.js](cypress/integration/stateless-spec.js) shows testing a stateless component from [stateless.jsx](src/stateless.jsx)
-* separate repo [bahmutov/calculator](https://github.com/bahmutov/calculator) tests multiple components
+
+## Large examples
+
+* [bahmutov/calculator](https://github.com/bahmutov/calculator) tests multiple components: calculator App, Button, Display.
 
 ## Related tools
 
