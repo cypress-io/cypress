@@ -1,3 +1,4 @@
 public/
 node_modules/
 dist
+cypress/videos
