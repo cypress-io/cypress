@@ -3158,7 +3158,7 @@ semantic-release-plugin-decorators@^1.2.0:
     import-from "^2.1.0"
     lodash "^4.17.4"
 
-semantic-release@^11.1.0:
+semantic-release@11.1.0:
   version "11.1.0"
   resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-11.1.0.tgz#db0316065d7612d1db5a2e26aaa0c3f7edebb6c3"
   dependencies:
