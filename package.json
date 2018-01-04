@@ -11,7 +11,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "semantic-release": "~11.1.0"
+    "semantic-release": ">=11.1.0"
   },
   "dependencies": {
     "debug": "^3.1.0",
@@ -19,15 +19,15 @@
     "pkg-up": "^2.0.0",
     "ramda": "^0.25.0",
     "read-pkg": "^3.0.0",
-    "semantic-release-plugin-decorators": "^1.2.0"
+    "semantic-release-plugin-decorators": "^1.2.1"
   },
   "devDependencies": {
     "husky": "^0.14.3",
     "jest": "^21.2.1",
     "lint-staged": "^6.0.0",
     "prettier": "^1.9.2",
-    "semantic-release": "~11.1.0",
-    "semantic-release-github-pr": "^2.0.0"
+    "semantic-release": "^11.1.0",
+    "semantic-release-github-pr": "^2.0.3"
   },
   "lint-staged": {
     "*.js": [
