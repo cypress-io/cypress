@@ -3,6 +3,7 @@ require("../../spec_helper")
 _            = require("lodash")
 fs           = require("fs-extra")
 cp           = require("child_process")
+niv          = require("npm-install-version")
 path         = require("path")
 http         = require("http")
 human        = require("human-interval")
@@ -79,7 +80,7 @@ stopServer = (srv) ->
 
 module.exports = {
   setup: (options = {}) ->
-    if options.npmInstall
+    if npmI = options.npmInstall
       before ->
         ## npm install needs extra time
         @timeout(human("2 minutes"))
@@ -89,9 +90,20 @@ module.exports = {
           maxBuffer: 1024*1000
         })
         .then ->
+          if _.isArray(npmI)
+            pathToNodeModules = path.relative(process.cwd(), Fixtures.path("projects/e2e/node_modules"))
+
+            npmI.map (version) ->
+              niv.install(version, {
+                ## walk up one dir since destination hard codes 'node_modules'
+                destination: path.join('..', pathToNodeModules, version)
+              })
+
+        .then ->
           ## symlinks mess up fs.copySync
           ## and bin files aren't necessary for these tests
           fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
+
 
       after ->
         fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
