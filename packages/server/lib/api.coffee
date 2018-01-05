@@ -1,4 +1,5 @@
 _          = require("lodash")
+R          = require("ramda")
 os         = require("os")
 nmi        = require("node-machine-id")
 request    = require("request-promise")
@@ -9,6 +10,8 @@ browsers   = require('./browsers')
 Routes     = require("./util/routes")
 system     = require("./util/system")
 debug      = require("debug")("cypress:server:api")
+la         = require("lazy-ass")
+check      = require("check-more-types")
 
 rp = request.defaults (params = {}, callback) ->
   headers = params.headers ?= {}
@@ -96,6 +99,7 @@ module.exports = {
     debugReturnedBuild = (info) ->
       debug("received API response with buildId %s", info.buildId)
       debug("and list of specs to run", info.specs)
+      debug("entire response", info)
 
     body = _.pick(options, [
       "projectId"
@@ -111,7 +115,8 @@ module.exports = {
       "ciBuildNumber",
       "groupId",
       "specs",
-      "specPattern"
+      "specPattern",
+      "parallelId"
     ])
 
     debug("creating project run")
@@ -133,6 +138,11 @@ module.exports = {
     .catch(tagError)
 
   createInstance: (options = {}) ->
+    debugInstanceCreate = (instance) ->
+      debug("created new instance for spec", options.spec)
+      debug("returned object")
+      debug(instance)
+
     { buildId, spec, timeout } = options
 
     browsers.getByName(options.browser)
@@ -144,21 +154,30 @@ module.exports = {
 
       system.info()
       .then (systemInfo) ->
-        systemInfo.spec = spec
-        systemInfo.browserName = displayName
-        systemInfo.browserVersion = version
+        instanceOptions = {
+          spec:           options.spec
+          browserName:    displayName
+          browserVersion: version
+          machineId: options.machineId
+        }
+        allOptions = _.extend(instanceOptions, systemInfo)
+        debug("creating instance with options", allOptions)
 
-        rp.post({
-          url: Routes.instances(buildId)
-          json: true
-          timeout: timeout ? 10000
-          headers: {
-            "x-route-version": "3"
-          }
-          body: systemInfo
-        })
-        .promise()
-        .get("instanceId")
+        # always have Bluebird promise
+        Promise.resolve(
+          rp.post({
+            url: Routes.instances(options.buildId)
+            json: true
+            timeout: options.timeout ? 10000
+            headers: {
+              "x-route-version": "3"
+            }
+            body: allOptions
+          })
+          .promise()
+        )
+        .tap(debugInstanceCreate)
+        .then(R.pick(["instanceId", "machineId"]))
         .catch(errors.StatusCodeError, formatResponseBody)
         .catch(tagError)
 
@@ -194,6 +213,22 @@ module.exports = {
         "stdout"
       ])
     })
+    .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
+
+  grabNextSpecForBuild: (options = {}) ->
+    la(check.unemptyString(options.parallelId), "missing parallelId", options)
+
+    rp.put({
+      url: Routes.grabNextSpecForBuild(options.buildId)
+      json: true
+      timeout: options.timeout ? 10000,
+      body: {
+        parallelId: options.parallelId
+      }
+    })
+    .promise()
+    .get("spec")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 

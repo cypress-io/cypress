@@ -11,11 +11,30 @@ const coerceFalse = (arg) => {
 }
 
 const parseOpts = (opts) => {
-  opts = _.pick(opts,
-    'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-    'port', 'env', 'cypressVersion', 'config', 'record', 'key',
-    'browser', 'detached', 'headed',
-    'group', 'groupId', 'global', 'dev')
+  opts = _.pick(
+    opts,
+    'project',
+    'spec',
+    'reporter',
+    'reporterOptions',
+    'path',
+    'destination',
+    'port',
+    'env',
+    'cypressVersion',
+    'config',
+    'record',
+    'key',
+    'browser',
+    'detached',
+    'headed',
+    'dev',
+    'group',
+    'groupId',
+    'global',
+    'parallel',
+    'parallelId'
+  )
 
   if (opts.project) {
     opts.project = path.resolve(opts.project)
@@ -44,12 +63,25 @@ const descriptions = {
   global: 'force Cypress into global mode as if its globally installed',
   version: 'Prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
-  group: 'flag to group individual runs by using common --group-id',
-  groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
+  group: 'flag to group separte runs in the dashboard',
+  groupId: 'optional id to pass to group runs. by default uses environment variables found in CI',
+  parallel: 'flag to run specs in parallel',
+  parallelId: 'optional id to pass to associate machines to the parallel run plan. by default uses environment variables found in CI',
   dev: 'runs cypress in development and bypasses binary check',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
+const knownCommands = [
+  'version',
+  'run',
+  'open',
+  'install',
+  'verify',
+  '-v',
+  '--version',
+  'help',
+  '-h',
+  '--help',
+]
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -60,13 +92,16 @@ const text = (description) => {
 }
 
 function includesVersion (args) {
-  return _.includes(args, 'version') ||
+  return (
+    _.includes(args, 'version') ||
     _.includes(args, '--version') ||
     _.includes(args, '-v')
+  )
 }
 
 function showVersions () {
   debug('printing Cypress version')
+
   return require('./exec/versions')
   .getVersions()
   .then((versions = {}) => {
@@ -118,9 +153,12 @@ module.exports = {
     .option('-P, --project <project-path>', text('project'))
     .option('--group', text('group'), coerceFalse)
     .option('--group-id <group-id>', text('groupId'))
+    .option('--parallel', text('parallel'), coerceFalse)
+    .option('--parallel-id <parallel-id>', text('parallelId'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress')
+
       require('./exec/run')
       .start(parseOpts(opts))
       .then(util.exit)
@@ -140,6 +178,7 @@ module.exports = {
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('opening Cypress')
+
       require('./exec/open')
       .start(parseOpts(opts))
       .catch(util.logErrorExit1)
@@ -175,6 +214,7 @@ module.exports = {
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
       debug('unknwon command %s', firstCommand)
+
       logger.error('Unknown command', `"${firstCommand}"`)
       program.outputHelp()
       return util.exit(1)
@@ -187,7 +227,9 @@ module.exports = {
       // so we have to manually catch '-v, --version'
       return showVersions()
     }
+
     debug('program parsing arguments')
+
     return program.parse(args)
   },
 }

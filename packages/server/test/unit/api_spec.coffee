@@ -357,12 +357,14 @@ describe "lib/api", ->
       .post("/builds/build-id-123/instances", @postProps)
       .reply(200, {
         instanceId: "instance-id-123"
+        machineId: "machine-a"
       })
 
       api.createInstance(@createProps)
-      .then (instanceId) ->
+      .then ({instanceId, machineId}) ->
         expect(browsers.getByName).to.be.calledWith("foo")
         expect(instanceId).to.eq("instance-id-123")
+        expect(machineId).to.eq("machine-a")
 
     it "POST /builds/:id/instances failure formatting", ->
       nock("http://localhost:1234")

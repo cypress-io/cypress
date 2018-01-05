@@ -11,6 +11,7 @@ electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
 Fixtures   = require("../support/helpers/fixtures")
 pkg        = require("@packages/root")
+stats      = require("#{root}lib/stats")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
 connect    = require("#{root}lib/util/connect")
@@ -784,6 +785,8 @@ describe "lib/cypress", ->
           specFiles = ["a-spec.js", "b-spec.js"]
 
           @sandbox.stub(Project, "findSpecs").resolves(specFiles)
+        else
+          @sandbox.stub(Project, "findSpecs").resolves(specFiles)
 
         createRunArgs = {
           projectId:    @projectId
@@ -825,7 +828,7 @@ describe "lib/cypress", ->
       })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
+      testStats = stats.create({
         tests: 1
         passes: 2
         failures: 3
@@ -837,6 +840,7 @@ describe "lib/cypress", ->
         failingTests: []
         config: {}
       })
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves(testStats)
 
       Promise.all([
         ## make sure we have no user object
@@ -848,17 +852,18 @@ describe "lib/cypress", ->
       ])
 
     it "runs project in ci and exits with number of failures", ->
-      @setup()
+      @setup(undefined, ["sub/sub_test.coffee"])
 
       @createRun.resolves("build-id-123")
 
       @createInstance = @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
+        spec: "sub/sub_test.coffee"
+        machineId: null
         browser: "electron"
-        spec: undefined
-      }).resolves("instance-id-123")
+      }).resolves({instanceId: "instance-id-123"})
 
-      @updateInstance = @sandbox.stub(api, "updateInstance").withArgs({
+      updateArgs = {
         instanceId: "instance-id-123"
         tests: 1
         passes: 2
@@ -866,22 +871,23 @@ describe "lib/cypress", ->
         pending: 4
         duration: 5
         video: true
-        error: undefined
+        error: null
         screenshots: []
         failingTests: []
         cypressConfig: {}
         ciProvider: "travis"
         stdout: "foobarbaz"
-      }).resolves({
+      }
+      @updateInstance = @sandbox.stub(api, "updateInstance").withArgs(updateArgs).resolves({
         videoUploadUrl: "http://video.url"
       })
 
       cypress.start(["--run-project=#{@todosPath}", "--record",  "--key=token-123"])
       .then =>
-        expect(@createInstance).to.be.calledOnce
-        expect(@updateInstance).to.be.calledOnce
+        expect(@createInstance, "createInstance").to.be.calledOnce
+        expect(@updateInstance, "updateInstance").to.be.calledOnce
 
-        expect(upload.send).to.be.calledOnce
+        expect(upload.send, "upload.send").to.be.calledOnce
 
         @expectExitWith(3)
 
@@ -914,7 +920,7 @@ describe "lib/cypress", ->
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
-      @setup()
+      @setup(undefined, ["sub/sub_test.coffee"])
 
       ## set the projectId to be todos even though
       ## we are running the pristine project
@@ -929,7 +935,7 @@ describe "lib/cypress", ->
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_RECORD_KEY", ->
-      @setup()
+      @setup(undefined, ["sub/sub_test.coffee"])
 
       process.env.CYPRESS_RECORD_KEY = "token-123"
 
@@ -942,7 +948,7 @@ describe "lib/cypress", ->
         @expectExitWith(3)
 
     it "still records even with old --ci option", ->
-      @setup()
+      @setup(undefined, ["sub/sub_test.coffee"])
 
       @createRun.resolves("build-id-123")
       @sandbox.stub(api, "createInstance").resolves()
@@ -1025,7 +1031,21 @@ describe "lib/cypress", ->
         @expectExitWithErr("DASHBOARD_PROJECT_NOT_FOUND", "abc123")
 
     it "logs error but continues running the tests", ->
-      @setup()
+      @setup(undefined, ["sub/sub_test.coffee"])
+
+      err = new Error()
+      err.statusCode = 500
+      @createRun.rejects(err)
+
+      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123"])
+      .then =>
+        @expectExitWith(3)
+
+    ## TODO disabled until I can find out why the second spec hits
+    ## type: 'PORT_IN_USE_LONG' } +1ms
+    ##   Can't run project because port is currently in use: 8888
+    it.skip "logs error but continues running the tests (several specs)", ->
+      @setup(undefined, ["etc/etc.js", "sub/sub_test.coffee", "test1.js"])
 
       err = new Error()
       err.statusCode = 500

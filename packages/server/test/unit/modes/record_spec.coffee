@@ -3,6 +3,7 @@ require("../../spec_helper")
 os         = require("os")
 R          = require("ramda")
 api        = require("#{root}../lib/api")
+stats      = require("#{root}../lib/stats")
 stdout     = require("#{root}../lib/stdout")
 errors     = require("#{root}../lib/errors")
 logger     = require("#{root}../lib/logger")
@@ -80,14 +81,14 @@ describe "lib/modes/record", ->
 
     it "passes list of found specs", ->
       api.createRun.resolves()
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", null, null, null, projectSpecs).then ->
         specs = api.createRun.firstCall.args[0].specs
         expect(specs).to.eq(projectSpecs)
 
     it "calls api.createRun with args", ->
       api.createRun.resolves()
 
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", null, null, null, projectSpecs).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "passes groupId", ->
@@ -95,7 +96,7 @@ describe "lib/modes/record", ->
 
       group = true
       groupId = "gr123"
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId, null, projectSpecs).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "warns group flag is missing if only groupId is passed", ->
@@ -114,7 +115,7 @@ describe "lib/modes/record", ->
       api.createRun.resolves()
 
       group = true
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group).then ->
+      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, null, null, projectSpecs).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "handles status code errors of 401", ->
@@ -354,6 +355,7 @@ describe "lib/modes/record", ->
         buildId: "id-123"
         browser: "FooBrowser"
         spec: "cypress/integration/app_spec.coffee"
+        machineId: undefined
       })
 
     it "logs warning on error", ->
@@ -387,14 +389,20 @@ describe "lib/modes/record", ->
         expect(logger.createException).not.to.be.called
 
   context ".run", ->
+    mockStats = stats.create({tests: 2, passes: 1})
     beforeEach ->
       @sandbox.stub(record, "generateProjectBuildId").resolves("build-id-123")
-      @sandbox.stub(record, "createInstance").resolves("instance-id-123")
+      @sandbox.stub(record, "createInstance").resolves({instanceId: "instance-id-123"})
       @sandbox.stub(record, "uploadAssets").resolves()
       @sandbox.stub(record, "uploadStdout").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
-      @sandbox.stub(Project, "config").resolves({projectName: "projectName"})
-      @sandbox.stub(headless, "run").resolves({tests: 2, passes: 1})
+      @sandbox.stub(Project, "findSpecsFromProjectConfig").resolves(["spec.js"])
+      @sandbox.stub(Project, "config").resolves({
+        projectName: "projectName"
+        projectRoot: "/foo/bar",
+        integrationFolder: "/foo/bar/cypress/integration"
+      })
+      @sandbox.stub(headless, "run").resolves(mockStats)
       @sandbox.spy(Project, "add")
 
     it "ensures id", ->
@@ -415,7 +423,7 @@ describe "lib/modes/record", ->
     it "passes buildId + options.spec to createInstance", ->
       record.run({spec: "foo/bar/spec"})
       .then ->
-        expect(record.createInstance).to.be.calledWith("build-id-123", "foo/bar/spec")
+        expect(record.createInstance).to.be.calledWith("build-id-123", "spec.js", null)
 
     it "does not call record.createInstance or record.uploadAssets when no buildId", ->
       record.generateProjectBuildId.resolves(null)
@@ -425,17 +433,20 @@ describe "lib/modes/record", ->
         expect(record.createInstance).not.to.be.called
         expect(record.uploadAssets).not.to.be.called
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "calls headless.run + ensureAuthToken + allDone into options", ->
       opts = {foo: "bar"}
 
       record.run(opts)
       .then ->
-        expect(headless.run).to.be.calledWith({projectId: "id-123", foo: "bar", ensureAuthToken: false, allDone: false})
+        expect(headless.run).to.be.calledWith({
+          projectId: "id-123",
+          foo: "bar",
+          ensureAuthToken: false,
+          allDone: false,
+          spec: "/foo/bar/cypress/integration/spec.js"
+        })
 
     it "calls uploadAssets with instanceId, stats, and stdout", ->
       @sandbox.stub(stdout, "capture").returns({
@@ -444,7 +455,8 @@ describe "lib/modes/record", ->
 
       record.run({})
       .then ->
-        expect(record.uploadAssets).to.be.calledWith("instance-id-123", {tests: 2, passes: 1}, "foobarbaz")
+        expect(record.uploadAssets).to.be.calledWith(
+          "instance-id-123", stats.create({tests: 2, passes: 1}), "foobarbaz")
 
     it "does not call uploadAssets with no instanceId", ->
       record.createInstance.resolves(null)
@@ -453,10 +465,7 @@ describe "lib/modes/record", ->
       .then (stats) ->
         expect(record.uploadAssets).not.to.be.called
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "does not call uploadStdout with no instanceId", ->
       record.createInstance.resolves(null)
@@ -488,13 +497,16 @@ describe "lib/modes/record", ->
         console.log("bar")
         process.stdout.write("baz")
 
-        Promise.resolve({failures: 0})
+        Promise.resolve(stats.create({failures: 0}))
 
       headless.run.restore()
       @sandbox.stub(headless, "run", fn)
 
       record.run({})
       .then (stats) ->
+        console.log('stats')
+        console.log(stats)
+        expect(record.uploadStdout).to.have.been.called
         str = record.uploadStdout.getCall(0).args[1]
 
         expect(str).to.include("foo\nbar\nbaz")
@@ -507,10 +519,7 @@ describe "lib/modes/record", ->
       .then (stats) ->
         expect(terminal.header).to.be.calledWith("All Done")
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "calls headless.allDone on uploadAssets failure", ->
       @sandbox.spy(terminal, "header")
@@ -521,10 +530,7 @@ describe "lib/modes/record", ->
       .then (stats) ->
         expect(terminal.header).to.be.calledWith("All Done")
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)
 
     it "calls headless.allDone on createInstance failure", ->
       @sandbox.spy(terminal, "header")
@@ -534,7 +540,4 @@ describe "lib/modes/record", ->
       .then (stats) ->
         expect(terminal.header).to.be.calledWith("All Done")
 
-        expect(stats).to.deep.eq({
-          tests: 2
-          passes: 1
-        })
+        expect(stats).to.deep.eq(mockStats)

@@ -577,26 +577,36 @@ class Project extends EE
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 
-  # Given a path to the project, finds all specs
-  # returns list of specs with respect to the project root
-  @findSpecs = (projectPath, specPattern) ->
-    debug("finding specs for project %s", projectPath)
-    la(check.unemptyString(projectPath), "missing project path", projectPath)
-    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
+  @findSpecsFromProjectConfig = (config, specPattern) ->
+    la(check.unemptyString(config.projectRoot), "config is missing project root", config)
 
     ## if we have a spec pattern
     if specPattern
       ## then normalize to create an absolute
       ## file path from projectRoot
       ## ie: **/* turns into /Users/bmann/dev/project/**/*
-      specPattern = path.resolve(projectPath, specPattern)
+      specPattern = path.resolve(config.projectRoot, specPattern)
 
-    Project(projectPath)
-    .getConfig()
-    # TODO: handle wild card pattern or spec filename
-    .then (cfg) ->
-      files.getTestFiles(cfg, specPattern)
+    files.getTestFiles(config, specPattern)
     .then R.prop("integration")
     .then R.map(R.prop("name"))
+
+  # Given a path to the project, finds all specs
+  # returns list of specs with respect to the project root
+  @findSpecs = (projectPathOrConfig, specPattern) ->
+    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
+
+    if check.unemptyString(projectPathOrConfig)
+      debug("finding specs for project %s", projectPathOrConfig)
+      getConfig = () ->
+        Project(projectPathOrConfig)
+        .getConfig()
+    else
+      getConfig = () ->
+        Promise.resolve(projectPathOrConfig)
+
+    getConfig()
+    .then (cfg) =>
+      @findSpecsFromProjectConfig(cfg, specPattern)
 
 module.exports = Project
