@@ -39,7 +39,7 @@ describe "e2e reporters", ->
       reporter: "reporters/custom.js"
     })
 
-  describe.only "mochawesome", ->
+  describe "mochawesome", ->
     mochaAwesomes = [
       "mochawesome@1.5.2"
       "mochawesome@2.3.1"
