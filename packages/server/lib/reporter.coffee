@@ -63,7 +63,13 @@ mergeRunnable = (testProps, runnables) ->
 safelyMergeRunnable = (testProps, runnables) ->
   _.extend({}, runnables[testProps.id], testProps)
 
-mergeErr = (test, runnables) ->
+mergeErr = (test, runnables, runner) ->
+  ## increment runner failures
+  ## because thats what the fail() fn does.
+  ## useful for reporters expecting this
+  ## and for 'end' event fn callbacks
+  runner.failures += 1
+
   runnable = runnables[test.id]
   runnable.err = test.err
   runnable.state = "failed"
@@ -137,7 +143,7 @@ class Reporter
       if _.isFunction(e)
         ## transform the arguments if
         ## there is an event.fn callback
-        args = e.apply(@, args.concat(@runnables))
+        args = e.apply(@, args.concat(@runnables, @runner))
 
       [event].concat(args)
 
@@ -174,7 +180,7 @@ class Reporter
     .map(@normalize)
     .value()
 
-    stats = if @reporter then @reporter.stats else {}
+    stats = @runner.stats
 
     _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(stats, STATS)
 
