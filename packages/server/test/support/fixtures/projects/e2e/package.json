@@ -2,7 +2,6 @@
   "name": "e2e",
   "version": "0.0.0",
   "devDependencies": {
-    "mochawesome": "^1.5.2",
     "mocha": "^4.1.0",
     "react": "15.4.0"
   }

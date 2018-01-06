@@ -1,7 +1,8 @@
 _     = require("lodash")
-Mocha = require("mocha")
-chalk = require("chalk")
 path  = require("path")
+chalk = require("chalk")
+Mocha = require("mocha")
+Promise = require("bluebird")
 log   = require("./log")
 
 mochaReporters = require("mocha/lib/reporters")
@@ -172,6 +173,17 @@ class Reporter
       started:        test.started
       # videoTimestamp: test.started - videoStart
     }
+
+  end: ->
+    if @reporter.done
+      failures = @runner.failures
+
+      new Promise (resolve, reject) =>
+        @reporter.done(failures, resolve)
+      .then =>
+        @stats()
+    else
+      @stats()
 
   stats: ->
     failingTests = _
