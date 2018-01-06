@@ -107,7 +107,6 @@ module.exports = {
           ## and bin files aren't necessary for these tests
           fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
 
-
       after ->
         fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
 
@@ -116,10 +115,7 @@ module.exports = {
 
       @sandbox.stub(process, "exit")
 
-      user.set({name: "brian", authToken: "auth-token-123"})
-      .then =>
-        Project.add(e2ePath)
-      .then =>
+      Promise.try =>
         if servers = options.servers
           servers = [].concat(servers)
 
