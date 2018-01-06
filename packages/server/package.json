@@ -48,6 +48,7 @@
     "mockery": "^1.4.0",
     "nock": "9.0.22",
     "nodemon": "^1.8.1",
+    "npm-install-version": "^6.0.2",
     "obfuscator": "^0.5.0",
     "plist": "^1.1.0",
     "proxyquire": "1.7.4",

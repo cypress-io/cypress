@@ -8,6 +8,23 @@ mochaReporters = require("mocha/lib/reporters")
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
 
+if Mocha.Suite.prototype.titlePath
+  throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
+
+Mocha.Suite.prototype.titlePath = ->
+  result = []
+
+  if @parent
+    result = result.concat(@parent.titlePath())
+
+  if !@root
+    result.push(@title);
+
+  return result
+
+Mocha.Runnable.prototype.titlePath = ->
+  @parent.titlePath().concat([@title])
+
 createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
