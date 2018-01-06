@@ -91,19 +91,21 @@ module.exports = {
         })
         .then ->
           if _.isArray(npmI)
-            pathToNodeModules = path.relative(process.cwd(), Fixtures.path("projects/e2e/node_modules"))
 
-            npmI.map (version) ->
-              niv.install(version, {
-                ## walk up one dir since destination hard codes 'node_modules'
-                destination: path.join('..', pathToNodeModules, version)
-              })
+            copyToE2ENodeModules = (module) ->
+              fs.copyAsync(
+                path.resolve("node_modules", module), Fixtures.path("projects/e2e/node_modules/#{module}")
+              )
+
+            Promise
+            .map(npmI, niv.install)
+            .then ->
+              Promise.map(npmI, copyToE2ENodeModules)
 
         .then ->
           ## symlinks mess up fs.copySync
           ## and bin files aren't necessary for these tests
           fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
-
 
       after ->
         fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
@@ -113,10 +115,7 @@ module.exports = {
 
       @sandbox.stub(process, "exit")
 
-      user.set({name: "brian", authToken: "auth-token-123"})
-      .then =>
-        Project.add(e2ePath)
-      .then =>
+      Promise.try =>
         if servers = options.servers
           servers = [].concat(servers)
 
