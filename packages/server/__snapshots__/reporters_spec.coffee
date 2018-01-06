@@ -64,7 +64,7 @@ finished!
 
 `
 
-exports['e2e reporters supports npm custom reporter 1'] = `
+exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -126,7 +126,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-
+  
   Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
@@ -151,86 +151,6 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- never gets here -- before each hook.png (1280x720)
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
-
-
-  (All Done)
-
-`
-
-exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
-[mochawesome] Generating report files...
-
-
-
-  simple passing spec
-    ✓ passes
-
-
-  1 passing
-
-
-[mochawesome] Report saved to mochawesome-reports/mochawesome.html
-
-
-
-  (Tests Finished)
-
-  - Tests:           1
-  - Passes:          1
-  - Failures:        0
-  - Pending:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
-
-
-  (All Done)
-
-`
-
-exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
-
-
-  simple passing spec
-    ✓ passes
-
-
-  1 passing
-
-[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
-
-[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
-
-
-  (Tests Finished)
-
-  - Tests:           1
-  - Passes:          1
-  - Failures:        0
-  - Pending:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
 
 
   (Video)
@@ -301,7 +221,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-
+  
   Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
@@ -326,6 +246,45 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- never gets here -- before each hook.png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+
+
+  (All Done)
+
+`
+
+exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom reporter 1'] = `
+Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+  (Tests Starting)
+
+
+  simple passing spec
+    ✓ passes
+
+
+  1 passing
+
+[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
+
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+
+
+  (Tests Finished)
+
+  - Tests:           1
+  - Passes:          1
+  - Failures:        0
+  - Pending:         0
+  - Duration:        10 seconds
+  - Screenshots:     0
+  - Video Recorded:  true
+  - Cypress Version: 1.2.3
 
 
   (Video)
@@ -357,7 +316,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-
+  
   Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
@@ -393,3 +352,4 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (All Done)
 
 `
+
