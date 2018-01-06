@@ -22,6 +22,10 @@ settings     = require("#{root}../lib/util/settings")
 cp = Promise.promisifyAll(cp)
 fs = Promise.promisifyAll(fs)
 
+Promise.config({
+  longStackTraces: true
+})
+
 env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
 

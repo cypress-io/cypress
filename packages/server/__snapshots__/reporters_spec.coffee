@@ -105,7 +105,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e reporters fails with mochawesome@1.5.2 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -126,7 +126,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-  
+
   Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
@@ -163,7 +163,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 `
 
-exports['e2e reporters passes with mochawesome@1.5.2 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -204,7 +204,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e reporters passes with mochawesome@3.0.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -243,7 +243,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e reporters passes with mochawesome@2.3.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -282,7 +282,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
-exports['e2e reporters fails with mochawesome@2.3.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -301,7 +301,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-  
+
   Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
@@ -338,7 +338,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 `
 
-exports['e2e reporters fails with mochawesome@3.0.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
@@ -357,7 +357,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-  
+
   Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
@@ -393,4 +393,3 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (All Done)
 
 `
-
