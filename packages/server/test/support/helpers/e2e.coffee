@@ -91,13 +91,16 @@ module.exports = {
         })
         .then ->
           if _.isArray(npmI)
-            pathToNodeModules = path.relative(process.cwd(), Fixtures.path("projects/e2e/node_modules"))
 
-            npmI.map (version) ->
-              niv.install(version, {
-                ## walk up one dir since destination hard codes 'node_modules'
-                destination: path.join('..', pathToNodeModules, version)
-              })
+            copyToE2ENodeModules = (module) ->
+              fs.copyAsync(
+                path.resolve("node_modules", module), Fixtures.path("projects/e2e/node_modules/#{module}")
+              )
+
+            Promise
+            .map(npmI, niv.install)
+            .then ->
+              Promise.map(npmI, copyToE2ENodeModules)
 
         .then ->
           ## symlinks mess up fs.copySync
