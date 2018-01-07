@@ -1,10 +1,11 @@
 const _ = require('lodash')
 const R = require('ramda')
+const path = require('path')
 const isCi = require('is-ci')
 const chalk = require('chalk')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
-const pkg = require('@packages/root')
+const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 
 const joinWithEq = (x, y) => `${x}=${y}`
