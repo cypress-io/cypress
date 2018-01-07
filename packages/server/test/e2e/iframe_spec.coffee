@@ -84,6 +84,6 @@ describe "e2e iframes", ->
       snapshot: true
       expectedExitCode: 0
       config: {
-        hosts: "*.foo.com=127.0.0.1,*.bar.com=127.0.0.1"
+        hosts: "{*.foo.com=127.0.0.1|*.bar.com=127.0.0.1}"
       }
     })
