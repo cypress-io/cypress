@@ -135,7 +135,7 @@ create = ->
             relaunchBrowser()
       })
 
-      options = _.extend {}, config.whitelist(args), options
+      options = _.extend {}, args.config, options
 
       browsers.get()
       .then (b = []) ->
