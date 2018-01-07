@@ -60,20 +60,22 @@ describe "lib/util/args", ->
     it "converts to object literal", ->
       options = @setup("--config", "pageLoadTimeout=10000,waitForAnimations=false")
 
-      expect(options.pageLoadTimeout).eq(10000)
-      expect(options.waitForAnimations).eq(false)
+      expect(options.config.pageLoadTimeout).eq(10000)
+      expect(options.config.waitForAnimations).eq(false)
 
     it "whitelists config properties", ->
       options = @setup("--config", "foo=bar,port=1111,supportFile=path/to/support_file")
 
-      expect(options.port).to.eq(1111)
-      expect(options.supportFile).to.eq("path/to/support_file")
+      expect(options.config.port).to.eq(1111)
+      expect(options.config.supportFile).to.eq("path/to/support_file")
       expect(options).not.to.have.property("foo")
 
-    it "overrides existing flat options", ->
+    it "overrides port in config", ->
       options = @setup("--port", 2222, "--config", "port=3333")
+      expect(options.config.port).to.eq(2222)
 
-      expect(options.port).to.eq(3333)
+      options = @setup("--port", 2222)
+      expect(options.config.port).to.eq(2222)
 
   context ".toArray", ->
     beforeEach ->
@@ -92,7 +94,7 @@ describe "lib/util/args", ->
         "--get-key",
         "--env=foo=bar,baz=quux,bar=foo=quz",
         "--config",
-        "requestTimeout=1234,responseTimeout=9876,blacklistHosts=a.com|b.com"
+        "requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
         "--reporter-options=foo=bar"
         "--spec=foo,bar,baz",
       )
@@ -116,18 +118,15 @@ describe "lib/util/args", ->
         }
         config: {
           requestTimeout: 1234
-          responseTimeout: 9876
           blacklistHosts: "a.com|b.com"
+          hosts: "a=b|b=c"
         }
-        _config: "requestTimeout=1234,responseTimeout=9876,blacklistHosts=a.com|b.com"
-        requestTimeout: 1234
-        responseTimeout: 9876
+        _config: "requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
         "reporter-options": "foo=bar"
         _reporterOptions: "foo=bar"
         reporterOptions: {
           foo: "bar"
         }
-        blacklistHosts: "a.com|b.com"
         _spec: "foo,bar,baz"
         spec: [
           path.join(cwd, "foo"),
@@ -141,12 +140,9 @@ describe "lib/util/args", ->
         "--cwd=#{cwd}"
         "--getKey=true"
         "--spec=foo,bar,baz",
-        "--config=requestTimeout=1234,responseTimeout=9876,blacklistHosts=a.com|b.com"
-        "--env=foo=bar,baz=quux,bar=foo=quz"
         "--reporterOptions=foo=bar"
-        "--blacklistHosts=a.com|b.com"
-        "--requestTimeout=1234"
-        "--responseTimeout=9876",
+        "--env=foo=bar,baz=quux,bar=foo=quz"
+        "--config=requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
       ])
 
   context "--updating", ->
