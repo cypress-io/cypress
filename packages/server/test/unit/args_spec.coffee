@@ -92,7 +92,7 @@ describe "lib/util/args", ->
         "--get-key",
         "--env=foo=bar,baz=quux,bar=foo=quz",
         "--config",
-        "requestTimeout=1234,responseTimeout=9876"
+        "requestTimeout=1234,responseTimeout=9876,blacklistHosts=a.com|b.com"
         "--reporter-options=foo=bar"
         "--spec=foo,bar,baz",
       )
@@ -117,8 +117,9 @@ describe "lib/util/args", ->
         config: {
           requestTimeout: 1234
           responseTimeout: 9876
+          blacklistHosts: "a.com|b.com"
         }
-        _config: "requestTimeout=1234,responseTimeout=9876"
+        _config: "requestTimeout=1234,responseTimeout=9876,blacklistHosts=a.com|b.com"
         requestTimeout: 1234
         responseTimeout: 9876
         "reporter-options": "foo=bar"
@@ -126,6 +127,7 @@ describe "lib/util/args", ->
         reporterOptions: {
           foo: "bar"
         }
+        blacklistHosts: "a.com|b.com"
         _spec: "foo,bar,baz"
         spec: [
           path.join(cwd, "foo"),
@@ -139,9 +141,10 @@ describe "lib/util/args", ->
         "--cwd=#{cwd}"
         "--getKey=true"
         "--spec=foo,bar,baz",
-        "--config=requestTimeout=1234,responseTimeout=9876"
+        "--config=requestTimeout=1234,responseTimeout=9876,blacklistHosts=a.com|b.com"
         "--env=foo=bar,baz=quux,bar=foo=quz"
         "--reporterOptions=foo=bar"
+        "--blacklistHosts=a.com|b.com"
         "--requestTimeout=1234"
         "--responseTimeout=9876",
       ])

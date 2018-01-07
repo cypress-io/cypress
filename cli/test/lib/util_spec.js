@@ -90,6 +90,22 @@ describe('util', function () {
       }
       snapshot('reporter_options_as_object', normalizeModuleOptions(options))
     })
+
+    it('converts specs array', () => {
+      const options = {
+        spec: [
+          'a', 'b', 'c',
+        ],
+      }
+      snapshot('spec_as_array', normalizeModuleOptions(options))
+    })
+
+    it('does not convert spec when string', () => {
+      const options = {
+        spec: 'x,y,z',
+      }
+      snapshot('spec_as_string', normalizeModuleOptions(options))
+    })
   })
 
   context('.supportsColor', function () {
