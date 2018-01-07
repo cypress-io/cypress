@@ -105,6 +105,6 @@ describe "e2e subdomain", ->
       snapshot: true
       expectedExitCode: 0
       config: {
-        hosts: "*.foobar.com=127.0.0.1"
+        hosts: "{*.foobar.com=127.0.0.1}"
       }
     })
