@@ -77,17 +77,19 @@ describe "lib/util/args", ->
 
   context ".toArray", ->
     beforeEach ->
-      @obj = {hosts: {"*.foobar.com": "127.0.0.1"}, _hosts: "*.foobar.com=127.0.0.1", project: "foo/bar"}
+      @obj = {config: {foo: "bar"}, _config: "foo=bar", project: "foo/bar"}
 
     it "rejects values which have an cooresponding underscore'd key", ->
-      expect(argsUtil.toArray(@obj)).to.deep.eq(["--project=foo/bar", "--hosts=*.foobar.com=127.0.0.1"])
+      expect(argsUtil.toArray(@obj)).to.deep.eq([
+        "--project=foo/bar",
+        "--config=foo=bar"
+      ])
 
   context ".toObject", ->
     beforeEach ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup(
         "--get-key",
-        "--hosts=*.foobar.com=127.0.0.1",
         "--env=foo=bar,baz=quux,bar=foo=quz",
         "--config",
         "requestTimeout=1234,responseTimeout=9876"
@@ -100,14 +102,12 @@ describe "lib/util/args", ->
       expect(@setup("--no-record").record).to.be.false
       expect(@setup("--record=false").record).to.be.false
 
-    it "backs up hosts, env, config, reporterOptions, spec", ->
+    it "backs up env, config, reporterOptions, spec", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
         "get-key": true
         getKey: true
-        _hosts: "*.foobar.com=127.0.0.1"
-        hosts: {"*.foobar.com": "127.0.0.1"}
         _env: "foo=bar,baz=quux,bar=foo=quz"
         env: {
           foo: "bar"
@@ -140,7 +140,6 @@ describe "lib/util/args", ->
         "--getKey=true"
         "--spec=foo,bar,baz",
         "--config=requestTimeout=1234,responseTimeout=9876"
-        "--hosts=*.foobar.com=127.0.0.1"
         "--env=foo=bar,baz=quux,bar=foo=quz"
         "--reporterOptions=foo=bar"
         "--requestTimeout=1234"
