@@ -1,11 +1,10 @@
 const _ = require('lodash')
 const R = require('ramda')
-const path = require('path')
 const isCi = require('is-ci')
 const chalk = require('chalk')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
-const pkg = require(path.join(__dirname, '..', 'package.json'))
+const pkg = require('@packages/root')
 const logger = require('./logger')
 
 const joinWithEq = (x, y) => `${x}=${y}`
@@ -18,11 +17,15 @@ const objectToString = (obj) =>
 const normalizeObject = (env) =>
   _.isPlainObject(env) ? objectToString(env) : env
 
+const normalizeArray = (arr) =>
+  _.isArray(arr) ? arr.join(',') : arr
+
 function normalizeModuleOptions (options = {}) {
   return R.evolve({
     env: normalizeObject,
     config: normalizeObject,
     reporterOptions: normalizeObject,
+    spec: normalizeArray,
   })(options)
 }
 

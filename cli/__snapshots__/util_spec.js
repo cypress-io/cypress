@@ -17,3 +17,11 @@ exports['reporter_options_as_object 1'] = {
 exports['others_unchanged 1'] = {
   "foo": "bar"
 }
+
+exports['spec_as_array 1'] = {
+  "spec": "a,b,c"
+}
+
+exports['spec_as_string 1'] = {
+  "spec": "x,y,z"
+}
