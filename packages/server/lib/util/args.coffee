@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exit exitWithCode hosts browser headless outputPath group groupId parallel parallelId".split(" ")
+whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exit exitWithCode browser headless outputPath group groupId parallel parallelId".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 everythingAfterFirstEqualRe = /=(.+)/
@@ -117,8 +117,6 @@ module.exports = {
 
       options.spec = parseArrayValues(spec).map(resolvePath)
     if hosts = options.hosts
-      backup("hosts", options)
-      options.hosts = parseNestedValues(hosts)
 
     if envs = options.env
       backup("env", options)
