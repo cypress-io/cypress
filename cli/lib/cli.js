@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const path = require('path')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
@@ -35,10 +34,6 @@ const parseOpts = (opts) => {
     'parallel',
     'parallelId'
   )
-
-  if (opts.project) {
-    opts.project = path.resolve(opts.project)
-  }
 
   debug('parsed cli options', opts)
 

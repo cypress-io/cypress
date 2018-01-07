@@ -3,6 +3,8 @@ require("../spec_helper")
 path     = require("path")
 argsUtil = require("#{root}lib/util/args")
 
+cwd = process.cwd()
+
 describe "lib/util/args", ->
   beforeEach ->
     @setup = (args...) ->
@@ -15,13 +17,13 @@ describe "lib/util/args", ->
 
   context "--project", ->
     it "sets projectPath", ->
-      projectPath = path.resolve(process.cwd(), "./foo/bar")
+      projectPath = path.resolve(cwd, "./foo/bar")
       options = @setup("--project", "./foo/bar")
       expect(options.projectPath).to.eq projectPath
 
   context "--run-project", ->
     it "sets projectPath", ->
-      projectPath = path.resolve(process.cwd(), "/baz")
+      projectPath = path.resolve(cwd, "/baz")
       options = @setup("--run-project", "/baz")
       expect(options.projectPath).to.eq projectPath
 
@@ -34,6 +36,10 @@ describe "lib/util/args", ->
     it "does not strip if there are multiple double quotes", ->
       options = @setup("--run-project", '"foo bar"')
       expect(options.runProject).to.eq('"foo bar"')
+
+  context "--spec", ->
+    it "converts to array", ->
+
 
   context "--port", ->
     it "converts to Number", ->
@@ -79,15 +85,24 @@ describe "lib/util/args", ->
   context ".toObject", ->
     beforeEach ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
-      @obj = @setup("--get-key", "--hosts=*.foobar.com=127.0.0.1", "--env=foo=bar,baz=quux,bar=foo=quz", "--config", "requestTimeout=1234,responseTimeout=9876")
+      @obj = @setup(
+        "--get-key",
+        "--hosts=*.foobar.com=127.0.0.1",
+        "--env=foo=bar,baz=quux,bar=foo=quz",
+        "--config",
+        "requestTimeout=1234,responseTimeout=9876"
+        "--reporter-options=foo=bar"
+        "--spec=foo,bar,baz",
+      )
 
     it "coerces booleans", ->
       expect(@setup("--foo=true").foo).be.true
       expect(@setup("--no-record").record).to.be.false
       expect(@setup("--record=false").record).to.be.false
 
-    it "backs up hosts + env", ->
+    it "backs up hosts, env, config, reporterOptions, spec", ->
       expect(@obj).to.deep.eq({
+        cwd
         _: []
         "get-key": true
         getKey: true
@@ -106,16 +121,30 @@ describe "lib/util/args", ->
         _config: "requestTimeout=1234,responseTimeout=9876"
         requestTimeout: 1234
         responseTimeout: 9876
+        "reporter-options": "foo=bar"
+        _reporterOptions: "foo=bar"
+        reporterOptions: {
+          foo: "bar"
+        }
+        _spec: "foo,bar,baz"
+        spec: [
+          path.join(cwd, "foo"),
+          path.join(cwd, "bar"),
+          path.join(cwd, "baz")
+        ]
       })
 
     it "can transpose back to an array", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
+        "--cwd=#{cwd}"
         "--getKey=true"
+        "--spec=foo,bar,baz",
         "--config=requestTimeout=1234,responseTimeout=9876"
         "--hosts=*.foobar.com=127.0.0.1"
         "--env=foo=bar,baz=quux,bar=foo=quz"
+        "--reporterOptions=foo=bar"
         "--requestTimeout=1234"
-        "--responseTimeout=9876"
+        "--responseTimeout=9876",
       ])
 
   context "--updating", ->
@@ -131,6 +160,7 @@ describe "lib/util/args", ->
       ]
 
       expect(argsUtil.toObject(argv)).to.deep.eq({
+        cwd
         _: [
           "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
           "/Applications/Cypress.app"
@@ -152,6 +182,7 @@ describe "lib/util/args", ->
       ]
 
       expect(argsUtil.toObject(argv)).to.deep.eq({
+        cwd
         _: [
           "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
           "/Applications/Cypress.app1"

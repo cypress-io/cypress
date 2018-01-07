@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exit exitWithCode hosts browser headless outputPath group groupId parallel parallelId".split(" ")
+whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exit exitWithCode hosts browser headless outputPath group groupId parallel parallelId".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 everythingAfterFirstEqualRe = /=(.+)/
@@ -38,6 +38,9 @@ normalizeBackslashes = (options) ->
       options[property] = normalizeBackslash(options[property])
 
   options
+
+parseArrayValues = (vals) ->
+  [].concat(vals.split(','))
 
 parseNestedValues = (vals) ->
   ## convert foo=bar,version=1.2.3 to
@@ -84,11 +87,16 @@ module.exports = {
       }
     })
 
-    whitelisted = _.pick(argv, whitelist...)
+    whitelisted = _.pick(argv, whitelist)
 
     options = _
     .chain(options)
     .defaults(whitelisted)
+    .defaults({
+      ## set in case we
+      ## bypassed the cli
+      cwd: process.cwd()
+    })
     .mapValues(coerce)
     .value()
 
@@ -102,6 +110,13 @@ module.exports = {
       ## and apply them to both appPath + execPath
       [options.appPath, options.execPath] = options._.slice(-2)
 
+    if spec = options.spec
+      backup("spec", options)
+
+      resolvePath = (p) ->
+        path.resolve(options.cwd, p)
+
+      options.spec = parseArrayValues(spec).map(resolvePath)
     if hosts = options.hosts
       backup("hosts", options)
       options.hosts = parseNestedValues(hosts)
@@ -131,11 +146,11 @@ module.exports = {
 
     ## normalize project to projectPath
     if p = options.project or options.runProject
-      options.projectPath = path.resolve(cwd(), p)
+      options.projectPath = path.resolve(options.cwd, p)
 
-    ## normalize output path from current working directory
+    ## normalize output path from previous current working directory
     if op = options.outputPath
-      options.outputPath = path.resolve(cwd(), op)
+      options.outputPath = path.resolve(options.cwd, op)
 
     if options.runProject
       options.run = true
