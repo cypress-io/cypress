@@ -2,7 +2,6 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 coerce   = require("./coerce")
-config   = require("../config")
 cwd      = require("../cwd")
 
 nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
