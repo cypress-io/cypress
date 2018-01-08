@@ -8,7 +8,17 @@ Promise  = require("bluebird")
 fs       = Promise.promisifyAll(fs)
 e2ePath  = Fixtures.projectPath("e2e")
 
+mochaAwesomes = [
+  "mochawesome@1.5.2"
+  "mochawesome@2.3.1"
+  "mochawesome@3.0.1"
+]
+
 describe "e2e reporters", ->
+  e2e.setup({
+    npmInstall: mochaAwesomes
+  })
+
   it "reports error if cannot load reporter", ->
     e2e.exec(@, {
       spec: "simple_passing_spec.coffee"
@@ -40,16 +50,6 @@ describe "e2e reporters", ->
     })
 
   describe "mochawesome", ->
-    mochaAwesomes = [
-      "mochawesome@1.5.2"
-      "mochawesome@2.3.1"
-      "mochawesome@3.0.1"
-    ]
-
-    e2e.setup({
-      npmInstall: mochaAwesomes
-    })
-
     mochaAwesomes.forEach (ma) ->
       it "passes with #{ma} npm custom reporter", ->
         e2e.exec(@, {
