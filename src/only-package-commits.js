@@ -1,10 +1,11 @@
-const { pipeP } = require('ramda');
+const { identity, memoizeWith, pipeP } = require('ramda');
 const pkgUp = require('pkg-up');
 const readPkg = require('read-pkg');
 const debug = require('debug')('semantic-release:monorepo');
-
 const { getCommitFiles, getGitRoot } = require('./git-utils');
 const { mapCommits } = require('./options-transforms');
+
+const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
 
 const getPackagePath = async () => {
   const path = await pkgUp();
@@ -15,7 +16,7 @@ const getPackagePath = async () => {
 const withFiles = async commits => {
   return Promise.all(
     commits.map(async commit => {
-      const files = await getCommitFiles(commit.hash);
+      const files = await memoizedGetCommitFiles(commit.hash);
       return { ...commit, files };
     })
   );

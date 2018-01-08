@@ -3,6 +3,7 @@ const pluginDefinitions = require('semantic-release/lib/plugins/definitions');
 const withOnlyPackageCommits = require('./only-package-commits');
 const versionToGitTag = require('./version-to-git-tag');
 const withVersionHead = require('./with-version-head');
+const logPluginVersion = require('./log-plugin-version');
 const {
   wrapPlugin,
   wrapMultiPlugin,
@@ -20,7 +21,7 @@ const NAMESPACE = 'monorepo';
 const analyzeCommits = wrapPlugin(
   NAMESPACE,
   'analyzeCommits',
-  withOnlyPackageCommits,
+  compose(logPluginVersion('analyzeCommits'), withOnlyPackageCommits),
   pluginDefinitions.analyzeCommits.default
 );
 
@@ -28,6 +29,7 @@ const generateNotes = wrapPlugin(
   NAMESPACE,
   'generateNotes',
   compose(
+    logPluginVersion('generateNotes'),
     withOnlyPackageCommits,
     withOptionsTransforms([
       mapLastReleaseVersionToLastReleaseGitTag(versionToGitTag),
@@ -41,16 +43,19 @@ const generateNotes = wrapPlugin(
 const getLastRelease = wrapPlugin(
   NAMESPACE,
   'getLastRelease',
-  withVersionHead,
+  compose(logPluginVersion('getLastRelease'), withVersionHead),
   pluginDefinitions.getLastRelease.default
 );
 
 const publish = wrapMultiPlugin(
   NAMESPACE,
   'publish',
-  withOptionsTransforms([
-    mapNextReleaseVersionToNextReleaseGitTag(versionToGitTag),
-  ]),
+  compose(
+    logPluginVersion('publish'),
+    withOptionsTransforms([
+      mapNextReleaseVersionToNextReleaseGitTag(versionToGitTag),
+    ])
+  ),
   pluginDefinitions.publish.default
 );
 
