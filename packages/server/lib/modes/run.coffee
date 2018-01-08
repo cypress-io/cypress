@@ -45,21 +45,38 @@ collectTestResults = (obj) ->
     version:     pkg.version
   }
 
+getProjectId = (project, id) ->
+  ## if we have an ID just use it
+  if id
+    return Promise.resolve(id)
+
+  project
+  .getProjectId()
+  .catch ->
+    ## no id no problem
+    return null
+
+reduceRuns = (runs, prop) ->
+  _.reduce runs, (memo, run) ->
+    memo += _.get(run, prop)
+  , 0
+
+writeOutput = (outputPath, results) ->
+  Promise.try ->
+    return if not outputPath
+
+    debug("saving output results as %s", outputPath)
+
+    fs.outputJsonAsync(outputPath, results)
+
 module.exports = {
   collectTestResults
 
-  getProjectId: (project, id) ->
-    ## if we have an ID just use it
-    if id
-      return Promise.resolve(id)
+  getProjectId
 
-    project
-    .getProjectId()
-    .catch ->
-      ## no id no problem
-      return null
+  writeOutput
 
-  openProject: (id, options) ->
+  createOpenProject: (id, options) ->
     ## now open the project to boot the server
     ## putting our web client app in headless mode
     ## - NO  display server logs (via morgan)
@@ -222,7 +239,7 @@ module.exports = {
 
     browserOpts.projectPath = options.projectPath
 
-    openProject.launch(browser, spec, browserOpts)
+    openProject.launch(browser, spec.absolute, browserOpts)
 
   listenForProjectEnd: (project, headed, exit) ->
     new Promise (resolve) ->
@@ -232,6 +249,7 @@ module.exports = {
         ## probably should say we ended
         ## early too: (Ended Early: true)
         ## in the stats
+        ## TODO: add more ended early stuff
         obj = {
           error:        errors.stripAnsi(errMsg)
           failures:     1
@@ -301,7 +319,7 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath, exit } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
 
     @listenForProjectEnd(project, headed, exit)
     .then (obj) =>
@@ -311,23 +329,12 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
+      obj.spec = spec.path
+
       testResults = collectTestResults(obj)
 
-      writeOutput = ->
-        if not outputPath
-          return Promise.resolve()
-
-        debug("saving results as %s", outputPath)
-
-        fs.outputJsonAsync(outputPath, testResults)
-
       finish = ->
-        writeOutput()
-        .then ->
-          project.getConfig()
-        .then (cfg) ->
-          obj.config = cfg
-        .return(obj)
+        return obj
 
       @displayStats(testResults)
 
@@ -414,12 +421,65 @@ module.exports = {
 
     console.log("")
 
-  runTests: (options = {}) ->
+  runSpecs: (options = {}) ->
+    { project, config, outputPath } = options
+
+    results = {
+      start: null
+      end: null
+      duration: null
+      totalTests: null,
+      totalFailures: null,
+      totalPasses: null,
+      totalPending: null,
+      runs: null
+      browserName: 'chrome',
+      browserVersion: '41.2.3.4',
+      osName: 'darwin',
+      osVersion: '1.2.3.4',
+      cypressVersion: '2.0.0',
+      config
+    }
+
+    project.getSpecs(options.spec)
+    .then (specs = []) =>
+      if not specs.length
+        ## TODO: throw error when no specs found
+        ## errors.throw('NO_SPECS_FOUND', options.spec)
+        "asdf"
+        # SPEC_FILE_NOT_FOUND, specFile
+
+      names = _.map(specs, "name")
+      debug("found '%d' specs using spec pattern '%s': %o", names.length, options.spec, names)
+
+      runSpec = (spec) =>
+        @runSpec(spec, options)
+        .get("results")
+
+      Promise.map(specs, runSpec, { concurrency: 1 })
+    .then (runs = []) ->
+      results.start = start = _.first(runs).start
+      results.end = end = _.last(runs).end
+      results.duration = end - start
+
+      results.totalSuites = reduceRuns(runs, "stats.suites")
+      results.totalTests = reduceRuns(runs, "stats.tests")
+      results.totalPasses = reduceRuns(runs, "stats.passes")
+      results.totalPending = reduceRuns(runs, "stats.pending")
+      results.totalFailures = reduceRuns(runs, "stats.failures")
+
+      results.runs = runs
+
+      debug("final results of all runs: %o", results)
+
+      writeOutput(outputPath, results)
+      .return(results)
+
+  runSpec: (spec = {}, options = {}) ->
     { browser, videoRecording, videosFolder } = options
-    debug("runTests with options", options)
 
     browser ?= "electron"
-    debug("runTests for browser #{browser}")
+    debug("browser for run is: #{browser}")
 
     screenshots = []
 
@@ -435,12 +495,11 @@ module.exports = {
 
     if videoRecording
       if browserCanBeRecorded(browser)
-        if !videosFolder
+        if not videosFolder
           throw new Error("Missing videoFolder for recording")
 
-        id2       = random.id()
-        name      = path.join(videosFolder, id2 + ".mp4")
-        cname     = path.join(videosFolder, id2 + "-compressed.mp4")
+        name      = path.join(videosFolder, spec.name + ".mp4")
+        cname     = path.join(videosFolder, spec.name + "-compressed.mp4")
         recording = @createRecording(name)
       else
         if browser is "electron" and options.headed
@@ -460,88 +519,89 @@ module.exports = {
       Promise.resolve(start)
       .then (started) =>
         Promise.props({
-          stats:      @waitForTestsToFinishRunning({
+          results: @waitForTestsToFinishRunning({
+            end
+            name
+            spec
+            cname
+            started
+            screenshots
             exit:                 options.exit
             headed:               options.headed
             project:              options.project
             videoCompression:     options.videoCompression
             videoUploadOnPasses:  options.videoUploadOnPasses
-            outputPath:           options.outputPath
-            end
-            name
-            cname
-            started
-            screenshots
           }),
 
           connection: @waitForBrowserToConnect({
-            spec:        options.spec
+            spec
+            write
+            browser
+            screenshots
             headed:      options.headed
             project:     options.project
             socketId:    options.socketId
             webSecurity: options.webSecurity
             projectPath: options.projectPath
-            write
-            browser
-            screenshots
           })
         })
 
   ready: (options = {}) ->
     debug("run mode ready with options %j", options)
 
-    if options.spec
-      debug("spec pattern given", options.spec)
-
     socketId = random.id()
 
     { projectPath } = options
 
     ## let's first make sure this project exists
-    Project.ensureExists(projectPath)
+    Project
+    .ensureExists(projectPath)
     .then =>
       ## open this project without
       ## adding it to the global cache
-      @openProject(socketId, options)
+      @createOpenProject(socketId, options)
       .call("getProject")
-      .then (project) =>
-        Promise.all([
-          @getProjectId(project, options.projectId)
+    .then (project) =>
+      Promise.all([
+        project
 
-          project.getConfig(),
-        ])
-        .spread (projectId, config) =>
-          ## if we have a project id and a key but record hasnt
-          ## been set
-          if haveProjectIdAndKeyButNoRecordOption(projectId, options)
-            ## log a warning telling the user
-            ## that they either need to provide us
-            ## with a RECORD_KEY or turn off
-            ## record mode
-            errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+        getProjectId(project, options.projectId)
 
-          @trashAssets(config)
-          .then =>
-            @runTests({
-              projectPath
-              socketId:             socketId
-              project:              project
-              videosFolder:         config.videosFolder
-              videoRecording:       config.videoRecording
-              videoCompression:     config.videoCompression
-              videoUploadOnPasses:  config.videoUploadOnPasses
-              exit:                 options.exit
-              spec:                 options.spec
-              headed:               options.headed
-              browser:              options.browser
-              outputPath:           options.outputPath
-            })
-          .get("stats")
-          .finally =>
-            @copy(config.videosFolder, config.screenshotsFolder)
-            .then =>
-              if options.allDone isnt false
-                @allDone()
+        project.getConfig(),
+      ])
+    .spread (project, projectId, config) =>
+      ## if we have a project id and a key but record hasnt
+      ## been set
+      if haveProjectIdAndKeyButNoRecordOption(projectId, options)
+        ## log a warning telling the user
+        ## that they either need to provide us
+        ## with a RECORD_KEY or turn off
+        ## record mode
+        errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+
+      @trashAssets(config)
+      .then =>
+        @runSpecs({
+          projectPath
+          socketId
+          project
+          config
+          videosFolder:         config.videosFolder
+          videoRecording:       config.videoRecording
+          videoCompression:     config.videoCompression
+          videoUploadOnPasses:  config.videoUploadOnPasses
+          exit:                 options.exit
+          spec:                 options.spec
+          headed:               options.headed
+          browser:              options.browser
+          outputPath:           options.outputPath
+        })
+      .finally =>
+        ## TODO: remove this
+        @copy(config.videosFolder, config.screenshotsFolder)
+        .then =>
+          if options.allDone isnt false
+            @allDone()
 
   run: (options) ->
     electronApp

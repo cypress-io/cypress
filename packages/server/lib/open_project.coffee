@@ -45,7 +45,7 @@ create = ->
       ## of potential domain changes, request buffers, etc
       @reset()
       .then ->
-        openProject.ensureSpecUrl(spec)
+        openProject.getSpecUrl(spec)
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->

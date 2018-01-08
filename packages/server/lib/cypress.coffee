@@ -54,10 +54,10 @@ module.exports = {
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
           fn = (code) ->
-            ## juggle up the failures since our outer
+            ## juggle up the totalFailures since our outer
             ## promise is expecting this object structure
             log("electron finished with", code)
-            resolve({failures: code})
+            resolve({totalFailures: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
   openProject: (options) ->
@@ -232,9 +232,9 @@ module.exports = {
 
       when "run"
         ## run headlessly and exit
-        ## with num of failures
+        ## with num of totalFailures
         @runElectron(mode, options)
-        .get("failures")
+        .get("totalFailures")
         .then(exit)
         .catch(exitErr)
 
@@ -244,7 +244,7 @@ module.exports = {
       when "record"
         ## run headlessly, record, and exit
         @runElectron(mode, options)
-        .get("failures")
+        .get("totalFailures")
         .then(exit)
         .catch(exitErr)
 
