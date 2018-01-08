@@ -15,7 +15,7 @@ TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
-RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body".split(" ")
+RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body speed".split(" ")
 
 # ## initial payload
 # {
@@ -458,10 +458,14 @@ hookFailed = (hook, err, hookName, getTestById, setTest) ->
 
 _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
   _runner.on "start", ->
-    Cypress.action("runner:start")
+    Cypress.action("runner:start", {
+      start: new Date()
+    })
 
   _runner.on "end", ->
-    Cypress.action("runner:end")
+    Cypress.action("runner:end", {
+      end: new Date()
+    })
 
   _runner.on "suite", (suite) ->
     return if _emissions.started[suite.id]

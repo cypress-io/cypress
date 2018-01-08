@@ -53,23 +53,41 @@ createRunnable = (obj, parent) ->
 
   return runnable
 
-mergeRunnable = (testProps, runnables) ->
-  runnable = runnables[testProps.id]
+mergeRunnable = (eventName) ->
+  return (testProps, runnables, stats) ->
+    switch eventName
+      when "test"
+        ## we deviate here from the defaul spec reporter
+        ## because cypress considers a 'test' the test body
+        ## including the hooks as opposed to only when the
+        ## test finishes
+        stats.tests += 1
+      when "pass"
+        stats.passes += 1
+      when "pending"
+        stats.pending += 1
+      when "suite"
+        ## dont increment if root suite
+        if not testProps.root
+          stats.suites += 1
 
-  if not runnable.started
-    testProps.started = Date.now()
+    runnable = runnables[testProps.id]
 
-  _.extend(runnable, testProps)
+    ## TODO: fix this
+    if not runnable.started
+      testProps.started = Date.now()
+
+    _.extend(runnable, testProps)
 
 safelyMergeRunnable = (testProps, runnables) ->
   _.extend({}, runnables[testProps.id], testProps)
 
-mergeErr = (test, runnables, runner) ->
-  ## increment runner failures
+mergeErr = (test, runnables, stats) ->
+  ## increment stats failures
   ## because thats what the fail() fn does.
   ## useful for reporters expecting this
   ## and for 'end' event fn callbacks
-  runner.failures += 1
+  stats.failures += 1
 
   runnable = runnables[test.id]
   runnable.err = test.err
@@ -78,17 +96,26 @@ mergeErr = (test, runnables, runner) ->
   runnable = _.extend({}, runnable, {title: test.title})
   [runnable, test.err]
 
+setDate = (obj, runnables, stats) ->
+  if s = obj.start
+    stats.start = new Date(s)
+
+  if e = obj.end
+    stats.end = new Date(e)
+
+  return null
+
 events = {
-  "start":     true
-  "end":       true
-  "suite":     mergeRunnable
-  "suite end": mergeRunnable
-  "test":      mergeRunnable
-  "test end":  mergeRunnable
+  "start":     setDate
+  "end":       setDate
+  "suite":     mergeRunnable("suite")
+  "suite end": mergeRunnable("suite end")
+  "test":      mergeRunnable("test")
+  "test end":  mergeRunnable("test end")
   "hook":      safelyMergeRunnable
   "hook end":  safelyMergeRunnable
-  "pass":      mergeRunnable
-  "pending":   mergeRunnable
+  "pass":      mergeRunnable("pass")
+  "pending":   mergeRunnable("pending")
   "fail":      mergeErr
 }
 
@@ -107,13 +134,17 @@ class Reporter
     @reporterOptions = reporterOptions
 
   setRunnables: (rootRunnable = {}) ->
+    ## manage stats ourselves
+    @stats = { suites: 0, tests: 0, passes: 0, pending: 0, failures: 0 }
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
     reporter = Reporter.loadReporter(@reporterName, @projectRoot)
     @mocha = new Mocha({reporter: reporter})
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
-    @reporter = new @mocha._reporter(@runner, {reporterOptions: @reporterOptions})
+    @reporter = new @mocha._reporter(@runner, {
+      reporterOptions: @reporterOptions
+    })
 
     @runner.ignoreLeaks = true
 
@@ -144,7 +175,7 @@ class Reporter
       if _.isFunction(e)
         ## transform the arguments if
         ## there is an event.fn callback
-        args = e.apply(@, args.concat(@runnables, @runner))
+        args = e.apply(@, args.concat(@runnables, @stats))
 
       [event].concat(args)
 
@@ -166,7 +197,7 @@ class Reporter
 
     {
       clientId:       test.id
-      title:          getParentTitle(test, titles).join(" /// ")
+      title:          getParentTitle(test, titles)
       duration:       test.duration
       stack:          err.stack
       error:          err.message
@@ -181,20 +212,33 @@ class Reporter
       new Promise (resolve, reject) =>
         @reporter.done(failures, resolve)
       .then =>
-        @stats()
+        @results()
     else
-      @stats()
+      @results()
 
-  stats: ->
-    failingTests = _
+  results: ->
+    tests = _
     .chain(@runnables)
-    .filter({state: "failed"})
     .map(@normalize)
     .value()
 
-    stats = @runner.stats
+    { start, end } = @stats
 
-    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(stats, STATS)
+    if start and end
+      @stats.duration = end - start
+
+    ## return an object of results
+    return {
+      ## this is our own stats object
+      stats: @stats
+
+      reporter: @reporterName
+
+      ## this comes from the reporter, not us
+      reporterStats: @runner.stats
+
+      tests
+    }
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
