@@ -42,10 +42,25 @@ groupIds = (provider) -> {
   circle:   process.env.CIRCLE_WORKFLOW_ID
 }[provider]
 
+# returns a common ID based on environment variables
+# that can be used to determine if CI workers running
+# in parallel are really related to the same build
 parallelIds = (provider) -> {
-  # for CircleCI v1 use build id
+  # for CircleCI v1 and v2 use build id
   # and parallelize using project configuration UI
+  # (setting parallelize CircleCI GUI option in v1 or "parallelism" job option in v2)
+  # we could switch to using CIRCLE_WORKFLOW_JOB_ID for Circle v2
+  # but for now do not see any advantage
   circle:   process.env.CIRCLE_BUILD_NUM
+  # in Travis assume there are multiple jobs in the same build stage
+  # they all still share the same build number like 4
+  # could also use TRAVIS_BUILD_ID like 326542068
+  travis:   process.env.TRAVIS_BUILD_NUMBER
+  # Codeship Pro (dockerized build) can run multiple jobs in parallel
+  # using "type: parallel" flag and listing multiple steps
+  # https://documentation.codeship.com/pro/continuous-integration/parallel-pro/#setting-up-parallel-steps
+  # they all have same CI_BUILD_ID
+  codeship: process.env.CI_BUILD_ID
 }[provider]
 
 params = (provider) -> {
