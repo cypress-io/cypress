@@ -17,7 +17,7 @@ connect     = require("../util/connect")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
-  debug("got request for event:", type, arg)
+  debug("got request for event: %s, %o", type, arg)
 
   sendResponse = (data = {}) ->
     try

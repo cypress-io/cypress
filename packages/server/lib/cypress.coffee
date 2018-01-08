@@ -13,13 +13,13 @@ _       = require("lodash")
 cp      = require("child_process")
 path    = require("path")
 Promise = require("bluebird")
-log     = require('./log')
+debug   = require('debug')('cypress:server:cypress')
 
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
   ## but cannot figure out how null is
   ## being passed into exit
-  log("about to exit with code", code)
+  debug("about to exit with code", code)
   process.exit(code)
 
 exit0 = ->
@@ -29,7 +29,7 @@ exitErr = (err) ->
   ## log errors to the console
   ## and potentially raygun
   ## and exit with 1
-  log('exiting with err', err)
+  debug('exiting with err', err)
   require("./errors").log(err)
   .then -> exit(1)
 
@@ -56,7 +56,7 @@ module.exports = {
           fn = (code) ->
             ## juggle up the failures since our outer
             ## promise is expecting this object structure
-            log("electron finished with", code)
+            debug("electron finished with", code)
             resolve({failures: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
@@ -108,7 +108,6 @@ module.exports = {
 
   start: (argv = []) ->
     require("./logger").info("starting desktop app", args: argv)
-    log("starting cypress server")
 
     ## make sure we have the appData folder
     require("./util/app_data").ensure()
@@ -170,7 +169,8 @@ module.exports = {
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->
-    log("start in mode %s with options %j", mode, options)
+    debug("start in mode %s with options %j", mode, options)
+
     switch mode
       when "removeIds"
         require("./project").removeIds(options.projectPath)
