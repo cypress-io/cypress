@@ -15,7 +15,7 @@ TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
-RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body speed".split(" ")
+RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration fnDuration start end timings".split(" ")
 
 # ## initial payload
 # {
@@ -320,7 +320,7 @@ getTestResults = (tests) ->
       obj.state = "skipped"
     obj
 
-normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getId) ->
+normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getTestId) ->
   hasTests = false
 
   ## only loop until we find the first test
@@ -337,7 +337,7 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
   tests         = {}
   grepIsDefault = _.isEqual(grep, defaultGrepRe)
 
-  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId)
+  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
 
   if setTestsById
     ## use callback here to hand back
@@ -350,9 +350,9 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
 
   return obj
 
-normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId) ->
+normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId) ->
   normalizer = (runnable) =>
-    runnable.id = getId()
+    runnable.id = getTestId()
 
     ## tests have a type of 'test' whereas suites do not have a type property
     runnable.type ?= "suite"
@@ -388,7 +388,7 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
     _.each {tests: runnable.tests, suites: runnable.suites}, (_runnables, key) =>
       if runnable[key]
         obj[key] = _.map _runnables, (runnable) =>
-          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId)
+          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
   else
     ## iterate through all tests and only push them in
     ## if they match the current grep
@@ -418,7 +418,7 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
             grepIsDefault,
             onRunnable,
             onLogsById,
-            getId
+            getTestId
           )
         )
 
@@ -440,9 +440,9 @@ hookFailed = (hook, err, hookName, getTestById, setTest) ->
   test = getTestFromHook(hook, hook.parent, getTestById)
   test.err = err
   test.state = "failed"
-  test.duration = hook.duration
-  test.hookName = hookName
-  test.failedFromHook = true
+  test.duration = hook.duration ## TODO: nope (?)
+  test.hookName = hookName ## TODO: why are we doing this?
+  test.failedFromHookId = hook.hookId
 
   ## make sure we set this test as the current
   ## else its possible that our TEST_AFTER_RUN_EVENT
@@ -456,7 +456,7 @@ hookFailed = (hook, err, hookName, getTestById, setTest) ->
   else
     Cypress.action("runner:test:end", wrap(test))
 
-_runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
+_runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest, getHookId) ->
   _runner.on "start", ->
     Cypress.action("runner:start", {
       start: new Date()
@@ -488,6 +488,8 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
   _runner.on "hook", (hook) ->
     hookName = getHookName(hook)
 
+    hook.hookId ?= getHookId()
+
     ## mocha incorrectly sets currentTest on before all's.
     ## if there is a nested suite with a before, then
     ## currentTest will refer to the previous test run
@@ -506,8 +508,6 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
     Cypress.action("runner:hook:start", wrap(hook))
 
   _runner.on "hook end", (hook) ->
-    hookName = getHookName(hook)
-
     Cypress.action("runner:hook:end", wrap(hook))
 
   _runner.on "test", (test) ->
@@ -599,6 +599,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
 
 create = (specWindow, mocha, Cypress, cy) ->
   _id = 0
+  _hookId = 0
   _uncaughtFn = null
 
   _runner = mocha.getRunner()
@@ -653,9 +654,12 @@ create = (specWindow, mocha, Cypress, cy) ->
   }
   _startTime = null
 
-  getId = ->
+  getTestId = ->
     ## increment the id counter
     "r" + (_id += 1)
+
+  getHookId = ->
+    "h" + (_hookId += 1)
 
   setTestsById = (tbid) ->
     _testsById = tbid
@@ -683,6 +687,14 @@ create = (specWindow, mocha, Cypress, cy) ->
     return if not id
 
     _testsById[id]
+
+  setTestTimings = (test, hookName, hook) ->
+    test.timings ?= {}
+    test.timings[hookName] ?= []
+    test.timings[hookName].push({
+      hookId: hook.hookId
+      duration: hook.duration,
+    })
 
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
@@ -725,13 +737,13 @@ create = (specWindow, mocha, Cypress, cy) ->
         setTests,
         onRunnable,
         onLogsById,
-        getId
+        getTestId
       )
 
     run: (fn) ->
       _startTime ?= moment().toJSON()
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, setTest)
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, setTest, getHookId)
 
       _runner.run (failures) ->
         ## if we happen to make it all the way through
@@ -754,6 +766,11 @@ create = (specWindow, mocha, Cypress, cy) ->
       switch runnable.type
         when "hook"
           test = runnable.ctx.currentTest
+
+          ## when this is a hook, capture the start
+          ## date so we can calculate our test's duration
+          ## including all of its hooks
+          test.hookStart ?= new Date()
         when "test"
           test = runnable
 
@@ -764,9 +781,32 @@ create = (specWindow, mocha, Cypress, cy) ->
       if not fired(TEST_BEFORE_RUN_EVENT, test)
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
 
+      ## hold onto the start time for a runnable
+      runnable.start = start = new Date()
+
       ## extract out the next(fn) which mocha uses to
       ## move to the next runnable - this will be our async seam
-      next = args[0]
+      _next = args[0]
+
+      next = (err) ->
+        ## when completely done, set end + duration
+        runnable.end = end = new Date()
+
+        if runnable.type is "hook"
+          setTestTimings(test, hookName, runnable)
+
+        ## if we are currently on a test and
+        ## it had an original hookStart then
+        ## recalculate its duration to be based
+        ## against that
+        if test is runnable and test.hookStart
+          test.duration = end - test.hookStart
+
+          ## but still preserve its actual function
+          ## body duration for timings
+          test.fnDuration = end - start
+
+        _next(err)
 
       ## our runnable is about to run, so let cy know. this enables
       ## us to always have a correct runnable set even when we are

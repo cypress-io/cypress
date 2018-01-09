@@ -2,8 +2,8 @@ _     = require("lodash")
 path  = require("path")
 chalk = require("chalk")
 Mocha = require("mocha")
+debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
-log   = require("./log")
 
 mochaReporters = require("mocha/lib/reporters")
 
@@ -26,6 +26,18 @@ Mocha.Suite.prototype.titlePath = ->
 Mocha.Runnable.prototype.titlePath = ->
   @parent.titlePath().concat([@title])
 
+getParentTitle = (runnable, titles) ->
+  if not titles
+    titles = [runnable.title]
+
+  if p = runnable.parent
+    if t = p.title
+      titles.unshift(t)
+
+    getParentTitle(p, titles)
+  else
+    titles
+
 createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
@@ -46,7 +58,7 @@ createRunnable = (obj, parent) ->
   runnable.async    = obj.async
   runnable.sync     = obj.sync
   runnable.duration = obj.duration
-  runnable.state    = obj.state
+  runnable.state    = obj.state ? "skipped" ## skipped by default
   runnable.body     ?= body
 
   runnable.parent = parent if parent
@@ -73,28 +85,41 @@ mergeRunnable = (eventName) ->
 
     runnable = runnables[testProps.id]
 
-    ## TODO: fix this
-    if not runnable.started
-      testProps.started = Date.now()
-
     _.extend(runnable, testProps)
 
-safelyMergeRunnable = (testProps, runnables) ->
-  _.extend({}, runnables[testProps.id], testProps)
+safelyMergeRunnable = (hookProps, runnables) ->
+  { hookId, title, body, type } = hookProps
 
-mergeErr = (test, runnables, stats) ->
+  if not runnable = runnables[hookId]
+    runnables[hookId] = {
+      hookId
+      type
+      title
+      body
+    }
+
+  _.extend({}, runnables[hookProps.id], hookProps)
+
+mergeErr = (runnable, runnables, stats) ->
   ## increment stats failures
   ## because thats what the fail() fn does.
   ## useful for reporters expecting this
   ## and for 'end' event fn callbacks
   stats.failures += 1
 
-  runnable = runnables[test.id]
-  runnable.err = test.err
-  runnable.state = "failed"
-  runnable.duration ?= test.duration
-  runnable = _.extend({}, runnable, {title: test.title})
-  [runnable, test.err]
+  ## this will always be a test because
+  ## we reset hook id's to match tests
+  test = runnables[runnable.id]
+  test.err = runnable.err
+  test.state = "failed"
+  test.duration ?= test.duration
+
+  if runnable.type is "hook"
+    test.failedFromHookId = runnable.hookId
+
+  test = _.extend({}, test, { title: test.title })
+
+  [test, test.err]
 
 setDate = (obj, runnables, stats) ->
   if s = obj.start
@@ -173,35 +198,36 @@ class Reporter
     ## make sure this event is in our events hash
     if e = events[event]
       if _.isFunction(e)
+        debug("got mocha event '%s' with args: %o", event, args)
         ## transform the arguments if
         ## there is an event.fn callback
         args = e.apply(@, args.concat(@runnables, @stats))
 
       [event].concat(args)
 
-  normalize: (test = {}) ->
-    getParentTitle = (runnable, titles) ->
-      if p = runnable.parent
-        if t = p.title
-          titles.unshift(t)
+  normalizeHook: (hook = {}) ->
+    {
+      hookId: hook.hookId
+      title:  getParentTitle(hook)
+      body:   hook.body
+    }
 
-        getParentTitle(p, titles)
-      else
-        titles
-
+  normalizeTest: (test = {}) ->
     err = test.err ? {}
-
-    titles = [test.title]
-
-    ## TODO: move the separator into some shared util function somewhere
 
     {
       clientId:       test.id
-      title:          getParentTitle(test, titles)
+      title:          getParentTitle(test)
+      state:          test.state
       duration:       test.duration
+      fnDuration:     test.fnDuration
+      start:          test.start
+      end:            test.end
+      body:           test.body
       stack:          err.stack
       error:          err.message
-      started:        test.started
+      timings:        test.timings
+      failedFromHookId: test.failedFromHookId
       # videoTimestamp: test.started - videoStart
     }
 
@@ -219,7 +245,14 @@ class Reporter
   results: ->
     tests = _
     .chain(@runnables)
-    .map(@normalize)
+    .filter({type: 'test'})
+    .map(@normalizeTest)
+    .value()
+
+    hooks = _
+    .chain(@runnables)
+    .filter({type: 'hook'})
+    .map(@normalizeHook)
     .value()
 
     { start, end } = @stats
@@ -237,25 +270,27 @@ class Reporter
       ## this comes from the reporter, not us
       reporterStats: @runner.stats
 
+      hooks
+
       tests
     }
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
-      test.videoTimestamp = test.started - videoStart
+      test.videoTimestamp = test.start - videoStart
       test
 
   @create = (reporterName, reporterOptions, projectRoot) ->
     new Reporter(reporterName, reporterOptions, projectRoot)
 
   @loadReporter = (reporterName, projectRoot) ->
-    log("loading reporter #{reporterName}")
+    debug("loading reporter #{reporterName}")
     if r = reporters[reporterName]
-      log("#{reporterName} is built-in reporter")
+      debug("#{reporterName} is built-in reporter")
       return require(r)
 
     if mochaReporters[reporterName]
-      log("#{reporterName} is Mocha reporter")
+      debug("#{reporterName} is Mocha reporter")
       return reporterName
 
     ## it's likely a custom reporter
@@ -263,7 +298,7 @@ class Reporter
     ## or one installed by the user through npm
     try
       ## try local
-      log("loading local reporter by name #{reporterName}")
+      debug("loading local reporter by name #{reporterName}")
 
       ## using path.resolve() here so we can just pass an
       ## absolute path as the reporterName which avoids
@@ -271,7 +306,7 @@ class Reporter
       return require(path.resolve(projectRoot, reporterName))
     catch err
       ## try npm. if this fails, we're out of options, so let it throw
-      log("loading NPM reporter module #{reporterName} from #{projectRoot}")
+      debug("loading NPM reporter module #{reporterName} from #{projectRoot}")
 
       try
         return require(path.resolve(projectRoot, "node_modules", reporterName))
@@ -288,7 +323,7 @@ class Reporter
   @isValidReporterName = (reporterName, projectRoot) ->
     try
       Reporter.loadReporter(reporterName, projectRoot)
-      log("reporter #{reporterName} is valid name")
+      debug("reporter #{reporterName} is valid name")
       true
     catch
       false
