@@ -1,8 +1,8 @@
 exports['e2e spec_isolation failing 1'] = {
   "schemaVersion": 1
-  "start": "2018-01-08T23:01:51.953Z",
-  "end": "2018-01-08T23:01:54.682Z",
-  "duration": 2729,
+  "startedTestsAt": "2018-01-08T23:01:51.953Z",
+  "endedTestsAt": "2018-01-08T23:01:54.682Z",
+  "totalDuration": 2729,
   "totalTests": 4,
   "totalFailures": 3,
   "totalPasses": 2,
@@ -178,6 +178,7 @@ exports['e2e spec_isolation failing 1'] = {
       "hooks": [
         {
           "hookId": "h1",
+          "name": "before each"
           "title": [
             "\"before each\" hook"
           ],
@@ -201,16 +202,20 @@ exports['e2e spec_isolation failing 1'] = {
             "before each": [
               {
                 "hookId": "h1",
-                "duration": 1013
+                "duration": 1013,
+                "lifecycle": 80
               }
-            ]
+            ],
+            "test": {
+              "duration": 100,
+              "lifecycle": 123
+            }
           }
         }
       ],
       "video": "/Users/bmann/Dev/cypress/packages/server/.projects/e2e/cypress/videos/simple_passing_spec.coffee.mp4",
       "screenshots": [],
-      "spec": "cypress/integration/simple_passing_spec.coffee",
-      "shouldUploadVideo": true
+      "spec": "cypress/integration/simple_passing_spec.coffee"
     }
   ],
   "browserName": "chrome",
