@@ -16,7 +16,9 @@ const browserNameLookup = {}
 
 const browserIconLookup = {
   chrome: 'chrome',
-  Electron: 'chrome',
+  chromium: 'chrome',
+  canary: 'chrome',
+  electron: 'chrome',
   firefox: 'firefox',
   safari: 'safari',
 }

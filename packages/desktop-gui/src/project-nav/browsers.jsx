@@ -4,6 +4,7 @@ import Tooltip from '@cypress/react-tooltip'
 import Dropdown from '../dropdown/dropdown'
 
 import projectsApi from '../projects/projects-api'
+import utils from '../lib/utils'
 
 @observer
 export default class Browsers extends Component {
@@ -63,7 +64,7 @@ export default class Browsers extends Component {
       icon = 'check-circle-o green'
       prefixText = 'Running'
     } else {
-      icon = browser.icon
+      icon = utils.browserIcon(browser.name)
       prefixText = ''
     }
 

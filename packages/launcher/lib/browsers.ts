@@ -38,6 +38,13 @@ export const browsers: Browser[] = [
     versionRegex: /Google Chrome Canary (\S+)/,
     profile: true,
     binary: 'google-chrome-canary'
+  },
+  {
+    name: 'firefox',
+    displayName: 'Firefox',
+    versionRegex: /Firefox (\S+)/,
+    profile: true,
+    binary: 'firefox'
   }
 ]
 
@@ -63,6 +70,6 @@ export function launch(
     args = [url].concat(args)
   }
 
-  log('spawning browser %s with args %s', browser.path, args.join(' '))
+  log('spawning browser %s with args %o', browser.path, args)
   return cp.spawn(browser.path, args, { stdio: 'ignore' })
 }

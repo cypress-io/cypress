@@ -158,6 +158,7 @@
     "underscore.string": "3.3.4",
     "url-parse": "^1.1.7",
     "watchify": "^3.9.0",
+    "web-ext": "^2.3.0",
     "winston": "^0.9.0"
   }
 }

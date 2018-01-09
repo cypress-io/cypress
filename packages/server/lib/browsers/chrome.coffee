@@ -16,19 +16,18 @@ pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
 
 defaultArgs = [
-  "--test-type"
+  "--test-type" ## Type of the current test harness ("browser" or "ui") QUESTION: Are we using this right?
   "--ignore-certificate-errors"
   "--start-maximized"
-  "--silent-debugger-extension-api"
+  "--silent-debugger-extension-api" ## Does not show an infobar when an extension attaches to a page using chrome.debugger page
   "--no-default-browser-check"
   "--no-first-run"
-  "--noerrdialogs"
-  "--enable-fixed-layout"
+  "--noerrdialogs" ## Suppresses all error dialogs
+  "--enable-fixed-layout" ## QUESTION: Does this do anything? Can't find info on what it does
   "--disable-popup-blocking"
   "--disable-password-generation"
   "--disable-save-password-bubble"
   "--disable-single-click-autofill"
-  "--disable-prompt-on-repos"
   "--disable-background-timer-throttling"
   "--disable-renderer-backgrounding"
   "--disable-renderer-throttling"
@@ -45,13 +44,13 @@ defaultArgs = [
   ## list of flags here: https://cs.chromium.org/chromium/src/third_party/WebKit/Source/platform/runtime_enabled_features.json5
   "--disable-blink-features=BlockCredentialedSubresources"
 
-  ## the following come frome chromedriver
+  ## the following come from chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
-  "--metrics-recording-only"
-  "--disable-prompt-on-repost"
-  "--disable-hang-monitor"
+  "--metrics-recording-only" ## Enables the recording of metrics reports but disables reporting
+  "--disable-prompt-on-repost" ## Disables prompt when user re-submits POST form
+  "--disable-hang-monitor" ## Suppresses hang monitor dialogs in renderer processes
   "--disable-sync"
-  "--disable-background-networking"
+  "--disable-background-networking" ## Disable several subsystems which run network requests in the background. This is for use when doing network performance testing to avoid noise in the measurements
   "--disable-web-resources"
   "--safebrowsing-disable-auto-update"
   "--safebrowsing-disable-download-protection"
@@ -78,20 +77,6 @@ _normalizeArgExtensions = (dest, args) ->
 
 module.exports = {
   _normalizeArgExtensions
-
-  _writeExtension: (proxyUrl, socketIoRoute) ->
-    ## get the string bytes for the final extension file
-    extension.setHostAndPath(proxyUrl, socketIoRoute)
-    .then (str) ->
-      extensionDest = appData.path("extensions", "chrome")
-      extensionBg   = appData.path("extensions", "chrome", "background.js")
-
-      ## copy the extension src to the extension dist
-      utils.copyExtension(pathToExtension, extensionDest)
-      .then ->
-        ## and overwrite background.js with the final string bytes
-        fs.writeFileAsync(extensionBg, str)
-      .return(extensionDest)
 
   _getArgs: (options = {}) ->
     args = [].concat(defaultArgs)
@@ -132,7 +117,7 @@ module.exports = {
         ## ensure that we have a chrome profile dir
         utils.ensureProfile(browserName)
 
-        @_writeExtension(options.proxyUrl, options.socketIoRoute)
+        utils.writeExtension(options.proxyUrl, options.socketIoRoute)
       ])
     .spread (dir, dest) ->
       ## normalize the --load-extensions argument by

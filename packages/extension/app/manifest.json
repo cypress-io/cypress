@@ -1,6 +1,11 @@
 {
-  "name" : "Cypress",
-  "description" : "Adds chrome.* API's for testing with Cypress",
+  "name": "Cypress",
+  "description": "Adds WebExtension APIs for testing with Cypress",
+  "applications": {
+    "gecko": {
+      "id": "automation-extension@cypress.io"
+    }
+  },
   "permissions": [
     "cookies",
     "tabs",
@@ -9,8 +14,8 @@
     "<all_urls>"
   ],
   "icons": {
-    "16":  "icons/icon_16x16.png",
-    "48":  "icons/icon_48x48.png",
+    "16": "icons/icon_16x16.png",
+    "48": "icons/icon_48x48.png",
     "128": "icons/icon_128x128.png"
   },
   "browser_action": {
@@ -23,6 +28,7 @@
   },
   "background": {
     "scripts": [
+      "browser-polyfill.js",
       "socket.io.js",
       "background.js"
     ]
@@ -30,5 +36,6 @@
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
-  "manifest_version": 2
+  "manifest_version": 2,
+  "version": "0.0.0"
 }

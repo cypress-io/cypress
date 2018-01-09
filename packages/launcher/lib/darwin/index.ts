@@ -5,18 +5,27 @@ import { log } from '../log'
 import { merge, partial } from 'ramda'
 
 const detectCanary = partial(findApp, [
+  'Google Chrome Canary.app',
   'Contents/MacOS/Google Chrome Canary',
   'com.google.Chrome.canary',
   'KSVersion'
 ])
 const detectChrome = partial(findApp, [
+  'Google Chrome.app',
   'Contents/MacOS/Google Chrome',
   'com.google.Chrome',
   'KSVersion'
 ])
 const detectChromium = partial(findApp, [
-  'Contents/MacOS/Chromium',
+  'Chromium.app',
+  'Contents/DMacOS/Chromium',
   'org.chromium.Chromium',
+  'CFBundleShortVersionString'
+])
+const detectFirefox = partial(findApp, [
+  'Firefox.app',
+  'Contents/MacOS/firefox-bin',
+  'org.mozilla.firefox',
   'CFBundleShortVersionString'
 ])
 
@@ -27,7 +36,8 @@ type Detectors = {
 const browsers: Detectors = {
   chrome: detectChrome,
   canary: detectCanary,
-  chromium: detectChromium
+  chromium: detectChromium,
+  firefox: detectFirefox
 }
 
 export function detectBrowserDarwin(browser: Browser) {
