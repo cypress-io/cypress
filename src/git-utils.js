@@ -1,6 +1,6 @@
 const { pipeP, split } = require('ramda');
 const execa = require('execa');
-const debug = require('debug')('semantic-release-monorepo');
+const debug = require('debug')('semantic-release:monorepo');
 
 const git = async (args, options = {}) => {
   const { stdout } = await execa('git', args, options);
@@ -23,7 +23,7 @@ const getCommitFiles = pipeP(
  * @async
  * @return {Promise<String>} System path of the git repository.
  */
-const getGitRoot = () => git(['rev-parse', '--show-toplevel']);
+const getRoot = () => git(['rev-parse', '--show-toplevel']);
 
 /**
  * Get the commit sha for a given tag.
@@ -32,14 +32,13 @@ const getGitRoot = () => git(['rev-parse', '--show-toplevel']);
  * @param {string} tagName Tag name for which to retrieve the commit sha.
  * @return {string} The commit sha of the tag in parameter or `null`.
  */
-async function gitTagHead(tagName) {
-  try {
-    return await git(['rev-list', '-1', tagName]);
-  } catch (err) {
-    debug(err);
-    return null;
-  }
-}
+const getTagHead = tagName =>
+  git(['rev-list', '-1', tagName], { reject: false });
+
+/**
+ * Fetch tags from the repository's origin.
+ */
+const fetchTags = () => git(['fetch', '--tags']);
 
 /**
  * Unshallow the git repository (retrieving every commit and tags).
@@ -50,7 +49,8 @@ const unshallow = () =>
 
 module.exports = {
   getCommitFiles,
-  getGitRoot,
-  gitTagHead,
+  getRoot,
+  getTagHead,
+  fetchTags,
   unshallow,
 };
