@@ -66,7 +66,7 @@
     "commit-message-install": "^1.10.0",
     "common-tags": "^1.4.0",
     "console.table": "^0.9.1",
-    "debug": "^2.6.8",
+    "debug": ">= 2.6.9 < 3.0.0 || >= 3.1.0",
     "del": "^3.0.0",
     "deps-ok": "^1.2.0",
     "electron-osx-sign": "^0.4.6",
