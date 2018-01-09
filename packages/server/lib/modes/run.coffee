@@ -23,6 +23,8 @@ terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
 
+SCHEMA_VERSION = 1
+
 fs = Promise.promisifyAll(fs)
 
 TITLE_SEPARATOR = " /// "
@@ -60,6 +62,9 @@ reduceRuns = (runs, prop) ->
   _.reduce runs, (memo, run) ->
     memo += _.get(run, prop)
   , 0
+
+getRun = (run, prop) ->
+  _.get(run, prop)
 
 writeOutput = (outputPath, results) ->
   Promise.try ->
@@ -438,6 +443,7 @@ module.exports = {
       osName: 'darwin',
       osVersion: '1.2.3.4',
       cypressVersion: '2.0.0',
+      schemaVersion: SCHEMA_VERSION
       config
     }
 
@@ -458,8 +464,8 @@ module.exports = {
 
       Promise.map(specs, runSpec, { concurrency: 1 })
     .then (runs = []) ->
-      results.start = start = _.first(runs).start
-      results.end = end = _.last(runs).end
+      results.start = start = getRun(_.first(runs), "stats.start")
+      results.end = end = getRun(_.last(runs), "stats.end")
       results.duration = end - start
 
       results.totalSuites = reduceRuns(runs, "stats.suites")
