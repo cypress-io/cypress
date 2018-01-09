@@ -195,6 +195,9 @@ module.exports = {
     if options.env
       args.push("--env", options.env)
 
+    if options.outputPath
+      args.push("--output-path", options.outputPath)
+
     if options.exit?
       args.push("--exit", options.exit)
 
