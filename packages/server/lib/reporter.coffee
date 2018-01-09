@@ -1,12 +1,30 @@
 _     = require("lodash")
-Mocha = require("mocha")
-chalk = require("chalk")
 path  = require("path")
+chalk = require("chalk")
+Mocha = require("mocha")
+Promise = require("bluebird")
 log   = require("./log")
 
 mochaReporters = require("mocha/lib/reporters")
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
+
+if Mocha.Suite.prototype.titlePath
+  throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
+
+Mocha.Suite.prototype.titlePath = ->
+  result = []
+
+  if @parent
+    result = result.concat(@parent.titlePath())
+
+  if !@root
+    result.push(@title);
+
+  return result
+
+Mocha.Runnable.prototype.titlePath = ->
+  @parent.titlePath().concat([@title])
 
 createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
@@ -46,7 +64,13 @@ mergeRunnable = (testProps, runnables) ->
 safelyMergeRunnable = (testProps, runnables) ->
   _.extend({}, runnables[testProps.id], testProps)
 
-mergeErr = (test, runnables) ->
+mergeErr = (test, runnables, runner) ->
+  ## increment runner failures
+  ## because thats what the fail() fn does.
+  ## useful for reporters expecting this
+  ## and for 'end' event fn callbacks
+  runner.failures += 1
+
   runnable = runnables[test.id]
   runnable.err = test.err
   runnable.state = "failed"
@@ -120,7 +144,7 @@ class Reporter
       if _.isFunction(e)
         ## transform the arguments if
         ## there is an event.fn callback
-        args = e.apply(@, args.concat(@runnables))
+        args = e.apply(@, args.concat(@runnables, @runner))
 
       [event].concat(args)
 
@@ -150,6 +174,17 @@ class Reporter
       # videoTimestamp: test.started - videoStart
     }
 
+  end: ->
+    if @reporter.done
+      failures = @runner.failures
+
+      new Promise (resolve, reject) =>
+        @reporter.done(failures, resolve)
+      .then =>
+        @stats()
+    else
+      @stats()
+
   stats: ->
     failingTests = _
     .chain(@runnables)
@@ -157,7 +192,7 @@ class Reporter
     .map(@normalize)
     .value()
 
-    stats = if @reporter then @reporter.stats else {}
+    stats = @runner.stats
 
     _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(stats, STATS)
 

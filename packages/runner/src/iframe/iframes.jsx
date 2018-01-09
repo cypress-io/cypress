@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
 import cs from 'classnames'
-import { action } from 'mobx'
+import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
@@ -9,13 +9,16 @@ import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
+import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
-import eventManager from '../lib/event-manager'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import windowUtil from '../lib/window-util'
 
 @observer
 export default class Iframes extends Component {
+  _disposers = []
+
   render () {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
@@ -53,6 +56,16 @@ export default class Iframes extends Component {
     eventManager.on('restart', () => {
       this._run(this.props.config, specPath)
     })
+
+    eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
+
+    this._disposers.push(autorun(() => {
+      this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
+    }))
+
+    this._disposers.push(autorun(() => {
+      this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
+    }))
 
     eventManager.start(this.props.config, specPath)
 
@@ -151,8 +164,15 @@ export default class Iframes extends Component {
     }
   }
 
+  _printSelectorElementsToConsole = () => {
+    this.autIframe.printSelectorElementsToConsole()
+  }
+
   componentWillUnmount () {
     this.props.eventManager.notifyRunningSpec(null)
     eventManager.stop()
+    this._disposers.forEach((dispose) => {
+      dispose()
+    })
   }
 }

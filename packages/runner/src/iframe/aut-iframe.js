@@ -1,13 +1,17 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
-import blankContents from './blank-contents'
-import { addElementBoxModelLayers, addHitBoxLayer, getOuterSize } from '../lib/dimensions'
-import visitFailure from './visit-failure'
 
+import blankContents from './blank-contents'
+import dom from '../lib/dom'
+import eventManager from '../lib/event-manager'
+import logger from '../lib/logger'
+import visitFailure from './visit-failure'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class AutIframe {
   constructor (config) {
     this.config = config
+    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create () {
@@ -27,11 +31,23 @@ export default class AutIframe {
   }
 
   _showContents (contents) {
-    this._contents().find('body').html(contents)
+    this._body().html(contents)
   }
 
   _contents () {
-    return this.$iframe.contents()
+    return this.$iframe && this.$iframe.contents()
+  }
+
+  _window () {
+    return this.$iframe.prop('contentWindow')
+  }
+
+  _document () {
+    return this.$iframe.prop('contentDocument')
+  }
+
+  _body () {
+    return this._contents() && this._contents().find('body')
   }
 
   detachDom = (Cypress) => {
@@ -61,9 +77,11 @@ export default class AutIframe {
     this._replaceHeadStyles(headStyles)
 
     // remove the old body and replace with restored one
-    contents.find('body').remove()
+    this._body().remove()
     this._insertBodyStyles(body, bodyStyles)
     $html.append(body)
+
+    this.debouncedToggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
   }
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
@@ -149,7 +167,7 @@ export default class AutIframe {
     if (body) {
       $el = body.find(`[${highlightAttr}]`)
     } else {
-      body = this._contents().find('body')
+      body = this._body()
     }
 
     // scroll the top of the element into view
@@ -171,21 +189,159 @@ export default class AutIframe {
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = getOuterSize(el)
+      const dimensions = dom.getOuterSize(el)
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0 || el.css('display') === 'none') return
 
-      addElementBoxModelLayers(el, body).attr('data-highlight-el', true)
+      dom.addElementBoxModelLayers(el, body).attr('data-highlight-el', true)
     })
 
     if (coords) {
       requestAnimationFrame(() => {
-        addHitBoxLayer(coords, body).attr('data-highlight-hitbox', true)
+        dom.addHitBoxLayer(coords, body).attr('data-highlight-hitbox', true)
       })
     }
   }
 
   removeHighlights = () => {
-    this._contents().find('[data-highlight-el],[data-highlight-hitbox]').remove()
+    this._contents() && this._contents().find('.__cypress-highlight').remove()
+  }
+
+  toggleSelectorPlayground = (isEnabled) => {
+    const $body = this._body()
+    if (!$body) return
+
+    const clearHighlight = this._clearHighlight.bind(this, false)
+
+    if (isEnabled) {
+      $body.on('mouseenter', this._resetShowHighlight)
+      $body.on('mousemove', this._onSelectorMouseMove)
+      $body.on('mouseleave', clearHighlight)
+    } else {
+      $body.off('mouseenter', this._resetShowHighlight)
+      $body.off('mousemove', this._onSelectorMouseMove)
+      $body.off('mouseleave', clearHighlight)
+      if (this._highlightedEl) {
+        this._clearHighlight()
+      }
+    }
+  }
+
+  _resetShowHighlight = () => {
+    selectorPlaygroundModel.setShowingHighlight(false)
+  }
+
+  _onSelectorMouseMove = (e) => {
+    const $body = this._body()
+    if (!$body) return
+
+    let el = e.target
+    let $el = $(el)
+
+    const $ancestorHighlight = $el.closest('.__cypress-selector-playground')
+    if ($ancestorHighlight.length) {
+      $el = $ancestorHighlight
+    }
+
+    if ($ancestorHighlight.length || $el.hasClass('__cypress-selector-playground')) {
+      const $highlight = $el
+      $highlight.css('display', 'none')
+      el = this._document().elementFromPoint(e.clientX, e.clientY)
+      $el = $(el)
+      $highlight.css('display', 'block')
+    }
+
+    if (this._highlightedEl === el) return
+
+    this._highlightedEl = el
+
+    const selector = dom.getBestSelector(el)
+
+    dom.addOrUpdateSelectorPlaygroundHighlight({
+      $el,
+      selector,
+      $body,
+      showTooltip: true,
+      onClick: () => {
+        selectorPlaygroundModel.setNumElements(1)
+        selectorPlaygroundModel.resetMethod()
+        selectorPlaygroundModel.setSelector(selector)
+      },
+    })
+  }
+
+  _clearHighlight = () => {
+    const $body = this._body()
+    if (!$body) return
+
+    dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
+    if (this._highlightedEl) {
+      this._highlightedEl = null
+    }
+  }
+
+  toggleSelectorHighlight (isShowingHighlight) {
+    if (!isShowingHighlight) {
+      this._clearHighlight()
+      return
+    }
+
+    const Cypress = eventManager.getCypress()
+
+    const $el = this.getElements(Cypress.dom)
+
+    selectorPlaygroundModel.setValidity(!!$el)
+
+    if ($el) {
+      selectorPlaygroundModel.setNumElements($el.length)
+
+      if ($el.length) {
+        dom.scrollIntoView(this._window(), $el[0])
+      }
+    }
+
+    dom.addOrUpdateSelectorPlaygroundHighlight({
+      $el: $el && $el.length ? $el : null,
+      selector: selectorPlaygroundModel.selector,
+      $body: this._body(),
+      showTooltip: false,
+    })
+  }
+
+  getElements (cypressDom) {
+    const contents = this._contents()
+    const selector = selectorPlaygroundModel.selector
+
+    if (!contents || !selector) return
+
+    return dom.getElementsForSelector({
+      selector,
+      method: selectorPlaygroundModel.method,
+      root: contents,
+      cypressDom,
+    })
+  }
+
+  printSelectorElementsToConsole () {
+    logger.clearLog()
+
+    const Cypress = eventManager.getCypress()
+
+    const $el = this.getElements(Cypress.dom)
+
+    const command = `cy.${selectorPlaygroundModel.method}('${selectorPlaygroundModel.selector}')`
+
+    if (!$el) {
+      return logger.logFormatted({
+        Command: command,
+        Yielded: 'Nothing',
+      })
+    }
+
+    logger.logFormatted({
+      Command: command,
+      Elements: $el.length,
+      Yielded: Cypress.dom.getElements($el),
+    })
   }
 }

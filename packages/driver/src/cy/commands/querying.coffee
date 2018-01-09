@@ -5,8 +5,6 @@ Promise = require("bluebird")
 $dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
-priorityElement = "input[type='submit'], button, a, label"
-
 $expr = $.expr[":"]
 
 $contains = $expr.contains
@@ -344,39 +342,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set({$el: $el})
 
-      getFirstDeepestElement = (elements, index = 0) ->
-        ## iterate through all of the elements in pairs
-        ## and check if the next item in the array is a
-        ## descedent of the current. if it is continue
-        ## to recurse. if not, or there is no next item
-        ## then return the current
-        $current = elements.slice(index,     index + 1)
-        $next    = elements.slice(index + 1, index + 2)
-
-        return $current if not $next
-
-        ## does current contain next?
-        if $.contains($current.get(0), $next.get(0))
-          getFirstDeepestElement(elements, index + 1)
-        else
-          ## return the current if it already is a priority element
-          return $current if $current.is(priorityElement)
-
-          ## else once we find the first deepest element then return its priority
-          ## parent if it has one and it exists in the elements chain
-          $priorities = elements.filter $current.parents(priorityElement)
-          if $priorities.length then $priorities.last() else $current
-
       if _.isRegExp(text)
         $expr.contains = (elem) ->
           ## taken from jquery's normal contains method
           text.test(elem.textContent or elem.innerText or $.text(elem))
-      else
-        text = $utils.escapeQuotes(text)
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
-      selector = "#{filter}:not(script):contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
+      selector = $dom.getContainsSelector(text, filter)
 
       checkToAutomaticallyRetry = (count, $el) ->
         ## we should automatically retry querying
@@ -399,12 +372,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           verify: false ## dont verify upcoming assertions, we do that ourselves
         })
 
-        cy.now("get", selector, getOpts).then ($elements) ->
-          $el = switch
-            when $elements and $elements.length
-              getFirstDeepestElement($elements)
-            else
-              $elements
+        cy.now("get", selector, getOpts).then ($el) ->
+          if $el and $el.length
+            $el = $dom.getFirstDeepestElement($el)
 
           setEl($el)
 

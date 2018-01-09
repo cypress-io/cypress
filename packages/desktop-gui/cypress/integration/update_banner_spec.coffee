@@ -106,4 +106,6 @@ describe "Update Banner", ->
 
     it "displays all folders/specs within visible area", ->
       cy.get(".folder-display-name")
-        .last().should("be.visible")
+        .last()
+        .scrollIntoView()
+        .should("be.visible")

@@ -1,4 +1,4 @@
-# cypress/reporter
+# Reporter
 
 ![Reporter](https://cloud.githubusercontent.com/assets/1157043/17947006/bffba412-6a18-11e6-86ee-af7e9c9d614e.png)
 
@@ -19,13 +19,26 @@ The reporter shows the running results of the tests. It includes the following:
 
 ## Install
 
-Root install is preferred (see `CONTRIBUTING.md`), but if you must
+The reporters's dependencies can be installed with:
 
-* `npm install`
+```bash
+cd packages/reporter
+npm install
+```
 
 ## Development
 
-### Building
+### Watching
+
+- Runs `*.js` and `*.jsx` through babel and bundles with browserify into single `dist/reporter.js`
+- Runs associated unit test of file saved and outputs to terminal
+- Compiles `*.scss` files to single `dist/reporter.css`
+
+```bash
+npm run watch
+```
+
+### One Time Building
 
 #### For development
 
@@ -39,17 +52,7 @@ npm run build-dev
 npm run build-prod
 ```
 
-### Watching
-
-- Runs `*.js` and `*.jsx` through babel and bundles with browserify into single `dist/reporter.js`
-- Runs associated unit test of file saved and outputs to terminal
-- Compiles `*.scss` files to single `dist/reporter.css`
-
-```bash
-npm run watch
-```
-
-### Testing
+## Testing
 
 ```bash
 npm test

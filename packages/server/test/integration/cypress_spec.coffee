@@ -4,14 +4,15 @@ _          = require("lodash")
 os         = require("os")
 cp         = require("child_process")
 path       = require("path")
-{ EventEmitter } = require("events")
+EE         = require("events")
 http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
 Fixtures   = require("../support/helpers/fixtures")
-extension  = require("@packages/extension")
 pkg        = require("@packages/root")
+launcher   = require("@packages/launcher")
+extension  = require("@packages/extension")
 connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
@@ -32,6 +33,7 @@ cypress    = require("#{root}lib/cypress")
 Project    = require("#{root}lib/project")
 Server     = require("#{root}lib/server")
 Reporter   = require("#{root}lib/reporter")
+utils      = require("#{root}lib/browsers/utils")
 browsers   = require("#{root}lib/browsers")
 Watchers   = require("#{root}lib/watchers")
 openProject   = require("#{root}lib/open_project")
@@ -76,13 +78,15 @@ describe "lib/cypress", ->
     @todosPath    = Fixtures.projectPath("todos")
     @pristinePath = Fixtures.projectPath("pristine")
     @noScaffolding = Fixtures.projectPath("no-scaffolding")
+    @pluginConfig = Fixtures.projectPath("plugin-config")
+    @pluginBrowser = Fixtures.projectPath("plugin-browser")
     @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     @sandbox.stub(extension, "setHostAndPath").resolves()
-    @sandbox.stub(browsers, "get").resolves(TYPICAL_BROWSERS)
+    @sandbox.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     @sandbox.stub(process, "exit")
     @sandbox.stub(Server.prototype, "reset")
     @sandbox.spy(errors, "log")
@@ -629,6 +633,90 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
+      it "can override values in plugins", ->
+        cypress.start([
+          "--run-project=#{@pluginConfig}", "--config=requestTimeout=1234,videoCompression=false"
+          "--env=foo=foo,bar=bar"
+        ])
+        .then =>
+          cfg = openProject.getProject().cfg
+
+          expect(cfg.videoCompression).to.eq(20)
+          expect(cfg.defaultCommandTimeout).to.eq(500)
+          expect(cfg.env).to.deep.eq({
+            foo: "bar"
+            bar: "bar"
+          })
+
+          expect(cfg.resolved.videoCompression).to.deep.eq({
+            value: 20
+            from: "plugin"
+          })
+          expect(cfg.resolved.requestTimeout).to.deep.eq({
+            value: 1234
+            from: "cli"
+          })
+          expect(cfg.resolved.env.foo).to.deep.eq({
+            value: "bar"
+            from: "plugin"
+          })
+          expect(cfg.resolved.env.bar).to.deep.eq({
+            value: "bar"
+            from: "cli"
+          })
+
+          @expectExitWith(0)
+
+    describe "plugins", ->
+      beforeEach ->
+        browsers.open.restore()
+
+        ee = new EE()
+        ee.kill = ->
+          ee.emit("exit")
+        ee.close = ->
+          ee.emit("closed")
+        ee.isDestroyed = -> false
+        ee.loadURL = ->
+
+        @sandbox.stub(utils, "launch").resolves(ee)
+        @sandbox.stub(Windows, "create").returns(ee)
+        @sandbox.stub(Windows, "automation")
+
+      context "before:browser:launch", ->
+        it "chrome", ->
+          cypress.start([
+            "--run-project=#{@pluginBrowser}"
+            "--browser=chrome"
+          ])
+          .then =>
+            args = utils.launch.firstCall.args
+
+            expect(args[0]).to.eq("chrome")
+
+            browserArgs = args[2]
+
+            expect(browserArgs).to.have.length(6)
+
+            expect(browserArgs.slice(0, 4)).to.deep.eq([
+              "chrome", "foo", "bar", "baz"
+            ])
+
+            @expectExitWith(0)
+
+        it "electron", ->
+          cypress.start([
+            "--run-project=#{@pluginBrowser}"
+            "--browser=electron"
+          ])
+          .then =>
+            expect(Windows.create).to.be.calledWith(@pluginBrowser, {
+              browser: "electron"
+              foo: "bar"
+            })
+
+            @expectExitWith(0)
+
     describe "--port", ->
       beforeEach ->
         headless.listenForProjectEnd.resolves({failures: 0})
@@ -674,7 +762,7 @@ describe "lib/cypress", ->
           "version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor"
         ])
         .then =>
-          expect(openProject.getProject().cfg.environmentVariables).to.deep.eq({
+          expect(openProject.getProject().cfg.env).to.deep.eq({
             version: "0.12.1"
             foo: "bar"
             host: "http://localhost:8888"
@@ -766,6 +854,7 @@ describe "lib/cypress", ->
 
       @createInstance = @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
+        browser: "electron"
         spec: undefined
       }).resolves("instance-id-123")
 
@@ -813,14 +902,15 @@ describe "lib/cypress", ->
 
       @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
+        browser: "chrome"
         spec: spec
       }).resolves("instance-id-123")
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}"])
+      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}", "--browser=chrome"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
+        expect(browsers.open).to.be.calledWithMatch("chrome", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
@@ -1067,7 +1157,7 @@ describe "lib/cypress", ->
           port: 2121
           pageLoadTimeout: 1000
           report: false
-          environmentVariables: { baz: "baz" }
+          env: { baz: "baz" }
         })
 
         cfg = open.getCall(0).args[0]
@@ -1078,12 +1168,12 @@ describe "lib/cypress", ->
         expect(cfg.baseUrl).to.eq("localhost")
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
-        expect(cfg.environmentVariables.baz).to.eq("baz")
-        expect(cfg.environmentVariables).not.to.have.property("fileServerFolder")
-        expect(cfg.environmentVariables).not.to.have.property("port")
-        expect(cfg.environmentVariables).not.to.have.property("BASE_URL")
-        expect(cfg.environmentVariables).not.to.have.property("watchForFileChanges")
-        expect(cfg.environmentVariables).not.to.have.property("responseTimeout")
+        expect(cfg.env.baz).to.eq("baz")
+        expect(cfg.env).not.to.have.property("fileServerFolder")
+        expect(cfg.env).not.to.have.property("port")
+        expect(cfg.env).not.to.have.property("BASE_URL")
+        expect(cfg.env).not.to.have.property("watchForFileChanges")
+        expect(cfg.env).not.to.have.property("responseTimeout")
 
         expect(cfg.resolved.fileServerFolder).to.deep.eq({
           value: "foo"
@@ -1109,13 +1199,13 @@ describe "lib/cypress", ->
           value: 5555
           from: "env"
         })
-        expect(cfg.resolved.environmentVariables.baz).to.deep.eq({
+        expect(cfg.resolved.env.baz).to.deep.eq({
           value: "baz"
           from: "cli"
         })
 
     it "sends warning when baseUrl cannot be verified", ->
-      bus = new EventEmitter()
+      bus = new EE()
       event = { sender: { send: @sandbox.stub() } }
       warning = { message: "Blah blah baseUrl blah blah" }
       open = @sandbox.stub(Server.prototype, "open").resolves([2121, warning])

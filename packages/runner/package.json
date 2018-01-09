@@ -19,8 +19,9 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/react-tooltip": "^0.2.5",
+    "@cypress/react-tooltip": "0.3.2",
     "@cypress/releaser": "0.1.12",
+    "@cypress/unique-selector": "^0.3.7",
     "bin-up": "^1.1.0",
     "bluebird": "3.5.0",
     "chai": "^3.5.0",
@@ -33,13 +34,14 @@
     "mobx": "^3.1.15",
     "mobx-react": "^4.2.1",
     "prop-types": "^15.5.9",
-    "react": "^15.6.1",
-    "react-addons-test-utils": "^15.6.0",
-    "react-dom": "^15.6.1",
-    "react-test-renderer": "^15.6.1",
+    "react": "15.6.2",
+    "react-addons-test-utils": "15.6.2",
+    "react-dom": "15.6.2",
+    "react-input-autosize": "^2.1.2",
+    "react-test-renderer": "15.6.2",
     "rebuild-node-sass": "^1.1.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "zunder": "^5.1.0"
+    "zunder": "5.5.2"
   }
 }

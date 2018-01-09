@@ -4,7 +4,7 @@
 <p align="center">
   <a href="https://on.cypress.io">Documentation</a> |
   <a href="https://on.cypress.io/changelog">Changelog</a> |
-  <a href="https://github.com/cypress-io/cypress/projects">Roadmap</a>
+  <a href="https://on.cypress.io/roadmap">Roadmap</a>
 </p>
 
 <h3 align="center">

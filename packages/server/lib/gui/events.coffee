@@ -1,7 +1,7 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
-log         = require('debug')('cypress:server:events')
+debug       = require('debug')('cypress:server:events')
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
@@ -17,13 +17,15 @@ connect     = require("../util/connect")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
+  debug("got request for event:", type, arg)
+
   sendResponse = (data = {}) ->
     try
-      log("sending ipc data", {type: type, data: data})
+      debug("sending ipc data", {type: type, data: data})
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    log("send error:", err)
+    debug("send error:", err)
     sendResponse({id: id, __error: errors.clone(err, {html: true})})
 
   send = (data) ->
@@ -110,7 +112,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "window:open"
-      Windows.open(arg)
+      Windows.open(options.projectPath, arg)
       .then(send)
       .catch(sendErr)
 

@@ -16,21 +16,7 @@ const browserNotFoundErr = (
   return err
 }
 
-const googleChromeStable: Browser = {
-  name: 'Google Chrome Stable',
-  versionRegex: /Google Chrome (\S+)/,
-  profile: true,
-  binary: 'google-chrome-stable'
-}
-
-const googleChromeAlias: Browser = {
-  name: 'Google Chrome',
-  versionRegex: /Google Chrome (\S+)/,
-  profile: true,
-  binary: 'chrome'
-}
-
-/** list of all browsers we can detect and use */
+/** list of the browsers we can detect and use by default */
 export const browsers: Browser[] = [
   {
     name: 'chrome',
@@ -52,10 +38,7 @@ export const browsers: Browser[] = [
     versionRegex: /Google Chrome Canary (\S+)/,
     profile: true,
     binary: 'google-chrome-canary'
-  },
-  // a couple of fallbacks
-  googleChromeStable,
-  googleChromeAlias
+  }
 ]
 
 /** starts a browser by name and opens URL if given one */

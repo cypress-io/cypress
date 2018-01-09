@@ -291,7 +291,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run test-integration -- --parallel 5 --index 0
+          command: npm run cypress:run -- --parallel 5 --index 0
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -311,7 +311,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run test-integration -- --parallel 5 --index 1
+          command: npm run cypress:run -- --parallel 5 --index 1
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -331,7 +331,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run test-integration -- --parallel 5 --index 2
+          command: npm run cypress:run -- --parallel 5 --index 2
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -351,7 +351,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run test-integration -- --parallel 5 --index 3
+          command: npm run cypress:run -- --parallel 5 --index 3
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -371,7 +371,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run test-integration -- --parallel 5 --index 4
+          command: npm run cypress:run -- --parallel 5 --index 4
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -387,7 +387,7 @@ jobs:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run test-integration -- --parallel 3 --index 0
+          command: npm run cypress:run -- --parallel 3 --index 0
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -403,7 +403,7 @@ jobs:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run test-integration -- --parallel 3 --index 1
+          command: npm run cypress:run -- --parallel 3 --index 1
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -419,7 +419,7 @@ jobs:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run test-integration -- --parallel 3 --index 2
+          command: npm run cypress:run -- --parallel 3 --index 2
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress-monorepo
@@ -467,9 +467,6 @@ jobs:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
       - run:
-          name: Installing xvfb-maybe
-          command: npm i cypress-io/xvfb-maybe
-      - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
@@ -488,17 +485,13 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_videoRecording=false \
-            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/repo \
-            --record
+            npm run cypress:run -- --project /tmp/repo --record
 
   "test-against-staging":
     <<: *defaults
     steps:
       - restore_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          name: Installing xvfb-maybe
-          command: npm i cypress-io/xvfb-maybe
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
@@ -508,8 +501,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
-            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/repo \
-            --record
+            npm run cypress:run -- --project /tmp/repo --record
 
   "build-npm-package":
     <<: *defaults

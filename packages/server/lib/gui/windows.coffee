@@ -5,6 +5,7 @@ cyDesktop     = require("@packages/desktop-gui")
 extension     = require("@packages/extension")
 contextMenu   = require("electron-context-menu")
 BrowserWindow = require("electron").BrowserWindow
+debug         = require("debug")("cypress:server:windows")
 cwd           = require("../cwd")
 user          = require("../user")
 savedState    = require("../saved_state")
@@ -118,7 +119,7 @@ module.exports = {
             resolve(img.toDataURL())
     }
 
-  create: (options = {}) ->
+  defaults: (options = {}) ->
     _.defaultsDeep(options, {
       x:               null
       y:               null
@@ -126,12 +127,14 @@ module.exports = {
       frame:           true
       width:           null
       height:          null
-      winWidth:        null
+      minWidth:        null
       minHeight:       null
       devTools:        false
       trackState:      false
       contextMenu:     false
       recordFrameRate: null
+      # extension:       null ## TODO add these once we update electron
+      # devToolsExtension: null ## since these API's were added in 1.7.6
       onPaint:         null
       onFocus: ->
       onBlur: ->
@@ -144,6 +147,9 @@ module.exports = {
         backgroundThrottling: false
       }
     })
+
+  create: (projectPath, options = {}) ->
+    options = @defaults(options)
 
     if options.show is false
       options.frame = false
@@ -171,7 +177,7 @@ module.exports = {
       options.onNewWindow.apply(win, arguments)
 
     if ts = options.trackState
-      @trackState(options.projectPath, win, ts)
+      @trackState(projectPath, win, ts)
 
     ## open dev tools if they're true
     if options.devTools
@@ -205,7 +211,7 @@ module.exports = {
 
     win
 
-  open: (options = {}) ->
+  open: (projectPath, options = {}) ->
     ## if we already have a window open based
     ## on that type then just show + focus it!
     if win = getByType(options.type)
@@ -220,7 +226,7 @@ module.exports = {
 
     recentlyCreatedWindow = true
 
-    _.defaults options, {
+    _.defaults(options, {
       width:  600
       height: 500
       show:   true
@@ -228,7 +234,7 @@ module.exports = {
       webPreferences: {
         preload: cwd("lib", "ipc", "ipc.js")
       }
-    }
+    })
 
     urlChanged = (url, resolve) ->
       parsed = uri.parse(url, true)
@@ -248,7 +254,9 @@ module.exports = {
     #   args.width = 0
     #   args.height = 0
 
-    win = @create(options)
+    win = @create(projectPath, options)
+
+    debug("creating electron window with options %o", options)
 
     windows[options.type] = win
 

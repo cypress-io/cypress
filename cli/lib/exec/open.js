@@ -30,12 +30,19 @@ module.exports = {
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
-    return verify.start()
-    .then(() => {
+    function open () {
       return spawn.start(args, {
+        dev: options.dev,
         detached: Boolean(options.detached),
         stdio: 'inherit',
       })
-    })
+    }
+
+    if (options.dev) {
+      return open()
+    }
+
+    return verify.start()
+    .then(open)
   },
 }

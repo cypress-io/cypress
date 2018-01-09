@@ -7,6 +7,7 @@ human      = require("human-interval")
 Promise    = require("bluebird")
 random     = require("randomstring")
 pkg        = require("@packages/root")
+debug      = require("debug")("cypress:server:headless")
 ss         = require("../screenshots")
 user       = require("../user")
 stats      = require("../stats")
@@ -20,7 +21,6 @@ trash      = require("../util/trash")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 Windows    = require("../gui/windows")
-log        = require("../log")
 
 fs = Promise.promisifyAll(fs)
 
@@ -226,10 +226,14 @@ module.exports = {
         resp
     }
 
+    browserOpts.projectPath = options.projectPath
+
     openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project, headed) ->
+  listenForProjectEnd: (project, headed, exit) ->
     new Promise (resolve) ->
+      return if exit is false
+
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
         ## early too: (Ended Early: true)
@@ -303,9 +307,9 @@ module.exports = {
       project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath, exit } = options
 
-    @listenForProjectEnd(project, headed)
+    @listenForProjectEnd(project, headed, exit)
     .then (obj) =>
       if end
         obj.video = name
@@ -319,7 +323,7 @@ module.exports = {
         if not outputPath
           return Promise.resolve()
 
-        log("saving results as %s", outputPath)
+        debug("saving results as %s", outputPath)
 
         fs.outputJsonAsync(outputPath, testResults)
 
@@ -388,10 +392,10 @@ module.exports = {
       ## dont attempt to copy if we're running in circle and we've turned off copying artifacts
       shouldCopy = (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
 
-      log("Should copy Circle Artifacts?", Boolean(shouldCopy))
+      debug("Should copy Circle Artifacts?", Boolean(shouldCopy))
 
       if shouldCopy and videosFolder and screenshotsFolder
-        log("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
+        debug("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
 
         ## copy each of the screenshots and videos
         ## to artifacts using each basename of the folders
@@ -418,10 +422,10 @@ module.exports = {
 
   runTests: (options = {}) ->
     { browser, videoRecording, videosFolder } = options
-    log("runTests with options %j", Object.keys(options))
+    debug("runTests with options", options)
 
     browser ?= "electron"
-    log "runTests for browser #{browser}"
+    debug("runTests for browser #{browser}")
 
     screenshots = []
 
@@ -463,6 +467,7 @@ module.exports = {
       .then (started) =>
         Promise.props({
           stats:      @waitForTestsToFinishRunning({
+            exit:                 options.exit
             headed:               options.headed
             project:              options.project
             videoCompression:     options.videoCompression
@@ -481,6 +486,7 @@ module.exports = {
             headed:      options.headed
             project:     options.project
             webSecurity: options.webSecurity
+            projectPath: options.projectPath
             write
             browser
             screenshots
@@ -488,11 +494,14 @@ module.exports = {
         })
 
   ready: (options = {}) ->
-    log("headless mode ready with options %j", Object.keys(options))
+    debug("headless mode ready with options %j", options)
+
     id = @getId()
 
+    { projectPath } = options
+
     ## let's first make sure this project exists
-    Project.ensureExists(options.projectPath)
+    Project.ensureExists(projectPath)
     .then =>
       ## open this project without
       ## adding it to the global cache
@@ -517,12 +526,14 @@ module.exports = {
           @trashAssets(config)
           .then =>
             @runTests({
+              projectPath
               id:                   id
               project:              project
               videosFolder:         config.videosFolder
               videoRecording:       config.videoRecording
               videoCompression:     config.videoCompression
               videoUploadOnPasses:  config.videoUploadOnPasses
+              exit:                 options.exit
               spec:                 options.spec
               headed:               options.headed
               browser:              options.browser

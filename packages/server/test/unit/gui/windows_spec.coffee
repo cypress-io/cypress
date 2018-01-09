@@ -1,15 +1,22 @@
 require("../../spec_helper")
 
 _             = require("lodash")
+path          = require("path")
 Promise       = require("bluebird")
 EE            = require("events").EventEmitter
 BrowserWindow = require("electron").BrowserWindow
+cyDesktop     = require("@packages/desktop-gui")
+user          = require("#{root}../lib/user")
 Windows       = require("#{root}../lib/gui/windows")
 savedState    = require("#{root}../lib/saved_state")
 
 describe "lib/gui/windows", ->
   beforeEach ->
+    Windows.reset()
+
     @win = new EE()
+    @win.loadURL = @sandbox.stub()
+    @win.destroy = @sandbox.stub()
     @win.getSize = @sandbox.stub().returns([1, 2])
     @win.getPosition = @sandbox.stub().returns([3, 4])
     @win.webContents = new EE()
@@ -17,6 +24,9 @@ describe "lib/gui/windows", ->
     @win.isDestroyed = @sandbox.stub().returns(false)
 
     @sandbox.stub(Windows, "_newBrowserWindow").returns(@win)
+
+  afterEach ->
+    Windows.reset()
 
   context ".getBrowserAutomation", ->
     beforeEach ->
@@ -37,12 +47,72 @@ describe "lib/gui/windows", ->
       BrowserWindow.fromWebContents.withArgs("foo").returns("bar")
       expect(Windows.getByWebContents("foo")).to.eq("bar")
 
+  context ".open", ->
+    beforeEach ->
+      @sandbox.stub(Windows, "create").returns(@win)
+
+    it "sets default options", ->
+      options = {
+        type: "INDEX"
+      }
+
+      Windows.open("/path/to/project", options)
+      .then (win) ->
+        expect(options).to.deep.eq({
+          height: 500
+          width: 600
+          type: "INDEX"
+          show: true
+          url: cyDesktop.getPathToIndex()
+          webPreferences: {
+            preload: path.resolve("lib", "ipc", "ipc.js")
+          }
+        })
+
+        expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
+
+    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
+      options = {
+        type: "GITHUB_LOGIN"
+      }
+
+      url = "https://github.com/login"
+      url2 = "https://github.com?code=code123"
+
+      @sandbox.stub(user, "getLoginUrl").resolves(url)
+
+      @sandbox.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
+
+      Windows.open("/path/to/project", options)
+      .then (code) =>
+        expect(code).to.eq("code123")
+        expect(options.type).eq("GITHUB_LOGIN")
+        expect(@win.loadURL).to.be.calledWith(url)
+
+    it "resolves with code on GITHUB_LOGIN for did-get-redirect-request", ->
+      options = {
+        type: "GITHUB_LOGIN"
+      }
+
+      url = "https://github.com/login"
+      url2 = "https://github.com?code=code123"
+
+      @sandbox.stub(user, "getLoginUrl").resolves(url)
+
+      @sandbox.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
+
+      Windows.open("/path/to/project", options)
+      .then (code) =>
+        expect(code).to.eq("code123")
+        expect(options.type).eq("GITHUB_LOGIN")
+        expect(@win.loadURL).to.be.calledWith(url)
+
   context ".create", ->
     it "opens dev tools if saved state is open", ->
-      Windows.create({devTools: true})
+      Windows.create("/foo/", {devTools: true})
       expect(@win.webContents.openDevTools).to.be.called
 
-      Windows.create({})
+      Windows.create("/foo/", {})
       expect(@win.webContents.openDevTools).not.to.be.calledTwice
 
     ## TODO: test everything else going on in this method!

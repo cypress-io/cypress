@@ -21,11 +21,12 @@ describe('exec open', function () {
     })
 
     it('calls spawn with correct options', function () {
-      return open.start()
+      return open.start({ dev: true })
       .then(() => {
         expect(spawn.start).to.be.calledWith([], {
           detached: false,
           stdio: 'inherit',
+          dev: true,
         })
       })
     })

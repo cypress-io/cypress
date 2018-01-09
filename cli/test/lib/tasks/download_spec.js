@@ -50,6 +50,18 @@ describe('download', function () {
       const url = download.getUrl('0.20.2')
       snapshot('specific version desktop url', normalize(url))
     })
+
+    it('returns input if it is already an https link', () => {
+      const url = 'https://somewhere.com'
+      const result = download.getUrl(url)
+      expect(result).to.equal(url)
+    })
+
+    it('returns input if it is already an http link', () => {
+      const url = 'http://local.com'
+      const result = download.getUrl(url)
+      expect(result).to.equal(url)
+    })
   })
 
   it('sets options.version to response x-version', function () {
@@ -61,7 +73,7 @@ describe('download', function () {
     .get('/desktop')
     .query(true)
     .reply(302, undefined, {
-      'Location': 'https://aws.amazon.com/some.zip',
+      Location: 'https://aws.amazon.com/some.zip',
       'x-version': '0.11.1',
     })
 
@@ -81,7 +93,7 @@ describe('download', function () {
     .get('/desktop/0.13.0')
     .query(true)
     .reply(302, undefined, {
-      'Location': 'https://aws.amazon.com/some.zip',
+      Location: 'https://aws.amazon.com/some.zip',
       'x-version': '0.13.0',
     })
 
@@ -97,11 +109,12 @@ describe('download', function () {
     err.statusCode = 404
     err.statusMessage = 'Not Found'
 
-    // not really the download erroring, but the easiest way to
+    // not really the download error, but the easiest way to
     // test the error handling
     this.sandbox.stub(info, 'ensureInstallationDir').rejects(err)
 
-    return download.start(this.options)
+    return download
+    .start(this.options)
     .then(() => {
       throw new Error('should have caught')
     })
