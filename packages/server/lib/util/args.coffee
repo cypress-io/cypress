@@ -9,7 +9,7 @@ nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 everythingAfterFirstEqualRe = /=(.+)/
 
-whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds headed config exit exitWithCode browser headless outputPath group groupId parallel parallelId".split(" ")
+whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode removeIds headed config exit exitWithCode browser headless outputPath group groupId parallel parallelId".split(" ")
 
 # returns true if the given string has double quote character "
 # only at the last position.
@@ -112,7 +112,6 @@ module.exports = {
         "clear-logs":  "clearLogs"
         "run-project": "runProject"
         "return-pkg":  "returnPkg"
-        "auto-open":   "autoOpen"
         "headless":    "isTextTerminal"
         "exit-with-code":   "exitWithCode"
         "reporter-options": "reporterOptions"
@@ -167,11 +166,19 @@ module.exports = {
       ## annd store the config
       options.config = sanitizeAndConvertNestedArgs(c)
 
-    ## handhold this option since its the only
-    ## one that overrides config values
-    if p = options.port
+    ## get a list of the available config keys
+    configKeys = config.getConfigKeys()
+
+    ## and if any of our options match this
+    configValues = _.pick(options, configKeys)
+
+    ## then set them on config
+    ## this solves situations where we accept
+    ## root level arguments which also can
+    ## be set in configuration
+    _.each configValues, (val, key) ->
       options.config ?= {}
-      options.config.port = p
+      options.config[key] = val
 
     options = normalizeBackslashes(options)
 
