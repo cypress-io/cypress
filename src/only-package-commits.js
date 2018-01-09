@@ -2,14 +2,14 @@ const { identity, memoizeWith, pipeP } = require('ramda');
 const pkgUp = require('pkg-up');
 const readPkg = require('read-pkg');
 const debug = require('debug')('semantic-release:monorepo');
-const { getCommitFiles, getGitRoot } = require('./git-utils');
+const { getCommitFiles, getRoot } = require('./git-utils');
 const { mapCommits } = require('./options-transforms');
 
 const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
 
 const getPackagePath = async () => {
   const path = await pkgUp();
-  const gitRoot = await getGitRoot();
+  const gitRoot = await getRoot();
   return path.replace('package.json', '').replace(`${gitRoot}/`, '');
 };
 

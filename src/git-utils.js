@@ -23,7 +23,7 @@ const getCommitFiles = pipeP(
  * @async
  * @return {Promise<String>} System path of the git repository.
  */
-const getGitRoot = () => git(['rev-parse', '--show-toplevel']);
+const getRoot = () => git(['rev-parse', '--show-toplevel']);
 
 /**
  * Get the commit sha for a given tag.
@@ -32,14 +32,14 @@ const getGitRoot = () => git(['rev-parse', '--show-toplevel']);
  * @param {string} tagName Tag name for which to retrieve the commit sha.
  * @return {string} The commit sha of the tag in parameter or `null`.
  */
-async function gitTagHead(tagName) {
+const getTagHead = async tagName => {
   try {
     return await git(['rev-list', '-1', tagName]);
   } catch (err) {
     debug(err);
     return null;
   }
-}
+};
 
 /**
  * Unshallow the git repository (retrieving every commit and tags).
@@ -50,7 +50,7 @@ const unshallow = () =>
 
 module.exports = {
   getCommitFiles,
-  getGitRoot,
-  gitTagHead,
+  getRoot,
+  getTagHead,
   unshallow,
 };
