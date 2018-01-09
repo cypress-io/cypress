@@ -104,7 +104,7 @@ describe "lib/util/args", ->
       expect(@setup("--no-record").record).to.be.false
       expect(@setup("--record=false").record).to.be.false
 
-    it "backs up env, config, reporterOptions, spec", ->
+    it.only "backs up env, config, reporterOptions, spec", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
@@ -120,6 +120,14 @@ describe "lib/util/args", ->
           requestTimeout: 1234
           blacklistHosts: "a.com|b.com"
           hosts: "a=b|b=c"
+          reporterOptions: {
+            foo: "bar"
+          }
+          env: {
+            foo: "bar"
+            baz: "quux"
+            bar: "foo=quz"
+          }
         }
         _config: "requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
         "reporter-options": "foo=bar"
