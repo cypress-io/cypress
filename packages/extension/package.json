@@ -35,8 +35,8 @@
     "fs-extra": "^0.26.7",
     "gulp": "^4.0.0",
     "gulp-rename": "^1.2.2",
-    "sinon": "^1.17.3",
-    "sinon-chai": "^2.8.0",
+    "sinon": "^4.1.4",
+    "sinon-chai": "^2.14.0",
     "stream-to-promise": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
     "web-ext": "^2.3.0"

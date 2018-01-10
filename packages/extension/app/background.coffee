@@ -65,7 +65,6 @@ connect = (host, path, io) ->
         fail(id, {message: "No handler registered for: '#{msg}'"})
 
   client.on "connect", ->
-    console.log("connected")
     listenToCookieChanges()
 
     client.emit("automation:client:connected")
