@@ -1,4 +1,5 @@
 _write = process.stdout.write
+_log = process.log
 
 module.exports = {
   capture: ->
@@ -7,6 +8,16 @@ module.exports = {
     ## lazily backup write to enable
     ## injection
     write = process.stdout.write
+    log = process.log
+
+    ## electron adds a new process.log
+    ## method for windows instead of process.stdout.write
+    ## https://github.com/cypress-io/cypress/issues/977
+    if log
+      process.log = (str) ->
+        logs.push(str)
+
+        log.apply(@, arguments)
 
     process.stdout.write = (str) ->
       logs.push(str)
@@ -20,6 +31,7 @@ module.exports = {
     }
 
   restore: ->
-    ## restore to the original write
+    ## restore to the originals
     process.stdout.write = _write
+    process.log = _log
 }

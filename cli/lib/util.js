@@ -3,6 +3,7 @@ const R = require('ramda')
 const path = require('path')
 const isCi = require('is-ci')
 const chalk = require('chalk')
+const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
@@ -36,6 +37,12 @@ const util = {
 
   isCi () {
     return isCi
+  },
+
+  supportsColor () {
+    // we only care about stderr supporting color
+    // since thats what our DEBUG logs use
+    return Boolean(supportsColor.stderr)
   },
 
   cwd () {
