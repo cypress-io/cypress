@@ -84,10 +84,16 @@ module.exports = {
     .then (extensionDest) ->
       if ps = options.proxyServer
         {hostname, port, protocol} = urlUtil.parse(ps)
-        port ?= if protocol is "https:" then "443" else "80"
+
+        port ?= if protocol is "https:" then 443 else 80
+
+        port = parseFloat(port)
 
         preferences["network.proxy.http"] = hostname
+        preferences["network.proxy.https"] = hostname
         preferences["network.proxy.http_port"] = port
+        preferences["network.proxy.https_port"] = port
+        preferences["network.proxy.no_proxies_on"] = ''
 
       # new Promise (resolve) ->
       #   profile.addExtension extensionPath, ->
