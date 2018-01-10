@@ -56,7 +56,7 @@ The error below should indicate which dependency is missing.
 
 https://on.cypress.io/required-dependencies
 
-If you using Docker, we provide containers with all required dependencies installed.
+If you are using Docker, we provide containers with all required dependencies installed.
 ----------
 
 an error about dependencies
@@ -118,7 +118,7 @@ Read our documentation on dependencies for more information:
 
 https://on.cypress.io/required-dependencies
 
-If you using Docker, we provide containers with all required dependencies installed.
+If you are using Docker, we provide containers with all required dependencies installed.
 ----------
 
 Caught error trying to run XVFB: "test without xvfb"
