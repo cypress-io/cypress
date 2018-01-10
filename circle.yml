@@ -4,18 +4,10 @@ defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress-monorepo
   docker:
-    # the Docker image with Cypress dependencies and Chrome browser
-    - image: cypress/browsers:chrome62
+    # the Docker image with Cypress dependencies and browsers
+    - image: cypress/browsers:chrome63-ff57
       environment:
-        ## this enables colors + fixes failing unit tests
-        TERM: xterm
-
         CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
-
-        npm_config_loglevel: warn
-        # even when running as non-root user
-        # need to set unsafe perm to be able to do `npm postinstall`
-        npm_config_unsafe-perm: true
 
 jobs:
   ## code checkout and NPM installs
