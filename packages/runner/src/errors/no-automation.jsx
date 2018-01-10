@@ -11,7 +11,10 @@ const icon = (browser) => {
     case 'chrome':
     case 'chromium':
     case 'canary':
+    case 'electron':
       return 'chrome'
+    case 'firefox':
+      return 'firefox'
     default:
       return ''
   }

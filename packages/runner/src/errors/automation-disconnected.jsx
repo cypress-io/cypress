@@ -4,7 +4,7 @@ import RunnerWrap from '../app/runner-wrap'
 export default ({ onReload }) => (
   <RunnerWrap className='automation-failure'>
     <div className='automation-message automation-disconnected'>
-      <p>Whoops, the Cypress Chrome extension has disconnected.</p>
+      <p>Whoops, the Cypress extension has disconnected.</p>
       <p className='muted'>Cypress cannot run tests without this extension.</p>
       <button onClick={onReload}>
         <i className='fa fa-refresh'></i> Reload the Browser
