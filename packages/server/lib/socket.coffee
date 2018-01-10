@@ -50,6 +50,8 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket(config)
 
+    @ended = false
+
     @onTestFileChange = @onTestFileChange.bind(@)
 
     if config.watchForFileChanges
@@ -177,6 +179,9 @@ class Socket
         ## if our automation disconnects then we're
         ## in trouble and should probably bomb everything
         automationClient.on "disconnect", =>
+          ## if we've stopped then don't do anything
+          return if @ended
+
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
           Promise.delay(500)
           .then =>
@@ -332,6 +337,8 @@ class Socket
           @toReporter(event, data)
 
   end: ->
+    @ended = true
+
     ## TODO: we need an 'ack' from this end
     ## event from the other side
     @io and @io.emit("tests:finished")

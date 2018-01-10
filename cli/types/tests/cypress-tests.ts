@@ -135,6 +135,8 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
     })
   })
 
+  cy.get('something').should('have.length', 1)
+
 cy.stub().withArgs('').log(false).as('foo')
 
 cy.spy().withArgs('').log(false).as('foo')
@@ -151,4 +153,12 @@ cy.wrap('foo').then(subject => {
   return Cypress.Promise.resolve(subject)
 }).then(subject => {
   subject // $ExpectType string
+})
+
+cy.get('body').within(body => {
+  body // $ExpectType JQuery<HTMLBodyElement>
+})
+
+cy.get('body').within({ log: false }, body => {
+  body // $ExpectType JQuery<HTMLBodyElement>
 })

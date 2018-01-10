@@ -3,6 +3,7 @@ require("../../spec_helper")
 _            = require("lodash")
 fs           = require("fs-extra")
 cp           = require("child_process")
+niv          = require("npm-install-version")
 path         = require("path")
 http         = require("http")
 human        = require("human-interval")
@@ -20,6 +21,10 @@ settings     = require("#{root}../lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
 fs = Promise.promisifyAll(fs)
+
+Promise.config({
+  longStackTraces: true
+})
 
 env = process.env
 env.COPY_CIRCLE_ARTIFACTS = "true"
@@ -79,7 +84,7 @@ stopServer = (srv) ->
 
 module.exports = {
   setup: (options = {}) ->
-    if options.npmInstall
+    if npmI = options.npmInstall
       before ->
         ## npm install needs extra time
         @timeout(human("2 minutes"))
@@ -88,6 +93,19 @@ module.exports = {
           cwd: Fixtures.path("projects/e2e")
           maxBuffer: 1024*1000
         })
+        .then ->
+          if _.isArray(npmI)
+
+            copyToE2ENodeModules = (module) ->
+              fs.copyAsync(
+                path.resolve("node_modules", module), Fixtures.path("projects/e2e/node_modules/#{module}")
+              )
+
+            Promise
+            .map(npmI, niv.install)
+            .then ->
+              Promise.map(npmI, copyToE2ENodeModules)
+
         .then ->
           ## symlinks mess up fs.copySync
           ## and bin files aren't necessary for these tests
@@ -101,10 +119,7 @@ module.exports = {
 
       @sandbox.stub(process, "exit")
 
-      user.set({name: "brian", authToken: "auth-token-123"})
-      .then =>
-        Project.add(e2ePath)
-      .then =>
+      Promise.try =>
         if servers = options.servers
           servers = [].concat(servers)
 
