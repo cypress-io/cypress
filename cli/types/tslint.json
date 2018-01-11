@@ -9,6 +9,7 @@
     "unified-signatures": false,
     "only-arrow-functions": false,
     "no-unnecessary-generics": false,
-    "export-just-namespace": false
+    "export-just-namespace": false,
+    "newline-per-chained-call": false
   }
 }
