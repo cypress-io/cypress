@@ -169,15 +169,15 @@ jobs:
       - run: echo $PWD
       - run: ls -l
       - save_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
           paths:
-            - /home/root/cypress-repo
+            - /root/cypress-repo
 
   lint:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run: npm run lint
       - run: npm run all lint
 
@@ -186,7 +186,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       # make sure mocha runs
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
@@ -210,7 +210,7 @@ jobs:
     parallelism: 2
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress-repo
@@ -220,7 +220,7 @@ jobs:
     parallelism: 2
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress-repo
@@ -229,7 +229,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 0
           working_directory: packages/server
@@ -240,7 +240,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 1
           working_directory: packages/server
@@ -251,7 +251,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 2
           working_directory: packages/server
@@ -262,7 +262,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 3
           working_directory: packages/server
@@ -273,7 +273,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 4
           working_directory: packages/server
@@ -284,7 +284,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           background: true
@@ -304,7 +304,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -324,7 +324,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -344,7 +344,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -364,7 +364,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -384,7 +384,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
@@ -400,7 +400,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
@@ -416,7 +416,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
@@ -432,7 +432,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -441,7 +441,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run: $(npm bin)/print-arch
       - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform linux
@@ -467,7 +467,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
@@ -493,7 +493,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
@@ -509,7 +509,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           name: bump NPM version
           command: npm --no-git-tag-version version $NEXT_DEV_VERSION
@@ -551,7 +551,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la /tmp/urls
@@ -585,7 +585,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - attach_workspace:
           at: /tmp/urls
       # make sure we have cypress.zip received
@@ -615,7 +615,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
+          key: cypress-repo-v2-{{ .Branch }}-{{ .Revision }}
       - attach_workspace:
           at: /tmp/urls
       # make sure we have the binary
