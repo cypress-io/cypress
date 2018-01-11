@@ -16,8 +16,15 @@ jobs:
     steps:
       - checkout
 
-      # print global NPM cache path
-      - run: echo $(npm -g bin)
+      - run:
+          name: current path
+          command: echo $PWD
+      - run:
+          name: file list
+          command: ls -l
+      - run:
+          name: global NPM bin path
+          command: echo $(npm -g bin)
 
       ## make sure the TERM is set to 'xterm' in node
       ## else colors (and tests) will fail
@@ -159,6 +166,8 @@ jobs:
       # hmm, do not see a good way to cache it, since all code
       # might change
       # requires absolute path
+      - run: echo $PWD
+      - run: ls -l
       - save_cache:
           key: cypress-repo-v1-{{ .Branch }}-{{ .Revision }}
           paths:
