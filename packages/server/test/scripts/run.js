@@ -16,8 +16,7 @@ function exitErr (msg) {
   return process.exit(1)
 }
 
-const isWindows = () =>
-  os.platform() === 'win32'
+const isWindows = () => os.platform() === 'win32'
 
 if (!run) {
   return exitErr(`
@@ -46,18 +45,18 @@ if (isWindows()) {
 } else {
   commandAndArguments.command = 'xvfb-maybe'
   commandAndArguments.args = [
-    '--xvfb-run-args ' +
-    '"-as \\"-screen 0 1280x1024x8\\""',
+    '--xvfb-run-args "-as \\"-screen 0 1280x1024x8\\""',
     'mocha',
     run,
   ]
 }
 
 if (options.fgrep) {
-  commandAndArguments.args.push(
-    '--fgrep',
-    options.fgrep
-  )
+  commandAndArguments.args.push('--fgrep', options.fgrep)
+}
+
+if (options.bail) {
+  commandAndArguments.args.push('--bail')
 }
 
 commandAndArguments.args.push(
@@ -100,8 +99,9 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
-const cmd = `${commandAndArguments.command} ${
-  commandAndArguments.args.join(' ')}`
+const cmd = `${commandAndArguments.command} ${commandAndArguments.args.join(
+  ' '
+)}`
 console.log('test command:')
 console.log(cmd)
 

@@ -13,7 +13,7 @@
     "test-watch": "./test/support/watch test",
     "test-unit": "node ./test/scripts/run.js test/unit",
     "test-unit-watch": "./test/support/watch test/unit",
-    "test-integration": "node ./test/scripts/run.js test/integration",
+    "test-integration": "node ./test/scripts/run.js test/integration --bail",
     "test-integration-watch": "./test/support/watch test-integration",
     "test-e2e": "node ./test/scripts/e2e.js",
     "test-e2e-chrome": "node ./test/scripts/run.js test/e2e chrome",
