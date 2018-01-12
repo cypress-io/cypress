@@ -122,9 +122,14 @@ module.exports = {
       })
     .then (runner) ->
       return {
-        kill: -> runner.exit()
+        kill: ->
+          runner.exit()
         removeAllListeners: ->
-        once: (fn) -> runner.registerCleanup(fn)
+        once: (event, fn) ->
+          if event is "exit"
+            runner.registerCleanup(fn)
+          else
+            throw new Error("firefox instance does not fire '#{event}' event")
       }
 
       # utils.launch(browserName, url, args)
