@@ -13,6 +13,8 @@ const execa = require('execa-wrap')
 const path = require('path')
 
 describe('cli', function () {
+  require('mocha-banner').register()
+
   beforeEach(function () {
     logger.reset()
     this.sandbox.stub(process, 'exit')
@@ -191,7 +193,7 @@ describe('cli', function () {
       expect(run.start).to.be.calledWith({ project: '/tmp/foo/bar' })
     })
 
-    it('calls run with heded', function () {
+    it('calls run with headed', function () {
       this.exec('run --headed')
       expect(run.start).to.be.calledWith({ headed: true })
     })
