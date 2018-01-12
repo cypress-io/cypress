@@ -183,7 +183,7 @@ describe('cli', function () {
 
     it('calls run with relative --project folder', function () {
       this.sandbox.stub(path, 'resolve')
-        .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
+      .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
       this.exec('run --project foo/bar')
       expect(run.start).to.be.calledWith({ project: '/mock/absolute/foo/bar' })
     })
@@ -206,7 +206,7 @@ describe('cli', function () {
 
     it('calls open.start with relative --project folder', function () {
       this.sandbox.stub(path, 'resolve')
-        .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
+      .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
       this.exec('open --project foo/bar')
       expect(open.start).to.be.calledWith({ project: '/mock/absolute/foo/bar' })
     })
