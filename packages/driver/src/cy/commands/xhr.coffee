@@ -409,7 +409,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Alias:    options.alias
         })
 
-        return getXhrServer(state).route(options)
+        return Cypress.backend("set:traffic:routing:rules", options)
+
+        # return getXhrServer(state).route(options)
 
       if _.isFunction(args[0])
         getArgs = =>

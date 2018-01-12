@@ -32,7 +32,7 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request) ->
+  handle: (req, res, config, getRemoteState, request, trafficRules) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
@@ -68,6 +68,29 @@ module.exports = {
         res.set("x-cypress-matched-blacklisted-host", matched)
 
         return res.status(503).end()
+
+    if rule = trafficRules.hasRuleForRequest(req)
+      rule.onRequestReceived({
+        headers: req.headers
+        body: req.body
+      })
+      .then (modifications) ->
+        req.merge(modifications)
+
+        req.resume()
+
+      # req.socket.pause()
+
+      ## do all the things!!
+      res.on('finish', () ->
+        rule.onResponseReceives({
+          body: res.body
+        })
+        .then (newBody) ->
+          res.body = newBody
+
+          rule.onFinish()
+      )
 
     thr = through (d) -> @queue(d)
 

@@ -59,6 +59,7 @@ class Server
     @_wsProxy    = null
     @_fileServer = null
     @_httpsProxy = null
+    @_trafficRules = null
 
   createExpressApp: (morgan) ->
     app = express()
@@ -128,6 +129,8 @@ class Server
 
       @createServer(app, config, @_request)
 
+      @createTrafficRulres(app, config, @_request)
+
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
@@ -166,9 +169,13 @@ class Server
       @_server.on "connect", (req, socket, head) =>
         debug("Got CONNECT request from %s", req.url)
 
+        cth = config.captureTrafficHosts
+
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
             urlToCheck = "https://" + req.url
+
+            return true if hosts.matches(urlToCheck, cth)
 
             isMatching = cors.urlMatchesOriginPolicyProps(urlToCheck, @_remoteProps)
 
@@ -579,9 +586,43 @@ class Server
 
       @_middleware = null
 
+  _onTrafficRoutingRules: (rule, cb) ->
+    ## something like this
+    # @trafficRules = {}
+    # @trafficRules.reset()
+    # @trafficRules.abort()
+
+    # rule = {
+    #   method: "GET"
+    #   url: "https://foo*.com"
+    #   headers: {
+    #
+    #   }
+    # }
+
+    callbacks = {
+      onResponse: =>
+        # @toRunner("traffic:routing:complete")
+
+      onRequest: (obj) ->
+        # @toRunner("traffic:routing:request", obj)
+    }
+
+    ## set the rule
+    @trafficRules.setRule(rule, callbacks)
+
+    ## notify driver we've set the rule
+    cb()
+
+  _onTrafficReset: ->
+    @trafficRules.abort()
+    @trafficRules.reset()
+
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onTrafficRoutingRule = @_onTrafficRoutingRules.bind(@)
+    options.onTrafficReset = @_onTrafficResets.bind(@)
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)

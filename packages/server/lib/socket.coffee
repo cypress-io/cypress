@@ -139,6 +139,7 @@ class Socket
       onSpecChanged: ->
       onChromiumRun: ->
       onReloadBrowser: ->
+      onTrafficRoutingRule: ->
       checkForAppErrors: ->
       onSavedStateChanged: ->
       onTestFileChange: ->
@@ -304,6 +305,10 @@ class Socket
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "exec"
               exec.run(config.projectRoot, args[0])
+            when "reset:traffic:rules"
+              options.onTrafficReset()
+            when "set:traffic:routing:rule"
+              options.onTrafficRoutingRule(args[0], args[1])
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"
