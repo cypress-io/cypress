@@ -10,6 +10,8 @@ evilDns      = require("evil-dns")
 httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
+pluralize    = require("pluralize")
+
 httpsProxy   = require("@packages/https-proxy")
 debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
@@ -27,6 +29,7 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+trafficRules = require("./util/traffic_rules")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -579,9 +582,23 @@ class Server
 
       @_middleware = null
 
+  _onTrafficRoutingAddRule: (rule) ->
+    debug("_onTrafficRoutingAddRule %j", rule)
+    trafficRules.add(rule)
+    debug('got %s', pluralize('rule', trafficRules.length(), true))
+    debug(trafficRules.toJSON())
+
+  _onTrafficReset: ->
+    debug("_onTrafficReset")
+    trafficRules.reset()
+    # TODO abort all unfinished requests
+    # TODO clear all existing traffic rules
+
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onTrafficRoutingAddRule = @_onTrafficRoutingAddRule.bind(@)
+    options.onTrafficReset = @_onTrafficReset.bind(@)
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)

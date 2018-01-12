@@ -128,7 +128,7 @@ class Socket
   startListening: (server, automation, config, options) ->
     existingState = null
 
-    _.defaults options,
+    _.defaults options, {
       socketId: null
       onSetRunnables: ->
       onMocha: ->
@@ -142,6 +142,9 @@ class Socket
       checkForAppErrors: ->
       onSavedStateChanged: ->
       onTestFileChange: ->
+      onTrafficReset: ->
+      onTrafficRoutingAddRule: ->
+    }
 
     automationClient = null
 
@@ -304,6 +307,9 @@ class Socket
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "exec"
               exec.run(config.projectRoot, args[0])
+            # network stubbing / route traffic rules
+            when "set:traffic:routing:add:rule"
+              options.onTrafficRoutingAddRule(args[0], args[1])
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"
@@ -335,6 +341,9 @@ class Socket
       runnerEvents.forEach (event) =>
         socket.on event, (data) =>
           @toReporter(event, data)
+
+      socket.on "test:before:run:async", ->
+        options.onTrafficReset()
 
   end: ->
     @ended = true

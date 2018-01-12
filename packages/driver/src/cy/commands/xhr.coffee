@@ -401,15 +401,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           alias:    options.alias
           isStubbed: options.response?
           numResponses: 0
-          consoleProps: ->
+          consoleProps: -> {
             Method:   options.method
             URL:      getUrl(options)
             Status:   options.status
             Response: options.response
             Alias:    options.alias
+          }
         })
 
-        return getXhrServer(state).route(options)
+        return Cypress.backend("set:traffic:routing:add:rule", options)
+        .then () ->
+          getXhrServer(state).route(options)
 
       if _.isFunction(args[0])
         getArgs = =>
