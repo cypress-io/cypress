@@ -64,6 +64,7 @@
     "babel-preset-react": "6.24.1",
     "bluebird": "3.5.0",
     "debug": "3.1.0",
+    "lodash.clonedeep": "4.5.0",
     "webpack": "3.6.0"
   },
   "release": {

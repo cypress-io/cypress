@@ -1,3 +1,4 @@
+const cloneDeep = require('lodash.clonedeep')
 const path = require('path')
 const webpack = require('webpack')
 const log = require('debug')('cypress:webpack')
@@ -167,6 +168,6 @@ const preprocessor = (options = {}) => {
 }
 
 // provide a clone of the default options
-preprocessor.defaultOptions = JSON.parse(JSON.stringify(defaultOptions))
+preprocessor.defaultOptions = cloneDeep(defaultOptions)
 
 module.exports = preprocessor

@@ -64,6 +64,10 @@ describe('webpack preprocessor', function () {
       expect(preprocessor.defaultOptions).to.be.an('object')
       expect(preprocessor.defaultOptions.webpackOptions.module.rules).to.be.an('array')
     })
+
+    it('defaultOptions are deeply cloned, preserving regexes', () => {
+      expect(preprocessor.defaultOptions.webpackOptions.module.rules[0].test).to.be.an.instanceOf(RegExp)
+    })
   })
 
   describe('preprocessor function', function () {
