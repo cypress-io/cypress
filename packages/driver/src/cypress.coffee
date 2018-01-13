@@ -272,6 +272,11 @@ class $Cypress
         ## stats and runnable properties such as errors
         @emit("test:after:run", args...)
 
+        if @config("isTextTerminal")
+          ## needed for calculating wallClockDuration
+          ## and the timings of after + afterEach hooks
+          @emit("mocha", "test:after:run", args[0])
+
       when "cy:test:set:state"
         @emit("test:set:state", args...)
 

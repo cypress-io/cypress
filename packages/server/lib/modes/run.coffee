@@ -355,7 +355,7 @@ module.exports = {
 
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures
-      suv = obj.shouldUploadVideo = !!(videoUploadOnPasses is true or hasFailingTests)
+      suv = !!(videoUploadOnPasses is true or hasFailingTests)
 
       ## always close the browser now as opposed to letting
       ## it exit naturally with the parent process due to
@@ -430,9 +430,9 @@ module.exports = {
     { project, config, outputPath } = options
 
     results = {
-      start: null
-      end: null
-      duration: null
+      startedTestsAt: null
+      endedTestsAt: null
+      totalDuration: null
       totalTests: null,
       totalFailures: null,
       totalPasses: null,
@@ -464,9 +464,9 @@ module.exports = {
 
       Promise.map(specs, runSpec, { concurrency: 1 })
     .then (runs = []) ->
-      results.start = start = getRun(_.first(runs), "stats.start")
-      results.end = end = getRun(_.last(runs), "stats.end")
-      results.duration = end - start
+      results.startedTestsAt = start = getRun(_.first(runs), "stats.start")
+      results.endedTestsAt = end = getRun(_.last(runs), "stats.end")
+      results.totalDuration = reduceRuns(runs, "stats.duration")
 
       results.totalSuites = reduceRuns(runs, "stats.suites")
       results.totalTests = reduceRuns(runs, "stats.tests")
