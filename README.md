@@ -33,10 +33,14 @@ npx semantic-release -e -semantic-release-monorepo
 It helps to think about `semantic-releaase-monorepo` as a variation on `semantic-release`'s default behavior, using the latter's plugin system to adapt it to work with a monorepo. 
 
 ### With Lerna
-Run `semantic-release-monorepo` for each package in a monorepo managed by [`lerna`](https://github.com/lerna/lerna):
+The monorepo management tool [`lerna`](https://github.com/lerna/lerna) can be used to run `semantic-release-monorepo` across all packages in a monorepo:
+
 ```bash
-lerna exec --concurrency 1 -- npx semantic-release -e -semantic-release-monorepo
+lerna exec --concurrency 1 -- npx --no-install semantic-release -e -semantic-release-monorepo
 ```
+Note that this requires installing `semantic-release` and `semantic-release-monorepo` for each package.
+
+Alternatively, thanks to how [`npx's package resolution works`](https://github.com/zkat/npx#description), if the repository root is in `$PATH` (typically true on CI), `semantic-release` and `semantic-release-monorepo` can be installed in the repo root instead of for each package, likely saving both time and disk space.
 
 ## Configuration
 The set of plugins in this package wrap other `semantic-release` plugins to modify their behavior. By default, the same plugin configuration as `semantic-release` is used, but any plugin configuration should be compatible.
