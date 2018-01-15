@@ -17,8 +17,13 @@ A push may release multiple package versions. In order to avoid version collisio
 
 ## Install
 ```bash
-npm install -D semantic-release semantic-release-monorepo
+npm install -D semantic-release semantic-release-monorepo @semantic-release/npm@2.6.0
 ```
+
+### Peer dependency on @semantic-release/npm
+The `@semantic-release/npm` package is a `semantic-release` plugin that provides functionality for releasing on `npm`. While it's technically optional, it covers a very likely use case and is applied by default by `semantic-release` (minor version dependency, `^2.0.0`). 
+
+Unfortunately, `@semantic-release/npm` version `2.6.1` and above is incompatible with `semantic-release-monorepo` ([discussion](https://github.com/semantic-release/npm/issues/36)). Until a solution is found, `semantic-release-monorepo` only supports the version range `2 - 2.6.0`.
 
 ## Usage
 Run `semantic-release-monorepo` for the package in the current working directory:
