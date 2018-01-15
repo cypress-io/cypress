@@ -1,12 +1,26 @@
 # cypress-react-unit-test [![Build Status](https://travis-ci.org/bahmutov/cypress-react-unit-test.svg?branch=master)](https://travis-ci.org/bahmutov/cypress-react-unit-test) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah)
 
-> Unit test React components using Cypress **ALPHA**
+> A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **ALPHA**
+
+## TLDR
+
+* What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your React components with zero effort.
+
+* How is this different from [Enzyme](https://github.com/airbnb/enzyme)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/).
 
 ## Known problems
 
 - [ ] some DOM events are not working when running all tests at once [#4](https://github.com/bahmutov/cypress-react-unit-test/issues/4)
 - [ ] cannot mock server XHR for injected components [#5](https://github.com/bahmutov/cypress-react-unit-test/issues/5)
 - [ ] cannot spy on `window.alert` [#6](https://github.com/bahmutov/cypress-react-unit-test/issues/6)
+
+## Install
+
+Requires [Node](https://nodejs.org/en/) version 6 or above.
+
+```sh
+npm install --save-dev cypress cypress-react-unit-test
+```
 
 ## Use
 
