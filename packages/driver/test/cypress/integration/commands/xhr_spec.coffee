@@ -69,6 +69,26 @@ describe "src/cy/commands/xhr", ->
           expect(onreadystatechanged).to.be.true
           expect(xhr.status).to.eq(404)
 
+    it "allow multiple readystatechange calls", ->
+      responseText = null
+      responseStatuses = 0
+
+      cy
+        .server()
+        .route({url: /longtext.txt/}).as("getFoo")
+        .window().then (win) ->
+          xhr = new win.XMLHttpRequest
+          xhr.onreadystatechange = ->
+            responseText = xhr.responseText
+            if xhr.readyState == 3
+              responseStatuses++
+          xhr.open("GET", "/fixtures/longtext.txt?" + (new Date).getTime())
+          xhr.send()
+          null
+        .wait("@getFoo").then (xhr) ->
+          expect(responseStatuses).to.be.gt(2)
+          expect(xhr.status).to.eq(200)
+
     it "works with jquery too", ->
       failed = false
       onloaded = false
