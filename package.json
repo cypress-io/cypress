@@ -11,6 +11,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
+    "@semantic-release/npm": "2 - 2.6.0",
     "semantic-release": ">=11.1.0"
   },
   "dependencies": {
