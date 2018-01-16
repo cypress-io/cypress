@@ -62,6 +62,7 @@ class Server
     @_wsProxy    = null
     @_fileServer = null
     @_httpsProxy = null
+    @_trafficRules = null
 
   createExpressApp: (morgan) ->
     app = express()
@@ -123,11 +124,13 @@ class Server
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
 
+      # @_trafficRules = TrafficRules.create()
+
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_trafficRules)
 
       @createServer(app, config, @_request)
 

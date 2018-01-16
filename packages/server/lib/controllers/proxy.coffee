@@ -32,7 +32,7 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request) ->
+  handle: (req, res, config, getRemoteState, request, trafficRules) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
@@ -69,10 +69,18 @@ module.exports = {
 
         return res.status(503).end()
 
+    # if rule = trafficRules.getRule(req)
+    #   return @applyRule(rule, req, res)
+
     thr = through (d) -> @queue(d)
 
     @getHttpContent(thr, req, res, remoteState, config, request)
     .pipe(res)
+
+  applyRule: (rule, req, res) ->
+    ## TODO: look at controllers/xhrs for some current implementation details
+    # res.setHeaders(rule.headers)
+    # res.send(rule.body)
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
