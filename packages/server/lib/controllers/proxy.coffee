@@ -84,6 +84,8 @@ module.exports = {
     # res.send(rule.body)
     debug("applying custom rule to %s %s", req.method, req.url)
     debug("rule", rule)
+    if rule.headers
+      res.set(rule.headers)
     if rule.response
       res.send(rule.response)
     else
