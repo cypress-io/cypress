@@ -147,8 +147,12 @@ module.exports = {
     ctx.timeout(options.timeout)
 
     if spec = options.spec
+      ## normalize into array and then prefix
+      specs = spec.split(',').map (spec) ->
+        path.join(e2ePath, "cypress", "integration", spec)
+
       ## normalize the path to the spec
-      options.spec = spec = path.join("cypress", "integration", spec)
+      options.spec = specs.join(',')
 
     return options
 
@@ -160,9 +164,6 @@ module.exports = {
 
     if options.port
       args.push("--port=#{options.port}")
-
-    if options.hosts
-      args.push("--hosts=#{options.hosts}")
 
     if options.headed
       args.push("--headed")

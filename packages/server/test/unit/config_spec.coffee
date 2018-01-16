@@ -409,6 +409,14 @@ describe "lib/config", ->
           @expectValidationFails("be a string or an array of string")
           @expectValidationFails("the value was: [5]")
 
+  context ".getConfigKeys", ->
+    beforeEach ->
+      @includes = (key) ->
+        expect(config.getConfigKeys()).to.include(key)
+
+    it "includes blacklistHosts", ->
+      @includes("blacklistHosts")
+
   context ".resolveConfigValues", ->
     beforeEach ->
       @expected = (obj) ->
@@ -571,6 +579,38 @@ describe "lib/config", ->
     it "blacklistHosts=null", ->
       @defaults("blacklistHosts", null)
 
+    it "blacklistHosts=[a,b]", ->
+      @defaults("blacklistHosts", ["a", "b"], {
+        blacklistHosts: ["a", "b"]
+      })
+
+    it "blacklistHosts=a|b", ->
+      @defaults("blacklistHosts", ["a", "b"], {
+        blacklistHosts: "a|b"
+      })
+
+    it "hosts=null", ->
+      @defaults("hosts", null)
+
+    it "hosts={}", ->
+      @defaults("hosts", {
+        foo: "bar"
+        baz: "quux"
+      }, {
+        hosts: {
+          foo: "bar",
+          baz: "quux"
+        }
+      })
+
+    it "hosts=foo=bar,baz=quux", ->
+      @defaults("hosts", {
+        foo: "bar"
+        baz: "quux"
+      }, {
+        hosts: "foo=bar|baz=quux"
+      })
+
     it "resets numTestsKeptInMemory to 0 when headless", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
       .then (cfg) ->
@@ -662,6 +702,7 @@ describe "lib/config", ->
             env:                        { }
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
+            blacklistHosts:             { value: null, from: "default" }
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "json", from: "cli" },
             reporterOptions:            { value: null, from: "default" },
@@ -719,6 +760,7 @@ describe "lib/config", ->
           expect(cfg.resolved).to.deep.eq({
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
+            blacklistHosts:             { value: null, from: "default" }
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "spec", from: "default" },
             reporterOptions:            { value: null, from: "default" },

@@ -81,12 +81,25 @@ describe "Settings", ->
       it "displays 'null' values", ->
         cy.get(".line").contains("null")
 
-      it "displays 'object' values for environmentVariables and hosts", ->
+      it "displays 'object' values for env and hosts", ->
         cy
-          .get(".nested").first()
+          .get(".nested-obj").eq(0)
             .contains("fixturesFolder")
-          .get(".nested").eq(1)
+          .get(".nested-obj").eq(1)
             .contains("*.foobar.com")
+
+      it "displays 'array' values for blacklistHosts", ->
+        cy
+          .get(".nested-arr")
+          .parent()
+            .should('contain', '[')
+            .and('contain', ']')
+            .and('not.contain', '0')
+            .and('not.contain', '1')
+          .find('.line .config').should ($lines) ->
+            expect($lines).to.have.length(2)
+            expect($lines).to.contain('www.google-analytics.com')
+            expect($lines).to.contain('hotjar.com')
 
       it "opens help link on click", ->
         cy
