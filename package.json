@@ -9,6 +9,8 @@
     "build": "webpack -d",
     "cy:open": "cypress open",
     "transpile": "tsc",
+    "pretest": "npm run lint",
+    "lint": "standard --verbose --fix *.js src cypress/integration",
     "semantic-release": "semantic-action pre && npm run transpile && npm publish && semantic-action post"
   },
   "files": [

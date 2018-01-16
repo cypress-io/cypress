@@ -12,7 +12,7 @@ const HelloWorld = ({name, click}) => {
 
   return (
     <div>
-      <a href="#"
+      <a href='#'
         onClick={sayHi}>Say Hi</a>
     </div>
   )
