@@ -36,6 +36,7 @@ module.exports = {
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
+      method: req.method
       url: req.url
       proxiedUrl: req.proxiedUrl
       cookies: req.cookies
@@ -69,8 +70,8 @@ module.exports = {
 
         return res.status(503).end()
 
-    # if rule = trafficRules.getRule(req)
-    #   return @applyRule(rule, req, res)
+    if rule = trafficRules.getRule(req)
+      return @applyRule(rule, req, res)
 
     thr = through (d) -> @queue(d)
 
@@ -81,6 +82,12 @@ module.exports = {
     ## TODO: look at controllers/xhrs for some current implementation details
     # res.setHeaders(rule.headers)
     # res.send(rule.body)
+    debug("applying custom rule to %s %s", req.method, req.url)
+    debug("rule", rule)
+    if rule.response
+      res.send(rule.response)
+    else
+      res.status(503).end()
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"

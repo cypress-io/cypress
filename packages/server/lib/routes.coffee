@@ -17,6 +17,8 @@ driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
 
 module.exports = (app, config, request, getRemoteState, project, trafficRules) ->
+  la(check.object(trafficRules), "missing traffic rules", trafficRules)
+
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->

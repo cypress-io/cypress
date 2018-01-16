@@ -29,7 +29,7 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
-trafficRules = require("./util/traffic_rules")
+TrafficRules = require("./util/traffic_rules")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -124,7 +124,9 @@ class Server
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
 
-      # @_trafficRules = TrafficRules.create()
+      debug("creating new traffic rules")
+      @_trafficRules = TrafficRules.create()
+      debug("traffic rules", @_trafficRules)
 
       getRemoteState = => @_getRemoteState()
 
@@ -587,13 +589,14 @@ class Server
 
   _onTrafficRoutingAddRule: (rule) ->
     debug("_onTrafficRoutingAddRule %j", rule)
-    trafficRules.add(rule)
-    debug('got %s', pluralize('rule', trafficRules.length(), true))
-    debug(trafficRules.toJSON())
+    console.log(@_trafficRules)
+    @_trafficRules.add(rule)
+    debug('got %s', pluralize('rule', @_trafficRules.length(), true))
+    debug(@_trafficRules.toJSON())
 
   _onTrafficReset: ->
     debug("_onTrafficReset")
-    trafficRules.reset()
+    @_trafficRules.reset()
     # TODO abort all unfinished requests
     # TODO clear all existing traffic rules
 
