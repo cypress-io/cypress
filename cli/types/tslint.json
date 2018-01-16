@@ -3,6 +3,7 @@
   "rules": {
     "semicolon": [true, "never"],
     "no-namespace": false,
+    "newline-per-chained-call": false,
     "max-line-length": false,
     "void-return": false,
     "no-redundant-jsdoc": false,
