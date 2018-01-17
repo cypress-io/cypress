@@ -16,6 +16,7 @@ const normalize = require('../../support/normalize')
 const dest = info.getInstallationDir()
 
 describe('unzip', function () {
+  require('mocha-banner').register()
   beforeEach(function () {
     this.stdout = stdout.capture()
 
@@ -33,7 +34,8 @@ describe('unzip', function () {
   it('throws when cannot unzip', function () {
     const ctx = this
 
-    return unzip.start({
+    return unzip
+    .start({
       downloadDestination: path.join('test', 'fixture', 'bad_example.zip'),
       zipDestination: '/foo/bar/baz',
     })
@@ -43,15 +45,13 @@ describe('unzip', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot(
-        'unzip error',
-        normalize(ctx.stdout.toString())
-      )
+      snapshot('unzip error', normalize(ctx.stdout.toString()))
     })
   })
 
   it('can really unzip', function () {
-    return unzip.start({
+    return unzip
+    .start({
       downloadDestination: path.join('test', 'fixture', 'example.zip'),
     })
     .then(() => {

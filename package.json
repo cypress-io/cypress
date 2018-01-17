@@ -94,6 +94,7 @@
     "lodash": "^4.17.4",
     "make-empty-github-commit": "^1.2.0",
     "mocha": "^3.5.0",
+    "mocha-banner": "^1.1.1",
     "mocha-junit-reporter": "^1.13.0",
     "mocha-multi-reporters": "^1.1.5",
     "obfuscator": "^0.5.4",
@@ -106,6 +107,7 @@
     "shelljs": "^0.7.8",
     "snap-shot-it": "^4.0.1",
     "stop-only": "^1.1.0",
+    "terminal-banner": "^1.0.0",
     "typescript": "^2.3.4",
     "vagrant": "0.0.1",
     "vinyl-paths": "^2.1.0"

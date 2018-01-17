@@ -43,6 +43,7 @@ const slice = (str) => {
 }
 
 context('.verify', function () {
+  require('mocha-banner').register()
   beforeEach(function () {
     this.stdout = stdout.capture()
     this.cpstderr = new EE()
