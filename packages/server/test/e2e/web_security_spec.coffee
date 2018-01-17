@@ -36,6 +36,8 @@ onServer = (app) ->
     """)
 
 describe "e2e web security", ->
+  require("mocha-banner").register()
+  
   context "when enabled", ->
     e2e.setup({
       servers: [{
