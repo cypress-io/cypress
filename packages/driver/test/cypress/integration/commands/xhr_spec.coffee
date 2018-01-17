@@ -86,7 +86,7 @@ describe "src/cy/commands/xhr", ->
           xhr.send()
           null
         .wait("@getFoo").then (xhr) ->
-          expect(responseStatuses).to.be.gt(2)
+          expect(responseStatuses).to.be.gt(1)
           expect(xhr.status).to.eq(200)
 
     it "works with jquery too", ->
