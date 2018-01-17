@@ -52,7 +52,7 @@ glob('test/e2e/**/*')
 })
 .tap(console.log)
 .each((spec = []) => {
-  terminalBanner(`Running spec ${spec}`)
+  terminalBanner(`Running spec ${spec}`, '*')
 
   const args = [
     './test/scripts/run.js',
