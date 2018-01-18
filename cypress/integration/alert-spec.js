@@ -16,8 +16,6 @@ describe('Stateless alert', () => {
 
   it('alerts with name', () => {
     cy.contains('Say Hi').click()
-    // spy on window:alert is never called
-    // https://github.com/bahmutov/cypress-react-unit-test/issues/6
     cy.get('@alert').should('have.been.calledOnce')
   })
 })
