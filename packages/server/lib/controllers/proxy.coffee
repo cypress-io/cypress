@@ -80,6 +80,9 @@ module.exports = {
     @getHttpContent(thr, req, res, remoteState, config, request)
     .pipe(res)
 
+  _isMessageMethod: (s) ->
+    _.isString(s) && s.startsWith("__message:")
+
   applyRule: (rule, req, res) ->
     ## TODO: look at controllers/xhrs for some current implementation details
     # res.setHeaders(rule.headers)
@@ -88,9 +91,23 @@ module.exports = {
     debug("rule", rule)
     if rule.headers
       res.set(rule.headers)
-    la(check.number(rule.delay), "expected rule to have delay number", rule)
-    debug("delaying response by %dms", rule.delay)
-    Promise.delay(rule.delay).then ->
+
+    la(check.fn(rule.toRunner), "missing a way to communicate with the runner", rule)
+
+    if @_isMessageMethod(rule.delay)
+      debug("delay should be computed by the client")
+      # TODO pass request object
+      delayThen = rule.toRunner("automation:push:message", "set:traffic:routing:delay:async")
+      .then (delay) ->
+        debug("client says delay by %dms", delay)
+        Promise.delay(delay)
+    else
+      la(check.number(rule.delay), "expected rule to have delay number", rule)
+      debug("delaying response by %dms", rule.delay)
+      delayThen = Promise.delay(rule.delay)
+
+    delayThen.then ->
+      console.log('sending result back')
       if rule.response
         res.send(rule.response)
       else

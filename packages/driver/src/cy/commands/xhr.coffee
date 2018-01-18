@@ -345,6 +345,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             _.extend o, args[3]
 
         if _.isString(o.method)
+          # normalize HTTP method names
           o.method = o.method.toUpperCase()
 
         _.defaults(options, defaults)
@@ -412,6 +413,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Alias:    options.alias
           }
         })
+
+        console.log('XHR route options', options)
+        if _.isFunction(options.delay)
+          console.log('setting delay to message callback string')
+          # TODO need general storage for functions to be called
+          state("runnable").xhrDelay = options.delay
+          options.delay = '__message:delay'
 
         return Cypress.backend("set:traffic:routing:add:rule", options)
         .then () ->

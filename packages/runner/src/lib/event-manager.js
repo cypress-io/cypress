@@ -58,6 +58,17 @@ const eventManager = {
         case 'change:cookie':
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
           break
+        case 'set:traffic:routing:delay:async':
+          if (/^__respond:/.test(data.responseMessage)) {
+            const xhrDelay = Cypress.state('runnable').xhrDelay
+            if (_.isFunction(xhrDelay)) {
+              Cypress.backend(data.responseMessage, xhrDelay())
+            } else {
+              // TODO is this an error? I think so
+              Cypress.backend(data.responseMessage, 0)
+            }
+          }
+          break
         default:
           break
       }

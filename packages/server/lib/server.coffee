@@ -587,7 +587,8 @@ class Server
 
       @_middleware = null
 
-  _onTrafficRoutingAddRule: (rule) ->
+  _onTrafficRoutingAddRule: (rule, toRunner) ->
+    rule.toRunner = toRunner
     debug("_onTrafficRoutingAddRule %j", rule)
     console.log(@_trafficRules)
     @_trafficRules.add(rule)
