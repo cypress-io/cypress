@@ -126,7 +126,7 @@ class Server
 
       debug("creating new traffic rules")
       @_trafficRules = TrafficRules.create()
-      debug("traffic rules", @_trafficRules)
+      debug("traffic rules API", _.functions(@_trafficRules))
 
       getRemoteState = => @_getRemoteState()
 

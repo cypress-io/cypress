@@ -310,6 +310,8 @@ class Socket
             # network stubbing / route traffic rules
             when "set:traffic:routing:add:rule"
               options.onTrafficRoutingAddRule(args[0], args[1])
+            when "set:traffic:routing:reset"
+              options.onTrafficReset()
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"

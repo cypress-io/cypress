@@ -22,6 +22,9 @@ reset = ->
 
   server = null
 
+  # TODO reset returns a promise, so all uses should be updated
+  Cypress.backend("set:traffic:routing:reset")
+
 isUrlLikeArgs = (url, response) ->
   (not _.isObject(url) and not _.isObject(response)) or
     (_.isRegExp(url) or _.isString(url))
