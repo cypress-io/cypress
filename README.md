@@ -501,6 +501,10 @@ it('can display mock XHR response', () => {
 })
 ```
 
+### Spying on `window.alert`
+
+Calls to `window.alert` are automatically recorded, but do not show up. Instead you can spy on them, see [AlertMessage.vue](components/AlertMessage.vue) and its test [cypress/integration/alert-spec.js](cypress/integration/alert-spec.js)
+
 ## Bundling
 
 How do we load this Vue file into the testing code? Using webpack preprocessor.

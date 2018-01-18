@@ -136,6 +136,11 @@ function setXMLHttpRequest (w) {
   return w
 }
 
+function setAlert (w) {
+  window.alert = w.alert
+  return w
+}
+
 // the double function allows mounting a component quickly
 // beforeEach(mountVue(component, options))
 const mountVue = (component, optionsOrProps = {}) => () => {
@@ -158,6 +163,7 @@ const mountVue = (component, optionsOrProps = {}) => () => {
   return cy
     .window({ log: false })
     .then(setXMLHttpRequest)
+    .then(setAlert)
     .its('Vue')
     .then(Vue => {
       installMixins(Vue, options)
