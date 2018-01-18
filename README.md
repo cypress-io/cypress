@@ -11,7 +11,7 @@
 ## Known problems
 
 - [ ] some DOM events are not working when running all tests at once [#4](https://github.com/bahmutov/cypress-react-unit-test/issues/4)
-- [ ] cannot mock server XHR for injected components [#5](https://github.com/bahmutov/cypress-react-unit-test/issues/5)
+- [x] cannot mock server XHR for injected components [#5](https://github.com/bahmutov/cypress-react-unit-test/issues/5)
 - [ ] cannot spy on `window.alert` [#6](https://github.com/bahmutov/cypress-react-unit-test/issues/6)
 
 ## Install
@@ -115,6 +115,7 @@ All components are in [src](src) folder. All tests are in [cypress/integration](
 * [counter-spec.js](cypress/integration/counter-spec.js) clicks on the component and confirms the result
 * [stateless-spec.js](cypress/integration/stateless-spec.js) shows testing a stateless component from [stateless.jsx](src/stateless.jsx)
 * [transpiled-spec.js](cypress/integration/stateless-spec.js) shows testing a component with class properties syntax from [transpiled.jsx](src/stateless.jsx)
+* [users-spec.js](cypress/integration/users-spec.js) shows how to observe XHR requests, mock server responses for component [users.jsx](src/users.jsx)
 
 ## Large examples
 
@@ -126,3 +127,4 @@ Same feature for unit testing components from other framesworks using Cypress
 
 * [cypress-vue-unit-test](https://github.com/bahmutov/cypress-vue-unit-test) for Vue.js
 * [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test) for Hyperapp
+* [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test) for Svelte.js
