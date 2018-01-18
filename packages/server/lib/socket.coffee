@@ -109,22 +109,28 @@ class Socket
   #     console.log('got response from runner for event', event)
   #     console.log('response', response)
   #   )
-  toRunnerThen: (event, msg, data = {}) ->
+  toRunnerThen: (event, msg, functionId, data = {}) ->
     console.log('toRunnerThen')
     console.log('event', event)
     console.log('msg', msg)
-    data.responseMessage = '__respond:1'
+    console.log('functionId', functionId)
+
+    responseId = '__respond:' + _.random(1e+6)
+    data.functionId = functionId
+    data.responseId = responseId
+
     console.log('data', data)
+
     if not @io
       throw new Error("missing @io")
 
     # TODO add timeout
     new Promise (resolve, reject) =>
       console.log('waiting for response', event, msg)
-      oneTimeMessages[data.responseMessage] = (arg) ->
-        console.log('got message back for one time message', data.responseMessage)
+      oneTimeMessages[responseId] = (arg) ->
+        console.log('got message back for one time message', responseId)
         console.log('arg', arg)
-        delete oneTimeMessages[data.responseMessage]
+        delete oneTimeMessages[responseId]
         resolve(arg)
 
       @io.to("runner").emit(event, msg, data)

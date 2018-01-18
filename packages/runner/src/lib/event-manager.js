@@ -59,14 +59,17 @@ const eventManager = {
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
           break
         case 'set:traffic:routing:delay:async':
-          if (/^__respond:/.test(data.responseMessage)) {
-            const xhrDelay = Cypress.state('runnable').xhrDelay
-            if (_.isFunction(xhrDelay)) {
-              Cypress.backend(data.responseMessage, xhrDelay())
-            } else {
-              // TODO is this an error? I think so
-              Cypress.backend(data.responseMessage, 0)
+          {
+            // will call unique function
+            // TODO verify all arguments
+            const arg0 = _.omit(data, ['functionId', 'responseId'])
+            const fn = Cypress.state('runnable')[data.functionId]
+            if (_.isFunction(fn) && _.isString(data.responseId)) {
+              // TODO handle thenable functions
+              const delayMs = fn(arg0)
+              Cypress.backend(data.responseId, delayMs)
             }
+            // how to handle missing data / errors?
           }
           break
         default:

@@ -95,9 +95,12 @@ module.exports = {
     la(check.fn(rule.toRunner), "missing a way to communicate with the runner", rule)
 
     if @_isMessageMethod(rule.delay)
-      debug("delay should be computed by the client")
-      # TODO pass request object
-      delayThen = rule.toRunner("automation:push:message", "set:traffic:routing:delay:async")
+      debug("delay should be computed by the client in function", rule.delay)
+      # TODO pass request object better
+      reqProps = _.pick(req, ['method', 'url'])
+      debug("request properties %j", reqProps)
+      delayThen = rule.toRunner("automation:push:message",
+        "set:traffic:routing:delay:async", rule.delay, reqProps)
       .then (delay) ->
         debug("client says delay by %dms", delay)
         Promise.delay(delay)
