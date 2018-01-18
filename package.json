@@ -71,6 +71,7 @@
     "generateNotes": "github-post-release"
   },
   "devDependencies": {
+    "axios": "0.17.1",
     "ban-sensitive-files": "1.9.2",
     "css-loader": "0.28.7",
     "cypress": "1.4.1",

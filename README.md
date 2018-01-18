@@ -472,6 +472,35 @@ and is emitting an event.
 
 [cypress.io]: https://www.cypress.io/
 
+### XHR spying and stubbing
+
+The mount function automatically wraps XMLHttpRequest giving you an ability to intercept XHR requests your component might do. For full documentation see [https://on.cypress.io/network-requests]. In this repo see [components/AjaxList.vue](components/AjaxList.vue) and the corresponding tests [cypress/integration/ajax-list-spec.js](cypress/integration/ajax-list-spec.js).
+
+```js
+// component use axios to get list of users
+created() {
+  axios.get(`http://jsonplaceholder.typicode.com/users?_limit=3`)
+  .then(response => {
+    // JSON responses are automatically parsed.
+    this.users = response.data
+  })
+}
+// test can observe, return mock data, delay and a lot more
+beforeEach(mountVue(AjaxList))
+it('can inspect real data in XHR', () => {
+  cy.server()
+  cy.route('/users?_limit=3').as('users')
+  cy.wait('@users').its('response.body').should('have.length', 3)
+})
+it('can display mock XHR response', () => {
+  cy.server()
+  const users = [{id: 1, name: 'foo'}]
+  cy.route('GET', '/users?_limit=3', users).as('users')
+  cy.get('li').should('have.length', 1)
+    .first().contains('foo')
+})
+```
+
 ## Bundling
 
 How do we load this Vue file into the testing code? Using webpack preprocessor.

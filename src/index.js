@@ -128,6 +128,14 @@ const isOptions = object => Object.keys(object).every(isOptionName)
 
 const isConstructor = object => object && object._compiled
 
+function setXMLHttpRequest (w) {
+  // by grabbing the XMLHttpRequest from app's iframe
+  // and putting it here - in the test iframe
+  // we suddenly get spying and stubbing 😁
+  window.XMLHttpRequest = w.XMLHttpRequest
+  return w
+}
+
 // the double function allows mounting a component quickly
 // beforeEach(mountVue(component, options))
 const mountVue = (component, optionsOrProps = {}) => () => {
@@ -149,6 +157,7 @@ const mountVue = (component, optionsOrProps = {}) => () => {
   // but it currently does not support it
   return cy
     .window({ log: false })
+    .then(setXMLHttpRequest)
     .its('Vue')
     .then(Vue => {
       installMixins(Vue, options)
