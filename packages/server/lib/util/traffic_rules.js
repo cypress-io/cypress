@@ -21,7 +21,7 @@ function create () {
     // TODO make sure request and rules have normalized method, url
     getRule: (req) => R.findLast(R.allPass([
       R.propEq('url', req.url),
-      R.propEq('method', req.method)
+      R.propEq('method', req.method),
     ]))(rules),
   }
   return trafficRules
