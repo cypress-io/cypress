@@ -1,3 +1,5 @@
+la            = require("lazy-ass")
+check         = require("check-more-types")
 _             = require("lodash")
 zlib          = require("zlib")
 concat        = require("concat-stream")
@@ -86,10 +88,13 @@ module.exports = {
     debug("rule", rule)
     if rule.headers
       res.set(rule.headers)
-    if rule.response
-      res.send(rule.response)
-    else
-      res.status(503).end()
+    la(check.number(rule.delay), "expected rule to have delay number", rule)
+    debug("delaying response by %dms", rule.delay)
+    Promise.delay(rule.delay).then ->
+      if rule.response
+        res.send(rule.response)
+      else
+        res.status(503).end()
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
