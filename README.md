@@ -12,7 +12,7 @@
 
 - [ ] some DOM events are not working when running all tests at once [#4](https://github.com/bahmutov/cypress-react-unit-test/issues/4)
 - [x] cannot mock server XHR for injected components [#5](https://github.com/bahmutov/cypress-react-unit-test/issues/5)
-- [ ] cannot spy on `window.alert` [#6](https://github.com/bahmutov/cypress-react-unit-test/issues/6)
+- [x] cannot spy on `window.alert` [#6](https://github.com/bahmutov/cypress-react-unit-test/issues/6)
 
 ## Install
 
@@ -116,6 +116,7 @@ All components are in [src](src) folder. All tests are in [cypress/integration](
 * [stateless-spec.js](cypress/integration/stateless-spec.js) shows testing a stateless component from [stateless.jsx](src/stateless.jsx)
 * [transpiled-spec.js](cypress/integration/stateless-spec.js) shows testing a component with class properties syntax from [transpiled.jsx](src/stateless.jsx)
 * [users-spec.js](cypress/integration/users-spec.js) shows how to observe XHR requests, mock server responses for component [users.jsx](src/users.jsx)
+* [alert-spec.js](cypress/integration/alert-spec.js) shows how to spy on `window.alert` calls from your component [stateless-alert.jsx](src/stateless-alert.jsx)
 
 ## Large examples
 
