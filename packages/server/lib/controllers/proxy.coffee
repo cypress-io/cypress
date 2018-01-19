@@ -18,6 +18,9 @@ redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
 
+isValidStatus = (s) ->
+  _.isFinite(s) and s >= 100 and s < 600
+
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
   ## is not sent correctly
@@ -96,6 +99,7 @@ module.exports = {
     reqProps = _.pick(req, ['method', 'url'])
     debug("request properties %j", reqProps)
 
+    status = rule.status
     Promise.resolve()
     .then =>
       if not rule.headers
@@ -110,6 +114,18 @@ module.exports = {
           res.set(headers)
       else
         res.set(rule.headers)
+
+    .then =>
+      if @_isMessageMethod(rule.status)
+        debug("status should be set by the client in function", rule.headers)
+        rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.status, reqProps)
+        .then (s) ->
+          debug("client says to set status %j", s)
+          if not isValidStatus(s)
+            console.error("invalid status code", s)
+            s = 503
+          status = s
 
     .then =>
       if @_isMessageMethod(rule.delay)
@@ -129,9 +145,10 @@ module.exports = {
     .then ->
       console.log('sending result back')
       if rule.response
-        res.send(rule.response)
+        res.status(status).send(rule.response)
       else
-        res.status(503).end()
+        # TODO allow forwarding of the request
+        res.status(status).end()
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"

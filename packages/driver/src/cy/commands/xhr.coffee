@@ -428,6 +428,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options.delay = prepareCallback(options.delay)
         options.headers = prepareCallback(options.headers)
+        options.status = prepareCallback(options.status)
 
         console.log('XHR route options', options)
 
