@@ -414,14 +414,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           }
         })
 
-        console.log('XHR route options', options)
-        if _.isFunction(options.delay)
-          # TODO need general storage for functions to be called
-          id = '__message:delay:' + _.random(0, 1e+6)
-          console.log('setting delay to message callback string %s', id)
+        # special serialization rules for route callbacks
+        # the server should be able to trigger these functions
+        # using message passing proxy
+        prepareCallback = (value) ->
+          if _.isFunction(value)
+            # TODO need general storage for functions to be called
+            id = '__message:' + _.random(0, 1e+6)
+            state("runnable")[id] = value
+            id
+          else
+            value
 
-          state("runnable")[id] = options.delay
-          options.delay = id
+        options.delay = prepareCallback(options.delay)
+        options.headers = prepareCallback(options.headers)
+
+        console.log('XHR route options', options)
 
         return Cypress.backend("set:traffic:routing:add:rule", options)
         .then () ->

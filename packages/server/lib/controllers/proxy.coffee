@@ -89,27 +89,44 @@ module.exports = {
     # res.send(rule.body)
     debug("applying custom rule to %s %s", req.method, req.url)
     debug("rule", rule)
-    if rule.headers
-      res.set(rule.headers)
 
     la(check.fn(rule.toRunner), "missing a way to communicate with the runner", rule)
 
-    if @_isMessageMethod(rule.delay)
-      debug("delay should be computed by the client in function", rule.delay)
-      # TODO pass request object better
-      reqProps = _.pick(req, ['method', 'url'])
-      debug("request properties %j", reqProps)
-      delayThen = rule.toRunner("automation:push:message",
-        "set:traffic:routing:delay:async", rule.delay, reqProps)
-      .then (delay) ->
-        debug("client says delay by %dms", delay)
-        Promise.delay(delay)
-    else
-      la(check.number(rule.delay), "expected rule to have delay number", rule)
-      debug("delaying response by %dms", rule.delay)
-      delayThen = Promise.delay(rule.delay)
+    # TODO pass request object better
+    reqProps = _.pick(req, ['method', 'url'])
+    debug("request properties %j", reqProps)
 
-    delayThen.then ->
+    Promise.resolve()
+    .then =>
+      if not rule.headers
+        return
+
+      if @_isMessageMethod(rule.headers)
+        debug("headers should be set by the client in function", rule.headers)
+        rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.headers, reqProps)
+        .then (headers) ->
+          debug("client says to set headers %j", headers)
+          res.set(headers)
+      else
+        res.set(rule.headers)
+
+    .then =>
+      if @_isMessageMethod(rule.delay)
+        debug("delay should be computed by the client in function", rule.delay)
+        delayThen = rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.delay, reqProps)
+        .then (delay) ->
+          debug("client says delay by %dms", delay)
+          Promise.delay(delay)
+      else
+        la(check.number(rule.delay), "expected rule to have delay number", rule)
+        debug("delaying response by %dms", rule.delay)
+        delayThen = Promise.delay(rule.delay)
+
+      delayThen
+
+    .then ->
       console.log('sending result back')
       if rule.response
         res.send(rule.response)
