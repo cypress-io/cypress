@@ -15,6 +15,29 @@
 
 * How is this different from [vue-test-utils](https://vue-test-utils.vuejs.org/en/)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/).
 
+## Table of Contents
+
+[Install](#install)
+
+[Use](#use)
+- [Options](#options)
+- [Global Vue Extensions](#global-vue-extensions)
+- [The Intro Example](#intro-example)
+- [The List Example](#list-example)
+- [Handling User Input](#handling-user-input)
+- [Component Example](#component-example)
+- [Spying Example](#spying-example)
+- [XHR Spying and Stubbing](#xhr-spying-stubbing)
+- [Spying On `window.alert`](#spying-window-alert)
+
+[Bundling](#bundling)
+- [Short Way](#short-way)
+- [Manual](#manual)
+
+[FAQ](#faq)
+
+<a name="install"/>
+
 ## Install
 
 Requires [Node](https://nodejs.org/en/) version 6 or above.
@@ -22,6 +45,8 @@ Requires [Node](https://nodejs.org/en/) version 6 or above.
 ```sh
 npm install --save-dev cypress cypress-vue-unit-test
 ```
+
+<a name="use"/>
 
 ## Use
 
@@ -39,6 +64,8 @@ describe('My Vue', () => {
 ```
 
 See examples below for details.
+
+<a name="options"/>
 
 ### Options
 
@@ -77,6 +104,8 @@ const options = {
 }
 beforeEach(mountVue(/* my Vue code */, options))
 ```
+
+<a name="global-vue-extensions"/>
 
 ### Global Vue extensions
 
@@ -150,6 +179,8 @@ it('calls mixin "created" method', () => {
 See [Vue global mixin docs](https://vuejs.org/v2/guide/mixins.html#Global-Mixin)
 and [mixin-spec.js](cypress/integration/mixin-spec.js)
 
+<a name="intro-example"/>
+
 ### The intro example
 
 Take a look at the first Vue v2 example:
@@ -215,6 +246,8 @@ the reference `Cypress.vue.$data` and via GUI. The full power of the
 
 ![Hello world tested](images/spec.png)
 
+<a name="list-example"/>
+
 ### The list example
 
 There is a list example next in the Vue docs.
@@ -279,6 +312,8 @@ describe('Declarative rendering', () => {
 ```
 
 ![List tested](images/list-spec.png)
+
+<a name="handling-user-input"/>
 
 ### Handling User Input
 
@@ -346,6 +381,8 @@ because it is really running!
 
 ![Reverse input](images/reverse-spec.gif)
 
+<a name="component-example"/>
+
 ### Component example
 
 Let us test a complex example. Let us test a [single file Vue component](https://vuejs.org/v2/guide/single-file-components.html). Here is the [Hello.vue](Hello.vue) file
@@ -400,6 +437,8 @@ describe('Several components', () => {
   })
 })
 ```
+
+<a name="spying-example"/>
 
 ### Spying example
 
@@ -472,6 +511,8 @@ and is emitting an event.
 
 [cypress.io]: https://www.cypress.io/
 
+<a name="xhr-spying-stubbing"/>
+
 ### XHR spying and stubbing
 
 The mount function automatically wraps XMLHttpRequest giving you an ability to intercept XHR requests your component might do. For full documentation see [Network Requests](https://on.cypress.io/network-requests). In this repo see [components/AjaxList.vue](components/AjaxList.vue) and the corresponding tests [cypress/integration/ajax-list-spec.js](cypress/integration/ajax-list-spec.js).
@@ -501,13 +542,19 @@ it('can display mock XHR response', () => {
 })
 ```
 
+<a name="spying-window-alert"/>
+
 ### Spying on `window.alert`
 
 Calls to `window.alert` are automatically recorded, but do not show up. Instead you can spy on them, see [AlertMessage.vue](components/AlertMessage.vue) and its test [cypress/integration/alert-spec.js](cypress/integration/alert-spec.js)
 
+<a name="bundling"/>
+
 ## Bundling
 
 How do we load this Vue file into the testing code? Using webpack preprocessor.
+
+<a name="short-way"/>
 
 ### Short way
 
@@ -526,6 +573,8 @@ module.exports = on => {
 ```
 
 Cypress should be able to import `.vue` files in the tests
+
+<a name="manual"/>
 
 ### Manual
 
@@ -581,6 +630,8 @@ describe('Hello.vue', () => {
   })
 })
 ```
+
+<a name="#faq"/>
 
 ## FAQ
 
