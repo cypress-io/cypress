@@ -1,13 +1,15 @@
-# Cypress Core Launcher
+# Launcher
 
-> Finds and launches browsers on each platform
+This package finds and launches browsers for each operating system.
 
 ## Install
 
-Root install is preferred (see `CONTRIBUTING.md`), but if you must
+The launcher's dependencies can be installed with:
 
-* `npm install`
-* `npm run build`
+```bash
+cd packages/launcher
+npm install
+```
 
 ## Development
 
@@ -25,3 +27,9 @@ DEBUG=cypress:launcher npm test
 ## Demo
 
 To see browsers detected on your machine, just run `node index.js`
+
+## Testing
+
+```bash
+npm run test
+```

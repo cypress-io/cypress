@@ -39,7 +39,6 @@ module.exports = {
         y: "appY"
         devTools: "isAppDevToolsOpen"
       }
-      projectPath: options.projectPath
       onBlur: ->
         return if @webContents.isDevToolsOpened()
 
@@ -74,6 +73,8 @@ module.exports = {
   ready: (options = {}) ->
     bus = new EE
 
+    { projectPath } = options
+
     ## TODO: potentially just pass an event emitter
     ## instance here instead of callback functions
     menu.set({
@@ -82,13 +83,12 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState(options.projectPath)
+    savedState(projectPath)
     .then (state) -> state.get()
     .then (state) =>
-      Windows.open(@getWindowArgs(state, options))
+      Windows.open(projectPath, @getWindowArgs(state, options))
       .then (win) =>
         Events.start(_.extend({}, options, {
-          env: process.env["CYPRESS_ENV"]
           onFocusTests: -> win.focus()
           os: os.platform()
         }), bus)

@@ -1,11 +1,16 @@
+_         = require("lodash")
+os        = require("os")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
-log       = require("debug")("cypress:server:browsers")
+debug     = require("debug")("cypress:server:browsers")
+plugins   = require("../plugins")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 
 fs = Promise.promisifyAll(fs)
+
+LOAD_EXTENSION = "--load-extension="
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -55,7 +60,25 @@ defaultArgs = [
   "--disable-default-apps"
 ]
 
+_normalizeArgExtensions = (dest, args) ->
+  loadExtension = _.find args, (arg) ->
+    arg.includes(LOAD_EXTENSION)
+
+  if loadExtension
+    args = _.without(args, loadExtension)
+
+    ## form into array, enabling users to pass multiple extensions
+    userExtensions = loadExtension.replace(LOAD_EXTENSION, "").split(",")
+
+  extensions = [].concat(userExtensions, dest, pathToTheme)
+
+  args.push(LOAD_EXTENSION + _.compact(extensions).join(","))
+
+  args
+
 module.exports = {
+  _normalizeArgExtensions
+
   _writeExtension: (proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
     extension.setHostAndPath(proxyUrl, socketIoRoute)
@@ -70,30 +93,57 @@ module.exports = {
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)
 
+  _getArgs: (options = {}) ->
+    args = [].concat(defaultArgs)
+
+    if os.platform() is "linux"
+      args.push("--disable-gpu")
+      args.push("--no-sandbox")
+
+    if ua = options.userAgent
+      args.push("--user-agent=#{ua}")
+
+    if ps = options.proxyServer
+      args.push("--proxy-server=#{ps}")
+
+    if options.chromeWebSecurity is false
+      args.push("--disable-web-security")
+      args.push("--allow-running-insecure-content")
+
+    args
+
   open: (browserName, url, options = {}, automation) ->
-    args = defaultArgs.concat(options.browserArgs)
+    args = @_getArgs(options)
 
-    Promise.all([
-      ## ensure that we have a chrome profile dir
-      utils.ensureProfile(browserName)
+    Promise
+    .try ->
+      ## bail if we're not registered to this event
+      return if not plugins.has("before:browser:launch")
 
-      @_writeExtension(options.proxyUrl, options.socketIoRoute)
-    ])
+      plugins.execute("before:browser:launch", options.browser, args)
+      .then (newArgs) ->
+        debug("got user args for 'before:browser:launch'", newArgs)
+
+        ## reset args if we got 'em
+        if newArgs
+          args = newArgs
+    .then =>
+      Promise.all([
+        ## ensure that we have a chrome profile dir
+        utils.ensureProfile(browserName)
+
+        @_writeExtension(options.proxyUrl, options.socketIoRoute)
+      ])
     .spread (dir, dest) ->
-      ## we now know where this extension is going
-      args.push("--load-extension=#{dest},#{pathToTheme}")
+      ## normalize the --load-extensions argument by
+      ## massaging what the user passed into our own
+      args = _normalizeArgExtensions(dest, args)
 
       ## this overrides any previous user-data-dir args
       ## by being the last one
       args.push("--user-data-dir=#{dir}")
 
-      if ps = options.proxyServer
-        args.push("--proxy-server=#{ps}")
+      debug("launch in chrome: %s, %s", url, args)
 
-      if options.chromeWebSecurity is false
-        args.push("--disable-web-security")
-        args.push("--allow-running-insecure-content")
-
-      log("launch in chrome: %s, %s", url, args)
       utils.launch(browserName, url, args)
 }

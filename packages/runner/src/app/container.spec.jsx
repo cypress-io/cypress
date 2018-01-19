@@ -14,7 +14,6 @@ import Container, { automationElementId } from './container'
 const createProps = () => ({
   config: {
     browsers: [],
-    env: 'test',
     integrationFolder: '',
     numTestsKeptInMemory: 1,
     projectName: '',

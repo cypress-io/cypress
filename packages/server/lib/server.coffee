@@ -11,12 +11,13 @@ httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
-log          = require("debug")("cypress:server:server")
+debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
+blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
@@ -133,7 +134,7 @@ class Server
 
   createServer: (app, config, request) ->
     new Promise (resolve, reject) =>
-      {port, fileServerFolder, socketIoRoute, baseUrl} = config
+      {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
       @_server  = http.createServer(app)
       @_wsProxy = httpProxy.createProxyServer()
@@ -148,7 +149,7 @@ class Server
           reject @portInUseErr(port)
 
       onUpgrade = (req, socket, head) =>
-        log("Got UPGRADE request from %s", req.url)
+        debug("Got UPGRADE request from %s", req.url)
 
         @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
 
@@ -163,7 +164,7 @@ class Server
           upgrade.call(@_server, req, socket, head)
 
       @_server.on "connect", (req, socket, head) =>
-        log("Got CONNECT request from %s", req.url)
+        debug("Got CONNECT request from %s", req.url)
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -173,7 +174,21 @@ class Server
 
             word = if isMatching then "does" else "does not"
 
-            log("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+            debug("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+
+            ## if we are currently matching then we're
+            ## not making a direct connection anyway
+            ## so we only need to check this if we
+            ## have blacklist hosts and are not matching.
+            ##
+            ## if we have blacklisted hosts lets
+            ## see if this matches - if so then
+            ## we cannot allow it to make a direct
+            ## connection
+            if blacklistHosts and not isMatching
+              isMatching = blacklist.matches(urlToCheck, blacklistHosts)
+
+              debug("HTTPS request #{urlToCheck} matches blacklist?", isMatching)
 
             ## make a direct connection only if
             ## our req url does not match the origin policy
@@ -231,7 +246,7 @@ class Server
 
         @isListening = true
 
-        log("Server listening on port %s", port)
+        debug("Server listening on port %s", port)
 
         @_server.removeListener "error", onError
 
@@ -271,14 +286,14 @@ class Server
       fileServer: @_remoteFileServer
     })
 
-    log("Getting remote state: %o", props)
+    debug("Getting remote state: %o", props)
 
     return props
 
   _onRequest: (headers, automationRequest, options) ->
     @_request.send(headers, automationRequest, options)
 
-  _onResolveUrl: (urlStr, headers, automationRequest) ->
+  _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
     request = @_request
 
     handlingLocalFile = false
@@ -350,7 +365,12 @@ class Server
 
               newUrl ?= urlStr
 
-              isOk        = statusCode.isOk(incomingRes.statusCode)
+              statusIs2xxOrAllowedFailure = ->
+                ## is our status code in the 2xx range, or have we disabled failing
+                ## on status code?
+                statusCode.isOk(incomingRes.statusCode) or (options.failOnStatusCode is false)
+
+              isOk        = statusIs2xxOrAllowedFailure()
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 
@@ -370,6 +390,8 @@ class Server
               if fp = incomingRes.headers["x-cypress-file-path"]
                 ## if so we know this is a local file request
                 details.filePath = fp
+
+              debug("received response for resolving url %o", details)
 
               if isOk and isHtml
                 ## reset the domain to the new url if we're not
@@ -425,7 +447,7 @@ class Server
 
   _onDomainSet: (fullyQualifiedUrl) ->
     l = (type, url) ->
-      log("Setting %s %s", type, url)
+      debug("Setting %s %s", type, url)
 
     ## if this isn't a fully qualified url
     ## or if this came to us as <root> in our tests
@@ -434,7 +456,7 @@ class Server
     if fullyQualifiedUrl is "<root>" or not fullyQualifiedRe.test(fullyQualifiedUrl)
       @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_port()}"
       @_remoteStrategy = "file"
-      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer.port()}"
+      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer?.port()}"
       @_remoteDomainName = DEFAULT_DOMAIN_NAME
       @_remoteProps = null
 
@@ -561,7 +583,7 @@ class Server
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
 
-    @_socket = Socket()
+    @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)

@@ -65,7 +65,7 @@ describe "Settings", ->
         cy.contains("Your project's configuration is displayed")
 
       it "displays legend in table", ->
-        cy.get("table>tbody>tr").should("have.length", 5)
+        cy.get("table>tbody>tr").should("have.length", 6)
 
       it "wraps config line in proper classes", ->
         cy

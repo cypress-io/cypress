@@ -28,15 +28,18 @@ const cliOptions = minimist(process.argv, {
   },
 })
 
-const shorten = (s) =>
-  s.substr(0, 7)
+const shorten = (s) => s.substr(0, 7)
 
 const getShortCommit = () => {
-  const sha = process.env.APPVEYOR_REPO_COMMIT ||
+  const sha =
+    process.env.APPVEYOR_REPO_COMMIT ||
     process.env.CIRCLE_SHA1 ||
     process.env.BUILDKITE_COMMIT
   if (sha) {
-    return shorten(sha)
+    return {
+      sha,
+      short: shorten(sha),
+    }
   }
 }
 
@@ -66,9 +69,9 @@ const shortNpmVersion = getJustVersion(npm)
 console.log('short NPM version', shortNpmVersion)
 
 let subject = `Testing new ${platform} Cypress version ${shortNpmVersion}`
-const shortSha = getShortCommit()
-if (shortSha) {
-  subject += ` ${shortSha}`
+const commitInfo = getShortCommit()
+if (commitInfo) {
+  subject += ` ${commitInfo.short}`
 }
 
 // instructions for installing this binary
@@ -76,7 +79,13 @@ if (shortSha) {
 const env = {
   CYPRESS_BINARY_VERSION: binary,
 }
-const commitMessageInstructions = getInstallJson(npm, env, platform)
+const commitMessageInstructions = getInstallJson(
+  npm,
+  env,
+  platform,
+  shortNpmVersion, // use as version as branch name on test projects
+  commitInfo && commitInfo.sha
+)
 const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
 const footer = 'Use tool `commit-message-install` to install from above block'
 let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
@@ -98,9 +107,12 @@ if (process.env.APPVEYOR) {
 
 console.log('commit message')
 console.log(message)
-bump.run(message, cliOptions.provider)
-  .catch((e) => {
-    console.error('could not bump test projects')
-    console.error(e)
-    process.exit(1)
-  })
+
+const onError = (e) => {
+  console.error('could not bump test projects')
+  console.error(e)
+  process.exit(1)
+}
+bump
+.runTestProjects(message, cliOptions.provider, shortNpmVersion)
+.catch(onError)

@@ -5,6 +5,8 @@
 .reporter-wrap {
   min-width: $reporter-min-width;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
   left: 0;
   position: absolute;
   top: 0;
@@ -12,6 +14,10 @@
 
   .is-reporter-sized & {
     min-width: 0;
+  }
+
+  .reporter {
+    flex-grow: 2;
   }
 }
 

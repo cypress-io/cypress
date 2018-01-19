@@ -15,7 +15,7 @@
     "clean-js": "npm run clean",
     "lint": "npm run format-ts && npm run lint-ts && npm run lint-js",
     "lint-js": "bin-up eslint --fix *.js",
-    "lint-ts": "tslint --type-check --project . --fix --format stylish lib/*.ts lib/**/*.ts",
+    "lint-ts": "tslint --project . --fix --format stylish lib/*.ts lib/**/*.ts",
     "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts",
     "build-js": "tsc",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
@@ -40,9 +40,9 @@
     "shelljs": "^0.7.8",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "tslint": "5.7.0",
-    "tslint-config-standard": "6.0.1",
-    "typescript": "2.5.2",
+    "tslint": "5.8.0",
+    "tslint-config-standard": "7.0.0",
+    "typescript": "2.6.2",
     "@types/ramda": "0.24.14"
   },
   "dependencies": {

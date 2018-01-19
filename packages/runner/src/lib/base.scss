@@ -6,7 +6,8 @@ body {
   height: 100%;
 }
 
-.runner {
+.runner,
+.reporter-wrap footer {
   * {
     box-sizing: border-box;
   }
@@ -16,7 +17,7 @@ body {
   textarea,
   button {
     color: #555;
-    font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: $font-sans;
     font-size: 13px;
   }
 
@@ -86,7 +87,7 @@ body {
     background: #f9f2f4;
     color: #c7254e;
     border-radius: 2px;
-    font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: $font-mono;
     font-size: 1.05em;
     letter-spacing: 0.5px;
     padding: 2px 4px;
@@ -98,7 +99,7 @@ body {
     border-radius: 2px;
     color: #333;
     display: block;
-    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-family: $font-mono;
     font-size: 12px;
     letter-spacing: 0.5px;
     margin: 0 0 10px;

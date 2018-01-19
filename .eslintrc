@@ -3,6 +3,7 @@
     "plugin:cypress-dev/general"
   ],
   "env": {
+    "es6": true,
     "node": true
   }
 }

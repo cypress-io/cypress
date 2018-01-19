@@ -23,6 +23,8 @@ const downloadDestination = {
 }
 
 describe('install', function () {
+  require('mocha-banner').register()
+
   beforeEach(function () {
     this.stdout = stdout.capture()
 
@@ -51,6 +53,26 @@ describe('install', function () {
       this.sandbox.stub(info, 'getInstalledVersion').resolves()
       this.sandbox.stub(info, 'writeInstalledVersion').resolves()
       this.sandbox.stub(info, 'clearVersionState').resolves()
+    })
+
+    describe('skips install', function () {
+      afterEach(function () {
+        delete process.env.CYPRESS_SKIP_BINARY_INSTALL
+      })
+
+      it('when environment variable is set', function () {
+        process.env.CYPRESS_SKIP_BINARY_INSTALL = true
+
+        return install.start()
+        .then(() => {
+          expect(download.start).not.to.be.called
+
+          snapshot(
+            'skip installation',
+            normalize(this.stdout.toString())
+          )
+        })
+      })
     })
 
     describe('override version', function () {
@@ -85,14 +107,14 @@ describe('install', function () {
         this.sandbox.stub(fs, 'statAsync').withArgs(version).resolves()
 
         return install.start()
-          .then(() => {
-            expect(unzip.start).calledWith({
-              zipDestination: version,
-              destination: info.getInstallationDir(),
-              executable: info.getPathToUserExecutableDir(),
-            })
-            expect(info.writeInstalledVersion).calledWith('unknown')
+        .then(() => {
+          expect(unzip.start).calledWith({
+            zipDestination: version,
+            destination: info.getInstallationDir(),
+            executable: info.getPathToUserExecutableDir(),
           })
+          expect(info.writeInstalledVersion).calledWith('unknown')
+        })
       })
     })
 

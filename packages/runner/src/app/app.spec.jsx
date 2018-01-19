@@ -13,7 +13,6 @@ import App from './app'
 const createProps = () => ({
   config: {
     browsers: [],
-    env: 'tst',
     integrationFolder: '',
     numTestsKeptInMemory: 1,
     projectName: '',

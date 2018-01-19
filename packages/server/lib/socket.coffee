@@ -46,11 +46,16 @@ isSpecialSpec = (name) ->
   name.endsWith("__all")
 
 class Socket
-  constructor: ->
+  constructor: (config) ->
     if not (@ instanceof Socket)
-      return new Socket
+      return new Socket(config)
+
+    @ended = false
 
     @onTestFileChange = @onTestFileChange.bind(@)
+
+    if config.watchForFileChanges
+      preprocessor.emitter.on("file:updated", @onTestFileChange)
 
   onTestFileChange: (filePath) ->
     log("test file changed: #{filePath}")
@@ -67,27 +72,22 @@ class Socket
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
     log("watch test file #{originalFilePath}")
     filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
-    filePath = filePath.replace("#{config.projectRoot}/", "")
+    filePath = path.relative(config.projectRoot, filePath)
 
     ## bail if this is special path like "__all"
     ## maybe the client should not ask to watch non-spec files?
     return if isSpecialSpec(filePath)
 
-    ## bail if we're already watching this
-    ## exact file or we've turned off watching
-    ## for file changes
+    ## bail if we're already watching this exact file
     return if filePath is @testFilePath
 
     ## remove the existing file by its path
     if @testFilePath
-      preprocessor.removeFile(@testFilePath)
+      preprocessor.removeFile(@testFilePath, config)
 
     ## store this location
     @testFilePath = filePath
     log("will watch test file path #{filePath}")
-
-    if config.watchForFileChanges
-      preprocessor.emitter.on("file:updated", @onTestFileChange)
 
     preprocessor.getFile(filePath, config, options)
     ## ignore errors b/c we're just setting up the watching. errors
@@ -179,6 +179,9 @@ class Socket
         ## if our automation disconnects then we're
         ## in trouble and should probably bomb everything
         automationClient.on "disconnect", =>
+          ## if we've stopped then don't do anything
+          return if @ended
+
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
           Promise.delay(500)
           .then =>
@@ -281,7 +284,7 @@ class Socket
         ## cb is always the last argument
         cb = args.pop()
 
-        log("backend:request", eventName, cb, args)
+        log("backend:request", { eventName, args })
 
         backendRequest = ->
           switch eventName
@@ -289,7 +292,8 @@ class Socket
               existingState = args[0]
               null
             when "resolve:url"
-              options.onResolveUrl(args[0], headers, automationRequest)
+              [url, resolveOpts] = args
+              options.onResolveUrl(url, headers, automationRequest, resolveOpts)
             when "http:request"
               options.onRequest(headers, automationRequest, args[0])
             when "get:fixture"
@@ -333,6 +337,8 @@ class Socket
           @toReporter(event, data)
 
   end: ->
+    @ended = true
+
     ## TODO: we need an 'ack' from this end
     ## event from the other side
     @io and @io.emit("tests:finished")

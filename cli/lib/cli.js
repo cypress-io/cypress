@@ -10,12 +10,12 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseOpts = (opts) =>  {
+const parseOpts = (opts) => {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed',
-    'group', 'groupId', 'global')
+    'group', 'groupId', 'global', 'dev')
 
   if (opts.project) {
     opts.project = path.resolve(opts.project)
@@ -46,6 +46,7 @@ const descriptions = {
   headed: 'displays the Electron browser instead of running headlessly',
   group: 'flag to group individual runs by using common --group-id',
   groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
+  dev: 'runs cypress in development and bypasses binary check',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -88,77 +89,79 @@ module.exports = {
     program._name = 'cypress'
 
     program
-      .command('help')
-      .description('Shows CLI help and exits')
-      .action(() => {
-        program.help()
-      })
+    .command('help')
+    .description('Shows CLI help and exits')
+    .action(() => {
+      program.help()
+    })
 
     program
-      .option('-v, --version', text('version'))
-      .command('version')
-      .description(text('version'))
-      .action(showVersions)
+    .option('-v, --version', text('version'))
+    .command('version')
+    .description(text('version'))
+    .action(showVersions)
 
     program
-      .command('run')
-      .usage('[options]')
-      .description('Runs Cypress tests from the CLI without the GUI')
-      .option('--record [bool]',                           text('record'), coerceFalse)
-      .option('--headed',                                  text('headed'))
-      .option('-k, --key <record-key>',                    text('key'))
-      .option('-s, --spec <spec>',                         text('spec'))
-      .option('-r, --reporter <reporter>',                 text('reporter'))
-      .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
-      .option('-p, --port <port>',                         text('port'))
-      .option('-e, --env <env>',                           text('env'))
-      .option('-c, --config <config>',                     text('config'))
-      .option('-b, --browser <browser-name>',              text('browser'))
-      .option('-P, --project <project-path>',              text('project'))
-      .option('--group',                                   text('group'), coerceFalse)
-      .option('--group-id <group-id>',                     text('groupId'))
-      .action((opts) => {
-        debug('running Cypress')
-        require('./exec/run')
-        .start(parseOpts(opts))
-        .then(util.exit)
-        .catch(util.logErrorExit1)
-      })
+    .command('run')
+    .usage('[options]')
+    .description('Runs Cypress tests from the CLI without the GUI')
+    .option('--record [bool]', text('record'), coerceFalse)
+    .option('--headed', text('headed'))
+    .option('-k, --key <record-key>', text('key'))
+    .option('-s, --spec <spec>', text('spec'))
+    .option('-r, --reporter <reporter>', text('reporter'))
+    .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
+    .option('-p, --port <port>', text('port'))
+    .option('-e, --env <env>', text('env'))
+    .option('-c, --config <config>', text('config'))
+    .option('-b, --browser <browser-name>', text('browser'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('--group', text('group'), coerceFalse)
+    .option('--group-id <group-id>', text('groupId'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('running Cypress')
+      require('./exec/run')
+      .start(parseOpts(opts))
+      .then(util.exit)
+      .catch(util.logErrorExit1)
+    })
 
     program
-      .command('open')
-      .usage('[options]')
-      .description('Opens Cypress in the interactive GUI.')
-      .option('-p, --port <port>',         text('port'))
-      .option('-e, --env <env>',           text('env'))
-      .option('-c, --config <config>',     text('config'))
-      .option('-d, --detached [bool]',     text('detached'), coerceFalse)
-      .option('-P, --project <project path>', text('project'))
-      .option('--global',                  text('global'))
-      .action((opts) => {
-        debug('opening Cypress')
-        require('./exec/open')
-        .start(parseOpts(opts))
-        .catch(util.logErrorExit1)
-      })
+    .command('open')
+    .usage('[options]')
+    .description('Opens Cypress in the interactive GUI.')
+    .option('-p, --port <port>', text('port'))
+    .option('-e, --env <env>', text('env'))
+    .option('-c, --config <config>', text('config'))
+    .option('-d, --detached [bool]', text('detached'), coerceFalse)
+    .option('-P, --project <project path>', text('project'))
+    .option('--global', text('global'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('opening Cypress')
+      require('./exec/open')
+      .start(parseOpts(opts))
+      .catch(util.logErrorExit1)
+    })
 
     program
-      .command('install')
-      .description('Installs the Cypress executable matching this package\'s version')
-      .action(() => {
-        require('./tasks/install')
-        .start({ force: true })
-        .catch(util.logErrorExit1)
-      })
+    .command('install')
+    .description('Installs the Cypress executable matching this package\'s version')
+    .action(() => {
+      require('./tasks/install')
+      .start({ force: true })
+      .catch(util.logErrorExit1)
+    })
 
     program
-      .command('verify')
-      .description('Verifies that Cypress is installed correctly and executable')
-      .action(() => {
-        require('./tasks/verify')
-        .start({ force: true, welcomeMessage: false })
-        .catch(util.logErrorExit1)
-      })
+    .command('verify')
+    .description('Verifies that Cypress is installed correctly and executable')
+    .action(() => {
+      require('./tasks/verify')
+      .start({ force: true, welcomeMessage: false })
+      .catch(util.logErrorExit1)
+    })
 
     debug('cli starts with arguments %j', args)
 

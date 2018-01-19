@@ -100,7 +100,7 @@ deploy = {
     .then (task) ->
       switch task
         when "run"
-          bump.run()
+          bump.runTestProjects()
         when "version"
           ask.whichVersion(meta.distDir(""))
           .then (v) ->
@@ -152,12 +152,12 @@ deploy = {
       options.zip = path.resolve(zippedFilename(options.platform))
       zip.ditto(zipDir, options.zip)
 
-  # upload Cypres NPM package file
+  # upload Cypress NPM package file
   "upload-npm-package": (args = process.argv) ->
     console.log('#packageUpload')
     uploadNpmPackage(args)
 
-  # upload Cypres binary zip file under unique hash
+  # upload Cypress binary zip file under unique hash
   "upload-unique-binary": (args = process.argv) ->
     console.log('#uniqueBinaryUpload')
     uploadUniqueBinary(args)
