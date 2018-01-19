@@ -208,7 +208,7 @@ class SetupProject extends Component {
             </div>
           </div>
           <div className='select-orgs'>
-            <div className={cs({ 'hidden': this.state.owner !== 'org' || orgsStore.orgs.length })}>
+            <div className={cs({ 'hidden': this.state.owner !== 'org' || this._hasOrgsOtherThanDefault() })}>
               <div className='empty-select-orgs well'>
                 <p>You don't have any organizations yet.</p>
                 <p>Organizations can help you manage projects, including billing.</p>
@@ -230,9 +230,13 @@ class SetupProject extends Component {
     )
   }
 
+  _hasOrgsOtherThanDefault () {
+    return orgsStore.orgs.length > 1
+  }
+
   _orgSelector () {
     return (
-      <div className={cs({ 'hidden': this.state.owner !== 'org' || !orgsStore.orgs.length })}>
+      <div className={cs({ 'hidden': this.state.owner !== 'org' || !(this._hasOrgsOtherThanDefault()) })}>
         <select
           ref='orgId'
           id='organizations-select'
@@ -424,6 +428,9 @@ class SetupProject extends Component {
   }
 
   _getUsageByOrgId = (id) => {
+    // they may just be on the --select org-- option
+    if (!id) return null
+
     ipc.getUsage(id)
     .then((usage) => {
       this.setState({ usage })

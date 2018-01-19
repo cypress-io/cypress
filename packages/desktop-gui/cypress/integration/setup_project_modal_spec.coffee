@@ -164,18 +164,35 @@ describe "Set Up Project", ->
       context "without orgs", ->
         beforeEach ->
           @getOrgs.resolve([])
-          cy
-            .get(".btn").contains("Set Up Project").click()
-            .get(".modal-content")
-              .contains(".btn", "An Organization").click()
+          cy.get(".btn").contains("Set Up Project").click()
+          cy.get(".modal-content")
+            .contains(".btn", "An Organization").click()
 
         it "displays empty message", ->
-          cy
-            .get(".empty-select-orgs").should("be.visible")
+          cy.get(".empty-select-orgs").should("be.visible")
 
         it "opens dashboard organizations when 'create organization' is clicked", ->
           cy.contains("Create Organization").click().then ->
              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
+
+      context "without only default org", ->
+        beforeEach ->
+          @getOrgs.resolve([{
+            "id": "000",
+            "name": "Jane Lane",
+            "default": true
+          }])
+          cy.get(".btn").contains("Set Up Project").click()
+          cy.get(".modal-content")
+            .contains(".btn", "An Organization").click()
+
+        it "displays empty message", ->
+          cy.get(".empty-select-orgs").should("be.visible")
+
+        it "opens dashboard organizations when 'create organization' is clicked", ->
+          cy.contains("Create Organization").click().then ->
+             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
+
 
       context "polls for newly added organizations", ->
         beforeEach ->
