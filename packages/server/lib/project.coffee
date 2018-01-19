@@ -146,6 +146,11 @@ class Project extends EE
     .spread (projectId, authToken) ->
       api.getProjectRuns(projectId, authToken)
 
+  getUsage: (orgId) ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getUsage(orgId, authToken)
+
   reset: ->
     debug("resetting project instance %s", @projectRoot)
 

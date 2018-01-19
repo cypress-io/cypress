@@ -260,6 +260,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
         sendErr(err)
 
+    when "get:usage"
+      openProject.getUsage(arg)
+      .then(send)
+      .catch(sendErr)
+
     when "onboarding:closed"
       openProject.getProject()
       .saveState({ showedOnBoardingModal: true })

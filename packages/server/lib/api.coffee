@@ -287,6 +287,16 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
+  getUsage: (orgId, authToken) ->
+    rp.get({
+      url: Routes.orgUsage(orgId)
+      json: true
+      auth: {
+        bearer: authToken
+      }
+    })
+    .catch(tagError)
+
   getLoginUrl: ->
     rp.get({
       url: Routes.auth(),

@@ -7,6 +7,7 @@ describe "Set Up Project", ->
     cy.fixture("specs").as("specs")
     cy.fixture("organizations").as("orgs")
     cy.fixture("keys").as("keys")
+    cy.fixture("usage").as("usage")
 
     cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
@@ -118,6 +119,7 @@ describe "Set Up Project", ->
 
         describe "select org w/in projects limit", ->
           beforeEach ->
+            cy.stub(@ipc, "getUsage").resolves(@usage)
             cy.get(".privacy-radio").should("not.be.visible")
             cy.get("select").select("Acme Developers")
 
@@ -142,6 +144,8 @@ describe "Set Up Project", ->
 
         describe "select org w/ reached projects limit", ->
           beforeEach ->
+            @usage.used.privateProjects = 2
+            cy.stub(@ipc, "getUsage").resolves(@usage)
             cy.get(".privacy-radio").should("not.be.visible")
             cy.get("select").select("Osato Devs")
 

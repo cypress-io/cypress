@@ -424,8 +424,14 @@ class SetupProject extends Component {
   }
 
   _getUsageByOrgId = (id) => {
-    // this needs to GET /organizations/:id/usage
-    // and set usage on the state
+    ipc.getUsage(id)
+    .then((usage) => {
+      this.setState({ usage })
+    })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
+    .catch((error) => {
+      this.setState({ error })
+    })
   }
 
   _updateAccess = (e) => {
