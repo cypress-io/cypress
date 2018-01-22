@@ -163,7 +163,12 @@ module.exports = {
       console.log('sending result back')
       if @_isMessageMethod(rule.onLogResponse)
         return rule.toRunner("automation:push:message",
-          "set:traffic:routing:delay:async", rule.onLogResponse)
+          "set:traffic:routing:delay:async", rule.onLogResponse, {
+            status,
+            body: response
+          })
+    .then ->
+      console.log('all done')
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"

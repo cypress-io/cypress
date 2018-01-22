@@ -444,8 +444,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options.response = prepareCallback(options.response)
 
         # log individual requests
-        options.onLogResponse = prepareCallback(() ->
-          console.log('route log response')
+        options.onLogResponse = prepareCallback((res) ->
+          console.log('route log response', res)
           incrementRouteCounter(options)
 
           routeLog = Cypress.log({
@@ -466,8 +466,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 Duration:      options.duration
                 "Stubbed":     if options.response? then "Yes" else "No"
                 Request:       options.request
-                Response:      options.response
-                # XHR:           options._getXhr()
+                Response:      res
+                # TODO do we need original XHR object or is it
+                # even possible for all requests?
+                # XHR:           {foo: "bar"}
               }
 
               if route and route.is404
