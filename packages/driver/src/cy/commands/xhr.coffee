@@ -382,18 +382,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if alias = cy.getNextAlias()
           options.alias = alias
 
-        if _.isFunction(o.response)
-          getResponse = =>
-            o.response.call(state("runnable").ctx, options)
+        # Disable client-side response get
+        # We should ask for response when the request happens
+        # if _.isFunction(o.response)
+        #   getResponse = =>
+        #     o.response.call(state("runnable").ctx, options)
 
-          ## allow route to return a promise
-          Promise.try(getResponse)
-          .then (resp) ->
-            options.response = resp
+        #   ## allow route to return a promise
+        #   Promise.try(getResponse)
+        #   .then (resp) ->
+        #     options.response = resp
 
-            route()
-        else
-          route()
+        #     route()
+        # else
+        #   route()
+
+        route()
 
       route = ->
         ## if our response is a string and
@@ -437,6 +441,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options.delay = prepareCallback(options.delay)
         options.headers = prepareCallback(options.headers)
         options.status = prepareCallback(options.status)
+        options.response = prepareCallback(options.response)
 
         # log individual requests
         options.onLogResponse = prepareCallback(() ->

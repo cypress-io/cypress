@@ -100,6 +100,8 @@ module.exports = {
     debug("request properties %j", reqProps)
 
     status = rule.status
+    response = rule.response
+
     Promise.resolve()
     .then =>
       if not rule.headers
@@ -143,17 +145,25 @@ module.exports = {
       delayThen
 
     .then =>
-      console.log('sending result back')
-      # TODO move code after this callback into promise chain
-      if @_isMessageMethod(rule.onLogResponse)
-        rule.toRunner("automation:push:message",
-          "set:traffic:routing:delay:async", rule.onLogResponse)
+      if @_isMessageMethod(rule.response)
+        return rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.response, reqProps)
+        .then (r) ->
+          debug("client response", r)
+          response = r
 
-      if rule.response
-        res.status(status).send(rule.response)
+    .then ->
+      if response
+        res.status(status).send(response)
       else
         # TODO allow forwarding of the request
         res.status(status).end()
+
+    .then =>
+      console.log('sending result back')
+      if @_isMessageMethod(rule.onLogResponse)
+        return rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.onLogResponse)
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
