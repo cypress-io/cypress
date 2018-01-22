@@ -302,6 +302,7 @@ class Server
     @_request.send(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
+    debug("resolving url %s", urlStr)
     request = @_request
 
     handlingLocalFile = false
@@ -315,6 +316,7 @@ class Server
     urlStr = urlStr.format()
 
     originalUrl = urlStr
+    debug("original url %s", originalUrl)
 
     ## if we have a buffer for this url
     ## then just respond with its details
@@ -322,15 +324,19 @@ class Server
     ## another request
     if obj = buffers.getByOriginalUrl(urlStr)
       ## reset the cookies from the existing stream's jar
+      debug("setting cookie jar for %s", urlStr)
       request.setJarCookies(obj.jar, automationRequest)
       .then (c) ->
         return obj.details
     else
       p = new Promise (resolve, reject) =>
+        debug("checking if fully qualified url %s", urlStr)
+
         redirects = []
         newUrl = null
 
         if not fullyQualifiedRe.test(urlStr)
+          debug("not fully qualified url %s", urlStr)
           handlingLocalFile = true
 
           @_remoteVisitingUrl = true
@@ -342,8 +348,10 @@ class Server
           ## and bypass all the remoteState.visiting shit
           urlFile = url.resolve(@_remoteFileServer, urlStr)
           urlStr  = url.resolve(@_remoteOrigin, urlStr)
+          debug("full url %s", urlStr)
 
         error = (err) ->
+          debug("resolve error", err.message)
           ## only restore the previous state
           ## if our promise is still pending
           if p.isPending()
@@ -430,6 +438,7 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
+        debug("sending stream to %s", urlStr)
         request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
@@ -441,6 +450,7 @@ class Server
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
+            debug("following redirect to %s", next)
 
             curr = newUrl ? urlStr
 
@@ -454,6 +464,7 @@ class Server
         .catch(error)
 
   _onDomainSet: (fullyQualifiedUrl) ->
+    debug("domain set for %s", fullyQualifiedUrl)
     l = (type, url) ->
       debug("Setting %s %s", type, url)
 
@@ -483,7 +494,9 @@ class Server
 
       ## set an object with port, tld, and domain properties
       ## as the remoteHostAndPort
+      debug("parsing %s", @_remoteOrigin)
       @_remoteProps = cors.parseUrlIntoDomainTldPort(@_remoteOrigin)
+      debug("top level domain %s", @_remoteProps.tld)
 
       @_remoteDomainName = _.compact([@_remoteProps.domain, @_remoteProps.tld]).join(".")
 
