@@ -1,17 +1,32 @@
 [
   {
+    "createdAt": "2018-01-22T15:32:56.564Z",
+    "default": false,
+    "hasSubscription": false,
     "id": "777",
+    "projectsCount": 1,
     "name": "Acme Developers",
-    "default": false
+    "updatedAt": "2018-01-22T15:32:56.564Z",
+    "usersCount": 5
   },
   {
+    "createdAt": "2018-01-22T15:32:56.564Z",
+    "default": true,
+    "hasSubscription": false,
     "id": "000",
+    "projectsCount": 1,
     "name": "Jane Lane",
-    "default": true
+    "updatedAt": "2018-01-22T15:32:56.564Z",
+    "usersCount": 5
   },
   {
+    "createdAt": "2018-01-22T15:32:56.564Z",
+    "default": false,
+    "hasSubscription": false,
     "id": "999",
+    "projectsCount": 1,
     "name": "Osato Devs",
-    "default": false
+    "updatedAt": "2018-01-22T15:32:56.564Z",
+    "usersCount": 5
   }
 ]
