@@ -443,10 +443,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options.status = prepareCallback(options.status)
         options.response = prepareCallback(options.response)
 
+        # dummy XHR object for storage
+        xhr = {id: _.random(1, 1e+6)}
+        setRequest(state, xhr, options.alias)
+
         # log individual requests
         options.onLogResponse = prepareCallback((res) ->
           console.log('route log response', res)
           incrementRouteCounter(options)
+
+          console.log('setting log snapshot and response')
+          xhr.response = res
+          setResponse(state, xhr)
 
           routeLog = Cypress.log({
             message:   ""
@@ -506,16 +514,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               }
           })
 
-          # dummy XHR object for storage
-          xhr = _.random(1, 1e+6)
-          setRequest(state, xhr, options.alias)
-
-          if routeLog
-            console.log('setting log snapshot and response')
-            setResponse(state, xhr)
-
-            routeLog.snapshot("request")
-            routeLog.snapshot("response").end()
+          routeLog.snapshot("request")
+          routeLog.snapshot("response").end()
         )
 
         console.log('XHR route options', options)
