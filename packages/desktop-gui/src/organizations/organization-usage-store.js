@@ -3,6 +3,7 @@ import { observable, action } from 'mobx'
 import Usage from './organization-usage-model'
 
 export class OrgUsage {
+  @observable orgId = null
   @observable usage = null
   @observable error = null
   @observable isLoading = false
@@ -17,6 +18,10 @@ export class OrgUsage {
 
   @action setError (err) {
     this.error = err
+  }
+
+  @action setOrgId (id) {
+    this.orgId = id
   }
 }
 

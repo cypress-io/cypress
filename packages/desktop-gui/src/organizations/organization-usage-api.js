@@ -4,6 +4,8 @@ import orgUsageStore from './organization-usage-store'
 let pollId
 
 const getOrgUsage = (id) => {
+  orgUsageStore.setOrgId(id)
+
   ipc.getUsage(id)
   .then((usage) => {
     orgUsageStore.setOrgUsage(usage)

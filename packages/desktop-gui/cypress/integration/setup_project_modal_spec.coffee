@@ -168,6 +168,24 @@ describe "Set Up Project", ->
             cy.tick(11000).then =>
               expect(@ipc.getUsage).to.be.calledTwice
 
+          it "updates privacy radios on successful poll", ->
+            cy.get(".privacy-radio-private").should("not.have.class", "disabled")
+              .find("input").should("not.be.disabled")
+            cy.get(".privacy-radio .help-block").should("not.be.visible")
+
+            @usage.plan.limits = {
+              "privateProjects": 1,
+              "monthlyTests": 5000,
+              "historicalDays": 30,
+              "users": 3
+            }
+            @getOrgUsageAgain = @ipc.getUsage.onCall(2).resolves(@usage)
+
+            cy.tick(11000)
+            cy.get(".privacy-radio-private").should("have.class", "disabled")
+              .find("input").should("be.disabled")
+            cy.get(".privacy-radio .help-block").should("be.visible")
+
       context "without orgs", ->
         beforeEach ->
           @getOrgs.resolve([])

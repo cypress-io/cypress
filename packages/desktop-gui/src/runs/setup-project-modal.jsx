@@ -35,29 +35,35 @@ class SetupProject extends Component {
       org: {},
       showNameMissingError: false,
       isSubmitting: false,
-      usage: null,
     }
   }
 
   componentDidMount () {
-    this._handlePolling()
+    this._handleOrgPolling()
+    this._handleOrgUsagePolling()
   }
 
-  componentDidUpdate () {
-    this._handlePolling()
+  componentDidUpdate (prevProps, prevState) {
+    this._handleOrgPolling()
+
+    if (prevState.orgId !== this.state.orgId) {
+      this._resetPollOrgUsageToNewId()
+    }
   }
 
   componentWillUnmount () {
     this._stopPolling()
   }
 
-  _handlePolling () {
+  _handleOrgPolling () {
     if (this._shouldPollOrgs()) {
       this._pollOrgs()
     } else {
       this._stopPollingOrgs()
     }
+  }
 
+  _handleOrgUsagePolling () {
     if (this._shouldPollOrgUsage()) {
       this._pollOrgUsage()
     } else {
@@ -86,11 +92,14 @@ class SetupProject extends Component {
     return (authStore.isAuthenticated && this.state.orgId)
   }
 
+  _resetPollOrgUsageToNewId () {
+    this._stopPollingOrgUsage()
+    this._pollOrgUsage()
+  }
+
   _pollOrgUsage () {
     // we need to fetch the usage of the selected org
     // to restrict them from going over private projects
-    if (orgUsageApi.isPolling()) return
-
     orgUsageApi.getOrgUsage(this.state.orgId)
     orgUsageApi.pollOrgUsage(this.state.orgId)
   }
@@ -326,7 +335,7 @@ class SetupProject extends Component {
             </p>
           </label>
         </div>
-        <div className={`radio privacy-radio ${this._reachedPrivateProjectsLimit() ? 'disabled' : ''}`}>
+        <div className={`radio privacy-radio privacy-radio-private ${this._reachedPrivateProjectsLimit() ? 'disabled' : ''}`}>
           <label>
             <input
               type='radio'
