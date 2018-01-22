@@ -142,8 +142,13 @@ module.exports = {
 
       delayThen
 
-    .then ->
+    .then =>
       console.log('sending result back')
+      # TODO move code after this callback into promise chain
+      if @_isMessageMethod(rule.onLogResponse)
+        rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.onLogResponse)
+
       if rule.response
         res.status(status).send(rule.response)
       else

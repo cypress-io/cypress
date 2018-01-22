@@ -56,12 +56,16 @@ setRequest = (state, xhr, alias) ->
   state("requests", requests)
 
 setResponse = (state, xhr) ->
+  console.log("state requests", state("requests"))
+
   obj = _.find(state("requests"), { xhr })
 
   ## if we've been reset between tests and an xhr
   ## leaked through, then we may not be able to associate
   ## this response correctly
   return if not obj
+
+  console.log('found request', obj)
 
   index = state("requests").indexOf(obj)
 
@@ -74,8 +78,14 @@ setResponse = (state, xhr) ->
     xhr: xhr
     alias: obj?.alias
   }
+  console.log('new responses', responses)
 
   state("responses", responses)
+
+incrementRouteCounter = (route) ->
+  if rl = route and route.log
+    numResponses = rl.get("numResponses")
+    rl.set "numResponses", numResponses + 1
 
 startXhrServer = (cy, state, config) ->
   logs = {}
@@ -91,9 +101,7 @@ startXhrServer = (cy, state, config) ->
 
       setRequest(state, xhr, alias)
 
-      if rl = route and route.log
-        numResponses = rl.get("numResponses")
-        rl.set "numResponses", numResponses + 1
+      incrementRouteCounter(route)
 
       logs[xhr.id] = log = Cypress.log({
         message:   ""
@@ -429,6 +437,79 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options.delay = prepareCallback(options.delay)
         options.headers = prepareCallback(options.headers)
         options.status = prepareCallback(options.status)
+
+        # log individual requests
+        options.onLogResponse = prepareCallback(() ->
+          console.log('route log response')
+          incrementRouteCounter(options)
+
+          routeLog = Cypress.log({
+            message:   ""
+            name:      "xhr"
+            displayName: getDisplayName(options)
+            alias:     options.alias
+            aliasType: "route"
+            type:      "parent"
+            event:     true
+            consoleProps: =>
+              consoleObj = {
+                Alias:         options.alias
+                Method:        options.method
+                URL:           options.url
+                "Matched URL": route?.url
+                Status:        options.statusMessage
+                Duration:      options.duration
+                "Stubbed":     if options.response? then "Yes" else "No"
+                Request:       options.request
+                Response:      options.response
+                # XHR:           options._getXhr()
+              }
+
+              if route and route.is404
+                consoleObj.Note = "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
+
+              consoleObj.groups = ->
+                [
+                  {
+                    name: "Initiator"
+                    # items: [stack]
+                    label: false
+                  }
+                ]
+
+              consoleObj
+            renderProps: ->
+              status = 200
+              # status = switch
+              #   when xhr.aborted
+              #     indicator = "aborted"
+              #     "(aborted)"
+              #   when xhr.status > 0
+              #     xhr.status
+              #   else
+              #     indicator = "pending"
+              #     "---"
+
+              # indicator ?= if /^2/.test(status) then "successful" else "bad"
+              indicator = "successful"
+
+              {
+                message: "#{options.method} #{status} #{_.truncate(stripOrigin(options.url), { length: 20 })}"
+                indicator: indicator
+              }
+          })
+
+          # dummy XHR object for storage
+          xhr = _.random(1, 1e+6)
+          setRequest(state, xhr, options.alias)
+
+          if routeLog
+            console.log('setting log snapshot and response')
+            setResponse(state, xhr)
+
+            routeLog.snapshot("request")
+            routeLog.snapshot("response").end()
+        )
 
         console.log('XHR route options', options)
 
