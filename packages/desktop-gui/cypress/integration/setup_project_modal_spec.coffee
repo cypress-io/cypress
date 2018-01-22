@@ -29,6 +29,9 @@ describe "Set Up Project", ->
       @getOrgs = @util.deferred()
       cy.stub(@ipc, "getOrgs").returns(@getOrgs.promise)
 
+      @getUsage = @util.deferred()
+      cy.stub(@ipc, "getUsage").returns(@getUsage.promise)
+
       @getProjectStatus = @util.deferred()
       cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
 
@@ -37,9 +40,8 @@ describe "Set Up Project", ->
 
       start()
 
-      cy
-        .get(".navbar-default a")
-          .contains("Runs").click()
+      cy.get(".navbar-default a")
+        .contains("Runs").click()
 
   it "displays 'need to set up' message", ->
     cy.contains("You Have No Recorded Runs")
@@ -57,17 +59,15 @@ describe "Set Up Project", ->
         cy.get(".modal").should("be.visible")
 
       it "submit button is disabled", ->
-        cy
-          .get(".modal").contains(".btn", "Set Up Project")
-            .should("be.disabled")
+        cy.get(".modal").contains(".btn", "Set Up Project")
+          .should("be.disabled")
 
       it "prefills Project Name", ->
         cy.get("#projectName").should("have.value", "bar")
 
       it "allows me to change Project Name value", ->
-        cy
-          .get("#projectName").clear().type("New Project Here")
-            .should("have.value", "New Project Here")
+        cy.get("#projectName").clear().type("New Project Here")
+          .should("have.value", "New Project Here")
 
       describe "default owner", ->
         it "has no owner selected by default", ->
@@ -75,28 +75,24 @@ describe "Set Up Project", ->
           cy.get("#org").should("not.be.selected")
 
         it "org docs are linked", ->
-          cy
-            .contains("label", "Who should own this")
-              .find("a").click().then ->
-                expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-are-organizations")
+          cy.contains("label", "Who should own this")
+            .find("a").click().then ->
+              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-are-organizations")
 
       describe "selecting me as owner", ->
         beforeEach ->
-          cy
-            .get(".privacy-radio").should("not.be.visible")
-            .get(".modal-content")
-              .contains(".btn", "Me").click()
+          cy.get(".privacy-radio").should("not.be.visible")
+          cy.get(".modal-content")
+            .contains(".btn", "Me").click()
 
         it "access docs are linked", ->
-          cy
-            .contains("label", "Who should see the runs")
-              .find("a").click().then ->
-                expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-project-access")
+          cy.contains("label", "Who should see the runs")
+            .find("a").click().then ->
+              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-project-access")
 
         it "displays public & private radios with no preselects", ->
-          cy
-            .get(".privacy-radio").should("be.visible")
-              .find("input").should("not.be.checked")
+          cy.get(".privacy-radio").should("be.visible")
+            .find("input").should("not.be.checked")
 
     describe "selecting an org", ->
       context "with orgs", ->
@@ -119,7 +115,7 @@ describe "Set Up Project", ->
 
         describe "select org w/in projects limit", ->
           beforeEach ->
-            cy.stub(@ipc, "getUsage").resolves(@usage)
+            @getUsage.resolve(@usage)
             cy.get(".privacy-radio").should("not.be.visible")
             cy.get("select").select("Acme Developers")
 
@@ -145,21 +141,32 @@ describe "Set Up Project", ->
         describe "select org w/ reached projects limit", ->
           beforeEach ->
             @usage.used.privateProjects = 2
-            cy.stub(@ipc, "getUsage").resolves(@usage)
+            @getUsage.resolve(@usage)
             cy.get(".privacy-radio").should("not.be.visible")
             cy.get("select").select("Osato Devs")
 
           it "displays private radio as disabled", ->
             cy.get(".privacy-radio").should("be.visible")
               .find("input")
-                .should("not.be.checked")
-                .and("be.disabled")
+              .should("not.be.checked")
+              .and("be.disabled")
 
           it "displays msg w/ link about private projects", ->
             cy.get(".privacy-radio")
               .contains("upgrade your account")
               .click().then ->
                  expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations/999/billing")
+
+        context "polls for updates to usage allowance", ->
+          beforeEach ->
+            cy.clock()
+            @getUsage.resolve(@usage)
+            cy.get(".privacy-radio").should("not.be.visible")
+            cy.get("select").select("Osato Devs")
+
+          it "polls for usage twice in 10+sec on click of org", ->
+            cy.tick(11000).then =>
+              expect(@ipc.getUsage).to.be.calledTwice
 
       context "without orgs", ->
         beforeEach ->
@@ -193,28 +200,39 @@ describe "Set Up Project", ->
           cy.contains("Create Organization").click().then ->
              expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/organizations")
 
-
-      context "polls for newly added organizations", ->
+      context "polls for updates to organizations", ->
         beforeEach ->
+          cy.clock()
           @getOrgs.resolve(@orgs)
-          cy
-            .clock()
-            .get(".btn").contains("Set Up Project").click()
-            .get(".modal-content")
-              .contains(".btn", "An Organization").click()
+          cy.get(".btn").contains("Set Up Project").click()
+          cy.get(".modal-content")
+            .contains(".btn", "An Organization").click()
 
-        it "polls for orgs twice on click of org", ->
+        it "polls for orgs twice in 10+sec on click of org", ->
           cy.tick(11000).then =>
             expect(@ipc.getOrgs).to.be.calledTwice
 
-        it "updates orgs list on successful poll", ->
-          @orgs[0].name = "Foo Bar Devs"
+        it "updates org name on list on successful poll", ->
+          @name = "Foo Bar Devs"
+          @orgs[0].name = @name
           @getOrgsAgain = @ipc.getOrgs.onCall(2).resolves(@orgs)
 
-          cy
-            .tick(11000)
-            .get("#organizations-select").find("option")
-              .contains("Foo Bar Devs")
+          cy.tick(11000)
+          cy.get("#organizations-select").find("option")
+            .contains(@name)
+
+        it "adds new org to list on successful poll", ->
+          @orgs.push({
+              "id": "333",
+              "name": "Ivory Developers",
+              "default": false
+          })
+          @getOrgsAgain = @ipc.getOrgs.onCall(2).resolves(@orgs)
+
+          cy.tick(11000)
+          cy.get("#organizations-select").find("option")
+            .should('have.length', @orgs.length)
+
 
     describe "on submit", ->
       beforeEach ->

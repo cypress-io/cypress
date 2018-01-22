@@ -10,7 +10,9 @@ import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
+import orgUsageStore from '../organizations/organization-usage-store'
 import orgsApi from '../organizations/organizations-api'
+import orgUsageApi from '../organizations/organization-usage-api'
 
 import LoginForm from '../auth/login-form'
 
@@ -50,26 +52,56 @@ class SetupProject extends Component {
   }
 
   _handlePolling () {
-    if (this._shouldPoll()) {
-      this._poll()
+    if (this._shouldPollOrgs()) {
+      this._pollOrgs()
     } else {
-      this._stopPolling()
+      this._stopPollingOrgs()
+    }
+
+    if (this._shouldPollOrgUsage()) {
+      this._pollOrgUsage()
+    } else {
+      this._stopPollingOrgUsage()
     }
   }
 
-  _shouldPoll () {
+  // Organizations polling
+  _shouldPollOrgs () {
     return authStore.isAuthenticated
   }
 
-  _poll () {
+  _pollOrgs () {
     if (orgsApi.isPolling()) return
 
     orgsApi.getOrgs()
     orgsApi.pollOrgs()
   }
 
-  _stopPolling () {
+  _stopPollingOrgs () {
     orgsApi.stopPollingOrgs()
+  }
+
+  // Organization usage polling
+  _shouldPollOrgUsage () {
+    return (authStore.isAuthenticated && this.state.orgId)
+  }
+
+  _pollOrgUsage () {
+    // we need to fetch the usage of the selected org
+    // to restrict them from going over private projects
+    if (orgUsageApi.isPolling()) return
+
+    orgUsageApi.getOrgUsage(this.state.orgId)
+    orgUsageApi.pollOrgUsage(this.state.orgId)
+  }
+
+  _stopPollingOrgUsage () {
+    orgUsageApi.stopPollingOrgUsage()
+  }
+
+  _stopPolling () {
+    this._stopPollingOrgs()
+    this._stopPollingOrgUsage()
   }
 
   render () {
@@ -289,7 +321,6 @@ class SetupProject extends Component {
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-eye'></i>{' '}
               <strong>Public:</strong>{' '}
               Anyone has access.
             </p>
@@ -301,12 +332,11 @@ class SetupProject extends Component {
               type='radio'
               name='privacy-radio'
               value='false'
-              checked={(this.state.public === false)}
+              checked={this._privateRadioChecked()}
               disabled={this._reachedPrivateProjectsLimit()}
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-lock'></i>{' '}
               <strong>Private:</strong>{' '}
               Only invited users have access.
               <br/>
@@ -320,6 +350,14 @@ class SetupProject extends Component {
         </div>
       </div>
     )
+  }
+
+  _privateRadioChecked = () => {
+    // we want to never have this checked if they're over their limit
+    // they may have previously checked it, but are not over limit, so uncheck it.
+    if (this._reachedPrivateProjectsLimit()) return false
+
+    return (this.state.public === false)
   }
 
   _openOrgDocs = (e) => {
@@ -338,7 +376,7 @@ class SetupProject extends Component {
   }
 
   _reachedPrivateProjectsLimit = () => {
-    let usage = this.state.usage
+    let usage = orgUsageStore.usage
 
     if (!usage) return
 
@@ -385,10 +423,6 @@ class SetupProject extends Component {
 
     const orgId = orgIsNotSelected ? null : this.refs.orgId.value
 
-    // we need to fetch the usage of the selected org
-    // to restrict them from going over private projects
-    this._getUsageByOrgId(orgId)
-
     this.setState({
       orgId,
       org: this._getOrgById(orgId),
@@ -414,30 +448,12 @@ class SetupProject extends Component {
 
     let orgId = owner === 'me' ? defaultOrg.id : null
 
-    // we need to fetch the usage of the default org
-    // to restrict them from going over private projects
-    this._getUsageByOrgId(orgId)
-
     // we want to clear all selects below the radio buttons
     // otherwise it looks jarring to already have selects
     this.setState({
       owner,
       orgId,
       public: null,
-    })
-  }
-
-  _getUsageByOrgId = (id) => {
-    // they may just be on the --select org-- option
-    if (!id) return null
-
-    ipc.getUsage(id)
-    .then((usage) => {
-      this.setState({ usage })
-    })
-    .catch(ipc.isUnauthed, ipc.handleUnauthed)
-    .catch((error) => {
-      this.setState({ error })
     })
   }
 
