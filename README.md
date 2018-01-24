@@ -179,6 +179,22 @@ it('calls mixin "created" method', () => {
 See [Vue global mixin docs](https://vuejs.org/v2/guide/mixins.html#Global-Mixin)
 and [mixin-spec.js](cypress/integration/mixin-spec.js)
 
+* `filters` - hash of global filters
+
+```js
+const filters = {
+  reverse: s => s.split().reverse().join()
+}
+// extend Vue with global filters
+const extensions = {
+  filters
+}
+beforeEach(mountVue({}, { extensions }))
+```
+
+See [Vue global filters docs](https://vuejs.org/v2/api/#Vue-filter)
+and [filters-spec.js](cypress/integration/filters-spec.js)
+
 <a name="intro-example"/>
 
 ### The intro example

@@ -99,6 +99,15 @@ const registerGlobalComponents = (Vue, options) => {
   }
 }
 
+const installFilters = (Vue, options) => {
+  const filters = Cypress._.get(options, 'extensions.filters')
+  if (Cypress._.isPlainObject(filters)) {
+    Object.keys(filters).forEach(name => {
+      Vue.filter(name, filters[name])
+    })
+  }
+}
+
 const installPlugins = (Vue, options) => {
   const plugins =
     Cypress._.get(options, 'extensions.use') ||
@@ -166,6 +175,7 @@ const mountVue = (component, optionsOrProps = {}) => () => {
     .then(setAlert)
     .its('Vue')
     .then(Vue => {
+      installFilters(Vue, options)
       installMixins(Vue, options)
       installPlugins(Vue, options)
       registerGlobalComponents(Vue, options)
