@@ -36,6 +36,10 @@
 
 [FAQ](#faq)
 
+[Related info](#related)
+
+[Other frameworks](#other)
+
 <a name="install"/>
 
 ## Install
@@ -654,11 +658,21 @@ describe('Hello.vue', () => {
 - If your component's static assets are not loading, you probably need
 to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmutov/cypress-vue-unit-test/issues/4)
 
+<a name="#related"/>
+
 ## Related info
 
 - [Testing Vue web applications with Vuex data store & REST backend](https://www.cypress.io/blog/2017/11/28/testing-vue-web-application-with-vuex-data-store-and-rest-backend/)
 - [Why Cypress?](https://on.cypress.io/why-cypress)
 - [Cypress API](https://on.cypress.io/api)
+
+<a name="#other"/>
+
+## Test adapters for other frameworks
+
+- [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test)
+- [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
+- [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
 
 ### Small print
 
