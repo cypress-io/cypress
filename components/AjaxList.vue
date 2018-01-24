@@ -21,7 +21,7 @@ export default {
 
   // Fetches posts when the component is created.
   created() {
-    axios.get(`http://jsonplaceholder.typicode.com/users?_limit=3`)
+    axios.get('http://jsonplaceholder.typicode.com/users?_limit=3')
     .then(response => {
       // JSON responses are automatically parsed.
       this.users = response.data
