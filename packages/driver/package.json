@@ -35,7 +35,7 @@
     "errorhandler": "^1.1.1",
     "eventemitter2": "^4.1.2",
     "express": "^4.12.3",
-    "jquery": "2.2.4",
+    "jquery": "3.0.0",
     "jquery.scrollto": "^2.1.2",
     "js-cookie": "2.1.1",
     "jsdom": "^11.0.0",
