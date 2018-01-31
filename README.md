@@ -1,6 +1,6 @@
 # cypress-react-unit-test [![Build Status](https://travis-ci.org/bahmutov/cypress-react-unit-test.svg?branch=master)](https://travis-ci.org/bahmutov/cypress-react-unit-test) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah)
 
-> A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **ALPHA**
+> A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **ALPHA**
 
 ## TLDR
 
