@@ -29,6 +29,8 @@
 - [Spying Example](#spying-example)
 - [XHR Spying and Stubbing](#xhr-spying-stubbing)
 - [Spying On `window.alert`](#spying-window-alert)
+- [Tests](cypress/integration/counter-vuex-spec.js) for a component that [uses Vuex data store](components/Counter.vue)
+- [Tests](cypress/integration/router-spec.js) for a component that [uses vue-router](components/PizzaShop)
 
 [Bundling](#bundling)
 - [Short Way](#short-way)
