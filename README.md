@@ -42,6 +42,7 @@
 
 [Other frameworks](#other)
 
+[Contributors](#contributors)
 
 <a name="install"/>
 
@@ -689,6 +690,13 @@ to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmuto
 - [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test)
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
+
+<a name="#contributors"/>
+
+## Contributors
+
+- [Amir Rustamzadeh](https://github.com/amirrustam)
+- [Gleb Bahmutov](https://github.com/bahmutov)
 
 ### Small print
 
