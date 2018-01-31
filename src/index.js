@@ -1,4 +1,16 @@
+const Vue = require('vue/dist/vue')
 const { stripIndent } = require('common-tags')
+
+// mountVue options
+const defaultOptions = ['html', 'vue', 'base', 'mountId', 'extensions']
+
+// default mount point element ID for root Vue instance
+const defaultMountId = 'app'
+
+const parentDocument = window.parent.document
+const projectName = Cypress.config('projectName')
+const appIframeId = `Your App: '${projectName}'`
+const appIframe = parentDocument.getElementById(appIframeId)
 
 // having weak reference to styles prevents garbage collection
 // and "losing" styles when the next test starts
@@ -23,10 +35,6 @@ const copyStyles = component => {
     return
   }
 
-  const parentDocument = window.parent.document
-  const projectName = Cypress.config('projectName')
-  const appIframeId = `Your App: '${projectName}'`
-  const appIframe = parentDocument.getElementById(appIframeId)
   const head = appIframe.contentDocument.querySelector('head')
   styles.forEach(style => {
     head.appendChild(style)
@@ -42,52 +50,20 @@ const deleteCachedConstructors = component => {
   Cypress._.values(component.components).forEach(deleteConstructor)
 }
 
-const getVuePath = options =>
-  options.vue || options.vuePath || '../node_modules/vue/dist/vue.js'
-
 const getPageHTML = options => {
-  if (options.html) {
-    return options.html
-  }
-  const vue = getVuePath(options)
-
-  // note: add "base" tag to force loading static assets
-  // from the server, not from the "spec" file URL
-  if (options.base) {
-    if (vue.startsWith('.')) {
-      console.error(
-        'You are using base tag %s and relative Vue path %s',
-        options.base,
-        vue
-      )
-      console.error('the relative path might NOT work')
-      console.error(
-        'maybe pass Vue url using "https://unpkg.com/vue/dist/vue.js"'
-      )
-    }
-    return stripIndent`
-      <html>
-        <head>
-          <base href="${options.base}" />
-        </head>
-        <body>
-          <div id="app"></div>
-          <script src="${vue}"></script>
-        </body>
-      </html>
-    `
-  }
-
-  const vueHtml = stripIndent`
+  return (
+    options.html ||
+    stripIndent`
     <html>
-      <head></head>
+      <head>
+        ${options.base ? `<base href="${options.base}" />` : ''}
+      </head>
       <body>
-        <div id="app"></div>
-        <script src="${vue}"></script>
+        <div id="${options.mountId || defaultMountId}"></div>
       </body>
     </html>
   `
-  return vueHtml
+  )
 }
 
 const registerGlobalComponents = (Vue, options) => {
@@ -130,12 +106,39 @@ const installMixins = (Vue, options) => {
   }
 }
 
-const isOptionName = name =>
-  ['vue', 'html', 'vuePath', 'base', 'extensions'].includes(name)
+const isOptionName = name => defaultOptions.includes(name)
 
 const isOptions = object => Object.keys(object).every(isOptionName)
 
 const isConstructor = object => object && object._compiled
+
+const hasStore = ({ store }) => store && store._vm
+
+const forEachValue = (obj, fn) =>
+  Object.keys(obj).forEach(key => fn(obj[key], key))
+
+const resetStoreVM = (Vue, { store }) => {
+  // bind store public getters
+  store.getters = {}
+  const wrappedGetters = store._wrappedGetters
+  const computed = {}
+  forEachValue(wrappedGetters, (fn, key) => {
+    // use computed to leverage its lazy-caching mechanism
+    computed[key] = () => fn(store)
+    Object.defineProperty(store.getters, key, {
+      get: () => store._vm[key],
+      enumerable: true // for local getters
+    })
+  })
+
+  store._watcherVM = new Vue()
+  store._vm = new Vue({
+    data: {
+      $$state: store._vm._data.$$state
+    },
+    computed
+  })
+  return store
 
 function setXMLHttpRequest (w) {
   // by grabbing the XMLHttpRequest from app's iframe
@@ -162,35 +165,56 @@ const mountVue = (component, optionsOrProps = {}) => () => {
     props = optionsOrProps
   }
 
-  const vueHtml = getPageHTML(options)
-  const document = cy.state('document')
-  document.write(vueHtml)
-  document.close()
+  // display deprecation warnings
+  if (options.vue) {
+    console.warn(stripIndent`
+      [DEPRECATION]: 'vue' option has been deprecated.
+      'node_modules/vue/dis/vue' is always used.
+      Please remove it from your 'mountVue' options.`)
+  }
 
-  // TODO: do not log out "its(Vue)" command
-  // but it currently does not support it
+  // insert base app template
+  const doc = appIframe.contentDocument
+  doc.write(getPageHTML(options))
+  doc.close()
+
+  // get root Vue mount element
+  const mountId = options.mountId || defaultMountId
+  const el = doc.getElementById(mountId)
+
+  // set global Vue instance:
+  // 1. convenience for debugging in DevTools
+  // 2. some libraries might check for this global
+  appIframe.contentWindow.Vue = Vue
+
+  // refresh inner Vue instance of Vuex store
+  if (hasStore(component)) {
+    component.store = resetStoreVM(Vue, component)
+  }
+
+  // setup Vue instance
+  installMixins(Vue, options)
+  installPlugins(Vue, options)
+  registerGlobalComponents(Vue, options)
+  deleteCachedConstructors(component)
+
+  // create root Vue component
+  // and make it accessible via Cypress.vue
+  if (isConstructor(component)) {
+    const Cmp = Vue.extend(component)
+    Cypress.vue = new Cmp(props).$mount(el)
+    copyStyles(Cmp)
+  } else {
+    Cypress.vue = new Vue(component).$mount(el)
+    copyStyles(component)
+  }
+
   return cy
     .window({ log: false })
     .then(setXMLHttpRequest)
     .then(setAlert)
-    .its('Vue')
-    .then(Vue => {
-      installFilters(Vue, options)
-      installMixins(Vue, options)
-      installPlugins(Vue, options)
-      registerGlobalComponents(Vue, options)
-      deleteCachedConstructors(component)
-
-      if (isConstructor(component)) {
-        const Cmp = Vue.extend(component)
-        Cypress.vue = new Cmp(props).$mount('#app')
-        copyStyles(Cmp)
-      } else {
-        Cypress.vue = new Vue(component).$mount('#app')
-        copyStyles(component)
-      }
-
-      return Cypress.vue
+    .then(() => {
+      return cy.wrap(Cypress.vue)
     })
 }
 

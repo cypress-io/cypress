@@ -77,13 +77,11 @@ See examples below for details.
 See [cypress/integration/options-spec.js](cypress/integration/options-spec.js)
 for examples of options.
 
-* `vue` - path or URL to the Vue library to load. By default, will
-try to load `../node_modules/vue/dist/vue.js`, but you can pass your
-own path or URL.
+* `mountId` - specify root Vue app mount element ID. Defaults to `app`.
 
 ```js
 const options = {
-  vue: 'https://unpkg.com/vue'
+  mountId: 'rootApp'  // div#rootApp
 }
 beforeEach(mountVue(/* my Vue code */, options))
 ```
@@ -103,12 +101,25 @@ beforeEach(mountVue(/* my Vue code */, options))
 place to load additional libraries, polyfills and styles.
 
 ```js
-const vue = '../node_modules/vue/dist/vue.js'
+const polyfill = '../node_modules/mypolyfill/dist/polyfill.js'
 const options = {
-  html: `<div id="app"></div><script src="${vue}"></script>`
+  html: `<div id="app"></div><script src="${polyfill}"></script>`
 }
 beforeEach(mountVue(/* my Vue code */, options))
 ```
+
+* `vue` **[DEPRECATED]** - path or URL to the Vue library to load. By default, will
+try to load `../node_modules/vue/dist/vue.js`, but you can pass your
+own path or URL.
+
+```js
+const options = {
+  vue: 'https://unpkg.com/vue'
+}
+beforeEach(mountVue(/* my Vue code */, options))
+```
+> #### Deprecation Warning
+> `vue` option has been deprecated. `node_modules/vue/dist/vue` is always used.
 
 <a name="global-vue-extensions"/>
 
