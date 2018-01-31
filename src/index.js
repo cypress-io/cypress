@@ -139,6 +139,7 @@ const resetStoreVM = (Vue, { store }) => {
     computed
   })
   return store
+}
 
 function setXMLHttpRequest (w) {
   // by grabbing the XMLHttpRequest from app's iframe
@@ -193,6 +194,7 @@ const mountVue = (component, optionsOrProps = {}) => () => {
   }
 
   // setup Vue instance
+  installFilters(Vue, options)
   installMixins(Vue, options)
   installPlugins(Vue, options)
   registerGlobalComponents(Vue, options)

@@ -89,7 +89,7 @@
     "simple-commit-message": "3.3.2",
     "standard": "10.0.3",
     "vue-loader": "13.6.1",
-    "vuex": "3.0.1"
+    "vuex": "3.0.1",
     "vue-router": "3.0.1",
     "vue-template-compiler": "2.5.13"
   },
