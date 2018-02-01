@@ -28,15 +28,15 @@ Unfortunately, `@semantic-release/npm` version `2.6.1` and above is incompatible
 ## Usage
 Run `semantic-release-monorepo` for the package in the current working directory:
 ```bash
-npx semantic-release -e -semantic-release-monorepo
+npx semantic-release -e semantic-release-monorepo
 ```
-It helps to think about `semantic-releaase-monorepo` as a variation on `semantic-release`'s default behavior, using the latter's plugin system to adapt it to work with a monorepo. 
+It helps to think about `semantic-release-monorepo` as a variation on `semantic-release`'s default behavior, using the latter's plugin system to adapt it to work with a monorepo. 
 
 ### With Lerna
 The monorepo management tool [`lerna`](https://github.com/lerna/lerna) can be used to run `semantic-release-monorepo` across all packages in a monorepo:
 
 ```bash
-lerna exec --concurrency 1 -- npx --no-install semantic-release -e -semantic-release-monorepo
+lerna exec --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo
 ```
 Note that this requires installing `semantic-release` and `semantic-release-monorepo` for each package.
 
