@@ -433,10 +433,12 @@ module.exports = {
       startedTestsAt: null
       endedTestsAt: null
       totalDuration: null
+      totalSuites: null,
       totalTests: null,
       totalFailures: null,
       totalPasses: null,
       totalPending: null,
+      totalSkipped: null,
       runs: null
       browserName: 'chrome',
       browserVersion: '41.2.3.4',
@@ -473,6 +475,7 @@ module.exports = {
       results.totalPasses = reduceRuns(runs, "stats.passes")
       results.totalPending = reduceRuns(runs, "stats.pending")
       results.totalFailures = reduceRuns(runs, "stats.failures")
+      results.totalSkipped = reduceRuns(runs, "stats.skipped")
 
       results.runs = runs
 
