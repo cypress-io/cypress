@@ -8,6 +8,7 @@ const url = require('url')
 const debug = require('debug')('cypress:cli')
 const { stripIndent } = require('common-tags')
 const is = require('check-more-types')
+const home = require('os').homedir()
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
@@ -120,15 +121,21 @@ const downloadFromUrl = (options) => {
       // send up our percent and seconds remaining
       options.onProgress(state.percent, util.secsRemaining(eta))
     })
-    // save this download here
+    // save this download here...
     .pipe(fs.createWriteStream(options.downloadDestination))
     .on('finish', () => {
       debug('downloading finished')
 
-      resolve({
-        filename: options.downloadDestination,
-        downloaded: true,
-      })
+      // ... and also add it to the global cache
+      fs.copy(
+        options.downloadDestination,
+        `${home}/.cypress/${options.version}`
+      ).then(() =>
+        resolve({
+          filename: options.downloadDestination,
+          downloaded: true,
+        })
+      )
     })
   })
 }
@@ -155,13 +162,25 @@ const download = (options = {}) => {
     }
 
     const possibleFile = formAbsolutePath(options.version)
+    const possibleFileFromGlobalCache = `${home}/.cypress/${options.version}`
     debug('checking local file', possibleFile, 'cwd', process.cwd())
-    return fs.pathExists(possibleFile).then((exists) => {
-      if (exists) {
+    debug('checking local global file', possibleFileFromGlobalCache, 'cwd', process.cwd())
+    return Promise.all([
+      fs.pathExists(possibleFile),
+      fs.pathExists(possibleFileFromGlobalCache),
+    ]).then(([localFileExists, globalFileExists]) => {
+      if (localFileExists) {
         debug('found local file', possibleFile)
         debug('skipping download')
         return {
           filename: possibleFile,
+          downloaded: false,
+        }
+      } else if (globalFileExists) {
+        debug('found local file in global cache', possibleFileFromGlobalCache)
+        debug('skipping download')
+        return {
+          filename: possibleFileFromGlobalCache,
           downloaded: false,
         }
       } else {
