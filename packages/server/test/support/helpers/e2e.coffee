@@ -79,6 +79,8 @@ stopServer = (srv) ->
   srv.destroyAsync()
 
 module.exports = {
+  normalizeStdout
+
   setup: (options = {}) ->
     if npmI = options.npmInstall
       before ->
