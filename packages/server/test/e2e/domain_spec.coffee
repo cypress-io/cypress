@@ -1,5 +1,10 @@
 e2e = require("../support/helpers/e2e")
 
+HOSTS = [
+  "app.localhost=127.0.0.1"
+  "foo.bar.baz.com.au=127.0.0.1"
+].join(",")
+
 describe "e2e domain", ->
   e2e.setup({
     servers: {
@@ -11,7 +16,7 @@ describe "e2e domain", ->
   it "passing", ->
     e2e.exec(@, {
       spec: "domain_spec.coffee"
-      hosts: "app.localhost=127.0.0.1"
+      hosts: HOSTS
       snapshot: true
       expectedExitCode: 0
     })

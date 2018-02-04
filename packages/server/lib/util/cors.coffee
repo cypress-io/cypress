@@ -13,6 +13,7 @@ module.exports = {
 
     ## if we couldn't get a parsed domain
     if not parsed = parseDomain(hostname, {
+      privateTlds: true ## use the public suffix
       customTlds: localHostOrIpAddressRe
     })
 
