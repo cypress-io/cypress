@@ -7,14 +7,20 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   localhost
     ✓ can visit
 
+  com.au
+    ✓ can visit
 
-  1 passing
+  herokuapp.com
+    ✓ can visit
+
+
+  3 passing
 
 
   (Tests Finished)
 
-  - Tests:           1
-  - Passes:          1
+  - Tests:           3
+  - Passes:          3
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds

@@ -36,6 +36,14 @@ describe "lib/util/cors", ->
         tld: "local"
       })
 
+    ## public suffix example of a private tld
+    it "parses https://example.herokuapp.com", ->
+      @isEq("https://example.herokuapp.com", {
+        port: "443"
+        domain: "example"
+        tld: "herokuapp.com"
+      })
+
   context ".urlMatchesOriginPolicyProps", ->
     beforeEach ->
       @isFalse = (url, props) =>
@@ -64,6 +72,18 @@ describe "lib/util/cors", ->
         @isTrue("https://google.com:443", @props)
         @isTrue("https://foo.google.com:443", @props)
         @isTrue("https://foo.bar.google.com:443", @props)
+
+    describe "public suffix", ->
+      beforeEach ->
+        @props = cors.parseUrlIntoDomainTldPort("https://example.gitlab.io")
+
+      it "does not match", ->
+        @isFalse("http://example.gitlab.io", @props)
+        @isFalse("https://foo.gitlab.io:443", @props)
+
+      it "matches", ->
+        @isTrue("https://example.gitlab.io:443", @props)
+        @isTrue("https://foo.example.gitlab.io:443", @props)
 
     describe "localhost", ->
       beforeEach ->
