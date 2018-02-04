@@ -9,6 +9,14 @@
 _ = require("lodash")
 UrlParse = require("url-parse")
 
+## TODO: this adds 70kb gzipped
+## and we need to move this to use
+## node over websockets so we dont
+## have to send it to the client
+parseDomain = require("parse-domain")
+
+localHostOrIpAddressRe = /.?localhost|\.local|^[\d\.]+$/
+
 reHttp = /^https?:\/\//
 reWww = /^www/
 
@@ -65,24 +73,30 @@ class $Location
 
   getSuperDomain: ->
     hostname = @getHostName()
-    parts    = hostname.split(".")
 
-    ## if this is an ip address then
-    ## just return it straight up
-    if ipAddressRe.test(hostname)
-      return hostname
+    ## TODO: this code is almost identical to
+    ## the code in server/util/cors
+    ## refactor this to share it together
 
-    switch parts.length
-      when 1
-        ## localhost => localhost
-        hostname
-      when 2
-        ## stackoverflow.com => stackoverflow.com
-        hostname
-      else
-        ## mail.google.com => google.com
-        ## cart.shopping.co.uk => shopping.co.uk
-        parts.slice(1).join(".")
+    ## if we couldn't get a parsed domain
+    if not parsed = parseDomain(hostname, {
+      privateTlds: true ## use the public suffix
+      customTlds: localHostOrIpAddressRe
+    })
+
+      ## then just fall back to a dumb check
+      ## based on assumptions that the tld
+      ## is the last segment after the final
+      ## '.' and that the domain is the segment
+      ## before that
+      segments = hostname.split(".")
+
+      parsed = {
+        tld:    segments[segments.length - 1]
+        domain: segments[segments.length - 2]
+      }
+
+    return _.compact([parsed.domain, parsed.tld]).join(".")
 
   getToString: ->
     @remote.toString()
