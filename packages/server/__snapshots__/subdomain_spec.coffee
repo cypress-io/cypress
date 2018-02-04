@@ -13,16 +13,17 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     - sets a hostOnly cookie by default
     ✓ issue #361: incorrect cookie synchronization between cy.request redirects
     ✓ issue #362: incorrect cookie synchronization between cy.visit redirects
+    ✓ issue #600 can visit between nested subdomains
 
 
-  6 passing
+  7 passing
   2 pending
 
 
   (Tests Finished)
 
-  - Tests:           8
-  - Passes:          6
+  - Tests:           9
+  - Passes:          7
   - Failures:        0
   - Pending:         2
   - Duration:        10 seconds
@@ -40,3 +41,4 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
+

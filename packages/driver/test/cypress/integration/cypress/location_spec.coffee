@@ -14,6 +14,9 @@ urls = {
   stack:    "https://stackoverflow.com/"
   trailHash:"http://localhost:3500/index.html?foo=bar#"
   email:    "http://localhost:3500/?email=brian@cypress.io"
+  heroku:   "https://example.herokuapp.com"
+  herokuSub:"https://foo.example.herokuapp.com"
+  unknown:  "http://what.is.so.unknown"
 }
 
 describe "src/cypress/location", ->
@@ -140,6 +143,18 @@ describe "src/cypress/location", ->
     it "issue: #255 two domains in the url", ->
       str = @setup("email").getOriginPolicy()
       expect(str).to.eq("http://localhost:3500")
+
+    it "handles private tlds in the public suffix", ->
+      str = @setup("heroku").getOriginPolicy()
+      expect(str).to.eq("https://example.herokuapp.com")
+
+    it "handles subdomains of private tlds in the public suffix", ->
+      str = @setup("herokuSub").getOriginPolicy()
+      expect(str).to.eq("https://example.herokuapp.com")
+
+    it "falls back to dumb check when invalid tld", ->
+      str = @setup("unknown").getOriginPolicy()
+      expect(str).to.eq("http://so.unknown")
 
   context ".create", ->
     it "returns an object literal", ->
