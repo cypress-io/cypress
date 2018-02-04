@@ -162,3 +162,12 @@ cy.get('body').within(body => {
 cy.get('body').within({ log: false }, body => {
   body // $ExpectType JQuery<HTMLBodyElement>
 })
+
+cy
+  .get('body')
+  .then(() => {
+    return cy.wrap(undefined)
+  })
+  .then(subject => {
+    subject // $ExpectType undefined
+  })
