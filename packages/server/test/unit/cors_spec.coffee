@@ -15,6 +15,27 @@ describe "lib/util/cors", ->
         tld: "com"
       })
 
+    it "parses http://localhost:8080", ->
+      @isEq("http://localhost:8080", {
+        port: "8080"
+        domain: ""
+        tld: "localhost"
+      })
+
+    it "parses http://app.localhost:8080", ->
+      @isEq("http://app.localhost:8080", {
+        port: "8080"
+        domain: "app"
+        tld: "localhost"
+      })
+
+    it "parses http://app.local:8080", ->
+      @isEq("http://app.local:8080", {
+        port: "8080"
+        domain: "app"
+        tld: "local"
+      })
+
   context ".urlMatchesOriginPolicyProps", ->
     beforeEach ->
       @isFalse = (url, props) =>
@@ -54,6 +75,18 @@ describe "lib/util/cors", ->
 
       it "matches", ->
         @isTrue("http://localhost:4200", @props)
+
+    describe "app.localhost", ->
+      beforeEach ->
+        @props = cors.parseUrlIntoDomainTldPort("http://app.localhost:4200")
+
+      it "does not match", ->
+        @isFalse("http://app.localhost:4201", @props)
+        @isFalse("http://app.localhoss:4200", @props)
+
+      it "matches", ->
+        @isTrue("http://app.localhost:4200", @props)
+        @isTrue("http://name.app.localhost:4200", @props)
 
     describe "local", ->
       beforeEach ->
