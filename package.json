@@ -92,7 +92,7 @@
     "vuex": "3.0.1",
     "vue-router": "3.0.1",
     "vue-template-compiler": "2.5.13",
-    "cypress": "1.4.1"
+    "cypress": "1.4.2"
   },
   "standard": {
     "globals": [
