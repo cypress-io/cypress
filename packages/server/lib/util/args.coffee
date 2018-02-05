@@ -116,7 +116,6 @@ module.exports = {
         path.resolve(options.cwd, p)
 
       options.spec = parseArrayValues(spec).map(resolvePath)
-    if hosts = options.hosts
 
     if envs = options.env
       backup("env", options)
