@@ -48,7 +48,7 @@
 
 ## Install
 
-Requires [Node](https://nodejs.org/en/) version 6 or above.
+Requires [Node](https://nodejs.org/en/) version 6 or above and Cypress (peer dependency)
 
 ```sh
 npm install --save-dev cypress cypress-vue-unit-test
