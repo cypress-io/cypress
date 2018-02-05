@@ -135,6 +135,8 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
     })
   })
 
+  cy.get('something').should('have.length', 1)
+
 cy.stub().withArgs('').log(false).as('foo')
 
 cy.spy().withArgs('').log(false).as('foo')
@@ -152,3 +154,20 @@ cy.wrap('foo').then(subject => {
 }).then(subject => {
   subject // $ExpectType string
 })
+
+cy.get('body').within(body => {
+  body // $ExpectType JQuery<HTMLBodyElement>
+})
+
+cy.get('body').within({ log: false }, body => {
+  body // $ExpectType JQuery<HTMLBodyElement>
+})
+
+cy
+  .get('body')
+  .then(() => {
+    return cy.wrap(undefined)
+  })
+  .then(subject => {
+    subject // $ExpectType undefined
+  })

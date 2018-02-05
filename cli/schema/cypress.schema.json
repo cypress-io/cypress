@@ -95,7 +95,7 @@
       "description": "Path to folder where screenshots will be saved from cy.screenshot() command or after a headless or CI run’s test failure"
     },
     "supportFile": {
-      "type": ["script", "boolean"],
+      "type": ["string", "boolean"],
       "default": "cypress/support/index.js",
       "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)"
     },

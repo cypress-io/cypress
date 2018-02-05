@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
@@ -66,7 +66,7 @@
     "commit-message-install": "^1.10.0",
     "common-tags": "^1.4.0",
     "console.table": "^0.9.1",
-    "debug": "^2.6.8",
+    "debug": "3.1.0",
     "del": "^3.0.0",
     "deps-ok": "^1.2.0",
     "electron-osx-sign": "^0.4.6",
@@ -94,6 +94,7 @@
     "lodash": "^4.17.4",
     "make-empty-github-commit": "^1.2.0",
     "mocha": "^3.5.0",
+    "mocha-banner": "^1.1.1",
     "mocha-junit-reporter": "^1.13.0",
     "mocha-multi-reporters": "^1.1.5",
     "obfuscator": "^0.5.4",
@@ -106,6 +107,7 @@
     "shelljs": "^0.7.8",
     "snap-shot-it": "^4.0.1",
     "stop-only": "^1.1.0",
+    "terminal-banner": "^1.0.0",
     "typescript": "^2.3.4",
     "vagrant": "0.0.1",
     "vinyl-paths": "^2.1.0"

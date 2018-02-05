@@ -18,7 +18,7 @@ Read our documentation on dependencies for more information:
 
 https://on.cypress.io/required-dependencies
 
-If you using Docker, we provide containers with all required dependencies installed.
+If you are using Docker, we provide containers with all required dependencies installed.
 ----------
 
 Platform: test platform (test release)

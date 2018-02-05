@@ -21,6 +21,9 @@
   </a>
   <a href="https://gitter.im/cypress-io/cypress">
     <img src="https://img.shields.io/gitter/room/cypress-io/cypress.svg" alt="Gitter chat"/>
+  </a><br />
+  <a href="https://opencollective.com/cypressio">
+    <object type="image/svg+xml" data="https://opencollective.com/cypressio/tiers/corporate-backer.svg?avatarHeight=64&width=600" />
   </a>
 </p>
 

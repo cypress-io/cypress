@@ -47,20 +47,16 @@ declare namespace Cypress {
      * Lodash library
      *
      * @see https://on.cypress.io/_
-     * @example _
-     * ```ts
-     * Cypress._.keys(obj)
-     * ```
+     * @example
+     *    Cypress._.keys(obj)
      */
     _: _.LoDashStatic
     /**
      * jQuery library
      *
      * @see https://on.cypress.io/$
-     * @example $
-     * ```ts
-     * Cypress.$('p')
-     * ```
+     * @example
+     *    Cypress.$('p')
      */
     $: JQueryStatic
     /**
@@ -68,10 +64,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/blob
      * @see https://github.com/nolanlawson/blob-util
-     * @example Blob
-     * ```ts
-     * Cypress.Blob.method()
-     * ```
+     * @example
+     *    Cypress.Blob.method()
      */
     Blob: BlobUtil.BlobUtilStatic
     /**
@@ -85,10 +79,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/moment
      * @see http://momentjs.com/
-     * @example moment
-     * ```ts
-     * const todaysDate = Cypress.moment().format("MMM DD, YYYY")
-     * ```
+     * @example
+     *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
      */
     moment: (...args: any[]) => any // perhaps we want to add moment as a dependency for types?
     /**
@@ -96,10 +88,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/promise
      * @see https://github.com/petkaantonov/bluebird
-     * @example Promise
-     * ```ts
-     * new Cypress.Promise((resolve, reject) => { ... })
-     * ```
+     * @example
+     *   new Cypress.Promise((resolve, reject) => { ... })
      */
     Promise: Bluebird.BluebirdStatic
     /**
@@ -117,10 +107,8 @@ declare namespace Cypress {
      * OS platform name, from Node `os.platform()`
      *
      * @see https://nodejs.org/api/os.html#os_os_platform
-     * @example platform
-     * ```ts
-     * Cypress.platform // "darwin"
-     * ```
+     * @example
+     *    Cypress.platform // "darwin"
      */
     platform: string
 
@@ -128,10 +116,8 @@ declare namespace Cypress {
      * CPU architecture, from Node `os.arch()`
      *
      * @see https://nodejs.org/api/os.html#os_os_arch
-     * @example arch
-     * ```ts
-     * Cypress.arch // "x64"
-     * ```
+     * @example
+     *    Cypress.arch // "x64"
      */
     arch: string
 
@@ -186,6 +172,8 @@ declare namespace Cypress {
     Server: {
       defaults(options: Partial<ServerOptions>): void
     }
+
+    on: Actions
   }
 
   /**
@@ -386,12 +374,10 @@ declare namespace Cypress {
      * Get the window.document of the page that is currently active.
      *
      * @see https://on.cypress.io/document
-     * @example document
-     * ```ts
-     * cy.document()
-     *   .its('contentType')
-     *   .should('eq', 'text/html')
-     * ```
+     * @example
+     *    cy.document()
+     *      .its('contentType')
+     *      .should('eq', 'text/html')
      */
     document(options?: Partial<Loggable>): Chainable<Document>
 
@@ -617,6 +603,12 @@ declare namespace Cypress {
     not(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
 
     /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    on: Actions
+
+    /**
      * Get the parent DOM element of a set of DOM elements.
      *
      * @see https://on.cypress.io/parent
@@ -832,8 +824,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -935,7 +927,7 @@ declare namespace Cypress {
      * Get the window object of the page that is currently active.
      *
      * @see https://on.cypress.io/window
-     * @example window
+     * @example
      *    cy.visit('http://localhost:8080/app')
      *    cy.window().then(function(win){
      *      // win is the remote window
@@ -958,7 +950,7 @@ declare namespace Cypress {
      *
      */
     within(fn: (currentSubject: Subject) => void): Chainable<Subject>
-    within(options: Partial<Loggable>, fn: (currentSubject?: Subject) => void): Chainable<Subject> // inconsistent argument order
+    within(options: Partial<Loggable>, fn: (currentSubject: Subject) => void): Chainable<Subject> // inconsistent argument order
 
     /**
      * Yield the object passed into `.wrap()`.
@@ -1370,274 +1362,1708 @@ declare namespace Cypress {
    */
   interface Chainer<Subject> {
     // chai
-    (chainer: 'be.a', value: string): Chainable<Subject>
-    (chainer: 'be.a.string'): Chainable<Subject>
-    (chainer: 'be.above', value: number): Chainable<Subject>
-    (chainer: 'be.an', value: string): Chainable<Subject>
-    (chainer: 'be.at.least', value: number): Chainable<Subject>
-    (chainer: 'be.below', value: number): Chainable<Subject>
-    (chainer: 'be.active'): Chainable<Subject>
-    (chainer: 'be.arguments'): Chainable<Subject>
-    (chainer: 'be.approximately', value: number, delta: number): Chainable<Subject>
-    (chainer: 'be.closeTo', value: number, delta: number): Chainable<Subject>
-    (chainer: 'be.empty'): Chainable<Subject>
-    (chainer: 'be.instanceOf', value: any): Chainable<Subject>
-    (chainer: 'be.false'): Chainable<Subject>
-    (chainer: 'be.greaterThan', value: number): Chainable<Subject>
-    (chainer: 'be.gt', value: number): Chainable<Subject>
-    (chainer: 'be.gte', value: number): Chainable<Subject>
-    (chainer: 'be.lessThan', value: number): Chainable<Subject>
-    (chainer: 'be.lt', value: number): Chainable<Subject>
-    (chainer: 'be.lte', value: number): Chainable<Subject>
-    (chainer: 'be.ok'): Chainable<Subject>
-    (chainer: 'be.true'): Chainable<Subject>
-    (chainer: 'be.undefined'): Chainable<Subject>
-    (chainer: 'be.within', start: number, end: number): Chainable<Subject>
-    (chainer: 'change', value: object, property: string): Chainable<Subject>
     /**
-     * Check if current element contains given text
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Asserts that the target’s `type` is equal to the given string type.
+     * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
+     * https://github.com/chaijs/type-detect.
      * @example
-     *    cy.get('.greeting').should('contain', 'world')
+     *    cy.wrap('foo').should('be.a', 'string')
+     * @see http://chaijs.com/api/bdd/#method_a
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.a', type: string): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a date greater than the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.above', 5)
+     * @see http://chaijs.com/api/bdd/#method_above
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.above', value: number | Date): Chainable<Subject>
+    /**
+     * Asserts that the target’s `type` is equal to the given string type.
+     * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
+     * https://github.com/chaijs/type-detect.
+     * @example
+     *    cy.wrap({ foo: 'bar' }).should('be.an', 'object')
+     * @alias a
+     * @see http://chaijs.com/api/bdd/#method_a
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.an', value: string): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.at.least', 5)
+     * @see http://chaijs.com/api/bdd/#method_least
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.at.least', value: number | Date): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('be.below', 5)
+     * @see http://chaijs.com/api/bdd/#method_below
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.below', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is an `arguments` object.
+     * @example
+     *    cy.wrap(arguments).should('be.arguments')
+     * @see http://chaijs.com/api/bdd/#method_arguments
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.arguments'): Chainable<Subject>
+    /**
+     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(5.1).should('be.approximately', 5, 0.5)
+     * @alias closeTo
+     * @see http://chaijs.com/api/bdd/#method_closeto
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.approximately', value: number, delta: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(5.1).should('be.closeTo', 5, 0.5)
+     * @see http://chaijs.com/api/bdd/#method_closeto
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.closeTo', value: number, delta: number): Chainable<Subject>
+    /**
+     * When the target is a string or array, .empty asserts that the target’s length property is strictly (===) equal to 0
+     * @example
+     *    cy.wrap([]).should('be.empty')
+     *    cy.wrap('').should('be.empty')
+     * @see http://chaijs.com/api/bdd/#method_empty
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.empty'): Chainable<Subject>
+    /**
+     * Asserts that the target is an instance of the given `constructor`.
+     * @example
+     *    cy.wrap([1, 2]).should('be.instanceOf', Array)
+     * @see http://chaijs.com/api/bdd/#method_instanceof
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.instanceOf', value: any): Chainable<Subject>
+    /**
+     * Asserts that the target is strictly (`===`) equal to `false`.
+     * @example
+     *    cy.wrap(false).should('be.false')
+     * @see http://chaijs.com/api/bdd/#method_false
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.false'): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a date greater than the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.greaterThan', 5)
+     * @alias above
+     * @see http://chaijs.com/api/bdd/#method_above
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.greaterThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a date greater than the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.gt', 5)
+     * @alias above
+     * @see http://chaijs.com/api/bdd/#method_above
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.gt', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.gte', 5)
+     * @alias least
+     * @see http://chaijs.com/api/bdd/#method_least
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.gte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('be.lessThan', 5)
+     * @alias below
+     * @see http://chaijs.com/api/bdd/#method_below
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.lessThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('be.lt', 5)
+     * @alias below
+     * @see http://chaijs.com/api/bdd/#method_below
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.lt', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('be.lte', 5)
+     * @alias most
+     * @see http://chaijs.com/api/bdd/#method_most
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.lte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
+     * @example
+     *    cy.wrap(1).should('be.ok')
+     * @see http://chaijs.com/api/bdd/#method_ok
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.ok'): Chainable<Subject>
+    /**
+     * Asserts that the target is strictly (`===`) equal to true.
+     * @example
+     *    cy.wrap(true).should('be.true')
+     * @see http://chaijs.com/api/bdd/#method_true
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.true'): Chainable<Subject>
+    /**
+     * Asserts that the target is strictly (`===`) equal to undefined.
+     * @example
+     *    cy.wrap(undefined).should('be.undefined')
+     * @see http://chaijs.com/api/bdd/#method_undefined
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.undefined'): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.within', 5, 10)
+     * @see http://chaijs.com/api/bdd/#method_within
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.within', start: number, end: number): Chainable<Subject>
+    (chainer: 'be.within', start: Date, end: Date): Chainable<Subject>
+    /**
+     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
+     * However, it’s often best to assert that `subject` is equal to its expected value.
+     * @example
+     *    let dots = ''
+     *    function addDot() { dots += '.' }
+     *    function getDots() { return dots }
+     *    cy.wrap(addDot).should('change', getDots)
+     * @see http://chaijs.com/api/bdd/#method_change
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'change', fn: (...args: any[]) => any): Chainable<Subject>
+    /**
+     * When two arguments are provided, `.change` asserts that the value of the given object `subject`'s `prop` property is different before invoking the target function compared to afterward.
+     * @example
+     *    const myObj = { dots: '' }
+     *    function addDot() { myObj.dots += '.' }
+     *    cy.wrap(addDot).should('change', myObj, 'dots')
+     * @see http://chaijs.com/api/bdd/#method_change
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'change', obj: object, prop: string): Chainable<Subject>
+    /**
+     * When the target is a string, `.include` asserts that the given string val is a substring of the target.
+     * @example
+     *    cy.wrap('tester').should('contain', 'test')
+     * @alias include
+     * @see http://chaijs.com/api/bdd/#method_include
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'contain', value: any): Chainable<Subject>
-    (chainer: 'decrease', value: object, property: string): Chainable<Subject>
+    /**
+     * When one argument is provided, `.decrease` asserts that the given function `subject` returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * @example
+     *    let val = 1
+     *    function subtractTwo() { val -= 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(subtractTwo).should('decrease', getVal)
+     * @see http://chaijs.com/api/bdd/#method_decrease
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'decrease', fn: (...args: any[]) => any): Chainable<Subject>
+    /**
+     * When two arguments are provided, `.decrease` asserts that the value of the given object `subject`'s `prop` property is lesser after invoking the target function compared to beforehand.
+     * @example
+     *    let val = 1
+     *    function subtractTwo() { val -= 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(subtractTwo).should('decrease', getVal)
+     * @see http://chaijs.com/api/bdd/#method_decrease
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'decrease', obj: object, prop: string): Chainable<Subject>
+    /**
+     * Causes all `.equal`, `.include`, `.members`, `.keys`, and `.property` assertions that follow in the chain to use deep equality instead of strict (`===`) equality. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
+     * @example
+     *    cy.wrap({ a: 1 }).should('deep.equal', { a: 1 })
+     * @see http://chaijs.com/api/bdd/#method_deep
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'deep.equal', value: Subject): Chainable<Subject>
     /**
-     * Check if current element exists in the DOM
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     *    // retry until navigation is added to the DOM
-     *    cy.get('nav').should('exist')
+     *    cy.wrap(1).should('exist')
+     * @see http://chaijs.com/api/bdd/#method_exist
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'exist'): Chainable<Subject>
-    (chainer: 'eq', value: any): Chainable<Subject>
-    (chainer: 'eql', value: any): Chainable<Subject>
-    (chainer: 'equal', value: any): Chainable<Subject>
-    (chainer: 'have.any.keys', ...value: any[]): Chainable<Subject>
-    (chainer: 'have.deep.property', value: string, match?: any): Chainable<Subject>
     /**
-     * Check if current subject has expected length
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Asserts that the target is strictly (`===`) equal to the given `val`.
      * @example
-     *    // retry until we find 3 matching <li.selected>
-     *    cy.get('li.selected').should('have.length', 3)
+     *    cy.wrap(1).should('eq', 1)
+     * @alias equal
+     * @see http://chaijs.com/api/bdd/#method_equal
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'eq', value: any): Chainable<Subject>
+    /**
+     * Asserts that the target is deeply equal to the given `obj`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
+     * @example
+     *    cy.wrap({a: 1}).should('eql', {a: 1}).and('not.equal', {a: 1})
+     * @see http://chaijs.com/api/bdd/#method_eql
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'eql', value: any): Chainable<Subject>
+    /**
+     * Asserts that the target is strictly (`===`) equal to the given `val`.
+     * @example
+     *    cy.wrap(1).should('equal', 1)
+     * @see http://chaijs.com/api/bdd/#method_equal
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'equal', value: any): Chainable<Subject>
+    /**
+     * Causes all `.keys` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('have.all.keys', 'a', 'b')
+     * @see http://chaijs.com/api/bdd/#method_all
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.all.keys', ...value: string[]): Chainable<Subject>
+    /**
+     * Causes all `.keys` assertions that follow in the chain to only require that the target have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('have.any.keys', 'a')
+     * @see http://chaijs.com/api/bdd/#method_any
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.any.keys', ...value: string[]): Chainable<Subject>
+    /**
+     * Asserts that the target has a property with the given key `name`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
+     * @example
+     *    cy.wrap({ x: {a: 1 }}).should('have.deep.property', 'x', { a: 1 })
+     * @see http://chaijs.com/api/bdd/#method_property
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.deep.property', value: string, obj: object): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is equal to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length', 3)
+     *    cy.wrap('foo').should('have.length', 3)
+     * @alias lengthOf
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'have.length', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is greater than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.greaterThan', 2)
+     *    cy.wrap('foo').should('have.length.greaterThan', 2)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.length.greaterThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is greater than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.gt', 2)
+     *    cy.wrap('foo').should('have.length.gt', 2)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.length.gt', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is greater than or equal to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.gte', 2)
+     *    cy.wrap('foo').should('have.length.gte', 2)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.length.gte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is less than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.lessThan', 4)
+     *    cy.wrap('foo').should('have.length.lessThan', 4)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.length.lessThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is less than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.lt', 4)
+     *    cy.wrap('foo').should('have.length.lt', 4)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.length.lt', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is less than or equal to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.lte', 4)
+     *    cy.wrap('foo').should('have.length.lte', 4)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.length.lte', value: number): Chainable<Subject>
-    (chainer: 'have.members', value: any[]): Chainable<Subject>
-    (chainer: 'have.ownProperty', value: string): Chainable<Subject>
-    (chainer: 'have.property', value: string, match?: any): Chainable<Subject>
-    (chainer: 'have.string', value: string): Chainable<Subject>
-    (chainer: 'have.key', value: string): Chainable<Subject>
-    (chainer: 'have.keys', ...value: any[]): Chainable<Subject>
+    /**
+     * Asserts that the target array has the same members as the given array `set`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.members', [2, 1, 3])
+     * @see http://chaijs.com/api/bdd/#method_members
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.members', values: any[]): Chainable<Subject>
+    /**
+     * Asserts that the target array has the same members as the given array where order matters.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.ordered.members', [1, 2, 3])
+     * @see http://chaijs.com/api/bdd/#method_members
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.ordered.members', values: any[]): Chainable<Subject>
+    /**
+     * Causes all `.property` and `.include` assertions that follow in the chain to ignore inherited properties.
+     * @example
+     *    Object.prototype.b = 2
+     *    cy.wrap({ a: 1 }).should('have.property', 'a').and('not.have.ownProperty', 'b')
+     * @see http://chaijs.com/api/bdd/#method_ownproperty
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.ownProperty', property: string): Chainable<Subject>
+    /**
+     * Asserts that the target has a property with the given key `name`.
+     * @example
+     *    cy.wrap({ a: 1 }).should('have.property', 'a')
+     *    cy.wrap({ a: 1 }).should('have.property', 'a', 1)
+     * @see http://chaijs.com/api/bdd/#method_property
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.property', property: string, value?: any): Chainable<Subject>
+    /**
+     * Asserts that the target string contains the given substring `str`.
+     * @example
+     *    cy.wrap('foobar').should('have.string', 'bar')
+     * @see http://chaijs.com/api/bdd/#method_string
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.string', match: string | RegExp): Chainable<Subject>
+    /**
+     * When the target is a string, `.include` asserts that the given string `val` is a substring of the target.
+     * @example
+     *    cy.wrap('foobar').should('include', 'foo')
+     * @see http://chaijs.com/api/bdd/#method_include
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'include', value: any): Chainable<Subject>
+    /**
+     * When the target is a string, `.include` asserts that the given string `val` is a substring of the target.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('include.members', [1, 2])
+     * @see http://chaijs.com/api/bdd/#method_members
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'include.members', value: any[]): Chainable<Subject>
+    /**
+     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
+     * invoked after invoking the target function compared to when it’s invoked beforehand.
+     * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
+     * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * @example
+     *    let val = 1
+     *    function addTwo() { val += 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(addTwo).should('increase', getVal)
+     * @see http://chaijs.com/api/bdd/#method_increase
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'increase', value: object, property: string): Chainable<Subject>
+    /**
+     * Asserts that the target matches the given regular expression `re`.
+     * @example
+     *    cy.wrap('foobar').should('match', /^foo/)
+     * @see http://chaijs.com/api/bdd/#method_match
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'match', value: string | RegExp): Chainable<Subject>
+    /**
+     * When the target is a non-function object, `.respondTo` asserts that the target has a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
+     * @example
+     *    class Cat {
+     *      meow() {}
+     *    }
+     *    cy.wrap(new Cat()).should('respondTo', 'meow')
+     * @see http://chaijs.com/api/bdd/#method_respondto
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'respondTo', value: string): Chainable<Subject>
+    /**
+     * Invokes the given `matcher` function with the target being passed as the first argument, and asserts that the value returned is truthy.
+     * @example
+     *    cy.wrap(1).should('satisfy', (num) => num > 0)
+     * @see http://chaijs.com/api/bdd/#method_satisfy
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'satisfy', fn: (val: any) => boolean): Chainable<Subject>
-    (chainer: 'throw', value: string | RegExp): Chainable<Subject>
+    /**
+     * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
+     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
+     * @example
+     *    function badFn() { throw new TypeError('Illegal salmon!') }
+     *    cy.wrap(badFn).should('throw')
+     *    cy.wrap(badFn).should('throw', 'salmon')
+     *    cy.wrap(badFn).should('throw', /salmon/)
+     * @see http://chaijs.com/api/bdd/#method_throw
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'throw', value?: string | RegExp): Chainable<Subject>
+    /**
+     * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
+     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
+     * @example
+     *    function badFn() { throw new TypeError('Illegal salmon!') }
+     *    cy.wrap(badFn).should('throw')
+     *    cy.wrap(badFn).should('throw', 'salmon')
+     *    cy.wrap(badFn).should('throw', /salmon/)
+     * @see http://chaijs.com/api/bdd/#method_throw
+     * @see https://on.cypress.io/assertions
+     */
     // tslint:disable-next-line ban-types
     (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
 
     // chai.not
-    (chainer: 'not.be.a', value: string): Chainable<Subject>
-    (chainer: 'not.be.a.string'): Chainable<Subject>
-    (chainer: 'not.be.above', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `type` is not equal to the given string type.
+     * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
+     * https://github.com/chaijs/type-detect.
+     * @example
+     *    cy.wrap('foo').should('not.be.a', 'number')
+     * @see http://chaijs.com/api/bdd/#method_a
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.a', type: string): Chainable<Subject>
+    /**
+     * Asserts that the target is a not number or not a date greater than the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('not.be.above', 10)
+     * @see http://chaijs.com/api/bdd/#method_above
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.above', value: number | Date): Chainable<Subject>
+    /**
+     * Asserts that the target’s `type` is not equal to the given string type.
+     * Types are case insensitive. See the `type-detect` project page for info on the type detection algorithm:
+     * https://github.com/chaijs/type-detect.
+     * @example
+     *    cy.wrap('foo').should('not.be.an', 'object')
+     * @alias a
+     * @see http://chaijs.com/api/bdd/#method_a
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.an', value: string): Chainable<Subject>
-    (chainer: 'not.be.at.least', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number or not a `n` date greater than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('not.be.at.least', 10)
+     * @see http://chaijs.com/api/bdd/#method_least
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.at.least', value: number | Date): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number or not a `n` date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('not.be.below', 1)
+     * @see http://chaijs.com/api/bdd/#method_below
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.below', value: number): Chainable<Subject>
-    (chainer: 'not.be.active'): Chainable<Subject>
+    /**
+     * Asserts that the target is not an `arguments` object.
+     * @example
+     *    cy.wrap(1).should('not.be.arguments')
+     * @see http://chaijs.com/api/bdd/#method_arguments
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.arguments'): Chainable<Subject>
+    /**
+     * Asserts that the target is a not number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(5.1).should('not.be.approximately', 6, 0.5)
+     * @alias closeTo
+     * @see http://chaijs.com/api/bdd/#method_closeto
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.approximately', value: number, delta: number): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(5.1).should('not.be.closeTo', 6, 0.5)
+     * @see http://chaijs.com/api/bdd/#method_closeto
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.closeTo', value: number, delta: number): Chainable<Subject>
+    /**
+     * When the target is a not string or array, .empty asserts that the target’s length property is strictly (===) equal to 0
+     * @example
+     *    cy.wrap([1]).should('not.be.empty')
+     *    cy.wrap('foo').should('not.be.empty')
+     * @see http://chaijs.com/api/bdd/#method_empty
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.empty'): Chainable<Subject>
+    /**
+     * Asserts that the target is not an instance of the given `constructor`.
+     * @example
+     *    cy.wrap([1, 2]).should('not.be.instanceOf', String)
+     * @see http://chaijs.com/api/bdd/#method_instanceof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.instanceOf', value: any): Chainable<Subject>
+    /**
+     * Asserts that the target is not strictly (`===`) equal to `false`.
+     * @example
+     *    cy.wrap(true).should('not.be.false')
+     * @see http://chaijs.com/api/bdd/#method_false
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.false'): Chainable<Subject>
+    /**
+     * Asserts that the target is a not number or a date greater than the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.greaterThan', 7)
+     * @alias above
+     * @see http://chaijs.com/api/bdd/#method_above
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.greaterThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a not number or a date greater than the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('not.be.gt', 7)
+     * @alias above
+     * @see http://chaijs.com/api/bdd/#method_above
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.gt', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a not number or a `n` date greater than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('not.be.gte', 7)
+     * @alias least
+     * @see http://chaijs.com/api/bdd/#method_least
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.gte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('not.be.lessThan', 3)
+     * @alias below
+     * @see http://chaijs.com/api/bdd/#method_below
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.lessThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('not.be.lt', 3)
+     * @alias below
+     * @see http://chaijs.com/api/bdd/#method_below
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.lt', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number or a date less than or equal to the given number or date n respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('not.be.lte', 3)
+     * @alias most
+     * @see http://chaijs.com/api/bdd/#method_most
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.lte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is not loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
+     * @example
+     *    cy.wrap(0).should('not.be.ok')
+     * @see http://chaijs.com/api/bdd/#method_ok
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.ok'): Chainable<Subject>
+    /**
+     * Asserts that the target is not strictly (`===`) equal to true.
+     * @example
+     *    cy.wrap(false).should('not.be.true')
+     * @see http://chaijs.com/api/bdd/#method_true
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.true'): Chainable<Subject>
+    /**
+     * Asserts that the target is not strictly (`===`) equal to undefined.
+     * @example
+     *    cy.wrap(true).should('not.be.undefined')
+     * @see http://chaijs.com/api/bdd/#method_undefined
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.undefined'): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
+     * However, it’s often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(3).should('not.be.within', 5, 10)
+     * @see http://chaijs.com/api/bdd/#method_within
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.within', start: number, end: number): Chainable<Subject>
-    (chainer: 'not.change', value: object, property: string): Chainable<Subject>
+    (chainer: 'not.be.within', start: Date, end: Date): Chainable<Subject>
+    /**
+     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
+     * However, it’s often best to assert that `subject` is equal to its expected value.
+     * @example
+     *    let dots = ''
+     *    function addDot() { dots += '.' }
+     *    function getDots() { return dots }
+     *    cy.wrap(() => {}).should('not.change', getDots)
+     * @see http://chaijs.com/api/bdd/#method_change
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.change', fn: (...args: any[]) => any): Chainable<Subject>
+    /**
+     * When two arguments are provided, `.change` asserts that the value of the given object `subject`'s `prop` property is different before invoking the target function compared to afterward.
+     * @example
+     *    const myObj = { dots: '' }
+     *    function addDot() { myObj.dots += '.' }
+     *    cy.wrap(() => {}).should('not.change', myObj, 'dots')
+     * @see http://chaijs.com/api/bdd/#method_change
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.change', obj: object, prop: string): Chainable<Subject>
+    /**
+     * When the target is a string, `.include` asserts that the given string val is a substring of the target.
+     * @example
+     *    cy.wrap('tester').should('not.contain', 'foo')
+     * @alias include
+     * @see http://chaijs.com/api/bdd/#method_include
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.contain', value: any): Chainable<Subject>
-    (chainer: 'not.decrease', value: object, property: string): Chainable<Subject>
+    /**
+     * When one argument is provided, `.decrease` asserts that the given function `subject` does not returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * @example
+     *    let val = 1
+     *    function subtractTwo() { val -= 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(() => {}).should('not.decrease', getVal)
+     * @see http://chaijs.com/api/bdd/#method_decrease
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.decrease', fn: (...args: any[]) => any): Chainable<Subject>
+    /**
+     * When two arguments are provided, `.decrease` asserts that the value of the given object `subject`'s `prop` property is not lesser after invoking the target function compared to beforehand.
+     * @example
+     *    const myObj = { val: 1 }
+     *    function subtractTwo() { myObj.val -= 2 }
+     *    cy.wrap(() => {}).should('not.decrease', myObj, 'val')
+     * @see http://chaijs.com/api/bdd/#method_decrease
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.decrease', obj: object, prop: string): Chainable<Subject>
+    /**
+     * Causes all `.equal`, `.include`, `.members`, `.keys`, and `.property` assertions that follow in the chain to not use deep equality instead of strict (`===`) equality. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
+     * @example
+     *    cy.wrap({ a: 1 }).should('not.deep.equal', { b: 1 })
+     * @see http://chaijs.com/api/bdd/#method_deep
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.deep.equal', value: Subject): Chainable<Subject>
     /**
-     * Check if current element does not exists in the DOM
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
-     *    // retry until loading spinner no longer exists
-     *    cy.get('#loading').should('not.exist')
+     *    cy.wrap(null).should('not.exist')
+     * @see http://chaijs.com/api/bdd/#method_exist
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.exist'): Chainable<Subject>
+    /**
+     * Asserts that the target is not strictly (`===`) equal to the given `val`.
+     * @example
+     *    cy.wrap(1).should('not.eq', 2)
+     * @alias equal
+     * @see http://chaijs.com/api/bdd/#method_equal
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.eq', value: any): Chainable<Subject>
+    /**
+     * Asserts that the target is not deeply equal to the given `obj`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
+     * @example
+     *    cy.wrap({a: 1}).should('not.eql', {c: 1}).and('not.equal', {a: 1})
+     * @see http://chaijs.com/api/bdd/#method_eql
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.eql', value: any): Chainable<Subject>
+    /**
+     * Asserts that the target is not strictly (`===`) equal to the given `val`.
+     * @example
+     *    cy.wrap(1).should('not.equal', 2)
+     * @see http://chaijs.com/api/bdd/#method_equal
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.equal', value: any): Chainable<Subject>
-    (chainer: 'not.have.any.keys', ...value: any[]): Chainable<Subject>
-    (chainer: 'not.have.deep.property', value: string, match?: any): Chainable<Subject>
+    /**
+     * Causes all `.keys` assertions that follow in the chain to not require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('not.have.all.keys', 'c', 'd')
+     * @see http://chaijs.com/api/bdd/#method_all
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.all.keys', ...value: string[]): Chainable<Subject>
+    /**
+     * Causes all `.keys` assertions that follow in the chain to only require that the target not have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('not.have.any.keys', 'c')
+     * @see http://chaijs.com/api/bdd/#method_any
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.any.keys', ...value: string[]): Chainable<Subject>
+    /**
+     * Asserts that the target does not have a property with the given key `name`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
+     * @example
+     *    cy.wrap({ x: {a: 1 }}).should('not.have.deep.property', 'y', { a: 1 })
+     * @see http://chaijs.com/api/bdd/#method_property
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.deep.property', value: string, obj: object): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is not equal to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.length', 2)
+     * cy.wrap('foo').should('not.have.length', 2)
+     * @alias lengthOf
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.length', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is not greater than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.length.greaterThan', 4)
+     *    cy.wrap('foo').should('not.have.length.greaterThan', 4)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.length.greaterThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is not greater than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.length.gt', 4)
+     *    cy.wrap('foo').should('not.have.length.gt', 4)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.length.gt', value: number): Chainable<Subject>
-    (chainer: 'not.have.length.gte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is not greater than or equal to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.length.gte', 4)
+     *    cy.wrap('foo').should('not.have.length.gte', 4)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.length.gte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is less than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.lessThan', 2)
+     *    cy.wrap('foo').should('have.length.lessThan', 2)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.length.lessThan', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is not less than to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.length.lt', 2)
+     *    cy.wrap('foo').should('not.have.length.lt', 2)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.length.lt', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is not less than or equal to the given number `n`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.length.let', 2)
+     *    cy.wrap('foo').should('not.have.length.lte', 2)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.length.lte', value: number): Chainable<Subject>
-    (chainer: 'not.have.members', value: any[]): Chainable<Subject>
-    (chainer: 'not.have.ownProperty', value: string): Chainable<Subject>
-    (chainer: 'not.have.property', value: string, match?: any): Chainable<Subject>
-    (chainer: 'not.have.string', value: string): Chainable<Subject>
-    (chainer: 'not.have.key', value: string): Chainable<Subject>
-    (chainer: 'not.have.keys', ...value: any[]): Chainable<Subject>
+    /**
+     * Asserts that the target array does not have the same members as the given array `set`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.members', [4, 5, 6])
+     * @see http://chaijs.com/api/bdd/#method_members
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.members', values: any[]): Chainable<Subject>
+    /**
+     * Asserts that the target array does not have the same members as the given array where order matters.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not. have.ordered.members', [4, 5, 6])
+     * @see http://chaijs.com/api/bdd/#method_members
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.ordered.members', values: any[]): Chainable<Subject>
+    /**
+     * Causes all `.property` and `.include` assertions that follow in the chain to ignore inherited properties.
+     * @example
+     *    Object.prototype.b = 2
+     *    cy.wrap({ a: 1 }).should('have.property', 'a').and('not.have.ownProperty', 'b')
+     * @see http://chaijs.com/api/bdd/#method_ownproperty
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.ownProperty', property: string): Chainable<Subject>
+    /**
+     * Asserts that the target has a property with the given key `name`.
+     * @example
+     *    cy.wrap({ a: 1 }).should('not.have.property', 'b')
+     *    cy.wrap({ a: 1 }).should('not.have.property', 'b', 1)
+     * @see http://chaijs.com/api/bdd/#method_property
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.property', property: string, value?: any): Chainable<Subject>
+    /**
+     * Asserts that the target string does not contains the given substring `str`.
+     * @example
+     *    cy.wrap('foobar').should('not.have.string', 'baz')
+     * @see http://chaijs.com/api/bdd/#method_string
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.string', match: string | RegExp): Chainable<Subject>
+    /**
+     * When the target is a string, `.include` asserts that the given string `val` is not a substring of the target.
+     * @example
+     *    cy.wrap('foobar').should('not.include', 'baz')
+     * @see http://chaijs.com/api/bdd/#method_include
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.include', value: any): Chainable<Subject>
+    /**
+     * When the target is a string, `.include` asserts that the given string `val` is not a substring of the target.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.include.members', [4, 5])
+     * @see http://chaijs.com/api/bdd/#method_members
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.include.members', value: any[]): Chainable<Subject>
+    /**
+     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
+     * invoked after invoking the target function compared to when it’s invoked beforehand.
+     * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
+     * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * @example
+     *    let val = 1
+     *    function addTwo() { val += 2 }
+     *    function getVal() { return val }
+     *    cy.wrap(() => {}).should('not.increase', getVal)
+     * @see http://chaijs.com/api/bdd/#method_increase
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.increase', value: object, property: string): Chainable<Subject>
+    /**
+     * Asserts that the target does not match the given regular expression `re`.
+     * @example
+     *    cy.wrap('foobar').should('not.match', /baz$/)
+     * @see http://chaijs.com/api/bdd/#method_match
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.match', value: string | RegExp): Chainable<Subject>
+    /**
+     * When the target is a non-function object, `.respondTo` asserts that the target does not have a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
+     * @example
+     *    class Cat {
+     *      meow() {}
+     *    }
+     *    cy.wrap(new Cat()).should('not.respondTo', 'bark')
+     * @see http://chaijs.com/api/bdd/#method_respondto
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.respondTo', value: string): Chainable<Subject>
+    /**
+     * Invokes the given `matcher` function with the target being passed as the first argument, and asserts that the value returned is falsy.
+     * @example
+     *    cy.wrap(1).should('not.satisfy', (num) => num < 0)
+     * @see http://chaijs.com/api/bdd/#method_satisfy
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.satisfy', fn: (val: any) => boolean): Chainable<Subject>
-    (chainer: 'not.throw', value: string | RegExp): Chainable<Subject>
+    /**
+     * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
+     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
+     * @example
+     *    function badFn() { console.log('Illegal salmon!') }
+     *    cy.wrap(badFn).should('not.throw')
+     *    cy.wrap(badFn).should('not.throw', 'salmon')
+     *    cy.wrap(badFn).should('not.throw', /salmon/)
+     * @see http://chaijs.com/api/bdd/#method_throw
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'throw', value?: string | RegExp): Chainable<Subject>
+    /**
+     * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
+     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
+     * @example
+     *    function badFn() { console.log('Illegal salmon!') }
+     *    cy.wrap(badFn).should('not.throw')
+     *    cy.wrap(badFn).should('not.throw', 'salmon')
+     *    cy.wrap(badFn).should('not.throw', /salmon/)
+     * @see http://chaijs.com/api/bdd/#method_throw
+     * @see https://on.cypress.io/assertions
+     */
     // tslint:disable-next-line ban-types
-    (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
 
     // sinon-chai
+    /**
+     * Assert spy/stub was called the `new` operator.
+     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.always.calledWithNew'): Chainable<Subject>
+    /**
+     * Assert if spy was always called with matching arguments (and possibly others).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwithmatcharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.always.calledWithMatch', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy always returned the provided value.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysreturnedobj
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'always.returned', value: any): Chainable<Subject>
+    /**
+     * `true` if the spy was called at least once
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalled
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.called'): Chainable<Subject>
+    /**
+     * Assert spy was called after `anotherSpy`
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledafteranotherspy
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert spy was called before `anotherSpy`
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledbeforeanotherspy
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert spy was called at least once with `obj` as `this`. `calledOn` also accepts a matcher (see [matchers](http://sinonjs.org/releases/v4.1.3/spies/#matchers)).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonobj
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledOn', context: any): Chainable<Subject>
+    /**
+     * Assert spy was called exactly once
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonce
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledOnce'): Chainable<Subject>
+    /**
+     * Assert spy was called exactly three times
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledthrice
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledThrice'): Chainable<Subject>
+    /**
+     * Assert spy was called exactly twice
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledtwice
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledTwice'): Chainable<Subject>
+    /**
+     * Assert spy was called at least once with the provided arguments and no others.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithexactlyarg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledWithExactly', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was called with matching arguments (and possibly others).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithmatcharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledWithMatch', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy/stub was called the `new` operator.
+     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.calledWithNew'): Chainable<Subject>
+    /**
+     * Assert spy always threw an exception.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysthrew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.always.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    /**
+     * Assert the number of calls.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycallcount
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.callCount', value: number): Chainable<Subject>
+    /**
+     * Assert spy threw an exception at least once.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spythrew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    /**
+     * Assert spy returned the provided value at least once. (see [matchers](http://sinonjs.org/releases/v4.1.3/spies/#matchers))
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyreturnedobj
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'returned', value: any): Chainable<Subject>
 
     // sinon-chai.not
+    /**
+     * Assert spy/stub was not called the `new` operator.
+     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.always.calledWithNew'): Chainable<Subject>
+    /**
+     * Assert if spy was not always called with matching arguments (and possibly others).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwithmatcharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.always.calledWithMatch', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy not always returned the provided value.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysreturnedobj
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.always.returned', value: any): Chainable<Subject>
+    /**
+     * `true` if the spy was not called at least once
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalled
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.called'): Chainable<Subject>
+    /**
+     * Assert spy was not.called after `anotherSpy`
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledafteranotherspy
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert spy was not called before `anotherSpy`
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledbeforeanotherspy
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert spy was not called at least once with `obj` as `this`. `calledOn` also accepts a matcher (see [matchers](http://sinonjs.org/releases/v4.1.3/spies/#matchers)).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonobj
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledOn', context: any): Chainable<Subject>
+    /**
+     * Assert spy was not called exactly once
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonce
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledOnce'): Chainable<Subject>
+    /**
+     * Assert spy was not called exactly three times
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledthrice
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledThrice'): Chainable<Subject>
+    /**
+     * Assert spy was not called exactly twice
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledtwice
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledTwice'): Chainable<Subject>
+    /**
+     * Assert spy was not called at least once with the provided arguments and no others.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithexactlyarg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledWithExactly', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was not called with matching arguments (and possibly others).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithmatcharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledWithMatch', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy/stub was not called the `new` operator.
+     * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.calledWithNew'): Chainable<Subject>
+    /**
+     * Assert spy did not always throw an exception.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysthrew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.always.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    /**
+     * Assert not the number of calls.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycallcount
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.callCount', value: number): Chainable<Subject>
+    /**
+     * Assert spy did not throw an exception at least once.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spythrew
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.thrown', value?: Error | typeof Error | string): Chainable<Subject>
+    /**
+     * Assert spy did not return the provided value at least once. (see [matchers](http://sinonjs.org/releases/v4.1.3/spies/#matchers))
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyreturnedobj
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.returned', value: any): Chainable<Subject>
 
     // jquery-chai
     /**
-     * Check if state of an element
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Assert that at least one element of the selection is checked, using `.is(':checked')`.
      * @example
-     *    // retry until our radio is checked
-     *    cy.get(':radio').should('be.checked')
+     *    cy.get('#result').should('be.checked')
+     * @see http://chaijs.com/plugins/chai-jquery/#checked
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'be.checked'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is disabled, using `.is(':disabled')`.
+     * @example
+     *    cy.get('#result').should('be.disabled')
+     * @see http://chaijs.com/plugins/chai-jquery/#disabled
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.disabled'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is empty, using `.is(':empty')`. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * @example
+     *    cy.get('#result').should('be.empty')
+     * @see http://chaijs.com/plugins/chai-jquery/#empty
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.empty'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is enabled, using `.is(':enabled')`.
+     * @example
+     *    cy.get('#result').should('be.enabled')
+     * @see http://chaijs.com/plugins/chai-jquery/#enabled
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.enabled'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is hidden, using `.is(':hidden')`.
+     * @example
+     *    cy.get('#result').should('be.hidden')
+     * @see http://chaijs.com/plugins/chai-jquery/#hidden
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.hidden'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is selected, using `.is(':selected')`.
+     * @example
+     *    cy.get('#result').should('be.selected')
+     * @see http://chaijs.com/plugins/chai-jquery/#selected
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'be.selected'): Chainable<Subject>
     /**
-     * Check if current subject is visible
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Assert that at least one element of the selection is visible, using `.is(':visible')`.
      * @example
      *    cy.get('#result').should('be.visible')
+     * @see http://chaijs.com/plugins/chai-jquery/#visible
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'be.visible'): Chainable<Subject>
+    /**
+     * Assert that the selection contains the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
+     * @example
+     *    cy.get('#result').should('contain', 'text')
+     * @see http://chaijs.com/plugins/chai-jquery/#containtext
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'contain', value: string): Chainable<Subject>
+    /**
+     * Assert that the selection is not empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * @example
+     *    cy.get('#result').should('exist')
+     * @see http://chaijs.com/plugins/chai-jquery/#exist
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'exist'): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection has the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('have.attr', 'role')
+     *    cy.get('#result').should('have.attr', 'role', 'menu')
+     * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.attr', value: string, match?: string): Chainable<Subject>
     /**
-     * Check if current subject has a class
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Assert that the first element of the selection has the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
      *    cy.get('#result').should('have.class', 'success')
+     * @see http://chaijs.com/plugins/chai-jquery/#classclassname
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'have.class', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection has the given CSS property, using `.css()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('have.css', 'display', 'none')
+     * @see http://chaijs.com/plugins/chai-jquery/#cssname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.css', value: string, match?: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection has the given data value, using `.data()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('have.data', 'foo', 'bar')
+     * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.data', value: string, match?: string): Chainable<Subject>
-    (chainer: 'have.decendants', selector: string): Chainable<Subject>
+    /**
+     * Assert that the selection contains at least one element which has a descendant matching the given selector, using `.has()`.
+     * @example
+     *    cy.get('#result').should('have.descendants', 'h1')
+     * @see http://chaijs.com/plugins/chai-jquery/#descendantsselector
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.descendants', selector: string): Chainable<Subject>
+    /**
+     * Assert that the html of the first element of the selection is equal to the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('have.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.html', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection has the given id, using `.attr('id')`.
+     * @example
+     *    cy.get('#result').should('have.id', 'result')
+     * @see http://chaijs.com/plugins/chai-jquery/#idid
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.id', value: string, match?: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection has the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('have.prop', 'disabled')
+     *    cy.get('#result').should('have.prop', 'disabled', false)
+     * @see http://chaijs.com/plugins/chai-jquery/#propname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.prop', value: string, match?: any): Chainable<Subject>
+    /**
+     * Assert that the text of the first element of the selection is equal to the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('have.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'have.text', value: string): Chainable<Subject>
     /**
-     * Check if current subject element has expected value
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Assert that the first element of the selection has the given value, using `.val()`.
      * @example
-     *    // retry until this textarea has the correct value
      *    cy.get('textarea').should('have.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'have.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the selection matches a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * @example
+     *    cy.get('#result').should('match', ':empty')
+     * @see http://chaijs.com/plugins/chai-jquery/#matchselector
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'match', value: string): Chainable<Subject>
 
     // jquery-chai.not
+    /**
+     * Assert that at least one element of the selection is not checked, using `.is(':checked')`.
+     * @example
+     *    cy.get('#result').should('not.be.checked')
+     * @see http://chaijs.com/plugins/chai-jquery/#checked
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.checked'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not disabled, using `.is(':disabled')`.
+     * @example
+     *    cy.get('#result').should('not.be.disabled')
+     * @see http://chaijs.com/plugins/chai-jquery/#disabled
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.disabled'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not empty, using `.is(':empty')`. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * @example
+     *    cy.get('#result').should('not.be.empty')
+     * @see http://chaijs.com/plugins/chai-jquery/#empty
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.empty'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not enabled, using `.is(':enabled')`.
+     * @example
+     *    cy.get('#result').should('not.be.enabled')
+     * @see http://chaijs.com/plugins/chai-jquery/#enabled
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.enabled'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not hidden, using `.is(':hidden')`.
+     * @example
+     *    cy.get('#result').should('not.be.hidden')
+     * @see http://chaijs.com/plugins/chai-jquery/#hidden
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.hidden'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not selected, using `.is(':selected')`.
+     * @example
+     *    cy.get('#result').should('not.be.selected')
+     * @see http://chaijs.com/plugins/chai-jquery/#selected
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.selected'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not visible, using `.is(':visible')`.
+     * @example
+     *    cy.get('#result').should('not.be.visible')
+     * @see http://chaijs.com/plugins/chai-jquery/#visible
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.be.visible'): Chainable<Subject>
     /**
-     * Check if current element does not have text value
-     * @see https://on.cypress.io/should
-     * @see https://on.cypress.io/assertions
+     * Assert that the selection does not contain the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
      * @example
-     *    // retry until this span does not contain 'click me'
-     *    cy.get('a').parent('span.help').should('not.contain', 'click me')
+     *    cy.get('#result').should('not.contain', 'text')
+     * @see http://chaijs.com/plugins/chai-jquery/#containtext
+     * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.contain', value: string): Chainable<Subject>
+    /**
+     * Assert that the selection is empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * @example
+     *    cy.get('#result').should('not.exist')
+     * @see http://chaijs.com/plugins/chai-jquery/#exist
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.exist'): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not have the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('not.have.attr', 'role')
+     *    cy.get('#result').should('not.have.attr', 'role', 'menu')
+     * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.attr', value: string, match?: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not have the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('not.have.class', 'success')
+     * @see http://chaijs.com/plugins/chai-jquery/#classclassname
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.class', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not have the given CSS property, using `.css()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('not.have.css', 'display', 'none')
+     * @see http://chaijs.com/plugins/chai-jquery/#cssname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.css', value: string, match?: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not have the given data value, using `.data()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('not.have.data', 'foo', 'bar')
+     * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.data', value: string, match?: string): Chainable<Subject>
-    (chainer: 'not.have.decendants', selector: string): Chainable<Subject>
+    /**
+     * Assert that the selection does not contain at least one element which has a descendant matching the given selector, using `.has()`.
+     * @example
+     *    cy.get('#result').should('not.have.descendants', 'h1')
+     * @see http://chaijs.com/plugins/chai-jquery/#descendantsselector
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.descendants', selector: string): Chainable<Subject>
+    /**
+     * Assert that the html of the first element of the selection is not equal to the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('not.have.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.html', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not have the given id, using `.attr('id')`.
+     * @example
+     *    cy.get('#result').should('not.have.id', 'result')
+     * @see http://chaijs.com/plugins/chai-jquery/#idid
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.id', value: string, match?: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not have the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
+     * @example
+     *    cy.get('#result').should('not.have.prop', 'disabled')
+     *    cy.get('#result').should('not.have.prop', 'disabled', false)
+     * @see http://chaijs.com/plugins/chai-jquery/#propname-value
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.prop', value: string, match?: any): Chainable<Subject>
+    /**
+     * Assert that the text of the first element of the selection is not equal to the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('not.have.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.text', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not have the given value, using `.val()`.
+     * @example
+     *    cy.get('textarea').should('not.have.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.have.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the selection does not match a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * @example
+     *    cy.get('#result').should('not.match', ':empty')
+     * @see http://chaijs.com/plugins/chai-jquery/#matchselector
+     * @see https://on.cypress.io/assertions
+     */
     (chainer: 'not.match', value: string): Chainable<Subject>
 
     // fallback
+    /**
+     * Create an assertion. Assertions are automatically retried until they pass or time out.
+     * Ctrl+Space will invoke auto-complete in most editors.
+     * @see https://on.cypress.io/should
+     */
     (chainers: string, value?: any): Chainable<Subject>
     (chainers: string, value: any, match: any): Chainable<Subject>
+    /**
+     * Create an assertion. Assertions are automatically retried until they pass or time out.
+     * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
+     * Just be sure _not_ to include any code that has side effects in your callback function. The callback function will be retried over and over again until no assertions within it throw.
+     * @example
+     *    cy
+     *      .get('p')
+     *      .should(($p) => {
+     *        // should have found 3 elements
+     *        expect($p).to.have.length(3)
+     *
+     *        // make sure the first contains some text content
+     *        expect($p.first()).to.contain('Hello World')
+     *
+     *        // use jquery's map to grab all of their classes
+     *        // jquery's map returns a new jquery object
+     *        const classes = $p.map((i, el) => {
+     *          return Cypress.$(el).attr('class')
+     *        })
+     *
+     *        // call classes.get() to make this a plain array
+     *        expect(classes.get()).to.deep.eq([
+     *          'text-primary',
+     *          'text-danger',
+     *          'text-default'
+     *        ])
+     *      })
+     * @see https://on.cypress.io/should
+     */
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
+  }
+
+  /**
+   * These events come from the application currently under test (your application). These are the most useful events for you to listen to.
+   * @see https://on.cypress.io/catalog-of-events#App-Events
+   */
+  interface Actions {
+    /**
+     * Fires when an uncaught exception occurs in your application.
+     * Cypress will fail the test when this fires.
+     * Return `false` from this event and Cypress will not fail the test. Also useful for debugging purposes because the actual `error` instance is provided to you.
+     * @example
+     * // likely want to do this in a support file
+     * // so it's applied to all spec files
+     * // cypress/support/index.js
+     *
+     * Cypress.on('uncaught:exception', (err, runnable) => {
+     *   // returning false here prevents Cypress from
+     *   // failing the test
+     *   return false
+     * })
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
+    /**
+     * Fires when your app calls the global `window.confirm()` method.
+     * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'window:confirm', fn: (text: string) => false | void): void
+    /**
+     * Fires when your app calls the global `window.alert()` method. Cypress will auto accept alerts. You cannot change this behavior.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'window:alert', fn: (text: string) => void): void
+    /**
+     * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'window:before:load', fn: (win: Window) => void): void
+    /**
+     * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onLoad` callback.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'window:load', fn: (win: Window) => void): void
+    /**
+     * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'window:before:unload', fn: (event: BeforeUnloadEvent) => void): void
+    /**
+     * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'window:unload', fn: (event: Event) => void): void
+    /**
+     * Fires whenever Cypress detects that your application's URL has changed.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'url:changed', fn: (url: string) => void): void
+    /**
+     * Fires when the test has failed. It is technically possible to prevent the test from actually failing by binding to this event and invoking an async `done` callback. However this is **strongly discouraged**. Tests should never legitimately fail. This event exists because it's extremely useful for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'fail', fn: (error: Error, mocha: Mocha.IRunnable) => void): void
+    /**
+     * Fires whenever the viewport changes via a `cy.viewport()` or naturally when Cypress resets the viewport to the default between tests. Useful for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'viewport:changed', fn: (viewport: Viewport) => void): void
+    /**
+     * Fires whenever **Cypress** is scrolling your application. This event is fired when Cypress is {% url 'waiting for and calculating actionability' interacting-with-elements %}. It will scroll to 'uncover' elements currently being covered. This event is extremely useful to debug why Cypress may think an element is not interactive.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'scrolled', fn: ($el: JQuery) => void): void
+    /**
+     * Fires when a cy command is first invoked and enqueued to be run later. Useful for debugging purposes if you're confused about the order in which commands will execute.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'command:enqueued', fn: (command: EnqueuedCommand) => void): void
+    /**
+     * Fires when cy begins actually running and executing your command. Useful for debugging and understanding how the command queue is async.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'command:start', fn: (command: CommandQueue) => void): void
+    /**
+     * Fires when cy finishes running and executing your command. Useful for debugging and understanding how commands are handled.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'command:end', fn: (command: CommandQueue) => void): void
+    /**
+     * Fires whenever a command begins its retrying routines. This is called on the trailing edge after Cypress has internally waited for the retry interval. Useful to understand **why** a command is retrying, and generally includes the actual error causing the retry to happen. When commands fail the final error is the one that actually bubbles up to fail the test. This event is essentially to debug why Cypress is failing.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'command:retry', fn: (command: CommandQueue) => void): void
+    /**
+     * Fires whenever a command emits this event so it can be displayed in the Command Log. Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'log:added', fn: (log: any, interactive: boolean) => void): void
+    /**
+     * Fires whenever a command's attributes changes. This event is debounced to prevent it from firing too quickly and too often. Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'log:changed', fn: (log: any, interactive: boolean) => void): void
+    /**
+     * Fires before the test and all **before** and **beforeEach** hooks run.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    /**
+     * Fires after the test and all **afterEach** and **after** hooks run.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+  }
+
+  // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS
+  interface CommandQueue extends ObjectLike {
+    logs(filters: any): any
+    add(obj: any): any
+    get(): any
+    toJSON(): string[]
+    create(): CommandQueue
   }
 
   /**
@@ -1664,6 +3090,14 @@ declare namespace Cypress {
     httpOnly: boolean
     secure: boolean
     expiry?: string
+  }
+
+  interface EnqueuedCommand {
+    name: string
+    args: any[]
+    type: string
+    chainerId: string
+    fn(...args: any[]): any
   }
 
   interface Exec {
@@ -1700,6 +3134,11 @@ declare namespace Cypress {
     whitelist: (xhr: any) => boolean
   }
 
+  interface Viewport {
+    viewportWidth: number
+    viewportHeight: number
+  }
+
   interface WaitXHR {
     duration: number
     id: string
@@ -1728,6 +3167,7 @@ declare namespace Cypress {
 
   // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
+  // @ts-ignore TODO - remove this if possible. Seems a recent change to TypeScript broke this. Possibly https://github.com/Microsoft/TypeScript/pull/17912
   type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>
 }
 

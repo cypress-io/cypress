@@ -16,6 +16,8 @@ const stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
 
 describe('download', function () {
+  require('mocha-banner').register()
+
   const rootFolder = '/home/user/git'
 
   beforeEach(function () {

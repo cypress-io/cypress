@@ -69,6 +69,8 @@ TYPICAL_BROWSERS = [
 ]
 
 describe "lib/cypress", ->
+  require("mocha-banner").register()
+  
   beforeEach ->
     @timeout(5000)
 

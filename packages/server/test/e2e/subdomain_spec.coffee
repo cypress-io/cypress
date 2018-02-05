@@ -86,6 +86,9 @@ onServer = (app) ->
 
           getText("Domain")
 
+        when "qa.sub.foobar.com:2292", "staging.sub.foobar.com:2292"
+          getText("Nested Subdomains")
+
         else
           throw new Error("Host: '#{h}' not recognized")
 

@@ -3,7 +3,7 @@ url         = require("url")
 debug       = require("debug")("cypress:server:cors")
 parseDomain = require("parse-domain")
 
-localHostOrIpAddressRe = /localhost|\.local|^[\d\.]+$/
+localHostOrIpAddressRe = /.?localhost|\.local|^[\d\.]+$/
 
 module.exports = {
   parseUrlIntoDomainTldPort: (str) ->
@@ -13,6 +13,7 @@ module.exports = {
 
     ## if we couldn't get a parsed domain
     if not parsed = parseDomain(hostname, {
+      privateTlds: true ## use the public suffix
       customTlds: localHostOrIpAddressRe
     })
 

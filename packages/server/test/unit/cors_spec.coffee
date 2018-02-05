@@ -15,6 +15,35 @@ describe "lib/util/cors", ->
         tld: "com"
       })
 
+    it "parses http://localhost:8080", ->
+      @isEq("http://localhost:8080", {
+        port: "8080"
+        domain: ""
+        tld: "localhost"
+      })
+
+    it "parses http://app.localhost:8080", ->
+      @isEq("http://app.localhost:8080", {
+        port: "8080"
+        domain: "app"
+        tld: "localhost"
+      })
+
+    it "parses http://app.local:8080", ->
+      @isEq("http://app.local:8080", {
+        port: "8080"
+        domain: "app"
+        tld: "local"
+      })
+
+    ## public suffix example of a private tld
+    it "parses https://example.herokuapp.com", ->
+      @isEq("https://example.herokuapp.com", {
+        port: "443"
+        domain: "example"
+        tld: "herokuapp.com"
+      })
+
   context ".urlMatchesOriginPolicyProps", ->
     beforeEach ->
       @isFalse = (url, props) =>
@@ -44,6 +73,18 @@ describe "lib/util/cors", ->
         @isTrue("https://foo.google.com:443", @props)
         @isTrue("https://foo.bar.google.com:443", @props)
 
+    describe "public suffix", ->
+      beforeEach ->
+        @props = cors.parseUrlIntoDomainTldPort("https://example.gitlab.io")
+
+      it "does not match", ->
+        @isFalse("http://example.gitlab.io", @props)
+        @isFalse("https://foo.gitlab.io:443", @props)
+
+      it "matches", ->
+        @isTrue("https://example.gitlab.io:443", @props)
+        @isTrue("https://foo.example.gitlab.io:443", @props)
+
     describe "localhost", ->
       beforeEach ->
         @props = cors.parseUrlIntoDomainTldPort("http://localhost:4200")
@@ -54,6 +95,18 @@ describe "lib/util/cors", ->
 
       it "matches", ->
         @isTrue("http://localhost:4200", @props)
+
+    describe "app.localhost", ->
+      beforeEach ->
+        @props = cors.parseUrlIntoDomainTldPort("http://app.localhost:4200")
+
+      it "does not match", ->
+        @isFalse("http://app.localhost:4201", @props)
+        @isFalse("http://app.localhoss:4200", @props)
+
+      it "matches", ->
+        @isTrue("http://app.localhost:4200", @props)
+        @isTrue("http://name.app.localhost:4200", @props)
 
     describe "local", ->
       beforeEach ->
