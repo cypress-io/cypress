@@ -278,8 +278,10 @@ describe "lib/cypress", ->
         ## still not projects
         expect(projects.length).to.eq(0)
 
-    it "runs project by specific spec and exits with status 0", ->
-      cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
+    it "runs project by relative spec and exits with status 0", ->
+      relativePath = path.relative(cwd(), @todosPath)
+
+      cypress.start(["--run-project=#{@todosPath}", "--spec=#{relativePath}/tests/test2.coffee"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
@@ -288,6 +290,12 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@idsPath}", "--spec=#{@idsPath}/cypress/integration/bar.js", "--config", "port=2020"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:2020/__/#/tests/integration/bar.js"})
+        @expectExitWith(0)
+
+    it "runs project by specific absolute spec and exits with status 0", ->
+      cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
     it "scaffolds out integration and example_spec if they do not exist when not headless", ->
