@@ -40,11 +40,6 @@ create = ->
     getProject: -> openProject
 
     launch: (browserName, spec, options = {}) ->
-      ## TODO: temporary hack to get this commit in
-      ## before spec parallelization lands
-      if _.isArray(spec)
-        spec = spec[0]
-
       log("launching browser %s spec %s", browserName, spec)
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
