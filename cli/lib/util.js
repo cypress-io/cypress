@@ -18,11 +18,15 @@ const objectToString = (obj) =>
 const normalizeObject = (env) =>
   _.isPlainObject(env) ? objectToString(env) : env
 
+const normalizeArray = (arr) =>
+  _.isArray(arr) ? arr.join(',') : arr
+
 function normalizeModuleOptions (options = {}) {
   return R.evolve({
     env: normalizeObject,
     config: normalizeObject,
     reporterOptions: normalizeObject,
+    spec: normalizeArray,
   })(options)
 }
 

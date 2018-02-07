@@ -70,7 +70,7 @@ TYPICAL_BROWSERS = [
 
 describe "lib/cypress", ->
   require("mocha-banner").register()
-  
+
   beforeEach ->
     @timeout(5000)
 
@@ -278,14 +278,16 @@ describe "lib/cypress", ->
         ## still not projects
         expect(projects.length).to.eq(0)
 
-    it "runs project by specific spec and exits with status 0", ->
-      cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+    it "runs project by relative spec and exits with status 0", ->
+      relativePath = path.relative(cwd(), @todosPath)
+
+      cypress.start(["--run-project=#{@todosPath}", "--spec=#{relativePath}/tests/test2.coffee"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
-      cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"])
+      cypress.start(["--run-project=#{@idsPath}", "--spec=#{@idsPath}/cypress/integration/bar.js", "--config", "port=2020"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:2020/__/#/tests/integration/bar.js"})
         @expectExitWith(0)
@@ -521,7 +523,7 @@ describe "lib/cypress", ->
     it "logs error and exits when spec file was specified and does not exist", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"])
       .then =>
-        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
+        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{cwd()}/path/to/spec")
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"])
@@ -598,7 +600,7 @@ describe "lib/cypress", ->
         fs.unlink(statePath)
 
       it "saves project state", ->
-        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
         .then =>
           @expectExitWith(0)
         .then ->
