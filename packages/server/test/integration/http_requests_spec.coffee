@@ -1318,7 +1318,7 @@ describe "Routes", ->
           expect(res.body).to.include("The error was:")
           expect(res.body).to.include("incorrect header check")
           expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("at Zlib._handle.onerror")
+          expect(res.body).to.include("at Gunzip.zlibOnError")
           expect(res.body).to.include("<html>\n<head> <script")
           expect(res.body).to.include("</script> </head> <body>")
           expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
