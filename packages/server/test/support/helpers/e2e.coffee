@@ -149,7 +149,7 @@ module.exports = {
     if spec = options.spec
       ## normalize into array and then prefix
       specs = spec.split(',').map (spec) ->
-        path.join(e2ePath, "cypress", "integration", spec)
+        path.join(options.project, "cypress", "integration", spec)
 
       ## normalize the path to the spec
       options.spec = specs.join(',')
