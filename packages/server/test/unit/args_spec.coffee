@@ -60,37 +60,41 @@ describe "lib/util/args", ->
     it "converts to object literal", ->
       options = @setup("--config", "pageLoadTimeout=10000,waitForAnimations=false")
 
-      expect(options.pageLoadTimeout).eq(10000)
-      expect(options.waitForAnimations).eq(false)
+      expect(options.config.pageLoadTimeout).eq(10000)
+      expect(options.config.waitForAnimations).eq(false)
 
     it "whitelists config properties", ->
       options = @setup("--config", "foo=bar,port=1111,supportFile=path/to/support_file")
 
-      expect(options.port).to.eq(1111)
-      expect(options.supportFile).to.eq("path/to/support_file")
+      expect(options.config.port).to.eq(1111)
+      expect(options.config.supportFile).to.eq("path/to/support_file")
       expect(options).not.to.have.property("foo")
 
-    it "overrides existing flat options", ->
+    it "overrides port in config", ->
       options = @setup("--port", 2222, "--config", "port=3333")
+      expect(options.config.port).to.eq(2222)
 
-      expect(options.port).to.eq(3333)
+      options = @setup("--port", 2222)
+      expect(options.config.port).to.eq(2222)
 
   context ".toArray", ->
     beforeEach ->
-      @obj = {hosts: {"*.foobar.com": "127.0.0.1"}, _hosts: "*.foobar.com=127.0.0.1", project: "foo/bar"}
+      @obj = {config: {foo: "bar"}, _config: "foo=bar", project: "foo/bar"}
 
     it "rejects values which have an cooresponding underscore'd key", ->
-      expect(argsUtil.toArray(@obj)).to.deep.eq(["--project=foo/bar", "--hosts=*.foobar.com=127.0.0.1"])
+      expect(argsUtil.toArray(@obj)).to.deep.eq([
+        "--project=foo/bar",
+        "--config=foo=bar"
+      ])
 
   context ".toObject", ->
     beforeEach ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup(
         "--get-key",
-        "--hosts=*.foobar.com=127.0.0.1",
         "--env=foo=bar,baz=quux,bar=foo=quz",
         "--config",
-        "requestTimeout=1234,responseTimeout=9876"
+        "requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
         "--reporter-options=foo=bar"
         "--spec=foo,bar,baz",
       )
@@ -100,14 +104,12 @@ describe "lib/util/args", ->
       expect(@setup("--no-record").record).to.be.false
       expect(@setup("--record=false").record).to.be.false
 
-    it "backs up hosts, env, config, reporterOptions, spec", ->
+    it "backs up env, config, reporterOptions, spec", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
         "get-key": true
         getKey: true
-        _hosts: "*.foobar.com=127.0.0.1"
-        hosts: {"*.foobar.com": "127.0.0.1"}
         _env: "foo=bar,baz=quux,bar=foo=quz"
         env: {
           foo: "bar"
@@ -116,11 +118,18 @@ describe "lib/util/args", ->
         }
         config: {
           requestTimeout: 1234
-          responseTimeout: 9876
+          blacklistHosts: "a.com|b.com"
+          hosts: "a=b|b=c"
+          reporterOptions: {
+            foo: "bar"
+          }
+          env: {
+            foo: "bar"
+            baz: "quux"
+            bar: "foo=quz"
+          }
         }
-        _config: "requestTimeout=1234,responseTimeout=9876"
-        requestTimeout: 1234
-        responseTimeout: 9876
+        _config: "requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
         "reporter-options": "foo=bar"
         _reporterOptions: "foo=bar"
         reporterOptions: {
@@ -139,12 +148,9 @@ describe "lib/util/args", ->
         "--cwd=#{cwd}"
         "--getKey=true"
         "--spec=foo,bar,baz",
-        "--config=requestTimeout=1234,responseTimeout=9876"
-        "--hosts=*.foobar.com=127.0.0.1"
-        "--env=foo=bar,baz=quux,bar=foo=quz"
         "--reporterOptions=foo=bar"
-        "--requestTimeout=1234"
-        "--responseTimeout=9876",
+        "--env=foo=bar,baz=quux,bar=foo=quz"
+        "--config=requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
       ])
 
   context "--updating", ->

@@ -1122,8 +1122,10 @@ describe "lib/cypress", ->
       .then ->
         expect(headed.ready).to.be.calledWithMatch({
           updating: true
-          port: 2121
-          pageLoadTimeout: 1000
+          config: {
+            port: 2121
+            pageLoadTimeout: 1000
+          }
         })
 
     it "passes options to Events.start", ->
@@ -1131,7 +1133,10 @@ describe "lib/cypress", ->
       .then ->
         expect(Events.start).to.be.calledWithMatch({
           port: 2121,
-          pageLoadTimeout: 1000
+          config: {
+            pageLoadTimeout: 1000
+            port: 2121
+          }
         })
 
     it "passes filtered options to Project#open and sets cli config", ->

@@ -17,6 +17,7 @@ pathHelpers = require("./util/path_helpers")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 oneOrMoreSpacesRe = /\s+/
+everythingAfterFirstEqualRe = /=(.+)/
 
 toWords = (str) ->
   str.trim().split(oneOrMoreSpacesRe)
@@ -42,8 +43,9 @@ configKeys = toWords """
   screenshotOnHeadlessFailure     defaultCommandTimeout
   testFiles                       execTimeout
   trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  userAgent                       requestTimeout
-  viewportWidth                   responseTimeout
+  blacklistHosts                  requestTimeout
+  userAgent                       responseTimeout
+  viewportWidth
   viewportHeight
   videoRecording
   videoCompression
@@ -51,6 +53,27 @@ configKeys = toWords """
   watchForFileChanges
   waitForAnimations
 """
+
+toArrayFromPipes = (str) ->
+  if _.isArray(str)
+    return str
+
+  [].concat(str.split('|'))
+
+toObjectFromPipes = (str) ->
+  if _.isObject(str)
+    return str
+
+  ## convert foo=bar|version=1.2.3 to
+  ## {foo: 'bar', version: '1.2.3'}
+  _
+  .chain(str)
+  .split("|")
+  .map (pair) ->
+    pair.split("=")
+  .fromPairs()
+  .mapValues(coerce)
+  .value()
 
 defaults = {
   port:                          null
@@ -212,6 +235,12 @@ module.exports = {
     config.env = @parseEnv(config, options.env, resolved)
     config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
+
+    if hosts = config.hosts
+      config.hosts = toObjectFromPipes(hosts)
+
+    if blacklistHosts = config.blacklistHosts
+      config.blacklistHosts = toArrayFromPipes(blacklistHosts)
 
     ## when headless
     if config.isTextTerminal

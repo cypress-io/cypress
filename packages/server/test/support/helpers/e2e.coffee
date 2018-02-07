@@ -165,9 +165,6 @@ module.exports = {
     if options.port
       args.push("--port=#{options.port}")
 
-    if options.hosts
-      args.push("--hosts=#{options.hosts}")
-
     if options.headed
       args.push("--headed")
 
