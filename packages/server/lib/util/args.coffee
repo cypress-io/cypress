@@ -71,32 +71,7 @@ sanitizeAndConvertNestedArgs = (str) ->
   .mapValues(coerce)
   .value()
 
-toArrayFromPipes = (str) ->
-  if _.isArray(str)
-    return str
-
-  [].concat(str.split('|'))
-
-toObjectFromPipes = (str) ->
-  if _.isObject(str)
-    return str
-
-  ## convert foo=bar|version=1.2.3 to
-  ## {foo: 'bar', version: '1.2.3'}
-  _
-  .chain(str)
-  .split("|")
-  .map (pair) ->
-    pair.split("=")
-  .fromPairs()
-  .mapValues(coerce)
-  .value()
-
 module.exports = {
-  toArrayFromPipes
-
-  toObjectFromPipes
-
   toObject: (argv) ->
     ## takes an array of args and converts
     ## to an object

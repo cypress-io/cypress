@@ -104,7 +104,7 @@ describe "lib/util/args", ->
       expect(@setup("--no-record").record).to.be.false
       expect(@setup("--record=false").record).to.be.false
 
-    it.only "backs up env, config, reporterOptions, spec", ->
+    it "backs up env, config, reporterOptions, spec", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
