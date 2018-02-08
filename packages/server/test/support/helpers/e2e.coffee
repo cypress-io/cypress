@@ -112,34 +112,34 @@ module.exports = {
           ## and bin files aren't necessary for these tests
           fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
 
+      after ->
+        ## now cleanup the node modules after because these add a lot
+        ## of copy time for the Fixtures scaffolding
+        fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
+
     beforeEach ->
+      ## after installing node modules copying all of the fixtures
+      ## can take a long time (5-15 secs)
       @timeout(human("2 minutes"))
 
-      debug("before scaffol")
       Fixtures.scaffold()
 
-      debug("after scaffol")
       @sandbox.stub(process, "exit")
 
       Promise.try =>
-        debug("try")
         if servers = options.servers
           servers = [].concat(servers)
 
           Promise.map(servers, startServer)
           .then (servers) =>
-            debug("servers")
             @servers = servers
         else
-          debug("null")
           @servers = null
       .then =>
-        debug("settings")
 
         if s = options.settings
           settings.write(e2ePath, s)
       .then =>
-        debug("end")
 
     afterEach ->
       @timeout(human("2 minutes"))
