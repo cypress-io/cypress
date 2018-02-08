@@ -20,6 +20,7 @@ Error: Async error from plugins file
     at stack trace line
     at stack trace line
     at stack trace line
+    at stack trace line
 
 
   (Tests Finished)
@@ -140,3 +141,4 @@ A video will not be recorded when using this browser.
   (All Done)
 
 `
+
