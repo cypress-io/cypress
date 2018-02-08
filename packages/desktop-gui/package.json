@@ -43,6 +43,6 @@
     "react-bootstrap-modal": "3.0.1",
     "react-dom": "^15.6.1",
     "react-loader": "^2.4.0",
-    "zunder": "5.5.2"
+    "zunder": "5.6.3"
   }
 }
