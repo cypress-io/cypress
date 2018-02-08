@@ -6,6 +6,7 @@ const debug = require('debug')('cypress:cli')
 const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
+const path = require('path')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
@@ -45,20 +46,21 @@ const checkIfNotInstalledOrMissingExecutable = (installedVersion, executable) =>
   })
 }
 
-const writeVerifiedVersion = (verifiedVersion) => {
+const writeVerifiedVersion = (verifiedVersion, options) => {
   debug('writing verified version string "%s"', verifiedVersion)
 
-  return info.ensureFileInfoContents()
+  return info.ensureFileInfoContents(options.getInstallationDir)
   .then((contents) => {
-    return info.writeInfoFileContents(_.extend(contents, { verifiedVersion }))
+    const updatedInfo = _.extend(contents, { verifiedVersion })
+    return info.writeInfoFileContents(updatedInfo, options.getInstallationDir)
   })
 }
 
-const runSmokeTest = () => {
+const runSmokeTest = (options) => {
   debug('running smoke test')
   let stderr = ''
   let stdout = ''
-  const cypressExecPath = info.getPathToExecutable()
+  const cypressExecPath = info.getPathToExecutable(options.getInstallationDir)
   debug('using Cypress executable %s', cypressExecPath)
 
   // TODO switch to execa for this?
@@ -124,10 +126,10 @@ const runSmokeTest = () => {
   }
 }
 
-function testBinary (version) {
+function testBinary (version, options = {}) {
   debug('running binary verification check', version)
 
-  const dir = info.getPathToUserExecutableDir()
+  const dir = info.getPathToUserExecutableDir(options.getInstallationDir)
 
   // let the user know what version of cypress we're downloading!
   logger.log(
@@ -151,15 +153,15 @@ function testBinary (version) {
       title: util.titleize('Verifying Cypress can run', chalk.gray(dir)),
       task: (ctx, task) => {
         // clear out the verified version
-        return writeVerifiedVersion(null)
+        return writeVerifiedVersion(null, options)
         .then(() => {
           return Promise.all([
-            runSmokeTest(),
+            runSmokeTest(options),
             Promise.delay(1500), // good user experience
           ])
         })
         .then(() => {
-          return writeVerifiedVersion(version)
+          return writeVerifiedVersion(version, options)
         })
         .then(() => {
           util.setTaskTitle(
@@ -181,7 +183,7 @@ function testBinary (version) {
 }
 
 const maybeVerify = (installedVersion, options = {}) => {
-  return info.getVerifiedVersion()
+  return info.getVerifiedVersion(options.getInstallationDir)
   .then((verifiedVersion) => {
     debug('has verified version', verifiedVersion)
 
@@ -191,7 +193,7 @@ const maybeVerify = (installedVersion, options = {}) => {
     debug('run verification check?', shouldVerify)
 
     if (shouldVerify) {
-      return testBinary(installedVersion)
+      return testBinary(installedVersion, options)
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
@@ -202,6 +204,10 @@ const maybeVerify = (installedVersion, options = {}) => {
   })
 }
 
+const getInstallationDir = () => {
+  return path.join(__dirname, '..', '..', 'dist')
+}
+
 const start = (options = {}) => {
   debug('verifying Cypress app')
 
@@ -210,14 +216,16 @@ const start = (options = {}) => {
   _.defaults(options, {
     force: false,
     welcomeMessage: true,
+    getInstallationDir,
   })
+  debug('Cypress app folder', options.getInstallationDir())
 
-  return info.getInstalledVersion()
+  return info.getInstalledVersion(options.getInstallationDir)
   .then((installedVersion) => {
     debug('installed version is', installedVersion, 'comparing to', packageVersion)
 
     // figure out where this executable is supposed to be at
-    const executable = info.getPathToExecutable()
+    const executable = info.getPathToExecutable(options.getInstallationDir)
 
     return checkIfNotInstalledOrMissingExecutable(installedVersion, executable)
     .return(installedVersion)

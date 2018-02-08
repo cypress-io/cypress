@@ -2,6 +2,8 @@ const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const fs = require('../fs')
 
@@ -16,65 +18,67 @@ const getPlatformExecutable = () => {
   }
 }
 
-const getInstallationDir = () => {
-  return path.join(__dirname, '..', '..', 'dist')
-}
-
-const getInfoFilePath = () => {
+const getInfoFilePath = (getInstallationDir) => {
   const infoPath = path.join(getInstallationDir(), 'info.json')
   debug('path to info.json file %s', infoPath)
   return infoPath
 }
 
-const getInstalledVersion = () => {
-  return ensureFileInfoContents()
+const getInstalledVersion = (getInstallationDir) => {
+  la(is.fn(getInstallationDir), 'missing installation dir function')
+  return ensureFileInfoContents(getInstallationDir)
   .tap(debug)
   .get('version')
 }
 
-const getVerifiedVersion = () => {
-  return ensureFileInfoContents().get('verifiedVersion')
+const getVerifiedVersion = (getInstallationDir) => {
+  la(is.fn(getInstallationDir), 'missing getInstallationDir')
+  return ensureFileInfoContents(getInstallationDir).get('verifiedVersion')
 }
 
-const ensureInstallationDir = () => {
+const ensureInstallationDir = (getInstallationDir) => {
   return fs.ensureDirAsync(getInstallationDir())
 }
 
-const clearVersionState = () => {
-  return ensureFileInfoContents()
+const clearVersionState = (getInstallationDir) => {
+  return ensureFileInfoContents(getInstallationDir)
   .then((contents) => {
     return writeInfoFileContents(_.omit(contents, 'version', 'verifiedVersion'))
   })
 }
 
-const writeInstalledVersion = (version) => {
-  return ensureFileInfoContents()
+const writeInstalledVersion = (version, getInstallationDir) => {
+  return ensureFileInfoContents(getInstallationDir)
   .then((contents) => {
-    return writeInfoFileContents(_.extend(contents, { version }))
+    const info = _.extend(contents, { version })
+    return writeInfoFileContents(info, getInstallationDir)
   })
 }
 
-const getPathToExecutable = () => {
+const getPathToExecutable = (getInstallationDir) => {
   return path.join(getInstallationDir(), getPlatformExecutable())
 }
 
-const getPathToUserExecutableDir = () => {
+const getPathToUserExecutableDir = (getInstallationDir) => {
+  la(is.fn(getInstallationDir), 'missing installation dir function')
   return path.join(getInstallationDir(), getPlatformExecutable().split('/')[0])
 }
 
-const getInfoFileContents = () => {
-  return fs.readJsonAsync(getInfoFilePath())
+const getInfoFileContents = (getInstallationDir) => {
+  return fs.readJsonAsync(getInfoFilePath(getInstallationDir))
 }
 
-const ensureFileInfoContents = () => {
-  return getInfoFileContents().catch(() => {
+const ensureFileInfoContents = (getInstallationDir) => {
+  return getInfoFileContents(getInstallationDir).catch(() => {
     debug('could not read info file')
     return {}
   })
 }
 
-const writeInfoFileContents = (contents) => {
-  return fs.outputJsonAsync(getInfoFilePath(), contents, {
+const writeInfoFileContents = (contents, getInstallationDir) => {
+  la(is.fn(getInstallationDir), 'missing install dir function')
+  const filePath = getInfoFilePath(getInstallationDir)
+  return fs.outputJsonAsync(filePath, contents, {
     spaces: 2,
   })
 }
@@ -86,7 +90,6 @@ module.exports = {
   ensureFileInfoContents,
   getInfoFilePath,
   getVerifiedVersion,
-  getInstallationDir,
   getInstalledVersion,
   getPathToUserExecutableDir,
   getPathToExecutable,
