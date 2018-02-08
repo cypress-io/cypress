@@ -562,9 +562,12 @@ describe "lib/cypress", ->
     ## for headed projects!
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
-    ## Gleb: disabling this because Node 8 docker image runs as root
-    ## which makes accessing everything possible.
-    it.skip "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+    it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+      if process.env.CI
+        ## Gleb: disabling this because Node 8 docker image runs as root
+        ## which makes accessing everything possible.
+        return @skip()
+
       permissionsPath = path.resolve("./permissions")
 
       cypressJson = path.join(permissionsPath, "cypress.json")
