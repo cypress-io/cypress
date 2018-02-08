@@ -11,6 +11,7 @@ morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
+debug        = require("debug")("cypress:support:e2e")
 Fixtures     = require("./fixtures")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
@@ -111,28 +112,38 @@ module.exports = {
           ## and bin files aren't necessary for these tests
           fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
 
-      after ->
-        fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
-
     beforeEach ->
+      @timeout(human("2 minutes"))
+
+      debug("before scaffol")
       Fixtures.scaffold()
 
+      debug("after scaffol")
       @sandbox.stub(process, "exit")
 
       Promise.try =>
+        debug("try")
         if servers = options.servers
           servers = [].concat(servers)
 
           Promise.map(servers, startServer)
           .then (servers) =>
+            debug("servers")
             @servers = servers
         else
+          debug("null")
           @servers = null
       .then =>
+        debug("settings")
+
         if s = options.settings
           settings.write(e2ePath, s)
+      .then =>
+        debug("end")
 
     afterEach ->
+      @timeout(human("2 minutes"))
+
       Fixtures.remove()
 
       if s = @servers
