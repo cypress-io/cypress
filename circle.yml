@@ -163,7 +163,7 @@ jobs:
       ## hmm, do not see a good way to cache it, since all code
       ## might change
       - save_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}-{{ checksum "circle.yml" }}
           paths:
             - /root/cypress-monorepo
 
