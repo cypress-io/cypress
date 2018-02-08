@@ -16,8 +16,12 @@ jobs:
     steps:
       - checkout
 
-      # print global NPM cache path
-      - run: echo $(npm -g bin)
+      - run:
+          name: Print working folder
+          command: echo $PWD
+      - run:
+          name: print global NPM cache path
+          command: echo $(npm -g bin)
 
       ## make sure the TERM is set to 'xterm' in node
       ## else colors (and tests) will fail
@@ -161,7 +165,7 @@ jobs:
       - save_cache:
           key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
           paths:
-            - /home/person/cypress-monorepo
+            - /root/cypress-monorepo
 
   lint:
     <<: *defaults
