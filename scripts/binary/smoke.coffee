@@ -54,7 +54,7 @@ runProjectTest = (buildAppExecutable, e2e) ->
 
     args = [
       "--run-project=#{e2e}",
-      "--spec=cypress/integration/simple_passing_spec.coffee"
+      "--spec=#{e2e}/cypress/integration/simple_passing_spec.coffee"
     ]
     options = {
       stdio: "inherit", env: env
@@ -91,7 +91,7 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
 
       cp.spawn(buildAppExecutable, [
         "--run-project=#{e2e}",
-        "--spec=cypress/integration/simple_failing_spec.coffee"
+        "--spec=#{e2e}/cypress/integration/simple_failing_spec.coffee"
       ], {
         stdio: "inherit", env: env
       })
