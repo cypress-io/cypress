@@ -566,7 +566,7 @@ describe "lib/cypress", ->
       if process.env.CI
         ## Gleb: disabling this because Node 8 docker image runs as root
         ## which makes accessing everything possible.
-        return @skip()
+        return
 
       permissionsPath = path.resolve("./permissions")
 
