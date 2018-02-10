@@ -138,7 +138,7 @@ declare namespace Cypress {
     env(key: string, value: any): void
     env(object: ObjectLike): void
 
-    log(options: Partial<Log>): void
+    log(options: Partial<LogConfig>): Log
 
     /**
      * @see https://on.cypress.io/api/commands
@@ -3106,15 +3106,31 @@ declare namespace Cypress {
     stderr: string
   }
 
+  interface LogAttrs {
+    url: string
+    consoleProps: ObjectLike
+  }
+
   interface Log {
-    $el: any
+    end(): Log
+    finish(): void
+    get<K extends keyof LogConfig>(attr: K): LogConfig[K]
+    get(): LogConfig
+    set<K extends keyof LogConfig>(key: K, value: LogConfig[K]): Log
+    set(options: Partial<LogConfig>): Log
+    snapshot(name?: string, options?: { at?: number, next: string }): Log
+  }
+
+  interface LogConfig {
+    /** The JQuery element for the command. This will highlight the command in the main window when debugging */
+    $el: JQuery
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any
+    message: any[]
     /** Return an object that will be printed in the dev tools console */
-    consoleProps(): any
+    consoleProps(): ObjectLike
   }
 
   interface Response {

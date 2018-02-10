@@ -50,12 +50,26 @@ namespace CypressCommandsTests {
 }
 
 namespace CypressLogsTest {
-  Cypress.log({
-    $el: 'foo',
+  const log = Cypress.log({
+    $el: Cypress.$('body'),
     name: 'MyCommand',
     displayName: 'My Command',
     message: ['foo', 'bar'],
+    consoleProps: () => {
+      return {
+        foo: 'bar',
+      }
+    },
   })
+    .set('$el', Cypress.$('body'))
+    .set({ name: 'MyCommand' })
+    .snapshot()
+    .snapshot('before')
+    .snapshot('before', { next: 'after' })
+
+  log.get() // $ExpectType LogConfig
+  log.get('name') // $ExpectType string
+  log.get('$el') // $ExpectType JQuery<HTMLElement>
 }
 
 cy.wrap({ foo: [1, 2, 3] })
