@@ -17,12 +17,29 @@ urls = {
   heroku:   "https://example.herokuapp.com"
   herokuSub:"https://foo.example.herokuapp.com"
   unknown:  "http://what.is.so.unknown"
+  auth:     "http://cypress:password123@localhost:8080/foo"
 }
 
 describe "src/cypress/location", ->
   beforeEach ->
     @setup = (remote) =>
       new Location(urls[remote])
+
+  context "#getAuth", ->
+    it "returns string with username + password", ->
+      str = @setup("auth").getAuth()
+      expect(str).to.eq("cypress:password123")
+
+  context "#getAuthObj", ->
+    it "returns an object with username and password", ->
+      obj = @setup("auth").getAuthObj()
+      expect(obj).to.deep.eq({
+        username: "cypress"
+        password: "password123"
+      })
+
+    it "returns undefined when no username or password", ->
+      expect(@setup("app").getAuthObj()).to.be.undefined
 
   context "#getHash", ->
     it "returns the hash fragment prepended with #", ->
@@ -159,7 +176,7 @@ describe "src/cypress/location", ->
   context ".create", ->
     it "returns an object literal", ->
       obj = Location.create(urls.cypress, urls.signin)
-      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"]
+      keys = ["auth", "authObj", "hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"]
       expect(obj).to.have.keys(keys)
 
     it "can invoke toString function", ->

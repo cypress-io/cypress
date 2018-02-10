@@ -612,6 +612,50 @@ describe "Server", ->
             expect(res.body).to.include("document.domain = 'google.com'")
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script> </head>content</html>")
 
+      it "passes auth through", ->
+        username = "u"
+        password = "p"
+
+        base64 = new Buffer(username + ":" + password).toString("base64")
+
+        auth = {
+          username
+          password
+        }
+
+        nock("http://google.com")
+        .get("/index")
+        .matchHeader("authorization", "Basic #{base64}")
+        .reply(200, "<html>content</html>", {
+          "Content-Type": "text/html"
+        })
+        .get("/index2")
+        .matchHeader("authorization", "Basic #{base64}")
+        .reply(200, "<html>content</html>", {
+          "Content-Type": "text/html"
+        })
+
+        headers = {}
+        headers["user-agent"] = "foobarbaz"
+
+        @server._onResolveUrl("http://google.com/index", headers, @automationRequest, { auth })
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            isOkStatusCode: true
+            isHtml: true
+            contentType: "text/html"
+            url: "http://google.com/index"
+            originalUrl: "http://google.com/index"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+        .then =>
+          @rp("http://google.com/index2")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
     describe "both", ->
       beforeEach ->
         Fixtures.scaffold("no-server")

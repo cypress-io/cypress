@@ -1673,6 +1673,59 @@ describe "Routes", ->
               "Content-Type": "text/css"
             })
 
+      it "attaches auth headers when matches origin", ->
+        username = "u"
+        password = "p"
+
+        base64 = new Buffer(username + ":" + password).toString("base64")
+
+        @server._remoteAuth = {
+          username
+          password
+        }
+
+        nock("http://localhost:8080")
+        .get("/index")
+        .matchHeader("authorization", "Basic #{base64}")
+        .reply(200, "")
+
+        @rp("http://localhost:8080/index")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+      it "does not attach auth headers when not matching origin", ->
+        nock("http://localhost:8080", {
+          badheaders: ['authorization']
+        })
+        .get("/index")
+        .reply(200, "")
+
+        @rp("http://localhost:8080/index")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+      it "does not modify existing auth headers when matching origin", ->
+        existing = "Basic asdf"
+
+        @server._remoteAuth = {
+          username: "u"
+          password: "p"
+        }
+
+        nock("http://localhost:8080")
+        .get("/index")
+        .matchHeader("authorization", existing)
+        .reply(200, "")
+
+        @rp({
+          url: "http://localhost:8080/index"
+          headers: {
+            "Authorization": existing
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
     context "images", ->
       beforeEach ->
         Fixtures.scaffold()

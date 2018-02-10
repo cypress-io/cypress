@@ -27,6 +27,18 @@ class $Location
   constructor: (remote) ->
     @remote = new UrlParse remote
 
+  getAuth: ->
+    @remote.auth
+
+  getAuthObj: ->
+    if a = @remote.auth
+      [ username, password ] = a.split(":")
+      return {
+        username
+
+        password
+      }
+
   getHash: ->
     @remote.hash
 
@@ -103,6 +115,8 @@ class $Location
 
   getObject: ->
     {
+      auth: @getAuth()
+      authObj: @getAuthObj()
       hash: @getHash()
       href: @getHref()
       host: @getHost()
