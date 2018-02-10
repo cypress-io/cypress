@@ -1,5 +1,14 @@
 run = ->
-  cy.window().then (win) ->
+  cy.window()
+  .then (win) ->
+    new Promise (resolve) ->
+      i = win.document.createElement("iframe")
+      i.onload = resolve
+      i.src = "/basic_auth"
+      win.document.body.appendChild(i)
+  .get("iframe").should ($iframe) ->
+    expect($iframe.contents().text()).to.include("basic auth worked")
+  .window().then (win) ->
     new Promise (resolve, reject) ->
       xhr = new win.XMLHttpRequest()
       xhr.open("GET", "/basic_auth")
@@ -11,12 +20,6 @@ run = ->
           reject(err)
       xhr.send()
   .then (win) ->
-    i = win.document.createElement("iframe")
-    i.src = "/basic_auth"
-    win.document.body.appendChild(i)
-  .get("iframe").should ($iframe) ->
-    expect($iframe.contents().text()).to.include("basic auth worked")
-  cy.window().then (win) ->
     new Promise (resolve, reject) ->
       ## ensure other origins do not have auth headers attached
       xhr = new win.XMLHttpRequest()
