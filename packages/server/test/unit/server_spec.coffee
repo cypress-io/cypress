@@ -262,6 +262,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("https://staging.google.com/foo/bar")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "https://staging.google.com"
         strategy: "http"
         domainName: "google.com"
@@ -278,6 +279,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("http://staging.google.com/foo/bar")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "http://staging.google.com"
         strategy: "http"
         domainName: "google.com"
@@ -294,6 +296,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "http://localhost:4200"
         strategy: "http"
         domainName: "localhost"
@@ -318,6 +321,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("/index.html")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "http://localhost:9999"
         strategy: "file"
         domainName: "localhost"
