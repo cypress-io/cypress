@@ -11,8 +11,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@semantic-release/npm": "2 - 2.6.0",
-    "semantic-release": ">=11.1.0"
+    "semantic-release": "^13.1.0"
   },
   "dependencies": {
     "debug": "^3.1.0",
@@ -27,8 +26,8 @@
     "jest": "^21.2.1",
     "lint-staged": "^6.0.0",
     "prettier": "^1.9.2",
-    "semantic-release": "^11.1.0",
-    "semantic-release-github-pr": "^2.0.3"
+    "semantic-release": "^13.2.0",
+    "semantic-release-github-pr": "^3.1.2"
   },
   "lint-staged": {
     "*.js": [

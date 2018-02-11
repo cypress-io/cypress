@@ -40,32 +40,4 @@ describe('semantic-release plugin options transforms', () => {
       });
     });
   });
-
-  describe('#mapLastReleaseVersionToLastReleaseGitTag', () => {
-    it('maps the lastRelease.version option to lastRelease.gitTag', async () => {
-      const fn = mapLastReleaseVersionToLastReleaseGitTag(toTag);
-
-      expect(await fn(OPTIONS)).toEqual({
-        ...OPTIONS,
-        lastRelease: {
-          gitTag: 'tag-1.2.3',
-          version: '1.2.3',
-        },
-      });
-    });
-  });
-
-  describe('#mapNextReleaseVersionToNextReleaseGitTag', () => {
-    it('maps the nextRelease.version option to nextRelease.gitTag', async () => {
-      const fn = mapNextReleaseVersionToNextReleaseGitTag(toTag);
-
-      expect(await fn(OPTIONS)).toEqual({
-        ...OPTIONS,
-        nextRelease: {
-          gitTag: 'tag-4.5.6',
-          version: '4.5.6',
-        },
-      });
-    });
-  });
 });
