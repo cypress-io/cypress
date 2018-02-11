@@ -30,7 +30,7 @@ normalizeBackslashes = (options) ->
   ## remove stray double quote from runProject and other path properties
   ## due to bug in NPM passing arguments with
   ## backslash at the end
-  ## https://github.com/cypress-io/cypress-monorepo/issues/535
+  ## https://github.com/cypress-io/cypress/issues/535
   # these properties are paths and likely to have backslash on Windows
   pathProperties = ["runProject", "project", "appPath", "execPath"]
 

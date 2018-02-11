@@ -563,6 +563,11 @@ describe "lib/cypress", ->
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+      if process.env.CI
+        ## Gleb: disabling this because Node 8 docker image runs as root
+        ## which makes accessing everything possible.
+        return
+
       permissionsPath = path.resolve("./permissions")
 
       cypressJson = path.join(permissionsPath, "cypress.json")
