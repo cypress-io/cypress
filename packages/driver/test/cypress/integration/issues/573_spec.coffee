@@ -1,6 +1,6 @@
 run = ->
   cy.window()
-  .then (win) ->
+  .then { timeout: 60000 }, (win) ->
     new Cypress.Promise (resolve) ->
       i = win.document.createElement("iframe")
       i.onload = resolve
@@ -8,7 +8,7 @@ run = ->
       win.document.body.appendChild(i)
   .get("iframe").should ($iframe) ->
     expect($iframe.contents().text()).to.include("basic auth worked")
-  .window().then (win) ->
+  .window().then { timeout: 60000 }, (win) ->
     new Cypress.Promise (resolve, reject) ->
       xhr = new win.XMLHttpRequest()
       xhr.open("GET", "/basic_auth")
@@ -19,7 +19,7 @@ run = ->
         catch err
           reject(err)
       xhr.send()
-  .then (win) ->
+  .then { timeout: 60000 }, (win) ->
     new Cypress.Promise (resolve, reject) ->
       ## ensure other origins do not have auth headers attached
       xhr = new win.XMLHttpRequest()
