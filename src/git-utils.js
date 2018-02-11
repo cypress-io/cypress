@@ -25,32 +25,7 @@ const getCommitFiles = pipeP(
  */
 const getRoot = () => git(['rev-parse', '--show-toplevel']);
 
-/**
- * Get the commit sha for a given tag.
- * https://github.com/semantic-release/semantic-release/blob/996305d69c36158f771bd20b6b416aa3461fb309/lib/git.js#L12
- *
- * @param {string} tagName Tag name for which to retrieve the commit sha.
- * @return {string} The commit sha of the tag in parameter or `null`.
- */
-const getTagHead = tagName =>
-  git(['rev-list', '-1', tagName], { reject: false });
-
-/**
- * Fetch tags from the repository's origin.
- */
-const fetchTags = () => git(['fetch', '--tags']);
-
-/**
- * Unshallow the git repository (retrieving every commit and tags).
- * Adapted from: https://github.com/semantic-release/npm/blob/cf039fdafda1a5ce43c2a5f033160cd46487f102/lib/git.js
- */
-const unshallow = () =>
-  git(['fetch', '--unshallow', '--tags'], { reject: false });
-
 module.exports = {
   getCommitFiles,
   getRoot,
-  getTagHead,
-  fetchTags,
-  unshallow,
 };
