@@ -41,6 +41,16 @@ describe "src/cy/commands/aliasing", ->
       cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
 
+    it "retries primitives and assertions", ->
+      obj = {}
+
+      cy.on "command:retry", _.after 2, ->
+        obj.foo = "bar"
+
+      cy.wrap(obj).as("obj")
+
+      cy.get("@obj").should("deep.eq", { foo: "bar" })
+
     context "DOM subjects", ->
       it "assigns the remote jquery instance", ->
         obj = {}
