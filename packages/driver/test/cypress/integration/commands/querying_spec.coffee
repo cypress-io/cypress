@@ -564,6 +564,9 @@ describe "src/cy/commands/querying", ->
           .get("@foo").should("contain", "asdf")
 
     describe "should('exist')", ->
+      beforeEach ->
+        Cypress.config("defaultCommandTimeout", 1000)
+
       it "waits until button exists", ->
         cy.on "command:retry", _.after 3, =>
           cy.$$("body").append $("<div id='missing-el'>missing el</div>")
