@@ -711,7 +711,6 @@ workflows:
             branches:
               only:
                 - develop
-                - issue-895
           requires:
             - build
       - build-binary:
@@ -719,7 +718,6 @@ workflows:
             branches:
               only:
                 - develop
-                - issue-895
           requires:
             - build
       - test-next-version:
@@ -727,7 +725,6 @@ workflows:
             branches:
               only:
                 - develop
-                - issue-895
           requires:
             - build-npm-package
             - build-binary
