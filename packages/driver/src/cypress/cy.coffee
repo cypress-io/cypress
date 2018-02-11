@@ -43,19 +43,6 @@ silenceConsole = (contentWindow) ->
     c.warn = ->
     c.info = ->
 
-redefineSelfAndParent = (contentWindow) ->
-  try
-    Object.defineProperty contentWindow, "self", {
-      get: ->
-        contentWindow.top
-    }
-
-  try
-    Object.defineProperty contentWindow, "parent", {
-      get: ->
-        contentWindow
-    }
-
 getContentWindow = ($autIframe) ->
   $autIframe.prop("contentWindow")
 
@@ -872,9 +859,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## inspection via the developer
       if not config("isInteractive")
         silenceConsole(contentWindow)
-
-      if config("modifyObstructiveCode")
-        redefineSelfAndParent(contentWindow)
 
       ## we set window / document props before the window load event
       ## so that we properly handle events coming from the application
