@@ -15,13 +15,12 @@ UrlParse = require("url-parse")
 ## have to send it to the client
 parseDomain = require("parse-domain")
 
-ipAddressRe = /.?localhost|\.local|^[\d\.]+$/
+ipAddressRe = /^[\d\.]+$/
 
 reHttp = /^https?:\/\//
 reWww = /^www/
 
 reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
-ipAddressRe = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 
 class $Location
   constructor: (remote) ->
