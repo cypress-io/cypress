@@ -11,6 +11,7 @@ morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
+debug        = require("debug")("cypress:support:e2e")
 Fixtures     = require("./fixtures")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
@@ -112,9 +113,15 @@ module.exports = {
           fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
 
       after ->
+        ## now cleanup the node modules after because these add a lot
+        ## of copy time for the Fixtures scaffolding
         fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
 
     beforeEach ->
+      ## after installing node modules copying all of the fixtures
+      ## can take a long time (5-15 secs)
+      @timeout(human("2 minutes"))
+
       Fixtures.scaffold()
 
       @sandbox.stub(process, "exit")
@@ -129,10 +136,14 @@ module.exports = {
         else
           @servers = null
       .then =>
+
         if s = options.settings
           settings.write(e2ePath, s)
+      .then =>
 
     afterEach ->
+      @timeout(human("2 minutes"))
+
       Fixtures.remove()
 
       if s = @servers

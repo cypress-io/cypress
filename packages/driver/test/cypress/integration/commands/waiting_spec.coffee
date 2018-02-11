@@ -125,7 +125,7 @@ describe "src/cy/commands/waiting", ->
             null
           .wait("@fetch")
 
-      ## https://github.com/cypress-io/cypress-monorepo/issues/369
+      ## https://github.com/cypress-io/cypress/issues/369
       it "does not mutate 2nd route methods when using shorthand route", ->
         cy
           .server()
@@ -565,7 +565,7 @@ describe "src/cy/commands/waiting", ->
             expect(xhr.responseBody).to.deep.eq resp
 
       ## TODO: fixme failing in CI sometimes
-      ## https://circleci.com/gh/cypress-io/cypress-monorepo/5655
+      ## https://circleci.com/gh/cypress-io/cypress/5655
       it.skip "waits for the 4th request before resolving", ->
         resp = {foo: "foo"}
         response = 0

@@ -13,7 +13,7 @@ echo Command npm run binary-deploy -- "$@"
 
 docker run \
   -e npm_config_loglevel='warn' \
-  -v $PWD:/home/person/cypress-monorepo \
-  -w /home/person/cypress-monorepo \
+  -v $PWD:/home/person/cypress \
+  -w /home/person/cypress \
   -it $name \
   npm run binary-deploy -- "$@"

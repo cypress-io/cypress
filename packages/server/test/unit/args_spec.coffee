@@ -28,7 +28,7 @@ describe "lib/util/args", ->
       expect(options.projectPath).to.eq projectPath
 
     it "strips single double quote from the end", ->
-      # https://github.com/cypress-io/cypress-monorepo/issues/535
+      # https://github.com/cypress-io/cypress/issues/535
       # NPM does not pass correctly options that end with backslash
       options = @setup("--run-project", "C:\\foo\"")
       expect(options.runProject).to.eq("C:\\foo")
