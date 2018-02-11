@@ -216,6 +216,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
 
             expect(@server._getRemoteState()).to.deep.eq({
+              auth: undefined
               origin: "http://localhost:2000"
               strategy: "file"
               visiting: false
@@ -379,6 +380,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script> </head>content</html>")
 
             expect(@server._getRemoteState()).to.deep.eq({
+              auth: undefined
               origin: "http://espn.go.com"
               strategy: "http"
               visiting: false
@@ -612,6 +614,64 @@ describe "Server", ->
             expect(res.body).to.include("document.domain = 'google.com'")
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script> </head>content</html>")
 
+      it "passes auth through", ->
+        username = "u"
+        password = "p"
+
+        base64 = new Buffer(username + ":" + password).toString("base64")
+
+        auth = {
+          username
+          password
+        }
+
+        nock("http://google.com")
+        .get("/index")
+        .matchHeader("authorization", "Basic #{base64}")
+        .reply(200, "<html>content</html>", {
+          "Content-Type": "text/html"
+        })
+        .get("/index2")
+        .matchHeader("authorization", "Basic #{base64}")
+        .reply(200, "<html>content</html>", {
+          "Content-Type": "text/html"
+        })
+
+        headers = {}
+        headers["user-agent"] = "foobarbaz"
+
+        @server._onResolveUrl("http://google.com/index", headers, @automationRequest, { auth })
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            isOkStatusCode: true
+            isHtml: true
+            contentType: "text/html"
+            url: "http://google.com/index"
+            originalUrl: "http://google.com/index"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+        .then =>
+          @rp("http://google.com/index2")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            auth: auth
+            origin: "http://google.com"
+            strategy: "http"
+            visiting: false
+            domainName: "google.com"
+            fileServer: null
+            props: {
+              domain: "google"
+              tld: "com"
+              port: "80"
+            }
+          })
+
     describe "both", ->
       beforeEach ->
         Fixtures.scaffold("no-server")
@@ -669,6 +729,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "http://www.google.com"
             strategy: "http"
             visiting: false
@@ -701,6 +762,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "http://localhost:2000"
             strategy: "file"
             visiting: false
@@ -742,6 +804,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>google</body></html>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "http://www.google.com"
             strategy: "http"
             visiting: false
@@ -777,6 +840,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "http://localhost:2000"
             strategy: "file"
             visiting: false
@@ -807,6 +871,7 @@ describe "Server", ->
               expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>google</body></html>")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
+              auth: undefined
               origin: "http://www.google.com"
               strategy: "http"
               visiting: false
@@ -844,6 +909,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>https server</body></html>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "https://www.foobar.com:8443"
             strategy: "http"
             visiting: false
@@ -879,6 +945,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "http://localhost:2000"
             strategy: "file"
             visiting: false
@@ -909,6 +976,7 @@ describe "Server", ->
               expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>https server</body></html>")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
+              auth: undefined
               origin: "https://www.foobar.com:8443"
               strategy: "http"
               visiting: false
@@ -955,6 +1023,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "https://www.apple.com"
             strategy: "http"
             visiting: false
@@ -990,6 +1059,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
+            auth: undefined
             origin: "http://localhost:2000"
             strategy: "file"
             visiting: false
@@ -1027,6 +1097,7 @@ describe "Server", ->
               expect(res.body).to.include("Cypress")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
+              auth: undefined
               origin: "https://www.apple.com"
               strategy: "http"
               visiting: false

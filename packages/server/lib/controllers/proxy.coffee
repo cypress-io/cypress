@@ -266,6 +266,13 @@ module.exports = {
       else
         opts.url = remoteUrl
 
+      ## if we have auth headers and this request matches our origin policy
+      if (a = remoteState.auth) and resMatchesOriginPolicy()
+        ## and no existing Authentication headers
+        if not req.headers["authorization"]
+          base64 = new Buffer(a.username + ":" + a.password).toString("base64")
+          req.headers["authorization"] = "Basic #{base64}"
+
       rq = request.create(opts)
 
       rq.on("error", endWithResponseErr)
