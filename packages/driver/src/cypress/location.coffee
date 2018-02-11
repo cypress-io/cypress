@@ -15,7 +15,7 @@ UrlParse = require("url-parse")
 ## have to send it to the client
 parseDomain = require("parse-domain")
 
-localHostOrIpAddressRe = /.?localhost|\.local|^[\d\.]+$/
+ipAddressRe = /.?localhost|\.local|^[\d\.]+$/
 
 reHttp = /^https?:\/\//
 reWww = /^www/
@@ -93,7 +93,7 @@ class $Location
     ## if we couldn't get a parsed domain
     if not parsed = parseDomain(hostname, {
       privateTlds: true ## use the public suffix
-      customTlds: localHostOrIpAddressRe
+      customTlds: ipAddressRe
     })
 
       ## then just fall back to a dumb check
@@ -104,8 +104,8 @@ class $Location
       segments = hostname.split(".")
 
       parsed = {
-        tld:    segments[segments.length - 1]
-        domain: segments[segments.length - 2]
+        tld:    segments[segments.length - 1] ? ""
+        domain: segments[segments.length - 2] ? ""
       }
 
     return _.compact([parsed.domain, parsed.tld]).join(".")
