@@ -68,6 +68,11 @@ module.exports = {
         ## and set a custom header
         res.set("x-cypress-matched-blacklisted-host", matched)
 
+        debug("blacklisting request %o", {
+          url: req.proxiedUrl
+          matched: matched
+        })
+
         return res.status(503).end()
 
     thr = through (d) -> @queue(d)
