@@ -48,6 +48,8 @@ onServer = (app) ->
     res.type("html").write("foo\n")
 
 describe "e2e visit", ->
+  require("mocha-banner").register()
+  
   context "low response timeout", ->
     e2e.setup({
       settings: {

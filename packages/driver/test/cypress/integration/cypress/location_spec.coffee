@@ -1,8 +1,4 @@
-require("../../support/unit_spec_helper")
-
-_ = require("lodash")
-Promise = require("bluebird")
-$Location = require("#{src}/cypress/location")
+{ _, Location, Promise } = Cypress
 
 urls = {
   blank:    "about:blank"
@@ -18,12 +14,32 @@ urls = {
   stack:    "https://stackoverflow.com/"
   trailHash:"http://localhost:3500/index.html?foo=bar#"
   email:    "http://localhost:3500/?email=brian@cypress.io"
+  heroku:   "https://example.herokuapp.com"
+  herokuSub:"https://foo.example.herokuapp.com"
+  unknown:  "http://what.is.so.unknown"
+  auth:     "http://cypress:password123@localhost:8080/foo"
 }
 
 describe "src/cypress/location", ->
   beforeEach ->
     @setup = (remote) =>
-      new $Location(urls[remote])
+      new Location(urls[remote])
+
+  context "#getAuth", ->
+    it "returns string with username + password", ->
+      str = @setup("auth").getAuth()
+      expect(str).to.eq("cypress:password123")
+
+  context "#getAuthObj", ->
+    it "returns an object with username and password", ->
+      obj = @setup("auth").getAuthObj()
+      expect(obj).to.deep.eq({
+        username: "cypress"
+        password: "password123"
+      })
+
+    it "returns undefined when no username or password", ->
+      expect(@setup("app").getAuthObj()).to.be.undefined
 
   context "#getHash", ->
     it "returns the hash fragment prepended with #", ->
@@ -145,20 +161,32 @@ describe "src/cypress/location", ->
       str = @setup("email").getOriginPolicy()
       expect(str).to.eq("http://localhost:3500")
 
+    it "handles private tlds in the public suffix", ->
+      str = @setup("heroku").getOriginPolicy()
+      expect(str).to.eq("https://example.herokuapp.com")
+
+    it "handles subdomains of private tlds in the public suffix", ->
+      str = @setup("herokuSub").getOriginPolicy()
+      expect(str).to.eq("https://example.herokuapp.com")
+
+    it "falls back to dumb check when invalid tld", ->
+      str = @setup("unknown").getOriginPolicy()
+      expect(str).to.eq("http://so.unknown")
+
   context ".create", ->
     it "returns an object literal", ->
-      obj = $Location.create(urls.cypress, urls.signin)
-      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"]
+      obj = Location.create(urls.cypress, urls.signin)
+      keys = ["auth", "authObj", "hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"]
       expect(obj).to.have.keys(keys)
 
     it "can invoke toString function", ->
-      obj = $Location.create(urls.signin)
+      obj = Location.create(urls.signin)
       expect(obj.toString()).to.eq("http://localhost:2020/signin")
 
   context ".normalize", ->
     beforeEach ->
       @url = (source, expected) ->
-        url = $Location.normalize(source)
+        url = Location.normalize(source)
         expect(url).to.eq(expected)
 
     describe "http urls", ->
@@ -210,44 +238,39 @@ describe "src/cypress/location", ->
 
   context ".fullyQualifyUrl", ->
     beforeEach ->
-      ## TODO: might be easier to stub out something on
-      ## the $Location object -> or refactor for it
-      ## to use a location getter module
-      jsdom.reconfigure({url: "http://localhost:3500"})
-
       @normalize = (url) ->
-        $Location.normalize(url)
+        Location.normalize(url)
 
     it "does not append trailing slash on a sub directory", ->
       url = @normalize("http://localhost:4200/app")
-      url = $Location.fullyQualifyUrl(url)
+      url = Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:4200/app"
 
     it "does not append a trailing slash to url with hash", ->
       url = @normalize("http://localhost:4000/#/home")
-      url = $Location.fullyQualifyUrl(url)
+      url = Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:4000/#/home"
 
     it "does not append a trailing slash to protocol-less url with hash", ->
       url = @normalize("www.github.com/#/home")
-      url = $Location.fullyQualifyUrl(url)
+      url = Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://www.github.com/#/home"
 
     it "handles urls without a host", ->
       url = @normalize("index.html")
-      url = $Location.fullyQualifyUrl(url)
+      url = Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/index.html"
 
     it "does not insert trailing slash without a host", ->
-      url = $Location.fullyQualifyUrl("index.html")
+      url = Location.fullyQualifyUrl("index.html")
       expect(url).to.eq "http://localhost:3500/index.html"
 
     it "handles no host + query params", ->
       url = @normalize("timeout?ms=1000")
-      url = $Location.fullyQualifyUrl(url)
+      url = Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/timeout?ms=1000"
 
     it "does not strip off path", ->
       url = @normalize("fixtures/sinon.html")
-      url = $Location.fullyQualifyUrl(url)
+      url = Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/fixtures/sinon.html"

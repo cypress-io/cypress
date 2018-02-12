@@ -5,6 +5,7 @@ konfig = require("konfig")
 getConfig = ->
   ## backup previous env
   previousNodeEnv = process.env["NODE_ENV"]
+  previousNodeEnvExisted = process.env.hasOwnProperty "NODE_ENV"
 
   ## we want to set node env to cypress env
   ## and then restore it back to the previous
@@ -13,8 +14,11 @@ getConfig = ->
   ## get the config values
   config = konfig().app
 
-  ## restore
-  process.env["NODE_ENV"] = previousNodeEnv
+  ## restore NODE_ENV to previous state
+  if previousNodeEnvExisted
+    process.env["NODE_ENV"] = previousNodeEnv
+  else
+    delete process.env["NODE_ENV"]
 
   ## return the config getter function
   return (getter) ->

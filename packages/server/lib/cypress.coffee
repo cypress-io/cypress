@@ -162,6 +162,11 @@ module.exports = {
       mode    = options.mode
       options = _.omit(options, "mode")
 
+      ## TODO: temporary hack to get this commit in
+      ## before spec parallelization lands
+      if _.isArray(options.spec)
+        options.spec = options.spec[0]
+
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->

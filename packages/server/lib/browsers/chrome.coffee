@@ -40,17 +40,17 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
 
-  ## needed for https://github.com/cypress-io/cypress/issues/573
-  ## list of flags here: https://cs.chromium.org/chromium/src/third_party/WebKit/Source/platform/runtime_enabled_features.json5
-  "--disable-blink-features=BlockCredentialedSubresources"
-
   ## the following come from chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
   "--metrics-recording-only" ## Enables the recording of metrics reports but disables reporting
   "--disable-prompt-on-repost" ## Disables prompt when user re-submits POST form
   "--disable-hang-monitor" ## Suppresses hang monitor dialogs in renderer processes
   "--disable-sync"
-  "--disable-background-networking" ## Disable several subsystems which run network requests in the background. This is for use when doing network performance testing to avoid noise in the measurements
+  ## this flag is causing throttling of XHR callbacks for
+  ## as much as 30 seconds. If you VNC in and open dev tools or
+  ## click on a button, it'll "instantly" work. with this
+  ## option enabled, it will time out some of our tests in circle
+  # "--disable-background-networking"
   "--disable-web-resources"
   "--safebrowsing-disable-auto-update"
   "--safebrowsing-disable-download-protection"

@@ -1,10 +1,11 @@
 inject = require("./inject")
+security = require("./security")
 
 headRe      = /(<head.*?>)/i
 bodyRe      = /(<body.*?>)/i
 htmlRe      = /(<html.*?>)/i
 
-rewriteHtml = (html, domainName, wantsInjection) ->
+rewriteHtml = (html, domainName, wantsInjection, modifyObstructiveCode) ->
   replace = (re, str) ->
     html.replace(re, str)
 
@@ -14,6 +15,11 @@ rewriteHtml = (html, domainName, wantsInjection) ->
         inject.full(domainName)
       when "partial"
         inject.partial(domainName)
+
+  ## strip clickjacking and framebusting
+  ## from the HTML if we've been told to
+  if modifyObstructiveCode
+    html = security.strip(html)
 
   switch
     when headRe.test(html)
@@ -30,4 +36,6 @@ rewriteHtml = (html, domainName, wantsInjection) ->
 
 module.exports = {
   html: rewriteHtml
+
+  security: security.stripStream
 }

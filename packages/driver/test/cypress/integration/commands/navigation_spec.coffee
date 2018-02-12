@@ -513,6 +513,27 @@ describe "src/cy/commands/navigation", ->
         .visit("localhost:3500/status-404", { failOnStatusCode: false })
         .visit("localhost:3500/status-500", { failOnStatusCode: false })
 
+    it "strips username + password out of the url when provided", ->
+      backend = cy.spy(Cypress, "backend")
+
+      cy
+        .visit("http://cypress:password123@localhost:3500/timeout")
+        .then ->
+          expect(backend).to.be.calledWith("resolve:url", "http://localhost:3500/timeout")
+
+    it "passes auth options", ->
+      backend = cy.spy(Cypress, "backend")
+
+      auth = {
+        username: "cypress"
+        password: "password123"
+      }
+
+      cy
+        .visit("http://localhost:3500/timeout", { auth })
+        .then ->
+          expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0

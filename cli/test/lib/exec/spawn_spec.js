@@ -10,6 +10,8 @@ const xvfb = require(`${lib}/exec/xvfb`)
 const spawn = require(`${lib}/exec/spawn`)
 const util = require(`${lib}/util.js`)
 
+const cwd = process.cwd()
+
 describe('exec spawn', function () {
   beforeEach(function () {
     this.sandbox.stub(process, 'exit')
@@ -40,7 +42,13 @@ describe('exec spawn', function () {
 
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
-        expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', ['--foo'], { foo: 'bar' })
+        expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
+          '--foo',
+          '--cwd',
+          cwd,
+        ], {
+          foo: 'bar',
+        })
       })
     })
 
@@ -51,7 +59,14 @@ describe('exec spawn', function () {
 
       return spawn.start('--foo', { dev: true, foo: 'bar' })
       .then(() => {
-        expect(cp.spawn).to.be.calledWithMatch('node', [p, '--foo'], { foo: 'bar' })
+        expect(cp.spawn).to.be.calledWithMatch('node', [
+          p,
+          '--foo',
+          '--cwd',
+          cwd,
+        ], {
+          foo: 'bar',
+        })
       })
     })
 
