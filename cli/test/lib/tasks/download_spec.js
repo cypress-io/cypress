@@ -5,6 +5,8 @@ const nock = require('nock')
 const snapshot = require('snap-shot-it')
 const la = require('lazy-ass')
 const is = require('check-more-types')
+const home = require('os').homedir()
+const Promise = require('bluebird')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -101,6 +103,29 @@ describe('download', function () {
 
     return download.start(this.options).then(() => {
       expect(this.options.version).to.eq('0.13.0')
+    })
+  })
+
+  it('searches from global cache if there is no local binary', function () {
+    const version = '0.13.0'
+    const pathFileGlobalCache = `${home}/.cypress/${version}`
+
+    this.options = Object.assign({}, this.options, { version })
+
+    // simulate that no local file was found but the global one was
+    this.sandbox.stub(fs, 'pathExists').callsFake((path) => {
+      if (path === pathFileGlobalCache) {
+        return Promise.resolve(true)
+      }
+
+      return Promise.resolve(false)
+    })
+
+    return download.start(this.options).then((result) => {
+      expect(result).to.deep.eq({
+        filename: `${home}/.cypress/${version}`,
+        downloaded: false,
+      })
     })
   })
 
