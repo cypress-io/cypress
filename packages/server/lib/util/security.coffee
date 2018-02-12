@@ -1,15 +1,22 @@
 stream = require("stream")
 replacestream = require("replacestream")
 
-## match the word 'top' or 'parent' as long as its prefixed
-## by a letter or number or followed by a letter or number
-topOrParentRe = /([^\d|a-zA-Z]){1}(top|parent)([^\d|a-zA-Z]){1}/g
+topOrParentRe = /.*(top|parent).*/g
+topOrParentEqualityBeforeRe = /([!=][=]\s*(?:window(?:\.|\[['"]))?)(top|parent)/g
+topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=][=])/g
+topOrParentLocationOrFramesRe = /([^\da-zA-Z])(top|parent)([.])(location|frames)/g
+
+replacer = (match, p1, offset, string) ->
+  match
+  .replace(topOrParentEqualityBeforeRe, "$1self")
+  .replace(topOrParentEqualityAfterRe, "self$2")
+  .replace(topOrParentLocationOrFramesRe, "$1self$3$4")
 
 strip = (html) ->
-  html.replace(topOrParentRe, "$1self$3") ## replace top with 'self'
+  html.replace(topOrParentRe, replacer)
 
 stripStream = ->
-  replacestream(topOrParentRe, "$1self$3")
+  replacestream(topOrParentRe, replacer)
 
 module.exports = {
   strip
