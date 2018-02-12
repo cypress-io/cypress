@@ -41,9 +41,15 @@ original = """
       if (window.top != window.self) run()
       if (window["top"] != window["parent"]) run()
       if (window['top'] != window['parent']) run()
+      if (window["top"] != self['parent']) run()
       if (parent && parent != window) run()
+      if (parent && parent != self) run()
+      if (parent && window != parent) run()
+      if (parent && self != parent) run()
       if (parent && parent.frames && parent.frames.length > 0) run()
       if ((self.parent && !(self.parent === self)) && (self.parent.frames.length != 0)) run()
+      if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
       if (top===self) return
       if (top==self) return
     </script>
@@ -89,9 +95,15 @@ expected = """
       if (window.self != window.self) run()
       if (window["self"] != window["self"]) run()
       if (window['self'] != window['self']) run()
+      if (window["self"] != self['self']) run()
       if (parent && self != window) run()
+      if (parent && self != self) run()
+      if (parent && window != self) run()
+      if (parent && self != self) run()
       if (parent && self.frames && self.frames.length > 0) run()
       if ((self.parent && !(self.self === self)) && (self.self.frames.length != 0)) run()
+      if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
       if (self===self) return
       if (self==self) return
     </script>

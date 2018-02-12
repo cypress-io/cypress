@@ -2,8 +2,8 @@ stream = require("stream")
 replacestream = require("replacestream")
 
 topOrParentRe = /.*(top|parent).*/g
-topOrParentEqualityBeforeRe = /([!=][=]\s*(?:window(?:\.|\[['"]))?)(top|parent)/g
-topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=][=])/g
+topOrParentEqualityBeforeRe = /((?:window|self).*[!=][=]\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)/g
+topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=][=].*(?:window|self))/g
 topOrParentLocationOrFramesRe = /([^\da-zA-Z])(top|parent)([.])(location|frames)/g
 
 replacer = (match, p1, offset, string) ->
