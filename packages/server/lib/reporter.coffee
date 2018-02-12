@@ -66,23 +66,7 @@ createRunnable = (obj, parent) ->
   return runnable
 
 mergeRunnable = (eventName) ->
-  return (testProps, runnables, stats) ->
-    switch eventName
-      when "test"
-        ## we deviate here from the defaul spec reporter
-        ## because cypress considers a 'test' the test body
-        ## including the hooks as opposed to only when the
-        ## test finishes
-        stats.tests += 1
-      when "pass"
-        stats.passes += 1
-      when "pending"
-        stats.pending += 1
-      when "suite"
-        ## dont increment if root suite
-        if not testProps.root
-          stats.suites += 1
-
+  return (testProps, runnables) ->
     runnable = runnables[testProps.id]
 
     _.extend(runnable, testProps)
@@ -102,12 +86,6 @@ safelyMergeRunnable = (hookProps, runnables) ->
   _.extend({}, runnables[hookProps.id], hookProps)
 
 mergeErr = (runnable, runnables, stats) ->
-  ## increment stats failures
-  ## because thats what the fail() fn does.
-  ## useful for reporters expecting this
-  ## and for 'end' event fn callbacks
-  stats.failures += 1
-
   ## this will always be a test because
   ## we reset hook id's to match tests
   test = runnables[runnable.id]
@@ -162,7 +140,7 @@ class Reporter
 
   setRunnables: (rootRunnable = {}) ->
     ## manage stats ourselves
-    @stats = { suites: 0, tests: 0, passes: 0, pending: 0, failures: 0 }
+    @stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
     reporter = Reporter.loadReporter(@reporterName, @projectRoot)
@@ -254,20 +232,32 @@ class Reporter
   results: ->
     tests = _
     .chain(@runnables)
-    .filter({type: 'test'})
+    .filter({type: "test"})
     .map(@normalizeTest)
     .value()
 
     hooks = _
     .chain(@runnables)
-    .filter({type: 'hook'})
+    .filter({type: "hook"})
     .map(@normalizeHook)
+    .value()
+
+    suites = _
+    .chain(@runnables)
+    .filter({type: "suite"})
     .value()
 
     { start, end } = @stats
 
     if start and end
       @stats.duration = end - start
+
+    @stats.suites = suites.length - 1 ## subtract the root suite
+    @stats.tests = tests.length
+    @stats.passes = _.filter(tests, { state: "passed" }).length
+    @stats.pending = _.filter(tests, { state: "pending" }).length
+    @stats.skipped = _.filter(tests, { state: "skipped" }).length
+    @stats.failures = _.filter(tests, { state: "failed" }).length
 
     ## return an object of results
     return {
