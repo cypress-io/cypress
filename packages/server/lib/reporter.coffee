@@ -88,7 +88,7 @@ mergeRunnable = (eventName) ->
     _.extend(runnable, testProps)
 
 safelyMergeRunnable = (hookProps, runnables) ->
-  { hookId, title, body, type } = hookProps
+  { hookId, title, hookName, body, type } = hookProps
 
   if not runnable = runnables[hookId]
     runnables[hookId] = {
@@ -96,6 +96,7 @@ safelyMergeRunnable = (hookProps, runnables) ->
       type
       title
       body
+      hookName
     }
 
   _.extend({}, runnables[hookProps.id], hookProps)
@@ -142,6 +143,7 @@ events = {
   "pass":      mergeRunnable("pass")
   "pending":   mergeRunnable("pending")
   "fail":      mergeErr
+  "test:after:run": mergeRunnable("test:after:run") ## our own custom event
 }
 
 reporters = {
@@ -208,6 +210,7 @@ class Reporter
   normalizeHook: (hook = {}) ->
     {
       hookId: hook.hookId
+      hookName: hook.hookName
       title:  getParentTitle(hook)
       body:   hook.body
     }
@@ -215,12 +218,17 @@ class Reporter
   normalizeTest: (test = {}) ->
     err = test.err ? {}
 
+    ## wallClockDuration:
+    ## this is the 'real' duration of wall clock time that the
+    ## user 'felt' when the test run. it includes everything
+    ## from hooks, to the test itself, to lifecycle, and event
+    ## async browser compute time. this number is likely higher
+    ## than summing the durations of the timings.
+    ##
     {
       clientId:       test.id
       title:          getParentTitle(test)
       state:          test.state
-      duration:       test.duration
-      fnDuration:     test.fnDuration
       start:          test.start
       end:            test.end
       body:           test.body
@@ -228,6 +236,7 @@ class Reporter
       error:          err.message
       timings:        test.timings
       failedFromHookId: test.failedFromHookId
+      wallClockDuration: test.wallClockDuration
       # videoTimestamp: test.started - videoStart
     }
 
