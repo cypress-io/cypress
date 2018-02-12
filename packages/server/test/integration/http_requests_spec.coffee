@@ -2335,6 +2335,93 @@ describe "Routes", ->
 
             expect(body).to.eq("<html><head></head></html>")
 
+    context "security rewriting", ->
+      describe "on by default", ->
+        beforeEach ->
+          @setup("http://www.google.com")
+
+        it "replaces obstructive code in HTML files", ->
+          html = "<html><body><script>if (top !== self) { }</script></body></html>"
+
+          nock(@server._remoteOrigin)
+          .get("/index.html")
+          .reply 200, html, {
+            "Content-Type": "text/html"
+          }
+
+          @rp({
+            url: "http://www.google.com/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include(
+              "<script>if (self !== self) { }</script>"
+            )
+
+        it "replaces obstructive code in JS files", ->
+          nock(@server._remoteOrigin)
+          .get("/app.js")
+          .reply 200, "if (top !== self) { }", {
+            "Content-Type": "application/javascript"
+          }
+
+          @rp("http://www.google.com/app.js")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.eq(
+              "if (self !== self) { }"
+            )
+
+      describe "off with config", ->
+        beforeEach ->
+          @setup("http://www.google.com", {
+            config: {
+              modifyObstructiveCode: false
+            }
+          })
+
+        it "can turn off security rewriting for HTML", ->
+          html = "<html><body><script>if (top !== self) { }</script></body></html>"
+
+          nock(@server._remoteOrigin)
+          .get("/index.html")
+          .reply 200, html, {
+            "Content-Type": "text/html"
+          }
+
+          @rp({
+            url: "http://www.google.com/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include(
+              "<script>if (top !== self) { }</script>"
+            )
+
+        it "does not replaces obstructive code in JS files", ->
+          nock(@server._remoteOrigin)
+          .get("/app.js")
+          .reply 200, "if (top !== self) { }", {
+            "Content-Type": "application/javascript"
+          }
+
+          @rp("http://www.google.com/app.js")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.eq(
+              "if (top !== self) { }"
+            )
+
     context "FQDN rewriting", ->
       beforeEach ->
         @setup("http://www.google.com")
