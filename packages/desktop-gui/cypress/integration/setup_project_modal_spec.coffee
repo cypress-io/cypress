@@ -149,7 +149,7 @@ describe "Set Up Project", ->
           cy.get(".modal-content")
             .contains(".btn", "An Organization").click()
 
-        it.only "displays empty message", ->
+        it "displays empty message", ->
           cy.get(".empty-select-orgs").should("be.visible")
 
         it "opens dashboard organizations when 'create org' is clicked", ->
