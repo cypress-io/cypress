@@ -1,22 +1,26 @@
-exports['e2e page_loading passes 1'] = `
+exports['e2e domain passing 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
 
-  page_loading
-    ✓ sets __cypress.initial, properly injects, and avoids json injection
-    issue #258: opener is undefined during snapshot
-      ✓ causes the xhr to be aborted while in flight
+  localhost
+    ✓ can visit
+
+  com.au
+    ✓ can visit
+
+  herokuapp.com
+    ✓ can visit
 
 
-  2 passing
+  3 passing
 
 
   (Tests Finished)
 
-  - Tests:           2
-  - Passes:          2
+  - Tests:           3
+  - Passes:          3
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds

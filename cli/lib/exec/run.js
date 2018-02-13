@@ -7,6 +7,7 @@ const verify = require('../tasks/verify')
 // and forms list of CLI arguments to the server
 const processRunOptions = (options = {}) => {
   debug('processing run options')
+
   const args = ['--run-project', options.project]
 
   //// if key is set use that - else attempt to find it by env var
@@ -27,7 +28,7 @@ const processRunOptions = (options = {}) => {
     args.push('--port', options.port)
   }
 
-  //// if we have a specific spec push that into the args
+  // if we have specific spec(s) push that into the args
   if (options.spec) {
     args.push('--spec', options.spec)
   }

@@ -4,7 +4,7 @@ exports['lib/plugins/child/run_plugins sends error message if pluginsFile is mis
     at Function.hookedLoader [as _load] <path>mockery.js
     at Module.require <path>module.js
     at require <path>module.js
-    at module.exports.err <path>run_plugins.js
+    at module.exports <path>run_plugins.js
     at Context.<anonymous> <path>run_plugins_spec.coffee
     at callFn <path>runnable.js
     at Test.Runnable.run <path>runnable.js
@@ -35,7 +35,7 @@ exports['lib/plugins/child/run_plugins sends error message if requiring pluginsF
     at Function.hookedLoader [as _load] <path>mockery.js
     at Module.require <path>module.js
     at require <path>module.js
-    at module.exports.err <path>run_plugins.js
+    at module.exports <path>run_plugins.js
     at Context.<anonymous> <path>run_plugins_spec.coffee
     at callFn <path>runnable.js
     at Test.Runnable.run <path>runnable.js
@@ -65,4 +65,3 @@ exports['lib/plugins/child/run_plugins on \'load\' message sends error if plugin
   "name": "ReferenceError",
   "message": "foo is not defined"
 }
-

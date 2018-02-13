@@ -1,11 +1,11 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
-    "node": ">=6.5.0"
+    "node": ">=8.2.1"
   },
   "scripts": {
     "start": "node ./cli/bin/cypress open --dev --global",

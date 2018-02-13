@@ -19,8 +19,8 @@ Thanks for taking the time to contribute! :smile:
 
 - [CI Status](#ci-status)
 - [Code of Conduct](#code-of-conduct)
-- [Bug Reports](#bug-reports)
-- [Feature Requests](#feature-requests)
+- [Bugs & Feature Requests](#bugs-features)
+- [Writing Documentation](#writing-documentation)
 - [Writing Code](#writing-code)
   - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
   - [Requirements](#requirements)
@@ -28,7 +28,6 @@ Thanks for taking the time to contribute! :smile:
   - [Coding Style](#coding-style)
   - [Tests](#tests)
   - [Packages](#packages)
-- [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
   - [Branches](#branches)
   - [Pull Requests](#pull-requests)
@@ -53,29 +52,24 @@ Build status | Description
 
 All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Bug Reports
+## Bugs & Feature Requests
 
 **The most important things to do are:**
 
 - Search existing [issues](https://github.com/cypress-io/cypress/issues) for your problem.
+- Understand our [roadmap](https://on.cypress.io/roadmap).
 - Check the list of [common fixes](#common-fixes) below.
-- Make sure we [support your setup](#supported-issues).
 - [Gather debugging information](#getting-more-information).
+- [Describe your problem, not your solution](#describe-problems)
 - [Explain how to reproduce the issue](#reproducibility).
 
 Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
-
-If you have a feature request (not a bug), see [Feature Requests](#feature-requests).
 
 ### Common Fixes
 
 Before filing a bug, make sure you are up to date. Your issue may have already been fixed. Even if you do not see the issue described as resolved in a newer version, a newer version may help in the process of debugging your issue by giving more helpful error messages.
 
 [See our document on installing cypress](https://on.cypress.io/installing-cypress)
-
-### Supported Issues
-
-Before filing a bug, make sure you are filing an issue against something we support. See our [System Requirements](https://on.cypress.io/installing-cypress#system-requirements).
 
 ### Getting more information
 
@@ -86,32 +80,6 @@ For some issues, there are places you can check for more information. This may h
 - Use Cypress [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
 - Ask other Cypress users for help in our [chat](https://on.cypress.io/chat).
 
-### Reproducibility
-
-The most important part of your issue is instructions on how to reproduce the issue.
-- What did you do?
-- If you do it again, does it still break?
-- Does it depend on a specific order?
-
-**It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
-
-## Feature Requests
-
-**The most important things to do are:**
-
-- Understand our [roadmap](https://on.cypress.io/roadmap).
-- Make sure your feature makes sense in the project.
-- [Align your expectations around timelines and priorities.](#setting-expectations)
-- [Describe your problem, not your solution](#describe-problems)
-
-If you think your feature might be a good fit for our roadmap, has reasonable expectations about it, and has a good description of the problem you are trying to solve, you are ready to [open a feature request](https://github.com/cypress-io/cypress/issues/new).
-
-### Setting Expectations
-
-We have a lot of users and a small team. Even if your feature is something we are interested in and a good fit for where we want the product to go, it may take us a long time to get around to building it.
-
-If you want a concrete timeline, you can [contact us](mailto:support@cypress.io) to pay for some control over our [roadmap](https://on.cypress.io/roadmap).
-
 ### Describe Problems
 
 When you file a feature request, we need you to **describe the problem you are facing first**, not just your desired solution.
@@ -119,6 +87,15 @@ When you file a feature request, we need you to **describe the problem you are f
 Often, your problem may have a lot in common with other similar problems. If we understand your use case we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
 
 Also, your proposed solution may not be compatible with the direction we want to take the product, but we may be able to come up with another solution which has approximately the same effect and does fit into the product direction.
+
+### Reproducibility
+
+**It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
+
+## Writing Documentation
+
+Cypress documentation lives in separate repository with its own dependencies and build tools.
+See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -136,6 +113,7 @@ Here is a list of the core packages in this repository with a short description,
 
  Folder Name | Purpose
  ----------- | -------
+[cli](./cli) | The command-line tool that is packaged as an `npm` module.
 [coffee](./packages/coffee) | A centralized version of CoffeeScript used for other packages.
 [desktop-gui](./packages/desktop-gui) | The front-end code for the Cypress Desktop GUI.
 [driver](./packages/driver) | The code that is used to drive the behavior of the API commands.
@@ -307,11 +285,6 @@ Generally when making contributions, you are typically making it to a small numb
 Each package documents how to best work with it, so simple consult the `README.md` of each package.
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
-
-## Writing Documentation
-
-Cypress documentation lives in separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Committing Code
 

@@ -9,15 +9,34 @@
 _ = require("lodash")
 UrlParse = require("url-parse")
 
+## TODO: this adds 70kb gzipped
+## and we need to move this to use
+## node over websockets so we dont
+## have to send it to the client
+parseDomain = require("parse-domain")
+
+ipAddressRe = /^[\d\.]+$/
+
 reHttp = /^https?:\/\//
 reWww = /^www/
 
 reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
-ipAddressRe = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 
 class $Location
   constructor: (remote) ->
     @remote = new UrlParse remote
+
+  getAuth: ->
+    @remote.auth
+
+  getAuthObj: ->
+    if a = @remote.auth
+      [ username, password ] = a.split(":")
+      return {
+        username
+
+        password
+      }
 
   getHash: ->
     @remote.hash
@@ -65,30 +84,38 @@ class $Location
 
   getSuperDomain: ->
     hostname = @getHostName()
-    parts    = hostname.split(".")
 
-    ## if this is an ip address then
-    ## just return it straight up
-    if ipAddressRe.test(hostname)
-      return hostname
+    ## TODO: this code is almost identical to
+    ## the code in server/util/cors
+    ## refactor this to share it together
 
-    switch parts.length
-      when 1
-        ## localhost => localhost
-        hostname
-      when 2
-        ## stackoverflow.com => stackoverflow.com
-        hostname
-      else
-        ## mail.google.com => google.com
-        ## cart.shopping.co.uk => shopping.co.uk
-        parts.slice(1).join(".")
+    ## if we couldn't get a parsed domain
+    if not parsed = parseDomain(hostname, {
+      privateTlds: true ## use the public suffix
+      customTlds: ipAddressRe
+    })
+
+      ## then just fall back to a dumb check
+      ## based on assumptions that the tld
+      ## is the last segment after the final
+      ## '.' and that the domain is the segment
+      ## before that
+      segments = hostname.split(".")
+
+      parsed = {
+        tld:    segments[segments.length - 1] ? ""
+        domain: segments[segments.length - 2] ? ""
+      }
+
+    return _.compact([parsed.domain, parsed.tld]).join(".")
 
   getToString: ->
     @remote.toString()
 
   getObject: ->
     {
+      auth: @getAuth()
+      authObj: @getAuthObj()
       hash: @getHash()
       href: @getHref()
       host: @getHost()

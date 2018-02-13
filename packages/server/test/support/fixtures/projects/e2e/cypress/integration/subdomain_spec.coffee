@@ -106,3 +106,10 @@ describe "subdomains", ->
       .visit("http://domain.foobar.com:2292/domainRedirect")
       .get("#cookie")
       .should("have.text", "foobar=1")
+
+  it "issue #600 can visit between nested subdomains", ->
+    cy
+      .visit("http://qa.sub.foobar.com:2292")
+      .contains("Nested Subdomains")
+      .visit("http://staging.sub.foobar.com:2292")
+      .contains("Nested Subdomains")
