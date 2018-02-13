@@ -10,7 +10,9 @@ import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
+import orgUsageStore from '../organizations/organization-usage-store'
 import orgsApi from '../organizations/organizations-api'
+import orgUsageApi from '../organizations/organization-usage-api'
 
 import LoginForm from '../auth/login-form'
 
@@ -30,44 +32,85 @@ class SetupProject extends Component {
       public: null,
       owner: null,
       orgId: null,
+      org: {},
       showNameMissingError: false,
       isSubmitting: false,
     }
   }
 
   componentDidMount () {
-    this._handlePolling()
+    this._handleOrgPolling()
+    this._handleOrgUsagePolling()
   }
 
-  componentDidUpdate () {
-    this._handlePolling()
+  componentDidUpdate (prevProps, prevState) {
+    this._handleOrgPolling()
+
+    if (prevState.orgId !== this.state.orgId) {
+      this._resetPollOrgUsageToNewId()
+    }
   }
 
   componentWillUnmount () {
     this._stopPolling()
   }
 
-  _handlePolling () {
-    if (this._shouldPoll()) {
-      this._poll()
+  _handleOrgPolling () {
+    if (this._shouldPollOrgs()) {
+      this._pollOrgs()
     } else {
-      this._stopPolling()
+      this._stopPollingOrgs()
     }
   }
 
-  _shouldPoll () {
+  _handleOrgUsagePolling () {
+    if (this._shouldPollOrgUsage()) {
+      this._pollOrgUsage()
+    } else {
+      this._stopPollingOrgUsage()
+    }
+  }
+
+  // Organizations polling
+  _shouldPollOrgs () {
     return authStore.isAuthenticated
   }
 
-  _poll () {
+  _pollOrgs () {
     if (orgsApi.isPolling()) return
 
     orgsApi.getOrgs()
     orgsApi.pollOrgs()
   }
 
-  _stopPolling () {
+  _stopPollingOrgs () {
     orgsApi.stopPollingOrgs()
+  }
+
+  // Organization usage polling
+  _shouldPollOrgUsage () {
+    return (authStore.isAuthenticated && this.state.orgId)
+  }
+
+  _resetPollOrgUsageToNewId () {
+    this._stopPollingOrgUsage()
+    this._pollOrgUsage()
+  }
+
+  _pollOrgUsage () {
+    // we need to fetch the usage of the selected org
+    // to restrict them from going over private projects
+    orgUsageApi.getOrgUsage(this.state.orgId)
+    orgUsageApi.pollOrgUsage(this.state.orgId)
+  }
+
+  _stopPollingOrgUsage () {
+    orgUsageApi.stopPollingOrgUsage()
+  }
+
+  _stopPolling () {
+    this._stopPollingOrgs()
+    this._stopPollingOrgUsage()
   }
 
   render () {
@@ -206,7 +249,7 @@ class SetupProject extends Component {
             </div>
           </div>
           <div className='select-orgs'>
-            <div className={cs({ 'hidden': this.state.owner !== 'org' || orgsStore.orgs.length })}>
+            <div className={cs({ 'hidden': this.state.owner !== 'org' || this._hasOrgsOtherThanDefault() })}>
               <div className='empty-select-orgs well'>
                 <p>You don't have any organizations yet.</p>
                 <p>Organizations can help you manage projects, including billing.</p>
@@ -228,9 +271,13 @@ class SetupProject extends Component {
     )
   }
 
+  _hasOrgsOtherThanDefault () {
+    return orgsStore.orgs.length > 1
+  }
+
   _orgSelector () {
     return (
-      <div className={cs({ 'hidden': this.state.owner !== 'org' || !orgsStore.orgs.length })}>
+      <div className={cs({ 'hidden': this.state.owner !== 'org' || !(this._hasOrgsOtherThanDefault()) })}>
         <select
           ref='orgId'
           id='organizations-select'
@@ -283,32 +330,43 @@ class SetupProject extends Component {
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-eye'></i>{' '}
               <strong>Public:</strong>{' '}
               Anyone has access.
             </p>
           </label>
         </div>
-        <div className='radio privacy-radio'>
+        <div className={`radio privacy-radio privacy-radio-private ${this._reachedPrivateProjectsLimit() ? 'disabled' : ''}`}>
           <label>
             <input
               type='radio'
               name='privacy-radio'
               value='false'
-              checked={(this.state.public === false)}
+              checked={this._privateRadioChecked()}
+              disabled={this._reachedPrivateProjectsLimit()}
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-lock'></i>{' '}
               <strong>Private:</strong>{' '}
               Only invited users have access.
               <br/>
-              <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
+              {
+                this._reachedPrivateProjectsLimit() ?
+                  <small className='help-block'>In order to make this project private, you will need to <a href="" onClick={this._upgradeAccount}>upgrade your account</a>.</small> :
+                  null
+              }
             </p>
           </label>
         </div>
       </div>
     )
+  }
+
+  _privateRadioChecked = () => {
+    // we want to never have this checked if they're over their limit
+    // they may have previously checked it, but are not over limit, so uncheck it.
+    if (this._reachedPrivateProjectsLimit()) return false
+
+    return (this.state.public === false)
   }
 
   _openOrgDocs = (e) => {
@@ -324,6 +382,19 @@ class SetupProject extends Component {
   _manageOrgs = (e) => {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/dashboard/organizations')
+  }
+
+  _reachedPrivateProjectsLimit = () => {
+    let usage = orgUsageStore.usage
+
+    if (!usage) return
+
+    return usage.used.privateProjects >= usage.plan.limits.privateProjects
+  }
+
+  _upgradeAccount = (e) => {
+    e.preventDefault()
+    ipc.externalOpen(`https://on.cypress.io/dashboard/organizations/${this.state.orgId ? `${this.state.orgId}/billing` : ''}`)
   }
 
   _formNotFilled () {
@@ -342,24 +413,6 @@ class SetupProject extends Component {
     )
   }
 
-  _updateOrgId = () => {
-    const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
-
-    const orgId = orgIsNotSelected ? null : this.refs.orgId.value
-
-    this.setState({
-      orgId,
-    })
-
-    // deselect their choice for access
-    // if they didn'tselect anything
-    if (orgIsNotSelected) {
-      this.setState({
-        public: null,
-      })
-    }
-  }
-
   _updateProjectName = () => {
     this.setState({
       projectName: this.refs.projectName.value,
@@ -368,6 +421,29 @@ class SetupProject extends Component {
 
   _hasValidProjectName () {
     return _.trim(this.state.projectName)
+  }
+
+  _getOrgById = (id) => {
+    return _.find(orgsStore.orgs, { id })
+  }
+
+  _updateOrgId = () => {
+    const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
+
+    const orgId = orgIsNotSelected ? null : this.refs.orgId.value
+
+    this.setState({
+      orgId,
+      org: this._getOrgById(orgId),
+    })
+
+    // deselect their choice for access
+    // if they didn't select anything
+    if (orgIsNotSelected) {
+      this.setState({
+        public: null,
+      })
+    }
   }
 
   _updateOwner = (e) => {
@@ -379,13 +455,13 @@ class SetupProject extends Component {
 
     const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
-    let chosenOrgId = owner === 'me' ? defaultOrg.id : null
+    let orgId = owner === 'me' ? defaultOrg.id : null
 
     // we want to clear all selects below the radio buttons
     // otherwise it looks jarring to already have selects
     this.setState({
       owner,
-      orgId: chosenOrgId,
+      orgId,
       public: null,
     })
   }

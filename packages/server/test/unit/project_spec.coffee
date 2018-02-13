@@ -613,6 +613,20 @@ describe "lib/project", ->
       @project.requestAccess("project-id-123").then (response) =>
         expect(response).to.equal("response")
 
+  context "#getUsage", ->
+    beforeEach ->
+      @project = Project(@pristinePath)
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      @sandbox.stub(api, "getUsage").resolves("response")
+
+    it "calls api.getUsage with org id + auth token", ->
+      @project.getUsage("org-id-123").then ->
+        expect(api.getUsage).to.be.calledWith("org-id-123", "auth-token-123")
+
+    it "returns response", ->
+      @project.getUsage("org-id-123").then (response) =>
+        expect(response).to.equal("response")
+
   context ".remove", ->
     beforeEach ->
       @sandbox.stub(cache, "removeProject").resolves()

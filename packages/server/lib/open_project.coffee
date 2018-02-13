@@ -35,6 +35,8 @@ create = ->
 
     requestAccess: tryToCall("requestAccess")
 
+    getUsage: tryToCall("getUsage")
+
     emit: tryToCall("emit")
 
     getProject: -> openProject

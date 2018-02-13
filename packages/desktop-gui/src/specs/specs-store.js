@@ -28,7 +28,7 @@ export class SpecsStore {
   }
 
   @action setExpandSpecFolder (spec) {
-    spec.setExpanded(!spec.isExpanded);
+    spec.setExpanded(!spec.isExpanded)
   }
 
   isChosenSpec (spec) {

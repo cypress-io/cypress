@@ -14,7 +14,7 @@ export default class Spec {
   }
 
   hasChildren () {
-    return this.children.specs && this.children.specs.length;
+    return this.children.specs && this.children.specs.length
   }
 
   @action setChosen (isChosen) {

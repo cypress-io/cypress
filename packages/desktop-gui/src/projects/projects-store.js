@@ -50,7 +50,7 @@ class ProjectsStore {
   }
 
   @action setProjects (projects) {
-    this.projects = _.map(projects, (project) =>  new Project(project))
+    this.projects = _.map(projects, (project) => new Project(project))
   }
 
   @action updateProjectsWithStatuses (projectsWithStatuses = []) {

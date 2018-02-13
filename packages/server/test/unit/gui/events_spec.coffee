@@ -683,3 +683,17 @@ describe "lib/gui/events", ->
           expect(err.name).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.message).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.apiUrl).to.equal(konfig("api_url"))
+
+    describe "get:usage", ->
+      it "returns result of project.getUsage", ->
+        @sandbox.stub(openProject, "getUsage").resolves("usage result")
+
+        @handleEvent("get:usage").then (assert) =>
+          assert.sendCalledWith("usage result")
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(openProject, "getUsage").rejects(err)
+
+        @handleEvent("get:usage").then (assert) =>
+          assert.sendErrCalledWith(err)

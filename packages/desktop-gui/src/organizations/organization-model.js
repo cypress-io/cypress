@@ -1,3 +1,4 @@
+import { assign } from 'lodash'
 import { observable } from 'mobx'
 
 export default class Org {
@@ -6,8 +7,6 @@ export default class Org {
   @observable default
 
   constructor (org) {
-    this.id = org.id
-    this.name = org.name
-    this.default = org.default
+    assign(this, org)
   }
 }

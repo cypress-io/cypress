@@ -1,0 +1,19 @@
+{
+  "errors": [],
+  "plan": {
+    "id": "starter",
+    "name": "Starter",
+    "limits": {
+      "privateProjects": 2,
+      "monthlyTests": 5000,
+      "historicalDays": 30,
+      "users": 3
+    },
+    "daysRemaining": 12
+  },
+  "used": {
+    "privateProjects": 1,
+    "monthlyTests": 3500,
+    "users": 1
+  }
+}
