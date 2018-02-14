@@ -13,7 +13,7 @@ describe "lib/browsers/chrome", ->
       @args = []
 
       @sandbox.stub(chrome, "_getArgs").returns(@args)
-      @sandbox.stub(chrome, "_writeExtension").resolves("/path/to/ext")
+      @sandbox.stub(utils, "writeExtension").resolves("/path/to/ext")
       @sandbox.stub(plugins, "has")
       @sandbox.stub(plugins, "execute")
       @sandbox.stub(utils, "launch")
