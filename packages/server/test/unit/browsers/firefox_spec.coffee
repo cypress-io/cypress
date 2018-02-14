@@ -80,6 +80,11 @@ describe "lib/browsers/firefox", ->
         expect(@firefoxClient.installTemporaryAddon).to.be.calledOnce
         expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/ext")
 
+    it "sets user-agent preference if specified", ->
+      @options.userAgent = "User Agent"
+      firefox.open("firefox", "http://", @options).then =>
+        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("general.useragent.override", "User Agent")
+
     it "writes extension", ->
       firefox.open("firefox", "http://", @options).then =>
         expect(utils.writeExtension).to.be.calledWith(@options.proxyUrl, @options.socketIoRoute)

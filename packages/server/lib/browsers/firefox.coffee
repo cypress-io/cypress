@@ -115,6 +115,9 @@ module.exports = {
         "network.proxy.no_proxies_on": ""
       })
 
+    if ua = options.userAgent
+      preferences["general.useragent.override"] = ua
+
     Promise
     .try ->
       return if not plugins.has("before:browser:launch")
