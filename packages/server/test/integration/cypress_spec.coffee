@@ -687,6 +687,11 @@ describe "lib/cypress", ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
+        ee.webContents = {
+          session: {
+            clearCache: @sandbox.stub().yieldsAsync()
+          }
+        }
 
         @sandbox.stub(utils, "launch").resolves(ee)
         @sandbox.stub(Windows, "create").returns(ee)
@@ -705,7 +710,7 @@ describe "lib/cypress", ->
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(6)
+            expect(browserArgs).to.have.length(7)
 
             expect(browserArgs.slice(0, 4)).to.deep.eq([
               "chrome", "foo", "bar", "baz"
