@@ -79,11 +79,21 @@ module.exports = {
       if ua = options.userAgent
         @_setUserAgent(win.webContents, ua)
 
-      if ps = options.proxyServer
-        @_setProxy(win.webContents, ps)
+      setProxy = =>
+        if ps = options.proxyServer
+          @_setProxy(win.webContents, ps)
+
+      Promise.join(
+        setProxy(),
+        @_clearCache(win.webContents)
+      )
     .then ->
       win.loadURL(url)
     .return(win)
+
+  _clearCache: (webContents) ->
+    new Promise (resolve) ->
+      webContents.session.clearCache(resolve)
 
   _setUserAgent: (webContents, userAgent) ->
     ## set both because why not
