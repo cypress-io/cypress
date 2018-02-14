@@ -121,8 +121,5 @@
   },
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
-  },
-  "dependencies": {
-    "firefox-profile": "^1.1.0"
   }
 }

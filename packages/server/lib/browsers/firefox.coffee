@@ -1,3 +1,4 @@
+_ = require("lodash")
 Promise = require("bluebird")
 fs = Promise.promisifyAll(require("fs-extra"))
 debug = require("debug")("cypress:server:browsers")
@@ -5,11 +6,28 @@ path = require("path")
 urlUtil = require("url")
 FirefoxProfile = require("firefox-profile")
 webExt = require("web-ext").default
+firefoxUtil = require("./firefox-util")
 
 utils = require("./utils")
 
-preferences = {
+defaultPreferences = {
   "network.proxy.type": 1
+
+  ## port used to add extensions via debugger protocol
+  "devtools.debugger.remote-port": firefoxUtil.REMOTE_PORT
+  ## necessary for adding extensions
+  "devtools.debugger.remote-enabled": true
+  "devtools.debugger.prompt-connection": false
+  # "devtools.debugger.remote-websocket": true
+  "devtools.chrome.enabled": true
+  ## http://hg.mozilla.org/mozilla-central/file/1dd81c324ac7/build/automation.py.in//l372
+  ## Only load extensions from the application and user profile.
+  ## AddonManager.SCOPE_PROFILE + AddonManager.SCOPE_APPLICATION
+  "extensions.enabledScopes": 5
+  ## Disable metadata caching for installed add-ons by default.
+  "extensions.getAddons.cache.enabled": false
+  ## Disable intalling any distribution add-ons.
+  "extensions.installDistroAddons": false
 
   ## https://github.com/SeleniumHQ/selenium/blob/master/javascript/firefox-driver/webdriver.json
   "app.update.auto": false
@@ -79,59 +97,53 @@ preferences = {
 }
 
 module.exports = {
-  open: (browserName, url, options = {}, automation) ->
-    utils.writeExtension(options.proxyUrl, options.socketIoRoute)
-    .then (extensionDest) ->
+  open: (browserName, url, options = {}) ->
+    Promise.all([
+      utils.writeExtension(options.proxyUrl, options.socketIoRoute)
+      firefoxUtil.findRemotePort()
+    ])
+    .spread (extensionDest, firefoxPort) ->
+      debug("firefox port:", firefoxPort)
+
+      preferences = _.extend({}, defaultPreferences)
+
       if ps = options.proxyServer
         {hostname, port, protocol} = urlUtil.parse(ps)
-
         port ?= if protocol is "https:" then 443 else 80
-
         port = parseFloat(port)
 
-        preferences["network.proxy.http"] = hostname
-        preferences["network.proxy.https"] = hostname
-        preferences["network.proxy.http_port"] = port
-        preferences["network.proxy.https_port"] = port
-        preferences["network.proxy.no_proxies_on"] = ''
+        _.extend(preferences, {
+          "network.proxy.http": hostname
+          "network.proxy.https": hostname
+          "network.proxy.http_port": port
+          "network.proxy.https_port": port
+          "network.proxy.no_proxies_on": ''
+        })
 
-      # new Promise (resolve) ->
-      #   profile.addExtension extensionPath, ->
-      #     resolve(profile)
-    # .then ->
       profile = new FirefoxProfile()
       debug("firefox profile dir:", profile.path())
 
-      # for pref, value of preferences
-      #   profile.setPreference(pref, value)
-      # profile.updatePreferences()
+      for pref, value of preferences
+        profile.setPreference(pref, value)
+      profile.updatePreferences()
 
       args = [
         "-profile"
         profile.path()
+        "-start-debugger-server"
+        "#{firefoxPort}"
+        "-new-instance"
+        "-foreground"
       ]
 
       debug("launch in firefox: %s, %s", url, args)
 
-      webExt.cmd.run({
-        startUrl: url
-        firefoxProfile: profile.path()
-        sourceDir: extensionDest
-        pref: preferences
-        noInput: true ## keeps from messing up killing with ctrl-c in terminal
-      })
-    .then (runner) ->
-      return {
-        kill: ->
-          runner.exit()
-        removeAllListeners: ->
-        once: (event, fn) ->
-          if event is "exit"
-            runner.registerCleanup(fn)
-          else
-            throw new Error("firefox instance does not fire '#{event}' event")
-      }
-
-      # utils.launch(browserName, url, args)
+      utils.launch(browserName, url, args)
+      .then (browserInstance) ->
+        firefoxUtil.connect(firefoxPort)
+        .then (client) ->
+          client.installTemporaryAddon(extensionDest)
+        .then ->
+          return browserInstance
 
 }
