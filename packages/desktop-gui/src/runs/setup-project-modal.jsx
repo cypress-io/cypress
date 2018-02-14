@@ -302,8 +302,6 @@ class SetupProject extends Component {
               <i className='fa fa-lock'></i>{' '}
               <strong>Private:</strong>{' '}
               Only invited users have access.
-              <br/>
-              <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
             </p>
           </label>
         </div>
