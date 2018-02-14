@@ -16,6 +16,7 @@ describe "lib/browsers/firefox", ->
       }
 
       @sandbox.stub(utils, "writeExtension").resolves("/path/to/ext")
+      @sandbox.stub(utils, "ensureProfile").resolves("/path/to/profile")
       @sandbox.stub(firefoxUtil, "findRemotePort").resolves(6005)
       @firefoxClient = { installTemporaryAddon: @sandbox.stub().resolves() }
       @sandbox.stub(firefoxUtil, "connect").resolves(@firefoxClient)
@@ -28,6 +29,10 @@ describe "lib/browsers/firefox", ->
     it "writes extension", ->
       firefox.open("firefox", "http://", @options).then =>
         expect(utils.writeExtension).to.be.calledWith(@options.proxyUrl, @options.socketIoRoute)
+
+    it "ensures profile directory", ->
+      firefox.open("firefox", "http://", @options).then =>
+        expect(utils.ensureProfile).to.be.calledWith("firefox")
 
     it "finds remote port for firefox debugger", ->
       firefox.open("firefox", "http://", @options).then =>

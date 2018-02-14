@@ -100,9 +100,10 @@ module.exports = {
   open: (browserName, url, options = {}) ->
     Promise.all([
       utils.writeExtension(options.proxyUrl, options.socketIoRoute)
+      utils.ensureProfile(browserName)
       firefoxUtil.findRemotePort()
     ])
-    .spread (extensionDest, firefoxPort) ->
+    .spread (extensionDest, profileDir, firefoxPort) ->
       debug("firefox port:", firefoxPort)
 
       preferences = _.extend({}, defaultPreferences)
@@ -120,7 +121,9 @@ module.exports = {
           "network.proxy.no_proxies_on": ''
         })
 
-      profile = new FirefoxProfile()
+      profile = new FirefoxProfile({
+        destinationDirectory: profileDir
+      })
       debug("firefox profile dir:", profile.path())
 
       for pref, value of preferences
