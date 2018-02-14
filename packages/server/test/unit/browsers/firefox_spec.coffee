@@ -3,6 +3,7 @@ require("../../spec_helper")
 extension = require("@packages/extension")
 FirefoxProfile = require("firefox-profile")
 utils = require("#{root}../lib/browsers/utils")
+plugins = require("#{root}../lib/plugins")
 firefoxUtil = require("#{root}../lib/browsers/firefox-util")
 
 firefox = require("#{root}../lib/browsers/firefox")
@@ -15,6 +16,8 @@ describe "lib/browsers/firefox", ->
         socketIoRoute: "socket/io/route"
       }
 
+      @sandbox.stub(plugins, "has")
+      @sandbox.stub(plugins, "execute")
       @sandbox.stub(utils, "writeExtension").resolves("/path/to/ext")
       @sandbox.stub(utils, "ensureProfile").resolves("/path/to/profile")
       @sandbox.stub(firefoxUtil, "findRemotePort").resolves(6005)
@@ -25,6 +28,57 @@ describe "lib/browsers/firefox", ->
       @sandbox.stub(FirefoxProfile.prototype, "setPreference")
       @sandbox.stub(FirefoxProfile.prototype, "updatePreferences")
       @sandbox.stub(FirefoxProfile.prototype, "path").returns("/path/to/profile")
+
+    it "executes before:browser:launch if registered", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves(null)
+      firefox.open("firefox", "http://", @options).then =>
+        expect(plugins.execute).to.be.called
+
+    it "does not execute before:browser:launch if not registered", ->
+      plugins.has.returns(false)
+      firefox.open("firefox", "http://", @options).then =>
+        expect(plugins.execute).not.to.be.called
+
+    it "uses default preferences if before:browser:launch returns falsy value", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves(null)
+      firefox.open("firefox", "http://", @options).then =>
+        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.type", 1)
+
+    it "uses default preferences if before:browser:launch returns object with non-object preferences", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({
+        preferences: []
+      })
+      firefox.open("firefox", "http://", @options).then =>
+        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.type", 1)
+
+    it "sets preferences if returned by before:browser:launch", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({
+        preferences: { "foo": "bar" }
+      })
+      firefox.open("firefox", "http://", @options).then =>
+        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("foo", "bar")
+
+    it "adds extensions returned by before:browser:launch, along with cypress extension", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({
+        extensions: ["/path/to/user/ext"]
+      })
+      firefox.open("firefox", "http://", @options).then =>
+        expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/user/ext")
+        expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/ext")
+
+    it "adds only cypress extension if before:browser:launch returns object with non-array extensions", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({
+        extensions: "not-an-array"
+      })
+      firefox.open("firefox", "http://", @options).then =>
+        expect(@firefoxClient.installTemporaryAddon).to.be.calledOnce
+        expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/ext")
 
     it "writes extension", ->
       firefox.open("firefox", "http://", @options).then =>

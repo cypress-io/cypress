@@ -8,6 +8,7 @@ FirefoxProfile = require("firefox-profile")
 webExt = require("web-ext").default
 firefoxUtil = require("./firefox-util")
 
+plugins   = require("../plugins")
 utils = require("./utils")
 
 defaultPreferences = {
@@ -98,28 +99,43 @@ defaultPreferences = {
 
 module.exports = {
   open: (browserName, url, options = {}) ->
-    Promise.all([
-      utils.writeExtension(options.proxyUrl, options.socketIoRoute)
-      utils.ensureProfile(browserName)
-      firefoxUtil.findRemotePort()
-    ])
+    preferences = _.extend({}, defaultPreferences)
+    extensions = []
+
+    if ps = options.proxyServer
+      {hostname, port, protocol} = urlUtil.parse(ps)
+      port ?= if protocol is "https:" then 443 else 80
+      port = parseFloat(port)
+
+      _.extend(preferences, {
+        "network.proxy.http": hostname
+        "network.proxy.https": hostname
+        "network.proxy.http_port": port
+        "network.proxy.https_port": port
+        "network.proxy.no_proxies_on": ""
+      })
+
+    Promise
+    .try ->
+      return if not plugins.has("before:browser:launch")
+
+      plugins.execute("before:browser:launch", options.browser, { preferences, extensions })
+      .then (result) ->
+        debug("got user args for 'before:browser:launch'", result)
+        return if not result
+
+        if _.isPlainObject(result.preferences)
+          preferences = result.preferences
+        if _.isArray(result.extensions)
+          extensions = result.extensions
+    .then ->
+      Promise.all([
+        utils.writeExtension(options.proxyUrl, options.socketIoRoute)
+        utils.ensureProfile(browserName)
+        firefoxUtil.findRemotePort()
+      ])
     .spread (extensionDest, profileDir, firefoxPort) ->
       debug("firefox port:", firefoxPort)
-
-      preferences = _.extend({}, defaultPreferences)
-
-      if ps = options.proxyServer
-        {hostname, port, protocol} = urlUtil.parse(ps)
-        port ?= if protocol is "https:" then 443 else 80
-        port = parseFloat(port)
-
-        _.extend(preferences, {
-          "network.proxy.http": hostname
-          "network.proxy.https": hostname
-          "network.proxy.http_port": port
-          "network.proxy.https_port": port
-          "network.proxy.no_proxies_on": ''
-        })
 
       profile = new FirefoxProfile({
         destinationDirectory: profileDir
@@ -145,7 +161,10 @@ module.exports = {
       .then (browserInstance) ->
         firefoxUtil.connect(firefoxPort)
         .then (client) ->
-          client.installTemporaryAddon(extensionDest)
+          extensions.push(extensionDest)
+          Promise.all(_.map(extensions, (extension) ->
+            client.installTemporaryAddon(extension)
+          ))
         .then ->
           return browserInstance
 
