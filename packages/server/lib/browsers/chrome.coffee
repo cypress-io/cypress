@@ -129,19 +129,23 @@ module.exports = {
           args = newArgs
     .then =>
       Promise.all([
-        ## ensure that we have a chrome profile dir
-        utils.ensureProfile(browserName)
+        ## ensure that we have a clean cache dir
+        ## before launching the browser every time
+        utils.ensureCleanCache(browserName)
 
         @_writeExtension(options.proxyUrl, options.socketIoRoute)
       ])
-    .spread (dir, dest) ->
+    .spread (cacheDir, dest) ->
       ## normalize the --load-extensions argument by
       ## massaging what the user passed into our own
       args = _normalizeArgExtensions(dest, args)
 
+      userDir = utils.getProfileDir(browserName)
+
       ## this overrides any previous user-data-dir args
       ## by being the last one
-      args.push("--user-data-dir=#{dir}")
+      args.push("--user-data-dir=#{userDir}")
+      args.push("--disk-cache-dir=#{cacheDir}")
 
       debug("launch in chrome: %s, %s", url, args)
 
