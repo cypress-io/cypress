@@ -32,13 +32,13 @@ haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## and (record or ci) hasn't been set to true or false
   (projectId and options.key) and (_.isUndefined(options.record) and _.isUndefined(options.ci))
 
-collectTestResults = (obj) ->
+collectTestResults = (obj = {}) ->
   {
-    tests:       obj.tests
-    passes:      obj.passes
-    pending:     obj.pending
-    failures:    obj.failures
-    duration:    humanTime(obj.duration)
+    tests:       _.get(obj, 'stats.tests')
+    passes:      _.get(obj, 'stats.passes')
+    pending:     _.get(obj, 'stats.pending')
+    failures:    _.get(obj, 'stats.failures')
+    duration:    humanTime(_.get(obj, 'stats.duration'))
     screenshots: obj.screenshots and obj.screenshots.length
     video:       !!obj.video
     version:     pkg.version
@@ -245,7 +245,7 @@ module.exports = {
           passes:       0
           pending:      0
           duration:     0
-          failingTests: []
+          # failingTests: [] ## TODO: fix this!
         }
 
         resolve(obj)
@@ -317,6 +317,9 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
+      ## TODO: fix this - no need to normalize here
+      ## just for displaying the stats. we are duplicating
+      ## logic here since its just based on 'obj'
       testResults = collectTestResults(obj)
 
       writeOutput = ->
@@ -325,7 +328,7 @@ module.exports = {
 
         debug("saving results as %s", outputPath)
 
-        fs.outputJsonAsync(outputPath, testResults)
+        fs.outputJsonAsync(outputPath, obj)
 
       finish = ->
         writeOutput()
@@ -345,11 +348,12 @@ module.exports = {
       hasFailingTests = ft and ft.length
 
       if hasFailingTests
+        ## TODO: fix this!!!
         obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures
-      suv = obj.shouldUploadVideo = !!(videoUploadOnPasses is true or hasFailingTests)
+      suv = !!(videoUploadOnPasses is true or hasFailingTests)
 
       ## always close the browser now as opposed to letting
       ## it exit naturally with the parent process due to
@@ -362,6 +366,7 @@ module.exports = {
           ## TODO: add a catch here
         else
           finish()
+    .get("stats")
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true
@@ -466,7 +471,7 @@ module.exports = {
       Promise.resolve(start)
       .then (started) =>
         Promise.props({
-          stats:      @waitForTestsToFinishRunning({
+          results: @waitForTestsToFinishRunning({
             exit:                 options.exit
             headed:               options.headed
             project:              options.project
@@ -539,7 +544,7 @@ module.exports = {
               browser:              options.browser
               outputPath:           options.outputPath
             })
-          .get("stats")
+          .get("results")
           .finally =>
             @copy(config.videosFolder, config.screenshotsFolder)
             .then =>
