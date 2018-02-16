@@ -2377,6 +2377,51 @@ describe "Routes", ->
               "if (self !== self) { }"
             )
 
+        it "does not die rewriting a huge JS file", ->
+          pathToHugeAppJs = Fixtures.path("server/huge_app.js")
+
+          getHugeFileGist = ->
+            rp("https://s3.amazonaws.com/assets.cypress.io/huge_app.js")
+            .then (resp) ->
+              fs
+              .writeFileAsync(pathToHugeAppJs, resp)
+              .return(resp)
+          fs
+          .readFileAsync(pathToHugeAppJs, "utf8")
+          .catch(getHugeFileGist)
+          .then (hugeJsFile)  =>
+
+            nock(@server._remoteOrigin)
+            .get("/app.js")
+            .reply 200, hugeJsFile, {
+              "Content-Type": "application/javascript"
+            }
+
+            reqTime = new Date
+
+            @rp("http://www.google.com/app.js")
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              reqTime = new Date - reqTime
+
+              ## shouldn't be more than 500ms
+              expect(reqTime).to.be.lt(500)
+
+              # b = res.body
+              #
+              # console.time("1")
+              # b.replace(topOrParentEqualityBeforeRe, "$self")
+              # console.timeEnd("1")
+              #
+              # console.time("2")
+              # b.replace(topOrParentEqualityAfterRe, "self$2")
+              # console.timeEnd("2")
+              #
+              # console.time("3")
+              # b.replace(topOrParentLocationOrFramesRe, "$1self$3$4")
+              # console.timeEnd("3")
+
       describe "off with config", ->
         beforeEach ->
           @setup("http://www.google.com", {
