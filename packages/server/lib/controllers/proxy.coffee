@@ -10,6 +10,7 @@ cors          = require("../util/cors")
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
+conditional   = require("../util/conditional_stream")
 networkFailures = require("../util/network_failures")
 
 redirectRe  = /^30(1|2|3|7|8)$/
@@ -67,6 +68,11 @@ module.exports = {
         ## and set a custom header
         res.set("x-cypress-matched-blacklisted-host", matched)
 
+        debug("blacklisting request %o", {
+          url: req.proxiedUrl
+          matched: matched
+        })
+
         return res.status(503).end()
 
     thr = through (d) -> @queue(d)
@@ -83,12 +89,13 @@ module.exports = {
     isInitial = req.cookies["__cypress.initial"] is "true"
 
     wantsInjection = null
+    wantsSecurityRemoved = null
 
-    resContentTypeIsHtml = (respHeaders) ->
+    resContentTypeIs = (respHeaders, str) ->
       contentType = respHeaders["content-type"]
 
-      ## make sure the response includes text/html
-      contentType and contentType.includes("text/html")
+      ## make sure the response includes string type
+      contentType and contentType.includes(str)
 
     reqAcceptsHtml = ->
       ## don't inject if this is an XHR from jquery
@@ -138,20 +145,34 @@ module.exports = {
 
       debug("received request response for #{remoteUrl} %o", { headers })
 
+      encoding = headers["content-encoding"]
+
+      isGzipped = encoding and encoding.includes("gzip")
+
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
       if not wantsInjection
-        str.pipe(thr)
+        ## only rewrite if we should
+        if config.modifyObstructiveCode and wantsSecurityRemoved
+          str
+          ## only unzip when it is already gzipped
+          .pipe(conditional(isGzipped, zlib.createGunzip()))
+          .pipe(rewriter.security())
+          .pipe(conditional(isGzipped, zlib.createGzip()))
+          .pipe(thr)
+        else
+          str.pipe(thr)
       else
         rewrite = (body) =>
-          rewriter.html(body.toString(), remoteState.domainName, wantsInjection)
+          rewriter.html(body.toString(), remoteState.domainName, wantsInjection, config.modifyObstructiveCode)
 
+        ## TODO: we can probably move this to the new
+        ## replacestream rewriter instead of using
+        ## a buffer
         injection = concat (body) =>
-          encoding = headers["content-encoding"]
-
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
-          if encoding and encoding.includes("gzip")
+          if isGzipped
             zlib.gunzipAsync(body)
             .then(rewrite)
             .then(zlib.gzipAsync)
@@ -190,7 +211,7 @@ module.exports = {
       {headers, statusCode} = incomingRes
 
       wantsInjection ?= do ->
-        return false if not resContentTypeIsHtml(headers)
+        return false if not resContentTypeIs(headers, "text/html")
 
         return false if not resMatchesOriginPolicy(headers)
 
@@ -199,6 +220,9 @@ module.exports = {
         return false if not reqAcceptsHtml()
 
         return "partial"
+
+      wantsSecurityRemoved ?= do ->
+        resContentTypeIs(headers, "application/javascript")
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
 
@@ -265,6 +289,13 @@ module.exports = {
         opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
       else
         opts.url = remoteUrl
+
+      ## if we have auth headers and this request matches our origin policy
+      if (a = remoteState.auth) and resMatchesOriginPolicy()
+        ## and no existing Authentication headers
+        if not req.headers["authorization"]
+          base64 = new Buffer(a.username + ":" + a.password).toString("base64")
+          req.headers["authorization"] = "Basic #{base64}"
 
       rq = request.create(opts)
 

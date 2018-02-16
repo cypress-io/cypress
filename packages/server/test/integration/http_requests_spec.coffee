@@ -1318,7 +1318,7 @@ describe "Routes", ->
           expect(res.body).to.include("The error was:")
           expect(res.body).to.include("incorrect header check")
           expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("at Zlib._handle.onerror")
+          expect(res.body).to.include("at Gunzip.zlibOnError")
           expect(res.body).to.include("<html>\n<head> <script")
           expect(res.body).to.include("</script> </head> <body>")
           expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
@@ -1672,6 +1672,59 @@ describe "Routes", ->
             .reply(200, "{}", {
               "Content-Type": "text/css"
             })
+
+      it "attaches auth headers when matches origin", ->
+        username = "u"
+        password = "p"
+
+        base64 = new Buffer(username + ":" + password).toString("base64")
+
+        @server._remoteAuth = {
+          username
+          password
+        }
+
+        nock("http://localhost:8080")
+        .get("/index")
+        .matchHeader("authorization", "Basic #{base64}")
+        .reply(200, "")
+
+        @rp("http://localhost:8080/index")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+      it "does not attach auth headers when not matching origin", ->
+        nock("http://localhost:8080", {
+          badheaders: ['authorization']
+        })
+        .get("/index")
+        .reply(200, "")
+
+        @rp("http://localhost:8080/index")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+      it "does not modify existing auth headers when matching origin", ->
+        existing = "Basic asdf"
+
+        @server._remoteAuth = {
+          username: "u"
+          password: "p"
+        }
+
+        nock("http://localhost:8080")
+        .get("/index")
+        .matchHeader("authorization", existing)
+        .reply(200, "")
+
+        @rp({
+          url: "http://localhost:8080/index"
+          headers: {
+            "Authorization": existing
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
 
     context "images", ->
       beforeEach ->
@@ -2281,6 +2334,93 @@ describe "Routes", ->
             body = removeWhitespace(res.body)
 
             expect(body).to.eq("<html><head></head></html>")
+
+    context "security rewriting", ->
+      describe "on by default", ->
+        beforeEach ->
+          @setup("http://www.google.com")
+
+        it "replaces obstructive code in HTML files", ->
+          html = "<html><body><script>if (top !== self) { }</script></body></html>"
+
+          nock(@server._remoteOrigin)
+          .get("/index.html")
+          .reply 200, html, {
+            "Content-Type": "text/html"
+          }
+
+          @rp({
+            url: "http://www.google.com/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include(
+              "<script>if (self !== self) { }</script>"
+            )
+
+        it "replaces obstructive code in JS files", ->
+          nock(@server._remoteOrigin)
+          .get("/app.js")
+          .reply 200, "if (top !== self) { }", {
+            "Content-Type": "application/javascript"
+          }
+
+          @rp("http://www.google.com/app.js")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.eq(
+              "if (self !== self) { }"
+            )
+
+      describe "off with config", ->
+        beforeEach ->
+          @setup("http://www.google.com", {
+            config: {
+              modifyObstructiveCode: false
+            }
+          })
+
+        it "can turn off security rewriting for HTML", ->
+          html = "<html><body><script>if (top !== self) { }</script></body></html>"
+
+          nock(@server._remoteOrigin)
+          .get("/index.html")
+          .reply 200, html, {
+            "Content-Type": "text/html"
+          }
+
+          @rp({
+            url: "http://www.google.com/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include(
+              "<script>if (top !== self) { }</script>"
+            )
+
+        it "does not replaces obstructive code in JS files", ->
+          nock(@server._remoteOrigin)
+          .get("/app.js")
+          .reply 200, "if (top !== self) { }", {
+            "Content-Type": "application/javascript"
+          }
+
+          @rp("http://www.google.com/app.js")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.eq(
+              "if (top !== self) { }"
+            )
 
     context "FQDN rewriting", ->
       beforeEach ->

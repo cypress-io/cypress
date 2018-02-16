@@ -29,6 +29,13 @@ describe "lib/util/cors", ->
         tld: "localhost"
       })
 
+    it "parses http://app.localhost.dev:8080", ->
+      @isEq("http://app.localhost.dev:8080", {
+        port: "8080"
+        domain: "localhost"
+        tld: "dev"
+      })
+
     it "parses http://app.local:8080", ->
       @isEq("http://app.local:8080", {
         port: "8080"
@@ -42,6 +49,27 @@ describe "lib/util/cors", ->
         port: "443"
         domain: "example"
         tld: "herokuapp.com"
+      })
+
+    it "parses http://www.local.nl", ->
+      @isEq("http://www.local.nl", {
+        port: "80"
+        domain: "local"
+        tld: "nl"
+      })
+
+    it "parses http://www.local.nl:8080", ->
+      @isEq("http://www.local.nl:8080", {
+        port: "8080"
+        domain: "local"
+        tld: "nl"
+      })
+
+    it "parses 192.168.1.1:8080", ->
+      @isEq("http://192.168.1.1:8080", {
+        port: "8080"
+        domain: ""
+        tld: "192.168.1.1"
       })
 
   context ".urlMatchesOriginPolicyProps", ->

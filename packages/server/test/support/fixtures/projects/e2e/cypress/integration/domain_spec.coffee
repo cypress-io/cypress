@@ -8,5 +8,5 @@ describe "com.au", ->
 
 describe "herokuapp.com", ->
   it "can visit", ->
-    cy.visit("https://example.herokuapp.com")
-    cy.contains("Example Heroku App")
+    cy.visit("https://cypress-example.herokuapp.com")
+    cy.contains("Getting Started with Node on Heroku")

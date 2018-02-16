@@ -15,17 +15,28 @@ UrlParse = require("url-parse")
 ## have to send it to the client
 parseDomain = require("parse-domain")
 
-localHostOrIpAddressRe = /.?localhost|\.local|^[\d\.]+$/
+ipAddressRe = /^[\d\.]+$/
 
 reHttp = /^https?:\/\//
 reWww = /^www/
 
 reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
-ipAddressRe = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 
 class $Location
   constructor: (remote) ->
     @remote = new UrlParse remote
+
+  getAuth: ->
+    @remote.auth
+
+  getAuthObj: ->
+    if a = @remote.auth
+      [ username, password ] = a.split(":")
+      return {
+        username
+
+        password
+      }
 
   getHash: ->
     @remote.hash
@@ -81,7 +92,7 @@ class $Location
     ## if we couldn't get a parsed domain
     if not parsed = parseDomain(hostname, {
       privateTlds: true ## use the public suffix
-      customTlds: localHostOrIpAddressRe
+      customTlds: ipAddressRe
     })
 
       ## then just fall back to a dumb check
@@ -92,8 +103,8 @@ class $Location
       segments = hostname.split(".")
 
       parsed = {
-        tld:    segments[segments.length - 1]
-        domain: segments[segments.length - 2]
+        tld:    segments[segments.length - 1] ? ""
+        domain: segments[segments.length - 2] ? ""
       }
 
     return _.compact([parsed.domain, parsed.tld]).join(".")
@@ -103,6 +114,8 @@ class $Location
 
   getObject: ->
     {
+      auth: @getAuth()
+      authObj: @getAuthObj()
       hash: @getHash()
       href: @getHref()
       host: @getHost()

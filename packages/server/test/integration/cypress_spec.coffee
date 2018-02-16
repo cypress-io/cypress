@@ -70,7 +70,7 @@ TYPICAL_BROWSERS = [
 
 describe "lib/cypress", ->
   require("mocha-banner").register()
-  
+
   beforeEach ->
     @timeout(5000)
 
@@ -278,14 +278,16 @@ describe "lib/cypress", ->
         ## still not projects
         expect(projects.length).to.eq(0)
 
-    it "runs project by specific spec and exits with status 0", ->
-      cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+    it "runs project by relative spec and exits with status 0", ->
+      relativePath = path.relative(cwd(), @todosPath)
+
+      cypress.start(["--run-project=#{@todosPath}", "--spec=#{relativePath}/tests/test2.coffee"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
-      cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"])
+      cypress.start(["--run-project=#{@idsPath}", "--spec=#{@idsPath}/cypress/integration/bar.js", "--config", "port=2020"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:2020/__/#/tests/integration/bar.js"})
         @expectExitWith(0)
@@ -521,7 +523,7 @@ describe "lib/cypress", ->
     it "logs error and exits when spec file was specified and does not exist", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"])
       .then =>
-        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
+        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{cwd()}/path/to/spec")
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"])
@@ -561,6 +563,11 @@ describe "lib/cypress", ->
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+      if process.env.CI
+        ## Gleb: disabling this because Node 8 docker image runs as root
+        ## which makes accessing everything possible.
+        return
+
       permissionsPath = path.resolve("./permissions")
 
       cypressJson = path.join(permissionsPath, "cypress.json")
@@ -598,7 +605,7 @@ describe "lib/cypress", ->
         fs.unlink(statePath)
 
       it "saves project state", ->
-        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
         .then =>
           @expectExitWith(0)
         .then ->
@@ -680,6 +687,11 @@ describe "lib/cypress", ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
+        ee.webContents = {
+          session: {
+            clearCache: @sandbox.stub().yieldsAsync()
+          }
+        }
 
         @sandbox.stub(utils, "launch").resolves(ee)
         @sandbox.stub(Windows, "create").returns(ee)
@@ -698,7 +710,7 @@ describe "lib/cypress", ->
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(6)
+            expect(browserArgs).to.have.length(7)
 
             expect(browserArgs.slice(0, 4)).to.deep.eq([
               "chrome", "foo", "bar", "baz"
@@ -1120,8 +1132,10 @@ describe "lib/cypress", ->
       .then ->
         expect(headed.ready).to.be.calledWithMatch({
           updating: true
-          port: 2121
-          pageLoadTimeout: 1000
+          config: {
+            port: 2121
+            pageLoadTimeout: 1000
+          }
         })
 
     it "passes options to Events.start", ->
@@ -1129,7 +1143,10 @@ describe "lib/cypress", ->
       .then ->
         expect(Events.start).to.be.calledWithMatch({
           port: 2121,
-          pageLoadTimeout: 1000
+          config: {
+            pageLoadTimeout: 1000
+            port: 2121
+          }
         })
 
     it "passes filtered options to Project#open and sets cli config", ->
