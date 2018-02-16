@@ -10,6 +10,7 @@ create = ->
   openProject     = null
   specIntervalId  = null
   relaunchBrowser = null
+  currentBrowser = null
 
   reset = ->
     openProject     = null
@@ -41,6 +42,7 @@ create = ->
 
     launch: (browserName, spec, options = {}) ->
       log("launching browser %s spec %s", browserName, spec)
+      currentBrowser = browserName
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
       @reset()
@@ -68,6 +70,9 @@ create = ->
           do relaunchBrowser = ->
             log "launching project in browser #{browserName}"
             browsers.open(browserName, options, automation)
+
+    getCurrentBrowser: (config) ->
+      _.find(config.browsers, { name: currentBrowser })
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -108,6 +113,7 @@ create = ->
         specIntervalId = null
 
     closeBrowser: ->
+      currentBrowser = null
       browsers.close()
 
     closeOpenProjectAndBrowsers: ->
