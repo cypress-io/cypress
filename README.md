@@ -1,5 +1,7 @@
 # cypress-vue-unit-test
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/bahmutov/cypress-vue-unit-test.svg)](https://greenkeeper.io/)
+
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner
 
 [![NPM][npm-icon] ][npm-url]

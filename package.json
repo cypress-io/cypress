@@ -74,25 +74,25 @@
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "axios": "0.17.1",
     "ban-sensitive-files": "1.9.2",
-    "css-loader": "0.28.7",
+    "css-loader": "0.28.9",
     "dependency-check": "3.0.0",
-    "deps-ok": "1.2.1",
+    "deps-ok": "1.2.2",
     "git-issues": "1.3.1",
     "github-post-release": "1.13.1",
-    "license-checker": "15.0.0",
-    "mocha": "4.0.1",
-    "nsp": "3.1.0",
+    "license-checker": "16.0.0",
+    "mocha": "5.0.1",
+    "nsp": "3.2.1",
     "pre-git": "3.17.0",
     "prettier-standard": "8.0.0",
-    "semantic-action": "1.1.0",
-    "simple-commit-message": "3.3.2",
+    "semantic-action": "1.1.6",
+    "simple-commit-message": "4.0.3",
     "standard": "10.0.3",
     "vue": "^2.5.13",
-    "vue-loader": "13.6.1",
+    "vue-loader": "14.1.1",
     "vuex": "3.0.1",
     "vue-router": "3.0.1",
     "vue-template-compiler": "2.5.13",
-    "cypress": "1.4.2"
+    "cypress": "2.0.0"
   },
   "standard": {
     "globals": [
@@ -106,7 +106,7 @@
     "cypress": "^1.4.1"
   },
   "dependencies": {
-    "@cypress/webpack-preprocessor": "1.1.2",
-    "common-tags": "1.6.0"
+    "@cypress/webpack-preprocessor": "1.1.3",
+    "common-tags": "1.7.2"
   }
 }
