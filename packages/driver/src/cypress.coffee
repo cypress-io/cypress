@@ -25,7 +25,7 @@ $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
 $utils = require("./cypress/utils")
-addBrowserProps = require("./cypress/browser")
+browserInfo = require("./cypress/browser")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
@@ -124,7 +124,7 @@ class $Cypress
 
     config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
 
-    addBrowserProps(@, config)
+    _.extend(@, browserInfo(config))
 
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)

@@ -22,7 +22,9 @@ isBrowser = (method, config, normalize, browserName = "") ->
 
   return browserName is currentBrowser
 
-module.exports = (Cypress, config) ->
-  Cypress.browser = config.browser
-  Cypress.isBrowser = _.partial(isBrowser, "isBrowser", config, false)
-  Cypress.isBrowserType = _.partial(isBrowser, "isBrowserType", config, true)
+module.exports = (config) ->
+  {
+    browser: config.browser
+    isBrowser: _.partial(isBrowser, "isBrowser", config, false)
+    isBrowserType: _.partial(isBrowser, "isBrowserType", config, true)
+  }
