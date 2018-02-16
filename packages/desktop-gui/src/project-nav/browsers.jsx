@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
@@ -69,7 +70,7 @@ export default class Browsers extends Component {
     }
 
     return (
-      <span className={browser.name}>
+      <span className={_.kebabCase(browser.name)}>
         <i className={`fa fa-${icon}`}></i>{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}

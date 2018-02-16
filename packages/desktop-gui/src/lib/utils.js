@@ -20,6 +20,8 @@ const browserIconLookup = {
   canary: 'chrome',
   electron: 'chrome',
   firefox: 'firefox',
+  firefoxDeveloperEdition: 'firefox',
+  firefoxNightly: 'firefox',
   safari: 'safari',
 }
 

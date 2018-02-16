@@ -2,11 +2,12 @@ _ = require("lodash")
 $utils = require("./utils")
 
 browsers = {
-  "electron": "chrome"
-  "chrome": "chrome"
-  "canary": "chrome"
-  "chromium": "chrome"
-  "firefox": "firefox"
+  electron: "chrome"
+  chrome: "chrome"
+  canary: "chrome"
+  chromium: "chrome"
+  firefoxDeveloperEdition: "firefox"
+  firefoxNightly: "firefox"
 }
 
 isBrowser = (method, config, normalize, browserName = "") ->

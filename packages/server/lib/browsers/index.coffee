@@ -33,7 +33,7 @@ getBrowser = (name) ->
       require("./chrome")
     when "electron"
       require("./electron")
-    when "firefox"
+    when "firefox", "firefoxDeveloperEdition", "firefoxNightly"
       require("./firefox")
 
 find = (browser, browsers = []) ->

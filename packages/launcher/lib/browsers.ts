@@ -45,6 +45,20 @@ export const browsers: Browser[] = [
     versionRegex: /Firefox (\S+)/,
     profile: true,
     binary: 'firefox'
+  },
+  {
+    name: 'firefoxDeveloperEdition',
+    displayName: 'Firefox Developer Edition',
+    versionRegex: /Firefox Developer Edition (\S+)/,
+    profile: true,
+    binary: 'firefox-developer-edition'
+  },
+  {
+    name: 'firefoxNightly',
+    displayName: 'Firefox Nightly',
+    versionRegex: /Firefox Nightly (\S+)/,
+    profile: true,
+    binary: 'firefox-nightly'
   }
 ]
 

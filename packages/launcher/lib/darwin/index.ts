@@ -28,6 +28,18 @@ const detectFirefox = partial(findApp, [
   'org.mozilla.firefox',
   'CFBundleShortVersionString'
 ])
+const detectFirefoxDeveloperEdition = partial(findApp, [
+  'Firefox Developer Edition.app',
+  'Contents/MacOS/firefox-bin',
+  'org.mozilla.firefoxdeveloperedition',
+  'CFBundleShortVersionString'
+])
+const detectFirefoxNightly = partial(findApp, [
+  'Firefox Nightly.app',
+  'Contents/MacOS/firefox-bin',
+  'org.mozilla.nightly',
+  'CFBundleShortVersionString'
+])
 
 type Detectors = {
   [index: string]: Function
@@ -37,7 +49,9 @@ const browsers: Detectors = {
   chrome: detectChrome,
   canary: detectCanary,
   chromium: detectChromium,
-  firefox: detectFirefox
+  firefox: detectFirefox,
+  firefoxDeveloperEdition: detectFirefoxDeveloperEdition,
+  firefoxNightly: detectFirefoxNightly,
 }
 
 export function detectBrowserDarwin(browser: Browser) {
