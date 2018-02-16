@@ -7,6 +7,7 @@
     flex-wrap: wrap;
     left: 0;
     line-height: 22px;
+    padding-left: 0.4em;
     position: absolute;
     right: 0;
     top: 0;
@@ -28,7 +29,7 @@
     color: #4f4f4f;
     cursor: pointer;
     border-radius: 0;
-    display: block;
+    display: none;
     font-size: 17px;
     font-weight: 500;
     line-height: 1.4;
@@ -59,6 +60,14 @@
       background: none;
       box-shadow: none;
       color: #999;
+    }
+  }
+
+  .display-selector-playground {
+    padding-left: 0;
+
+    .selector-playground-toggle {
+      display: block;
     }
   }
 
