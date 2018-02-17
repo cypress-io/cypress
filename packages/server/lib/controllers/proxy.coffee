@@ -143,7 +143,11 @@ module.exports = {
       ## turn off __cypress.initial by setting false here
       setCookies(false, wantsInjection)
 
-      debug("received request response for #{remoteUrl} %o", { headers })
+      debug("received response for %o", {
+        url: remoteUrl
+        headers,
+        statusCode
+      })
 
       encoding = headers["content-encoding"]
 

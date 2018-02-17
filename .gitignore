@@ -32,6 +32,7 @@ packages/example/cypress/fixtures/users.json
 packages/server/.cy
 packages/server/.projects
 packages/server/support
+packages/server/test/support/fixtures/server/huge_app.js
 
 # CLI tool
 cli/build
