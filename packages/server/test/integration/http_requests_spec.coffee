@@ -2397,7 +2397,7 @@ describe "Routes", ->
               "Content-Type": "application/javascript"
             }
 
-            reqTime = new Date
+            reqTime = new Date()
 
             @rp("http://www.google.com/app.js")
             .then (res) ->
