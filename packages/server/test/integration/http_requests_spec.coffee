@@ -2403,7 +2403,7 @@ describe "Routes", ->
             .then (res) ->
               expect(res.statusCode).to.eq(200)
 
-              reqTime = new Date - reqTime
+              reqTime = new Date() - reqTime
 
               ## shouldn't be more than 500ms
               expect(reqTime).to.be.lt(500)
