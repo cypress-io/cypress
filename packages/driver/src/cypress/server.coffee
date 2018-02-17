@@ -318,7 +318,7 @@ create = (options = {}) ->
         proxy = server.getProxyFor(@)
         ## Sometimes abort is called after the proxy
         ## objects have already been cleaned up (long
-        ## polling).  Don't try to abort it if it
+        ## polling).  Don't try to abort if it
         ## does not exist
         if proxy
           abortStack = server.getStack()
