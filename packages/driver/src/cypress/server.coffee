@@ -315,12 +315,16 @@ create = (options = {}) ->
         ## to test this just use a regular XHR
         @aborted = true
 
-        abortStack = server.getStack()
-
         proxy = server.getProxyFor(@)
-        proxy.aborted = true
+        ## Sometimes abort is called after the proxy
+        ## objects have already been cleaned up (long
+        ## polling).  Don't try to abort it if it
+        ## does not exist
+        if proxy
+          abortStack = server.getStack()
+          proxy.aborted = true
 
-        options.onXhrAbort(proxy, abortStack)
+          options.onXhrAbort(proxy, abortStack)
 
         if _.isFunction(options.onAnyAbort)
           route = server.getRouteForXhr(@)
