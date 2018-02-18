@@ -2,7 +2,7 @@ _             = require("lodash")
 fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
-log           = require("debug")("cypress:server:browsers")
+debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
 
@@ -18,7 +18,12 @@ kill = (unbind) ->
     if unbind
       instance.removeAllListeners()
 
-    instance.once("exit", resolve)
+    instance.once "exit", (code, sigint) ->
+      debug("browser process killed")
+
+      resolve.apply(null, arguments)
+
+    debug("killing browser process")
 
     instance.kill()
     cleanup()
@@ -74,10 +79,10 @@ module.exports = {
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
-      log("open browser %s", name)
+      debug("opening browser %s", name)
       browser.open(name, url, options, automation)
       .then (i) ->
-        log("browser opened")
+        debug("browser opened")
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder
 

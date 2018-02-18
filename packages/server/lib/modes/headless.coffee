@@ -155,6 +155,8 @@ module.exports = {
       console.log(format(screenshot))
 
   postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
+    debug("ending the video recording:", name)
+
     ## once this ended promises resolves
     ## then begin processing the file
     end()
@@ -350,6 +352,8 @@ module.exports = {
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures
       suv = obj.shouldUploadVideo = !!(videoUploadOnPasses is true or hasFailingTests)
+
+      debug("attempting to close the browser")
 
       ## always close the browser now as opposed to letting
       ## it exit naturally with the parent process due to
