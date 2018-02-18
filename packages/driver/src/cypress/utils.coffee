@@ -64,7 +64,7 @@ module.exports = {
     err.message = msg
 
     ## reset stack by joining up firstStack, new msg, and the rest
-    err.stack = [firstStack + msg, restStack].join("\n")
+    err.stack = [firstStack + msg].concat(restStack).join("\n")
 
     return err
 
