@@ -2378,7 +2378,7 @@ describe "Routes", ->
             )
 
         it "does not die rewriting a huge JS file", ->
-          pathToHugeAppJs = Fixtures.path("server/huge_app.js")
+          pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
 
           getHugeFileGist = ->
             rp("https://s3.amazonaws.com/assets.cypress.io/huge_app.js")
