@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, autorun, computed, observable } from 'mobx'
+import { action, autorun, computed, observable, observe } from 'mobx'
 
 import Err from '../lib/err-model'
 import Hook from '../hooks/hook-model'
@@ -62,6 +62,17 @@ export default class Test extends Runnable {
   }
 
   update ({ state, err, hookName, isOpen }, cb) {
+    let hadChanges = false
+
+    const disposer = observe(this, (change) => {
+      hadChanges = true
+
+      disposer()
+
+      // apply change as-is
+      return change
+    })
+
     if (cb) {
       this.callbackAfterUpdate = () => {
         this.callbackAfterUpdate = null
@@ -81,6 +92,20 @@ export default class Test extends Runnable {
         hook.failed = true
       }
     }
+
+    // if we had no changes then react will
+    // never fire componentDidUpdate and
+    // so we need to manually call our callback
+    // https://github.com/cypress-io/cypress/issues/674#issuecomment-366495057
+    if (!hadChanges) {
+      // unbind the listener if no changes
+      disposer()
+
+      // if we had a callback, invoke it
+      if (this.callbackAfterUpdate) {
+        this.callbackAfterUpdate()
+      }
+    }
   }
 
   finish (props) {
@@ -90,9 +115,9 @@ export default class Test extends Runnable {
 
   commandMatchingErr () {
     return _(this.hooks)
-      .map((hook) => hook.commandMatchingErr(this.err))
-      .compact()
-      .last()
+    .map((hook) => hook.commandMatchingErr(this.err))
+    .compact()
+    .last()
   }
 
   _findOrCreateHook (name) {
