@@ -2380,17 +2380,16 @@ describe "Routes", ->
         it "does not die rewriting a huge JS file", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
 
-          getHugeFileGist = ->
+          getHugeFile = ->
             rp("https://s3.amazonaws.com/assets.cypress.io/huge_app.js")
             .then (resp) ->
               fs
-              .writeFileAsync(pathToHugeAppJs, resp)
+              .outputFileAsync(pathToHugeAppJs, resp)
               .return(resp)
           fs
           .readFileAsync(pathToHugeAppJs, "utf8")
-          .catch(getHugeFileGist)
+          .catch(getHugeFile)
           .then (hugeJsFile)  =>
-
             nock(@server._remoteOrigin)
             .get("/app.js")
             .reply 200, hugeJsFile, {
