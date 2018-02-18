@@ -2,8 +2,8 @@ _     = require("lodash")
 path  = require("path")
 chalk = require("chalk")
 Mocha = require("mocha")
+debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
-log   = require("./log")
 
 mochaReporters = require("mocha/lib/reporters")
 
@@ -142,6 +142,7 @@ class Reporter
     ## make sure this event is in our events hash
     if e = events[event]
       if _.isFunction(e)
+        debug("got mocha event '%s' with args: %o", event, args)
         ## transform the arguments if
         ## there is an event.fn callback
         args = e.apply(@, args.concat(@runnables, @runner))
@@ -205,13 +206,13 @@ class Reporter
     new Reporter(reporterName, reporterOptions, projectRoot)
 
   @loadReporter = (reporterName, projectRoot) ->
-    log("loading reporter #{reporterName}")
+    debug("loading reporter #{reporterName}")
     if r = reporters[reporterName]
-      log("#{reporterName} is built-in reporter")
+      debug("#{reporterName} is built-in reporter")
       return require(r)
 
     if mochaReporters[reporterName]
-      log("#{reporterName} is Mocha reporter")
+      debug("#{reporterName} is Mocha reporter")
       return reporterName
 
     ## it's likely a custom reporter
@@ -219,7 +220,7 @@ class Reporter
     ## or one installed by the user through npm
     try
       ## try local
-      log("loading local reporter by name #{reporterName}")
+      debug("loading local reporter by name #{reporterName}")
 
       ## using path.resolve() here so we can just pass an
       ## absolute path as the reporterName which avoids
@@ -227,7 +228,7 @@ class Reporter
       return require(path.resolve(projectRoot, reporterName))
     catch err
       ## try npm. if this fails, we're out of options, so let it throw
-      log("loading NPM reporter module #{reporterName} from #{projectRoot}")
+      debug("loading NPM reporter module #{reporterName} from #{projectRoot}")
 
       try
         return require(path.resolve(projectRoot, "node_modules", reporterName))
@@ -244,7 +245,7 @@ class Reporter
   @isValidReporterName = (reporterName, projectRoot) ->
     try
       Reporter.loadReporter(reporterName, projectRoot)
-      log("reporter #{reporterName} is valid name")
+      debug("reporter #{reporterName} is valid name")
       true
     catch
       false
