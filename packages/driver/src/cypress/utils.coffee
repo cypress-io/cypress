@@ -39,23 +39,9 @@ module.exports = {
     stack = err.stack
 
     ## preserve message
+    ## and toString
     msg = err.message
-
-    stack = stack.split("\n")
-
-    firstStack = stack[0]
-    restStack  = stack.slice(1)
-
-    if msg
-      ## grab the last occurance of msg
-      i = firstStack.lastIndexOf(msg)
-
-      if i > -1
-        ## and if we have one, slice it out
-        firstStack = firstStack.slice(0, i)
-    else
-      ## else append colon + space to err
-      firstStack = firstStack + ": "
+    str = err.toString()
 
     ## append message
     msg += "\n\n" + message
@@ -63,8 +49,9 @@ module.exports = {
     ## set message
     err.message = msg
 
-    ## reset stack by joining up firstStack, new msg, and the rest
-    err.stack = [firstStack + msg].concat(restStack).join("\n")
+    ## reset stack by replacing the original first line
+    ## with the new one
+    err.stack = stack.replace(str, err.toString())
 
     return err
 
