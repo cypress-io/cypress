@@ -110,7 +110,7 @@ testAfterRun = (test, Cypress) ->
 
 reduceProps = (obj, props) ->
   _.reduce props, (memo, prop) ->
-    if _.has(obj, prop) or obj[prop]
+    if _.has(obj, prop) or (obj[prop] isnt undefined)
       memo[prop] = obj[prop]
     memo
   , {}
