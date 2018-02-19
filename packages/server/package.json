@@ -135,6 +135,7 @@
     "pluralize": "^3.0.0",
     "pretty-error": "^2.1.0",
     "progress": "^1.1.8",
+    "pumpify": "^1.4.0",
     "ramda": "^0.24.0",
     "randomstring": "^1.1.5",
     "replacestream": "^4.0.3",
