@@ -92,61 +92,62 @@ startXhrServer = (cy, state, config) ->
         numResponses = rl.get("numResponses")
         rl.set "numResponses", numResponses + 1
 
-      logs[xhr.id] = log = Cypress.log({
-        message:   ""
-        name:      "xhr"
-        displayName: getDisplayName(route)
-        alias:     alias
-        aliasType: "route"
-        type:      "parent"
-        event:     true
-        consoleProps: =>
-          consoleObj = {
-            Alias:         alias
-            Method:        xhr.method
-            URL:           xhr.url
-            "Matched URL": route?.url
-            Status:        xhr.statusMessage
-            Duration:      xhr.duration
-            "Stubbed":     if route and route.response? then "Yes" else "No"
-            Request:       xhr.request
-            Response:      xhr.response
-            XHR:           xhr._getXhr()
-          }
+      if false
+        logs[xhr.id] = log = Cypress.log({
+          message:   ""
+          name:      "xhr"
+          displayName: getDisplayName(route)
+          alias:     alias
+          aliasType: "route"
+          type:      "parent"
+          event:     true
+          consoleProps: =>
+            consoleObj = {
+              Alias:         alias
+              Method:        xhr.method
+              URL:           xhr.url
+              "Matched URL": route?.url
+              Status:        xhr.statusMessage
+              Duration:      xhr.duration
+              "Stubbed":     if route and route.response? then "Yes" else "No"
+              Request:       xhr.request
+              Response:      xhr.response
+              XHR:           xhr._getXhr()
+            }
 
-          if route and route.is404
-            consoleObj.Note = "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
+            if route and route.is404
+              consoleObj.Note = "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
 
-          consoleObj.groups = ->
-            [
-              {
-                name: "Initiator"
-                items: [stack]
-                label: false
-              }
-            ]
+            consoleObj.groups = ->
+              [
+                {
+                  name: "Initiator"
+                  items: [stack]
+                  label: false
+                }
+              ]
 
-          consoleObj
-        renderProps: ->
-          status = switch
-            when xhr.aborted
-              indicator = "aborted"
-              "(aborted)"
-            when xhr.status > 0
-              xhr.status
-            else
-              indicator = "pending"
-              "---"
+            consoleObj
+          renderProps: ->
+            status = switch
+              when xhr.aborted
+                indicator = "aborted"
+                "(aborted)"
+              when xhr.status > 0
+                xhr.status
+              else
+                indicator = "pending"
+                "---"
 
-          indicator ?= if /^2/.test(status) then "successful" else "bad"
+            indicator ?= if /^2/.test(status) then "successful" else "bad"
 
-          {
-            message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), { length: 20 })}"
-            indicator: indicator
-          }
-      })
+            {
+              message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), { length: 20 })}"
+              indicator: indicator
+            }
+        })
 
-      log.snapshot("request")
+        log.snapshot("request")
 
     onLoad: (xhr) =>
       setResponse(state, xhr)
