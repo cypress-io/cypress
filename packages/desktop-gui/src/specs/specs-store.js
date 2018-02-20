@@ -28,7 +28,7 @@ export class SpecsStore {
   }
 
   @action setExpandSpecFolder (spec) {
-    spec.setExpanded(!spec.isExpanded);
+    spec.setExpanded(!spec.isExpanded)
   }
 
   isChosenSpec (spec) {
@@ -39,7 +39,11 @@ export class SpecsStore {
     let specsTree = new SpecsStore()
 
     _.forEach(specsByType, (specs, type) => {
-      const filesByDirectory = _.map(specs, (spec) => spec.name.split('/'))
+      const filesByDirectory = _.map(specs, (spec) => {
+        // change \\ from Windows to /
+        let name = spec.name.replace(/\\/g, '/')
+        return name.split('/')
+      })
       _.forEach(filesByDirectory, (segments, index) => {
         // add the 'type' to the beginning of the segment
         // so it prepend 'unit' or 'integration'
