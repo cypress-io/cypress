@@ -104,7 +104,7 @@ describe "Specs List", ->
 
     context "Linux paths", ->
       beforeEach ->
-        @ipc.getSpecs.yields(null, @specsWindows)
+        @ipc.getSpecs.yields(null, @specs)
         @openProject.resolve(@config)
 
       context "run all specs", ->
@@ -201,6 +201,8 @@ describe "Specs List", ->
 
     context "Searching specs", ->
       beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
         cy.get("#search-input").type("new")
 
       it "should display only one spec", ->
@@ -220,6 +222,8 @@ describe "Specs List", ->
 
     context "click on spec", ->
       beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
         cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
       it "closes then launches browser on click of file", ->
@@ -244,6 +248,10 @@ describe "Specs List", ->
         cy.get("@firstSpec").should("have.class", "active")
 
     context "spec running in browser", ->
+      beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
+
       context "choose shallow spec", ->
         beforeEach ->
           cy.get(".file a").contains("a", "app_spec.coffee").as("firstSpec").click()
@@ -266,7 +274,10 @@ describe "Specs List", ->
           cy.get("@deepSpec").should("have.class", "active")
 
     context "switching specs", ->
+
       beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
         cy
           .get(".file").contains("a", "app_spec.coffee").as("firstSpec")
             .click()
