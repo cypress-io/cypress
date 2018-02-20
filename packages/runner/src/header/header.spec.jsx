@@ -107,8 +107,8 @@ describe('<Header />', () => {
     it('displays default width and height in menu', () => {
       const state = { defaults: { width: 4, height: 5 } }
       const component = shallow(<Header state={getState(state)} />)
-      expect(component.find('.viewport-menu pre').text()).to.contain('viewportWidth: 4')
-      expect(component.find('.viewport-menu pre').text()).to.contain('viewportHeight: 5')
+      expect(component.find('.viewport-menu pre').text()).to.contain('"viewportWidth": 4')
+      expect(component.find('.viewport-menu pre').text()).to.contain('"viewportHeight": 5')
     })
   })
 })
