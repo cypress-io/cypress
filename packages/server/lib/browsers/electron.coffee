@@ -1,7 +1,7 @@
 _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
-debug         = require("debug")("cypress:server:browsers")
+debug         = require("debug")("cypress:server:browsers:electron")
 plugins       = require("../plugins")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
@@ -72,7 +72,7 @@ module.exports = {
   _launch: (win, url, options) ->
     menu.set({withDevTools: true})
 
-    debug("launching electron browser window to url %s with options %o", url, options)
+    debug("launching browser window to url %s with options %o", url, options)
 
     Promise
     .try =>
@@ -164,6 +164,8 @@ module.exports = {
         events = new EE
 
         win.once "closed", ->
+          debug("closed event fired")
+
           call("removeAllListeners")
           events.emit("exit")
 
