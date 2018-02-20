@@ -98,7 +98,7 @@ describe "Specs List", ->
         it "lists nested folders", ->
           cy.get(".folder .folder").contains("accounts")
 
-        it.only "lists test specs", ->
+        it "lists test specs", ->
           cy.get(".file a").last().should("contain", "baz_list_spec.coffee")
           cy.get(".file a").last().should("not.contain", "admin_users")
 
