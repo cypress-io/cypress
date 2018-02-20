@@ -39,10 +39,9 @@ module.exports = {
     stack = err.stack
 
     ## preserve message
+    ## and toString
     msg = err.message
-
-    ## slice out message
-    stack = stack.split(msg)
+    str = err.toString()
 
     ## append message
     msg += "\n\n" + message
@@ -50,8 +49,9 @@ module.exports = {
     ## set message
     err.message = msg
 
-    ## reset stack
-    err.stack = stack.join(msg)
+    ## reset stack by replacing the original first line
+    ## with the new one
+    err.stack = stack.replace(str, err.toString())
 
     return err
 
