@@ -234,6 +234,19 @@ isLastSuite = (suite, tests) ->
   .last()
   .value() is suite
 
+## we are the last test that will run in the suite
+## if we're the last test in the tests array or
+## if we failed from a hook and that hook was 'before'
+## since then mocha skips the remaining tests in the suite
+lastTestThatWillRunInSuite = (test, tests) ->
+  isLastTest(test, tests) or (test.failedFromHook and test.hookName is "before all")
+
+isLastTest = (test, tests) ->
+  test is _.last(tests)
+
+isRootSuite = (suite) ->
+  suite and suite.root
+
 overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) ->
   ## bail if our _runner doesnt have a hook.
   ## useful in tests
@@ -267,31 +280,35 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
 
     switch name
       when "afterEach"
+        t = getTest()
+
         ## find all of the grep'd _tests which share
         ## the same parent suite as our current _test
-        tests = getAllSiblingTests(getTest().parent, getTestById)
+        tests = getAllSiblingTests(t.parent, getTestById)
 
         ## make sure this test isnt the last test overall but also
         ## isnt the last test in our grep'd parent suite's tests array
-        if @suite.root and (getTest() isnt _.last(allTests)) and (getTest() isnt _.last(tests))
+        if @suite.root and (t isnt _.last(allTests)) and (t isnt _.last(tests))
           changeFnToRunAfterHooks()
 
       when "afterAll"
-        ## find all of the grep'd _tests which share
+        ## find all of the grep'd allTests which share
         ## the same parent suite as our current _test
-        if getTest()
-          tests = getAllSiblingTests(getTest().parent, getTestById)
+        if t = getTest()
+          siblings = getAllSiblingTests(t.parent, getTestById)
 
-          ## if we're the very last test in the entire _tests
-          ## we wait until the root suite fires
-          ## else we wait until the very last possible moment by waiting
-          ## until the root suite is the parent of the current suite
-          ## since that will bubble up IF we're the last nested suite
-          ## else if we arent the last nested suite we fire if we're
-          ## the last test
-          if (@suite.root and getTest() is _.last(allTests)) or
-            (@suite.parent?.root and getTest() is _.last(tests)) or
-              (not isLastSuite(@suite, allTests) and getTest() is _.last(tests))
+          ## 1. if we're the very last test in the entire allTests
+          ##    we wait until the root suite fires
+          ## 2. else we wait until the very last possible moment by waiting
+          ##    until the root suite is the parent of the current suite
+          ##    since that will bubble up IF we're the last nested suite
+          ## 3. else if we arent the last nested suite we fire if we're
+          ##    the last test that will run
+          if (
+              (isRootSuite(@suite) and isLastTest(t, allTests)) or
+              (isRootSuite(@suite.parent) and lastTestThatWillRunInSuite(t, siblings)) or
+              (not isLastSuite(@suite, allTests) and lastTestThatWillRunInSuite(t, siblings))
+            )
             changeFnToRunAfterHooks()
 
     _runnerHook.call(@, name, fn)
@@ -429,21 +446,16 @@ afterEachFailed = (Cypress, test, err) ->
 
   Cypress.action("runner:test:end", wrap(test))
 
-hookFailed = (hook, err, hookName, getTestById, setTest) ->
+hookFailed = (hook, err, hookName, getTestById, getTest) ->
   ## finds the test by returning the first test from
   ## the parent or looping through the suites until
   ## it finds the first test
-  test = getTestFromHook(hook, hook.parent, getTestById)
+  test = getTest() or getTestFromHook(hook, hook.parent, getTestById)
   test.err = err
   test.state = "failed"
   test.duration = hook.duration
   test.hookName = hookName
   test.failedFromHook = true
-
-  ## make sure we set this test as the current
-  ## else its possible that our TEST_AFTER_RUN_EVENT
-  ## will never fire if this failed in a before hook
-  setTest(test)
 
   if hook.alreadyEmittedMocha
     ## TODO: won't this always hit right here???
@@ -452,7 +464,7 @@ hookFailed = (hook, err, hookName, getTestById, setTest) ->
   else
     Cypress.action("runner:test:end", wrap(test))
 
-_runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
+_runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest) ->
   _runner.on "start", ->
     Cypress.action("runner:start")
 
@@ -491,9 +503,14 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
     ## hooks do not have their own id, their
     ## commands need to grouped with the test
     ## and we can only associate them by this id
-    test = getTestFromHook(hook, hook.parent, getTestById)
+    test = getTest() or getTestFromHook(hook, hook.parent, getTestById)
     hook.id = test.id
     hook.ctx.currentTest = test
+
+    ## make sure we set this test as the current now
+    ## else its possible that our TEST_AFTER_RUN_EVENT
+    ## will never fire if this failed in a before hook
+    setTest(test)
 
     Cypress.action("runner:hook:start", wrap(hook))
 
@@ -587,7 +604,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest) ->
       ## if a hook fails (such as a before) then the test will never
       ## get run and we'll need to make sure we set the test so that
       ## the TEST_AFTER_RUN_EVENT fires correctly
-      hookFailed(runnable, runnable.err, hookName, getTestById, setTest)
+      hookFailed(runnable, runnable.err, hookName, getTestById, getTest)
 
 create = (specWindow, mocha, Cypress, cy) ->
   _id = 0
@@ -723,7 +740,7 @@ create = (specWindow, mocha, Cypress, cy) ->
     run: (fn) ->
       _startTime ?= moment().toJSON()
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, setTest)
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest)
 
       _runner.run (failures) ->
         ## if we happen to make it all the way through
@@ -745,7 +762,7 @@ create = (specWindow, mocha, Cypress, cy) ->
 
       switch runnable.type
         when "hook"
-          test = runnable.ctx.currentTest
+          test = getTest() or getTestFromHook(runnable, runnable.parent, getTestById)
         when "test"
           test = runnable
 
