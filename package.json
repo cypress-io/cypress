@@ -86,7 +86,7 @@
     "prettier-standard": "8.0.0",
     "semantic-action": "1.1.6",
     "simple-commit-message": "4.0.3",
-    "standard": "10.0.3",
+    "standard": "11.0.0",
     "vue": "^2.5.13",
     "vue-loader": "14.1.1",
     "vuex": "3.0.1",
