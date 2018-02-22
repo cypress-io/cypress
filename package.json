@@ -72,7 +72,7 @@
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
-    "axios": "0.17.1",
+    "axios": "0.18.0",
     "ban-sensitive-files": "1.9.2",
     "css-loader": "0.28.9",
     "dependency-check": "3.0.0",
