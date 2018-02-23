@@ -21,7 +21,7 @@
   "devDependencies": {
     "@cypress/react-tooltip": "0.3.2",
     "@cypress/releaser": "0.1.12",
-    "@cypress/unique-selector": "^0.3.7",
+    "@cypress/unique-selector": "^0.4.0",
     "bin-up": "^1.1.0",
     "bluebird": "3.5.0",
     "chai": "^3.5.0",

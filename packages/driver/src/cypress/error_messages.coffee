@@ -638,6 +638,11 @@ module.exports = {
     no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
     option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
 
+  selector_playground:
+    defaults_invalid_arg: "Cypress.SelectorPlayground.defaults() must be called with an object. You passed: {{arg}}"
+    defaults_invalid_priority: "Cypress.SelectorPlayground.defaults() called with invalid 'selectorPriority' property. It must be an array. You passed: {{arg}}"
+    defaults_invalid_on_element: "Cypress.SelectorPlayground.defaults() called with invalid 'onElement' property. It must be a function. You passed: {{arg}}"
+
   server:
     invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."

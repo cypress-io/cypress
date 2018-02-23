@@ -25,6 +25,7 @@ $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
 $utils = require("./cypress/utils")
+selectorPlaygroundMethods = require("./cypress/selector_playground")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
@@ -126,6 +127,7 @@ class $Cypress
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
     @env = $SetterGetter.create(env)
+    @SelectorPlayground = selectorPlaygroundMethods(@state)
 
     @Cookies = $Cookies.create(config.namespace, d)
 

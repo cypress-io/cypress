@@ -3,6 +3,7 @@ import { $ } from '@packages/driver'
 import getUniqueSelector from '@cypress/unique-selector'
 import Promise from 'bluebird'
 
+import eventManager from '../lib/event-manager'
 import selectorPlaygroundHighlight from '../selector-playground/highlight'
 
 const resetStyles = `
@@ -341,8 +342,17 @@ function getOuterSize (el) {
 }
 
 function getBestSelector (el) {
+  const Cypress = eventManager.getCypress()
+  const onElement = Cypress.SelectorPlayground._onElement()
+  if (onElement) {
+    const selector = onElement(el)
+    if (_.isString(selector)) return selector
+  }
+
+  const selectorPriority = Cypress.SelectorPlayground._selectorPriority()
+
   return getUniqueSelector(el, {
-    selectorTypes: ['ID', 'Class', 'Tag', 'Attributes', 'NthChild'],
+    selectorTypes: selectorPriority || ['data-cy', 'data-test', 'data-testid', 'id', 'class', 'tag', 'attributes', 'nth-child'],
   })
 }
 
