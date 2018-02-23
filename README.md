@@ -17,14 +17,12 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/cypress">
-    <img src="https://img.shields.io/npm/dm/cypress.svg" alt="npm"/>
+     <img src="https://img.shields.io/npm/dm/cypress.svg" alt="npm"/>
   </a>
   <a href="https://gitter.im/cypress-io/cypress">
     <img src="https://img.shields.io/gitter/room/cypress-io/cypress.svg" alt="Gitter chat"/>
-  </a><br />
-  <a href="https://opencollective.com/cypressio">
-    <object type="image/svg+xml" data="https://opencollective.com/cypressio/tiers/corporate-backer.svg?avatarHeight=64&width=600" />
   </a>
+  <a href="#backers" alt="sponsors on Open Collective"><img src="https://opencollective.com/cypressio/backers/badge.svg" /></a> <a href="#sponsors" alt="Sponsors on Open Collective"><img src="https://opencollective.com/cypressio/sponsors/badge.svg" /></a>
 </p>
 
 ## What is Cypress?
@@ -53,6 +51,36 @@ npm install cypress --save-dev
  [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/master) - `master` branch
 
 Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
+
+## Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="graphs/contributors"><img src="https://opencollective.com/cypressio/contributors.svg?width=890&button=false" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/cypressio#backer)]
+
+<a href="https://opencollective.com/cypressio#backers" target="_blank"><img src="https://opencollective.com/cypressio/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/cypressio#sponsor)]
+
+<a href="https://opencollective.com/cypressio/sponsor/0/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/1/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/2/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/3/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/4/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/5/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/6/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/7/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/8/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/cypressio/sponsor/9/website" target="_blank"><img src="https://opencollective.com/cypressio/sponsor/9/avatar.svg"></a>
+
+
 
 ## License
 
