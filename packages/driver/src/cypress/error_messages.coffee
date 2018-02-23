@@ -70,7 +70,7 @@ module.exports = {
     wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: {{node}}"
 
   browser:
-    invalid_arg: "#{cmd('{{method}}')} must be passed the name of a browser. You passed: {{browserName}}"
+    invalid_arg: "Cypress.{{method}}() must be passed the name of a browser. You passed: {{browserName}}"
 
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"

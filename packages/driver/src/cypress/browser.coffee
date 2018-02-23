@@ -2,10 +2,12 @@ _ = require("lodash")
 $utils = require("./utils")
 
 browsers = {
-  electron: "chrome"
   chrome: "chrome"
   canary: "chrome"
   chromium: "chrome"
+  electron: "chrome"
+
+  firefox: "firefox"
   firefoxDeveloperEdition: "firefox"
   firefoxNightly: "firefox"
 }

@@ -1,13 +1,11 @@
 _ = Cypress._
 
-addBrowserProps = require("../../../../src/cypress/browser")
+browserProps = require("../../../../src/cypress/browser")
 
 describe "src/cypress/browser", ->
   beforeEach ->
     @commands = (browser = { name: "chrome" }) ->
-      Cypress = {}
-      addBrowserProps(Cypress, { browser })
-      return Cypress
+      browserProps({ browser })
 
   context ".browser", ->
     it "returns the current browser", ->
@@ -22,6 +20,11 @@ describe "src/cypress/browser", ->
 
     it "is case-insensitive", ->
       expect(@commands().isBrowser("Chrome")).to.be.true
+
+    it "throws if arg is not a string", ->
+      expect =>
+        @commands().isBrowser(true)
+      .to.throw("Cypress.isBrowser() must be passed the name of a browser. You passed: true")
 
   context ".isBrowserType", ->
     it "returns true if it's a match or a 'parent' browser", ->
@@ -38,3 +41,8 @@ describe "src/cypress/browser", ->
     it "is case-insensitive", ->
       expect(@commands().isBrowserType("Chrome")).to.be.true
       expect(@commands({ name: "Firefox" }).isBrowserType("fireFox")).to.be.true
+
+    it "throws if arg is not a string", ->
+      expect =>
+        @commands().isBrowserType(true)
+      .to.throw("Cypress.isBrowserType() must be passed the name of a browser. You passed: true")
