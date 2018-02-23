@@ -19,7 +19,7 @@
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "link": "node ./scripts/link-packages.js",
-    "postinstall": "echo 'root postinstall' && npm run link && npm run all install && npm run build",
+    "postinstall": "echo 'root postinstall' && npm run link && npm run all install && npm run build && opencollective postinstall",
     "clean-deps": "npm run all clean-deps",
     "docker": "./scripts/run-docker-local.sh",
     "lint-js": "eslint --fix scripts/*.js packages/ts/*.js cli/*.js cli/**/*.js",
@@ -121,5 +121,12 @@
   },
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
+  },
+  "dependencies": {
+    "opencollective": "^1.0.3"
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/cypressio"
   }
 }
