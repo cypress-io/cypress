@@ -21,7 +21,7 @@ A push may release multiple package versions. In order to avoid version collisio
 ## Install
 
 ```bash
-npm install -D semantic-release semantic-release-monorepo
+npm install -D semantic-release@next semantic-release-monorepo
 ```
 
 ## Usage
