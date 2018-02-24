@@ -1,6 +1,5 @@
 const { pipeP, split } = require('ramda');
 const execa = require('execa');
-const debug = require('debug')('semantic-release:monorepo');
 
 const git = async (args, options = {}) => {
   const { stdout } = await execa('git', args, options);

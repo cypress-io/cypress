@@ -1,18 +1,13 @@
 const readPkg = require('read-pkg');
 const { compose } = require('ramda');
-const pluginDefinitions = require('semantic-release/lib/plugins/definitions');
+const pluginDefinitions = require('semantic-release/lib/definitions/plugins');
 const withOnlyPackageCommits = require('./only-package-commits');
 const versionToGitTag = require('./version-to-git-tag');
 const logPluginVersion = require('./log-plugin-version');
-const {
-  wrapPlugin,
-  wrapMultiPlugin,
-} = require('semantic-release-plugin-decorators');
+const { wrapPlugin } = require('semantic-release-plugin-decorators');
 
 const {
   mapNextReleaseVersion,
-  mapLastReleaseVersionToLastReleaseGitTag,
-  mapNextReleaseVersionToNextReleaseGitTag,
   withOptionsTransforms,
 } = require('./options-transforms');
 
