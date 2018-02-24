@@ -4,15 +4,10 @@ const pluginDefinitions = require('semantic-release/lib/plugins/definitions');
 const withOnlyPackageCommits = require('./only-package-commits');
 const versionToGitTag = require('./version-to-git-tag');
 const logPluginVersion = require('./log-plugin-version');
-const {
-  wrapPlugin,
-  wrapMultiPlugin,
-} = require('semantic-release-plugin-decorators');
+const { wrapPlugin } = require('semantic-release-plugin-decorators');
 
 const {
   mapNextReleaseVersion,
-  mapLastReleaseVersionToLastReleaseGitTag,
-  mapNextReleaseVersionToNextReleaseGitTag,
   withOptionsTransforms,
 } = require('./options-transforms');
 
