@@ -711,6 +711,7 @@ workflows:
             branches:
               only:
                 - develop
+                - fix-engines-1373
           requires:
             - build
       - build-binary:
@@ -718,6 +719,7 @@ workflows:
             branches:
               only:
                 - develop
+                - fix-engines-1373
           requires:
             - build
       - test-next-version:
@@ -725,6 +727,7 @@ workflows:
             branches:
               only:
                 - develop
+                - fix-engines-1373
           requires:
             - build-npm-package
             - build-binary
