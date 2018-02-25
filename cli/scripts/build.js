@@ -3,7 +3,8 @@ const path = require('path')
 
 const fs = require('../lib/fs')
 
-// grab the current version from the root monorepo package.json
+// grab the current version and a few other properties
+// from the root package.json
 const {
   version,
   description,
@@ -12,9 +13,9 @@ const {
   license,
   bugs,
   repository,
-  engines,
 } = require('@packages/root')
 
+// the rest of properties should come from the package.json in CLI folder
 const packageJsonSrc = path.join('package.json')
 const packageJsonDest = path.join('build', 'package.json')
 
@@ -32,7 +33,6 @@ function preparePackageForNpmRelease (json) {
     license,
     bugs,
     repository,
-    engines,
     types: 'types', // typescript types
     scripts: {
       postinstall: 'node index.js --exec install',
