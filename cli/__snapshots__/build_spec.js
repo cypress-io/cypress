@@ -1,7 +1,7 @@
-exports['package.json build outputs expected engines property 1'] = {
+exports['package.json build outputs expected properties 1'] = {
   "name": "test",
   "engines": "test engines",
-  "version": "2.0.3",
+  "version": "x.y.z",
   "description": "Cypress.io end to end testing tool",
   "author": "Brian Mann",
   "homepage": "https://github.com/cypress-io/cypress",
