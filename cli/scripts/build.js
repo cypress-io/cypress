@@ -43,10 +43,25 @@ function preparePackageForNpmRelease (json) {
   return json
 }
 
-fs.readJsonAsync(packageJsonSrc)
-.then(preparePackageForNpmRelease)
-.then((json) => {
-  return fs.outputJsonAsync(packageJsonDest, json, {
-    spaces: 2,
+function makeUserPackageFile () {
+  return fs.readJsonAsync(packageJsonSrc)
+  .then(preparePackageForNpmRelease)
+  .then((json) => {
+    return fs.outputJsonAsync(packageJsonDest, json, {
+      spaces: 2,
+    }).then(() => json) // returning package json object makes it easy to test
   })
-})
+}
+
+module.exports = makeUserPackageFile
+
+if (!module.parent) {
+  makeUserPackageFile()
+  .catch((err) => {
+    /* eslint-disable no-console */
+    console.error('Could not write user package file')
+    console.error(err)
+    /* eslint-enable no-console */
+    process.exit(-1)
+  })
+}
