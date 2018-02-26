@@ -74,7 +74,7 @@
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "axios": "0.18.0",
     "ban-sensitive-files": "1.9.2",
-    "css-loader": "0.28.9",
+    "css-loader": "0.28.10",
     "dependency-check": "3.0.0",
     "deps-ok": "1.2.2",
     "git-issues": "1.3.1",
