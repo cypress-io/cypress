@@ -538,6 +538,9 @@ class Server
           protocol: protocol
         }
       })
+
+      proxy.on "error", (err, req, res) =>
+        res.end()
     else
       ## we can't do anything with this socket
       ## since we don't know how to proxy it!
