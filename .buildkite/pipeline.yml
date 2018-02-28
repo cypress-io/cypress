@@ -6,6 +6,7 @@ env:
 steps:
   - label: "install tools"
     command:
+      - "nvm install 8.2.1"
       - "node --version"
       - "npm --version"
       - "security find-identity -p codesigning"

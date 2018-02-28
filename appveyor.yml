@@ -5,8 +5,8 @@ branches:
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
-# Test against the latest version of this Node.js version
 environment:
+  # Test against the same version of Node.js version as included in Electron
   nodejs_version: "8.2.1"
   # encode secure variables which will NOT be used
   # in pull requests
