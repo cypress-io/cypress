@@ -8,10 +8,8 @@ steps:
     command:
       # print the user login name
       - "whoami"
-      # this should load NVM
-      - "ls -la ~"
-      - 'export NVM_DIR="$HOME/.nvm"'
-      - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+      # install NVM
+      - "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash"
       # use same Node.js version as the one included in Electron
       - "nvm install 8.2.1"
       - "node --version"
