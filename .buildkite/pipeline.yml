@@ -8,8 +8,8 @@ steps:
     command:
       # print the user login name
       - "whoami"
-      # install NVM
-      - "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash"
+      # assuming NVM has been installed
+      # https://github.com/creationix/nvm
       # use same Node.js version as the one included in Electron
       - "nvm install 8.2.1"
       - "node --version"
