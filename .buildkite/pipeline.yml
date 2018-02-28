@@ -9,6 +9,7 @@ steps:
       # print the user login name
       - "whoami"
       # this should load NVM
+      - "ls -la ~"
       - "source ~/.bashrc"
       # use same Node.js version as the one included in Electron
       - "nvm install 8.2.1"
