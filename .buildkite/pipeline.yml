@@ -8,6 +8,7 @@ steps:
     command:
       # print the user login name
       - "whoami"
+      - "bash --login"
       # print current shell
       - "echo $0"
       # load NVM
