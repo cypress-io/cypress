@@ -29,7 +29,7 @@
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^1.1.2",
     "@types/node": "^9.4.6",
-    "axios": "^0.17.1",
+    "axios": "^0.18.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-class-properties": "^6.24.1",
