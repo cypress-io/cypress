@@ -6,6 +6,10 @@ env:
 steps:
   - label: "install tools"
     command:
+      # print the user login name
+      - "whoami"
+      # this should load NVM
+      - "source ~/.bashrc"
       # use same Node.js version as the one included in Electron
       - "nvm install 8.2.1"
       - "node --version"
