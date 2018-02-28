@@ -8,6 +8,10 @@ steps:
     command:
       # print the user login name
       - "whoami"
+      # print current shell
+      - "echo $0"
+      # load NVM
+      - '[ -n "$PS1" ] && source ~/.bash_profile'
       # assuming NVM has been installed
       # https://github.com/creationix/nvm
       # use same Node.js version as the one included in Electron
