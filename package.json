@@ -42,7 +42,7 @@
     "semantic-action": "^1.1.0",
     "standard": "^11.0.0",
     "typescript": "^2.6.2",
-    "webpack": "^3.10.0"
+    "webpack": "^4.0.0"
   },
   "standard": {
     "globals": [
