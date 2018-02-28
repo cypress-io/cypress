@@ -10,7 +10,8 @@ steps:
       - "whoami"
       # this should load NVM
       - "ls -la ~"
-      - "source ~/.bashrc"
+      - 'export NVM_DIR="$HOME/.nvm"'
+      - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
       # use same Node.js version as the one included in Electron
       - "nvm install 8.2.1"
       - "node --version"
