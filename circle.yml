@@ -22,6 +22,7 @@ jobs:
       - run:
           name: print global NPM cache path
           command: echo $(npm -g bin)
+      - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node
       ## else colors (and tests) will fail
