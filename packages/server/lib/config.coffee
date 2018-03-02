@@ -89,6 +89,7 @@ defaults = {
   blacklistHosts:                null
   clientRoute:                   "/__/"
   xhrRoute:                      "/xhrs/"
+  logXhr:                        true
   socketIoRoute:                 "/__socket.io"
   socketIoCookie:                "__socket.io"
   reporterRoute:                 "/__cypress/reporter"

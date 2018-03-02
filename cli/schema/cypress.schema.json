@@ -19,6 +19,11 @@
       },
       "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match."
     },
+    "logXhr": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will log xhr requests"
+    },
     "numTestsKeptInMemory": {
       "type": "number",
       "default": 50,

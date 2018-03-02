@@ -43,6 +43,7 @@
   "javascripts": [
 
   ],
+  "logXhr": true,
   "morgan": true,
   "namespace": "__cypress",
   "numTestsKeptInMemory": 50,

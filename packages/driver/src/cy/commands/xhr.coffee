@@ -92,7 +92,7 @@ startXhrServer = (cy, state, config) ->
         numResponses = rl.get("numResponses")
         rl.set "numResponses", numResponses + 1
 
-      if false
+      if config('logXhr')
         logs[xhr.id] = log = Cypress.log({
           message:   ""
           name:      "xhr"
