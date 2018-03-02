@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
-import getUniqueSelector from '@cypress/unique-selector'
 import Promise from 'bluebird'
 
 import selectorPlaygroundHighlight from '../selector-playground/highlight'
@@ -340,12 +339,6 @@ function getOuterSize (el) {
   }
 }
 
-function getBestSelector (el) {
-  return getUniqueSelector(el, {
-    selectorTypes: ['ID', 'Class', 'Tag', 'Attributes', 'NthChild'],
-  })
-}
-
 function isInViewport (win, el) {
   let rect = el.getBoundingClientRect()
 
@@ -389,7 +382,6 @@ export default {
   addElementBoxModelLayers,
   addHitBoxLayer,
   addOrUpdateSelectorPlaygroundHighlight,
-  getBestSelector,
   getElementsForSelector,
   getOuterSize,
   scrollIntoView,

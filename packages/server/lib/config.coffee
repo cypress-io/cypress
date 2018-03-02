@@ -33,7 +33,8 @@ folders = toWords """
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
-  chromeWebSecurity               integrationFolder
+  chromeWebSecurity
+  modifyObstructiveCode           integrationFolder
   env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
@@ -100,7 +101,8 @@ defaults = {
   execTimeout:                   60000
   videoRecording:                true
   videoCompression:              32
-  videoUploadOnPasses:          true
+  videoUploadOnPasses:           true
+  modifyObstructiveCode:         true
   chromeWebSecurity:             true
   waitForAnimations:             true
   animationDistanceThreshold:    5
@@ -128,6 +130,7 @@ validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
   blacklistHosts: v.isStringOrArrayOfStrings
+  modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject

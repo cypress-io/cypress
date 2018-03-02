@@ -85,7 +85,7 @@ class Project extends EE
     .then (cfg) =>
       @_initPlugins(cfg, options)
       .then (modifiedCfg) ->
-        debug("plugin config yielded", modifiedCfg)
+        debug("plugin config yielded:", modifiedCfg)
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
@@ -103,6 +103,8 @@ class Project extends EE
         ## store the cfg from
         ## opening the server
         @cfg = cfg
+
+        debug("project config: %o", _.omit(cfg, "resolved"))
 
         if warning
           options.onWarning(warning)

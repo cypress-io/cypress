@@ -17,7 +17,8 @@ describe "lib/browsers/chrome", ->
       @sandbox.stub(plugins, "has")
       @sandbox.stub(plugins, "execute")
       @sandbox.stub(utils, "launch")
-      @sandbox.stub(utils, "ensureProfile").resolves("/profile/dir")
+      @sandbox.stub(utils, "getProfileDir").returns("/profile/dir")
+      @sandbox.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
@@ -51,6 +52,7 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
     it "normalizes multiple extensions from plugins", ->
@@ -72,6 +74,7 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
   context "#_getArgs", ->

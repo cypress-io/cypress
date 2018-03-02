@@ -70,7 +70,6 @@ describe "e2e reporters", ->
               expect(json.stats).to.be.an('object')
               expect(json.stats.passes).to.eq(1)
 
-
       it "fails with #{ma} npm custom reporter", ->
         e2e.exec(@, {
           spec: "simple_failing_hook_spec.coffee"

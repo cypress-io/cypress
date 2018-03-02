@@ -1,7 +1,7 @@
 _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
-debug         = require("debug")("cypress:server:browsers")
+debug         = require("debug")("cypress:server:browsers:electron")
 plugins       = require("../plugins")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
@@ -72,18 +72,28 @@ module.exports = {
   _launch: (win, url, options) ->
     menu.set({withDevTools: true})
 
-    debug("launching electron browser window to url %s with options %o", url, options)
+    debug("launching browser window to url %s with options %o", url, options)
 
     Promise
     .try =>
       if ua = options.userAgent
         @_setUserAgent(win.webContents, ua)
 
-      if ps = options.proxyServer
-        @_setProxy(win.webContents, ps)
+      setProxy = =>
+        if ps = options.proxyServer
+          @_setProxy(win.webContents, ps)
+
+      Promise.join(
+        setProxy(),
+        @_clearCache(win.webContents)
+      )
     .then ->
       win.loadURL(url)
     .return(win)
+
+  _clearCache: (webContents) ->
+    new Promise (resolve) ->
+      webContents.session.clearCache(resolve)
 
   _setUserAgent: (webContents, userAgent) ->
     ## set both because why not
@@ -154,6 +164,8 @@ module.exports = {
         events = new EE
 
         win.once "closed", ->
+          debug("closed event fired")
+
           call("removeAllListeners")
           events.emit("exit")
 

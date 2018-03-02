@@ -563,6 +563,11 @@ describe "lib/cypress", ->
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+      if process.env.CI
+        ## Gleb: disabling this because Node 8 docker image runs as root
+        ## which makes accessing everything possible.
+        return
+
       permissionsPath = path.resolve("./permissions")
 
       cypressJson = path.join(permissionsPath, "cypress.json")
@@ -682,6 +687,11 @@ describe "lib/cypress", ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
+        ee.webContents = {
+          session: {
+            clearCache: @sandbox.stub().yieldsAsync()
+          }
+        }
 
         @sandbox.stub(utils, "launch").resolves(ee)
         @sandbox.stub(Windows, "create").returns(ee)
@@ -700,7 +710,7 @@ describe "lib/cypress", ->
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(6)
+            expect(browserArgs).to.have.length(7)
 
             expect(browserArgs.slice(0, 4)).to.deep.eq([
               "chrome", "foo", "bar", "baz"

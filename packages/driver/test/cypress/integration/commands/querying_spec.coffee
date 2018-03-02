@@ -564,6 +564,9 @@ describe "src/cy/commands/querying", ->
           .get("@foo").should("contain", "asdf")
 
     describe "should('exist')", ->
+      beforeEach ->
+        Cypress.config("defaultCommandTimeout", 1000)
+
       it "waits until button exists", ->
         cy.on "command:retry", _.after 3, =>
           cy.$$("body").append $("<div id='missing-el'>missing el</div>")
@@ -1419,10 +1422,16 @@ describe "src/cy/commands/querying", ->
 
     describe "special characters", ->
       _.each "' \" [ ] { } . @ # $ % ^ & * ( ) , ; :".split(" "), (char) ->
-        it "finds content with character: #{char}", ->
+        it "finds content by string with character: #{char}", ->
           span = $("<span>special char #{char} content</span>").appendTo cy.$$("body")
 
           cy.contains("span", char).then ($span) ->
+            expect($span.get(0)).to.eq span.get(0)
+
+        it "finds content by regex with character: #{char}", ->
+          span = $("<span>special char #{char} content</span>").appendTo cy.$$("body")
+
+          cy.contains("span", new RegExp(_.escapeRegExp(char))).then ($span) ->
             expect($span.get(0)).to.eq span.get(0)
 
     describe ".log", ->

@@ -121,6 +121,16 @@ describe "lib/config", ->
           @expectValidationFails("be a boolean")
           @expectValidationFails("the value was: 42")
 
+      context "modifyObstructiveCode", ->
+        it "passes if a boolean", ->
+          @setup({modifyObstructiveCode: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({modifyObstructiveCode: 42})
+          @expectValidationFails("be a boolean")
+          @expectValidationFails("the value was: 42")
+
       context "defaultCommandTimeout", ->
         it "passes if a number", ->
           @setup({defaultCommandTimeout: 10})
@@ -573,6 +583,9 @@ describe "lib/config", ->
     it "screenshotOnHeadlessFailure=true", ->
       @defaults "screenshotOnHeadlessFailure", true
 
+    it "modifyObstructiveCode=true", ->
+      @defaults "modifyObstructiveCode", true
+
     it "supportFile=false", ->
       @defaults "supportFile", false, {supportFile: false}
 
@@ -718,6 +731,7 @@ describe "lib/config", ->
             animationDistanceThreshold: { value: 5, from: "default" },
             trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
+            modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
@@ -776,6 +790,7 @@ describe "lib/config", ->
             screenshotOnHeadlessFailure:{ value: true, from: "default" },
             trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
+            modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },

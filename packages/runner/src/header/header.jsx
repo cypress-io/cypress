@@ -59,8 +59,8 @@ export default class Header extends Component {
               <p>Additionally you can override the default viewport dimensions by specifying these values in your <code>cypress.json</code>.</p>
               <pre>{/* eslint-disable indent */}
 {`{
-  viewportWidth: ${state.defaults.width},
-  viewportHeight: ${state.defaults.height}
+  "viewportWidth": ${state.defaults.width},
+  "viewportHeight": ${state.defaults.height}
 }`}
               </pre>{/* eslint-enable indent */}
               <p>
