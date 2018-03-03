@@ -126,8 +126,6 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-  
-  Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
 
@@ -221,8 +219,6 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-  
-  Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
 
@@ -316,8 +312,6 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'
       at stack trace line
-  
-  Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'simple failing hook spec'ing_hook_spec.coffee-456:4:11)
 
 
 

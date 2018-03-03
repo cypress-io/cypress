@@ -14,6 +14,10 @@ const glob = Promise.promisify(require('glob'))
 
 const options = minimist(process.argv.slice(2))
 
+if (options.browser) {
+  process.env.BROWSER = options.browser
+}
+
 const started = new Date()
 
 let numFailed = 0

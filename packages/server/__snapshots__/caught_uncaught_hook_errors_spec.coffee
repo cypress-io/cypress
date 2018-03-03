@@ -13,9 +13,18 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ t6a
     ✓ t7a
 
+  s3a
+    2) "before all" hook for "t8a"
 
-  4 passing
-  1 failing
+  s4a
+    3) "before all" hook for "t10a"
+
+  s5a
+    ✓ fires all test:after:run events
+
+
+  5 passing
+  3 failing
 
   1) s1a "before each" hook for "t2a":
      CypressError: Timed out retrying: Expected to find element: '.does-not-exist', but never found it.
@@ -36,17 +45,29 @@ Because this error occurred during a 'before each' hook we are skipping the rema
       at stack trace line
       at stack trace line
 
+  2) s3a "before all" hook for "t8a":
+     Error: s3a before hook failed
+
+Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 's3a'
+      at stack trace line
+
+  3) s4a "before all" hook for "t10a":
+     Error: s4a before hook failed
+
+Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 's4a'
+      at stack trace line
+
 
 
 
   (Tests Finished)
 
-  - Tests:           4
-  - Passes:          4
-  - Failures:        1
+  - Tests:           5
+  - Passes:          5
+  - Failures:        3
   - Pending:         0
   - Duration:        10 seconds
-  - Screenshots:     1
+  - Screenshots:     3
   - Video Recorded:  true
   - Cypress Version: 1.2.3
 
@@ -54,6 +75,8 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/s1a -- t2a -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s3a -- t8a -- before all hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/s4a -- t10a -- before all hook.png (1280x720)
 
 
   (Video)

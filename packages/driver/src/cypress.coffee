@@ -24,6 +24,7 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
+$SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 
 proxies = {
@@ -454,6 +455,7 @@ class $Cypress
   Mocha: $Mocha
   Runner: $Runner
   Server: $Server
+  SelectorPlayground: $SelectorPlayground
   utils: $utils
   _: _
   moment: moment

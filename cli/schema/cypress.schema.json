@@ -147,6 +147,11 @@
       "default": null,
       "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blacklistHosts"
     },
+    "modifyObstructiveCode": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will search for and replace obstructive JS code found in .js or .html files that prevents Cypress from working. Please read the notes for more information on this setting. https://on.cypress.io/configuration#modifyObstructiveCode"
+    },
     "viewportHeight":	{
       "type": "number",
       "default": 660,

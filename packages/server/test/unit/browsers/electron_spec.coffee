@@ -68,6 +68,7 @@ describe "lib/browsers/electron", ->
   context "._launch", ->
     beforeEach ->
       @sandbox.stub(menu, "set")
+      @sandbox.stub(electron, "_clearCache").resolves()
       @sandbox.stub(electron, "_setProxy").resolves()
       @sandbox.stub(electron, "_setUserAgent")
 
