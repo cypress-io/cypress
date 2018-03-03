@@ -241,13 +241,15 @@ module.exports = {
         ## early too: (Ended Early: true)
         ## in the stats
         obj = {
-          error:        errors.stripAnsi(errMsg)
-          failures:     1
-          tests:        0
-          passes:       0
-          pending:      0
-          duration:     0
-          # failingTests: [] ## TODO: fix this!
+          error: errors.stripAnsi(errMsg)
+          stats: {
+            failures:     1
+            tests:        0
+            passes:       0
+            pending:      0
+            duration:     0
+            # failingTests: [] ## TODO: fix this!
+          }
         }
 
         resolve(obj)
