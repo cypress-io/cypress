@@ -462,35 +462,35 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   simple failing hook spec
     beforeEach hooks
-      1) never gets here
+      1) "before each" hook for "never gets here"
     pending
       - is pending
     afterEach hooks
       ✓ runs this
-      2) runs this
+      2) "after each" hook for "runs this"
     after hooks
       ✓ runs this
       ✓ fails on this
-      3) fails on this
+      3) "after all" hook for "fails on this"
 
 
   3 passing
   1 pending
   3 failing
 
-  1) simple failing hook spec beforeEach hooks never gets here:
+  1) simple failing hook spec beforeEach hooks "before each" hook for "never gets here":
      Error: fail1
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
       at stack trace line
 
-  2) simple failing hook spec afterEach hooks runs this:
+  2) simple failing hook spec afterEach hooks "after each" hook for "runs this":
      Error: fail2
 
 Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
       at stack trace line
 
-  3) simple failing hook spec after hooks fails on this:
+  3) simple failing hook spec after hooks "after all" hook for "fails on this":
      Error: fail3
 
 Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
