@@ -199,6 +199,14 @@ class Reporter
   normalizeTest: (test = {}) ->
     err = test.err ? {}
 
+    ## use this or null
+    wcs = test.wallClockStart ? null
+
+    if wcs
+      ## convert to actual date object
+      wcs = new Date(wcs)
+
+
     ## wallClockDuration:
     ## this is the 'real' duration of wall clock time that the
     ## user 'felt' when the test run. it includes everything
@@ -217,6 +225,7 @@ class Reporter
       error:          err.message
       timings:        test.timings
       failedFromHookId: test.failedFromHookId
+      wallClockStart: wcs
       wallClockDuration: test.wallClockDuration
       # videoTimestamp: test.started - videoStart
     }
@@ -279,7 +288,9 @@ class Reporter
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
-      test.videoTimestamp = test.start - videoStart
+      ## if we have a wallClockStart 
+      if wcs = test.wallClockStart
+        test.videoTimestamp = test.wallClockStart - videoStart
       test
 
   @create = (reporterName, reporterOptions, projectRoot) ->
