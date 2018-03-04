@@ -31,7 +31,8 @@ exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
         2,
         3
       ],
-      "error": "foo"
+      "error": "foo",
+      "wallClockStart": null
     },
     {
       "title": [
@@ -40,7 +41,8 @@ exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
         "does something good"
       ],
       "state": "pending",
-      "body": ""
+      "body": "",
+      "wallClockStart": null
     }
   ]
 }

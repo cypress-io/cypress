@@ -89,9 +89,9 @@ exports['e2e timings simple_passing_spec.coffee 2'] = {
           "afterFnDuration": 200
         }
       },
-      "wallClockStart": "2018-03-04T22:22:19.601Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 1666
+      "videoTimestamp": 9999
     }
   ],
   "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
@@ -230,9 +230,9 @@ exports['e2e timings simple_hooks_spec.coffee 2'] = {
           }
         ]
       },
-      "wallClockStart": "2018-03-04T22:22:28.689Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 1656
+      "videoTimestamp": 9999
     },
     {
       "clientId": "r4",
@@ -263,9 +263,9 @@ exports['e2e timings simple_hooks_spec.coffee 2'] = {
           }
         ]
       },
-      "wallClockStart": "2018-03-04T22:22:29.266Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 2233
+      "videoTimestamp": 9999
     },
     {
       "clientId": "r5",
@@ -303,9 +303,9 @@ exports['e2e timings simple_hooks_spec.coffee 2'] = {
           }
         ]
       },
-      "wallClockStart": "2018-03-04T22:22:29.697Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 2664
+      "videoTimestamp": 9999
     }
   ],
   "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
@@ -421,9 +421,9 @@ exports['e2e timings simple_failing_spec.coffee 2'] = {
           "afterFnDuration": 200
         }
       },
-      "wallClockStart": "2018-03-04T22:22:38.244Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 1721
+      "videoTimestamp": 9999
     },
     {
       "clientId": "r4",
@@ -442,9 +442,9 @@ exports['e2e timings simple_failing_spec.coffee 2'] = {
           "afterFnDuration": 200
         }
       },
-      "wallClockStart": "2018-03-04T22:22:38.484Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 1961
+      "videoTimestamp": 9999
     }
   ],
   "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
@@ -466,50 +466,7 @@ exports['e2e timings simple_failing_spec.coffee 2'] = {
       "width": 1280
     }
   ],
-  "failingTests": [
-    {
-      "clientId": "r3",
-      "title": [
-        "simple failing spec",
-        "fails1"
-      ],
-      "state": "failed",
-      "body": "function () {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-      "stack": "CypressError: Timed out retrying: expected true to be false\n    at Object.cypressErr (http://localhost:54476/__cypress/runner/cypress_runner.js:66833:11)\n    at Object.throwErr (http://localhost:54476/__cypress/runner/cypress_runner.js:66798:18)\n    at Object.throwErrByPath (http://localhost:54476/__cypress/runner/cypress_runner.js:66825:17)\n    at retry (http://localhost:54476/__cypress/runner/cypress_runner.js:60757:16)\n    at http://localhost:54476/__cypress/runner/cypress_runner.js:53260:18\n    at tryCatcher (http://localhost:54476/__cypress/runner/cypress_runner.js:6846:23)\n    at Promise._settlePromiseFromHandler (http://localhost:54476/__cypress/runner/cypress_runner.js:4868:31)\n    at Promise._settlePromise (http://localhost:54476/__cypress/runner/cypress_runner.js:4925:18)\n    at Promise._settlePromise0 (http://localhost:54476/__cypress/runner/cypress_runner.js:4970:10)\n    at Promise._settlePromises (http://localhost:54476/__cypress/runner/cypress_runner.js:5045:18)\n    at Async._drainQueue (http://localhost:54476/__cypress/runner/cypress_runner.js:1778:16)\n    at Async._drainQueues (http://localhost:54476/__cypress/runner/cypress_runner.js:1788:10)\n    at Async.drainQueues (http://localhost:54476/__cypress/runner/cypress_runner.js:1662:14)\n    at <anonymous>",
-      "error": "Timed out retrying: expected true to be false",
-      "timings": {
-        "lifecycle": 35,
-        "test": {
-          "fnDuration": 99,
-          "afterFnDuration": 100
-        }
-      },
-      "wallClockStart": "2018-03-04T22:22:38.244Z",
-      "wallClockDuration": 236,
-      "videoTimestamp": 1721
-    },
-    {
-      "clientId": "r4",
-      "title": [
-        "simple failing spec",
-        "fails2"
-      ],
-      "state": "failed",
-      "body": "function () {\n    throw new Error(\"fails2\");\n  }",
-      "stack": "Error: fails2\n    at Context.<anonymous> (http://localhost:54476/__cypress/tests?p=cypress/integration/simple_failing_spec.coffee-422:9:11)",
-      "error": "fails2",
-      "timings": {
-        "lifecycle": 12,
-        "test": {
-          "fnDuration": 0,
-          "afterFnDuration": 92
-        }
-      },
-      "wallClockStart": "2018-03-04T22:22:38.484Z",
-      "wallClockDuration": 106,
-      "videoTimestamp": 1961
-    }
-  ],
+  "failingTests": [],
   "shouldUploadVideo": true
 }
 
@@ -659,9 +616,9 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
         ]
       },
       "failedFromHookId": "h1",
-      "wallClockStart": "2018-03-04T22:22:46.837Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 1852
+      "videoTimestamp": 9999
     },
     {
       "clientId": "r6",
@@ -701,9 +658,9 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
         ]
       },
       "failedFromHookId": "h2",
-      "wallClockStart": "2018-03-04T22:22:47.050Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 2065
+      "videoTimestamp": 9999
     },
     {
       "title": [
@@ -731,9 +688,9 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
           "afterFnDuration": 200
         }
       },
-      "wallClockStart": "2018-03-04T22:22:47.239Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 2254
+      "videoTimestamp": 9999
     },
     {
       "clientId": "r12",
@@ -761,9 +718,9 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
         ]
       },
       "failedFromHookId": "h3",
-      "wallClockStart": "2018-03-04T22:22:47.245Z",
+      "wallClockStart": "2018-02-01T20:14:19.323Z",
       "wallClockDuration": 1234,
-      "videoTimestamp": 2260
+      "videoTimestamp": 9999
     }
   ],
   "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
@@ -793,94 +750,7 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
       "width": 1280
     }
   ],
-  "failingTests": [
-    {
-      "clientId": "r4",
-      "title": [
-        "simple failing hook spec",
-        "beforeEach hooks",
-        "never gets here"
-      ],
-      "state": "failed",
-      "body": "function () {}",
-      "stack": "Error: fail1\n\nBecause this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'\n    at Context.<anonymous> (http://localhost:54516/__cypress/tests?p=cypress/integration/simple_failing_hook_spec.coffee-226:5:13)",
-      "error": "fail1\n\nBecause this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'",
-      "timings": {
-        "lifecycle": 37,
-        "before each": [
-          {
-            "hookId": "h1",
-            "fnDuration": 1,
-            "afterFnDuration": 162
-          }
-        ]
-      },
-      "failedFromHookId": "h1",
-      "wallClockStart": "2018-03-04T22:22:46.837Z",
-      "wallClockDuration": 204,
-      "videoTimestamp": 1852
-    },
-    {
-      "clientId": "r8",
-      "title": [
-        "simple failing hook spec",
-        "afterEach hooks",
-        "runs this"
-      ],
-      "state": "failed",
-      "body": "function () {}",
-      "stack": "Error: fail2\n\nBecause this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'\n    at Context.<anonymous> (http://localhost:54516/__cypress/tests?p=cypress/integration/simple_failing_hook_spec.coffee-226:14:13)",
-      "error": "fail2\n\nBecause this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'",
-      "timings": {
-        "lifecycle": 9,
-        "test": {
-          "fnDuration": 1,
-          "afterFnDuration": 0
-        },
-        "after each": [
-          {
-            "hookId": "h2",
-            "fnDuration": 0,
-            "afterFnDuration": 172
-          }
-        ]
-      },
-      "failedFromHookId": "h2",
-      "wallClockStart": "2018-03-04T22:22:47.050Z",
-      "wallClockDuration": 186,
-      "videoTimestamp": 2065
-    },
-    {
-      "clientId": "r12",
-      "title": [
-        "simple failing hook spec",
-        "after hooks",
-        "fails on this"
-      ],
-      "state": "failed",
-      "body": "function () {}",
-      "stack": "Error: fail3\n\nBecause this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'\n    at Context.<anonymous> (http://localhost:54516/__cypress/tests?p=cypress/integration/simple_failing_hook_spec.coffee-226:21:13)",
-      "error": "fail3\n\nBecause this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'",
-      "timings": {
-        "lifecycle": 3,
-        "test": {
-          "fnDuration": 0,
-          "afterFnDuration": 0
-        },
-        "after all": [
-          {
-            "hookId": "h3",
-            "fnDuration": 0,
-            "afterFnDuration": 204
-          }
-        ]
-      },
-      "failedFromHookId": "h3",
-      "wallClockStart": "2018-03-04T22:22:47.245Z",
-      "wallClockDuration": 211,
-      "videoTimestamp": 2260
-    }
-  ],
+  "failingTests": [],
   "shouldUploadVideo": true
 }
 

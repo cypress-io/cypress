@@ -9,6 +9,8 @@ e2ePath = Fixtures.projectPath("e2e")
 
 outputPath = path.join(e2ePath, "output.json")
 
+STATIC_DATE = "2018-02-01T20:14:19.323Z"
+
 specs = {
   "simple_passing_spec.coffee": 0
   "simple_hooks_spec.coffee": 0
@@ -26,8 +28,8 @@ expectStartToBeBeforeEnd = (obj, start, end) ->
   ).to.be.true
 
   ## once valid, mutate and set static dates
-  _.set(obj, start, "2018-02-01T20:14:19.323Z")
-  _.set(obj, end, "2018-02-01T20:14:19.323Z")
+  _.set(obj, start, STATIC_DATE)
+  _.set(obj, end, STATIC_DATE)
 
 expectDurationWithin = (obj, duration, low, high, reset) ->
   d = _.get(obj, duration)
@@ -85,7 +87,7 @@ expectRunToHaveCorrectStats = (run) ->
     run,
     "stats.duration",
     wallClocks,
-    wallClocks + 50, ## add 50ms to account for padding
+    wallClocks + 100, ## add 100ms to account for padding
     1234
   )
 
@@ -93,13 +95,24 @@ expectRunToHaveCorrectStats = (run) ->
     run,
     "reporterStats.duration",
     wallClocks,
-    wallClocks + 50, ## add 50ms to account for padding
+    wallClocks + 100, ## add 100ms to account for padding
     1234
   )
 
   addFnAndAfterFn = (obj) ->
     ## add these two together
     obj.fnDuration + obj.afterFnDuration
+
+  ## make sure we've added failingTests
+  failingTests = _.filter(run.tests, { state: "failed" })
+
+  if failingTests.length
+    expect(run.failingTests).to.deep.eq(failingTests)
+
+    ## now reset it
+    run.failingTests = []
+  else
+    expect(run.failingTests).to.be.undefined
 
   ## now make sure that each tests wallclock duration
   ## is around the sum of all of its timings
@@ -130,6 +143,14 @@ expectRunToHaveCorrectStats = (run) ->
     ## normalize stack
     if test.stack
       test.stack = e2e.normalizeStdout(test.stack)
+
+    if test.wallClockStart
+      d = new Date(test.wallClockStart)
+      expect(d.toJSON()).to.eq(test.wallClockStart)
+      test.wallClockStart = STATIC_DATE
+
+      expect(test.videoTimestamp).to.be.a("number")
+      test.videoTimestamp = 9999
 
   ## normalize video path
   run.video = e2e.normalizeStdout(run.video)
