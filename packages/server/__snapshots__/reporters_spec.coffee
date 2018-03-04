@@ -44,10 +44,10 @@ finished!
 
   (Tests Finished)
 
-  - Tests:           undefined
-  - Passes:          undefined
-  - Failures:        undefined
-  - Pending:         undefined
+  - Tests:           1
+  - Passes:          1
+  - Failures:        0
+  - Pending:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -346,4 +346,3 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (All Done)
 
 `
-

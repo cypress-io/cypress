@@ -74,7 +74,7 @@ describe "e2e reporters", ->
         e2e.exec(@, {
           spec: "simple_failing_hook_spec.coffee"
           snapshot: true
-          expectedExitCode: 1
+          expectedExitCode: 3
           reporter: ma
         })
         .then ->

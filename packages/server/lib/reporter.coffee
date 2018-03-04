@@ -96,7 +96,10 @@ mergeErr = (runnable, runnables, stats) ->
   if runnable.type is "hook"
     test.failedFromHookId = runnable.hookId
 
-  test = _.extend({}, test, { title: test.title })
+  ## dont mutate the test, and merge in the runnable title
+  ## in the case its a hook so that we emit the right 'fail'
+  ## event for reporters
+  test = _.extend({}, test, { title: runnable.title })
 
   [test, test.err]
 

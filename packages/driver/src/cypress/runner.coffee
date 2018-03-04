@@ -252,7 +252,7 @@ isLastSuite = (suite, tests) ->
 ## if we failed from a hook and that hook was 'before'
 ## since then mocha skips the remaining tests in the suite
 lastTestThatWillRunInSuite = (test, tests) ->
-  isLastTest(test, tests) or (test.failedFromHook and test.hookName is "before all")
+  isLastTest(test, tests) or (test.failedFromHookId and test.hookName is "before all")
 
 isLastTest = (test, tests) ->
   test is _.last(tests)
@@ -780,7 +780,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       switch runnable.type
         when "hook"
           test = getTest() or getTestFromHook(runnable, runnable.parent, getTestById)
-          
+
         when "test"
           test = runnable
 
