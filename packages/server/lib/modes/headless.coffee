@@ -248,7 +248,6 @@ module.exports = {
             passes:       0
             pending:      0
             duration:     0
-            # failingTests: [] ## TODO: fix this!
           }
         }
 
@@ -347,17 +346,30 @@ module.exports = {
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
 
-      ft = obj.failingTests
+      { tests, failures } = obj
 
-      hasFailingTests = ft and ft.length
+      ## TODO: this is a interstitial modification to keep
+      ## the logic the same but incrementally prepare for
+      ## sending all the tests
+      failingTests = _.filter(tests, { state: "failed" })
 
-      if hasFailingTests
-        ## TODO: fix this!!!
-        obj.failingTests = Reporter.setVideoTimestamp(started, ft)
+      hasFailingTests = failures > 0 and failingTests and failingTests.length
+
+      ## if we have a video recording
+      if started and tests and tests.length
+        ## always set the video timestamp on tests
+        obj.tests = Reporter.setVideoTimestamp(started, tests)
+
+      ## TODO: temporary - remove later
+      if started and failingTests and failingTests.length
+        obj.failingTests = Reporter.setVideoTimestamp(started, failingTests)
 
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures
       suv = !!(videoUploadOnPasses is true or hasFailingTests)
+
+      ## TODO: remove this later
+      obj.shouldUploadVideo = suv
 
       debug("attempting to close the browser")
 
@@ -372,7 +384,6 @@ module.exports = {
           ## TODO: add a catch here
         else
           finish()
-    .get("stats")
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true

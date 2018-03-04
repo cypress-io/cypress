@@ -144,7 +144,7 @@ module.exports = {
 
       logException(err)
 
-  uploadAssets: (instanceId, stats, stdout) ->
+  uploadAssets: (instanceId, results, stdout) ->
     console.log("")
     console.log("")
 
@@ -155,29 +155,29 @@ module.exports = {
     console.log("")
 
     ## get rid of the path property
-    screenshots = _.map stats.screenshots, (screenshot) ->
+    screenshots = _.map results.screenshots, (screenshot) ->
       _.omit(screenshot, "path")
 
     api.updateInstance({
       instanceId:   instanceId
-      tests:        stats.tests
-      passes:       stats.passes
-      failures:     stats.failures
-      pending:      stats.pending
-      duration:     stats.duration
-      error:        stats.error
-      video:        !!stats.video
+      tests:        _.get(results, "stats.tests")
+      passes:       _.get(results, "stats.passes")
+      failures:     _.get(results, "stats.failures")
+      pending:      _.get(results, "stats.pending")
+      duration:     _.get(results, "stats.duration")
+      error:        results.error
+      video:        !!results.video
       screenshots:  screenshots
-      failingTests: stats.failingTests
-      cypressConfig: stats.config
+      failingTests: results.failingTests
+      cypressConfig: results.config
       ciProvider:    ciProvider.name() ## TODO: don't send this (no reason to)
       stdout:       stdout
     })
     .then (resp = {}) =>
       @upload({
-        video:          stats.video
-        uploadVideo:    stats.shouldUploadVideo
-        screenshots:    stats.screenshots
+        video:          results.video
+        uploadVideo:    results.shouldUploadVideo
+        screenshots:    results.screenshots
         videoUrl:       resp.videoUploadUrl
         screenshotUrls: resp.screenshotUploadUrls
       })
@@ -254,14 +254,14 @@ module.exports = {
           didUploadAssets       = false
 
           headless.run(options)
-          .then (stats = {}) =>
+          .then (results = {}) =>
             ## if we got a instanceId then attempt to
             ## upload these assets
             if instanceId
-              @uploadAssets(instanceId, stats, captured.toString())
+              @uploadAssets(instanceId, results, captured.toString())
               .then (ret) ->
                 didUploadAssets = ret isnt null
-              .return(stats)
+              .return(results)
               .finally =>
                 headless.allDone()
 
@@ -272,5 +272,5 @@ module.exports = {
             else
               stdout.restore()
               headless.allDone()
-              return stats
+              return results
 }

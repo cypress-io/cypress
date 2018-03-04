@@ -247,7 +247,7 @@ class Reporter
 
     suites = _
     .chain(@runnables)
-    .filter({type: "suite"})
+    .filter({root: false}) ## don't include root suite
     .value()
 
     { start, end } = @stats
@@ -255,7 +255,7 @@ class Reporter
     if start and end
       @stats.duration = end - start
 
-    @stats.suites = suites.length - 1 ## subtract the root suite
+    @stats.suites = suites.length
     @stats.tests = tests.length
     @stats.passes = _.filter(tests, { state: "passed" }).length
     @stats.pending = _.filter(tests, { state: "pending" }).length

@@ -495,6 +495,7 @@ describe "lib/cypress", ->
             tests: []
             hooks: []
             screenshots: []
+            shouldUploadVideo: true
             video: json.video
           })
       .finally ->
@@ -853,11 +854,13 @@ describe "lib/cypress", ->
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
+        stats: {
+          tests: 1
+          passes: 2
+          failures: 3
+          pending: 4
+          duration: 5
+        }
         video: true
         shouldUploadVideo: true
         screenshots: []

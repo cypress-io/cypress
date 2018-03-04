@@ -57,7 +57,7 @@ module.exports = {
             ## juggle up the failures since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
-            resolve({failures: code})
+            resolve({stats: { failures: code } })
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
   openProject: (options) ->
@@ -237,6 +237,7 @@ module.exports = {
       when "headless"
         ## run headlessly and exit
         @runElectron(mode, options)
+        .get("stats")
         .get("failures")
         .then(exit)
         .catch(exitErr)
@@ -247,6 +248,7 @@ module.exports = {
       when "record"
         ## run headlessly, record, and exit
         @runElectron(mode, options)
+        .get("stats")
         .get("failures")
         .then(exit)
         .catch(exitErr)
