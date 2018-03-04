@@ -206,7 +206,8 @@ class Reporter
     new Reporter(reporterName, reporterOptions, projectRoot)
 
   @loadReporter = (reporterName, projectRoot) ->
-    debug("loading reporter #{reporterName}")
+    debug("trying to load reporter:", reporterName)
+
     if r = reporters[reporterName]
       debug("#{reporterName} is built-in reporter")
       return require(r)
@@ -219,35 +220,33 @@ class Reporter
     ## that is local (./custom-reporter.js)
     ## or one installed by the user through npm
     try
+      p = path.resolve(projectRoot, reporterName)
+
       ## try local
-      debug("loading local reporter by name #{reporterName}")
+      debug("trying to require local reporter with path:", p)
 
       ## using path.resolve() here so we can just pass an
       ## absolute path as the reporterName which avoids
       ## joining projectRoot unnecessarily
-      return require(path.resolve(projectRoot, reporterName))
+      return require(p)
     catch err
-      ## try npm. if this fails, we're out of options, so let it throw
-      debug("loading NPM reporter module #{reporterName} from #{projectRoot}")
+      if err.code isnt "MODULE_NOT_FOUND"
+        ## bail early if the error wasn't MODULE_NOT_FOUND
+        ## because that means theres something actually wrong
+        ## with the found reporter
+        throw err
 
-      try
-        return require(path.resolve(projectRoot, "node_modules", reporterName))
-      catch err
-        msg = "Could not find reporter module #{reporterName} relative to #{projectRoot}"
-        throw new Error(msg)
+      p = path.resolve(projectRoot, "node_modules", reporterName)
+
+      ## try npm. if this fails, we're out of options, so let it throw
+      debug("trying to require local reporter with path:", p)
+
+      return require(p)
 
   @getSearchPathsForReporter = (reporterName, projectRoot) ->
     _.uniq([
       path.resolve(projectRoot, reporterName),
       path.resolve(projectRoot, "node_modules", reporterName)
     ])
-
-  @isValidReporterName = (reporterName, projectRoot) ->
-    try
-      Reporter.loadReporter(reporterName, projectRoot)
-      debug("reporter #{reporterName} is valid name")
-      true
-    catch
-      false
 
 module.exports = Reporter

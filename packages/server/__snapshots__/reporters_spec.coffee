@@ -5,6 +5,10 @@ We searched for the reporter in these paths:
 - /foo/bar/.projects/e2e/module-does-not-exist
 - /foo/bar/.projects/e2e/node_modules/module-does-not-exist
 
+The error we received was:
+
+Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
+
 Learn more at stack trace line
 `
 
@@ -345,5 +349,51 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (All Done)
 
+`
+
+exports['e2e reporters reports error when thrown from reporter 1'] = `Could not load reporter by name: reporters/throws.js
+
+We searched for the reporter in these paths:
+
+- /foo/bar/.projects/e2e/reporters/throws.js
+- /foo/bar/.projects/e2e/node_modules/reporters/throws.js
+
+The error we received was:
+
+Error: this reporter threw an error
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+
+Learn more at stack trace line
 `
 

@@ -27,6 +27,15 @@ describe "e2e reporters", ->
       reporter: "module-does-not-exist"
     })
 
+  ## https://github.com/cypress-io/cypress/issues/1192
+  it "reports error when thrown from reporter", ->
+    e2e.exec(@, {
+      spec: "simple_passing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+      reporter: "reporters/throws.js"
+    })
+
   it "supports junit reporter and reporter options", ->
     e2e.exec(@, {
       spec: "simple_passing_spec.coffee"
