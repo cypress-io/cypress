@@ -880,10 +880,10 @@ describe "lib/cypress", ->
     it "runs project in ci and exits with number of failures", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
 
       @createInstance = @sandbox.stub(api, "createInstance").withArgs({
-        buildId: "build-id-123"
+        runId: "run-id-123"
         browser: "electron"
         spec: undefined
       }).resolves("instance-id-123")
@@ -928,10 +928,10 @@ describe "lib/cypress", ->
       ## it to return something we specify
       @sandbox.stub(Project.prototype, "ensureSpecExists").resolves("#{@todosPath}/test2.coffee")
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
 
       @sandbox.stub(api, "createInstance").withArgs({
-        buildId: "build-id-123"
+        runId: "run-id-123"
         browser: "chrome"
         spec: spec
       }).resolves("instance-id-123")
@@ -974,7 +974,7 @@ describe "lib/cypress", ->
     it "still records even with old --ci option", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -985,7 +985,7 @@ describe "lib/cypress", ->
     it "logs warning when using deprecated --ci arg and no env var", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -998,7 +998,7 @@ describe "lib/cypress", ->
     it "logs ONLY CLI warning when using older version of CLI when using deprecated --ci", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -1012,7 +1012,7 @@ describe "lib/cypress", ->
 
       process.env.CYPRESS_CI_KEY = "asdf123foobarbaz"
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 

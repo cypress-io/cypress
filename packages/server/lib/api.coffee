@@ -6,7 +6,7 @@ errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
 browsers   = require('./browsers')
-Routes     = require("./util/routes")
+routes     = require("./util/routes")
 system     = require("./util/system")
 debug      = require("debug")("cypress:server:api")
 
@@ -25,6 +25,10 @@ rp = request.defaults (params = {}, callback) ->
   method = params.method.toLowerCase()
 
   request[method](params, callback)
+
+debugReturnedRun = (info) ->
+  debug("received API response with id %s", info.id)
+  debug("and list of specs to run", info.specs)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -47,12 +51,12 @@ machineId = ->
 
 module.exports = {
   ping: ->
-    rp.get(Routes.ping())
+    rp.get(routes.ping())
     .catch(tagError)
 
   getOrgs: (authToken) ->
     rp.get({
-      url: Routes.orgs()
+      url: routes.orgs()
       json: true
       auth: {
         bearer: authToken
@@ -62,7 +66,7 @@ module.exports = {
 
   getProjects: (authToken) ->
     rp.get({
-      url: Routes.projects()
+      url: routes.projects()
       json: true
       auth: {
         bearer: authToken
@@ -72,7 +76,7 @@ module.exports = {
 
   getProject: (projectId, authToken) ->
     rp.get({
-      url: Routes.project(projectId)
+      url: routes.project(projectId)
       json: true
       auth: {
         bearer: authToken
@@ -86,7 +90,7 @@ module.exports = {
   getProjectRuns: (projectId, authToken, options = {}) ->
     options.page ?= 1
     rp.get({
-      url: Routes.projectRuns(projectId)
+      url: routes.projectRuns(projectId)
       json: true
       timeout: options.timeout ? 10000
       auth: {
@@ -97,10 +101,6 @@ module.exports = {
     .catch(tagError)
 
   createRun: (options = {}) ->
-    debugReturnedBuild = (info) ->
-      debug("received API response with buildId %s", info.buildId)
-      debug("and list of specs to run", info.specs)
-
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -122,22 +122,22 @@ module.exports = {
     debug("project '%s' group id '%s'", body.projectId, body.groupId)
 
     rp.post({
-      url: Routes.runs()
+      url: routes.runs()
       json: true
       timeout: options.timeout ? 10000
       headers: {
-        "x-route-version": "2"
+        "x-route-version": "3"
       }
       body: body
     })
     .promise()
-    .tap(debugReturnedBuild)
-    .get("buildId")
+    .tap(debugReturnedRun)
+    .get("runId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
   createInstance: (options = {}) ->
-    { buildId, spec, timeout } = options
+    { runId, spec, timeout } = options
 
     browsers.getByName(options.browser)
     .then (browser = {}) ->
@@ -153,11 +153,11 @@ module.exports = {
         systemInfo.browserVersion = version
 
         rp.post({
-          url: Routes.instances(buildId)
+          url: routes.instances(runId)
           json: true
           timeout: timeout ? 10000
           headers: {
-            "x-route-version": "3"
+            "x-route-version": "4"
           }
           body: systemInfo
         })
@@ -168,7 +168,7 @@ module.exports = {
 
   updateInstanceStdout: (options = {}) ->
     rp.put({
-      url: Routes.instanceStdout(options.instanceId)
+      url: routes.instanceStdout(options.instanceId)
       json: true
       timeout: options.timeout ? 10000
       body: {
@@ -180,9 +180,12 @@ module.exports = {
 
   updateInstance: (options = {}) ->
     rp.put({
-      url: Routes.instance(options.instanceId)
+      url: routes.instance(options.instanceId)
       json: true
       timeout: options.timeout ? 10000
+      headers: {
+        "x-route-version": "2"
+      }
       body: _.pick(options, [
         "tests"
         "duration"
@@ -203,7 +206,7 @@ module.exports = {
 
   createRaygunException: (body, authToken, timeout = 3000) ->
     rp.post({
-      url: Routes.exceptions()
+      url: routes.exceptions()
       json: true
       body: body
       auth: {
@@ -226,7 +229,7 @@ module.exports = {
         h["x-machine-id"] = id
 
       rp.post({
-        url: Routes.signin({code: code})
+        url: routes.signin({code: code})
         json: true
         headers: h
       })
@@ -241,7 +244,7 @@ module.exports = {
 
   createSignout: (authToken) ->
     rp.post({
-      url: Routes.signout()
+      url: routes.signout()
       json: true
       auth: {
         bearer: authToken
@@ -252,7 +255,7 @@ module.exports = {
 
   createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({
-      url: Routes.projects()
+      url: routes.projects()
       json: true
       auth: {
         bearer: authToken
@@ -272,7 +275,7 @@ module.exports = {
 
   getProjectRecordKeys: (projectId, authToken) ->
     rp.get({
-      url: Routes.projectRecordKeys(projectId)
+      url: routes.projectRecordKeys(projectId)
       json: true
       auth: {
         bearer: authToken
@@ -282,7 +285,7 @@ module.exports = {
 
   requestAccess: (projectId, authToken) ->
     rp.post({
-      url: Routes.membershipRequests(projectId)
+      url: routes.membershipRequests(projectId)
       json: true
       auth: {
         bearer: authToken
@@ -293,7 +296,7 @@ module.exports = {
 
   getLoginUrl: ->
     rp.get({
-      url: Routes.auth(),
+      url: routes.auth(),
       json: true
     })
     .promise()
@@ -303,7 +306,7 @@ module.exports = {
   _projectToken: (method, projectId, authToken) ->
     rp({
       method: method
-      url: Routes.projectToken(projectId)
+      url: routes.projectToken(projectId)
       json: true
       auth: {
         bearer: authToken

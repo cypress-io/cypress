@@ -68,7 +68,7 @@ exports['e2e timings simple_passing_spec.coffee 2'] = {
   ],
   "tests": [
     {
-      "clientId": "r3",
+      "testId": "r3",
       "title": [
         "simple passing spec",
         "passes"
@@ -195,7 +195,7 @@ exports['e2e timings simple_hooks_spec.coffee 2'] = {
   ],
   "tests": [
     {
-      "clientId": "r3",
+      "testId": "r3",
       "title": [
         "simple hooks spec",
         "t1"
@@ -235,7 +235,7 @@ exports['e2e timings simple_hooks_spec.coffee 2'] = {
       "videoTimestamp": 9999
     },
     {
-      "clientId": "r4",
+      "testId": "r4",
       "title": [
         "simple hooks spec",
         "t2"
@@ -268,7 +268,7 @@ exports['e2e timings simple_hooks_spec.coffee 2'] = {
       "videoTimestamp": 9999
     },
     {
-      "clientId": "r5",
+      "testId": "r5",
       "title": [
         "simple hooks spec",
         "t3"
@@ -405,7 +405,7 @@ exports['e2e timings simple_failing_spec.coffee 2'] = {
   "hooks": [],
   "tests": [
     {
-      "clientId": "r3",
+      "testId": "r3",
       "title": [
         "simple failing spec",
         "fails1"
@@ -426,7 +426,7 @@ exports['e2e timings simple_failing_spec.coffee 2'] = {
       "videoTimestamp": 9999
     },
     {
-      "clientId": "r4",
+      "testId": "r4",
       "title": [
         "simple failing spec",
         "fails2"
@@ -452,7 +452,10 @@ exports['e2e timings simple_failing_spec.coffee 2'] = {
     {
       "clientId": "some-random-guid-number",
       "testId": "r3",
-      "testTitle": "simple failing spec /// fails1",
+      "testTitle": [
+        "simple failing spec",
+        "fails1"
+      ],
       "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing spec -- fails1.png",
       "height": 720,
       "width": 1280
@@ -460,7 +463,10 @@ exports['e2e timings simple_failing_spec.coffee 2'] = {
     {
       "clientId": "some-random-guid-number",
       "testId": "r4",
-      "testTitle": "simple failing spec /// fails2",
+      "testTitle": [
+        "simple failing spec",
+        "fails2"
+      ],
       "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing spec -- fails2.png",
       "height": 720,
       "width": 1280
@@ -595,7 +601,7 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
   ],
   "tests": [
     {
-      "clientId": "r4",
+      "testId": "r4",
       "title": [
         "simple failing hook spec",
         "beforeEach hooks",
@@ -621,7 +627,7 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
       "videoTimestamp": 9999
     },
     {
-      "clientId": "r6",
+      "testId": "r6",
       "title": [
         "simple failing hook spec",
         "pending",
@@ -633,7 +639,7 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
       "wallClockDuration": null
     },
     {
-      "clientId": "r8",
+      "testId": "r8",
       "title": [
         "simple failing hook spec",
         "afterEach hooks",
@@ -673,7 +679,7 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
       "wallClockStart": null
     },
     {
-      "clientId": "r11",
+      "testId": "r11",
       "title": [
         "simple failing hook spec",
         "after hooks",
@@ -693,7 +699,7 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
       "videoTimestamp": 9999
     },
     {
-      "clientId": "r12",
+      "testId": "r12",
       "title": [
         "simple failing hook spec",
         "after hooks",
@@ -728,7 +734,12 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
     {
       "clientId": "some-random-guid-number",
       "testId": "r4",
-      "testTitle": "simple failing hook spec /// beforeEach hooks /// never gets here /// \"before each\" hook",
+      "testTitle": [
+        "simple failing hook spec",
+        "beforeEach hooks",
+        "never gets here",
+        "\"before each\" hook"
+      ],
       "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook.png",
       "height": 720,
       "width": 1280
@@ -736,7 +747,12 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
     {
       "clientId": "some-random-guid-number",
       "testId": "r8",
-      "testTitle": "simple failing hook spec /// afterEach hooks /// runs this /// \"after each\" hook",
+      "testTitle": [
+        "simple failing hook spec",
+        "afterEach hooks",
+        "runs this",
+        "\"after each\" hook"
+      ],
       "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- afterEach hooks -- runs this -- after each hook.png",
       "height": 720,
       "width": 1280
@@ -744,7 +760,12 @@ exports['e2e timings simple_failing_hook_spec.coffee 2'] = {
     {
       "clientId": "some-random-guid-number",
       "testId": "r12",
-      "testTitle": "simple failing hook spec /// after hooks /// fails on this /// \"after all\" hook",
+      "testTitle": [
+        "simple failing hook spec",
+        "after hooks",
+        "fails on this",
+        "\"after all\" hook"
+      ],
       "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- after hooks -- fails on this -- after all hook.png",
       "height": 720,
       "width": 1280
