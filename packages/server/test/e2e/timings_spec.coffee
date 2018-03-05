@@ -52,8 +52,8 @@ normalizeTestTimings = (obj, timings) ->
   _.set obj, "timings", _.mapValues t, (val, key) ->
     switch key
       when "lifecycle"
-        ## ensure that lifecycle is under 100ms
-        expect(val, "lifecyle").to.be.within(0, 100)
+        ## ensure that lifecycle is under 500ms
+        expect(val, "lifecycle").to.be.within(0, 500)
 
         ## reset to 100
         return 100
