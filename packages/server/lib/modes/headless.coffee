@@ -24,8 +24,6 @@ Windows    = require("../gui/windows")
 
 fs = Promise.promisifyAll(fs)
 
-TITLE_SEPARATOR = " /// "
-
 haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## if we have a project id
   ## and we have a key
@@ -403,7 +401,7 @@ module.exports = {
       title:      data.name ## TODO: rename this property
       # name:      data.name
       testId:    data.testId
-      testTitle: data.titles.join(TITLE_SEPARATOR)
+      testTitle: data.titles
       path:      resp.path
       height:    resp.height
       width:     resp.width

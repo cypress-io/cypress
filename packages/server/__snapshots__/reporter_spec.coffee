@@ -18,7 +18,7 @@ exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
   "hooks": [],
   "tests": [
     {
-      "clientId": "r4",
+      "testId": "r4",
       "title": [
         "TodoMVC - React",
         "When page is initially opened",
@@ -46,4 +46,3 @@ exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
     }
   ]
 }
-

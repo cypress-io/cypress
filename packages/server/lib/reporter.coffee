@@ -215,7 +215,7 @@ class Reporter
     ## than summing the durations of the timings.
     ##
     {
-      clientId:       test.id
+      testId:         test.id
       title:          getParentTitle(test)
       state:          test.state
       start:          test.start
@@ -288,7 +288,7 @@ class Reporter
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
-      ## if we have a wallClockStart 
+      ## if we have a wallClockStart
       if wcs = test.wallClockStart
         test.videoTimestamp = test.wallClockStart - videoStart
       test
