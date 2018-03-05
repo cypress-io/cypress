@@ -11,6 +11,10 @@ system     = require("./util/system")
 debug      = require("debug")("cypress:server:api")
 
 rp = request.defaults (params = {}, callback) ->
+  _.defaults(params, {
+    gzip: true
+  })
+
   headers = params.headers ?= {}
 
   _.defaults(headers, {

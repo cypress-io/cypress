@@ -19,6 +19,7 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/organizations")
       .reply(200, orgs)
 
@@ -29,6 +30,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/organizations")
       .reply(500, {})
 
@@ -44,6 +46,7 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects")
       .reply(200, projects)
 
@@ -54,6 +57,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects")
       .reply(500, {})
 
@@ -69,6 +73,7 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .matchHeader("x-route-version", "2")
       .get("/projects/id-123")
       .reply(200, project)
@@ -80,6 +85,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123")
       .reply(500, {})
 
@@ -95,6 +101,7 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/builds")
       .reply(200, builds)
 
@@ -105,6 +112,7 @@ describe "lib/api", ->
     it "handles timeouts", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/builds")
       .socketDelay(5000)
       .reply(200, [])
@@ -133,6 +141,7 @@ describe "lib/api", ->
     it "GET /projects/:id/builds failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/builds")
       .reply(401, {
         errors: {
@@ -159,6 +168,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/builds")
       .reply(500, {})
 
@@ -183,6 +193,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/ping")
       .reply(500, {})
 
@@ -304,6 +315,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/builds", @buildProps)
       .reply(500, {})
 
@@ -431,6 +443,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/builds/build-id-123/instances", @postProps)
       .reply(500, {})
 
@@ -540,6 +553,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/instances/instance-id-123", @putProps)
       .reply(500, {})
 
@@ -618,6 +632,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/instances/instance-id-123/stdout", {
         stdout: "foobarbaz\n"
       })
@@ -648,6 +663,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/auth")
       .reply(500, {})
 
@@ -716,6 +732,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signin")
       .reply(500, {})
 
@@ -731,6 +748,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signout")
       .reply(200)
 
@@ -739,6 +757,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signout")
       .reply(500, {})
 
@@ -769,6 +788,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", @postProps)
       .reply(200, {
         id: "id-123"
@@ -792,6 +812,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", {
         name: "foobar"
         orgId: "org-id-123"
@@ -829,6 +850,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", @postProps)
       .reply(500, {})
 
@@ -844,6 +866,7 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/keys")
       .reply(200, recordKeys)
 
@@ -854,6 +877,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/keys")
       .reply(500, {})
 
@@ -867,6 +891,7 @@ describe "lib/api", ->
     it "POST /projects/:id/membership_requests + returns response", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(200)
 
@@ -877,6 +902,7 @@ describe "lib/api", ->
     it "POST /projects/:id/membership_requests failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(422, {
         errors: {
@@ -903,6 +929,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(500, {})
 
@@ -918,6 +945,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
@@ -930,6 +958,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/project-123/token")
       .reply(500, {})
 
@@ -945,6 +974,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
@@ -957,6 +987,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/projects/project-id-123/token")
       .reply(500, {})
 
@@ -1007,6 +1038,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/exceptions", {foo: "bar"})
       .reply(500, {})
 
