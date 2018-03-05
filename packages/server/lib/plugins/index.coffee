@@ -37,7 +37,7 @@ module.exports = {
 
       registeredEvents = {}
 
-      pluginsProcess = cp.fork(path.join(__dirname, "child", "index.js"), ["--file", config.pluginsFile])
+      pluginsProcess = cp.fork(path.join(__dirname, "child", "index.js"), ["--file", config.pluginsFile], { stdio: "inherit" })
       ipc = util.wrapIpc(pluginsProcess)
 
       handler(ipc) for handler in handlers
