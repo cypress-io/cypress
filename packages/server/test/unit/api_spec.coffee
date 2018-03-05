@@ -24,7 +24,7 @@ describe "lib/api", ->
 
       api.getOrgs("auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(orgs)
+        expect(ret).to.deep.eq(orgs)
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -49,7 +49,7 @@ describe "lib/api", ->
 
       api.getProjects("auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(projects)
+        expect(ret).to.deep.eq(projects)
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -75,7 +75,7 @@ describe "lib/api", ->
 
       api.getProject("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(project)
+        expect(ret).to.deep.eq(project)
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -90,22 +90,22 @@ describe "lib/api", ->
         expect(err.isApiError).to.be.true
 
   context ".getProjectRuns", ->
-    it "GET /projects/:id/builds + returns builds", ->
-      builds = []
+    it "GET /projects/:id/runs + returns runs", ->
+      runs = []
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
-      .reply(200, builds)
+      .get("/projects/id-123/runs")
+      .reply(200, runs)
 
       api.getProjectRuns("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(builds)
+        expect(ret).to.deep.eq(runs)
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .get("/projects/id-123/runs")
       .socketDelay(5000)
       .reply(200, [])
 
@@ -130,10 +130,10 @@ describe "lib/api", ->
       .then (ret) ->
         expect(rp.get).to.be.calledWithMatch({timeout: 10000})
 
-    it "GET /projects/:id/builds failure formatting", ->
+    it "GET /projects/:id/runs failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .get("/projects/id-123/runs")
       .reply(401, {
         errors: {
           permission: ["denied"]
@@ -159,7 +159,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .get("/projects/id-123/runs")
       .reply(500, {})
 
       api.getProjectRuns("id-123", "auth-token-123")
@@ -209,12 +209,12 @@ describe "lib/api", ->
         specs:             ["foo.js", "bar.js"]
       }
 
-    it "POST /builds + returns buildId", ->
+    it "POST /runs + returns buildId", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds", @buildProps)
+      .post("/runs", @buildProps)
       .reply(200, {
         buildId: "new-build-id-123"
       })
@@ -223,12 +223,12 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eq("new-build-id-123")
 
-    it "POST /builds failure formatting", ->
+    it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds", {
+      .post("/runs", {
         projectId:         null
         recordKey:         "token-123"
         commitSha:         "sha"
@@ -280,7 +280,7 @@ describe "lib/api", ->
       .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds")
+      .post("/runs")
       .socketDelay(5000)
       .reply(200, {})
 
@@ -304,7 +304,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/builds", @buildProps)
+      .post("/runs", @buildProps)
       .reply(500, {})
 
       api.createRun(@buildProps)
@@ -338,7 +338,7 @@ describe "lib/api", ->
         spec: "cypress/integration/app_spec.js"
       }
 
-    it "POSTs /builds/:id/instances", ->
+    it "POSTs /runs/:id/instances", ->
       @sandbox.stub(os, "release").returns("10.10.10")
       @sandbox.stub(os, "cpus").returns([{model: "foo"}])
       @sandbox.stub(os, "freemem").returns(1000)
@@ -354,7 +354,7 @@ describe "lib/api", ->
       .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances", @postProps)
+      .post("/runs/build-id-123/instances", @postProps)
       .reply(200, {
         instanceId: "instance-id-123"
       })
@@ -364,12 +364,12 @@ describe "lib/api", ->
         expect(browsers.getByName).to.be.calledWith("foo")
         expect(instanceId).to.eq("instance-id-123")
 
-    it "POST /builds/:id/instances failure formatting", ->
+    it "POST /runs/:id/instances failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances")
+      .post("/runs/build-id-123/instances")
       .reply(422, {
         errors: {
           tests: ["is required"]
@@ -397,7 +397,7 @@ describe "lib/api", ->
       .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances")
+      .post("/runs/build-id-123/instances")
       .socketDelay(5000)
       .reply(200, {})
 
@@ -431,7 +431,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/builds/build-id-123/instances", @postProps)
+      .post("/runs/build-id-123/instances", @postProps)
       .reply(500, {})
 
       api.createInstance(@createProps)
@@ -779,7 +779,7 @@ describe "lib/api", ->
 
       api.createProject(@createProps, "remoteOrigin", "auth-token-123")
       .then (projectDetails) ->
-        expect(projectDetails).to.eql({
+        expect(projectDetails).to.deep.eq({
           id: "id-123"
           name: "foobar"
           orgId: "org-id-123"
@@ -849,7 +849,7 @@ describe "lib/api", ->
 
       api.getProjectRecordKeys("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(recordKeys)
+        expect(ret).to.deep.eq(recordKeys)
 
     it "tags errors", ->
       nock("http://localhost:1234")

@@ -1,43 +1,46 @@
 require("../spec_helper")
 
-Routes = require("#{root}/lib/util/routes")
+routes = require("#{root}/lib/util/routes")
 
 describe "lib/util/routes", ->
   it "api", ->
-    expect(Routes.api()).to.eq "http://localhost:1234/"
+    expect(routes.api()).to.eq "http://localhost:1234/"
 
   it "auth", ->
-    expect(Routes.auth()).to.eq "http://localhost:1234/auth"
+    expect(routes.auth()).to.eq "http://localhost:1234/auth"
 
   it "ping", ->
-    expect(Routes.ping()).to.eq("http://localhost:1234/ping")
+    expect(routes.ping()).to.eq("http://localhost:1234/ping")
 
   it "signin", ->
-    expect(Routes.signin()).to.eq "http://localhost:1234/signin"
+    expect(routes.signin()).to.eq "http://localhost:1234/signin"
 
   it "signin?code=abc", ->
-    expect(Routes.signin({code: "abc"})).to.eq "http://localhost:1234/signin?code=abc"
+    expect(routes.signin({code: "abc"})).to.eq "http://localhost:1234/signin?code=abc"
 
   it "signout", ->
-    expect(Routes.signout()).to.eq "http://localhost:1234/signout"
+    expect(routes.signout()).to.eq "http://localhost:1234/signout"
 
   it "runs", ->
-    expect(Routes.runs()).to.eq("http://localhost:1234/builds")
+    expect(routes.runs()).to.eq("http://localhost:1234/runs")
 
   it "instances", ->
-    expect(Routes.instances(123)).to.eq("http://localhost:1234/builds/123/instances")
+    expect(routes.instances(123)).to.eq("http://localhost:1234/runs/123/instances")
 
   it "instance", ->
-    expect(Routes.instance(123)).to.eq("http://localhost:1234/instances/123")
+    expect(routes.instance(123)).to.eq("http://localhost:1234/instances/123")
 
   it "projects", ->
-    expect(Routes.projects()).to.eq "http://localhost:1234/projects"
+    expect(routes.projects()).to.eq "http://localhost:1234/projects"
 
   it "project", ->
-    expect(Routes.project("123-foo")).to.eq "http://localhost:1234/projects/123-foo"
+    expect(routes.project("123-foo")).to.eq "http://localhost:1234/projects/123-foo"
+
+  it "projectRuns", ->
+    expect(routes.projectRuns("123-foo")).to.eq "http://localhost:1234/projects/123-foo/runs"
 
   it "projectToken", ->
-    expect(Routes.projectToken("123-foo")).to.eq "http://localhost:1234/projects/123-foo/token"
+    expect(routes.projectToken("123-foo")).to.eq "http://localhost:1234/projects/123-foo/token"
 
   it "exceptions", ->
-    expect(Routes.exceptions()).to.eq "http://localhost:1234/exceptions"
+    expect(routes.exceptions()).to.eq "http://localhost:1234/exceptions"
