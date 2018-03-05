@@ -25,7 +25,7 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
+  generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
@@ -85,9 +85,9 @@ module.exports = {
             logException(err)
             .return(null)
 
-  createInstance: (buildId, spec, browser) ->
+  createInstance: (runId, spec, browser) ->
     api.createInstance({
-      buildId
+      runId
       spec
       browser
     })
@@ -237,13 +237,13 @@ module.exports = {
 
         key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
-        @generateProjectBuildId(projectId, projectPath, projectName, key,
+        @generateProjectRunId(projectId, projectPath, projectName, key,
           options.group, options.groupId, options.spec)
-        .then (buildId) =>
-          ## bail if we dont have a buildId
-          return if not buildId
+        .then (runId) =>
+          ## bail if we dont have a runId
+          return if not runId
 
-          @createInstance(buildId, options.spec, browser)
+          @createInstance(runId, options.spec, browser)
         .then (instanceId) =>
           ## dont check that the user is logged in
           options.ensureAuthToken = false

@@ -209,23 +209,23 @@ describe "lib/api", ->
         specs:             ["foo.js", "bar.js"]
       }
 
-    it "POST /runs + returns buildId", ->
+    it "POST /runs + returns runId", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", @buildProps)
       .reply(200, {
-        buildId: "new-build-id-123"
+        runId: "new-run-id-123"
       })
 
       api.createRun(@buildProps)
       .then (ret) ->
-        expect(ret).to.eq("new-build-id-123")
+        expect(ret).to.eq("new-run-id-123")
 
     it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", {
@@ -243,7 +243,7 @@ describe "lib/api", ->
       })
       .reply(422, {
         errors: {
-          buildId: ["is required"]
+          runId: ["is required"]
         }
       })
 
@@ -268,7 +268,7 @@ describe "lib/api", ->
 
           {
             "errors": {
-              "buildId": [
+              "runId": [
                 "is required"
               ]
             }
@@ -277,7 +277,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs")
@@ -294,7 +294,7 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: () -> Promise.resolve({buildId: 'foo'})
+        promise: () -> Promise.resolve({runId: 'foo'})
       })
 
       api.createRun({})
@@ -303,6 +303,7 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "3")
       .matchHeader("authorization", "Bearer auth-token-123")
       .post("/runs", @buildProps)
       .reply(500, {})
@@ -333,7 +334,7 @@ describe "lib/api", ->
       }
 
       @createProps = {
-        buildId: "build-id-123"
+        runId: "run-id-123"
         browser: "foo"
         spec: "cypress/integration/app_spec.js"
       }
@@ -351,10 +352,10 @@ describe "lib/api", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/runs/build-id-123/instances", @postProps)
+      .post("/runs/run-id-123/instances", @postProps)
       .reply(200, {
         instanceId: "instance-id-123"
       })
@@ -366,17 +367,17 @@ describe "lib/api", ->
 
     it "POST /runs/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/runs/build-id-123/instances")
+      .post("/runs/run-id-123/instances")
       .reply(422, {
         errors: {
           tests: ["is required"]
         }
       })
 
-      api.createInstance({buildId: "build-id-123"})
+      api.createInstance({runId: "run-id-123"})
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -394,15 +395,15 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/runs/build-id-123/instances")
+      .post("/runs/run-id-123/instances")
       .socketDelay(5000)
       .reply(200, {})
 
       api.createInstance({
-        buildId: "build-id-123"
+        runId: "run-id-123"
         timeout: 100
       })
       .then ->
@@ -431,7 +432,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/runs/build-id-123/instances", @postProps)
+      .post("/runs/run-id-123/instances", @postProps)
       .reply(500, {})
 
       api.createInstance(@createProps)
@@ -479,6 +480,7 @@ describe "lib/api", ->
 
     it "PUTs /instances/:id", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123", @putProps)
@@ -488,6 +490,7 @@ describe "lib/api", ->
 
     it "PUT /instances/:id failure formatting", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
@@ -515,6 +518,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
@@ -539,6 +543,7 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
       .put("/instances/instance-id-123", @putProps)
       .reply(500, {})

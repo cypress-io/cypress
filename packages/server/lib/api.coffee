@@ -22,6 +22,10 @@ rp = request.defaults (params = {}, callback) ->
 
   request[method](params, callback)
 
+debugReturnedRun = (info) ->
+  debug("received API response with id %s", info.id)
+  debug("and list of specs to run", info.specs)
+
 formatResponseBody = (err) ->
   ## if the body is JSON object
   if _.isObject(err.error)
@@ -93,10 +97,6 @@ module.exports = {
     .catch(tagError)
 
   createRun: (options = {}) ->
-    debugReturnedBuild = (info) ->
-      debug("received API response with buildId %s", info.buildId)
-      debug("and list of specs to run", info.specs)
-
     body = _.pick(options, [
       "projectId"
       "recordKey"
@@ -122,18 +122,18 @@ module.exports = {
       json: true
       timeout: options.timeout ? 10000
       headers: {
-        "x-route-version": "2"
+        "x-route-version": "3"
       }
       body: body
     })
     .promise()
-    .tap(debugReturnedBuild)
-    .get("buildId")
+    .tap(debugReturnedRun)
+    .get("runId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
   createInstance: (options = {}) ->
-    { buildId, spec, timeout } = options
+    { runId, spec, timeout } = options
 
     browsers.getByName(options.browser)
     .then (browser = {}) ->
@@ -149,11 +149,11 @@ module.exports = {
         systemInfo.browserVersion = version
 
         rp.post({
-          url: routes.instances(buildId)
+          url: routes.instances(runId)
           json: true
           timeout: timeout ? 10000
           headers: {
-            "x-route-version": "3"
+            "x-route-version": "4"
           }
           body: systemInfo
         })
@@ -179,6 +179,9 @@ module.exports = {
       url: routes.instance(options.instanceId)
       json: true
       timeout: options.timeout ? 10000
+      headers: {
+        "x-route-version": "2"
+      }
       body: _.pick(options, [
         "tests"
         "duration"

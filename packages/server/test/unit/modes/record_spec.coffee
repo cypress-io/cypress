@@ -64,7 +64,7 @@ describe "lib/modes/record", ->
     it "gets branch from git", ->
       # this is tested inside @cypress/commit-info
 
-  context ".generateProjectBuildId", ->
+  context ".generateProjectRunId", ->
     projectSpecs = ["spec.js"]
     beforeEach ->
       @sandbox.stub(commitInfo, "commitInfo").resolves({
@@ -80,14 +80,14 @@ describe "lib/modes/record", ->
 
     it "passes list of found specs", ->
       api.createRun.resolves()
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+      record.generateProjectRunId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
         specs = api.createRun.firstCall.args[0].specs
         expect(specs).to.eq(projectSpecs)
 
     it "calls api.createRun with args", ->
       api.createRun.resolves()
 
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
+      record.generateProjectRunId("id-123", "/_test-output/path/to/project", "project", "key-123").then ->
         snapshot(api.createRun.firstCall.args)
 
     it "passes groupId", ->
@@ -95,7 +95,7 @@ describe "lib/modes/record", ->
 
       group = true
       groupId = "gr123"
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
+      record.generateProjectRunId("id-123", "/_test-output/path/to/project", "project", "key-123", group, groupId).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "warns group flag is missing if only groupId is passed", ->
@@ -104,7 +104,7 @@ describe "lib/modes/record", ->
       api.createRun.resolves()
 
       groupId = "gr123"
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", false, groupId).then ->
+      record.generateProjectRunId("id-123", "/_test-output/path/to/project", "project", "key-123", false, groupId).then ->
         msg = "Warning: you passed group-id but no group flag"
         expect(console.log).to.have.been.calledWith(msg)
 
@@ -114,7 +114,7 @@ describe "lib/modes/record", ->
       api.createRun.resolves()
 
       group = true
-      record.generateProjectBuildId("id-123", "/_test-output/path/to/project", "project", "key-123", group).then ->
+      record.generateProjectRunId("id-123", "/_test-output/path/to/project", "project", "key-123", group).then ->
         snapshot(api.createRun.firstCall.args)
 
     it "handles status code errors of 401", ->
@@ -125,7 +125,7 @@ describe "lib/modes/record", ->
 
       key = "3206e6d9-51b6-4766-b2a5-9d173f5158aa"
 
-      record.generateProjectBuildId("id-123", "path", "project", key)
+      record.generateProjectRunId("id-123", "path", "project", key)
         .then ->
           throw new Error("should have failed but did not")
         .catch (err) ->
@@ -140,7 +140,7 @@ describe "lib/modes/record", ->
 
       api.createRun.rejects(err)
 
-      record.generateProjectBuildId("id-123", "path", "project", "key-123")
+      record.generateProjectRunId("id-123", "path", "project", "key-123")
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) ->
@@ -156,7 +156,7 @@ describe "lib/modes/record", ->
       @sandbox.spy(console, "log")
 
       ## this should not throw
-      record.generateProjectBuildId(1,2,3,4)
+      record.generateProjectRunId(1,2,3,4)
       .then (ret) ->
         expect(ret).to.be.null
         expect(errors.warning).to.be.calledWith("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
@@ -353,7 +353,7 @@ describe "lib/modes/record", ->
       record.createInstance("id-123", "cypress/integration/app_spec.coffee", "FooBrowser")
 
       expect(api.createInstance).to.be.calledWith({
-        buildId: "id-123"
+        runId: "id-123"
         browser: "FooBrowser"
         spec: "cypress/integration/app_spec.coffee"
       })
@@ -390,7 +390,7 @@ describe "lib/modes/record", ->
 
   context ".run", ->
     beforeEach ->
-      @sandbox.stub(record, "generateProjectBuildId").resolves("build-id-123")
+      @sandbox.stub(record, "generateProjectRunId").resolves("run-id-123")
       @sandbox.stub(record, "createInstance").resolves("instance-id-123")
       @sandbox.stub(record, "uploadAssets").resolves()
       @sandbox.stub(record, "uploadStdout").resolves()
@@ -409,18 +409,18 @@ describe "lib/modes/record", ->
       .then ->
         expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
 
-    it "passes id + projectPath + options.key to generateProjectBuildId", ->
+    it "passes id + projectPath + options.key to generateProjectRunId", ->
       record.run({projectPath: "/_test-output/path/to/project", key: "key-foo"})
       .then ->
-        expect(record.generateProjectBuildId).to.be.calledWith("id-123", "/_test-output/path/to/project", "projectName", "key-foo")
+        expect(record.generateProjectRunId).to.be.calledWith("id-123", "/_test-output/path/to/project", "projectName", "key-foo")
 
-    it "passes buildId + options.spec to createInstance", ->
+    it "passes runId + options.spec to createInstance", ->
       record.run({spec: "foo/bar/spec"})
       .then ->
-        expect(record.createInstance).to.be.calledWith("build-id-123", "foo/bar/spec")
+        expect(record.createInstance).to.be.calledWith("run-id-123", "foo/bar/spec")
 
-    it "does not call record.createInstance or record.uploadAssets when no buildId", ->
-      record.generateProjectBuildId.resolves(null)
+    it "does not call record.createInstance or record.uploadAssets when no runId", ->
+      record.generateProjectRunId.resolves(null)
 
       record.run({})
       .then (stats) ->
