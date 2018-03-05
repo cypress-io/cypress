@@ -63,6 +63,9 @@ const execute = (ipc, event, ids, args = []) => {
     case 'before:browser:launch':
       util.wrapChildPromise(ipc, invoke, ids, args)
       return
+    case 'task:requested':
+      util.wrapChildPromise(ipc, invoke, ids, args)
+      return
     default:
       log('unexpected execute message:', event, args)
       return

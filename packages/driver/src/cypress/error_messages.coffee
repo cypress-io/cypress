@@ -719,6 +719,14 @@ module.exports = {
     multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
     not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
 
+  task:
+    failed: """#{cmd('task', '\'{{task}}\'')} failed with the following error:
+
+        > "{{error}}"
+    """
+    invalid_argument: "#{cmd('task')} must be passed a non-empty string as its 1st argument. You passed: '{{task}}'."
+    timed_out: "#{cmd('task', '\'{{task}}\'')} timed out after waiting {{timeout}}ms."
+
   tick:
     invalid_argument: "clock.tick()/#{cmd('tick')} only accept a number as their argument. You passed: {{arg}}"
     no_clock: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
