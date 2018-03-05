@@ -106,7 +106,7 @@ describe "lib/reporter", ->
 
       @reporter.reporterName = "foo"
 
-      snapshot(@reporter.stats())
+      snapshot(@reporter.results())
 
   context "#emit", ->
     beforeEach ->

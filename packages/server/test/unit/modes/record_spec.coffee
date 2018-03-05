@@ -214,11 +214,13 @@ describe "lib/modes/record", ->
       api.updateInstance.resolves()
 
       record.uploadAssets("id-123", {
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
+        stats: {
+          tests: 1
+          passes: 2
+          failures: 3
+          pending: 4
+          duration: 5
+        }
         video: "path/to/video"
         error: "err msg"
         screenshots: [{

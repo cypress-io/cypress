@@ -33,7 +33,7 @@ describe "taking screenshots", ->
       throw new Error("before each hook failed")
 
     afterEach ->
-      ## failure 4
+      ## failure 3 still (since associated only to a single test)
       throw new Error("after each hook failed")
 
     it "empty test 2", ->

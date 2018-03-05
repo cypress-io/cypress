@@ -230,7 +230,7 @@ describe "lib/cypress", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
+      @sandbox.stub(headless, "listenForProjectEnd").resolves({stats: {failures: 0} })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
 
@@ -241,7 +241,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      headless.listenForProjectEnd.resolves({failures: 10})
+      headless.listenForProjectEnd.resolves({stats: {failures: 10} })
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
@@ -461,14 +461,15 @@ describe "lib/cypress", ->
 
     it "writes json results when passed outputPath", ->
       obj = {
-        tests:       1
-        passes:      2
-        pending:     3
-        failures:    4
-        duration:    5
-        video:       6
-        version:     7
-        screenshots: []
+        stats: {
+          tests:       1
+          passes:      2
+          pending:     3
+          failures:    4
+          duration:    5
+        }
+        tests: []
+        hooks: []
       }
 
       outputPath = "./.results/results.json"
@@ -481,10 +482,23 @@ describe "lib/cypress", ->
 
         fs.readJsonAsync(cwd(outputPath))
         .then (json) ->
-          expect(json).to.deep.eq(
-            headless.collectTestResults(obj)
-          )
-      .finally =>
+          expect(json.video).to.be.a("string")
+
+          expect(json).to.deep.eq({
+            stats: {
+              tests:       1
+              passes:      2
+              pending:     3
+              failures:    4
+              duration:    5
+            }
+            tests: []
+            hooks: []
+            screenshots: []
+            shouldUploadVideo: true
+            video: json.video
+          })
+      .finally ->
         fs.removeAsync(cwd(path.dirname(outputPath)))
 
     it "logs error when supportFile doesn't exist", ->
@@ -733,7 +747,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        headless.listenForProjectEnd.resolves({failures: 0})
+        headless.listenForProjectEnd.resolves({stats: {failures: 0} })
 
       it "can change the default port to 5555", ->
         listen = @sandbox.spy(http.Server.prototype, "listen")
@@ -763,7 +777,7 @@ describe "lib/cypress", ->
 
         process.env = _.omit(process.env, "CYPRESS_DEBUG")
 
-        headless.listenForProjectEnd.resolves({failures: 0})
+        headless.listenForProjectEnd.resolves({stats: {failures: 0} })
 
       afterEach ->
         process.env = @env
@@ -840,11 +854,13 @@ describe "lib/cypress", ->
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
+        stats: {
+          tests: 1
+          passes: 2
+          failures: 3
+          pending: 4
+          duration: 5
+        }
         video: true
         shouldUploadVideo: true
         screenshots: []
