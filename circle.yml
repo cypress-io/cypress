@@ -22,6 +22,12 @@ jobs:
       - run:
           name: print global NPM cache path
           command: echo $(npm -g bin)
+      - run:
+          name: print Node version
+          command: node -v
+      - run:
+          name: print NPM version
+          command: npm -v
       - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node

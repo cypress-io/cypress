@@ -184,7 +184,7 @@ class $Cypress
         return if @_RESUMED_AT_TEST
 
         if @config("isTextTerminal")
-          @emit("mocha", "start")
+          @emit("mocha", "start", args[0])
 
       when "runner:end"
         ## mocha runner has finished running the tests
@@ -199,7 +199,7 @@ class $Cypress
         @emit("run:end")
 
         if @config("isTextTerminal")
-          @emit("mocha", "end")
+          @emit("mocha", "end", args[0])
 
       when "runner:set:runnable"
         ## when there is a hook / test (runnable) that
@@ -272,6 +272,11 @@ class $Cypress
         ## this event is how the reporter knows how to display
         ## stats and runnable properties such as errors
         @emit("test:after:run", args...)
+
+        if @config("isTextTerminal")
+          ## needed for calculating wallClockDuration
+          ## and the timings of after + afterEach hooks
+          @emit("mocha", "test:after:run", args[0])
 
       when "cy:test:set:state"
         @emit("test:set:state", args...)

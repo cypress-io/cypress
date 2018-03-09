@@ -9,5 +9,5 @@ describe "e2e issue 674", ->
     e2e.exec(@, {
       spec: "issue_674_spec.coffee"
       snapshot: true
-      expectedExitCode: 2 ## TODO: this is changing to become '1' in Cypress 3.0
+      expectedExitCode: 1
     })
