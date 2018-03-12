@@ -271,6 +271,7 @@ describe "lib/request", ->
     it "sets duration on response", ->
       nock("http://localhost:8080")
       .get("/foo")
+      .delay(10)
       .reply(200, "123", {
         "Content-Type": "text/plain"
       })
