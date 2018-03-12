@@ -12,21 +12,21 @@ describe "lib/task", ->
     @sandbox.stub(plugins, "execute").resolves("result")
     @sandbox.stub(plugins, "has").returns(true)
 
-  it "executes the task:requested plugin", ->
+  it "executes the 'task' plugin", ->
     task.run({ task: "some:task", arg: "some:arg", timeout: 1000 }).then ->
-      expect(plugins.execute).to.be.calledWith("task:requested", "some:task", "some:arg")
+      expect(plugins.execute).to.be.calledWith("task", "some:task", "some:arg")
 
-  it "resolves the result of the task:requested plugin", ->
+  it "resolves the result of the 'task' plugin", ->
     task.run({ task: "some:task", arg: "some:arg", timeout: 1000 }).then (result) ->
       expect(result).to.equal("result")
 
-  it "throws if task:requested is not registered", ->
+  it "throws if 'task' event is not registered", ->
     plugins.has.returns(false)
 
     task.run({ timeout: 1000 }).catch (err) ->
-      expect(err.message).to.equal("The 'task:requested' event has not been registered in the plugins file, so cy.task() cannot run")
+      expect(err.message).to.equal("The 'task' event has not been registered in the plugins file, so cy.task() cannot run")
 
-  it "throws if task:requested resolves undefined", ->
+  it "throws if 'task' event resolves undefined", ->
     plugins.execute.resolves(undefined)
     task.run({ task: "some:task", arg: "some:arg", timeout: 1000 }).catch (err) ->
       expect(err.message).to.equal("The task 'some:task' was not handled in the plugins file")

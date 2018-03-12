@@ -63,7 +63,7 @@ const execute = (ipc, event, ids, args = []) => {
     case 'before:browser:launch':
       util.wrapChildPromise(ipc, invoke, ids, args)
       return
-    case 'task:requested':
+    case 'task':
       util.wrapChildPromise(ipc, invoke, ids, args)
       return
     default:

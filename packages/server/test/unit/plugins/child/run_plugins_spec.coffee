@@ -104,7 +104,7 @@ describe "lib/plugins/child/run_plugins", ->
       pluginsFn = (register) =>
         register("file:preprocessor", @onFilePreprocessor)
         register("before:browser:launch", @beforeBrowserLaunch)
-        register("task:requested", @taskRequested)
+        register("task", @taskRequested)
       mockery.registerMock("plugins-file", pluginsFn)
       runPlugins(@ipc, "plugins-file")
       @ipc.on.withArgs("load").yield()
@@ -148,14 +148,14 @@ describe "lib/plugins/child/run_plugins", ->
         util.wrapChildPromise.lastCall.args[1](1, args)
         expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")
 
-    context "task:requested", ->
+    context "task", ->
       beforeEach ->
         @sandbox.stub(util, "wrapChildPromise")
         @ids = { callbackId: 2, invocationId: "00" }
 
       it "wraps child promise", ->
         args = ["arg1", "arg2"]
-        @ipc.on.withArgs("execute").yield("task:requested", @ids, args)
+        @ipc.on.withArgs("execute").yield("task", @ids, args)
         expect(util.wrapChildPromise).to.be.called
         expect(util.wrapChildPromise.lastCall.args[0]).to.equal(@ipc)
         expect(util.wrapChildPromise.lastCall.args[1]).to.be.a("function")
@@ -163,7 +163,7 @@ describe "lib/plugins/child/run_plugins", ->
         expect(util.wrapChildPromise.lastCall.args[3]).to.equal(args)
 
       it "invokes registered function when invoked by preprocessor handler", ->
-        @ipc.on.withArgs("execute").yield("task:requested", @ids, [])
+        @ipc.on.withArgs("execute").yield("task", @ids, [])
         args = ["one", "two"]
         util.wrapChildPromise.lastCall.args[1](1, args)
         expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")

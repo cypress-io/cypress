@@ -35,7 +35,7 @@ module.exports = {
       return invoke(ids.callbackId, args)
     .then (value) ->
       ## undefined is coerced into null when sent over ipc, but we need
-      ## to differentiate between them for task:requested
+      ## to differentiate between them for 'task' event
       if value is undefined
         value = UNDEFINED_SERIALIZED
       ipc.send("promise:fulfilled:#{ids.invocationId}", null, value)

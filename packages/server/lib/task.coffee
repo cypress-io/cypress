@@ -8,11 +8,11 @@ module.exports = {
 
     Promise
     .try ->
-      if not plugins.has("task:requested")
-        log("task:requested event is not registered")
-        throw new Error("The 'task:requested' event has not been registered in the plugins file, so cy.task() cannot run")
+      if not plugins.has("task")
+        log("'task' event is not registered")
+        throw new Error("The 'task' event has not been registered in the plugins file, so cy.task() cannot run")
 
-      plugins.execute("task:requested", options.task, options.arg)
+      plugins.execute("task", options.task, options.arg)
     .then (result) ->
       if result is undefined
         log("result is undefined")

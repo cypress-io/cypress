@@ -4,15 +4,15 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Tests Starting)
 
 
-  1) fails because task:requested is not registered in plugins file
+  1) fails because the 'task' event is not registered in plugins file
 
   0 passing
   1 failing
 
-  1)  fails because task:requested is not registered in plugins file:
+  1)  fails because the 'task' event is not registered in plugins file:
      CypressError: cy.task('some:task') failed with the following error:
 
-> "Error: The 'task:requested' event has not been registered in the plugins file, so cy.task() cannot run"
+> "Error: The 'task' event has not been registered in the plugins file, so cy.task() cannot run"
       at stack trace line
       at stack trace line
       at stack trace line
@@ -56,4 +56,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-
