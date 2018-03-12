@@ -19,7 +19,8 @@ Thanks for taking the time to contribute! :smile:
 
 - [CI Status](#ci-status)
 - [Code of Conduct](#code-of-conduct)
-- [Bugs & Feature Requests](#bugs-features)
+- [Opening Issues](#opening-issues)
+- [Triaging Issues](#triaging-issues)
 - [Writing Documentation](#writing-documentation)
 - [Writing Code](#writing-code)
   - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
@@ -52,7 +53,7 @@ Build status | Description
 
 All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Bugs & Feature Requests
+## Opening Issues
 
 **The most important things to do are:**
 
@@ -91,6 +92,32 @@ Also, your proposed solution may not be compatible with the direction we want to
 ### Reproducibility
 
 **It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
+
+## Triaging Issues
+
+When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we need to evaluate the issue to determine what steps should be taken next. So, when approaching new issues, there are some steps that should be taken.
+
+### 1. Is this already an open issue?
+
+Search [all issues](https://github.com/cypress-io/cypress/issues) for keywords from the issue to ensure there isn't already an issue open for this. GitHub has some [search tips](https://help.github.com/articles/searching-issues-and-pull-requests/) that may help you better find the relevant issue.
+
+### 2. Is what they are describing actually happening?
+
+The best way to determine the validity of a bug is to recreate it yourself. Follow the directions or information provided to recreate the bug that is described. Did they provide a repository that demonstrates the bug? Great - fork it and run the project and steps required. If they did not provide a repository, the best way to reproduce the issue is to have a 'sandbox' project up and running locally for Cypress. This is just a simple project with Cypress installed where you can freely edit the application under test and the tests themselves to recreate the problem.
+
+**Attempting to recreate the bug will lead to a few scenarios:**
+
+#### 1. You can not recreate the bug
+
+Leave a comment on the issue saying, "I can't reproduce this situation with the code you provided. Could you provide more information or a repository demonstrating the bug?"
+
+#### 2. You can recreate the bug
+
+Leave a comment on the issue saying "I was able to reproduce this in Cypress version x.x.x" If you know where the code is that could possibly fix this issue - link to the file or line of code from the [cypress](https://github.com/cypress-io/cypress) repo and remind the user that we are open source and that we gladly accept PRs, even if they are a work in progress.
+
+#### 3. You can tell the problem is a user error
+
+In recreating the issue, you may realize that they had a typo or used the Cypress api incorrectly, etc. Leave a comment informing the user of their error and close the issue - or ask them to close the issue if it fixes their problem.
 
 ## Writing Documentation
 
