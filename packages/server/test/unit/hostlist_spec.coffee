@@ -1,6 +1,6 @@
 require("../spec_helper")
 
-blacklist = require("#{root}lib/util/blacklist")
+hostlist = require("#{root}lib/util/hostlist")
 
 hosts = [
   "*.google.com"
@@ -11,17 +11,17 @@ hosts = [
 ]
 
 matchesStr = (url, host, val) ->
-  m = blacklist.matches(url, host)
+  m = hostlist.matches(url, host)
   expect(!!m).to.eq(val, "url: '#{url}' did not pass")
 
 matchesArray = (url, val) ->
-  m = blacklist.matches(url, hosts)
+  m = hostlist.matches(url, hosts)
   expect(!!m).to.eq(val, "url: '#{url}' did not pass")
 
 matchesHost = (url, host) ->
-  expect(blacklist.matches(url, hosts)).to.eq(host)
+  expect(hostlist.matches(url, hosts)).to.eq(host)
 
-describe "lib/util/blacklist", ->
+describe "lib/util/hostlist", ->
   it "handles hosts, ports, wildcards", ->
     matchesArray("https://mail.google.com/foo", true)
     matchesArray("https://shop.apple.com/bar", true)

@@ -9,7 +9,7 @@ cwd           = require("../cwd")
 cors          = require("../util/cors")
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
-blacklist     = require("../util/blacklist")
+hostlist      = require("../util/hostlist")
 conditional   = require("../util/conditional_stream")
 networkFailures = require("../util/network_failures")
 
@@ -63,7 +63,7 @@ module.exports = {
     ## if we have black listed hosts
     if blh = config.blacklistHosts
       ## and url matches any of our blacklisted hosts
-      if matched = blacklist.matches(req.proxiedUrl, blh)
+      if matched = hostlist.matches(req.proxiedUrl, blh)
         ## then bail and return with 503
         ## and set a custom header
         res.set("x-cypress-matched-blacklisted-host", matched)
@@ -71,6 +71,20 @@ module.exports = {
         debug("blacklisting request %o", {
           url: req.proxiedUrl
           matched: matched
+        })
+
+        return res.status(503).end()
+
+    ## if we have white listed hosts
+    if wlh = config.whitelistHosts
+      ## and url does not match any of our whitelisted hosts
+      if not matched = hostlist.matches(req.proxiedUrl, wlh)
+        ## then bail and return with 503
+        ## and set a custom header
+        res.set("x-cypress-not-matched-whitelisted-host", '1')
+
+        debug("blacklisting request %o as not on whitelist", {
+          url: req.proxiedUrl
         })
 
         return res.status(503).end()

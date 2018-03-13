@@ -147,6 +147,14 @@
       "default": null,
       "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blacklistHosts"
     },
+    "whitelistHosts": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      },
+      "default": null,
+      "description": "A String or Array of hosts that you wish to allow traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#whitelistHosts"
+    },
     "modifyObstructiveCode": {
       "type": "boolean",
       "default": true,

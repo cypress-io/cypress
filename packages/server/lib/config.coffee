@@ -45,7 +45,8 @@ configKeys = toWords """
   testFiles                       execTimeout
   trashAssetsBeforeHeadlessRuns   pageLoadTimeout
   blacklistHosts                  requestTimeout
-  userAgent                       responseTimeout
+  whitelistHosts                  responseTimeout
+  userAgent
   viewportWidth
   viewportHeight
   videoRecording
@@ -87,6 +88,7 @@ defaults = {
   reporter:                      "spec"
   reporterOptions:               null
   blacklistHosts:                null
+  whitelistHosts:                null
   clientRoute:                   "/__/"
   xhrRoute:                      "/xhrs/"
   socketIoRoute:                 "/__socket.io"
@@ -130,6 +132,7 @@ validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
   blacklistHosts: v.isStringOrArrayOfStrings
+  whitelistHosts: v.isStringOrArrayOfStrings
   modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
   defaultCommandTimeout: v.isNumber
@@ -244,6 +247,9 @@ module.exports = {
 
     if blacklistHosts = config.blacklistHosts
       config.blacklistHosts = toArrayFromPipes(blacklistHosts)
+
+    if whitelistHosts = config.whitelistHosts
+      config.whitelistHosts = toArrayFromPipes(whitelistHosts)
 
     ## when headless
     if config.isTextTerminal

@@ -401,6 +401,24 @@ describe "lib/config", ->
           @setup({watchForFileChanges: 42})
           @expectValidationFails("be a boolean")
 
+      context "whitelistHosts", ->
+        it "passes if a string", ->
+          @setup({whitelistHosts: "google.com"})
+          @expectValidationPasses()
+
+        it "passes if an array of strings", ->
+          @setup({whitelistHosts: ["google.com"]})
+          @expectValidationPasses()
+
+        it "fails if not a string or array", ->
+          @setup({whitelistHosts: 5})
+          @expectValidationFails("be a string or an array of string")
+
+        it "fails if not an array of strings", ->
+          @setup({whitelistHosts: [5]})
+          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("the value was: [5]")
+
       context "blacklistHosts", ->
         it "passes if a string", ->
           @setup({blacklistHosts: "google.com"})
@@ -426,6 +444,9 @@ describe "lib/config", ->
 
     it "includes blacklistHosts", ->
       @includes("blacklistHosts")
+
+    it "includes whitelistHosts", ->
+      @includes("whitelistHosts")
 
   context ".resolveConfigValues", ->
     beforeEach ->
@@ -589,6 +610,19 @@ describe "lib/config", ->
     it "supportFile=false", ->
       @defaults "supportFile", false, {supportFile: false}
 
+    it "whitelistHosts=null", ->
+      @defaults("whitelistHosts", null)
+
+    it "whitelistHosts=[a,b]", ->
+      @defaults("whitelistHosts", ["a", "b"], {
+        whitelistHosts: ["a", "b"]
+      })
+
+    it "whitelistHosts=a|b", ->
+      @defaults("whitelistHosts", ["a", "b"], {
+        whitelistHosts: "a|b"
+      })
+
     it "blacklistHosts=null", ->
       @defaults("blacklistHosts", null)
 
@@ -716,6 +750,7 @@ describe "lib/config", ->
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
+            whitelistHosts:             { value: null, from: "default" }
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "json", from: "cli" },
             reporterOptions:            { value: null, from: "default" },
@@ -775,6 +810,7 @@ describe "lib/config", ->
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
+            whitelistHosts:             { value: null, from: "default" }
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "spec", from: "default" },
             reporterOptions:            { value: null, from: "default" },

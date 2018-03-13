@@ -16,9 +16,9 @@ stripProtocolAndDefaultPorts = (urlToCheck) ->
   ## else return the host
   return host
 
-matches = (urlToCheck, blacklistHosts) ->
+matches = (urlToCheck, listHosts) ->
   ## normalize into flat array
-  blacklistHosts = [].concat(blacklistHosts)
+  listHosts = [].concat(listHosts)
 
   urlToCheck = stripProtocolAndDefaultPorts(urlToCheck)
 
@@ -27,7 +27,7 @@ matches = (urlToCheck, blacklistHosts) ->
     ## to see if any match
     minimatch(urlToCheck, hostMatcher)
 
-  _.find(blacklistHosts, matchUrl)
+  _.find(listHosts, matchUrl)
 
 
 module.exports = {
