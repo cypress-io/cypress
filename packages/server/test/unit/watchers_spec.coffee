@@ -1,7 +1,8 @@
 require("../spec_helper")
 
-_        = require("lodash")
+_ = require("lodash")
 chokidar = require("chokidar")
+dependencyTree = require("dependency-tree")
 Watchers = require("#{root}lib/watchers")
 
 describe "lib/watchers", ->
@@ -27,6 +28,26 @@ describe "lib/watchers", ->
     it "stores a reference to the watcher", ->
       expect(_.keys(@watchers.watchers)).to.have.length(1)
       expect(@watchers.watchers).to.have.property("/foo/bar")
+
+  context "#watchTree", ->
+    beforeEach ->
+      @sandbox.stub(dependencyTree, "toList").returns([
+        "/foo/bar"
+        "/dep/a"
+        "/dep/b"
+      ])
+      @watchers.watchTree("/foo/bar")
+
+    it "watches each file in dependency tree", ->
+      expect(chokidar.watch).to.be.calledWith("/foo/bar")
+      expect(chokidar.watch).to.be.calledWith("/dep/a")
+      expect(chokidar.watch).to.be.calledWith("/dep/b")
+
+    it "stores a reference to the watcher", ->
+      expect(_.keys(@watchers.watchers)).to.have.length(3)
+      expect(@watchers.watchers).to.have.property("/foo/bar")
+      expect(@watchers.watchers).to.have.property("/dep/a")
+      expect(@watchers.watchers).to.have.property("/dep/b")
 
   context "#close", ->
     it "removes each watched property", ->
