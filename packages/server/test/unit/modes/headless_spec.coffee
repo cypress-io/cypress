@@ -262,26 +262,28 @@ describe "lib/modes/headless", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({})
 
-    it "end event resolves with obj, displays stats, displays screenshots, setsFailingTests", ->
+    it "end event resolves with obj, displays stats, displays screenshots, sets video timestamps", ->
       started = new Date
       screenshots = [{}, {}, {}]
       end = ->
-      stats = {
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        failingTests: [4,5,6]
+      results = {
+        tests: [4,5,6]
+        stats: {
+          tests: 1
+          passes: 2
+          failures: 3
+          pending: 4
+          duration: 5
+        }
       }
 
-      @sandbox.stub(Reporter, "setVideoTimestamp").withArgs(started, stats.failingTests).returns([1,2,3])
+      @sandbox.stub(Reporter, "setVideoTimestamp").withArgs(started, results.tests).returns([1,2,3])
       @sandbox.stub(headless, "postProcessRecording").resolves()
       @sandbox.spy(headless,  "displayStats")
       @sandbox.spy(headless,  "displayScreenshots")
 
       process.nextTick =>
-        @projectInstance.emit("end", stats)
+        @projectInstance.emit("end", results)
 
       headless.waitForTestsToFinishRunning({
         project: @projectInstance,
@@ -298,20 +300,23 @@ describe "lib/modes/headless", ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         results = headless.collectTestResults(obj)
+
         expect(headless.displayStats).to.be.calledWith(results)
         expect(headless.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
-          tests:        1
-          passes:       2
-          failures:     3
-          pending:      4
-          duration:     5
           config:       {}
-          failingTests: [1,2,3]
           screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
+          tests: [1,2,3]
+          stats: {
+            tests:        1
+            passes:       2
+            failures:     3
+            pending:      4
+            duration:     5
+          }
         })
 
     it "exitEarlyWithErr event resolves with no tests, error, and empty failingTests", ->
@@ -349,16 +354,17 @@ describe "lib/modes/headless", ->
 
         expect(obj).to.deep.eq({
           error:        err.message
-          failures:     1
-          tests:        0
-          passes:       0
-          pending:      0
-          duration:     0
           config:       {}
-          failingTests: []
           screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
+          stats: {
+            failures:     1
+            tests:        0
+            passes:       0
+            pending:      0
+            duration:     0
+          }
         })
 
     it "should not upload video when videoUploadOnPasses is false and no failing tests", ->
@@ -412,7 +418,7 @@ describe "lib/modes/headless", ->
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(headless,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
@@ -452,7 +458,7 @@ describe "lib/modes/headless", ->
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "openProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(headless,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
@@ -464,8 +470,8 @@ describe "lib/modes/headless", ->
 
     it "returns stats", ->
       headless.run()
-      .then (stats) ->
-        expect(stats).to.deep.eq({failures: 10})
+      .then (results) ->
+        expect(results).to.deep.eq({stats: { failures: 10 } })
 
     it "passes id + options to openProject", ->
       headless.run({foo: "bar"})

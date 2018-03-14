@@ -20,6 +20,7 @@ agent = require("superagent")
 
 require("chai")
 .use(require("@cypress/sinon-chai"))
+.use(require("chai-uuid"))
 
 mockery.enable({
   warnOnUnregistered: false

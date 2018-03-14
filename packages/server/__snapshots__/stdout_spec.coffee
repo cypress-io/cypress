@@ -84,7 +84,7 @@ The internal Cypress web server responded with:
 
   (Tests Finished)
 
-  - Tests:           4
+  - Tests:           5
   - Passes:          2
   - Failures:        3
   - Pending:         0

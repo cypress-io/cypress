@@ -193,7 +193,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Tests Finished)
 
-  - Tests:           1
+  - Tests:           2
   - Passes:          1
   - Failures:        1
   - Pending:         0

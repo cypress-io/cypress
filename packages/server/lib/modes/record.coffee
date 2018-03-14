@@ -25,7 +25,7 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  generateProjectBuildId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
+  generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
@@ -85,9 +85,9 @@ module.exports = {
             logException(err)
             .return(null)
 
-  createInstance: (buildId, spec, browser) ->
+  createInstance: (runId, spec, browser) ->
     api.createInstance({
-      buildId
+      runId
       spec
       browser
     })
@@ -144,7 +144,7 @@ module.exports = {
 
       logException(err)
 
-  uploadAssets: (instanceId, stats, stdout) ->
+  uploadAssets: (instanceId, results, stdout) ->
     console.log("")
     console.log("")
 
@@ -155,29 +155,29 @@ module.exports = {
     console.log("")
 
     ## get rid of the path property
-    screenshots = _.map stats.screenshots, (screenshot) ->
+    screenshots = _.map results.screenshots, (screenshot) ->
       _.omit(screenshot, "path")
 
     api.updateInstance({
       instanceId:   instanceId
-      tests:        stats.tests
-      passes:       stats.passes
-      failures:     stats.failures
-      pending:      stats.pending
-      duration:     stats.duration
-      error:        stats.error
-      video:        !!stats.video
+      tests:        _.get(results, "stats.tests")
+      passes:       _.get(results, "stats.passes")
+      failures:     _.get(results, "stats.failures")
+      pending:      _.get(results, "stats.pending")
+      duration:     _.get(results, "stats.duration")
+      error:        results.error
+      video:        !!results.video
       screenshots:  screenshots
-      failingTests: stats.failingTests
-      cypressConfig: stats.config
+      failingTests: results.failingTests
+      cypressConfig: results.config
       ciProvider:    ciProvider.name() ## TODO: don't send this (no reason to)
       stdout:       stdout
     })
     .then (resp = {}) =>
       @upload({
-        video:          stats.video
-        uploadVideo:    stats.shouldUploadVideo
-        screenshots:    stats.screenshots
+        video:          results.video
+        uploadVideo:    results.shouldUploadVideo
+        screenshots:    results.screenshots
         videoUrl:       resp.videoUploadUrl
         screenshotUrls: resp.screenshotUploadUrls
       })
@@ -237,13 +237,13 @@ module.exports = {
 
         key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
-        @generateProjectBuildId(projectId, projectPath, projectName, key,
+        @generateProjectRunId(projectId, projectPath, projectName, key,
           options.group, options.groupId, options.spec)
-        .then (buildId) =>
-          ## bail if we dont have a buildId
-          return if not buildId
+        .then (runId) =>
+          ## bail if we dont have a runId
+          return if not runId
 
-          @createInstance(buildId, options.spec, browser)
+          @createInstance(runId, options.spec, browser)
         .then (instanceId) =>
           ## dont check that the user is logged in
           options.ensureAuthToken = false
@@ -254,14 +254,14 @@ module.exports = {
           didUploadAssets       = false
 
           headless.run(options)
-          .then (stats = {}) =>
+          .then (results = {}) =>
             ## if we got a instanceId then attempt to
             ## upload these assets
             if instanceId
-              @uploadAssets(instanceId, stats, captured.toString())
+              @uploadAssets(instanceId, results, captured.toString())
               .then (ret) ->
                 didUploadAssets = ret isnt null
-              .return(stats)
+              .return(results)
               .finally =>
                 headless.allDone()
 
@@ -272,5 +272,5 @@ module.exports = {
             else
               stdout.restore()
               headless.allDone()
-              return stats
+              return results
 }

@@ -19,16 +19,18 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/organizations")
       .reply(200, orgs)
 
       api.getOrgs("auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(orgs)
+        expect(ret).to.deep.eq(orgs)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/organizations")
       .reply(500, {})
 
@@ -44,16 +46,18 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects")
       .reply(200, projects)
 
       api.getProjects("auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(projects)
+        expect(ret).to.deep.eq(projects)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects")
       .reply(500, {})
 
@@ -69,17 +73,19 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .matchHeader("x-route-version", "2")
       .get("/projects/id-123")
       .reply(200, project)
 
       api.getProject("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(project)
+        expect(ret).to.deep.eq(project)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123")
       .reply(500, {})
 
@@ -90,22 +96,24 @@ describe "lib/api", ->
         expect(err.isApiError).to.be.true
 
   context ".getProjectRuns", ->
-    it "GET /projects/:id/builds + returns builds", ->
-      builds = []
+    it "GET /projects/:id/runs + returns runs", ->
+      runs = []
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
-      .reply(200, builds)
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
+      .reply(200, runs)
 
       api.getProjectRuns("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(builds)
+        expect(ret).to.deep.eq(runs)
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
       .socketDelay(5000)
       .reply(200, [])
 
@@ -130,10 +138,11 @@ describe "lib/api", ->
       .then (ret) ->
         expect(rp.get).to.be.calledWithMatch({timeout: 10000})
 
-    it "GET /projects/:id/builds failure formatting", ->
+    it "GET /projects/:id/runs failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
       .reply(401, {
         errors: {
           permission: ["denied"]
@@ -159,7 +168,8 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
       .reply(500, {})
 
       api.getProjectRuns("id-123", "auth-token-123")
@@ -183,6 +193,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/ping")
       .reply(500, {})
 
@@ -209,26 +220,26 @@ describe "lib/api", ->
         specs:             ["foo.js", "bar.js"]
       }
 
-    it "POST /builds + returns buildId", ->
+    it "POST /runs + returns runId", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds", @buildProps)
+      .post("/runs", @buildProps)
       .reply(200, {
-        buildId: "new-build-id-123"
+        runId: "new-run-id-123"
       })
 
       api.createRun(@buildProps)
       .then (ret) ->
-        expect(ret).to.eq("new-build-id-123")
+        expect(ret).to.eq("new-run-id-123")
 
-    it "POST /builds failure formatting", ->
+    it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds", {
+      .post("/runs", {
         projectId:         null
         recordKey:         "token-123"
         commitSha:         "sha"
@@ -243,7 +254,7 @@ describe "lib/api", ->
       })
       .reply(422, {
         errors: {
-          buildId: ["is required"]
+          runId: ["is required"]
         }
       })
 
@@ -268,7 +279,7 @@ describe "lib/api", ->
 
           {
             "errors": {
-              "buildId": [
+              "runId": [
                 "is required"
               ]
             }
@@ -277,10 +288,10 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds")
+      .post("/runs")
       .socketDelay(5000)
       .reply(200, {})
 
@@ -294,7 +305,7 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: () -> Promise.resolve({buildId: 'foo'})
+        promise: () -> Promise.resolve({runId: 'foo'})
       })
 
       api.createRun({})
@@ -303,8 +314,10 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "3")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/builds", @buildProps)
+      .matchHeader("accept-encoding", /gzip/)
+      .post("/runs", @buildProps)
       .reply(500, {})
 
       api.createRun(@buildProps)
@@ -333,12 +346,12 @@ describe "lib/api", ->
       }
 
       @createProps = {
-        buildId: "build-id-123"
+        runId: "run-id-123"
         browser: "foo"
         spec: "cypress/integration/app_spec.js"
       }
 
-    it "POSTs /builds/:id/instances", ->
+    it "POSTs /runs/:id/instances", ->
       @sandbox.stub(os, "release").returns("10.10.10")
       @sandbox.stub(os, "cpus").returns([{model: "foo"}])
       @sandbox.stub(os, "freemem").returns(1000)
@@ -351,10 +364,10 @@ describe "lib/api", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances", @postProps)
+      .post("/runs/run-id-123/instances", @postProps)
       .reply(200, {
         instanceId: "instance-id-123"
       })
@@ -364,19 +377,19 @@ describe "lib/api", ->
         expect(browsers.getByName).to.be.calledWith("foo")
         expect(instanceId).to.eq("instance-id-123")
 
-    it "POST /builds/:id/instances failure formatting", ->
+    it "POST /runs/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances")
+      .post("/runs/run-id-123/instances")
       .reply(422, {
         errors: {
           tests: ["is required"]
         }
       })
 
-      api.createInstance({buildId: "build-id-123"})
+      api.createInstance({runId: "run-id-123"})
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -394,15 +407,15 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances")
+      .post("/runs/run-id-123/instances")
       .socketDelay(5000)
       .reply(200, {})
 
       api.createInstance({
-        buildId: "build-id-123"
+        runId: "run-id-123"
         timeout: 100
       })
       .then ->
@@ -431,7 +444,8 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/builds/build-id-123/instances", @postProps)
+      .matchHeader("accept-encoding", /gzip/)
+      .post("/runs/run-id-123/instances", @postProps)
       .reply(500, {})
 
       api.createInstance(@createProps)
@@ -479,6 +493,7 @@ describe "lib/api", ->
 
     it "PUTs /instances/:id", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123", @putProps)
@@ -488,6 +503,7 @@ describe "lib/api", ->
 
     it "PUT /instances/:id failure formatting", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
@@ -515,6 +531,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
@@ -539,7 +556,9 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/instances/instance-id-123", @putProps)
       .reply(500, {})
 
@@ -618,6 +637,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/instances/instance-id-123/stdout", {
         stdout: "foobarbaz\n"
       })
@@ -648,6 +668,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/auth")
       .reply(500, {})
 
@@ -716,6 +737,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signin")
       .reply(500, {})
 
@@ -731,6 +753,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signout")
       .reply(200)
 
@@ -739,6 +762,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signout")
       .reply(500, {})
 
@@ -769,6 +793,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", @postProps)
       .reply(200, {
         id: "id-123"
@@ -779,7 +804,7 @@ describe "lib/api", ->
 
       api.createProject(@createProps, "remoteOrigin", "auth-token-123")
       .then (projectDetails) ->
-        expect(projectDetails).to.eql({
+        expect(projectDetails).to.deep.eq({
           id: "id-123"
           name: "foobar"
           orgId: "org-id-123"
@@ -792,6 +817,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", {
         name: "foobar"
         orgId: "org-id-123"
@@ -829,6 +855,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", @postProps)
       .reply(500, {})
 
@@ -844,16 +871,18 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/keys")
       .reply(200, recordKeys)
 
       api.getProjectRecordKeys("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(recordKeys)
+        expect(ret).to.deep.eq(recordKeys)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/keys")
       .reply(500, {})
 
@@ -867,6 +896,7 @@ describe "lib/api", ->
     it "POST /projects/:id/membership_requests + returns response", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(200)
 
@@ -877,6 +907,7 @@ describe "lib/api", ->
     it "POST /projects/:id/membership_requests failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(422, {
         errors: {
@@ -903,6 +934,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(500, {})
 
@@ -918,6 +950,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
@@ -930,6 +963,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/project-123/token")
       .reply(500, {})
 
@@ -945,6 +979,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
@@ -957,6 +992,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/projects/project-id-123/token")
       .reply(500, {})
 
@@ -1007,6 +1043,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/exceptions", {foo: "bar"})
       .reply(500, {})
 
