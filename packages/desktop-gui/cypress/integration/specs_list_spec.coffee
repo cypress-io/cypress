@@ -56,14 +56,16 @@ describe "Specs List", ->
 
     it "displays the scaffolded files", ->
       cy.get(".folder-preview-onboarding").within ->
-        cy.contains("fixtures")
+        cy.contains("span", "fixtures").siblings("ul").within ->
         cy.contains("example.json")
-        cy.contains("integration")
-        cy.contains("example_spec.js")
-        cy.contains("support")
-        cy.contains("commands.js")
-        cy.contains("defaults.js")
-        cy.contains("index.js")
+        cy.contains("span", "integration").siblings("ul").within ->
+          cy.contains("example_spec.js")
+        cy.contains("span", "support").siblings("ul").within ->
+          cy.contains("commands.js")
+          cy.contains("defaults.js")
+          cy.contains("index.js")
+        cy.contains("span", "plugins").siblings("ul").within ->
+          cy.contains("index.js")
 
     it "lists folders and files alphabetically", ->
       cy.get(".folder-preview-onboarding").within ->
