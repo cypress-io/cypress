@@ -179,6 +179,7 @@ export default class Project {
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
     this.integrationExampleName = config.integrationExampleName
+    this.integrationExampleFolder = config.integrationExampleFolder
     this.scaffoldedFiles = config.scaffoldedFiles
   }
 
