@@ -44,7 +44,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/fails because taskrequested is not registered in plugins file.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fails because the task event is not registered in plugins file.png (1280x720)
 
 
   (Video)
