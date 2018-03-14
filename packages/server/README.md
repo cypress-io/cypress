@@ -53,6 +53,9 @@ Because of the large number of dependencies of the server, it's much more perfor
 ```bash
 ## runs only this one test file
 npm run test ./test/unit/api_spec.coffee
+
+## works for integration tests too
+npm run test ./test/integration/server_spec.coffee
 ```
 
 You can also run in `watch` mode
@@ -60,4 +63,11 @@ You can also run in `watch` mode
 ```bash
 ## runs and watches only this one test file
 npm run test-watch ./test/unit/api_spec.coffee
+```
+
+To run an individual e2e test:
+
+```bash
+## runs only this one test file
+npm run test-e2e -- --spec ./test/e2e/base_url_spec.coffee
 ```
