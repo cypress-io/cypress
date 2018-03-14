@@ -1,6 +1,7 @@
 const log = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
+const task = require('./task')
 const util = require('../util')
 
 const callbacks = {}
@@ -64,7 +65,7 @@ const execute = (ipc, event, ids, args = []) => {
       util.wrapChildPromise(ipc, invoke, ids, args)
       return
     case 'task':
-      util.wrapChildPromise(ipc, invoke, ids, args)
+      task.wrap(ipc, callbacks, ids, args)
       return
     default:
       log('unexpected execute message:', event, args)

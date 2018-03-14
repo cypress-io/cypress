@@ -5,6 +5,7 @@ cp = require("child_process")
 snapshot = require("snap-shot-it")
 
 preprocessor = require("#{root}../../lib/plugins/child/preprocessor")
+task = require("#{root}../../lib/plugins/child/task")
 runPlugins = require("#{root}../../lib/plugins/child/run_plugins")
 util = require("#{root}../../lib/plugins/util")
 
@@ -150,23 +151,17 @@ describe "lib/plugins/child/run_plugins", ->
 
     context "task", ->
       beforeEach ->
-        @sandbox.stub(util, "wrapChildPromise")
+        @sandbox.stub(task, "wrap")
         @ids = { callbackId: 2, invocationId: "00" }
 
-      it "wraps child promise", ->
-        args = ["arg1", "arg2"]
+      it "calls task handler", ->
+        args = ["arg1"]
         @ipc.on.withArgs("execute").yield("task", @ids, args)
-        expect(util.wrapChildPromise).to.be.called
-        expect(util.wrapChildPromise.lastCall.args[0]).to.equal(@ipc)
-        expect(util.wrapChildPromise.lastCall.args[1]).to.be.a("function")
-        expect(util.wrapChildPromise.lastCall.args[2]).to.equal(@ids)
-        expect(util.wrapChildPromise.lastCall.args[3]).to.equal(args)
-
-      it "invokes registered function when invoked by preprocessor handler", ->
-        @ipc.on.withArgs("execute").yield("task", @ids, [])
-        args = ["one", "two"]
-        util.wrapChildPromise.lastCall.args[1](1, args)
-        expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")
+        expect(task.wrap).to.be.called
+        expect(task.wrap.lastCall.args[0]).to.equal(@ipc)
+        expect(task.wrap.lastCall.args[1]).to.be.an("object")
+        expect(task.wrap.lastCall.args[2]).to.equal(@ids)
+        expect(task.wrap.lastCall.args[3]).to.equal(args)
 
   describe "errors", ->
     beforeEach ->

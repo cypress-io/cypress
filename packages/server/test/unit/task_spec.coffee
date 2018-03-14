@@ -26,10 +26,15 @@ describe "lib/task", ->
     task.run({ timeout: 1000 }).catch (err) ->
       expect(err.message).to.equal("The 'task' event has not been registered in the plugins file, so cy.task() cannot run")
 
+  it "throws if 'task' event resolves __cypress_unhandled__", ->
+    plugins.execute.resolves("__cypress_unhandled__")
+    task.run({ task: "some:task", arg: "some:arg", timeout: 1000 }).catch (err) ->
+      expect(err.message).to.equal("The task 'some:task' was not handled in the plugins file")
+
   it "throws if 'task' event resolves undefined", ->
     plugins.execute.resolves(undefined)
     task.run({ task: "some:task", arg: "some:arg", timeout: 1000 }).catch (err) ->
-      expect(err.message).to.equal("The task 'some:task' was not handled in the plugins file")
+      expect(err.message).to.equal("The task 'some:task' returned undefined. Return a promise, a value, or null to indicate that the task was handled.")
 
   it "throws if it times out", ->
     plugins.execute.resolves(Promise.delay(250))
