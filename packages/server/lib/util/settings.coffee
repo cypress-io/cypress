@@ -139,3 +139,6 @@ module.exports =
 
   pathToCypressJson: (projectRoot) ->
     @_pathToFile(projectRoot, "cypress.json")
+
+  pathToCypressEnvJson: (projectRoot) ->
+    @_pathToFile(projectRoot, "cypress.env.json")

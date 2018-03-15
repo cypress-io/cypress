@@ -278,7 +278,15 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
       @project.server = {startWebsockets: ->}
+      @sandbox.stub(settings, "pathToCypressJson").returns("/path/to/cypress.json")
+      @sandbox.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
       @watch = @sandbox.stub(@project.watchers, "watch")
+
+    it "watches cypress.json and cypress.env.json", ->
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->})
+      expect(@watch).to.be.calledTwice
+      expect(@watch).to.be.calledWith("/path/to/cypress.json")
+      expect(@watch).to.be.calledWith("/path/to/cypress.env.json")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
       @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
