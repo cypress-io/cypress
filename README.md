@@ -15,7 +15,7 @@ npm install --save-dev eslint-plugin-cypress-dev
 Extend one or more of the presets depending on the nature of the package:
 
 ```js
-// .eslintrc
+// .eslintrc.json
 {
   "extends": [
     "plugin:cypress-dev/general",
@@ -28,7 +28,7 @@ Extend one or more of the presets depending on the nature of the package:
 You can relax rules
 
 ```js
-// .eslintrc
+// .eslintrc.json
 {
   "extends": [
     "plugin:cypress-dev/general"
