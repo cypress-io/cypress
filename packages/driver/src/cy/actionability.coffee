@@ -246,8 +246,10 @@ verify = (cy, $el, options, callbacks) ->
       ## then do not perform these additional ensures...
       if (force isnt true) and (options.waitForAnimations isnt false)
         ## store the coords that were absolute
-        ## from the window
-        coordsHistory.push(coords.fromWindow)
+        ## from the window or from the viewport for sticky/fixed elements
+
+        sticky = !!getFixedOrStickyEl($el)
+        coordsHistory.push(if sticky then coords.fromViewport else coords.fromWindow)
 
         ## then we ensure the element isnt animating
         ensureNotAnimating(cy, $el, coordsHistory, options.animationDistanceThreshold)
