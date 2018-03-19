@@ -93,7 +93,7 @@ module.exports = (on) => {
 
 ## Compatibility
 
-* webpack: 4.x+ (use `cypress-webpack-preprocessor` 1.x if you need webpack 2 or 3 support)
+* webpack: 4.x+ (use `@cypress/webpack-preprocessor` 1.x if you need webpack 2 or 3 support)
 * node: 8.2.1 minimum (aligned with Cypress 2.x)
 
 ## Contributing
