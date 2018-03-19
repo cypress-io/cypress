@@ -5,7 +5,7 @@
   "author": "Chris Breiding <chris@cypress.io>",
   "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
   "engines": {
-    "node": ">=6.5"
+    "node": ">=8.2.1"
   },
   "files": [
     "*.js"
@@ -65,7 +65,7 @@
     "bluebird": "3.5.0",
     "debug": "3.1.0",
     "lodash.clonedeep": "4.5.0",
-    "webpack": "3.6.0"
+    "webpack": "^4.0.0"
   },
   "release": {
     "verifyConditions": "condition-circle",
