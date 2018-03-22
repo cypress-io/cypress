@@ -2,6 +2,5 @@
   "git.ignoreLimitWarning": true,
   "eslint.enable": true,
   "eslint.alwaysShowStatus": true,
-  "eslint.autoFixOnSave": true,
-  "standard.enable": false
+  "eslint.autoFixOnSave": true
 }
