@@ -24,6 +24,7 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
+$Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 
@@ -278,8 +279,17 @@ class $Cypress
           ## and the timings of after + afterEach hooks
           @emit("mocha", "test:after:run", args[0])
 
-      when "cy:test:set:state"
-        @emit("test:set:state", args...)
+      when "cy:before:all:screenshots"
+        @emit("before:all:screenshots", args...)
+
+      when "cy:before:screenshot"
+        @emit("before:screenshot", args...)
+
+      when "cy:after:screenshot"
+        @emit("after:screenshot", args...)
+
+      when "cy:after:all:screenshots"
+        @emit("after:all:screenshots", args...)
 
       when "command:log:added"
         @runner.addLog(args[0], @config("isInteractive"))
@@ -378,6 +388,9 @@ class $Cypress
       when "spec:script:error"
         @emit("script:error", args...)
 
+      when "cy:pause:timers"
+        @emit("pause:timers", args...)
+
   backend: (eventName, args...) ->
     new Promise (resolve, reject) =>
       fn = (reply) ->
@@ -455,6 +468,7 @@ class $Cypress
   Mocha: $Mocha
   Runner: $Runner
   Server: $Server
+  Screenshot: $Screenshot
   SelectorPlayground: $SelectorPlayground
   utils: $utils
   _: _

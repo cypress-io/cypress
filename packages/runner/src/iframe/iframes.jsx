@@ -48,16 +48,18 @@ export default class Iframes extends Component {
 
     this.autIframe = new AutIframe(this.props.config)
 
-    eventManager.on('visit:failed', this.autIframe.showVisitFailure)
-    eventManager.on('script:error', this._setScriptError)
+    this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
+    this.props.eventManager.on('before:all:screenshots', this.autIframe.beforeScreenshots)
+    this.props.eventManager.on('after:all:screenshots', this.autIframe.afterScreenshots)
+    this.props.eventManager.on('script:error', this._setScriptError)
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
-    eventManager.on('restart', () => {
+    this.props.eventManager.on('restart', () => {
       this._run(this.props.config, specPath)
     })
 
-    eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
+    this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
 
     this._disposers.push(autorun(() => {
       this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
@@ -67,7 +69,7 @@ export default class Iframes extends Component {
       this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
     }))
 
-    eventManager.start(this.props.config, specPath)
+    this.props.eventManager.start(this.props.config, specPath)
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
@@ -82,7 +84,7 @@ export default class Iframes extends Component {
       },
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
-          eventManager={eventManager}
+          eventManager={this.props.eventManager}
           snapshotProps={snapshotProps}
           state={this.props.state}
           onToggleHighlights={this._toggleSnapshotHighlights}
@@ -103,11 +105,11 @@ export default class Iframes extends Component {
     logger.clearLog()
     this._setScriptError(null)
 
-    eventManager.setup(config, specPath)
+    this.props.eventManager.setup(config, specPath)
 
     this._loadIframes(specPath)
     .then(($autIframe) => {
-      eventManager.initialize($autIframe, config)
+      this.props.eventManager.initialize($autIframe, config)
     })
   }
 
@@ -170,7 +172,7 @@ export default class Iframes extends Component {
 
   componentWillUnmount () {
     this.props.eventManager.notifyRunningSpec(null)
-    eventManager.stop()
+    this.props.eventManager.stop()
     this._disposers.forEach((dispose) => {
       dispose()
     })

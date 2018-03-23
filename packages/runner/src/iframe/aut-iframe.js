@@ -346,4 +346,20 @@ export default class AutIframe {
       Yielded: Cypress.dom.getElements($el),
     })
   }
+
+  beforeScreenshots = (config) => {
+    if (config.disableTimersAndAnimations) {
+      dom.addCssAnimationDisabler(this._body())
+    }
+    _.each(config.blackout, (selector) => {
+      dom.addBlackout(this._body(), selector)
+    })
+  }
+
+  afterScreenshots = (config) => {
+    if (config.disableTimersAndAnimations) {
+      dom.removeCssAnimationDisabler(this._body())
+    }
+    dom.removeBlackouts(this._body())
+  }
 }

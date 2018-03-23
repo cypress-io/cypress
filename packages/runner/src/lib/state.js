@@ -40,6 +40,8 @@ export default class State {
   @observable width = _defaults.width
   @observable height = _defaults.height
 
+  @observable forceFullScale = false
+
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
   @observable reporterWidth = _defaults.reporterWidth
@@ -59,6 +61,8 @@ export default class State {
   }
 
   @computed get scale () {
+    if (this.forceFullScale) return 1
+
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
       return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
@@ -102,7 +106,7 @@ export default class State {
     this.isLoading = isLoading
   }
 
-  updateDimensions (width, height) {
+  @action updateDimensions (width, height) {
     this.width = width
     this.height = height
   }
@@ -114,7 +118,7 @@ export default class State {
     if (headerHeight != null) this.headerHeight = headerHeight
   }
 
-  clearMessage () {
+  @action clearMessage () {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
@@ -128,9 +132,33 @@ export default class State {
     }
   }
 
-  resetUrl () {
+  @action resetUrl () {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl
+  }
+
+  @action setForceFullScale (force) {
+    this.forceFullScale = force
+  }
+
+  @action clearUIDimensions () {
+    this._prevReporterWidth = this.reporterWidth
+    this._prevAbsoluteReporterWidth = this.absoluteReporterWidth
+    this._prevHeaderHeight = this.headerHeight
+
+    this.reporterWidth = 0
+    this.absoluteReporterWidth = 0
+    this.headerHeight = 0
+  }
+
+  @action resetUIDimensions () {
+    this.reporterWidth = this._prevReporterWidth
+    this.absoluteReporterWidth = this._prevAbsoluteReporterWidth
+    this.headerHeight = this._prevHeaderHeight
+
+    this._prevReporterWidth = undefined
+    this._prevAbsoluteReporterWidth = undefined
+    this._prevHeaderHeight = undefined
   }
 }

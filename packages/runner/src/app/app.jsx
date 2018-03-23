@@ -1,4 +1,5 @@
 import cs from 'classnames'
+import _ from 'lodash'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
@@ -15,7 +16,6 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import Resizer from './resizer'
-import RunnerWrap from './runner-wrap'
 
 @observer
 class App extends Component {
@@ -41,15 +41,16 @@ class App extends Component {
             error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
           />
         </div>
-        <RunnerWrap
-          className='container'
+        <div
+          ref='container'
+          className='runner container'
           style={{ left: this.props.state.absoluteReporterWidth }}
         >
           <Header ref='header' {...this.props} />
           <Iframes {...this.props} />
-          <Message state={this.props.state} />
+          <Message ref='message' state={this.props.state} />
           {this.props.children}
-        </RunnerWrap>
+        </div>
         <Resizer
           style={{ left: this.props.state.absoluteReporterWidth }}
           state={this.props.state}
@@ -63,6 +64,41 @@ class App extends Component {
 
   componentDidMount () {
     this._monitorWindowResize()
+
+    const state = this.props.state
+
+    this.props.eventManager.on('before:screenshot', (config) => {
+      if (config.appOnly) {
+        this.refs.reporterWrap.style.display = 'none'
+        findDOMNode(this.refs.header).style.display = 'none'
+        const messageNode = findDOMNode(this.refs.message)
+        if (messageNode) {
+          messageNode.style.display = 'none'
+        }
+        findDOMNode(this.refs.container).className += ' screenshotting'
+        state.clearUIDimensions()
+      }
+
+      if (!config.scale) {
+        state.setForceFullScale(true)
+      }
+    })
+
+    this.props.eventManager.on('after:screenshot', (config) => {
+      if (config.appOnly) {
+        const container = findDOMNode(this.refs.container)
+        container.className = container.className.replace(' screenshotting', '')
+        state.resetUIDimensions()
+        this.refs.reporterWrap.style.display = null
+        findDOMNode(this.refs.header).style.display = null
+        const messageNode = findDOMNode(this.refs.message)
+        if (messageNode) {
+          messageNode.style.display = null
+        }
+      }
+
+      state.setForceFullScale(false)
+    })
   }
 
   _specPath () {

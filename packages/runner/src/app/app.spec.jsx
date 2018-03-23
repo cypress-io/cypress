@@ -1,5 +1,5 @@
 import React from 'react'
-import { shallow } from 'enzyme'
+import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import reporter from '@packages/reporter'
@@ -27,7 +27,6 @@ const createProps = () => ({
       emit: sinon.spy(),
       on: sinon.spy(),
     },
-    on: sinon.spy(),
   },
   state: new State(),
   windowUtil: {
@@ -63,11 +62,11 @@ describe('<App />', () => {
     expect(component.find(Reporter)).to.have.prop('autoScrollingEnabled', true)
   })
 
-  it('renders the runner wrap with `left` set as the width of the reporter', () => {
+  it('renders the runner container with `left` set as the width of the reporter', () => {
     const props = createProps()
     props.state.absoluteReporterWidth = 400
     const component = shallow(<App {...props} />)
-    expect(component.find('RunnerWrap').prop('style').left).to.equal(400)
+    expect(component.find('.runner').prop('style').left).to.equal(400)
   })
 
   it('renders the <Header />', () => {

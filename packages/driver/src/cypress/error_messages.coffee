@@ -627,6 +627,15 @@ module.exports = {
     animation_failed: "#{cmd('scrollTo')} failed."
 
   screenshot:
+    defaults:
+      invalid_arg: "Cypress.Screenshot.defaults() must be called with an object. You passed: {{arg}}"
+      invalid_capture: "Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: {{arg}}"
+      invalid_wait_for_sync: "Cypress.Screenshot.defaults() 'waitForCommandSynchronization' option must be a boolean. You passed: {{arg}}"
+      invalid_scale_captures: "Cypress.Screenshot.defaults() 'scaleAppCaptures' option must be a boolean. You passed: {{arg}}"
+      invalid_disable_animations: "Cypress.Screenshot.defaults() 'disableTimersAndAnimations' option must be a boolean. You passed: {{arg}}"
+      invalid_screenshot_on_failure: "Cypress.Screenshot.defaults() 'screenshotOnRunFailures' option must be a boolean. You passed: {{arg}}"
+      invalid_blackout: "Cypress.Screenshot.defaults() 'blackout' option must be an array of strings. You passed: {{arg}}"
+      invalid_on_screenshot: "Cypress.Screenshot.defaults() 'onScreenshot' option must be a function. You passed: {{arg}}"
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
   select:

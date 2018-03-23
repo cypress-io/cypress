@@ -141,6 +141,46 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return ret
     })
 
+  wrapTimers = (contentWindow) ->
+    originalSetTimeout = contentWindow.setTimeout
+    originalSetInterval = contentWindow.setInterval
+    originalRequestAnimationFrame = contentWindow.requestAnimationFrame
+
+    paused = false
+
+    queues = {
+      setTimeout: []
+      setInterval: []
+      requestAnimationFrame: []
+    }
+
+    runQueue = (queue) ->
+      _.each queues[queue], ([fn, args]) ->
+        fn(args...)
+      queues[queue] = []
+
+    wrap = (fn, queue) -> (args...) ->
+      if paused
+        queues[queue].push([fn, args])
+      else
+        fn(args...)
+
+    contentWindow.setTimeout = (fn, args...) ->
+      originalSetTimeout(wrap(fn, "setTimeout"), args...)
+
+    contentWindow.setInterval = (fn, args...) ->
+      originalSetInterval(wrap(fn, "setInterval"), args...)
+
+    contentWindow.requestAnimationFrame = (fn, args...) ->
+      originalRequestAnimationFrame(wrap(fn, "requestAnimationFrame"), args...)
+
+    Cypress.on "pause:timers", (pause) ->
+      paused = pause
+      if not pause
+        runQueue("setTimeout")
+        runQueue("setInterval")
+        runQueue("requestAnimationFrame")
+
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
@@ -869,6 +909,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindowListeners(contentWindow)
 
+      wrapTimers(contentWindow)
+
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
       err = errors.createUncaughtException("spec", arguments)
@@ -1030,7 +1072,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## but we should still teardown and handle
           ## the error
           fail(err, runnable)
-
   }
 
   _.each privateProps, (obj, key) =>

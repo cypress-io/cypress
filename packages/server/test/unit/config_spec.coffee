@@ -285,15 +285,6 @@ describe "lib/config", ->
           @setup({responseTimeout: "foo"})
           @expectValidationFails("be a number")
 
-      context "screenshotOnHeadlessFailure", ->
-        it "passes if a boolean", ->
-          @setup({screenshotOnHeadlessFailure: false})
-          @expectValidationPasses()
-
-        it "fails if not a boolean", ->
-          @setup({screenshotOnHeadlessFailure: 42})
-          @expectValidationFails("be a boolean")
-
       context "testFiles", ->
         it "passes if a string", ->
           @setup({testFiles: "**/*.coffee"})
@@ -580,9 +571,6 @@ describe "lib/config", ->
     it "numTestsKeptInMemory=50", ->
       @defaults "numTestsKeptInMemory", 50
 
-    it "screenshotOnHeadlessFailure=true", ->
-      @defaults "screenshotOnHeadlessFailure", true
-
     it "modifyObstructiveCode=true", ->
       @defaults "modifyObstructiveCode", true
 
@@ -725,7 +713,6 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
@@ -787,7 +774,6 @@ describe "lib/config", ->
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
             trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
