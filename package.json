@@ -4,9 +4,6 @@
   "version": "0.0.0-development",
   "author": "Chris Breiding <chris@cypress.io>",
   "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
-  "engines": {
-    "node": ">=8.2.1"
-  },
   "files": [
     "*.js"
   ],
