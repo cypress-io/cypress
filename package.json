@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "babel-core": "6.26.0",
-    "babel-loader": "7.1.2",
+    "babel-loader": "7.1.4",
     "babel-preset-env": "1.6.0",
     "babel-preset-react": "6.24.1",
     "bluebird": "3.5.0",
