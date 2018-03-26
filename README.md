@@ -4,11 +4,15 @@ Cypress preprocessor for bundling JavaScript via webpack
 
 ## Installation
 
-Requires [Node](https://nodejs.org/en/) version 6.5.0 or above.
-
 ```sh
 npm install --save-dev @cypress/webpack-preprocessor
 ```
+
+## Compatibility
+
+This version is only compatible with webpack 4.x+. If you need webpack 2 or 3 support, use `@cypress/webpack-preprocessor` 1.x
+
+This plugin (and all Cypress plugins) run in Cypress's own version of Node. If you require npm packages or your own code into the pluginsFile, they needs to be compatible with [the version of Node that Cypress uses]((https://github.com/cypress-io/cypress/blob/develop/.node-version)), currently `8.2.1`.
 
 ## Usage
 
@@ -91,12 +95,9 @@ module.exports = (on) => {
 }
 ```
 
-## Compatibility
-
-* webpack: 4.x+ (use `@cypress/webpack-preprocessor` 1.x if you need webpack 2 or 3 support)
-* node: 8.2.1 minimum (aligned with Cypress 2.x)
-
 ## Contributing
+
+Use the [version of Node that matches Cypress](https://github.com/cypress-io/cypress/blob/develop/.node-version). Currently that's `8.2.1`.
 
 Run all tests once:
 
