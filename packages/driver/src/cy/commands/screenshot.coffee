@@ -150,7 +150,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      screenshotConfig = Screenshot.getConfig()
+      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization")
+      screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
+      screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
 
       beforeAll(runnable)
       .then ->

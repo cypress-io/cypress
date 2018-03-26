@@ -390,7 +390,6 @@ describe "src/cy/commands/screenshot", ->
           ## restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
 
-    ## FIXME: these are really flakey, mostly fail
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)
@@ -402,8 +401,54 @@ describe "src/cy/commands/screenshot", ->
             @lastLog = log
             @logs.push(log)
 
+        @assertErrorMessage = (message, done) =>
+          cy.on "fail", (err) =>
+            expect(@lastLog.get("error").message).to.eq(message)
+            done()
+
         return null
 
+      it "throws if capture is not an array", (done) ->
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: foo", done)
+        cy.screenshot({ capture: "foo" })
+
+      it "throws if capture is an empty array", (done) ->
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: ", done)
+        cy.screenshot({ capture: [] })
+
+      it "throws if capture is an array with invalid items", (done) ->
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: ap", done)
+        cy.screenshot({ capture: ["ap"] })
+
+      it "throws if capture is an array with duplicates", (done) ->
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: app, app", done)
+        cy.screenshot({ capture: ["app", "app"] })
+
+      it "throws if capture is an array with too many items", (done) ->
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: all, app, app", done)
+        cy.screenshot({ capture: ["all", "app", "app"] })
+
+      it "throws if waitForCommandSynchronization is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'waitForCommandSynchronization' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ waitForCommandSynchronization: "foo" })
+
+      it "throws if scaleAppCaptures is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'scaleAppCaptures' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ scaleAppCaptures: "foo" })
+
+      it "throws if disableTimersAndAnimations is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'disableTimersAndAnimations' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ disableTimersAndAnimations: "foo" })
+
+      it "throws if blackout is not an array", (done) ->
+        @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: foo", done)
+        cy.screenshot({ blackout: "foo" })
+
+      it "throws if blackout is not an array of strings", (done) ->
+        @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: true", done)
+        cy.screenshot({ blackout: [true] })
+
+      ## FIXME: this is really flakey, mostly fails
       it "logs once on error", (done) ->
         error = new Error("some error")
         error.name = "foo"
@@ -412,6 +457,7 @@ describe "src/cy/commands/screenshot", ->
         Cypress.automation.withArgs("take:screenshot").rejects(error)
 
         cy.on "fail", (err) =>
+          console.log("faill")
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -423,6 +469,7 @@ describe "src/cy/commands/screenshot", ->
 
         cy.screenshot()
 
+      ## FIXME: this is really flakey, mostly fails
       it "throws after timing out", (done) ->
         Cypress.automation.withArgs("take:screenshot").resolves(Promise.delay(1000))
 
