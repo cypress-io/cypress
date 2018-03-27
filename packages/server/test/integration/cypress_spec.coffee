@@ -70,7 +70,7 @@ TYPICAL_BROWSERS = [
   }
 ]
 
-describe.only "lib/cypress", ->
+describe "lib/cypress", ->
   require("mocha-banner").register()
 
   beforeEach ->
