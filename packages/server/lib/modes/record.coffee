@@ -15,6 +15,7 @@ debug      = require("debug")("cypress:server")
 commitInfo = require("@cypress/commit-info")
 la         = require("lazy-ass")
 check      = require("check-more-types")
+isForkPr   = require("is-fork-pr")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -27,7 +28,7 @@ logException = (err) ->
 module.exports = {
   generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
     if not recordKey
-      errors.throw("RECORD_KEY_MISSING")
+        errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
       console.log("Warning: you passed group-id but no group flag")
 
@@ -237,8 +238,14 @@ module.exports = {
 
         key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
-        @generateProjectRunId(projectId, projectPath, projectName, key,
-          options.group, options.groupId, options.spec)
+        if not key and isForkPr.isForkPr()
+          errors.warning("RECORDING_FROM_FORK_PR")
+          maybeGetRunId = Promise.resolve()
+        else
+          maybeGetRunId = @generateProjectRunId(projectId, projectPath, projectName, key,
+            options.group, options.groupId, options.spec)
+
+        maybeGetRunId
         .then (runId) =>
           ## bail if we dont have a runId
           return if not runId

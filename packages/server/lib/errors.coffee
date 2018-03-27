@@ -135,6 +135,15 @@ API = {
 
         https://on.cypress.io/cypress-ci-deprecated
         """
+      when "RECORDING_FROM_FORK_PR"
+        """
+        Warning: Trying to record from fork PR without Record Key
+
+        Normally CI does not pass private environment variables to builds from forks, so this is expected.
+        These results will not be recorded.
+
+        This error will not alter or the exit code.
+        """
       when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
         """
         Warning: We encountered an error while uploading results from your run.

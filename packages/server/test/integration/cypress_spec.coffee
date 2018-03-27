@@ -9,6 +9,8 @@ http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
+isForkPr   = require("is-fork-pr")
+
 Fixtures   = require("../support/helpers/fixtures")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
@@ -68,7 +70,7 @@ TYPICAL_BROWSERS = [
   }
 ]
 
-describe "lib/cypress", ->
+describe.only "lib/cypress", ->
   require("mocha-banner").register()
 
   beforeEach ->
@@ -1064,6 +1066,16 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123"])
       .then =>
         @expectExitWith(3)
+
+    it "logs warning but continues run if missing Record Key is for a pull request from fork", ->
+      @setup()
+      @sandbox.stub(isForkPr, "isForkPr").returns(true)
+      @sandbox.spy(record, 'generateProjectRunId')
+
+      cypress.start(["--run-project=#{@todosPath}", "--record"])
+      .then =>
+        expect(errors.warning).to.be.calledWith("RECORDING_FROM_FORK_PR")
+        expect(record.generateProjectRunId).to.not.be.called
 
     it "throws when no Record Key was provided", ->
       @setup()
