@@ -41,7 +41,7 @@ describe "e2e screenshots", ->
 
     e2e.exec(@, {
       spec: "screenshots_spec.coffee"
-      expectedExitCode: 4
+      expectedExitCode: 3
       snapshot: true
     })
     .then ->

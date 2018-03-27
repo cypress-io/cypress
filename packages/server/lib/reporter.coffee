@@ -26,6 +26,18 @@ Mocha.Suite.prototype.titlePath = ->
 Mocha.Runnable.prototype.titlePath = ->
   @parent.titlePath().concat([@title])
 
+getParentTitle = (runnable, titles) ->
+  if not titles
+    titles = [runnable.title]
+
+  if p = runnable.parent
+    if t = p.title
+      titles.unshift(t)
+
+    getParentTitle(p, titles)
+  else
+    titles
+
 createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
@@ -46,50 +58,73 @@ createRunnable = (obj, parent) ->
   runnable.async    = obj.async
   runnable.sync     = obj.sync
   runnable.duration = obj.duration
-  runnable.state    = obj.state
+  runnable.state    = obj.state ? "skipped" ## skipped by default
   runnable.body     ?= body
 
   runnable.parent = parent if parent
 
   return runnable
 
-mergeRunnable = (testProps, runnables) ->
-  runnable = runnables[testProps.id]
+mergeRunnable = (eventName) ->
+  return (testProps, runnables) ->
+    runnable = runnables[testProps.id]
 
-  if not runnable.started
-    testProps.started = Date.now()
+    _.extend(runnable, testProps)
 
-  _.extend(runnable, testProps)
+safelyMergeRunnable = (hookProps, runnables) ->
+  { hookId, title, hookName, body, type } = hookProps
 
-safelyMergeRunnable = (testProps, runnables) ->
-  _.extend({}, runnables[testProps.id], testProps)
+  if not runnable = runnables[hookId]
+    runnables[hookId] = {
+      hookId
+      type
+      title
+      body
+      hookName
+    }
 
-mergeErr = (test, runnables, runner) ->
-  ## increment runner failures
-  ## because thats what the fail() fn does.
-  ## useful for reporters expecting this
-  ## and for 'end' event fn callbacks
-  runner.failures += 1
+  _.extend({}, runnables[hookProps.id], hookProps)
 
-  runnable = runnables[test.id]
-  runnable.err = test.err
-  runnable.state = "failed"
-  runnable.duration ?= test.duration
-  runnable = _.extend({}, runnable, {title: test.title})
-  [runnable, test.err]
+mergeErr = (runnable, runnables, stats) ->
+  ## this will always be a test because
+  ## we reset hook id's to match tests
+  test = runnables[runnable.id]
+  test.err = runnable.err
+  test.state = "failed"
+  test.duration ?= test.duration
+
+  if runnable.type is "hook"
+    test.failedFromHookId = runnable.hookId
+
+  ## dont mutate the test, and merge in the runnable title
+  ## in the case its a hook so that we emit the right 'fail'
+  ## event for reporters
+  test = _.extend({}, test, { title: runnable.title })
+
+  [test, test.err]
+
+setDate = (obj, runnables, stats) ->
+  if s = obj.start
+    stats.start = new Date(s)
+
+  if e = obj.end
+    stats.end = new Date(e)
+
+  return null
 
 events = {
-  "start":     true
-  "end":       true
-  "suite":     mergeRunnable
-  "suite end": mergeRunnable
-  "test":      mergeRunnable
-  "test end":  mergeRunnable
+  "start":     setDate
+  "end":       setDate
+  "suite":     mergeRunnable("suite")
+  "suite end": mergeRunnable("suite end")
+  "test":      mergeRunnable("test")
+  "test end":  mergeRunnable("test end")
   "hook":      safelyMergeRunnable
   "hook end":  safelyMergeRunnable
-  "pass":      mergeRunnable
-  "pending":   mergeRunnable
+  "pass":      mergeRunnable("pass")
+  "pending":   mergeRunnable("pending")
   "fail":      mergeErr
+  "test:after:run": mergeRunnable("test:after:run") ## our own custom event
 }
 
 reporters = {
@@ -107,13 +142,17 @@ class Reporter
     @reporterOptions = reporterOptions
 
   setRunnables: (rootRunnable = {}) ->
+    ## manage stats ourselves
+    @stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
     reporter = Reporter.loadReporter(@reporterName, @projectRoot)
     @mocha = new Mocha({reporter: reporter})
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
-    @reporter = new @mocha._reporter(@runner, {reporterOptions: @reporterOptions})
+    @reporter = new @mocha._reporter(@runner, {
+      reporterOptions: @reporterOptions
+    })
 
     @runner.ignoreLeaks = true
 
@@ -145,33 +184,49 @@ class Reporter
         debug("got mocha event '%s' with args: %o", event, args)
         ## transform the arguments if
         ## there is an event.fn callback
-        args = e.apply(@, args.concat(@runnables, @runner))
+        args = e.apply(@, args.concat(@runnables, @stats))
 
       [event].concat(args)
 
-  normalize: (test = {}) ->
-    getParentTitle = (runnable, titles) ->
-      if p = runnable.parent
-        if t = p.title
-          titles.unshift(t)
+  normalizeHook: (hook = {}) ->
+    {
+      hookId: hook.hookId
+      hookName: hook.hookName
+      title:  getParentTitle(hook)
+      body:   hook.body
+    }
 
-        getParentTitle(p, titles)
-      else
-        titles
-
+  normalizeTest: (test = {}) ->
     err = test.err ? {}
 
-    titles = [test.title]
+    ## use this or null
+    wcs = test.wallClockStart ? null
 
-    ## TODO: move the separator into some shared util function somewhere
+    if wcs
+      ## convert to actual date object
+      wcs = new Date(wcs)
 
+
+    ## wallClockDuration:
+    ## this is the 'real' duration of wall clock time that the
+    ## user 'felt' when the test run. it includes everything
+    ## from hooks, to the test itself, to lifecycle, and event
+    ## async browser compute time. this number is likely higher
+    ## than summing the durations of the timings.
+    ##
     {
-      clientId:       test.id
-      title:          getParentTitle(test, titles).join(" /// ")
-      duration:       test.duration
+      testId:         test.id
+      title:          getParentTitle(test)
+      state:          test.state
+      start:          test.start
+      end:            test.end
+      body:           test.body
       stack:          err.stack
       error:          err.message
-      started:        test.started
+      timings:        test.timings
+      failedFromHookId: test.failedFromHookId
+      wallClockStart: wcs
+      wallClockDuration: test.wallClockDuration
       # videoTimestamp: test.started - videoStart
     }
 
@@ -182,31 +237,68 @@ class Reporter
       new Promise (resolve, reject) =>
         @reporter.done(failures, resolve)
       .then =>
-        @stats()
+        @results()
     else
-      @stats()
+      @results()
 
-  stats: ->
-    failingTests = _
+  results: ->
+    tests = _
     .chain(@runnables)
-    .filter({state: "failed"})
-    .map(@normalize)
+    .filter({type: "test"})
+    .map(@normalizeTest)
     .value()
 
-    stats = @runner.stats
+    hooks = _
+    .chain(@runnables)
+    .filter({type: "hook"})
+    .map(@normalizeHook)
+    .value()
 
-    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(stats, STATS)
+    suites = _
+    .chain(@runnables)
+    .filter({root: false}) ## don't include root suite
+    .value()
+
+    { start, end } = @stats
+
+    if start and end
+      @stats.duration = end - start
+
+    @stats.suites = suites.length
+    @stats.tests = tests.length
+    @stats.passes = _.filter(tests, { state: "passed" }).length
+    @stats.pending = _.filter(tests, { state: "pending" }).length
+    @stats.skipped = _.filter(tests, { state: "skipped" }).length
+    @stats.failures = _.filter(tests, { state: "failed" }).length
+
+    ## return an object of results
+    return {
+      ## this is our own stats object
+      stats: @stats
+
+      reporter: @reporterName
+
+      ## this comes from the reporter, not us
+      reporterStats: @runner.stats
+
+      hooks
+
+      tests
+    }
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
-      test.videoTimestamp = test.started - videoStart
+      ## if we have a wallClockStart
+      if wcs = test.wallClockStart
+        test.videoTimestamp = test.wallClockStart - videoStart
       test
 
   @create = (reporterName, reporterOptions, projectRoot) ->
     new Reporter(reporterName, reporterOptions, projectRoot)
 
   @loadReporter = (reporterName, projectRoot) ->
-    debug("loading reporter #{reporterName}")
+    debug("trying to load reporter:", reporterName)
+
     if r = reporters[reporterName]
       debug("#{reporterName} is built-in reporter")
       return require(r)
@@ -219,35 +311,33 @@ class Reporter
     ## that is local (./custom-reporter.js)
     ## or one installed by the user through npm
     try
+      p = path.resolve(projectRoot, reporterName)
+
       ## try local
-      debug("loading local reporter by name #{reporterName}")
+      debug("trying to require local reporter with path:", p)
 
       ## using path.resolve() here so we can just pass an
       ## absolute path as the reporterName which avoids
       ## joining projectRoot unnecessarily
-      return require(path.resolve(projectRoot, reporterName))
+      return require(p)
     catch err
-      ## try npm. if this fails, we're out of options, so let it throw
-      debug("loading NPM reporter module #{reporterName} from #{projectRoot}")
+      if err.code isnt "MODULE_NOT_FOUND"
+        ## bail early if the error wasn't MODULE_NOT_FOUND
+        ## because that means theres something actually wrong
+        ## with the found reporter
+        throw err
 
-      try
-        return require(path.resolve(projectRoot, "node_modules", reporterName))
-      catch err
-        msg = "Could not find reporter module #{reporterName} relative to #{projectRoot}"
-        throw new Error(msg)
+      p = path.resolve(projectRoot, "node_modules", reporterName)
+
+      ## try npm. if this fails, we're out of options, so let it throw
+      debug("trying to require local reporter with path:", p)
+
+      return require(p)
 
   @getSearchPathsForReporter = (reporterName, projectRoot) ->
     _.uniq([
       path.resolve(projectRoot, reporterName),
       path.resolve(projectRoot, "node_modules", reporterName)
     ])
-
-  @isValidReporterName = (reporterName, projectRoot) ->
-    try
-      Reporter.loadReporter(reporterName, projectRoot)
-      debug("reporter #{reporterName} is valid name")
-      true
-    catch
-      false
 
 module.exports = Reporter

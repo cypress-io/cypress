@@ -27,6 +27,15 @@ describe "e2e reporters", ->
       reporter: "module-does-not-exist"
     })
 
+  ## https://github.com/cypress-io/cypress/issues/1192
+  it "reports error when thrown from reporter", ->
+    e2e.exec(@, {
+      spec: "simple_passing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+      reporter: "reporters/throws.js"
+    })
+
   it "supports junit reporter and reporter options", ->
     e2e.exec(@, {
       spec: "simple_passing_spec.coffee"
@@ -74,7 +83,7 @@ describe "e2e reporters", ->
         e2e.exec(@, {
           spec: "simple_failing_hook_spec.coffee"
           snapshot: true
-          expectedExitCode: 1
+          expectedExitCode: 3
           reporter: ma
         })
         .then ->
@@ -82,7 +91,7 @@ describe "e2e reporters", ->
             fs.readFileAsync(path.join(e2ePath, "mochawesome-reports", "mochawesome.html"), "utf8")
             .then (xml) ->
               expect(xml).to.include("<h3 class=\"suite-title\">simple failing hook spec</h3>")
-              expect(xml).to.include("<div class=\"status-item status-item-hooks danger\">1 Failed Hook</div>")
+              expect(xml).to.include("<div class=\"status-item status-item-hooks danger\">3 Failed Hooks</div>")
           else
             fs.readJsonAsync(path.join(e2ePath, "mochawesome-report", "mochawesome.json"))
             .then (json) ->
@@ -90,4 +99,4 @@ describe "e2e reporters", ->
               ## 'failures' but it does collect them in 'other'
               expect(json.stats).to.be.an('object')
               expect(json.stats.failures).to.eq(0)
-              expect(json.stats.other).to.eq(1)
+              expect(json.stats.other).to.eq(3)

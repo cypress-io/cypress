@@ -626,15 +626,6 @@ module.exports = {
     invalid_duration: "#{cmd('scrollTo')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"
     animation_failed: "#{cmd('scrollTo')} failed."
 
-  select:
-    disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"
-    invalid_element: "#{cmd('select')} can only be called on a <select>. Your subject is a: {{node}}"
-    invalid_multiple: "#{cmd('select')} was called with an array of arguments but does not have a 'multiple' attribute set."
-    multiple_elements: "#{cmd('select')} can only be called on a single <select>. Your subject contained {{num}} elements."
-    multiple_matches: "#{cmd('select')} matched more than one option by value or text: {{value}}"
-    no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
-    option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
-
   screenshot:
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
@@ -646,6 +637,11 @@ module.exports = {
     multiple_matches: "#{cmd('select')} matched more than one option by value or text: {{value}}"
     no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
     option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
+
+  selector_playground:
+    defaults_invalid_arg: "Cypress.SelectorPlayground.defaults() must be called with an object. You passed: {{arg}}"
+    defaults_invalid_priority: "Cypress.SelectorPlayground.defaults() called with invalid 'selectorPriority' property. It must be an array. You passed: {{arg}}"
+    defaults_invalid_on_element: "Cypress.SelectorPlayground.defaults() called with invalid 'onElement' property. It must be a function. You passed: {{arg}}"
 
   server:
     invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
@@ -803,7 +799,7 @@ module.exports = {
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 200px and 3000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 3000px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"

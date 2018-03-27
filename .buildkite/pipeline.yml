@@ -6,7 +6,11 @@ env:
 steps:
   - label: "install tools"
     command:
+      # assuming we have installed the same Node.js version
+      # as the one included in Electron
       - "node --version"
+      # make sure we are using correct version of Node to build
+      - "npm run check-node-version"
       - "npm --version"
       - "security find-identity -p codesigning"
       - "security list-keychains"

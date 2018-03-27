@@ -46,10 +46,10 @@ describe('cypress', function () {
 
     it('calls run#start, passing in options', () =>
       cypress.run({ foo: 'foo' })
-        .then(getStartArgs)
-        .then((args) => {
-          expect(args.foo).to.equal('foo')
-        })
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args.foo).to.equal('foo')
+      })
     )
 
     it('normalizes config object', () => {
@@ -58,20 +58,20 @@ describe('cypress', function () {
         watchForFileChanges: false,
       }
       return cypress.run({ config })
-        .then(getStartArgs)
-        .then(snapshot)
+      .then(getStartArgs)
+      .then(snapshot)
     })
 
     it('normalizes env option if passed an object', () =>
       cypress.run({ env: { foo: 'bar' } })
-        .then(getStartArgs)
-        .then(snapshot)
+      .then(getStartArgs)
+      .then(snapshot)
     )
 
     it('normalizes env option if passed an object with multiple properties', () =>
       cypress.run({ env: { foo: 'bar', another: 'one' } })
-        .then(getStartArgs)
-        .then(snapshot)
+      .then(getStartArgs)
+      .then(snapshot)
     )
 
     it('gets random tmp file and passes it to run#start', function () {

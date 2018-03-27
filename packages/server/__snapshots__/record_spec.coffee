@@ -1,4 +1,4 @@
-exports['lib/modes/record .generateProjectBuildId calls api.createRun with args 1'] = [
+exports['lib/modes/record .generateProjectRunId calls api.createRun with args 1'] = [
   {
     "projectId": "id-123",
     "recordKey": "key-123",
@@ -20,7 +20,7 @@ exports['lib/modes/record .generateProjectBuildId calls api.createRun with args 
   }
 ]
 
-exports['lib/modes/record .generateProjectBuildId passes groupId 1'] = [
+exports['lib/modes/record .generateProjectRunId passes groupId 1'] = [
   {
     "projectId": "id-123",
     "recordKey": "key-123",
@@ -42,7 +42,7 @@ exports['lib/modes/record .generateProjectBuildId passes groupId 1'] = [
   }
 ]
 
-exports['lib/modes/record .generateProjectBuildId figures out groupId from CI environment variables 1'] = [
+exports['lib/modes/record .generateProjectRunId figures out groupId from CI environment variables 1'] = [
   {
     "projectId": "id-123",
     "recordKey": "key-123",
