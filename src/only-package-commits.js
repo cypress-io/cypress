@@ -56,7 +56,7 @@ const onlyPackageCommits = async commits => {
       );
     }
 
-    return packageFile;
+    return !!packageFile;
   });
 };
 
