@@ -177,4 +177,8 @@ export default class Iframes extends Component {
       dispose()
     })
   }
+
+  getSizeContainer () {
+    return this.refs.container
+  }
 }

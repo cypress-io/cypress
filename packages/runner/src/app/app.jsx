@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
@@ -47,7 +46,7 @@ class App extends Component {
           style={{ left: this.props.state.absoluteReporterWidth }}
         >
           <Header ref='header' {...this.props} />
-          <Iframes {...this.props} />
+          <Iframes ref='iframes' {...this.props} />
           <Message ref='message' state={this.props.state} />
           {this.props.children}
         </div>
@@ -65,39 +64,65 @@ class App extends Component {
   componentDidMount () {
     this._monitorWindowResize()
 
-    const state = this.props.state
+    const containerNode = findDOMNode(this.refs.container)
+    const reporterNode = this.refs.reporterWrap
+    const headerNode = findDOMNode(this.refs.header)
+    const iframesNode = findDOMNode(this.refs.iframes)
+    const iframesSizeNode = findDOMNode(this.refs.iframes.getSizeContainer())
+
+    let prevAttrs = {}
 
     this.props.eventManager.on('before:screenshot', (config) => {
       if (config.appOnly) {
-        this.refs.reporterWrap.style.display = 'none'
-        findDOMNode(this.refs.header).style.display = 'none'
+        prevAttrs = {
+          top: iframesNode.style.top,
+          marginLeft: iframesSizeNode.style.marginLeft,
+          height: iframesSizeNode.style.height,
+          width: iframesSizeNode.style.width,
+          transform: iframesSizeNode.style.transform,
+          left: containerNode.style.left,
+        }
+
         const messageNode = findDOMNode(this.refs.message)
         if (messageNode) {
           messageNode.style.display = 'none'
         }
-        findDOMNode(this.refs.container).className += ' screenshotting'
-        state.clearUIDimensions()
-      }
 
-      if (!config.scale) {
-        state.setForceFullScale(true)
+        reporterNode.style.display = 'none'
+        headerNode.style.display = 'none'
+
+        iframesNode.style.top = 0
+        iframesSizeNode.style.height = '100%'
+        iframesSizeNode.style.width = '100%'
+        iframesSizeNode.style.marginLeft = 0
+        iframesSizeNode.style.transform = null
+
+        containerNode.style.left = 0
+        containerNode.className += ' screenshotting'
       }
     })
 
     this.props.eventManager.on('after:screenshot', (config) => {
       if (config.appOnly) {
-        const container = findDOMNode(this.refs.container)
-        container.className = container.className.replace(' screenshotting', '')
-        state.resetUIDimensions()
-        this.refs.reporterWrap.style.display = null
-        findDOMNode(this.refs.header).style.display = null
+        containerNode.className = containerNode.className.replace(' screenshotting', '')
+        containerNode.style.left = prevAttrs.left
+
+        iframesNode.style.top = prevAttrs.top
+        iframesSizeNode.style.height = prevAttrs.height
+        iframesSizeNode.style.width = prevAttrs.width
+        iframesSizeNode.style.marginLeft = prevAttrs.marginLeft
+        iframesSizeNode.style.transform = prevAttrs.transform
+
+        reporterNode.style.display = null
+        headerNode.style.display = null
+
+        prevAttrs = {}
+
         const messageNode = findDOMNode(this.refs.message)
         if (messageNode) {
           messageNode.style.display = null
         }
       }
-
-      state.setForceFullScale(false)
     })
   }
 
