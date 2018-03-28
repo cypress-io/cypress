@@ -141,27 +141,26 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return ret
     })
 
+  timersPaused = false
+  timerQueues = {
+    setTimeout: []
+    setInterval: []
+    requestAnimationFrame: []
+  }
+
+  runTimerQueue = (queue) ->
+    _.each timerQueues[queue], ([fn, args]) ->
+      fn(args...)
+    timerQueues[queue] = []
+
   wrapTimers = (contentWindow) ->
     originalSetTimeout = contentWindow.setTimeout
     originalSetInterval = contentWindow.setInterval
     originalRequestAnimationFrame = contentWindow.requestAnimationFrame
 
-    paused = false
-
-    queues = {
-      setTimeout: []
-      setInterval: []
-      requestAnimationFrame: []
-    }
-
-    runQueue = (queue) ->
-      _.each queues[queue], ([fn, args]) ->
-        fn(args...)
-      queues[queue] = []
-
     wrap = (fn, queue) -> (args...) ->
-      if paused
-        queues[queue].push([fn, args])
+      if timersPaused
+        timerQueues[queue].push([fn, args])
       else
         fn(args...)
 
@@ -173,13 +172,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     contentWindow.requestAnimationFrame = (fn, args...) ->
       originalRequestAnimationFrame(wrap(fn, "requestAnimationFrame"), args...)
-
-    Cypress.on "pause:timers", (pause) ->
-      paused = pause
-      if not pause
-        runQueue("setTimeout")
-        runQueue("setInterval")
-        runQueue("requestAnimationFrame")
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -910,6 +902,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindowListeners(contentWindow)
 
       wrapTimers(contentWindow)
+
+    pauseTimers: (pause) ->
+      timersPaused = pause
+      if not pause
+        runTimerQueue("setTimeout")
+        runTimerQueue("setInterval")
+        runTimerQueue("requestAnimationFrame")
+
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err

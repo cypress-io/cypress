@@ -67,7 +67,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     screenshotConfig = Screenshot.getConfig()
 
     if screenshotConfig.disableTimersAndAnimations
-      Cypress.action("cy:pause:timers", true)
+      cy.pauseTimers(true)
 
     send("before:all:screenshots", {
       disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations
@@ -78,7 +78,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     screenshotConfig = Screenshot.getConfig()
 
     if screenshotConfig.disableTimersAndAnimations
-      Cypress.action("cy:pause:timers", false)
+      cy.pauseTimers(false)
 
     send("after:all:screenshots", {
       disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations

@@ -388,9 +388,6 @@ class $Cypress
       when "spec:script:error"
         @emit("script:error", args...)
 
-      when "cy:pause:timers"
-        @emit("pause:timers", args...)
-
   backend: (eventName, args...) ->
     new Promise (resolve, reject) =>
       fn = (reply) ->
