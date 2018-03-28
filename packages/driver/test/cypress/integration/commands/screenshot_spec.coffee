@@ -86,10 +86,7 @@ describe "src/cy/commands/screenshot", ->
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
         expect(Cypress.action).to.be.calledWith("cy:before:all:screenshots", {
-          id: "123"
-          isOpen: true
           disableTimersAndAnimations: true
-          waitForCommandSynchronization: true
           blackout: []
         })
         expect(Cypress.automation).to.be.calledWith("take:screenshot", {
@@ -123,13 +120,9 @@ describe "src/cy/commands/screenshot", ->
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
         expect(Cypress.action).to.be.calledWith("cy:before:all:screenshots", {
-          id: "123"
-          isOpen: true
           disableTimersAndAnimations: true
-          waitForCommandSynchronization: true
           blackout: []
         })
-        console.log(Cypress.automation.withArgs("take:screenshot").args)
         expect(Cypress.automation).to.be.calledWith("take:screenshot", {
           name: undefined
           testId: runnable.id
@@ -187,7 +180,6 @@ describe "src/cy/commands/screenshot", ->
         })
 
     it "sends before:all:screenshots with appropriate props", ->
-      runnable = cy.state("runnable")
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.spy(Cypress, "action").log(false)
 
@@ -195,51 +187,59 @@ describe "src/cy/commands/screenshot", ->
       .screenshot("foo")
       .then ->
         expect(Cypress.action).to.be.calledWith("cy:before:all:screenshots", {
-          id: runnable.id
-          isOpen: true
           disableTimersAndAnimations: true
           blackout: []
-          waitForCommandSynchronization: true
         })
 
     it "sends before:screenshot for each capture", ->
       @screenshotConfig.capture = ["app", "runner"]
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.spy(Cypress, "action").log(false)
+      runnable = cy.state("runnable")
 
       cy
       .screenshot("foo")
       .then ->
         expect(Cypress.action.withArgs("cy:before:screenshot")).to.be.calledTwice
         expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
+          id: runnable.id
+          isOpen: true
           appOnly: true
           scale: true
+          waitForCommandSynchronization: false
         })
         expect(Cypress.action.withArgs("cy:before:screenshot").args[1][1]).to.eql({
+          id: runnable.id
+          isOpen: true
           appOnly: false
           scale: true
+          waitForCommandSynchronization: true
         })
 
     it "sends after:screenshot for each capture", ->
       @screenshotConfig.capture = ["app", "runner"]
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.spy(Cypress, "action").log(false)
+      runnable = cy.state("runnable")
 
       cy
       .screenshot("foo")
       .then ->
         expect(Cypress.action.withArgs("cy:after:screenshot")).to.be.calledTwice
         expect(Cypress.action.withArgs("cy:after:screenshot").args[0][1]).to.eql({
+          id: runnable.id
+          isOpen: false
           appOnly: true
           scale: true
         })
         expect(Cypress.action.withArgs("cy:after:screenshot").args[1][1]).to.eql({
+          id: runnable.id
+          isOpen: false
           appOnly: false
           scale: true
         })
 
     it "sends after:all:screenshots with appropriate props", ->
-      runnable = cy.state("runnable")
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.spy(Cypress, "action").log(false)
 
@@ -247,8 +247,6 @@ describe "src/cy/commands/screenshot", ->
       .screenshot("foo")
       .then ->
         expect(Cypress.action).to.be.calledWith("cy:after:all:screenshots", {
-          id: runnable.id
-          isOpen: false
           disableTimersAndAnimations: true
           blackout: []
         })
@@ -291,7 +289,7 @@ describe "src/cy/commands/screenshot", ->
           ]
         })
         expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: "my/file -- all"
+          name: "my/file -- runner"
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -409,23 +407,23 @@ describe "src/cy/commands/screenshot", ->
         return null
 
       it "throws if capture is not an array", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: foo", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: foo", done)
         cy.screenshot({ capture: "foo" })
 
       it "throws if capture is an empty array", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: ", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: ", done)
         cy.screenshot({ capture: [] })
 
       it "throws if capture is an array with invalid items", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: ap", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: ap", done)
         cy.screenshot({ capture: ["ap"] })
 
       it "throws if capture is an array with duplicates", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: app, app", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: app, app", done)
         cy.screenshot({ capture: ["app", "app"] })
 
       it "throws if capture is an array with too many items", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: all, app, app", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: runner, app, app", done)
         cy.screenshot({ capture: ["runner", "app", "app"] })
 
       it "throws if waitForCommandSynchronization is not a boolean", (done) ->
@@ -448,7 +446,6 @@ describe "src/cy/commands/screenshot", ->
         @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: true", done)
         cy.screenshot({ blackout: [true] })
 
-      ## FIXME: this is really flakey, mostly fails
       it "logs once on error", (done) ->
         error = new Error("some error")
         error.name = "foo"
@@ -457,7 +454,6 @@ describe "src/cy/commands/screenshot", ->
         Cypress.automation.withArgs("take:screenshot").rejects(error)
 
         cy.on "fail", (err) =>
-          console.log("faill")
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -469,7 +465,6 @@ describe "src/cy/commands/screenshot", ->
 
         cy.screenshot()
 
-      ## FIXME: this is really flakey, mostly fails
       it "throws after timing out", (done) ->
         Cypress.automation.withArgs("take:screenshot").resolves(Promise.delay(1000))
 

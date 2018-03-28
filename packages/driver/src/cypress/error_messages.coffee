@@ -628,7 +628,7 @@ module.exports = {
 
   screenshot:
     invalid_arg: "{{cmd}}() must be called with an object. You passed: {{arg}}"
-    invalid_capture: "{{cmd}}() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: {{arg}}"
+    invalid_capture: "{{cmd}}() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: {{arg}}"
     invalid_wait_for_sync: "{{cmd}}() 'waitForCommandSynchronization' option must be a boolean. You passed: {{arg}}"
     invalid_scale_captures: "{{cmd}}() 'scaleAppCaptures' option must be a boolean. You passed: {{arg}}"
     invalid_disable_animations: "{{cmd}}() 'disableTimersAndAnimations' option must be a boolean. You passed: {{arg}}"

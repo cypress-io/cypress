@@ -94,7 +94,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         isOpen: true
         appOnly: capture is "app"
         scale: if capture is "app" then screenshotConfig.scaleAppCaptures else true
-        waitForCommandSynchronization: if capture is "all" then screenshotConfig.waitForCommandSynchronization else false
+        waitForCommandSynchronization: if capture is "runner" then screenshotConfig.waitForCommandSynchronization else false
       })
 
     after = (capture) ->
