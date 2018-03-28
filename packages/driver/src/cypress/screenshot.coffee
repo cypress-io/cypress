@@ -3,7 +3,7 @@ _ = require("lodash")
 $utils = require("./utils")
 
 reset = -> {
-  capture: ["all"]
+  capture: ["runner"]
   waitForCommandSynchronization: true
   scaleAppCaptures: false
   disableTimersAndAnimations: true
@@ -14,7 +14,7 @@ reset = -> {
 
 defaults = reset()
 
-validCaptures = ["app", "all"]
+validCaptures = ["app", "runner"]
 
 isCaptureValid = (capture) ->
   if not _.isArray(capture)

@@ -1,7 +1,7 @@
 { Screenshot, $ } = Cypress
 
 DEFAULTS = {
-  capture: ["all"]
+  capture: ["runner"]
   waitForCommandSynchronization: true
   scaleAppCaptures: false
   disableTimersAndAnimations: true
@@ -87,7 +87,7 @@ describe "src/cypress/screenshot", ->
 
       it "throws if capture is an array with too many items", ->
         expect =>
-          Screenshot.defaults({ capture: ["all", "app", "app"] })
+          Screenshot.defaults({ capture: ["runner", "app", "app"] })
         .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: all, app, app")
 
       it "throws if waitForCommandSynchronization is not a boolean", ->

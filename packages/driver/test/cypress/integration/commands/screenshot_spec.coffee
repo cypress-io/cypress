@@ -203,7 +203,7 @@ describe "src/cy/commands/screenshot", ->
         })
 
     it "sends before:screenshot for each capture", ->
-      @screenshotConfig.capture = ["app", "all"]
+      @screenshotConfig.capture = ["app", "runner"]
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.spy(Cypress, "action").log(false)
 
@@ -221,7 +221,7 @@ describe "src/cy/commands/screenshot", ->
         })
 
     it "sends after:screenshot for each capture", ->
-      @screenshotConfig.capture = ["app", "all"]
+      @screenshotConfig.capture = ["app", "runner"]
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.spy(Cypress, "action").log(false)
 
@@ -274,7 +274,7 @@ describe "src/cy/commands/screenshot", ->
         expect(Cypress.action.withArgs("cy:pause:timers")).not.to.be.called
 
     it "includes capture type in name if named and more than one capture", ->
-      @screenshotConfig.capture = ["app", "all"]
+      @screenshotConfig.capture = ["app", "runner"]
       runnable = cy.state("runnable")
       runnable.title = "foo bar"
 
@@ -301,7 +301,7 @@ describe "src/cy/commands/screenshot", ->
         })
 
     it "includes capture type in titles if not named and more than one capture", ->
-      @screenshotConfig.capture = ["app", "all"]
+      @screenshotConfig.capture = ["app", "runner"]
       runnable = cy.state("runnable")
       runnable.title = "foo bar"
 
@@ -325,7 +325,7 @@ describe "src/cy/commands/screenshot", ->
             "src/cy/commands/screenshot",
             "#screenshot",
             "foo bar"
-            "all"
+            "runner"
           ]
         })
 
@@ -426,7 +426,7 @@ describe "src/cy/commands/screenshot", ->
 
       it "throws if capture is an array with too many items", (done) ->
         @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: all, app, app", done)
-        cy.screenshot({ capture: ["all", "app", "app"] })
+        cy.screenshot({ capture: ["runner", "app", "app"] })
 
       it "throws if waitForCommandSynchronization is not a boolean", (done) ->
         @assertErrorMessage("cy.screenshot() 'waitForCommandSynchronization' option must be a boolean. You passed: foo", done)
