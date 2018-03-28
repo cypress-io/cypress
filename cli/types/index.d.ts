@@ -174,6 +174,7 @@ declare namespace Cypress {
     }
 
     on: Actions
+    off: Actions
   }
 
   /**
