@@ -63,29 +63,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     new Promise (resolve) ->
       Cypress.action("cy:#{event}", props, resolve)
 
-  beforeAll = (runnable) ->
+  beforeAll = ->
     screenshotConfig = Screenshot.getConfig()
 
     if screenshotConfig.disableTimersAndAnimations
       Cypress.action("cy:pause:timers", true)
 
     send("before:all:screenshots", {
-      id: runnable.id
-      isOpen: true
       disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations
       blackout: screenshotConfig.blackout
-      waitForCommandSynchronization: screenshotConfig.waitForCommandSynchronization
     })
 
-  afterAll = (runnable) ->
+  afterAll = ->
     screenshotConfig = Screenshot.getConfig()
 
     if screenshotConfig.disableTimersAndAnimations
       Cypress.action("cy:pause:timers", false)
 
     send("after:all:screenshots", {
-      id: runnable.id
-      isOpen: false
       disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations
       blackout: screenshotConfig.blackout
     })
@@ -95,12 +90,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     before = (capture) ->
       send("before:screenshot", {
+        id: runnable.id
+        isOpen: true
         appOnly: capture is "app"
         scale: if capture is "app" then screenshotConfig.scaleAppCaptures else true
+        waitForCommandSynchronization: if capture is "all" then screenshotConfig.waitForCommandSynchronization else false
       })
 
     after = (capture) ->
       send("after:screenshot", {
+        id: runnable.id
+        isOpen: false
         appOnly: capture is "app"
         scale: if capture is "app" then screenshotConfig.scaleAppCaptures else true
       })
@@ -123,7 +123,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## to take a screenshot and we are not interactive
     ## which means we're exiting at the end
     if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
-      beforeAll(test)
+      beforeAll()
       .then ->
         prepAndTakeScreenshots(runnable)
 
@@ -154,11 +154,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
 
-      beforeAll(runnable)
+      beforeAll()
       .then ->
         prepAndTakeScreenshots(runnable, name, options._log, options.timeout)
         .finally ->
-          afterAll(runnable)
+          afterAll()
       .then (results) ->
         _.each results, ({ path, size }, i) ->
           capture = screenshotConfig.capture[i]

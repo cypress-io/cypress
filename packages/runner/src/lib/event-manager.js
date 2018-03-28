@@ -237,30 +237,29 @@ const eventManager = {
     })
 
     Cypress.on('before:all:screenshots', (config, cb) => {
-      const delayedCb = () => {
-        // have to delay callback or the UI changes won't have taken effect
-        setTimeout(cb, 10)
-      }
-      const wait = config.waitForCommandSynchronization
       localBus.emit('before:all:screenshots', config)
-      reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? delayedCb : undefined)
-      // have to delay callback or the UI changes won't have taken effect
-      if (!wait) delayedCb()
+      cb()
     })
 
     Cypress.on('before:screenshot', (config, cb) => {
       localBus.emit('before:screenshot', config)
-      setTimeout(cb, 10)
+      const wait = !config.appOnly && config.waitForCommandSynchronization
+      if (!config.appOnly) {
+        reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? cb : undefined)
+      }
+      if (!wait) cb()
     })
 
     Cypress.on('after:screenshot', (config, cb) => {
       localBus.emit('after:screenshot', config)
-      setTimeout(cb, 10)
+      if (!config.appOnly) {
+        reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'))
+      }
+      cb()
     })
 
     Cypress.on('after:all:screenshots', (config, cb) => {
       localBus.emit('after:all:screenshots', config)
-      reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'))
       cb()
     })
 
