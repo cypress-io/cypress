@@ -15,7 +15,7 @@ reset = -> {
 
 defaults = reset()
 
-validCaptures = ["app", "runner"]
+validCaptures = ["app", "runner", "app,runner"]
 
 isCaptureValid = (capture) ->
   if not _.isArray(capture)
@@ -25,8 +25,8 @@ isCaptureValid = (capture) ->
   if not capture.length
     return false
 
-  ## must be valid strings
-  if _.some(capture, (item) -> not (item in validCaptures))
+  ## must be valid strings in valid order
+  if not (capture.join(",") in validCaptures)
     return false
 
   ## can't be duplicates
