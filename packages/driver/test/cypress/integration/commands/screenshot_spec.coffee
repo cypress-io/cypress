@@ -428,23 +428,23 @@ describe "src/cy/commands/screenshot", ->
         return null
 
       it "throws if capture is not an array", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: foo", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: foo", done)
         cy.screenshot({ capture: "foo" })
 
       it "throws if capture is an empty array", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: ", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: ", done)
         cy.screenshot({ capture: [] })
 
       it "throws if capture is an array with invalid items", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: ap", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: ap", done)
         cy.screenshot({ capture: ["ap"] })
 
       it "throws if capture is an array with duplicates", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: app, app", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: app, app", done)
         cy.screenshot({ capture: ["app", "app"] })
 
       it "throws if capture is an array with too many items", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: runner, app, app", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: runner, app, app", done)
         cy.screenshot({ capture: ["runner", "app", "app"] })
 
       it "throws if waitForCommandSynchronization is not a boolean", (done) ->
