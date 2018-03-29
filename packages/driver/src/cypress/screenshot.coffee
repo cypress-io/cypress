@@ -9,7 +9,8 @@ reset = -> {
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
-  onScreenshot: ->
+  beforeScreenshot: ->
+  afterScreenshot: ->
 }
 
 defaults = reset()
@@ -34,16 +35,39 @@ isCaptureValid = (capture) ->
 
   return true
 
-validateAndSetBoolean = (props, values, cmd, log, option, errorKey) ->
+validateAndSetBoolean = (props, values, cmd, log, option) ->
   value = props[option]
-  if value?
-    if not _.isBoolean(value)
-      $utils.throwErrByPath("screenshot.#{errorKey}", {
-        log: log
-        args: { cmd: cmd, arg: $utils.stringify(value) }
-      })
+  if not value?
+    return
 
-    values[option] = value
+  if not _.isBoolean(value)
+    $utils.throwErrByPath("screenshot.invalid_boolean", {
+      log: log
+      args: { 
+        cmd: cmd
+        option: option
+        arg: $utils.stringify(value) 
+      }
+    })
+
+  values[option] = value
+
+validateAndSetCallback = (props, values, cmd, log, option) ->
+  value = props[option]
+  if not value?
+    return
+
+  if not _.isFunction(value)
+    $utils.throwErrByPath("screenshot.invalid_callback", {
+      log: log
+      args: { 
+        cmd: cmd
+        callback: option
+        arg: $utils.stringify(value) 
+      }
+    })
+
+  values[option] = value
 
 validate = (props, cmd, log) ->
   values = {}
@@ -63,10 +87,10 @@ validate = (props, cmd, log) ->
 
     values.capture = capture
 
-  validateAndSetBoolean(props, values, cmd, log, "waitForCommandSynchronization", "invalid_wait_for_sync")
-  validateAndSetBoolean(props, values, cmd, log, "scaleAppCaptures", "invalid_scale_captures")
-  validateAndSetBoolean(props, values, cmd, log, "disableTimersAndAnimations", "invalid_disable_animations")
-  validateAndSetBoolean(props, values, cmd, log, "screenshotOnRunFailure", "invalid_screenshot_on_failure")
+  validateAndSetBoolean(props, values, cmd, log, "waitForCommandSynchronization")
+  validateAndSetBoolean(props, values, cmd, log, "scaleAppCaptures")
+  validateAndSetBoolean(props, values, cmd, log, "disableTimersAndAnimations")
+  validateAndSetBoolean(props, values, cmd, log, "screenshotOnRunFailure")
 
   if blackout = props.blackout
     if not _.isArray(blackout) or _.some(blackout, (selector) -> not _.isString(selector))
@@ -77,14 +101,8 @@ validate = (props, cmd, log) ->
 
     values.blackout = blackout
 
-  if onScreenshot = props.onScreenshot
-    if not _.isFunction(onScreenshot)
-      $utils.throwErrByPath("screenshot.invalid_on_screenshot", {
-        log: log
-        args: { cmd: cmd, arg: $utils.stringify(onScreenshot) }
-      })
-
-    values.onScreenshot = onScreenshot
+  validateAndSetCallback(props, values, cmd, log, "beforeScreenshot")
+  validateAndSetCallback(props, values, cmd, log, "afterScreenshot")
 
   return values
 
@@ -94,10 +112,13 @@ module.exports = {
     defaults = reset()
 
   getConfig: ->
-    _.omit(defaults, "onScreenshot")
+    _.omit(defaults, "beforeScreenshot", "afterScreenshot")
 
-  getOnScreenshot: ->
-    defaults.onScreenshot
+  callBeforeScreenshot: (doc) ->
+    defaults.beforeScreenshot(doc)
+
+  callAfterScreenshot: (doc) ->
+    defaults.afterScreenshot(doc)
 
   defaults: (props) ->
     values = validate(props, "Cypress.Screenshot.defaults")

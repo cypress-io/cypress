@@ -69,6 +69,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     if screenshotConfig.disableTimersAndAnimations
       cy.pauseTimers(true)
 
+    Screenshot.callBeforeScreenshot(state("document"))
+
     send("before:all:screenshots", {
       disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations
       blackout: screenshotConfig.blackout
@@ -77,13 +79,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   afterAll = ->
     screenshotConfig = Screenshot.getConfig()
 
-    if screenshotConfig.disableTimersAndAnimations
-      cy.pauseTimers(false)
+    Screenshot.callAfterScreenshot(state("document"))
 
     send("after:all:screenshots", {
       disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations
       blackout: screenshotConfig.blackout
     })
+
+    if screenshotConfig.disableTimersAndAnimations
+      cy.pauseTimers(false)
 
   prepAndTakeScreenshots = (runnable, name, log, timeout) ->
     screenshotConfig = Screenshot.getConfig()

@@ -191,6 +191,16 @@ describe "src/cy/commands/screenshot", ->
           blackout: []
         })
 
+    it "calls beforeScreenshot callback with document", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.stub(Screenshot, "callBeforeScreenshot")
+      cy.spy(Cypress, "action").log(false)
+
+      cy
+      .screenshot("foo")
+      .then ->
+        expect(Screenshot.callBeforeScreenshot).to.be.calledWith(cy.state("document"))
+
     it "sends before:screenshot for each capture", ->
       @screenshotConfig.capture = ["app", "runner"]
       Cypress.automation.withArgs("take:screenshot").resolves({})
@@ -251,15 +261,26 @@ describe "src/cy/commands/screenshot", ->
           blackout: []
         })
 
-    it "pauses then unpauses timers if disableTimersAndAnimations is true", ->
+    it "calls afterScreenshot callback with document", ->
       Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.stub(Screenshot, "callAfterScreenshot")
       cy.spy(Cypress, "action").log(false)
 
       cy
       .screenshot("foo")
       .then ->
-        expect(Cypress.action.withArgs("cy:pause:timers", true)).to.be.calledOnce
-        expect(Cypress.action.withArgs("cy:pause:timers", false)).to.be.calledOnce
+        expect(Screenshot.callAfterScreenshot).to.be.calledWith(cy.state("document"))
+
+    it "pauses then unpauses timers if disableTimersAndAnimations is true", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.spy(Cypress, "action").log(false)
+      cy.spy(cy, "pauseTimers")
+
+      cy
+      .screenshot("foo")
+      .then ->
+        expect(cy.pauseTimers).to.be.calledWith(true)
+        expect(cy.pauseTimers).to.be.calledWith(false)
 
     it "does not pause timers if disableTimersAndAnimations is false", ->
       @screenshotConfig.disableTimersAndAnimations = false

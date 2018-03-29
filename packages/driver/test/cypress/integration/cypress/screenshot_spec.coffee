@@ -16,13 +16,15 @@ describe "src/cypress/screenshot", ->
 
   it "has defaults", ->
     expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
-    expect(Screenshot.getOnScreenshot()).to.be.a("function")
+    expect(-> Screenshot.callBeforeScreenshot()).not.to.throw()
+    expect(-> Screenshot.callAfterScreenshot()).not.to.throw()
 
   context ".defaults", ->
     it "is noop if not called with any valid properties", ->
       Screenshot.defaults({})
       expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
-      expect(Screenshot.getOnScreenshot()).to.be.a("function")
+      expect(-> Screenshot.callBeforeScreenshot()).not.to.throw()
+      expect(-> Screenshot.callAfterScreenshot()).not.to.throw()
 
     it "sets capture if specified", ->
       Screenshot.defaults({
@@ -54,10 +56,17 @@ describe "src/cypress/screenshot", ->
       })
       expect(Screenshot.getConfig().screenshotOnRunFailure).to.equal(false)
 
-    it "sets onScreenshot if specified", ->
-      onScreenshot = ->
-      Screenshot.defaults({ onScreenshot })
-      expect(Screenshot.getOnScreenshot()).to.equal(onScreenshot)
+    it "sets beforeScreenshot if specified", ->
+      beforeScreenshot = cy.stub()
+      Screenshot.defaults({ beforeScreenshot })
+      Screenshot.callBeforeScreenshot()
+      expect(beforeScreenshot).to.be.called
+
+    it "sets afterScreenshot if specified", ->
+      afterScreenshot = cy.stub()
+      Screenshot.defaults({ afterScreenshot })
+      Screenshot.callAfterScreenshot()
+      expect(afterScreenshot).to.be.called
 
     describe "errors", ->
       it "throws if not passed an object", ->
@@ -68,27 +77,27 @@ describe "src/cypress/screenshot", ->
       it "throws if capture is not an array", ->
         expect =>
           Screenshot.defaults({ capture: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: foo")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: foo")
 
       it "throws if capture is an empty array", ->
         expect =>
           Screenshot.defaults({ capture: [] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: ")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: ")
 
       it "throws if capture is an array with invalid items", ->
         expect =>
           Screenshot.defaults({ capture: ["ap"] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: ap")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: ap")
 
       it "throws if capture is an array with duplicates", ->
         expect =>
           Screenshot.defaults({ capture: ["app", "app"] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: app, app")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: app, app")
 
       it "throws if capture is an array with too many items", ->
         expect =>
           Screenshot.defaults({ capture: ["runner", "app", "app"] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'all'. You passed: all, app, app")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be an array with one or both of the following items: 'app', 'runner'. You passed: runner, app, app")
 
       it "throws if waitForCommandSynchronization is not a boolean", ->
         expect =>
@@ -120,7 +129,12 @@ describe "src/cypress/screenshot", ->
           Screenshot.defaults({ blackout: [true] })
         .to.throw("Cypress.Screenshot.defaults() 'blackout' option must be an array of strings. You passed: true")
 
-      it "throws if onScreenshot is not a function", ->
+      it "throws if beforeScreenshot is not a function", ->
         expect =>
-          Screenshot.defaults({ onScreenshot: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'onScreenshot' option must be a function. You passed: foo")
+          Screenshot.defaults({ beforeScreenshot: "foo" })
+        .to.throw("Cypress.Screenshot.defaults() 'beforeScreenshot' option must be a function. You passed: foo")
+
+      it "throws if afterScreenshot is not a function", ->
+        expect =>
+          Screenshot.defaults({ afterScreenshot: "foo" })
+        .to.throw("Cypress.Screenshot.defaults() 'afterScreenshot' option must be a function. You passed: foo")
