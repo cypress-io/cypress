@@ -134,7 +134,7 @@ Working on your first Pull Request? You can learn how from this free series [How
 
 Cypress is a large open source project. When you want to contribute to Cypress, you may be unsure which part of the project to work within.
 
-This repository is made up of various packages. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and are not necessarily useful outside of the Cypress app.
+This repository is made up of various packages. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app.
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
