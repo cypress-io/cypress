@@ -13,7 +13,7 @@ Thanks for taking the time to contribute! :smile:
 
 - [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
-- Write Code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
+- Write code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
 
 ## Table of Contents
 
@@ -85,7 +85,7 @@ For some issues, there are places you can check for more information. This may h
 
 When you file a feature request, we need you to **describe the problem you are facing first**, not just your desired solution.
 
-Often, your problem may have a lot in common with other similar problems. If we understand your use case we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
+Often, your problem may have a lot in common with other similar problems. If we understand your use case, we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
 
 Also, your proposed solution may not be compatible with the direction we want to take the product, but we may be able to come up with another solution which has approximately the same effect and does fit into the product direction.
 
@@ -117,11 +117,11 @@ Leave a comment on the issue saying "I was able to reproduce this in Cypress ver
 
 #### 3. You can tell the problem is a user error
 
-In recreating the issue, you may realize that they had a typo or used the Cypress api incorrectly, etc. Leave a comment informing the user of their error and close the issue - or ask them to close the issue if it fixes their problem.
+In recreating the issue, you may realize that they had a typo or used the Cypress API incorrectly, etc. Leave a comment informing the user of their error and close the issue – or ask them to close the issue if it fixes their problem.
 
 ## Writing Documentation
 
-Cypress documentation lives in separate repository with its own dependencies and build tools.
+Cypress documentation lives in a separate repository with its own dependencies and build tools.
 See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
@@ -134,7 +134,7 @@ Working on your first Pull Request? You can learn how from this free series [How
 
 Cypress is a large open source project. When you want to contribute to Cypress, you may be unsure which part of the project to work within.
 
-This repository is made up of various packages. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app.
+This repository is made up of various packages. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and are not necessarily useful outside of the Cypress app.
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
@@ -180,14 +180,13 @@ npm run build
 npm start
 ```
 
-If there are errors building the packages, run with `DEBUG=cypress:*`
-option to see more details.
+If there are errors building the packages, prefix the commands with `DEBUG=cypress:*` to see more details.
 
-This outputs a lot of debugging lines. To focus on an individual module run with `DEBUG=cypress:launcher` for instance.
+This outputs a lot of debugging lines. To focus on an individual module, run with `DEBUG=cypress:launcher` for instance.
 
-When running `npm start` this routes through the CLI and eventually calls `npm run dev` with the proper arguments. This enables Cypress day to day development to match the logic of the built binary + CLI integration.
+When running `npm start` this routes through the CLI and eventually calls `npm run dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
 
-If you want to bypass the CLI entirely you can use the `npm run dev` task and pass arguments directly.
+If you want to bypass the CLI entirely, you can use the `npm run dev` task and pass arguments directly.
 
 #### Tasks
 
@@ -307,9 +306,9 @@ npm rebuild node-sass
 
 ### Packages
 
-Generally when making contributions, you are typically making it to a small number of packages. Most of your local development work will be inside a single package at a time.
+Generally when making contributions, you are typically making them to a small number of packages. Most of your local development work will be inside a single package at a time.
 
-Each package documents how to best work with it, so simple consult the `README.md` of each package.
+Each package documents how to best work with it, so simply consult the `README.md` of each package.
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
@@ -319,7 +318,7 @@ They will outline development and test procedures. When in doubt just look at th
 
 The repository is setup with two main (protected) branches.
 
-- `master` is the code already published in the last Cypress version
+- `master` is the code already published in the last Cypress version.
 - `develop` is the current latest "edge" code. This branch is set as the default branch, and all pull requests should be made against this branch.
 
 ### Pull Requests
