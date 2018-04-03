@@ -72,57 +72,67 @@ class App extends Component {
 
     let prevAttrs = {}
 
-    this.props.eventManager.on('before:screenshot', (config) => {
-      if (config.appOnly) {
-        prevAttrs = {
-          top: iframesNode.style.top,
-          marginLeft: iframesSizeNode.style.marginLeft,
-          height: iframesSizeNode.style.height,
-          width: iframesSizeNode.style.width,
-          transform: iframesSizeNode.style.transform,
-          left: containerNode.style.left,
-        }
+    const { eventManager } = this.props
 
-        const messageNode = findDOMNode(this.refs.message)
-        if (messageNode) {
-          messageNode.style.display = 'none'
-        }
+    eventManager.on('before:screenshot', (config) => {
+      if (!config.appOnly) return
 
-        reporterNode.style.display = 'none'
-        headerNode.style.display = 'none'
-
-        iframesNode.style.top = 0
-        iframesSizeNode.style.height = '100%'
-        iframesSizeNode.style.width = '100%'
-        iframesSizeNode.style.marginLeft = 0
-        iframesSizeNode.style.transform = null
-
-        containerNode.style.left = 0
-        containerNode.className += ' screenshotting'
+      prevAttrs = {
+        top: iframesNode.style.top,
+        marginLeft: iframesSizeNode.style.marginLeft,
+        height: iframesSizeNode.style.height,
+        width: iframesSizeNode.style.width,
+        transform: iframesSizeNode.style.transform,
+        left: containerNode.style.left,
       }
+
+      const messageNode = findDOMNode(this.refs.message)
+      if (messageNode) {
+        messageNode.style.display = 'none'
+      }
+
+      reporterNode.style.display = 'none'
+      headerNode.style.display = 'none'
+
+      iframesNode.style.top = 0
+      iframesSizeNode.style.height = '100%'
+      iframesSizeNode.style.width = '100%'
+      iframesSizeNode.style.marginLeft = 0
+
+      containerNode.style.left = 0
+      containerNode.className += ' screenshotting'
+
+      if (!config.scale) {
+        iframesSizeNode.style.transform = null
+      }
+
+      eventManager.emit('before:screenshot:finished')
     })
 
-    this.props.eventManager.on('after:screenshot', (config) => {
-      if (config.appOnly) {
-        containerNode.className = containerNode.className.replace(' screenshotting', '')
-        containerNode.style.left = prevAttrs.left
+    eventManager.on('after:screenshot', (config) => {
+      if (!config.appOnly) return
 
-        iframesNode.style.top = prevAttrs.top
-        iframesSizeNode.style.height = prevAttrs.height
-        iframesSizeNode.style.width = prevAttrs.width
-        iframesSizeNode.style.marginLeft = prevAttrs.marginLeft
-        iframesSizeNode.style.transform = prevAttrs.transform
+      containerNode.className = containerNode.className.replace(' screenshotting', '')
+      containerNode.style.left = prevAttrs.left
 
-        reporterNode.style.display = null
-        headerNode.style.display = null
+      iframesNode.style.top = prevAttrs.top
+      iframesSizeNode.style.height = prevAttrs.height
+      iframesSizeNode.style.width = prevAttrs.width
+      iframesSizeNode.style.marginLeft = prevAttrs.marginLeft
 
-        prevAttrs = {}
+      reporterNode.style.display = null
+      headerNode.style.display = null
 
-        const messageNode = findDOMNode(this.refs.message)
-        if (messageNode) {
-          messageNode.style.display = null
-        }
+      const messageNode = findDOMNode(this.refs.message)
+      if (messageNode) {
+        messageNode.style.display = null
       }
+
+      if (!config.scale) {
+        iframesSizeNode.style.transform = prevAttrs.transform
+      }
+
+      prevAttrs = {}
     })
   }
 
