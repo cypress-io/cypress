@@ -1,7 +1,5 @@
 # cypress-vue-unit-test
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/bahmutov/cypress-vue-unit-test.svg)](https://greenkeeper.io/)
-
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner
 
 [![NPM][npm-icon] ][npm-url]
@@ -10,6 +8,7 @@
 [![Cypress dashboard][cypress-badge] ][cypress-dashboard]
 [![semantic-release][semantic-image] ][semantic-url]
 [![js-standard-style][standard-image]][standard-url]
+[![renovate-app badge][renovate-badge]][renovate-app]
 
 ## TLDR
 
@@ -748,3 +747,5 @@ OTHER DEALINGS IN THE SOFTWARE.
 [standard-url]: http://standardjs.com/
 [cypress-badge]: https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
 [cypress-dashboard]: https://dashboard.cypress.io/#/projects/134ej7
+[renovate-badge]: https://img.shields.io/badge/renovate-app-blue.svg
+[renovate-app]: https://renovateapp.com/
