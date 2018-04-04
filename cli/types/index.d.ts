@@ -1058,6 +1058,11 @@ declare namespace Cypress {
      */
     ignoreTestFiles: string | string[]
     /**
+     * Whether Cypress will log xhr requests
+     * @default true
+     */
+    logXhr: boolean
+    /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
      */
