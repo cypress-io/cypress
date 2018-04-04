@@ -62,13 +62,20 @@
     "test": "npm run cy:run",
     "unit": "mocha src/*-spec.js",
     "unused-deps": "echo skip dependency-check --unused --no-dev --no-peer . --entry cypress/plugins/index.js",
-    "semantic-release": "semantic-action pre && npm publish && semantic-action post",
+    "semantic-release": "semantic-release",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
   },
   "release": {
-    "analyzeCommits": "simple-commit-message",
-    "generateNotes": "github-post-release"
+    "analyzeCommits": {
+      "preset": "angular",
+      "releaseRules": [
+        {
+          "type": "break",
+          "release": "major"
+        }
+      ]
+    }
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -84,8 +91,8 @@
     "nsp": "3.2.1",
     "pre-git": "3.17.1",
     "prettier-standard": "8.0.0",
-    "semantic-action": "1.1.6",
     "simple-commit-message": "4.0.3",
+    "semantic-release": "15.1.4",
     "standard": "11.0.1",
     "vue": "2.5.16",
     "vue-loader": "14.2.2",
