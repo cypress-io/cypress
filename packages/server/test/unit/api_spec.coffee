@@ -205,6 +205,11 @@ describe "lib/api", ->
 
   context ".createRun", ->
     beforeEach ->
+      @sandbox.stub(browsers, "getByName").resolves({
+        displayName: "Foo"
+        version: "1.2.3"
+      })
+
       @buildProps = {
         projectId:         "id-123"
         recordKey:         "token-123"
@@ -218,6 +223,11 @@ describe "lib/api", ->
         ciBuildNumber:     "987"
         ciParams:          { foo: "bar" }
         specs:             ["foo.js", "bar.js"]
+        platform: {
+          browserName:    'Foo',
+          browserVersion: '1.2.3',
+          osName:         'linux'
+        }
       }
 
     it "POST /runs + returns runId", ->
@@ -251,6 +261,11 @@ describe "lib/api", ->
         ciProvider:        "circle"
         ciBuildNumber:     "987"
         ciParams:          { foo: "bar" }
+        platform: {
+          browserName:    'Foo',
+          browserVersion: '1.2.3',
+          osName:         'linux'
+        }
       })
       .reply(422, {
         errors: {
@@ -325,6 +340,22 @@ describe "lib/api", ->
         throw new Error("should have thrown here")
       .catch (err) ->
         expect(err.isApiError).to.be.true
+
+  context ".getPlatform", ->
+    beforeEach ->
+      @sandbox.stub(browsers, "getByName").withArgs("chrome").resolves({
+        displayName: "Foo"
+        version: "1.2.3"
+      })
+
+    it "returns browser and os info", ->
+      api.getPlatform("chrome")
+      .then (platform) ->
+        expect(platform).to.deep.equal({
+          browserName: 'Foo',
+          browserVersion: '1.2.3',
+          osName: 'linux'
+        })
 
   context ".createInstance", ->
     beforeEach ->
