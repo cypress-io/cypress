@@ -118,6 +118,8 @@ module.exports = {
     .catch(tagError)
 
   createRun: (options = {}) ->
+    debug("getting platform information from browser", options.browser)
+
     getPlatform(options.browser)
     .then (platform) ->
 
