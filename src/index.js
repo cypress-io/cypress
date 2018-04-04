@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 const Vue = require('vue/dist/vue')
 const { stripIndent } = require('common-tags')
 
