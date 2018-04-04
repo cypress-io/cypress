@@ -27,8 +27,7 @@ rp = request.defaults (params = {}, callback) ->
   request[method](params, callback)
 
 debugReturnedRun = (info) ->
-  debug("received API response with id %s", info.id)
-  debug("and list of specs to run", info.specs)
+  debug("run received API responses %j", info)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -51,6 +50,8 @@ machineId = ->
 
 # resolves with platform object: browser name and version, os name
 getPlatform = (browserName) ->
+  debug("getting browser information for name %s", browserName)
+
   browsers.getByName(browserName)
   .then (browser = {}) ->
     ## get the formatted browserName
@@ -150,7 +151,8 @@ module.exports = {
         json: true
         timeout: options.timeout ? 10000
         headers: {
-          "x-route-version": "3"
+          # TODO why route version 4? It should stay at 3
+          "x-route-version": "4"
         }
         body: body
       })
@@ -162,9 +164,11 @@ module.exports = {
 
   createInstance: (options = {}) ->
     { runId, spec, timeout } = options
+    debug("creating instance for run %s for spec %s", runId, spec)
 
     getPlatform(options.browser)
     .then (platform) ->
+
       system.info()
       .then (systemInfo) ->
         systemInfo.spec = spec
@@ -176,7 +180,7 @@ module.exports = {
           json: true
           timeout: timeout ? 10000
           headers: {
-            "x-route-version": "4"
+            "x-route-version": "3"
           }
           body: systemInfo
         })

@@ -69,8 +69,11 @@ module.exports = {
         browser:           browser
       }
 
+      debug("createRun options %j", createRunOptions)
       api.createRun(createRunOptions)
       .catch (err) ->
+        debug("api.createRun error %j", err)
+
         switch err.statusCode
           when 401
             recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
@@ -208,6 +211,8 @@ module.exports = {
 
     ## default browser
     browser ?= "electron"
+
+    debug("run record in browser %s", browser)
 
     captured = stdout.capture()
 

@@ -828,6 +828,7 @@ describe "lib/cypress", ->
           groupId: null
           specs: specFiles
           specPattern: specPattern
+          browser: "electron"
         }
 
         @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
