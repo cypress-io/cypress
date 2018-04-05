@@ -180,7 +180,8 @@ module.exports = {
           json: true
           timeout: timeout ? 10000
           headers: {
-            "x-route-version": "3"
+            # why version 4?
+            "x-route-version": "4"
           }
           body: systemInfo
         })

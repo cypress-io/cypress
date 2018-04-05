@@ -232,7 +232,7 @@ describe "lib/api", ->
 
     it "POST /runs + returns runId", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", @buildProps)
@@ -246,7 +246,7 @@ describe "lib/api", ->
 
     it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", {
@@ -303,7 +303,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs")
