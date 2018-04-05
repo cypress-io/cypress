@@ -807,7 +807,7 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_RECORD_KEY
 
     beforeEach ->
-      @setup = (specPattern, specFiles) =>
+      @setup = (specPattern, specFiles, browser = "electron") =>
         if not specFiles
           specFiles = ["a-spec.js", "b-spec.js"]
 
@@ -828,7 +828,7 @@ describe "lib/cypress", ->
           groupId: null
           specs: specFiles
           specPattern: specPattern
-          browser: "electron"
+          browser: browser
         }
 
         @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
@@ -922,7 +922,7 @@ describe "lib/cypress", ->
       @setup(spec, [
         "test1.js"
         "test2.coffee"
-      ])
+      ], "chrome")
 
       ## TODO: fix this once we implement proper globbing
       ## per spec. currently just hacking this and forcing
@@ -939,7 +939,13 @@ describe "lib/cypress", ->
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}", "--browser=chrome"])
+      cypress.start([
+        "--run-project=#{@todosPath}",
+        "--record",
+        "--key=token-123",
+        "--spec=#{spec}",
+        "--browser=chrome"
+      ])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("chrome", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
         @expectExitWith(3)
