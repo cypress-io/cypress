@@ -151,8 +151,7 @@ module.exports = {
         json: true
         timeout: options.timeout ? 10000
         headers: {
-          # TODO why route version 4? It should stay at 3
-          "x-route-version": "4"
+          "x-route-version": "3"
         }
         body: body
       })
@@ -180,8 +179,7 @@ module.exports = {
           json: true
           timeout: timeout ? 10000
           headers: {
-            # why version 4?
-            "x-route-version": "4"
+            "x-route-version": "3"
           }
           body: systemInfo
         })
