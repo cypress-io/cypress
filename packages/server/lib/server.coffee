@@ -539,13 +539,12 @@ class Server
         }
       })
 
-      ## handle errors gracefully
-      proxy.on "error", (err, req, res) ->
-        if (!res.headersSent)
-          res.writeHead({"contentType":"application/json"})
-
-        json = {error: "proxy_error", reason: err.message}
-        res.end(JSON.stringify(json))
+      ## Listen to proxy errors
+      ## An ECONNRESET can happen frequently when the connection is closed by the
+      ## user, e.g. reloading the page when it's still loading. We handle them with
+      ## just a 500 code response, so that the server doesn't crash when they occur
+      proxy.on 'error', (err, req, res) ->
+        res.status(500).end()
 
     else
       ## we can't do anything with this socket
