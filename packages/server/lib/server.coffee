@@ -539,8 +539,14 @@ class Server
         }
       })
 
-      proxy.on "error", (err, req, res) =>
-        res.end()
+      ## handle errors gracefully
+      proxy.on "error", (err, req, res) ->
+        if (!res.headersSent)
+          res.writeHead({"contentType":"application/json"})
+
+        json = {error: "proxy_error", reason: err.message}
+        res.end(JSON.stringify(json))
+
     else
       ## we can't do anything with this socket
       ## since we don't know how to proxy it!
