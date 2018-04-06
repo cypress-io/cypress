@@ -540,11 +540,10 @@ class Server
       })
 
       ## Listen to proxy errors
-      ## An ECONNRESET can happen frequently when the connection is closed by the
-      ## user, e.g. reloading the page when it's still loading. We handle them with
-      ## just a 500 code response, so that the server doesn't crash when they occur
+      ## An ECONNRESET error can happen frequently when the connection is closed by the
+      ## user, e.g. reloading the page when it's still loading, so we just end the request
       proxy.on 'error', (err, req, res) ->
-        res.status(500).end()
+        res.end()
 
     else
       ## we can't do anything with this socket
