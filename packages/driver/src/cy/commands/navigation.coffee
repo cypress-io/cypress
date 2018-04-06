@@ -260,7 +260,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "failOnStatusCode", "auth")
+      _.pick(options, "failOnStatusCode", "auth", "headers")
     )
     .then (resp = {}) ->
       switch
@@ -464,6 +464,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         failOnStatusCode: true
         log: true
         timeout: config("pageLoadTimeout")
+        headers: {}
         onBeforeLoad: ->
         onLoad: ->
       })

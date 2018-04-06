@@ -315,6 +315,16 @@ class Server
 
     originalUrl = urlStr
 
+    ## if we have headers in the options param
+    ## we add it to the headers array for the
+    ## final request
+    customHeaders = {
+      accept: "text/html,*/*"
+    }
+
+    if options.headers
+      customHeaders = Object.assign({}, customHeaders, options.headers);
+
     ## if we have a buffer for this url
     ## then just respond with its details
     ## so we are idempotant and do not make
@@ -436,9 +446,7 @@ class Server
           auth: options.auth
           gzip: false
           url: urlFile ? urlStr
-          headers: {
-            accept: "text/html,*/*"
-          }
+          headers: customHeaders
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
