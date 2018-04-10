@@ -159,6 +159,15 @@ describe "lib/config", ->
           @setup({execTimeout: "foo"})
           @expectValidationFails("be a number")
 
+      context "taskTimeout", ->
+        it "passes if a number", ->
+          @setup({taskTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({taskTimeout: "foo"})
+          @expectValidationFails("be a number")
+
       context "fileServerFolder", ->
         it "passes if a string", ->
           @setup({fileServerFolder: "_files"})
@@ -713,6 +722,7 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
@@ -771,6 +781,7 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },

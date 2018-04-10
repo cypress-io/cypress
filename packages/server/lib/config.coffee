@@ -46,7 +46,7 @@ configKeys = toWords """
   blacklistHosts                  pageLoadTimeout
   userAgent                       requestTimeout
   viewportWidth                   responseTimeout
-  viewportHeight
+  viewportHeight                  taskTimeout
   videoRecording
   videoCompression
   videoUploadOnPasses
@@ -98,6 +98,7 @@ defaults = {
   responseTimeout:               30000
   pageLoadTimeout:               60000
   execTimeout:                   60000
+  taskTimeout:                   60000
   videoRecording:                true
   videoCompression:              32
   videoUploadOnPasses:           true
@@ -146,6 +147,7 @@ validationRules = {
   responseTimeout: v.isNumber
   testFiles: v.isString
   supportFile: v.isStringOrFalse
+  taskTimeout: v.isNumber
   trashAssetsBeforeHeadlessRuns: v.isBoolean
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse

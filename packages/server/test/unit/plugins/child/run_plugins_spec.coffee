@@ -5,7 +5,9 @@ cp = require("child_process")
 snapshot = require("snap-shot-it")
 
 preprocessor = require("#{root}../../lib/plugins/child/preprocessor")
+task = require("#{root}../../lib/plugins/child/task")
 runPlugins = require("#{root}../../lib/plugins/child/run_plugins")
+util = require("#{root}../../lib/plugins/util")
 
 colorCodeRe = /\[[0-9;]+m/gm
 pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
@@ -98,8 +100,12 @@ describe "lib/plugins/child/run_plugins", ->
     beforeEach ->
       @sandbox.stub(preprocessor, "wrap")
       @onFilePreprocessor = @sandbox.stub().resolves()
+      @beforeBrowserLaunch = @sandbox.stub().resolves()
+      @taskRequested = @sandbox.stub().resolves("foo")
       pluginsFn = (register) =>
         register("file:preprocessor", @onFilePreprocessor)
+        register("before:browser:launch", @beforeBrowserLaunch)
+        register("task", @taskRequested)
       mockery.registerMock("plugins-file", pluginsFn)
       runPlugins(@ipc, "plugins-file")
       @ipc.on.withArgs("load").yield()
@@ -122,6 +128,40 @@ describe "lib/plugins/child/run_plugins", ->
         args = ["one", "two"]
         preprocessor.wrap.lastCall.args[1](0, args)
         expect(@onFilePreprocessor).to.be.calledWith("one", "two")
+
+    context "before:browser:launch", ->
+      beforeEach ->
+        @sandbox.stub(util, "wrapChildPromise")
+        @ids = { callbackId: 1, invocationId: "00" }
+
+      it "wraps child promise", ->
+        args = ["arg1", "arg2"]
+        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, args)
+        expect(util.wrapChildPromise).to.be.called
+        expect(util.wrapChildPromise.lastCall.args[0]).to.equal(@ipc)
+        expect(util.wrapChildPromise.lastCall.args[1]).to.be.a("function")
+        expect(util.wrapChildPromise.lastCall.args[2]).to.equal(@ids)
+        expect(util.wrapChildPromise.lastCall.args[3]).to.equal(args)
+
+      it "invokes registered function when invoked by preprocessor handler", ->
+        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, [])
+        args = ["one", "two"]
+        util.wrapChildPromise.lastCall.args[1](1, args)
+        expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")
+
+    context "task", ->
+      beforeEach ->
+        @sandbox.stub(task, "wrap")
+        @ids = { callbackId: 2, invocationId: "00" }
+
+      it "calls task handler", ->
+        args = ["arg1"]
+        @ipc.on.withArgs("execute").yield("task", @ids, args)
+        expect(task.wrap).to.be.called
+        expect(task.wrap.lastCall.args[0]).to.equal(@ipc)
+        expect(task.wrap.lastCall.args[1]).to.be.an("object")
+        expect(task.wrap.lastCall.args[2]).to.equal(@ids)
+        expect(task.wrap.lastCall.args[3]).to.equal(args)
 
   describe "errors", ->
     beforeEach ->
