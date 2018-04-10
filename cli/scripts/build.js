@@ -13,6 +13,7 @@ const {
   license,
   bugs,
   repository,
+  keywords,
 } = require('@packages/root')
 
 // the rest of properties should come from the package.json in CLI folder
@@ -33,6 +34,7 @@ function preparePackageForNpmRelease (json) {
     license,
     bugs,
     repository,
+    keywords,
     types: 'types', // typescript types
     scripts: {
       postinstall: 'node index.js --exec install',
