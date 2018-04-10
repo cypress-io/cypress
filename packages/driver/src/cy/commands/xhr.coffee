@@ -22,6 +22,9 @@ reset = ->
 
   server = null
 
+  # TODO reset returns a promise, so all uses should be updated
+  Cypress.backend("set:traffic:routing:reset")
+
 isUrlLikeArgs = (url, response) ->
   (not _.isObject(url) and not _.isObject(response)) or
     (_.isRegExp(url) or _.isString(url))
@@ -53,12 +56,16 @@ setRequest = (state, xhr, alias) ->
   state("requests", requests)
 
 setResponse = (state, xhr) ->
+  console.log("state requests", state("requests"))
+
   obj = _.find(state("requests"), { xhr })
 
   ## if we've been reset between tests and an xhr
   ## leaked through, then we may not be able to associate
   ## this response correctly
   return if not obj
+
+  console.log('found request', obj)
 
   index = state("requests").indexOf(obj)
 
@@ -71,8 +78,14 @@ setResponse = (state, xhr) ->
     xhr: xhr
     alias: obj?.alias
   }
+  console.log('new responses', responses)
 
   state("responses", responses)
+
+incrementRouteCounter = (route) ->
+  if rl = route and route.log
+    numResponses = rl.get("numResponses")
+    rl.set "numResponses", numResponses + 1
 
 startXhrServer = (cy, state, config) ->
   logs = {}
@@ -88,9 +101,7 @@ startXhrServer = (cy, state, config) ->
 
       setRequest(state, xhr, alias)
 
-      if rl = route and route.log
-        numResponses = rl.get("numResponses")
-        rl.set "numResponses", numResponses + 1
+      incrementRouteCounter(route)
 
       logs[xhr.id] = log = Cypress.log({
         message:   ""
@@ -342,6 +353,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             _.extend o, args[3]
 
         if _.isString(o.method)
+          # normalize HTTP method names
           o.method = o.method.toUpperCase()
 
         _.defaults(options, defaults)
@@ -370,18 +382,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if alias = cy.getNextAlias()
           options.alias = alias
 
-        if _.isFunction(o.response)
-          getResponse = =>
-            o.response.call(state("runnable").ctx, options)
+        # Disable client-side response get
+        # We should ask for response when the request happens
+        # if _.isFunction(o.response)
+        #   getResponse = =>
+        #     o.response.call(state("runnable").ctx, options)
 
-          ## allow route to return a promise
-          Promise.try(getResponse)
-          .then (resp) ->
-            options.response = resp
+        #   ## allow route to return a promise
+        #   Promise.try(getResponse)
+        #   .then (resp) ->
+        #     options.response = resp
 
-            route()
-        else
-          route()
+        #     route()
+        # else
+        #   route()
+
+        route()
 
       route = ->
         ## if our response is a string and
@@ -401,15 +417,112 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           alias:    options.alias
           isStubbed: options.response?
           numResponses: 0
-          consoleProps: ->
+          consoleProps: -> {
             Method:   options.method
             URL:      getUrl(options)
             Status:   options.status
             Response: options.response
             Alias:    options.alias
+          }
         })
 
-        return getXhrServer(state).route(options)
+        # special serialization rules for route callbacks
+        # the server should be able to trigger these functions
+        # using message passing proxy
+        prepareCallback = (value) ->
+          if _.isFunction(value)
+            # TODO need general storage for functions to be called
+            id = '__message:' + _.random(0, 1e+6)
+            state("runnable")[id] = value
+            id
+          else
+            value
+
+        options.delay = prepareCallback(options.delay)
+        options.headers = prepareCallback(options.headers)
+        options.status = prepareCallback(options.status)
+        options.response = prepareCallback(options.response)
+
+        # dummy XHR object for storage
+        xhr = {id: _.random(1, 1e+6)}
+        setRequest(state, xhr, options.alias)
+
+        # log individual requests
+        options.onLogResponse = prepareCallback((res) ->
+          console.log('route log response', res)
+          incrementRouteCounter(options)
+
+          console.log('setting log snapshot and response')
+          xhr.response = res
+          setResponse(state, xhr)
+
+          routeLog = Cypress.log({
+            message:   ""
+            name:      "xhr"
+            displayName: getDisplayName(options)
+            alias:     options.alias
+            aliasType: "route"
+            type:      "parent"
+            event:     true
+            consoleProps: =>
+              consoleObj = {
+                Alias:         options.alias
+                Method:        options.method
+                URL:           options.url
+                "Matched URL": route?.url
+                Status:        options.statusMessage
+                Duration:      options.duration
+                "Stubbed":     if options.response? then "Yes" else "No"
+                Request:       options.request
+                Response:      res
+                # TODO do we need original XHR object or is it
+                # even possible for all requests?
+                # XHR:           {foo: "bar"}
+              }
+
+              if route and route.is404
+                consoleObj.Note = "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
+
+              consoleObj.groups = ->
+                [
+                  {
+                    name: "Initiator"
+                    # items: [stack]
+                    label: false
+                  }
+                ]
+
+              consoleObj
+            renderProps: ->
+              status = 200
+              # status = switch
+              #   when xhr.aborted
+              #     indicator = "aborted"
+              #     "(aborted)"
+              #   when xhr.status > 0
+              #     xhr.status
+              #   else
+              #     indicator = "pending"
+              #     "---"
+
+              # indicator ?= if /^2/.test(status) then "successful" else "bad"
+              indicator = "successful"
+
+              {
+                message: "#{options.method} #{status} #{_.truncate(stripOrigin(options.url), { length: 20 })}"
+                indicator: indicator
+              }
+          })
+
+          routeLog.snapshot("request")
+          routeLog.snapshot("response").end()
+        )
+
+        console.log('XHR route options', options)
+
+        return Cypress.backend("set:traffic:routing:add:rule", options)
+        .then () ->
+          getXhrServer(state).route(options)
 
       if _.isFunction(args[0])
         getArgs = =>

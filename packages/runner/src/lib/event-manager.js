@@ -58,6 +58,20 @@ const eventManager = {
         case 'change:cookie':
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
           break
+        case 'set:traffic:routing:delay:async':
+          {
+            // will call unique function
+            // TODO verify all arguments
+            const arg0 = _.omit(data, ['functionId', 'responseId'])
+            const fn = Cypress.state('runnable')[data.functionId]
+            if (_.isFunction(fn) && _.isString(data.responseId)) {
+              // TODO handle thenable functions
+              const delayMs = fn(arg0)
+              Cypress.backend(data.responseId, delayMs)
+            }
+            // how to handle missing data / errors?
+          }
+          break
         default:
           break
       }

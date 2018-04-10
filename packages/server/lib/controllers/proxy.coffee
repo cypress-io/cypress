@@ -1,3 +1,5 @@
+la            = require("lazy-ass")
+check         = require("check-more-types")
 _             = require("lodash")
 zlib          = require("zlib")
 concat        = require("concat-stream")
@@ -17,6 +19,9 @@ redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
 
+isValidStatus = (s) ->
+  _.isFinite(s) and s >= 100 and s < 600
+
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
   ## is not sent correctly
@@ -33,10 +38,11 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request) ->
+  handle: (req, res, config, getRemoteState, request, trafficRules) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
+      method: req.method
       url: req.url
       proxiedUrl: req.proxiedUrl
       cookies: req.cookies
@@ -75,10 +81,100 @@ module.exports = {
 
         return res.status(503).end()
 
+    if rule = trafficRules.getRule(req)
+      return @applyRule(rule, req, res)
+
     thr = through (d) -> @queue(d)
 
     @getHttpContent(thr, req, res, remoteState, config, request)
     .pipe(res)
+
+  _isMessageMethod: (s) ->
+    _.isString(s) && s.startsWith("__message:")
+
+  applyRule: (rule, req, res) ->
+    ## TODO: look at controllers/xhrs for some current implementation details
+    # res.setHeaders(rule.headers)
+    # res.send(rule.body)
+    debug("applying custom rule to %s %s", req.method, req.url)
+    debug("rule", rule)
+
+    la(check.fn(rule.toRunner), "missing a way to communicate with the runner", rule)
+
+    # TODO pass request object better
+    reqProps = _.pick(req, ['method', 'url'])
+    debug("request properties %j", reqProps)
+
+    status = rule.status
+    response = rule.response
+
+    Promise.resolve()
+    .then =>
+      if not rule.headers
+        return
+
+      if @_isMessageMethod(rule.headers)
+        debug("headers should be set by the client in function", rule.headers)
+        rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.headers, reqProps)
+        .then (headers) ->
+          debug("client says to set headers %j", headers)
+          res.set(headers)
+      else
+        res.set(rule.headers)
+
+    .then =>
+      if @_isMessageMethod(rule.status)
+        debug("status should be set by the client in function", rule.headers)
+        rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.status, reqProps)
+        .then (s) ->
+          debug("client says to set status %j", s)
+          if not isValidStatus(s)
+            console.error("invalid status code", s)
+            s = 503
+          status = s
+
+    .then =>
+      if @_isMessageMethod(rule.delay)
+        debug("delay should be computed by the client in function", rule.delay)
+        delayThen = rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.delay, reqProps)
+        .then (delay) ->
+          debug("client says delay by %dms", delay)
+          Promise.delay(delay)
+      else
+        la(check.number(rule.delay), "expected rule to have delay number", rule)
+        debug("delaying response by %dms", rule.delay)
+        delayThen = Promise.delay(rule.delay)
+
+      delayThen
+
+    .then =>
+      if @_isMessageMethod(rule.response)
+        return rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.response, reqProps)
+        .then (r) ->
+          debug("client response", r)
+          response = r
+
+    .then ->
+      if response
+        res.status(status).send(response)
+      else
+        # TODO allow forwarding of the request
+        res.status(status).end()
+
+    .then =>
+      console.log('sending result back')
+      if @_isMessageMethod(rule.onLogResponse)
+        return rule.toRunner("automation:push:message",
+          "set:traffic:routing:delay:async", rule.onLogResponse, {
+            status,
+            body: response
+          })
+    .then ->
+      console.log('all done')
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
