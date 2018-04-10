@@ -286,6 +286,7 @@ class Server
     # }
 
     props = _.extend({},  {
+      auth:       @_remoteAuth
       props:      @_remoteProps
       origin:     @_remoteOrigin
       strategy:   @_remoteStrategy
@@ -302,7 +303,12 @@ class Server
     @_request.send(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
-    debug("resolving url %s", urlStr)
+    debug("resolving visit", {
+      url: urlStr
+      headers
+      options
+    })
+
     request = @_request
 
     handlingLocalFile = false
@@ -341,7 +347,7 @@ class Server
 
           @_remoteVisitingUrl = true
 
-          @_onDomainSet(urlStr)
+          @_onDomainSet(urlStr, options)
 
           ## TODO: instead of joining remoteOrigin here
           ## we can simply join our fileServer origin
@@ -412,7 +418,7 @@ class Server
               if isOk and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
-                @_onDomainSet(newUrl) if not handlingLocalFile
+                @_onDomainSet(newUrl, options) if not handlingLocalFile
 
                 buffers.set({
                   url: newUrl
@@ -431,6 +437,7 @@ class Server
           .pipe(stream.PassThrough())
 
         restorePreviousState = =>
+          @_remoteAuth         = previousState.auth
           @_remoteProps        = previousState.props
           @_remoteOrigin       = previousState.origin
           @_remoteStrategy     = previousState.strategy
@@ -442,6 +449,7 @@ class Server
         request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
+          auth: options.auth
           gzip: false
           url: urlFile ? urlStr
           headers: {
@@ -463,10 +471,13 @@ class Server
         .then(handleReqStream)
         .catch(error)
 
-  _onDomainSet: (fullyQualifiedUrl) ->
-    debug("domain set for %s", fullyQualifiedUrl)
-    l = (type, url) ->
-      debug("Setting %s %s", type, url)
+  _onDomainSet: (fullyQualifiedUrl, options = {}) ->
+    l = (type, val) ->
+      debug("Setting", type, val)
+
+    @_remoteAuth = options.auth
+
+    l("remoteAuth", @_remoteAuth)
 
     ## if this isn't a fully qualified url
     ## or if this came to us as <root> in our tests

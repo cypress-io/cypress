@@ -35,7 +35,7 @@ describe "src/cy/commands/exec", ->
 
     it "really works", ->
       # output is trimmed
-      cy.exec("echo foo").its("stdout").should("eq", "foo")
+      cy.exec("echo foo", { timeout: 20000 }).its("stdout").should("eq", "foo")
 
     describe ".log", ->
       beforeEach ->

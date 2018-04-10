@@ -85,7 +85,7 @@ class Project extends EE
     .then (cfg) =>
       @_initPlugins(cfg, options)
       .then (modifiedCfg) ->
-        debug("plugin config yielded", modifiedCfg)
+        debug("plugin config yielded:", modifiedCfg)
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
@@ -103,6 +103,8 @@ class Project extends EE
         ## store the cfg from
         ## opening the server
         @cfg = cfg
+
+        debug("project config: %o", _.omit(cfg, "resolved"))
 
         if warning
           options.onWarning(warning)
@@ -202,6 +204,8 @@ class Project extends EE
     ## watch anything
     return if not onSettingsChanged
 
+    debug("watch settings files")
+
     obj = {
       onChange: (filePath, stats) =>
         ## dont fire change events if we generated
@@ -215,18 +219,32 @@ class Project extends EE
     }
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
+    @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
     @watchSettings(options.onSettingsChanged)
 
+    { reporter, projectRoot } = cfg
+
     ## if we've passed down reporter
     ## then record these via mocha reporter
     if cfg.report
-      if not Reporter.isValidReporterName(cfg.reporter, cfg.projectRoot)
-        paths = Reporter.getSearchPathsForReporter(cfg.reporter, cfg.projectRoot)
-        errors.throw("INVALID_REPORTER_NAME", cfg.reporter, paths)
+      try
+        Reporter.loadReporter(reporter, projectRoot)
+      catch err
+        paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
-      reporter = Reporter.create(cfg.reporter, cfg.reporterOptions, cfg.projectRoot)
+        ## only include the message if this is the standard MODULE_NOT_FOUND
+        ## else include the whole stack
+        errorMsg = if err.code is "MODULE_NOT_FOUND" then err.message else err.stack
+
+        errors.throw("INVALID_REPORTER_NAME", {
+          paths
+          error: errorMsg
+          name: reporter
+        })
+
+      reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
 
     @automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 

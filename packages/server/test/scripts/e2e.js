@@ -6,12 +6,17 @@ const _ = require('lodash')
 const cp = require('child_process')
 const minimist = require('minimist')
 const Promise = require('bluebird')
+const terminalBanner = require('terminal-banner').terminalBanner
 
 const humanTime = require('../../lib/util/human_time.coffee')
 
 const glob = Promise.promisify(require('glob'))
 
 const options = minimist(process.argv.slice(2))
+
+if (options.browser) {
+  process.env.BROWSER = options.browser
+}
 
 const started = new Date()
 
@@ -51,7 +56,7 @@ glob('test/e2e/**/*')
 })
 .tap(console.log)
 .each((spec = []) => {
-  console.log('Running spec', spec)
+  terminalBanner(`Running spec ${spec}`, '*')
 
   const args = [
     './test/scripts/run.js',

@@ -477,7 +477,7 @@ describe "src/cy/commands/querying", ->
       cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
 
-    it "FLAKY retries finding elements until something is found", ->
+    it.skip "FLAKY retries finding elements until something is found", ->
       missingEl = $("<div />", id: "missing-el")
 
       ## wait until we're ALMOST about to time out before
@@ -564,6 +564,9 @@ describe "src/cy/commands/querying", ->
           .get("@foo").should("contain", "asdf")
 
     describe "should('exist')", ->
+      beforeEach ->
+        Cypress.config("defaultCommandTimeout", 1000)
+
       it "waits until button exists", ->
         cy.on "command:retry", _.after 3, =>
           cy.$$("body").append $("<div id='missing-el'>missing el</div>")
@@ -766,7 +769,7 @@ describe "src/cy/commands/querying", ->
           .visit("http://localhost:3500/fixtures/jquery.html")
           .server()
           .route(/users/, {}).as("getUsers")
-          .window().then (win) ->
+          .window().then { timeout: 2000 }, (win) ->
             win.$.get("/users")
           .get("@getUsers").then ->
             expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
@@ -856,7 +859,7 @@ describe "src/cy/commands/querying", ->
           .server()
           .route(/users/, {}).as("getUsers")
           .visit("http://localhost:3500/fixtures/jquery.html")
-          .window().then (win) ->
+          .window().then { timeout: 2000 }, (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
@@ -867,7 +870,7 @@ describe "src/cy/commands/querying", ->
 
     describe "alias references", ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 200)
+        Cypress.config("defaultCommandTimeout", 100)
 
       it "can get alias primitives", ->
         cy
@@ -910,7 +913,7 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .visit("http://localhost:3500/fixtures/jquery.html")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               win.$.get("/users")
             .get("@getUsers").then (xhr) ->
               expect(xhr.url).to.include "/users"
@@ -928,7 +931,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -943,7 +946,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -956,7 +959,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -969,7 +972,7 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .visit("http://localhost:3500/fixtures/jquery.html")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -1419,10 +1422,16 @@ describe "src/cy/commands/querying", ->
 
     describe "special characters", ->
       _.each "' \" [ ] { } . @ # $ % ^ & * ( ) , ; :".split(" "), (char) ->
-        it "finds content with character: #{char}", ->
+        it "finds content by string with character: #{char}", ->
           span = $("<span>special char #{char} content</span>").appendTo cy.$$("body")
 
           cy.contains("span", char).then ($span) ->
+            expect($span.get(0)).to.eq span.get(0)
+
+        it "finds content by regex with character: #{char}", ->
+          span = $("<span>special char #{char} content</span>").appendTo cy.$$("body")
+
+          cy.contains("span", new RegExp(_.escapeRegExp(char))).then ($span) ->
             expect($span.get(0)).to.eq span.get(0)
 
     describe ".log", ->

@@ -17,6 +17,7 @@ pathHelpers = require("./util/path_helpers")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 oneOrMoreSpacesRe = /\s+/
+everythingAfterFirstEqualRe = /=(.+)/
 
 toWords = (str) ->
   str.trim().split(oneOrMoreSpacesRe)
@@ -32,7 +33,8 @@ folders = toWords """
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
-  chromeWebSecurity               integrationFolder
+  chromeWebSecurity
+  modifyObstructiveCode           integrationFolder
   env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
@@ -42,8 +44,9 @@ configKeys = toWords """
   screenshotOnHeadlessFailure     defaultCommandTimeout
   testFiles                       execTimeout
   trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  userAgent                       requestTimeout
-  viewportWidth                   responseTimeout
+  blacklistHosts                  requestTimeout
+  userAgent                       responseTimeout
+  viewportWidth
   viewportHeight
   videoRecording
   videoCompression
@@ -51,6 +54,27 @@ configKeys = toWords """
   watchForFileChanges
   waitForAnimations
 """
+
+toArrayFromPipes = (str) ->
+  if _.isArray(str)
+    return str
+
+  [].concat(str.split('|'))
+
+toObjectFromPipes = (str) ->
+  if _.isObject(str)
+    return str
+
+  ## convert foo=bar|version=1.2.3 to
+  ## {foo: 'bar', version: '1.2.3'}
+  _
+  .chain(str)
+  .split("|")
+  .map (pair) ->
+    pair.split("=")
+  .fromPairs()
+  .mapValues(coerce)
+  .value()
 
 defaults = {
   port:                          null
@@ -77,7 +101,8 @@ defaults = {
   execTimeout:                   60000
   videoRecording:                true
   videoCompression:              32
-  videoUploadOnPasses:          true
+  videoUploadOnPasses:           true
+  modifyObstructiveCode:         true
   chromeWebSecurity:             true
   waitForAnimations:             true
   animationDistanceThreshold:    5
@@ -105,6 +130,7 @@ validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
   blacklistHosts: v.isStringOrArrayOfStrings
+  modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject
@@ -212,6 +238,12 @@ module.exports = {
     config.env = @parseEnv(config, options.env, resolved)
     config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
+
+    if hosts = config.hosts
+      config.hosts = toObjectFromPipes(hosts)
+
+    if blacklistHosts = config.blacklistHosts
+      config.blacklistHosts = toArrayFromPipes(blacklistHosts)
 
     ## when headless
     if config.isTextTerminal

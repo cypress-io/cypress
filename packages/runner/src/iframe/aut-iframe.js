@@ -255,7 +255,9 @@ export default class AutIframe {
 
     this._highlightedEl = el
 
-    const selector = dom.getBestSelector(el)
+    const Cypress = eventManager.getCypress()
+
+    const selector = Cypress.SelectorPlayground.getSelector($el)
 
     dom.addOrUpdateSelectorPlaygroundHighlight({
       $el,

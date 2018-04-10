@@ -15,7 +15,7 @@ describe "e2e caught and uncaught hooks errors", ->
     e2e.exec(@, {
       spec: "hook_caught_error_failing_spec.coffee"
       snapshot: true
-      expectedExitCode: 1
+      expectedExitCode: 3
     })
 
   it "failing2", ->

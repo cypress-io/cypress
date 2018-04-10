@@ -49,6 +49,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
   3) stdout_failing_spec passing hook is failing:
      CypressError: cy.visit() failed trying to load:
@@ -76,13 +77,14 @@ The internal Cypress web server responded with:
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
 
 
 
   (Tests Finished)
 
-  - Tests:           4
+  - Tests:           5
   - Passes:          2
   - Failures:        3
   - Pending:         0
@@ -198,3 +200,4 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
+

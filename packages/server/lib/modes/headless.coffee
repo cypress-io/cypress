@@ -24,21 +24,19 @@ Windows    = require("../gui/windows")
 
 fs = Promise.promisifyAll(fs)
 
-TITLE_SEPARATOR = " /// "
-
 haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## if we have a project id
   ## and we have a key
   ## and (record or ci) hasn't been set to true or false
   (projectId and options.key) and (_.isUndefined(options.record) and _.isUndefined(options.ci))
 
-collectTestResults = (obj) ->
+collectTestResults = (obj = {}) ->
   {
-    tests:       obj.tests
-    passes:      obj.passes
-    pending:     obj.pending
-    failures:    obj.failures
-    duration:    humanTime(obj.duration)
+    tests:       _.get(obj, 'stats.tests')
+    passes:      _.get(obj, 'stats.passes')
+    pending:     _.get(obj, 'stats.pending')
+    failures:    _.get(obj, 'stats.failures')
+    duration:    humanTime(_.get(obj, 'stats.duration'))
     screenshots: obj.screenshots and obj.screenshots.length
     video:       !!obj.video
     version:     pkg.version
@@ -155,6 +153,8 @@ module.exports = {
       console.log(format(screenshot))
 
   postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
+    debug("ending the video recording:", name)
+
     ## once this ended promises resolves
     ## then begin processing the file
     end()
@@ -239,13 +239,14 @@ module.exports = {
         ## early too: (Ended Early: true)
         ## in the stats
         obj = {
-          error:        errors.stripAnsi(errMsg)
-          failures:     1
-          tests:        0
-          passes:       0
-          pending:      0
-          duration:     0
-          failingTests: []
+          error: errors.stripAnsi(errMsg)
+          stats: {
+            failures:     1
+            tests:        0
+            passes:       0
+            pending:      0
+            duration:     0
+          }
         }
 
         resolve(obj)
@@ -317,6 +318,9 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
+      ## TODO: fix this - no need to normalize here
+      ## just for displaying the stats. we are duplicating
+      ## logic here since its just based on 'obj'
       testResults = collectTestResults(obj)
 
       writeOutput = ->
@@ -325,7 +329,7 @@ module.exports = {
 
         debug("saving results as %s", outputPath)
 
-        fs.outputJsonAsync(outputPath, testResults)
+        fs.outputJsonAsync(outputPath, obj)
 
       finish = ->
         writeOutput()
@@ -340,16 +344,32 @@ module.exports = {
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
 
-      ft = obj.failingTests
+      { tests, failures } = obj
 
-      hasFailingTests = ft and ft.length
+      ## TODO: this is a interstitial modification to keep
+      ## the logic the same but incrementally prepare for
+      ## sending all the tests
+      failingTests = _.filter(tests, { state: "failed" })
 
-      if hasFailingTests
-        obj.failingTests = Reporter.setVideoTimestamp(started, ft)
+      hasFailingTests = failures > 0 and failingTests and failingTests.length
+
+      ## if we have a video recording
+      if started and tests and tests.length
+        ## always set the video timestamp on tests
+        obj.tests = Reporter.setVideoTimestamp(started, tests)
+
+      ## TODO: temporary - remove later
+      if started and failingTests and failingTests.length
+        obj.failingTests = Reporter.setVideoTimestamp(started, failingTests)
 
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures
-      suv = obj.shouldUploadVideo = !!(videoUploadOnPasses is true or hasFailingTests)
+      suv = !!(videoUploadOnPasses is true or hasFailingTests)
+
+      ## TODO: remove this later
+      obj.shouldUploadVideo = suv
+
+      debug("attempting to close the browser")
 
       ## always close the browser now as opposed to letting
       ## it exit naturally with the parent process due to
@@ -381,7 +401,7 @@ module.exports = {
       title:      data.name ## TODO: rename this property
       # name:      data.name
       testId:    data.testId
-      testTitle: data.titles.join(TITLE_SEPARATOR)
+      testTitle: data.titles
       path:      resp.path
       height:    resp.height
       width:     resp.width
@@ -466,7 +486,7 @@ module.exports = {
       Promise.resolve(start)
       .then (started) =>
         Promise.props({
-          stats:      @waitForTestsToFinishRunning({
+          results: @waitForTestsToFinishRunning({
             exit:                 options.exit
             headed:               options.headed
             project:              options.project
@@ -539,7 +559,7 @@ module.exports = {
               browser:              options.browser
               outputPath:           options.outputPath
             })
-          .get("stats")
+          .get("results")
           .finally =>
             @copy(config.videosFolder, config.screenshotsFolder)
             .then =>

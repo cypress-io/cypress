@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "npm run test-unit",
-    "test-unit": "npm run dtslint && bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
+    "test-unit": "npm run dtslint && npm run unit",
     "test-watch": "bin-up mocha --watch",
     "test-dependencies": "bin-up deps-ok && dependency-check . --no-dev",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
@@ -21,7 +21,8 @@
     "build": "node ./scripts/build.js",
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
+    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "types": "types",
   "dependencies": {
@@ -85,5 +86,16 @@
     "lib",
     "index.js",
     "types/*.d.ts"
+  ],
+  "keywords": [
+    "browser",
+    "cypress",
+    "automation",
+    "mocks",
+    "test",
+    "testing",
+    "runner",
+    "spies",
+    "stubs"
   ]
 }

@@ -11,7 +11,7 @@ listPaths = (paths) ->
 API = {
   # forms well-formatted user-friendly error for most common
   # errors Cypress can encounter
-  getMsgByType: (type, arg1, arg2) ->
+  getMsgByType: (type, arg1 = {}, arg2 = {}) ->
     switch type
       when "CANNOT_TRASH_ASSETS"
         """
@@ -326,11 +326,15 @@ API = {
         """
       when "INVALID_REPORTER_NAME"
         """
-        Could not load reporter by name: #{chalk.yellow(arg1)}
+        Could not load reporter by name: #{chalk.yellow(arg1.name)}
 
         We searched for the reporter in these paths:
 
-        #{listPaths(arg2).join("\n")}
+        #{listPaths(arg1.paths).join("\n")}
+
+        The error we received was:
+
+        #{chalk.yellow(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters
         """

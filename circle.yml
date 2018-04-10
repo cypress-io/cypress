@@ -2,20 +2,12 @@ version: 2
 
 defaults: &defaults
   parallelism: 1
-  working_directory: ~/cypress-monorepo
+  working_directory: ~/cypress
   docker:
     # the Docker image with Cypress dependencies and Chrome browser
-    - image: cypress/browsers:chrome62
+    - image: cypress/browsers:chrome64
       environment:
-        ## this enables colors + fixes failing unit tests
-        TERM: xterm
-
         CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
-
-        npm_config_loglevel: warn
-        # even when running as non-root user
-        # need to set unsafe perm to be able to do `npm postinstall`
-        npm_config_unsafe-perm: true
 
 jobs:
   ## code checkout and NPM installs
@@ -24,8 +16,19 @@ jobs:
     steps:
       - checkout
 
-      # print global NPM cache path
-      - run: echo $(npm -g bin)
+      - run:
+          name: Print working folder
+          command: echo $PWD
+      - run:
+          name: print global NPM cache path
+          command: echo $(npm -g bin)
+      - run:
+          name: print Node version
+          command: node -v
+      - run:
+          name: print NPM version
+          command: npm -v
+      - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node
       ## else colors (and tests) will fail
@@ -167,15 +170,15 @@ jobs:
       ## hmm, do not see a good way to cache it, since all code
       ## might change
       - save_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}-{{ checksum "circle.yml" }}
           paths:
-            - /home/person/cypress-monorepo
+            - /root/cypress
 
   lint:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run: npm run lint
       - run: npm run all lint
 
@@ -184,7 +187,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       # make sure mocha runs
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
@@ -201,88 +204,88 @@ jobs:
       - run: npm run all test -- --package socket
       - run: npm run all test -- --package static
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-unit-tests":
     <<: *defaults
     parallelism: 2
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-unit -- --package server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-integration-tests":
     <<: *defaults
     parallelism: 2
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run: npm run all test-integration -- --package server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-1":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 0
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-2":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 1
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-3":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 2
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-4":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 3
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-5":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run test-e2e -- --parallel 5 --index 4
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "driver-integration-tests-1":
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           background: true
@@ -294,7 +297,7 @@ jobs:
           command: npm run cypress:run -- --parallel 5 --index 0
           working_directory: packages/driver
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -302,7 +305,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -314,7 +317,7 @@ jobs:
           command: npm run cypress:run -- --parallel 5 --index 1
           working_directory: packages/driver
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -322,7 +325,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -334,7 +337,7 @@ jobs:
           command: npm run cypress:run -- --parallel 5 --index 2
           working_directory: packages/driver
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -342,7 +345,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -354,7 +357,7 @@ jobs:
           command: npm run cypress:run -- --parallel 5 --index 3
           working_directory: packages/driver
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -362,7 +365,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm start
           working_directory: packages/driver
@@ -374,7 +377,7 @@ jobs:
           command: npm run cypress:run -- --parallel 5 --index 4
           working_directory: packages/driver
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -382,7 +385,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
@@ -390,7 +393,7 @@ jobs:
           command: npm run cypress:run -- --parallel 3 --index 0
           working_directory: packages/desktop-gui
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -398,7 +401,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
@@ -406,7 +409,7 @@ jobs:
           command: npm run cypress:run -- --parallel 3 --index 1
           working_directory: packages/desktop-gui
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -414,7 +417,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
@@ -422,7 +425,7 @@ jobs:
           command: npm run cypress:run -- --parallel 3 --index 2
           working_directory: packages/desktop-gui
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -430,7 +433,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -439,7 +442,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run: $(npm bin)/print-arch
       - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform linux
@@ -465,7 +468,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
@@ -491,7 +494,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
@@ -507,7 +510,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
           name: bump NPM version
           command: npm --no-git-tag-version version $NEXT_DEV_VERSION
@@ -549,7 +552,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la /tmp/urls
@@ -583,7 +586,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - attach_workspace:
           at: /tmp/urls
       # make sure we have cypress.zip received
@@ -613,7 +616,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+          key: cypress-{{ .Branch }}-{{ .Revision }}
       - attach_workspace:
           at: /tmp/urls
       # make sure we have the binary
@@ -715,6 +718,7 @@ workflows:
             branches:
               only:
                 - develop
+                - fix-engines-1373
           requires:
             - build
       - build-binary:
@@ -722,6 +726,7 @@ workflows:
             branches:
               only:
                 - develop
+                - fix-engines-1373
           requires:
             - build
       - test-next-version:
@@ -729,6 +734,7 @@ workflows:
             branches:
               only:
                 - develop
+                - fix-engines-1373
           requires:
             - build-npm-package
             - build-binary
@@ -745,6 +751,7 @@ workflows:
             branches:
               only:
                 - develop
+                - issue-895
           requires:
             - build-npm-package
             - build-binary

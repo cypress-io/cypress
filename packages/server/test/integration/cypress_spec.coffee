@@ -69,6 +69,8 @@ TYPICAL_BROWSERS = [
 ]
 
 describe "lib/cypress", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     @timeout(5000)
 
@@ -228,7 +230,7 @@ describe "lib/cypress", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "listenForProjectEnd").resolves({failures: 0})
+      @sandbox.stub(headless, "listenForProjectEnd").resolves({stats: {failures: 0} })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
 
@@ -239,7 +241,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      headless.listenForProjectEnd.resolves({failures: 10})
+      headless.listenForProjectEnd.resolves({stats: {failures: 10} })
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
@@ -276,14 +278,16 @@ describe "lib/cypress", ->
         ## still not projects
         expect(projects.length).to.eq(0)
 
-    it "runs project by specific spec and exits with status 0", ->
-      cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+    it "runs project by relative spec and exits with status 0", ->
+      relativePath = path.relative(cwd(), @todosPath)
+
+      cypress.start(["--run-project=#{@todosPath}", "--spec=#{relativePath}/tests/test2.coffee"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
-      cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"])
+      cypress.start(["--run-project=#{@idsPath}", "--spec=#{@idsPath}/cypress/integration/bar.js", "--config", "port=2020"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:2020/__/#/tests/integration/bar.js"})
         @expectExitWith(0)
@@ -457,14 +461,15 @@ describe "lib/cypress", ->
 
     it "writes json results when passed outputPath", ->
       obj = {
-        tests:       1
-        passes:      2
-        pending:     3
-        failures:    4
-        duration:    5
-        video:       6
-        version:     7
-        screenshots: []
+        stats: {
+          tests:       1
+          passes:      2
+          pending:     3
+          failures:    4
+          duration:    5
+        }
+        tests: []
+        hooks: []
       }
 
       outputPath = "./.results/results.json"
@@ -477,10 +482,23 @@ describe "lib/cypress", ->
 
         fs.readJsonAsync(cwd(outputPath))
         .then (json) ->
-          expect(json).to.deep.eq(
-            headless.collectTestResults(obj)
-          )
-      .finally =>
+          expect(json.video).to.be.a("string")
+
+          expect(json).to.deep.eq({
+            stats: {
+              tests:       1
+              passes:      2
+              pending:     3
+              failures:    4
+              duration:    5
+            }
+            tests: []
+            hooks: []
+            screenshots: []
+            shouldUploadVideo: true
+            video: json.video
+          })
+      .finally ->
         fs.removeAsync(cwd(path.dirname(outputPath)))
 
     it "logs error when supportFile doesn't exist", ->
@@ -519,7 +537,7 @@ describe "lib/cypress", ->
     it "logs error and exits when spec file was specified and does not exist", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"])
       .then =>
-        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
+        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{cwd()}/path/to/spec")
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"])
@@ -559,6 +577,11 @@ describe "lib/cypress", ->
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+      if process.env.CI
+        ## Gleb: disabling this because Node 8 docker image runs as root
+        ## which makes accessing everything possible.
+        return
+
       permissionsPath = path.resolve("./permissions")
 
       cypressJson = path.join(permissionsPath, "cypress.json")
@@ -596,7 +619,7 @@ describe "lib/cypress", ->
         fs.unlink(statePath)
 
       it "saves project state", ->
-        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
         .then =>
           @expectExitWith(0)
         .then ->
@@ -678,6 +701,11 @@ describe "lib/cypress", ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
+        ee.webContents = {
+          session: {
+            clearCache: @sandbox.stub().yieldsAsync()
+          }
+        }
 
         @sandbox.stub(utils, "launch").resolves(ee)
         @sandbox.stub(Windows, "create").returns(ee)
@@ -696,7 +724,7 @@ describe "lib/cypress", ->
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(6)
+            expect(browserArgs).to.have.length(7)
 
             expect(browserArgs.slice(0, 4)).to.deep.eq([
               "chrome", "foo", "bar", "baz"
@@ -719,7 +747,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        headless.listenForProjectEnd.resolves({failures: 0})
+        headless.listenForProjectEnd.resolves({stats: {failures: 0} })
 
       it "can change the default port to 5555", ->
         listen = @sandbox.spy(http.Server.prototype, "listen")
@@ -749,7 +777,7 @@ describe "lib/cypress", ->
 
         process.env = _.omit(process.env, "CYPRESS_DEBUG")
 
-        headless.listenForProjectEnd.resolves({failures: 0})
+        headless.listenForProjectEnd.resolves({stats: {failures: 0} })
 
       afterEach ->
         process.env = @env
@@ -826,11 +854,13 @@ describe "lib/cypress", ->
       @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
+        stats: {
+          tests: 1
+          passes: 2
+          failures: 3
+          pending: 4
+          duration: 5
+        }
         video: true
         shouldUploadVideo: true
         screenshots: []
@@ -850,10 +880,10 @@ describe "lib/cypress", ->
     it "runs project in ci and exits with number of failures", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
 
       @createInstance = @sandbox.stub(api, "createInstance").withArgs({
-        buildId: "build-id-123"
+        runId: "run-id-123"
         browser: "electron"
         spec: undefined
       }).resolves("instance-id-123")
@@ -898,10 +928,10 @@ describe "lib/cypress", ->
       ## it to return something we specify
       @sandbox.stub(Project.prototype, "ensureSpecExists").resolves("#{@todosPath}/test2.coffee")
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
 
       @sandbox.stub(api, "createInstance").withArgs({
-        buildId: "build-id-123"
+        runId: "run-id-123"
         browser: "chrome"
         spec: spec
       }).resolves("instance-id-123")
@@ -944,7 +974,7 @@ describe "lib/cypress", ->
     it "still records even with old --ci option", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -955,7 +985,7 @@ describe "lib/cypress", ->
     it "logs warning when using deprecated --ci arg and no env var", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -968,7 +998,7 @@ describe "lib/cypress", ->
     it "logs ONLY CLI warning when using older version of CLI when using deprecated --ci", ->
       @setup()
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -982,7 +1012,7 @@ describe "lib/cypress", ->
 
       process.env.CYPRESS_CI_KEY = "asdf123foobarbaz"
 
-      @createRun.resolves("build-id-123")
+      @createRun.resolves("run-id-123")
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
@@ -1118,8 +1148,10 @@ describe "lib/cypress", ->
       .then ->
         expect(headed.ready).to.be.calledWithMatch({
           updating: true
-          port: 2121
-          pageLoadTimeout: 1000
+          config: {
+            port: 2121
+            pageLoadTimeout: 1000
+          }
         })
 
     it "passes options to Events.start", ->
@@ -1127,7 +1159,10 @@ describe "lib/cypress", ->
       .then ->
         expect(Events.start).to.be.calledWithMatch({
           port: 2121,
-          pageLoadTimeout: 1000
+          config: {
+            pageLoadTimeout: 1000
+            port: 2121
+          }
         })
 
     it "passes filtered options to Project#open and sets cli config", ->

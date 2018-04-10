@@ -15,6 +15,7 @@ const cypressModuleApi = {
 
   run (options = {}) {
     options = util.normalizeModuleOptions(options)
+
     return tmp.fileAsync()
     .then((outputPath) => {
       options.outputPath = outputPath

@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const path = require('path')
 const commander = require('commander')
 const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
@@ -16,10 +15,6 @@ const parseOpts = (opts) => {
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed',
     'group', 'groupId', 'global', 'dev')
-
-  if (opts.project) {
-    opts.project = path.resolve(opts.project)
-  }
 
   debug('parsed cli options', opts)
 

@@ -120,9 +120,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         obj = {}
 
         if aliasType is "dom"
-          _.extend obj,
+          _.extend(obj, {
             $el: value
             numRetries: options._retries
+          })
 
         obj.consoleProps = ->
           key = if aliasObj then "Alias" else "Selector"
@@ -130,17 +131,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           switch aliasType
             when "dom"
-              _.extend consoleProps,
+              _.extend(consoleProps, {
                 Yielded: $dom.getElements(value)
                 Elements: value?.length
+              })
 
             when "primitive"
-              _.extend consoleProps,
+              _.extend(consoleProps, {
                 Yielded: value
+              })
 
             when "route"
-              _.extend consoleProps,
+              _.extend(consoleProps, {
                 Yielded: value
+              })
 
           return consoleProps
 
@@ -203,7 +207,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             else
               ## log as primitive
               log(subject, "primitive")
-              return subject
+
+              do verifyAssertions = =>
+                cy.verifyUpcomingAssertions(subject, options, {
+                  ensureExistenceFor: false
+                  onRetry: verifyAssertions
+                })
 
       start("dom")
 

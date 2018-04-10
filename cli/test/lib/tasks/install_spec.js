@@ -23,6 +23,8 @@ const downloadDestination = {
 }
 
 describe('install', function () {
+  require('mocha-banner').register()
+
   beforeEach(function () {
     this.stdout = stdout.capture()
 

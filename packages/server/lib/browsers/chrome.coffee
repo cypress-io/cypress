@@ -41,17 +41,17 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
 
-  ## needed for https://github.com/cypress-io/cypress/issues/573
-  ## list of flags here: https://cs.chromium.org/chromium/src/third_party/WebKit/Source/platform/runtime_enabled_features.json5
-  "--disable-blink-features=BlockCredentialedSubresources"
-
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
   "--metrics-recording-only"
   "--disable-prompt-on-repost"
   "--disable-hang-monitor"
   "--disable-sync"
-  "--disable-background-networking"
+  ## this flag is causing throttling of XHR callbacks for
+  ## as much as 30 seconds. If you VNC in and open dev tools or
+  ## click on a button, it'll "instantly" work. with this
+  ## option enabled, it will time out some of our tests in circle
+  # "--disable-background-networking"
   "--disable-web-resources"
   "--safebrowsing-disable-auto-update"
   "--safebrowsing-disable-download-protection"
@@ -129,19 +129,23 @@ module.exports = {
           args = newArgs
     .then =>
       Promise.all([
-        ## ensure that we have a chrome profile dir
-        utils.ensureProfile(browserName)
+        ## ensure that we have a clean cache dir
+        ## before launching the browser every time
+        utils.ensureCleanCache(browserName)
 
         @_writeExtension(options.proxyUrl, options.socketIoRoute)
       ])
-    .spread (dir, dest) ->
+    .spread (cacheDir, dest) ->
       ## normalize the --load-extensions argument by
       ## massaging what the user passed into our own
       args = _normalizeArgExtensions(dest, args)
 
+      userDir = utils.getProfileDir(browserName)
+
       ## this overrides any previous user-data-dir args
       ## by being the last one
-      args.push("--user-data-dir=#{dir}")
+      args.push("--user-data-dir=#{userDir}")
+      args.push("--disk-cache-dir=#{cacheDir}")
 
       debug("launch in chrome: %s, %s", url, args)
 
