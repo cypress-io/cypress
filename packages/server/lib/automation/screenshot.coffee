@@ -40,7 +40,10 @@ module.exports = (screenshotsFolder) ->
           buffer = dataUriToBuffer(dataUrl)
           Jimp.read(buffer).then (image) ->
             hasPixels = hasHelperPixels(image)
-            if (data.appOnly and hasPixels) or (not data.appOnly and not hasPixels) and tries < 10
+            if tries < 10 and (
+              (data.appOnly and hasPixels) or 
+              (not data.appOnly and not hasPixels)
+            )
               log("pixels still present - try again")
               return captureAndCheck()
             else

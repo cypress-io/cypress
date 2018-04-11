@@ -27,6 +27,12 @@ describe "taking screenshots", ->
       .screenshot("crop-check", { capture: ["app"] })
       .task("check:screenshot:crop", { name: 'crop-check.png', width: 600, height: 400 })
 
+  it "accepts screenshot after 10 tries if somehow app has pixels that match helper pixels", ->
+    cy
+      .viewport(1280, 720)
+      .visit('http://localhost:3322/pathological')
+      .screenshot("pathological", { capture: ["app"] })
+
   context "before hooks", ->
     before ->
       ## failure 2

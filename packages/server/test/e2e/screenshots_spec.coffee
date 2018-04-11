@@ -22,9 +22,27 @@ onServer = (app) ->
     """
 
   app.get "/color/:color", (req, res) ->
-    res.set('Content-Type', 'text/html');
-
+    res.set('Content-Type', 'text/html')
     res.send(getHtml(req.params.color))
+
+  app.get "/pathological", (req, res) ->
+    res.set('Content-Type', 'text/html')
+    res.send("""
+    <!DOCTYPE html>
+    <html lang="en" style="background: grey">
+    <body>
+      <style>
+        div { width: 1px; height: 1px; position: fixed; }
+      </style>
+      <div style="left: 0; top: 0; background-color: black;"></div>
+      <div style="left: 1px; top: 0; background-color: white;"></div>
+      <div style="left: 0; top: 1px; background-color: white;"></div>
+      <div style="right: 0; top: 0; background-color: white;"></div>
+      <div style="left: 0; bottom: 0; background-color: white;"></div>
+      <div style="right: 0; bottom: 0; background-color: black;"></div>
+    </body>
+    </html>
+    """)
 
 describe "e2e screenshots", ->
   e2e.setup({
