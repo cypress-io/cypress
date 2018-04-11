@@ -4,6 +4,9 @@ Promise = require("bluebird")
 log = require("debug")("cypress:server:screenshot")
 screenshots = require("../screenshots")
 
+Jimp.prototype.crop = Promise.promisify(Jimp.prototype.crop)
+Jimp.prototype.getBuffer = Promise.promisify(Jimp.prototype.getBuffer)
+
 isBlack = (rgba) ->
   "#{rgba.r}#{rgba.g}#{rgba.b}" is "000"
 
@@ -57,9 +60,6 @@ module.exports = (screenshotsFolder) ->
         save = (buffer) ->
           log("save to", screenshotsFolder)
           screenshots.save(data, buffer, screenshotsFolder)
-
-        image.crop = Promise.promisify(image.crop.bind(image))
-        image.getBuffer = Promise.promisify(image.getBuffer.bind(image))
 
         if data.appOnly
           width = Math.min(data.viewport.width, image.bitmap.width)
