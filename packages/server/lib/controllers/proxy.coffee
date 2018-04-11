@@ -159,11 +159,14 @@ module.exports = {
           response = r
 
     .then ->
+      if status
+        res.status(status)
+
       if response
-        res.status(status).send(response)
+        res.send(response)
       else
         # TODO allow forwarding of the request
-        res.status(status).end()
+        res.end()
 
     .then =>
       console.log('sending result back')
