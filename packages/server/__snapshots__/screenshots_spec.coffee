@@ -8,6 +8,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ manually generates pngs
     ✓ can nest screenshots in folders
     1) generates pngs on failure
+    ✓ crops app captures to just app size
     before hooks
       2) "before all" hook for "empty test 1"
     each hooks
@@ -15,7 +16,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       4) "after each" hook for "empty test 2"
 
 
-  2 passing
+  3 passing
   4 failing
 
   1) taking screenshots generates pngs on failure:
@@ -45,12 +46,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Tests Finished)
 
-  - Tests:           5
-  - Passes:          2
+  - Tests:           6
+  - Passes:          3
   - Failures:        3
   - Pending:         0
   - Duration:        10 seconds
-  - Screenshots:     7
+  - Screenshots:     8
   - Video Recorded:  true
   - Cypress Version: 1.2.3
 
@@ -61,6 +62,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/red.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/foobarbaz.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/crop-check.png (600x400)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- before hooks -- empty test 1 -- before all hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- before each hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- after each hook.png (1280x720)

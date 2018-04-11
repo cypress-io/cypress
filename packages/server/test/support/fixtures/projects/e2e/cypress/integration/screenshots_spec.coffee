@@ -20,6 +20,13 @@ describe "taking screenshots", ->
         ## failure 1
         throw new Error("fail whale")
 
+  it "crops app captures to just app size", ->
+    cy
+      .viewport(600, 400)
+      .visit('http://localhost:3322/color/yellow')
+      .screenshot("crop-check", { capture: ["app"] })
+      .task("check:screenshot:crop", { name: 'crop-check.png', width: 600, height: 400 })
+
   context "before hooks", ->
     before ->
       ## failure 2

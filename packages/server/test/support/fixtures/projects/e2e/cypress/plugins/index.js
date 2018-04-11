@@ -30,5 +30,16 @@ module.exports = (on) => {
         return null
       })
     },
+
+    'check:screenshot:crop' ({ name, width, height }) {
+      return Jimp.read(path.join(__dirname, '..', 'screenshots', name))
+      .then((image) => {
+        if (image.bitmap.width !== width && image.bitmap.height !== height) {
+          throw new Error('Screenshot does not match dimensions!')
+        }
+
+        return null
+      })
+    },
   })
 }

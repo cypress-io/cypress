@@ -1,6 +1,7 @@
 dataUriToBuffer = require("data-uri-to-buffer")
 Jimp = require("jimp")
 Promise = require("bluebird")
+log = require("debug")("cypress:server:screenshot")
 screenshots = require("../screenshots")
 
 isBlack = (rgba) ->
@@ -32,6 +33,7 @@ module.exports = (screenshotsFolder) ->
       tries = 0
       captureAndCheck = ->
         tries++
+        log("capture and check attempt ##{tries}")
 
         automate(data)
         .then (dataUrl) ->
@@ -39,13 +41,35 @@ module.exports = (screenshotsFolder) ->
           Jimp.read(buffer).then (image) ->
             hasPixels = hasHelperPixels(image)
             if (data.appOnly and hasPixels) or (not data.appOnly and not hasPixels) and tries < 10
+              log("pixels still present - try again")
               return captureAndCheck()
             else
+              if tries >= 10
+                log("too many tries - accept latest capture")
+              else
+                log("succeeded taking capture")
               return [buffer, image]
 
       captureAndCheck().then ([buffer, image]) ->
-        screenshots.save(data, buffer, screenshotsFolder)
-
         save = (buffer) ->
+          log("save to", screenshotsFolder)
+          screenshots.save(data, buffer, screenshotsFolder)
+
+        image.crop = Promise.promisify(image.crop.bind(image))
+        image.getBuffer = Promise.promisify(image.getBuffer.bind(image))
+
+        if data.appOnly
+          width = Math.min(data.viewport.width, image.bitmap.width)
+          height = Math.min(data.viewport.height, image.bitmap.height)
+          log("crop to dimensions #{width} x #{height}")
+
+          image.crop(0, 0, width, height)
+          .then ->
+            image.getBuffer(Jimp.AUTO)
+          .then (buffer) ->
+            buffer.type = image.getMIME()
+            save(buffer)
+        else
+          save(buffer)
 
   }

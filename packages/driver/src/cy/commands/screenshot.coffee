@@ -35,6 +35,7 @@ takeScreenshot = (runnable, name, options = {}) ->
     titles: titles
     testId: runnable.id
     appOnly: options.appOnly
+    viewport: options.viewport
   }
 
   automate = ->
@@ -113,6 +114,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           takeScreenshot(runnable, name, _.extend({}, options, {
             appOnly: capture is "app"
             type: type
+            viewport: {
+              width: state("viewportWidth")
+              height: state("viewportHeight")
+            }
           }))
         .finally ->
           after(capture)
