@@ -49,6 +49,10 @@ describe "lib/watchers", ->
       expect(@watchers.watchers).to.have.property("/dep/a")
       expect(@watchers.watchers).to.have.property("/dep/b")
 
+    it "ignores node_modules", ->
+      expect(dependencyTree.toList.lastCall.args[0].filter("/foo/bar")).to.be.true
+      expect(dependencyTree.toList.lastCall.args[0].filter("/node_modules/foo")).to.be.false
+
   context "#close", ->
     it "removes each watched property", ->
       watched1 = {close: @sandbox.spy()}
