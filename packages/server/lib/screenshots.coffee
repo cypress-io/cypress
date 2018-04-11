@@ -5,7 +5,6 @@ glob            = require("glob")
 bytes           = require("bytes")
 sizeOf          = require("image-size")
 Promise         = require("bluebird")
-dataUriToBuffer = require("data-uri-to-buffer")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -31,9 +30,7 @@ module.exports = {
 
     glob(screenshotsFolder, {nodir: true})
 
-  save: (data, dataUrl, screenshotsFolder) ->
-    buffer = dataUriToBuffer(dataUrl)
-
+  save: (data, buffer, screenshotsFolder) ->
     ## use the screenshots specific name or
     ## simply make its name the result of the titles
     name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)

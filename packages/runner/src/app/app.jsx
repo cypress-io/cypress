@@ -57,6 +57,10 @@ class App extends Component {
           onResize={this._onReporterResize}
           onResizeEnd={this._onReporterResizeEnd}
         />
+        {/* these pixels help ensure the browser has painted when taking a screenshot */}
+        <div ref='screenshotHelperPixels' className='screenshot-helper-pixels'>
+          <div /><div /><div /><div /><div /><div />
+        </div>
       </div>
     )
   }
@@ -69,6 +73,7 @@ class App extends Component {
     const headerNode = findDOMNode(this.refs.header)
     const iframesNode = findDOMNode(this.refs.iframes)
     const iframesSizeNode = findDOMNode(this.refs.iframes.getSizeContainer())
+    const screenshotHelperPixels = this.refs.screenshotHelperPixels
 
     let prevAttrs = {}
 
@@ -80,8 +85,6 @@ class App extends Component {
       prevAttrs = {
         top: iframesNode.style.top,
         marginLeft: iframesSizeNode.style.marginLeft,
-        height: iframesSizeNode.style.height,
-        width: iframesSizeNode.style.width,
         transform: iframesSizeNode.style.transform,
         left: containerNode.style.left,
       }
@@ -95,8 +98,7 @@ class App extends Component {
       headerNode.style.display = 'none'
 
       iframesNode.style.top = 0
-      iframesSizeNode.style.height = '100%'
-      iframesSizeNode.style.width = '100%'
+      iframesNode.style.backgroundColor = 'black'
       iframesSizeNode.style.marginLeft = 0
 
       containerNode.style.left = 0
@@ -106,18 +108,19 @@ class App extends Component {
         iframesSizeNode.style.transform = null
       }
 
-      eventManager.emit('before:screenshot:finished')
+      screenshotHelperPixels.style.display = 'none'
     })
 
     eventManager.on('after:screenshot', (config) => {
       if (!config.appOnly) return
 
+      screenshotHelperPixels.style.display = 'block'
+
       containerNode.className = containerNode.className.replace(' screenshotting', '')
       containerNode.style.left = prevAttrs.left
 
       iframesNode.style.top = prevAttrs.top
-      iframesSizeNode.style.height = prevAttrs.height
-      iframesSizeNode.style.width = prevAttrs.width
+      iframesNode.style.backgroundColor = null
       iframesSizeNode.style.marginLeft = prevAttrs.marginLeft
 
       reporterNode.style.display = null

@@ -4,7 +4,7 @@ Promise = require("bluebird")
 Screenshot = require("../../cypress/screenshot")
 $utils = require("../../cypress/utils")
 
-takeScreenshot = (runnable, name, log, timeout, type) ->
+takeScreenshot = (runnable, name, options = {}) ->
   titles = []
 
   ## if this a hook then push both the current test title
@@ -15,11 +15,11 @@ takeScreenshot = (runnable, name, log, timeout, type) ->
   else
     titles.push(runnable.title)
 
-  if type
+  if options.type
     if name
-      name += " -- #{type}"
+      name += " -- #{options.type}"
     else
-      titles.push(type)
+      titles.push(options.type)
 
   getParentTitle = (runnable) ->
     if p = runnable.parent
@@ -31,15 +31,16 @@ takeScreenshot = (runnable, name, log, timeout, type) ->
   getParentTitle(runnable)
 
   props = {
-    name:   name
+    name: name
     titles: titles
     testId: runnable.id
+    appOnly: options.appOnly
   }
 
   automate = ->
     Cypress.automation("take:screenshot", props)
 
-  if not timeout
+  if not options.timeout
     automate()
   else
     ## need to remove the current timeout
@@ -47,14 +48,14 @@ takeScreenshot = (runnable, name, log, timeout, type) ->
     cy.clearTimeout("take:screenshot")
 
     automate()
-    .timeout(timeout)
+    .timeout(options.timeout)
     .catch (err) ->
-      $utils.throwErr(err, { onFail: log })
+      $utils.throwErr(err, { onFail: options.log })
     .catch Promise.TimeoutError, (err) ->
       $utils.throwErrByPath "screenshot.timed_out", {
-        onFail: log
+        onFail: options.log
         args: {
-          timeout: timeout
+          timeout: options.timeout
         }
       }
 
@@ -63,9 +64,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     new Promise (resolve) ->
       Cypress.action("cy:#{event}", props, resolve)
 
-  beforeAll = ->
-    screenshotConfig = Screenshot.getConfig()
-
+  beforeAll = (screenshotConfig) ->
     if screenshotConfig.disableTimersAndAnimations
       cy.pauseTimers(true)
 
@@ -76,9 +75,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       blackout: screenshotConfig.blackout
     })
 
-  afterAll = ->
-    screenshotConfig = Screenshot.getConfig()
-
+  afterAll = (screenshotConfig) ->
     Screenshot.callAfterScreenshot(state("document"))
 
     send("after:all:screenshots", {
@@ -89,9 +86,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     if screenshotConfig.disableTimersAndAnimations
       cy.pauseTimers(false)
 
-  prepAndTakeScreenshots = (runnable, name, log, timeout) ->
-    screenshotConfig = Screenshot.getConfig()
-
+  prepAndTakeScreenshots = (screenshotConfig, runnable, name, options = {}) ->
     before = (capture) ->
       send("before:screenshot", {
         id: runnable.id
@@ -115,7 +110,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         before(capture)
         .then ->
-          takeScreenshot(runnable, name, log, timeout, type)
+          takeScreenshot(runnable, name, _.extend({}, options, {
+            appOnly: capture is "app"
+            type: type
+          }))
         .finally ->
           after(capture)
 
@@ -127,9 +125,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## to take a screenshot and we are not interactive
     ## which means we're exiting at the end
     if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
-      beforeAll()
+      beforeAll(screenshotConfig)
       .then ->
-        prepAndTakeScreenshots(runnable)
+        prepAndTakeScreenshots(screenshotConfig, runnable)
 
   Commands.addAll({
     screenshot: (name, options = {}) ->
@@ -145,8 +143,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: config("responseTimeout")
       }
 
+      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization")
+      screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
+      screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
+
       if options.log
-        consoleProps = {}
+        consoleProps = {
+          options: screenshotConfig
+        }
 
         options._log = Cypress.log({
           message: name
@@ -154,15 +158,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization")
-      screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
-      screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
-
-      beforeAll()
+      beforeAll(screenshotConfig)
       .then ->
-        prepAndTakeScreenshots(runnable, name, options._log, options.timeout)
+        prepAndTakeScreenshots(screenshotConfig, runnable, name, {
+          log: options._log
+          timeout: options.timeout
+        })
         .finally ->
-          afterAll()
+          afterAll(screenshotConfig)
       .then (results) ->
         _.each results, ({ path, size }, i) ->
           capture = screenshotConfig.capture[i]

@@ -241,26 +241,22 @@ const eventManager = {
       cb()
     })
 
-    const afterTwoTicks = (cb) => {
-      setTimeout(() => setTimeout(cb))
-    }
-
     Cypress.on('before:screenshot', (config, cb) => {
-      const delayedCb = () => {
+      const beforeThenCb = () => {
         localBus.emit('before:screenshot', config)
-        afterTwoTicks(cb)
+        cb()
       }
 
       const wait = !config.appOnly && config.waitForCommandSynchronization
       if (!config.appOnly) {
-        reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? delayedCb : undefined)
+        reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? beforeThenCb : undefined)
       }
-      if (!wait) delayedCb()
+      if (!wait) beforeThenCb()
     })
 
     Cypress.on('after:screenshot', (config, cb) => {
       localBus.emit('after:screenshot', config)
-      afterTwoTicks(cb)
+      cb()
     })
 
     Cypress.on('after:all:screenshots', (config, cb) => {
