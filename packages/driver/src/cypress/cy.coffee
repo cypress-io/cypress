@@ -149,8 +149,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   }
 
   runTimerQueue = (queue) ->
-    _.each timerQueues[queue], ([fn, args]) ->
-      fn(args...)
+    _.each timerQueues[queue], ([fn, args, context]) ->
+      fn.apply(context, args)
     timerQueues[queue] = []
 
   wrapTimers = (contentWindow) ->
@@ -160,9 +160,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     wrap = (fn, queue) -> (args...) ->
       if timersPaused
-        timerQueues[queue].push([fn, args])
+        timerQueues[queue].push([fn, args, this])
       else
-        fn(args...)
+        fn.apply(this, args)
 
     contentWindow.setTimeout = (fn, args...) ->
       originalSetTimeout(wrap(fn, "setTimeout"), args...)
@@ -909,7 +909,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         runTimerQueue("setTimeout")
         runTimerQueue("setInterval")
         runTimerQueue("requestAnimationFrame")
-
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
