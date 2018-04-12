@@ -121,7 +121,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .finally ->
         after(capture)
 
-    Promise.map(screenshotConfig.capture, fn, { concurrency: 1 })
+    beforeAll(screenshotConfig)
+    .then ->
+      Promise.map(screenshotConfig.capture, fn, { concurrency: 1 })
+    .finally ->
+      afterAll(screenshotConfig)
 
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = Screenshot.getConfig()
@@ -129,9 +133,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## to take a screenshot and we are not interactive
     ## which means we're exiting at the end
     if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
-      beforeAll(screenshotConfig)
-      .then ->
-        prepAndTakeScreenshots(screenshotConfig, runnable)
+      prepAndTakeScreenshots(screenshotConfig, runnable)
 
   Commands.addAll({
     screenshot: (name, options = {}) ->
@@ -162,14 +164,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      beforeAll(screenshotConfig)
-      .then ->
-        prepAndTakeScreenshots(screenshotConfig, runnable, name, {
-          log: options._log
-          timeout: options.timeout
-        })
-        .finally ->
-          afterAll(screenshotConfig)
+      prepAndTakeScreenshots(screenshotConfig, runnable, name, {
+        log: options._log
+        timeout: options.timeout
+      })
       .then (results) ->
         _.each results, ({ path, size }, i) ->
           capture = screenshotConfig.capture[i]
