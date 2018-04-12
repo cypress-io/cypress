@@ -8,7 +8,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ takes consistent app captures
 
 
-  1 passing (10s)
+  1 passing
 
 
   (Tests Finished)
