@@ -92,7 +92,7 @@
     "pre-git": "3.17.1",
     "prettier-standard": "8.0.1",
     "simple-commit-message": "4.0.3",
-    "semantic-release": "15.1.6",
+    "semantic-release": "15.1.7",
     "standard": "11.0.1",
     "vue": "2.5.16",
     "vue-loader": "14.2.2",
