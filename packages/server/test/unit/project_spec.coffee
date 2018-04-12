@@ -350,7 +350,7 @@ describe "lib/project", ->
     beforeEach ->
       @sandbox.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
-      @project.watchers = { watch: @sandbox.spy() }
+      @project.watchers = { watchTree: @sandbox.spy() }
       @sandbox.stub(plugins, "init").resolves()
       @config = {
         pluginsFile: "/path/to/plugins-file"
@@ -359,22 +359,22 @@ describe "lib/project", ->
     it "does nothing when {pluginsFile: false}", ->
       @config.pluginsFile = false
       @project.watchPluginsFile(@config).then =>
-        expect(@project.watchers.watch).not.to.be.called
+        expect(@project.watchers.watchTree).not.to.be.called
 
     it "does nothing if pluginsFile does not exist", ->
       fs.pathExists.resolves(false)
       @project.watchPluginsFile(@config).then =>
-        expect(@project.watchers.watch).not.to.be.called
+        expect(@project.watchers.watchTree).not.to.be.called
 
     it "watches the pluginsFile", ->
       @project.watchPluginsFile(@config).then =>
-        expect(@project.watchers.watch).to.be.calledWith(@config.pluginsFile)
-        expect(@project.watchers.watch.lastCall.args[1]).to.be.an("object")
-        expect(@project.watchers.watch.lastCall.args[1].onChange).to.be.a("function")
+        expect(@project.watchers.watchTree).to.be.calledWith(@config.pluginsFile)
+        expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
+        expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
     it "calls plugins.init when file changes", ->
       @project.watchPluginsFile(@config).then =>
-        @project.watchers.watch.firstCall.args[1].onChange()
+        @project.watchers.watchTree.firstCall.args[1].onChange()
         expect(plugins.init).to.be.calledWith(@config)
 
     it "handles errors from calling plugins.init", (done) ->
@@ -386,7 +386,7 @@ describe "lib/project", ->
           done()
       })
       .then =>
-        @project.watchers.watch.firstCall.args[1].onChange()
+        @project.watchers.watchTree.firstCall.args[1].onChange()
       return
 
   context "#watchSettingsAndStartWebsockets", ->

@@ -189,7 +189,7 @@ class Project extends EE
       return if not found
 
       debug("watch plugins file")
-      @watchers.watch(cfg.pluginsFile, {
+      @watchers.watchTree(cfg.pluginsFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
