@@ -96,7 +96,12 @@ describe "src/cy/commands/screenshot", ->
             "src/cy/commands/screenshot",
             "runnable:after:run:async",
             runnable.title
-          ]
+            ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
 
   context "runnable:after:run:async hooks", ->
@@ -132,6 +137,11 @@ describe "src/cy/commands/screenshot", ->
             "takes screenshot of hook title with test",
             '"before each" hook'
           ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
 
     it "takes screenshot of hook title with test", ->
@@ -160,6 +170,11 @@ describe "src/cy/commands/screenshot", ->
             "#screenshot",
             "foo bar"
           ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
 
     it "can pass name", ->
@@ -177,6 +192,11 @@ describe "src/cy/commands/screenshot", ->
             "#screenshot",
             "foo bar"
           ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
 
     it "sends before:all:screenshots with appropriate props", ->
@@ -308,6 +328,11 @@ describe "src/cy/commands/screenshot", ->
             "#screenshot",
             "foo bar"
           ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
         expect(Cypress.automation).to.be.calledWith("take:screenshot", {
           name: "my/file -- runner"
@@ -317,6 +342,11 @@ describe "src/cy/commands/screenshot", ->
             "#screenshot",
             "foo bar"
           ]
+          appOnly: false
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
 
     it "includes capture type in titles if not named and more than one capture", ->
@@ -336,6 +366,11 @@ describe "src/cy/commands/screenshot", ->
             "foo bar"
             "app"
           ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
         expect(Cypress.automation).to.be.calledWith("take:screenshot", {
           name: undefined
@@ -346,6 +381,11 @@ describe "src/cy/commands/screenshot", ->
             "foo bar"
             "runner"
           ]
+          appOnly: false
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
 
     it "does not include capture in name or titles if only one capture", ->
@@ -363,6 +403,11 @@ describe "src/cy/commands/screenshot", ->
             "#screenshot",
             "foo bar"
           ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
         expect(Cypress.automation).to.be.calledWith("take:screenshot", {
           name: undefined
@@ -372,6 +417,11 @@ describe "src/cy/commands/screenshot", ->
             "#screenshot",
             "foo bar"
           ]
+          appOnly: true
+          viewport: {
+            width: cy.state("viewportWidth")
+            height: cy.state("viewportHeight")
+          }
         })
 
     describe "timeout", ->
