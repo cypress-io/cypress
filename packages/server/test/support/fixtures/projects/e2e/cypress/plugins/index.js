@@ -17,12 +17,20 @@ module.exports = (on) => {
 
   on('task', {
     'compare:screenshots' () {
+      function isBlack (rgba) {
+        return `${rgba.r}${rgba.g}${rgba.b}` === '000'
+      }
+
       const comparePath = path.join(__dirname, '..', 'screenshots', 'compare.png')
       return Promise.all([
         getOriginalImage(),
         Jimp.read(comparePath),
       ])
       .spread((originalImage, compareImage) => {
+        if (!isBlack(Jimp.intToRGBA(compareImage.getPixelColor(11, 11)))) {
+          throw new Error('Blackout not present!')
+        }
+
         if (originalImage.hash() !== compareImage.hash()) {
           throw new Error('Screenshot mismatch!')
         }

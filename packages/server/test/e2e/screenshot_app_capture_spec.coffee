@@ -11,20 +11,17 @@ sizeOf  = Promise.promisify(sizeOf)
 e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
-  getHtml = (color) ->
-    """
+  app.get "/", (req, res) ->
+    res.set('Content-Type', 'text/html');
+
+    res.send("""
     <!DOCTYPE html>
     <html lang="en">
     <body>
-      <div style="height: 2000px; width: 2000px; background-color: #{color};"></div>
+      <div class="black-me-out" style="position: fixed; left: 10px; top: 10px;">Redacted</div>
     </body>
     </html>
-    """
-
-  app.get "/color/:color", (req, res) ->
-    res.set('Content-Type', 'text/html');
-
-    res.send(getHtml(req.params.color))
+    """)
 
 describe "e2e screenshot app capture", ->
   e2e.setup({
