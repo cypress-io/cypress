@@ -1,5 +1,5 @@
 exports['e2e task fails 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+Started video recording: /foo/bar/.projects/task-not-registered/cypress/videos/abc123.mp4
 
   (Tests Starting)
 
@@ -44,15 +44,16 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/fails because the task event is not registered in plugins file.png (1280x720)
+  - /foo/bar/.projects/task-not-registered/cypress/screenshots/fails because the task event is not registered in plugins file.png (1280x720)
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/task-not-registered/cypress/videos/abc123.mp4 (0 seconds)
 
 
   (All Done)
 
 `
+
