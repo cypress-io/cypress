@@ -5,6 +5,7 @@ config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
 log       = require('./log')
+preprocessor = require("./plugins/preprocessor")
 
 create = ->
   openProject     = null
@@ -64,6 +65,12 @@ create = ->
           ## been defined here
           if am = options.automationMiddleware
             automation.use(am)
+
+          onBrowserClose = options.onBrowserClose
+          options.onBrowserClose = ->
+            preprocessor.removeFile(spec, cfg)
+            if onBrowserClose
+              onBrowserClose()
 
           do relaunchBrowser = ->
             log "launching project in browser #{browserName}"
