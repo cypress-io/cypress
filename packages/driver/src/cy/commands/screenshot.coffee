@@ -105,24 +105,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         scale: if capture is "app" then screenshotConfig.scaleAppCaptures else true
       })
 
-    captures = _.map screenshotConfig.capture, (capture) ->
-      -> ## intentionally returning a function
-        type = if screenshotConfig.capture.length > 1 then capture else null
+    fn = (capture) ->
+      type = if screenshotConfig.capture.length > 1 then capture else null
 
-        before(capture)
-        .then ->
-          takeScreenshot(runnable, name, _.extend({}, options, {
-            appOnly: capture is "app"
-            type: type
-            viewport: {
-              width: state("viewportWidth")
-              height: state("viewportHeight")
-            }
-          }))
-        .finally ->
-          after(capture)
+      before(capture)
+      .then ->
+        takeScreenshot(runnable, name, _.extend({}, options, {
+          appOnly: capture is "app"
+          type: type
+          viewport: {
+            width: state("viewportWidth")
+            height: state("viewportHeight")
+          }
+        }))
+      .finally ->
+        after(capture)
 
-    $utils.runSerially(captures)
+    Promise.map(screenshotConfig.capture, fn, { concurrency: 1 })
 
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = Screenshot.getConfig()
