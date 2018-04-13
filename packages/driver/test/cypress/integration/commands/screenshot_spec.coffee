@@ -12,7 +12,7 @@ describe "src/cy/commands/screenshot", ->
       disableTimersAndAnimations: true
       waitForCommandSynchronization: true
       scaleAppCaptures: true
-      blackout: []
+      blackout: [".foo"]
     }
 
   context "runnable:after:run:async", ->
@@ -65,6 +65,60 @@ describe "src/cy/commands/screenshot", ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
 
+    it "sends before:screenshot event", ->
+      Cypress.config("isInteractive", false)
+      @screenshotConfig.scaleAppCaptures = false
+      cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
+
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+
+      cy.stub(Cypress, "action").log(false)
+      .callThrough()
+      .withArgs("cy:before:screenshot")
+      .yieldsAsync()
+
+      test = { id: "123", err: new Error() }
+      runnable = cy.state("runnable")
+
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        expect(Cypress.action).to.be.calledWith("cy:before:screenshot", {
+          id: runnable.id
+          isOpen: true
+          appOnly: false
+          scale: true
+          waitForCommandSynchronization: true
+          disableTimersAndAnimations: true
+          blackout: []
+        })
+
+    it "sends after:screenshot event", ->
+      Cypress.config("isInteractive", false)
+      @screenshotConfig.scaleAppCaptures = false
+      cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
+
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+
+      cy.stub(Cypress, "action").log(false)
+      .callThrough()
+      .withArgs("cy:after:screenshot")
+      .yieldsAsync()
+
+      test = { id: "123", err: new Error() }
+      runnable = cy.state("runnable")
+
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        expect(Cypress.action).to.be.calledWith("cy:after:screenshot", {
+          id: runnable.id
+          isOpen: false
+          appOnly: false
+          scale: true
+          waitForCommandSynchronization: true
+          disableTimersAndAnimations: true
+          blackout: []
+        })
+
     it "takes screenshot when not isInteractive", ->
       Cypress.config("isInteractive", false)
       cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
@@ -88,7 +142,7 @@ describe "src/cy/commands/screenshot", ->
             "runnable:after:run:async",
             runnable.title
             ]
-          appOnly: true
+          appOnly: false
           viewport: {
             width: cy.state("viewportWidth")
             height: cy.state("viewportHeight")
@@ -119,7 +173,7 @@ describe "src/cy/commands/screenshot", ->
             "takes screenshot of hook title with test",
             '"before each" hook'
           ]
-          appOnly: true
+          appOnly: false
           viewport: {
             width: cy.state("viewportWidth")
             height: cy.state("viewportHeight")

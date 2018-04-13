@@ -129,6 +129,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## to take a screenshot and we are not interactive
     ## which means we're exiting at the end
     if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
+      ## always capture runner and don't blackout on failure screenshots
+      screenshotConfig.capture = "runner"
+      screenshotConfig.blackout = []
       takeScreenshot(Cypress, state, screenshotConfig, { runnable })
 
   Commands.addAll({
