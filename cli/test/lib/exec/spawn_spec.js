@@ -44,6 +44,7 @@ describe('exec spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
           '--foo',
+          '--run-from-cli',
           '--cwd',
           cwd,
         ], {
@@ -62,6 +63,7 @@ describe('exec spawn', function () {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
           '--foo',
+          '--run-from-cli',
           '--cwd',
           cwd,
         ], {
