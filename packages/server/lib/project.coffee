@@ -189,7 +189,7 @@ class Project extends EE
       return if not found
 
       debug("watch plugins file")
-      @watchers.watch(cfg.pluginsFile, {
+      @watchers.watchTree(cfg.pluginsFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
@@ -204,6 +204,8 @@ class Project extends EE
     ## watch anything
     return if not onSettingsChanged
 
+    debug("watch settings files")
+
     obj = {
       onChange: (filePath, stats) =>
         ## dont fire change events if we generated
@@ -217,6 +219,7 @@ class Project extends EE
     }
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
+    @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
     @watchSettings(options.onSettingsChanged)
