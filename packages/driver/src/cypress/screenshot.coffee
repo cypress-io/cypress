@@ -94,7 +94,7 @@ module.exports = {
     defaults = reset()
 
   getConfig: ->
-    _.omit(defaults, "beforeScreenshot", "afterScreenshot")
+    _.cloneDeep(_.omit(defaults, "beforeScreenshot", "afterScreenshot"))
 
   callBeforeScreenshot: (doc) ->
     defaults.beforeScreenshot(doc)

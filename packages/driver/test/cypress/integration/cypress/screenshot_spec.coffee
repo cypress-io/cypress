@@ -19,6 +19,12 @@ describe "src/cypress/screenshot", ->
     expect(-> Screenshot.callBeforeScreenshot()).not.to.throw()
     expect(-> Screenshot.callAfterScreenshot()).not.to.throw()
 
+  context ".getConfig", ->
+    it "returns copy of config", ->
+      config = Screenshot.getConfig()
+      config.blackout.push(".foo")
+      expect(Screenshot.getConfig().blackout).to.deep.eq(DEFAULTS.blackout)
+
   context ".defaults", ->
     it "is noop if not called with any valid properties", ->
       Screenshot.defaults({})
