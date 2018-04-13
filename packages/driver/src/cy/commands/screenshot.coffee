@@ -78,31 +78,27 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     new Promise (resolve) ->
       Cypress.action("cy:#{event}", props, resolve)
 
+  getOptions = (isOpen) ->
+    {
+      id: runnable.id
+      isOpen: isOpen
+      appOnly: appOnly
+      scale: if appOnly then scaleAppCaptures else true
+      waitForCommandSynchronization: if not appOnly then waitForCommandSynchronization else false
+      disableTimersAndAnimations: disableTimersAndAnimations
+      blackout: blackout
+    }
+
   before = (capture) ->
     if disableTimersAndAnimations
       cy.pauseTimers(true)
 
     Screenshot.callBeforeScreenshot(state("document"))
 
-    send("before:screenshot", {
-      id: runnable.id
-      isOpen: true
-      appOnly: appOnly
-      scale: if appOnly then scaleAppCaptures else true
-      waitForCommandSynchronization: if capture is "runner" then waitForCommandSynchronization else false
-      disableTimersAndAnimations: disableTimersAndAnimations
-      blackout: blackout
-    })
+    send("before:screenshot", getOptions(true))
 
   after = (capture) ->
-    send("after:screenshot", {
-      id: runnable.id
-      isOpen: false
-      appOnly: appOnly
-      scale: if appOnly then scaleAppCaptures else true
-      disableTimersAndAnimations: disableTimersAndAnimations
-      blackout: blackout
-    })
+    send("after:screenshot", getOptions(false))
 
     Screenshot.callAfterScreenshot(state("document"))
 

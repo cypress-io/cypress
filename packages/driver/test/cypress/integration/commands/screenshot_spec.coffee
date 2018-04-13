@@ -245,43 +245,6 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Screenshot.callBeforeScreenshot).to.be.calledWith(cy.state("document"))
 
-    it "sends before:screenshot", ->
-      Cypress.automation.withArgs("take:screenshot").resolves({})
-      cy.spy(Cypress, "action").log(false)
-      runnable = cy.state("runnable")
-
-      cy
-      .screenshot("foo")
-      .then ->
-        expect(Cypress.action.withArgs("cy:before:screenshot")).to.be.calledOnce
-        expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
-          id: runnable.id
-          isOpen: true
-          appOnly: true
-          scale: true
-          waitForCommandSynchronization: false
-          disableTimersAndAnimations: true
-          blackout: []
-        })
-
-    it "sends after:screenshot", ->
-      Cypress.automation.withArgs("take:screenshot").resolves({})
-      cy.spy(Cypress, "action").log(false)
-      runnable = cy.state("runnable")
-
-      cy
-      .screenshot("foo")
-      .then ->
-        expect(Cypress.action.withArgs("cy:after:screenshot")).to.be.calledOnce
-        expect(Cypress.action.withArgs("cy:after:screenshot").args[0][1]).to.eql({
-          id: runnable.id
-          isOpen: false
-          appOnly: true
-          scale: true
-          disableTimersAndAnimations: true
-          blackout: []
-        })
-
     it "calls afterScreenshot callback with document", ->
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.stub(Screenshot, "callAfterScreenshot")
@@ -312,6 +275,78 @@ describe "src/cy/commands/screenshot", ->
       .screenshot("foo")
       .then ->
         expect(Cypress.action.withArgs("cy:pause:timers")).not.to.be.called
+
+    describe "before/after events", ->
+      beforeEach ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+        cy.spy(Cypress, "action").log(false)
+
+      it "sends before:screenshot", ->
+        runnable = cy.state("runnable")
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot")).to.be.calledOnce
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: true
+            appOnly: true
+            scale: true
+            waitForCommandSynchronization: false
+            disableTimersAndAnimations: true
+            blackout: [".foo"]
+          })
+
+      it "sends after:screenshot", ->
+        runnable = cy.state("runnable")
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:after:screenshot")).to.be.calledOnce
+          expect(Cypress.action.withArgs("cy:after:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: false
+            appOnly: true
+            scale: true
+            waitForCommandSynchronization: false
+            disableTimersAndAnimations: true
+            blackout: [".foo"]
+          })
+
+      it "always send scale: true for non-app captures", ->
+        runnable = cy.state("runnable")
+        @screenshotConfig.capture = "runner"
+        @screenshotConfig.scaleAppCaptures = false
+
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: true
+            appOnly: false
+            scale: true
+            waitForCommandSynchronization: true
+            disableTimersAndAnimations: true
+            blackout: [".foo"]
+          })
+
+      it "always send waitForCommandSynchronization: false for app captures", ->
+        runnable = cy.state("runnable")
+        @screenshotConfig.waitForAnimations = true
+
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: true
+            appOnly: true
+            scale: true
+            waitForCommandSynchronization: false
+            disableTimersAndAnimations: true
+            blackout: [".foo"]
+          })
 
     describe "timeout", ->
       beforeEach ->
