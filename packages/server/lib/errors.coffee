@@ -349,10 +349,10 @@ API = {
       # QUESTION should we show different ways to run Cypress CLI depending on OS?
       when "OPENED_CYPRESS_DIRECTLY"
         """
-        Looks like you are running Cypress binary directly.
+        It looks like you are running the Cypress binary directly.
 
         This should only be done for DEVELOPMENT.
-        Please run Cypress via its NPM package
+        Please run Cypress via it's NPM package.
 
           > #{chalk.blue('npm install --save-dev cypress')}
           > #{chalk.blue('./node_modules/.bin/cypress open')}
