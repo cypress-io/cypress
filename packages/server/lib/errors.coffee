@@ -352,7 +352,7 @@ API = {
         It looks like you are running the Cypress binary directly.
 
         This should only be done for DEVELOPMENT.
-        Please run Cypress via it's NPM package.
+        Please run Cypress via its NPM package.
 
           > #{chalk.blue('npm install --save-dev cypress')}
           > #{chalk.blue('./node_modules/.bin/cypress open')}
