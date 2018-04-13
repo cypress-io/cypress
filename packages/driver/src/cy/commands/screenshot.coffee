@@ -84,9 +84,9 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       isOpen: isOpen
       appOnly: appOnly
       scale: if appOnly then scaleAppCaptures else true
-      waitForCommandSynchronization: if not appOnly then waitForCommandSynchronization else false
+      waitForCommandSynchronization: if appOnly then false else waitForCommandSynchronization
       disableTimersAndAnimations: disableTimersAndAnimations
-      blackout: blackout
+      blackout: if appOnly then blackout else []
     }
 
   before = (capture) ->
@@ -125,9 +125,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## to take a screenshot and we are not interactive
     ## which means we're exiting at the end
     if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
-      ## always capture runner and don't blackout on failure screenshots
+      ## always capture runner on failure screenshots
       screenshotConfig.capture = "runner"
-      screenshotConfig.blackout = []
       takeScreenshot(Cypress, state, screenshotConfig, { runnable })
 
   Commands.addAll({

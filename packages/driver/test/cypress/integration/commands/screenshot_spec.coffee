@@ -313,7 +313,7 @@ describe "src/cy/commands/screenshot", ->
             blackout: [".foo"]
           })
 
-      it "always send scale: true for non-app captures", ->
+      it "always sends scale: true and blackout: [] for non-app captures", ->
         runnable = cy.state("runnable")
         @screenshotConfig.capture = "runner"
         @screenshotConfig.scaleAppCaptures = false
@@ -328,10 +328,10 @@ describe "src/cy/commands/screenshot", ->
             scale: true
             waitForCommandSynchronization: true
             disableTimersAndAnimations: true
-            blackout: [".foo"]
+            blackout: []
           })
 
-      it "always send waitForCommandSynchronization: false for app captures", ->
+      it "always sends waitForCommandSynchronization: false for app captures", ->
         runnable = cy.state("runnable")
         @screenshotConfig.waitForAnimations = true
 
