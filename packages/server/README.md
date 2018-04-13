@@ -40,7 +40,7 @@ Since this is slow, it's better to drive your development with tests.
 
 * `npm run test-unit` executes unit tests in `test/unit`
 * `npm run test-integration` executes integration tests in `test/integration`
-* `npm run test-e2e` executes the large (slow) end to end tests in `test/e2e`
+* `npm run test-e2e` executes the large (slow) end-to-end tests in `test/e2e`
 
 Each of these tasks can run in "watch" mode by appending this word to the task:
 
@@ -62,7 +62,7 @@ You can also run in `watch` mode
 npm run test-watch ./test/unit/api_spec.coffee
 ```
 
-To run a single end to end spec pass part of its name using `--spec` option. You can also turn on the debug output from the test script itself using `DEBUG=e2e` environment option
+To run a single end-to-end spec, pass part of its name using the `--spec` option. You can also turn on the debug output from the test script itself using the `DEBUG=e2e` environment option.
 
 ```bash
 DEBUG=e2e npm run test-e2e -- --spec stdout_spec
