@@ -7,12 +7,16 @@ const cp = require('child_process')
 const minimist = require('minimist')
 const Promise = require('bluebird')
 const terminalBanner = require('terminal-banner').terminalBanner
+const debug = require('debug')('e2e')
 
 const humanTime = require('../../lib/util/human_time.coffee')
 
 const glob = Promise.promisify(require('glob'))
 
 const options = minimist(process.argv.slice(2))
+
+debug('e2e options')
+debug(options)
 
 if (options.browser) {
   process.env.BROWSER = options.browser

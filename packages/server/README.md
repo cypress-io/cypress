@@ -61,3 +61,9 @@ You can also run in `watch` mode
 ## runs and watches only this one test file
 npm run test-watch ./test/unit/api_spec.coffee
 ```
+
+To run a single end to end spec pass part of its name using `--spec` option. You can also turn on the debug output from the test script itself using `DEBUG=e2e` environment option
+
+```bash
+DEBUG=e2e npm run test-e2e -- --spec stdout_spec
+```
