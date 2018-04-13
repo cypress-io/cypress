@@ -33,9 +33,11 @@ exitErr = (err) ->
   require("./errors").log(err)
   .then -> exit(1)
 
+isCurrentlyRunningElectron = ->
+  !!(process.versions and process.versions.electron)
+
 module.exports = {
-  isCurrentlyRunningElectron: ->
-    !!(process.versions and process.versions.electron)
+  isCurrentlyRunningElectron
 
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the
@@ -107,12 +109,19 @@ module.exports = {
     #   require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
+    debug("cypress start with arguments", argv)
+
+    argsUtil = require("./util/args")
+
     require("./logger").info("starting desktop app", args: argv)
+
+    if isCurrentlyRunningElectron() and not argsUtil.startedFromCLI(argv)
+      require("./errors").warning("OPENED_CYPRESS_DIRECTLY")
 
     ## make sure we have the appData folder
     require("./util/app_data").ensure()
     .then =>
-      options = require("./util/args").toObject(argv)
+      options = argsUtil.toObject(argv)
 
       ## else determine the mode by
       ## the passed in arguments / options
@@ -166,6 +175,7 @@ module.exports = {
       if _.isArray(options.spec)
         options.spec = options.spec[0]
 
+      debug("starting in mode '%s' with options %j", mode, options)
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->

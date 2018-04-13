@@ -9,7 +9,7 @@ nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 everythingAfterFirstEqualRe = /=(.+)/
 
-whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode removeIds headed config exit exitWithCode browser headless outputPath group groupId parallel parallelId".split(" ")
+whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode removeIds headed config exit exitWithCode browser headless outputPath group groupId parallel parallelId runFromCli".split(" ")
 
 # returns true if the given string has double quote character "
 # only at the last position.
@@ -71,7 +71,13 @@ sanitizeAndConvertNestedArgs = (str) ->
   .mapValues(coerce)
   .value()
 
+startedFromCLI = (argv) ->
+  _.includes(argv, "--run-from-cli") ||
+  _.includes(argv, "--runFromCli=true")
+
 module.exports = {
+  startedFromCLI
+
   toObject: (argv) ->
     ## takes an array of args and converts
     ## to an object
@@ -92,6 +98,7 @@ module.exports = {
         "reporter-options": "reporterOptions"
         "output-path":      "outputPath"
         "group-id":         "groupId"
+        "run-from-cli":     "runFromCli"
       }
     })
 

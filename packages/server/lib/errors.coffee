@@ -345,6 +345,20 @@ API = {
         We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
         """
 
+      # TODO once we have a doc on global vs local install, add link
+      # QUESTION should we show different ways to run Cypress CLI depending on OS?
+      when "OPENED_CYPRESS_DIRECTLY"
+        """
+        Looks like you are running Cypress binary directly.
+
+        This should only be done for DEVELOPMENT.
+        Please run Cypress via its NPM package
+
+          > #{chalk.blue('npm install --save-dev cypress')}
+          > #{chalk.blue('./node_modules/.bin/cypress open')}
+
+        """
+
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)
     err = new Error(msg)
