@@ -1,5 +1,6 @@
-_           = require("lodash")
-chokidar    = require("chokidar")
+_ = require("lodash")
+chokidar = require("chokidar")
+dependencyTree = require("dependency-tree")
 pathHelpers = require("./util/path_helpers")
 
 class Watchers
@@ -37,6 +38,17 @@ class Watchers
       w.on "error", options.onError
 
     return @
+
+  watchTree: (filePath, options = {}) ->
+    files = dependencyTree.toList({
+      filename: filePath
+      directory: process.cwd()
+      filter: (filePath) ->
+        filePath.indexOf("node_modules") is -1
+    })
+
+    _.each files, (file) =>
+      @watch(file, options)
 
   _add: (filePath, watcher) ->
     @_remove(filePath)
