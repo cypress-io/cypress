@@ -85,6 +85,54 @@ describe "src/cy/snapshot", ->
       .load(onLoad)
       .appendTo(cy.$$("head"))
 
+    it "provides media-less stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles[0]).to.include(".foo { color: green; }")
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
+    it "provides media=screen stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles[0]).to.include(".foo { color: green; }")
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' media='screen' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
+    it "provides media=all stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles[0]).to.include(".foo { color: green; }")
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' media='all' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
+    it "does not provide non-screen stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles).to.have.length(0)
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' media='print' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
     it "provides object with href of external stylesheets in head", (done) ->
       onLoad = ->
         ## need to for appended stylesheet to load
