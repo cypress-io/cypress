@@ -39,6 +39,7 @@ Watchers   = require("#{root}lib/watchers")
 openProject   = require("#{root}lib/open_project")
 appData       = require("#{root}lib/util/app_data")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
+argsUtil      = require("#{root}lib/util/args")
 
 TYPICAL_BROWSERS = [
   {
@@ -91,6 +92,7 @@ describe "lib/cypress", ->
     @sandbox.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     @sandbox.stub(process, "exit")
     @sandbox.stub(Server.prototype, "reset")
+    @sandbox.stub(argsUtil, "startedFromCLI").returns(true)
     @sandbox.spy(errors, "log")
     @sandbox.spy(errors, "warning")
     @sandbox.spy(console, "log")
@@ -1252,6 +1254,29 @@ describe "lib/cypress", ->
         Events.handleEvent(options, bus, event, 123, "open:project", @todosPath)
       .then ->
         expect(event.sender.send.withArgs("response").firstCall.args[1].data).to.eql(warning)
+
+  context "--run-from-cli", ->
+    beforeEach ->
+      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      @sandbox.stub(headed, "ready").resolves()
+      argsUtil.startedFromCLI.restore()
+
+    it "shows warning if Cypress has been started directly", ->
+      cypress.start().then ->
+        expect(errors.warning).to.be.calledWith("OPENED_CYPRESS_DIRECTLY")
+
+    it "does not show warning if finds --run-from-cli", ->
+      cypress.start(["--run-from-cli"]).then ->
+        expect(errors.warning).not.to.be.called
+
+    it "does not show warning if finds --runFromCli=true", ->
+      cypress.start(["--runFromCli=true"]).then ->
+        expect(errors.warning).not.to.be.called
+
+    it "does not show warning if finds util method tells it not to worry", ->
+      @sandbox.stub(argsUtil, "startedFromCLI").returns(true)
+      cypress.start().then ->
+        expect(errors.warning).not.to.be.called
 
   context "no args", ->
     beforeEach ->

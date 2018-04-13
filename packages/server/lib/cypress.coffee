@@ -115,7 +115,8 @@ module.exports = {
 
     require("./logger").info("starting desktop app", args: argv)
 
-    if isCurrentlyRunningElectron() and not argsUtil.startedFromCLI(argv)
+    if @isCurrentlyRunningElectron() and not argsUtil.startedFromCLI(argv)
+      debug("Cypress started directly ⚠️")
       require("./errors").warning("OPENED_CYPRESS_DIRECTLY")
 
     ## make sure we have the appData folder
