@@ -25,6 +25,12 @@ describe "lib/open_project", ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(preprocessor.removeFile).to.be.calledWith("path/to/spec")
 
+
+    it "does not tell preprocessor to remove file if no spec", ->
+      openProject.launch("chrome").then ->
+        browsers.open.lastCall.args[1].onBrowserClose()
+        expect(preprocessor.removeFile).not.to.be.called
+
     it "runs original onBrowserClose callback on browser close", ->
       onBrowserClose = @sandbox.stub()
       options = { onBrowserClose }

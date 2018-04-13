@@ -4,7 +4,7 @@ files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
-log       = require('./log')
+log       = require('debug')("cypress:server:project")
 preprocessor = require("./plugins/preprocessor")
 
 create = ->
@@ -68,7 +68,8 @@ create = ->
 
           onBrowserClose = options.onBrowserClose
           options.onBrowserClose = ->
-            preprocessor.removeFile(spec, cfg)
+            if spec
+              preprocessor.removeFile(spec, cfg)
             if onBrowserClose
               onBrowserClose()
 
