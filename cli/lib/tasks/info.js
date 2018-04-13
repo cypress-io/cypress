@@ -2,8 +2,10 @@ const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
+const cachedir = require('cachedir')
 
 const fs = require('../fs')
+const util = require('../util')
 
 const getPlatformExecutable = () => {
   const platform = os.platform()
@@ -16,24 +18,46 @@ const getPlatformExecutable = () => {
   }
 }
 
-const getInstallationDir = () => {
+const getInstallationDir = (version = util.pkgVersion()) => {
+  return getInfoFileContents()
+  .tap(debug)
+  .get('install_directory')
+  .catch(() => {
+    let cache_directory = cachedir('Cypress')
+
+    if (process.env.CYPRESS_CACHE_DIRECTORY) {
+      const envVarCacheDir = process.env.CYPRESS_CACHE_DIRECTORY
+      debug('using env var CYPRESS_CACHE_DIRECTORY %s', envVarCacheDir)
+      cache_directory = envVarCacheDir
+    }
+    return path.join(cache_directory, version)
+  })
+}
+
+const getDistDirectory = () => {
   return path.join(__dirname, '..', '..', 'dist')
 }
 
-const getInfoFilePath = () => {
+const getBinaryInfoFilePath = () => {
   const infoPath = path.join(getInstallationDir(), 'info.json')
   debug('path to info.json file %s', infoPath)
   return infoPath
 }
 
+const getInfoFilePath = () => {
+  const infoPath = path.join(getDistDirectory(), 'info.json')
+  debug('path to info.json file %s', infoPath)
+  return infoPath
+}
+
 const getInstalledVersion = () => {
-  return ensureFileInfoContents()
+  return getInfoFileContents()
   .tap(debug)
   .get('version')
 }
 
 const getVerifiedVersion = () => {
-  return ensureFileInfoContents().get('verifiedVersion')
+  return getBinaryInfoFileContents().get('verifiedVersion')
 }
 
 const ensureInstallationDir = () => {
@@ -41,16 +65,27 @@ const ensureInstallationDir = () => {
 }
 
 const clearVersionState = () => {
-  return ensureFileInfoContents()
+  return getBinaryInfoFileContents()
   .then((contents) => {
-    return writeInfoFileContents(_.omit(contents, 'version', 'verifiedVersion'))
+    return writeBinaryInfoFileContents(_.omit(contents, 'verifiedVersion'))
+  })
+  .then(getInfoFileContents())
+  .then((contents) => {
+    return writeInfoFileContents(_.omit(contents, 'version'))
   })
 }
 
 const writeInstalledVersion = (version) => {
-  return ensureFileInfoContents()
+  return getInfoFileContents()
   .then((contents) => {
     return writeInfoFileContents(_.extend(contents, { version }))
+  })
+}
+
+const writeInstallDirectory = (install_directory) => {
+  return getInfoFileContents()
+  .then((contents) => {
+    return writeInfoFileContents(_.extend(contents, { install_directory }))
   })
 }
 
@@ -64,10 +99,15 @@ const getPathToUserExecutableDir = () => {
 
 const getInfoFileContents = () => {
   return fs.readJsonAsync(getInfoFilePath())
+  .catch(() => {
+    debug('could not read info file')
+    return {}
+  })
 }
 
-const ensureFileInfoContents = () => {
-  return getInfoFileContents().catch(() => {
+const getBinaryInfoFileContents = () => {
+  return fs.readJsonAsync(getBinaryInfoFilePath())
+  .catch(() => {
     debug('could not read info file')
     return {}
   })
@@ -79,11 +119,17 @@ const writeInfoFileContents = (contents) => {
   })
 }
 
+const writeBinaryInfoFileContents = (contents) => {
+  return fs.outputJsonAsync(getBinaryInfoFilePath(), contents, {
+    spaces: 2,
+  })
+}
+
 module.exports = {
   clearVersionState,
   writeInfoFileContents,
   ensureInstallationDir,
-  ensureFileInfoContents,
+  getInfoFileContents,
   getInfoFilePath,
   getVerifiedVersion,
   getInstallationDir,
@@ -91,4 +137,5 @@ module.exports = {
   getPathToUserExecutableDir,
   getPathToExecutable,
   writeInstalledVersion,
+  writeInstallDirectory,
 }

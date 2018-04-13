@@ -14,6 +14,7 @@ const unzip = require('./unzip')
 const logger = require('../logger')
 const la = require('lazy-ass')
 const is = require('check-more-types')
+// const cachedir = require('cachedir')
 
 const alreadyInstalledMsg = (installedVersion, needVersion) => {
   logger.log(chalk.yellow(stripIndent`

@@ -48,7 +48,7 @@ const checkIfNotInstalledOrMissingExecutable = (installedVersion, executable) =>
 const writeVerifiedVersion = (verifiedVersion) => {
   debug('writing verified version string "%s"', verifiedVersion)
 
-  return info.ensureFileInfoContents()
+  return info.getInfoFileContents()
   .then((contents) => {
     return info.writeInfoFileContents(_.extend(contents, { verifiedVersion }))
   })
