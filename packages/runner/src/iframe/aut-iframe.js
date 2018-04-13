@@ -348,18 +348,34 @@ export default class AutIframe {
   }
 
   beforeScreenshot = (config) => {
-    if (config.disableTimersAndAnimations) {
-      dom.addCssAnimationDisabler(this._body())
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (config.disableTimersAndAnimations) {
+        dom.addCssAnimationDisabler(this._body())
+      }
+      _.each(config.blackout, (selector) => {
+        dom.addBlackout(this._body(), selector)
+      })
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-disable no-console */
     }
-    _.each(config.blackout, (selector) => {
-      dom.addBlackout(this._body(), selector)
-    })
   }
 
   afterScreenshot = (config) => {
-    if (config.disableTimersAndAnimations) {
-      dom.removeCssAnimationDisabler(this._body())
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (config.disableTimersAndAnimations) {
+        dom.removeCssAnimationDisabler(this._body())
+      }
+      dom.removeBlackouts(this._body())
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-disable no-console */
     }
-    dom.removeBlackouts(this._body())
   }
 }
