@@ -24,14 +24,14 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 400)
       .visit('http://localhost:3322/color/yellow')
-      .screenshot("crop-check", { capture: ["app"] })
+      .screenshot("crop-check")
       .task("check:screenshot:crop", { name: 'crop-check.png', width: 600, height: 400 })
 
   it "accepts screenshot after 10 tries if somehow app has pixels that match helper pixels", ->
     cy
       .viewport(1280, 720)
       .visit('http://localhost:3322/pathological')
-      .screenshot("pathological", { capture: ["app"] })
+      .screenshot("pathological")
 
   context "before hooks", ->
     before ->
