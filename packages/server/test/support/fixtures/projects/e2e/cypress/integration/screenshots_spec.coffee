@@ -2,15 +2,15 @@ describe "taking screenshots", ->
   it "manually generates pngs", ->
     cy
       .visit('http://localhost:3322/color/black')
-      .screenshot("black")
+      .screenshot("black", { capture: "runner" })
       .wait(1500)
       .visit('http://localhost:3322/color/red')
-      .screenshot("red")
+      .screenshot("red", { capture: "runner" })
 
   it "can nest screenshots in folders", ->
     cy
       .visit('http://localhost:3322/color/white')
-      .screenshot("foo/bar/baz")
+      .screenshot("foo/bar/baz", { capture: "runner" })
 
   it "generates pngs on failure", ->
     cy
