@@ -1,7 +1,7 @@
 { Screenshot, $ } = Cypress
 
 DEFAULTS = {
-  capture: "runner"
+  capture: "app"
   waitForCommandSynchronization: true
   scaleAppCaptures: false
   disableTimersAndAnimations: true
@@ -34,9 +34,9 @@ describe "src/cypress/screenshot", ->
 
     it "sets capture if specified", ->
       Screenshot.defaults({
-        capture: "app"
+        capture: "runner"
       })
-      expect(Screenshot.getConfig().capture).to.eql("app")
+      expect(Screenshot.getConfig().capture).to.eql("runner")
 
     it "sets waitForCommandSynchronization if specified", ->
       Screenshot.defaults({
