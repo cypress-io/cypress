@@ -4,7 +4,16 @@ Promise = require("bluebird")
 Screenshot = require("../../cypress/screenshot")
 $utils = require("../../cypress/utils")
 
-takeScreenshot = (runnable, name, options = {}) ->
+automateScreenshot = (options = {}) ->
+  {
+    runnable
+    name
+    log
+    timeout
+    appOnly
+    viewport
+  } = options
+
   titles = []
 
   ## if this a hook then push both the current test title
@@ -14,12 +23,6 @@ takeScreenshot = (runnable, name, options = {}) ->
       titles.push(ct.title, runnable.title)
   else
     titles.push(runnable.title)
-
-  if options.type
-    if name
-      name += " -- #{options.type}"
-    else
-      titles.push(options.type)
 
   getParentTitle = (runnable) ->
     if p = runnable.parent
@@ -34,14 +37,14 @@ takeScreenshot = (runnable, name, options = {}) ->
     name: name
     titles: titles
     testId: runnable.id
-    appOnly: options.appOnly
-    viewport: options.viewport
+    appOnly: appOnly
+    viewport: viewport
   }
 
   automate = ->
     Cypress.automation("take:screenshot", props)
 
-  if not options.timeout
+  if not timeout
     automate()
   else
     ## need to remove the current timeout
@@ -49,83 +52,76 @@ takeScreenshot = (runnable, name, options = {}) ->
     cy.clearTimeout("take:screenshot")
 
     automate()
-    .timeout(options.timeout)
+    .timeout(timeout)
     .catch (err) ->
-      $utils.throwErr(err, { onFail: options.log })
+      $utils.throwErr(err, { onFail: log })
     .catch Promise.TimeoutError, (err) ->
       $utils.throwErrByPath "screenshot.timed_out", {
-        onFail: options.log
-        args: {
-          timeout: options.timeout
-        }
+        onFail: log
+        args: { timeout }
       }
 
-module.exports = (Commands, Cypress, cy, state, config) ->
+takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
+  {
+    blackout
+    capture
+    disableTimersAndAnimations
+    scaleAppCaptures
+    waitForCommandSynchronization
+  } = screenshotConfig
+
+  { runnable } = options
+
+  appOnly = capture is "app"
+
   send = (event, props) ->
     new Promise (resolve) ->
       Cypress.action("cy:#{event}", props, resolve)
 
-  beforeAll = (screenshotConfig) ->
-    if screenshotConfig.disableTimersAndAnimations
+  before = (capture) ->
+    if disableTimersAndAnimations
       cy.pauseTimers(true)
 
     Screenshot.callBeforeScreenshot(state("document"))
 
-    send("before:all:screenshots", {
-      disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations
-      blackout: screenshotConfig.blackout
+    send("before:screenshot", {
+      id: runnable.id
+      isOpen: true
+      appOnly: appOnly
+      scale: if appOnly then scaleAppCaptures else true
+      waitForCommandSynchronization: if capture is "runner" then waitForCommandSynchronization else false
+      disableTimersAndAnimations: disableTimersAndAnimations
+      blackout: blackout
     })
 
-  afterAll = (screenshotConfig) ->
+  after = (capture) ->
+    send("after:screenshot", {
+      id: runnable.id
+      isOpen: false
+      appOnly: appOnly
+      scale: if appOnly then scaleAppCaptures else true
+      disableTimersAndAnimations: disableTimersAndAnimations
+      blackout: blackout
+    })
+
     Screenshot.callAfterScreenshot(state("document"))
 
-    send("after:all:screenshots", {
-      disableTimersAndAnimations: screenshotConfig.disableTimersAndAnimations
-      blackout: screenshotConfig.blackout
-    })
-
-    if screenshotConfig.disableTimersAndAnimations
+    if disableTimersAndAnimations
       cy.pauseTimers(false)
 
-  prepAndTakeScreenshots = (screenshotConfig, runnable, name, options = {}) ->
-    before = (capture) ->
-      send("before:screenshot", {
-        id: runnable.id
-        isOpen: true
-        appOnly: capture is "app"
-        scale: if capture is "app" then screenshotConfig.scaleAppCaptures else true
-        waitForCommandSynchronization: if capture is "runner" then screenshotConfig.waitForCommandSynchronization else false
-      })
+  before(capture)
+  .then ->
+    automateScreenshot(_.extend({}, options, {
+      appOnly: appOnly
+      viewport: {
+        width: state("viewportWidth")
+        height: state("viewportHeight")
+      }
+    }))
+  .finally ->
+    after(screenshotConfig)
 
-    after = (capture) ->
-      send("after:screenshot", {
-        id: runnable.id
-        isOpen: false
-        appOnly: capture is "app"
-        scale: if capture is "app" then screenshotConfig.scaleAppCaptures else true
-      })
-
-    fn = (capture) ->
-      type = if screenshotConfig.capture.length > 1 then capture else null
-
-      before(capture)
-      .then ->
-        takeScreenshot(runnable, name, _.extend({}, options, {
-          appOnly: capture is "app"
-          type: type
-          viewport: {
-            width: state("viewportWidth")
-            height: state("viewportHeight")
-          }
-        }))
-      .finally ->
-        after(capture)
-
-    beforeAll(screenshotConfig)
-    .then ->
-      Promise.map(screenshotConfig.capture, fn, { concurrency: 1 })
-    .finally ->
-      afterAll(screenshotConfig)
+module.exports = (Commands, Cypress, cy, state, config) ->
 
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = Screenshot.getConfig()
@@ -133,7 +129,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## to take a screenshot and we are not interactive
     ## which means we're exiting at the end
     if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
-      prepAndTakeScreenshots(screenshotConfig, runnable)
+      takeScreenshot(Cypress, state, screenshotConfig, { runnable })
 
   Commands.addAll({
     screenshot: (name, options = {}) ->
@@ -164,16 +160,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      prepAndTakeScreenshots(screenshotConfig, runnable, name, {
+      takeScreenshot(Cypress, state, screenshotConfig, {
+        runnable: runnable
+        name: name
         log: options._log
         timeout: options.timeout
       })
-      .then (results) ->
-        _.each results, ({ path, size }, i) ->
-          capture = screenshotConfig.capture[i]
-          _.extend(consoleProps, {
-            "#{capture} Saved": path
-            "#{capture} Size": size
-          })
+      .then ({ path, size }) ->
+        _.extend(consoleProps, {
+          "Saved": path
+          "Size": size
+        })
       .return(null)
   })

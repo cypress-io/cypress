@@ -1,7 +1,7 @@
 { Screenshot, $ } = Cypress
 
 DEFAULTS = {
-  capture: ["runner"]
+  capture: "runner"
   waitForCommandSynchronization: true
   scaleAppCaptures: false
   disableTimersAndAnimations: true
@@ -28,9 +28,9 @@ describe "src/cypress/screenshot", ->
 
     it "sets capture if specified", ->
       Screenshot.defaults({
-        capture: ["app"]
+        capture: "app"
       })
-      expect(Screenshot.getConfig().capture).to.eql(["app"])
+      expect(Screenshot.getConfig().capture).to.eql("app")
 
     it "sets waitForCommandSynchronization if specified", ->
       Screenshot.defaults({
@@ -74,35 +74,15 @@ describe "src/cypress/screenshot", ->
           Screenshot.defaults()
         .to.throw("Cypress.Screenshot.defaults() must be called with an object. You passed: ")
 
-      it "throws if capture is not an array", ->
+      it "throws if capture is not a string", ->
+        expect =>
+          Screenshot.defaults({ capture: true })
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app' or 'runner'. You passed: true")
+
+      it "throws if capture is not a valid option", ->
         expect =>
           Screenshot.defaults({ capture: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: foo")
-
-      it "throws if capture is an empty array", ->
-        expect =>
-          Screenshot.defaults({ capture: [] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: ")
-
-      it "throws if capture is an array with invalid items", ->
-        expect =>
-          Screenshot.defaults({ capture: ["ap"] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: ap")
-
-      it "throws if capture is an array with duplicates", ->
-        expect =>
-          Screenshot.defaults({ capture: ["app", "app"] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: app, app")
-
-      it "throws if capture is in wrong order", ->
-        expect =>
-          Screenshot.defaults({ capture: ["runner", "app"] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: runner, app")
-
-      it "throws if capture is an array with too many items", ->
-        expect =>
-          Screenshot.defaults({ capture: ["runner", "app", "app"] })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: [app], [runner], or [app, runner]. You passed: runner, app, app")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app' or 'runner'. You passed: foo")
 
       it "throws if waitForCommandSynchronization is not a boolean", ->
         expect =>

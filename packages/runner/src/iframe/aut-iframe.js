@@ -347,7 +347,7 @@ export default class AutIframe {
     })
   }
 
-  beforeScreenshots = (config) => {
+  beforeScreenshot = (config) => {
     if (config.disableTimersAndAnimations) {
       dom.addCssAnimationDisabler(this._body())
     }
@@ -356,7 +356,7 @@ export default class AutIframe {
     })
   }
 
-  afterScreenshots = (config) => {
+  afterScreenshot = (config) => {
     if (config.disableTimersAndAnimations) {
       dom.removeCssAnimationDisabler(this._body())
     }

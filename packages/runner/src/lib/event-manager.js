@@ -236,11 +236,6 @@ const eventManager = {
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
-    Cypress.on('before:all:screenshots', (config, cb) => {
-      localBus.emit('before:all:screenshots', config)
-      cb()
-    })
-
     Cypress.on('before:screenshot', (config, cb) => {
       const beforeThenCb = () => {
         localBus.emit('before:screenshot', config)
@@ -256,11 +251,6 @@ const eventManager = {
 
     Cypress.on('after:screenshot', (config, cb) => {
       localBus.emit('after:screenshot', config)
-      cb()
-    })
-
-    Cypress.on('after:all:screenshots', (config, cb) => {
-      localBus.emit('after:all:screenshots', config)
       cb()
     })
 

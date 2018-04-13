@@ -3,7 +3,7 @@ _ = require("lodash")
 $utils = require("./utils")
 
 reset = -> {
-  capture: ["runner"]
+  capture: "runner"
   waitForCommandSynchronization: true
   scaleAppCaptures: false
   disableTimersAndAnimations: true
@@ -15,25 +15,7 @@ reset = -> {
 
 defaults = reset()
 
-validCaptures = ["app", "runner", "app,runner"]
-
-isCaptureValid = (capture) ->
-  if not _.isArray(capture)
-    return false
-
-  ## can't be any empty array
-  if not capture.length
-    return false
-
-  ## must be valid strings in valid order
-  if not (capture.join(",") in validCaptures)
-    return false
-
-  ## can't be duplicates
-  if _.uniq(capture).length isnt capture.length
-    return false
-
-  return true
+validCaptures = ["app", "runner"]
 
 validateAndSetBoolean = (props, values, cmd, log, option) ->
   value = props[option]
@@ -43,10 +25,10 @@ validateAndSetBoolean = (props, values, cmd, log, option) ->
   if not _.isBoolean(value)
     $utils.throwErrByPath("screenshot.invalid_boolean", {
       log: log
-      args: { 
+      args: {
         cmd: cmd
         option: option
-        arg: $utils.stringify(value) 
+        arg: $utils.stringify(value)
       }
     })
 
@@ -60,10 +42,10 @@ validateAndSetCallback = (props, values, cmd, log, option) ->
   if not _.isFunction(value)
     $utils.throwErrByPath("screenshot.invalid_callback", {
       log: log
-      args: { 
+      args: {
         cmd: cmd
         callback: option
-        arg: $utils.stringify(value) 
+        arg: $utils.stringify(value)
       }
     })
 
@@ -79,7 +61,7 @@ validate = (props, cmd, log) ->
     })
 
   if capture = props.capture
-    if not isCaptureValid(capture)
+    if not (capture in validCaptures)
       $utils.throwErrByPath("screenshot.invalid_capture", {
         log: log
         args: { cmd: cmd, arg: $utils.stringify(capture) }
