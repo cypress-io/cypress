@@ -16,6 +16,7 @@ Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
 Windows    = require("../gui/windows")
+specs      = require("../util/specs")
 trash      = require("../util/trash")
 random     = require("../util/random")
 progress   = require("../util/progress_bar")
@@ -462,7 +463,7 @@ module.exports = {
       config
     }
 
-    project.getSpecs(options.spec)
+    specs.find(config, options.spec)
     .then (specs = []) =>
       if not specs.length
         ## TODO: throw error when no specs found

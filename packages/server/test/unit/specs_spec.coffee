@@ -4,10 +4,10 @@ R = require("ramda")
 path = require("path")
 files = require("#{root}lib/files")
 config = require("#{root}lib/config")
-filesController = require("#{root}lib/controllers/files")
+specs = require("#{root}lib/util/specs")
 FixturesHelper = require("#{root}/test/support/helpers/fixtures")
 
-describe "lib/controllers/files", ->
+describe "lib/util/specs", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
@@ -20,28 +20,28 @@ describe "lib/controllers/files", ->
   afterEach ->
     FixturesHelper.remove()
 
-  context "#getTestFiles", ->
+  context ".find", ->
     checkFoundSpec = (foundSpec) ->
       if not path.isAbsolute(foundSpec.absolute)
         throw new Error("path to found spec should be absolute #{JSON.stringify(foundSpec)}")
 
     it "returns absolute filenames", ->
-      filesController
-      .getTestFiles(@config)
+      specs
+      .find(@config)
       .then (R.prop("integration"))
       .then (R.forEach(checkFoundSpec))
 
     it "handles fixturesFolder being false", ->
       @config.fixturesFolder = false
 
-      fn = => filesController.getTestFiles(@config)
+      fn = => specs.find(@config)
 
       expect(fn).not.to.throw()
 
     it "by default, returns all files as long as they have a name and extension", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
       .then (cfg) ->
-        filesController.getTestFiles(cfg)
+        specs.find(cfg)
       .then (files) ->
         expect(files.integration.length).to.equal(3)
         expect(files.integration[0].name).to.equal("coffee_spec.coffee")
@@ -52,7 +52,7 @@ describe "lib/controllers/files", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
       .then (cfg) ->
         cfg.testFiles = "**/*.coffee"
-        filesController.getTestFiles(cfg)
+        specs.find(cfg)
       .then (files) ->
         expect(files.integration.length).to.equal(1)
         expect(files.integration[0].name).to.equal("coffee_spec.coffee")
@@ -60,7 +60,7 @@ describe "lib/controllers/files", ->
     it "filters using specPattern", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
       .then (cfg) ->
-        filesController.getTestFiles(cfg, [
+        specs.find(cfg, [
           path.join(cfg.projectRoot, "cypress", "integration", "js_spec.js")
         ])
       .then (files) ->
@@ -70,7 +70,7 @@ describe "lib/controllers/files", ->
     it "filters using specPattern as array of glob patterns", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
       .then (cfg) ->
-        filesController.getTestFiles(cfg, [
+        specs.find(cfg, [
           path.join(cfg.projectRoot, "cypress", "integration", "js_spec.js")
           path.join(cfg.projectRoot, "cypress", "integration", "ts*")
         ])
