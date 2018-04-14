@@ -139,3 +139,4 @@ module.exports = {
   writeInstalledVersion,
   writeInstallDirectory,
 }
+
