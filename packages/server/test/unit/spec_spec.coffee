@@ -47,7 +47,7 @@ describe "lib/controllers/spec", ->
       expect(@res.send.firstCall.args[0]).to.include("(function")
       expect(@res.send.firstCall.args[0]).to.include("Reason request failed")
 
-  it "logs the error and exits in headless mode", ->
+  it "logs the error and exits in run mode", ->
     @sandbox.stub(errors, "log")
     preprocessor.getFile.rejects(new Error("Reason request failed"))
 

@@ -101,7 +101,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "launch:browser"
-      # headless.createWindows(arg, true)
+      # runMode.createWindows(arg, true)
       openProject.launch(arg.browser, arg.spec, {
         projectPath: options.projectPath
         onBrowserOpen: ->

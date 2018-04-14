@@ -9,7 +9,7 @@ nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 everythingAfterFirstEqualRe = /=(.+)/
 
-whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode removeIds headed config exit exitWithCode browser headless outputPath group groupId parallel parallelId".split(" ")
+whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode removeIds headed config exit exitWithCode browser runMode outputPath group groupId parallel parallelId".split(" ")
 
 # returns true if the given string has double quote character "
 # only at the last position.
@@ -87,7 +87,7 @@ module.exports = {
         "clear-logs":  "clearLogs"
         "run-project": "runProject"
         "return-pkg":  "returnPkg"
-        "headless":    "isTextTerminal"
+        "runMode":    "isTextTerminal"
         "exit-with-code":   "exitWithCode"
         "reporter-options": "reporterOptions"
         "output-path":      "outputPath"

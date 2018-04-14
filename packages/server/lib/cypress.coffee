@@ -152,7 +152,7 @@ module.exports = {
         when options.runProject
           ## go into headless mode when running
           ## until completion + exit
-          options.mode = "headless"
+          options.mode = "run"
 
         else
           ## set the default mode as headed
@@ -230,7 +230,7 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      when "headless"
+      when "run"
         ## run headlessly and exit
         ## with num of totalFailures
         @runElectron(mode, options)
