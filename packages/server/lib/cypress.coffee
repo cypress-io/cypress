@@ -118,9 +118,6 @@ module.exports = {
       ## the passed in arguments / options
       ## and normalize this mode
       switch
-        when options.removeIds
-          options.mode = "removeIds"
-
         when options.version
           options.mode = "version"
 
@@ -168,13 +165,6 @@ module.exports = {
     debug("start in mode %s with options %j", mode, options)
 
     switch mode
-      when "removeIds"
-        require("./project").removeIds(options.projectPath)
-        .then (stats = {}) ->
-          console.log("Removed '#{stats.ids}' ids from '#{stats.files}' files.")
-        .then(exit0)
-        .catch(exitErr)
-
       when "version"
         require("./modes/pkg")(options)
         .get("version")

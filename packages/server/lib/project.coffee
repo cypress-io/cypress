@@ -9,7 +9,6 @@ commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
 check       = require("check-more-types")
 cwd         = require("./cwd")
-ids         = require("./ids")
 api         = require("./api")
 user        = require("./user")
 cache       = require("./cache")
@@ -566,14 +565,6 @@ class Project extends EE
       {id, path}
     .catch ->
       {path}
-
-  @removeIds = (p) ->
-    Project(p)
-    .verifyExistence()
-    .call("getConfig")
-    .then (cfg) ->
-      ## remove all of the ids for the test files found in the integrationFolder
-      ids.remove(cfg.integrationFolder)
 
   @id = (path) ->
     Project(path).getProjectId()
