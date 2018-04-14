@@ -5,7 +5,6 @@ path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
 Promise    = require("bluebird")
-random     = require("randomstring")
 pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:headless")
 ss         = require("../screenshots")
@@ -18,6 +17,7 @@ Reporter   = require("../reporter")
 openProject = require("../open_project")
 progress   = require("../util/progress_bar")
 trash      = require("../util/trash")
+random     = require("../util/random")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 Windows    = require("../gui/windows")
@@ -45,12 +45,6 @@ collectTestResults = (obj = {}) ->
 module.exports = {
   collectTestResults
 
-  getId: ->
-    ## return a random id
-    random.generate({
-      length: 5
-      capitalization: "lowercase"
-    })
 
   getProjectId: (project, id) ->
     ## if we have an ID just use it
@@ -516,7 +510,7 @@ module.exports = {
   ready: (options = {}) ->
     debug("headless mode ready with options %j", options)
 
-    id = @getId()
+    socketId = random.id()
 
     { projectPath } = options
 

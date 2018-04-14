@@ -1,6 +1,5 @@
 require("../../spec_helper")
 
-random   = require("randomstring")
 Promise  = require("bluebird")
 electron = require("electron")
 user     = require("#{root}../lib/user")
@@ -14,18 +13,6 @@ openProject = require("#{root}../lib/open_project")
 describe "lib/modes/headless", ->
   beforeEach ->
     @projectInstance = Project("/_test-output/path/to/project")
-
-  context ".getId", ->
-    it "returns random.generate string", ->
-      @sandbox.spy(random, "generate")
-
-      id = headless.getId()
-      expect(id.length).to.eq(5)
-
-      expect(random.generate).to.be.calledWith({
-        length: 5
-        capitalization: "lowercase"
-      })
 
   context ".openProject", ->
     beforeEach ->
