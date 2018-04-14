@@ -7,10 +7,8 @@ const cp = require('child_process')
 const minimist = require('minimist')
 const Promise = require('bluebird')
 const terminalBanner = require('terminal-banner').terminalBanner
-
-const humanTime = require('../../lib/util/human_time.coffee')
-
 const glob = require('../../lib/util/glob')
+const humanTime = require('../../lib/util/human_time')
 
 const options = minimist(process.argv.slice(2))
 

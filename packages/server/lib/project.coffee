@@ -6,6 +6,8 @@ Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
 check       = require("check-more-types")
+scaffoldLog = require("debug")("cypress:server:scaffold")
+debug       = require("debug")("cypress:server:project")
 cwd         = require("./cwd")
 api         = require("./api")
 user        = require("./user")
@@ -14,21 +16,17 @@ config      = require("./config")
 logger      = require("./logger")
 errors      = require("./errors")
 Server      = require("./server")
+plugins     = require("./plugins")
 scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
+browsers    = require("./browsers")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
-files       = require("./controllers/files")
-plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
 fs          = require("./util/fs")
 specs       = require("./util/specs")
 settings    = require("./util/settings")
-browsers    = require("./browsers")
-scaffoldLog = require("debug")("cypress:server:scaffold")
-debug       = require("debug")("cypress:server:project")
-
 
 localCwd = cwd()
 
@@ -302,7 +300,9 @@ class Project extends EE
     setNewProject = (cfg) =>
       ## decide if new project by asking scaffold
       ## and looking at previously saved user state
-      throw new Error("Missing integration folder") if not cfg.integrationFolder
+      if not cfg.integrationFolder
+        throw new Error("Missing integration folder")
+
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
@@ -311,11 +311,11 @@ class Project extends EE
       .return(cfg)
 
     if c = @cfg
-      Promise.resolve(c)
-    else
-      config.get(@projectRoot, options)
-      .then (cfg) => @_setSavedState(cfg)
-      .then(setNewProject)
+      return Promise.resolve(c)
+
+    config.get(@projectRoot, options)
+    .then (cfg) => @_setSavedState(cfg)
+    .then(setNewProject)
 
   # forces saving of project's state by first merging with argument
   saveState: (stateChanges = {}) ->

@@ -1,11 +1,10 @@
 _          = require("lodash")
 utils      = require("fluent-ffmpeg/lib/utils")
+debug      = require("debug")("cypress:server:video")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
-debug      = require("debug")("cypress:server:video")
-
 fs         = require("./util/fs")
 
 ffmpeg.setFfmpegPath(ffmpegPath)
@@ -96,7 +95,7 @@ module.exports = {
 
     .on "end", ->
       debug("ffmpeg ended")
-      
+
       ended.resolve()
     .save(name)
 

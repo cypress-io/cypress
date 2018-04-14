@@ -1,3 +1,4 @@
+os      = require("os")
 path    = require("path")
 ospath  = require("ospath")
 Promise = require("bluebird")
@@ -6,7 +7,6 @@ check   = require("check-more-types")
 log     = require("debug")("cypress:server:appdata")
 pkg     = require("@packages/root")
 cwd     = require("../cwd")
-os      = require("os")
 fs      = require("../util/fs")
 
 name = pkg.productName or pkg.name
@@ -16,9 +16,9 @@ if not name
   throw new Error("Root package is missing name")
 
 getSymlinkType = ->
-  if os.platform() == "win32" 
-    "junction" 
-  else 
+  if os.platform() == "win32"
+    "junction"
+  else
     "dir"
 
 isProduction = ->

@@ -2,6 +2,7 @@ require("../spec_helper")
 
 path         = require("path")
 Promise      = require("bluebird")
+commitInfo   = require("@cypress/commit-info")
 Fixtures     = require("../support/helpers/fixtures")
 ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
@@ -13,12 +14,11 @@ scaffold     = require("#{root}lib/scaffold")
 Server       = require("#{root}lib/server")
 Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
-settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
-commitInfo   = require("@cypress/commit-info")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
 fs           = require("#{root}lib/util/fs")
+settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->

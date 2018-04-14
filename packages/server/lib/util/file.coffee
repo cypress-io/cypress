@@ -1,14 +1,13 @@
 _ = require("lodash")
-md5 = require("md5")
 os = require("os")
+md5 = require("md5")
 path = require("path")
-Promise = require("bluebird")
+debug = require('debug')('cypress:server:file')
 Queue = require("p-queue")
+Promise = require("bluebird")
 lockFile = Promise.promisifyAll(require("lockfile"))
-fs = Promise.promisifyAll(require("fs-extra"))
 fs = require("./fs")
 exit = require("./exit")
-log = require('debug')('cypress:server:file')
 
 DEBOUNCE_LIMIT = 1000
 
@@ -81,7 +80,7 @@ module.exports = class Conf
   _read: ->
     @_lock()
     .then =>
-      log('reading JSON file %s', @path)
+      debug('reading JSON file %s', @path)
       fs.readJsonAsync(@path, "utf8")
     .catch (err) =>
       ## default to {} in certain cases, otherwise bubble up error
@@ -129,7 +128,7 @@ module.exports = class Conf
   _write: ->
     @_lock()
     .then =>
-      log('writing JSON file %s', @path)
+      debug('writing JSON file %s', @path)
       fs.outputJsonAsync(@path, @_cache, {spaces: 2})
     .finally =>
       @_unlock()

@@ -19,14 +19,13 @@ pkg           = require("@packages/root")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Watchers      = require("#{root}lib/watchers")
-files         = require("#{root}lib/controllers/files")
-CacheBuster   = require("#{root}lib/util/cache_buster")
-Fixtures      = require("#{root}test/support/helpers/fixtures")
 errors        = require("#{root}lib/errors")
+files         = require("#{root}lib/controllers/files")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
-
+CacheBuster   = require("#{root}lib/util/cache_buster")
 fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
+Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})

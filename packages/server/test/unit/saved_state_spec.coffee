@@ -2,10 +2,10 @@ require("../spec_helper")
 
 path = require("path")
 Promise = require("bluebird")
+savedState = require("#{root}lib/saved_state")
 fs = require("#{root}lib/util/fs")
 FileUtil = require("#{root}lib/util/file")
 appData = require("#{root}lib/util/app_data")
-savedState = require("#{root}lib/saved_state")
 savedStateUtil = require("#{root}lib/util/saved_state")
 
 describe "lib/util/saved_state", ->

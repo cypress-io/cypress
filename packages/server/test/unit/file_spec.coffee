@@ -3,10 +3,10 @@ require("../spec_helper")
 os = require("os")
 path = require("path")
 Promise = require("bluebird")
-FileUtil = require("#{root}lib/util/file")
-exit = require("#{root}lib/util/exit")
 lockFile = Promise.promisifyAll(require("lockfile"))
 fs = require("#{root}lib/util/fs")
+exit = require("#{root}lib/util/exit")
+FileUtil = require("#{root}lib/util/file")
 
 describe "lib/util/file", ->
   beforeEach ->
