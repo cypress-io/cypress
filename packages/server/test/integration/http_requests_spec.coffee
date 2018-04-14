@@ -7,7 +7,6 @@ fs            = require("fs-extra")
 rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
-glob          = require("glob")
 path          = require("path")
 str           = require("underscore.string")
 browserify    = require("browserify")
@@ -28,11 +27,10 @@ errors        = require("#{root}lib/errors")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
 
 fs = Promise.promisifyAll(fs)
+glob          = require("#{root}lib/util/glob")
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
-
-glob = Promise.promisify(glob)
 
 removeWhitespace = (c) ->
   c = str.clean(c)

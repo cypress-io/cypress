@@ -3,7 +3,6 @@ R           = require("ramda")
 fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
-glob        = require("glob")
 Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
@@ -31,7 +30,6 @@ scaffoldLog = require("debug")("cypress:server:scaffold")
 debug       = require("debug")("cypress:server:project")
 
 fs   = Promise.promisifyAll(fs)
-glob = Promise.promisify(glob)
 
 localCwd = cwd()
 

@@ -10,7 +10,7 @@ const terminalBanner = require('terminal-banner').terminalBanner
 
 const humanTime = require('../../lib/util/human_time.coffee')
 
-const glob = Promise.promisify(require('glob'))
+const glob = require('../../lib/util/glob')
 
 const options = minimist(process.argv.slice(2))
 
