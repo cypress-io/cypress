@@ -826,16 +826,6 @@ describe "lib/project", ->
       .catch (err) ->
         expect(err).to.equal(error)
 
-  context ".removeIds", ->
-    beforeEach ->
-      @sandbox.stub(ids, "remove").resolves({})
-
-    it "calls id.remove with path to project tests", ->
-      p = Fixtures.projectPath("ids")
-
-      Project.removeIds(p).then ->
-        expect(ids.remove).to.be.calledWith(p + "/cypress/integration")
-
   context ".getSecretKeyByPath", ->
     beforeEach ->
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
