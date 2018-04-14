@@ -155,8 +155,8 @@ module.exports = {
           options.mode = "run"
 
         else
-          ## set the default mode as headed
-          options.mode ?= "headed"
+          ## set the default mode as interactive
+          options.mode ?= "interactive"
 
       ## remove mode from options
       mode    = options.mode
@@ -238,7 +238,7 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      when "headed"
+      when "interactive"
         @runElectron(mode, options)
 
       when "record"

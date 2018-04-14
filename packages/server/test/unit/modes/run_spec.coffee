@@ -426,7 +426,7 @@ describe "lib/modes/runMode", ->
       .then ->
         expect(errors.warning).to.not.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
-    it "disables video recording on headed runs", ->
+    it "disables video recording on interactive mode runs", ->
       runMode.run({headed: true})
       .then ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_HEADED")

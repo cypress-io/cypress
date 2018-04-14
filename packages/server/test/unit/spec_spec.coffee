@@ -39,7 +39,7 @@ describe "lib/controllers/spec", ->
     @handle(specName).then =>
       expect(@res.sendFile).to.be.calledWith(outputFilePath)
 
-  it "sends a client-side error in headed mode", ->
+  it "sends a client-side error in interactive mode", ->
     preprocessor.getFile.rejects(new Error("Reason request failed"))
 
     @handle(specName).then =>

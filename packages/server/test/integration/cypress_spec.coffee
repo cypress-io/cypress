@@ -19,7 +19,7 @@ settings   = require("#{root}lib/util/settings")
 Events     = require("#{root}lib/gui/events")
 Windows    = require("#{root}lib/gui/windows")
 record     = require("#{root}lib/modes/record")
-headed     = require("#{root}lib/modes/headed")
+interactiveMode    = require("#{root}lib/modes/interactive")
 runMode   = require("#{root}lib/modes/run")
 api        = require("#{root}lib/api")
 cwd        = require("#{root}lib/cwd")
@@ -1119,7 +1119,7 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
-  context "headed", ->
+  context "interactive", ->
     beforeEach ->
       @win = {
         on: @sandbox.stub()
@@ -1141,12 +1141,12 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_responseTimeout
       delete process.env.CYPRESS_watch_for_file_changes
 
-    it "passes options to headed.ready", ->
-      @sandbox.stub(headed, "ready")
+    it "passes options to interactiveMode.ready", ->
+      @sandbox.stub(interactiveMode, "ready")
 
       cypress.start(["--updating", "--port=2121", "--config=pageLoadTimeout=1000"])
       .then ->
-        expect(headed.ready).to.be.calledWithMatch({
+        expect(interactiveMode.ready).to.be.calledWithMatch({
           updating: true
           config: {
             port: 2121
@@ -1256,8 +1256,8 @@ describe "lib/cypress", ->
   context "no args", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(headed, "ready").resolves()
+      @sandbox.stub(interactiveMode, "ready").resolves()
 
-    it "runs headed and does not exit", ->
+    it "runs interactiveMode and does not exit", ->
       cypress.start().then ->
-        expect(headed.ready).to.be.calledOnce
+        expect(interactiveMode.ready).to.be.calledOnce

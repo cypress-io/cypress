@@ -4,5 +4,5 @@ module.exports = (mode, options) ->
       require("./record").run(options)
     when "run"
       require("./run").run(options)
-    when "headed"
-      require("./headed").run(options)
+    when "interactive"
+      require("./interactive").run(options)
