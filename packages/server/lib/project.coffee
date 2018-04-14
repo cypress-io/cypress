@@ -1,6 +1,5 @@
 _           = require("lodash")
 R           = require("ramda")
-fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
 Promise     = require("bluebird")
@@ -23,13 +22,13 @@ Automation  = require("./automation")
 files       = require("./controllers/files")
 plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
+fs          = require("./util/fs")
 specs       = require("./util/specs")
 settings    = require("./util/settings")
 browsers    = require("./browsers")
 scaffoldLog = require("debug")("cypress:server:scaffold")
 debug       = require("debug")("cypress:server:project")
 
-fs   = Promise.promisifyAll(fs)
 
 localCwd = cwd()
 

@@ -1,5 +1,4 @@
 _          = require("lodash")
-fs         = require("fs-extra")
 utils      = require("fluent-ffmpeg/lib/utils")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
@@ -7,7 +6,7 @@ Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
 debug      = require("debug")("cypress:server:video")
 
-fs = Promise.promisifyAll(fs)
+fs         = require("./util/fs")
 
 ffmpeg.setFfmpegPath(ffmpegPath)
 

@@ -1,15 +1,13 @@
 _         = require("lodash")
-fs        = require("fs-extra")
 Promise   = require("bluebird")
 path      = require("path")
 cypressEx = require("@packages/example")
 cwd       = require("./cwd")
 log       = require("debug")("cypress:server:scaffold")
+fs        = require("./util/fs")
 glob      = require("./util/glob")
 { propEq, complement, equals, compose, head, isEmpty, always } = require("ramda")
 { isDefault } = require("./util/config")
-
-fs = Promise.promisifyAll(fs)
 
 INTEGRATION_EXAMPLE_SPEC = cypressEx.getPathToExample()
 INTEGRATION_EXAMPLE_NAME = path.basename(INTEGRATION_EXAMPLE_SPEC)

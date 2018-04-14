@@ -1,12 +1,10 @@
-fs              = require("fs-extra")
 mime            = require("mime")
 path            = require("path")
 bytes           = require("bytes")
 sizeOf          = require("image-size")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
-
-fs   = Promise.promisifyAll(fs)
+fs              = require("./util/fs")
 glob            = require("./util/glob")
 
 RUNNABLE_SEPARATOR = " -- "

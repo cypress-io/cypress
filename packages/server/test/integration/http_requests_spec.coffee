@@ -3,7 +3,6 @@ require("../spec_helper")
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 _             = require("lodash")
-fs            = require("fs-extra")
 rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
@@ -26,7 +25,7 @@ Fixtures      = require("#{root}test/support/helpers/fixtures")
 errors        = require("#{root}lib/errors")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
 
-fs = Promise.promisifyAll(fs)
+fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
 
 ## force supertest-session to use supertest-as-promised, hah

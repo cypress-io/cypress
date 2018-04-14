@@ -1,4 +1,3 @@
-fs      = require("fs-extra")
 path    = require("path")
 ospath  = require("ospath")
 Promise = require("bluebird")
@@ -8,8 +7,8 @@ log     = require("debug")("cypress:server:appdata")
 pkg     = require("@packages/root")
 cwd     = require("../cwd")
 os      = require("os")
+fs      = require("../util/fs")
 
-fs   = Promise.promisifyAll(fs)
 name = pkg.productName or pkg.name
 data = ospath.data()
 

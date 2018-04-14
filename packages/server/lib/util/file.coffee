@@ -6,6 +6,7 @@ Promise = require("bluebird")
 Queue = require("p-queue")
 lockFile = Promise.promisifyAll(require("lockfile"))
 fs = Promise.promisifyAll(require("fs-extra"))
+fs = require("./fs")
 exit = require("./exit")
 log = require('debug')('cypress:server:file')
 

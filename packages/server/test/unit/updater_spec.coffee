@@ -1,7 +1,5 @@
 require("../spec_helper")
 
-delete global.fs
-
 nmi         = require("node-machine-id")
 cwd         = require("#{root}lib/cwd")
 request     = require("request")

@@ -1,13 +1,12 @@
 _             = require("lodash")
-fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
+fs            = require("../util/fs")
 
-fs              = Promise.promisifyAll(fs)
-instance        = null
+instance = null
 
 kill = (unbind) ->
   ## cleanup our running browser

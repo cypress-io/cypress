@@ -6,7 +6,7 @@ Promise = require("bluebird")
 FileUtil = require("#{root}lib/util/file")
 exit = require("#{root}lib/util/exit")
 lockFile = Promise.promisifyAll(require("lockfile"))
-fs = Promise.promisifyAll(require("fs-extra"))
+fs = require("#{root}lib/util/fs")
 
 describe "lib/util/file", ->
   beforeEach ->

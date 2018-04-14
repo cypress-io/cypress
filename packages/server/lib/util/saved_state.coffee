@@ -1,10 +1,10 @@
 log       = require('../log')
 cwd       = require('../cwd')
-fs        = require('fs-extra')
 md5       = require('md5')
 sanitize  = require("sanitize-filename")
 Promise   = require("bluebird")
 { basename, join, isAbsolute } = require('path')
+fs        = require("../util/fs")
 
 toHashName = (projectPath) ->
   throw new Error("Missing project path") unless projectPath

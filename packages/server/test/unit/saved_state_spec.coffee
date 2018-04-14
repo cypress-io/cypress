@@ -1,14 +1,12 @@
 require("../spec_helper")
 
-fs = require("fs-extra")
 path = require("path")
 Promise = require("bluebird")
+fs = require("#{root}lib/util/fs")
 FileUtil = require("#{root}lib/util/file")
 appData = require("#{root}lib/util/app_data")
 savedState = require("#{root}lib/saved_state")
 savedStateUtil = require("#{root}lib/util/saved_state")
-
-fs = Promise.promisifyAll(fs)
 
 describe "lib/util/saved_state", ->
   describe "project name hash", ->

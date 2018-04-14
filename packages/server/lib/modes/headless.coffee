@@ -1,5 +1,4 @@
 _          = require("lodash")
-fs         = require("fs-extra")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
@@ -16,6 +15,7 @@ Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
 Windows    = require("../gui/windows")
+fs         = require("../util/fs")
 specs      = require("../util/specs")
 trash      = require("../util/trash")
 random     = require("../util/random")
@@ -23,8 +23,6 @@ progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
-
-fs = Promise.promisifyAll(fs)
 
 haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## if we have a project id

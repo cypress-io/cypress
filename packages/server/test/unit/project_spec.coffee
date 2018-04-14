@@ -2,7 +2,6 @@ require("../spec_helper")
 
 path         = require("path")
 Promise      = require("bluebird")
-fs           = require("fs-extra")
 Fixtures     = require("../support/helpers/fixtures")
 ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
@@ -19,6 +18,7 @@ savedState   = require("#{root}lib/saved_state")
 commitInfo   = require("@cypress/commit-info")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
+fs           = require("#{root}lib/util/fs")
 
 describe "lib/project", ->
   beforeEach ->
