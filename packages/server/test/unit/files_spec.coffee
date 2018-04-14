@@ -25,7 +25,6 @@ describe "lib/controllers/files", ->
     FixturesHelper.remove()
 
   context "#getTestFiles", ->
-
     checkFoundSpec = (foundSpec) ->
       if not path.isAbsolute(foundSpec.absolute)
         throw new Error("path to found spec should be absolute #{JSON.stringify(foundSpec)}")
@@ -38,7 +37,10 @@ describe "lib/controllers/files", ->
 
     it "handles fixturesFolder being false", ->
       @config.fixturesFolder = false
-      expect(=> filesController.getTestFiles(@config)).not.to.throw()
+
+      fn = => filesController.getTestFiles(@config)
+
+      expect(fn).not.to.throw()
 
     it "by default, returns all files as long as they have a name and extension", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
@@ -58,6 +60,28 @@ describe "lib/controllers/files", ->
       .then (files) ->
         expect(files.integration.length).to.equal(1)
         expect(files.integration[0].name).to.equal("coffee_spec.coffee")
+
+    it "filters using specPattern", ->
+      config.get(FixturesHelper.projectPath("various-file-types"))
+      .then (cfg) ->
+        filesController.getTestFiles(cfg, [
+          path.join(cfg.projectRoot, "cypress", "integration", "js_spec.js")
+        ])
+      .then (files) ->
+        expect(files.integration.length).to.equal(1)
+        expect(files.integration[0].name).to.equal("js_spec.js")
+
+    it "filters using specPattern as array of glob patterns", ->
+      config.get(FixturesHelper.projectPath("various-file-types"))
+      .then (cfg) ->
+        filesController.getTestFiles(cfg, [
+          path.join(cfg.projectRoot, "cypress", "integration", "js_spec.js")
+          path.join(cfg.projectRoot, "cypress", "integration", "ts*")
+        ])
+      .then (files) ->
+        expect(files.integration.length).to.equal(2)
+        expect(files.integration[0].name).to.equal("js_spec.js")
+        expect(files.integration[1].name).to.equal("ts_spec.ts")
 
 describe "lib/files", ->
   beforeEach ->

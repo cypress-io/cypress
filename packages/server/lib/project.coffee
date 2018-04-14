@@ -339,37 +339,26 @@ class Project extends EE
       cfg.state = state
       cfg
 
-  ensureSpecUrl: (spec) ->
+  getSpecUrl: (spec) ->
     @getConfig()
     .then (cfg) =>
       ## if we dont have a spec or its __all
       if not spec or (spec is "__all")
-        @getUrlBySpec(cfg.browserUrl, "/__all")
+        @normalizeSpecUrl(cfg.browserUrl, "/__all")
       else
-        @ensureSpecExists(spec)
-        .then (pathToSpec) =>
-          ## TODO:
-          ## to handle both unit + integration tests we need
-          ## to figure out (based on the config) where this spec
-          ## lives. does it live in the integrationFolder or
-          ## the unit folder?
-          ## once we determine that we can then prefix it correctly
-          ## with either integration or unit
-          prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.browserUrl, prefixedPath)
+        ## TODO:
+        ## to handle both unit + integration tests we need
+        ## to figure out (based on the config) where this spec
+        ## lives. does it live in the integrationFolder or
+        ## the unit folder?
+        ## once we determine that we can then prefix it correctly
+        ## with either integration or unit
+        prefixedPath = @getPrefixedPathToSpec(cfg, spec)
+        @normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
-  ensureSpecExists: (spec) ->
-    specFile = path.resolve(@projectRoot, spec)
+  getPrefixedPathToSpec: (cfg, pathToSpec, type = "integration") ->
+    { integrationFolder, projectRoot } = cfg
 
-    ## we want to make it easy on the user by allowing them to pass both
-    ## an absolute path to the spec, or a relative path from their test folder
-    fs
-    .statAsync(specFile)
-    .return(specFile)
-    .catch ->
-      errors.throw("SPEC_FILE_NOT_FOUND", specFile)
-
-  getPrefixedPathToSpec: (integrationFolder, pathToSpec, type = "integration") ->
     ## for now hard code the 'type' as integration
     ## but in the future accept something different here
 
@@ -380,13 +369,20 @@ class Project extends EE
     ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     ##
     ## becomes /integration/foo.coffee
-    "/" + path.join(type, path.relative(integrationFolder, pathToSpec))
+    "/" + path.join(type, path.relative(
+      integrationFolder,
+      path.resolve(projectRoot, pathToSpec)
+    ))
 
-  getUrlBySpec: (browserUrl, specUrl) ->
+  normalizeSpecUrl: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [
+      browserUrl,
+      "#/tests",
+      specUrl
+    ].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (cfg) ->
     debug("scaffolding project %s", @projectRoot)
@@ -413,8 +409,24 @@ class Project extends EE
 
     Promise.all(scaffolds)
 
+  getSpecs: (specPattern) ->
+    la(check.maybe.strings(specPattern), "invalid spec pattern", specPattern)
+
+    debug("finding specs for project", @cfg.projectRoot)
+
+    # ## if we have a spec pattern
+    # if specPattern
+    #   ## then normalize to create an absolute
+    #   ## file path from projectRoot
+    #   ## ie: **/* turns into /Users/bmann/dev/project/**/*
+    #   ## TODO: .... not sure we have to do this............
+    #   specPattern = path.resolve(@cfg.projectRoot, specPattern)
+
+    files.getTestFiles(@cfg, specPattern)
+    .then R.prop("integration")
+
   writeProjectId: (id) ->
-    attrs = {projectId: id}
+    attrs = { projectId: id }
     logger.info "Writing Project ID", _.clone(attrs)
 
     @generatedProjectIdTimestamp = new Date

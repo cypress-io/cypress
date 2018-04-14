@@ -9,9 +9,11 @@ user        = require("../user")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 errors      = require("../errors")
-log         = require("debug")("cypress:server:files")
+debug       = require("debug")("cypress:server:files")
 
 glob = Promise.promisify(glob)
+
+MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
 module.exports = {
   handleFiles: (req, res, config) ->
@@ -103,10 +105,11 @@ module.exports = {
 
   getTestFiles: (config, specPattern) ->
     integrationFolderPath = config.integrationFolder
-    log("looking for test files in the integration folder %s",
-      integrationFolderPath)
 
-    log("specPattern for test files is", specPattern)
+    debug(
+      "looking for test files in the folder:",
+      integrationFolderPath
+    )
 
     ## support files are not automatically
     ## ignored because only _fixtures are hard
@@ -153,8 +156,10 @@ module.exports = {
       path.relative(config.projectRoot, file)
 
     setNameParts = (file) ->
-      log("found test file %s", file)
-      throw new Error("Cannot set parts of file from non-absolute path #{file}") if not path.isAbsolute(file)
+      debug("found spec file %s", file)
+
+      if not path.isAbsolute(file)
+        throw new Error("Cannot set parts of file from non-absolute path #{file}")
 
       {
         name: relativePathFromIntegrationFolder(file)
@@ -172,17 +177,25 @@ module.exports = {
       ## using {matchBase: true} here so that patterns without a globstar **
       ## match against the basename of the file
       _.every ignorePatterns, (pattern) ->
-        not minimatch(file, pattern, {dot: true, matchBase: true})
+        not minimatch(file, pattern, MINIMATCH_OPTIONS)
 
     matchesSpecPattern = (file) ->
       if not specPattern
         return true
 
-      minimatch(file, specPattern, { dot: true, matchBase: true })
+      matchesPattern = (pattern) ->
+        minimatch(file, pattern, MINIMATCH_OPTIONS)
+
+      ## check to see if the file matches
+      ## any of the spec patterns array
+      return _
+      .chain([])
+      .concat(specPattern)
+      .some(matchesPattern)
+      .value()
 
     ## grab all the files
     glob(config.testFiles, options)
-
 
     ## filter out anything that matches our
     ## ignored test files glob
@@ -190,8 +203,8 @@ module.exports = {
     .filter(matchesSpecPattern)
     .map(setNameParts)
     .then (files) ->
-      log("found %d spec files", files.length)
-      log(files)
+      debug("found %d spec files: %o", files.length, files)
+
       {
         integration: files
       }

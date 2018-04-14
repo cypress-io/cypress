@@ -479,64 +479,37 @@ describe "lib/project", ->
       @project.writeProjectId("id-123").then =>
         expect(@project.generatedProjectIdTimestamp).to.be.a("date")
 
-  context "#ensureSpecUrl", ->
+  context "#getSpecUrl", ->
     beforeEach ->
       @project2 = Project(@idsPath)
 
       settings.write(@idsPath, {port: 2020})
 
     it "returns fully qualified url when spec exists", ->
-      @project2.ensureSpecUrl("cypress/integration/bar.js")
+      @project2.getSpecUrl("cypress/integration/bar.js")
       .then (str) ->
         expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js")
 
     it "returns fully qualified url on absolute path to spec", ->
       todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
-      @project.ensureSpecUrl(todosSpec)
+      @project.getSpecUrl(todosSpec)
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee")
 
     it "returns __all spec url", ->
-      @project.ensureSpecUrl()
+      @project.getSpecUrl()
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
     it "returns __all spec url with spec is __all", ->
-      @project.ensureSpecUrl('__all')
+      @project.getSpecUrl('__all')
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
     it "throws when spec isnt found", ->
-      @project.ensureSpecUrl("does/not/exist.js")
+      @project.getSpecUrl("does/not/exist.js")
       .catch (err) ->
         expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
-
-  context "#ensureSpecExists", ->
-    beforeEach ->
-      @project2 = Project(@idsPath)
-
-    it "resolves relative path to test file against projectRoot", ->
-      @project2.ensureSpecExists("cypress/integration/foo.coffee")
-      .then =>
-        @project.ensureSpecExists("tests/test1.js")
-
-    it "resolves + returns absolute path to test file", ->
-      idsSpec   = path.join(@idsPath, "cypress/integration/foo.coffee")
-      todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
-
-      @project2.ensureSpecExists(idsSpec)
-      .then (spec1) =>
-        expect(spec1).to.eq(idsSpec)
-
-        @project.ensureSpecExists(todosSpec)
-      .then (spec2) ->
-        expect(spec2).to.eq(todosSpec)
-
-    it "throws SPEC_FILE_NOT_FOUND when spec does not exist", ->
-      @project2.ensureSpecExists("does/not/exist.js")
-      .catch (err) =>
-        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
-        expect(err.message).to.include(path.join(@idsPath, "does/not/exist.js"))
 
   context ".add", ->
     beforeEach ->
