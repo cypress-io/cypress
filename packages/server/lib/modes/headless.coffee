@@ -331,7 +331,7 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
-      obj.spec = spec.path
+      obj.spec = spec?.path
 
       testResults = collectTestResults(obj)
 
