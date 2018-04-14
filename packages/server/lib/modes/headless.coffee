@@ -15,12 +15,13 @@ errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
-progress   = require("../util/progress_bar")
+Windows    = require("../gui/windows")
 trash      = require("../util/trash")
 random     = require("../util/random")
+progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
-Windows    = require("../gui/windows")
+electronApp = require("../util/electron_app")
 
 fs = Promise.promisifyAll(fs)
 
@@ -625,16 +626,8 @@ module.exports = {
             @allDone()
 
   run: (options) ->
-    app = require("electron").app
-
-    waitForReady = ->
-      new Promise (resolve, reject) ->
-        app.on "ready", resolve
-
-    Promise.any([
-      waitForReady()
-      Promise.delay(500)
-    ])
+    electronApp
+    .ready()
     .then =>
       @ready(options)
 
