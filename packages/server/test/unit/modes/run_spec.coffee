@@ -10,7 +10,7 @@ Reporter = require("#{root}../lib/reporter")
 runMode = require("#{root}../lib/modes/run")
 openProject = require("#{root}../lib/open_project")
 
-describe "lib/modes/runMode", ->
+describe "lib/modes/run", ->
   beforeEach ->
     @projectInstance = Project("/_test-output/path/to/project")
 
@@ -24,7 +24,7 @@ describe "lib/modes/runMode", ->
         projectPath: "/_test-output/path/to/project/foo"
       }
 
-      runMode.openProject(1234, options)
+      runMode.createOpenProject(1234, options)
 
     it "calls openProject.create with projectPath + options", ->
       expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
@@ -463,7 +463,7 @@ describe "lib/modes/runMode", ->
     it "passes id + options to openProject", ->
       runMode.run({foo: "bar"})
       .then ->
-        expect(runMode.openProject).to.be.calledWithMatch(1234, {foo: "bar"})
+        expect(runMode.createOpenProject).to.be.calledWithMatch(1234, {foo: "bar"})
 
     it "passes project + id to waitForBrowserToConnect", ->
       runMode.run()
