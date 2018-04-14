@@ -4,7 +4,6 @@ path         = require("path")
 Promise      = require("bluebird")
 commitInfo   = require("@cypress/commit-info")
 Fixtures     = require("../support/helpers/fixtures")
-ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
 user         = require("#{root}lib/user")
 cache        = require("#{root}lib/cache")
@@ -871,22 +870,3 @@ describe "lib/project", ->
         throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err.type).to.eq("CANNOT_CREATE_PROJECT_TOKEN")
-
-  context ".findSpecs", ->
-    it "returns all the specs without a specPattern", ->
-      Project.findSpecs(@todosPath)
-      .then (specs = []) ->
-        expect(specs).to.deep.eq([
-          "etc/etc.js"
-          "sub/sub_test.coffee"
-          "test1.js"
-          "test2.coffee"
-        ])
-
-    it "returns glob subset matching specPattern", ->
-      Project.findSpecs(@todosPath, "tests/*")
-      .then (specs = []) ->
-        expect(specs).to.deep.eq([
-          "test1.js"
-          "test2.coffee"
-        ])

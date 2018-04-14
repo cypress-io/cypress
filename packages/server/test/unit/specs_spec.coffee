@@ -28,7 +28,6 @@ describe "lib/util/specs", ->
     it "returns absolute filenames", ->
       specs
       .find(@config)
-      .then (R.prop("integration"))
       .then (R.forEach(checkFoundSpec))
 
     it "handles fixturesFolder being false", ->
@@ -43,10 +42,10 @@ describe "lib/util/specs", ->
       .then (cfg) ->
         specs.find(cfg)
       .then (files) ->
-        expect(files.integration.length).to.equal(3)
-        expect(files.integration[0].name).to.equal("coffee_spec.coffee")
-        expect(files.integration[1].name).to.equal("js_spec.js")
-        expect(files.integration[2].name).to.equal("ts_spec.ts")
+        expect(files.length).to.equal(3)
+        expect(files[0].name).to.equal("coffee_spec.coffee")
+        expect(files[1].name).to.equal("js_spec.js")
+        expect(files[2].name).to.equal("ts_spec.ts")
 
     it "returns files matching config.testFiles", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
@@ -54,8 +53,8 @@ describe "lib/util/specs", ->
         cfg.testFiles = "**/*.coffee"
         specs.find(cfg)
       .then (files) ->
-        expect(files.integration.length).to.equal(1)
-        expect(files.integration[0].name).to.equal("coffee_spec.coffee")
+        expect(files.length).to.equal(1)
+        expect(files[0].name).to.equal("coffee_spec.coffee")
 
     it "filters using specPattern", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
@@ -64,8 +63,8 @@ describe "lib/util/specs", ->
           path.join(cfg.projectRoot, "cypress", "integration", "js_spec.js")
         ])
       .then (files) ->
-        expect(files.integration.length).to.equal(1)
-        expect(files.integration[0].name).to.equal("js_spec.js")
+        expect(files.length).to.equal(1)
+        expect(files[0].name).to.equal("js_spec.js")
 
     it "filters using specPattern as array of glob patterns", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
@@ -75,6 +74,6 @@ describe "lib/util/specs", ->
           path.join(cfg.projectRoot, "cypress", "integration", "ts*")
         ])
       .then (files) ->
-        expect(files.integration.length).to.equal(2)
-        expect(files.integration[0].name).to.equal("js_spec.js")
-        expect(files.integration[1].name).to.equal("ts_spec.ts")
+        expect(files.length).to.equal(2)
+        expect(files[0].name).to.equal("js_spec.js")
+        expect(files[1].name).to.equal("ts_spec.ts")

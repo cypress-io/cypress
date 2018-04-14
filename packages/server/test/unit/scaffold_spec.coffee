@@ -7,6 +7,7 @@ snapshot   = require("snap-shot-it")
 config     = require("#{root}lib/config")
 Project    = require("#{root}lib/project")
 scaffold   = require("#{root}lib/scaffold")
+fs         = require("#{root}lib/util/fs")
 glob       = require("#{root}lib/util/glob")
 Fixtures   = require("#{root}/test/support/helpers/fixtures")
 
