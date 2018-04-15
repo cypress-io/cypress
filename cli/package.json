@@ -86,16 +86,5 @@
     "lib",
     "index.js",
     "types/*.d.ts"
-  ],
-  "keywords": [
-    "browser",
-    "cypress",
-    "automation",
-    "mocks",
-    "test",
-    "testing",
-    "runner",
-    "spies",
-    "stubs"
   ]
 }
