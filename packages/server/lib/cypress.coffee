@@ -54,10 +54,10 @@ module.exports = {
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
           fn = (code) ->
-            ## juggle up the failures since our outer
+            ## juggle up the totalFailures since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
-            resolve({stats: { failures: code } })
+            resolve({totalFailures: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
   openProject: (options) ->
@@ -118,9 +118,6 @@ module.exports = {
       ## the passed in arguments / options
       ## and normalize this mode
       switch
-        when options.removeIds
-          options.mode = "removeIds"
-
         when options.version
           options.mode = "version"
 
@@ -150,7 +147,8 @@ module.exports = {
           options.mode = "record"
 
         when options.runProject
-          ## go into headless mode when told to run
+          ## go into headless mode when running
+          ## until completion + exit
           options.mode = "headless"
 
         else
@@ -161,24 +159,12 @@ module.exports = {
       mode    = options.mode
       options = _.omit(options, "mode")
 
-      ## TODO: temporary hack to get this commit in
-      ## before spec parallelization lands
-      if _.isArray(options.spec)
-        options.spec = options.spec[0]
-
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->
     debug("start in mode %s with options %j", mode, options)
 
     switch mode
-      when "removeIds"
-        require("./project").removeIds(options.projectPath)
-        .then (stats = {}) ->
-          console.log("Removed '#{stats.ids}' ids from '#{stats.files}' files.")
-        .then(exit0)
-        .catch(exitErr)
-
       when "version"
         require("./modes/pkg")(options)
         .get("version")
@@ -236,9 +222,9 @@ module.exports = {
 
       when "headless"
         ## run headlessly and exit
+        ## with num of totalFailures
         @runElectron(mode, options)
-        .get("stats")
-        .get("failures")
+        .get("totalFailures")
         .then(exit)
         .catch(exitErr)
 
@@ -248,8 +234,7 @@ module.exports = {
       when "record"
         ## run headlessly, record, and exit
         @runElectron(mode, options)
-        .get("stats")
-        .get("failures")
+        .get("totalFailures")
         .then(exit)
         .catch(exitErr)
 

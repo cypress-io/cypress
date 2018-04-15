@@ -1,7 +1,6 @@
 require("../../spec_helper")
 
 _            = require("lodash")
-fs           = require("fs-extra")
 cp           = require("child_process")
 niv          = require("npm-install-version")
 path         = require("path")
@@ -13,6 +12,7 @@ Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
 debug        = require("debug")("cypress:support:e2e")
 Fixtures     = require("./fixtures")
+fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
 stdout       = require("#{root}../lib/stdout")
@@ -21,7 +21,6 @@ Project      = require("#{root}../lib/project")
 settings     = require("#{root}../lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
-fs = Promise.promisifyAll(fs)
 
 Promise.config({
   longStackTraces: true

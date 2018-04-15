@@ -1,31 +1,21 @@
 require("../../spec_helper")
 
-random   = require("randomstring")
 Promise  = require("bluebird")
 electron = require("electron")
 user     = require("#{root}../lib/user")
 video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
+config   = require("#{root}../lib/config")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
 headless = require("#{root}../lib/modes/headless")
 openProject = require("#{root}../lib/open_project")
+specs = require("#{root}../lib/util/specs")
+random = require("#{root}../lib/util/random")
 
 describe "lib/modes/headless", ->
   beforeEach ->
     @projectInstance = Project("/_test-output/path/to/project")
-
-  context ".getId", ->
-    it "returns random.generate string", ->
-      @sandbox.spy(random, "generate")
-
-      id = headless.getId()
-      expect(id.length).to.eq(5)
-
-      expect(random.generate).to.be.calledWith({
-        length: 5
-        capitalization: "lowercase"
-      })
 
   context ".openProject", ->
     beforeEach ->
@@ -37,7 +27,7 @@ describe "lib/modes/headless", ->
         projectPath: "/_test-output/path/to/project/foo"
       }
 
-      headless.openProject(1234, options)
+      headless.createOpenProject(1234, options)
 
     it "calls openProject.create with projectPath + options", ->
       expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
@@ -127,16 +117,18 @@ describe "lib/modes/headless", ->
 
       headless.launchBrowser({
         browser: undefined
-        spec: null
         project: @projectInstance
         write: "write"
         gui: null
         screenshots: screenshots
+        spec: {
+          absolute: "/path/to/spec"
+        }
       })
 
       expect(headless.getElectronProps).to.be.calledWith(false, @projectInstance, "write")
 
-      expect(@launch).to.be.calledWithMatch("electron", null, {foo: "bar"})
+      expect(@launch).to.be.calledWithMatch("electron", "/path/to/spec", {foo: "bar"})
 
       browserOpts = @launch.firstCall.args[2]
 
@@ -152,12 +144,14 @@ describe "lib/modes/headless", ->
     it "can launch chrome", ->
       headless.launchBrowser({
         browser: "chrome"
-        spec: "spec"
+        spec: {
+          absolute: "/path/to/spec"
+        }
       })
 
       expect(headless.getElectronProps).not.to.be.called
 
-      expect(@launch).to.be.calledWithMatch("chrome", "spec", {})
+      expect(@launch).to.be.calledWithMatch("chrome", "/path/to/spec", {})
 
   context ".postProcessRecording", ->
     beforeEach ->
@@ -295,6 +289,9 @@ describe "lib/modes/headless", ->
         screenshots
         started
         end
+        spec: {
+          path: "cypress/integration/spec.js"
+        }
       })
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
@@ -305,7 +302,7 @@ describe "lib/modes/headless", ->
         expect(headless.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
-          config:       {}
+          spec: "cypress/integration/spec.js"
           screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
@@ -344,6 +341,9 @@ describe "lib/modes/headless", ->
         screenshots
         started
         end
+        spec: {
+          path: "cypress/integration/spec.js"
+        }
       })
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
@@ -353,8 +353,8 @@ describe "lib/modes/headless", ->
         expect(headless.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
-          error:        err.message
-          config:       {}
+          error:      err.message
+          spec:       "cypress/integration/spec.js"
           screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
@@ -415,19 +415,27 @@ describe "lib/modes/headless", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(Project, "ensureExists").resolves()
-      @sandbox.stub(headless, "getId").returns(1234)
-      @sandbox.stub(headless, "openProject").resolves(openProject)
+      @sandbox.stub(random, "id").returns(1234)
+      @sandbox.stub(headless, "createOpenProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(headless,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
       @sandbox.spy(errors, "warning")
-      @sandbox.stub(@projectInstance, "getConfig").resolves({
+      @sandbox.stub(config, "get").resolves({
         proxyUrl: "http://localhost:12345",
         videoRecording: true,
-        videosFolder: "videos"
+        videosFolder: "videos",
+        integrationFolder: "/path/to/integrationFolder"
       })
+      @sandbox.stub(specs, "find").resolves([
+        {
+          name: "foo_spec.js"
+          path: "cypress/integration/foo_spec.js"
+          absolute: "/path/to/spec.js"
+        }
+      ])
 
     it "shows no warnings for default browser", ->
       headless.run()
@@ -455,35 +463,42 @@ describe "lib/modes/headless", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(Project, "ensureExists").resolves()
-      @sandbox.stub(headless, "getId").returns(1234)
-      @sandbox.stub(headless, "openProject").resolves(openProject)
+      @sandbox.stub(random, "id").returns(1234)
+      @sandbox.stub(headless, "createOpenProject").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(headless,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
+      @sandbox.stub(specs, "find").resolves([
+        {
+          name: "foo_spec.js"
+          path: "cypress/integration/foo_spec.js"
+          absolute: "/path/to/spec.js"
+        }
+      ])
 
     it "no longer ensures user session", ->
       headless.run()
       .then ->
         expect(user.ensureAuthToken).not.to.be.called
 
-    it "returns stats", ->
+    it "resolves with object and totalFailures", ->
       headless.run()
       .then (results) ->
-        expect(results).to.deep.eq({stats: { failures: 10 } })
+        expect(results).to.have.property("totalFailures", 10)
 
     it "passes id + options to openProject", ->
       headless.run({foo: "bar"})
       .then ->
-        expect(headless.openProject).to.be.calledWithMatch(1234, {foo: "bar"})
+        expect(headless.createOpenProject).to.be.calledWithMatch(1234, {foo: "bar"})
 
     it "passes project + id to waitForBrowserToConnect", ->
       headless.run()
       .then =>
         expect(headless.waitForBrowserToConnect).to.be.calledWithMatch({
           project: @projectInstance
-          id: 1234
+          socketId: 1234
         })
 
     it "passes project to waitForTestsToFinishRunning", ->
@@ -496,4 +511,10 @@ describe "lib/modes/headless", ->
     it "passes headed to openProject.launch", ->
       headless.run({headed: true})
       .then ->
-        expect(openProject.launch).to.be.calledWithMatch("electron", undefined, {show: true})
+        expect(openProject.launch).to.be.calledWithMatch(
+          "electron",
+          "path/to/spec.js",
+          {
+            show: true
+          }
+        )
