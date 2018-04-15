@@ -505,14 +505,6 @@ describe "lib/project", ->
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
-<<<<<<< HEAD
-    it "throws when spec isnt found", ->
-      @project.getSpecUrl("does/not/exist.js")
-      .catch (err) ->
-        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
-
-=======
->>>>>>> develop
   context ".add", ->
     beforeEach ->
       @pristinePath = Fixtures.projectPath("pristine")
