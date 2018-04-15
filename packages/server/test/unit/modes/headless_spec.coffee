@@ -10,8 +10,8 @@ Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
 headless = require("#{root}../lib/modes/headless")
 openProject = require("#{root}../lib/open_project")
-specs = require("#{root}../lib/util/specs")
 random = require("#{root}../lib/util/random")
+specsUtil = require("#{root}../lib/util/specs")
 
 describe "lib/modes/headless", ->
   beforeEach ->
@@ -420,6 +420,7 @@ describe "lib/modes/headless", ->
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(headless,  "waitForBrowserToConnect")
+      @sandbox.stub(video, "start").resolves()
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
       @sandbox.spy(errors, "warning")
@@ -429,7 +430,7 @@ describe "lib/modes/headless", ->
         videosFolder: "videos",
         integrationFolder: "/path/to/integrationFolder"
       })
-      @sandbox.stub(specs, "find").resolves([
+      @sandbox.stub(specsUtil, "find").resolves([
         {
           name: "foo_spec.js"
           path: "cypress/integration/foo_spec.js"
@@ -457,6 +458,14 @@ describe "lib/modes/headless", ->
       .then ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
+    it "names video file with spec name", ->
+      headless.run()
+      .then =>
+        expect(video.start).to.be.calledWith("videos/foo_spec.js.mp4")
+        expect(headless.waitForTestsToFinishRunning).to.be.calledWithMatch({
+          cname: "videos/foo_spec.js-compressed.mp4"
+        })
+
   context ".run", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
@@ -470,7 +479,7 @@ describe "lib/modes/headless", ->
       @sandbox.spy(headless,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
-      @sandbox.stub(specs, "find").resolves([
+      @sandbox.stub(specsUtil, "find").resolves([
         {
           name: "foo_spec.js"
           path: "cypress/integration/foo_spec.js"

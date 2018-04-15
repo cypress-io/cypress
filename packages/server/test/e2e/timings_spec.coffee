@@ -88,7 +88,7 @@ expectRunToHaveCorrectStats = (run) ->
     run,
     "stats.duration",
     wallClocks,
-    wallClocks + 100, ## add 100ms to account for padding
+    wallClocks + 150, ## add 150ms to account for padding
     1234
   )
 
@@ -96,7 +96,7 @@ expectRunToHaveCorrectStats = (run) ->
     run,
     "reporterStats.duration",
     wallClocks,
-    wallClocks + 100, ## add 100ms to account for padding
+    wallClocks + 150, ## add 150ms to account for padding
     1234
   )
 

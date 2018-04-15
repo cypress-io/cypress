@@ -545,6 +545,29 @@ describe "lib/cypress", ->
 
         expect(found2, "browser names should be listed").to.be.ok
 
+    it "logs error and exits when spec file was specified and does not exist", ->
+      cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"])
+      .then =>
+        @expectExitWithErr("NO_SPECS_FOUND", "path/to/spec")
+        @expectExitWithErr("NO_SPECS_FOUND", "We searched for any files matching this glob pattern:")
+
+    it "logs error and exits when spec absolute file was specified and does not exist", ->
+      cypress.start([
+        "--run-project=#{@todosPath}",
+        "--spec=#{@todosPath}/tests/path/to/spec"
+      ])
+      .then =>
+        @expectExitWithErr("NO_SPECS_FOUND", "#{@todosPath}/tests/path/to/spec")
+
+    it "logs error and exits when no specs were found at all", ->
+      cypress.start([
+        "--run-project=#{@todosPath}",
+        "--config=integrationFolder=cypress/specs"
+      ])
+      .then =>
+        @expectExitWithErr("NO_SPECS_FOUND", "We searched for any files inside of this folder:")
+        @expectExitWithErr("NO_SPECS_FOUND", "cypress/specs")
+
     it "logs error and exits when project has cypress.json syntax error", ->
       fs.writeFileAsync(@todosPath + "/cypress.json", "{'foo': 'bar}")
       .then =>
