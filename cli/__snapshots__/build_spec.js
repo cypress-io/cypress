@@ -16,6 +16,7 @@ exports['package.json build outputs expected properties 1'] = {
   "keywords": [
     "browser",
     "cypress",
+    "cypress.io",
     "automation",
     "end-to-end",
     "e2e",
