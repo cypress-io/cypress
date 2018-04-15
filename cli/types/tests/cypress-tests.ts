@@ -171,3 +171,27 @@ cy
   .then(subject => {
     subject // $ExpectType undefined
   })
+
+namespace CypressOnTests {
+  Cypress.on('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+
+  cy.on('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+}
+
+namespace CypressOffTests {
+  Cypress.off('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+
+  cy.off('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+}
