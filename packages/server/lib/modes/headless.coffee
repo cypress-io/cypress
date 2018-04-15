@@ -465,9 +465,7 @@ module.exports = {
     .then (specs = []) =>
       if not specs.length
         ## TODO: throw error when no specs found
-        ## errors.throw('NO_SPECS_FOUND', options.spec)
-        "asdf"
-        # SPEC_FILE_NOT_FOUND, specFile
+        errors.throw('SPEC_FILE_NOT_FOUND', options.spec)
 
       names = _.map(specs, "name")
       debug("found '%d' specs using spec pattern '%s': %o", names.length, options.spec, names)
