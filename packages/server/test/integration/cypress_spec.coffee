@@ -20,8 +20,8 @@ settings   = require("#{root}lib/util/settings")
 Events     = require("#{root}lib/gui/events")
 Windows    = require("#{root}lib/gui/windows")
 record     = require("#{root}lib/modes/record")
-headed     = require("#{root}lib/modes/headed")
-headless   = require("#{root}lib/modes/headless")
+interactiveMode = require("#{root}lib/modes/interactive")
+runMode   = require("#{root}lib/modes/run")
 api        = require("#{root}lib/api")
 cwd        = require("#{root}lib/cwd")
 user       = require("#{root}lib/user")
@@ -230,8 +230,8 @@ describe "lib/cypress", ->
   context "--run-project", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "listenForProjectEnd").resolves({stats: {failures: 0} })
+      @sandbox.stub(runMode, "waitForSocketConnection")
+      @sandbox.stub(runMode, "listenForProjectEnd").resolves({stats: {failures: 0} })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
 
@@ -242,7 +242,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      @sandbox.stub(headless, "runSpecs").resolves({ totalFailures: 10 })
+      @sandbox.stub(runMode, "runSpecs").resolves({ totalFailures: 10 })
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
@@ -303,14 +303,14 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
-    it "scaffolds out integration and example_spec if they do not exist when not headless", ->
+    it "scaffolds out integration and example_spec if they do not exist when not runMode", ->
       config.get(@pristinePath)
       .then (cfg) =>
         fs.statAsync(cfg.integrationFolder)
         .then ->
           throw new Error("integrationFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
         .then =>
           fs.statAsync(cfg.integrationFolder)
         .then =>
@@ -339,7 +339,7 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("PROJECT_DOES_NOT_EXIST", @pristinePath)
 
-    it "does not scaffold integration or example_spec when headless", ->
+    it "does not scaffold integration or example_spec when runMode", ->
       settings.write(@pristinePath, {})
       .then =>
         cypress.start(["--run-project=#{@pristinePath}"])
@@ -356,7 +356,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
         .then =>
           fs.statAsync(cfg.fixturesFolder)
         .then =>
@@ -371,7 +371,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("supportFolder should not exist!")
         .catch {code: "ENOENT"}, =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
         .then =>
           fs.statAsync(supportFolder)
         .then =>
@@ -478,7 +478,7 @@ describe "lib/cypress", ->
 
       outputPath = "./.results/results.json"
 
-      headless.listenForProjectEnd.resolves(_.clone(obj))
+      runMode.listenForProjectEnd.resolves(_.clone(obj))
 
       cypress.start([
         "--run-project=#{@todosPath}",
@@ -771,7 +771,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        headless.listenForProjectEnd.resolves({stats: {failures: 0} })
+        runMode.listenForProjectEnd.resolves({stats: {failures: 0} })
 
       it "can change the default port to 5555", ->
         listen = @sandbox.spy(http.Server.prototype, "listen")
@@ -801,7 +801,7 @@ describe "lib/cypress", ->
 
         process.env = _.omit(process.env, "CYPRESS_DEBUG")
 
-        headless.listenForProjectEnd.resolves({stats: {failures: 0} })
+        runMode.listenForProjectEnd.resolves({stats: {failures: 0} })
 
       afterEach ->
         process.env = @env
@@ -876,8 +876,8 @@ describe "lib/cypress", ->
         remote: "https://github.com/foo/bar.git"
       })
       @sandbox.stub(browsers, "open")
-      @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
+      @sandbox.stub(runMode, "waitForSocketConnection")
+      @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({
         stats: {
           tests: 1
           passes: 2
@@ -1129,7 +1129,7 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWith("abc123")
         @expectExitWith(0)
 
-  context "headed", ->
+  context "interactive", ->
     beforeEach ->
       @win = {
         on: @sandbox.stub()
@@ -1151,12 +1151,12 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_responseTimeout
       delete process.env.CYPRESS_watch_for_file_changes
 
-    it "passes options to headed.ready", ->
-      @sandbox.stub(headed, "ready")
+    it "passes options to interactiveMode.ready", ->
+      @sandbox.stub(interactiveMode, "ready")
 
       cypress.start(["--updating", "--port=2121", "--config=pageLoadTimeout=1000"])
       .then ->
-        expect(headed.ready).to.be.calledWithMatch({
+        expect(interactiveMode.ready).to.be.calledWithMatch({
           updating: true
           config: {
             port: 2121
@@ -1266,8 +1266,8 @@ describe "lib/cypress", ->
   context "no args", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(headed, "ready").resolves()
+      @sandbox.stub(interactiveMode, "ready").resolves()
 
-    it "runs headed and does not exit", ->
+    it "runs interactiveMode and does not exit", ->
       cypress.start().then ->
-        expect(headed.ready).to.be.calledOnce
+        expect(interactiveMode.ready).to.be.calledOnce

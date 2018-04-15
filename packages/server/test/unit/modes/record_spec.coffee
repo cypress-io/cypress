@@ -10,7 +10,7 @@ upload     = require("#{root}../lib/upload")
 Project    = require("#{root}../lib/project")
 terminal   = require("#{root}../lib/util/terminal")
 record     = require("#{root}../lib/modes/record")
-headless   = require("#{root}../lib/modes/headless")
+runMode   = require("#{root}../lib/modes/run")
 ciProvider = require("#{root}../lib/util/ci_provider")
 commitInfo = require("@cypress/commit-info")
 snapshot   = require("snap-shot-it")
@@ -396,7 +396,7 @@ describe "lib/modes/record", ->
       @sandbox.stub(record, "uploadStdout").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
       @sandbox.stub(Project, "config").resolves({projectName: "projectName"})
-      @sandbox.stub(headless, "run").resolves({tests: 2, passes: 1})
+      @sandbox.stub(runMode, "run").resolves({tests: 2, passes: 1})
       @sandbox.spy(Project, "add")
 
     it "ensures id", ->
@@ -432,12 +432,12 @@ describe "lib/modes/record", ->
           passes: 1
         })
 
-    it "calls headless.run + ensureAuthToken + allDone into options", ->
+    it "calls runMode.run + ensureAuthToken + allDone into options", ->
       opts = {foo: "bar"}
 
       record.run(opts)
       .then ->
-        expect(headless.run).to.be.calledWith({projectId: "id-123", foo: "bar", ensureAuthToken: false, allDone: false})
+        expect(runMode.run).to.be.calledWith({projectId: "id-123", foo: "bar", ensureAuthToken: false, allDone: false})
 
     it "calls uploadAssets with instanceId, stats, and stdout", ->
       @sandbox.stub(stdout, "capture").returns({
@@ -484,7 +484,7 @@ describe "lib/modes/record", ->
       .then (stats) ->
         expect(record.uploadStdout).to.be.calledWith("instance-id-123", "foobarbaz")
 
-    it "captures stdout from headless.run and headless.allDone", ->
+    it "captures stdout from runMode.run and runMode.allDone", ->
       fn = ->
         console.log("foo")
         console.log("bar")
@@ -492,8 +492,8 @@ describe "lib/modes/record", ->
 
         Promise.resolve({failures: 0})
 
-      headless.run.restore()
-      @sandbox.stub(headless, "run", fn)
+      runMode.run.restore()
+      @sandbox.stub(runMode, "run", fn)
 
       record.run({})
       .then (stats) ->
@@ -502,7 +502,7 @@ describe "lib/modes/record", ->
         expect(str).to.include("foo\nbar\nbaz")
         expect(str).to.include("All Done")
 
-    it "calls headless.allDone on uploadAssets success", ->
+    it "calls runMode.allDone on uploadAssets success", ->
       @sandbox.spy(terminal, "header")
 
       record.run({})
@@ -514,7 +514,7 @@ describe "lib/modes/record", ->
           passes: 1
         })
 
-    it "calls headless.allDone on uploadAssets failure", ->
+    it "calls runMode.allDone on uploadAssets failure", ->
       @sandbox.spy(terminal, "header")
       @sandbox.stub(api, "updateInstance").rejects(new Error)
       record.uploadAssets.restore()
@@ -528,7 +528,7 @@ describe "lib/modes/record", ->
           passes: 1
         })
 
-    it "calls headless.allDone on createInstance failure", ->
+    it "calls runMode.allDone on createInstance failure", ->
       @sandbox.spy(terminal, "header")
       record.createInstance.resolves(null)
 
