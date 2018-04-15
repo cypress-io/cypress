@@ -5,10 +5,13 @@ electron = require("electron")
 user     = require("#{root}../lib/user")
 video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
+config   = require("#{root}../lib/config")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
 runMode = require("#{root}../lib/modes/run")
 openProject = require("#{root}../lib/open_project")
+random = require("#{root}../lib/util/random")
+specsUtil = require("#{root}../lib/util/specs")
 
 describe "lib/modes/run", ->
   beforeEach ->
@@ -114,16 +117,18 @@ describe "lib/modes/run", ->
 
       runMode.launchBrowser({
         browser: undefined
-        spec: null
         project: @projectInstance
         write: "write"
         gui: null
         screenshots: screenshots
+        spec: {
+          absolute: "/path/to/spec"
+        }
       })
 
       expect(runMode.getElectronProps).to.be.calledWith(false, @projectInstance, "write")
 
-      expect(@launch).to.be.calledWithMatch("electron", null, {foo: "bar"})
+      expect(@launch).to.be.calledWithMatch("electron", "/path/to/spec", {foo: "bar"})
 
       browserOpts = @launch.firstCall.args[2]
 
@@ -139,12 +144,14 @@ describe "lib/modes/run", ->
     it "can launch chrome", ->
       runMode.launchBrowser({
         browser: "chrome"
-        spec: "spec"
+        spec: {
+          absolute: "/path/to/spec"
+        }
       })
 
       expect(runMode.getElectronProps).not.to.be.called
 
-      expect(@launch).to.be.calledWithMatch("chrome", "spec", {})
+      expect(@launch).to.be.calledWithMatch("chrome", "/path/to/spec", {})
 
   context ".postProcessRecording", ->
     beforeEach ->
@@ -282,6 +289,9 @@ describe "lib/modes/run", ->
         screenshots
         started
         end
+        spec: {
+          path: "cypress/integration/spec.js"
+        }
       })
       .then (obj) ->
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
@@ -292,7 +302,7 @@ describe "lib/modes/run", ->
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
-          config:       {}
+          spec: "cypress/integration/spec.js"
           screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
@@ -331,6 +341,9 @@ describe "lib/modes/run", ->
         screenshots
         started
         end
+        spec: {
+          path: "cypress/integration/spec.js"
+        }
       })
       .then (obj) ->
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
@@ -340,8 +353,8 @@ describe "lib/modes/run", ->
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
-          error:        err.message
-          config:       {}
+          error:      err.message
+          spec:       "cypress/integration/spec.js"
           screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
@@ -402,19 +415,28 @@ describe "lib/modes/run", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(Project, "ensureExists").resolves()
-      @sandbox.stub(runMode, "getId").returns(1234)
-      @sandbox.stub(runMode, "openProject").resolves(openProject)
+      @sandbox.stub(random, "id").returns(1234)
+      @sandbox.stub(runMode, "createOpenProject").resolves(openProject)
       @sandbox.stub(runMode, "waitForSocketConnection").resolves()
       @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(runMode,  "waitForBrowserToConnect")
+      @sandbox.stub(video, "start").resolves()
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
       @sandbox.spy(errors, "warning")
-      @sandbox.stub(@projectInstance, "getConfig").resolves({
+      @sandbox.stub(config, "get").resolves({
         proxyUrl: "http://localhost:12345",
         videoRecording: true,
-        videosFolder: "videos"
+        videosFolder: "videos",
+        integrationFolder: "/path/to/integrationFolder"
       })
+      @sandbox.stub(specsUtil, "find").resolves([
+        {
+          name: "foo_spec.js"
+          path: "cypress/integration/foo_spec.js"
+          absolute: "/path/to/spec.js"
+        }
+      ])
 
     it "shows no warnings for default browser", ->
       runMode.run()
@@ -436,29 +458,44 @@ describe "lib/modes/run", ->
       .then ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
 
+    it "names video file with spec name", ->
+      runMode.run()
+      .then =>
+        expect(video.start).to.be.calledWith("videos/foo_spec.js.mp4")
+        expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
+          cname: "videos/foo_spec.js-compressed.mp4"
+        })
+
   context ".run", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(Project, "ensureExists").resolves()
-      @sandbox.stub(runMode, "getId").returns(1234)
-      @sandbox.stub(runMode, "openProject").resolves(openProject)
+      @sandbox.stub(random, "id").returns(1234)
+      @sandbox.stub(runMode, "createOpenProject").resolves(openProject)
       @sandbox.stub(runMode, "waitForSocketConnection").resolves()
       @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(runMode,  "waitForBrowserToConnect")
       @sandbox.stub(openProject, "launch").resolves()
       @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
+      @sandbox.stub(specsUtil, "find").resolves([
+        {
+          name: "foo_spec.js"
+          path: "cypress/integration/foo_spec.js"
+          absolute: "/path/to/spec.js"
+        }
+      ])
 
     it "no longer ensures user session", ->
       runMode.run()
       .then ->
         expect(user.ensureAuthToken).not.to.be.called
 
-    it "returns stats", ->
+    it "resolves with object and totalFailures", ->
       runMode.run()
       .then (results) ->
-        expect(results).to.deep.eq({stats: { failures: 10 } })
+        expect(results).to.have.property("totalFailures", 10)
 
     it "passes id + options to openProject", ->
       runMode.run({foo: "bar"})
@@ -470,7 +507,7 @@ describe "lib/modes/run", ->
       .then =>
         expect(runMode.waitForBrowserToConnect).to.be.calledWithMatch({
           project: @projectInstance
-          id: 1234
+          socketId: 1234
         })
 
     it "passes project to waitForTestsToFinishRunning", ->
@@ -483,4 +520,10 @@ describe "lib/modes/run", ->
     it "passes headed to openProject.launch", ->
       runMode.run({headed: true})
       .then ->
-        expect(openProject.launch).to.be.calledWithMatch("electron", undefined, {show: true})
+        expect(openProject.launch).to.be.calledWithMatch(
+          "electron",
+          "path/to/spec.js",
+          {
+            show: true
+          }
+        )

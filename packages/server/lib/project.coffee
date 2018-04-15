@@ -1,15 +1,14 @@
 _           = require("lodash")
 R           = require("ramda")
-fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
-glob        = require("glob")
 Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
 check       = require("check-more-types")
+scaffoldLog = require("debug")("cypress:server:scaffold")
+debug       = require("debug")("cypress:server:project")
 cwd         = require("./cwd")
-ids         = require("./ids")
 api         = require("./api")
 user        = require("./user")
 cache       = require("./cache")
@@ -17,21 +16,17 @@ config      = require("./config")
 logger      = require("./logger")
 errors      = require("./errors")
 Server      = require("./server")
+plugins     = require("./plugins")
 scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
+browsers    = require("./browsers")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
-files       = require("./controllers/files")
-plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
+fs          = require("./util/fs")
 settings    = require("./util/settings")
-browsers    = require("./browsers")
-scaffoldLog = require("debug")("cypress:server:scaffold")
-debug       = require("debug")("cypress:server:project")
-
-fs   = Promise.promisifyAll(fs)
-glob = Promise.promisify(glob)
+specsUtil   = require("./util/specs")
 
 localCwd = cwd()
 
@@ -189,7 +184,7 @@ class Project extends EE
       return if not found
 
       debug("watch plugins file")
-      @watchers.watch(cfg.pluginsFile, {
+      @watchers.watchTree(cfg.pluginsFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
@@ -305,7 +300,9 @@ class Project extends EE
     setNewProject = (cfg) =>
       ## decide if new project by asking scaffold
       ## and looking at previously saved user state
-      throw new Error("Missing integration folder") if not cfg.integrationFolder
+      if not cfg.integrationFolder
+        throw new Error("Missing integration folder")
+
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
@@ -314,11 +311,11 @@ class Project extends EE
       .return(cfg)
 
     if c = @cfg
-      Promise.resolve(c)
-    else
-      config.get(@projectRoot, options)
-      .then (cfg) => @_setSavedState(cfg)
-      .then(setNewProject)
+      return Promise.resolve(c)
+
+    config.get(@projectRoot, options)
+    .then (cfg) => @_setSavedState(cfg)
+    .then(setNewProject)
 
   # forces saving of project's state by first merging with argument
   saveState: (stateChanges = {}) ->
@@ -567,14 +564,6 @@ class Project extends EE
     .catch ->
       {path}
 
-  @removeIds = (p) ->
-    Project(p)
-    .verifyExistence()
-    .call("getConfig")
-    .then (cfg) ->
-      ## remove all of the ids for the test files found in the integrationFolder
-      ids.remove(cfg.integrationFolder)
-
   @id = (path) ->
     Project(path).getProjectId()
 
@@ -623,7 +612,7 @@ class Project extends EE
     .getConfig()
     # TODO: handle wild card pattern or spec filename
     .then (cfg) ->
-      files.getTestFiles(cfg, specPattern)
+      specsUtil.find(cfg, specPattern)
     .then R.prop("integration")
     .then R.map(R.prop("name"))
 

@@ -2,6 +2,7 @@ _ = require("lodash")
 path = require("path")
 moment = require("moment")
 snapshot = require("snap-shot-it")
+fs = require("../../lib/util/fs")
 e2e = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
@@ -88,7 +89,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       run,
       "stats.duration",
       wallClocks,
-      wallClocks + 100, ## add 100ms to account for padding
+      wallClocks + 150, ## add 150ms to account for padding
       1234
     )
 
@@ -96,7 +97,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       run,
       "reporterStats.duration",
       wallClocks,
-      wallClocks + 100, ## add 100ms to account for padding
+      wallClocks + 150, ## add 150ms to account for padding
       1234
     )
 

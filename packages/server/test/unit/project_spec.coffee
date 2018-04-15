@@ -2,9 +2,8 @@ require("../spec_helper")
 
 path         = require("path")
 Promise      = require("bluebird")
-fs           = require("fs-extra")
+commitInfo   = require("@cypress/commit-info")
 Fixtures     = require("../support/helpers/fixtures")
-ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
 user         = require("#{root}lib/user")
 cache        = require("#{root}lib/cache")
@@ -14,11 +13,11 @@ scaffold     = require("#{root}lib/scaffold")
 Server       = require("#{root}lib/server")
 Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
-settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
-commitInfo   = require("@cypress/commit-info")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
+fs           = require("#{root}lib/util/fs")
+settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->
@@ -350,7 +349,7 @@ describe "lib/project", ->
     beforeEach ->
       @sandbox.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
-      @project.watchers = { watch: @sandbox.spy() }
+      @project.watchers = { watchTree: @sandbox.spy() }
       @sandbox.stub(plugins, "init").resolves()
       @config = {
         pluginsFile: "/path/to/plugins-file"
@@ -359,22 +358,22 @@ describe "lib/project", ->
     it "does nothing when {pluginsFile: false}", ->
       @config.pluginsFile = false
       @project.watchPluginsFile(@config).then =>
-        expect(@project.watchers.watch).not.to.be.called
+        expect(@project.watchers.watchTree).not.to.be.called
 
     it "does nothing if pluginsFile does not exist", ->
       fs.pathExists.resolves(false)
       @project.watchPluginsFile(@config).then =>
-        expect(@project.watchers.watch).not.to.be.called
+        expect(@project.watchers.watchTree).not.to.be.called
 
     it "watches the pluginsFile", ->
       @project.watchPluginsFile(@config).then =>
-        expect(@project.watchers.watch).to.be.calledWith(@config.pluginsFile)
-        expect(@project.watchers.watch.lastCall.args[1]).to.be.an("object")
-        expect(@project.watchers.watch.lastCall.args[1].onChange).to.be.a("function")
+        expect(@project.watchers.watchTree).to.be.calledWith(@config.pluginsFile)
+        expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
+        expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
     it "calls plugins.init when file changes", ->
       @project.watchPluginsFile(@config).then =>
-        @project.watchers.watch.firstCall.args[1].onChange()
+        @project.watchers.watchTree.firstCall.args[1].onChange()
         expect(plugins.init).to.be.calledWith(@config)
 
     it "handles errors from calling plugins.init", (done) ->
@@ -386,7 +385,7 @@ describe "lib/project", ->
           done()
       })
       .then =>
-        @project.watchers.watch.firstCall.args[1].onChange()
+        @project.watchers.watchTree.firstCall.args[1].onChange()
       return
 
   context "#watchSettingsAndStartWebsockets", ->
@@ -506,11 +505,14 @@ describe "lib/project", ->
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
+<<<<<<< HEAD
     it "throws when spec isnt found", ->
       @project.getSpecUrl("does/not/exist.js")
       .catch (err) ->
         expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
 
+=======
+>>>>>>> develop
   context ".add", ->
     beforeEach ->
       @pristinePath = Fixtures.projectPath("pristine")
@@ -748,7 +750,7 @@ describe "lib/project", ->
 
         Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then =>
-          throw new Error("Should throw error")
+          throw new Error("should have caught error but did not")
         .catch (err) ->
           expect(err).to.equal(error)
 
@@ -822,19 +824,9 @@ describe "lib/project", ->
 
       Project.getProjectStatus(@clientProject)
       .then =>
-        throw new Error("Should throw error")
+        throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err).to.equal(error)
-
-  context ".removeIds", ->
-    beforeEach ->
-      @sandbox.stub(ids, "remove").resolves({})
-
-    it "calls id.remove with path to project tests", ->
-      p = Fixtures.projectPath("ids")
-
-      Project.removeIds(p).then ->
-        expect(ids.remove).to.be.calledWith(p + "/cypress/integration")
 
   context ".getSecretKeyByPath", ->
     beforeEach ->
@@ -881,22 +873,3 @@ describe "lib/project", ->
         throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err.type).to.eq("CANNOT_CREATE_PROJECT_TOKEN")
-
-  context ".findSpecs", ->
-    it "returns all the specs without a specPattern", ->
-      Project.findSpecs(@todosPath)
-      .then (specs = []) ->
-        expect(specs).to.deep.eq([
-          "etc/etc.js"
-          "sub/sub_test.coffee"
-          "test1.js"
-          "test2.coffee"
-        ])
-
-    it "returns glob subset matching specPattern", ->
-      Project.findSpecs(@todosPath, "tests/*")
-      .then (specs = []) ->
-        expect(specs).to.deep.eq([
-          "test1.js"
-          "test2.coffee"
-        ])

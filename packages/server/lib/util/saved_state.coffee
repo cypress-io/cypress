@@ -1,15 +1,15 @@
-log       = require('../log')
-cwd       = require('../cwd')
-fs        = require('fs-extra')
-md5       = require('md5')
-sanitize  = require("sanitize-filename")
+md5       = require("md5")
+path      =  require("path")
 Promise   = require("bluebird")
-{ basename, join, isAbsolute } = require('path')
+sanitize  = require("sanitize-filename")
+log       = require("../log")
+cwd       = require("../cwd")
+fs        = require("../util/fs")
 
 toHashName = (projectPath) ->
   throw new Error("Missing project path") unless projectPath
-  throw new Error("Expected project absolute path, not just a name #{projectPath}") unless isAbsolute(projectPath)
-  name = sanitize(basename(projectPath))
+  throw new Error("Expected project absolute path, not just a name #{projectPath}") unless path.isAbsolute(projectPath)
+  name = sanitize(path.basename(projectPath))
   hash = md5(projectPath)
   "#{name}-#{hash}"
 
@@ -36,10 +36,10 @@ formStatePath = (projectPath) ->
     fileName = "state.json"
     if projectPath
       log("state path for project #{projectPath}")
-      statePath = join(toHashName(projectPath), fileName)
+      statePath = path.join(toHashName(projectPath), fileName)
     else
       log("state path for global mode")
-      statePath = join("__global__", fileName)
+      statePath = path.join("__global__", fileName)
 
     return statePath
 

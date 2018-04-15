@@ -1,5 +1,4 @@
 _          = require("lodash")
-fs         = require("fs-extra")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
@@ -16,14 +15,14 @@ Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
 Windows    = require("../gui/windows")
+fs         = require("../util/fs")
 trash      = require("../util/trash")
 random     = require("../util/random")
 progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
+specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
-
-fs = Promise.promisifyAll(fs)
 
 haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## if we have a project id
@@ -332,7 +331,7 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
-      obj.spec = spec.path
+      obj.spec = spec?.path
 
       testResults = collectTestResults(obj)
 
@@ -383,11 +382,11 @@ module.exports = {
         else
           finish()
 
-  trashAssets: (options = {}) ->
-    if options.trashAssetsBeforeHeadlessRuns is true
+  trashAssets: (config = {}) ->
+    if config.trashAssetsBeforeHeadlessRuns is true
       Promise.join(
-        trash.folder(options.videosFolder)
-        trash.folder(options.screenshotsFolder)
+        trash.folder(config.videosFolder)
+        trash.folder(config.screenshotsFolder)
       )
       .catch (err) ->
         ## dont make trashing assets fail the build
@@ -441,7 +440,7 @@ module.exports = {
     console.log("")
 
   runSpecs: (options = {}) ->
-    { project, config, outputPath } = options
+    { project, config, outputPath, specs } = options
 
     results = {
       startedTestsAt: null
@@ -462,22 +461,11 @@ module.exports = {
       config
     }
 
-    project.getSpecs(options.spec)
-    .then (specs = []) =>
-      if not specs.length
-        ## TODO: throw error when no specs found
-        ## errors.throw('NO_SPECS_FOUND', options.spec)
-        "asdf"
-        # SPEC_FILE_NOT_FOUND, specFile
+    runSpec = (spec) =>
+      @runSpec(spec, options)
+      .get("results")
 
-      names = _.map(specs, "name")
-      debug("found '%d' specs using spec pattern '%s': %o", names.length, options.spec, names)
-
-      runSpec = (spec) =>
-        @runSpec(spec, options)
-        .get("results")
-
-      Promise.map(specs, runSpec, { concurrency: 1 })
+    Promise.map(specs, runSpec, { concurrency: 1 })
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.start")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.end")
@@ -568,6 +556,23 @@ module.exports = {
           })
         })
 
+  findSpecs: (config, spec) ->
+    specsUtil.find(config, spec)
+    .then (files = []) =>
+      if not files.length
+        errors.throw('NO_SPECS_FOUND', config.integrationFolder, spec)
+
+      if debug.enabled
+        names = _.map(files, "name")
+        debug(
+          "found '%d' specs using spec pattern '%s': %o",
+          names.length,
+          spec,
+          names
+        )
+
+      return files
+
   ready: (options = {}) ->
     debug("run mode ready with options %j", options)
 
@@ -601,29 +606,31 @@ module.exports = {
         ## record mode
         errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
 
-      @trashAssets(config)
-      .then =>
-        @runSpecs({
-          projectPath
-          socketId
-          project
-          config
-          videosFolder:         config.videosFolder
-          videoRecording:       config.videoRecording
-          videoCompression:     config.videoCompression
-          videoUploadOnPasses:  config.videoUploadOnPasses
-          exit:                 options.exit
-          spec:                 options.spec
-          headed:               options.headed
-          browser:              options.browser
-          outputPath:           options.outputPath
-        })
-      .finally =>
-        ## TODO: remove this
-        @copy(config.videosFolder, config.screenshotsFolder)
+      @findSpecs(config, options.spec)
+      .then (specs) =>
+        @trashAssets(config)
         .then =>
-          if options.allDone isnt false
-            @allDone()
+          @runSpecs({
+            projectPath
+            socketId
+            project
+            config
+            specs
+            videosFolder:         config.videosFolder
+            videoRecording:       config.videoRecording
+            videoCompression:     config.videoCompression
+            videoUploadOnPasses:  config.videoUploadOnPasses
+            exit:                 options.exit
+            headed:               options.headed
+            browser:              options.browser
+            outputPath:           options.outputPath
+          })
+        .finally =>
+          ## TODO: remove this
+          @copy(config.videosFolder, config.screenshotsFolder)
+          .then =>
+            if options.allDone isnt false
+              @allDone()
 
   run: (options) ->
     electronApp
