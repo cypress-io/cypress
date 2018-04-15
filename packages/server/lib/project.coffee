@@ -25,8 +25,8 @@ savedState  = require("./saved_state")
 Automation  = require("./automation")
 preprocessor = require("./plugins/preprocessor")
 fs          = require("./util/fs")
-specs       = require("./util/specs")
 settings    = require("./util/settings")
+specsUtil   = require("./util/specs")
 
 localCwd = cwd()
 
@@ -596,7 +596,7 @@ class Project extends EE
     .getConfig()
     # TODO: handle wild card pattern or spec filename
     .then (cfg) ->
-      specs.find(cfg, specPattern)
+      specsUtil.find(cfg, specPattern)
     .then R.prop("integration")
     .then R.map(R.prop("name"))
 

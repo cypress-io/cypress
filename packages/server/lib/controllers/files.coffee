@@ -3,13 +3,13 @@ path        = require("path")
 Promise     = require("bluebird")
 cwd         = require("../cwd")
 glob        = require("../util/glob")
-specs       = require("../util/specs")
+specsUtil   = require("../util/specs")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 
 module.exports = {
   handleFiles: (req, res, config) ->
-    specs.find(config)
+    specsUtil.find(config)
     .then (files) ->
       res.json({
         integration: files
@@ -43,7 +43,7 @@ module.exports = {
     getSpecs = =>
       ## grab all of the specs if this is ci
       if spec is "__all"
-        specs.find(config)
+        specsUtil.find(config)
         .map (spec) ->
           ## grab the name of each
           spec.absolute
