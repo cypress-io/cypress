@@ -6,7 +6,6 @@ human      = require("human-interval")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
-ss         = require("../screenshots")
 user       = require("../user")
 stats      = require("../stats")
 video      = require("../video")
@@ -406,29 +405,6 @@ module.exports = {
       width:     resp.width
     }
 
-  copy: (videosFolder, screenshotsFolder) ->
-    Promise.try ->
-      ## dont attempt to copy if we're running in circle and we've turned off copying artifacts
-      shouldCopy = (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
-
-      debug("Should copy Circle Artifacts?", Boolean(shouldCopy))
-
-      if shouldCopy and videosFolder and screenshotsFolder
-        debug("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
-
-        ## copy each of the screenshots and videos
-        ## to artifacts using each basename of the folders
-        Promise.join(
-          ss.copy(
-            screenshotsFolder,
-            path.join(ca, path.basename(screenshotsFolder))
-          ),
-          video.copy(
-            videosFolder,
-            path.join(ca, path.basename(videosFolder))
-          )
-        )
-
   allDone: ->
     console.log("")
     console.log("")
@@ -626,11 +602,8 @@ module.exports = {
             outputPath:           options.outputPath
           })
         .finally =>
-          ## TODO: remove this
-          @copy(config.videosFolder, config.screenshotsFolder)
-          .then =>
-            if options.allDone isnt false
-              @allDone()
+          if options.allDone isnt false
+            @allDone()
 
   run: (options) ->
     electronApp
