@@ -802,7 +802,7 @@ describe "lib/cypress", ->
 
   ## the majority of the logic in Record mode is covered already
   ## in --run-project specs above
-  context "--record or --ci", ->
+  context.skip "--record or --ci", ->
     afterEach ->
       delete process.env.CYPRESS_PROJECT_ID
       delete process.env.CYPRESS_RECORD_KEY
