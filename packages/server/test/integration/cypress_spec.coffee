@@ -13,6 +13,7 @@ Fixtures   = require("../support/helpers/fixtures")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
+fs         = require("#{root}lib/util/fs")
 connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
@@ -237,15 +238,14 @@ describe "lib/cypress", ->
     it "runs project headlessly and exits with exit code 0", ->
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/__all"})
+        expect(browsers.open).to.be.calledWithMatch("electron")
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      headless.listenForProjectEnd.resolves({stats: {failures: 10} })
+      @sandbox.stub(headless, "runSpecs").resolves({ totalFailures: 10 })
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/__all"})
         @expectExitWith(10)
 
     it "does not generate a project id even if missing one", ->
@@ -261,7 +261,7 @@ describe "lib/cypress", ->
 
         Project(@noScaffolding).getProjectId()
         .then ->
-          throw new Error("should have caught error but didnt")
+          throw new Error("should have caught error but did not")
         .catch (err) ->
           expect(err.type).to.eq("NO_PROJECT_ID")
 
@@ -281,9 +281,14 @@ describe "lib/cypress", ->
     it "runs project by relative spec and exits with status 0", ->
       relativePath = path.relative(cwd(), @todosPath)
 
-      cypress.start(["--run-project=#{@todosPath}", "--spec=#{relativePath}/tests/test2.coffee"])
+      cypress.start([
+        "--run-project=#{@todosPath}",
+        "--spec=#{relativePath}/tests/test2.coffee"
+      ])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        expect(browsers.open).to.be.calledWithMatch("electron", {
+          url: "http://localhost:8888/__/#/tests/integration/test2.coffee"
+        })
         @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
@@ -395,7 +400,6 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--headed"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch("electron", {
-          url: "http://localhost:8888/__/#/tests/__all"
           proxyServer: "http://localhost:8888"
           show: true
         })
@@ -476,15 +480,21 @@ describe "lib/cypress", ->
 
       headless.listenForProjectEnd.resolves(_.clone(obj))
 
-      cypress.start(["--run-project=#{@todosPath}", "--output-path=#{outputPath}"])
+      cypress.start([
+        "--run-project=#{@todosPath}",
+        "--spec=#{@todosPath}/tests/test2.coffee"
+        "--output-path=#{outputPath}"
+      ])
       .then =>
         @expectExitWith(4)
 
         fs.readJsonAsync(cwd(outputPath))
         .then (json) ->
-          expect(json.video).to.be.a("string")
+          run = json.runs[0]
 
-          expect(json).to.deep.eq({
+          expect(run.video).to.be.a("string")
+
+          expect(run).to.deep.eq({
             stats: {
               tests:       1
               passes:      2
@@ -496,7 +506,8 @@ describe "lib/cypress", ->
             hooks: []
             screenshots: []
             shouldUploadVideo: true
-            video: json.video
+            spec: "tests/test2.coffee"
+            video: run.video
           })
       .finally ->
         fs.removeAsync(cwd(path.dirname(outputPath)))
@@ -533,16 +544,6 @@ describe "lib/cypress", ->
             )
 
         expect(found2, "browser names should be listed").to.be.ok
-
-    it "logs error and exits when spec file was specified and does not exist", ->
-      cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"])
-      .then =>
-        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{cwd()}/path/to/spec")
-
-    it "logs error and exits when spec absolute file was specified and does not exist", ->
-      cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"])
-      .then =>
-        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
 
     it "logs error and exits when project has cypress.json syntax error", ->
       fs.writeFileAsync(@todosPath + "/cypress.json", "{'foo': 'bar}")
