@@ -2,6 +2,7 @@ _ = require("lodash")
 path = require("path")
 moment = require("moment")
 snapshot = require("snap-shot-it")
+fs = require("../../lib/util/fs")
 e2e = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
