@@ -1,14 +1,11 @@
 _           = require("lodash")
 path        = require("path")
 Promise     = require("bluebird")
-debug       = require("debug")("cypress:server:files")
 cwd         = require("../cwd")
 glob        = require("../util/glob")
 specsUtil   = require("../util/specs")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
-
-MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
 module.exports = {
   handleFiles: (req, res, config) ->

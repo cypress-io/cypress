@@ -406,22 +406,6 @@ class Project extends EE
 
     Promise.all(scaffolds)
 
-  getSpecs: (specPattern) ->
-    la(check.maybe.strings(specPattern), "invalid spec pattern", specPattern)
-
-    debug("finding specs for project", @cfg.projectRoot)
-
-    # ## if we have a spec pattern
-    # if specPattern
-    #   ## then normalize to create an absolute
-    #   ## file path from projectRoot
-    #   ## ie: **/* turns into /Users/bmann/dev/project/**/*
-    #   ## TODO: .... not sure we have to do this............
-    #   specPattern = path.resolve(@cfg.projectRoot, specPattern)
-
-    files.getTestFiles(@cfg, specPattern)
-    .then R.prop("integration")
-
   writeProjectId: (id) ->
     attrs = { projectId: id }
     logger.info "Writing Project ID", _.clone(attrs)

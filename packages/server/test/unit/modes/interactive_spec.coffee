@@ -7,10 +7,10 @@ user       = require("#{root}../lib/user")
 logger     = require("#{root}../lib/logger")
 Updater    = require("#{root}../lib/updater")
 savedState = require("#{root}../lib/saved_state")
-interactiveMode    = require("#{root}../lib/modes/interactive")
 menu       = require("#{root}../lib/gui/menu")
 Events     = require("#{root}../lib/gui/events")
 Windows   = require("#{root}../lib/gui/windows")
+interactiveMode = require("#{root}../lib/modes/interactive")
 
 describe "gui/interactive", ->
   context ".isMac", ->
