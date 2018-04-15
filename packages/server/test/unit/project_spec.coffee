@@ -505,11 +505,6 @@ describe "lib/project", ->
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
-    it "throws when spec isnt found", ->
-      @project.getSpecUrl("does/not/exist.js")
-      .catch (err) ->
-        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
-
   context ".add", ->
     beforeEach ->
       @pristinePath = Fixtures.projectPath("pristine")
@@ -747,7 +742,7 @@ describe "lib/project", ->
 
         Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then =>
-          throw new Error("Should throw error")
+          throw new Error("should have caught error but did not")
         .catch (err) ->
           expect(err).to.equal(error)
 
@@ -821,7 +816,7 @@ describe "lib/project", ->
 
       Project.getProjectStatus(@clientProject)
       .then =>
-        throw new Error("Should throw error")
+        throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err).to.equal(error)
 
