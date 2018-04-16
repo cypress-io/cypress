@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme'
+import { mount, shallow } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
 import sinon from 'sinon'
@@ -13,13 +13,15 @@ const model = (props) => {
   return _.extend({
     event: false,
     id: 'c1',
-    message: 'The message',
+    displayMessage: 'The message',
     name: 'The name',
     number: 1,
     numElements: 0,
     renderProps: {},
     state: 'passed',
     type: 'parent',
+    hasDuplicates: false,
+    duplicates: [],
   }, props)
 }
 
@@ -102,7 +104,7 @@ describe('<Command />', () => {
     })
 
     it('renders with the scaled class when it has a renderProps message over 100 chars long', () => {
-      const component = shallow(<Command model={model({ renderProps: { message: longText } })} />)
+      const component = shallow(<Command model={model({ displayMessage: longText })} />)
       expect(component).to.have.className('command-scaled')
     })
 
@@ -130,28 +132,18 @@ describe('<Command />', () => {
   })
 
   context('message', () => {
-    it('renders the message', () => {
+    it('renders the displayMessage', () => {
       const component = shallow(<Command model={model()} />)
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The message')
     })
 
-    it('renders the renderProps message when specified', () => {
-      const component = shallow(<Command model={model({ renderProps: { message: 'The display message' } })} />)
-      expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The display message')
-    })
-
-    it('does not truncate the renderProps message when over 100 chars', () => {
-      const component = shallow(<Command model={model({ renderProps: { message: longText } })} />)
+    it('does not truncate the message when over 100 chars', () => {
+      const component = shallow(<Command model={model({ displayMessage: longText })} />)
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(longText)
     })
 
-    it('renders markdown in message', () => {
-      const component = shallow(<Command model={model({ message: withMarkdown })} />)
-      expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(fromMarkdown)
-    })
-
-    it('renders markdown in renderProps message', () => {
-      const component = shallow(<Command model={model({ renderProps: { message: withMarkdown } })} />)
+    it('renders markdown', () => {
+      const component = shallow(<Command model={model({ displayMessage: withMarkdown })} />)
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(fromMarkdown)
     })
 
@@ -436,6 +428,41 @@ describe('<Command />', () => {
           })
         })
       })
+    })
+  })
+
+  context('duplicates', () => {
+    const withDuplicates = { hasDuplicates: true, numDuplicates: 5 }
+
+    it('renders with command-has-duplicates class if it has duplicates', () => {
+      const component = shallow(<Command model={model(withDuplicates)} />)
+      expect(component).to.have.className('command-has-duplicates')
+    })
+
+    it('renders without command-has-duplicates class if no duplicates', () => {
+      const component = shallow(<Command model={model()} />)
+      expect(component).not.to.have.className('command-has-duplicates')
+    })
+
+    it('renders with command-is-duplicate class if it is a duplicate', () => {
+      const component = shallow(<Command model={model({ isDuplicate: true })} />)
+      expect(component).to.have.className('command-is-duplicate')
+    })
+
+    it('renders without command-is-duplicate class if it is not a duplicate', () => {
+      const component = shallow(<Command model={model()} />)
+      expect(component).not.to.have.className('command-is-duplicate')
+    })
+
+    it('displays number of duplicates', () => {
+      const component = shallow(<Command model={model({ hasDuplicates: true, numDuplicates: 5 })} />)
+      expect(component.find('.num-duplicates')).to.have.text('5')
+    })
+
+    it('opens after clicking expander', () => {
+      const component = shallow(<Command model={model(withDuplicates)} />)
+      component.find('.command-expander').simulate('click', { stopPropagation: () => {} })
+      expect(component).to.have.className('command-is-open')
     })
   })
 })
