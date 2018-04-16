@@ -375,19 +375,6 @@
     }
   }
 
-  .command-is-pinned,
-  .command:hover {
-    .command-number {
-      display: none;
-    }
-
-    .command-pin {
-      display: block;
-    }
-  }
-
-  // TODO: still show pin if pinned
-
   .command-expander {
     color: #bcbccc;
     display: none;
@@ -410,8 +397,7 @@
       display: block;
     }
 
-    .command-number,
-    .command-pin {
+    .command-number {
       display: none;
     }
   }
@@ -435,6 +421,34 @@
       i {
         @extend .#{$fa-css-prefix}-caret-down;
       }
+    }
+  }
+
+  .command-is-pinned,
+  .command:hover {
+    .command-number {
+      display: none;
+    }
+
+    .command-pin {
+      display: block;
+    }
+  }
+
+  .command-has-duplicates:hover .duplicates .command-pin,
+  .command-has-duplicates:hover > span > .command-wrapper .command-pin {
+    display: none;
+  }
+
+  .command-has-duplicates.command-is-pinned > span > .command-wrapper,
+  .command-is-duplicate.command-is-pinned > span > .command-wrapper,
+  .command-is-duplicate > span > .command-wrapper:hover {
+    .command-expander {
+      display: none;
+    }
+
+    .command-pin {
+      display: block;
     }
   }
 
