@@ -1,3 +1,5 @@
+moment = require("moment")
+
 describe "Runs List", ->
   beforeEach ->
     cy.fixture("user").as("user")
@@ -8,9 +10,8 @@ describe "Runs List", ->
     cy.fixture("organizations").as("orgs")
 
     @goToRuns = ->
-      cy
-        .get(".navbar-default a")
-          .contains("Runs").click()
+      cy.get(".navbar-default a")
+        .contains("Runs").click()
 
     @validCiProject = {
       id: "project-id-123"
@@ -56,12 +57,13 @@ describe "Runs List", ->
       @goToRuns()
 
     it "highlights run nav", ->
-      cy
-        .get(".navbar-default a")
-          .contains("Runs").should("have.class", "active")
+      cy.get(".navbar-default a")
+        .contains("Runs").should("have.class", "active")
 
   context "api server connection", ->
     beforeEach ->
+      timestamp = moment("2016-12-19T10:00:00").valueOf()
+      cy.clock(timestamp)
       @getCurrentUser.resolve(@user)
       @openProject.resolve(@config)
       @getRuns.resolve(@runs)
@@ -77,6 +79,35 @@ describe "Runs List", ->
 
       it "shows runs", ->
         cy.contains("h5", "Runs")
+
+      context "displays each run's data", ->
+        beforeEach ->
+          cy.get(".runs-container li").eq(1).as("runRow")
+
+        it "displays build num", ->
+          cy.get("@runRow").contains("#" + @runs[1].buildNumber)
+
+        it "displays commit info", ->
+          cy.get("@runRow").contains(@runs[1].commitBranch)
+          cy.get("@runRow").contains(@runs[1].commitMessage)
+
+        it "displays totals", ->
+          cy.get("@runRow").contains(@runs[1].failed)
+          cy.get("@runRow").contains(@runs[1].passed)
+
+        it "displays times", ->
+          cy.get("@runRow").contains("a few secs ago")
+          cy.get("@runRow").contains("00:16")
+        
+        context "spec display", ->
+          it "displays spec if defined when 1 instance", ->
+            cy.get(".runs-container li").eq(1).contains(@runs[1].instances[0].spec)
+
+          it "does not display spec if null", ->
+            cy.get(".runs-container li").eq(3).contains("spec").should("not.exist")
+
+          it "does not display spec if multiple instances", ->
+            cy.get(".runs-container li").eq(2).contains("spec").should("not.exist")
 
     describe "failure", ->
       beforeEach ->
@@ -146,7 +177,7 @@ describe "Runs List", ->
 
     it "displays link to dashboard that goes to admin project runs", ->
       cy
-        .contains("See All").click()
+        .contains("See all").click()
         .then ->
           expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
 
@@ -185,7 +216,7 @@ describe "Runs List", ->
       @goToRuns()
 
     it "displays 'need to set up' message", ->
-      cy.contains("You Have No Recorded Runs")
+      cy.contains("You have no recorded runs")
 
   context "without a current user and without project id", ->
     beforeEach ->
@@ -196,11 +227,11 @@ describe "Runs List", ->
       @goToRuns()
 
     it "displays 'need to set up' message", ->
-      cy.contains("You Have No Recorded Runs")
+      cy.contains("You have no recorded runs")
 
     describe "click setup project", ->
       beforeEach ->
-        cy.contains("Set Up Project").click()
+        cy.contains("Set up project").click()
 
       it "shows login message", ->
         cy.get(".login h1").should("contain", "Log In")
@@ -231,8 +262,7 @@ describe "Runs List", ->
         .tick(10000)
 
     it "has original state of runs", ->
-      cy
-        .get(".runs-container li").first().find("> div")
+      cy.get(".runs-container li").first().find("> div")
         .should("have.class", "running")
 
     it "sends get:runs ipc event", ->
@@ -250,8 +280,7 @@ describe "Runs List", ->
         @getRunsAgain.resolve(@runs)
 
       it "updates the runs", ->
-        cy
-          .get(".runs-container li").first().find("> div")
+        cy.get(".runs-container li").first().find("> div")
           .should("have.class", "passed")
 
       it "enables refresh button", ->
@@ -272,7 +301,7 @@ describe "Runs List", ->
 
       it "displays 'need to set up' message", ->
         @ipcError({type: "NO_PROJECT_ID"})
-        cy.contains("You Have No Recorded Runs")
+        cy.contains("You have no recorded runs")
 
       it "displays old runs if another error", ->
         @ipcError({type: "TIMED_OUT"})
@@ -380,8 +409,7 @@ describe "Runs List", ->
 
             it "shows runs when getting runs succeeds", ->
               @getRuns.resolve(@runs)
-              cy
-                .get(".runs-container li")
+              cy.get(".runs-container li")
                 .should("have.length", @runs.length)
 
           describe "when request fails", ->
@@ -429,7 +457,7 @@ describe "Runs List", ->
                 cy.shouldBeLoggedOut()
 
               it "shows login message", ->
-                cy.get(".empty h4").should("contain", "Log In")
+                cy.get(".empty h4").should("contain", "Log in")
 
               it "clicking 'Log In with GitHub' opens login", ->
                 cy.contains("button", "Log In with GitHub").click().then ->
@@ -452,7 +480,7 @@ describe "Runs List", ->
           @getRuns.reject({name: "foo", message: "There's an error", type: "NOT_FOUND"})
 
       it "displays empty message", ->
-        cy.contains("Runs Cannot Be Displayed")
+        cy.contains("Runs cannot be displayed")
 
     describe "unauthenticated error", ->
       beforeEach ->
@@ -464,7 +492,7 @@ describe "Runs List", ->
         cy.shouldBeLoggedOut()
 
       it "shows login message", ->
-        cy.get(".empty h4").should("contain", "Log In")
+        cy.get(".empty h4").should("contain", "Log in")
 
     describe "no project id error", ->
       beforeEach ->
@@ -475,16 +503,15 @@ describe "Runs List", ->
           @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
 
       it "displays 'need to set up' message", ->
-        cy.contains("You Have No Recorded Runs")
+        cy.contains("You have no recorded runs")
 
       it "clears message after setting up to record", ->
-        cy
+        cy.contains(".btn", "Set up project").click()
+        cy.get(".modal-body")
+          .contains(".btn", "Me").click()
+        cy.get(".privacy-radio").find("input").last().check()
+        cy.get(".modal-body")
           .contains(".btn", "Set Up Project").click()
-          .get(".modal-body")
-            .contains(".btn", "Me").click()
-          .get(".privacy-radio").find("input").last().check()
-          .get(".modal-body")
-            .contains(".btn", "Set Up Project").click()
         cy.contains("To record your first")
 
     describe "unexpected error", ->
@@ -525,21 +552,19 @@ describe "Runs List", ->
         @goToRuns()
 
       it "displays empty message", ->
-        cy.contains("Runs Cannot Be Displayed")
+        cy.contains("Runs cannot be displayed")
 
       it "clicking link opens setup project window", ->
-        cy
-          .contains(".btn", "Set Up a New Project").click()
-          .get(".modal").should("be.visible")
+        cy.contains(".btn", "Set up a new project").click()
+        cy.get(".modal").should("be.visible")
 
       it "clears message after setting up CI", ->
-        cy
-          .contains(".btn", "Set Up a New Project").click()
-          .get(".modal-body")
-            .contains(".btn", "Me").click()
-          .get(".privacy-radio").find("input").last().check()
-          .get(".modal-body")
-            .contains(".btn", "Set Up Project").click()
+        cy.contains(".btn", "Set up a new project").click()
+        cy.get(".modal-body")
+          .contains(".btn", "Me").click()
+        cy.get(".privacy-radio").find("input").last().check()
+        cy.get(".modal-body")
+          .contains(".btn", "Set Up Project").click()
         cy.contains("To record your first")
 
     describe "no runs", ->
@@ -552,7 +577,7 @@ describe "Runs List", ->
             @getRuns.resolve([])
 
         it "displays 'need to set up' message", ->
-          cy.contains("You Have No Recorded Runs")
+          cy.contains("You have no recorded runs")
 
     context "having previously set up CI", ->
       beforeEach ->
@@ -564,13 +589,11 @@ describe "Runs List", ->
         cy.contains("To record your first")
 
       it "opens project id guide on clicking 'Why?'", ->
-        cy
-          .contains("Why?").click()
+        cy.contains("Why?").click()
           .then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/what-is-a-project-id")
 
       it "opens dashboard on clicking 'Cypress Dashboard'", ->
-        cy
-          .contains("Cypress Dashboard").click()
+        cy.contains("Cypress Dashboard").click()
           .then ->
             expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@config.projectId}/runs")
