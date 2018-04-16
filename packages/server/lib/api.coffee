@@ -26,10 +26,6 @@ rp = request.defaults (params = {}, callback) ->
 
   request[method](params, callback)
 
-debugReturnedRun = (info) ->
-  debug("received API response with id %s", info.id)
-  debug("and list of specs to run", info.specs)
-
 formatResponseBody = (err) ->
   ## if the body is JSON object
   if _.isObject(err.error)
@@ -102,6 +98,7 @@ module.exports = {
 
   createRun: (options = {}) ->
     body = _.pick(options, [
+      "specs",
       "projectId"
       "recordKey"
       "commitSha"
@@ -113,13 +110,7 @@ module.exports = {
       "ciParams"
       "ciProvider"
       "ciBuildNumber",
-      "groupId",
-      "specs",
-      "specPattern"
     ])
-
-    debug("creating project run")
-    debug("project '%s' group id '%s'", body.projectId, body.groupId)
 
     rp.post({
       url: routes.runs()
@@ -131,7 +122,6 @@ module.exports = {
       body: body
     })
     .promise()
-    .tap(debugReturnedRun)
     .get("runId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)

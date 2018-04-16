@@ -142,10 +142,6 @@ module.exports = {
         when options.exitWithCode?
           options.mode = "exitWithCode"
 
-        ## enable old CLI tools to record
-        when options.record or options.ci
-          options.mode = "record"
-
         when options.runProject
           ## go into headless mode when running
           ## until completion + exit
@@ -230,13 +226,6 @@ module.exports = {
 
       when "interactive"
         @runElectron(mode, options)
-
-      when "record"
-        ## run headlessly, record, and exit
-        @runElectron(mode, options)
-        .get("totalFailures")
-        .then(exit)
-        .catch(exitErr)
 
       when "server"
         @runServer(options)

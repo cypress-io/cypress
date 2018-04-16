@@ -6,6 +6,7 @@ human      = require("human-interval")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
+recordMode = require("./recordMode")
 user       = require("../user")
 stats      = require("../stats")
 video      = require("../video")
@@ -15,6 +16,7 @@ Reporter   = require("../reporter")
 openProject = require("../open_project")
 Windows    = require("../gui/windows")
 fs         = require("../util/fs")
+env        = require("../util/env")
 trash      = require("../util/trash")
 random     = require("../util/random")
 progress   = require("../util/progress_bar")
@@ -22,12 +24,6 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
-
-haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
-  ## if we have a project id
-  ## and we have a key
-  ## and (record or ci) hasn't been set to true or false
-  (projectId and options.key) and (_.isUndefined(options.record) and _.isUndefined(options.ci))
 
 collectTestResults = (obj = {}) ->
   {
@@ -41,7 +37,19 @@ collectTestResults = (obj = {}) ->
     version:     pkg.version
   }
 
+allDone = ->
+  console.log("")
+  console.log("")
+
+  terminal.header("All Done", {
+    color: ["gray"]
+  })
+
+  console.log("")
+
 getProjectId = (project, id) ->
+  id ?= env.get("CYPRESS_PROJECT_ID")
+
   ## if we have an ID just use it
   if id
     return Promise.resolve(id)
@@ -68,32 +76,49 @@ writeOutput = (outputPath, results) ->
 
     fs.outputJsonAsync(outputPath, results)
 
+openProjectCreate = (projectPath, socketId, options) ->
+  ## now open the project to boot the server
+  ## putting our web client app in headless mode
+  ## - NO  display server logs (via morgan)
+  ## - YES display reporter results (via mocha reporter)
+  openProject.create(projectPath, options, {
+    morgan:       false
+    socketId:     id
+    report:       true
+    isTextTerminal:   options.isTextTerminal ? true
+    onError: (err) ->
+      console.log()
+      console.log(err.stack)
+      openProject.emit("exitEarlyWithErr", err.message)
+  })
+  .catch {portInUse: true}, (err) ->
+    ## TODO: this needs to move to emit exitEarly
+    ## so we record the failure in CI
+    errors.throw("PORT_IN_USE_LONG", err.port)
+
+createAndOpenProject = (socketId, options) ->
+  { projectPath, projectId } = options
+
+  Project
+  .ensureExists(projectPath)
+  .then ->
+    ## open this project without
+    ## adding it to the global cache
+    openProjectCreate(projectPath, socketId, options)
+    .call("getProject")
+  .then (project) ->
+    Promise.props({
+      project
+      config: project.getConfig()
+      projectId: getProjectId(project, projectId)
+    ])
+
 module.exports = {
   collectTestResults
 
   getProjectId
 
   writeOutput
-
-  createOpenProject: (id, options) ->
-    ## now open the project to boot the server
-    ## putting our web client app in headless mode
-    ## - NO  display server logs (via morgan)
-    ## - YES display reporter results (via mocha reporter)
-    openProject.create(options.projectPath, options, {
-      morgan:       false
-      socketId:     id
-      report:       true
-      isTextTerminal:   options.isTextTerminal ? true
-      onError: (err) ->
-        console.log()
-        console.log(err.stack)
-        openProject.emit("exitEarlyWithErr", err.message)
-    })
-    .catch {portInUse: true}, (err) ->
-      ## TODO: this needs to move to emit exitEarly
-      ## so we record the failure in CI
-      errors.throw("PORT_IN_USE_LONG", err.port)
 
   createRecording: (name) ->
     outputDir = path.dirname(name)
@@ -405,18 +430,8 @@ module.exports = {
       width:     resp.width
     }
 
-  allDone: ->
-    console.log("")
-    console.log("")
-
-    terminal.header("All Done", {
-      color: ["gray"]
-    })
-
-    console.log("")
-
   runSpecs: (options = {}) ->
-    { project, config, outputPath, specs } = options
+    { project, config, outputPath, specs, beforeSpecRun, afterSpecRun } = options
 
     results = {
       startedTestsAt: null
@@ -437,11 +452,19 @@ module.exports = {
       config
     }
 
-    runSpec = (spec) =>
-      @runSpec(spec, options)
+    runEachSpec = (spec) =>
+      Promise
+      .try ->
+        if beforeSpecRun
+          beforeSpecRun(spec)
+      .then =>
+        @runSpec(spec, options)
       .get("results")
+      .tap (results) ->
+        if afterSpecRun
+          afterSpecRun(spec, results)
 
-    Promise.map(specs, runSpec, { concurrency: 1 })
+    Promise.map(specs, runEachSpec, { concurrency: 1 })
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.start")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.end")
@@ -534,10 +557,7 @@ module.exports = {
 
   findSpecs: (config, spec) ->
     specsUtil.find(config, spec)
-    .then (files = []) =>
-      if not files.length
-        errors.throw('NO_SPECS_FOUND', config.integrationFolder, spec)
-
+    .tap (files = []) =>
       if debug.enabled
         names = _.map(files, "name")
         debug(
@@ -547,63 +567,71 @@ module.exports = {
           names
         )
 
-      return files
-
   ready: (options = {}) ->
     debug("run mode ready with options %j", options)
 
     socketId = random.id()
 
-    { projectPath } = options
+    { projectPath, record, key, spec } = options
 
-    ## let's first make sure this project exists
-    Project
-    .ensureExists(projectPath)
-    .then =>
-      ## open this project without
-      ## adding it to the global cache
-      @createOpenProject(socketId, options)
-      .call("getProject")
-    .then (project) =>
-      Promise.all([
-        project
+    if record
+      captured = stdout.capture()
 
-        getProjectId(project, options.projectId)
+    ## warn if we're using deprecated --ci flag
+    recordMode.warnIfCiFlag(options.ci)
 
-        project.getConfig(),
-      ])
-    .spread (project, projectId, config) =>
-      ## if we have a project id and a key but record hasnt
-      ## been set
-      if haveProjectIdAndKeyButNoRecordOption(projectId, options)
-        ## log a warning telling the user
-        ## that they either need to provide us
-        ## with a RECORD_KEY or turn off
-        ## record mode
-        errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+    ## ensure the project exists
+    ## and open up the project
+    createAndOpenProject(socketId, options)
+    .then ({ project, projectId, config }) =>
+      ## if we have a project id and a key but record hasnt been given
+      recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
 
-      @findSpecs(config, options.spec)
-      .then (specs) =>
-        @trashAssets(config)
-        .then =>
-          @runSpecs({
-            projectPath
-            socketId
-            project
-            config
+      if record
+        recordMode.throwIfNoProjectId(projectId)
+
+      @findSpecs(config, spec)
+      .then (specs = []) ->
+        runAllSpecs = (beforeSpecRun, afterSpecRun) =>
+          if not specs.length
+            errors.throw('NO_SPECS_FOUND', config.integrationFolder, spec)
+
+          @trashAssets(config)
+          .then =>
+            @runSpecs({
+              beforeSpecRun
+              afterSpecRun
+              projectPath
+              socketId
+              project
+              config
+              specs
+              videosFolder:         config.videosFolder
+              videoRecording:       config.videoRecording
+              videoCompression:     config.videoCompression
+              videoUploadOnPasses:  config.videoUploadOnPasses
+              exit:                 options.exit
+              headed:               options.headed
+              browser:              options.browser
+              outputPath:           options.outputPath
+            })
+          .finally(allDone)
+            # if options.allDone isnt false
+              # allDone()
+
+        ## TODO: we may still want to capture
+        ## stdout even when no specs were found
+        if record
+          recordMode.createRunAndRecordSpecs({
             specs
-            videosFolder:         config.videosFolder
-            videoRecording:       config.videoRecording
-            videoCompression:     config.videoCompression
-            videoUploadOnPasses:  config.videoUploadOnPasses
-            exit:                 options.exit
-            headed:               options.headed
-            browser:              options.browser
-            outputPath:           options.outputPath
+            key,
+            projectId,
+            projectPath,
+            projectName,
+            runAllSpecs
           })
-        .finally =>
-          if options.allDone isnt false
-            @allDone()
+        else
+          runAllSpecs()
 
   run: (options) ->
     electronApp

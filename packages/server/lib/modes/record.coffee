@@ -2,13 +2,12 @@ _          = require("lodash")
 os         = require("os")
 chalk      = require("chalk")
 Promise    = require("bluebird")
-runMode   = require("./run")
 api        = require("../api")
 logger     = require("../logger")
 errors     = require("../errors")
-stdout     = require("../stdout")
+# stdout     = require("../stdout")
 upload     = require("../upload")
-Project    = require("../project")
+# Project    = require("../project")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
 debug      = require("debug")("cypress:server")
@@ -24,7 +23,115 @@ logException = (err) ->
   .catch ->
     ## dont yell about any errors either
 
+warnIfCiFlag = (ci) ->
+  ## if we are using the ci flag that means
+  ## we have an old version of the CLI tools installed
+  ## and that we need to warn the user what to update
+  if ci
+    type = switch
+      when env.get("CYPRESS_CI_KEY")
+        "CYPRESS_CI_DEPRECATED_ENV_VAR"
+      else
+        "CYPRESS_CI_DEPRECATED"
+
+    errors.warning(type)
+
+haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
+  ## if we have a project id
+  ## and we have a key
+  ## and (record or ci) hasn't been set to true or false
+  (projectId and options.key) and (
+    _.isUndefined(options.record) and _.isUndefined(options.ci)
+  )
+
+warnIfProjectIdButNoRecordOption = (projectId, options) ->
+  if haveProjectIdAndKeyButNoRecordOption(projectId, options)
+    ## log a warning telling the user
+    ## that they either need to provide us
+    ## with a RECORD_KEY or turn off
+    ## record mode
+    errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+
+throwIfNoProjectId = (projectId) ->
+  if not projectId
+    errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
+
+createRun = (projectId, recordKey, projectPath, projectName, specs) ->
+  recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
+
+  if not recordKey
+    errors.throw("RECORD_KEY_MISSING")
+
+  commitInfo.commitInfo(projectPath)
+  .then (git) ->
+    api.createRun({
+      specs
+      projectId
+      recordKey
+      commitSha:         git.sha
+      commitBranch:      git.branch
+      commitAuthorName:  git.author
+      commitAuthorEmail: git.email
+      commitMessage:     git.message
+      remoteOrigin:      git.remote
+      ciParams:          ciProvider.params()
+      ciProvider:        ciProvider.name()
+      ciBuildNumber:     ciProvider.buildNum()
+    })
+    .catch (err) ->
+      switch err.statusCode
+        when 401
+          recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+          errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
+        when 404
+          errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
+        else
+          ## warn the user that assets will be not recorded
+          errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+          ## report on this exception
+          ## and return null
+          logException(err)
+          .return(null)
+
+createRunAndRecordSpecs = (options = {}) ->
+  { specs, key, projectId, projectPath, projectName, runAllSpecs } = options
+
+  createRun(projectId, key, projectPath, projectName, specs)
+  .then (resp) ->
+    if not resp
+      runAllSpecs()
+    else
+      { runId, machineId, planId } = resp
+
+      beforeSpecRun = (spec) ->
+        recordMode.createInstance({
+          runId
+          machineId
+          planId
+          spec
+        })
+
+      afterSpecRun = (spec, results) ->
+        # recordMode.updateInstance({
+        #   runId
+        #   machineId
+        #   planId
+        #   spec
+        #   results
+        # })
+
+      runAllSpecs(beforeSpecRun, afterSpecRun)
+
 module.exports = {
+  warnIfCiFlag
+
+  throwIfNoProjectId
+
+  warnIfProjectIdButNoRecordOption
+
+  createRunAndRecordSpecs
+
   generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")

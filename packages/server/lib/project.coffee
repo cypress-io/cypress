@@ -419,10 +419,7 @@ class Project extends EE
   getProjectId: ->
     @verifyExistence()
     .then =>
-      if id = process.env.CYPRESS_PROJECT_ID
-        {projectId: id}
-      else
-        settings.read(@projectRoot)
+      settings.read(@projectRoot)
     .then (settings) =>
       if settings and id = settings.projectId
         return id
