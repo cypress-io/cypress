@@ -420,8 +420,14 @@
     display: block;
   }
 
-  .command-is-duplicate .command-expander {
-    visibility: hidden;
+  .command-is-duplicate {
+    &:first-child {
+      border-top: solid 1px #e3e3e3;
+    }
+
+    .command-expander {
+      visibility: hidden;
+    }
   }
 
   .command-is-open {
