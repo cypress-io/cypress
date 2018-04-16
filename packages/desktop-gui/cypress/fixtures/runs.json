@@ -1,6 +1,7 @@
 [
   {
-    "buildNumber": "1891",
+    "buildNumber": 1891,
+    "ciBuildNumber": "140",
     "ciProvider": "CircleCI",
     "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
     "commitAuthorEmail": "julie@devs.com",
@@ -8,8 +9,69 @@
     "commitBranch": "search-todos",
     "commitMessage": "remove listings from search results on clear",
     "commitSha": "abc1234",
+    "commitUrl": "https://github.com/cypress-io/cypress-core-example/commit/abc1234",
     "createdAt": "2016-05-13T02:35:12.748Z",
-    "expectedInstances": 1,
+    "cypressVersion": "0.18.5",
+    "duration": 1019080,
+    "endedAt": "2016-05-13T02:52:57.748Z",
+    "failed": 2,
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      }
+    ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d5",
     "instances": [
       {
@@ -18,33 +80,107 @@
         "createdAt": "2016-05-13T02:35:12.748Z",
         "duration": 1424424,
         "error": null,
-        "failures": 0,
+        "failed": 0,
         "id": "od9809-0352-4ad9-85d3-feeb1e0505d5",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
         "osName": "windows",
         "osVersion": "7",
         "osVersionFormatted": "7",
         "passes": 28,
         "pending": 4,
+        "spec": "users_list_spec.js",
         "status": "passed"
       }
     ],
-    "projectId": "3d89712jdha0wef082h98ha-8f98h3",
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "passed": 45,
+    "pending": 6,
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "skipped": 1,
+    "specIsolation": false,
+    "startedAt": "2016-05-13T02:30:10.000Z",
     "status": "running",
-    "totalDuration": 1424424,
-    "totalFailures": 0,
-    "totalPasses": 28,
-    "totalPending": 4
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
-    "buildNumber": "1892",
-    "ciProvider": "CircleCI",
+    "buildNumber": 1892,
+    "ciBuildNumber": "140",
+    "ciProvider": "Circle",
     "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthor": "Brian Mann",
+    "commitAuthorEmail": "brian@devs.com",
+    "commitAuthorName": "Brian Mann",
     "commitBranch": "master",
-    "commitEmail": "brian@devs.com",
     "commitMessage": "fix for smaller screens widths so todos display completely",
+    "commitSha": "abc1234",
+    "commitUrl": "https://github.com/cypress-io/cypress-core-example/commit/abc1234",
     "createdAt": "2016-04-21T02:35:12.748Z",
-    "expectedInstances": 1,
+    "cypressVersion": "0.18.5",
+    "duration": 1019080,
+    "endedAt": "2016-05-13T02:52:57.748Z",
+    "failed": 2,
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      }
+    ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d4",
     "instances": [
       {
@@ -54,52 +190,197 @@
         "duration": 16,
         "error": "The tests couldn't run.",
         "failures": 0,
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
         "osName": "windows",
         "osVersion": "7",
         "osVersionFormatted": "7",
         "passes": 0,
         "pending": 0,
+        "spec": "login_spec.js",
         "status": "errored"
       }
     ],
-    "projectId": "4d89712jdha0wef082h98h9098h3",
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "passed": 45,
+    "pending": 6,
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "skipped": 1,
+    "specIsolation": false,
+    "startedAt": "2016-05-13T02:30:10.000Z",
     "status": "failed",
-    "totalDuration": 16,
-    "totalFailures": 0,
-    "totalPasses": 0,
-    "totalPending": 0
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
-    "buildNumber": "1893",
-    "ciProvider": "CircleCI",
+    "buildNumber": 1893,
+    "ciBuildNumber": "140",
+    "ciProvider": "Circle",
     "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthor": "Julie Pearson",
+    "commitAuthorEmail": "julie@devs.com",
+    "commitAuthorName": "Julie Pearson",
     "commitBranch": "search-todos",
-    "commitEmail": "julie@devs.com",
     "commitMessage": "regex remove whitespace",
+    "commitSha": "abc1234",
+    "commitUrl": "https://github.com/cypress-io/cypress-core-example/commit/abc1234",
     "createdAt": "2016-03-21T02:35:12.748Z",
-    "expectedInstances": 1,
+    "cypressVersion": "0.18.5",
+    "duration": 1019080,
+    "endedAt": "2016-05-13T02:52:57.748Z",
+    "failed": 2,
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      }
+    ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d3",
     "instances": [
       
     ],
-    "projectId": "4d89712jdha0wef082h98h9098h3",
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "passed": 45,
+    "pending": 6,
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "skipped": 1,
+    "specIsolation": false,
+    "startedAt": "2016-05-13T02:30:10.000Z",
     "status": "errored",
-    "totalDuration": 1424424,
-    "totalFailures": 0,
-    "totalPasses": 28,
-    "totalPending": 0
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
-    "buildNumber": "1894",
-    "ciProvider": "CircleCI",
+    "buildNumber": 1894,
+    "ciProvider": "Circle",
     "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthor": "Julie Pearson",
+    "commitAuthorEmail": "julie@devs.com",
+    "commitAuthorName": "Julie Pearson",
     "commitBranch": "search-todos",
-    "commitEmail": "julie@devs.com",
     "commitMessage": "remove listings from search results on clear",
+    "commitSha": "abc1234",
+    "commitUrl": "https://github.com/cypress-io/cypress-core-example/commit/abc1234",
     "createdAt": "2015-08-21T02:35:12.748Z",
-    "expectedInstances": 2,
+    "cypressVersion": "0.18.5",
+    "duration": 1019080,
+    "endedAt": "2016-05-13T02:52:57.748Z",
+    "failed": 0,
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStart": "2018-02-01T20:14:19.323Z"
+      }
+    ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d2",
     "instances": [
       {
@@ -110,11 +391,13 @@
         "error": "The tests couldn't run.",
         "failures": 0,
         "id": "dkwd809-0352-4ad9-85d3-feeb1e0505d5",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
         "osName": "windows",
         "osVersion": "7",
         "osVersionFormatted": "7",
         "passes": 0,
         "pending": 0,
+        "spec": "filters_spec.js",
         "status": "errored"
       },
       {
@@ -125,19 +408,29 @@
         "error": null,
         "failures": 0,
         "id": "as9d0809-0352-4ad9-85d3-feeb1e0505d5",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
         "osName": "darwin",
         "osVersion": "10",
         "osVersionFormatted": "OSX Mountain Lion",
         "passes": 0,
         "pending": 0,
+        "spec": "search_spec.js",
         "status": "running"
       }
     ],
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "passed": 45,
+    "pending": 6,
     "projectId": "2d89712jdha0wef082h98h9098h3",
+    "projectName": "jekyl_blog",
+    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "skipped": 1,
+    "specIsolation": false,
     "status": "passed",
-    "totalDuration": 1424424,
-    "totalFailures": 0,
-    "totalPasses": 28,
-    "totalPending": 2
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   }
 ]
