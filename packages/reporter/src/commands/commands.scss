@@ -422,6 +422,10 @@
         @extend .#{$fa-css-prefix}-caret-down;
       }
     }
+
+    .num-duplicates {
+      display: none;
+    }
   }
 
   .command-is-pinned,
