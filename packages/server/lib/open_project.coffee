@@ -5,6 +5,7 @@ config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
 log       = require('./log')
+specsUtil = require('./util/specs')
 
 create = ->
   openProject     = null
@@ -45,7 +46,7 @@ create = ->
       ## of potential domain changes, request buffers, etc
       @reset()
       .then ->
-        openProject.ensureSpecUrl(spec)
+        openProject.getSpecUrl(spec)
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
@@ -95,7 +96,13 @@ create = ->
       get = ->
         openProject.getConfig()
         .then (cfg) ->
-          files.getTestFiles(cfg)
+          specsUtil.find(cfg)
+        .then (specs = []) ->
+          ## TODO: put back 'integration' property
+          ## on the specs
+          return {
+            integration: specs
+          }
 
       specIntervalId = setInterval(checkForSpecUpdates, 2500)
 

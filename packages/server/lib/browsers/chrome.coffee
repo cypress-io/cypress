@@ -1,14 +1,12 @@
 _         = require("lodash")
 os        = require("os")
-fs        = require("fs-extra")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
 plugins   = require("../plugins")
+fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
-
-fs = Promise.promisifyAll(fs)
 
 LOAD_EXTENSION = "--load-extension="
 

@@ -6,8 +6,9 @@ Buffer      = require("buffer").Buffer
 Jimp        = require("jimp")
 Fixtures    = require("../support/helpers/fixtures")
 config      = require("#{root}lib/config")
-settings    = require("#{root}lib/util/settings")
 screenshots = require("#{root}lib/screenshots")
+fs          = require("#{root}lib/util/fs")
+settings    = require("#{root}lib/util/settings")
 screenshotAutomation = require("#{root}lib/automation/screenshot")
 
 image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC"

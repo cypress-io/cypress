@@ -2,9 +2,8 @@ require("../spec_helper")
 
 path         = require("path")
 Promise      = require("bluebird")
-fs           = require("fs-extra")
+commitInfo   = require("@cypress/commit-info")
 Fixtures     = require("../support/helpers/fixtures")
-ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
 user         = require("#{root}lib/user")
 cache        = require("#{root}lib/cache")
@@ -14,11 +13,11 @@ scaffold     = require("#{root}lib/scaffold")
 Server       = require("#{root}lib/server")
 Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
-settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
-commitInfo   = require("@cypress/commit-info")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
+fs           = require("#{root}lib/util/fs")
+settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->
@@ -479,64 +478,32 @@ describe "lib/project", ->
       @project.writeProjectId("id-123").then =>
         expect(@project.generatedProjectIdTimestamp).to.be.a("date")
 
-  context "#ensureSpecUrl", ->
+  context "#getSpecUrl", ->
     beforeEach ->
       @project2 = Project(@idsPath)
 
       settings.write(@idsPath, {port: 2020})
 
     it "returns fully qualified url when spec exists", ->
-      @project2.ensureSpecUrl("cypress/integration/bar.js")
+      @project2.getSpecUrl("cypress/integration/bar.js")
       .then (str) ->
         expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js")
 
     it "returns fully qualified url on absolute path to spec", ->
       todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
-      @project.ensureSpecUrl(todosSpec)
+      @project.getSpecUrl(todosSpec)
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee")
 
     it "returns __all spec url", ->
-      @project.ensureSpecUrl()
+      @project.getSpecUrl()
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
     it "returns __all spec url with spec is __all", ->
-      @project.ensureSpecUrl('__all')
+      @project.getSpecUrl('__all')
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
-
-    it "throws when spec isnt found", ->
-      @project.ensureSpecUrl("does/not/exist.js")
-      .catch (err) ->
-        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
-
-  context "#ensureSpecExists", ->
-    beforeEach ->
-      @project2 = Project(@idsPath)
-
-    it "resolves relative path to test file against projectRoot", ->
-      @project2.ensureSpecExists("cypress/integration/foo.coffee")
-      .then =>
-        @project.ensureSpecExists("tests/test1.js")
-
-    it "resolves + returns absolute path to test file", ->
-      idsSpec   = path.join(@idsPath, "cypress/integration/foo.coffee")
-      todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
-
-      @project2.ensureSpecExists(idsSpec)
-      .then (spec1) =>
-        expect(spec1).to.eq(idsSpec)
-
-        @project.ensureSpecExists(todosSpec)
-      .then (spec2) ->
-        expect(spec2).to.eq(todosSpec)
-
-    it "throws SPEC_FILE_NOT_FOUND when spec does not exist", ->
-      @project2.ensureSpecExists("does/not/exist.js")
-      .catch (err) =>
-        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
-        expect(err.message).to.include(path.join(@idsPath, "does/not/exist.js"))
 
   context ".add", ->
     beforeEach ->
@@ -775,7 +742,7 @@ describe "lib/project", ->
 
         Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then =>
-          throw new Error("Should throw error")
+          throw new Error("should have caught error but did not")
         .catch (err) ->
           expect(err).to.equal(error)
 
@@ -849,19 +816,9 @@ describe "lib/project", ->
 
       Project.getProjectStatus(@clientProject)
       .then =>
-        throw new Error("Should throw error")
+        throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err).to.equal(error)
-
-  context ".removeIds", ->
-    beforeEach ->
-      @sandbox.stub(ids, "remove").resolves({})
-
-    it "calls id.remove with path to project tests", ->
-      p = Fixtures.projectPath("ids")
-
-      Project.removeIds(p).then ->
-        expect(ids.remove).to.be.calledWith(p + "/cypress/integration")
 
   context ".getSecretKeyByPath", ->
     beforeEach ->
@@ -908,22 +865,3 @@ describe "lib/project", ->
         throw new Error("should have caught error but did not")
       .catch (err) ->
         expect(err.type).to.eq("CANNOT_CREATE_PROJECT_TOKEN")
-
-  context ".findSpecs", ->
-    it "returns all the specs without a specPattern", ->
-      Project.findSpecs(@todosPath)
-      .then (specs = []) ->
-        expect(specs).to.deep.eq([
-          "etc/etc.js"
-          "sub/sub_test.coffee"
-          "test1.js"
-          "test2.coffee"
-        ])
-
-    it "returns glob subset matching specPattern", ->
-      Project.findSpecs(@todosPath, "tests/*")
-      .then (specs = []) ->
-        expect(specs).to.deep.eq([
-          "test1.js"
-          "test2.coffee"
-        ])

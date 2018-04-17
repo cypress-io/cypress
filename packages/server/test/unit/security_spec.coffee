@@ -3,6 +3,7 @@ require("../spec_helper")
 _ = require("lodash")
 rp = require("request-promise")
 concat = require("concat-stream")
+fs = require("#{root}lib/util/fs")
 security = require("#{root}lib/util/security")
 Fixtures = require("#{root}test/support/helpers/fixtures")
 

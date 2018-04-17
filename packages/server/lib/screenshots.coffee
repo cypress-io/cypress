@@ -1,13 +1,10 @@
-fs              = require("fs-extra")
 mime            = require("mime")
 path            = require("path")
-glob            = require("glob")
 bytes           = require("bytes")
 sizeOf          = require("image-size")
 Promise         = require("bluebird")
-
-fs   = Promise.promisifyAll(fs)
-glob = Promise.promisify(glob)
+fs              = require("./util/fs")
+glob            = require("./util/glob")
 
 RUNNABLE_SEPARATOR = " -- "
 invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
