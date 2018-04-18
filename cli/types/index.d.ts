@@ -756,7 +756,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/scrollintoview
      */
-    scrollIntoView(options?: Partial<ScrollToOptions>): Chainable<Subject>
+    scrollIntoView(options?: Partial<ScrollIntoViewOptions>): Chainable<Subject>
 
     /**
      * Scroll to a specific position.
@@ -1268,6 +1268,9 @@ declare namespace Cypress {
      * @default 'swing'
      */
     easing: 'swing' | 'linear',
+  }
+
+  interface ScrollIntoViewOptions extends ScrollToOptions {
     /**
      * Amount to scroll after the element has been scrolled into view
      *
