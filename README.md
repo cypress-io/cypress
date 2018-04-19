@@ -94,3 +94,12 @@ The set of `semantic-release-monorepo` plugins wrap the default `semantic-releas
 #### tagFormat
 
 Pre-configures the [`tagFormat` option](https://github.com/semantic-release/semantic-release/blob/caribou/docs/usage/configuration.md#tagformat) to use the [monorepo git tag format](#how).
+
+If you are using Lerna, you can customize the format using the following command:
+
+```
+"semantic-release": "lerna exec --concurrency 1 -- semantic-release -e semantic-release-monorepo --tag-format='${LERNA_PACKAGE_NAME}-v\\${version}'"
+```
+
+Where `'${LERNA_PACKAGE_NAME}-v\\${version}'` is the string you want to customize.  
+By default it will be `<PACKAGE_NAME>-v<VERSION>` (e.g. `foobar-v1.2.3`).
