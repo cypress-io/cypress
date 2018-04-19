@@ -234,7 +234,7 @@ describe "Runs List", ->
         cy.contains("Set up project").click()
 
       it "shows login message", ->
-        cy.get(".login h1").should("contain", "Log In")
+        cy.get(".login h1").should("contain", "Log in")
 
       it "clicking 'Log In with GitHub' opens login", ->
         cy.contains("button", "Log In with GitHub").click().then ->
@@ -356,7 +356,7 @@ describe "Runs List", ->
           @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
 
         it "displays permissions message", ->
-          cy.contains("Request Access")
+          cy.contains("Request access")
 
       context "any case", ->
         beforeEach ->
@@ -366,33 +366,33 @@ describe "Runs List", ->
 
         context "request access", ->
           beforeEach ->
-            cy.contains("Request Access").click()
+            cy.contains("button", "Request access").as("requestAccessBtn").click()
 
-          it "sends requests access with org id", ->
-            expect(@ipc.requestAccess).to.be.calledWith("d8104707-a348-4653-baea-7da9c7d52448")
+          it "sends requests access with project id", ->
+            expect(@ipc.requestAccess).to.be.calledWith(@config.projectId)
 
           it "disables button", ->
-            cy.contains("Request Access").should("be.disabled")
+            cy.get("@requestAccessBtn").should("be.disabled")
 
-          it "hides 'Request Access' text", ->
-            cy.contains("Request Access").find("span").should("not.be.visible")
+          it "hides 'Request access' text", ->
+            cy.get("@requestAccessBtn").find("span").should("not.be.visible")
 
           it "shows spinner", ->
-            cy.contains("Request Access").find("> i").should("be.visible")
+            cy.get("@requestAccessBtn").find("> i").should("be.visible")
 
           describe "when request succeeds", ->
             beforeEach ->
               @requestAccess.resolve()
 
             it "shows success message", ->
-              cy.contains("Request Sent")
+              cy.contains("Request sent")
 
             it "'persists' request state (until app is reloaded at least)", ->
               @ipc.getRuns.onCall(1).rejects({name: "foo", message: "There's an error", statusCode: 403})
 
               cy.get(".navbar-default a").contains("Tests").click()
               cy.get(".navbar-default a").contains("Runs").click()
-              cy.contains("Request Sent")
+              cy.contains("Request sent")
 
           describe "when request succeeds and user is already a member", ->
             beforeEach ->
@@ -425,29 +425,30 @@ describe "Runs List", ->
                 ## this is displayed in the DOM
                 cy.contains("Request Failed")
                 cy.contains("off the cracker")
+                cy.contains("button", "Request access").as("requestAccessBtn")
 
               it "enables button", ->
-                cy.contains("Request Access").should("not.be.disabled")
+                cy.get("@requestAccessBtn").should("not.be.disabled")
 
-              it "shows 'Request Access' text", ->
-                cy.contains("Request Access").find("span").should("be.visible")
+              it "shows 'Request access' text", ->
+                cy.get("@requestAccessBtn").find("span").should("be.visible")
 
               it "hides spinner", ->
-                cy.contains("Request Access").find("> i").should("not.be.visible")
+                cy.get("@requestAccessBtn").find("> i").should("not.be.visible")
 
             describe "because requested was denied", ->
               beforeEach ->
                 @requestAccess.reject({type: "DENIED", name: "foo", message: "There's an error"})
 
               it "shows 'success' message", ->
-                cy.contains("Request Sent")
+                cy.contains("Request sent")
 
             describe "because request was already sent", ->
               beforeEach ->
                 @requestAccess.reject({type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
 
               it "shows 'success' message", ->
-                cy.contains("Request Sent")
+                cy.contains("Request sent")
 
             describe "because user became unauthenticated", ->
               beforeEach ->
@@ -511,7 +512,7 @@ describe "Runs List", ->
           .contains(".btn", "Me").click()
         cy.get(".privacy-radio").find("input").last().check()
         cy.get(".modal-body")
-          .contains(".btn", "Set Up Project").click()
+          .contains(".btn", "Set up project").click()
         cy.contains("To record your first")
 
     describe "unexpected error", ->
@@ -564,7 +565,7 @@ describe "Runs List", ->
           .contains(".btn", "Me").click()
         cy.get(".privacy-radio").find("input").last().check()
         cy.get(".modal-body")
-          .contains(".btn", "Set Up Project").click()
+          .contains(".btn", "Set up project").click()
         cy.contains("To record your first")
 
     describe "no runs", ->
