@@ -71,7 +71,7 @@ Users may still want to define a custom versions of the plugin set, or want to p
       },
       "generateNotes": "myNotesGenerator"
     },
-    "publish": ["@semantic-release/npm", "@semantic-release/git"],
+    "prepare": ["@semantic-release/npm", "@semantic-release/git"],
     "verifyConditions": ["@semantic-release/git"]
   }
 }
