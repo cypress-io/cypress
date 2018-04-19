@@ -25,13 +25,13 @@ describe('cli', function () {
   context('unknown option', () => {
     // note it shows help for that specific command
     it('shows help', () =>
-      execa('bin/cypress', ['open', '--foo']).then(result => {
+      execa('bin/cypress', ['open', '--foo']).then((result) => {
         snapshot('shows help for open --foo', result)
       })
     )
 
     it('shows help for run command', () =>
-      execa('bin/cypress', ['run', '--foo']).then(result => {
+      execa('bin/cypress', ['run', '--foo']).then((result) => {
         snapshot('shows help for run --foo', result)
       })
     )
