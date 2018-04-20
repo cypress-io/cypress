@@ -361,6 +361,14 @@ API = {
 
         We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
         """
+      when "INVALID_CYPRESS_ENV"
+        """
+        We have detected unknown or unsupported CYPRESS_ENV value
+
+          #{chalk.yellow(arg1)}
+
+        Please do not modify CYPRESS_ENV value.
+        """
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)

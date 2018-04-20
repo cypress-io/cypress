@@ -180,6 +180,11 @@ validate = (file) ->
 module.exports = {
   getConfigKeys: -> configKeys
 
+  isValidCypressEnvValue: (value) ->
+    # names of config environments, see "config/app.yml"
+    names = ["development", "test", "staging", "production"]
+    _.includes(names, value)
+
   whitelist: (obj = {}) ->
     _.pick(obj, configKeys)
 
@@ -236,7 +241,12 @@ module.exports = {
     ## split out our own app wide env from user env variables
     ## and delete envFile
     config.env = @parseEnv(config, options.env, resolved)
+
     config.cypressEnv = process.env["CYPRESS_ENV"]
+    log("using CYPRESS_ENV %s", config.cypressEnv)
+    if not @isValidCypressEnvValue(config.cypressEnv)
+      errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
+
     delete config.envFile
 
     if hosts = config.hosts
