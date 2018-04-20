@@ -3,7 +3,6 @@ require("../lib/environment")
 global.root      = "../../"
 global.supertest = require("supertest-as-promised")
 global.nock      = require("nock")
-global.fs        = require("fs-extra")
 global.expect    = require("chai").expect
 global.mockery   = require("mockery")
 global.proxyquire = require("proxyquire")
@@ -13,8 +12,6 @@ sinon            = require("sinon")
 sinonPromise     = require("sinon-as-promised")(Promise)
 cache            = require("../lib/cache")
 appData          = require("../lib/util/app_data")
-
-global.fs = fs = Promise.promisifyAll(global.fs)
 
 agent = require("superagent")
 
@@ -39,9 +36,6 @@ before ->
   appData.ensure()
 
 beforeEach ->
-  if global.fs isnt fs
-    global.fs = fs
-
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 
@@ -52,9 +46,6 @@ afterEach ->
 
   nock.cleanAll()
   nock.enableNetConnect()
-
-  if global.fs isnt fs
-    global.fs = fs
 
   ## always clean up the cache
   ## after each test
