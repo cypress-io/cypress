@@ -42,6 +42,30 @@ describe('cli', function () {
     )
   })
 
+  context('CYPRESS_ENV', () => {
+    it('allows staging environment', () => {
+      const options = {
+        env: {
+          CYPRESS_ENV: 'staging'
+        },
+        // we are only interested in the exit code
+        filter: ['code', 'stderr']
+      }
+      return execa('bin/cypress', ['help'], options).then(snapshot)
+    })
+
+    it('catches environment "foo"', () => {
+      const options = {
+        env: {
+          CYPRESS_ENV: 'foo'
+        },
+        // we are only interested in the exit code
+        filter: ['code', 'stderr']
+      }
+      return execa('bin/cypress', ['help'], options).then(snapshot)
+    })
+  })
+
   context('cypress version', function () {
     it('reports package version', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')

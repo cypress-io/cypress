@@ -6,7 +6,8 @@ exports['errors individual has the following errors 1'] = [
   "versionMismatch",
   "unexpected",
   "failedDownload",
-  "failedUnzip"
+  "failedUnzip",
+  "invalidCypressEnv"
 ]
 
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `

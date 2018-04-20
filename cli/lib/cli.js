@@ -4,6 +4,7 @@ const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
+const errors = require('./errors')
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
@@ -75,6 +76,11 @@ module.exports = {
   init (args) {
     if (!args) {
       args = process.argv
+    }
+
+    if (!util.isValidCypressEnvValue(process.env.CYPRESS_ENV)) {
+      debug('invalid CYPRESS_ENV value', process.env.CYPRESS_ENV)
+      return errors.exitWithError(errors.errors.invalidCypressEnv)(process.env.CYPRESS_ENV)
     }
 
     const program = new commander.Command()

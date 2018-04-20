@@ -168,3 +168,30 @@ exports['cli -v no binary version 1'] = `
 Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
+
+exports['cli CYPRESS_ENV allows staging environment 1'] = `
+  code: 0
+  stderr:
+  -------
+  
+  -------
+
+`
+
+exports['cli CYPRESS_ENV catches environment "foo" 1'] = `
+  code: 11
+  stderr:
+  -------
+  We have detected unknown or unsupported CYPRESS_ENV value
+
+  Please unset CYPRESS_ENV variable and run Cypress again
+  ----------
+
+  foo
+  ----------
+
+  Platform: darwin (16.7.0)
+  Cypress Version: 0.0.0
+  -------
+
+`

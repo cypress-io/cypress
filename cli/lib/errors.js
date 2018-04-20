@@ -89,6 +89,12 @@ const unexpected = {
   `,
 }
 
+const invalidCypressEnv = {
+  description: 'We have detected unknown or unsupported CYPRESS_ENV value',
+  solution: 'Please unset CYPRESS_ENV variable and run Cypress again',
+  exitCode: 11,
+}
+
 const getOsVersion = () => {
   if (os.platform() === 'linux') {
     return getos()
@@ -171,8 +177,23 @@ const throwFormErrorText = (info) => (msg) => {
   .then(raise)
 }
 
+/**
+ * Forms full error message with error and OS details, prints to the error output
+ * and then exits the process.
+ * @param {ErrorInformation} info Error information {description, solution}
+ * @example return exitWithError(errors.invalidCypressEnv)('foo')
+ */
+const exitWithError = (info) => (msg) => {
+  return formErrorText(info, msg).then((text) => {
+    // eslint-disable-next-line no-console
+    console.error(text)
+    process.exit(info.exitCode || 1)
+  })
+}
+
 module.exports = {
   raise,
+  exitWithError,
   // formError,
   formErrorText,
   throwFormErrorText,
@@ -185,5 +206,6 @@ module.exports = {
     unexpected,
     failedDownload,
     failedUnzip,
+    invalidCypressEnv,
   },
 }

@@ -23,6 +23,6 @@ switch (args.exec) {
 
     break
   default:
-    // export our node module interface
+    debug('exporting Cypress module interface')
     module.exports = require('./lib/cypress')
 }
