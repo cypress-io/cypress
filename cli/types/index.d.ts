@@ -7,13 +7,14 @@
 // TypeScript Version: 2.5
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="blob-util" />
-/// <reference types="bluebird" />
+/// <reference path="./blob-util.d.ts" />
+/// <reference path="./bluebird.d.ts" />
+/// <reference path="./minimatch.d.ts" />
+
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
 /// <reference types="lodash" />
-/// <reference types="minimatch" />
 /// <reference types="mocha" />
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
