@@ -46,10 +46,10 @@ describe('cli', function () {
     it('allows staging environment', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'staging'
+          CYPRESS_ENV: 'staging',
         },
         // we are only interested in the exit code
-        filter: ['code', 'stderr']
+        filter: ['code', 'stderr'],
       }
       return execa('bin/cypress', ['help'], options).then(snapshot)
     })
@@ -57,10 +57,10 @@ describe('cli', function () {
     it('catches environment "foo"', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'foo'
+          CYPRESS_ENV: 'foo',
         },
         // we are only interested in the exit code
-        filter: ['code', 'stderr']
+        filter: ['code', 'stderr'],
       }
       return execa('bin/cypress', ['help'], options).then(snapshot)
     })
