@@ -190,8 +190,8 @@ exports['cli CYPRESS_ENV catches environment "foo" 1'] = `
   foo
   ----------
 
-  Platform: darwin (16.7.0)
-  Cypress Version: 0.0.0
+  Platform: xxx
+  Cypress Version: 1.2.3
   -------
 
 `

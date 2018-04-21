@@ -10,6 +10,7 @@ const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
 const execa = require('execa-wrap')
+const os = require('os')
 
 describe('cli', function () {
   require('mocha-banner').register()
@@ -43,6 +44,26 @@ describe('cli', function () {
   })
 
   context('CYPRESS_ENV', () => {
+    /**
+     * Replaces line "Platform: ..." with "Platform: xxx"
+     * @param {string} s
+     */
+    const replacePlatform = (s) =>
+      s.replace(/Platform: .+/, 'Platform: xxx')
+
+    /**
+     * Replaces line "Cypress Version: ..." with "Cypress Version: 1.2.3"
+     * @param {string} s
+     */
+    const replaceCypressVersion = (s) =>
+      s.replace(/Cypress Version: .+/, 'Cypress Version: 1.2.3')
+
+    const sanitizePlatform = (text) =>
+      text.split(os.eol)
+      .map(replacePlatform)
+      .map(replaceCypressVersion)
+      .join(os.eol)
+
     it('allows staging environment', () => {
       const options = {
         env: {
@@ -62,7 +83,9 @@ describe('cli', function () {
         // we are only interested in the exit code
         filter: ['code', 'stderr'],
       }
-      return execa('bin/cypress', ['help'], options).then(snapshot)
+      return execa('bin/cypress', ['help'], options)
+        .then(sanitizePlatform)
+        .then(snapshot)
     })
   })
 
