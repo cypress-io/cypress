@@ -84,8 +84,8 @@ describe('cli', function () {
         filter: ['code', 'stderr'],
       }
       return execa('bin/cypress', ['help'], options)
-        .then(sanitizePlatform)
-        .then(snapshot)
+      .then(sanitizePlatform)
+      .then(snapshot)
     })
   })
 
