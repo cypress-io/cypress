@@ -17,7 +17,7 @@ const wrap = (ipc, invoke, ids, args) => {
     ipc.on('preprocessor:close', (filePath) => {
       // no filePath means close all
       if (!filePath || filePath === file.filePath) {
-        delete fileObjects[filePath]
+        delete fileObjects[file.filePath]
         childFile.emit('close')
       }
     })
@@ -27,4 +27,10 @@ const wrap = (ipc, invoke, ids, args) => {
 
 module.exports = {
   wrap,
+
+  // for testing purposes
+  _clearFiles: () => {
+    for (let file in fileObjects) delete fileObjects[file]
+  },
+  _getFiles: () => fileObjects,
 }
