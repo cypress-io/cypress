@@ -4,8 +4,9 @@ files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
-log       = require('./log')
 specsUtil = require('./util/specs')
+log       = require('debug')("cypress:server:project")
+preprocessor = require("./plugins/preprocessor")
 
 create = ->
   openProject     = null
@@ -65,6 +66,13 @@ create = ->
           ## been defined here
           if am = options.automationMiddleware
             automation.use(am)
+
+          onBrowserClose = options.onBrowserClose
+          options.onBrowserClose = ->
+            if spec
+              preprocessor.removeFile(spec, cfg)
+            if onBrowserClose
+              onBrowserClose()
 
           do relaunchBrowser = ->
             log "launching project in browser #{browserName}"
