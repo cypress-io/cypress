@@ -59,6 +59,25 @@ describe "Web Sockets", ->
         expect(err.code).to.eq("ECONNRESET")
         done()
 
+    it "sends back 502 Bad Gateway when error upgrading", (done) ->
+      agent = new httpsAgent("http://localhost:#{cyPort}")
+
+      @server._onDomainSet("http://localhost:#{otherPort}")
+
+      client = new ws("ws://localhost:#{otherPort}", {
+        agent: agent
+      })
+
+      client.on "unexpected-response", (req, res) ->
+        expect(res.statusCode).to.eq(502)
+        expect(res.statusMessage).to.eq("Bad Gateway")
+        expect(res.headers).to.deep.eq({
+          'x-cypress-proxy-error-message': 'connect ECONNREFUSED 127.0.0.1:5555',
+          'x-cypress-proxy-error-code': 'ECONNREFUSED'
+        })
+
+        done()
+
     it "proxies https messages", (done) ->
       @server._onDomainSet("https://localhost:#{wssPort}")
 
