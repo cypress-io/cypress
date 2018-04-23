@@ -75,7 +75,8 @@
           "release": "major"
         }
       ]
-    }
+    },
+    "generateNotes": "github-post-release"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
