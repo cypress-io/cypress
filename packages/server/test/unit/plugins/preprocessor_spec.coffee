@@ -2,7 +2,6 @@ require("../../spec_helper")
 
 EE = require("events")
 Fixtures = require("../../support/helpers/fixtures")
-fs = require("fs-extra")
 path = require("path")
 snapshot = require("snap-shot-it")
 appData = require("#{root}../lib/util/app_data")

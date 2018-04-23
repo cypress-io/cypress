@@ -2,7 +2,7 @@ _          = require("lodash")
 os         = require("os")
 chalk      = require("chalk")
 Promise    = require("bluebird")
-headless   = require("./headless")
+runMode   = require("./run")
 api        = require("../api")
 logger     = require("../logger")
 errors     = require("../errors")
@@ -253,7 +253,7 @@ module.exports = {
 
           didUploadAssets       = false
 
-          headless.run(options)
+          runMode.run(options)
           .then (results = {}) =>
             ## if we got a instanceId then attempt to
             ## upload these assets
@@ -263,7 +263,7 @@ module.exports = {
                 didUploadAssets = ret isnt null
               .return(results)
               .finally =>
-                headless.allDone()
+                runMode.allDone()
 
                 if didUploadAssets
                   stdout.restore()
@@ -271,6 +271,6 @@ module.exports = {
 
             else
               stdout.restore()
-              headless.allDone()
+              runMode.allDone()
               return results
 }

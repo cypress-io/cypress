@@ -1,6 +1,6 @@
-fs         = require("fs-extra")
 path       = require("path")
 Promise    = require("bluebird")
+fs         = require("../../lib/util/fs")
 Fixtures   = require("../support/helpers/fixtures")
 e2e        = require("../support/helpers/e2e")
 

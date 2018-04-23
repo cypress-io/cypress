@@ -4,6 +4,7 @@ files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
+specsUtil = require('./util/specs')
 log       = require('debug')("cypress:server:project")
 preprocessor = require("./plugins/preprocessor")
 
@@ -46,7 +47,7 @@ create = ->
       ## of potential domain changes, request buffers, etc
       @reset()
       .then ->
-        openProject.ensureSpecUrl(spec)
+        openProject.getSpecUrl(spec)
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
@@ -103,7 +104,13 @@ create = ->
       get = ->
         openProject.getConfig()
         .then (cfg) ->
-          files.getTestFiles(cfg)
+          specsUtil.find(cfg)
+        .then (specs = []) ->
+          ## TODO: put back 'integration' property
+          ## on the specs
+          return {
+            integration: specs
+          }
 
       specIntervalId = setInterval(checkForSpecUpdates, 2500)
 
