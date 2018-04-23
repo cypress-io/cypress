@@ -90,8 +90,8 @@ const unexpected = {
 }
 
 const invalidCypressEnv = {
-  description: 'We have detected unknown or unsupported CYPRESS_ENV value',
-  solution: 'Please unset CYPRESS_ENV variable and run Cypress again',
+  description: 'Environment variable with reserved name "CYPRESS_ENV" was used.',
+  solution: 'Remove "CYPRESS_ENV" variable and run Cypress again.',
   exitCode: 11,
 }
 

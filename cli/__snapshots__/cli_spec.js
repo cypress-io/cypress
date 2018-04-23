@@ -182,9 +182,9 @@ exports['cli CYPRESS_ENV catches environment "foo" 1'] = `
   code: 11
   stderr:
   -------
-  We have detected unknown or unsupported CYPRESS_ENV value
+  Environment variable with reserved name "CYPRESS_ENV" was used.
 
-  Please unset CYPRESS_ENV variable and run Cypress again
+  Remove "CYPRESS_ENV" variable and run Cypress again.
   ----------
 
   foo
