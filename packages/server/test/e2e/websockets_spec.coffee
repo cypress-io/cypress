@@ -12,15 +12,20 @@ onWsServer = (app, server) ->
     ws.on "message", (msg) ->
       ws.send(msg + "bar")
 
+onWssServer = (app) ->
+
 describe "e2e websockets", ->
   e2e.setup({
     servers: [{
-      port: 3838
+      port: 3038
       static: true
       onServer: onServer
     }, {
-      port: 3939
+      port: 3039
       onServer: onWsServer
+    }, {
+      port: 3040
+      onServer: onWssServer
     }]
   })
 
