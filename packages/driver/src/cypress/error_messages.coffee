@@ -628,7 +628,7 @@ module.exports = {
 
   screenshot:
     invalid_arg: "{{cmd}}() must be called with an object. You passed: {{arg}}"
-    invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'app' or 'runner'. You passed: {{arg}}"
+    invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: {{arg}}"
     invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
     invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
     invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"

@@ -20,7 +20,7 @@ describe "lib/screenshots", ->
     @todosPath = Fixtures.projectPath("todos")
 
     @appData = {
-      appOnly: true
+      capture: "app"
       clip: { x: 0, y: 0, width: 10, height: 10 }
     }
 
@@ -89,11 +89,11 @@ describe "lib/screenshots", ->
       screenshots.capture(@appData, @automate).then (buffer) =>
         expect(buffer).to.equal(@buffer)
 
-    describe "fullPage: true", ->
+    describe "capture: fullpage", ->
       beforeEach ->
         screenshots.clearFullPageState()
 
-        @appData.fullPage = true
+        @appData.capture = "fullpage"
         @appData.current = 1
         @appData.total = 3
 

@@ -59,6 +59,12 @@ captureAndCheck = (data, automate, condition) ->
 
   attempt()
 
+isAppOnly = (data) ->
+  data.capture is "app" or data.capture is "fullpage"
+
+isFullPage = (data) ->
+  data.capture is "fullpage"
+
 getBufferWithType = (image) ->
   image.getBuffer(Jimp.AUTO).then (buffer) ->
     buffer.type = image.getMIME()
@@ -78,8 +84,8 @@ crop = (image, dimensions) ->
 pixelCondition = (data, image) ->
   hasPixels = hasHelperPixels(image)
   return (
-    (data.appOnly and not hasPixels) or
-    (not data.appOnly and hasPixels)
+    (isAppOnly(data) and not hasPixels) or
+    (not isAppOnly(data) and hasPixels)
   )
 
 fullPageImages = []
@@ -125,11 +131,11 @@ module.exports = {
     glob(screenshotsFolder, {nodir: true})
 
   capture: (data, automate) ->
-    condition = if data.fullPage then fullPageCondition else pixelCondition
+    condition = if isFullPage(data) then fullPageCondition else pixelCondition
 
     captureAndCheck(data, automate, condition)
     .then ([buffer, image]) ->
-      if data.fullPage and data.total > 1
+      if isFullPage(data) and data.total > 1
         return crop(image, data.clip).then ->
           fullPageImages.push(image)
 
@@ -138,7 +144,7 @@ module.exports = {
           else
             return null
 
-      if data.appOnly
+      if isAppOnly(data)
         return crop(image, data.clip)
 
       return buffer

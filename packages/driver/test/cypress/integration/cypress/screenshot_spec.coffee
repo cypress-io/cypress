@@ -7,7 +7,6 @@ DEFAULTS = {
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
-  fullPage: false
 }
 
 describe "src/cypress/screenshot", ->
@@ -63,12 +62,6 @@ describe "src/cypress/screenshot", ->
       })
       expect(Screenshot.getConfig().screenshotOnRunFailure).to.equal(false)
 
-    it "sets fullPage if specified", ->
-      Screenshot.defaults({
-        fullPage: true
-      })
-      expect(Screenshot.getConfig().fullPage).to.equal(true)
-
     it "sets beforeScreenshot if specified", ->
       beforeScreenshot = cy.stub()
       Screenshot.defaults({ beforeScreenshot })
@@ -90,12 +83,12 @@ describe "src/cypress/screenshot", ->
       it "throws if capture is not a string", ->
         expect =>
           Screenshot.defaults({ capture: true })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app' or 'runner'. You passed: true")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: true")
 
       it "throws if capture is not a valid option", ->
         expect =>
           Screenshot.defaults({ capture: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app' or 'runner'. You passed: foo")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: foo")
 
       it "throws if waitForCommandSynchronization is not a boolean", ->
         expect =>
@@ -126,11 +119,6 @@ describe "src/cypress/screenshot", ->
         expect =>
           Screenshot.defaults({ blackout: [true] })
         .to.throw("Cypress.Screenshot.defaults() 'blackout' option must be an array of strings. You passed: true")
-
-      it "throws if fullPage is not a boolean", ->
-        expect =>
-          Screenshot.defaults({ fullPage: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'fullPage' option must be a boolean. You passed: foo")
 
       it "throws if beforeScreenshot is not a function", ->
         expect =>

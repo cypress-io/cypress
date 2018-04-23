@@ -83,7 +83,6 @@ takeFullPageScreenshot = (state, automationOptions) ->
     win.scrollTo(0, y)
     finished = num is numScreenshots
     options = _.extend({}, automationOptions, {
-      fullPage: true
       current: num
       total: numScreenshots
     })
@@ -116,7 +115,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
 
   { runnable } = options
 
-  appOnly = capture is "app"
+  appOnly = capture is "app" or capture is "fullpage"
 
   send = (event, props) ->
     new Promise (resolve) ->
@@ -150,7 +149,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       cy.pauseTimers(false)
 
   automationOptions = _.extend({}, options, {
-    appOnly: appOnly
+    capture: capture
     clip: {
       x: 0
       y: 0
@@ -161,7 +160,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
 
   before(capture)
   .then ->
-    if options.fullPage
+    if capture is "fullpage"
       takeFullPageScreenshot(state, automationOptions)
     else
       automateScreenshot(automationOptions)
@@ -194,7 +193,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: config("responseTimeout")
       }
 
-      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "fullPage")
+      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization")
       screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
 
@@ -215,7 +214,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         name: name
         log: options._log
         timeout: options.timeout
-        fullPage: screenshotConfig.capture is "app" and screenshotConfig.fullPage
       })
       .then ({ path, size }) ->
         _.extend(consoleProps, {

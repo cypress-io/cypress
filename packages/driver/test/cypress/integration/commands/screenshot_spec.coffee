@@ -146,7 +146,7 @@ describe "src/cy/commands/screenshot", ->
             "runnable:after:run:async",
             runnable.title
           ]
-          appOnly: false
+          capture: "runner"
         })
         expect(args.clip.x).to.equal(0)
         expect(args.clip.y).to.equal(0)
@@ -178,7 +178,7 @@ describe "src/cy/commands/screenshot", ->
             "takes screenshot of hook title with test",
             '"before each" hook'
           ]
-          appOnly: false
+          capture: "runner"
         })
 
     it "takes screenshot of hook title with test", ->
@@ -323,7 +323,7 @@ describe "src/cy/commands/screenshot", ->
             blackout: [".foo"]
           })
 
-    describe "fullPage: true", ->
+    describe "capture: fullpage", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves({})
         cy.spy(Cypress, "action").log(false)
@@ -331,20 +331,20 @@ describe "src/cy/commands/screenshot", ->
         cy.visit("/fixtures/screenshots.html")
 
       it "takes a screenshot for each time it needs to scroll", ->
-        cy.screenshot({ fullPage: true })
+        cy.screenshot({ capture: "fullpage" })
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledThrice
 
-      it "fullPage: true", ->
-        cy.screenshot({ fullPage: true })
+      it "sends capture: fullpage", ->
+        cy.screenshot({ capture: "fullpage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
-          expect(take.args[0][1].fullPage).to.be.true
-          expect(take.args[1][1].fullPage).to.be.true
-          expect(take.args[2][1].fullPage).to.be.true
+          expect(take.args[0][1].capture).to.equal("fullpage")
+          expect(take.args[1][1].capture).to.equal("fullpage")
+          expect(take.args[2][1].capture).to.equal("fullpage")
 
       it "sends number of current screenshot for each time it needs to scroll", ->
-        cy.screenshot({ fullPage: true })
+        cy.screenshot({ capture: "fullpage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].current).to.equal(1)
@@ -352,18 +352,18 @@ describe "src/cy/commands/screenshot", ->
           expect(take.args[2][1].current).to.equal(3)
 
       it "sends total number of screenshots for each time it needs to scroll", ->
-        cy.screenshot({ fullPage: true })
+        cy.screenshot({ capture: "fullpage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].total).to.equal(3)
           expect(take.args[1][1].total).to.equal(3)
           expect(take.args[2][1].total).to.equal(3)
 
-      it.only "scrolls the window to the right place for each screenshot", ->
+      it "scrolls the window to the right place for each screenshot", ->
         win = cy.state("window")
         win.scrollTo(0, 100)
         scrollTo = cy.spy(win, "scrollTo")
-        cy.screenshot({ fullPage: true })
+        cy.screenshot({ capture: "fullpage" })
         .then ->
           expect(scrollTo.getCall(0).args.join(",")).to.equal("0,0")
           expect(scrollTo.getCall(1).args.join(",")).to.equal("0,200")
@@ -373,7 +373,7 @@ describe "src/cy/commands/screenshot", ->
         win = cy.state("window")
         win.scrollTo(0, 100)
         scrollTo = cy.spy(win, "scrollTo")
-        cy.screenshot({ fullPage: true })
+        cy.screenshot({ capture: "fullpage" })
         .then ->
           expect(scrollTo.getCall(3).args.join(",")).to.equal("0,100")
 
@@ -431,11 +431,11 @@ describe "src/cy/commands/screenshot", ->
         return null
 
       it "throws if capture is not a string", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app' or 'runner'. You passed: true", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: true", done)
         cy.screenshot({ capture: true })
 
       it "throws if capture is not a valid option", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app' or 'runner'. You passed: foo", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: foo", done)
         cy.screenshot({ capture: "foo" })
 
       it "throws if waitForCommandSynchronization is not a boolean", (done) ->
@@ -449,10 +449,6 @@ describe "src/cy/commands/screenshot", ->
       it "throws if disableTimersAndAnimations is not a boolean", (done) ->
         @assertErrorMessage("cy.screenshot() 'disableTimersAndAnimations' option must be a boolean. You passed: foo", done)
         cy.screenshot({ disableTimersAndAnimations: "foo" })
-
-      it "throws if fullPage is not a boolean", (done) ->
-        @assertErrorMessage("cy.screenshot() 'fullPage' option must be a boolean. You passed: foo", done)
-        cy.screenshot({ fullPage: "foo" })
 
       it "throws if blackout is not an array", (done) ->
         @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: foo", done)
