@@ -231,19 +231,8 @@
   },
   {
     "buildNumber": 1893,
-    "ci": {
-      "buildNumber": "140",
-      "provider": "Circle",
-      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
-    },
-    "commit": {
-      "authorEmail": "julie@devs.com",
-      "authorName": "Julie Pearson",
-      "branch": "search-todos",
-      "message": "regex remove whitespace",
-      "sha": "abc1234",
-      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
-    },
+    "ci": null,
+    "commit": null,
     "createdAt": "2016-03-21T02:35:12.748Z",
     "cypressVersion": "0.18.5",
     "duration": 1019080,

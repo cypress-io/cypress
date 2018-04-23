@@ -28,25 +28,31 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              { run.commitBranch ? run.commitBranch : null }
-              {run.commitBranch && this._displaySpec() ? ' / ' : null}
+              { run.commit ?
+                <span>
+                  {run.commit.branch ? run.commit.branch : null}
+                  {run.commit.branch && this._displaySpec() ? ' / ' : null}
+
+                </span> :
+                null
+              }
               {this._displaySpec()}
             </div>
             <div className='msg'>
               {
-                run.commitAuthorEmail ?
+                run.commit && run.commit.authorEmail ?
                   <img
                     className='user-avatar'
                     height='13'
                     width='13'
-                    src={`${gravatarUrl(run.commitAuthorEmail)}`}
+                    src={`${gravatarUrl(run.commit.authorEmail)}`}
                   /> :
                   null
               }
               {
-                run.commitMessage ?
+                run.commit && run.commit.message ?
                   <span className='commit-msg'>
-                    {run.commitMessage.split(NEWLINE)[0]}
+                    {run.commit.message.split(NEWLINE)[0]}
                   </span> :
                   null
               }

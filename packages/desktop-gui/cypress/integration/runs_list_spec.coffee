@@ -88,8 +88,8 @@ describe "Runs List", ->
           cy.get("@runRow").contains("#" + @runs[1].buildNumber)
 
         it "displays commit info", ->
-          cy.get("@runRow").contains(@runs[1].commitBranch)
-          cy.get("@runRow").contains(@runs[1].commitMessage)
+          cy.get("@runRow").contains(@runs[1].commit.branch)
+          cy.get("@runRow").contains(@runs[1].commit.message)
 
         it "displays totals", ->
           cy.get("@runRow").contains(@runs[1].failed)
