@@ -74,7 +74,7 @@ startServer = (obj) ->
   new Promise (resolve) ->
     srv.listen port, =>
       console.log "listening on port: #{port}"
-      onServer?(app)
+      onServer?(app, srv)
 
       resolve(srv)
 
@@ -245,22 +245,16 @@ module.exports = {
 
     exit = (code) ->
       if (expected = options.expectedExitCode)?
-        try
-          expect(expected).to.eq(code)
-        catch err
-          return reject(err)
+        expect(expected).to.eq(code)
 
       ## snapshot the stdout!
       if options.snapshot
-        try
-          ## enable callback to modify stdout
-          if ostd = options.onStdout
-            stdout = ostd(stdout)
+        ## enable callback to modify stdout
+        if ostd = options.onStdout
+          stdout = ostd(stdout)
 
-          str = normalizeStdout(stdout)
-          snapshot(str)
-        catch err
-          reject(err)
+        str = normalizeStdout(stdout)
+        snapshot(str)
 
       return {
         code:   code
