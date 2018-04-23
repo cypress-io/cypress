@@ -7,6 +7,7 @@ DEFAULTS = {
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
+  fullPage: false
 }
 
 describe "src/cypress/screenshot", ->
@@ -61,6 +62,12 @@ describe "src/cypress/screenshot", ->
         screenshotOnRunFailure: false
       })
       expect(Screenshot.getConfig().screenshotOnRunFailure).to.equal(false)
+
+    it "sets fullPage if specified", ->
+      Screenshot.defaults({
+        fullPage: true
+      })
+      expect(Screenshot.getConfig().fullPage).to.equal(true)
 
     it "sets beforeScreenshot if specified", ->
       beforeScreenshot = cy.stub()
@@ -119,6 +126,11 @@ describe "src/cypress/screenshot", ->
         expect =>
           Screenshot.defaults({ blackout: [true] })
         .to.throw("Cypress.Screenshot.defaults() 'blackout' option must be an array of strings. You passed: true")
+
+      it "throws if fullPage is not a boolean", ->
+        expect =>
+          Screenshot.defaults({ fullPage: "foo" })
+        .to.throw("Cypress.Screenshot.defaults() 'fullPage' option must be a boolean. You passed: foo")
 
       it "throws if beforeScreenshot is not a function", ->
         expect =>

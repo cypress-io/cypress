@@ -4,16 +4,15 @@ screenshots = require("../screenshots")
 module.exports = (screenshotsFolder) ->
   return {
     capture: (data, automate) ->
+      log("capture", data)
+
       screenshots.capture(data, automate)
-      .then ([buffer, image]) ->
-        save = (buffer) ->
+      .then (buffer) ->
+        if buffer
           log("save to", screenshotsFolder)
           screenshots.save(data, buffer, screenshotsFolder)
-
-        if data.appOnly
-          screenshots.crop(image, data.viewport).then (buffer) ->
-            save(buffer)
-        else
-          save(buffer)
+      .catch (err) ->
+        screenshots.clearFullPageState()
+        throw err
 
   }

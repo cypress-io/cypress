@@ -1,3 +1,4 @@
+_               = require("lodash")
 mime            = require("mime")
 path            = require("path")
 bytes           = require("bytes")
@@ -17,7 +18,6 @@ invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
 ## screenshots since its possible two screenshots with
 ## the same name will be written to the file system
 
-Jimp.prototype.crop = Promise.promisify(Jimp.prototype.crop)
 Jimp.prototype.getBuffer = Promise.promisify(Jimp.prototype.getBuffer)
 
 isBlack = (rgba) ->
@@ -43,7 +43,75 @@ hasHelperPixels = (image) ->
     isWhite(bottomLeft)
   )
 
+captureAndCheck = (data, automate, condition) ->
+  tries = 0
+  attempt = ->
+    tries++
+    log("capture and check attempt ##{tries}")
+    automate(data)
+    .then (dataUrl) ->
+      buffer = dataUriToBuffer(dataUrl)
+      Jimp.read(buffer).then (image) ->
+        if tries >= 10 or condition(data, image)
+          return [buffer, image]
+        else
+          attempt()
+
+  attempt()
+
+getBufferWithType = (image) ->
+  image.getBuffer(Jimp.AUTO).then (buffer) ->
+    buffer.type = image.getMIME()
+    buffer
+
+crop = (image, dimensions) ->
+  x = Math.min(dimensions.x, image.bitmap.width - 1)
+  y = Math.min(dimensions.y, image.bitmap.height - 1)
+  width = Math.min(dimensions.width, image.bitmap.width - x)
+  height = Math.min(dimensions.height, image.bitmap.height - y)
+  log("crop: from #{image.bitmap.width} x #{image.bitmap.height}")
+  log("        to #{width} x #{height} at (#{x}, #{y})")
+
+  image.crop(x, y, width, height)
+  getBufferWithType(image)
+
+pixelCondition = (data, image) ->
+  hasPixels = hasHelperPixels(image)
+  return (
+    (data.appOnly and not hasPixels) or
+    (not data.appOnly and hasPixels)
+  )
+
+fullPageImages = []
+
+clearFullPageState = ->
+  fullPageImages = []
+
+compareLast = (image) ->
+  return _.last(fullPageImages).hash() isnt image.hash()
+
+fullPageCondition = (data, image) ->
+  if data.current is 1
+    pixelCondition(data, image)
+  else
+    compareLast(image)
+
+stitchFullPageScreenshots = ->
+  width = _.first(fullPageImages).bitmap.width
+  height = _.sumBy(fullPageImages, "bitmap.height")
+
+  fullImage = new Jimp(width, height)
+  heightMarker = 0
+  _.each fullPageImages, (image) ->
+    fullImage.composite(image, 0, heightMarker)
+    heightMarker += image.bitmap.height
+
+  clearFullPageState()
+  getBufferWithType(fullImage)
+
 module.exports = {
+  crop: crop
+
   copy: (src, dest) ->
     fs
     .copyAsync(src, dest, {overwrite: true})
@@ -57,42 +125,23 @@ module.exports = {
     glob(screenshotsFolder, {nodir: true})
 
   capture: (data, automate) ->
-    tries = 0
-    captureAndCheck = ->
-      tries++
-      log("capture and check attempt ##{tries}")
+    condition = if data.fullPage then fullPageCondition else pixelCondition
 
-      automate(data)
-      .then (dataUrl) ->
-        buffer = dataUriToBuffer(dataUrl)
-        Jimp.read(buffer).then (image) ->
-          hasPixels = hasHelperPixels(image)
-          if tries < 10 and (
-            (data.appOnly and hasPixels) or
-            (not data.appOnly and not hasPixels)
-          )
-            log("pixels still present - try again")
-            return captureAndCheck()
+    captureAndCheck(data, automate, condition)
+    .then ([buffer, image]) ->
+      if data.fullPage and data.total > 1
+        return crop(image, data.clip).then ->
+          fullPageImages.push(image)
+
+          if data.current is data.total
+            return stitchFullPageScreenshots()
           else
-            if tries >= 10
-              log("too many tries - accept latest capture")
-            else
-              log("succeeded taking capture")
-            return [buffer, image]
+            return null
 
-    captureAndCheck()
+      if data.appOnly
+        return crop(image, data.clip)
 
-  crop: (image, dimensions) ->
-    width = Math.min(dimensions.width, image.bitmap.width)
-    height = Math.min(dimensions.height, image.bitmap.height)
-    log("crop to dimensions #{width} x #{height}")
-
-    image.crop(0, 0, width, height)
-    .then ->
-      image.getBuffer(Jimp.AUTO)
-    .then (buffer) ->
-      buffer.type = image.getMIME()
-      buffer
+      return buffer
 
   save: (data, buffer, screenshotsFolder) ->
     ## use the screenshots specific name or
@@ -120,5 +169,7 @@ module.exports = {
         width:  dimensions.width
         height: dimensions.height
       }
+
+  clearFullPageState: clearFullPageState
 
 }

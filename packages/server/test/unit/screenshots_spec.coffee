@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_           = require("lodash")
 path        = require("path")
 dataUriToBuffer = require("data-uri-to-buffer")
 Buffer      = require("buffer").Buffer
@@ -20,18 +21,24 @@ describe "lib/screenshots", ->
 
     @appData = {
       appOnly: true
-      viewport: { width: 10, height: 10 }
+      clip: { x: 0, y: 0, width: 10, height: 10 }
     }
+
+    @buffer = {}
 
     @jimpImage = {
       bitmap: {
         width: 20
         height: 20
       }
-      crop: @sandbox.stub().resolves()
-      getBuffer: @sandbox.stub().resolves({})
+      crop: @sandbox.stub()
+      getBuffer: @sandbox.stub().resolves(@buffer)
       getMIME: -> "image/png"
+      hash: @sandbox.stub().returns("image hash")
     }
+
+    Jimp.prototype.composite = @sandbox.stub()
+    Jimp.prototype.getBuffer = @sandbox.stub().resolves(@buffer)
 
     config.get(@todosPath).then (@config) =>
 
@@ -77,21 +84,122 @@ describe "lib/screenshots", ->
       screenshots.capture(@appData, @automate).then =>
         expect(@automate.callCount).to.equal(10)
 
+    it "resolves buffer", ->
+      @getPixelColor.withArgs(0, 0).returns("white")
+      screenshots.capture(@appData, @automate).then (buffer) =>
+        expect(buffer).to.equal(@buffer)
+
+    describe "fullPage: true", ->
+      beforeEach ->
+        screenshots.clearFullPageState()
+
+        @appData.fullPage = true
+        @appData.current = 1
+        @appData.total = 3
+
+        @getPixelColor.withArgs(0, 0).onCall(1).returns("white")
+
+      it "retries until helper pixels are no longer present on first capture", ->
+        screenshots.capture(@appData, @automate).then =>
+          expect(@automate).to.be.calledTwice
+
+      it "retries until images aren't the same on subsequent captures", ->
+        @jimpImage2 = _.extend({}, @jimpImage, {
+          foo: true
+          hash: -> "image 2 hash"
+        })
+        Jimp.read.onCall(3).resolves(@jimpImage2)
+
+        screenshots.capture(@appData, @automate)
+        .then =>
+          @appData.current = 2
+          screenshots.capture(@appData, @automate)
+        .then =>
+          expect(@automate.callCount).to.equal(4)
+
+      it "resolves no buffer on non-last captures", ->
+        screenshots.capture(@appData, @automate).then (buffer) ->
+          expect(buffer).to.be.null
+
+      it "resolves buffer on last capture", ->
+        screenshots.capture(@appData, @automate)
+        .then =>
+          @appData.current = 3
+          screenshots.capture(@appData, @automate)
+        .then (buffer) =>
+          expect(buffer).to.equal(@buffer)
+
+      it "composites images into one image", ->
+        screenshots.capture(@appData, @automate)
+        .then =>
+          @appData.current = 2
+          screenshots.capture(@appData, @automate)
+        .then =>
+          @appData.current = 3
+          screenshots.capture(@appData, @automate)
+        .then =>
+          composite = Jimp.prototype.composite
+          expect(composite).to.be.calledThrice
+          expect(composite.getCall(0).args[0]).to.equal(@jimpImage)
+          expect(composite.getCall(0).args[1]).to.equal(0)
+          expect(composite.getCall(0).args[2]).to.equal(0)
+          expect(composite.getCall(1).args[0]).to.equal(@jimpImage)
+          expect(composite.getCall(1).args[2]).to.equal(20)
+          expect(composite.getCall(2).args[0]).to.equal(@jimpImage)
+          expect(composite.getCall(2).args[2]).to.equal(40)
+
+      it "clears previous full page state once complete", ->
+        @appData.total = 2
+        screenshots.capture(@appData, @automate)
+        .then =>
+          @appData.current = 2
+          screenshots.capture(@appData, @automate)
+        .then =>
+          @appData.current = 1
+          screenshots.capture(@appData, @automate)
+        .then =>
+          @appData.current = 2
+          screenshots.capture(@appData, @automate)
+        .then ->
+          expect(Jimp.prototype.composite.callCount).to.equal(4)
+
+      it "skips full page process if only one capture needed", ->
+        @appData.total = 1
+        screenshots.capture(@appData, @automate)
+        .then ->
+          expect(Jimp.prototype.composite).not.to.be.called
+
   context ".crop", ->
-    it "crops to viewport size if less than the image size", ->
-      screenshots.crop(@jimpImage, { width: 10, height: 10 }).then =>
+    beforeEach ->
+      @dimensions = (overrides) ->
+        _.extend({ x: 0, y: 0, width: 10, height: 10 }, overrides)
+
+    it "crops to dimension size if less than the image size", ->
+      screenshots.crop(@jimpImage, @dimensions()).then =>
         expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
 
-    it "crops only width if viewport height is more than the image size", ->
-      screenshots.crop(@jimpImage, { width: 10, height: 30 }).then =>
+    it "crops to dimension size if less than the image size", ->
+      screenshots.crop(@jimpImage, @dimensions()).then =>
+        expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
+
+    it "crops to one less than width if dimensions x is more than the image width", ->
+      screenshots.crop(@jimpImage, @dimensions({ x: 30 })).then =>
+        expect(@jimpImage.crop).to.be.calledWith(19, 0, 1, 10)
+
+    it "crops to one less than height if dimensions y is more than the image height", ->
+      screenshots.crop(@jimpImage, @dimensions({ y: 30 })).then =>
+        expect(@jimpImage.crop).to.be.calledWith(0, 19, 10, 1)
+
+    it "crops only width if dimensions height is more than the image height", ->
+      screenshots.crop(@jimpImage, @dimensions({ height: 30 })).then =>
         expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 20)
 
-    it "crops only height if viewport width is more than the image size", ->
-      screenshots.crop(@jimpImage, { width: 30, height: 10 }).then =>
+    it "crops only height if dimensions width is more than the image width", ->
+      screenshots.crop(@jimpImage, @dimensions({ width: 30 })).then =>
         expect(@jimpImage.crop).to.be.calledWith(0, 0, 20, 10)
 
     it "sets the type on the buffer after cropping", ->
-      screenshots.crop(@jimpImage, { width: 10, height: 10 }).then (buffer) =>
+      screenshots.crop(@jimpImage, @dimensions()).then (buffer) =>
         expect(buffer.type).to.equal("image/png")
 
   context ".save", ->
@@ -121,8 +229,7 @@ describe "lib/automation/screenshots", ->
   beforeEach ->
     @buffer = {}
     @image = {}
-    @sandbox.stub(screenshots, "capture").resolves([@buffer, @image])
-    @sandbox.stub(screenshots, "crop").resolves(@buffer)
+    @sandbox.stub(screenshots, "capture").resolves(@buffer)
     @sandbox.stub(screenshots, "save")
 
     @screenshot = screenshotAutomation("cypress/screenshots")
@@ -133,16 +240,12 @@ describe "lib/automation/screenshots", ->
     @screenshot.capture(data, automation).then ->
       expect(screenshots.capture).to.be.calledWith(data, automation)
 
-  it "crops screenshot if appOnly", ->
-    viewport = {}
-    @screenshot.capture({ appOnly: true, viewport }).then =>
-      expect(screenshots.crop).to.be.calledWith(@image, viewport)
-
-  it "does not crop screenshot if not appOnly", ->
-    @screenshot.capture({}).then ->
-      expect(screenshots.crop).to.not.be.called
-
-  it "saves screenshot", ->
+  it "saves screenshot if there's a buffer", ->
     data = {}
     @screenshot.capture(data, @automate).then =>
       expect(screenshots.save).to.be.calledWith(data, @buffer, "cypress/screenshots")
+
+  it "does not save screenshot if there's no buffer", ->
+    screenshots.capture.resolves(null)
+    @screenshot.capture({}, @automate).then =>
+      expect(screenshots.save).not.to.be.called

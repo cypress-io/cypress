@@ -9,6 +9,7 @@ reset = -> {
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
+  fullPage: false
   beforeScreenshot: ->
   afterScreenshot: ->
 }
@@ -73,6 +74,7 @@ validate = (props, cmd, log) ->
   validateAndSetBoolean(props, values, cmd, log, "scaleAppCaptures")
   validateAndSetBoolean(props, values, cmd, log, "disableTimersAndAnimations")
   validateAndSetBoolean(props, values, cmd, log, "screenshotOnRunFailure")
+  validateAndSetBoolean(props, values, cmd, log, "fullPage")
 
   if blackout = props.blackout
     if not _.isArray(blackout) or _.some(blackout, (selector) -> not _.isString(selector))

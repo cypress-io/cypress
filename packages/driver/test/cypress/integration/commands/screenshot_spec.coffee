@@ -1,3 +1,5 @@
+$ = require("jquery")
+
 _ = Cypress._
 Promise = Cypress.Promise
 Screenshot = Cypress.Screenshot
@@ -12,6 +14,7 @@ describe "src/cy/commands/screenshot", ->
       disableTimersAndAnimations: true
       waitForCommandSynchronization: true
       scaleAppCaptures: true
+      fullPage: false
       blackout: [".foo"]
     }
 
@@ -134,20 +137,21 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: undefined
+        expect(Cypress.automation).to.be.calledWith("take:screenshot")
+        args = Cypress.automation.withArgs("take:screenshot").args[0][1]
+        expect(_.omit(args, "clip")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
             "runnable:after:run:async",
             runnable.title
-            ]
+          ]
           appOnly: false
-          viewport: {
-            width: cy.state("viewportWidth")
-            height: cy.state("viewportHeight")
-          }
         })
+        expect(args.clip.x).to.equal(0)
+        expect(args.clip.y).to.equal(0)
+        expect(args.clip.width).to.be.gt(0)
+        expect(args.clip.height).to.be.gt(0)
 
   context "runnable:after:run:async hooks", ->
     beforeEach ->
@@ -164,8 +168,9 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: undefined
+        expect(Cypress.automation).to.be.calledWith("take:screenshot")
+        args = Cypress.automation.withArgs("take:screenshot").args[0][1]
+        expect(_.omit(args, "clip")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -174,10 +179,6 @@ describe "src/cy/commands/screenshot", ->
             '"before each" hook'
           ]
           appOnly: false
-          viewport: {
-            width: cy.state("viewportWidth")
-            height: cy.state("viewportHeight")
-          }
         })
 
     it "takes screenshot of hook title with test", ->
@@ -198,20 +199,7 @@ describe "src/cy/commands/screenshot", ->
       Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
 
       cy.screenshot().then ->
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: undefined
-          testId: runnable.id
-          titles: [
-            "src/cy/commands/screenshot",
-            "#screenshot",
-            "foo bar"
-          ]
-          appOnly: true
-          viewport: {
-            width: cy.state("viewportWidth")
-            height: cy.state("viewportHeight")
-          }
-        })
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].name).to.be.undefined
 
     it "can pass name", ->
       runnable = cy.state("runnable")
@@ -220,20 +208,7 @@ describe "src/cy/commands/screenshot", ->
       Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
 
       cy.screenshot("my/file").then ->
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: "my/file"
-          testId: runnable.id
-          titles: [
-            "src/cy/commands/screenshot",
-            "#screenshot",
-            "foo bar"
-          ]
-          appOnly: true
-          viewport: {
-            width: cy.state("viewportWidth")
-            height: cy.state("viewportHeight")
-          }
-        })
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].name).to.equal("my/file")
 
     it "calls beforeScreenshot callback with document", ->
       Cypress.automation.withArgs("take:screenshot").resolves({})
@@ -348,6 +323,60 @@ describe "src/cy/commands/screenshot", ->
             blackout: [".foo"]
           })
 
+    describe "fullPage: true", ->
+      beforeEach ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+        cy.spy(Cypress, "action").log(false)
+        cy.viewport(600, 200)
+        cy.visit("/fixtures/screenshots.html")
+
+      it "takes a screenshot for each time it needs to scroll", ->
+        cy.screenshot({ fullPage: true })
+        .then ->
+          expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledThrice
+
+      it "fullPage: true", ->
+        cy.screenshot({ fullPage: true })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].fullPage).to.be.true
+          expect(take.args[1][1].fullPage).to.be.true
+          expect(take.args[2][1].fullPage).to.be.true
+
+      it "sends number of current screenshot for each time it needs to scroll", ->
+        cy.screenshot({ fullPage: true })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].current).to.equal(1)
+          expect(take.args[1][1].current).to.equal(2)
+          expect(take.args[2][1].current).to.equal(3)
+
+      it "sends total number of screenshots for each time it needs to scroll", ->
+        cy.screenshot({ fullPage: true })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].total).to.equal(3)
+          expect(take.args[1][1].total).to.equal(3)
+          expect(take.args[2][1].total).to.equal(3)
+
+      it.only "scrolls the window to the right place for each screenshot", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.screenshot({ fullPage: true })
+        .then ->
+          expect(scrollTo.getCall(0).args.join(",")).to.equal("0,0")
+          expect(scrollTo.getCall(1).args.join(",")).to.equal("0,200")
+          expect(scrollTo.getCall(2).args.join(",")).to.equal("0,400")
+
+      it "scrolls the window back to the original place", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.screenshot({ fullPage: true })
+        .then ->
+          expect(scrollTo.getCall(3).args.join(",")).to.equal("0,100")
+
     describe "timeout", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
@@ -420,6 +449,10 @@ describe "src/cy/commands/screenshot", ->
       it "throws if disableTimersAndAnimations is not a boolean", (done) ->
         @assertErrorMessage("cy.screenshot() 'disableTimersAndAnimations' option must be a boolean. You passed: foo", done)
         cy.screenshot({ disableTimersAndAnimations: "foo" })
+
+      it "throws if fullPage is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'fullPage' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ fullPage: "foo" })
 
       it "throws if blackout is not an array", (done) ->
         @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: foo", done)

@@ -1,18 +1,18 @@
 _ = require("lodash")
 Promise = require("bluebird")
+$ = require("jquery")
 
 Screenshot = require("../../cypress/screenshot")
 $utils = require("../../cypress/utils")
 
+getViewportHeight = (state) ->
+  Math.min(state("viewportHeight"), $(window).height())
+
+getViewportWidth = (state) ->
+  Math.min(state("viewportWidth"), $(window).width())
+
 automateScreenshot = (options = {}) ->
-  {
-    runnable
-    name
-    log
-    timeout
-    appOnly
-    viewport
-  } = options
+  { runnable, timeout } = options
 
   titles = []
 
@@ -33,13 +33,10 @@ automateScreenshot = (options = {}) ->
 
   getParentTitle(runnable)
 
-  props = {
-    name: name
+  props = _.extend({
     titles: titles
     testId: runnable.id
-    appOnly: appOnly
-    viewport: viewport
-  }
+  }, _.omit(options, "runnable", "timeout", "log"))
 
   automate = ->
     Cypress.automation("take:screenshot", props)
@@ -54,12 +51,59 @@ automateScreenshot = (options = {}) ->
     automate()
     .timeout(timeout)
     .catch (err) ->
-      $utils.throwErr(err, { onFail: log })
+      $utils.throwErr(err, { onFail: options.log })
     .catch Promise.TimeoutError, (err) ->
       $utils.throwErrByPath "screenshot.timed_out", {
-        onFail: log
+        onFail: options.log
         args: { timeout }
       }
+
+takeFullPageScreenshot = (state, automationOptions) ->
+  win = state("window")
+  doc = state("document")
+  body = doc.body
+
+  originalOverflow = doc.documentElement.style.overflow
+  originalBodyOverflowY = doc.body.style.overflowY
+  originalX = win.scrollX
+  originalY = win.scrollY
+
+  ## overflow-y: scroll can break `window.scrollTo`
+  if body
+    body.style.overflowY = "visible"
+
+  ## hide scrollbars
+  doc.documentElement.style.overflow = "hidden"
+
+  docHeight = $(doc).height()
+  viewportHeight = getViewportHeight(state)
+  numScreenshots = Math.ceil(docHeight / viewportHeight)
+
+  scrollAndTake = (y, num) ->
+    win.scrollTo(0, y)
+    finished = num is numScreenshots
+    options = _.extend({}, automationOptions, {
+      fullPage: true
+      current: num
+      total: numScreenshots
+    })
+    if finished
+      heightLeft = docHeight - (viewportHeight * (numScreenshots - 1))
+      options.clip.y = viewportHeight - heightLeft
+      options.clip.height = heightLeft
+
+    automateScreenshot(options).then (result) ->
+      if finished
+        result
+      else
+        scrollAndTake(y + viewportHeight, ++num)
+
+  scrollAndTake(0, 1)
+  .finally ->
+    doc.documentElement.style.overflow = originalOverflow
+    if body
+      body.style.overflowY = originalBodyOverflowY
+    win.scrollTo(originalX, originalY)
 
 takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
@@ -105,15 +149,22 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     if disableTimersAndAnimations
       cy.pauseTimers(false)
 
+  automationOptions = _.extend({}, options, {
+    appOnly: appOnly
+    clip: {
+      x: 0
+      y: 0
+      width: getViewportWidth(state)
+      height: getViewportHeight(state)
+    }
+  })
+
   before(capture)
   .then ->
-    automateScreenshot(_.extend({}, options, {
-      appOnly: appOnly
-      viewport: {
-        width: state("viewportWidth")
-        height: state("viewportHeight")
-      }
-    }))
+    if options.fullPage
+      takeFullPageScreenshot(state, automationOptions)
+    else
+      automateScreenshot(automationOptions)
   .finally ->
     after(screenshotConfig)
 
@@ -130,26 +181,27 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       takeScreenshot(Cypress, state, screenshotConfig, { runnable })
 
   Commands.addAll({
-    screenshot: (name, options = {}) ->
+    screenshot: (name, userOptions = {}) ->
       if _.isObject(name)
-        options = name
+        userOptions = name
         name = null
 
       ## TODO: handle hook titles
       runnable = state("runnable")
 
-      _.defaults options, {
+      options = _.defaults {}, userOptions, {
         log: true
         timeout: config("responseTimeout")
       }
 
-      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization")
+      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "fullPage")
       screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
 
       if options.log
         consoleProps = {
-          options: screenshotConfig
+          options: userOptions
+          config: screenshotConfig
         }
 
         options._log = Cypress.log({
@@ -163,6 +215,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         name: name
         log: options._log
         timeout: options.timeout
+        fullPage: screenshotConfig.capture is "app" and screenshotConfig.fullPage
       })
       .then ({ path, size }) ->
         _.extend(consoleProps, {

@@ -85,6 +85,8 @@ class App extends Component {
       prevAttrs = {
         top: iframesNode.style.top,
         marginLeft: iframesSizeNode.style.marginLeft,
+        width: iframesSizeNode.style.width,
+        height: iframesSizeNode.style.height,
         transform: iframesSizeNode.style.transform,
         left: containerNode.style.left,
       }
@@ -105,6 +107,10 @@ class App extends Component {
       containerNode.className += ' screenshotting'
 
       if (!config.scale) {
+        const $window = $(window)
+        const $iframesSizeNode = $(iframesSizeNode)
+        iframesSizeNode.style.width = `${Math.min($window.width(), $iframesSizeNode.width())}px`
+        iframesSizeNode.style.height = `${Math.min($window.height(), $iframesSizeNode.height())}px`
         iframesSizeNode.style.transform = null
       }
 
@@ -133,6 +139,8 @@ class App extends Component {
 
       if (!config.scale) {
         iframesSizeNode.style.transform = prevAttrs.transform
+        iframesSizeNode.style.width = prevAttrs.width
+        iframesSizeNode.style.height = prevAttrs.height
       }
 
       prevAttrs = {}
