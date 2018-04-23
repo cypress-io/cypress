@@ -242,26 +242,6 @@ describe "lib/server", ->
         }
       })
 
-    it "handles errors gracefully", ->
-      error = new Error("Websocket error")
-      @proxy  = @sandbox.stub({
-        ws: ->
-        on: -> throw error
-      })
-
-      @server._onDomainSet("https://www.google.com")
-
-      req = {
-        url: "/"
-        headers: {
-          host: "www.google.com"
-        }
-      }
-
-      @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
-
-      expect(@proxy.on).to.be.calledWith("error")
-
     it "ends the socket if its writable and there is no __cypress.remoteHost", ->
       req = {
         url: "/"

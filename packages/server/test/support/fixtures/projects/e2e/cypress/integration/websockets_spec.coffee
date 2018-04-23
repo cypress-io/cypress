@@ -18,7 +18,7 @@ describe "websockets", ->
   it "does not crash", ->
     cy.visit("http://localhost:3838/foo")
     cy.log("should not crash on ECONNRESET websocket upgrade")
-    cy.window().then (win) ->
+    cy.window().then { timeout: 10000 }, (win) ->
       Cypress.Promise.all([
         urlClosesWithCode1006(win, "ws://localhost:3838/websocket")
         urlClosesWithCode1006(win, "wss://localhost:3006/websocket")
@@ -28,7 +28,7 @@ describe "websockets", ->
 
     cy
     .window()
-    .then (win) ->
+    .then { timeout: 10000 }, (win) ->
       new Promise (resolve, reject) ->
         ws = new win.WebSocket("ws://localhost:3939/")
         ws.onmessage = (evt) ->

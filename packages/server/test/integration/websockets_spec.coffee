@@ -71,10 +71,8 @@ describe "Web Sockets", ->
       client.on "unexpected-response", (req, res) ->
         expect(res.statusCode).to.eq(502)
         expect(res.statusMessage).to.eq("Bad Gateway")
-        expect(res.headers).to.deep.eq({
-          'x-cypress-proxy-error-message': 'connect ECONNREFUSED 127.0.0.1:5555',
-          'x-cypress-proxy-error-code': 'ECONNREFUSED'
-        })
+        expect(res.headers).to.have.property("x-cypress-proxy-error-message")
+        expect(res.headers).to.have.property("x-cypress-proxy-error-code")
 
         done()
 
