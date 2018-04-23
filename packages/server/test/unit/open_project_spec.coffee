@@ -11,7 +11,7 @@ describe "lib/open_project", ->
     @sandbox.stub(browsers, "open")
     @sandbox.stub(Project.prototype, "open")
     @sandbox.stub(Project.prototype, "reset").resolves()
-    @sandbox.stub(Project.prototype, "ensureSpecUrl").resolves()
+    @sandbox.stub(Project.prototype, "getSpecUrl").resolves()
     @sandbox.stub(Project.prototype, "getConfig").resolves({})
     @sandbox.stub(Project.prototype, "getAutomation")
     @sandbox.stub(preprocessor, "removeFile")
