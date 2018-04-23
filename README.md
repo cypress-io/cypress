@@ -590,7 +590,7 @@ Calls to `window.alert` are automatically recorded, but do not show up. Instead 
 
 ## Bundling
 
-How do we load this Vue file into the testing code? Using webpack preprocessor.
+How do we load this Vue file into the testing code? Using webpack preprocessor. Note that this module ships with [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor#compatibility) 2.x that requires Webpack 4.x. If you have Webpack 3.x please add `@cypress/webpack-preprocessor v1.x`.
 
 <a name="short-way"/>
 
