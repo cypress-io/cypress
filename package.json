@@ -78,10 +78,11 @@
     }
   },
   "devDependencies": {
-    "babel-plugin-transform-object-rest-spread": "6.26.0",
     "axios": "0.18.0",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
     "ban-sensitive-files": "1.9.2",
     "css-loader": "0.28.11",
+    "cypress": "2.1.0",
     "dependency-check": "3.1.0",
     "deps-ok": "1.4.0",
     "git-issues": "1.3.1",
@@ -90,15 +91,15 @@
     "nsp": "3.2.1",
     "pre-git": "3.17.1",
     "prettier-standard": "8.0.1",
-    "simple-commit-message": "4.0.3",
     "semantic-release": "15.1.7",
+    "simple-commit-message": "4.0.3",
     "standard": "11.0.1",
     "vue": "2.5.16",
+    "vue-i18n": "7.6.0",
     "vue-loader": "14.2.2",
-    "vuex": "3.0.1",
     "vue-router": "3.0.1",
     "vue-template-compiler": "2.5.16",
-    "cypress": "2.1.0"
+    "vuex": "3.0.1"
   },
   "standard": {
     "globals": [
@@ -113,6 +114,7 @@
   },
   "dependencies": {
     "@cypress/webpack-preprocessor": "2.0.1",
-    "common-tags": "1.7.2"
+    "common-tags": "1.7.2",
+    "@kazupon/vue-i18n-loader": "0.3.0"
   }
 }

@@ -32,6 +32,7 @@
 - [Spying On `window.alert`](#spying-window-alert)
 - [Tests](cypress/integration/counter-vuex-spec.js) for a component that [uses Vuex data store](components/Counter.vue)
 - [Tests](cypress/integration/router-spec.js) for a component that [uses vue-router](components/PizzaShop)
+- [translated-message-spec.js](cypress/integration/translated-message-spec.js) shows how to test [TranslatedMessage.vue](components/TranslatedMessage.vue) component that uses [Vue-i18n](http://kazupon.github.io/vue-i18n/en/)
 
 [Bundling](#bundling)
 - [Short Way](#short-way)
