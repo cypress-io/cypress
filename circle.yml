@@ -7,6 +7,8 @@ defaults: &defaults
     # the Docker image with Cypress dependencies and Chrome browser
     - image: cypress/browsers:chrome64
       environment:
+        # set specific timezone
+        TZ: "/usr/share/zoneinfo/America/New_York"
         CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
 
 jobs:

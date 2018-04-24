@@ -47,7 +47,7 @@ class Specs extends Component {
           </div>
           <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-default ${allActiveClass}`}>
             <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
-          Run All Tests
+          Run all tests
           </a>
         </header>
         <ul className='outer-files-container list-as-table'>
