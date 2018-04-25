@@ -43,6 +43,11 @@ const util = {
     return isCi
   },
 
+  isTerminal () {
+    // in redirected streams we should not show progress bars
+    return process.stdout.columns > 0
+  },
+
   supportsColor () {
     // we only care about stderr supporting color
     // since thats what our DEBUG logs use

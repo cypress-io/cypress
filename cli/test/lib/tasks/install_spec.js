@@ -277,5 +277,23 @@ describe('install', function () {
         )
       })
     })
+
+    describe('when running without a terminal', function () {
+      beforeEach(function () {
+        util.isCi.returns(false)
+        this.sandbox.stub(util, 'isTerminal').returns(false)
+
+        info.getInstalledVersion.resolves('x.x.x')
+
+        return install.start()
+      })
+
+      it('uses verbose renderer', function () {
+        snapshot(
+          'installing without a terminal',
+          normalize(this.stdout.toString())
+        )
+      })
+    })
   })
 })

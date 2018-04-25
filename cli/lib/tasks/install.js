@@ -15,6 +15,9 @@ const logger = require('../logger')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 
+debug('write stream isTTY', process.stdout.isTTY)
+debug('write stream columns', process.stdout.columns)
+
 const alreadyInstalledMsg = (installedVersion, needVersion) => {
   logger.log(chalk.yellow(stripIndent`
     Cypress ${chalk.cyan(needVersion)} is already installed. Skipping installation.
@@ -87,11 +90,14 @@ const downloadAndUnzip = (version) => {
     }
   }
 
-  // if we are running in CI then use
-  // the verbose renderer else use
-  // the default
+  // if we are running in CI or do not have a terminal then use
+  // the verbose (simple) renderer else use the default (with progress bars)
   const rendererOptions = {
-    renderer: util.isCi() ? verbose : 'default',
+    renderer: util.isCi()
+      ? verbose
+      : util.isTerminal()
+        ? 'default'
+        : verbose,
   }
 
   const tasks = new Listr([
