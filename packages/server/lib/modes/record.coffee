@@ -25,7 +25,7 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
+  generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern, browser) ->
     if not recordKey
       errors.throw("RECORD_KEY_MISSING")
     if groupId and not group
@@ -66,10 +66,14 @@ module.exports = {
         groupId:           groupId
         specs:             specs
         specPattern:       specPattern
+        browser:           browser
       }
 
+      debug("createRun options %j", createRunOptions)
       api.createRun(createRunOptions)
       .catch (err) ->
+        debug("api.createRun error %j", err)
+
         switch err.statusCode
           when 401
             recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
@@ -208,6 +212,8 @@ module.exports = {
     ## default browser
     browser ?= "electron"
 
+    debug("run record in browser %s", browser)
+
     captured = stdout.capture()
 
     ## if we are using the ci flag that means
@@ -238,7 +244,7 @@ module.exports = {
         key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
         @generateProjectRunId(projectId, projectPath, projectName, key,
-          options.group, options.groupId, options.spec)
+          options.group, options.groupId, options.spec, browser)
         .then (runId) =>
           ## bail if we dont have a runId
           return if not runId

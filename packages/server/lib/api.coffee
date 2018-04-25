@@ -27,8 +27,7 @@ rp = request.defaults (params = {}, callback) ->
   request[method](params, callback)
 
 debugReturnedRun = (info) ->
-  debug("received API response with id %s", info.id)
-  debug("and list of specs to run", info.specs)
+  debug("run received API responses %j", info)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -49,7 +48,26 @@ machineId = ->
   .catch ->
     return null
 
+# resolves with platform object: browser name and version, os name
+getPlatform = (browserName) ->
+  debug("getting browser information for name %s", browserName)
+
+  browsers.getByName(browserName)
+  .then (browser = {}) ->
+    ## get the formatted browserName
+    ## and version of the browser we're
+    ## about to be running on
+    { displayName, version } = browser
+
+    {
+      browserName: displayName
+      browserVersion: version
+      osName: os.platform()
+    }
+
 module.exports = {
+  getPlatform: getPlatform
+
   ping: ->
     rp.get(routes.ping())
     .catch(tagError)
@@ -101,63 +119,67 @@ module.exports = {
     .catch(tagError)
 
   createRun: (options = {}) ->
-    body = _.pick(options, [
-      "projectId"
-      "recordKey"
-      "commitSha"
-      "commitBranch"
-      "commitAuthorName"
-      "commitAuthorEmail"
-      "commitMessage"
-      "remoteOrigin"
-      "ciParams"
-      "ciProvider"
-      "ciBuildNumber",
-      "groupId",
-      "specs",
-      "specPattern"
-    ])
+    debug("getting platform information from browser", options.browser)
 
-    debug("creating project run")
-    debug("project '%s' group id '%s'", body.projectId, body.groupId)
+    getPlatform(options.browser)
+    .then (platform) ->
 
-    rp.post({
-      url: routes.runs()
-      json: true
-      timeout: options.timeout ? 10000
-      headers: {
-        "x-route-version": "3"
-      }
-      body: body
-    })
-    .promise()
-    .tap(debugReturnedRun)
-    .get("runId")
-    .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+      body = _.pick(options, [
+        "projectId"
+        "recordKey"
+        "commitSha"
+        "commitBranch"
+        "commitAuthorName"
+        "commitAuthorEmail"
+        "commitMessage"
+        "remoteOrigin"
+        "ciParams"
+        "ciProvider"
+        "ciBuildNumber",
+        "groupId",
+        "specs",
+        "specPattern"
+      ])
+
+      body.platform = platform
+
+      debug("creating project run")
+      debug("project '%s' group id '%s'", body.projectId, body.groupId)
+
+      rp.post({
+        url: routes.runs()
+        json: true
+        timeout: options.timeout ? 10000
+        headers: {
+          "x-route-version": "3"
+        }
+        body: body
+      })
+      .promise()
+      .tap(debugReturnedRun)
+      .get("runId")
+      .catch(errors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
 
   createInstance: (options = {}) ->
     { runId, spec, timeout } = options
+    debug("creating instance for run %s for spec %s", runId, spec)
 
-    browsers.getByName(options.browser)
-    .then (browser = {}) ->
-      ## get the formatted browserName
-      ## and version of the browser we're
-      ## about to be running on
-      { displayName, version } = browser
+    getPlatform(options.browser)
+    .then (platform) ->
 
       system.info()
       .then (systemInfo) ->
         systemInfo.spec = spec
-        systemInfo.browserName = displayName
-        systemInfo.browserVersion = version
+        systemInfo.browserName = platform.browserName
+        systemInfo.browserVersion = platform.browserVersion
 
         rp.post({
           url: routes.instances(runId)
           json: true
           timeout: timeout ? 10000
           headers: {
-            "x-route-version": "4"
+            "x-route-version": "3"
           }
           body: systemInfo
         })
