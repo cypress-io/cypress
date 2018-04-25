@@ -22,8 +22,18 @@ const downloadDestination = {
   downloaded: true,
 }
 
+const isCircle = Boolean(process.env.CIRCLECI)
+
+
 describe('install', function () {
   require('mocha-banner').register()
+
+  before(() => {
+    /* eslint-disable no-console */
+    console.log('isCircle', isCircle)
+    console.log('util.isCi', util.isCi())
+    console.log('util.isTerminal', util.isTerminal())
+  })
 
   beforeEach(function () {
     this.stdout = stdout.capture()
@@ -44,6 +54,11 @@ describe('install', function () {
       logger.reset()
 
       this.sandbox.stub(util, 'isCi').returns(false)
+      // on CircleCI we have "normal" terminal, but without stdout.columns
+      // so work around it and let it use progress bar
+      const isTerm = util.isTerminal()
+      this.sandbox.stub(util, 'isTerminal').returns(isTerm || isCircle)
+
       this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
       this.sandbox.stub(download, 'start').resolves(downloadDestination)
       this.sandbox.stub(unzip, 'start').resolves()
@@ -281,7 +296,7 @@ describe('install', function () {
     describe('when running without a terminal', function () {
       beforeEach(function () {
         util.isCi.returns(false)
-        this.sandbox.stub(util, 'isTerminal').returns(false)
+        util.isTerminal.returns(false)
 
         info.getInstalledVersion.resolves('x.x.x')
 
