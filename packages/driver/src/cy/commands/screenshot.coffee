@@ -58,51 +58,69 @@ automateScreenshot = (options = {}) ->
         args: { timeout }
       }
 
-takeFullPageScreenshot = (state, automationOptions) ->
-  win = state("window")
-  doc = state("document")
-  body = doc.body
-
+scrollOverrides = (win, doc) ->
   originalOverflow = doc.documentElement.style.overflow
   originalBodyOverflowY = doc.body.style.overflowY
   originalX = win.scrollX
   originalY = win.scrollY
 
   ## overflow-y: scroll can break `window.scrollTo`
-  if body
-    body.style.overflowY = "visible"
+  if doc.body
+    doc.body.style.overflowY = "visible"
 
   ## hide scrollbars
   doc.documentElement.style.overflow = "hidden"
+
+  ->
+    doc.documentElement.style.overflow = originalOverflow
+    if doc.body
+      doc.body.style.overflowY = originalBodyOverflowY
+    win.scrollTo(originalX, originalY)
+
+takeScrollingScreenshots = (scrolls, win, automationOptions) ->
+  scrollAndTake = ({ y, clip }, index) ->
+    win.scrollTo(0, y)
+    options = _.extend({}, automationOptions, {
+      current: index + 1
+      total: scrolls.length
+      clip: clip
+    })
+    automateScreenshot(options)
+
+  Promise
+  .mapSeries(scrolls, scrollAndTake)
+  .then (results) ->
+    _.last(results)
+
+takeFullPageScreenshot = (state, automationOptions) ->
+  win = state("window")
+  doc = state("document")
+
+  resetScrollOverrides = scrollOverrides(win, doc)
 
   docHeight = $(doc).height()
   viewportHeight = getViewportHeight(state)
   numScreenshots = Math.ceil(docHeight / viewportHeight)
 
-  scrollAndTake = (y, num) ->
-    win.scrollTo(0, y)
-    finished = num is numScreenshots
-    options = _.extend({}, automationOptions, {
-      current: num
-      total: numScreenshots
-    })
-    if finished
-      heightLeft = docHeight - (viewportHeight * (numScreenshots - 1))
-      options.clip.y = viewportHeight - heightLeft
-      options.clip.height = heightLeft
+  scrolls = _.map _.times(numScreenshots), (index) ->
+    y = viewportHeight * index
+    clip = if index + 1 is numScreenshots
+      heightLeft = docHeight - (viewportHeight * index)
+      {
+        x: automationOptions.clip.x
+        y: viewportHeight - heightLeft
+        width: automationOptions.clip.width
+        height: heightLeft
+      }
+    else
+      automationOptions.clip
 
-    automateScreenshot(options).then (result) ->
-      if finished
-        result
-      else
-        scrollAndTake(y + viewportHeight, ++num)
+    { y, clip }
 
-  scrollAndTake(0, 1)
-  .finally ->
-    doc.documentElement.style.overflow = originalOverflow
-    if body
-      body.style.overflowY = originalBodyOverflowY
-    win.scrollTo(originalX, originalY)
+  takeScrollingScreenshots(scrolls, win, automationOptions)
+  .finally(resetScrollOverrides)
+
+takeElementScreenshot = (element, state, automationOptions) ->
 
 takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
