@@ -35,6 +35,7 @@ describe "lib/screenshots", ->
       getBuffer: @sandbox.stub().resolves(@buffer)
       getMIME: -> "image/png"
       hash: @sandbox.stub().returns("image hash")
+      clone: => @jimpImage
     }
 
     Jimp.prototype.composite = @sandbox.stub()
@@ -175,32 +176,28 @@ describe "lib/screenshots", ->
         _.extend({ x: 0, y: 0, width: 10, height: 10 }, overrides)
 
     it "crops to dimension size if less than the image size", ->
-      screenshots.crop(@jimpImage, @dimensions()).then =>
-        expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
+      screenshots.crop(@jimpImage, @dimensions())
+      expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
 
     it "crops to dimension size if less than the image size", ->
-      screenshots.crop(@jimpImage, @dimensions()).then =>
-        expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
+      screenshots.crop(@jimpImage, @dimensions())
+      expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
 
     it "crops to one less than width if dimensions x is more than the image width", ->
-      screenshots.crop(@jimpImage, @dimensions({ x: 30 })).then =>
-        expect(@jimpImage.crop).to.be.calledWith(19, 0, 1, 10)
+      screenshots.crop(@jimpImage, @dimensions({ x: 30 }))
+      expect(@jimpImage.crop).to.be.calledWith(19, 0, 1, 10)
 
     it "crops to one less than height if dimensions y is more than the image height", ->
-      screenshots.crop(@jimpImage, @dimensions({ y: 30 })).then =>
-        expect(@jimpImage.crop).to.be.calledWith(0, 19, 10, 1)
+      screenshots.crop(@jimpImage, @dimensions({ y: 30 }))
+      expect(@jimpImage.crop).to.be.calledWith(0, 19, 10, 1)
 
     it "crops only width if dimensions height is more than the image height", ->
-      screenshots.crop(@jimpImage, @dimensions({ height: 30 })).then =>
-        expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 20)
+      screenshots.crop(@jimpImage, @dimensions({ height: 30 }))
+      expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 20)
 
     it "crops only height if dimensions width is more than the image width", ->
-      screenshots.crop(@jimpImage, @dimensions({ width: 30 })).then =>
-        expect(@jimpImage.crop).to.be.calledWith(0, 0, 20, 10)
-
-    it "sets the type on the buffer after cropping", ->
-      screenshots.crop(@jimpImage, @dimensions()).then (buffer) =>
-        expect(buffer.type).to.equal("image/png")
+      screenshots.crop(@jimpImage, @dimensions({ width: 30 }))
+      expect(@jimpImage.crop).to.be.calledWith(0, 0, 20, 10)
 
   context ".save", ->
     it "outputs file and returns size and path", ->
