@@ -38,6 +38,8 @@
 - [Short Way](#short-way)
 - [Manual](#manual)
 
+[Development](#development)
+
 [FAQ](#faq)
 
 [Related info](#related)
@@ -668,6 +670,17 @@ describe('Hello.vue', () => {
     cy.contains('Hello World!')
   })
 })
+```
+
+<a name="#development"/>
+
+## Development
+
+To see all local tests, install dependencies and open Cypress in GUI mode
+
+```
+npm install
+npm run cy:open
 ```
 
 <a name="#faq"/>
