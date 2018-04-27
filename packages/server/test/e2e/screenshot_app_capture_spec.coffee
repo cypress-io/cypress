@@ -11,17 +11,28 @@ sizeOf  = Promise.promisify(sizeOf)
 e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
-  app.get "/", (req, res) ->
-    res.set('Content-Type', 'text/html');
-
+  sendHtml = (contents) -> (req, res) ->
+    res.set('Content-Type', 'text/html')
     res.send("""
-    <!DOCTYPE html>
-    <html lang="en">
-    <body>
-      <div class="black-me-out" style="position: fixed; left: 10px; top: 10px;">Redacted</div>
-    </body>
-    </html>
+      <!DOCTYPE html>
+      <html lang="en">
+      <body>
+        #{contents}
+      </body>
+      </html>
     """)
+
+  app.get "/app", sendHtml("""
+    <div class="black-me-out" style="position: fixed; left: 10px; top: 10px;">Redacted</div>
+  """)
+
+  app.get "/fullpage", sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div class="black-me-out" style="position: absolute; left: 10px; top: 10px;">Redacted</div>
+    <div style="background: white; height: 200px;"></div>
+    <div style="background: black; height: 200px;"></div>
+    <div style="background: white; height: 100px;"></div>
+  """)
 
 describe "e2e screenshot app capture", ->
   e2e.setup({
@@ -32,12 +43,13 @@ describe "e2e screenshot app capture", ->
   })
 
   it "passes", ->
-    ## this tests that when an app capture screenshot is taken
-    ## it waits until the runner UI is hidden to save the screenshot
+    ## this tests that consistent screenshots are taken for app
+    ## and fullpage captures. that the runner UI is hidden and that
+    ## the page is scrolled properly on fullpage captures
 
     e2e.exec(@, {
       spec: "screenshot_app_capture_spec.coffee"
       expectedExitCode: 0
       snapshot: true
-      timeout: 180000
+      timeout: 300000 ## 5 minutes
     })

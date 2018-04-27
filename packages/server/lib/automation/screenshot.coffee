@@ -9,7 +9,6 @@ module.exports = (screenshotsFolder) ->
       screenshots.capture(data, automate)
       .then (buffer) ->
         if buffer
-          log("save to", screenshotsFolder)
           screenshots.save(data, buffer, screenshotsFolder)
       .catch (err) ->
         screenshots.clearFullPageState()

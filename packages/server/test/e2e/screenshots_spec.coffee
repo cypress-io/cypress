@@ -11,38 +11,41 @@ sizeOf  = Promise.promisify(sizeOf)
 e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
-  getHtml = (color) ->
-    """
-    <!DOCTYPE html>
-    <html lang="en">
-    <body>
-      <div style="height: 2000px; width: 2000px; background-color: #{color};"></div>
-    </body>
-    </html>
-    """
-
-  app.get "/color/:color", (req, res) ->
-    res.set('Content-Type', 'text/html')
-    res.send(getHtml(req.params.color))
-
-  app.get "/pathological", (req, res) ->
+  sendHtml = (contents) -> (req, res) ->
     res.set('Content-Type', 'text/html')
     res.send("""
-    <!DOCTYPE html>
-    <html lang="en" style="background: grey">
-    <body>
-      <style>
-        div { width: 1px; height: 1px; position: fixed; }
-      </style>
-      <div style="left: 0; top: 0; background-color: black;"></div>
-      <div style="left: 1px; top: 0; background-color: white;"></div>
-      <div style="left: 0; top: 1px; background-color: white;"></div>
-      <div style="right: 0; top: 0; background-color: white;"></div>
-      <div style="left: 0; bottom: 0; background-color: white;"></div>
-      <div style="right: 0; bottom: 0; background-color: black;"></div>
-    </body>
-    </html>
+      <!DOCTYPE html>
+      <html lang="en">
+      <body>
+        #{contents}
+      </body>
+      </html>
     """)
+
+  app.get "/color/:color", (req, res) ->
+    sendHtml("""<div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>""")(req, res)
+
+  app.get "/fullpage", sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div style="background: red; height: 200px;"></div>
+    <div style="background: yellow; height: 200px;"></div>
+    <div style="background: blue; height: 100px;"></div>
+  """)
+
+  app.get "/fullpage-same", sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div style="height: 500px;"></div>
+  """)
+
+  app.get "/pathological", sendHtml("""
+    <style>div { width: 1px; height: 1px; position: fixed; }</style>
+    <div style="left: 0; top: 0; background-color: black;"></div>
+    <div style="left: 1px; top: 0; background-color: white;"></div>
+    <div style="left: 0; top: 1px; background-color: white;"></div>
+    <div style="right: 0; top: 0; background-color: white;"></div>
+    <div style="left: 0; bottom: 0; background-color: white;"></div>
+    <div style="right: 0; bottom: 0; background-color: black;"></div>
+  """)
 
 describe "e2e screenshots", ->
   e2e.setup({

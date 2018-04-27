@@ -232,7 +232,7 @@ module.exports = {
 
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) =>
-        if message is "take:screenshot"
+        if message is "take:screenshot" and resp
           screenshots.push @screenshotMetadata(data, resp)
 
         resp

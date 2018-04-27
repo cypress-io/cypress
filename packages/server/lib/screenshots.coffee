@@ -53,7 +53,7 @@ captureAndCheck = (data, automate, condition) ->
       buffer = dataUriToBuffer(dataUrl)
       Jimp.read(buffer).then (image) ->
         if tries >= 10 or condition(data, image)
-          return [buffer, image]
+          return { buffer, image }
         else
           attempt()
 
@@ -79,7 +79,6 @@ crop = (image, dimensions) ->
   log("        to #{width} x #{height} at (#{x}, #{y})")
 
   image.crop(x, y, width, height)
-  getBufferWithType(image)
 
 pixelCondition = (data, image) ->
   hasPixels = hasHelperPixels(image)
@@ -93,26 +92,33 @@ fullPageImages = []
 clearFullPageState = ->
   fullPageImages = []
 
-compareLast = (image) ->
-  return _.last(fullPageImages).hash() isnt image.hash()
+compareLast = (data, image) ->
+  ## ensure the previous image isn't the same, which might indicate the
+  ## page has not scrolled yet
+  previous = _.last(fullPageImages)
+  if not previous
+    return true
+  log("compare", previous.image.hash(), "vs", image.hash())
+  return previous.image.hash() isnt image.hash()
 
 fullPageCondition = (data, image) ->
   if data.current is 1
-    pixelCondition(data, image)
+    pixelCondition(data, image) and compareLast(data, image)
   else
-    compareLast(image)
+    compareLast(data, image)
 
 stitchFullPageScreenshots = ->
-  width = _.first(fullPageImages).bitmap.width
-  height = _.sumBy(fullPageImages, "bitmap.height")
+  width = Math.min(_.map(fullPageImages, "data.clip.width")...)
+  height = _.sumBy(fullPageImages, "data.clip.height")
 
   fullImage = new Jimp(width, height)
   heightMarker = 0
-  _.each fullPageImages, (image) ->
-    fullImage.composite(image, 0, heightMarker)
+  _.each fullPageImages, ({ data, image }) ->
+    croppedImage = image.clone()
+    crop(croppedImage, data.clip)
+    fullImage.composite(croppedImage, 0, heightMarker)
     heightMarker += image.bitmap.height
 
-  clearFullPageState()
   getBufferWithType(fullImage)
 
 module.exports = {
@@ -134,18 +140,29 @@ module.exports = {
     condition = if isFullPage(data) then fullPageCondition else pixelCondition
 
     captureAndCheck(data, automate, condition)
-    .then ([buffer, image]) ->
-      if isFullPage(data) and data.total > 1
-        return crop(image, data.clip).then ->
-          fullPageImages.push(image)
+    .then ({ buffer, image }) ->
+      if isFullPage(data)
+        log("fullpage #{data.current}/#{data.total}")
 
-          if data.current is data.total
-            return stitchFullPageScreenshots()
-          else
-            return null
+      if isFullPage(data) and data.total > 1
+        ## keep previous screenshot partials around b/c if two screenshots are
+        ## taken in a row, the UI might not be caught up so we need something
+        ## to compare the new one to
+        ## only clear out once we're ready to save the first partial for the
+        ## screenshot currently being taken
+        if data.current is 1
+          clearFullPageState()
+
+        fullPageImages.push({ data, image })
+
+        if data.current is data.total
+          return stitchFullPageScreenshots()
+        else
+          return null
 
       if isAppOnly(data)
-        return crop(image, data.clip)
+        crop(image, data.clip)
+        return getBufferWithType(image)
 
       return buffer
 
@@ -161,6 +178,8 @@ module.exports = {
     name = [name, mime.extension(buffer.type)].join(".")
 
     pathToScreenshot = path.join(screenshotsFolder, name)
+
+    log("save", pathToScreenshot)
 
     fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->

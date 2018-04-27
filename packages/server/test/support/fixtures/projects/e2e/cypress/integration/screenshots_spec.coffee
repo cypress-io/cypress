@@ -25,9 +25,25 @@ describe "taking screenshots", ->
       .viewport(600, 400)
       .visit('http://localhost:3322/color/yellow')
       .screenshot("crop-check")
-      .task("check:screenshot:crop", { name: 'crop-check.png', width: 600, height: 400 })
+      .task("check:screenshot:size", { name: 'crop-check.png', width: 600, height: 400 })
 
-  it "accepts screenshot after 10 tries if somehow app has pixels that match helper pixels", ->
+  it "can capture fullpage screenshots", ->
+    cy
+      .viewport(600, 200)
+      .visit('http://localhost:3322/fullpage')
+      .pause()
+      .screenshot("fullpage", { capture: "fullpage" })
+      .task("check:screenshot:size", { name: 'fullpage.png', width: 600, height: 500 })
+
+  it "accepts subsequent same captures after multiple tries", ->
+    cy
+      .viewport(600, 200)
+      .visit('http://localhost:3322/fullpage-same')
+      .pause()
+      .screenshot("fullpage-same", { capture: "fullpage" })
+      .task("check:screenshot:size", { name: 'fullpage-same.png', width: 600, height: 500 })
+
+  it "accepts screenshot after multiple tries if somehow app has pixels that match helper pixels", ->
     cy
       .viewport(1280, 720)
       .visit('http://localhost:3322/pathological')

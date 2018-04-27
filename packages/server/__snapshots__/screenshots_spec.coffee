@@ -9,7 +9,9 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ can nest screenshots in folders
     1) generates pngs on failure
     ✓ crops app captures to just app size
-    ✓ accepts screenshot after 10 tries if somehow app has pixels that match helper pixels
+    ✓ can capture fullpage screenshots
+    ✓ accepts subsequent same captures after multiple tries
+    ✓ accepts screenshot after multiple tries if somehow app has pixels that match helper pixels
     before hooks
       2) "before all" hook for "empty test 1"
     each hooks
@@ -17,7 +19,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       4) "after each" hook for "empty test 2"
 
 
-  4 passing
+  6 passing
   4 failing
 
   1) taking screenshots generates pngs on failure:
@@ -47,12 +49,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Tests Finished)
 
-  - Tests:           7
-  - Passes:          4
+  - Tests:           9
+  - Passes:          6
   - Failures:        3
   - Pending:         0
   - Duration:        10 seconds
-  - Screenshots:     9
+  - Screenshots:     11
   - Video Recorded:  true
   - Cypress Version: 1.2.3
 
@@ -64,6 +66,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/foobarbaz.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/crop-check.png (600x400)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-same.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/pathological.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- before hooks -- empty test 1 -- before all hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- before each hook.png (1280x720)
