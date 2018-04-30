@@ -100,7 +100,15 @@ module.exports = {
     invalid_element: "#{cmd('{{cmd}}')} can only be called on :checkbox{{phrase}}. Your subject {{word}} a: {{node}}"
 
   clear:
-    invalid_element: "#{cmd('clear')} can only be called on textarea or :text. Your subject {{word}} a: {{node}}"
+    invalid_element: """
+      #{cmd('clear')} failed because it requires a valid clearable element. 
+      
+      The element cleared was:
+
+        > {{node}}
+      
+      Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
+    """
 
   clearCookie:
     invalid_argument: "#{cmd('clearCookie')} must be passed a string argument for name."
@@ -747,8 +755,16 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
-    multiple_elements: "#{cmd('type')} can only be called on a single textarea or :text. Your subject contained {{num}} elements."
-    not_on_text_field: "#{cmd('type')} can only be called on textarea or :text. Your subject is a: {{node}}"
+    multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
+    not_on_typeable_element: """
+      #{cmd('type')} failed because it requires a valid typeable element. 
+      
+      The element typed into was:
+
+        > {{node}}
+      
+      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+    """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
     wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
 

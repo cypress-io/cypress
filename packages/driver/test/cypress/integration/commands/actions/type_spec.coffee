@@ -2158,22 +2158,24 @@ describe "src/cy/commands/actions/type", ->
 
         cy.get("input:first").type("a").type("b")
 
-      it "throws when not textarea or :text", (done) ->
+      it "throws when not textarea or text-like", (done) ->
         cy.get("form").type("foo")
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.type() can only be called on textarea or :text. Your subject is a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "cy.type() failed because it requires a valid typeable element."
+          expect(err.message).to.include "The element typed into was:"
+          expect(err.message).to.include "<form id=\"by-id\">...</form>"
+          expect(err.message).to.include "Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements."
           done()
 
       it "throws when subject is a collection of elements", (done) ->
-        cy
-          .get("textarea,:text").then ($inputs) ->
+        cy.get("textarea,:text").then ($inputs) ->
             @num = $inputs.length
             return $inputs
           .type("foo")
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.type() can only be called on a single textarea or :text. Your subject contained #{@num} elements."
+          expect(err.message).to.include "cy.type() can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "throws when the subject isnt visible", (done) ->
@@ -2570,34 +2572,46 @@ describe "src/cy/commands/actions/type", ->
 
         cy.get("input:first").clear().clear()
 
-      it "throws if any subject isnt a textarea", (done) ->
+      it "throws if any subject isnt a textarea or text-like", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(3)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <form id=\"checkboxes\">...</form>"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<form id=\"checkboxes\">...</form>"
+          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get("textarea:first,form#checkboxes").clear()
 
       it "throws if any subject isnt a :text", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <div id=\"dom\">...</div>"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<div id=\"dom\">...</div>"
+          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get("div").clear()
 
       it "throws on an input radio", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<input type=\"radio\" name=\"gender\" value=\"male\">"
+          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get(":radio").clear()
 
       it "throws on an input checkbox", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<input type=\"checkbox\" name=\"colors\" value=\"blue\">"
+          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get(":checkbox").clear()
