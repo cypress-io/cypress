@@ -427,6 +427,7 @@ module.exports = {
       # name:      data.name
       testId:    data.testId
       testTitle: data.titles
+      takenAt:   resp.takenAt
       path:      resp.path
       height:    resp.height
       width:     resp.width
