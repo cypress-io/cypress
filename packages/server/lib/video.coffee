@@ -118,6 +118,11 @@ module.exports = {
       .outputOptions([
         "-preset fast"
         "-crf #{videoCompression}"
+        "-movflags faststart"
+        "-profile:v baseline"
+        "-level:v 3.0"
+        "-tune zerolatency"
+        "-threads 0"
       ])
       .save(cname)
       .on "codecData", (data) ->
