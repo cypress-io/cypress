@@ -10,6 +10,11 @@ routes     = require("./util/routes")
 system     = require("./util/system")
 debug      = require("debug")("cypress:server:api")
 
+## TODO: improve this, dont just use
+## requests because its way too verbose
+if debug.enabled
+  request.debug = true
+
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
     gzip: true
@@ -98,63 +103,49 @@ module.exports = {
 
   createRun: (options = {}) ->
     body = _.pick(options, [
-      "specs",
       "projectId"
       "recordKey"
-      "commitSha"
-      "commitBranch"
-      "commitAuthorName"
-      "commitAuthorEmail"
-      "commitMessage"
-      "remoteOrigin"
-      "ciParams"
-      "ciProvider"
-      "ciBuildNumber",
+      "ci"
+      "specs",
+      "commit"
+      "platform"
     ])
 
     rp.post({
+      body
       url: routes.runs()
       json: true
       timeout: options.timeout ? 10000
       headers: {
         "x-route-version": "3"
       }
-      body: body
     })
-    .promise()
-    .get("runId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
   createInstance: (options = {}) ->
-    { runId, spec, timeout } = options
+    { runId, timeout } = options
 
-    browsers.getByName(options.browser)
-    .then (browser = {}) ->
-      ## get the formatted browserName
-      ## and version of the browser we're
-      ## about to be running on
-      { displayName, version } = browser
+    body = _.pick(options, [
+      "spec"
+      "planId"
+      "machineId"
+      "platform"
+    ])
 
-      system.info()
-      .then (systemInfo) ->
-        systemInfo.spec = spec
-        systemInfo.browserName = displayName
-        systemInfo.browserVersion = version
-
-        rp.post({
-          url: routes.instances(runId)
-          json: true
-          timeout: timeout ? 10000
-          headers: {
-            "x-route-version": "4"
-          }
-          body: systemInfo
-        })
-        .promise()
-        .get("instanceId")
-        .catch(errors.StatusCodeError, formatResponseBody)
-        .catch(tagError)
+    rp.post({
+      body
+      url: routes.instances(runId)
+      json: true
+      timeout: timeout ? 10000
+      headers: {
+        "x-route-version": "3"
+      }
+    })
+    .promise()
+    .get("instanceId")
+    .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
 
   updateInstanceStdout: (options = {}) ->
     rp.put({
@@ -177,18 +168,15 @@ module.exports = {
         "x-route-version": "2"
       }
       body: _.pick(options, [
+        "stats"
         "tests"
-        "duration"
-        "passes"
-        "failures"
-        "pending"
         "error"
         "video"
-        "screenshots"
-        "failingTests"
-        "ciProvider" ## TODO: don't send this (no reason to)
-        "cypressConfig"
+        "hooks"
         "stdout"
+        "screenshots"
+        "cypressConfig"
+        "reporterStats"
       ])
     })
     .catch(errors.StatusCodeError, formatResponseBody)

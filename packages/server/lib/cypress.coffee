@@ -30,6 +30,7 @@ exitErr = (err) ->
   ## and potentially raygun
   ## and exit with 1
   debug('exiting with err', err)
+  
   require("./errors").log(err)
   .then -> exit(1)
 

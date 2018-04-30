@@ -6,11 +6,12 @@ human      = require("human-interval")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
-recordMode = require("./recordMode")
+recordMode = require("./record")
 user       = require("../user")
 stats      = require("../stats")
 video      = require("../video")
 errors     = require("../errors")
+stdout     = require("../stdout")
 Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
@@ -82,8 +83,8 @@ openProjectCreate = (projectPath, socketId, options) ->
   ## - NO  display server logs (via morgan)
   ## - YES display reporter results (via mocha reporter)
   openProject.create(projectPath, options, {
+    socketId
     morgan:       false
-    socketId:     id
     report:       true
     isTextTerminal:   options.isTextTerminal ? true
     onError: (err) ->
@@ -111,7 +112,7 @@ createAndOpenProject = (socketId, options) ->
       project
       config: project.getConfig()
       projectId: getProjectId(project, projectId)
-    ])
+    })
 
 module.exports = {
   collectTestResults
@@ -247,8 +248,6 @@ module.exports = {
 
     headed = !!headed
 
-    browser ?= "electron"
-
     browserOpts = switch browser
       when "electron"
         @getElectronProps(headed, project, write)
@@ -347,7 +346,7 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { config, project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
 
     @listenForProjectEnd(project, headed, exit)
     .then (obj) =>
@@ -358,6 +357,7 @@ module.exports = {
         obj.screenshots = screenshots
 
       obj.spec = spec?.path
+      obj.config = config
 
       testResults = collectTestResults(obj)
 
@@ -421,12 +421,15 @@ module.exports = {
       Promise.resolve()
 
   screenshotMetadata: (data, resp) ->
+    ## TODO: update all of these properties
+    ## because we have a full array of tests
+    ## no need for testTitle
     {
-      clientId:  uuid.v4()
+      # clientId:  uuid.v4()
       title:      data.name ## TODO: rename this property
       # name:      data.name
       testId:    data.testId
-      testTitle: data.titles
+      # testTitle: data.titles
       takenAt:   resp.takenAt
       path:      resp.path
       height:    resp.height
@@ -488,7 +491,7 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}) ->
-    { browser, videoRecording, videosFolder } = options
+    { config, browser, videoRecording, videosFolder } = options
 
     browser ?= "electron"
     debug("browser for run is: #{browser}")
@@ -536,6 +539,7 @@ module.exports = {
             name
             spec
             cname
+            config
             started
             screenshots
             exit:                 options.exit
@@ -573,9 +577,13 @@ module.exports = {
   ready: (options = {}) ->
     debug("run mode ready with options %j", options)
 
+    _.defaults(options, {
+      browser: "electron"
+    })
+
     socketId = random.id()
 
-    { projectPath, record, key, spec } = options
+    { projectPath, record, key, spec, browser } = options
 
     if record
       captured = stdout.capture()
@@ -594,7 +602,7 @@ module.exports = {
         recordMode.throwIfNoProjectId(projectId)
 
       @findSpecs(config, spec)
-      .then (specs = []) ->
+      .then (specs = []) =>
         runAllSpecs = (beforeSpecRun, afterSpecRun) =>
           if not specs.length
             errors.throw('NO_SPECS_FOUND', config.integrationFolder, spec)
@@ -606,6 +614,7 @@ module.exports = {
               afterSpecRun
               projectPath
               socketId
+              browser
               project
               config
               specs
@@ -615,22 +624,22 @@ module.exports = {
               videoUploadOnPasses:  config.videoUploadOnPasses
               exit:                 options.exit
               headed:               options.headed
-              browser:              options.browser
               outputPath:           options.outputPath
             })
           .finally(allDone)
-            # if options.allDone isnt false
-              # allDone()
 
         ## TODO: we may still want to capture
         ## stdout even when no specs were found
         if record
+          { projectName } = config
+
           recordMode.createRunAndRecordSpecs({
+            key
             specs
-            key,
-            projectId,
-            projectPath,
-            projectName,
+            browser
+            projectId
+            projectPath
+            projectName
             runAllSpecs
           })
         else

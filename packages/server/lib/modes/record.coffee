@@ -8,6 +8,9 @@ errors     = require("../errors")
 # stdout     = require("../stdout")
 upload     = require("../upload")
 # Project    = require("../project")
+browsers   = require('../browsers')
+env        = require("../util/env")
+system     = require("../util/system")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
 debug      = require("debug")("cypress:server")
@@ -56,74 +59,199 @@ throwIfNoProjectId = (projectId) ->
   if not projectId
     errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
 
-createRun = (projectId, recordKey, projectPath, projectName, specs) ->
+getSpecPath = (spec) ->
+  _.get(spec, "path")
+
+updateInstance = (options = {}) ->
+  { instanceId, results, stdout } = options
+
+  { stats, tests, hooks, video, screenshots, reporterStats, error } = results
+
+  video = Boolean(video)
+  cypressConfig = results.config
+
+  ## set to null if not defined
+  error ?= null
+
+  ## get rid of the path property
+  screenshots = _.map screenshots, (screenshot) ->
+    _.omit(screenshot, "path")
+
+  api.updateInstance({
+    stats
+    tests
+    error
+    video
+    hooks
+    stdout
+    instanceId
+    screenshots
+    reporterStats
+    cypressConfig
+  })
+  # .then (resp = {}) =>
+    ## TODO: WIP implement this
+    # @upload({
+    #   video:          results.video
+    #   uploadVideo:    results.shouldUploadVideo
+    #   screenshots:    results.screenshots
+    #   videoUrl:       resp.videoUploadUrl
+    #   screenshotUrls: resp.screenshotUploadUrls
+    # })
+  .catch (err) ->
+    errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+    ## dont log exceptions if we have a 503 status code
+    if err.statusCode isnt 503
+      logException(err)
+      .return(null)
+    else
+      null
+
+createRun = (options = {}) ->
+  { projectId, recordKey, platform, git, specs } = options
+
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
     errors.throw("RECORD_KEY_MISSING")
 
-  commitInfo.commitInfo(projectPath)
-  .then (git) ->
-    api.createRun({
-      specs
-      projectId
-      recordKey
-      commitSha:         git.sha
-      commitBranch:      git.branch
-      commitAuthorName:  git.author
-      commitAuthorEmail: git.email
-      commitMessage:     git.message
-      remoteOrigin:      git.remote
-      ciParams:          ciProvider.params()
-      ciProvider:        ciProvider.name()
-      ciBuildNumber:     ciProvider.buildNum()
-    })
-    .catch (err) ->
-      switch err.statusCode
-        when 401
-          recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
-          errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
-        when 404
-          errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
-        else
-          ## warn the user that assets will be not recorded
-          errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+  specs = _.map(specs, getSpecPath)
 
-          ## report on this exception
-          ## and return null
-          logException(err)
-          .return(null)
+  api.createRun({
+    specs
+    projectId
+    recordKey
+    platform
+    ci: {
+      url: null ## TODO: remove this upon schema update
+      params: ciProvider.params()
+      provider: ciProvider.name()
+      buildNumber: ciProvider.buildNum()
+    }
+    commit: {
+      url: null ## TODO: remove this upon schema update
+      sha: git.sha
+      branch: git.branch
+      authorName: git.author
+      authorEmail: git.email
+      message: git.message
+      remoteOrigin: git.remote
+    }
+  })
+  .catch (err) ->
+    switch err.statusCode
+      when 400
+        errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
+      when 401
+        recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+        errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
+      when 404
+        errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
+      else
+        ## warn the user that assets will be not recorded
+        errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+        ## report on this exception
+        ## and return null
+        logException(err)
+        .return(null)
+
+createInstance = (options = {}) ->
+  { runId, planId, machineId, platform, spec } = options
+
+  spec = getSpecPath(spec)
+
+  api.createInstance({
+    spec
+    runId
+    planId
+    platform
+    machineId
+  })
+  .catch (err) ->
+    errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+    ## dont log exceptions if we have a 503 status code
+    if err.statusCode isnt 503
+      logException(err)
+      .return(null)
+    else
+      null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { specs, key, projectId, projectPath, projectName, runAllSpecs } = options
+  { specs, browser, projectId, projectPath, runAllSpecs } = options
 
-  createRun(projectId, key, projectPath, projectName, specs)
-  .then (resp) ->
-    if not resp
-      runAllSpecs()
-    else
-      { runId, machineId, planId } = resp
+  recordKey = options.key
 
-      beforeSpecRun = (spec) ->
-        recordMode.createInstance({
-          runId
-          machineId
-          planId
-          spec
-        })
+  Promise.all([
+    system.info()
+    commitInfo.commitInfo(projectPath)
+    browsers.getByName(browser)
+  ])
+  .spread (sys, git, browser) ->
+    platform = {
+      osName: sys.osName
+      osVersion: sys.osVersion
+      browserName: browser.displayName
+      browserVersion: browser.version
+    }
 
-      afterSpecRun = (spec, results) ->
-        # recordMode.updateInstance({
-        #   runId
-        #   machineId
-        #   planId
-        #   spec
-        #   results
-        # })
+    createRun({
+      git
+      specs
+      platform
+      recordKey
+      projectId
+    })
+    .then (resp) ->
+      if not resp
+        runAllSpecs()
+      else
+        { runId, machineId, planId } = resp
 
-      runAllSpecs(beforeSpecRun, afterSpecRun)
+        instanceId = null
+
+        beforeSpecRun = (spec) ->
+          createInstance({
+            spec
+            runId
+            planId
+            machineId
+            platform
+          })
+          .then (id) ->
+            instanceId = id
+
+        afterSpecRun = (spec, results) ->
+          ## dont do anything if we failed to
+          ## create to instance
+          return if not instanceId
+
+          console.log("")
+          console.log("")
+
+          terminal.header("Uploading Assets", {
+            color: ["blue"]
+          })
+
+          console.log("")
+
+          updateInstance({
+            spec
+            results
+            instanceId
+          })
+
+        runAllSpecs(beforeSpecRun, afterSpecRun)
 
 module.exports = {
+  createRun
+
+  createInstance
+
+  updateInstance
+
   warnIfCiFlag
 
   throwIfNoProjectId
@@ -131,82 +259,6 @@ module.exports = {
   warnIfProjectIdButNoRecordOption
 
   createRunAndRecordSpecs
-
-  generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
-    if not recordKey
-      errors.throw("RECORD_KEY_MISSING")
-    if groupId and not group
-      console.log("Warning: you passed group-id but no group flag")
-
-    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
-
-    debug("generating build id for project %s at %s", projectId, projectPath)
-    Promise.all([
-      commitInfo.commitInfo(projectPath),
-      Project.findSpecs(projectPath, specPattern)
-    ])
-    .spread (git, specs) ->
-      debug("git information")
-      debug(git)
-      if specPattern
-        debug("spec pattern", specPattern)
-      debug("project specs")
-      debug(specs)
-      la(check.maybe.strings(specs), "invalid list of specs to run", specs)
-      # only send groupId if group option is true
-      if group
-        groupId ?= ciProvider.groupId()
-      else
-        groupId = null
-      createRunOptions = {
-        projectId:         projectId
-        recordKey:         recordKey
-        commitSha:         git.sha
-        commitBranch:      git.branch
-        commitAuthorName:  git.author
-        commitAuthorEmail: git.email
-        commitMessage:     git.message
-        remoteOrigin:      git.remote
-        ciParams:          ciProvider.params()
-        ciProvider:        ciProvider.name()
-        ciBuildNumber:     ciProvider.buildNum()
-        groupId:           groupId
-        specs:             specs
-        specPattern:       specPattern
-      }
-
-      api.createRun(createRunOptions)
-      .catch (err) ->
-        switch err.statusCode
-          when 401
-            recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
-            errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
-          when 404
-            errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
-          else
-            ## warn the user that assets will be not recorded
-            errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
-
-            ## report on this exception
-            ## and return null
-            logException(err)
-            .return(null)
-
-  createInstance: (runId, spec, browser) ->
-    api.createInstance({
-      runId
-      spec
-      browser
-    })
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
-
-      ## dont log exceptions if we have a 503 status code
-      if err.statusCode isnt 503
-        logException(err)
-        .return(null)
-      else
-        null
 
   upload: (options = {}) ->
     {video, uploadVideo, screenshots, videoUrl, screenshotUrls} = options
@@ -237,7 +289,7 @@ module.exports = {
 
     if screenshotUrls
       screenshotUrls.forEach (obj) ->
-        screenshot = _.find(screenshots, {clientId: obj.clientId})
+        screenshot = _.find(screenshots, { testId: obj.testId })
 
         send(screenshot.path, obj.uploadUrl)
 
@@ -250,53 +302,6 @@ module.exports = {
       errors.warning("DASHBOARD_CANNOT_UPLOAD_RESULTS", err)
 
       logException(err)
-
-  uploadAssets: (instanceId, results, stdout) ->
-    console.log("")
-    console.log("")
-
-    terminal.header("Uploading Assets", {
-      color: ["blue"]
-    })
-
-    console.log("")
-
-    ## get rid of the path property
-    screenshots = _.map results.screenshots, (screenshot) ->
-      _.omit(screenshot, "path")
-
-    api.updateInstance({
-      instanceId:   instanceId
-      tests:        _.get(results, "stats.tests")
-      passes:       _.get(results, "stats.passes")
-      failures:     _.get(results, "stats.failures")
-      pending:      _.get(results, "stats.pending")
-      duration:     _.get(results, "stats.duration")
-      error:        results.error
-      video:        !!results.video
-      screenshots:  screenshots
-      failingTests: results.failingTests
-      cypressConfig: results.config
-      ciProvider:    ciProvider.name() ## TODO: don't send this (no reason to)
-      stdout:       stdout
-    })
-    .then (resp = {}) =>
-      @upload({
-        video:          results.video
-        uploadVideo:    results.shouldUploadVideo
-        screenshots:    results.screenshots
-        videoUrl:       resp.videoUploadUrl
-        screenshotUrls: resp.screenshotUploadUrls
-      })
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
-
-      ## dont log exceptions if we have a 503 status code
-      if err.statusCode isnt 503
-        logException(err)
-        .return(null)
-      else
-        null
 
   uploadStdout: (instanceId, stdout) ->
     api.updateInstanceStdout({

@@ -197,15 +197,13 @@ class Reporter
     }
 
   normalizeTest: (test = {}) ->
-    err = test.err ? {}
+    get = (prop) ->
+      _.get(test, prop, null)
 
     ## use this or null
-    wcs = test.wallClockStart ? null
-
-    if wcs
+    if wcs = get("wallClockStart")
       ## convert to actual date object
       wcs = new Date(wcs)
-
 
     ## wallClockDuration:
     ## this is the 'real' duration of wall clock time that the
@@ -215,19 +213,17 @@ class Reporter
     ## than summing the durations of the timings.
     ##
     {
-      testId:         test.id
+      testId:         get("id")
       title:          getParentTitle(test)
-      state:          test.state
-      start:          test.start
-      end:            test.end
-      body:           test.body
-      stack:          err.stack
-      error:          err.message
-      timings:        test.timings
-      failedFromHookId: test.failedFromHookId
+      state:          get("state")
+      body:           get("body")
+      stack:          get("err.stack")
+      error:          get("err.message")
+      timings:        get("timings")
+      failedFromHookId: get("failedFromHookId")
       wallClockStart: wcs
-      wallClockDuration: test.wallClockDuration
-      # videoTimestamp: test.started - videoStart
+      wallClockDuration: get("wallClockDuration")
+      videoTimestamp: null ## always start this as null
     }
 
   end: ->

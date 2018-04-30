@@ -135,6 +135,20 @@ API = {
 
         https://on.cypress.io/cypress-ci-deprecated
         """
+      when "DASHBOARD_INVALID_RUN_REQUEST"
+        """
+        Recording this run failed because the request was invalid.
+
+        #{arg1.message}
+
+        Errors:
+
+        #{JSON.stringify(arg1.errors, null, 2)}
+
+        Request Sent:
+
+        #{JSON.stringify(arg1.object, null, 2)}
+        """
       when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
         """
         Warning: We encountered an error while uploading results from your run.

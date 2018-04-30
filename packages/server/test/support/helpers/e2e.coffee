@@ -201,6 +201,12 @@ module.exports = {
     if options.headed
       args.push("--headed")
 
+    if options.record
+      args.push("--record")
+
+    if options.key
+      args.push("--key=#{options.key}")
+
     if options.reporter
       args.push("--reporter=#{options.reporter}")
 
