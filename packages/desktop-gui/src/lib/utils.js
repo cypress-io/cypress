@@ -5,17 +5,11 @@ import padStart from 'string.prototype.padstart'
 
 const cyDirRegex = /^cypress\/integration\//g
 
-const osNameLookup = {
-  darwin: 'apple',
-}
-
 const osIconLookup = {
   win32: 'windows',
   darwin: 'apple',
   linux: 'linux',
 }
-
-const browserNameLookup = {}
 
 const browserIconLookup = {
   chrome: 'chrome',
@@ -31,24 +25,11 @@ module.exports = {
     return osIconLookup[osName] || 'desktop'
   },
 
-  osNameFormatted: (osName) => {
-    if (!osName) return ''
-
-    return _.capitalize(osNameLookup[osName] || osName)
-  },
-
   browserIcon: (browserName) => {
     if (!browserName) return ''
 
     return browserIconLookup[browserName] || 'globe'
   },
-
-  browserNameFormatted: (browserName) => {
-    if (!browserName) return ''
-
-    return _.capitalize(browserNameLookup[browserName] || browserName)
-  },
-
 
   browserVersionFormatted: (browserVersion) => {
     if (!browserVersion) return ''
