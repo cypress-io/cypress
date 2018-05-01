@@ -91,7 +91,7 @@ export default class RunsListItem extends Component {
                   </div> :
                   // or did we only actual run it on one OS
                   <div>
-                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].osName)}`}></i>{' '}
+                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].platform.osName)}`}></i>{' '}
                     {this._osDisplay()}
                   </div> :
                 null
@@ -168,7 +168,7 @@ export default class RunsListItem extends Component {
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.browserName} + ${instance.browserVersion}`
+      return `${instance.platform.browserName} + ${instance.platform.browserVersion}`
     })
     .uniq()
     .value()
@@ -179,12 +179,12 @@ export default class RunsListItem extends Component {
   }
 
   _browserIcon () {
-    return browserIcon(this.props.run.instances[0].browserName)
+    return browserIcon(this.props.run.instances[0].platform.browserName)
   }
 
   _osIcon () {
     if (!this._moreThanOneInstance() && this.props.run.instances.length) {
-      return (osIcon(this.props.run.instances[0].osName))
+      return (osIcon(this.props.run.instances[0].platform.osName))
     } else {
       return 'desktop'
     }
@@ -196,7 +196,7 @@ export default class RunsListItem extends Component {
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.osName} + ${instance.osVersionFormatted}`
+      return `${instance.platform.osName} + ${instance.platform.osVersionFormatted}`
     })
     .uniq()
     .value()
@@ -210,7 +210,7 @@ export default class RunsListItem extends Component {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
         <span>
-          {this.props.run.instances[0].osVersionFormatted}
+          {this.props.run.instances[0].platform.osVersionFormatted}
         </span>
       )
     }
@@ -220,7 +220,7 @@ export default class RunsListItem extends Component {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
         <span>
-          {browserVersionFormatted(this.props.run.instances[0].browserVersion)}
+          {browserVersionFormatted(this.props.run.instances[0].platform.browserVersion)}
         </span>
       )
     }

@@ -91,6 +91,13 @@ describe "Runs List", ->
           cy.get("@runRow").contains(@runs[1].commit.branch)
           cy.get("@runRow").contains(@runs[1].commit.message)
 
+        it "displays platform info", ->
+          cy.get("@runRow").within ->
+            cy.contains(@runs[1].instances[0].platform.osVersionFormatted)
+            cy.contains(@runs[1].instances[0].platform.browserVersion)
+            cy.get(".fa-windows")
+            cy.get(".fa-chrome")
+
         it "displays totals", ->
           cy.get("@runRow").contains(@runs[1].failed)
           cy.get("@runRow").contains(@runs[1].passed)

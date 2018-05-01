@@ -10,7 +10,7 @@ const osNameLookup = {
 }
 
 const osIconLookup = {
-  windows: 'windows',
+  win32: 'windows',
   darwin: 'apple',
   linux: 'linux',
 }
