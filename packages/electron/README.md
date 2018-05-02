@@ -4,6 +4,8 @@ This is the lib responsible for installing + building Electron. This enables us 
 
 It does this by using `symlinks` while in development.
 
+The version of [Electron](https://electronjs.org) is specified in [package.json](package.json) as `electronVersion` property.
+
 ## Install
 
 The Desktop GUI's dependencies can be installed with:
