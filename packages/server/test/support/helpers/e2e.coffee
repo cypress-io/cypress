@@ -74,7 +74,7 @@ startServer = (obj) ->
   new Promise (resolve) ->
     srv.listen port, =>
       console.log "listening on port: #{port}"
-      onServer?(app)
+      onServer?(app, srv)
 
       resolve(srv)
 

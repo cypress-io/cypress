@@ -244,7 +244,9 @@ module.exports = {
 
   listenForProjectEnd: (project, headed, exit) ->
     new Promise (resolve) ->
-      return if exit is false
+      if exit is false
+        resolve = (arg) ->
+          console.log("not exiting due to options.exit being false")
 
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
