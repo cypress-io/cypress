@@ -11,37 +11,26 @@ sizeOf  = Promise.promisify(sizeOf)
 e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
-  sendHtml = (contents) -> (req, res) ->
-    res.set('Content-Type', 'text/html')
-    res.send("""
-      <!DOCTYPE html>
-      <html lang="en">
-      <body>
-        #{contents}
-      </body>
-      </html>
-    """)
-
   app.get "/color/:color", (req, res) ->
-    sendHtml("""<div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>""")(req, res)
+    e2e.sendHtml("""<div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>""")(req, res)
 
-  app.get "/fullpage", sendHtml("""
+  app.get "/fullpage", e2e.sendHtml("""
     <style>body { margin: 0; }</style>
     <div style="background: white; height: 200px;"></div>
     <div style="background: black; height: 200px;"></div>
     <div style="background: white; height: 100px;"></div>
   """)
 
-  app.get "/fullpage-same", sendHtml("""
+  app.get "/fullpage-same", e2e.sendHtml("""
     <style>body { margin: 0; }</style>
     <div style="height: 500px;"></div>
   """)
 
-  app.get "/element", sendHtml("""
+  app.get "/element", e2e.sendHtml("""
     <div class="element" style="background: red; width: 400px; height: 300px; margin: 20px;"></div>
   """)
 
-  app.get "/pathological", sendHtml("""
+  app.get "/pathological", e2e.sendHtml("""
     <style>div { width: 1px; height: 1px; position: fixed; }</style>
     <div style="left: 0; top: 0; background-color: black;"></div>
     <div style="left: 1px; top: 0; background-color: white;"></div>

@@ -280,4 +280,15 @@ module.exports = {
       sp.on("exit", resolve)
     .tap(copy)
     .then(exit)
+
+  sendHtml: (contents) -> (req, res) ->
+    res.set('Content-Type', 'text/html')
+    res.send("""
+      <!DOCTYPE html>
+      <html lang="en">
+      <body>
+        #{contents}
+      </body>
+      </html>
+    """)
 }

@@ -4,23 +4,19 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Tests Starting)
 
 
-  screenshot app capture
-    ✓ takes consistent app captures
-    ✓ takes consistent fullpage captures
-    ✓ takes consistent element captures
+  ✓ takes consistent app captures
 
-
-  3 passing
+  1 passing
 
 
   (Tests Finished)
 
-  - Tests:           3
-  - Passes:          3
+  - Tests:           1
+  - Passes:          1
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds
-  - Screenshots:     73
+  - Screenshots:     51
   - Video Recorded:  true
   - Cypress Version: 1.2.3
 
@@ -78,28 +74,6 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/app-compare.png (1000x660)
   - /foo/bar/.projects/e2e/cypress/screenshots/app-compare.png (1000x660)
   - /foo/bar/.projects/e2e/cypress/screenshots/app-compare.png (1000x660)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-original.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-original.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
 
 
   (Video)
