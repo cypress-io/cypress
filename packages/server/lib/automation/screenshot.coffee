@@ -11,7 +11,7 @@ module.exports = (screenshotsFolder) ->
         if buffer
           screenshots.save(data, buffer, screenshotsFolder)
       .catch (err) ->
-        screenshots.clearFullPageState()
+        screenshots.clearMultipartState()
         throw err
 
   }

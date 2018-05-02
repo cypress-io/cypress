@@ -90,11 +90,10 @@ describe "lib/screenshots", ->
       screenshots.capture(@appData, @automate).then (buffer) =>
         expect(buffer).to.equal(@buffer)
 
-    describe "capture: fullpage", ->
+    describe "multi-part capture (fullpage or element)", ->
       beforeEach ->
-        screenshots.clearFullPageState()
+        screenshots.clearMultipartState()
 
-        @appData.capture = "fullpage"
         @appData.current = 1
         @appData.total = 3
 

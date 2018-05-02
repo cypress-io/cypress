@@ -62,8 +62,8 @@ captureAndCheck = (data, automate, condition) ->
 isAppOnly = (data) ->
   data.capture is "app" or data.capture is "fullpage"
 
-isFullPage = (data) ->
-  data.capture is "fullpage"
+isMultipart = (data) ->
+  _.isNumber(data.current) and _.isNumber(data.total)
 
 getBufferWithType = (image) ->
   image.getBuffer(Jimp.AUTO).then (buffer) ->
@@ -87,37 +87,40 @@ pixelCondition = (data, image) ->
     (not isAppOnly(data) and hasPixels)
   )
 
-fullPageImages = []
+multipartImages = []
 
-clearFullPageState = ->
-  fullPageImages = []
+clearMultipartState = ->
+  multipartImages = []
 
 compareLast = (data, image) ->
   ## ensure the previous image isn't the same, which might indicate the
   ## page has not scrolled yet
-  previous = _.last(fullPageImages)
+  previous = _.last(multipartImages)
   if not previous
     return true
   log("compare", previous.image.hash(), "vs", image.hash())
   return previous.image.hash() isnt image.hash()
 
-fullPageCondition = (data, image) ->
+multipartCondition = (data, image) ->
   if data.current is 1
     pixelCondition(data, image) and compareLast(data, image)
   else
     compareLast(data, image)
 
-stitchFullPageScreenshots = ->
-  width = Math.min(_.map(fullPageImages, "data.clip.width")...)
-  height = _.sumBy(fullPageImages, "data.clip.height")
+stitchScreenshots = ->
+  width = Math.min(_.map(multipartImages, "data.clip.width")...)
+  height = _.sumBy(multipartImages, "data.clip.height")
+
+  log("stitch #{multipartImages.length} images together")
 
   fullImage = new Jimp(width, height)
   heightMarker = 0
-  _.each fullPageImages, ({ data, image }) ->
+  _.each multipartImages, ({ data, image }) ->
     croppedImage = image.clone()
     crop(croppedImage, data.clip)
+    log("stitch: add image at (0, #{heightMarker})")
     fullImage.composite(croppedImage, 0, heightMarker)
-    heightMarker += image.bitmap.height
+    heightMarker += croppedImage.bitmap.height
 
   getBufferWithType(fullImage)
 
@@ -137,30 +140,30 @@ module.exports = {
     glob(screenshotsFolder, {nodir: true})
 
   capture: (data, automate) ->
-    condition = if isFullPage(data) then fullPageCondition else pixelCondition
+    condition = if isMultipart(data) then multipartCondition else pixelCondition
 
     captureAndCheck(data, automate, condition)
     .then ({ buffer, image }) ->
-      if isFullPage(data)
-        log("fullpage #{data.current}/#{data.total}")
+      if isMultipart(data)
+        log("multi-part #{data.current}/#{data.total}")
 
-      if isFullPage(data) and data.total > 1
+      if isMultipart(data) and data.total > 1
         ## keep previous screenshot partials around b/c if two screenshots are
         ## taken in a row, the UI might not be caught up so we need something
         ## to compare the new one to
         ## only clear out once we're ready to save the first partial for the
         ## screenshot currently being taken
         if data.current is 1
-          clearFullPageState()
+          clearMultipartState()
 
-        fullPageImages.push({ data, image })
+        multipartImages.push({ data, image })
 
         if data.current is data.total
-          return stitchFullPageScreenshots()
+          return stitchScreenshots()
         else
           return null
 
-      if isAppOnly(data)
+      if isAppOnly(data) or isMultipart(data)
         crop(image, data.clip)
         return getBufferWithType(image)
 
@@ -195,6 +198,6 @@ module.exports = {
         height: dimensions.height
       }
 
-  clearFullPageState: clearFullPageState
+  clearMultipartState: clearMultipartState
 
 }
