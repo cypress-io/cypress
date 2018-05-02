@@ -163,7 +163,7 @@ export default class RunsListItem extends Component {
   }
 
   _getUniqBrowsers () {
-    if (!this.props.run.instances) return 0
+    if (!this.props.run.instances) return []
 
     return _
     .chain(this.props.run.instances)
@@ -175,7 +175,9 @@ export default class RunsListItem extends Component {
   }
 
   _browsersLength () {
-    return this._getUniqBrowsers().length
+    if (this._getUniqBrowsers()) {
+      return this._getUniqBrowsers().length
+    }
   }
 
   _browserIcon () {
