@@ -3,11 +3,28 @@
   <head>
     <title>Screenshots Fixture</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
-        height: 500px;
+        margin: 0;
+      }
+      div {
+        border: solid 1px black;
+        margin: 20px;
+      }
+      .short-element {
+        height: 100px;
+        margin-left: 40px;
+        width: 200px;
+      }
+      .tall-element {
+        height: 320px;
       }
     </style>
   </head>
   <body>
+    <div class="short-element"></div>
+    <div class="tall-element"></div>
   </body>
 </html>

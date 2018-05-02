@@ -3,6 +3,7 @@ Promise = require("bluebird")
 $ = require("jquery")
 
 Screenshot = require("../../cypress/screenshot")
+$dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
 getViewportHeight = (state) ->
@@ -36,7 +37,7 @@ automateScreenshot = (options = {}) ->
   props = _.extend({
     titles: titles
     testId: runnable.id
-  }, _.omit(options, "runnable", "timeout", "log"))
+  }, _.omit(options, "runnable", "timeout", "log", "subject"))
 
   automate = ->
     Cypress.automation("take:screenshot", props)
@@ -78,8 +79,10 @@ scrollOverrides = (win, doc) ->
     win.scrollTo(originalX, originalY)
 
 takeScrollingScreenshots = (scrolls, win, automationOptions) ->
-  scrollAndTake = ({ y, clip }, index) ->
+  scrollAndTake = ({ y, clip, afterScroll }, index) ->
     win.scrollTo(0, y)
+    if afterScroll
+      clip = afterScroll()
     options = _.extend({}, automationOptions, {
       current: index + 1
       total: scrolls.length
@@ -120,7 +123,54 @@ takeFullPageScreenshot = (state, automationOptions) ->
   takeScrollingScreenshots(scrolls, win, automationOptions)
   .finally(resetScrollOverrides)
 
-takeElementScreenshot = (element, state, automationOptions) ->
+takeElementScreenshot = ($el, state, automationOptions) ->
+  win = state("window")
+  doc = state("document")
+
+  resetScrollOverrides = scrollOverrides(win, doc)
+
+  elPosition = $dom.getElementPositioning($el)
+  viewportHeight = getViewportHeight(state)
+  viewportWidth = getViewportWidth(state)
+  numScreenshots = Math.ceil(elPosition.height / viewportHeight)
+
+  scrolls = _.map _.times(numScreenshots), (index) ->
+    y = elPosition.fromWindow.top + (viewportHeight * index)
+    afterScroll = ->
+      elPosition = $dom.getElementPositioning($el)
+      x = Math.min(viewportWidth, elPosition.fromViewport.left)
+      width = Math.min(viewportWidth - x, elPosition.width)
+
+      if numScreenshots is 1
+        return {
+          x: x
+          y: elPosition.fromViewport.top
+          width: width
+          height: elPosition.height
+        }
+
+      if index + 1 is numScreenshots
+        overlap = (numScreenshots - 1) * viewportHeight + elPosition.fromViewport.top
+        heightLeft = elPosition.fromViewport.bottom - overlap
+        {
+          x: x
+          y: overlap
+          width: width
+          height: heightLeft
+        }
+      else
+        {
+          x: x
+          y: Math.max(0, elPosition.fromViewport.top)
+          width: width
+          ## TODO: try simplifying to just 'viewportHeight'
+          height: Math.min(viewportHeight, elPosition.fromViewport.top + elPosition.height)
+        }
+
+    { y, afterScroll }
+
+  takeScrollingScreenshots(scrolls, win, automationOptions)
+  .finally(resetScrollOverrides)
 
 takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
@@ -131,7 +181,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     waitForCommandSynchronization
   } = screenshotConfig
 
-  { runnable } = options
+  { subject, runnable } = options
 
   appOnly = capture is "app" or capture is "fullpage"
 
@@ -180,6 +230,8 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   .then ->
     if capture is "fullpage"
       takeFullPageScreenshot(state, automationOptions)
+    else if subject
+      takeElementScreenshot(subject, state, automationOptions)
     else
       automateScreenshot(automationOptions)
   .finally ->
@@ -197,11 +249,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       screenshotConfig.capture = "runner"
       takeScreenshot(Cypress, state, screenshotConfig, { runnable })
 
-  Commands.addAll({
-    screenshot: (name, userOptions = {}) ->
+  Commands.addAll({ prevSubject: "optional" }, {
+    screenshot: (subject, name, userOptions = {}) ->
       if _.isObject(name)
         userOptions = name
         name = null
+
+      if not $dom.isElement(subject)
+        subject = null
 
       ## TODO: handle hook titles
       runnable = state("runnable")
@@ -228,6 +283,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       takeScreenshot(Cypress, state, screenshotConfig, {
+        subject: subject
         runnable: runnable
         name: name
         log: options._log

@@ -12,6 +12,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
     ✓ can capture fullpage screenshots
     ✓ accepts subsequent same captures after multiple tries
     ✓ accepts screenshot after multiple tries if somehow app has pixels that match helper pixels
+    ✓ can capture element screenshots
     before hooks
       2) "before all" hook for "empty test 1"
     each hooks
@@ -19,7 +20,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       4) "after each" hook for "empty test 2"
 
 
-  6 passing
+  7 passing
   4 failing
 
   1) taking screenshots generates pngs on failure:
@@ -49,12 +50,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Tests Finished)
 
-  - Tests:           9
-  - Passes:          6
+  - Tests:           10
+  - Passes:          7
   - Failures:        3
   - Pending:         0
   - Duration:        10 seconds
-  - Screenshots:     11
+  - Screenshots:     12
   - Video Recorded:  true
   - Cypress Version: 1.2.3
 
@@ -69,6 +70,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/fullpage.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-same.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/pathological.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element.png (400x300)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- before hooks -- empty test 1 -- before all hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- before each hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- after each hook.png (1280x720)

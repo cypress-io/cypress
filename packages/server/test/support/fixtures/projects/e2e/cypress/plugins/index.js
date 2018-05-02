@@ -17,7 +17,7 @@ module.exports = (on) => {
   }
 
   on('task', {
-    'compare:screenshots' ({ a, b }) {
+    'compare:screenshots' ({ a, b, blackout = false }) {
       function isBlack (rgba) {
         return `${rgba.r}${rgba.g}${rgba.b}` === '000'
       }
@@ -28,7 +28,7 @@ module.exports = (on) => {
         Jimp.read(comparePath),
       ])
       .spread((originalImage, compareImage) => {
-        if (!isBlack(Jimp.intToRGBA(compareImage.getPixelColor(11, 11)))) {
+        if (blackout && !isBlack(Jimp.intToRGBA(compareImage.getPixelColor(11, 11)))) {
           throw new Error('Blackout not present!')
         }
 

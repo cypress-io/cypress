@@ -7,19 +7,20 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   screenshot app capture
     ✓ takes consistent app captures
     ✓ takes consistent fullpage captures
+    ✓ takes consistent element captures
 
 
-  2 passing
+  3 passing
 
 
   (Tests Finished)
 
-  - Tests:           2
-  - Passes:          2
+  - Tests:           3
+  - Passes:          3
   - Failures:        0
   - Pending:         0
   - Duration:        10 seconds
-  - Screenshots:     62
+  - Screenshots:     73
   - Video Recorded:  true
   - Cypress Version: 1.2.3
 
@@ -88,6 +89,17 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-original.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-compare.png (560x302)
 
 
   (Video)

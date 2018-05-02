@@ -1,13 +1,6 @@
-_        = require("lodash")
-fs       = require("fs-extra")
-path     = require("path")
-Promise  = require("bluebird")
-sizeOf   = require("image-size")
 Fixtures = require("../support/helpers/fixtures")
 e2e      = require("../support/helpers/e2e")
 
-fs      = Promise.promisifyAll(fs)
-sizeOf  = Promise.promisify(sizeOf)
 e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
@@ -32,6 +25,12 @@ onServer = (app) ->
     <div style="background: white; height: 200px;"></div>
     <div style="background: black; height: 200px;"></div>
     <div style="background: white; height: 100px;"></div>
+  """)
+
+  app.get "/element", sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div class="black-me-out" style="position: absolute; left: 10px; top: 10px;">Redacted</div>
+    <div class="capture-me" style="height: 300px; border: solid 1px black; margin: 20px;"></div>
   """)
 
 describe "e2e screenshot app capture", ->

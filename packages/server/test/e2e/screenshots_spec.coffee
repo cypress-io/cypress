@@ -27,14 +27,18 @@ onServer = (app) ->
 
   app.get "/fullpage", sendHtml("""
     <style>body { margin: 0; }</style>
-    <div style="background: red; height: 200px;"></div>
-    <div style="background: yellow; height: 200px;"></div>
-    <div style="background: blue; height: 100px;"></div>
+    <div style="background: white; height: 200px;"></div>
+    <div style="background: black; height: 200px;"></div>
+    <div style="background: white; height: 100px;"></div>
   """)
 
   app.get "/fullpage-same", sendHtml("""
     <style>body { margin: 0; }</style>
     <div style="height: 500px;"></div>
+  """)
+
+  app.get "/element", sendHtml("""
+    <div class="element" style="background: red; width: 400px; height: 300px; margin: 20px;"></div>
   """)
 
   app.get "/pathological", sendHtml("""

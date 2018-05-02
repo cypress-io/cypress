@@ -31,7 +31,6 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 200)
       .visit('http://localhost:3322/fullpage')
-      .pause()
       .screenshot("fullpage", { capture: "fullpage" })
       .task("check:screenshot:size", { name: 'fullpage.png', width: 600, height: 500 })
 
@@ -39,7 +38,6 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 200)
       .visit('http://localhost:3322/fullpage-same')
-      .pause()
       .screenshot("fullpage-same", { capture: "fullpage" })
       .task("check:screenshot:size", { name: 'fullpage-same.png', width: 600, height: 500 })
 
@@ -48,6 +46,14 @@ describe "taking screenshots", ->
       .viewport(1280, 720)
       .visit('http://localhost:3322/pathological')
       .screenshot("pathological")
+
+  it "can capture element screenshots", ->
+    cy
+      .viewport(600, 200)
+      .visit('http://localhost:3322/element')
+      .get(".element")
+      .screenshot("element")
+      .task("check:screenshot:size", { name: 'element.png', width: 400, height: 300 })
 
   context "before hooks", ->
     before ->

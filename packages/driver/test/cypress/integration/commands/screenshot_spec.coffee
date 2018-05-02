@@ -377,6 +377,70 @@ describe "src/cy/commands/screenshot", ->
         .then ->
           expect(scrollTo.getCall(3).args.join(",")).to.equal("0,100")
 
+      it "sends the right clip values", ->
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 0, y: 0, width: 600, height: 200 })
+          expect(take.args[1][1].clip).to.eql({ x: 0, y: 0, width: 600, height: 200 })
+          expect(take.args[2][1].clip).to.eql({ x: 0, y: 120, width: 600, height: 80 })
+
+    describe "element capture", ->
+      beforeEach ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+        cy.spy(Cypress, "action").log(false)
+        cy.viewport(600, 200)
+        cy.visit("/fixtures/screenshots.html")
+
+      it "takes a screenshot for each time it needs to scroll", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledTwice
+
+      it "sends number of current screenshot for each time it needs to scroll", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].current).to.equal(1)
+          expect(take.args[1][1].current).to.equal(2)
+
+      it "sends total number of screenshots for each time it needs to scroll", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].total).to.equal(2)
+          expect(take.args[1][1].total).to.equal(2)
+
+      it "scrolls the window to the right place for each screenshot", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.get(".tall-element").screenshot()
+        .then ->
+          expect(scrollTo.getCall(0).args.join(",")).to.equal("0,140")
+          expect(scrollTo.getCall(1).args.join(",")).to.equal("0,340")
+
+      it "scrolls the window back to the original place", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.get(".tall-element").screenshot()
+        .then ->
+          expect(scrollTo.getCall(2).args.join(",")).to.equal("0,100")
+
+      it "sends the right clip values for elements that need scrolling", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 20, y: 0, width: 560, height: 200 })
+          expect(take.args[1][1].clip).to.eql({ x: 20, y: 60, width: 560, height: 120 })
+
+      it "sends the right clip values for elements that don't need scrolling", ->
+        cy.get(".short-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
+
     describe "timeout", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
