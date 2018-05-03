@@ -45,19 +45,28 @@ hasHelperPixels = (image) ->
 
 captureAndCheck = (data, automate, condition) ->
   tries = 0
-  attempt = ->
+  do attempt = ->
     tries++
     log("capture and check attempt ##{tries}")
+
     automate(data)
     .then (dataUrl) ->
+      log("received screenshot data from automation layer")
+
+      ## to determine the true "devicePixelRatio"
+      ## take screenshot with dimensions from driver: 1000x660
+      ## after screenshot, we check width + height
+        ## divide that by driver dimensions === ratio
+        ## crop using that ratio
+
       buffer = dataUriToBuffer(dataUrl)
       Jimp.read(buffer).then (image) ->
+        log("read buffer to image")
+
         if tries >= 10 or condition(data, image)
           return { buffer, image }
         else
           attempt()
-
-  attempt()
 
 isAppOnly = (data) ->
   data.capture is "app" or data.capture is "fullpage"
@@ -75,7 +84,10 @@ crop = (image, dimensions) ->
   y = Math.min(dimensions.y, image.bitmap.height - 1)
   width = Math.min(dimensions.width, image.bitmap.width - x)
   height = Math.min(dimensions.height, image.bitmap.height - y)
-  log("crop: from #{image.bitmap.width} x #{image.bitmap.height}")
+  log("crop: from %d x %d",
+    image.bitmap.width,
+    image.bitmap.height
+  )
   log("        to #{width} x #{height} at (#{x}, #{y})")
 
   image.crop(x, y, width, height)
@@ -118,7 +130,9 @@ stitchScreenshots = ->
   _.each multipartImages, ({ data, image }) ->
     croppedImage = image.clone()
     crop(croppedImage, data.clip)
+
     log("stitch: add image at (0, #{heightMarker})")
+
     fullImage.composite(croppedImage, 0, heightMarker)
     heightMarker += croppedImage.bitmap.height
 
@@ -126,7 +140,9 @@ stitchScreenshots = ->
     { buffer, image: fullImage }
 
 module.exports = {
-  crop: crop
+  crop
+
+  clearMultipartState
 
   copy: (src, dest) ->
     fs
@@ -208,7 +224,5 @@ module.exports = {
         width:  dimensions.width
         height: dimensions.height
       }
-
-  clearMultipartState: clearMultipartState
 
 }

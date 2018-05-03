@@ -14,6 +14,7 @@ getViewportWidth = (state) ->
 
 adjustClipForPixelRatio = (win, clip) ->
   ratio = win.devicePixelRatio ? 1
+
   {
     x: clip.x * ratio
     y: clip.y * ratio
