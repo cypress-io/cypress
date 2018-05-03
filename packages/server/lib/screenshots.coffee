@@ -122,7 +122,8 @@ stitchScreenshots = ->
     fullImage.composite(croppedImage, 0, heightMarker)
     heightMarker += croppedImage.bitmap.height
 
-  getBufferWithType(fullImage)
+  getBufferWithType(fullImage).then (buffer) ->
+    { buffer, image: fullImage }
 
 module.exports = {
   crop: crop
@@ -161,13 +162,23 @@ module.exports = {
         if data.current is data.total
           return stitchScreenshots()
         else
-          return null
+          return {}
 
       if isAppOnly(data) or isMultipart(data)
         crop(image, data.clip)
-        return getBufferWithType(image)
+        return getBufferWithType(image).then (buffer) ->
+          { buffer, image }
 
-      return buffer
+      return { buffer, image }
+    .then ({ buffer, image }) ->
+      if not buffer
+        return null
+
+      if not data.userClip
+        return buffer
+
+      crop(image, data.userClip)
+      getBufferWithType(image)
 
   save: (data, buffer, screenshotsFolder) ->
     ## use the screenshots specific name or

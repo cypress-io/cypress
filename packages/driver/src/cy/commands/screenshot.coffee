@@ -176,6 +176,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
     blackout
     capture
+    clip
     disableTimersAndAnimations
     scaleAppCaptures
     waitForCommandSynchronization
@@ -224,6 +225,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       width: getViewportWidth(state)
       height: getViewportHeight(state)
     }
+    userClip: clip
   })
 
   before(capture)
@@ -266,7 +268,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: config("responseTimeout")
       }
 
-      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization")
+      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip")
       screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
 

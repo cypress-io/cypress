@@ -62,6 +62,12 @@ describe "src/cypress/screenshot", ->
       })
       expect(Screenshot.getConfig().screenshotOnRunFailure).to.equal(false)
 
+    it "sets clip if specified", ->
+      Screenshot.defaults({
+        clip: { width: 200, height: 100, x: 0, y: 0 }
+      })
+      expect(Screenshot.getConfig().clip).to.eql({ width: 200, height: 100, x: 0, y:0 })
+
     it "sets beforeScreenshot if specified", ->
       beforeScreenshot = cy.stub()
       Screenshot.defaults({ beforeScreenshot })
@@ -119,6 +125,26 @@ describe "src/cypress/screenshot", ->
         expect =>
           Screenshot.defaults({ blackout: [true] })
         .to.throw("Cypress.Screenshot.defaults() 'blackout' option must be an array of strings. You passed: true")
+
+      it "throws if clip is not an object", ->
+        expect =>
+          Screenshot.defaults({ clip: true })
+        .to.throw("Cypress.Screenshot.defaults() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: true")
+
+      it "throws if clip is lacking proper keys", ->
+        expect =>
+          Screenshot.defaults({ clip: { x: 5 } })
+        .to.throw("Cypress.Screenshot.defaults() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {x: 5}")
+
+      it "throws if clip has extraneous keys", ->
+        expect =>
+          Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
+        .to.throw("Cypress.Screenshot.defaults() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{5}")
+
+      it "throws if clip has non-number values", ->
+        expect =>
+          Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: "5" } })
+        .to.throw("Cypress.Screenshot.defaults() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{4}")
 
       it "throws if beforeScreenshot is not a function", ->
         expect =>

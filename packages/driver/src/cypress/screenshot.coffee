@@ -83,6 +83,19 @@ validate = (props, cmd, log) ->
 
     values.blackout = blackout
 
+  if clip = props.clip
+    if (
+      not _.isPlainObject(clip) or
+      _.some(clip, (value) -> not _.isNumber(value)) or
+      _.sortBy(_.keys(clip)).join(",") isnt "height,width,x,y"
+    )
+      $utils.throwErrByPath("screenshot.invalid_clip", {
+        log: log
+        args: { cmd: cmd, arg: $utils.stringify(clip) }
+      })
+
+    values.clip = clip
+
   validateAndSetCallback(props, values, cmd, log, "beforeScreenshot")
   validateAndSetCallback(props, values, cmd, log, "afterScreenshot")
 

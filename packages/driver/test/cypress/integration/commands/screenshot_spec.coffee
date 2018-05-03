@@ -139,7 +139,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip")).to.eql({
+        expect(_.omit(args, "clip", "userClip")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -170,7 +170,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip")).to.eql({
+        expect(_.omit(args, "clip", "userClip")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -250,6 +250,16 @@ describe "src/cy/commands/screenshot", ->
       .screenshot("foo")
       .then ->
         expect(Cypress.action.withArgs("cy:pause:timers")).not.to.be.called
+
+    it "sends clip as userClip if specified", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.spy(Cypress, "action").log(false)
+      clip = { width: 100, height: 100, x: 0, y: 0 }
+
+      cy
+      .screenshot({ clip })
+      .then ->
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].userClip).to.equal(clip)
 
     describe "before/after events", ->
       beforeEach ->
@@ -521,6 +531,22 @@ describe "src/cy/commands/screenshot", ->
       it "throws if blackout is not an array of strings", (done) ->
         @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: true", done)
         cy.screenshot({ blackout: [true] })
+
+      it "throws if clip is not an object", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: true", done)
+        cy.screenshot({ clip: true })
+
+      it "throws if clip is lacking proper keys", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {x: 5}", done)
+        cy.screenshot({ clip: { x: 5 } })
+
+      it "throws if clip has extraneous keys", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{5}", done)
+        cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
+
+      it "throws if clip has non-number values", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{4}", done)
+        cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: "5" } })
 
       it "logs once on error", (done) ->
         error = new Error("some error")

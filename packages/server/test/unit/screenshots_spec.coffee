@@ -90,6 +90,21 @@ describe "lib/screenshots", ->
       screenshots.capture(@appData, @automate).then (buffer) =>
         expect(buffer).to.equal(@buffer)
 
+    describe "userClip", ->
+      it "crops final image if userClip specified", ->
+        @appData.userClip = { width: 5, height: 5, x: 2, y: 2 }
+        @getPixelColor.withArgs(0, 0).returns("white")
+        screenshots.capture(@appData, @automate).then =>
+          expect(@jimpImage.crop).to.be.calledWith(2, 2, 5, 5)
+
+      it "does not crop intermediary multi-part images", ->
+        @appData.userClip = { width: 5, height: 5, x: 2, y: 2 }
+        @appData.current = 1
+        @appData.total = 3
+        @getPixelColor.withArgs(0, 0).returns("white")
+        screenshots.capture(@appData, @automate).then =>
+          expect(@jimpImage.crop).not.to.be.called
+
     describe "multi-part capture (fullpage or element)", ->
       beforeEach ->
         screenshots.clearMultipartState()
@@ -221,7 +236,7 @@ describe "lib/screenshots", ->
 
       screenshots.copy("foo", "bar")
 
-describe "lib/automation/screenshots", ->
+describe "lib/automation/screenshot", ->
   beforeEach ->
     @buffer = {}
     @image = {}
