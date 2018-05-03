@@ -62,8 +62,23 @@ throwIfNoProjectId = (projectId) ->
 getSpecPath = (spec) ->
   _.get(spec, "path")
 
+updateInstanceStdout = (options = {}) ->
+  { instanceId, captured } = options
+
+  stdout = captured.toString()
+
+  api.updateInstanceStdout({
+    stdout
+    instanceId
+  })
+  .catch (err) ->
+    errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+    ## dont log exceptions if we have a 503 status code
+    logException(err) unless err.statusCode is 503
+
 updateInstance = (options = {}) ->
-  { instanceId, results, stdout } = options
+  { instanceId, results, captured } = options
 
   { stats, tests, hooks, video, screenshots, reporterStats, error } = results
 
@@ -72,6 +87,8 @@ updateInstance = (options = {}) ->
 
   ## set to null if not defined
   error ?= null
+
+  stdout = captured.toString()
 
   ## get rid of the path property
   screenshots = _.map screenshots, (screenshot) ->
@@ -109,28 +126,31 @@ updateInstance = (options = {}) ->
       null
 
 createRun = (options = {}) ->
-  { projectId, recordKey, platform, git, specs } = options
+  { projectId, recordKey, platform, git, specPattern, specs } = options
 
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
     errors.throw("RECORD_KEY_MISSING")
 
+  ## go back to being a string
+  if specPattern
+    specPattern = specPattern.join(",")
+
   specs = _.map(specs, getSpecPath)
 
   api.createRun({
+    specPattern
     specs
     projectId
     recordKey
     platform
     ci: {
-      url: null ## TODO: remove this upon schema update
       params: ciProvider.params()
       provider: ciProvider.name()
       buildNumber: ciProvider.buildNum()
     }
     commit: {
-      url: null ## TODO: remove this upon schema update
       sha: git.sha
       branch: git.branch
       authorName: git.author
@@ -180,7 +200,7 @@ createInstance = (options = {}) ->
       null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { specs, browser, projectId, projectPath, runAllSpecs } = options
+  { captured, specPattern, specs, browser, projectId, projectPath, runAllSpecs } = options
 
   recordKey = options.key
 
@@ -191,7 +211,9 @@ createRunAndRecordSpecs = (options = {}) ->
   ])
   .spread (sys, git, browser) ->
     platform = {
+      osCpus: sys.osCpus
       osName: sys.osName
+      osMemory: sys.osMemory
       osVersion: sys.osVersion
       browserName: browser.displayName
       browserVersion: browser.version
@@ -203,6 +225,7 @@ createRunAndRecordSpecs = (options = {}) ->
       platform
       recordKey
       projectId
+      specPattern
     })
     .then (resp) ->
       if not resp
@@ -217,13 +240,13 @@ createRunAndRecordSpecs = (options = {}) ->
             spec
             runId
             planId
-            machineId
             platform
+            machineId
           })
           .then (id) ->
             instanceId = id
 
-        afterSpecRun = (spec, results) ->
+        afterSpecRun = (results) ->
           ## dont do anything if we failed to
           ## create to instance
           return if not instanceId
@@ -238,10 +261,17 @@ createRunAndRecordSpecs = (options = {}) ->
           console.log("")
 
           updateInstance({
-            spec
             results
+            captured
             instanceId
           })
+          .then (ret) ->
+            return if not ret
+
+            updateInstanceStdout({
+              captured
+              instanceId
+            })
 
         runAllSpecs(beforeSpecRun, afterSpecRun)
 
@@ -251,6 +281,8 @@ module.exports = {
   createInstance
 
   updateInstance
+
+  updateInstanceStdout
 
   warnIfCiFlag
 
@@ -289,7 +321,7 @@ module.exports = {
 
     if screenshotUrls
       screenshotUrls.forEach (obj) ->
-        screenshot = _.find(screenshots, { testId: obj.testId })
+        screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
 
         send(screenshot.path, obj.uploadUrl)
 
@@ -302,17 +334,6 @@ module.exports = {
       errors.warning("DASHBOARD_CANNOT_UPLOAD_RESULTS", err)
 
       logException(err)
-
-  uploadStdout: (instanceId, stdout) ->
-    api.updateInstanceStdout({
-      instanceId:   instanceId
-      stdout:       stdout
-    })
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
-
-      ## dont log exceptions if we have a 503 status code
-      logException(err) unless err.statusCode is 503
 
   run: (options) ->
     { projectPath, browser } = options

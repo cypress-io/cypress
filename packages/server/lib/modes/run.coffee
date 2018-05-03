@@ -39,6 +39,8 @@ collectTestResults = (obj = {}) ->
   }
 
 allDone = ->
+  stdout.restore()
+
   console.log("")
   console.log("")
 
@@ -425,11 +427,9 @@ module.exports = {
     ## because we have a full array of tests
     ## no need for testTitle
     {
-      # clientId:  uuid.v4()
-      title:      data.name ## TODO: rename this property
-      # name:      data.name
+      screenshotId:  random.id()
+      name:      data.name ? null
       testId:    data.testId
-      # testTitle: data.titles
       takenAt:   resp.takenAt
       path:      resp.path
       height:    resp.height
@@ -468,7 +468,7 @@ module.exports = {
       .get("results")
       .tap (results) ->
         if afterSpecRun
-          afterSpecRun(spec, results)
+          afterSpecRun(results)
 
     Promise.map(specs, runEachSpec, { concurrency: 1 })
     .then (runs = []) ->
@@ -583,7 +583,10 @@ module.exports = {
 
     socketId = random.id()
 
-    { projectPath, record, key, spec, browser } = options
+    { projectPath, record, key, browser } = options
+
+    ## alias
+    specPattern = options.spec
 
     if record
       captured = stdout.capture()
@@ -601,11 +604,11 @@ module.exports = {
       if record
         recordMode.throwIfNoProjectId(projectId)
 
-      @findSpecs(config, spec)
+      @findSpecs(config, specPattern)
       .then (specs = []) =>
         runAllSpecs = (beforeSpecRun, afterSpecRun) =>
           if not specs.length
-            errors.throw('NO_SPECS_FOUND', config.integrationFolder, spec)
+            errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
           @trashAssets(config)
           .then =>
@@ -637,9 +640,11 @@ module.exports = {
             key
             specs
             browser
+            captured
             projectId
             projectPath
             projectName
+            specPattern
             runAllSpecs
           })
         else

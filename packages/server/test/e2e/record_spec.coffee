@@ -22,17 +22,13 @@ routes = [
     req: "putInstanceRequest@1.0.0",
     res: "putInstanceResponse@1.0.0"
   }
+  , {
+    method: "put"
+    url: "/instances/:id/stdout"
+    req: "putInstanceStdoutRequest@1.0.0",
+    res: (res) -> res.sendStatus(200)
+  }
 ]
-
-applyHacksToBody = (body) ->
-  if tests = body.tests
-    _.each tests, (test) ->
-      test.instanceId = "f858a2bc-b469-4e48-be67-0876339ee7e1"
-      test.failedFromHookId = "h1"
-
-  if screenshots = body.screenshots
-    _.each screenshots, (screenshot) ->
-      screenshot.testTitle = []
 
 getSchemaErr = (err, schema) ->
   {
@@ -50,20 +46,21 @@ getResponse = (responseSchema) ->
 
   jsonSchemas.getExample(name)(version)
 
+sendResponse = (res, responseSchema) ->
+  if _.isFunction(responseSchema)
+    return responseSchema(res)
+
+  res.json(getResponse(responseSchema))
+
 ensureSchema = (requestSchema, responseSchema) ->
   [ name, version ] = requestSchema.split("@")
 
   return (req, res) ->
     { body } = req
 
-    ## TODO: these are the hacks
-    ## to get the schema to pass
-    ## remove this once its fixed
-    applyHacksToBody(body)
-
     try
       jsonSchemas.assertSchema(name, version)(body)
-      res.json(getResponse(responseSchema))
+      sendResponse(res, responseSchema)
 
       key = [req.method, req.url].join(" ")
 
@@ -119,11 +116,11 @@ describe "e2e record", ->
       firstInstance = requests[1]
 
       expect(firstInstance.body.spec).to.eq(
-        "cypress/integration/record_pass_spec.coffee"
+        "cypress/integration/record_fail_spec.coffee"
       )
 
-      secondInstance = requests[1]
+      secondInstance = requests[4]
 
       expect(secondInstance.body.spec).to.eq(
-        "cypress/integration/record_fail_spec.coffee"
+        "cypress/integration/record_pass_spec.coffee"
       )

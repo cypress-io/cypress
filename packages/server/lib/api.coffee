@@ -109,6 +109,7 @@ module.exports = {
       "specs",
       "commit"
       "platform"
+      "specPattern"
     ])
 
     rp.post({
