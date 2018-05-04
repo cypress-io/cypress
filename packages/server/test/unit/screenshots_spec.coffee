@@ -2,8 +2,6 @@ require("../spec_helper")
 
 _           = require("lodash")
 path        = require("path")
-dataUriToBuffer = require("data-uri-to-buffer")
-Buffer      = require("buffer").Buffer
 Jimp        = require("jimp")
 Fixtures    = require("../support/helpers/fixtures")
 config      = require("#{root}lib/config")
@@ -89,17 +87,17 @@ describe "lib/screenshots", ->
       screenshots.capture(@appData, @automate).then =>
         expect(@automate.callCount).to.equal(10)
 
-    it "resolves buffer", ->
-      @passPixelTest()
-      screenshots.capture(@appData, @automate).then (buffer) =>
-        expect(buffer).to.equal(@buffer)
-
     it "adjusts cropping based on pixel ratio", ->
       @appData.viewport = { width: 20, height: 20 }
       @appData.clip = { x: 5, y: 5, width: 10, height: 10 }
       @passPixelTest()
       screenshots.capture(@appData, @automate).then =>
         expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
+
+    it "resolves image", ->
+      @passPixelTest()
+      screenshots.capture(@appData, @automate).then (image) =>
+        expect(image).to.equal(@jimpImage)
 
     describe "userClip", ->
       it "crops final image if userClip specified", ->
@@ -150,17 +148,17 @@ describe "lib/screenshots", ->
         .then =>
           expect(@automate.callCount).to.equal(4)
 
-      it "resolves no buffer on non-last captures", ->
-        screenshots.capture(@appData, @automate).then (buffer) ->
-          expect(buffer).to.be.null
+      it "resolves no image on non-last captures", ->
+        screenshots.capture(@appData, @automate).then (image) ->
+          expect(image).to.be.undefined
 
-      it "resolves buffer on last capture", ->
+      it "resolves image on last capture", ->
         screenshots.capture(@appData, @automate)
         .then =>
           @appData.current = 3
           screenshots.capture(@appData, @automate)
-        .then (buffer) =>
-          expect(buffer).to.equal(@buffer)
+        .then (image) =>
+          expect(image).to.be.an.instanceOf(Jimp)
 
       it "composites images into one image", ->
         screenshots.capture(@appData, @automate)
@@ -233,15 +231,15 @@ describe "lib/screenshots", ->
 
   context ".save", ->
     it "outputs file and returns size and path", ->
-      screenshots.save({name: "foo/tweet"}, dataUriToBuffer(image), @config.screenshotsFolder)
+      screenshots.save({name: "foo/tweet"}, @jimpImage, @config.screenshotsFolder)
       .then (obj) =>
         expectedPath = path.normalize(@config.screenshotsFolder + "/footweet.png")
         actualPath = path.normalize(obj.path)
 
-        expect(obj.size).to.eq("279 B")
+        expect(obj.size).to.eq("15 B")
         expect(actualPath).to.eq(expectedPath)
-        expect(obj.width).to.eq(10)
-        expect(obj.height).to.eq(10)
+        expect(obj.width).to.eq(40)
+        expect(obj.height).to.eq(40)
 
         fs.statAsync(expectedPath)
 
@@ -256,9 +254,8 @@ describe "lib/screenshots", ->
 
 describe "lib/automation/screenshot", ->
   beforeEach ->
-    @buffer = {}
     @image = {}
-    @sandbox.stub(screenshots, "capture").resolves(@buffer)
+    @sandbox.stub(screenshots, "capture").resolves(@image)
     @sandbox.stub(screenshots, "save")
 
     @screenshot = screenshotAutomation("cypress/screenshots")
@@ -272,7 +269,7 @@ describe "lib/automation/screenshot", ->
   it "saves screenshot if there's a buffer", ->
     data = {}
     @screenshot.capture(data, @automate).then =>
-      expect(screenshots.save).to.be.calledWith(data, @buffer, "cypress/screenshots")
+      expect(screenshots.save).to.be.calledWith(data, @image, "cypress/screenshots")
 
   it "does not save screenshot if there's no buffer", ->
     screenshots.capture.resolves(null)

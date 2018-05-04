@@ -7,9 +7,9 @@ module.exports = (screenshotsFolder) ->
       log("capture %o", data)
 
       screenshots.capture(data, automate)
-      .then (buffer) ->
-        if buffer
-          screenshots.save(data, buffer, screenshotsFolder)
+      .then (image) ->
+        if image
+          screenshots.save(data, image, screenshotsFolder)
       .catch (err) ->
         screenshots.clearMultipartState()
         throw err

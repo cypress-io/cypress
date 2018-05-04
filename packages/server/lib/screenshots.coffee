@@ -2,11 +2,10 @@ _               = require("lodash")
 mime            = require("mime")
 path            = require("path")
 bytes           = require("bytes")
-sizeOf          = require("image-size")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
 Jimp            = require("jimp")
-log             = require("debug")("cypress:server:screenshot")
+debug           = require("debug")("cypress:server:screenshot")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
 
@@ -47,31 +46,26 @@ captureAndCheck = (data, automate, condition) ->
   tries = 0
   do attempt = ->
     tries++
-    log("capture and check attempt ##{tries}")
+    debug("capture and check attempt ##{tries}")
 
     automate(data)
     .then (dataUrl) ->
-      log("received screenshot data from automation layer")
+      debug("received screenshot data from automation layer")
 
-      buffer = dataUriToBuffer(dataUrl)
-      Jimp.read(buffer).then (image) ->
-        log("read buffer to image")
+      Jimp.read(dataUriToBuffer(dataUrl))
+    .then (image) ->
+      debug("read buffer to image #{image.bitmap.width} x #{image.bitmap.height}")
 
-        if tries >= 10 or condition(data, image)
-          return { buffer, image }
-        else
-          attempt()
+      if tries >= 10 or condition(data, image)
+        return image
+      else
+        attempt()
 
 isAppOnly = (data) ->
   data.capture is "app" or data.capture is "fullpage"
 
 isMultipart = (data) ->
   _.isNumber(data.current) and _.isNumber(data.total)
-
-getBufferWithType = (image) ->
-  image.getBuffer(Jimp.AUTO).then (buffer) ->
-    buffer.type = image.getMIME()
-    buffer
 
 crop = (image, dimensions, pixelRatio = 1) ->
   dimensions = _.transform dimensions, (result, value, dimension) ->
@@ -81,8 +75,8 @@ crop = (image, dimensions, pixelRatio = 1) ->
   y = Math.min(dimensions.y, image.bitmap.height - 1)
   width = Math.min(dimensions.width, image.bitmap.width - x)
   height = Math.min(dimensions.height, image.bitmap.height - y)
-  log("crop: from #{image.bitmap.width} x #{image.bitmap.height}")
-  log("        to #{width} x #{height} at (#{x}, #{y})")
+  debug("crop: from #{image.bitmap.width} x #{image.bitmap.height}")
+  debug("        to #{width} x #{height} at (#{x}, #{y})")
 
   image.crop(x, y, width, height)
 
@@ -104,7 +98,7 @@ compareLast = (data, image) ->
   previous = _.last(multipartImages)
   if not previous
     return true
-  log("compare", previous.image.hash(), "vs", image.hash())
+  debug("compare", previous.image.hash(), "vs", image.hash())
   return previous.image.hash() isnt image.hash()
 
 multipartCondition = (data, image) ->
@@ -117,7 +111,7 @@ stitchScreenshots = (pixelRatio) ->
   width = Math.min(_.map(multipartImages, "data.clip.width")...)
   height = _.sumBy(multipartImages, "data.clip.height")
 
-  log("stitch #{multipartImages.length} images together")
+  debug("stitch #{multipartImages.length} images together")
 
   fullImage = new Jimp(width, height)
   heightMarker = 0
@@ -125,13 +119,12 @@ stitchScreenshots = (pixelRatio) ->
     croppedImage = image.clone()
     crop(croppedImage, data.clip, pixelRatio)
 
-    log("stitch: add image at (0, #{heightMarker})")
+    debug("stitch: add image at (0, #{heightMarker})")
 
     fullImage.composite(croppedImage, 0, heightMarker)
     heightMarker += croppedImage.bitmap.height
 
-  getBufferWithType(fullImage).then (buffer) ->
-    { buffer, image: fullImage, pixelRatio }
+  return { image: fullImage, pixelRatio }
 
 module.exports = {
   crop
@@ -154,11 +147,12 @@ module.exports = {
     condition = if isMultipart(data) then multipartCondition else pixelCondition
 
     captureAndCheck(data, automate, condition)
-    .then ({ buffer, image }) ->
+    .then (image) ->
       pixelRatio = image.bitmap.width / data.viewport.width
+      debug("pixel ratio is", pixelRatio)
 
       if isMultipart(data)
-        log("multi-part #{data.current}/#{data.total}")
+        debug("multi-part #{data.current}/#{data.total}")
 
       if isMultipart(data) and data.total > 1
         ## keep previous screenshot partials around b/c if two screenshots are
@@ -178,47 +172,36 @@ module.exports = {
 
       if isAppOnly(data) or isMultipart(data)
         crop(image, data.clip, pixelRatio)
-        return getBufferWithType(image).then (buffer) ->
-          { buffer, image, pixelRatio }
 
-      return { buffer, image, pixelRatio }
-    .then ({ buffer, image, pixelRatio }) ->
-      if not buffer
-        return null
+      return { image, pixelRatio }
+    .then ({ image, pixelRatio }) ->
+      if image and data.userClip
+        crop(image, data.userClip, pixelRatio)
 
-      if not data.userClip
-        return buffer
+      return image
 
-      crop(image, data.userClip, pixelRatio)
-      getBufferWithType(image)
+  save: (data, image, screenshotsFolder) ->
+    type = image.getMIME()
 
-  save: (data, buffer, screenshotsFolder) ->
-    ## use the screenshots specific name or
-    ## simply make its name the result of the titles
     name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
-
-    ## strip out any invalid characters out of the name
     name = name.replace(invalidCharsRe, "")
-
-    ## join name + extension with '.'
-    name = [name, mime.extension(buffer.type)].join(".")
+    name = [name, mime.extension(type)].join(".")
 
     pathToScreenshot = path.join(screenshotsFolder, name)
 
-    log("save", pathToScreenshot)
+    debug("save", pathToScreenshot)
 
-    fs.outputFileAsync(pathToScreenshot, buffer)
+    image.getBuffer(Jimp.AUTO)
+    .then (buffer) ->
+      fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->
-      fs.statAsync(pathToScreenshot)
-      .get("size")
+      fs.statAsync(pathToScreenshot).get("size")
     .then (size) ->
-      dimensions = sizeOf(buffer)
-
       {
         size:   bytes(size, {unitSeparator: " "})
         path:   pathToScreenshot
-        width:  dimensions.width
-        height: dimensions.height
+        width:  image.bitmap.width
+        height: image.bitmap.height
       }
 
 }
