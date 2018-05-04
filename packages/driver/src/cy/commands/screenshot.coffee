@@ -264,6 +264,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not $dom.isElement(subject)
         subject = null
 
+      withinSubject = state("withinSubject")
+      if withinSubject and $dom.isElement(withinSubject)
+        subject = withinSubject
+
       ## TODO: handle hook titles
       runnable = state("runnable")
 

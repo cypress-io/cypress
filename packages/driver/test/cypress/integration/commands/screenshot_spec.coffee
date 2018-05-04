@@ -261,7 +261,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation.withArgs("take:screenshot").args[0][1].userClip).to.equal(clip)
 
-    it "send viewport dimensions of main browser window", ->
+    it "sends viewport dimensions of main browser window", ->
       Cypress.automation.withArgs("take:screenshot").resolves({})
       cy.spy(Cypress, "action").log(false)
 
@@ -459,6 +459,13 @@ describe "src/cy/commands/screenshot", ->
 
       it "sends the right clip values for elements that don't need scrolling", ->
         cy.get(".short-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
+
+      it "works with cy.within()", ->
+        cy.get(".short-element").within ->
+          cy.screenshot()
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
