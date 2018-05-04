@@ -3,7 +3,7 @@ _ = require("lodash")
 $utils = require("./utils")
 
 reset = -> {
-  capture: "app"
+  capture: "fullpage"
   waitForCommandSynchronization: true
   scaleAppCaptures: false
   disableTimersAndAnimations: true

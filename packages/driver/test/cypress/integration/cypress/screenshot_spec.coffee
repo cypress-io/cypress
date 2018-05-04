@@ -1,7 +1,7 @@
 { Screenshot, $ } = Cypress
 
 DEFAULTS = {
-  capture: "app"
+  capture: "fullpage"
   waitForCommandSynchronization: true
   scaleAppCaptures: false
   disableTimersAndAnimations: true

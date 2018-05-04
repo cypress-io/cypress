@@ -24,7 +24,7 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 400)
       .visit('http://localhost:3322/color/yellow')
-      .screenshot("crop-check")
+      .screenshot("crop-check", { capture: "app" })
       .task("check:screenshot:size", { name: 'crop-check.png', width: 600, height: 400 })
 
   it "can capture fullpage screenshots", ->
@@ -45,7 +45,7 @@ describe "taking screenshots", ->
     cy
       .viewport(1280, 720)
       .visit('http://localhost:3322/pathological')
-      .screenshot("pathological")
+      .screenshot("pathological", { capture: "app" })
 
   it "can capture element screenshots", ->
     cy

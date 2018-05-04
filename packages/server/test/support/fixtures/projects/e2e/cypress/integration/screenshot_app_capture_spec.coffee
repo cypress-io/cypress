@@ -1,5 +1,5 @@
 it "takes consistent app captures", ->
-  options = { blackout: [".black-me-out"] }
+  options = { capture: "app", blackout: [".black-me-out"] }
 
   cy
     .visit('http://localhost:3322/app')

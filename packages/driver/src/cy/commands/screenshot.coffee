@@ -234,10 +234,10 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
 
   before(capture)
   .then ->
-    if capture is "fullpage"
-      takeFullPageScreenshot(state, automationOptions)
-    else if subject
+    if subject
       takeElementScreenshot(subject, state, automationOptions)
+    else if capture is "fullpage"
+      takeFullPageScreenshot(state, automationOptions)
     else
       automateScreenshot(automationOptions)
   .finally ->
