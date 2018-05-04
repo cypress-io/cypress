@@ -22,14 +22,15 @@ describe "lib/screenshots", ->
     @appData = {
       capture: "app"
       clip: { x: 0, y: 0, width: 10, height: 10 }
+      viewport: { width: 40, height: 40 }
     }
 
     @buffer = {}
 
     @jimpImage = {
       bitmap: {
-        width: 20
-        height: 20
+        width: 40
+        height: 40
       }
       crop: @sandbox.stub()
       getBuffer: @sandbox.stub().resolves(@buffer)
@@ -52,9 +53,9 @@ describe "lib/screenshots", ->
       @getPixelColor.withArgs(0, 0).returns("black")
       @getPixelColor.withArgs(1, 0).returns("white")
       @getPixelColor.withArgs(0, 1).returns("white")
-      @getPixelColor.withArgs(20, 0).returns("white")
-      @getPixelColor.withArgs(0, 20).returns("white")
-      @getPixelColor.withArgs(20, 20).returns("black")
+      @getPixelColor.withArgs(40, 0).returns("white")
+      @getPixelColor.withArgs(0, 40).returns("white")
+      @getPixelColor.withArgs(40, 40).returns("black")
       @jimpImage.getPixelColor = @getPixelColor
 
       @sandbox.stub(Jimp, "read").resolves(@jimpImage)
@@ -64,8 +65,11 @@ describe "lib/screenshots", ->
 
       @automate = @sandbox.stub().resolves(image)
 
+      @passPixelTest = =>
+        @getPixelColor.withArgs(0, 0).returns("white")
+
     it "captures screenshot with automation", ->
-      data = {}
+      data = { viewport: {} }
       screenshots.capture(data, @automate).then =>
         expect(@automate).to.be.calledOnce
         expect(@automate).to.be.calledWith(data)
@@ -76,9 +80,9 @@ describe "lib/screenshots", ->
         expect(@automate).to.be.calledTwice
 
     it "retries until helper pixels are present for runner capture", ->
-      @getPixelColor.withArgs(0, 0).returns("white")
+      @passPixelTest()
       @getPixelColor.withArgs(0, 0).onCall(1).returns("black")
-      screenshots.capture({}, @automate).then =>
+      screenshots.capture({ viewport: {} }, @automate).then =>
         expect(@automate).to.be.calledTwice
 
     it "gives up after 10 tries", ->
@@ -86,14 +90,21 @@ describe "lib/screenshots", ->
         expect(@automate.callCount).to.equal(10)
 
     it "resolves buffer", ->
-      @getPixelColor.withArgs(0, 0).returns("white")
+      @passPixelTest()
       screenshots.capture(@appData, @automate).then (buffer) =>
         expect(buffer).to.equal(@buffer)
+
+    it "adjusts cropping based on pixel ratio", ->
+      @appData.viewport = { width: 20, height: 20 }
+      @appData.clip = { x: 5, y: 5, width: 10, height: 10 }
+      @passPixelTest()
+      screenshots.capture(@appData, @automate).then =>
+        expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
     describe "userClip", ->
       it "crops final image if userClip specified", ->
         @appData.userClip = { width: 5, height: 5, x: 2, y: 2 }
-        @getPixelColor.withArgs(0, 0).returns("white")
+        @passPixelTest()
         screenshots.capture(@appData, @automate).then =>
           expect(@jimpImage.crop).to.be.calledWith(2, 2, 5, 5)
 
@@ -101,9 +112,16 @@ describe "lib/screenshots", ->
         @appData.userClip = { width: 5, height: 5, x: 2, y: 2 }
         @appData.current = 1
         @appData.total = 3
-        @getPixelColor.withArgs(0, 0).returns("white")
+        @passPixelTest()
         screenshots.capture(@appData, @automate).then =>
           expect(@jimpImage.crop).not.to.be.called
+
+      it "adjusts cropping based on pixel ratio", ->
+        @appData.viewport = { width: 20, height: 20 }
+        @appData.userClip = { x: 5, y: 5, width: 10, height: 10 }
+        @passPixelTest()
+        screenshots.capture(@appData, @automate).then =>
+          expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
     describe "multi-part capture (fullpage or element)", ->
       beforeEach ->
@@ -159,9 +177,9 @@ describe "lib/screenshots", ->
           expect(composite.getCall(0).args[1]).to.equal(0)
           expect(composite.getCall(0).args[2]).to.equal(0)
           expect(composite.getCall(1).args[0]).to.equal(@jimpImage)
-          expect(composite.getCall(1).args[2]).to.equal(20)
+          expect(composite.getCall(1).args[2]).to.equal(40)
           expect(composite.getCall(2).args[0]).to.equal(@jimpImage)
-          expect(composite.getCall(2).args[2]).to.equal(40)
+          expect(composite.getCall(2).args[2]).to.equal(80)
 
       it "clears previous full page state once complete", ->
         @appData.total = 2
@@ -198,20 +216,20 @@ describe "lib/screenshots", ->
       expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
 
     it "crops to one less than width if dimensions x is more than the image width", ->
-      screenshots.crop(@jimpImage, @dimensions({ x: 30 }))
-      expect(@jimpImage.crop).to.be.calledWith(19, 0, 1, 10)
+      screenshots.crop(@jimpImage, @dimensions({ x: 50 }))
+      expect(@jimpImage.crop).to.be.calledWith(39, 0, 1, 10)
 
     it "crops to one less than height if dimensions y is more than the image height", ->
-      screenshots.crop(@jimpImage, @dimensions({ y: 30 }))
-      expect(@jimpImage.crop).to.be.calledWith(0, 19, 10, 1)
+      screenshots.crop(@jimpImage, @dimensions({ y: 50 }))
+      expect(@jimpImage.crop).to.be.calledWith(0, 39, 10, 1)
 
     it "crops only width if dimensions height is more than the image height", ->
-      screenshots.crop(@jimpImage, @dimensions({ height: 30 }))
-      expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 20)
+      screenshots.crop(@jimpImage, @dimensions({ height: 50 }))
+      expect(@jimpImage.crop).to.be.calledWith(0, 0, 10, 40)
 
     it "crops only height if dimensions width is more than the image width", ->
-      screenshots.crop(@jimpImage, @dimensions({ width: 30 }))
-      expect(@jimpImage.crop).to.be.calledWith(0, 0, 20, 10)
+      screenshots.crop(@jimpImage, @dimensions({ width: 50 }))
+      expect(@jimpImage.crop).to.be.calledWith(0, 0, 40, 10)
 
   context ".save", ->
     it "outputs file and returns size and path", ->

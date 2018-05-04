@@ -53,12 +53,6 @@ captureAndCheck = (data, automate, condition) ->
     .then (dataUrl) ->
       log("received screenshot data from automation layer")
 
-      ## to determine the true "devicePixelRatio"
-      ## take screenshot with dimensions from driver: 1000x660
-      ## after screenshot, we check width + height
-        ## divide that by driver dimensions === ratio
-        ## crop using that ratio
-
       buffer = dataUriToBuffer(dataUrl)
       Jimp.read(buffer).then (image) ->
         log("read buffer to image")
@@ -79,15 +73,15 @@ getBufferWithType = (image) ->
     buffer.type = image.getMIME()
     buffer
 
-crop = (image, dimensions) ->
+crop = (image, dimensions, pixelRatio = 1) ->
+  dimensions = _.transform dimensions, (result, value, dimension) ->
+    result[dimension] = value * pixelRatio
+
   x = Math.min(dimensions.x, image.bitmap.width - 1)
   y = Math.min(dimensions.y, image.bitmap.height - 1)
   width = Math.min(dimensions.width, image.bitmap.width - x)
   height = Math.min(dimensions.height, image.bitmap.height - y)
-  log("crop: from %d x %d",
-    image.bitmap.width,
-    image.bitmap.height
-  )
+  log("crop: from #{image.bitmap.width} x #{image.bitmap.height}")
   log("        to #{width} x #{height} at (#{x}, #{y})")
 
   image.crop(x, y, width, height)
@@ -119,7 +113,7 @@ multipartCondition = (data, image) ->
   else
     compareLast(data, image)
 
-stitchScreenshots = ->
+stitchScreenshots = (pixelRatio) ->
   width = Math.min(_.map(multipartImages, "data.clip.width")...)
   height = _.sumBy(multipartImages, "data.clip.height")
 
@@ -129,7 +123,7 @@ stitchScreenshots = ->
   heightMarker = 0
   _.each multipartImages, ({ data, image }) ->
     croppedImage = image.clone()
-    crop(croppedImage, data.clip)
+    crop(croppedImage, data.clip, pixelRatio)
 
     log("stitch: add image at (0, #{heightMarker})")
 
@@ -137,7 +131,7 @@ stitchScreenshots = ->
     heightMarker += croppedImage.bitmap.height
 
   getBufferWithType(fullImage).then (buffer) ->
-    { buffer, image: fullImage }
+    { buffer, image: fullImage, pixelRatio }
 
 module.exports = {
   crop
@@ -161,6 +155,8 @@ module.exports = {
 
     captureAndCheck(data, automate, condition)
     .then ({ buffer, image }) ->
+      pixelRatio = image.bitmap.width / data.viewport.width
+
       if isMultipart(data)
         log("multi-part #{data.current}/#{data.total}")
 
@@ -176,24 +172,24 @@ module.exports = {
         multipartImages.push({ data, image })
 
         if data.current is data.total
-          return stitchScreenshots()
+          return stitchScreenshots(pixelRatio)
         else
           return {}
 
       if isAppOnly(data) or isMultipart(data)
-        crop(image, data.clip)
+        crop(image, data.clip, pixelRatio)
         return getBufferWithType(image).then (buffer) ->
-          { buffer, image }
+          { buffer, image, pixelRatio }
 
-      return { buffer, image }
-    .then ({ buffer, image }) ->
+      return { buffer, image, pixelRatio }
+    .then ({ buffer, image, pixelRatio }) ->
       if not buffer
         return null
 
       if not data.userClip
         return buffer
 
-      crop(image, data.userClip)
+      crop(image, data.userClip, pixelRatio)
       getBufferWithType(image)
 
   save: (data, buffer, screenshotsFolder) ->

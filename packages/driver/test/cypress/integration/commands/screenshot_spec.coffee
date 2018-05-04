@@ -139,7 +139,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip", "userClip")).to.eql({
+        expect(_.omit(args, "clip", "userClip", "viewport")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -170,7 +170,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip", "userClip")).to.eql({
+        expect(_.omit(args, "clip", "userClip", "viewport")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -260,6 +260,18 @@ describe "src/cy/commands/screenshot", ->
       .screenshot({ clip })
       .then ->
         expect(Cypress.automation.withArgs("take:screenshot").args[0][1].userClip).to.equal(clip)
+
+    it "send viewport dimensions of main browser window", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.spy(Cypress, "action").log(false)
+
+      cy
+      .screenshot()
+      .then ->
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].viewport).to.eql({
+          width: $(window.parent).width()
+          height: $(window.parent).height()
+        })
 
     describe "before/after events", ->
       beforeEach ->

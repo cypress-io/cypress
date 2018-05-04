@@ -12,17 +12,7 @@ getViewportHeight = (state) ->
 getViewportWidth = (state) ->
   Math.min(state("viewportWidth"), $(window).width())
 
-adjustClipForPixelRatio = (win, clip) ->
-  ratio = win.devicePixelRatio ? 1
-
-  {
-    x: clip.x * ratio
-    y: clip.y * ratio
-    width: clip.width * ratio
-    height: clip.height * ratio
-  }
-
-automateScreenshot = (win, options = {}) ->
+automateScreenshot = (options = {}) ->
   { runnable, timeout } = options
 
   titles = []
@@ -48,9 +38,6 @@ automateScreenshot = (win, options = {}) ->
     titles: titles
     testId: runnable.id
   }, _.omit(options, "runnable", "timeout", "log", "subject"))
-
-  if props.clip
-    props.clip = adjustClipForPixelRatio(win, props.clip)
 
   automate = ->
     Cypress.automation("take:screenshot", props)
@@ -101,7 +88,7 @@ takeScrollingScreenshots = (scrolls, win, automationOptions) ->
       total: scrolls.length
       clip: clip
     })
-    automateScreenshot(win, options)
+    automateScreenshot(options)
 
   Promise
   .mapSeries(scrolls, scrollAndTake)
@@ -239,6 +226,10 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       height: getViewportHeight(state)
     }
     userClip: clip
+    viewport: {
+      width: $(window).width()
+      height: $(window).height()
+    }
   })
 
   before(capture)
@@ -248,7 +239,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     else if subject
       takeElementScreenshot(subject, state, automationOptions)
     else
-      automateScreenshot(state("window"), automationOptions)
+      automateScreenshot(automationOptions)
   .finally ->
     after(screenshotConfig)
 
