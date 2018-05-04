@@ -1,6 +1,9 @@
 import _ from 'lodash'
 import moment from 'moment'
 import gravatar from 'gravatar'
+import padStart from 'string.prototype.padstart'
+
+const cyDirRegex = /^cypress\/integration\//g
 
 const osNameLookup = {
   darwin: 'apple',
@@ -85,13 +88,31 @@ module.exports = {
     }
   },
 
-  durationFormatted: (durationInMs) => {
+  durationFormatted: (durationInMs, padMinutes = true) => {
     const duration = moment.duration(durationInMs)
 
-    let durationHours = duration.hours() ? `${duration.hours()}h ` : ''
-    let durationMinutes = duration.minutes() ? `${duration.minutes()}m ` : ''
-    let durationSeconds = duration.seconds() ? `${duration.seconds()}s ` : ''
+    const durationSecs = duration.seconds() ? `${duration.seconds()}` : ''
+    const durationMins = duration.minutes() ? `${duration.minutes()}` : ''
+    const durationHrs = duration.hours() ? `${duration.hours()}` : ''
 
-    return durationHours + durationMinutes + durationSeconds
+    const total = _.compact([
+      durationHrs,
+      !!durationHrs || padMinutes ? padStart(durationMins, 2, '0') : durationMins,
+      padStart(durationSecs, 2, '0'),
+    ])
+
+    const totalMinSec = total.join(':')
+
+    if (totalMinSec === '00:00') {
+      return `${duration.milliseconds()}ms`
+    } else {
+      return totalMinSec
+    }
+  },
+
+  stripLeadingCyDirs (spec) {
+    if (!spec) return null
+    // remove leading 'cypress/integration' from spec
+    return spec.replace(cyDirRegex, '')
   },
 }

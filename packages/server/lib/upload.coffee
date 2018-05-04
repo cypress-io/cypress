@@ -1,9 +1,7 @@
-fs      = require("fs-extra")
 r       = require("request")
 rp      = require("request-promise")
 Promise = require("bluebird")
-
-fs = Promise.promisifyAll(fs)
+fs      = require("./util/fs")
 
 module.exports = {
   send: (pathToFile, url) ->

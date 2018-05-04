@@ -1,11 +1,10 @@
-cp        = require("child_process")
-e2e      = require("../support/helpers/e2e")
-Fixtures = require("../support/helpers/fixtures")
-fs       = require("fs-extra")
 path     = require("path")
 Promise  = require("bluebird")
+cp       = require("child_process")
+fs       = require("../../lib/util/fs")
+e2e      = require("../support/helpers/e2e")
+Fixtures = require("../support/helpers/fixtures")
 
-fs       = Promise.promisifyAll(fs)
 e2ePath  = Fixtures.projectPath("e2e")
 
 mochaAwesomes = [
