@@ -633,6 +633,7 @@ module.exports = {
     invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
     invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
     invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
+    multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
   select:

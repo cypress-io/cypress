@@ -567,6 +567,11 @@ describe "src/cy/commands/screenshot", ->
         @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{4}", done)
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: "5" } })
 
+      it "throws if element capture with multiple elements", (done) ->
+        @assertErrorMessage("cy.screenshot() only works for a single element. You attempted to screenshot 4 elements.", done)
+        cy.visit("/fixtures/dom.html")
+        cy.get(".screenshot-multiple").screenshot()
+
       it "logs once on error", (done) ->
         error = new Error("some error")
         error.name = "foo"

@@ -292,6 +292,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
+      if subject and subject.length > 1
+        $utils.throwErrByPath("screenshot.multiple_elements", {
+          log: options._log
+          args: { numElements: subject.length }
+        })
+
       takeScreenshot(Cypress, state, screenshotConfig, {
         subject: subject
         runnable: runnable
