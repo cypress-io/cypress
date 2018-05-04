@@ -470,6 +470,14 @@ describe "src/cy/commands/screenshot", ->
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
 
+      it "coerces capture option into 'app'", ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+
+        cy.get(".short-element").screenshot({ capture: "runner" })
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1].appOnly).to.be.true
+          expect(Cypress.automation.withArgs("take:screenshot").args[0][1].capture).to.equal("app")
+
     describe "timeout", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})

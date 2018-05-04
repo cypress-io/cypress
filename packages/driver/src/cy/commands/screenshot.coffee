@@ -298,6 +298,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { numElements: subject.length }
         })
 
+      if subject
+        screenshotConfig.capture = "app"
+
       takeScreenshot(Cypress, state, screenshotConfig, {
         subject: subject
         runnable: runnable
