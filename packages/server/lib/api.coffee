@@ -12,8 +12,8 @@ debug      = require("debug")("cypress:server:api")
 
 ## TODO: improve this, dont just use
 ## requests because its way too verbose
-if debug.enabled
-  request.debug = true
+# if debug.enabled
+#   request.debug = true
 
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
