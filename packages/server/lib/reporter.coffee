@@ -105,10 +105,10 @@ mergeErr = (runnable, runnables, stats) ->
 
 setDate = (obj, runnables, stats) ->
   if s = obj.start
-    stats.start = new Date(s)
+    stats.wallClockStartedAt = new Date(s)
 
   if e = obj.end
-    stats.end = new Date(e)
+    stats.wallClockEndedAt = new Date(e)
 
   return null
 
@@ -201,7 +201,7 @@ class Reporter
       _.get(test, prop, null)
 
     ## use this or null
-    if wcs = get("wallClockStart")
+    if wcs = get("wallClockStartedAt")
       ## convert to actual date object
       wcs = new Date(wcs)
 
@@ -221,7 +221,7 @@ class Reporter
       error:          get("err.message")
       timings:        get("timings")
       failedFromHookId: get("failedFromHookId")
-      wallClockStart: wcs
+      wallClockStartedAt: wcs
       wallClockDuration: get("wallClockDuration")
       videoTimestamp: null ## always start this as null
     }
@@ -255,10 +255,10 @@ class Reporter
     .filter({root: false}) ## don't include root suite
     .value()
 
-    { start, end } = @stats
+    { wallClockStartedAt, wallClockEndedAt } = @stats
 
-    if start and end
-      @stats.duration = end - start
+    if wallClockStartedAt and wallClockEndedAt
+      @stats.wallClockDuration = wallClockEndedAt - wallClockStartedAt
 
     @stats.suites = suites.length
     @stats.tests = tests.length
@@ -285,8 +285,8 @@ class Reporter
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
       ## if we have a wallClockStart
-      if wcs = test.wallClockStart
-        test.videoTimestamp = test.wallClockStart - videoStart
+      if wcs = test.wallClockStartedAt
+        test.videoTimestamp = test.wallClockStartedAt - videoStart
       test
 
   @create = (reporterName, reporterOptions, projectRoot) ->

@@ -133,6 +133,8 @@ createRun = (options = {}) ->
   if not recordKey
     errors.throw("RECORD_KEY_MISSING")
 
+  specPattern ?= null
+
   ## go back to being a string
   if specPattern
     specPattern = specPattern.join(",")
