@@ -10,6 +10,7 @@ Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
 runMode = require("#{root}../lib/modes/run")
 openProject = require("#{root}../lib/open_project")
+env = require("#{root}../lib/util/env")
 random = require("#{root}../lib/util/random")
 specsUtil = require("#{root}../lib/util/specs")
 
@@ -17,7 +18,29 @@ describe "lib/modes/run", ->
   beforeEach ->
     @projectInstance = Project("/_test-output/path/to/project")
 
-  context ".openProject", ->
+  context ".getProjectId", ->
+    it "resolves if id", ->
+      runMode.getProjectId("project", "id123")
+      .then (ret) ->
+        expect(ret).to.eq("id123")
+
+    it "resolves if CYPRESS_PROJECT_ID set", ->
+      @sandbox.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns("envId123")
+
+      runMode.getProjectId("project")
+      .then (ret) ->
+        expect(ret).to.eq("envId123")
+
+    it "is null when no projectId", ->
+      project = {
+        getProjectId: @sandbox.stub().rejects(new Error)
+      }
+
+      runMode.getProjectId(project)
+      .then (ret) ->
+        expect(ret).to.be.null
+
+  context ".openProjectCreate", ->
     beforeEach ->
       @sandbox.stub(openProject, "create").resolves()
 
@@ -27,7 +50,7 @@ describe "lib/modes/run", ->
         projectRoot: "/_test-output/path/to/project/foo"
       }
 
-      runMode.createOpenProject(1234, options)
+      runMode.openProjectCreate(options.projectRoot, 1234, options)
 
     it "calls openProject.create with projectRoot + options", ->
       expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
@@ -107,16 +130,14 @@ describe "lib/modes/run", ->
   context ".launchBrowser", ->
     beforeEach ->
       @launch = @sandbox.stub(openProject, "launch")
-
       @sandbox.stub(runMode, "getElectronProps").returns({foo: "bar"})
-
       @sandbox.stub(runMode, "screenshotMetadata").returns({a: "a"})
 
-    it "gets electron props by default", ->
+    it "can launch electron", ->
       screenshots = []
 
       runMode.launchBrowser({
-        browser: undefined
+        browser: "electron"
         project: @projectInstance
         write: "write"
         gui: null
@@ -259,6 +280,7 @@ describe "lib/modes/run", ->
     it "end event resolves with obj, displays stats, displays screenshots, sets video timestamps", ->
       started = new Date
       screenshots = [{}, {}, {}]
+      cfg = {}
       end = ->
       results = {
         tests: [4,5,6]
@@ -286,6 +308,7 @@ describe "lib/modes/run", ->
         videoCompression: 32
         videoUploadOnPasses: true
         gui: false
+        config: cfg
         screenshots
         started
         end
@@ -302,8 +325,9 @@ describe "lib/modes/run", ->
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
+          screenshots
+          config: cfg
           spec: "cypress/integration/spec.js"
-          screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
           tests: [1,2,3]
@@ -319,6 +343,7 @@ describe "lib/modes/run", ->
     it "exitEarlyWithErr event resolves with no tests, error, and empty failingTests", ->
       err = new Error("foo")
       started = new Date
+      cfg = {}
       screenshots = [{}, {}, {}]
       end = ->
 
@@ -341,6 +366,7 @@ describe "lib/modes/run", ->
         screenshots
         started
         end
+        config: cfg
         spec: {
           path: "cypress/integration/spec.js"
         }
@@ -353,9 +379,10 @@ describe "lib/modes/run", ->
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
+          screenshots
+          config: cfg
           error:      err.message
           spec:       "cypress/integration/spec.js"
-          screenshots:  screenshots
           video:        "foo.mp4"
           shouldUploadVideo: true
           stats: {
@@ -416,7 +443,7 @@ describe "lib/modes/run", ->
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(Project, "ensureExists").resolves()
       @sandbox.stub(random, "id").returns(1234)
-      @sandbox.stub(runMode, "createOpenProject").resolves(openProject)
+      @sandbox.stub(openProject, "create").resolves(openProject)
       @sandbox.stub(runMode, "waitForSocketConnection").resolves()
       @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(runMode,  "waitForBrowserToConnect")
@@ -473,7 +500,7 @@ describe "lib/modes/run", ->
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(Project, "ensureExists").resolves()
       @sandbox.stub(random, "id").returns(1234)
-      @sandbox.stub(runMode, "createOpenProject").resolves(openProject)
+      @sandbox.stub(openProject, "create").resolves(openProject)
       @sandbox.stub(runMode, "waitForSocketConnection").resolves()
       @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
       @sandbox.spy(runMode,  "waitForBrowserToConnect")
@@ -497,10 +524,12 @@ describe "lib/modes/run", ->
       .then (results) ->
         expect(results).to.have.property("totalFailures", 10)
 
-    it "passes id + options to openProject", ->
-      runMode.run({foo: "bar"})
+    it "passes projectRoot + options to openProject", ->
+      opts = { projectRoot: "/path/to/project", foo: "bar" }
+
+      runMode.run(opts)
       .then ->
-        expect(runMode.createOpenProject).to.be.calledWithMatch(1234, {foo: "bar"})
+        expect(openProject.create).to.be.calledWithMatch(opts.projectRoot, opts)
 
     it "passes project + id to waitForBrowserToConnect", ->
       runMode.run()

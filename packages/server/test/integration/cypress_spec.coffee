@@ -38,7 +38,9 @@ utils      = require("#{root}lib/browsers/utils")
 browsers   = require("#{root}lib/browsers")
 Watchers   = require("#{root}lib/watchers")
 openProject   = require("#{root}lib/open_project")
+system        = require("#{root}lib/util/system")
 appData       = require("#{root}lib/util/app_data")
+specsUtil     = require("#{root}lib/util/specs")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
 
 TYPICAL_BROWSERS = [
@@ -831,30 +833,44 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_RECORD_KEY
 
     beforeEach ->
-      @setup = (specPattern, specFiles) =>
-        if not specFiles
-          specFiles = ["a-spec.js", "b-spec.js"]
+      specs = [{
+        path: "path/to/spec/a"
+      }, {
+        path: "path/to/spec/b"
+      }]
 
-          @sandbox.stub(Project, "findSpecs").resolves(specFiles)
+      @setup = (specPattern = null) =>
+        @sandbox.stub(specsUtil, "find").resolves(specs)
 
-        createRunArgs = {
+        @createRunArgs = {
+          specPattern
+          specs: ["path/to/spec/a", "path/to/spec/b"]
           projectId:    @projectId
           recordKey:    "token-123"
-          commitSha:    "sha-123"
-          commitBranch: "bem/ci"
-          commitAuthorName: "brian"
-          commitAuthorEmail:  "brian@cypress.io"
-          commitMessage: "foo"
-          remoteOrigin: "https://github.com/foo/bar.git"
-          ciProvider: "travis"
-          ciBuildNumber: "987"
-          ciParams: null
-          groupId: null
-          specs: specFiles
-          specPattern: specPattern
+          commit: {
+            sha:    "sha-123"
+            branch: "bem/ci"
+            authorName: "brian"
+            authorEmail:  "brian@cypress.io"
+            message: "foo"
+            remoteOrigin: "https://github.com/foo/bar.git"
+          }
+          ci: {
+            provider: "travis"
+            buildNumber: "987"
+            params: null
+          }
+          platform: {
+            osCpus: 1
+            osName: 2
+            osMemory: 3
+            osVersion: 4
+            browserName: "chrome"
+            browserVersion: "59"
+          }
         }
 
-        @createRun = @sandbox.stub(api, "createRun").withArgs(createRunArgs)
+        @createRun = @sandbox.stub(api, "createRun")
 
       @sandbox.stub(upload, "send").resolves()
       @sandbox.stub(stdout, "capture").returns({
@@ -875,6 +891,16 @@ describe "lib/cypress", ->
         message: "foo",
         remote: "https://github.com/foo/bar.git"
       })
+      @sandbox.stub(system, "info").resolves({
+        osCpus: 1
+        osName: 2
+        osMemory: 3
+        osVersion: 4
+      })
+      @sandbox.stub(browsers, "getByName").resolves({
+        displayName: "chrome"
+        version: "59"
+      })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(runMode, "waitForSocketConnection")
       @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({
@@ -883,7 +909,7 @@ describe "lib/cypress", ->
           passes: 2
           failures: 3
           pending: 4
-          duration: 5
+          wallClockDuration: 5
         }
         video: true
         shouldUploadVideo: true
@@ -904,36 +930,51 @@ describe "lib/cypress", ->
     it "runs project in ci and exits with number of failures", ->
       @setup()
 
-      @createRun.resolves("run-id-123")
-
-      @createInstance = @sandbox.stub(api, "createInstance").withArgs({
+      @createRun.resolves({
         runId: "run-id-123"
-        browser: "electron"
-        spec: undefined
-      }).resolves("instance-id-123")
-
-      @updateInstance = @sandbox.stub(api, "updateInstance").withArgs({
-        instanceId: "instance-id-123"
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        video: true
-        error: undefined
-        screenshots: []
-        failingTests: []
-        cypressConfig: {}
-        ciProvider: "travis"
-        stdout: "foobarbaz"
-      }).resolves({
+        planId: "plan-id-123"
+        machineId: "machine-id-123"
+      })
+      @createInstance = @sandbox.stub(api, "createInstance").resolves("instance-id-123")
+      @updateInstance = @sandbox.stub(api, "updateInstance").resolves({
         videoUploadUrl: "http://video.url"
       })
 
       cypress.start(["--run-project=#{@todosPath}", "--record",  "--key=token-123"])
       .then =>
-        expect(@createInstance).to.be.calledOnce
-        expect(@updateInstance).to.be.calledOnce
+        expect(@createRun).to.be.calledWith(@createRunArgs)
+        expect(@createInstance).to.be.calledWith({
+          runId: "run-id-123"
+          planId: "plan-id-123"
+          machineId: "machine-id-123"
+          spec: "path/to/spec/a"
+          platform: {
+            browserName: "chrome",
+            browserVersion: "59",
+            osCpus: 1,
+            osMemory: 3,
+            osName: 2,
+            osVersion: 4
+          },
+        })
+        expect(@updateInstance).to.be.calledWith({
+          stats: {
+            tests: 1
+            passes: 2
+            failures: 3
+            pending: 4
+            wallClockDuration: 5
+          }
+          video: true
+          screenshots: []
+          cypressConfig: {}
+          instanceId: "instance-id-123"
+          error: null
+          hooks: undefined
+          tests: undefined
+          reporterStats: undefined
+          stdout: "foobarbaz"
+        })
 
         expect(upload.send).to.be.calledOnce
 
@@ -942,10 +983,7 @@ describe "lib/cypress", ->
     it "sends specs and runs project by specific absolute spec and exits with status 3", ->
       spec = "#{@todosPath}/tests/*"
 
-      @setup(spec, [
-        "test1.js"
-        "test2.coffee"
-      ])
+      @setup(spec)
 
       ## TODO: fix this once we implement proper globbing
       ## per spec. currently just hacking this and forcing

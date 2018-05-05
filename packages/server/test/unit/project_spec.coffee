@@ -413,18 +413,9 @@ describe "lib/project", ->
       expect(fn).to.be.calledOnce
 
   context "#getProjectId", ->
-    afterEach ->
-      delete process.env.CYPRESS_PROJECT_ID
-
     beforeEach ->
       @project         = Project("/_test-output/path/to/project")
       @verifyExistence = @sandbox.stub(Project.prototype, "verifyExistence").resolves()
-
-    it "resolves with process.env.CYPRESS_PROJECT_ID if set", ->
-      process.env.CYPRESS_PROJECT_ID = "123"
-
-      @project.getProjectId().then (id) ->
-        expect(id).to.eq("123")
 
     it "calls verifyExistence", ->
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})

@@ -208,15 +208,20 @@ describe "lib/api", ->
       @buildProps = {
         projectId:         "id-123"
         recordKey:         "token-123"
-        commitSha:         "sha"
-        commitBranch:      "master"
-        commitAuthorName:  "brian"
-        commitAuthorEmail: "brian@cypress.io"
-        commitMessage:     "such hax"
-        remoteOrigin:      "https://github.com/foo/bar.git"
-        ciProvider:        "circle"
-        ciBuildNumber:     "987"
-        ciParams:          { foo: "bar" }
+        ci: {
+          provider:        "circle"
+          buildNumber:     "987"
+          params:          { foo: "bar" }
+        }
+        platform: {}
+        commit: {
+          sha:         "sha"
+          branch:      "master"
+          authorName:  "brian"
+          authorEmail: "brian@cypress.io"
+          message:     "such hax"
+          remoteOrigin: "https://github.com/foo/bar.git"
+        }
         specs:             ["foo.js", "bar.js"]
       }
 
@@ -232,45 +237,21 @@ describe "lib/api", ->
 
       api.createRun(@buildProps)
       .then (ret) ->
-        expect(ret).to.eq("new-run-id-123")
+        expect(ret).to.deep.eq({ runId: "new-run-id-123" })
 
     it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/runs", {
-        projectId:         null
-        recordKey:         "token-123"
-        commitSha:         "sha"
-        commitBranch:      "master"
-        commitAuthorName:  "brian"
-        commitAuthorEmail: "brian@cypress.io"
-        commitMessage:     "such hax"
-        remoteOrigin:      "https://github.com/foo/bar.git"
-        ciProvider:        "circle"
-        ciBuildNumber:     "987"
-        ciParams:          { foo: "bar" }
-      })
+      .post("/runs", @buildProps)
       .reply(422, {
         errors: {
           runId: ["is required"]
         }
       })
 
-      api.createRun({
-        projectId:         null
-        recordKey:         "token-123"
-        commitSha:         "sha"
-        commitBranch:      "master"
-        commitAuthorName:  "brian"
-        commitAuthorEmail: "brian@cypress.io"
-        commitMessage:     "such hax"
-        remoteOrigin:      "https://github.com/foo/bar.git"
-        ciProvider:        "circle"
-        ciBuildNumber:     "987"
-        ciParams:          { foo: "bar" }
-      })
+      api.createRun(@buildProps)
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -304,9 +285,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "post").returns({
-        promise: () -> Promise.resolve({runId: 'foo'})
-      })
+      @sandbox.stub(rp, "post").resolves({runId: 'foo'})
 
       api.createRun({})
       .then ->
@@ -332,39 +311,21 @@ describe "lib/api", ->
         value: "53"
       })
 
-      @postProps = {
-        spec: "cypress/integration/app_spec.js"
-        browserName: "Foo"
-        browserVersion: "1.2.3"
-        osName: "darwin"
-        osVersion: "10.10.10"
-        osCpus: [{model: "foo"}]
-        osMemory: {
-          free:  1000
-          total: 2000
-        }
-      }
-
       @createProps = {
         runId: "run-id-123"
-        browser: "foo"
         spec: "cypress/integration/app_spec.js"
+        planId: "planId123"
+        machineId: "machineId123"
+        platform: {}
       }
 
-    it "POSTs /runs/:id/instances", ->
-      @sandbox.stub(os, "release").returns("10.10.10")
-      @sandbox.stub(os, "cpus").returns([{model: "foo"}])
-      @sandbox.stub(os, "freemem").returns(1000)
-      @sandbox.stub(os, "totalmem").returns(2000)
-      @sandbox.stub(browsers, "getByName").resolves({
-        displayName: "Foo"
-        version: "1.2.3"
-      })
+      @postProps = _.omit(@createProps, "runId")
 
+    it "POSTs /runs/:id/instances", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "4")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances", @postProps)
@@ -374,12 +335,11 @@ describe "lib/api", ->
 
       api.createInstance(@createProps)
       .then (instanceId) ->
-        expect(browsers.getByName).to.be.calledWith("foo")
         expect(instanceId).to.eq("instance-id-123")
 
     it "POST /runs/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "4")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances")
@@ -407,7 +367,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "4")
+      .matchHeader("x-route-version", "3")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances")
@@ -425,16 +385,7 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "post").returns({
-        promise: -> {
-          get: -> {
-            catch: -> {
-              catch: -> {
-                then: (fn) -> fn()
-              }
-              then: (fn) -> fn()
-            }
-          }
-        }
+        promise: -> Promise.resolve({ instanceId: "instanceId123" })
       })
 
       api.createInstance({})
@@ -456,40 +407,18 @@ describe "lib/api", ->
 
   context ".updateInstance", ->
     beforeEach ->
-      Object.defineProperty(process.versions, "chrome", {
-        value: "53"
-      })
-
-      @putProps = {
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        error: "err msg"
-        video: true
-        screenshots: []
-        failingTests: []
-        cypressConfig: {}
-        ciProvider: "circle"
-        stdout: "foo\nbar\nbaz"
-      }
-
       @updateProps = {
         instanceId: "instance-id-123"
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
+        stats: {}
         error: "err msg"
         video: true
         screenshots: []
-        failingTests: []
         cypressConfig: {}
-        ciProvider: "circle"
+        reporterStats: {}
         stdout: "foo\nbar\nbaz"
       }
+
+      @putProps = _.omit(@updateProps, "instanceId")
 
     it "PUTs /instances/:id", ->
       nock("http://localhost:1234")

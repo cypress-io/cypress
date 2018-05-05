@@ -123,6 +123,8 @@ module.exports = {
 
   writeOutput
 
+  openProjectCreate
+
   createRecording: (name) ->
     outputDir = path.dirname(name)
 
@@ -562,15 +564,15 @@ module.exports = {
           })
         })
 
-  findSpecs: (config, spec) ->
-    specsUtil.find(config, spec)
+  findSpecs: (config, specPattern) ->
+    specsUtil.find(config, specPattern)
     .tap (files = []) =>
       if debug.enabled
         names = _.map(files, "name")
         debug(
           "found '%d' specs using spec pattern '%s': %o",
           names.length,
-          spec,
+          specPattern,
           names
         )
 
