@@ -400,17 +400,17 @@ describe "lib/modes/record", ->
       @sandbox.spy(Project, "add")
 
     it "ensures id", ->
-      record.run({projectPath: "/_test-output/path/to/project"})
+      record.run({projectRoot: "/_test-output/path/to/project"})
       .then ->
         expect(Project.id).to.be.calledWith("/_test-output/path/to/project")
 
-    it "adds project with projectPath", ->
-      record.run({projectPath: "/_test-output/path/to/project"})
+    it "adds project with projectRoot", ->
+      record.run({projectRoot: "/_test-output/path/to/project"})
       .then ->
         expect(Project.add).to.be.calledWith("/_test-output/path/to/project")
 
-    it "passes id + projectPath + options.key to generateProjectRunId", ->
-      record.run({projectPath: "/_test-output/path/to/project", key: "key-foo"})
+    it "passes id + projectRoot + options.key to generateProjectRunId", ->
+      record.run({projectRoot: "/_test-output/path/to/project", key: "key-foo"})
       .then ->
         expect(record.generateProjectRunId).to.be.calledWith("id-123", "/_test-output/path/to/project", "projectName", "key-foo")
 

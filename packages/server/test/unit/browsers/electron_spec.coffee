@@ -17,7 +17,7 @@ describe "lib/browsers/electron", ->
     @state = {}
     @options = {
       some: "var"
-      projectPath: "/foo/"
+      projectRoot: "/foo/"
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
@@ -45,7 +45,7 @@ describe "lib/browsers/electron", ->
     it "calls render with url, state, and options", ->
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._defaultOptions(@options.projectPath, @state, @options)
+        options = electron._defaultOptions(@options.projectRoot, @state, @options)
 
         options = Windows.defaults(options)
 
@@ -55,7 +55,7 @@ describe "lib/browsers/electron", ->
 
         expect(electron._render).to.be.calledWith(
           @url,
-          @options.projectPath,
+          @options.projectRoot,
         )
 
     it "returns custom object emitter interface", ->
@@ -113,13 +113,13 @@ describe "lib/browsers/electron", ->
       @sandbox.stub(electron, "_setProxy").resolves()
       @sandbox.stub(electron, "_launch").resolves()
       @sandbox.stub(Windows, "create")
-      .withArgs(@options.projectPath, @options)
+      .withArgs(@options.projectRoot, @options)
       .returns(@newWin)
 
     it "creates window instance and calls launch with window", ->
-      electron._render(@url, @options.projectPath, @options)
+      electron._render(@url, @options.projectRoot, @options)
       .then =>
-        expect(Windows.create).to.be.calledWith(@options.projectPath, @options)
+        expect(Windows.create).to.be.calledWith(@options.projectRoot, @options)
         expect(electron._launch).to.be.calledWith(@newWin, @url, @options)
 
   context "._defaultOptions", ->
@@ -173,7 +173,7 @@ describe "lib/browsers/electron", ->
         @sandbox.stub(electron, "_launchChild").resolves(@win)
 
       it "passes along event, url, parent window and options", ->
-        opts = electron._defaultOptions(@options.projectPath, @state, @options)
+        opts = electron._defaultOptions(@options.projectRoot, @state, @options)
 
         event = {}
         parentWindow = {
@@ -183,7 +183,7 @@ describe "lib/browsers/electron", ->
         opts.onNewWindow.call(parentWindow, event, @url)
 
         expect(electron._launchChild).to.be.calledWith(
-          event, @url, parentWindow, @options.projectPath, @state, @options
+          event, @url, parentWindow, @options.projectRoot, @state, @options
         )
 
   ## TODO: these all need to be updated

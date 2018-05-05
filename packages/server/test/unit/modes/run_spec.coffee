@@ -24,15 +24,15 @@ describe "lib/modes/run", ->
       options = {
         port: 8080
         env: {foo: "bar"}
-        projectPath: "/_test-output/path/to/project/foo"
+        projectRoot: "/_test-output/path/to/project/foo"
       }
 
       runMode.createOpenProject(1234, options)
 
-    it "calls openProject.create with projectPath + options", ->
+    it "calls openProject.create with projectRoot + options", ->
       expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
         port: 8080
-        projectPath: "/_test-output/path/to/project/foo"
+        projectRoot: "/_test-output/path/to/project/foo"
         env: {foo: "bar"}
       }, {
         morgan: false

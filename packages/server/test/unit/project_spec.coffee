@@ -614,16 +614,16 @@ describe "lib/project", ->
 
   context ".paths", ->
     beforeEach ->
-      @sandbox.stub(cache, "getProjectPaths").resolves([])
+      @sandbox.stub(cache, "getProjectRoots").resolves([])
 
-    it "calls cache.getProjectPaths", ->
+    it "calls cache.getProjectRoots", ->
       Project.paths().then (ret) ->
         expect(ret).to.deep.eq([])
-        expect(cache.getProjectPaths).to.be.calledOnce
+        expect(cache.getProjectRoots).to.be.calledOnce
 
   context ".getPathsAndIds", ->
     beforeEach ->
-      @sandbox.stub(cache, "getProjectPaths").resolves([
+      @sandbox.stub(cache, "getProjectRoots").resolves([
         "/path/to/first"
         "/path/to/second"
       ])

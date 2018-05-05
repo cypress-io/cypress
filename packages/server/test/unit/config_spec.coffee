@@ -19,21 +19,21 @@ describe "lib/config", ->
 
   context ".get", ->
     beforeEach ->
-      @projectPath = "/_test-output/path/to/project"
+      @projectRoot = "/_test-output/path/to/project"
       @setup = (cypressJson = {}, cypressEnvJson = {}) =>
-        @sandbox.stub(settings, "read").withArgs(@projectPath).resolves(cypressJson)
-        @sandbox.stub(settings, "readEnv").withArgs(@projectPath).resolves(cypressEnvJson)
+        @sandbox.stub(settings, "read").withArgs(@projectRoot).resolves(cypressJson)
+        @sandbox.stub(settings, "readEnv").withArgs(@projectRoot).resolves(cypressEnvJson)
 
     it "sets projectRoot", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) =>
-        expect(obj.projectRoot).to.eq(@projectPath)
+        expect(obj.projectRoot).to.eq(@projectRoot)
         expect(obj.env).to.deep.eq({foo: "bar"})
 
     it "sets projectName", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) ->
         expect(obj.projectName).to.eq("project")
 
@@ -42,27 +42,27 @@ describe "lib/config", ->
         @setup({}, {foo: "bar"})
 
       it "can override default port", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.port).to.eq(8080)
 
       it "updates browserUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.browserUrl).to.eq "http://localhost:8080/__/"
 
       it "updates proxyUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.proxyUrl).to.eq "http://localhost:8080"
 
     context "validation", ->
       beforeEach ->
         @expectValidationPasses = =>
-          config.get(@projectPath) ## shouldn't throw
+          config.get(@projectRoot) ## shouldn't throw
 
         @expectValidationFails = (errorMessage = "validation error") =>
-          config.get(@projectPath)
+          config.get(@projectRoot)
           .then ->
             throw new Error("should throw validation error")
           .catch (err) ->

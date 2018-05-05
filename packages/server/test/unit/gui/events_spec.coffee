@@ -166,7 +166,7 @@ describe "lib/gui/events", ->
   context "window", ->
     describe "window:open", ->
       beforeEach ->
-        @options.projectPath = "/path/to/my/project"
+        @options.projectRoot = "/path/to/my/project"
 
         @win = @sandbox.stub({
           on: ->
@@ -175,7 +175,7 @@ describe "lib/gui/events", ->
           webContents: {}
         })
 
-        @sandbox.stub(Windows, "create").withArgs(@options.projectPath).returns(@win)
+        @sandbox.stub(Windows, "create").withArgs(@options.projectRoot).returns(@win)
 
       it "calls Windows#open with args and resolves with return of Windows.open", ->
         @handleEvent("window:open", {type: "INDEX"})
@@ -184,7 +184,7 @@ describe "lib/gui/events", ->
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Windows, "open").withArgs(@options.projectPath, {foo: "bar"}).rejects(err)
+        @sandbox.stub(Windows, "open").withArgs(@options.projectRoot, {foo: "bar"}).rejects(err)
 
         @handleEvent("window:open", {foo: "bar"}).then (assert) =>
           assert.sendErrCalledWith(err)

@@ -79,12 +79,12 @@ writeOutput = (outputPath, results) ->
 
     fs.outputJsonAsync(outputPath, results)
 
-openProjectCreate = (projectPath, socketId, options) ->
+openProjectCreate = (projectRoot, socketId, options) ->
   ## now open the project to boot the server
   ## putting our web client app in headless mode
   ## - NO  display server logs (via morgan)
   ## - YES display reporter results (via mocha reporter)
-  openProject.create(projectPath, options, {
+  openProject.create(projectRoot, options, {
     socketId
     morgan:       false
     report:       true
@@ -100,14 +100,14 @@ openProjectCreate = (projectPath, socketId, options) ->
     errors.throw("PORT_IN_USE_LONG", err.port)
 
 createAndOpenProject = (socketId, options) ->
-  { projectPath, projectId } = options
+  { projectRoot, projectId } = options
 
   Project
-  .ensureExists(projectPath)
+  .ensureExists(projectRoot)
   .then ->
     ## open this project without
     ## adding it to the global cache
-    openProjectCreate(projectPath, socketId, options)
+    openProjectCreate(projectRoot, socketId, options)
     .call("getProject")
   .then (project) ->
     Promise.props({
@@ -264,7 +264,7 @@ module.exports = {
         resp
     }
 
-    browserOpts.projectPath = options.projectPath
+    browserOpts.projectRoot = options.projectRoot
 
     openProject.launch(browser, spec.absolute, browserOpts)
 
@@ -558,7 +558,7 @@ module.exports = {
             project:     options.project
             socketId:    options.socketId
             webSecurity: options.webSecurity
-            projectPath: options.projectPath
+            projectRoot: options.projectRoot
           })
         })
 
@@ -583,7 +583,7 @@ module.exports = {
 
     socketId = random.id()
 
-    { projectPath, record, key, browser } = options
+    { projectRoot, record, key, browser } = options
 
     ## alias
     specPattern = options.spec
@@ -615,7 +615,7 @@ module.exports = {
             @runSpecs({
               beforeSpecRun
               afterSpecRun
-              projectPath
+              projectRoot
               socketId
               browser
               project
@@ -642,7 +642,7 @@ module.exports = {
             browser
             captured
             projectId
-            projectPath
+            projectRoot
             projectName
             specPattern
             runAllSpecs

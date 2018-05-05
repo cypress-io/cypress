@@ -16,16 +16,16 @@ describe "lib/util/args", ->
       expect(options.pong).to.eq 123
 
   context "--project", ->
-    it "sets projectPath", ->
-      projectPath = path.resolve(cwd, "./foo/bar")
+    it "sets projectRoot", ->
+      projectRoot = path.resolve(cwd, "./foo/bar")
       options = @setup("--project", "./foo/bar")
-      expect(options.projectPath).to.eq projectPath
+      expect(options.projectRoot).to.eq projectRoot
 
   context "--run-project", ->
-    it "sets projectPath", ->
-      projectPath = path.resolve(cwd, "/baz")
+    it "sets projectRoot", ->
+      projectRoot = path.resolve(cwd, "/baz")
       options = @setup("--run-project", "/baz")
-      expect(options.projectPath).to.eq projectPath
+      expect(options.projectRoot).to.eq projectRoot
 
     it "strips single double quote from the end", ->
       # https://github.com/cypress-io/cypress/issues/535

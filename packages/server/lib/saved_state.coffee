@@ -21,8 +21,8 @@ stateFiles = {}
 #   state should have width = 200
 
 # async promise-returning function
-findSavedSate = (projectPath) ->
-  savedStateUtil.formStatePath(projectPath)
+findSavedSate = (projectRoot) ->
+  savedStateUtil.formStatePath(projectRoot)
   .then (statePath) ->
     fullStatePath = appData.projectsPath(statePath)
     log('full state path %s', fullStatePath)

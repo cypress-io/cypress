@@ -102,7 +102,7 @@ describe "lib/cache", ->
           cache.__get("PROJECTS").then (projects) ->
             expect(projects).to.deep.eq []
 
-    describe "#getProjectPaths", ->
+    describe "#getProjectRoots", ->
       beforeEach ->
         @statAsync = @sandbox.stub(fs, "statAsync")
 
@@ -114,7 +114,7 @@ describe "lib/cache", ->
         .then =>
           cache.insertProject("/Users/sam/app2")
         .then =>
-          cache.getProjectPaths().then (paths) ->
+          cache.getProjectRoots().then (paths) ->
             expect(paths).to.deep.eq ["/Users/sam/app2", "/Users/brian/app"]
 
       it "removes any paths which no longer exist on the filesystem", ->
@@ -125,7 +125,7 @@ describe "lib/cache", ->
         .then =>
           cache.insertProject("/Users/sam/app2")
         .then =>
-          cache.getProjectPaths().then (paths) =>
+          cache.getProjectRoots().then (paths) =>
             expect(paths).to.deep.eq ["/Users/brian/app"]
         .then =>
           ## we have to wait on the write event because

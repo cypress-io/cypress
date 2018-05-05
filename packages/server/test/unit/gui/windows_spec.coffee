@@ -123,7 +123,7 @@ describe "lib/gui/windows", ->
       .then (@state) =>
         @sandbox.stub(@state, "set")
 
-        @projectPath = undefined
+        @projectRoot = undefined
         @keys = {
           width: "theWidth"
           height: "someHeight"
@@ -137,7 +137,7 @@ describe "lib/gui/windows", ->
       ## reason, so this is the next best thing
       @sandbox.stub(_, "debounce").returnsArg(0)
 
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, @win, @keys)
       @win.emit("resize")
 
       expect(_.debounce).to.be.called
@@ -155,7 +155,7 @@ describe "lib/gui/windows", ->
     it "returns if window isDestroyed on resize", ->
       @win.isDestroyed.returns(true)
 
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, @win, @keys)
       @win.emit("resize")
 
       Promise
@@ -167,7 +167,7 @@ describe "lib/gui/windows", ->
       ## tried using useFakeTimers here, but it didn't work for some
       ## reason, so this is the next best thing
       @sandbox.stub(_, "debounce").returnsArg(0)
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, @win, @keys)
       @win.emit("moved")
 
       Promise
@@ -181,7 +181,7 @@ describe "lib/gui/windows", ->
     it "returns if window isDestroyed on moved", ->
       @win.isDestroyed.returns(true)
 
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, @win, @keys)
       @win.emit("moved")
 
       Promise
@@ -190,7 +190,7 @@ describe "lib/gui/windows", ->
         expect(@state.set).not.to.be.called
 
     it "saves dev tools state when opened", ->
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, @win, @keys)
       @win.webContents.emit("devtools-opened")
 
       Promise
@@ -199,7 +199,7 @@ describe "lib/gui/windows", ->
         expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
 
     it "saves dev tools state when closed", ->
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, @win, @keys)
       @win.webContents.emit("devtools-closed")
 
       Promise

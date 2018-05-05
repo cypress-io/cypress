@@ -202,13 +202,13 @@ createInstance = (options = {}) ->
       null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { captured, specPattern, specs, browser, projectId, projectPath, runAllSpecs } = options
+  { captured, specPattern, specs, browser, projectId, projectRoot, runAllSpecs } = options
 
   recordKey = options.key
 
   Promise.all([
     system.info()
-    commitInfo.commitInfo(projectPath)
+    commitInfo.commitInfo(projectRoot)
     browsers.getByName(browser)
   ])
   .spread (sys, git, browser) ->
@@ -338,7 +338,7 @@ module.exports = {
       logException(err)
 
   run: (options) ->
-    { projectPath, browser } = options
+    { projectRoot, browser } = options
 
     ## default browser
     browser ?= "electron"
@@ -357,22 +357,22 @@ module.exports = {
 
       errors.warning(type)
 
-    Project.add(projectPath)
+    Project.add(projectRoot)
     .then ->
-      Project.id(projectPath)
+      Project.id(projectRoot)
       .catch ->
         errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
     .then (projectId) =>
       ## store the projectId for later use
       options.projectId = projectId
 
-      Project.config(projectPath)
+      Project.config(projectRoot)
       .then (cfg) =>
         { projectName } = cfg
 
         key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
 
-        @generateProjectRunId(projectId, projectPath, projectName, key,
+        @generateProjectRunId(projectId, projectRoot, projectName, key,
           options.group, options.groupId, options.spec)
         .then (runId) =>
           ## bail if we dont have a runId

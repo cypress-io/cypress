@@ -198,7 +198,7 @@ module.exports = {
 
       when "getKey"
         ## print the key + exit
-        require("./project").getSecretKeyByPath(options.projectPath)
+        require("./project").getSecretKeyByPath(options.projectRoot)
         .then (key) ->
           console.log(key)
         .then(exit0)
@@ -206,7 +206,7 @@ module.exports = {
 
       when "generateKey"
         ## generate + print the key + exit
-        require("./project").generateSecretKeyByPath(options.projectPath)
+        require("./project").generateSecretKeyByPath(options.projectRoot)
         .then (key) ->
           console.log(key)
         .then(exit0)

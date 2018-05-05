@@ -266,14 +266,14 @@ describe "lib/cypress", ->
           expect(err.type).to.eq("NO_PROJECT_ID")
 
     it "does not add project to the global cache", ->
-      cache.getProjectPaths()
+      cache.getProjectRoots()
       .then (projects) =>
         ## no projects in the cache
         expect(projects.length).to.eq(0)
 
         cypress.start(["--run-project=#{@todosPath}"])
       .then ->
-        cache.getProjectPaths()
+        cache.getProjectRoots()
       .then (projects) ->
         ## still not projects
         expect(projects.length).to.eq(0)

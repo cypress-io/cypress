@@ -156,9 +156,9 @@ module.exports = {
 
     options = normalizeBackslashes(options)
 
-    ## normalize project to projectPath
+    ## normalize project to projectRoot
     if p = options.project or options.runProject
-      options.projectPath = path.resolve(options.cwd, p)
+      options.projectRoot = path.resolve(options.cwd, p)
 
     ## normalize output path from previous current working directory
     if op = options.outputPath
