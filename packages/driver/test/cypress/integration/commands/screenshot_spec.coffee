@@ -577,8 +577,8 @@ describe "src/cy/commands/screenshot", ->
 
       it "throws if element capture with multiple elements", (done) ->
         @assertErrorMessage("cy.screenshot() only works for a single element. You attempted to screenshot 4 elements.", done)
-        cy.visit("/fixtures/dom.html")
-        cy.get(".screenshot-multiple").screenshot()
+        cy.visit("/fixtures/screenshots.html")
+        cy.get(".multiple").screenshot()
 
       it "logs once on error", (done) ->
         error = new Error("some error")
