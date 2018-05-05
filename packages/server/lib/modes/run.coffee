@@ -585,8 +585,8 @@ module.exports = {
 
     { projectRoot, record, key, browser } = options
 
-    ## alias
-    specPattern = options.spec
+    ## alias and coerce to null
+    specPattern = options.spec ? null
 
     if record
       captured = stdout.capture()
@@ -606,6 +606,10 @@ module.exports = {
 
       @findSpecs(config, specPattern)
       .then (specs = []) =>
+        ## return only what is return to the specPattern
+        if specPattern
+          specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+
         runAllSpecs = (beforeSpecRun, afterSpecRun) =>
           if not specs.length
             errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)

@@ -113,6 +113,11 @@ describe "e2e record", ->
         "PUT /instances/instanceId-123-guid/stdout"
       ])
 
+      postRun = requests[0]
+
+      ## ensure its relative to projectRoot
+      expect(postRun.body.specPattern).to.eq("cypress/integration/record*")
+
       firstInstance = requests[1]
 
       expect(firstInstance.body.spec).to.eq(
