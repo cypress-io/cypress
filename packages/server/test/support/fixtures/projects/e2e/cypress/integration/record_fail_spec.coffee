@@ -1,6 +1,7 @@
 describe "record fails", ->
-  it "fails 1", ->
+  beforeEach ->
     throw new Error("foo")
 
-  it "fails 2", ->
-    throw new Error("bar")
+  it "fails 1", ->
+
+  it "is skipped", ->

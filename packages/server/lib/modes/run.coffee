@@ -34,7 +34,7 @@ collectTestResults = (obj = {}) ->
     failures:    _.get(obj, 'stats.failures')
     duration:    humanTime(_.get(obj, 'stats.duration'))
     screenshots: obj.screenshots and obj.screenshots.length
-    video:       !!obj.video
+    video:       Boolean(obj.video)
     version:     pkg.version
   }
 
@@ -283,11 +283,15 @@ module.exports = {
         obj = {
           error: errors.stripAnsi(errMsg)
           stats: {
-            failures:     1
-            tests:        0
-            passes:       0
-            pending:      0
-            duration:     0
+            failures: 1
+            tests: 0
+            passes: 0
+            pending: 0
+            suites: 0
+            skipped: 0
+            wallClockDuration: 0
+            wallClockStartedAt: (new Date()).toJSON()
+            wallClockEndedAt: (new Date()).toJSON()
           }
         }
 
@@ -354,6 +358,15 @@ module.exports = {
 
     @listenForProjectEnd(project, headed, exit)
     .then (obj) =>
+      _.defaults(obj, {
+        error: null
+        hooks: null
+        tests: null
+        video: null
+        screenshots: null
+        reporterStats: null
+      })
+
       if end
         obj.video = name
 
@@ -472,7 +485,7 @@ module.exports = {
         if afterSpecRun
           afterSpecRun(results)
 
-    Promise.map(specs, runEachSpec, { concurrency: 1 })
+    Promise.mapSeries(specs, runEachSpec)
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.start")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.end")

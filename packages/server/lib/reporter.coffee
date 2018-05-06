@@ -170,6 +170,8 @@ class Reporter
       else
         throw new Error("Unknown runnable type: '#{type}'")
 
+    runnable.id = runnableProps.id
+
     @runnables[runnableProps.id] = runnable
     return runnable
 
@@ -254,6 +256,9 @@ class Reporter
     .chain(@runnables)
     .filter({root: false}) ## don't include root suite
     .value()
+
+    ## default to 0
+    @stats.wallClockDuration = 0
 
     { wallClockStartedAt, wallClockEndedAt } = @stats
 

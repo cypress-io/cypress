@@ -84,10 +84,6 @@ updateInstance = (options = {}) ->
 
   video = Boolean(video)
   cypressConfig = results.config
-
-  ## set to null if not defined
-  error ?= null
-
   stdout = captured.toString()
 
   ## get rid of the path property
