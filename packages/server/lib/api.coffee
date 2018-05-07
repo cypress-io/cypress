@@ -140,7 +140,7 @@ module.exports = {
       json: true
       timeout: timeout ? 10000
       headers: {
-        "x-route-version": "3"
+        "x-route-version": "4"
       }
     })
     .promise()
