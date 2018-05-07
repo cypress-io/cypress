@@ -23,7 +23,7 @@ rp = request.defaults (params = {}, callback) ->
   headers = params.headers ?= {}
 
   _.defaults(headers, {
-    "x-platform":        os.platform()
+    "x-os-name":         os.platform()
     "x-cypress-version": pkg.version
   })
 
