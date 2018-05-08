@@ -57,11 +57,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## re-throw if timedout error from above
         throw error if error.name is "CypressError"
 
+        error = if error?.isKnownError
+          error.message
+        else
+          error?.stack or error?.message or error
+
         $utils.throwErrByPath("task.failed", {
           onFail: options._log
-          args: {
-            task
-            error: error?.stack or error?.message or error
-          }
+          args: { task, error }
         })
   })

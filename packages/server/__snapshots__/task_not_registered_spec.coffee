@@ -12,7 +12,7 @@ Started video recording: /foo/bar/.projects/task-not-registered/cypress/videos/a
   1)  fails because the 'task' event is not registered in plugins file:
      CypressError: cy.task('some:task') failed with the following error:
 
-> "Error: The 'task' event has not been registered in the plugins file, so cy.task() cannot run"
+> "The 'task' event has not been registered in the plugins file, so cy.task() cannot run"
       at stack trace line
       at stack trace line
       at stack trace line

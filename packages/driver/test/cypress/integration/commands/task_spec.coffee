@@ -147,7 +147,8 @@ describe "src/cy/commands/task", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("cy.task('foo') failed with the following error:\n\n> \"Error: task failed\"")
+          expect(err.message).to.include("cy.task('foo') failed with the following error:")
+          expect(err.message).to.include("Error: task failed")
           done()
 
         cy.task("foo")
@@ -160,7 +161,7 @@ describe "src/cy/commands/task", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("cy.task('bar') failed with the following error:\n\n> \"Error: The task 'bar' was not handled in the plugins file\"")
+          expect(err.message).to.eq("cy.task('bar') failed with the following error:\n\n> \"The task 'bar' was not handled in the plugins file\"")
           done()
 
         cy.task("bar")
