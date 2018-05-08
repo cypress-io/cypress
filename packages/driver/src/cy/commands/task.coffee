@@ -59,6 +59,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         $utils.throwErrByPath("task.failed", {
           onFail: options._log
-          args: { task, error }
+          args: {
+            task
+            error: error?.stack or error?.message or error
+          }
         })
   })
