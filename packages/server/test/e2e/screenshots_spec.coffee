@@ -32,7 +32,7 @@ onServer = (app) ->
 
   app.get "/pathological", e2e.sendHtml("""
     <style>div { width: 1px; height: 1px; position: fixed; }</style>
-    <div style="left: 0; top: 0; background-color: black;"></div>
+    <div style="left: 0; top: 0; background-color: grey;"></div>
     <div style="left: 1px; top: 0; background-color: white;"></div>
     <div style="left: 0; top: 1px; background-color: white;"></div>
     <div style="right: 0; top: 0; background-color: white;"></div>

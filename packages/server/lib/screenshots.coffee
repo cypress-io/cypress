@@ -34,7 +34,7 @@ hasHelperPixels = (image) ->
   bottomRight = Jimp.intToRGBA(image.getPixelColor(image.bitmap.width, image.bitmap.height))
 
   return (
-    isBlack(topLeft) and
+    (not isWhite(topLeft)) and
     isWhite(topLeftRight) and
     isWhite(topLeftDown) and
     isWhite(topRight) and
