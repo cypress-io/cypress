@@ -1,14 +1,11 @@
 _          = require("lodash")
-fs         = require("fs-extra")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
 Promise    = require("bluebird")
-random     = require("randomstring")
 pkg        = require("@packages/root")
-debug      = require("debug")("cypress:server:headless")
-ss         = require("../screenshots")
+debug      = require("debug")("cypress:server:run")
 user       = require("../user")
 stats      = require("../stats")
 video      = require("../video")
@@ -16,13 +13,15 @@ errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
-progress   = require("../util/progress_bar")
-trash      = require("../util/trash")
-terminal   = require("../util/terminal")
-humanTime  = require("../util/human_time")
 Windows    = require("../gui/windows")
-
-fs = Promise.promisifyAll(fs)
+fs         = require("../util/fs")
+trash      = require("../util/trash")
+random     = require("../util/random")
+progress   = require("../util/progress_bar")
+terminal   = require("../util/terminal")
+specsUtil  = require("../util/specs")
+humanTime  = require("../util/human_time")
+electronApp = require("../util/electron_app")
 
 haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## if we have a project id
@@ -42,28 +41,41 @@ collectTestResults = (obj = {}) ->
     version:     pkg.version
   }
 
+getProjectId = (project, id) ->
+  ## if we have an ID just use it
+  if id
+    return Promise.resolve(id)
+
+  project
+  .getProjectId()
+  .catch ->
+    ## no id no problem
+    return null
+
+reduceRuns = (runs, prop) ->
+  _.reduce runs, (memo, run) ->
+    memo += _.get(run, prop)
+  , 0
+
+getRun = (run, prop) ->
+  _.get(run, prop)
+
+writeOutput = (outputPath, results) ->
+  Promise.try ->
+    return if not outputPath
+
+    debug("saving output results as %s", outputPath)
+
+    fs.outputJsonAsync(outputPath, results)
+
 module.exports = {
   collectTestResults
 
-  getId: ->
-    ## return a random id
-    random.generate({
-      length: 5
-      capitalization: "lowercase"
-    })
+  getProjectId
 
-  getProjectId: (project, id) ->
-    ## if we have an ID just use it
-    if id
-      return Promise.resolve(id)
+  writeOutput
 
-    project
-    .getProjectId()
-    .catch ->
-      ## no id no problem
-      return null
-
-  openProject: (id, options) ->
+  createOpenProject: (id, options) ->
     ## now open the project to boot the server
     ## putting our web client app in headless mode
     ## - NO  display server logs (via morgan)
@@ -228,11 +240,13 @@ module.exports = {
 
     browserOpts.projectPath = options.projectPath
 
-    openProject.launch(browser, spec, browserOpts)
+    openProject.launch(browser, spec.absolute, browserOpts)
 
   listenForProjectEnd: (project, headed, exit) ->
     new Promise (resolve) ->
-      return if exit is false
+      if exit is false
+        resolve = (arg) ->
+          console.log("not exiting due to options.exit being false")
 
       onEarlyExit = (errMsg) ->
         ## probably should say we ended
@@ -260,13 +274,13 @@ module.exports = {
       project.once("exitEarlyWithErr", onEarlyExit)
 
   waitForBrowserToConnect: (options = {}) ->
-    { project, id, timeout } = options
+    { project, socketId, timeout } = options
 
     attempts = 0
 
     do waitForBrowserToConnect = =>
       Promise.join(
-        @waitForSocketConnection(project, id)
+        @waitForSocketConnection(project, socketId)
         @launchBrowser(options)
       )
       .timeout(timeout ? 30000)
@@ -298,17 +312,17 @@ module.exports = {
       fn = (socketId) ->
         if socketId is id
           ## remove the event listener if we've connected
-          project.removeListener "socket:connected", fn
+          project.removeListener("socket:connected", fn)
 
           ## resolve the promise
           resolve()
 
       ## when a socket connects verify this
       ## is the one that matches our id!
-      project.on "socket:connected", fn
+      project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, outputPath, exit } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
 
     @listenForProjectEnd(project, headed, exit)
     .then (obj) =>
@@ -318,26 +332,12 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
-      ## TODO: fix this - no need to normalize here
-      ## just for displaying the stats. we are duplicating
-      ## logic here since its just based on 'obj'
+      obj.spec = spec?.path
+
       testResults = collectTestResults(obj)
 
-      writeOutput = ->
-        if not outputPath
-          return Promise.resolve()
-
-        debug("saving results as %s", outputPath)
-
-        fs.outputJsonAsync(outputPath, obj)
-
       finish = ->
-        writeOutput()
-        .then ->
-          project.getConfig()
-        .then (cfg) ->
-          obj.config = cfg
-        .return(obj)
+        return obj
 
       @displayStats(testResults)
 
@@ -383,11 +383,11 @@ module.exports = {
         else
           finish()
 
-  trashAssets: (options = {}) ->
-    if options.trashAssetsBeforeHeadlessRuns is true
+  trashAssets: (config = {}) ->
+    if config.trashAssetsBeforeHeadlessRuns is true
       Promise.join(
-        trash.folder(options.videosFolder)
-        trash.folder(options.screenshotsFolder)
+        trash.folder(config.videosFolder)
+        trash.folder(config.screenshotsFolder)
       )
       .catch (err) ->
         ## dont make trashing assets fail the build
@@ -407,29 +407,6 @@ module.exports = {
       width:     resp.width
     }
 
-  copy: (videosFolder, screenshotsFolder) ->
-    Promise.try ->
-      ## dont attempt to copy if we're running in circle and we've turned off copying artifacts
-      shouldCopy = (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
-
-      debug("Should copy Circle Artifacts?", Boolean(shouldCopy))
-
-      if shouldCopy and videosFolder and screenshotsFolder
-        debug("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
-
-        ## copy each of the screenshots and videos
-        ## to artifacts using each basename of the folders
-        Promise.join(
-          ss.copy(
-            screenshotsFolder,
-            path.join(ca, path.basename(screenshotsFolder))
-          ),
-          video.copy(
-            videosFolder,
-            path.join(ca, path.basename(videosFolder))
-          )
-        )
-
   allDone: ->
     console.log("")
     console.log("")
@@ -440,12 +417,57 @@ module.exports = {
 
     console.log("")
 
-  runTests: (options = {}) ->
+  runSpecs: (options = {}) ->
+    { project, config, outputPath, specs } = options
+
+    results = {
+      startedTestsAt: null
+      endedTestsAt: null
+      totalDuration: null
+      totalSuites: null,
+      totalTests: null,
+      totalFailures: null,
+      totalPasses: null,
+      totalPending: null,
+      totalSkipped: null,
+      runs: null
+      browserName: 'chrome',
+      browserVersion: '41.2.3.4',
+      osName: 'darwin',
+      osVersion: '1.2.3.4',
+      cypressVersion: '2.0.0',
+      config
+    }
+
+    runSpec = (spec) =>
+      @runSpec(spec, options)
+      .get("results")
+
+    Promise.map(specs, runSpec, { concurrency: 1 })
+    .then (runs = []) ->
+      results.startedTestsAt = start = getRun(_.first(runs), "stats.start")
+      results.endedTestsAt = end = getRun(_.last(runs), "stats.end")
+      results.totalDuration = reduceRuns(runs, "stats.duration")
+
+      results.totalSuites = reduceRuns(runs, "stats.suites")
+      results.totalTests = reduceRuns(runs, "stats.tests")
+      results.totalPasses = reduceRuns(runs, "stats.passes")
+      results.totalPending = reduceRuns(runs, "stats.pending")
+      results.totalFailures = reduceRuns(runs, "stats.failures")
+      results.totalSkipped = reduceRuns(runs, "stats.skipped")
+
+      results.runs = runs
+
+      debug("final results of all runs: %o", results)
+
+      writeOutput(outputPath, results)
+      .return(results)
+
+  runSpec: (spec = {}, options = {}) ->
     { browser, videoRecording, videosFolder } = options
-    debug("runTests with options", options)
 
     browser ?= "electron"
-    debug("runTests for browser #{browser}")
+    debug("browser for run is: #{browser}")
 
     screenshots = []
 
@@ -461,12 +483,11 @@ module.exports = {
 
     if videoRecording
       if browserCanBeRecorded(browser)
-        if !videosFolder
+        if not videosFolder
           throw new Error("Missing videoFolder for recording")
 
-        id2       = @getId()
-        name      = path.join(videosFolder, id2 + ".mp4")
-        cname     = path.join(videosFolder, id2 + "-compressed.mp4")
+        name      = path.join(videosFolder, spec.name + ".mp4")
+        cname     = path.join(videosFolder, spec.name + "-compressed.mp4")
         recording = @createRecording(name)
       else
         if browser is "electron" and options.headed
@@ -487,96 +508,108 @@ module.exports = {
       .then (started) =>
         Promise.props({
           results: @waitForTestsToFinishRunning({
+            end
+            name
+            spec
+            cname
+            started
+            screenshots
             exit:                 options.exit
             headed:               options.headed
             project:              options.project
             videoCompression:     options.videoCompression
             videoUploadOnPasses:  options.videoUploadOnPasses
-            outputPath:           options.outputPath
-            end
-            name
-            cname
-            started
-            screenshots
           }),
 
           connection: @waitForBrowserToConnect({
-            id:          options.id
-            spec:        options.spec
-            headed:      options.headed
-            project:     options.project
-            webSecurity: options.webSecurity
-            projectPath: options.projectPath
+            spec
             write
             browser
             screenshots
+            headed:      options.headed
+            project:     options.project
+            socketId:    options.socketId
+            webSecurity: options.webSecurity
+            projectPath: options.projectPath
           })
         })
 
-  ready: (options = {}) ->
-    debug("headless mode ready with options %j", options)
+  findSpecs: (config, spec) ->
+    specsUtil.find(config, spec)
+    .then (files = []) =>
+      if not files.length
+        errors.throw('NO_SPECS_FOUND', config.integrationFolder, spec)
 
-    id = @getId()
+      if debug.enabled
+        names = _.map(files, "name")
+        debug(
+          "found '%d' specs using spec pattern '%s': %o",
+          names.length,
+          spec,
+          names
+        )
+
+      return files
+
+  ready: (options = {}) ->
+    debug("run mode ready with options %j", options)
+
+    socketId = random.id()
 
     { projectPath } = options
 
     ## let's first make sure this project exists
-    Project.ensureExists(projectPath)
+    Project
+    .ensureExists(projectPath)
     .then =>
       ## open this project without
       ## adding it to the global cache
-      @openProject(id, options)
+      @createOpenProject(socketId, options)
       .call("getProject")
-      .then (project) =>
-        Promise.all([
-          @getProjectId(project, options.projectId)
+    .then (project) =>
+      Promise.all([
+        project
 
-          project.getConfig(),
-        ])
-        .spread (projectId, config) =>
-          ## if we have a project id and a key but record hasnt
-          ## been set
-          if haveProjectIdAndKeyButNoRecordOption(projectId, options)
-            ## log a warning telling the user
-            ## that they either need to provide us
-            ## with a RECORD_KEY or turn off
-            ## record mode
-            errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+        getProjectId(project, options.projectId)
 
-          @trashAssets(config)
-          .then =>
-            @runTests({
-              projectPath
-              id:                   id
-              project:              project
-              videosFolder:         config.videosFolder
-              videoRecording:       config.videoRecording
-              videoCompression:     config.videoCompression
-              videoUploadOnPasses:  config.videoUploadOnPasses
-              exit:                 options.exit
-              spec:                 options.spec
-              headed:               options.headed
-              browser:              options.browser
-              outputPath:           options.outputPath
-            })
-          .get("results")
-          .finally =>
-            @copy(config.videosFolder, config.screenshotsFolder)
-            .then =>
-              if options.allDone isnt false
-                @allDone()
+        project.getConfig(),
+      ])
+    .spread (project, projectId, config) =>
+      ## if we have a project id and a key but record hasnt
+      ## been set
+      if haveProjectIdAndKeyButNoRecordOption(projectId, options)
+        ## log a warning telling the user
+        ## that they either need to provide us
+        ## with a RECORD_KEY or turn off
+        ## record mode
+        errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
+
+      @findSpecs(config, options.spec)
+      .then (specs) =>
+        @trashAssets(config)
+        .then =>
+          @runSpecs({
+            projectPath
+            socketId
+            project
+            config
+            specs
+            videosFolder:         config.videosFolder
+            videoRecording:       config.videoRecording
+            videoCompression:     config.videoCompression
+            videoUploadOnPasses:  config.videoUploadOnPasses
+            exit:                 options.exit
+            headed:               options.headed
+            browser:              options.browser
+            outputPath:           options.outputPath
+          })
+        .finally =>
+          if options.allDone isnt false
+            @allDone()
 
   run: (options) ->
-    app = require("electron").app
-
-    waitForReady = ->
-      new Promise (resolve, reject) ->
-        app.on "ready", resolve
-
-    Promise.any([
-      waitForReady()
-      Promise.delay(500)
-    ])
+    electronApp
+    .ready()
     .then =>
       @ready(options)
 

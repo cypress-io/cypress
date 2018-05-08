@@ -2,6 +2,7 @@ require("../spec_helper")
 
 Promise = require("bluebird")
 pkg = require("@packages/root")
+fs = require("#{root}lib/util/fs")
 
 describe "lib/environment", ->
   before ->

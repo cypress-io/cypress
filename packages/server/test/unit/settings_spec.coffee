@@ -2,6 +2,7 @@ require("../spec_helper")
 
 path = require("path")
 R = require("ramda")
+fs = require("#{root}lib/util/fs")
 settings = require("#{root}lib/util/settings")
 
 projectRoot = process.cwd()

@@ -5,7 +5,8 @@ const configureMoment = () => {
     relativeTime: {
       future: 'in %s',
       past: '%s ago',
-      s: 'secs',
+      s: 'a few secs',
+      ss: '%d secs',
       m: 'a min',
       mm: '%d mins',
       h: 'an hour',

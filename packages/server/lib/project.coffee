@@ -1,15 +1,14 @@
 _           = require("lodash")
 R           = require("ramda")
-fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
-glob        = require("glob")
 Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
 check       = require("check-more-types")
+scaffoldLog = require("debug")("cypress:server:scaffold")
+debug       = require("debug")("cypress:server:project")
 cwd         = require("./cwd")
-ids         = require("./ids")
 api         = require("./api")
 user        = require("./user")
 cache       = require("./cache")
@@ -17,21 +16,17 @@ config      = require("./config")
 logger      = require("./logger")
 errors      = require("./errors")
 Server      = require("./server")
+plugins     = require("./plugins")
 scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
+browsers    = require("./browsers")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
-files       = require("./controllers/files")
-plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
+fs          = require("./util/fs")
 settings    = require("./util/settings")
-browsers    = require("./browsers")
-scaffoldLog = require("debug")("cypress:server:scaffold")
-debug       = require("debug")("cypress:server:project")
-
-fs   = Promise.promisifyAll(fs)
-glob = Promise.promisify(glob)
+specsUtil   = require("./util/specs")
 
 localCwd = cwd()
 
@@ -189,7 +184,7 @@ class Project extends EE
       return if not found
 
       debug("watch plugins file")
-      @watchers.watch(cfg.pluginsFile, {
+      @watchers.watchTree(cfg.pluginsFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
@@ -305,7 +300,9 @@ class Project extends EE
     setNewProject = (cfg) =>
       ## decide if new project by asking scaffold
       ## and looking at previously saved user state
-      throw new Error("Missing integration folder") if not cfg.integrationFolder
+      if not cfg.integrationFolder
+        throw new Error("Missing integration folder")
+
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
@@ -314,11 +311,11 @@ class Project extends EE
       .return(cfg)
 
     if c = @cfg
-      Promise.resolve(c)
-    else
-      config.get(@projectRoot, options)
-      .then (cfg) => @_setSavedState(cfg)
-      .then(setNewProject)
+      return Promise.resolve(c)
+
+    config.get(@projectRoot, options)
+    .then (cfg) => @_setSavedState(cfg)
+    .then(setNewProject)
 
   # forces saving of project's state by first merging with argument
   saveState: (stateChanges = {}) ->
@@ -339,37 +336,26 @@ class Project extends EE
       cfg.state = state
       cfg
 
-  ensureSpecUrl: (spec) ->
+  getSpecUrl: (spec) ->
     @getConfig()
     .then (cfg) =>
       ## if we dont have a spec or its __all
       if not spec or (spec is "__all")
-        @getUrlBySpec(cfg.browserUrl, "/__all")
+        @normalizeSpecUrl(cfg.browserUrl, "/__all")
       else
-        @ensureSpecExists(spec)
-        .then (pathToSpec) =>
-          ## TODO:
-          ## to handle both unit + integration tests we need
-          ## to figure out (based on the config) where this spec
-          ## lives. does it live in the integrationFolder or
-          ## the unit folder?
-          ## once we determine that we can then prefix it correctly
-          ## with either integration or unit
-          prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.browserUrl, prefixedPath)
+        ## TODO:
+        ## to handle both unit + integration tests we need
+        ## to figure out (based on the config) where this spec
+        ## lives. does it live in the integrationFolder or
+        ## the unit folder?
+        ## once we determine that we can then prefix it correctly
+        ## with either integration or unit
+        prefixedPath = @getPrefixedPathToSpec(cfg, spec)
+        @normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
-  ensureSpecExists: (spec) ->
-    specFile = path.resolve(@projectRoot, spec)
+  getPrefixedPathToSpec: (cfg, pathToSpec, type = "integration") ->
+    { integrationFolder, projectRoot } = cfg
 
-    ## we want to make it easy on the user by allowing them to pass both
-    ## an absolute path to the spec, or a relative path from their test folder
-    fs
-    .statAsync(specFile)
-    .return(specFile)
-    .catch ->
-      errors.throw("SPEC_FILE_NOT_FOUND", specFile)
-
-  getPrefixedPathToSpec: (integrationFolder, pathToSpec, type = "integration") ->
     ## for now hard code the 'type' as integration
     ## but in the future accept something different here
 
@@ -380,13 +366,20 @@ class Project extends EE
     ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     ##
     ## becomes /integration/foo.coffee
-    "/" + path.join(type, path.relative(integrationFolder, pathToSpec))
+    "/" + path.join(type, path.relative(
+      integrationFolder,
+      path.resolve(projectRoot, pathToSpec)
+    ))
 
-  getUrlBySpec: (browserUrl, specUrl) ->
+  normalizeSpecUrl: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [
+      browserUrl,
+      "#/tests",
+      specUrl
+    ].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (cfg) ->
     debug("scaffolding project %s", @projectRoot)
@@ -414,7 +407,7 @@ class Project extends EE
     Promise.all(scaffolds)
 
   writeProjectId: (id) ->
-    attrs = {projectId: id}
+    attrs = { projectId: id }
     logger.info "Writing Project ID", _.clone(attrs)
 
     @generatedProjectIdTimestamp = new Date
@@ -555,14 +548,6 @@ class Project extends EE
     .catch ->
       {path}
 
-  @removeIds = (p) ->
-    Project(p)
-    .verifyExistence()
-    .call("getConfig")
-    .then (cfg) ->
-      ## remove all of the ids for the test files found in the integrationFolder
-      ids.remove(cfg.integrationFolder)
-
   @id = (path) ->
     Project(path).getProjectId()
 
@@ -611,7 +596,7 @@ class Project extends EE
     .getConfig()
     # TODO: handle wild card pattern or spec filename
     .then (cfg) ->
-      files.getTestFiles(cfg, specPattern)
+      specsUtil.find(cfg, specPattern)
     .then R.prop("integration")
     .then R.map(R.prop("name"))
 

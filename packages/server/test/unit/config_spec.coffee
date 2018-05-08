@@ -633,12 +633,12 @@ describe "lib/config", ->
         hosts: "foo=bar|baz=quux"
       })
 
-    it "resets numTestsKeptInMemory to 0 when headless", ->
+    it "resets numTestsKeptInMemory to 0 when runMode", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
       .then (cfg) ->
         expect(cfg.numTestsKeptInMemory).to.eq(0)
 
-    it "resets watchForFileChanges to false when headless", ->
+    it "resets watchForFileChanges to false when runMode", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
       .then (cfg) ->
         expect(cfg.watchForFileChanges).to.be.false
