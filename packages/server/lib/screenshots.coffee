@@ -25,6 +25,22 @@ isBlack = (rgba) ->
 isWhite = (rgba) ->
   "#{rgba.r}#{rgba.g}#{rgba.b}" is "255255255"
 
+## when we hide the runner UI for an app or fullpage capture
+## the browser doesn't paint synchronously, it can take 100+ ms
+## to ensure that the runner UI has been hidden, we put
+## pixels in the corners of the runner UI like so:
+##
+##  -------------
+## |g w         w|  w = white
+## |w            |  g = grey
+## |             |  b = black
+## |w           b|
+##  -------------
+##
+## when taking an 'app' or 'fullpage' capture, we ensure that the pixels
+## are NOT there before accepting the screenshot
+## when taking a 'runner' capture, we ensure the pixels ARE there
+
 hasHelperPixels = (image) ->
   topLeft = Jimp.intToRGBA(image.getPixelColor(0, 0))
   topLeftRight = Jimp.intToRGBA(image.getPixelColor(1, 0))
@@ -42,6 +58,10 @@ hasHelperPixels = (image) ->
     isWhite(bottomLeft)
   )
 
+## if somehow after 10 tries, the condition isn't met, just
+## accept the current screenshot
+MAX_TRIES = 10
+
 captureAndCheck = (data, automate, condition) ->
   tries = 0
   do attempt = ->
@@ -56,7 +76,7 @@ captureAndCheck = (data, automate, condition) ->
     .then (image) ->
       debug("read buffer to image #{image.bitmap.width} x #{image.bitmap.height}")
 
-      if tries >= 10 or condition(data, image)
+      if tries >= MAX_TRIES or condition(data, image)
         return image
       else
         attempt()
