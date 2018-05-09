@@ -201,26 +201,38 @@ describe "Specs List", ->
           cy.get(lastExpandedFolderSelector).click()
           cy.get(".file").should("have.length", 0)
 
-    context "Searching specs", ->
+    context "filtering specs", ->
       beforeEach ->
         @ipc.getSpecs.yields(null, @specs)
         @openProject.resolve(@config)
-        cy.get("#search-input").type("new")
+        cy.get(".filter").type("new")
 
-      it "should display only one spec", ->
-        cy.get(".list-as-table .file")
+      it "displays only matching spec", ->
+        cy.get(".outer-files-container .file")
           .should("have.length", 1)
           .and("contain", "account_new_spec.coffee")
 
-      it "should display the same number of open folders", ->
-        cy.get(".list-as-table .folder")
-          .should("have.length", 10)
+      it "only shows matching folders", ->
+        cy.get(".outer-files-container .folder")
+          .should("have.length", 2)
 
-      it "should clear the search if the user press ESC key", ->
-        cy.get("#search-input").type("{esc}")
+      it "clears the filter on clear button click", ->
+        cy.get(".clear-filter").click()
+        cy.get(".filter")
           .should("have.value", "")
-        cy.get(".list-as-table .file")
+        cy.get(".outer-files-container .file")
           .should("have.length", 7)
+
+      it "clears the filter if the user press ESC key", ->
+        cy.get(".filter").type("{esc}")
+          .should("have.value", "")
+        cy.get(".outer-files-container .file")
+          .should("have.length", 7)
+
+      it "shows empty message if no results", ->
+        cy.get(".filter").clear().type("foobarbaz")
+        cy.get(".outer-files-container").should("not.exist")
+        cy.get(".empty-well").should("have.text", "No files match the filter 'foobarbaz'")
 
     context "click on spec", ->
       beforeEach ->
