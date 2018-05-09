@@ -22,10 +22,12 @@ rp = request.defaults (params = {}, callback) ->
 
   headers = params.headers ?= {}
 
-  _.defaults(headers, {
+  extraHeaders = {
     "x-os-name":         os.platform()
     "x-cypress-version": pkg.version
-  })
+  }
+  debug("extra headers %j", extraHeaders)
+  _.defaults(headers, extraHeaders)
 
   method = params.method.toLowerCase()
 
@@ -89,10 +91,13 @@ module.exports = {
     .catch(tagError)
 
   getProjectRuns: (projectId, authToken, options = {}) ->
+    url = routes.projectRuns(projectId)
+    debug('getProjectsRuns url %s', url)
+
     options.page ?= 1
 
     rp.get({
-      url: routes.projectRuns(projectId)
+      url
       json: true
       timeout: options.timeout ? 10000
       auth: {
