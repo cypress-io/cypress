@@ -1,13 +1,12 @@
-exports['installs without existing installation 1'] = `
-Installing Cypress (version: 1.2.3)
+exports['version already installed 1'] = `
+Cypress 1.2.3 is already installed. Skipping installation.
 
- ✔  Downloaded Cypress
- ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/binary/dir/
+Pass the --force option if you'd like to reinstall anyway.
 
-You can now open Cypress by running: node_modules/.bin/cypress open
+`
 
-https://on.cypress.io/installing-cypress
+exports['skip installation 1'] = `
+Skipping binary installation. Env var 'CYPRESS_SKIP_BINARY_INSTALL' was found.
 
 `
 
@@ -32,14 +31,22 @@ https://on.cypress.io/installing-cypress
 
 `
 
-exports['version already installed 1'] = `
-Cypress 1.2.3 is already installed. Skipping installation.
+exports['continues installing on failure 1'] = `
+Installed version ([object Object]) does not match needed version (1.2.3).
 
-Pass the --force option if you'd like to reinstall anyway.
+Installing Cypress (version: 1.2.3)
+
+ ✔  Downloaded Cypress
+ ✔  Unzipped Cypress
+ ✔  Finished Installation   /path/to/binary/dir/
+
+You can now open Cypress by running: node_modules/.bin/cypress open
+
+https://on.cypress.io/installing-cypress
 
 `
 
-exports['continues installing on failure 1'] = `
+exports['installs without existing installation 1'] = `
 Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
@@ -117,10 +124,5 @@ Installing Cypress (version: 1.2.3)
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
-
-`
-
-exports['skip installation 1'] = `
-Skipping binary installation. Env var 'CYPRESS_SKIP_BINARY_INSTALL' was found.
 
 `

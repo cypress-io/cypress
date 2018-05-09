@@ -5,14 +5,14 @@ const os = require('os')
 const tty = require('tty')
 const path = require('path')
 
-const info = require(`${lib}/tasks/info`)
+const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
 const spawn = require(`${lib}/exec/spawn`)
 const util = require(`${lib}/util.js`)
 
 const cwd = process.cwd()
 
-describe('exec spawn', function () {
+describe('lib/exec/spawn', function () {
   beforeEach(function () {
     this.sandbox.stub(process, 'exit')
     this.spawnedProcess = this.sandbox.stub({
@@ -26,7 +26,7 @@ describe('exec spawn', function () {
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(false)
-    this.sandbox.stub(info, 'getPathToExecutable').returns('/path/to/cypress')
+    this.sandbox.stub(state, 'getPathToExecutable').returns('/path/to/cypress')
   })
 
   context('.start', function () {

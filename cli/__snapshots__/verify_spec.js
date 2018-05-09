@@ -1,3 +1,12 @@
+exports['verbose stdout output 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /path/to/executable/dir
+
+Opening Cypress...
+
+`
+
 exports['no version of Cypress installed 1'] = `
 Error: No version of Cypress is installed.
 
@@ -77,7 +86,11 @@ Opening Cypress...
 `
 
 exports['current version has not been verified 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
+Installed version different version does not match the expected package version 1.2.3
+
+Note: there is no guarantee these versions will work properly together.
+
+It looks like this is your first time using Cypress: different version
 
  ✔  Verified Cypress! /path/to/executable/dir
 
@@ -99,9 +112,10 @@ Opening Cypress...
 `
 
 exports['no welcome message 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
+Installed version different version does not match the expected package version 1.2.3
 
- ✔  Verified Cypress! /path/to/executable/dir
+Note: there is no guarantee these versions will work properly together.
+
 
 `
 
@@ -134,15 +148,6 @@ It looks like this is your first time using Cypress: 1.2.3
 
 [xx:xx:xx]  Verifying Cypress can run /path/to/executable/dir [started]
 [xx:xx:xx]  Verifying Cypress can run /path/to/executable/dir [completed]
-
-Opening Cypress...
-
-`
-
-exports['verbose stdout output 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
-
- ✔  Verified Cypress! /path/to/executable/dir
 
 Opening Cypress...
 

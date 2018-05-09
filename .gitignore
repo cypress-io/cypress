@@ -12,6 +12,7 @@ build
 _test-output
 cypress.zip
 tmp/
+.nyc_output
 
 # from extension
 Cached Theme.pak

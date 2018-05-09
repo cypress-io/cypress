@@ -5,7 +5,7 @@ const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
-const info = require(`${lib}/tasks/info`)
+const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
@@ -45,7 +45,7 @@ describe('cli', function () {
   context('cypress version', function () {
     it('reports package version', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -56,7 +56,7 @@ describe('cli', function () {
 
     it('reports package and binary message', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -67,7 +67,7 @@ describe('cli', function () {
 
     it('handles non-existent binary version', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -78,7 +78,7 @@ describe('cli', function () {
 
     it('handles non-existent binary --version', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('--version')
       process.exit.callsFake(() => {
@@ -89,7 +89,7 @@ describe('cli', function () {
 
     it('handles non-existent binary -v', function (done) {
       this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('-v')
       process.exit.callsFake(() => {
@@ -237,9 +237,15 @@ describe('cli', function () {
   })
 
 
-  it('install calls install.start with force: true', function () {
+  it('install calls install.start without forcing', function () {
     this.sandbox.stub(install, 'start').resolves()
     this.exec('install')
+    expect(install.start).not.to.be.calledWith({ force: true })
+  })
+
+  it('install calls install.start with force: true when passed', function () {
+    this.sandbox.stub(install, 'start').resolves()
+    this.exec('install --force')
     expect(install.start).to.be.calledWith({ force: true })
   })
 

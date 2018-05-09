@@ -4,6 +4,7 @@ const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
 const EE = require('events').EventEmitter
+const path = require('path')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
 const { stripIndent } = require('common-tags')
@@ -12,7 +13,7 @@ const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 const xvfb = require(`${lib}/exec/xvfb`)
-const info = require(`${lib}/tasks/info`)
+const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 
 const stdout = require('../../support/stdout')
@@ -21,7 +22,6 @@ const normalize = require('../../support/normalize')
 const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
-const installationDir = info.getInstallationDir()
 
 const LISTR_DELAY = 500 // for its animation
 
@@ -42,9 +42,11 @@ const slice = (str) => {
   return str.join('\n')
 }
 
-context('.verify', function () {
+context('lib/tasks/verify', function () {
   require('mocha-banner').register()
+
   beforeEach(function () {
+    this.sandbox.restore()
     this.stdout = stdout.capture()
     this.cpstderr = new EE()
     this.cpstdout = new EE()
@@ -52,27 +54,20 @@ context('.verify', function () {
     this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
     this.sandbox.stub(os, 'platform').returns('darwin')
     this.sandbox.stub(os, 'release').returns('test release')
-    this.ensureEmptyInstallationDir = () => {
-      return fs.removeAsync(installationDir)
-      .then(() => {
-        return info.ensureInstallationDir()
-      })
-    }
     this.spawnedProcess = _.extend(new EE(), {
       unref: this.sandbox.stub(),
       stderr: this.cpstderr,
       stdout: this.cpstdout,
     })
     this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
-    this.sandbox.stub(info, 'getPathToExecutable').returns(executablePath)
-    this.sandbox.stub(info, 'getPathToUserExecutableDir').returns(executableDir)
+    this.sandbox.stub(state, 'getPathToExecutable').returns(executablePath)
+    this.sandbox.stub(state, 'getPathToExecutableDir').returns(executableDir)
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(false)
     this.sandbox.stub(Promise, 'delay').resolves()
     this.sandbox.stub(this.spawnedProcess, 'on')
     this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-    return this.ensureEmptyInstallationDir()
   })
 
   afterEach(function () {
@@ -81,11 +76,8 @@ context('.verify', function () {
 
   it('logs error and exits when no version of Cypress is installed', function () {
     const ctx = this
-
-    return info.writeInfoFileContents({})
-    .then(() => {
-      return verify.start()
-    })
+    this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(false)
+    return verify.start()
     .then(() => {
       throw new Error('should have caught error')
     })
@@ -99,19 +91,14 @@ context('.verify', function () {
     })
   })
 
-  it('is noop when verifiedVersion matches expected', function () {
+  it('is noop when binary is already verified', function () {
     const ctx = this
 
-    // make it think the executable exists
-    this.sandbox.stub(fs, 'statAsync').resolves()
-
-    return info.writeInfoFileContents({
-      version: packageVersion,
-      verifiedVersion: packageVersion,
-    })
-    .then(() => {
-      return verify.start()
-    })
+    // make it think the executable exists and is verified
+    this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+    this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+    this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(true)
+    return verify.start()
     .then(() => {
       // nothing should have been logged to stdout
       // since no verification took place
@@ -123,19 +110,12 @@ context('.verify', function () {
 
   it('logs warning when installed version does not match verified version', function () {
     const ctx = this
-
-    this.sandbox.stub(fs, 'statAsync')
-    .callThrough()
-    .withArgs(executablePath)
-    .resolves()
-
+    this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+    this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves('bloop')
     // force this to throw to short circuit actually running smoke test
-    this.sandbox.stub(info, 'getVerifiedVersion').rejects(new Error)
+    this.sandbox.stub(state, 'getBinaryVerifiedAsync').rejects(new Error())
 
-    return info.writeInstalledVersion('bloop')
-    .then(() => {
-      return verify.start()
-    })
+    return verify.start()
     .then(() => {
       throw new Error('should have caught error')
     })
@@ -149,11 +129,9 @@ context('.verify', function () {
 
   it('logs error and exits when executable cannot be found', function () {
     const ctx = this
+    this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
 
-    return info.writeInstalledVersion(packageVersion)
-    .then(() => {
-      return verify.start()
-    })
+    return verify.start()
     .then(() => {
       throw new Error('should have caught error')
     })
@@ -169,18 +147,16 @@ context('.verify', function () {
 
   describe('with force: true', function () {
     beforeEach(function () {
-      this.sandbox.stub(fs, 'statAsync').resolves()
       this.sandbox.stub(_, 'random').returns('222')
       this.sandbox.stub(this.cpstdout, 'on').yieldsAsync('222')
-
-      return info.writeInfoFileContents({
-        version: packageVersion,
-        verifiedVersion: packageVersion,
-      })
     })
 
     it('shows full path to executable when verifying', function () {
       const ctx = this
+
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+      this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
 
       return verify.start({ force: true })
       .then(() => {
@@ -188,12 +164,6 @@ context('.verify', function () {
           '--smoke-test',
           '--ping=222',
         ])
-      })
-      .then(() => {
-        return info.getVerifiedVersion()
-      })
-      .then((vv) => {
-        expect(vv).to.eq(packageVersion)
       })
       .delay(LISTR_DELAY)
       .then(() => {
@@ -205,12 +175,19 @@ context('.verify', function () {
     })
 
     it('clears verified version from state if verification fails', function () {
+
       const ctx = this
 
       const stderr = 'an error about dependencies'
 
-      this.sandbox.stub(this.cpstderr, 'on').withArgs('data').yields(stderr)
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+      this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(true)
 
+      this.sandbox.spy(state, 'writeBinaryVerifiedAsync')
+      this.sandbox.spy(state, 'clearBinaryStateAsync')
+
+      this.sandbox.stub(this.cpstderr, 'on').withArgs('data').yields(stderr)
       this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
 
       return verify.start({ force: true })
@@ -221,11 +198,10 @@ context('.verify', function () {
           'fails verifying Cypress',
           normalize(slice(ctx.stdout.toString()))
         )
-
-        return info.getVerifiedVersion()
       })
-      .then((verifiedVersion) => {
-        expect(verifiedVersion).to.be.null
+      .then(() => {
+        expect(state.clearBinaryStateAsync).to.be.called
+        expect(state.writeBinaryVerifiedAsync).to.not.be.called
       })
     })
   })
@@ -245,19 +221,11 @@ context('.verify', function () {
 
     it('finds ping value in the verbose output', function () {
       const ctx = this
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+      this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
 
-      return info.writeInfoFileContents({
-        version: packageVersion,
-      })
-      .then(() => {
-        return verify.start()
-      })
-      .then(() => {
-        return info.getVerifiedVersion()
-      })
-      .then((vv) => {
-        expect(vv).to.eq(packageVersion)
-      })
+      return verify.start()
       .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
@@ -277,19 +245,11 @@ context('.verify', function () {
 
     it('logs and runs when no version has been verified', function () {
       const ctx = this
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+      this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
 
-      return info.writeInfoFileContents({
-        version: packageVersion,
-      })
-      .then(() => {
-        return verify.start()
-      })
-      .then(() => {
-        return info.getVerifiedVersion()
-      })
-      .then((vv) => {
-        expect(vv).to.eq(packageVersion)
-      })
+      return verify.start()
       .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
@@ -301,20 +261,10 @@ context('.verify', function () {
 
     it('logs and runs when current version has not been verified', function () {
       const ctx = this
-
-      return info.writeInfoFileContents({
-        version: packageVersion,
-        verifiedVersion: 'different version',
-      })
-      .then(() => {
-        return verify.start()
-      })
-      .then(() => {
-        return info.getVerifiedVersion()
-      })
-      .then((vv) => {
-        expect(vv).to.eq(packageVersion)
-      })
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves('different version')
+      this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
+      return verify.start()
       .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
@@ -326,20 +276,11 @@ context('.verify', function () {
 
     it('logs and runs when installed version is different than verified version', function () {
       const ctx = this
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves('9.8.7')
+      this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
 
-      return info.writeInfoFileContents({
-        version: '9.8.7',
-        verifiedVersion: packageVersion,
-      })
-      .then(() => {
-        return verify.start()
-      })
-      .then(() => {
-        return info.getVerifiedVersion()
-      })
-      .then((vv) => {
-        expect(vv).to.eq('9.8.7')
-      })
+      return verify.start()
       .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
@@ -351,15 +292,12 @@ context('.verify', function () {
 
     it('turns off Opening Cypress...', function () {
       const ctx = this
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves('different version')
+      this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(true)
 
-      return info.writeInfoFileContents({
-        version: packageVersion,
-        verifiedVersion: 'different version',
-      })
-      .then(() => {
-        return verify.start({
-          welcomeMessage: false,
-        })
+      return verify.start({
+        welcomeMessage: false,
       })
       .delay(LISTR_DELAY)
       .then(() => {
@@ -373,11 +311,9 @@ context('.verify', function () {
     describe('on linux', function () {
       beforeEach(function () {
         xvfb.isNeeded.returns(true)
-
-        return info.writeInfoFileContents({
-          version: packageVersion,
-          verifiedVersion: 'different version',
-        })
+        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+        this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+        this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
       })
 
       it('starts xvfb', function () {
@@ -417,14 +353,12 @@ context('.verify', function () {
 
     describe('when running in CI', function () {
       beforeEach(function () {
+        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+        this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+        this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
         util.isCi.returns(true)
 
-        return info.writeInfoFileContents({
-          version: packageVersion,
-        })
-        .then(() => {
-          return verify.start({ force: true })
-        })
+        return verify.start({ force: true })
       })
 
       it('uses verbose renderer', function () {

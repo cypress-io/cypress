@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 
 const util = require('../util')
-const info = require('../tasks/info')
+const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
@@ -45,7 +45,7 @@ module.exports = {
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let cypressPath = info.getPathToExecutable()
+        let cypressPath = state.getPathToExecutable()
 
         if (options.dev) {
           // if we're in dev then reset
@@ -109,8 +109,9 @@ module.exports = {
       })
     }
 
-    const userFriendlySpawn = () =>
-      spawn().catch(throwFormErrorText(errors.unexpected))
+    const userFriendlySpawn = () => {
+      return spawn().catch(throwFormErrorText(errors.unexpected))
+    }
 
     if (needsXvfb) {
       return xvfb.start()
