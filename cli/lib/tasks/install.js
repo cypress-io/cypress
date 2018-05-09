@@ -297,7 +297,7 @@ const start = (options = {}) => {
       return downloadAndUnzip({ version: needVersion, installDir, downloadDir })
     })
     // delay 1 sec for UX, unless we are testing
-    .delay(process.env.NODE_ENV === 'test' ? 0 : 1000)
+    .then(() => Promise.resolve().delay(1000))
     .then(displayCompletionMsg)
   })
 }

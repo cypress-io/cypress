@@ -136,7 +136,7 @@ function testBinary (version, installPath) {
         .then(() => {
           return Promise.all([
             runSmokeTest(),
-            Promise.delay(1500), // good user experience
+            Promise.resolve().delay(1500), // good user experience
           ])
         })
         .then(() => {

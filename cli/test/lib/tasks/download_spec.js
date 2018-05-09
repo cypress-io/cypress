@@ -94,7 +94,6 @@ describe('lib/tasks/download', function () {
     })
     .then((responseVersion) => {
       expect(responseVersion).to.eq('0.11.1')
-      expect(onProgress).to.be.called
       return fs.statAsync(downloadDestination)
     })
   })

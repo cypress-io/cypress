@@ -22,7 +22,6 @@ const packageVersion = '1.2.3'
 const executablePath = '/path/to/executable'
 const executableDir = '/path/to/executable/dir'
 
-const LISTR_DELAY = 500 // for its animation
 
 const slice = (str) => {
   // strip answer and split by new lines
@@ -64,8 +63,10 @@ context('lib/tasks/verify', function () {
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(false)
-    this.sandbox.stub(Promise, 'delay').resolves()
+    this.sandbox.stub(Promise.prototype, 'delay').resolves()
     this.sandbox.stub(this.spawnedProcess, 'on')
+    this.sandbox.stub(state, 'writeBinaryVerifiedAsync').resolves()
+    this.sandbox.stub(state, 'clearBinaryStateAsync').resolves()
     this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
   })
 
@@ -164,7 +165,6 @@ context('lib/tasks/verify', function () {
           '--ping=222',
         ])
       })
-      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'verification with executable',
@@ -183,8 +183,6 @@ context('lib/tasks/verify', function () {
       this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
       this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(true)
 
-      this.sandbox.spy(state, 'writeBinaryVerifiedAsync')
-      this.sandbox.spy(state, 'clearBinaryStateAsync')
 
       this.sandbox.stub(this.cpstderr, 'on').withArgs('data').yields(stderr)
       this.spawnedProcess.on.withArgs('close').yieldsAsync(1)
@@ -225,7 +223,6 @@ context('lib/tasks/verify', function () {
       this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
 
       return verify.start()
-      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'verbose stdout output',
@@ -249,7 +246,6 @@ context('lib/tasks/verify', function () {
       this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
 
       return verify.start()
-      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'no existing version verified',
@@ -264,7 +260,6 @@ context('lib/tasks/verify', function () {
       this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves('different version')
       this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
       return verify.start()
-      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'current version has not been verified',
@@ -280,7 +275,6 @@ context('lib/tasks/verify', function () {
       this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
 
       return verify.start()
-      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'current version has not been verified',
@@ -298,7 +292,6 @@ context('lib/tasks/verify', function () {
       return verify.start({
         welcomeMessage: false,
       })
-      .delay(LISTR_DELAY)
       .then(() => {
         snapshot(
           'no welcome message',

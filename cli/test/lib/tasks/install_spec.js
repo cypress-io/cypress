@@ -47,7 +47,7 @@ describe('install', function () {
       this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
       this.sandbox.stub(download, 'start').resolves(packageVersion)
       this.sandbox.stub(unzip, 'start').resolves()
-      this.sandbox.stub(Promise, 'delay').resolves()
+      this.sandbox.stub(Promise.prototype, 'delay').resolves()
       this.sandbox.stub(fs, 'removeAsync').resolves()
       this.sandbox.stub(state, 'getPathToExecutableDir').returns('/path/to/binary/dir/')
       this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves()
