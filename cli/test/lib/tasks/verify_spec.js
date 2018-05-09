@@ -4,7 +4,6 @@ const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
 const EE = require('events').EventEmitter
-const path = require('path')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
 const { stripIndent } = require('common-tags')

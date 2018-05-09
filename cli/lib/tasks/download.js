@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')
