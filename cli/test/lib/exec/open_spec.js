@@ -104,5 +104,14 @@ describe('exec open', function () {
         expect(spawn.start).to.be.calledWith([])
       })
     })
+
+    it('can accept option.cypressPath', function () {
+      const cypressPath = '/path/to/cypress/'
+      return open.start({ cypressPath })
+      .then(() => {
+        expect(verify.start).to.be.calledWith({ cypressPath })
+        expect(spawn.start).to.be.calledWith(['--cypress-path', cypressPath])
+      })
+    })
   })
 })

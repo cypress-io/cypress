@@ -360,5 +360,21 @@ context('lib/tasks/verify', function () {
         )
       })
     })
+
+    describe('with options.cypressPath', function () {
+      it('verifies the binary when passed with options.cypressPath', function () {
+        state.getPathToExecutableDir.restore()
+        state.getPathToExecutable.restore()
+        const customBinaryDir = 'custom/path/to/binary'
+        const customExecPath = state.getPathToExecutable(customBinaryDir)
+        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(customExecPath).resolves(true)
+        this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+        this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
+        return verify.start({ cypressPath: customBinaryDir })
+        .then(() => {
+          expect(cp.spawn).to.be.calledWith(customExecPath)
+        })
+      })
+    })
   })
 })

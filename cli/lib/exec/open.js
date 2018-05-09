@@ -27,6 +27,10 @@ module.exports = {
       args.push('--project', options.project)
     }
 
+    if (options.cypressPath) {
+      args.push('--cypress-path', options.cypressPath)
+    }
+
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
@@ -42,7 +46,7 @@ module.exports = {
       return open()
     }
 
-    return verify.start()
+    return verify.start({ cypressPath: options.cypressPath })
     .then(open)
   },
 }

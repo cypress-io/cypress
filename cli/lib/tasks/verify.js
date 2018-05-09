@@ -22,8 +22,8 @@ const xvfbError = (message) => {
   return _.extend(new Error(''), { name: '', message, isXvfbError: true })
 }
 
-const isMissingExecutable = () => {
-  const executable = state.getPathToExecutable()
+const isMissingExecutable = (binaryDir) => {
+  const executable = state.getPathToExecutable(binaryDir)
   debug('checking if executable exists', executable)
   return fs.pathExistsAsync(executable)
   .then((exists) => {
@@ -35,11 +35,11 @@ const isMissingExecutable = () => {
   })
 }
 
-const runSmokeTest = () => {
+const runSmokeTest = (binaryDir) => {
   debug('running smoke test')
   let stderr = ''
   let stdout = ''
-  const cypressExecPath = state.getPathToExecutable()
+  const cypressExecPath = state.getPathToExecutable(binaryDir)
   debug('using Cypress executable %s', cypressExecPath)
 
   // TODO switch to execa for this?
@@ -105,10 +105,10 @@ const runSmokeTest = () => {
   }
 }
 
-function testBinary (version, installPath) {
+function testBinary (version, binaryDir) {
   debug('running binary verification check', version)
 
-  const dir = state.getPathToExecutableDir(installPath)
+  const dir = state.getPathToExecutableDir(binaryDir)
 
   // let the user know what version of cypress we're downloading!
   logger.log(
@@ -132,16 +132,16 @@ function testBinary (version, installPath) {
       title: util.titleize('Verifying Cypress can run', chalk.gray(dir)),
       task: (ctx, task) => {
         debug('clearing out the verified version')
-        return state.clearBinaryStateAsync()
+        return state.clearBinaryStateAsync(binaryDir)
         .then(() => {
           return Promise.all([
-            runSmokeTest(),
+            runSmokeTest(binaryDir),
             Promise.resolve().delay(1500), // good user experience
           ])
         })
         .then(() => {
           debug('write verified: true')
-          return state.writeBinaryVerifiedAsync(true)
+          return state.writeBinaryVerifiedAsync(true, binaryDir)
         })
         .then(() => {
           util.setTaskTitle(
@@ -191,13 +191,13 @@ const start = (options = {}) => {
   debug('verifying Cypress app')
 
   const packageVersion = util.pkgVersion()
-  const binaryDir = state.getBinaryDir(packageVersion)
+  const binaryDir = options.cypressPath || state.getBinaryDir(packageVersion)
 
   _.defaults(options, {
     force: false,
     welcomeMessage: true,
   })
-  return isMissingExecutable()
+  return isMissingExecutable(binaryDir)
   .then(() => state.getBinaryPkgVersionAsync(binaryDir))
   .then((binaryVersion) => {
 

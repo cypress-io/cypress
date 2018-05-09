@@ -50,35 +50,38 @@ const getDistDir = () => {
   return path.join(__dirname, '..', '..', 'dist')
 }
 
-const getBinaryStatePath = () => {
-  return path.join(getBinaryDir(), 'binary_state.json')
+const getBinaryStatePath = (binaryDir) => {
+  return path.join(binaryDir, 'binary_state.json')
 }
 
-const getBinaryStateContentsAsync = () => {
-  return fs.readJsonAsync(getBinaryStatePath())
+const getBinaryStateContentsAsync = (binaryDir = getBinaryDir()) => {
+  return fs.readJsonAsync(getBinaryStatePath(binaryDir))
   .catch({ code: 'ENOENT' }, SyntaxError, () => {
     debug('could not read binary_state.json file')
     return {}
   })
 }
 
-const getBinaryVerifiedAsync = () => {
-  return getBinaryStateContentsAsync()
+const getBinaryVerifiedAsync = (binaryDir = getBinaryDir()) => {
+  return getBinaryStateContentsAsync(binaryDir)
   .tap(debug)
   .get('verified')
 }
 
-const clearBinaryStateAsync = () => {
-  return fs.removeAsync(getBinaryDir())
+const clearBinaryStateAsync = (binaryDir = getBinaryDir()) => {
+  return fs.removeAsync(path.join(binaryDir, getBinaryStatePath(binaryDir)))
 }
 
 /**
  * @param {boolean} verified
  */
-const writeBinaryVerifiedAsync = (verified) => {
-  return getBinaryStateContentsAsync()
+const writeBinaryVerifiedAsync = (verified, binaryDir = getBinaryDir()) => {
+  return getBinaryStateContentsAsync(binaryDir)
   .then((contents) => {
-    return fs.outputJsonAsync(getBinaryStatePath(), _.extend(contents, { verified }), { spaces: 2 })
+    return fs.outputJsonAsync(
+      getBinaryStatePath(binaryDir),
+      _.extend(contents, { verified }),
+      { spaces: 2 })
   })
 }
 

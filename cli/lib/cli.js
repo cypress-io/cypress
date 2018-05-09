@@ -14,7 +14,7 @@ const parseOpts = (opts) => {
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed',
-    'group', 'groupId', 'global', 'dev', 'force')
+    'group', 'groupId', 'global', 'dev', 'force', 'cypressPath')
 
   debug('parsed cli options', opts)
 
@@ -43,6 +43,7 @@ const descriptions = {
   groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
   dev: 'runs cypress in development and bypasses binary check',
   forceInstall: 'force install the Cypress binary',
+  cypressPath: 'path to Cypress binary',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -115,6 +116,7 @@ module.exports = {
     .option('--group', text('group'), coerceFalse)
     .option('--group-id <group-id>', text('groupId'))
     .option('--dev', text('dev'), coerceFalse)
+    .option('--cypress-path <cypress path>', text('cypressPath'))
     .action((opts) => {
       debug('running Cypress')
       require('./exec/run')
@@ -132,6 +134,8 @@ module.exports = {
     .option('-c, --config <config>', text('config'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('-P, --project <project path>', text('project'))
+    .option('--cypress-path <cypress path>', text('cypressPath'))
+
     .option('--global', text('global'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
@@ -154,10 +158,12 @@ module.exports = {
 
     program
     .command('verify')
+    .usage('[options]')
     .description('Verifies that Cypress is installed correctly and executable')
-    .action(() => {
+    .option('--cypress-path <cypress path>', text('cypressPath'))
+    .action((opts) => {
       require('./tasks/verify')
-      .start({ force: true, welcomeMessage: false })
+      .start(_.extend(parseOpts(opts), { force: true, welcomeMessage: false }))
       .catch(util.logErrorExit1)
     })
 

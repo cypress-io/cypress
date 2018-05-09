@@ -194,6 +194,12 @@ describe('cli', function () {
       this.exec('run --headed')
       expect(run.start).to.be.calledWith({ headed: true })
     })
+
+    it('calls run.start with --cypress-path', function () {
+      this.exec('run --cypress-path /custom/path')
+      expect(run.start).to.be.calledWith({ cypressPath: '/custom/path' })
+    })
+
   })
 
   context('cypress open', function () {
@@ -215,6 +221,11 @@ describe('cli', function () {
       // this.sandbox.stub(open, 'start').resolves()
       this.exec('open --port 7878')
       expect(open.start).to.be.calledWith({ port: '7878' })
+    })
+
+    it('calls open.start with --cypress-path', function () {
+      this.exec('open --cypress-path /custom/path')
+      expect(open.start).to.be.calledWith({ cypressPath: '/custom/path' })
     })
 
     it('calls open.start with global', function () {
@@ -260,22 +271,31 @@ describe('cli', function () {
       done()
     })
   })
+  context('cypress verify', function () {
 
-  it('verify calls verify.start with force: true', function () {
-    this.sandbox.stub(verify, 'start').resolves()
-    this.exec('verify')
-    expect(verify.start).to.be.calledWith({ force: true, welcomeMessage: false })
-  })
 
-  it('verify calls verify.start + catches errors', function (done) {
-    const err = new Error('foo')
+    it('verify calls verify.start with force: true', function () {
+      this.sandbox.stub(verify, 'start').resolves()
+      this.exec('verify')
+      expect(verify.start).to.be.calledWith({ force: true, welcomeMessage: false })
+    })
 
-    this.sandbox.stub(verify, 'start').rejects(err)
-    this.exec('verify')
+    it('verify calls verify.start + catches errors', function (done) {
+      const err = new Error('foo')
 
-    util.logErrorExit1.callsFake((e) => {
-      expect(e).to.eq(err)
-      done()
+      this.sandbox.stub(verify, 'start').rejects(err)
+      this.exec('verify')
+
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
+    })
+
+    it('calls verify.start with --binary-path when passed', function () {
+      this.sandbox.stub(verify, 'start').resolves()
+      this.exec('verify --cypress-path /custom/path')
+      expect(verify.start).to.be.calledWithMatch({ cypressPath: '/custom/path' })
     })
   })
 })

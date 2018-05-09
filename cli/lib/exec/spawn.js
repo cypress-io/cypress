@@ -45,7 +45,7 @@ module.exports = {
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let cypressPath = state.getPathToExecutable()
+        let cypressPath = state.getPathToExecutable(options.cypressPath || state.getBinaryDir())
 
         if (options.dev) {
           // if we're in dev then reset
