@@ -162,8 +162,11 @@ module.exports = {
     .description('Verifies that Cypress is installed correctly and executable')
     .option('--cypress-path <cypress path>', text('cypressPath'))
     .action((opts) => {
+      const defaultOpts = { force: true, welcomeMessage: false }
+      const parsedOpts = parseOpts(opts)
+      const options = _.extend(parsedOpts, defaultOpts)
       require('./tasks/verify')
-      .start(_.extend(parseOpts(opts), { force: true, welcomeMessage: false }))
+      .start(options)
       .catch(util.logErrorExit1)
     })
 
