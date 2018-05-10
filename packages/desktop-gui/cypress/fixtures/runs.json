@@ -131,17 +131,25 @@
   },
   {
     "buildNumber": 1892,
-    "ciBuildNumber": "140",
-    "ciProvider": "Circle",
-    "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthorEmail": "brian@devs.com",
-    "commitAuthorName": "Brian Mann",
-    "commitBranch": "master",
-    "commitMessage": "fix for smaller screens widths so todos display completely",
-    "commitSha": "abc1234",
-    "commitUrl": "https://github.com/cypress-io/cypress-core-example/commit/abc1234",
+    "ci": {
+      "buildNumber": "140",
+      "provider": "Circle",
+      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
+    },
+    "commit": {
+      "authorEmail": "brian@devs.com",
+      "authorName": "Brian Mann",
+      "branch": "master",
+      "message": "fix for smaller screens widths so todos display completely",
+      "sha": "abc1234",
+      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
+    },
     "createdAt": "2016-12-19T14:59:59.328Z",
+    "completed": false,
+    "specPattern": null,
     "cypressVersion": "0.18.5",
+    "wallClockStartedAt": null,
+    "wallClockEndedAt": null,
     "duration": 16000,
     "endedAt": "2016-05-13T02:52:57.748Z",
     "failed": 2,
@@ -171,7 +179,7 @@
         ],
         "videoTimestamp": 1000,
         "wallClockDuration": 1234,
-        "wallClockStart": "2018-02-01T20:14:19.323Z"
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
       },
       {
         "body": "function () {}",
@@ -199,28 +207,41 @@
         ],
         "videoTimestamp": 1000,
         "wallClockDuration": 1234,
-        "wallClockStart": "2018-02-01T20:14:19.323Z"
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
       }
     ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d4",
     "instances": [
       {
-        "browserName": "chrome",
-        "browserVersion": "43",
+        "platform": {
+          "browserName": "chrome",
+          "browserVersion": "43",
+          "osName": "win32",
+          "osVersion": "7",
+          "osVersionFormatted": "7",
+          "osMemory": {
+            "free": 1000,
+            "total": 2000
+          },
+          "osCpus": []
+        },
         "createdAt": "2016-05-13T02:35:12.748Z",
-        "duration": 16,
+        "completedAt": null,
+        "wallClockDuration": 16,
+        "wallClockStartedAt": null,
+        "wallClockEndedAt": null,
+        "claimedAt": null,
         "error": "The tests couldn't run.",
-        "failures": 0,
+        "failed": 0,
         "id": "1dca4de7-eb48-51ee-9bb9-e4c272e6bbc6",
         "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
-        "osName": "windows",
-        "osVersion": "7",
-        "osVersionFormatted": "7",
-        "passes": 0,
+        "passed": 0,
         "pending": 0,
+        "skipped": 0,
         "screenshots": [],
         "spec": "login_spec.js",
         "status": "errored",
+        "stdout": null,
         "videos": []
       }
     ],
@@ -242,19 +263,24 @@
   },
   {
     "buildNumber": 1893,
-    "ciBuildNumber": "140",
-    "ciProvider": "Circle",
-    "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthorEmail": "julie@devs.com",
-    "commitAuthorName": "Julie Pearson",
-    "commitBranch": "search-todos",
-    "commitMessage": "regex remove whitespace",
-    "commitSha": "abc1234",
-    "commitUrl": "https://github.com/cypress-io/cypress-core-example/commit/abc1234",
+    "ci": {
+      "buildNumber": "140",
+      "provider": "Circle",
+      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
+    },
+    "commit": {
+      "authorEmail": "julie@devs.com",
+      "authorName": "Julie Pearson",
+      "branch": "search-todos",
+      "message": "regex remove whitespace",
+      "sha": "abc1234",
+      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
+    },
     "createdAt": "2016-03-21T02:35:12.748Z",
+    "completed": true,
     "cypressVersion": "0.18.5",
     "duration": 1019080,
-    "endedAt": "2016-05-13T02:52:57.748Z",
+    "wallClockEndedAt": "2016-05-13T02:52:57.748Z",
     "failed": 2,
     "failedTests": [
       {
@@ -282,7 +308,7 @@
         ],
         "videoTimestamp": 1000,
         "wallClockDuration": 1234,
-        "wallClockStart": "2018-02-01T20:14:19.323Z"
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
       },
       {
         "body": "function () {}",
@@ -310,7 +336,7 @@
         ],
         "videoTimestamp": 1000,
         "wallClockDuration": 1234,
-        "wallClockStart": "2018-02-01T20:14:19.323Z"
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
       }
     ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d3",
@@ -327,26 +353,33 @@
     "projectName": "jekyl_blog",
     "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
     "skipped": 1,
+    "specPattern": null,
     "specIsolation": false,
-    "startedAt": "2016-05-13T02:30:10.000Z",
+    "wallClockStartedAt": "2016-05-13T02:30:10.000Z",
     "status": "errored",
     "updatedAt": "2016-05-15T02:35:38.687Z",
     "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
     "buildNumber": 1894,
-    "ciProvider": "Circle",
-    "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthorEmail": "julie@devs.com",
-    "commitAuthorName": "Julie Pearson",
-    "commitBranch": "search-todos",
-    "commitMessage": "remove listings from search results on clear",
-    "commitSha": "abc1234",
-    "commitUrl": "https://github.com/cypress-io/cypress-core-example/commit/abc1234",
+    "ci": {
+      "buildNumber": "11",
+      "provider": "Circle",
+      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
+    },
+    "commit": {
+      "authorEmail": "julie@devs.com",
+      "authorName": "Julie Pearson",
+      "branch": "search-todos",
+      "message": "remove listings from search results on clear",
+      "sha": "abc1234",
+      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
+    },
     "createdAt": "2015-08-21T02:35:12.748Z",
+    "completed": true,
     "cypressVersion": "0.18.5",
     "duration": 1019080,
-    "endedAt": "2016-05-13T02:52:57.748Z",
+    "wallClockEndedAt": "2016-05-13T02:52:57.748Z",
     "failed": 0,
     "failedTests": [
       {
@@ -374,7 +407,7 @@
         ],
         "videoTimestamp": 1000,
         "wallClockDuration": 1234,
-        "wallClockStart": "2018-02-01T20:14:19.323Z"
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
       },
       {
         "body": "function () {}",
@@ -402,47 +435,73 @@
         ],
         "videoTimestamp": 1000,
         "wallClockDuration": 1234,
-        "wallClockStart": "2018-02-01T20:14:19.323Z"
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
       }
     ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d2",
     "instances": [
       {
-        "browserName": "chrome",
-        "browserVersion": "43",
+        "platform": {
+          "browserName": "chrome",
+          "browserVersion": "43",
+          "osName": "win32",
+          "osVersion": "7",
+          "osVersionFormatted": "7",
+          "osCpus": [],
+          "osMemory": {
+            "free": 100,
+            "total": 2000
+          }
+        },
         "createdAt": "2016-05-13T02:35:12.748Z",
-        "duration": 1424424,
+        "claimedAt": null,
+        "completedAt": null,
+        "wallClockStartedAt": null,
+        "wallClockEndedAt": null,
+        "wallClockDuration": 1424424,
         "error": "The tests couldn't run.",
-        "failures": 0,
+        "failed": 0,
         "id": "228c2dee-167d-53b1-98be-da38c5b7bd9a",
         "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
-        "osName": "windows",
-        "osVersion": "7",
-        "osVersionFormatted": "7",
-        "passes": 0,
+        "passed": 0,
         "pending": 0,
+        "skipped": 0,
         "screenshots": [],
         "spec": "filters_spec.js",
         "status": "errored",
+        "stdout": null,
         "videos": []
       },
       {
-        "browserName": "safari",
-        "browserVersion": "13.5",
+        "platform": {
+          "browserName": "safari",
+          "browserVersion": "13.5",
+          "osName": "darwin",
+          "osVersion": "10",
+          "osVersionFormatted": "OSX Mountain Lion",
+          "osCpus": [],
+          "osMemory": {
+            "free": 100,
+            "total": 2000
+          }
+        },
         "createdAt": "2016-05-13T02:35:12.748Z",
-        "duration": 1424424,
+        "wallClockDuration": 1424424,
+        "wallClockEndedAt": null,
+        "wallClockStartedAt": null,
+        "claimedAt": null,
+        "completedAt": null,
         "error": null,
-        "failures": 0,
+        "failed": 0,
         "id": "71272f43-0891-588a-a822-5ad143985fc3",
         "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
-        "osName": "darwin",
-        "osVersion": "10",
-        "osVersionFormatted": "OSX Mountain Lion",
-        "passes": 0,
+        "passed": 0,
         "pending": 0,
+        "skipped": 0,
         "screenshots": [],
         "spec": "search_spec.js",
         "status": "running",
+        "stdout": null,
         "videos": []
       }
     ],
@@ -456,7 +515,9 @@
     "projectName": "jekyl_blog",
     "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
     "skipped": 1,
+    "wallClockStartedAt": null,
     "specIsolation": false,
+    "specPattern": null,
     "status": "passed",
     "updatedAt": "2016-05-15T02:35:38.687Z",
     "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
