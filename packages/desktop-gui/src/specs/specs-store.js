@@ -38,7 +38,7 @@ export class SpecsStore {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setFilter (projectId, filter) {
+  @action setFilter (projectId, filter = null) {
     localData.set(`specsFilter-${projectId}`, filter)
 
     this.filter = filter
