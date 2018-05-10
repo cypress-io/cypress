@@ -1,16 +1,15 @@
 require("../spec_helper")
 
 path       = require("path")
-glob       = require("glob")
 Promise    = require("bluebird")
 cypressEx  = require("@packages/example")
 snapshot   = require("snap-shot-it")
 config     = require("#{root}lib/config")
 Project    = require("#{root}lib/project")
 scaffold   = require("#{root}lib/scaffold")
+fs         = require("#{root}lib/util/fs")
+glob       = require("#{root}lib/util/glob")
 Fixtures   = require("#{root}/test/support/helpers/fixtures")
-
-glob = Promise.promisify(glob)
 
 describe "lib/scaffold", ->
   beforeEach ->

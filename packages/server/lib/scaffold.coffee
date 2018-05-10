@@ -1,16 +1,14 @@
 _         = require("lodash")
-fs        = require("fs-extra")
 Promise   = require("bluebird")
 path      = require("path")
 cypressEx = require("@packages/example")
-glob      = require("glob")
+log       = require("debug")("cypress:server:scaffold")
+fs        = require("./util/fs")
+glob      = require("./util/glob")
 cwd       = require("./cwd")
 debug     = require("debug")("cypress:server:scaffold")
 { equals, head, isEmpty, always } = require("ramda")
 { isDefault } = require("./util/config")
-
-glob = Promise.promisify(glob)
-fs = Promise.promisifyAll(fs)
 
 getPathFromIntegrationFolder = (file) ->
   file.substring(file.indexOf("integration/") + "integration/".length)

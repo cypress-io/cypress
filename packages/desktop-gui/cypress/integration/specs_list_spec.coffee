@@ -112,16 +112,16 @@ describe "Specs List", ->
 
       context "run all specs", ->
         it "displays run all specs button", ->
-          cy.contains(".btn", "Run All Tests")
+          cy.contains(".btn", "Run all tests")
 
         it "has play icon", ->
           cy
-            .contains(".btn", "Run All Tests")
+            .contains(".btn", "Run all tests")
             .find("i").should("have.class", "fa-play")
 
         it "triggers browser launch on click of button", ->
           cy
-            .contains(".btn", "Run All Tests").click()
+            .contains(".btn", "Run all tests").click()
             .then ->
               launchArgs = @ipc.launchBrowser.lastCall.args
 
@@ -130,7 +130,7 @@ describe "Specs List", ->
 
         describe "all specs running in browser", ->
           beforeEach ->
-            cy.contains(".btn", "Run All Tests").as("allSpecs").click()
+            cy.contains(".btn", "Run all tests").as("allSpecs").click()
 
           it "updates spec icon", ->
             cy.get("@allSpecs").find("i").should("have.class", "fa-dot-circle-o")
