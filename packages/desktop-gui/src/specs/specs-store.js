@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
+import fuzzy from 'fuzzy'
 
 import localData from '../lib/local-data'
 import Spec from './spec-model'
@@ -65,9 +66,7 @@ export class SpecsStore {
     }))
 
     if (this.filter) {
-      specs = _.filter(specs, (spec) => {
-        return spec.name.toLowerCase().includes(this.filter.toLowerCase())
-      })
+      specs = _.filter(specs, (spec) => fuzzy.test(this.filter, spec.name))
     }
 
     return _.reduce(specs, (root, file) => {
