@@ -134,7 +134,7 @@ describe('install', function () {
 
       describe('when getting installed version fails', function () {
         beforeEach(function () {
-          state.getBinaryPkgVersionAsync.resolves({})
+          state.getBinaryPkgVersionAsync.resolves(null)
 
           return install.start()
         })

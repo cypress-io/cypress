@@ -32,8 +32,6 @@ https://on.cypress.io/installing-cypress
 `
 
 exports['continues installing on failure 1'] = `
-Installed version ([object Object]) does not match needed version (1.2.3).
-
 Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
