@@ -85,11 +85,11 @@ class Specs extends Component {
   }
 
   _clearFilter = () => {
-    specsStore.clearFilter()
+    specsStore.clearFilter(this.props.project.id)
   }
 
   _updateFilter = (e) => {
-    specsStore.setFilter(e.target.value)
+    specsStore.setFilter(this.props.project.id, e.target.value)
   }
 
   _executeFilterAction = (e) => {

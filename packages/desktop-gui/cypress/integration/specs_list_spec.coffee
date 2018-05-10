@@ -202,37 +202,59 @@ describe "Specs List", ->
           cy.get(".file").should("have.length", 0)
 
     context "filtering specs", ->
-      beforeEach ->
-        @ipc.getSpecs.yields(null, @specs)
-        @openProject.resolve(@config)
-        cy.get(".filter").type("new")
+      describe "typing the filter", ->
+        beforeEach ->
+          @ipc.getSpecs.yields(null, @specs)
+          @openProject.resolve(@config)
+          cy.get(".filter").type("new")
 
-      it "displays only matching spec", ->
-        cy.get(".outer-files-container .file")
-          .should("have.length", 1)
-          .and("contain", "account_new_spec.coffee")
+        it "displays only matching spec", ->
+          cy.get(".outer-files-container .file")
+            .should("have.length", 1)
+            .and("contain", "account_new_spec.coffee")
 
-      it "only shows matching folders", ->
-        cy.get(".outer-files-container .folder")
-          .should("have.length", 2)
+        it "only shows matching folders", ->
+          cy.get(".outer-files-container .folder")
+            .should("have.length", 2)
 
-      it "clears the filter on clear button click", ->
-        cy.get(".clear-filter").click()
-        cy.get(".filter")
-          .should("have.value", "")
-        cy.get(".outer-files-container .file")
-          .should("have.length", 7)
+        it "clears the filter on clear button click", ->
+          cy.get(".clear-filter").click()
+          cy.get(".filter")
+            .should("have.value", "")
+          cy.get(".outer-files-container .file")
+            .should("have.length", 7)
 
-      it "clears the filter if the user press ESC key", ->
-        cy.get(".filter").type("{esc}")
-          .should("have.value", "")
-        cy.get(".outer-files-container .file")
-          .should("have.length", 7)
+        it "clears the filter if the user press ESC key", ->
+          cy.get(".filter").type("{esc}")
+            .should("have.value", "")
+          cy.get(".outer-files-container .file")
+            .should("have.length", 7)
 
-      it "shows empty message if no results", ->
-        cy.get(".filter").clear().type("foobarbaz")
-        cy.get(".outer-files-container").should("not.exist")
-        cy.get(".empty-well").should("have.text", "No files match the filter 'foobarbaz'")
+        it "shows empty message if no results", ->
+          cy.get(".filter").clear().type("foobarbaz")
+          cy.get(".outer-files-container").should("not.exist")
+          cy.get(".empty-well").should("have.text", "No files match the filter 'foobarbaz'")
+
+        it "saves the filter to local storage for the project", ->
+          cy.window().then (win) =>
+            expect(win.localStorage["specsFilter-#{@config.projectId}"]).to.be.a("string")
+            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}"])).to.equal("new")
+
+      describe "when there's a saved filter", ->
+        beforeEach ->
+          @ipc.getSpecs.yields(null, @specs)
+          cy.window().then (win) ->
+            win.localStorage["specsFilter-#{@config.projectId}"] = JSON.stringify("app")
+
+        it "applies it for the appropriate project", ->
+          @openProject.resolve(@config)
+          cy.get(".filter").should("have.value", "app")
+
+        it "does not apply it for a different project", ->
+          @config.projectId = "different"
+          @openProject.resolve(@config)
+          cy.get(".filter").should("have.value", "")
+
 
     context "click on spec", ->
       beforeEach ->

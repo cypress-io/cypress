@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
+import localData from '../lib/local-data'
 import Spec from './spec-model'
 
 export class SpecsStore {
@@ -36,11 +37,15 @@ export class SpecsStore {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setFilter (filter) {
+  @action setFilter (projectId, filter) {
+    localData.set(`specsFilter-${projectId}`, filter)
+
     this.filter = filter
   }
 
-  @action clearFilter () {
+  @action clearFilter (projectId) {
+    localData.remove(`specsFilter-${projectId}`)
+
     this.filter = null
   }
 
