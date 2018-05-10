@@ -16,6 +16,7 @@ getPathFromIntegrationFolder = (file) ->
   file.substring(file.indexOf("integration/") + "integration/".length)
 
 exampleSpecsFullPaths = cypressEx.getPathToExamples()
+exampleFolderName = cypressEx.getFolderName()
 ## short paths relative to integration folder (i.e. examples/actions.spec.js)
 exampleSpecs = _.map exampleSpecsFullPaths, (file) ->
   getPathFromIntegrationFolder(file)
@@ -76,6 +77,8 @@ isNewProject = (integrationFolder) ->
 module.exports = {
   isNewProject
 
+  integrationExampleName: -> exampleFolderName
+
   integration: (folder, config) ->
     debug("integration folder #{folder}")
 
@@ -85,7 +88,7 @@ module.exports = {
     @verifyScaffolding folder, =>
       debug("copying examples into #{folder}")
       Promise.all _.map exampleSpecsFullPaths, (file) =>
-        @_copy(file, path.join(folder, "examples"), config)
+        @_copy(file, path.join(folder, exampleFolderName), config)
 
   fixture: (folder, config) ->
     debug("fixture folder #{folder}")

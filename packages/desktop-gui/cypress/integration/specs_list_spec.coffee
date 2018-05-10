@@ -71,6 +71,12 @@ describe "Specs List", ->
         cy.contains("fixtures").parent().next()
           .contains("integration")
 
+    it "truncates file lists with more than 3 items", ->
+      cy.get(".folder-preview-onboarding").within ->
+        cy.contains("examples").closest(".new-item").find("li")
+          .should("have.length", 3)
+        cy.get(".is-more").should("have.text", " ... 17 more files ...")
+
     it "can dismiss the modal", ->
       cy.contains("OK, got it!").click()
       cy.get(".modal").should("not.be.visible")
@@ -78,12 +84,12 @@ describe "Specs List", ->
           expect(@ipc.onboardingClosed).to.be.called
 
     it "triggers open:finder on click of example folder", ->
-      cy.get(".modal").contains("examples").click().then ->
-          expect(@ipc.openFinder).to.be.calledWith(@config.integrationExampleFolder)
+      cy.get(".modal").contains("examples").click().then =>
+        expect(@ipc.openFinder).to.be.calledWith(@config.integrationExamplePath)
 
     it "triggers open:finder on click of text folder", ->
-      cy.get(".modal").contains("cypress/integration").click().then ->
-          expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
+      cy.get(".modal").contains("cypress/integration").click().then =>
+        expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
 
   describe "lists specs", ->
     context "Windows paths", ->
