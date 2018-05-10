@@ -2,4 +2,7 @@
 
 describe "api object schemas matches fixture: ", ->
   it "runs", ->
-    cy.fixture("runs.json").each assertSchema("getRunResponse", "3.0.0", ["orgId"])
+    options = {
+      substitutions: ['orgId']
+    }
+    cy.fixture("runs.json").each assertSchema("getRunResponse", "2.0.0", options)
