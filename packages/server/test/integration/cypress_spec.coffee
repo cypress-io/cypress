@@ -303,7 +303,7 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
-    it "scaffolds out integration and example_spec if they do not exist when not runMode", ->
+    it "scaffolds out integration and example specs if they do not exist when not runMode", ->
       config.get(@pristinePath)
       .then (cfg) =>
         fs.statAsync(cfg.integrationFolder)
@@ -314,7 +314,11 @@ describe "lib/cypress", ->
         .then =>
           fs.statAsync(cfg.integrationFolder)
         .then =>
-          fs.statAsync path.join(cfg.integrationFolder, "example_spec.js")
+          Promise.join(
+            fs.statAsync(path.join(cfg.integrationFolder, "examples", "actions.spec.js")),
+            fs.statAsync(path.join(cfg.integrationFolder, "examples", "files.spec.js")),
+            fs.statAsync(path.join(cfg.integrationFolder, "examples", "viewport.spec.js"))
+          )
 
     it "does not scaffold when headless and exits with error when no existing project", ->
       ensureDoesNotExist = (inspection, index) ->
@@ -339,7 +343,7 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("PROJECT_DOES_NOT_EXIST", @pristinePath)
 
-    it "does not scaffold integration or example_spec when runMode", ->
+    it "does not scaffold integration or example specs when runMode", ->
       settings.write(@pristinePath, {})
       .then =>
         cypress.start(["--run-project=#{@pristinePath}"])
