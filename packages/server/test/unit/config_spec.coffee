@@ -624,12 +624,12 @@ describe "lib/config", ->
         hosts: "foo=bar|baz=quux"
       })
 
-    it "resets numTestsKeptInMemory to 0 when headless", ->
+    it "resets numTestsKeptInMemory to 0 when runMode", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
       .then (cfg) ->
         expect(cfg.numTestsKeptInMemory).to.eq(0)
 
-    it "resets watchForFileChanges to false when headless", ->
+    it "resets watchForFileChanges to false when runMode", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
       .then (cfg) ->
         expect(cfg.watchForFileChanges).to.be.false
@@ -970,7 +970,7 @@ describe "lib/config", ->
       expect(urls.proxyUrl).to.eq("http://localhost:65432")
 
   context ".setScaffoldPaths", ->
-    it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->
+    it "sets integrationExamplePath + integrationExampleName + scaffoldedFiles", ->
       obj = {
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
@@ -978,8 +978,8 @@ describe "lib/config", ->
 
       expect(config.setScaffoldPaths(obj)).to.deep.eq({
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
-        integrationExampleFile: "/_test-output/path/to/project/cypress/integration/example_spec.js"
-        integrationExampleName: "example_spec.js"
+        integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
+        integrationExampleName: "examples"
         scaffoldedFiles: []
       })
 

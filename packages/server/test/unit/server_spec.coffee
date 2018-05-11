@@ -207,7 +207,10 @@ describe "lib/server", ->
 
   context "#proxyWebsockets", ->
     beforeEach ->
-      @proxy  = @sandbox.stub({ws: ->})
+      @proxy  = @sandbox.stub({
+        ws: ->
+        on: ->
+      })
       @socket = @sandbox.stub({end: ->})
       @head   = {}
 

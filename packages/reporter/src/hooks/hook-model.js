@@ -18,12 +18,17 @@ export default class Hook {
       command.number = this._currentNumber
       this._currentNumber++
     }
-    this.commands.push(command)
+    const lastCommand = _.last(this.commands)
+    if (lastCommand && lastCommand.isMatchingEvent(command)) {
+      lastCommand.addDuplicate(command)
+    } else {
+      this.commands.push(command)
+    }
   }
 
   commandMatchingErr (errToMatch) {
     return _(this.commands)
-      .filter(({ err }) => err.displayMessage === errToMatch.displayMessage)
-      .last()
+    .filter(({ err }) => err.displayMessage === errToMatch.displayMessage)
+    .last()
   }
 }

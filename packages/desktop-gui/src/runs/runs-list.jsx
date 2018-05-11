@@ -200,12 +200,6 @@ class RunsList extends Component {
       <div className='runs'>
         <header>
           <h5>Runs
-            <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
-            See All <i className='fa fa-external-link'></i>
-            </a>
-
-          </h5>
-          <div>
             {this._lastUpdated()}
             <button
               className='btn btn-link btn-sm'
@@ -214,6 +208,11 @@ class RunsList extends Component {
             >
               <i className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
+          </h5>
+          <div>
+            <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
+              See all runs <i className='fa fa-external-link'></i>
+            </a>
           </div>
         </header>
         <ul className='runs-container list-as-table'>
@@ -264,7 +263,7 @@ class RunsList extends Component {
   _loginMessage () {
     return (
       <div className='empty empty-log-in'>
-        <h4>Log In to View Runs</h4>
+        <h4>Log in to view runs</h4>
         <p>
           After logging in, you will see recorded runs here and on the <a href='#' onClick={this._visitDashboard}>Cypress Dashboard Service</a>.
         </p>
