@@ -19,7 +19,7 @@ const normalize = require('../../support/normalize')
 
 const packageVersion = '1.2.3'
 const downloadDestination = path.join(os.tmpdir(), 'cypress.zip')
-const installDir = '/path/to/install/dir'
+const installDir = '/cache/Cypress/1.2.3'
 
 describe('install', function () {
   require('mocha-banner').register()
@@ -49,9 +49,9 @@ describe('install', function () {
       this.sandbox.stub(unzip, 'start').resolves()
       this.sandbox.stub(Promise.prototype, 'delay').resolves()
       this.sandbox.stub(fs, 'removeAsync').resolves()
-      this.sandbox.stub(state, 'getPathToExecutableDir').returns('/path/to/binary/dir/')
+      this.sandbox.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
+      this.sandbox.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
       this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves()
-      this.sandbox.stub(state, 'getBinaryDir').returns(installDir)
     })
 
     describe('skips install', function () {
@@ -105,7 +105,7 @@ describe('install', function () {
         process.env.CYPRESS_BINARY_VERSION = version
         this.sandbox.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
 
-        const installDir = state.getBinaryDir()
+        const installDir = state.getVersionDir()
         return install.start()
         .then(() => {
           expect(unzip.start).to.be.calledWithMatch({

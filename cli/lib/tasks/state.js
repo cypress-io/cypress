@@ -21,9 +21,9 @@ const getPlatformExecutable = () => {
 const getBinaryPkgPath = () => {
   const platform = os.platform()
   switch (platform) {
-    case 'darwin': return path.join('Cypress.app', 'Contents', 'Resources', 'app', 'package.json')
-    case 'linux': return path.join('Cypress', 'resources', 'app', 'package.json')
-    case 'win32': return path.join('Cypress', 'resources', 'app', 'package.json')
+    case 'darwin': return path.join('Contents', 'Resources', 'app', 'package.json')
+    case 'linux': return path.join('resources', 'app', 'package.json')
+    case 'win32': return path.join('resources', 'app', 'package.json')
       // TODO handle this error using our standard
     default: throw new Error(`Platform: "${platform}" is not supported.`)
   }
@@ -33,6 +33,10 @@ const getBinaryPkgPath = () => {
  * Get path to binary directory
 */
 const getBinaryDir = (version = util.pkgVersion()) => {
+  return path.join(getVersionDir(version), getPlatformExecutable().split('/')[0])
+}
+
+const getVersionDir = (version = util.pkgVersion()) => {
   return path.join(getCacheDir(), version)
 }
 
@@ -86,11 +90,7 @@ const writeBinaryVerifiedAsync = (verified, binaryDir = getBinaryDir()) => {
 }
 
 const getPathToExecutable = (binaryDir = getBinaryDir()) => {
-  return path.join(binaryDir, getPlatformExecutable())
-}
-
-const getPathToExecutableDir = (binaryDir = getBinaryDir()) => {
-  return path.join(binaryDir, getPlatformExecutable().split('/')[0])
+  return path.join(path.dirname(binaryDir), getPlatformExecutable())
 }
 
 const getBinaryPkgVersionAsync = (binaryDir = getBinaryDir()) => {
@@ -107,7 +107,6 @@ const getBinaryPkgVersionAsync = (binaryDir = getBinaryDir()) => {
 
 
 module.exports = {
-  getPathToExecutableDir,
   getPathToExecutable,
   getBinaryPkgVersionAsync,
   getBinaryVerifiedAsync,
@@ -116,4 +115,5 @@ module.exports = {
   clearBinaryStateAsync,
   writeBinaryVerifiedAsync,
   getDistDir,
+  getVersionDir,
 }

@@ -108,7 +108,6 @@ const runSmokeTest = (binaryDir) => {
 function testBinary (version, binaryDir) {
   debug('running binary verification check', version)
 
-  const dir = state.getPathToExecutableDir(binaryDir)
 
   // let the user know what version of cypress we're downloading!
   logger.log(
@@ -129,7 +128,7 @@ function testBinary (version, binaryDir) {
 
   const tasks = new Listr([
     {
-      title: util.titleize('Verifying Cypress can run', chalk.gray(dir)),
+      title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
       task: (ctx, task) => {
         debug('clearing out the verified version')
         return state.clearBinaryStateAsync(binaryDir)
@@ -148,7 +147,7 @@ function testBinary (version, binaryDir) {
             task,
             util.titleize(
               chalk.green('Verified Cypress!'),
-              chalk.gray(dir)
+              chalk.gray(binaryDir)
             ),
             rendererOptions.renderer
           )
@@ -191,12 +190,13 @@ const start = (options = {}) => {
   debug('verifying Cypress app')
 
   const packageVersion = util.pkgVersion()
-  const binaryDir = options.cypressPath || state.getBinaryDir(packageVersion)
+  const binaryDir = options.cypressFolder || state.getBinaryDir(packageVersion)
 
   _.defaults(options, {
     force: false,
     welcomeMessage: true,
   })
+
   return isMissingExecutable(binaryDir)
   .then(() => state.getBinaryPkgVersionAsync(binaryDir))
   .then((binaryVersion) => {

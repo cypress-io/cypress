@@ -1,6 +1,6 @@
 exports['version already installed 1'] = `
 
-Cypress 1.2.3 is already installed in /path/to/install/dir
+Cypress 1.2.3 is already installed in /cache/Cypress/1.2.3
 Skipping installation
 
 Pass the --force option if you'd like to reinstall anyway.
@@ -26,7 +26,7 @@ Installing Cypress (version: 0.12.1)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/install/dir
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
@@ -39,7 +39,7 @@ Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/install/dir
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
@@ -52,7 +52,7 @@ Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/install/dir
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
@@ -67,7 +67,7 @@ Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/install/dir
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
@@ -80,7 +80,7 @@ Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/install/dir
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
@@ -95,7 +95,7 @@ Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/install/dir
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 It looks like you've installed Cypress globally.
 

@@ -27,8 +27,8 @@ module.exports = {
       args.push('--project', options.project)
     }
 
-    if (options.cypressPath) {
-      args.push('--cypress-path', options.cypressPath)
+    if (options.cypressFolder) {
+      args.push('--cypress-folder', options.cypressFolder)
     }
 
     debug('opening from options %j', options)
@@ -46,7 +46,7 @@ module.exports = {
       return open()
     }
 
-    return verify.start({ cypressPath: options.cypressPath })
+    return verify.start({ cypressFolder: options.cypressFolder })
     .then(open)
   },
 }

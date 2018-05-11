@@ -82,8 +82,8 @@ const processRunOptions = (options = {}) => {
     args.push('--group-id', options.groupId)
   }
 
-  if (options.cypressPath) {
-    args.push('--binary-path', options.cypressPath)
+  if (options.cypressFolder) {
+    args.push('--binary-path', options.cypressFolder)
   }
 
   return args
@@ -115,7 +115,7 @@ module.exports = {
       return run()
     }
 
-    return verify.start({ cypressPath: options.cypressPath })
+    return verify.start({ cypressFolder: options.cypressFolder })
     .then(run)
   },
 }

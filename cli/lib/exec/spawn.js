@@ -45,16 +45,16 @@ module.exports = {
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let cypressPath = state.getPathToExecutable(options.cypressPath || state.getBinaryDir())
+        let cypressFolder = state.getPathToExecutable(options.cypressFolder || state.getBinaryDir())
 
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          cypressPath = 'node'
+          cypressFolder = 'node'
           args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
-        debug('spawning Cypress %s', cypressPath)
+        debug('spawning Cypress %s', cypressFolder)
         debug('spawn args %j', args, options)
 
         // strip dev out of child process options
@@ -87,7 +87,7 @@ module.exports = {
           process.env.FORCE_STDERR_TTY = 1
         }
 
-        const child = cp.spawn(cypressPath, args, options)
+        const child = cp.spawn(cypressFolder, args, options)
         child.on('close', resolve)
         child.on('error', reject)
 

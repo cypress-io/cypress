@@ -1,7 +1,7 @@
 exports['verbose stdout output 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✔  Verified Cypress! /path/to/executable/dir
+ ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -13,7 +13,7 @@ Error: No version of Cypress is installed.
 Please reinstall Cypress by running: cypress install
 ----------
 
-Cypress executable not found at: /path/to/executable
+Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
 ----------
 
 Platform: darwin (test release)
@@ -35,7 +35,7 @@ Error: No version of Cypress is installed.
 Please reinstall Cypress by running: cypress install
 ----------
 
-Cypress executable not found at: /path/to/executable
+Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
 ----------
 
 Platform: darwin (test release)
@@ -46,7 +46,7 @@ Cypress Version: 1.2.3
 exports['verification with executable 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✔  Verified Cypress! /path/to/executable/dir
+ ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -55,7 +55,7 @@ Opening Cypress...
 exports['fails verifying Cypress 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /path/to/executable/dir
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
 Error: Cypress failed to start.
 
@@ -79,7 +79,7 @@ Cypress Version: 1.2.3
 exports['no existing version verified 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✔  Verified Cypress! /path/to/executable/dir
+ ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -92,7 +92,7 @@ Note: there is no guarantee these versions will work properly together.
 
 It looks like this is your first time using Cypress: different version
 
- ✔  Verified Cypress! /path/to/executable/dir
+ ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -105,7 +105,7 @@ Note: there is no guarantee these versions will work properly together.
 
 It looks like this is your first time using Cypress: 9.8.7
 
- ✔  Verified Cypress! /path/to/executable/dir
+ ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -122,7 +122,7 @@ Note: there is no guarantee these versions will work properly together.
 exports['xvfb fails 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /path/to/executable/dir
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
 Error: Your system is missing the dependency: XVFB
 
@@ -146,8 +146,8 @@ Cypress Version: 1.2.3
 exports['verifying in ci 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
-[xx:xx:xx]  Verifying Cypress can run /path/to/executable/dir [started]
-[xx:xx:xx]  Verifying Cypress can run /path/to/executable/dir [completed]
+[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [started]
+[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [completed]
 
 Opening Cypress...
 

@@ -105,12 +105,12 @@ describe('exec open', function () {
       })
     })
 
-    it('can accept option.cypressPath', function () {
-      const cypressPath = '/path/to/cypress/'
-      return open.start({ cypressPath })
+    it('can accept option.cypressFolder', function () {
+      const cypressFolder = '/path/to/cypress/'
+      return open.start({ cypressFolder })
       .then(() => {
-        expect(verify.start).to.be.calledWith({ cypressPath })
-        expect(spawn.start).to.be.calledWith(['--cypress-path', cypressPath])
+        expect(verify.start).to.be.calledWith({ cypressFolder })
+        expect(spawn.start).to.be.calledWith(['--cypress-folder', cypressFolder])
       })
     })
   })

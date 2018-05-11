@@ -219,7 +219,7 @@ const start = (options = {}) => {
     logger.log('')
   }
 
-  const installDir = state.getBinaryDir(util.pkgVersion())
+  const installDir = state.getVersionDir(util.pkgVersion())
 
   return state.getBinaryPkgVersionAsync()
   .then((binaryVersion) => {

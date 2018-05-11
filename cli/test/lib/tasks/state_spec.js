@@ -2,39 +2,34 @@ require('../../spec_helper')
 
 const os = require('os')
 const path = require('path')
-const cachedir = require('cachedir')
 const proxyquire = require('proxyquire')
 // const Promise = require('bluebird')
 
-const state = require(`${lib}/tasks/state`)
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
 const util = require(`${lib}/util`)
 
-const cacheDir = path.join(cachedir('Cypress'))
-const binaryDir = path.join(cacheDir, '1.2.3')
-const binaryPkgPath = path.join(binaryDir, 'Cypress.app', 'Contents', 'Resources', 'app', 'package.json')
+const fakeCachedir = (cacheName) => path.join('.cache', cacheName)
+
+const cacheDir = path.join(fakeCachedir('Cypress'))
+const versionDir = path.join(cacheDir, '1.2.3')
+const binaryDir = path.join(versionDir, 'Cypress.app')
+const binaryPkgPath = path.join(binaryDir, 'Contents', 'Resources', 'app', 'package.json')
+
+let state
 
 describe('lib/tasks/state', function () {
   beforeEach(function () {
+    state = proxyquire(`${lib}/tasks/state`, { cachedir: fakeCachedir })
     logger.reset()
     this.sandbox.stub(process, 'exit')
     this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-  })
-
-  context('.getBinaryDir', function () {
-    it('resolves path to binary/installation directory', function () {
-      expect(state.getBinaryDir()).to.equal(binaryDir)
-    })
-    it('resolves path to binary/installation from version', function () {
-      expect(state.getBinaryDir('4.5.6')).to.be.equal(path.join(cacheDir, '4.5.6'))
-    })
+    this.sandbox.stub(os, 'platform').returns('darwin')
   })
 
   context('.getBinaryPkgVersionAsync', function () {
 
     it('resolves version from version file when it exists', function () {
-      this.sandbox.stub(os, 'platform').returns('darwin')
       this.sandbox.stub(fs, 'pathExistsAsync').withArgs(binaryPkgPath).resolves(true)
       this.sandbox.stub(fs, 'readJsonAsync').withArgs(binaryPkgPath).resolves({ version: '2.0.48' })
       return state.getBinaryPkgVersionAsync()
@@ -52,33 +47,55 @@ describe('lib/tasks/state', function () {
   })
 
   context('.getPathToExecutable', function () {
+    it('resolves path on macOS', function () {
+      const macExecutable = '.cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
+      expect(state.getPathToExecutable()).to.equal(macExecutable)
+    })
+    it('resolves path on linux', function () {
+      os.platform.restore()
+      this.sandbox.stub(os, 'platform').returns('linux')
+      const macExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
+      expect(state.getPathToExecutable()).to.equal(macExecutable)
+    })
     it('resolves path on windows', function () {
+      os.platform.restore()
       this.sandbox.stub(os, 'platform').returns('win32')
       expect(state.getPathToExecutable()).to.endWith('.exe')
     })
   })
 
-  context('.getPathToUserExecutableDir', function () {
+  context('.getBinaryDir', function () {
     it('resolves path on macOS', function () {
-      this.sandbox.stub(os, 'platform').returns('darwin')
-      expect(state.getPathToExecutableDir()).to.equal(path.join(binaryDir, 'Cypress.app'))
+      expect(state.getBinaryDir()).to.equal(path.join(versionDir, 'Cypress.app'))
     })
 
     it('resolves path on linux', function () {
+      os.platform.restore()
       this.sandbox.stub(os, 'platform').returns('linux')
-      expect(state.getPathToExecutableDir()).to.equal(path.join(binaryDir, 'Cypress'))
+      expect(state.getBinaryDir()).to.equal(path.join(versionDir, 'Cypress'))
     })
 
     it('resolves path on windows', function () {
-      const state = proxyquire(`${lib}/tasks/state`, { path: path.win32 })
+      const state = proxyquire(`${lib}/tasks/state`, { path: path.win32, cachedir: fakeCachedir })
+      os.platform.restore()
       this.sandbox.stub(os, 'platform').returns('win32')
-      const pathToExec = state.getPathToExecutableDir(binaryDir)
-      expect(pathToExec).to.be.equal(path.win32.join(binaryDir, 'Cypress'))
+      const pathToExec = state.getBinaryDir()
+      expect(pathToExec).to.be.equal(path.win32.join(versionDir, 'Cypress'))
+    })
+
+    it('resolves path to binary/installation directory', function () {
+      expect(state.getBinaryDir()).to.equal(binaryDir)
+    })
+
+    it('resolves path to binary/installation from version', function () {
+      expect(state.getBinaryDir('4.5.6')).to.be.equal(path.join(cacheDir, '4.5.6', 'Cypress.app'))
     })
 
     it('rejects on anything else', function () {
+      os.platform.restore()
       this.sandbox.stub(os, 'platform').returns('unknown')
-      expect(() => state.getPathToExecutableDir()).to.throw('Platform: "unknown" is not supported.')
+      expect(() => state.getBinaryDir().to.throw('Platform: "unknown" is not supported.')
+      )
     })
   })
 

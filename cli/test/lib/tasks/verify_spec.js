@@ -19,8 +19,8 @@ const stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
 
 const packageVersion = '1.2.3'
-const executablePath = '/path/to/executable'
-const executableDir = '/path/to/executable/dir'
+const executablePath = '/cache/Cypress/1.2.3/Cypress.app/executable'
+const binaryDir = '/cache/Cypress/1.2.3/Cypress.app'
 
 
 const slice = (str) => {
@@ -59,7 +59,7 @@ context('lib/tasks/verify', function () {
     })
     this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
     this.sandbox.stub(state, 'getPathToExecutable').returns(executablePath)
-    this.sandbox.stub(state, 'getPathToExecutableDir').returns(executableDir)
+    this.sandbox.stub(state, 'getBinaryDir').returns(binaryDir)
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(false)
@@ -345,7 +345,7 @@ context('lib/tasks/verify', function () {
 
     describe('when running in CI', function () {
       beforeEach(function () {
-        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+        this.sandbox.stub(fs, 'pathExistsAsync').resolves(true)
         this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
         this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
         util.isCi.returns(true)
@@ -361,16 +361,16 @@ context('lib/tasks/verify', function () {
       })
     })
 
-    describe('with options.cypressPath', function () {
-      it('verifies the binary when passed with options.cypressPath', function () {
-        state.getPathToExecutableDir.restore()
+    describe('with options.cypressFolder', function () {
+      it('verifies the binary when passed with options.cypressFolder', function () {
+        state.getBinaryDir.restore()
         state.getPathToExecutable.restore()
         const customBinaryDir = 'custom/path/to/binary'
         const customExecPath = state.getPathToExecutable(customBinaryDir)
         this.sandbox.stub(fs, 'pathExistsAsync').withArgs(customExecPath).resolves(true)
         this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
         this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
-        return verify.start({ cypressPath: customBinaryDir })
+        return verify.start({ cypressFolder: customBinaryDir })
         .then(() => {
           expect(cp.spawn).to.be.calledWith(customExecPath)
         })
