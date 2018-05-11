@@ -17,6 +17,7 @@
     "createdAt": "2016-12-19T14:12:57.328Z",
     "cypressVersion": "0.18.5",
     "completedAt": null,
+    "duration": null,
     "failed": 2,
     "failedTests": [
       {
@@ -144,6 +145,7 @@
     "createdAt": "2016-12-19T14:59:59.328Z",
     "cypressVersion": "0.18.5",
     "completedAt": "2016-05-13T02:52:57.748Z",
+    "duration": 12908,
     "failed": 2,
     "failedTests": [
       {
@@ -260,6 +262,7 @@
     "createdAt": "2016-03-21T02:35:12.748Z",
     "cypressVersion": "0.18.5",
     "completedAt": "2016-05-13T02:52:57.748Z",
+    "duration": 1290384,
     "failed": 2,
     "failedTests": [
       {
@@ -354,6 +357,7 @@
     "createdAt": "2015-08-21T02:35:12.748Z",
     "cypressVersion": "0.18.5",
     "completedAt": "2016-05-13T02:52:57.748Z",
+    "duration": 9018203,
     "failed": 0,
     "failedTests": [
       {
@@ -513,6 +517,7 @@
     "createdAt": "2016-12-19T14:02:57.328Z",
     "cypressVersion": "0.18.5",
     "completedAt": null,
+    "duration": null,
     "failed": 2,
     "failedTests": [
       {
