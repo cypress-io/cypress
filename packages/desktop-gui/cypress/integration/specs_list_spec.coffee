@@ -213,18 +213,6 @@ describe "Specs List", ->
             .should("have.length", 1)
             .and("contain", "account_new_spec.coffee")
 
-        it "is case-insensitive", ->
-          cy.get(".filter").clear().type("NEW")
-          cy.get(".outer-files-container .file")
-            .should("have.length", 1)
-            .and("contain", "account_new_spec.coffee")
-
-        it "uses fuzzy filter", ->
-          cy.get(".filter").clear().type("acclis")
-          cy.get(".outer-files-container .file")
-            .should("have.length", 1)
-            .and("contain", "accounts_list_spec.coffee")
-
         it "only shows matching folders", ->
           cy.get(".outer-files-container .folder")
             .should("have.length", 2)

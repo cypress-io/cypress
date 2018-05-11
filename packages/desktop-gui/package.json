@@ -29,7 +29,6 @@
     "classnames": "^2.2.5",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "font-awesome": "4.7",
-    "fuzzy": "^0.1.3",
     "gravatar": "^1.6.0",
     "human-interval": "^0.1.6",
     "istanbul": "^0.4.3",
