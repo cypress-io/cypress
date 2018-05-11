@@ -14,9 +14,11 @@ const state = require('./state')
 const unzip = require('./unzip')
 const logger = require('../logger')
 
-const alreadyInstalledMsg = (installedVersion, needVersion) => {
+const alreadyInstalledMsg = (installDir, binaryVersion) => {
+  logger.log()
   logger.log(chalk.yellow(stripIndent`
-    Cypress ${chalk.cyan(needVersion)} is already installed. Skipping installation.
+    Cypress ${chalk.cyan(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
+    Skipping installation
   `))
 
   logger.log()
@@ -24,6 +26,7 @@ const alreadyInstalledMsg = (installedVersion, needVersion) => {
   logger.log(chalk.gray(stripIndent`
     Pass the ${chalk.white('--force')} option if you'd like to reinstall anyway.
   `))
+  logger.log()
 }
 
 const displayCompletionMsg = () => {
@@ -145,12 +148,11 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 
         return cleanup()
         .then(() => {
-          const dir = state.getPathToExecutableDir(installDir)
-          debug('finished installation in', dir)
+          debug('finished installation in', installDir)
 
           util.setTaskTitle(
             task,
-            util.titleize(chalk.green('Finished Installation'), chalk.gray(dir)),
+            util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir)),
             rendererOptions.renderer
           )
         })
@@ -236,7 +238,7 @@ const start = (options = {}) => {
 
     if (binaryVersion === needVersion) {
       // our version matches, tell the user this is a noop
-      alreadyInstalledMsg(binaryVersion, needVersion)
+      alreadyInstalledMsg(installDir, binaryVersion)
       return false
     }
 
