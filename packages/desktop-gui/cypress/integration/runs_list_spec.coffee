@@ -107,10 +107,12 @@ describe "Runs List", ->
           cy.get("@runRow").contains("a few secs ago")
           cy.get("@runRow").contains("00:16")
 
-        it "displays timer for incomplete runs", ->
+        it "displays seperate timers for incomplete runs", ->
           cy.get("@firstRunRow").contains("47:02")
+          cy.get(".runs-container li").last().contains("57:02")
           .then -> cy.tick(1000)
           cy.get("@firstRunRow").contains("47:03")
+          cy.get(".runs-container li").last().contains("57:03")
 
         context "spec display", ->
           it "displays spec if defined when 1 instance", ->
@@ -318,7 +320,7 @@ describe "Runs List", ->
 
       it "displays old runs if another error", ->
         @ipcError({type: "TIMED_OUT"})
-        cy.get(".runs-container li").should("have.length", 4)
+        cy.get(".runs-container li").should("have.length", @runs.length)
 
   describe "manually refreshing runs", ->
     beforeEach ->
@@ -336,7 +338,7 @@ describe "Runs List", ->
       expect(@ipc.getRuns).to.be.calledTwice
 
     it "still shows list of runs", ->
-      cy.get(".runs-container li").should("have.length", 4)
+      cy.get(".runs-container li").should("have.length", @runs.length)
 
     it "disables refresh button", ->
       cy.get(".runs header button").should("be.disabled")

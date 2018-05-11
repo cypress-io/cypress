@@ -32,7 +32,6 @@ export default class RunsListItem extends Component {
                 <span>
                   {run.commit.branch ? run.commit.branch : null}
                   {run.commit.branch && this._displaySpec() ? ' / ' : null}
-
                 </span> :
                 null
               }
@@ -73,8 +72,8 @@ export default class RunsListItem extends Component {
                   <i className='fa fa-hourglass-end'></i>{' '}
                   {durationFormatted(run.duration)}
                 </span> :
-                run.wallClockStartedAt ?
-                  <TimerDisplay startTime={run.wallClockStartedAt} /> :
+                run.createdAt ?
+                  <TimerDisplay startTime={run.createdAt} /> :
                   null
             }
           </div>
