@@ -67,7 +67,7 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             {
-              run.completed ?
+              run.duration ?
                 <span>
                   <i className='fa fa-hourglass-end'></i>{' '}
                   {durationFormatted(run.duration)}
