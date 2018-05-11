@@ -96,6 +96,9 @@ module.exports = {
       auth: {
         bearer: authToken
       }
+      headers: {
+        "x-route-version": "2"
+      }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)

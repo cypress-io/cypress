@@ -68,13 +68,13 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             {
-              run.duration ?
+              run.completed ?
                 <span>
                   <i className='fa fa-hourglass-end'></i>{' '}
                   {durationFormatted(run.duration)}
                 </span> :
-                run.startedAt ?
-                  <TimerDisplay startTime={run.startedAt} /> :
+                run.wallClockStartedAt ?
+                  <TimerDisplay startTime={run.wallClockStartedAt} /> :
                   null
             }
           </div>

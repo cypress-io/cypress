@@ -82,6 +82,7 @@ describe "Runs List", ->
 
       context "displays each run's data", ->
         beforeEach ->
+          cy.get(".runs-container li").first().as("firstRunRow")
           cy.get(".runs-container li").eq(1).as("runRow")
 
         it "displays build num", ->
@@ -105,7 +106,12 @@ describe "Runs List", ->
         it "displays times", ->
           cy.get("@runRow").contains("a few secs ago")
           cy.get("@runRow").contains("00:16")
-        
+
+        it "displays timer for incomplete runs", ->
+          cy.get("@firstRunRow").contains("47:02")
+          .then -> cy.tick(1000)
+          cy.get("@firstRunRow").contains("47:03")
+
         context "spec display", ->
           it "displays spec if defined when 1 instance", ->
             cy.get(".runs-container li").eq(1).contains(@runs[1].instances[0].spec)
