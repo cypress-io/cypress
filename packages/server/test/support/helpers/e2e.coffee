@@ -16,7 +16,7 @@ fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
 video        = require("#{root}../lib/video")
-stdout       = require("#{root}../lib/stdout")
+stdout       = require("#{root}../lib/capture")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
 screenshots  = require("#{root}../lib/screenshots")
@@ -107,6 +107,17 @@ copy = ->
 
 module.exports = {
   normalizeStdout
+
+  snapshot: (args...) ->
+    args = _.compact(args)
+
+    ## grab the last element in index
+    index = args.length - 1
+
+    ## normalize the stdout of it
+    args[index] = normalizeStdout(args[index])
+
+    snapshot.apply(null, args)
 
   setup: (options = {}) ->
     if npmI = options.npmInstall

@@ -11,7 +11,6 @@ user       = require("../user")
 stats      = require("../stats")
 video      = require("../video")
 errors     = require("../errors")
-stdout     = require("../stdout")
 Project    = require("../project")
 Reporter   = require("../reporter")
 openProject = require("../open_project")
@@ -39,8 +38,6 @@ collectTestResults = (obj = {}) ->
   }
 
 allDone = ->
-  stdout.restore()
-
   console.log("")
   console.log("")
 
@@ -603,9 +600,6 @@ module.exports = {
     ## alias and coerce to null
     specPattern = options.spec ? null
 
-    if record
-      captured = stdout.capture()
-
     ## warn if we're using deprecated --ci flag
     recordMode.warnIfCiFlag(options.ci)
 
@@ -659,7 +653,6 @@ module.exports = {
             key
             specs
             browser
-            captured
             projectId
             projectRoot
             projectName

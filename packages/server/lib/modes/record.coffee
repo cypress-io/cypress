@@ -5,7 +5,7 @@ Promise    = require("bluebird")
 api        = require("../api")
 logger     = require("../logger")
 errors     = require("../errors")
-# stdout     = require("../stdout")
+capture    = require("../capture")
 upload     = require("../upload")
 # Project    = require("../project")
 browsers   = require('../browsers')
@@ -76,6 +76,7 @@ updateInstanceStdout = (options = {}) ->
 
     ## dont log exceptions if we have a 503 status code
     logException(err) unless err.statusCode is 503
+  .finally(capture.restore)
 
 updateInstance = (options = {}) ->
   { instanceId, results, captured } = options
@@ -196,7 +197,7 @@ createInstance = (options = {}) ->
       null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { captured, specPattern, specs, browser, projectId, projectRoot, runAllSpecs } = options
+  { specPattern, specs, browser, projectId, projectRoot, runAllSpecs } = options
 
   recordKey = options.key
 
@@ -229,9 +230,14 @@ createRunAndRecordSpecs = (options = {}) ->
       else
         { runId, machineId, planId } = resp
 
+        captured = null
         instanceId = null
 
         beforeSpecRun = (spec) ->
+          capture.restore()
+
+          captured = capture.stdout()
+
           createInstance({
             spec
             runId
@@ -337,7 +343,7 @@ module.exports = {
     ## default browser
     browser ?= "electron"
 
-    captured = stdout.capture()
+    captured = capture.stdout()
 
     ## if we are using the ci flag that means
     ## we have an old version of the CLI tools installed
@@ -395,11 +401,11 @@ module.exports = {
                 runMode.allDone()
 
                 if didUploadAssets
-                  stdout.restore()
+                  capture.restore()
                   @uploadStdout(instanceId, captured.toString())
 
             else
-              stdout.restore()
+              capture.restore()
               runMode.allDone()
               return results
 }

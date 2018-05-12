@@ -100,7 +100,6 @@ describe "e2e record", ->
       key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
       spec: "record*"
       record: true
-      # snapshot: true
       expectedExitCode: 3
     })
     .then ->
@@ -146,6 +145,8 @@ describe "e2e record", ->
       expect(firstInstancePut.body.stats.failures).to.eq(1)
       expect(firstInstancePut.body.stats.passes).to.eq(0)
 
+      firstInstanceStdout = requests[3]
+      expect(firstInstanceStdout.body.stdout).to.include("record_error_spec.coffee")
       secondInstance = requests[4]
       expect(secondInstance.body.planId).to.eq(planId)
       expect(secondInstance.body.machineId).to.eq(machineId)
@@ -163,6 +164,9 @@ describe "e2e record", ->
       expect(secondInstancePut.body.stats.passes).to.eq(0)
       expect(secondInstancePut.body.stats.skipped).to.eq(1)
 
+      secondInstanceStdout = requests[6]
+      expect(secondInstanceStdout.body.stdout).to.include("record_fail_spec.coffee")
+      expect(secondInstanceStdout.body.stdout).not.to.include("record_error_spec.coffee")
       thirdInstance = requests[7]
       expect(thirdInstance.body.planId).to.eq(planId)
       expect(thirdInstance.body.machineId).to.eq(machineId)
@@ -180,6 +184,10 @@ describe "e2e record", ->
       expect(thirdInstancePut.body.stats.failures).to.eq(0)
       expect(thirdInstancePut.body.stats.pending).to.eq(1)
 
+      thirdInstanceStdout = requests[9]
+      expect(thirdInstanceStdout.body.stdout).to.include("record_pass_spec.coffee")
+      expect(thirdInstanceStdout.body.stdout).not.to.include("record_error_spec.coffee")
+      expect(thirdInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
       fourthInstance = requests[10]
       expect(fourthInstance.body.planId).to.eq(planId)
       expect(fourthInstance.body.machineId).to.eq(machineId)
@@ -195,3 +203,9 @@ describe "e2e record", ->
       expect(fourthInstancePut.body.stats.tests).to.eq(1)
       expect(fourthInstancePut.body.stats.failures).to.eq(1)
       expect(fourthInstancePut.body.stats.passes).to.eq(0)
+
+      forthInstanceStdout = requests[12]
+      expect(forthInstanceStdout.body.stdout).to.include("record_uncaught_spec.coffee")
+      expect(forthInstanceStdout.body.stdout).not.to.include("record_error_spec.coffee")
+      expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
+      expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
