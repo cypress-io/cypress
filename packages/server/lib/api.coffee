@@ -90,6 +90,7 @@ module.exports = {
 
   getProjectRuns: (projectId, authToken, options = {}) ->
     options.page ?= 1
+
     rp.get({
       url: routes.projectRuns(projectId)
       json: true
