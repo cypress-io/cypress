@@ -1,7 +1,12 @@
+const glob = require('glob')
 const path = require('path')
 
 module.exports = {
-  getPathToExample () {
-    return path.join(__dirname, '..', 'cypress', 'integration', 'example_spec.js')
+  getPathToExamples () {
+    return glob.sync(path.join(__dirname, '..', 'cypress', 'integration', 'examples', '**', '*'))
+  },
+
+  getFolderName () {
+    return 'examples'
   },
 }
