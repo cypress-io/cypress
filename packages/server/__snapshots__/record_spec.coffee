@@ -503,3 +503,27 @@ You can also set the key as an environment variable with the name CYPRESS_RECORD
 https://on.cypress.io/how-do-i-record-runs
 `
 
+exports['e2e record projectId errors and exits without projectId 1'] = `You passed the --record flag but this project has not been setup to record.
+
+This project is missing the 'projectId' inside of 'cypress.json'.
+
+We cannot uniquely identify this project without this id.
+
+You need to setup this project to record. This will generate a unique 'projectId'.
+
+Alternatively if you omit the --record flag this project will run without recording.
+
+https://on.cypress.io/recording-project-runs
+`
+
+exports['e2e record api interaction errors recordKey and projectId errors and exits on 401 1'] = `We failed trying to authenticate this project: pid123
+
+Your Record Key is invalid: f858a...ee7e1
+
+It may have been recently revoked by you or another user.
+
+Please log into the Dashboard to see the updated token.
+
+https://on.cypress.io/dashboard/projects/pid123
+`
+
