@@ -313,7 +313,6 @@ describe "lib/modes/run", ->
         videoCompression: 32
         videoUploadOnPasses: true
         gui: false
-        config: cfg
         screenshots
         started
         end
@@ -331,7 +330,6 @@ describe "lib/modes/run", ->
 
         expect(obj).to.deep.eq({
           screenshots
-          config: cfg
           spec: "cypress/integration/spec.js"
           video:        "foo.mp4"
           error: null
@@ -354,7 +352,6 @@ describe "lib/modes/run", ->
       err = new Error("foo")
       started = new Date
       wallClock = new Date()
-      cfg = {}
       screenshots = [{}, {}, {}]
       end = ->
 
@@ -377,7 +374,6 @@ describe "lib/modes/run", ->
         screenshots
         started
         end
-        config: cfg
         spec: {
           path: "cypress/integration/spec.js"
         }
@@ -391,7 +387,6 @@ describe "lib/modes/run", ->
 
         expect(obj).to.deep.eq({
           screenshots
-          config: cfg
           error:      err.message
           spec:       "cypress/integration/spec.js"
           video:      "foo.mp4"

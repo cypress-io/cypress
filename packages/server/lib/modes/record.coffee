@@ -78,13 +78,12 @@ updateInstanceStdout = (options = {}) ->
     logException(err) unless err.statusCode is 503
   .finally(capture.restore)
 
-updateInstance = (options = {}) ->
+updateInstance = (options = {}, cypressConfig) ->
   { instanceId, results, captured } = options
 
   { stats, tests, hooks, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
-  cypressConfig = results.config
   stdout = captured.toString()
 
   ## get rid of the path property
@@ -248,7 +247,7 @@ createRunAndRecordSpecs = (options = {}) ->
           .then (id) ->
             instanceId = id
 
-        afterSpecRun = (results) ->
+        afterSpecRun = (results, config) ->
           ## dont do anything if we failed to
           ## create the instance
           return if not instanceId
@@ -263,6 +262,7 @@ createRunAndRecordSpecs = (options = {}) ->
           console.log("")
 
           updateInstance({
+            config
             results
             captured
             instanceId

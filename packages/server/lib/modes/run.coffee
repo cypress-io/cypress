@@ -351,7 +351,7 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { config, project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
 
     @listenForProjectEnd(project, headed, exit)
     .then (obj) =>
@@ -371,7 +371,6 @@ module.exports = {
         obj.screenshots = screenshots
 
       obj.spec = spec?.path
-      obj.config = config
 
       testResults = collectTestResults(obj)
 
@@ -449,7 +448,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { project, config, outputPath, specs, beforeSpecRun, afterSpecRun } = options
+    { config, outputPath, specs, beforeSpecRun, afterSpecRun } = options
 
     results = {
       startedTestsAt: null
@@ -480,13 +479,13 @@ module.exports = {
       .get("results")
       .tap (results) ->
         if afterSpecRun
-          afterSpecRun(results)
+          afterSpecRun(results, config)
 
     Promise.mapSeries(specs, runEachSpec)
     .then (runs = []) ->
-      results.startedTestsAt = start = getRun(_.first(runs), "stats.start")
-      results.endedTestsAt = end = getRun(_.last(runs), "stats.end")
-      results.totalDuration = reduceRuns(runs, "stats.duration")
+      results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
+      results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
+      results.totalDuration = reduceRuns(runs, "stats.wallClockDuration")
 
       results.totalSuites = reduceRuns(runs, "stats.suites")
       results.totalTests = reduceRuns(runs, "stats.tests")
@@ -503,7 +502,7 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}) ->
-    { config, browser, videoRecording, videosFolder } = options
+    { project, headed, browser, videoRecording, videosFolder } = options
 
     browser ?= "electron"
     debug("browser for run is: #{browser}")
@@ -551,12 +550,11 @@ module.exports = {
             name
             spec
             cname
-            config
+            headed
             started
+            project
             screenshots
             exit:                 options.exit
-            headed:               options.headed
-            project:              options.project
             videoCompression:     options.videoCompression
             videoUploadOnPasses:  options.videoUploadOnPasses
           }),
@@ -564,10 +562,10 @@ module.exports = {
           connection: @waitForBrowserToConnect({
             spec
             write
+            headed
             browser
+            project
             screenshots
-            headed:      options.headed
-            project:     options.project
             socketId:    options.socketId
             webSecurity: options.webSecurity
             projectRoot: options.projectRoot

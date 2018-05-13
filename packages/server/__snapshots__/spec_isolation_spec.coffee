@@ -17,9 +17,9 @@ exports['e2e spec_isolation failing 1'] = {
         "pending": 1,
         "skipped": 1,
         "failures": 3,
-        "start": "2018-02-01T20:14:19.323Z",
-        "end": "2018-02-01T20:14:19.323Z",
-        "duration": 1234
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockDuration": 1234
       },
       "reporter": "spec",
       "reporterStats": {
@@ -81,7 +81,7 @@ exports['e2e spec_isolation failing 1'] = {
             ]
           },
           "failedFromHookId": "h1",
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         },
@@ -94,8 +94,13 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "pending",
           "body": "",
-          "wallClockStart": null,
-          "wallClockDuration": null
+          "stack": null,
+          "error": null,
+          "timings": null,
+          "failedFromHookId": null,
+          "wallClockStartedAt": null,
+          "wallClockDuration": null,
+          "videoTimestamp": null
         },
         {
           "testId": "r8",
@@ -123,11 +128,12 @@ exports['e2e spec_isolation failing 1'] = {
             ]
           },
           "failedFromHookId": "h2",
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         },
         {
+          "testId": "r9",
           "title": [
             "simple failing hook spec",
             "afterEach hooks",
@@ -135,7 +141,13 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "skipped",
           "body": "function () {}",
-          "wallClockStart": null
+          "stack": null,
+          "error": null,
+          "timings": null,
+          "failedFromHookId": null,
+          "wallClockStartedAt": null,
+          "wallClockDuration": null,
+          "videoTimestamp": null
         },
         {
           "testId": "r11",
@@ -146,6 +158,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "passed",
           "body": "function () {}",
+          "stack": null,
+          "error": null,
           "timings": {
             "lifecycle": 100,
             "test": {
@@ -153,7 +167,8 @@ exports['e2e spec_isolation failing 1'] = {
               "afterFnDuration": 200
             }
           },
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "failedFromHookId": null,
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         },
@@ -183,48 +198,37 @@ exports['e2e spec_isolation failing 1'] = {
             ]
           },
           "failedFromHookId": "h3",
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         }
       ],
+      "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
       "screenshots": [
         {
-          "clientId": "some-random-guid-number",
+          "screenshotId": "some-random-id",
+          "name": null,
           "testId": "r4",
-          "testTitle": [
-            "simple failing hook spec",
-            "beforeEach hooks",
-            "never gets here",
-            "\"before each\" hook"
-          ],
+          "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook.png",
           "height": 720,
           "width": 1280
         },
         {
-          "clientId": "some-random-guid-number",
+          "screenshotId": "some-random-id",
+          "name": null,
           "testId": "r8",
-          "testTitle": [
-            "simple failing hook spec",
-            "afterEach hooks",
-            "runs this",
-            "\"after each\" hook"
-          ],
+          "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- afterEach hooks -- runs this -- after each hook.png",
           "height": 720,
           "width": 1280
         },
         {
-          "clientId": "some-random-guid-number",
+          "screenshotId": "some-random-id",
+          "name": null,
           "testId": "r12",
-          "testTitle": [
-            "simple failing hook spec",
-            "after hooks",
-            "fails on this",
-            "\"after all\" hook"
-          ],
+          "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing hook spec -- after hooks -- fails on this -- after all hook.png",
           "height": 720,
           "width": 1280
@@ -242,9 +246,9 @@ exports['e2e spec_isolation failing 1'] = {
         "pending": 0,
         "skipped": 0,
         "failures": 2,
-        "start": "2018-02-01T20:14:19.323Z",
-        "end": "2018-02-01T20:14:19.323Z",
-        "duration": 1234
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockDuration": 1234
       },
       "reporter": "spec",
       "reporterStats": {
@@ -276,7 +280,8 @@ exports['e2e spec_isolation failing 1'] = {
               "afterFnDuration": 200
             }
           },
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "failedFromHookId": null,
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         },
@@ -297,31 +302,29 @@ exports['e2e spec_isolation failing 1'] = {
               "afterFnDuration": 200
             }
           },
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "failedFromHookId": null,
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         }
       ],
+      "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
       "screenshots": [
         {
-          "clientId": "some-random-guid-number",
+          "screenshotId": "some-random-id",
+          "name": null,
           "testId": "r3",
-          "testTitle": [
-            "simple failing spec",
-            "fails1"
-          ],
+          "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing spec -- fails1.png",
           "height": 720,
           "width": 1280
         },
         {
-          "clientId": "some-random-guid-number",
+          "screenshotId": "some-random-id",
+          "name": null,
           "testId": "r4",
-          "testTitle": [
-            "simple failing spec",
-            "fails2"
-          ],
+          "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple failing spec -- fails2.png",
           "height": 720,
           "width": 1280
@@ -339,9 +342,9 @@ exports['e2e spec_isolation failing 1'] = {
         "pending": 0,
         "skipped": 0,
         "failures": 0,
-        "start": "2018-02-01T20:14:19.323Z",
-        "end": "2018-02-01T20:14:19.323Z",
-        "duration": 1234
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockDuration": 1234
       },
       "reporter": "spec",
       "reporterStats": {
@@ -397,6 +400,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "passed",
           "body": "function () {\n    return cy.wrap(\"t1\").should(\"eq\", \"t1\");\n  }",
+          "stack": null,
+          "error": null,
           "timings": {
             "lifecycle": 100,
             "before all": [
@@ -425,7 +430,8 @@ exports['e2e spec_isolation failing 1'] = {
               }
             ]
           },
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "failedFromHookId": null,
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         },
@@ -437,6 +443,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "passed",
           "body": "function () {\n    return cy.wrap(\"t2\").should(\"eq\", \"t2\");\n  }",
+          "stack": null,
+          "error": null,
           "timings": {
             "lifecycle": 100,
             "before each": [
@@ -458,7 +466,8 @@ exports['e2e spec_isolation failing 1'] = {
               }
             ]
           },
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "failedFromHookId": null,
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         },
@@ -470,6 +479,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "passed",
           "body": "function () {\n    return cy.wrap(\"t3\").should(\"eq\", \"t3\");\n  }",
+          "stack": null,
+          "error": null,
           "timings": {
             "lifecycle": 100,
             "before each": [
@@ -498,11 +509,13 @@ exports['e2e spec_isolation failing 1'] = {
               }
             ]
           },
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "failedFromHookId": null,
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         }
       ],
+      "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
       "screenshots": [],
       "spec": "cypress/integration/simple_hooks_spec.coffee",
@@ -516,9 +529,9 @@ exports['e2e spec_isolation failing 1'] = {
         "pending": 0,
         "skipped": 0,
         "failures": 0,
-        "start": "2018-02-01T20:14:19.323Z",
-        "end": "2018-02-01T20:14:19.323Z",
-        "duration": 1234
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
+        "wallClockDuration": 1234
       },
       "reporter": "spec",
       "reporterStats": {
@@ -550,6 +563,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "passed",
           "body": "function () {\n    return cy.wrap(true).should(\"be.true\");\n  }",
+          "stack": null,
+          "error": null,
           "timings": {
             "lifecycle": 100,
             "before each": [
@@ -564,11 +579,13 @@ exports['e2e spec_isolation failing 1'] = {
               "afterFnDuration": 200
             }
           },
-          "wallClockStart": "2018-02-01T20:14:19.323Z",
+          "failedFromHookId": null,
+          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         }
       ],
+      "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
       "screenshots": [],
       "spec": "cypress/integration/simple_passing_spec.coffee",

@@ -289,7 +289,7 @@ class Reporter
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
-      ## if we have a wallClockStart
+      ## if we have a wallClockStartedAt
       if wcs = test.wallClockStartedAt
         test.videoTimestamp = test.wallClockStartedAt - videoStart
       test
