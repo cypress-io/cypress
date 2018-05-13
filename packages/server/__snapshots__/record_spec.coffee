@@ -479,3 +479,16 @@ StatusCodeError: 500 - "Internal Server Error"
 
 `
 
+exports['e2e record failing errors and exits without projectId 1'] = `You passed the --record flag but this project has not been setup to record.
+
+This project is missing the 'projectId' inside of 'cypress.json'.
+
+We cannot uniquely identify this project without this id.
+
+You need to setup this project to record. This will generate a unique 'projectId'.
+
+Alternatively if you omit the --record flag this project will run without recording.
+
+https://on.cypress.io/recording-project-runs
+`
+

@@ -231,6 +231,18 @@ describe "e2e record", ->
         expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
 
+  context "failing", ->
+    e2e.setup()
+
+    it "errors and exits without projectId", ->
+      e2e.exec(@, {
+        key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+        spec: "record_pass*"
+        record: true
+        snapshot: true
+        expectedExitCode: 1
+      })
+
   context "api interaction errors", ->
     describe "recordKey and projectId", ->
       routes = [
@@ -244,7 +256,7 @@ describe "e2e record", ->
 
       setup(routes)
 
-      it "errors and exits", ->
+      it "errors and exits on 401", ->
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
