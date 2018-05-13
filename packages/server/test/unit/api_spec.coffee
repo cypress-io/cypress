@@ -181,7 +181,7 @@ describe "lib/api", ->
   context ".ping", ->
     it "GET /ping", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .get("/ping")
       .reply(200, "OK")
@@ -228,7 +228,7 @@ describe "lib/api", ->
     it "POST /runs + returns runId", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", @buildProps)
       .reply(200, {
@@ -242,7 +242,7 @@ describe "lib/api", ->
     it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", @buildProps)
       .reply(422, {
@@ -270,7 +270,7 @@ describe "lib/api", ->
     it "handles timeouts", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs")
       .socketDelay(5000)
@@ -325,8 +325,8 @@ describe "lib/api", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "darwin")
+      .matchHeader("x-route-version", "4")
+      .matchHeader("x-os-name", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances", @postProps)
       .reply(200, {
@@ -339,8 +339,8 @@ describe "lib/api", ->
 
     it "POST /runs/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "4")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances")
       .reply(422, {
@@ -367,8 +367,8 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "4")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances")
       .socketDelay(5000)
@@ -423,7 +423,7 @@ describe "lib/api", ->
     it "PUTs /instances/:id", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123", @putProps)
       .reply(200)
@@ -433,7 +433,7 @@ describe "lib/api", ->
     it "PUT /instances/:id failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
       .reply(422, {
@@ -461,7 +461,7 @@ describe "lib/api", ->
     it "handles timeouts", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
       .socketDelay(5000)
@@ -500,7 +500,7 @@ describe "lib/api", ->
   context ".updateInstanceStdout", ->
     it "PUTs /instances/:id/stdout", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123/stdout", {
         stdout: "foobarbaz\n"
@@ -514,7 +514,7 @@ describe "lib/api", ->
 
     it "PUT /instances/:id/stdout failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123/stdout")
       .reply(422, {
@@ -541,7 +541,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123/stdout")
       .socketDelay(5000)
@@ -584,7 +584,7 @@ describe "lib/api", ->
   context ".getLoginUrl", ->
     it "GET /auth + returns the url", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .get("/auth")
       .reply(200, {
@@ -612,7 +612,7 @@ describe "lib/api", ->
       @sandbox.stub(nmi, "machineId").resolves("12345")
 
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
       .matchHeader("x-machine-id", "12345")
@@ -633,7 +633,7 @@ describe "lib/api", ->
       nock("http://localhost:1234", {
         "badheaders": ["x-machine-id"]
       })
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
       .matchHeader("x-accept-terms", "true")
@@ -650,7 +650,7 @@ describe "lib/api", ->
 
     it "handles 401 exceptions", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
       .post("/signin")
@@ -679,7 +679,7 @@ describe "lib/api", ->
   context ".createSignout", ->
     it "POSTs /signout", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
@@ -718,7 +718,7 @@ describe "lib/api", ->
 
     it "POST /projects", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
@@ -742,7 +742,7 @@ describe "lib/api", ->
 
     it "POST /projects failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
@@ -876,7 +876,7 @@ describe "lib/api", ->
   context ".getProjectToken", ->
     it "GETs /projects/:id/token", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
@@ -905,7 +905,7 @@ describe "lib/api", ->
   context ".updateProjectToken", ->
     it "PUTs /projects/:id/token", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
@@ -935,7 +935,7 @@ describe "lib/api", ->
     beforeEach ->
       @setup = (body, authToken, delay = 0) ->
         nock("http://localhost:1234")
-        .matchHeader("x-platform", "linux")
+        .matchHeader("x-os-name", "linux")
         .matchHeader("x-cypress-version", pkg.version)
         .matchHeader("authorization", "Bearer #{authToken}")
         .post("/exceptions", body)
@@ -969,7 +969,7 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
