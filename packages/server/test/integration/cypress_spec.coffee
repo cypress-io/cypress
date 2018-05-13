@@ -27,20 +27,19 @@ cwd        = require("#{root}lib/cwd")
 user       = require("#{root}lib/user")
 config     = require("#{root}lib/config")
 cache      = require("#{root}lib/cache")
-stdout     = require("#{root}lib/stdout")
+video      = require("#{root}lib/video")
 errors     = require("#{root}lib/errors")
-upload     = require("#{root}lib/upload")
+plugins    = require("#{root}lib/plugins")
 cypress    = require("#{root}lib/cypress")
 Project    = require("#{root}lib/project")
 Server     = require("#{root}lib/server")
 Reporter   = require("#{root}lib/reporter")
-utils      = require("#{root}lib/browsers/utils")
-browsers   = require("#{root}lib/browsers")
 Watchers   = require("#{root}lib/watchers")
+browsers   = require("#{root}lib/browsers")
+browserUtils = require("#{root}lib/browsers/utils")
 openProject   = require("#{root}lib/open_project")
-system        = require("#{root}lib/util/system")
+env           = require("#{root}lib/util/env")
 appData       = require("#{root}lib/util/app_data")
-specsUtil     = require("#{root}lib/util/specs")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
 
 TYPICAL_BROWSERS = [
@@ -83,12 +82,15 @@ describe "lib/cypress", ->
     @todosPath    = Fixtures.projectPath("todos")
     @pristinePath = Fixtures.projectPath("pristine")
     @noScaffolding = Fixtures.projectPath("no-scaffolding")
+    @recordPath = Fixtures.projectPath("record")
     @pluginConfig = Fixtures.projectPath("plugin-config")
     @pluginBrowser = Fixtures.projectPath("plugin-browser")
     @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
     ## spawning a separate process
+    @sandbox.stub(video, "start").resolves({})
+    @sandbox.stub(plugins, "init").resolves(undefined)
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     @sandbox.stub(extension, "setHostAndPath").resolves()
     @sandbox.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
@@ -465,55 +467,6 @@ describe "lib/cypress", ->
         expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
 
-    it "writes json results when passed outputPath", ->
-      obj = {
-        stats: {
-          tests:       1
-          passes:      2
-          pending:     3
-          failures:    4
-          duration:    5
-        }
-        tests: []
-        hooks: []
-      }
-
-      outputPath = "./.results/results.json"
-
-      runMode.listenForProjectEnd.resolves(_.clone(obj))
-
-      cypress.start([
-        "--run-project=#{@todosPath}",
-        "--spec=#{@todosPath}/tests/test2.coffee"
-        "--output-path=#{outputPath}"
-      ])
-      .then =>
-        @expectExitWith(4)
-
-        fs.readJsonAsync(cwd(outputPath))
-        .then (json) ->
-          run = json.runs[0]
-
-          expect(run.video).to.be.a("string")
-
-          expect(run).to.deep.eq({
-            stats: {
-              tests:       1
-              passes:      2
-              pending:     3
-              failures:    4
-              duration:    5
-            }
-            tests: []
-            hooks: []
-            screenshots: []
-            shouldUploadVideo: true
-            spec: "tests/test2.coffee"
-            video: run.video
-          })
-      .finally ->
-        fs.removeAsync(cwd(path.dirname(outputPath)))
-
     it "logs error when supportFile doesn't exist", ->
       settings.write(@idsPath, {supportFile: "/does/not/exist"})
       .then =>
@@ -559,7 +512,7 @@ describe "lib/cypress", ->
         "--spec=#{@todosPath}/tests/path/to/spec"
       ])
       .then =>
-        @expectExitWithErr("NO_SPECS_FOUND", "#{@todosPath}/tests/path/to/spec")
+        @expectExitWithErr("NO_SPECS_FOUND", "tests/path/to/spec")
 
     it "logs error and exits when no specs were found at all", ->
       cypress.start([
@@ -683,6 +636,8 @@ describe "lib/cypress", ->
           @expectExitWith(0)
 
       it "can override values in plugins", ->
+        plugins.init.restore()
+
         cypress.start([
           "--run-project=#{@pluginConfig}", "--config=requestTimeout=1234,videoCompression=false"
           "--env=foo=foo,bar=bar"
@@ -718,6 +673,7 @@ describe "lib/cypress", ->
 
     describe "plugins", ->
       beforeEach ->
+        plugins.init.restore()
         browsers.open.restore()
 
         ee = new EE()
@@ -733,7 +689,7 @@ describe "lib/cypress", ->
           }
         }
 
-        @sandbox.stub(utils, "launch").resolves(ee)
+        @sandbox.stub(browserUtils, "launch").resolves(ee)
         @sandbox.stub(Windows, "create").returns(ee)
         @sandbox.stub(Windows, "automation")
 
@@ -744,7 +700,7 @@ describe "lib/cypress", ->
             "--browser=chrome"
           ])
           .then =>
-            args = utils.launch.firstCall.args
+            args = browserUtils.launch.firstCall.args
 
             expect(args[0]).to.eq("chrome")
 
@@ -825,82 +781,12 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
-  ## the majority of the logic in Record mode is covered already
-  ## in --run-project specs above
-  context.skip "--record or --ci", ->
-    afterEach ->
-      delete process.env.CYPRESS_PROJECT_ID
-      delete process.env.CYPRESS_RECORD_KEY
-
+  ## most record mode logic is covered in e2e tests.
+  ## we only need to cover the edge cases / warnings
+  context "--record or --ci", ->
     beforeEach ->
-      specs = [{
-        path: "path/to/spec/a"
-      }, {
-        path: "path/to/spec/b"
-      }]
-
-      @setup = (specPattern = null) =>
-        @sandbox.stub(specsUtil, "find").resolves(specs)
-
-        @createRunArgs = {
-          specPattern
-          specs: ["path/to/spec/a", "path/to/spec/b"]
-          projectId:    @projectId
-          recordKey:    "token-123"
-          commit: {
-            sha:    "sha-123"
-            branch: "bem/ci"
-            authorName: "brian"
-            authorEmail:  "brian@cypress.io"
-            message: "foo"
-            remoteOrigin: "https://github.com/foo/bar.git"
-          }
-          ci: {
-            provider: "travis"
-            buildNumber: "987"
-            params: null
-          }
-          platform: {
-            osCpus: 1
-            osName: 2
-            osMemory: 3
-            osVersion: 4
-            browserName: "chrome"
-            browserVersion: "59"
-          }
-        }
-
-        @createRun = @sandbox.stub(api, "createRun")
-
-      @sandbox.stub(upload, "send").resolves()
-      @sandbox.stub(stdout, "capture").returns({
-        toString: -> "foobarbaz"
-      })
-
-      @sandbox.stub(ciProvider, "name").returns("travis")
-      @sandbox.stub(ciProvider, "buildNum").returns("987")
-      @sandbox.stub(ciProvider, "params").returns(null)
-      @sandbox.stub(os, "platform").returns("linux")
-      ## TODO: might need to change this to a different return
+      @sandbox.stub(api, "createRun").resolves()
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(commitInfo, "commitInfo").resolves({
-        branch: "bem/ci",
-        sha: "sha-123",
-        author: "brian",
-        email: "brian@cypress.io",
-        message: "foo",
-        remote: "https://github.com/foo/bar.git"
-      })
-      @sandbox.stub(system, "info").resolves({
-        osCpus: 1
-        osName: 2
-        osMemory: 3
-        osVersion: 4
-      })
-      @sandbox.stub(browsers, "getByName").resolves({
-        displayName: "chrome"
-        version: "59"
-      })
       @sandbox.stub(browsers, "open")
       @sandbox.stub(runMode, "waitForSocketConnection")
       @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({
@@ -927,212 +813,65 @@ describe "lib/cypress", ->
           @projectId = id
       ])
 
-    it "runs project in ci and exits with number of failures", ->
-      @setup()
-
-      @createRun.resolves({
-        runId: "run-id-123"
-        planId: "plan-id-123"
-        machineId: "machine-id-123"
-      })
-      @createInstance = @sandbox.stub(api, "createInstance").resolves("instance-id-123")
-      @updateInstance = @sandbox.stub(api, "updateInstance").resolves({
-        videoUploadUrl: "http://video.url"
-      })
-
-      cypress.start(["--run-project=#{@todosPath}", "--record",  "--key=token-123"])
-      .then =>
-        expect(@createRun).to.be.calledWith(@createRunArgs)
-        expect(@createInstance).to.be.calledWith({
-          runId: "run-id-123"
-          planId: "plan-id-123"
-          machineId: "machine-id-123"
-          spec: "path/to/spec/a"
-          platform: {
-            browserName: "chrome",
-            browserVersion: "59",
-            osCpus: 1,
-            osMemory: 3,
-            osName: 2,
-            osVersion: 4
-          },
-        })
-        expect(@updateInstance).to.be.calledWith({
-          stats: {
-            tests: 1
-            passes: 2
-            failures: 3
-            pending: 4
-            wallClockDuration: 5
-          }
-          video: true
-          screenshots: []
-          cypressConfig: {}
-          instanceId: "instance-id-123"
-          error: null
-          hooks: undefined
-          tests: undefined
-          reporterStats: undefined
-          stdout: "foobarbaz"
-        })
-
-        expect(upload.send).to.be.calledOnce
-
-        @expectExitWith(3)
-
-    it "sends specs and runs project by specific absolute spec and exits with status 3", ->
-      spec = "#{@todosPath}/tests/*"
-
-      @setup(spec)
-
-      ## TODO: fix this once we implement proper globbing
-      ## per spec. currently just hacking this and forcing
-      ## it to return something we specify
-      @sandbox.stub(Project.prototype, "ensureSpecExists").resolves("#{@todosPath}/test2.coffee")
-
-      @createRun.resolves("run-id-123")
-
-      @sandbox.stub(api, "createInstance").withArgs({
-        runId: "run-id-123"
-        browser: "chrome"
-        spec: spec
-      }).resolves("instance-id-123")
-
-      @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
-
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{spec}", "--browser=chrome"])
-      .then =>
-        expect(browsers.open).to.be.calledWithMatch("chrome", {url: "http://localhost:8888/__/#/tests/test2.coffee"})
-        @expectExitWith(3)
-
     it "uses process.env.CYPRESS_PROJECT_ID", ->
-      @setup()
+      @sandbox.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns(@projectId)
 
-      ## set the projectId to be todos even though
-      ## we are running the pristine project
-      process.env.CYPRESS_PROJECT_ID = @projectId
-
-      @createRun.resolves()
-      @sandbox.stub(api, "createInstance").resolves()
-
-      cypress.start(["--run-project=#{@pristinePath}", "--record", "--key=token-123"])
+      cypress.start([
+        "--run-project=#{@noScaffolding}",
+        "--record",
+        "--key=token-123"
+      ])
       .then =>
+        expect(api.createRun).to.be.calledWithMatch({projectId: @projectId})
         expect(errors.warning).not.to.be.called
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_RECORD_KEY", ->
-      @setup()
+      @sandbox.stub(env, "get")
+      .withArgs("CYPRESS_PROJECT_ID").returns("foo-project-123")
+      .withArgs("CYPRESS_RECORD_KEY").returns("token")
 
-      process.env.CYPRESS_RECORD_KEY = "token-123"
-
-      @createRun.resolves()
-      @sandbox.stub(api, "createInstance").resolves()
-
-      cypress.start(["--run-project=#{@todosPath}", "--record"])
+      cypress.start([
+        "--run-project=#{@noScaffolding}",
+        "--record"
+      ])
       .then =>
+        expect(api.createRun).to.be.calledWithMatch({
+          projectId: "foo-project-123"
+          recordKey: "token"
+        })
         expect(errors.warning).not.to.be.called
         @expectExitWith(3)
 
-    it "still records even with old --ci option", ->
-      @setup()
-
-      @createRun.resolves("run-id-123")
-      @sandbox.stub(api, "createInstance").resolves()
-      @sandbox.stub(api, "updateInstance").resolves()
-
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
-      .then =>
-        @expectExitWith(3)
-
     it "logs warning when using deprecated --ci arg and no env var", ->
-      @setup()
-
-      @createRun.resolves("run-id-123")
-      @sandbox.stub(api, "createInstance").resolves()
-      @sandbox.stub(api, "updateInstance").resolves()
-
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--key=token-123",
+        "--ci"
+      ])
       .then =>
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
         expect(console.log).to.be.calledWithMatch("You are using the deprecated command:")
         expect(console.log).to.be.calledWithMatch("cypress run --record --key <record_key>")
-
-    it "logs ONLY CLI warning when using older version of CLI when using deprecated --ci", ->
-      @setup()
-
-      @createRun.resolves("run-id-123")
-      @sandbox.stub(api, "createInstance").resolves()
-      @sandbox.stub(api, "updateInstance").resolves()
-
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
-      .then =>
-        expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
         expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION")
+        @expectExitWith(3)
 
     it "logs warning when using deprecated --ci arg and env var", ->
-      @setup()
+      @sandbox.stub(env, "get")
+      .withArgs("CYPRESS_CI_KEY")
+      .returns("asdf123foobarbaz")
 
-      process.env.CYPRESS_CI_KEY = "asdf123foobarbaz"
-
-      @createRun.resolves("run-id-123")
-      @sandbox.stub(api, "createInstance").resolves()
-      @sandbox.stub(api, "updateInstance").resolves()
-
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--key=token-123",
+        "--ci"
+      ])
       .then =>
-        delete process.env.CYPRESS_CI_KEY
-
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED_ENV_VAR")
         expect(console.log).to.be.calledWithMatch("You are using the deprecated command:")
         expect(console.log).to.be.calledWithMatch("cypress ci")
         expect(console.log).to.be.calledWithMatch("cypress run --record")
-
-    it "logs error when missing project id", ->
-      @setup()
-
-      cypress.start(["--run-project=#{@pristinePath}", "--record", "--key=token-123"])
-      .then =>
-        @expectExitWithErr("CANNOT_RECORD_NO_PROJECT_ID")
-
-    it "logs error and exits when ci key is not valid", ->
-      @setup()
-
-      err = new Error()
-      err.statusCode = 401
-      @createRun.rejects(err)
-
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123"])
-      .then =>
-        @expectExitWithErr("RECORD_KEY_NOT_VALID", "token...n-123")
-
-    it "logs error and exits when project could not be found", ->
-      @setup()
-
-      err = new Error()
-      err.statusCode = 404
-      @createRun.rejects(err)
-
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123"])
-      .then =>
-        @expectExitWithErr("DASHBOARD_PROJECT_NOT_FOUND", "abc123")
-
-    it "logs error but continues running the tests", ->
-      @setup()
-
-      err = new Error()
-      err.statusCode = 500
-      @createRun.rejects(err)
-
-      cypress.start(["--run-project=#{@todosPath}", "--record", "--key=token-123"])
-      .then =>
         @expectExitWith(3)
-
-    it "throws when no Record Key was provided", ->
-      @setup()
-
-      cypress.start(["--run-project=#{@todosPath}", "--record"])
-      .then =>
-        @expectExitWithErr("RECORD_KEY_MISSING", "cypress run --record --key <record_key>")
 
   context "--return-pkg", ->
     beforeEach ->
