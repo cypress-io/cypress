@@ -294,7 +294,7 @@ module.exports = {
 
         resolve(obj)
 
-      onEnd = (obj) =>
+      onEnd = (obj) ->
         resolve(obj)
 
       ## when our project fires its end event

@@ -329,6 +329,9 @@ describe "lib/modes/run", ->
           config: cfg
           spec: "cypress/integration/spec.js"
           video:        "foo.mp4"
+          error: null
+          hooks: null
+          reporterStats: null
           shouldUploadVideo: true
           tests: [1,2,3]
           stats: {
@@ -341,15 +344,15 @@ describe "lib/modes/run", ->
         })
 
     it "exitEarlyWithErr event resolves with no tests, error, and empty failingTests", ->
+      clock = @sandbox.useFakeTimers()
+
       err = new Error("foo")
       started = new Date
+      wallClock = new Date()
       cfg = {}
       screenshots = [{}, {}, {}]
       end = ->
 
-      @sandbox.stub(runMode, "postProcessRecording").resolves()
-      @sandbox.spy(runMode,  "displayStats")
-      @sandbox.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
@@ -383,14 +386,21 @@ describe "lib/modes/run", ->
           config: cfg
           error:      err.message
           spec:       "cypress/integration/spec.js"
-          video:        "foo.mp4"
+          video:      "foo.mp4"
+          hooks: null
+          tests: null
+          reporterStats: null
           shouldUploadVideo: true
           stats: {
-            failures:     1
-            tests:        0
-            passes:       0
-            pending:      0
-            duration:     0
+            failures: 1
+            tests: 0
+            passes: 0
+            pending: 0
+            suites: 0
+            skipped: 0
+            wallClockDuration: 0
+            wallClockStartedAt: wallClock.toJSON()
+            wallClockEndedAt: wallClock.toJSON()
           }
         })
 
