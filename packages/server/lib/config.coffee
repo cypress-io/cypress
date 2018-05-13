@@ -326,10 +326,8 @@ module.exports = {
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
 
-    fileName = scaffold.integrationExampleName()
-
-    obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
-    obj.integrationExampleName = fileName
+    obj.integrationExampleName = scaffold.integrationExampleName()
+    obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
     obj.scaffoldedFiles = scaffold.fileTree(obj)
 
     return obj
