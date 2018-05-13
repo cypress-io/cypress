@@ -19,6 +19,19 @@ require("chai")
 
 sinon.usingPromise(Promise)
 
+## backup these originals
+restore = sinon.restore
+useFakeTimers = sinon.useFakeTimers
+
+sinon.useFakeTimers = ->
+  sinon._clock = useFakeTimers.apply(sinon, arguments)
+
+sinon.restore = ->
+  if c = sinon._clock
+    c.restore()
+
+  restore.apply(sinon, arguments)
+
 mockery.enable({
   warnOnUnregistered: false
 })
