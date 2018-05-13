@@ -8,7 +8,7 @@ describe "lib/capture", ->
 
   context "process.stdout.write", ->
     beforeEach ->
-      @write    = @sandbox.spy(process.stdout, "write")
+      @write    = sinon.spy(process.stdout, "write")
       @captured = capture.stdout()
 
     it "slurps up stdout", ->
@@ -32,7 +32,7 @@ describe "lib/capture", ->
   context "process.log", ->
     beforeEach ->
       @log = process.log
-      @logStub = process.log = @sandbox.stub()
+      @logStub = process.log = sinon.stub()
 
       @captured = capture.stdout()
 

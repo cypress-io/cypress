@@ -89,16 +89,16 @@ describe "lib/cypress", ->
 
     ## force cypress to call directly into main without
     ## spawning a separate process
-    @sandbox.stub(video, "start").resolves({})
-    @sandbox.stub(plugins, "init").resolves(undefined)
-    @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
-    @sandbox.stub(extension, "setHostAndPath").resolves()
-    @sandbox.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
-    @sandbox.stub(process, "exit")
-    @sandbox.stub(Server.prototype, "reset")
-    @sandbox.spy(errors, "log")
-    @sandbox.spy(errors, "warning")
-    @sandbox.spy(console, "log")
+    sinon.stub(video, "start").resolves({})
+    sinon.stub(plugins, "init").resolves(undefined)
+    sinon.stub(cypress, "isCurrentlyRunningElectron").returns(true)
+    sinon.stub(extension, "setHostAndPath").resolves()
+    sinon.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
+    sinon.stub(process, "exit")
+    sinon.stub(Server.prototype, "reset")
+    sinon.spy(errors, "log")
+    sinon.spy(errors, "warning")
+    sinon.spy(console, "log")
 
     @expectExitWith = (code) =>
       expect(process.exit).to.be.calledWith(code)
@@ -127,7 +127,7 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @sandbox.stub(api, "getProjectToken")
+        sinon.stub(api, "getProjectToken")
           .withArgs(@projectId, "auth-token-123")
           .resolves("new-key-123")
 
@@ -166,7 +166,7 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @sandbox.stub(api, "getProjectToken")
+        sinon.stub(api, "getProjectToken")
           .withArgs(@projectId, "auth-token-123")
           .rejects(new Error())
 
@@ -184,7 +184,7 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @sandbox.stub(api, "updateProjectToken")
+        sinon.stub(api, "updateProjectToken")
           .withArgs(@projectId, "auth-token-123")
           .resolves("new-key-123")
 
@@ -223,7 +223,7 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @sandbox.stub(api, "updateProjectToken")
+        sinon.stub(api, "updateProjectToken")
           .withArgs(@projectId, "auth-token-123")
           .rejects(new Error())
 
@@ -233,11 +233,11 @@ describe "lib/cypress", ->
 
   context "--run-project", ->
     beforeEach ->
-      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(runMode, "waitForSocketConnection")
-      @sandbox.stub(runMode, "listenForProjectEnd").resolves({stats: {failures: 0} })
-      @sandbox.stub(browsers, "open")
-      @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(runMode, "waitForSocketConnection")
+      sinon.stub(runMode, "listenForProjectEnd").resolves({stats: {failures: 0} })
+      sinon.stub(browsers, "open")
+      sinon.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
 
     it "runs project headlessly and exits with exit code 0", ->
       cypress.start(["--run-project=#{@todosPath}"])
@@ -246,14 +246,14 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      @sandbox.stub(runMode, "runSpecs").resolves({ totalFailures: 10 })
+      sinon.stub(runMode, "runSpecs").resolves({ totalFailures: 10 })
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
         @expectExitWith(10)
 
     it "does not generate a project id even if missing one", ->
-      @sandbox.stub(api, "createProject")
+      sinon.stub(api, "createProject")
 
       user.set({authToken: "auth-token-123"})
       .then =>
@@ -410,7 +410,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "turns on reporting", ->
-      @sandbox.spy(Reporter, "create")
+      sinon.spy(Reporter, "create")
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then  =>
@@ -418,7 +418,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "can change the reporter to nyan", ->
-      @sandbox.spy(Reporter, "create")
+      sinon.spy(Reporter, "create")
 
       cypress.start(["--run-project=#{@todosPath}", "--reporter=nyan"])
       .then  =>
@@ -426,7 +426,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "can change the reporter with cypress.json", ->
-      @sandbox.spy(Reporter, "create")
+      sinon.spy(Reporter, "create")
 
       config.get(@idsPath)
       .then (@cfg) =>
@@ -685,13 +685,13 @@ describe "lib/cypress", ->
         ee.loadURL = ->
         ee.webContents = {
           session: {
-            clearCache: @sandbox.stub().yieldsAsync()
+            clearCache: sinon.stub().yieldsAsync()
           }
         }
 
-        @sandbox.stub(browserUtils, "launch").resolves(ee)
-        @sandbox.stub(Windows, "create").returns(ee)
-        @sandbox.stub(Windows, "automation")
+        sinon.stub(browserUtils, "launch").resolves(ee)
+        sinon.stub(Windows, "create").returns(ee)
+        sinon.stub(Windows, "automation")
 
       context "before:browser:launch", ->
         it "chrome", ->
@@ -732,8 +732,8 @@ describe "lib/cypress", ->
         runMode.listenForProjectEnd.resolves({stats: {failures: 0} })
 
       it "can change the default port to 5555", ->
-        listen = @sandbox.spy(http.Server.prototype, "listen")
-        open   = @sandbox.spy(Server.prototype, "open")
+        listen = sinon.spy(http.Server.prototype, "listen")
+        open   = sinon.spy(Server.prototype, "open")
 
         cypress.start(["--run-project=#{@todosPath}", "--port=5555"])
         .then =>
@@ -785,11 +785,11 @@ describe "lib/cypress", ->
   ## we only need to cover the edge cases / warnings
   context "--record or --ci", ->
     beforeEach ->
-      @sandbox.stub(api, "createRun").resolves()
-      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(browsers, "open")
-      @sandbox.stub(runMode, "waitForSocketConnection")
-      @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({
+      sinon.stub(api, "createRun").resolves()
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(browsers, "open")
+      sinon.stub(runMode, "waitForSocketConnection")
+      sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({
         stats: {
           tests: 1
           passes: 2
@@ -814,7 +814,7 @@ describe "lib/cypress", ->
       ])
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
-      @sandbox.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns(@projectId)
+      sinon.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns(@projectId)
 
       cypress.start([
         "--run-project=#{@noScaffolding}",
@@ -827,7 +827,7 @@ describe "lib/cypress", ->
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_RECORD_KEY", ->
-      @sandbox.stub(env, "get")
+      sinon.stub(env, "get")
       .withArgs("CYPRESS_PROJECT_ID").returns("foo-project-123")
       .withArgs("CYPRESS_RECORD_KEY").returns("token")
 
@@ -857,7 +857,7 @@ describe "lib/cypress", ->
         @expectExitWith(3)
 
     it "logs warning when using deprecated --ci arg and env var", ->
-      @sandbox.stub(env, "get")
+      sinon.stub(env, "get")
       .withArgs("CYPRESS_CI_KEY")
       .returns("asdf123foobarbaz")
 
@@ -876,7 +876,7 @@ describe "lib/cypress", ->
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()
-      @sandbox.stub(console, "log")
+      sinon.stub(console, "log")
 
     it "logs package.json and exits", ->
       cypress.start(["--return-pkg"])
@@ -887,7 +887,7 @@ describe "lib/cypress", ->
   context "--version", ->
     beforeEach ->
       console.log.restore()
-      @sandbox.stub(console, "log")
+      sinon.stub(console, "log")
 
     it "logs version and exits", ->
       cypress.start(["--version"])
@@ -898,7 +898,7 @@ describe "lib/cypress", ->
   context "--smoke-test", ->
     beforeEach ->
       console.log.restore()
-      @sandbox.stub(console, "log")
+      sinon.stub(console, "log")
 
     it "logs pong value and exits", ->
       cypress.start(["--smoke-test", "--ping=abc123"])
@@ -909,17 +909,17 @@ describe "lib/cypress", ->
   context "interactive", ->
     beforeEach ->
       @win = {
-        on: @sandbox.stub()
+        on: sinon.stub()
         webContents: {
-          on: @sandbox.stub()
+          on: sinon.stub()
         }
       }
 
-      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(Windows, "open").resolves(@win)
-      @sandbox.stub(Server.prototype, "startWebsockets")
-      @sandbox.spy(Events, "start")
-      @sandbox.stub(electron.ipcMain, "on")
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(Windows, "open").resolves(@win)
+      sinon.stub(Server.prototype, "startWebsockets")
+      sinon.spy(Events, "start")
+      sinon.stub(electron.ipcMain, "on")
 
     afterEach ->
       delete process.env.CYPRESS_FILE_SERVER_FOLDER
@@ -929,7 +929,7 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_watch_for_file_changes
 
     it "passes options to interactiveMode.ready", ->
-      @sandbox.stub(interactiveMode, "ready")
+      sinon.stub(interactiveMode, "ready")
 
       cypress.start(["--updating", "--port=2121", "--config=pageLoadTimeout=1000"])
       .then ->
@@ -953,8 +953,8 @@ describe "lib/cypress", ->
         })
 
     it "passes filtered options to Project#open and sets cli config", ->
-      getConfig = @sandbox.spy(Project.prototype, "getConfig")
-      open      = @sandbox.stub(Server.prototype, "open").resolves([])
+      getConfig = sinon.spy(Project.prototype, "getConfig")
+      open      = sinon.stub(Server.prototype, "open").resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = "foo"
       process.env.CYPRESS_BASE_URL = "localhost"
@@ -1028,9 +1028,9 @@ describe "lib/cypress", ->
 
     it "sends warning when baseUrl cannot be verified", ->
       bus = new EE()
-      event = { sender: { send: @sandbox.stub() } }
+      event = { sender: { send: sinon.stub() } }
       warning = { message: "Blah blah baseUrl blah blah" }
-      open = @sandbox.stub(Server.prototype, "open").resolves([2121, warning])
+      open = sinon.stub(Server.prototype, "open").resolves([2121, warning])
 
       cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
       .then =>
@@ -1042,8 +1042,8 @@ describe "lib/cypress", ->
 
   context "no args", ->
     beforeEach ->
-      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(interactiveMode, "ready").resolves()
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(interactiveMode, "ready").resolves()
 
     it "runs interactiveMode and does not exit", ->
       cypress.start().then ->

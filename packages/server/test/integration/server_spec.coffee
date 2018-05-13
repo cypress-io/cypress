@@ -12,13 +12,13 @@ Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 describe "Server", ->
   beforeEach ->
-    @sandbox.stub(Server.prototype, "reset")
+    sinon.stub(Server.prototype, "reset")
 
   context "resolving url", ->
     beforeEach ->
       nock.enableNetConnect()
 
-      @automationRequest = @sandbox.stub()
+      @automationRequest = sinon.stub()
       .withArgs("get:cookies").resolves([])
       .withArgs("set:cookie").resolves({})
 
@@ -151,7 +151,7 @@ describe "Server", ->
           })
 
       it "buffers the response", ->
-        @sandbox.spy(@server._request, "sendStream")
+        sinon.spy(@server._request, "sendStream")
 
         @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) =>
@@ -394,7 +394,7 @@ describe "Server", ->
             })
 
       it "buffers the http response", ->
-        @sandbox.spy(@server._request, "sendStream")
+        sinon.spy(@server._request, "sendStream")
 
         nock("http://espn.com")
         .get("/")
@@ -459,7 +459,7 @@ describe "Server", ->
             expect(buffers.keys()).to.deep.eq([])
 
       it "does not buffer 'bad' responses", ->
-        @sandbox.spy(@server._request, "sendStream")
+        sinon.spy(@server._request, "sendStream")
 
         nock("http://espn.com")
         .get("/")

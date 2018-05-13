@@ -159,7 +159,7 @@ module.exports = {
 
       Fixtures.scaffold()
 
-      @sandbox.stub(process, "exit")
+      sinon.stub(process, "exit")
 
       Promise.try =>
         if servers = options.servers

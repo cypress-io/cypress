@@ -11,7 +11,7 @@ Promise  = require("bluebird")
 
 describe "lib/api", ->
   beforeEach ->
-    @sandbox.stub(os, "platform").returns("linux")
+    sinon.stub(os, "platform").returns("linux")
 
   context ".getOrgs", ->
     it "GET /orgs + returns orgs", ->
@@ -124,7 +124,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "get").returns({
+      sinon.stub(rp, "get").returns({
         catch: -> {
           catch: -> {
             then: (fn) -> fn()
@@ -285,7 +285,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "post").resolves({runId: 'foo'})
+      sinon.stub(rp, "post").resolves({runId: 'foo'})
 
       api.createRun({})
       .then ->
@@ -384,7 +384,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "post").returns({
+      sinon.stub(rp, "post").returns({
         promise: -> Promise.resolve({ instanceId: "instanceId123" })
       })
 
@@ -477,7 +477,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "put").resolves()
+      sinon.stub(rp, "put").resolves()
 
       api.updateInstance({})
       .then ->
@@ -557,7 +557,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "put").resolves()
+      sinon.stub(rp, "put").resolves()
 
       api.updateInstanceStdout({})
       .then ->
@@ -609,7 +609,7 @@ describe "lib/api", ->
 
   context ".createSignin", ->
     it "POSTs /signin + returns user object", ->
-      @sandbox.stub(nmi, "machineId").resolves("12345")
+      sinon.stub(nmi, "machineId").resolves("12345")
 
       nock("http://localhost:1234")
       .matchHeader("x-os-name", "linux")
@@ -628,7 +628,7 @@ describe "lib/api", ->
         })
 
     it "handles nmi errors", ->
-      @sandbox.stub(nmi, "machineId").rejects(new Error("foo"))
+      sinon.stub(nmi, "machineId").rejects(new Error("foo"))
 
       nock("http://localhost:1234", {
         "badheaders": ["x-machine-id"]
@@ -950,8 +950,8 @@ describe "lib/api", ->
       ## return our own specific promise
       ## so we can spy on the timeout function
       p = Promise.resolve()
-      @sandbox.spy(p, "timeout")
-      @sandbox.stub(rp.Request.prototype, "promise").returns(p)
+      sinon.spy(p, "timeout")
+      sinon.stub(rp.Request.prototype, "promise").returns(p)
 
       @setup({foo: "bar"}, "auth-token-123")
       api.createRaygunException({foo: "bar"}, "auth-token-123").then ->

@@ -67,11 +67,11 @@ describe "lib/modes/record", ->
     ]
 
     beforeEach ->
-      @sandbox.stub(ciProvider, "name").returns("circle")
-      @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
-      @sandbox.stub(ciProvider, "buildNum").returns("build-123")
+      sinon.stub(ciProvider, "name").returns("circle")
+      sinon.stub(ciProvider, "params").returns({foo: "bar"})
+      sinon.stub(ciProvider, "buildNum").returns("build-123")
 
-      @sandbox.stub(commitInfo, "commitInfo").resolves({
+      sinon.stub(commitInfo, "commitInfo").resolves({
         branch: "master",
         author: "brian",
         email: "brian@cypress.io",
@@ -80,19 +80,19 @@ describe "lib/modes/record", ->
         remote: "https://github.com/foo/bar.git"
       })
 
-      @sandbox.stub(browsers, "getByName").resolves({
+      sinon.stub(browsers, "getByName").resolves({
         displayName: "chrome"
         version: "59"
       })
 
-      @sandbox.stub(system, "info").resolves({
+      sinon.stub(system, "info").resolves({
         osCpus: 1
         osName: 2
         osMemory: 3
         osVersion: 4
       })
 
-      @sandbox.stub(api, "createRun").resolves()
+      sinon.stub(api, "createRun").resolves()
 
     it "calls api.createRun with the right args", ->
       browser = "chrome"
@@ -100,7 +100,7 @@ describe "lib/modes/record", ->
       projectId = "pId123"
       specPattern = ["spec/pattern1", "spec/pattern2"]
       projectRoot = "project/root"
-      runAllSpecs = @sandbox.stub()
+      runAllSpecs = sinon.stub()
 
       recordMode.createRunAndRecordSpecs({
         key
@@ -145,7 +145,7 @@ describe "lib/modes/record", ->
 
   context ".updateInstanceStdout", ->
     beforeEach ->
-      @sandbox.stub(api, "updateInstanceStdout")
+      sinon.stub(api, "updateInstanceStdout")
 
     it "calls api.updateInstanceStdout", ->
       api.updateInstanceStdout.resolves()
@@ -166,7 +166,7 @@ describe "lib/modes/record", ->
       err = new Error("foo")
       err.statusCode = 503
 
-      @sandbox.spy(logger, "createException")
+      sinon.spy(logger, "createException")
 
       api.updateInstanceStdout.rejects(err)
 
@@ -181,7 +181,7 @@ describe "lib/modes/record", ->
 
   context.skip ".uploadAssets", ->
     beforeEach ->
-      @sandbox.stub(api, "updateInstance")
+      sinon.stub(api, "updateInstance")
 
     it "calls api.updateInstance", ->
       api.updateInstance.resolves()
@@ -231,7 +231,7 @@ describe "lib/modes/record", ->
 
       api.updateInstance.resolves(resp)
 
-      @sandbox.stub(upload, "send").resolves()
+      sinon.stub(upload, "send").resolves()
 
       recordMode.uploadAssets("id-123", {
         tests: 1
@@ -291,9 +291,9 @@ describe "lib/modes/record", ->
     it "logs warning on error", ->
       err = new Error("foo")
 
-      @sandbox.spy(errors, "warning")
-      @sandbox.spy(logger, "createException")
-      @sandbox.spy(console, "log")
+      sinon.spy(errors, "warning")
+      sinon.spy(logger, "createException")
+      sinon.spy(console, "log")
 
       api.updateInstance.rejects(err)
 
@@ -308,7 +308,7 @@ describe "lib/modes/record", ->
       err = new Error("foo")
       err.statusCode = 503
 
-      @sandbox.spy(logger, "createException")
+      sinon.spy(logger, "createException")
 
       api.updateInstance.rejects(err)
 
@@ -318,7 +318,7 @@ describe "lib/modes/record", ->
 
   context ".createInstance", ->
     beforeEach ->
-      @sandbox.stub(api, "createInstance")
+      sinon.stub(api, "createInstance")
 
     it "calls api.createInstance", ->
       api.createInstance.resolves()
@@ -343,7 +343,7 @@ describe "lib/modes/record", ->
       err = new Error("foo")
       err.statusCode = 503
 
-      @sandbox.spy(logger, "createException")
+      sinon.spy(logger, "createException")
 
       api.createInstance.rejects(err)
 

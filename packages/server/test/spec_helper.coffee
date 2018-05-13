@@ -6,18 +6,18 @@ global.nock      = require("nock")
 global.expect    = require("chai").expect
 global.mockery   = require("mockery")
 global.proxyquire = require("proxyquire")
+global.sinon     = require("sinon")
 Promise          = require("bluebird")
 path             = require("path")
-sinon            = require("sinon")
-sinonPromise     = require("sinon-as-promised")(Promise)
 cache            = require("../lib/cache")
 appData          = require("../lib/util/app_data")
-
-agent = require("superagent")
+agent            = require("superagent")
 
 require("chai")
 .use(require("@cypress/sinon-chai"))
 .use(require("chai-uuid"))
+
+sinon.usingPromise(Promise)
 
 mockery.enable({
   warnOnUnregistered: false
@@ -27,7 +27,10 @@ mockery.enable({
 ## we must use an absolute path here because of the way mockery internally loads this
 ## module - meaning the first time electron is required it'll use this path string
 ## so because its required from a separate module we must use an absolute reference to it
-mockery.registerSubstitute("electron", path.join(__dirname, "./support/helpers/electron_stub"))
+mockery.registerSubstitute(
+  "electron",
+  path.join(__dirname, "./support/helpers/electron_stub")
+)
 
 ## stub out electron's original-fs module which is available when running in electron
 mockery.registerMock("original-fs", {})
@@ -39,10 +42,8 @@ beforeEach ->
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 
-  @sandbox = sinon.sandbox.create()
-
 afterEach ->
-  @sandbox.restore()
+  sinon.restore()
 
   nock.cleanAll()
   nock.enableNetConnect()

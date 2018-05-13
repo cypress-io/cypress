@@ -50,8 +50,8 @@ describe "lib/project", ->
   context "#saveState", ->
     beforeEach ->
       integrationFolder = "the/save/state/test"
-      @sandbox.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
-      @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
+      sinon.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
+      sinon.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
       @project.cfg = { integrationFolder }
       savedState(@project.projectRoot)
       .then (state) -> state.remove()
@@ -88,13 +88,13 @@ describe "lib/project", ->
   context "#getConfig", ->
     integrationFolder = "foo/bar/baz"
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({ baz: "quux", integrationFolder })
-      @sandbox.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
+      sinon.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({ baz: "quux", integrationFolder })
+      sinon.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
       savedState(@todosPath)
       .then (state) =>
-        @sandbox.stub(state, "get").resolves({ reporterWidth: 225 })
+        sinon.stub(state, "get").resolves({ reporterWidth: 225 })
         @project.getConfig({foo: "bar"})
         .then (cfg) ->
           expect(cfg).to.deep.eq({
@@ -122,7 +122,7 @@ describe "lib/project", ->
     it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
       savedState(@todosPath)
       .then (state) =>
-        @sandbox.stub(state, "get").resolves({ showedOnBoardingModal: true })
+        sinon.stub(state, "get").resolves({ showedOnBoardingModal: true })
 
         @project.getConfig({foo: "bar"})
         .then (cfg) ->
@@ -137,15 +137,15 @@ describe "lib/project", ->
 
   context "#open", ->
     beforeEach ->
-      @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
-      @sandbox.stub(@project, "checkSupportFile").resolves()
-      @sandbox.stub(@project, "scaffold").resolves()
-      @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(Server.prototype, "open").resolves([])
-      @sandbox.stub(Server.prototype, "reset")
-      @sandbox.stub(config, "updateWithPluginValues").returns(@config)
-      @sandbox.stub(scaffold, "plugins").resolves()
-      @sandbox.stub(plugins, "init").resolves()
+      sinon.stub(@project, "watchSettingsAndStartWebsockets").resolves()
+      sinon.stub(@project, "checkSupportFile").resolves()
+      sinon.stub(@project, "scaffold").resolves()
+      sinon.stub(@project, "getConfig").resolves(@config)
+      sinon.stub(Server.prototype, "open").resolves([])
+      sinon.stub(Server.prototype, "reset")
+      sinon.stub(config, "updateWithPluginValues").returns(@config)
+      sinon.stub(scaffold, "plugins").resolves()
+      sinon.stub(plugins, "init").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -175,7 +175,7 @@ describe "lib/project", ->
         expect(scaffold.plugins).to.be.calledWith(path.dirname(@config.pluginsFile))
 
     it "calls options.onError with plugins error when there is a plugins error", ->
-      onError = @sandbox.spy()
+      onError = sinon.spy()
       err = {
         name: "plugin error name"
         message: "plugin error message"
@@ -187,7 +187,7 @@ describe "lib/project", ->
         expect(onError).to.be.calledWith(err)
 
     it "updates config.state when saved state changes", ->
-      @sandbox.spy(@project, "saveState")
+      sinon.spy(@project, "saveState")
 
       options = {}
 
@@ -216,17 +216,17 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
 
-      @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(@project, "getConfig").resolves(@config)
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "closes server", ->
-      @project.server = @sandbox.stub({close: ->})
+      @project.server = sinon.stub({close: ->})
 
       @project.close().then =>
         expect(@project.server.close).to.be.calledOnce
 
     it "closes watchers", ->
-      @project.watchers = @sandbox.stub({close: ->})
+      @project.watchers = sinon.stub({close: ->})
 
       @project.close().then =>
         expect(@project.watchers.close).to.be.calledOnce
@@ -237,9 +237,9 @@ describe "lib/project", ->
   context "#getRuns", ->
     beforeEach ->
       @project = Project(@todosPath)
-      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
-      @sandbox.stub(api, "getProjectRuns").resolves('runs')
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(settings, "read").resolves({projectId: "id-123"})
+      sinon.stub(api, "getProjectRuns").resolves('runs')
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "calls api.getProjectRuns with project id + session", ->
       @project.getRuns().then (runs) ->
@@ -249,10 +249,10 @@ describe "lib/project", ->
   context "#scaffold", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
-      @sandbox.stub(scaffold, "integration").resolves()
-      @sandbox.stub(scaffold, "fixture").resolves()
-      @sandbox.stub(scaffold, "support").resolves()
-      @sandbox.stub(scaffold, "plugins").resolves()
+      sinon.stub(scaffold, "integration").resolves()
+      sinon.stub(scaffold, "fixture").resolves()
+      sinon.stub(scaffold, "support").resolves()
+      sinon.stub(scaffold, "plugins").resolves()
 
       @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf", pluginsFile: "pf/index.js"}
 
@@ -277,9 +277,9 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
       @project.server = {startWebsockets: ->}
-      @sandbox.stub(settings, "pathToCypressJson").returns("/path/to/cypress.json")
-      @sandbox.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
-      @watch = @sandbox.stub(@project.watchers, "watch")
+      sinon.stub(settings, "pathToCypressJson").returns("/path/to/cypress.json")
+      sinon.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
+      @watch = sinon.stub(@project.watchers, "watch")
 
     it "watches cypress.json and cypress.env.json", ->
       @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->})
@@ -304,9 +304,9 @@ describe "lib/project", ->
     it "does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", ->
       @project.generatedProjectIdTimestamp = timestamp = new Date()
 
-      emit = @sandbox.spy(@project, "emit")
+      emit = sinon.spy(@project, "emit")
 
-      stub = @sandbox.stub()
+      stub = sinon.stub()
 
       @project.watchSettingsAndStartWebsockets({onSettingsChanged: stub})
 
@@ -325,10 +325,10 @@ describe "lib/project", ->
 
   context "#checkSupportFile", ->
     beforeEach ->
-      @sandbox.stub(fs, "pathExists").resolves(true)
+      sinon.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
-      @project.server = {onTestFileChange: @sandbox.spy()}
-      @sandbox.stub(preprocessor, "getFile").resolves()
+      @project.server = {onTestFileChange: sinon.spy()}
+      sinon.stub(preprocessor, "getFile").resolves()
       @config = {
         projectRoot: "/path/to/root/"
         supportFile: "/path/to/root/foo/bar.js"
@@ -347,10 +347,10 @@ describe "lib/project", ->
 
   context "#watchPluginsFile", ->
     beforeEach ->
-      @sandbox.stub(fs, "pathExists").resolves(true)
+      sinon.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
-      @project.watchers = { watchTree: @sandbox.spy() }
-      @sandbox.stub(plugins, "init").resolves()
+      @project.watchers = { watchTree: sinon.spy() }
+      sinon.stub(plugins, "init").resolves()
       @config = {
         pluginsFile: "/path/to/plugins-file"
       }
@@ -392,9 +392,9 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
       @project.watchers = {}
-      @project.server = @sandbox.stub({startWebsockets: ->})
-      @sandbox.stub(@project, "watchSettings")
-      @sandbox.stub(Automation, "create").returns("automation")
+      @project.server = sinon.stub({startWebsockets: ->})
+      sinon.stub(@project, "watchSettings")
+      sinon.stub(Automation, "create").returns("automation")
 
     it "calls server.startWebsockets with automation + config", ->
       c = {}
@@ -404,7 +404,7 @@ describe "lib/project", ->
       expect(@project.server.startWebsockets).to.be.calledWith("automation", c)
 
     it "passes onReloadBrowser callback", ->
-      fn = @sandbox.stub()
+      fn = sinon.stub()
 
       @project.server.startWebsockets.yieldsTo("onReloadBrowser")
 
@@ -415,24 +415,24 @@ describe "lib/project", ->
   context "#getProjectId", ->
     beforeEach ->
       @project         = Project("/_test-output/path/to/project")
-      @verifyExistence = @sandbox.stub(Project.prototype, "verifyExistence").resolves()
+      @verifyExistence = sinon.stub(Project.prototype, "verifyExistence").resolves()
 
     it "calls verifyExistence", ->
-      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+      sinon.stub(settings, "read").resolves({projectId: "id-123"})
 
       @project.getProjectId()
       .then =>
         expect(@verifyExistence).to.be.calledOnce
 
     it "returns the project id from settings", ->
-      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+      sinon.stub(settings, "read").resolves({projectId: "id-123"})
 
       @project.getProjectId()
       .then (id) ->
         expect(id).to.eq "id-123"
 
     it "throws NO_PROJECT_ID with the projectRoot when no projectId was found", ->
-      @sandbox.stub(settings, "read").resolves({})
+      sinon.stub(settings, "read").resolves({})
 
       @project.getProjectId()
       .then (id) ->
@@ -445,7 +445,7 @@ describe "lib/project", ->
       err = new Error()
       err.code = "EACCES"
 
-      @sandbox.stub(settings, "read").rejects(err)
+      sinon.stub(settings, "read").rejects(err)
 
       @project.getProjectId()
       .then (id) ->
@@ -457,7 +457,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
 
-      @sandbox.stub(settings, "write")
+      sinon.stub(settings, "write")
         .withArgs(@project.projectRoot, {projectId: "id-123"})
         .resolves({projectId: "id-123"})
 
@@ -509,7 +509,7 @@ describe "lib/project", ->
 
     describe "if project at path has id", ->
       it "returns object containing path and id", ->
-        @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+        sinon.stub(settings, "read").resolves({projectId: "id-123"})
 
         Project.add(@pristinePath)
         .then (project) =>
@@ -518,7 +518,7 @@ describe "lib/project", ->
 
     describe "if project at path does not have id", ->
       it "returns object containing just the path", ->
-        @sandbox.stub(settings, "read").rejects()
+        sinon.stub(settings, "read").rejects()
 
         Project.add(@pristinePath)
         .then (project) =>
@@ -530,10 +530,10 @@ describe "lib/project", ->
       @project = Project("/_test-output/path/to/project")
       @newProject = { id: "project-id-123" }
 
-      @sandbox.stub(@project, "writeProjectId").resolves("project-id-123")
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
-      @sandbox.stub(api, "createProject")
+      sinon.stub(@project, "writeProjectId").resolves("project-id-123")
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
+      sinon.stub(api, "createProject")
       .withArgs({foo: "bar"}, "remoteOrigin", "auth-token-123")
       .resolves(@newProject)
 
@@ -553,9 +553,9 @@ describe "lib/project", ->
     beforeEach ->
       @recordKeys = []
       @project = Project(@pristinePath)
-      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(api, "getProjectRecordKeys").resolves(@recordKeys)
+      sinon.stub(settings, "read").resolves({projectId: "id-123"})
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(api, "getProjectRecordKeys").resolves(@recordKeys)
 
     it "calls api.getProjectRecordKeys with project id + session", ->
       @project.getRecordKeys().then ->
@@ -568,8 +568,8 @@ describe "lib/project", ->
   context "#requestAccess", ->
     beforeEach ->
       @project = Project(@pristinePath)
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(api, "requestAccess").resolves("response")
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(api, "requestAccess").resolves("response")
 
     it "calls api.requestAccess with project id + auth token", ->
       @project.requestAccess("project-id-123").then ->
@@ -581,7 +581,7 @@ describe "lib/project", ->
 
   context ".remove", ->
     beforeEach ->
-      @sandbox.stub(cache, "removeProject").resolves()
+      sinon.stub(cache, "removeProject").resolves()
 
     it "calls cache.removeProject with path", ->
       Project.remove("/_test-output/path/to/project").then ->
@@ -594,8 +594,8 @@ describe "lib/project", ->
 
   context ".getOrgs", ->
     beforeEach ->
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(api, "getOrgs").resolves([])
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(api, "getOrgs").resolves([])
 
     it "calls api.getOrgs", ->
       Project.getOrgs().then (orgs) ->
@@ -605,7 +605,7 @@ describe "lib/project", ->
 
   context ".paths", ->
     beforeEach ->
-      @sandbox.stub(cache, "getProjectRoots").resolves([])
+      sinon.stub(cache, "getProjectRoots").resolves([])
 
     it "calls cache.getProjectRoots", ->
       Project.paths().then (ret) ->
@@ -614,11 +614,11 @@ describe "lib/project", ->
 
   context ".getPathsAndIds", ->
     beforeEach ->
-      @sandbox.stub(cache, "getProjectRoots").resolves([
+      sinon.stub(cache, "getProjectRoots").resolves([
         "/path/to/first"
         "/path/to/second"
       ])
-      @sandbox.stub(settings, "id").resolves("id-123")
+      sinon.stub(settings, "id").resolves("id-123")
 
     it "returns array of objects with paths and ids", ->
       Project.getPathsAndIds().then (pathsAndIds) ->
@@ -635,38 +635,38 @@ describe "lib/project", ->
 
   context ".getProjectStatuses", ->
     beforeEach ->
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "gets projects from api", ->
-      @sandbox.stub(api, "getProjects").resolves([])
+      sinon.stub(api, "getProjects").resolves([])
 
       Project.getProjectStatuses([])
       .then ->
         expect(api.getProjects).to.have.been.calledWith("auth-token-123")
 
     it "returns array of projects", ->
-      @sandbox.stub(api, "getProjects").resolves([])
+      sinon.stub(api, "getProjects").resolves([])
 
       Project.getProjectStatuses([])
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses).to.eql([])
 
     it "returns same number as client projects, even if there are less api projects", ->
-      @sandbox.stub(api, "getProjects").resolves([])
+      sinon.stub(api, "getProjects").resolves([])
 
       Project.getProjectStatuses([{}])
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses.length).to.eql(1)
 
     it "returns same number as client projects, even if there are more api projects", ->
-      @sandbox.stub(api, "getProjects").resolves([{}, {}])
+      sinon.stub(api, "getProjects").resolves([{}, {}])
 
       Project.getProjectStatuses([{}])
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses.length).to.eql(1)
 
     it "merges in details of matching projects", ->
-      @sandbox.stub(api, "getProjects").resolves([
+      sinon.stub(api, "getProjects").resolves([
         { id: "id-123", lastBuildStatus: "passing" }
       ])
 
@@ -680,7 +680,7 @@ describe "lib/project", ->
         })
 
     it "returns client project when it has no id", ->
-      @sandbox.stub(api, "getProjects").resolves([])
+      sinon.stub(api, "getProjects").resolves([])
 
       Project.getProjectStatuses([{ path: "/_test-output/path/to/project" }])
       .then (projectsWithStatuses) =>
@@ -691,10 +691,10 @@ describe "lib/project", ->
 
     describe "when client project has id and there is no matching user project", ->
       beforeEach ->
-        @sandbox.stub(api, "getProjects").resolves([])
+        sinon.stub(api, "getProjects").resolves([])
 
       it "marks project as invalid if api 404s", ->
-        @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
+        sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
 
         Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
@@ -705,7 +705,7 @@ describe "lib/project", ->
           })
 
       it "marks project as unauthorized if api 403s", ->
-        @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+        sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
 
         Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
@@ -716,7 +716,7 @@ describe "lib/project", ->
           })
 
       it "merges in project details and marks valid if somehow project exists and is authorized", ->
-        @sandbox.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" })
+        sinon.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" })
 
         Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then (projectsWithStatuses) =>
@@ -729,7 +729,7 @@ describe "lib/project", ->
 
       it "throws error if not accounted for", ->
         error = {name: "", message: ""}
-        @sandbox.stub(api, "getProject").rejects(error)
+        sinon.stub(api, "getProject").rejects(error)
 
         Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
         .then =>
@@ -743,17 +743,17 @@ describe "lib/project", ->
         id: "id-123",
         path: "/_test-output/path/to/project"
       }
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "gets project from api", ->
-      @sandbox.stub(api, "getProject").resolves([])
+      sinon.stub(api, "getProject").resolves([])
 
       Project.getProjectStatus(@clientProject)
       .then ->
         expect(api.getProject).to.have.been.calledWith("id-123", "auth-token-123")
 
     it "returns project merged with details", ->
-      @sandbox.stub(api, "getProject").resolves({
+      sinon.stub(api, "getProject").resolves({
         lastBuildStatus: "passing"
       })
 
@@ -767,7 +767,7 @@ describe "lib/project", ->
         })
 
     it "returns project, marked as valid, if it does not have an id, without querying api", ->
-      @sandbox.stub(api, "getProject")
+      sinon.stub(api, "getProject")
 
       @clientProject.id = undefined
       Project.getProjectStatus(@clientProject)
@@ -780,7 +780,7 @@ describe "lib/project", ->
         expect(api.getProject).not.to.be.called
 
     it "marks project as invalid if api 404s", ->
-      @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
+      sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
 
       Project.getProjectStatus(@clientProject)
       .then (project) =>
@@ -791,7 +791,7 @@ describe "lib/project", ->
         })
 
     it "marks project as unauthorized if api 403s", ->
-      @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+      sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
 
       Project.getProjectStatus(@clientProject)
       .then (project) =>
@@ -803,7 +803,7 @@ describe "lib/project", ->
 
     it "throws error if not accounted for", ->
       error = {name: "", message: ""}
-      @sandbox.stub(api, "getProject").rejects(error)
+      sinon.stub(api, "getProject").rejects(error)
 
       Project.getProjectStatus(@clientProject)
       .then =>
@@ -813,10 +813,10 @@ describe "lib/project", ->
 
   context ".getSecretKeyByPath", ->
     beforeEach ->
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "calls api.getProjectToken with id + session", ->
-      @sandbox.stub(api, "getProjectToken")
+      sinon.stub(api, "getProjectToken")
         .withArgs(@projectId, "auth-token-123")
         .resolves("key-123")
 
@@ -824,7 +824,7 @@ describe "lib/project", ->
         expect(key).to.eq("key-123")
 
     it "throws CANNOT_FETCH_PROJECT_TOKEN on error", ->
-      @sandbox.stub(api, "getProjectToken")
+      sinon.stub(api, "getProjectToken")
         .withArgs(@projectId, "auth-token-123")
         .rejects(new Error())
 
@@ -836,10 +836,10 @@ describe "lib/project", ->
 
   context ".generateSecretKeyByPath", ->
     beforeEach ->
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "calls api.updateProjectToken with id + session", ->
-      @sandbox.stub(api, "updateProjectToken")
+      sinon.stub(api, "updateProjectToken")
         .withArgs(@projectId, "auth-token-123")
         .resolves("new-key-123")
 
@@ -847,7 +847,7 @@ describe "lib/project", ->
         expect(key).to.eq("new-key-123")
 
     it "throws CANNOT_CREATE_PROJECT_TOKEN on error", ->
-      @sandbox.stub(api, "updateProjectToken")
+      sinon.stub(api, "updateProjectToken")
         .withArgs(@projectId, "auth-token-123")
         .rejects(new Error())
 

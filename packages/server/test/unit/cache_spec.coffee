@@ -104,7 +104,7 @@ describe "lib/cache", ->
 
     describe "#getProjectRoots", ->
       beforeEach ->
-        @statAsync = @sandbox.stub(fs, "statAsync")
+        @statAsync = sinon.stub(fs, "statAsync")
 
       it "returns an array of paths", ->
         @statAsync.withArgs("/Users/brian/app").resolves()

@@ -15,23 +15,23 @@ describe "lib/gui/windows", ->
     Windows.reset()
 
     @win = new EE()
-    @win.loadURL = @sandbox.stub()
-    @win.destroy = @sandbox.stub()
-    @win.getSize = @sandbox.stub().returns([1, 2])
-    @win.getPosition = @sandbox.stub().returns([3, 4])
+    @win.loadURL = sinon.stub()
+    @win.destroy = sinon.stub()
+    @win.getSize = sinon.stub().returns([1, 2])
+    @win.getPosition = sinon.stub().returns([3, 4])
     @win.webContents = new EE()
-    @win.webContents.openDevTools = @sandbox.stub()
-    @win.isDestroyed = @sandbox.stub().returns(false)
+    @win.webContents.openDevTools = sinon.stub()
+    @win.isDestroyed = sinon.stub().returns(false)
 
-    @sandbox.stub(Windows, "_newBrowserWindow").returns(@win)
+    sinon.stub(Windows, "_newBrowserWindow").returns(@win)
 
   afterEach ->
     Windows.reset()
 
   context ".getBrowserAutomation", ->
     beforeEach ->
-      @sandbox.stub(Windows, "automation")
-      @sandbox.stub(Windows, "getByWebContents")
+      sinon.stub(Windows, "automation")
+      sinon.stub(Windows, "getByWebContents")
 
     it "gets window and passes to electron.automation", ->
       Windows.getByWebContents.withArgs("foo").returns("bar")
@@ -41,7 +41,7 @@ describe "lib/gui/windows", ->
 
   context ".getByWebContents", ->
     beforeEach ->
-      @sandbox.stub(BrowserWindow, "fromWebContents")
+      sinon.stub(BrowserWindow, "fromWebContents")
 
     it "calls BrowserWindow.fromWebContents", ->
       BrowserWindow.fromWebContents.withArgs("foo").returns("bar")
@@ -49,7 +49,7 @@ describe "lib/gui/windows", ->
 
   context ".open", ->
     beforeEach ->
-      @sandbox.stub(Windows, "create").returns(@win)
+      sinon.stub(Windows, "create").returns(@win)
 
     it "sets default options", ->
       options = {
@@ -79,9 +79,9 @@ describe "lib/gui/windows", ->
       url = "https://github.com/login"
       url2 = "https://github.com?code=code123"
 
-      @sandbox.stub(user, "getLoginUrl").resolves(url)
+      sinon.stub(user, "getLoginUrl").resolves(url)
 
-      @sandbox.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
+      sinon.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
 
       Windows.open("/path/to/project", options)
       .then (code) =>
@@ -97,9 +97,9 @@ describe "lib/gui/windows", ->
       url = "https://github.com/login"
       url2 = "https://github.com?code=code123"
 
-      @sandbox.stub(user, "getLoginUrl").resolves(url)
+      sinon.stub(user, "getLoginUrl").resolves(url)
 
-      @sandbox.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
+      sinon.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
 
       Windows.open("/path/to/project", options)
       .then (code) =>
@@ -121,7 +121,7 @@ describe "lib/gui/windows", ->
     beforeEach ->
       savedState()
       .then (@state) =>
-        @sandbox.stub(@state, "set")
+        sinon.stub(@state, "set")
 
         @projectRoot = undefined
         @keys = {
@@ -135,7 +135,7 @@ describe "lib/gui/windows", ->
     it "saves size and position when window resizes, debounced", ->
       ## tried using useFakeTimers here, but it didn't work for some
       ## reason, so this is the next best thing
-      @sandbox.stub(_, "debounce").returnsArg(0)
+      sinon.stub(_, "debounce").returnsArg(0)
 
       Windows.trackState(@projectRoot, @win, @keys)
       @win.emit("resize")
@@ -166,7 +166,7 @@ describe "lib/gui/windows", ->
     it "saves position when window moves, debounced", ->
       ## tried using useFakeTimers here, but it didn't work for some
       ## reason, so this is the next best thing
-      @sandbox.stub(_, "debounce").returnsArg(0)
+      sinon.stub(_, "debounce").returnsArg(0)
       Windows.trackState(@projectRoot, @win, @keys)
       @win.emit("moved")
 
@@ -210,9 +210,9 @@ describe "lib/gui/windows", ->
   context ".automation", ->
     beforeEach ->
       @cookies = {
-        set:    @sandbox.stub()
-        get:    @sandbox.stub()
-        remove: @sandbox.stub()
+        set:    sinon.stub()
+        get:    sinon.stub()
+        remove: sinon.stub()
       }
 
       @win = {

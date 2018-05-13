@@ -21,8 +21,8 @@ describe "lib/config", ->
     beforeEach ->
       @projectRoot = "/_test-output/path/to/project"
       @setup = (cypressJson = {}, cypressEnvJson = {}) =>
-        @sandbox.stub(settings, "read").withArgs(@projectRoot).resolves(cypressJson)
-        @sandbox.stub(settings, "readEnv").withArgs(@projectRoot).resolves(cypressEnvJson)
+        sinon.stub(settings, "read").withArgs(@projectRoot).resolves(cypressJson)
+        sinon.stub(settings, "readEnv").withArgs(@projectRoot).resolves(cypressEnvJson)
 
     it "sets projectRoot", ->
       @setup({}, {foo: "bar"})
@@ -749,7 +749,7 @@ describe "lib/config", ->
           })
 
       it "sets config, envFile and env", ->
-        @sandbox.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+        sinon.stub(config, "getProcessEnvVars").returns({quux: "quux"})
 
         obj = {
           projectRoot: "/foo/bar"
@@ -882,7 +882,7 @@ describe "lib/config", ->
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
-      @sandbox.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
+      sinon.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
 
       obj = {
         env: {
@@ -974,7 +974,7 @@ describe "lib/config", ->
       obj = {
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
-      @sandbox.stub(scaffold, "fileTree").returns([])
+      sinon.stub(scaffold, "fileTree").returns([])
 
       expect(config.setScaffoldPaths(obj)).to.deep.eq({
         integrationFolder: "/_test-output/path/to/project/cypress/integration"

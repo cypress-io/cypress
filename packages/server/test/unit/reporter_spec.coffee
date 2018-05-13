@@ -58,7 +58,7 @@ describe "lib/reporter", ->
 
   context ".create", ->
     it "can create mocha-teamcity-reporter", ->
-      teamCityFn = @sandbox.stub()
+      teamCityFn = sinon.stub()
       mockery.registerMock("@cypress/mocha-teamcity-reporter", teamCityFn)
 
       reporter = Reporter.create("teamcity")
@@ -68,7 +68,7 @@ describe "lib/reporter", ->
       expect(teamCityFn).to.be.calledWith(reporter.runner)
 
     it "can create mocha-junit-reporter", ->
-      junitFn = @sandbox.stub()
+      junitFn = sinon.stub()
       mockery.registerMock("mocha-junit-reporter", junitFn)
 
       reporter = Reporter.create("junit")
@@ -98,7 +98,7 @@ describe "lib/reporter", ->
 
   context "#stats", ->
     it "has reporterName and failingTests in stats", ->
-      @sandbox.stub(Date, "now").returns(1234)
+      sinon.stub(Date, "now").returns(1234)
 
       @reporter.emit("test", @testObj)
       @reporter.emit("fail", @testObj)
@@ -110,7 +110,7 @@ describe "lib/reporter", ->
 
   context "#emit", ->
     beforeEach ->
-      @emit = @sandbox.spy @reporter.runner, "emit"
+      @emit = sinon.spy @reporter.runner, "emit"
 
     it "emits start", ->
       @reporter.emit("start")
