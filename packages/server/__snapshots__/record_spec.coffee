@@ -492,3 +492,14 @@ Alternatively if you omit the --record flag this project will run without record
 https://on.cypress.io/recording-project-runs
 `
 
+exports['e2e record recordKey errors and exits without recordKey 1'] = `You passed the --record flag but did not provide us your Record Key.
+
+You can pass us your Record Key like this:
+
+  cypress run --record --key <record_key>
+
+You can also set the key as an environment variable with the name CYPRESS_RECORD_KEY.
+
+https://on.cypress.io/how-do-i-record-runs
+`
+
