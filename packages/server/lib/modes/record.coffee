@@ -250,7 +250,7 @@ createRunAndRecordSpecs = (options = {}) ->
 
         afterSpecRun = (results) ->
           ## dont do anything if we failed to
-          ## create to instance
+          ## create the instance
           return if not instanceId
 
           console.log("")

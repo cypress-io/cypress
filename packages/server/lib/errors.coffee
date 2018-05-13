@@ -171,7 +171,7 @@ API = {
         """
       when "RECORD_KEY_NOT_VALID"
         """
-        We failed trying to authenticate this project.
+        We failed trying to authenticate this project: #{chalk.blue(arg2)}
 
         Your Record Key is invalid: #{chalk.yellow(arg1)}
 
