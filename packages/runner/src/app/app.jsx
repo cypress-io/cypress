@@ -67,7 +67,49 @@ class App extends Component {
 
   componentDidMount () {
     this._monitorWindowResize()
+    this._handleScreenshots()
+  }
 
+  _specPath () {
+    return `${this.props.config.integrationFolder}/${this.props.windowUtil.specFile()}`
+  }
+
+  _monitorWindowResize () {
+    const state = this.props.state
+
+    const $window = $(this.props.window)
+    const $header = $(findDOMNode(this.refs.header))
+    const $reporterWrap = $(this.refs.reporterWrap)
+
+    this._onWindowResize = () => {
+      state.updateWindowDimensions({
+        windowWidth: $window.width(),
+        windowHeight: $window.height(),
+        reporterWidth: $reporterWrap.outerWidth(),
+        headerHeight: $header.outerHeight(),
+      })
+    }
+
+    $window.on('resize', this._onWindowResize).trigger('resize')
+  }
+
+  _onReporterResizeStart = () => {
+    this.isReporterResizing = true
+  }
+
+  _onReporterResize = (reporterWidth) => {
+    this.props.state.reporterWidth = reporterWidth
+    this.props.state.absoluteReporterWidth = reporterWidth
+  }
+
+  _onReporterResizeEnd = () => {
+    this.isReporterResizing = false
+    this.props.eventManager.saveState({
+      reporterWidth: this.props.state.reporterWidth,
+    })
+  }
+
+  _handleScreenshots () {
     const containerNode = findDOMNode(this.refs.container)
     const reporterNode = this.refs.reporterWrap
     const headerNode = findDOMNode(this.refs.header)
@@ -144,45 +186,6 @@ class App extends Component {
       }
 
       prevAttrs = {}
-    })
-  }
-
-  _specPath () {
-    return `${this.props.config.integrationFolder}/${this.props.windowUtil.specFile()}`
-  }
-
-  _monitorWindowResize () {
-    const state = this.props.state
-
-    const $window = $(this.props.window)
-    const $header = $(findDOMNode(this.refs.header))
-    const $reporterWrap = $(this.refs.reporterWrap)
-
-    this._onWindowResize = () => {
-      state.updateWindowDimensions({
-        windowWidth: $window.width(),
-        windowHeight: $window.height(),
-        reporterWidth: $reporterWrap.outerWidth(),
-        headerHeight: $header.outerHeight(),
-      })
-    }
-
-    $window.on('resize', this._onWindowResize).trigger('resize')
-  }
-
-  _onReporterResizeStart = () => {
-    this.isReporterResizing = true
-  }
-
-  _onReporterResize = (reporterWidth) => {
-    this.props.state.reporterWidth = reporterWidth
-    this.props.state.absoluteReporterWidth = reporterWidth
-  }
-
-  _onReporterResizeEnd = () => {
-    this.isReporterResizing = false
-    this.props.eventManager.saveState({
-      reporterWidth: this.props.state.reporterWidth,
     })
   }
 
