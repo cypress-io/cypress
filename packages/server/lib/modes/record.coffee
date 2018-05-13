@@ -78,12 +78,13 @@ updateInstanceStdout = (options = {}) ->
     logException(err) unless err.statusCode is 503
   .finally(capture.restore)
 
-updateInstance = (options = {}, cypressConfig) ->
+updateInstance = (options = {}) ->
   { instanceId, results, captured } = options
 
   { stats, tests, hooks, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
+  cypressConfig = options.config
   stdout = captured.toString()
 
   ## get rid of the path property
