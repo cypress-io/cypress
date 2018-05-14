@@ -34,6 +34,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          13
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -112,6 +113,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -183,6 +185,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -254,6 +257,7 @@ The internal Cypress web server responded with:
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -327,6 +331,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -425,6 +430,7 @@ When this 'load' event occurs, Cypress will continue running commands.
   - Passes:          0
   - Failures:        2
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     2
   - Video Recorded:  true
