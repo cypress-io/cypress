@@ -50,7 +50,22 @@ describe "lib/screenshots", ->
 
   context ".capture", ->
     beforeEach ->
-      @getPixelColor = sinon.stub().resolves(image)
+      @getPixelColor = sinon.stub()
+      @getPixelColor.withArgs(0, 0).returns("grey")
+      @getPixelColor.withArgs(1, 0).returns("white")
+      @getPixelColor.withArgs(0, 1).returns("white")
+      @getPixelColor.withArgs(40, 0).returns("white")
+      @getPixelColor.withArgs(0, 40).returns("white")
+      @getPixelColor.withArgs(40, 40).returns("black")
+      @jimpImage.getPixelColor = @getPixelColor
+
+      sinon.stub(Jimp, "read").resolves(@jimpImage)
+      intToRGBA = sinon.stub(Jimp, "intToRGBA")
+      intToRGBA.withArgs("black").returns({ r: 0, g: 0, b: 0 })
+      intToRGBA.withArgs("grey").returns({ r: 127, g: 127, b: 127 })
+      intToRGBA.withArgs("white").returns({ r: 255, g: 255, b: 255 })
+
+      @automate = sinon.stub().resolves(image)
 
       @passPixelTest = =>
         @getPixelColor.withArgs(0, 0).returns("white")
@@ -271,6 +286,7 @@ describe "lib/screenshots", ->
 describe "lib/automation/screenshot", ->
   beforeEach ->
     @image = {}
+    sinon.stub(screenshots, "capture").resolves(@image)
     sinon.stub(screenshots, "save")
 
     @screenshot = screenshotAutomation("cypress/screenshots")
