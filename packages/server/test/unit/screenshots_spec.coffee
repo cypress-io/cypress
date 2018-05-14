@@ -33,15 +33,15 @@ describe "lib/screenshots", ->
         width: 40
         height: 40
       }
-      crop: @sandbox.stub()
-      getBuffer: @sandbox.stub().resolves(@buffer)
+      crop: sinon.stub()
+      getBuffer: sinon.stub().resolves(@buffer)
       getMIME: -> "image/png"
-      hash: @sandbox.stub().returns("image hash")
+      hash: sinon.stub().returns("image hash")
       clone: => @jimpImage
     }
 
-    Jimp.prototype.composite = @sandbox.stub()
-    Jimp.prototype.getBuffer = @sandbox.stub().resolves(@buffer)
+    Jimp.prototype.composite = sinon.stub()
+    Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
 
     config.get(@todosPath).then (@config) =>
 
@@ -50,22 +50,7 @@ describe "lib/screenshots", ->
 
   context ".capture", ->
     beforeEach ->
-      @getPixelColor = @sandbox.stub()
-      @getPixelColor.withArgs(0, 0).returns("grey")
-      @getPixelColor.withArgs(1, 0).returns("white")
-      @getPixelColor.withArgs(0, 1).returns("white")
-      @getPixelColor.withArgs(40, 0).returns("white")
-      @getPixelColor.withArgs(0, 40).returns("white")
-      @getPixelColor.withArgs(40, 40).returns("black")
-      @jimpImage.getPixelColor = @getPixelColor
-
-      @sandbox.stub(Jimp, "read").resolves(@jimpImage)
-      intToRGBA = @sandbox.stub(Jimp, "intToRGBA")
-      intToRGBA.withArgs("black").returns({ r: 0, g: 0, b: 0 })
-      intToRGBA.withArgs("grey").returns({ r: 127, g: 127, b: 127 })
-      intToRGBA.withArgs("white").returns({ r: 255, g: 255, b: 255 })
-
-      @automate = @sandbox.stub().resolves(image)
+      @getPixelColor = sinon.stub().resolves(image)
 
       @passPixelTest = =>
         @getPixelColor.withArgs(0, 0).returns("white")
@@ -286,8 +271,7 @@ describe "lib/screenshots", ->
 describe "lib/automation/screenshot", ->
   beforeEach ->
     @image = {}
-    @sandbox.stub(screenshots, "capture").resolves(@image)
-    @sandbox.stub(screenshots, "save")
+    sinon.stub(screenshots, "save")
 
     @screenshot = screenshotAutomation("cypress/screenshots")
 

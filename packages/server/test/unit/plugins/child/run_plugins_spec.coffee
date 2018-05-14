@@ -131,7 +131,7 @@ describe "lib/plugins/child/run_plugins", ->
 
     context "before:browser:launch", ->
       beforeEach ->
-        @sandbox.stub(util, "wrapChildPromise")
+        sinon.stub(util, "wrapChildPromise")
         @ids = { callbackId: 1, invocationId: "00" }
 
       it "wraps child promise", ->
@@ -151,7 +151,7 @@ describe "lib/plugins/child/run_plugins", ->
 
     context "task", ->
       beforeEach ->
-        @sandbox.stub(task, "wrap")
+        sinon.stub(task, "wrap")
         @ids = { callbackId: 2, invocationId: "00" }
 
       it "calls task handler", ->
