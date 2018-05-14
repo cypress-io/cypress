@@ -9,5 +9,6 @@ exports['e2e specs failing when no spec pattern found 1'] = `Can't run because n
 
 We searched for any files matching this glob pattern:
 
-/foo/bar/.projects/e2e/cypress/integration/cypress/integration/**notfound**
+cypress/integration/cypress/integration/**notfound**
 `
+

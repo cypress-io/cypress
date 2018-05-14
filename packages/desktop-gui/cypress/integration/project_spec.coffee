@@ -8,7 +8,7 @@ describe "Project", ->
     cy.visitIndex().then (win) =>
       { @start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)

@@ -102,7 +102,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "launch:browser"
       openProject.launch(arg.browser, arg.spec, {
-        projectPath: options.projectPath
+        projectRoot: options.projectRoot
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->
@@ -111,7 +111,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "window:open"
-      Windows.open(options.projectPath, arg)
+      Windows.open(options.projectRoot, arg)
       .then(send)
       .catch(sendErr)
 

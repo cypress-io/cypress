@@ -209,3 +209,12 @@ namespace CypressOffTests {
     runnable // $ExpectType IRunnable
   })
 }
+
+namespace CypressFilterTests {
+  cy.get<HTMLDivElement>('#id')
+    .filter((index: number, element: HTMLDivElement) => {
+      index // $ExpectType number
+      element // $ExpectType HTMLDivElement
+      return true
+    })
+}

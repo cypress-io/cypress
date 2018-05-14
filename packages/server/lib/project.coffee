@@ -419,10 +419,7 @@ class Project extends EE
   getProjectId: ->
     @verifyExistence()
     .then =>
-      if id = process.env.CYPRESS_PROJECT_ID
-        {projectId: id}
-      else
-        settings.read(@projectRoot)
+      settings.read(@projectRoot)
     .then (settings) =>
       if settings and id = settings.projectId
         return id
@@ -465,14 +462,14 @@ class Project extends EE
       api.getOrgs(authToken)
 
   @paths = ->
-    cache.getProjectPaths()
+    cache.getProjectRoots()
 
   @getPathsAndIds = ->
-    cache.getProjectPaths()
-    .map (projectPath) ->
+    cache.getProjectRoots()
+    .map (projectRoot) ->
       Promise.props({
-        path: projectPath
-        id: settings.id(projectPath)
+        path: projectRoot
+        id: settings.id(projectRoot)
       })
 
   @_mergeDetails = (clientProject, project) ->
@@ -580,9 +577,9 @@ class Project extends EE
 
   # Given a path to the project, finds all specs
   # returns list of specs with respect to the project root
-  @findSpecs = (projectPath, specPattern) ->
-    debug("finding specs for project %s", projectPath)
-    la(check.unemptyString(projectPath), "missing project path", projectPath)
+  @findSpecs = (projectRoot, specPattern) ->
+    debug("finding specs for project %s", projectRoot)
+    la(check.unemptyString(projectRoot), "missing project path", projectRoot)
     la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
 
     ## if we have a spec pattern
@@ -590,9 +587,9 @@ class Project extends EE
       ## then normalize to create an absolute
       ## file path from projectRoot
       ## ie: **/* turns into /Users/bmann/dev/project/**/*
-      specPattern = path.resolve(projectPath, specPattern)
+      specPattern = path.resolve(projectRoot, specPattern)
 
-    Project(projectPath)
+    Project(projectRoot)
     .getConfig()
     # TODO: handle wild card pattern or spec filename
     .then (cfg) ->

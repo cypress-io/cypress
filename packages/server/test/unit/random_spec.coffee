@@ -5,7 +5,7 @@ random = require("#{root}lib/util/random")
 
 context ".id", ->
   it "returns random.generate string", ->
-    @sandbox.spy(randomstring, "generate")
+    sinon.spy(randomstring, "generate")
 
     id = random.id()
     expect(id.length).to.eq(5)

@@ -13,17 +13,17 @@ describe "lib/controllers/spec", ->
 
   beforeEach ->
     @project = {
-      emit: @sandbox.spy()
+      emit: sinon.spy()
     }
 
     @res = {
-      set: @sandbox.spy()
-      type: @sandbox.spy()
-      send: @sandbox.spy()
-      sendFile: @sandbox.spy()
+      set: sinon.spy()
+      type: sinon.spy()
+      send: sinon.spy()
+      sendFile: sinon.spy()
     }
 
-    @sandbox.stub(preprocessor, "getFile").resolves(outputFilePath)
+    sinon.stub(preprocessor, "getFile").resolves(outputFilePath)
 
     @handle = (filePath, config = {}) =>
       spec.handle(filePath, {}, @res, config, (->), @project)
@@ -48,7 +48,7 @@ describe "lib/controllers/spec", ->
       expect(@res.send.firstCall.args[0]).to.include("Reason request failed")
 
   it "logs the error and exits in run mode", ->
-    @sandbox.stub(errors, "log")
+    sinon.stub(errors, "log")
     preprocessor.getFile.rejects(new Error("Reason request failed"))
 
     @handle(specName, {isTextTerminal: true}).then =>
