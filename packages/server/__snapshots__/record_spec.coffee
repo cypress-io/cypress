@@ -1,69 +1,3 @@
-exports['lib/modes/record .generateProjectRunId calls api.createRun with args 1'] = [
-  {
-    "projectId": "id-123",
-    "recordKey": "key-123",
-    "commitSha": "sha-123",
-    "commitBranch": "master",
-    "commitAuthorName": "brian",
-    "commitAuthorEmail": "brian@cypress.io",
-    "commitMessage": "such hax",
-    "remoteOrigin": "https://github.com/foo/bar.git",
-    "ciParams": {
-      "foo": "bar"
-    },
-    "ciProvider": "circle",
-    "ciBuildNumber": "build-123",
-    "groupId": null,
-    "specs": [
-      "spec.js"
-    ]
-  }
-]
-
-exports['lib/modes/record .generateProjectRunId passes groupId 1'] = [
-  {
-    "projectId": "id-123",
-    "recordKey": "key-123",
-    "commitSha": "sha-123",
-    "commitBranch": "master",
-    "commitAuthorName": "brian",
-    "commitAuthorEmail": "brian@cypress.io",
-    "commitMessage": "such hax",
-    "remoteOrigin": "https://github.com/foo/bar.git",
-    "ciParams": {
-      "foo": "bar"
-    },
-    "ciProvider": "circle",
-    "ciBuildNumber": "build-123",
-    "groupId": "gr123",
-    "specs": [
-      "spec.js"
-    ]
-  }
-]
-
-exports['lib/modes/record .generateProjectRunId figures out groupId from CI environment variables 1'] = [
-  {
-    "projectId": "id-123",
-    "recordKey": "key-123",
-    "commitSha": "sha-123",
-    "commitBranch": "master",
-    "commitAuthorName": "brian",
-    "commitAuthorEmail": "brian@cypress.io",
-    "commitMessage": "such hax",
-    "remoteOrigin": "https://github.com/foo/bar.git",
-    "ciParams": {
-      "foo": "bar"
-    },
-    "ciProvider": "circle",
-    "ciBuildNumber": "build-123",
-    "groupId": "ci-group-123",
-    "specs": [
-      "spec.js"
-    ]
-  }
-]
-
 exports['e2e record passing passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
@@ -102,8 +36,9 @@ Fix the error in your code and re-run your tests.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (Uploading Assets)
+  (Uploading Results)
 
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
@@ -132,10 +67,10 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Passes:          0
   - Failures:        1
   - Pending:         0
-  - Duration:        0 seconds
+  - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
-  - Cypress Version: 2.1.0
+  - Cypress Version: 1.2.3
 
 
   (Screenshots)
@@ -149,8 +84,10 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (Uploading Assets)
+  (Uploading Results)
 
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record fails -- fails 1 -- before each hook.png
+  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
@@ -172,10 +109,10 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         1
-  - Duration:        0 seconds
+  - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
-  - Cypress Version: 2.1.0
+  - Cypress Version: 1.2.3
 
 
   (Screenshots)
@@ -183,14 +120,9 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
-  (Video)
+  (Uploading Results)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
-
-
-  (Uploading Assets)
-
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
@@ -226,10 +158,10 @@ We dynamically generated a new test to display this failure.
   - Passes:          0
   - Failures:        1
   - Pending:         0
-  - Duration:        0 seconds
+  - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
-  - Cypress Version: 2.1.0
+  - Cypress Version: 1.2.3
 
 
   (Screenshots)
@@ -243,8 +175,10 @@ We dynamically generated a new test to display this failure.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (Uploading Assets)
+  (Uploading Results)
 
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png
+  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
   (All Done)
@@ -314,12 +248,6 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
-
-
   (All Done)
 
 `
@@ -363,12 +291,6 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
-
-
   (All Done)
 
 `
@@ -405,13 +327,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
-
-
-  (Uploading Assets)
+  (Uploading Results)
 
 Warning: We encountered an error talking to our servers.
 
@@ -458,14 +374,9 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
-  (Video)
+  (Uploading Results)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
-
-
-  (Uploading Assets)
-
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
 Warning: We encountered an error talking to our servers.
 
 This run will not be recorded.
@@ -525,5 +436,91 @@ It may have been recently revoked by you or another user.
 Please log into the Dashboard to see the updated token.
 
 https://on.cypress.io/dashboard/projects/pid123
+`
+
+exports['e2e record video recording does not upload when not enabled 1'] = `  (Tests Starting)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Tests Finished)
+
+  - Tests:           2
+  - Passes:          1
+  - Failures:        0
+  - Pending:         1
+  - Duration:        10 seconds
+  - Screenshots:     1
+  - Video Recorded:  false
+  - Cypress Version: 1.2.3
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
+
+
+  (All Done)
+
+`
+
+exports['e2e record api interaction errors uploading assets warns but proceeds 1'] = `
+Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+  (Tests Starting)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Tests Finished)
+
+  - Tests:           2
+  - Passes:          1
+  - Failures:        0
+  - Pending:         1
+  - Duration:        10 seconds
+  - Screenshots:     1
+  - Video Recorded:  true
+  - Cypress Version: 1.2.3
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+
+
+  (Uploading Results)
+
+  - Failed Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
+  - Failed Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+
+  (All Done)
+
 `
 

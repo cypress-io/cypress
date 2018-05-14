@@ -46,9 +46,9 @@ normalizeStdout = (str) ->
   .replace(/\s\(\d+m?s\)/g, "")
   .replace(/coffee-\d{3}/g, "coffee-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
-  .replace(/Duration\: (.+)/, "Duration:        10 seconds")
-  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
+  .replace(/Cypress Version\: (.+)/g, "Cypress Version: 1.2.3")
+  .replace(/Duration\: (.+)/g, "Duration:        10 seconds")
+  .replace(/\(\d+ seconds?\)/g, "(0 seconds)")
   .replace(/\r/g, "")
   .split("\n")
     .map(replaceStackTraceLines)

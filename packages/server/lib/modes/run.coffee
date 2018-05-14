@@ -8,7 +8,6 @@ pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
 recordMode = require("./record")
 user       = require("../user")
-stats      = require("../stats")
 video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
@@ -21,6 +20,7 @@ trash      = require("../util/trash")
 random     = require("../util/random")
 progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
+statsUtil  = require("../util/stats")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
@@ -173,7 +173,7 @@ module.exports = {
 
     console.log("")
 
-    stats.display(color, obj)
+    statsUtil.display(color, obj)
 
   displayScreenshots: (screenshots = []) ->
     console.log("")
@@ -192,7 +192,7 @@ module.exports = {
       console.log(format(screenshot))
 
   postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
-    debug("ending the video recording:", name)
+    debug("ending the video recording %o", { name })
 
     ## once this ended promises resolves
     ## then begin processing the file
@@ -382,14 +382,11 @@ module.exports = {
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
 
-      { tests, failures } = obj
+      { tests, stats } = obj
 
-      ## TODO: this is a interstitial modification to keep
-      ## the logic the same but incrementally prepare for
-      ## sending all the tests
       failingTests = _.filter(tests, { state: "failed" })
 
-      hasFailingTests = failures > 0 and failingTests and failingTests.length
+      hasFailingTests = _.get(stats, 'failures') > 0
 
       ## if we have a video recording
       if started and tests and tests.length
@@ -401,10 +398,9 @@ module.exports = {
         obj.failingTests = Reporter.setVideoTimestamp(started, failingTests)
 
       ## we should upload the video if we upload on passes (by default)
-      ## or if we have any failures
-      suv = !!(videoUploadOnPasses is true or hasFailingTests)
+      ## or if we have any failures and have started the video
+      suv = Boolean(videoUploadOnPasses is true or (started and hasFailingTests))
 
-      ## TODO: remove this later
       obj.shouldUploadVideo = suv
 
       debug("attempting to close the browser")
@@ -473,12 +469,18 @@ module.exports = {
       Promise
       .try ->
         if beforeSpecRun
+          debug("before spec run %o", spec)
+
           beforeSpecRun(spec)
       .then =>
         @runSpec(spec, options)
       .get("results")
       .tap (results) ->
+        debug("spec results %o", results)
+
         if afterSpecRun
+          debug("after spec run %o", spec)
+
           afterSpecRun(results, config)
 
     Promise.mapSeries(specs, runEachSpec)
@@ -505,7 +507,12 @@ module.exports = {
     { project, headed, browser, videoRecording, videosFolder } = options
 
     browser ?= "electron"
-    debug("browser for run is: #{browser}")
+
+    debug("about to run spec %o", {
+      spec
+      headed
+      browser
+    })
 
     screenshots = []
 
@@ -585,7 +592,7 @@ module.exports = {
         )
 
   ready: (options = {}) ->
-    debug("run mode ready with options %j", options)
+    debug("run mode ready with options %o", options)
 
     _.defaults(options, {
       browser: "electron"
