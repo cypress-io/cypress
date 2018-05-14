@@ -68,6 +68,6 @@ npm run test-watch ./test/unit/api_spec.coffee
 To run an individual e2e test:
 
 ```bash
-## runs only this one test file
-npm run test-e2e -- --spec ./test/e2e/base_url_spec.coffee
+## runs tests that match "base_url"
+npm run test-e2e -- --spec base_url
 ```
