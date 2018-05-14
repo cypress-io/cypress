@@ -10,17 +10,17 @@ describe "lib/plugins/index", ->
     plugins._reset()
 
     @pluginsProcess = {
-      send: @sandbox.spy()
-      on: @sandbox.stub()
-      kill: @sandbox.spy()
+      send: sinon.spy()
+      on: sinon.stub()
+      kill: sinon.spy()
     }
-    @sandbox.stub(cp, "fork").returns(@pluginsProcess)
+    sinon.stub(cp, "fork").returns(@pluginsProcess)
 
     @ipc = {
-      send: @sandbox.spy()
-      on: @sandbox.stub()
+      send: sinon.spy()
+      on: sinon.stub()
     }
-    @sandbox.stub(util, "wrapIpc").returns(@ipc)
+    sinon.stub(util, "wrapIpc").returns(@ipc)
 
   context "#init", ->
     it "is noop if no pluginsFile", ->
@@ -33,7 +33,7 @@ describe "lib/plugins/index", ->
       expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
 
     it "calls any handlers registered with the wrapped ipc", ->
-      handler = @sandbox.spy()
+      handler = sinon.spy()
       plugins.registerHandler(handler)
       plugins.init({ pluginsFile: "cypress-plugin" })
       expect(handler).to.be.called
@@ -70,7 +70,7 @@ describe "lib/plugins/index", ->
         plugins.init({ pluginsFile: "cypress-plugin" })
 
       it "sends 'execute' message when event is executed, wrapped in promise", ->
-        @sandbox.stub(util, "wrapParentPromise").resolves("value").yields("00")
+        sinon.stub(util, "wrapParentPromise").resolves("value").yields("00")
 
         plugins.execute("some:event", "foo", "bar").then (value) =>
           expect(util.wrapParentPromise).to.be.called
@@ -113,7 +113,7 @@ describe "lib/plugins/index", ->
           name: "error name"
           message: "error message"
         }
-        @onError = @sandbox.spy()
+        @onError = sinon.spy()
         @ipc.on.withArgs("loaded").yields([])
         plugins.init({ pluginsFile: "cypress-plugin" }, { onError: @onError })
 
@@ -141,7 +141,7 @@ describe "lib/plugins/index", ->
 
   context "#register", ->
     it "registers callback for event", ->
-      foo = @sandbox.spy()
+      foo = sinon.spy()
       plugins.register("foo", foo)
       plugins.execute("foo")
       expect(foo).to.be.called
@@ -162,7 +162,7 @@ describe "lib/plugins/index", ->
 
   context "#execute", ->
     it "calls the callback registered for the event", ->
-      foo = @sandbox.spy()
+      foo = sinon.spy()
       plugins.register("foo", foo)
       plugins.execute("foo", "arg1", "arg2")
       expect(foo).to.be.calledWith("arg1", "arg2")

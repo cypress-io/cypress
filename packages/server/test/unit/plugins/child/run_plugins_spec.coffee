@@ -21,9 +21,9 @@ withoutStackPaths = (stack) -> stack.replace(stackPathRe, '<path>$2')
 describe "lib/plugins/child/run_plugins", ->
   beforeEach ->
     @ipc = {
-      send: @sandbox.spy()
-      on: @sandbox.stub()
-      removeListener: @sandbox.spy()
+      send: sinon.spy()
+      on: sinon.stub()
+      removeListener: sinon.spy()
     }
 
   afterEach ->
@@ -59,7 +59,7 @@ describe "lib/plugins/child/run_plugins", ->
   describe "on 'load' message", ->
     it "sends error if pluginsFile function rejects the promise", (done) ->
       err = new Error('foo')
-      pluginsFn = @sandbox.stub().rejects(err)
+      pluginsFn = sinon.stub().rejects(err)
 
       mockery.registerMock("plugins-file", pluginsFn)
       @ipc.on.withArgs("load").yields({})
@@ -73,7 +73,7 @@ describe "lib/plugins/child/run_plugins", ->
         done()
 
     it "calls function exported by pluginsFile with register function and config", ->
-      pluginsFn = @sandbox.spy()
+      pluginsFn = sinon.spy()
       mockery.registerMock("plugins-file", pluginsFn)
       runPlugins(@ipc, "plugins-file")
       config = {}
@@ -98,10 +98,10 @@ describe "lib/plugins/child/run_plugins", ->
 
   describe "on 'execute' message", ->
     beforeEach ->
-      @sandbox.stub(preprocessor, "wrap")
-      @onFilePreprocessor = @sandbox.stub().resolves()
-      @beforeBrowserLaunch = @sandbox.stub().resolves()
-      @taskRequested = @sandbox.stub().resolves("foo")
+      sinon.stub(preprocessor, "wrap")
+      @onFilePreprocessor = sinon.stub().resolves()
+      @beforeBrowserLaunch = sinon.stub().resolves()
+      @taskRequested = sinon.stub().resolves("foo")
       pluginsFn = (register) =>
         register("file:preprocessor", @onFilePreprocessor)
         register("before:browser:launch", @beforeBrowserLaunch)
@@ -166,7 +166,7 @@ describe "lib/plugins/child/run_plugins", ->
   describe "errors", ->
     beforeEach ->
       mockery.registerMock("plugins-file", ->)
-      @sandbox.stub(process, "on")
+      sinon.stub(process, "on")
 
       @err = {
         name: "error name"

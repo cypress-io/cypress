@@ -7,14 +7,14 @@ preprocessor = require("#{root}lib/plugins/preprocessor")
 
 describe "lib/open_project", ->
   beforeEach ->
-    @sandbox.stub(browsers, "get").resolves()
-    @sandbox.stub(browsers, "open")
-    @sandbox.stub(Project.prototype, "open")
-    @sandbox.stub(Project.prototype, "reset").resolves()
-    @sandbox.stub(Project.prototype, "getSpecUrl").resolves()
-    @sandbox.stub(Project.prototype, "getConfig").resolves({})
-    @sandbox.stub(Project.prototype, "getAutomation")
-    @sandbox.stub(preprocessor, "removeFile")
+    sinon.stub(browsers, "get").resolves()
+    sinon.stub(browsers, "open")
+    sinon.stub(Project.prototype, "open")
+    sinon.stub(Project.prototype, "reset").resolves()
+    sinon.stub(Project.prototype, "getSpecUrl").resolves()
+    sinon.stub(Project.prototype, "getConfig").resolves({})
+    sinon.stub(Project.prototype, "getAutomation")
+    sinon.stub(preprocessor, "removeFile")
 
     openProject.create("/project/root")
 
@@ -32,7 +32,7 @@ describe "lib/open_project", ->
         expect(preprocessor.removeFile).not.to.be.called
 
     it "runs original onBrowserClose callback on browser close", ->
-      onBrowserClose = @sandbox.stub()
+      onBrowserClose = sinon.stub()
       options = { onBrowserClose }
       openProject.launch("chrome", "path/to/spec", options).then ->
         browsers.open.lastCall.args[1].onBrowserClose()

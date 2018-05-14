@@ -239,6 +239,10 @@ module.exports = {
 
     debug("save", pathToScreenshot)
 
+    ## TODO: this should be done at the time the
+    ## screenshot is taken, not asynchronously after
+    takenAt = (new Date()).toJSON()
+
     getBuffer(imageOrBuffer)
     .then (buffer) ->
       fs.outputFileAsync(pathToScreenshot, buffer)
@@ -247,6 +251,7 @@ module.exports = {
     .then (size) ->
       dimensions = getDimensions(imageOrBuffer)
       {
+        takenAt
         size:   bytes(size, {unitSeparator: " "})
         path:   pathToScreenshot
         width:  dimensions.width
