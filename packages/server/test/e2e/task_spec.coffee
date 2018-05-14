@@ -5,9 +5,9 @@ describe "e2e task", ->
 
   it "fails", ->
     e2e.exec(@, {
-      spec: "task_error_spec.coffee"
+      spec: "task_spec.coffee"
       snapshot: true
-      expectedExitCode: 1
+      expectedExitCode: 2
     })
     .then ({ stdout }) ->
       ## should include a stack trace from plugins file
