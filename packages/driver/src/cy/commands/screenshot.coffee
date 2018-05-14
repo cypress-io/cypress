@@ -201,7 +201,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       blackout: if appOnly then blackout else []
     }
 
-  before = (capture) ->
+  before = ->
     if disableTimersAndAnimations
       cy.pauseTimers(true)
 
@@ -209,7 +209,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
 
     send("before:screenshot", getOptions(true))
 
-  after = (capture) ->
+  after = ->
     send("after:screenshot", getOptions(false))
 
     Screenshot.callAfterScreenshot(state("document"))
@@ -232,7 +232,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     }
   })
 
-  before(capture)
+  before()
   .then ->
     if subject
       takeElementScreenshot(subject, state, automationOptions)
@@ -240,8 +240,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       takeFullPageScreenshot(state, automationOptions)
     else
       automateScreenshot(automationOptions)
-  .finally ->
-    after(screenshotConfig)
+  .finally(after)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
 
