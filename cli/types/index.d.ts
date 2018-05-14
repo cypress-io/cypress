@@ -192,7 +192,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     off: Actions
-
   }
 
   /**

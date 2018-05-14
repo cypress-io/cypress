@@ -782,8 +782,8 @@ describe('Kitchen Sink', function() {
         clip: { x: 0, y: 0, width: 200, height: 200 },
         disableTimersAndAnimations: true,
         waitForCommandSynchronization: true,
-        beforeScreenshot () {},
-        afterScreenshot () {},
+        beforeScreenshot() {},
+        afterScreenshot() {},
       })
     })
 
