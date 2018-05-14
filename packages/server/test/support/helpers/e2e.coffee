@@ -16,7 +16,7 @@ fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
 video        = require("#{root}../lib/video")
-stdout       = require("#{root}../lib/stdout")
+stdout       = require("#{root}../lib/capture")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
 screenshots  = require("#{root}../lib/screenshots")
@@ -46,9 +46,9 @@ normalizeStdout = (str) ->
   .replace(/\s\(\d+m?s\)/g, "")
   .replace(/coffee-\d{3}/g, "coffee-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
-  .replace(/Duration\: (.+)/, "Duration:        10 seconds")
-  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
+  .replace(/Cypress Version\: (.+)/g, "Cypress Version: 1.2.3")
+  .replace(/Duration\: (.+)/g, "Duration:        10 seconds")
+  .replace(/\(\d+ seconds?\)/g, "(0 seconds)")
   .replace(/\r/g, "")
   .split("\n")
     .map(replaceStackTraceLines)
@@ -108,6 +108,17 @@ copy = ->
 module.exports = {
   normalizeStdout
 
+  snapshot: (args...) ->
+    args = _.compact(args)
+
+    ## grab the last element in index
+    index = args.length - 1
+
+    ## normalize the stdout of it
+    args[index] = normalizeStdout(args[index])
+
+    snapshot.apply(null, args)
+
   setup: (options = {}) ->
     if npmI = options.npmInstall
       before ->
@@ -148,7 +159,7 @@ module.exports = {
 
       Fixtures.scaffold()
 
-      @sandbox.stub(process, "exit")
+      sinon.stub(process, "exit")
 
       Promise.try =>
         if servers = options.servers
@@ -200,6 +211,12 @@ module.exports = {
 
     if options.headed
       args.push("--headed")
+
+    if options.record
+      args.push("--record")
+
+    if options.key
+      args.push("--key=#{options.key}")
 
     if options.reporter
       args.push("--reporter=#{options.reporter}")

@@ -2,8 +2,8 @@
 * These styles are shared between the runner and the reporter
 */
 
-.num-elements {
-  background-color: #476fc9;
+.num-elements,
+.num-duplicates {
   border-radius: 5px;
   color: #fff;
   display: none;
@@ -14,4 +14,12 @@
   text-align: center;
   vertical-align: baseline;
   white-space: nowrap;
+}
+
+.num-elements {
+  background-color: #476fc9;
+}
+
+.num-duplicates {
+  background-color: #999;
 }

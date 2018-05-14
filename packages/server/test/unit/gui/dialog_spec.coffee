@@ -7,7 +7,7 @@ Windows = require("#{root}../lib/gui/windows")
 describe "gui/dialog", ->
   context ".show", ->
     beforeEach ->
-      @showOpenDialog = electron.dialog.showOpenDialog = @sandbox.stub()
+      @showOpenDialog = electron.dialog.showOpenDialog = sinon.stub()
 
     it "calls dialog.showOpenDialog with args", ->
       dialog.show()

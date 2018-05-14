@@ -10,6 +10,7 @@ Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
 runMode = require("#{root}../lib/modes/run")
 openProject = require("#{root}../lib/open_project")
+env = require("#{root}../lib/util/env")
 random = require("#{root}../lib/util/random")
 specsUtil = require("#{root}../lib/util/specs")
 
@@ -17,22 +18,44 @@ describe "lib/modes/run", ->
   beforeEach ->
     @projectInstance = Project("/_test-output/path/to/project")
 
-  context ".openProject", ->
+  context ".getProjectId", ->
+    it "resolves if id", ->
+      runMode.getProjectId("project", "id123")
+      .then (ret) ->
+        expect(ret).to.eq("id123")
+
+    it "resolves if CYPRESS_PROJECT_ID set", ->
+      sinon.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns("envId123")
+
+      runMode.getProjectId("project")
+      .then (ret) ->
+        expect(ret).to.eq("envId123")
+
+    it "is null when no projectId", ->
+      project = {
+        getProjectId: sinon.stub().rejects(new Error)
+      }
+
+      runMode.getProjectId(project)
+      .then (ret) ->
+        expect(ret).to.be.null
+
+  context ".openProjectCreate", ->
     beforeEach ->
-      @sandbox.stub(openProject, "create").resolves()
+      sinon.stub(openProject, "create").resolves()
 
       options = {
         port: 8080
         env: {foo: "bar"}
-        projectPath: "/_test-output/path/to/project/foo"
+        projectRoot: "/_test-output/path/to/project/foo"
       }
 
-      runMode.createOpenProject(1234, options)
+      runMode.openProjectCreate(options.projectRoot, 1234, options)
 
-    it "calls openProject.create with projectPath + options", ->
+    it "calls openProject.create with projectRoot + options", ->
       expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
         port: 8080
-        projectPath: "/_test-output/path/to/project/foo"
+        projectRoot: "/_test-output/path/to/project/foo"
         env: {foo: "bar"}
       }, {
         morgan: false
@@ -42,7 +65,7 @@ describe "lib/modes/run", ->
       })
 
     it "emits 'exitEarlyWithErr' with error message onError", ->
-      @sandbox.stub(openProject, "emit")
+      sinon.stub(openProject, "emit")
       expect(openProject.create.lastCall.args[2].onError).to.be.a("function")
       openProject.create.lastCall.args[2].onError({ message: "the message" })
       expect(openProject.emit).to.be.calledWith("exitEarlyWithErr", "the message")
@@ -62,10 +85,10 @@ describe "lib/modes/run", ->
       expect(props.show).to.be.true
 
     it "sets recordFrameRate and onPaint when write is true", ->
-      write = @sandbox.stub()
+      write = sinon.stub()
 
       image = {
-        toJPEG: @sandbox.stub().returns("imgdata")
+        toJPEG: sinon.stub().returns("imgdata")
       }
 
       props = runMode.getElectronProps(true, {}, write)
@@ -91,10 +114,10 @@ describe "lib/modes/run", ->
       expect(options.show).to.eq(false)
 
     it "emits exitEarlyWithErr when webContents crashed", ->
-      @sandbox.spy(errors, "get")
-      @sandbox.spy(errors, "log")
+      sinon.spy(errors, "get")
+      sinon.spy(errors, "log")
 
-      emit = @sandbox.stub(@projectInstance, "emit")
+      emit = sinon.stub(@projectInstance, "emit")
 
       props = runMode.getElectronProps(true, @projectInstance)
 
@@ -106,17 +129,15 @@ describe "lib/modes/run", ->
 
   context ".launchBrowser", ->
     beforeEach ->
-      @launch = @sandbox.stub(openProject, "launch")
+      @launch = sinon.stub(openProject, "launch")
+      sinon.stub(runMode, "getElectronProps").returns({foo: "bar"})
+      sinon.stub(runMode, "screenshotMetadata").returns({a: "a"})
 
-      @sandbox.stub(runMode, "getElectronProps").returns({foo: "bar"})
-
-      @sandbox.stub(runMode, "screenshotMetadata").returns({a: "a"})
-
-    it "gets electron props by default", ->
+    it "can launch electron", ->
       screenshots = []
 
       runMode.launchBrowser({
-        browser: undefined
+        browser: "electron"
         project: @projectInstance
         write: "write"
         gui: null
@@ -155,7 +176,7 @@ describe "lib/modes/run", ->
 
   context ".postProcessRecording", ->
     beforeEach ->
-      @sandbox.stub(video, "process").resolves()
+      sinon.stub(video, "process").resolves()
 
     it "calls video process with name, cname and videoCompression", ->
       end = -> Promise.resolve()
@@ -187,12 +208,14 @@ describe "lib/modes/run", ->
 
   context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
-      @sandbox.spy(errors, "warning")
-      @sandbox.spy(errors, "get")
-      @sandbox.spy(openProject, "closeBrowser")
-      @sandbox.stub(runMode, "launchBrowser").resolves()
-      @sandbox.stub(runMode, "waitForSocketConnection").resolves(Promise.delay(1000))
-      emit = @sandbox.stub(@projectInstance, "emit")
+      sinon.spy(errors, "warning")
+      sinon.spy(errors, "get")
+      sinon.spy(openProject, "closeBrowser")
+      sinon.stub(runMode, "launchBrowser").resolves()
+      sinon.stub(runMode, "waitForSocketConnection").callsFake ->
+        Promise.delay(1000)
+
+      emit = sinon.stub(@projectInstance, "emit")
 
       runMode.waitForBrowserToConnect({project: @projectInstance, timeout: 10})
       .then ->
@@ -205,7 +228,7 @@ describe "lib/modes/run", ->
 
   context ".waitForSocketConnection", ->
     beforeEach ->
-      @projectStub = @sandbox.stub({
+      @projectStub = sinon.stub({
         on: ->
         removeListener: ->
       })
@@ -254,11 +277,12 @@ describe "lib/modes/run", ->
 
   context ".waitForTestsToFinishRunning", ->
     beforeEach ->
-      @sandbox.stub(@projectInstance, "getConfig").resolves({})
+      sinon.stub(@projectInstance, "getConfig").resolves({})
 
     it "end event resolves with obj, displays stats, displays screenshots, sets video timestamps", ->
       started = new Date
       screenshots = [{}, {}, {}]
+      cfg = {}
       end = ->
       results = {
         tests: [4,5,6]
@@ -271,10 +295,13 @@ describe "lib/modes/run", ->
         }
       }
 
-      @sandbox.stub(Reporter, "setVideoTimestamp").withArgs(started, results.tests).returns([1,2,3])
-      @sandbox.stub(runMode, "postProcessRecording").resolves()
-      @sandbox.spy(runMode,  "displayStats")
-      @sandbox.spy(runMode,  "displayScreenshots")
+      sinon.stub(Reporter, "setVideoTimestamp")
+      .withArgs(started, results.tests)
+      .returns([1,2,3])
+
+      sinon.stub(runMode, "postProcessRecording").resolves()
+      sinon.spy(runMode,  "displayStats")
+      sinon.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
         @projectInstance.emit("end", results)
@@ -302,9 +329,12 @@ describe "lib/modes/run", ->
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
+          screenshots
           spec: "cypress/integration/spec.js"
-          screenshots:  screenshots
           video:        "foo.mp4"
+          error: null
+          hooks: null
+          reporterStats: null
           shouldUploadVideo: true
           tests: [1,2,3]
           stats: {
@@ -316,15 +346,18 @@ describe "lib/modes/run", ->
           }
         })
 
-    it "exitEarlyWithErr event resolves with no tests, error, and empty failingTests", ->
+    it "exitEarlyWithErr event resolves with no tests, and error", ->
+      clock = sinon.useFakeTimers()
+
       err = new Error("foo")
       started = new Date
+      wallClock = new Date()
       screenshots = [{}, {}, {}]
       end = ->
 
-      @sandbox.stub(runMode, "postProcessRecording").resolves()
-      @sandbox.spy(runMode,  "displayStats")
-      @sandbox.spy(runMode,  "displayScreenshots")
+      sinon.stub(runMode, "postProcessRecording").resolves()
+      sinon.spy(runMode,  "displayStats")
+      sinon.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
@@ -353,29 +386,38 @@ describe "lib/modes/run", ->
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
-          error:      err.message
-          spec:       "cypress/integration/spec.js"
-          screenshots:  screenshots
-          video:        "foo.mp4"
+          screenshots
+          error: err.message
+          spec: "cypress/integration/spec.js"
+          video: "foo.mp4"
+          hooks: null
+          tests: null
+          reporterStats: null
           shouldUploadVideo: true
           stats: {
-            failures:     1
-            tests:        0
-            passes:       0
-            pending:      0
-            duration:     0
+            failures: 1
+            tests: 0
+            passes: 0
+            pending: 0
+            suites: 0
+            skipped: 0
+            wallClockDuration: 0
+            wallClockStartedAt: wallClock.toJSON()
+            wallClockEndedAt: wallClock.toJSON()
           }
         })
 
-    it "should not upload video when videoUploadOnPasses is false and no failing tests", ->
+    it "should not upload video when videoUploadOnPasses is false and no failures", ->
       process.nextTick =>
         @projectInstance.emit("end", {
-          failingTests: []
+          stats: {
+            failures: 0
+          }
         })
 
-      @sandbox.spy(runMode, "postProcessRecording")
-      @sandbox.spy(video, "process")
-      end = @sandbox.stub().resolves()
+      sinon.spy(runMode, "postProcessRecording")
+      sinon.spy(video, "process")
+      end = sinon.stub().resolves()
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
@@ -412,25 +454,25 @@ describe "lib/modes/run", ->
 
   context ".run browser vs video recording", ->
     beforeEach ->
-      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(user, "ensureAuthToken")
-      @sandbox.stub(Project, "ensureExists").resolves()
-      @sandbox.stub(random, "id").returns(1234)
-      @sandbox.stub(runMode, "createOpenProject").resolves(openProject)
-      @sandbox.stub(runMode, "waitForSocketConnection").resolves()
-      @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
-      @sandbox.spy(runMode,  "waitForBrowserToConnect")
-      @sandbox.stub(video, "start").resolves()
-      @sandbox.stub(openProject, "launch").resolves()
-      @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
-      @sandbox.spy(errors, "warning")
-      @sandbox.stub(config, "get").resolves({
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(user, "ensureAuthToken")
+      sinon.stub(Project, "ensureExists").resolves()
+      sinon.stub(random, "id").returns(1234)
+      sinon.stub(openProject, "create").resolves(openProject)
+      sinon.stub(runMode, "waitForSocketConnection").resolves()
+      sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
+      sinon.spy(runMode,  "waitForBrowserToConnect")
+      sinon.stub(video, "start").resolves()
+      sinon.stub(openProject, "launch").resolves()
+      sinon.stub(openProject, "getProject").resolves(@projectInstance)
+      sinon.spy(errors, "warning")
+      sinon.stub(config, "get").resolves({
         proxyUrl: "http://localhost:12345",
         videoRecording: true,
         videosFolder: "videos",
         integrationFolder: "/path/to/integrationFolder"
       })
-      @sandbox.stub(specsUtil, "find").resolves([
+      sinon.stub(specsUtil, "find").resolves([
         {
           name: "foo_spec.js"
           path: "cypress/integration/foo_spec.js"
@@ -468,18 +510,18 @@ describe "lib/modes/run", ->
 
   context ".run", ->
     beforeEach ->
-      @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
-      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(user, "ensureAuthToken")
-      @sandbox.stub(Project, "ensureExists").resolves()
-      @sandbox.stub(random, "id").returns(1234)
-      @sandbox.stub(runMode, "createOpenProject").resolves(openProject)
-      @sandbox.stub(runMode, "waitForSocketConnection").resolves()
-      @sandbox.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
-      @sandbox.spy(runMode,  "waitForBrowserToConnect")
-      @sandbox.stub(openProject, "launch").resolves()
-      @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
-      @sandbox.stub(specsUtil, "find").resolves([
+      sinon.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(user, "ensureAuthToken")
+      sinon.stub(Project, "ensureExists").resolves()
+      sinon.stub(random, "id").returns(1234)
+      sinon.stub(openProject, "create").resolves(openProject)
+      sinon.stub(runMode, "waitForSocketConnection").resolves()
+      sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
+      sinon.spy(runMode,  "waitForBrowserToConnect")
+      sinon.stub(openProject, "launch").resolves()
+      sinon.stub(openProject, "getProject").resolves(@projectInstance)
+      sinon.stub(specsUtil, "find").resolves([
         {
           name: "foo_spec.js"
           path: "cypress/integration/foo_spec.js"
@@ -497,10 +539,12 @@ describe "lib/modes/run", ->
       .then (results) ->
         expect(results).to.have.property("totalFailures", 10)
 
-    it "passes id + options to openProject", ->
-      runMode.run({foo: "bar"})
+    it "passes projectRoot + options to openProject", ->
+      opts = { projectRoot: "/path/to/project", foo: "bar" }
+
+      runMode.run(opts)
       .then ->
-        expect(runMode.createOpenProject).to.be.calledWithMatch(1234, {foo: "bar"})
+        expect(openProject.create).to.be.calledWithMatch(opts.projectRoot, opts)
 
     it "passes project + id to waitForBrowserToConnect", ->
       runMode.run()
