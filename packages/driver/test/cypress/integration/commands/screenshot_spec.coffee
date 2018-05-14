@@ -68,7 +68,7 @@ describe "src/cy/commands/screenshot", ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
 
-    it "sends before:screenshot event", ->
+    it "does not send before/after events", ->
       Cypress.config("isInteractive", false)
       @screenshotConfig.scaleAppCaptures = false
       cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
@@ -79,31 +79,6 @@ describe "src/cy/commands/screenshot", ->
       .callThrough()
       .withArgs("cy:before:screenshot")
       .yieldsAsync()
-
-      test = { id: "123", err: new Error() }
-      runnable = cy.state("runnable")
-
-      Cypress.action("runner:runnable:after:run:async", test, runnable)
-      .then ->
-        expect(Cypress.action).to.be.calledWith("cy:before:screenshot", {
-          id: runnable.id
-          isOpen: true
-          appOnly: false
-          scale: true
-          waitForCommandSynchronization: true
-          disableTimersAndAnimations: true
-          blackout: []
-        })
-
-    it "sends after:screenshot event", ->
-      Cypress.config("isInteractive", false)
-      @screenshotConfig.scaleAppCaptures = false
-      cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
-
-      Cypress.automation.withArgs("take:screenshot").resolves({})
-
-      cy.stub(Cypress, "action").log(false)
-      .callThrough()
       .withArgs("cy:after:screenshot")
       .yieldsAsync()
 
@@ -112,15 +87,8 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        expect(Cypress.action).to.be.calledWith("cy:after:screenshot", {
-          id: runnable.id
-          isOpen: false
-          appOnly: false
-          scale: true
-          waitForCommandSynchronization: true
-          disableTimersAndAnimations: true
-          blackout: []
-        })
+        expect(Cypress.action).not.to.be.calledWith("cy:before:screenshot")
+        expect(Cypress.action).not.to.be.calledWith("cy:after:screenshot")
 
     it "takes screenshot when not isInteractive", ->
       Cypress.config("isInteractive", false)
@@ -139,7 +107,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip", "userClip", "viewport")).to.eql({
+        expect(args).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -147,11 +115,8 @@ describe "src/cy/commands/screenshot", ->
             runnable.title
           ]
           capture: "runner"
+          simple: true
         })
-        expect(args.clip.x).to.equal(0)
-        expect(args.clip.y).to.equal(0)
-        expect(args.clip.width).to.be.gt(0)
-        expect(args.clip.height).to.be.gt(0)
 
   context "runnable:after:run:async hooks", ->
     beforeEach ->
@@ -179,6 +144,7 @@ describe "src/cy/commands/screenshot", ->
             '"before each" hook'
           ]
           capture: "runner"
+          simple: true
         })
 
     it "takes screenshot of hook title with test", ->

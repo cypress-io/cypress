@@ -244,15 +244,16 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
 
+  ## failure screenshot when not interactive
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = Screenshot.getConfig()
-    ## we want to take a screenshot if we have an error, we're
-    ## to take a screenshot and we are not interactive
-    ## which means we're exiting at the end
     if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
-      ## always capture runner on failure screenshots
-      screenshotConfig.capture = "runner"
-      takeScreenshot(Cypress, state, screenshotConfig, { runnable })
+      automateScreenshot({
+        capture: "runner"
+        runnable
+        simple: true
+        timeout: config("responseTimeout")
+      })
 
   Commands.addAll({ prevSubject: "optional" }, {
     screenshot: (subject, name, userOptions = {}) ->

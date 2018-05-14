@@ -3,6 +3,9 @@ require("../spec_helper")
 _           = require("lodash")
 path        = require("path")
 Jimp        = require("jimp")
+Buffer      = require("buffer").Buffer
+dataUriToBuffer = require("data-uri-to-buffer")
+sizeOf      = require("image-size")
 Fixtures    = require("../support/helpers/fixtures")
 config      = require("#{root}lib/config")
 screenshots = require("#{root}lib/screenshots")
@@ -99,6 +102,18 @@ describe "lib/screenshots", ->
       @passPixelTest()
       screenshots.capture(@appData, @automate).then (image) =>
         expect(image).to.equal(@jimpImage)
+
+    describe "simple capture", ->
+      beforeEach ->
+        @appData.simple = true
+
+      it "skips pixel checking / reading into Jimp image", ->
+        screenshots.capture(@appData, @automate).then ->
+          expect(Jimp.read).not.to.be.called
+
+      it "resolves the buffer", ->
+        screenshots.capture(@appData, @automate).then (buffer) ->
+          expect(buffer).to.be.instanceOf(Buffer)
 
     describe "userClip", ->
       it "crops final image if userClip specified", ->
@@ -241,6 +256,21 @@ describe "lib/screenshots", ->
         expect(actualPath).to.eq(expectedPath)
         expect(obj.width).to.eq(40)
         expect(obj.height).to.eq(40)
+
+        fs.statAsync(expectedPath)
+
+    it "can handle saving buffer", ->
+      buffer = dataUriToBuffer(image)
+      dimensions = sizeOf(buffer)
+      screenshots.save({name: "bar/tweet"}, buffer, @config.screenshotsFolder)
+      .then (obj) =>
+        expectedPath = path.normalize(@config.screenshotsFolder + "/bartweet.png")
+        actualPath = path.normalize(obj.path)
+
+        expect(obj.size).to.eq("279 B")
+        expect(actualPath).to.eq(expectedPath)
+        expect(obj.width).to.eq(dimensions.width)
+        expect(obj.height).to.eq(dimensions.height)
 
         fs.statAsync(expectedPath)
 

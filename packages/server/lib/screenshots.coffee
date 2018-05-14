@@ -5,6 +5,7 @@ bytes           = require("bytes")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
 Jimp            = require("jimp")
+sizeOf          = require("image-size")
 debug           = require("debug")("cypress:server:screenshot")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
@@ -146,6 +147,27 @@ stitchScreenshots = (pixelRatio) ->
 
   return { image: fullImage, pixelRatio }
 
+isBuffer = (imageOrBuffer) ->
+  Buffer.isBuffer(imageOrBuffer)
+
+getType = (imageOrBuffer) ->
+  if isBuffer(imageOrBuffer)
+    imageOrBuffer.type
+  else
+    imageOrBuffer.getMIME()
+
+getBuffer = (imageOrBuffer) ->
+  if isBuffer(imageOrBuffer)
+    Promise.resolve(imageOrBuffer)
+  else
+    imageOrBuffer.getBuffer(Jimp.AUTO)
+
+getDimensions = (imageOrBuffer) ->
+  if isBuffer(imageOrBuffer)
+    sizeOf(imageOrBuffer)
+  else
+    imageOrBuffer.bitmap
+
 module.exports = {
   crop
 
@@ -164,6 +186,12 @@ module.exports = {
     glob(screenshotsFolder, {nodir: true})
 
   capture: (data, automate) ->
+    ## for failure screenshots, we keep it simple to avoid latency
+    ## caused by jimp reading the image buffer
+    if data.simple
+      return automate(data).then (dataUrl) ->
+        dataUriToBuffer(dataUrl)
+
     condition = if isMultipart(data) then multipartCondition else pixelCondition
 
     captureAndCheck(data, automate, condition)
@@ -200,8 +228,8 @@ module.exports = {
 
       return image
 
-  save: (data, image, screenshotsFolder) ->
-    type = image.getMIME()
+  save: (data, imageOrBuffer, screenshotsFolder) ->
+    type = getType(imageOrBuffer)
 
     name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
     name = name.replace(invalidCharsRe, "")
@@ -211,17 +239,18 @@ module.exports = {
 
     debug("save", pathToScreenshot)
 
-    image.getBuffer(Jimp.AUTO)
+    getBuffer(imageOrBuffer)
     .then (buffer) ->
       fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->
       fs.statAsync(pathToScreenshot).get("size")
     .then (size) ->
+      dimensions = getDimensions(imageOrBuffer)
       {
         size:   bytes(size, {unitSeparator: " "})
         path:   pathToScreenshot
-        width:  image.bitmap.width
-        height: image.bitmap.height
+        width:  dimensions.width
+        height: dimensions.height
       }
 
 }
