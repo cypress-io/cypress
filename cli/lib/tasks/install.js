@@ -13,7 +13,7 @@ const util = require('../util')
 const state = require('./state')
 const unzip = require('./unzip')
 const logger = require('../logger')
-const {throwFormErrorText, errors} = require('../errors')
+const { throwFormErrorText, errors } = require('../errors')
 
 const alreadyInstalledMsg = (installDir, binaryVersion) => {
   logger.log()
