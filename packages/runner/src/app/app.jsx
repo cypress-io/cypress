@@ -118,13 +118,17 @@ class App extends Component {
     const screenshotHelperPixels = this.refs.screenshotHelperPixels
 
     let prevAttrs = {}
+    let screenshotting = false
 
     const { eventManager } = this.props
 
     eventManager.on('before:screenshot', (config) => {
       if (!config.appOnly) return
 
+      screenshotting = true
+
       prevAttrs = {
+        config,
         top: iframesNode.style.top,
         marginLeft: iframesSizeNode.style.marginLeft,
         width: iframesSizeNode.style.width,
@@ -159,8 +163,10 @@ class App extends Component {
       screenshotHelperPixels.style.display = 'none'
     })
 
-    eventManager.on('after:screenshot', (config) => {
+    const afterScreenshot = (config) => {
       if (!config.appOnly) return
+
+      screenshotting = false
 
       screenshotHelperPixels.style.display = 'block'
 
@@ -186,6 +192,14 @@ class App extends Component {
       }
 
       prevAttrs = {}
+    }
+
+    eventManager.on('after:screenshot', afterScreenshot)
+
+    eventManager.on('run:start', () => {
+      if (screenshotting) {
+        afterScreenshot(prevAttrs.config)
+      }
     })
   }
 
