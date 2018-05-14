@@ -105,7 +105,7 @@ describe "Runs List", ->
 
         it "displays times", ->
           cy.get("@runRow").contains("a few secs ago")
-          cy.get("@runRow").contains("00:16")
+          cy.get("@runRow").contains("00:12")
 
         it "displays seperate timers for incomplete runs", ->
           cy.get("@firstRunRow").contains("47:02")
