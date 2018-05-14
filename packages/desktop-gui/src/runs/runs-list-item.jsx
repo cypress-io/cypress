@@ -79,7 +79,7 @@ export default class RunsListItem extends Component {
           </div>
         </div>
         <div className='row-column-wrapper env-data'>
-          <div className='td-top-padding'>
+          <div className='td-env-padding'>
             {/* // do we have multiple OS's ? */}
             {
               this._instancesExist() ?
