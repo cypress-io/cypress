@@ -174,11 +174,11 @@ export default class Project {
 
   @action setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
-    this.integrationExampleFile = config.integrationExampleFile
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
     this.integrationExampleName = config.integrationExampleName
+    this.integrationExamplePath = config.integrationExamplePath
     this.scaffoldedFiles = config.scaffoldedFiles
   }
 
