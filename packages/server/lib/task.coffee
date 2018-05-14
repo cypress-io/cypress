@@ -32,7 +32,7 @@ module.exports = {
     .catch Promise.TimeoutError, ->
       debug("timed out after #{options.timeout}ms")
       err = new Error("Process timed out\ntask: #{options.task}")
-      err.timedout = true
+      err.timedOut = true
       throw err
     .catch (err) ->
       throw err

@@ -47,14 +47,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           _.extend(consoleOutput, { Yielded: result })
         return result
 
-      .catch Promise.TimeoutError, { timedout: true }, (err) ->
+      .catch Promise.TimeoutError, { timedOut: true }, (err) ->
         $utils.throwErrByPath "task.timed_out", {
           onFail: options._log
           args: { task, timeout: options.timeout }
         }
 
       .catch (error) ->
-        ## re-throw if timedout error from above
+        ## re-throw if timedOut error from above
         throw error if error.name is "CypressError"
 
         error = if error?.isKnownError
