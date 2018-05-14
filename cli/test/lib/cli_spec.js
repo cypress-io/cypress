@@ -195,9 +195,9 @@ describe('cli', function () {
       expect(run.start).to.be.calledWith({ headed: true })
     })
 
-    it('calls run.start with --cypress-folder', function () {
-      this.exec('run --cypress-folder /custom/path')
-      expect(run.start).to.be.calledWith({ cypressFolder: '/custom/path' })
+    it('calls run.start with --binary-folder', function () {
+      this.exec('run --binary-folder /custom/path')
+      expect(run.start).to.be.calledWith({ binaryFolder: '/custom/path' })
     })
 
   })
@@ -223,9 +223,9 @@ describe('cli', function () {
       expect(open.start).to.be.calledWith({ port: '7878' })
     })
 
-    it('calls open.start with --cypress-folder', function () {
-      this.exec('open --cypress-folder /custom/path')
-      expect(open.start).to.be.calledWith({ cypressFolder: '/custom/path' })
+    it('calls open.start with --binary-folder', function () {
+      this.exec('open --binary-folder /custom/path')
+      expect(open.start).to.be.calledWith({ binaryFolder: '/custom/path' })
     })
 
     it('calls open.start with global', function () {
@@ -294,8 +294,8 @@ describe('cli', function () {
 
     it('calls verify.start with --binary-path when passed', function () {
       this.sandbox.stub(verify, 'start').resolves()
-      this.exec('verify --cypress-folder /custom/path')
-      expect(verify.start).to.be.calledWithMatch({ cypressFolder: '/custom/path' })
+      this.exec('verify --binary-folder /custom/path')
+      expect(verify.start).to.be.calledWithMatch({ binaryFolder: '/custom/path' })
     })
   })
 })

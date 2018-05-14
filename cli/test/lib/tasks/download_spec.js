@@ -85,6 +85,7 @@ describe('lib/tasks/download', function () {
       'x-version': '0.11.1',
     })
 
+
     const onProgress = this.sandbox.stub()
 
     return download.start({

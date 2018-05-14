@@ -13,7 +13,7 @@ Error: No version of Cypress is installed.
 Please reinstall Cypress by running: cypress install
 ----------
 
-Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
+Cypress executable not found in: /cache/Cypress/1.2.3/Cypress.app
 ----------
 
 Platform: darwin (test release)
@@ -35,7 +35,7 @@ Error: No version of Cypress is installed.
 Please reinstall Cypress by running: cypress install
 ----------
 
-Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
+Cypress executable not found in: /cache/Cypress/1.2.3/Cypress.app
 ----------
 
 Platform: darwin (test release)

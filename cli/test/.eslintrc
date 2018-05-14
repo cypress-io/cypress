@@ -1,7 +1,6 @@
 {
   "globals": {
-    "lib": true,
-    "mocha": true
+    "lib": true
   },
   "extends": [
     "plugin:cypress-dev/tests"

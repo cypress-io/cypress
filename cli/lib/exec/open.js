@@ -27,10 +27,6 @@ module.exports = {
       args.push('--project', options.project)
     }
 
-    if (options.cypressFolder) {
-      args.push('--cypress-folder', options.cypressFolder)
-    }
-
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
@@ -39,6 +35,7 @@ module.exports = {
         dev: options.dev,
         detached: Boolean(options.detached),
         stdio: 'inherit',
+        binaryFolder: options.binaryFolder,
       })
     }
 
@@ -46,7 +43,7 @@ module.exports = {
       return open()
     }
 
-    return verify.start({ cypressFolder: options.cypressFolder })
+    return verify.start({ binaryFolder: options.binaryFolder })
     .then(open)
   },
 }

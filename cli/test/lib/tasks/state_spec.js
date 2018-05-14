@@ -52,15 +52,17 @@ describe('lib/tasks/state', function () {
       expect(state.getPathToExecutable()).to.equal(macExecutable)
     })
     it('resolves path on linux', function () {
-      os.platform.restore()
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
       const macExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
       expect(state.getPathToExecutable()).to.equal(macExecutable)
     })
     it('resolves path on windows', function () {
-      os.platform.restore()
-      this.sandbox.stub(os, 'platform').returns('win32')
+      os.platform.returns('win32')
       expect(state.getPathToExecutable()).to.endWith('.exe')
+    })
+    it('resolves from custom binaryDir', function () {
+      const customBinaryDir = 'home/downloads/cypress.app'
+      expect(state.getPathToExecutable(customBinaryDir)).to.equal('home/downloads/cypress.app/Contents/MacOS/Cypress')
     })
   })
 
@@ -70,15 +72,13 @@ describe('lib/tasks/state', function () {
     })
 
     it('resolves path on linux', function () {
-      os.platform.restore()
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
       expect(state.getBinaryDir()).to.equal(path.join(versionDir, 'Cypress'))
     })
 
     it('resolves path on windows', function () {
       const state = proxyquire(`${lib}/tasks/state`, { path: path.win32, cachedir: fakeCachedir })
-      os.platform.restore()
-      this.sandbox.stub(os, 'platform').returns('win32')
+      os.platform.returns('win32')
       const pathToExec = state.getBinaryDir()
       expect(pathToExec).to.be.equal(path.win32.join(versionDir, 'Cypress'))
     })
@@ -92,8 +92,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('rejects on anything else', function () {
-      os.platform.restore()
-      this.sandbox.stub(os, 'platform').returns('unknown')
+      os.platform.returns('unknown')
       expect(() => state.getBinaryDir().to.throw('Platform: "unknown" is not supported.')
       )
     })

@@ -41,24 +41,26 @@ module.exports = {
     _.defaults(options, {
       detached: false,
       stdio: getStdio(needsXvfb),
+      binaryFolder: state.getBinaryDir(),
     })
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let cypressFolder = state.getPathToExecutable(options.cypressFolder || state.getBinaryDir())
+        let binaryFolder = state.getPathToExecutable(options.binaryFolder)
 
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          cypressFolder = 'node'
+          binaryFolder = 'node'
           args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
-        debug('spawning Cypress %s', cypressFolder)
+        debug('spawning Cypress %s', binaryFolder)
         debug('spawn args %j', args, options)
 
         // strip dev out of child process options
         options = _.omit(options, 'dev')
+        options = _.omit(options, 'binaryFolder')
 
         // when running in electron in windows
         // it never supports color but we're
@@ -87,7 +89,7 @@ module.exports = {
           process.env.FORCE_STDERR_TTY = 1
         }
 
-        const child = cp.spawn(cypressFolder, args, options)
+        const child = cp.spawn(binaryFolder, args, options)
         child.on('close', resolve)
         child.on('error', reject)
 

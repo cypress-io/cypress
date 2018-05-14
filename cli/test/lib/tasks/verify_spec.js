@@ -361,8 +361,8 @@ context('lib/tasks/verify', function () {
       })
     })
 
-    describe('with options.cypressFolder', function () {
-      it('verifies the binary when passed with options.cypressFolder', function () {
+    describe('with options.binaryFolder', function () {
+      it('verifies the binary when passed with options.binaryFolder', function () {
         state.getBinaryDir.restore()
         state.getPathToExecutable.restore()
         const customBinaryDir = 'custom/path/to/binary'
@@ -370,7 +370,7 @@ context('lib/tasks/verify', function () {
         this.sandbox.stub(fs, 'pathExistsAsync').withArgs(customExecPath).resolves(true)
         this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
         this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
-        return verify.start({ cypressFolder: customBinaryDir })
+        return verify.start({ binaryFolder: customBinaryDir })
         .then(() => {
           expect(cp.spawn).to.be.calledWith(customExecPath)
         })

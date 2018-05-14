@@ -29,7 +29,7 @@ const isMissingExecutable = (binaryDir) => {
   .then((exists) => {
     if (!exists) {
       return throwFormErrorText(errors.missingApp)(stripIndent`
-      Cypress executable not found at: ${chalk.cyan(executable)}
+      Cypress executable not found in: ${chalk.cyan(binaryDir)}
     `)
     }
   })
@@ -190,7 +190,9 @@ const start = (options = {}) => {
   debug('verifying Cypress app')
 
   const packageVersion = util.pkgVersion()
-  const binaryDir = options.cypressFolder || state.getBinaryDir(packageVersion)
+  options.binaryFolder && debug('supplied binaryFolder', options.binaryFolder)
+  const binaryDir = options.binaryFolder || state.getBinaryDir(packageVersion)
+  options.binaryFolder && debug('supplied binaryFolder', options.binaryFolder)
 
   _.defaults(options, {
     force: false,
