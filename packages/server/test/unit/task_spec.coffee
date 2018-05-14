@@ -9,8 +9,8 @@ fail = (message) -> throw new Error(message)
 
 describe "lib/task", ->
   beforeEach ->
-    @sandbox.stub(plugins, "execute").resolves("result")
-    @sandbox.stub(plugins, "has").returns(true)
+    sinon.stub(plugins, "execute").resolves("result")
+    sinon.stub(plugins, "has").returns(true)
 
   it "executes the 'task' plugin", ->
     task.run({ task: "some:task", arg: "some:arg", timeout: 1000 }).then ->

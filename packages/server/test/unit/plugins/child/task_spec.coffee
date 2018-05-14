@@ -8,18 +8,18 @@ task = require("#{root}../../lib/plugins/child/task")
 describe "lib/plugins/child/task", ->
   beforeEach ->
     @ipc = {
-      send: @sandbox.spy()
-      on: @sandbox.stub()
-      removeListener: @sandbox.spy()
+      send: sinon.spy()
+      on: sinon.stub()
+      removeListener: sinon.spy()
     }
     @callbacks = {
       "1": {
-        "the:task": @sandbox.stub().returns("result")
+        "the:task": sinon.stub().returns("result")
       }
     }
     @ids = {}
 
-    @sandbox.stub(util, "wrapChildPromise")
+    sinon.stub(util, "wrapChildPromise")
 
 
   it "passes through ipc and ids", ->
