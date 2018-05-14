@@ -127,3 +127,17 @@ You can now open Cypress by running: node_modules/.bin/cypress open
 https://on.cypress.io/installing-cypress
 
 `
+
+exports['invalid cache directory 1'] = `
+Error: Cypress cannot write to the cache directory due to file permissions
+----------
+
+Failed to access /invalid/cache/dir:
+
+EACCES: permission denied, mkdir '/invalid'
+----------
+
+Platform: darwin (4.13.0-39-generic)
+Cypress Version: 1.2.3
+
+`

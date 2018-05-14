@@ -58,8 +58,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
     const req = request({
       url,
       followRedirect (response) {
-        debug('redirect response:', response)
         const version = response.headers['x-version']
+        debug('redirect version:', version)
         if (version) {
           // set the version in options if we have one.
           // this insulates us from potential redirect

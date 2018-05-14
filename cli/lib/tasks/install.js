@@ -13,6 +13,7 @@ const util = require('../util')
 const state = require('./state')
 const unzip = require('./unzip')
 const logger = require('../logger')
+const {throwFormErrorText, errors} = require('../errors')
 
 const alreadyInstalledMsg = (installDir, binaryVersion) => {
   logger.log()
@@ -211,17 +212,25 @@ const start = (options = {}) => {
     const envCache = process.env.CYPRESS_CACHE_DIRECTORY
     logger.log(
       chalk.yellow(stripIndent`
-        Overriding Cypress cache directory to:
-        ${chalk.cyan(envCache)}
-        Any previous installs of Cypress may not be found.
+        Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
+        Previous installs of Cypress may not be found.
       `)
     )
     logger.log('')
   }
 
   const installDir = state.getVersionDir(util.pkgVersion())
+  const cacheDir = state.getCacheDir()
 
-  return state.getBinaryPkgVersionAsync()
+  return fs.ensureDirAsync(cacheDir)
+  .catch({ code: 'EACCES' }, (err) => {
+    return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
+    Failed to access ${chalk.cyan(cacheDir)}:
+
+    ${err.message}
+    `)
+  })
+  .then(() => state.getBinaryPkgVersionAsync())
   .then((binaryVersion) => {
 
     if (!binaryVersion) {

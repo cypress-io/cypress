@@ -52,6 +52,7 @@ describe('install', function () {
       this.sandbox.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
       this.sandbox.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
       this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves()
+      this.sandbox.stub(fs, 'ensureDirAsync').resolves(undefined)
     })
 
     describe('skips install', function () {
@@ -270,6 +271,27 @@ describe('install', function () {
             'installing in ci',
             normalize(this.stdout.toString())
           )
+        })
+      })
+
+      describe('failed write access to cache directory', function () {
+        it('logs error on failure', function () {
+          this.sandbox.stub(os, 'platform').returns('darwin')
+          this.sandbox.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
+          fs.ensureDirAsync.restore()
+
+          return install.start()
+          .then(() => {
+            throw new Error('should have caught error')
+          })
+          .catch((err) => {
+            logger.error(err)
+
+            snapshot(
+              'invalid cache directory',
+              normalize(this.stdout.toString())
+            )
+          })
         })
       })
     })

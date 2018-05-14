@@ -69,6 +69,11 @@ const missingDependency = {
   `,
 }
 
+const invalidCacheDirectory = {
+  description: 'Cypress cannot write to the cache directory due to file permissions',
+  solution: '',
+}
+
 const versionMismatch = {
   description: 'Installed version does not match package version.',
   solution: 'Install Cypress and verify app again',
@@ -185,5 +190,6 @@ module.exports = {
     unexpected,
     failedDownload,
     failedUnzip,
+    invalidCacheDirectory,
   },
 }

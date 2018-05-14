@@ -105,7 +105,7 @@ const getPathToExecutable = (binaryDir = getBinaryDir()) => {
 }
 
 const getBinaryPkgVersionAsync = (binaryDir = getBinaryDir()) => {
-  const pathToPackageJson = path.join(getBinaryDir(), getBinaryPkgPath(binaryDir))
+  const pathToPackageJson = path.join(binaryDir, getBinaryPkgPath())
   return fs.pathExistsAsync(pathToPackageJson)
   .then((exists) => {
     if (!exists) {

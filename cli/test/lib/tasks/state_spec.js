@@ -44,6 +44,16 @@ describe('lib/tasks/state', function () {
       .then((binaryVersion) => expect(binaryVersion).to.equal(null))
     })
 
+    it('returns correct version if passed binaryDir', function () {
+      const customBinaryDir = '/custom/binary/dir'
+      const customBinaryPackageDir = '/custom/binary/dir/Contents/Resources/app/package.json'
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(customBinaryPackageDir).resolves(true)
+      this.sandbox.stub(fs, 'readJsonAsync').withArgs(customBinaryPackageDir).resolves({ version: '3.4.5' })
+
+      return state.getBinaryPkgVersionAsync(customBinaryDir)
+      .then((binaryVersion) => expect(binaryVersion).to.equal('3.4.5'))
+    })
+
   })
 
   context('.getPathToExecutable', function () {
@@ -108,6 +118,13 @@ describe('lib/tasks/state', function () {
       this.sandbox.stub(fs, 'readJsonAsync').rejects({ code: 'ENOENT' })
       return state.getBinaryVerifiedAsync()
       .then((isVerified) => expect(isVerified).to.be.equal(undefined))
+    })
+    it('can accept custom binaryDir', function () {
+      const customBinaryDir = '/custom/binary/dir'
+      this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/custom/binary/dir/binary_state.json').resolves({ verified: true })
+      this.sandbox.stub(fs, 'readJsonAsync').withArgs('/custom/binary/dir/binary_state.json').resolves({ verified: true })
+      return state.getBinaryVerifiedAsync(customBinaryDir)
+      .then((isVerified) => expect(isVerified).to.be.equal(true))
     })
   })
   context('.writeBinaryVerified', function () {
