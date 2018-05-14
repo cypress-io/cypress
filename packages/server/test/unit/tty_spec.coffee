@@ -34,7 +34,7 @@ describe "lib/util/tty", ->
       fd0 = tty.isatty(0)
       fd1 = tty.isatty(1)
 
-      isatty = @sandbox.spy(tty, 'isatty')
+      isatty = sinon.spy(tty, 'isatty')
 
       ttyUtil.override()
 

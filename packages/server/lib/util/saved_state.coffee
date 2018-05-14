@@ -6,21 +6,21 @@ log       = require("../log")
 cwd       = require("../cwd")
 fs        = require("../util/fs")
 
-toHashName = (projectPath) ->
-  throw new Error("Missing project path") unless projectPath
-  throw new Error("Expected project absolute path, not just a name #{projectPath}") unless path.isAbsolute(projectPath)
-  name = sanitize(path.basename(projectPath))
-  hash = md5(projectPath)
+toHashName = (projectRoot) ->
+  throw new Error("Missing project path") unless projectRoot
+  throw new Error("Expected project absolute path, not just a name #{projectRoot}") unless path.isAbsolute(projectRoot)
+  name = sanitize(path.basename(projectRoot))
+  hash = md5(projectRoot)
   "#{name}-#{hash}"
 
 # async promise-returning method
-formStatePath = (projectPath) ->
+formStatePath = (projectRoot) ->
   Promise.resolve()
   .then ->
     log('making saved state from %s', cwd())
-    if projectPath
-      log('for project path %s', projectPath)
-      return projectPath
+    if projectRoot
+      log('for project path %s', projectRoot)
+      return projectRoot
     else
       log('missing project path, looking for project here')
 
@@ -29,14 +29,14 @@ formStatePath = (projectPath) ->
       .then (found) ->
         if found
           log('found cypress file %s', cypressJsonPath)
-          projectPath = cwd()
-        return projectPath
+          projectRoot = cwd()
+        return projectRoot
 
-  .then (projectPath) ->
+  .then (projectRoot) ->
     fileName = "state.json"
-    if projectPath
-      log("state path for project #{projectPath}")
-      statePath = path.join(toHashName(projectPath), fileName)
+    if projectRoot
+      log("state path for project #{projectRoot}")
+      statePath = path.join(toHashName(projectRoot), fileName)
     else
       log("state path for global mode")
       statePath = path.join("__global__", fileName)

@@ -4,7 +4,7 @@ fs = require("#{root}lib/util/fs")
 
 describe "lib/util/fs", ->
   beforeEach () ->
-    @sandbox.spy(console, "error")
+    sinon.spy(console, "error")
 
   it "warns when trying to use fs.existsSync", ->
     fs.existsSync(__filename)
