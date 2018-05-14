@@ -28,25 +28,30 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              { run.commitBranch ? run.commitBranch : null }
-              {run.commitBranch && this._displaySpec() ? ' / ' : null}
+              { run.commit ?
+                <span>
+                  {run.commit.branch ? run.commit.branch : null}
+                  {run.commit.branch && this._displaySpec() ? ' / ' : null}
+                </span> :
+                null
+              }
               {this._displaySpec()}
             </div>
             <div className='msg'>
               {
-                run.commitAuthorEmail ?
+                run.commit && run.commit.authorEmail ?
                   <img
                     className='user-avatar'
                     height='13'
                     width='13'
-                    src={`${gravatarUrl(run.commitAuthorEmail)}`}
+                    src={`${gravatarUrl(run.commit.authorEmail)}`}
                   /> :
                   null
               }
               {
-                run.commitMessage ?
+                run.commit && run.commit.message ?
                   <span className='commit-msg'>
-                    {run.commitMessage.split(NEWLINE)[0]}
+                    {run.commit.message.split(NEWLINE)[0]}
                   </span> :
                   null
               }
@@ -67,14 +72,14 @@ export default class RunsListItem extends Component {
                   <i className='fa fa-hourglass-end'></i>{' '}
                   {durationFormatted(run.duration)}
                 </span> :
-                run.startedAt ?
-                  <TimerDisplay startTime={run.startedAt} /> :
+                run.createdAt ?
+                  <TimerDisplay startTime={run.createdAt} /> :
                   null
             }
           </div>
         </div>
         <div className='row-column-wrapper env-data'>
-          <div className='td-top-padding'>
+          <div className='td-env-padding'>
             {/* // do we have multiple OS's ? */}
             {
               this._instancesExist() ?
@@ -85,7 +90,7 @@ export default class RunsListItem extends Component {
                   </div> :
                   // or did we only actual run it on one OS
                   <div>
-                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].osName)}`}></i>{' '}
+                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].platform.osName)}`}></i>{' '}
                     {this._osDisplay()}
                   </div> :
                 null
@@ -157,28 +162,30 @@ export default class RunsListItem extends Component {
   }
 
   _getUniqBrowsers () {
-    if (!this.props.run.instances) return 0
+    if (!this.props.run.instances) return []
 
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.browserName} + ${instance.browserVersion}`
+      return `${instance.platform.browserName} + ${instance.platform.browserVersion}`
     })
     .uniq()
     .value()
   }
 
   _browsersLength () {
-    return this._getUniqBrowsers().length
+    if (this._getUniqBrowsers()) {
+      return this._getUniqBrowsers().length
+    }
   }
 
   _browserIcon () {
-    return browserIcon(this.props.run.instances[0].browserName)
+    return browserIcon(this.props.run.instances[0].platform.browserName)
   }
 
   _osIcon () {
     if (!this._moreThanOneInstance() && this.props.run.instances.length) {
-      return (osIcon(this.props.run.instances[0].osName))
+      return (osIcon(this.props.run.instances[0].platform.osName))
     } else {
       return 'desktop'
     }
@@ -190,7 +197,7 @@ export default class RunsListItem extends Component {
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.osName} + ${instance.osVersionFormatted}`
+      return `${instance.platform.osName} + ${instance.platform.osVersionFormatted}`
     })
     .uniq()
     .value()
@@ -204,7 +211,7 @@ export default class RunsListItem extends Component {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
         <span>
-          {this.props.run.instances[0].osVersionFormatted}
+          {this.props.run.instances[0].platform.osVersionFormatted}
         </span>
       )
     }
@@ -214,7 +221,7 @@ export default class RunsListItem extends Component {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
         <span>
-          {browserVersionFormatted(this.props.run.instances[0].browserVersion)}
+          {browserVersionFormatted(this.props.run.instances[0].platform.browserVersion)}
         </span>
       )
     }
