@@ -105,17 +105,6 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       ## add these two together
       obj.fnDuration + obj.afterFnDuration
 
-    ## make sure we've added failingTests
-    failingTests = _.filter(run.tests, { state: "failed" })
-
-    if failingTests.length
-      expect(run.failingTests).to.deep.eq(failingTests)
-
-      ## now reset it
-      run.failingTests = []
-    else
-      expect(run.failingTests).to.be.undefined
-
     ## now make sure that each tests wallclock duration
     ## is around the sum of all of its timings
     run.tests.forEach (test) ->

@@ -393,10 +393,6 @@ module.exports = {
         ## always set the video timestamp on tests
         obj.tests = Reporter.setVideoTimestamp(started, tests)
 
-      ## TODO: temporary - remove later
-      if started and failingTests and failingTests.length
-        obj.failingTests = Reporter.setVideoTimestamp(started, failingTests)
-
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures and have started the video
       suv = Boolean(videoUploadOnPasses is true or (started and hasFailingTests))

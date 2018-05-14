@@ -346,7 +346,7 @@ describe "lib/modes/run", ->
           }
         })
 
-    it "exitEarlyWithErr event resolves with no tests, error, and empty failingTests", ->
+    it "exitEarlyWithErr event resolves with no tests, and error", ->
       clock = sinon.useFakeTimers()
 
       err = new Error("foo")
@@ -387,9 +387,9 @@ describe "lib/modes/run", ->
 
         expect(obj).to.deep.eq({
           screenshots
-          error:      err.message
-          spec:       "cypress/integration/spec.js"
-          video:      "foo.mp4"
+          error: err.message
+          spec: "cypress/integration/spec.js"
+          video: "foo.mp4"
           hooks: null
           tests: null
           reporterStats: null
@@ -407,10 +407,12 @@ describe "lib/modes/run", ->
           }
         })
 
-    it "should not upload video when videoUploadOnPasses is false and no failing tests", ->
+    it "should not upload video when videoUploadOnPasses is false and no failures", ->
       process.nextTick =>
         @projectInstance.emit("end", {
-          failingTests: []
+          stats: {
+            failures: 0
+          }
         })
 
       sinon.spy(runMode, "postProcessRecording")

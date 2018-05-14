@@ -97,7 +97,7 @@ describe "lib/reporter", ->
       expect(args[1].fullTitle()).to.eq title
 
   context "#stats", ->
-    it "has reporterName and failingTests in stats", ->
+    it "has reporterName stats, reporterStats, etc", ->
       sinon.stub(Date, "now").returns(1234)
 
       @reporter.emit("test", @testObj)

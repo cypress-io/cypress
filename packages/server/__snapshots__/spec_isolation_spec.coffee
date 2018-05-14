@@ -235,7 +235,6 @@ exports['e2e spec_isolation failing 1'] = {
         }
       ],
       "spec": "cypress/integration/simple_failing_hook_spec.coffee",
-      "failingTests": [],
       "shouldUploadVideo": true
     },
     {
@@ -331,7 +330,6 @@ exports['e2e spec_isolation failing 1'] = {
         }
       ],
       "spec": "cypress/integration/simple_failing_spec.coffee",
-      "failingTests": [],
       "shouldUploadVideo": true
     },
     {
@@ -599,4 +597,3 @@ exports['e2e spec_isolation failing 1'] = {
   "cypressVersion": "2.0.0",
   "config": {}
 }
-

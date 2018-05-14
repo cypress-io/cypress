@@ -797,10 +797,11 @@ describe "lib/cypress", ->
           pending: 4
           wallClockDuration: 5
         }
-        video: true
+        tests: []
+        hooks: []
+        video: "path/to/video"
         shouldUploadVideo: true
         screenshots: []
-        failingTests: []
         config: {}
       })
 

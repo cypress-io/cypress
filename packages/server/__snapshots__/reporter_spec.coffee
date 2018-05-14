@@ -1,4 +1,4 @@
-exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
+exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
   "stats": {
     "suites": 2,
     "tests": 2,
@@ -58,4 +58,3 @@ exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
     }
   ]
 }
-
