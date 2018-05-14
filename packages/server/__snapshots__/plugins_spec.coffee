@@ -29,6 +29,7 @@ Error: Async error from plugins file
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -63,6 +64,7 @@ Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/
   - Passes:          2
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -97,6 +99,7 @@ Started video recording: /foo/bar/.projects/plugin-config/cypress/videos/abc123.
   - Passes:          2
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -132,6 +135,7 @@ A video will not be recorded when using this browser.
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  false
