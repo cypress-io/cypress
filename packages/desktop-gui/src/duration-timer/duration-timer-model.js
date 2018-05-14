@@ -10,11 +10,6 @@ export default class Timer {
     this.id = uniqueId()
   }
 
-  @action saveTime () {
-    this.savedMilliseconds += this.milliseconds
-    this.milliseconds = 0
-  }
-
   @action reset () {
     this.milliseconds = 0
   }
