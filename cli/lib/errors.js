@@ -26,12 +26,12 @@ const failedUnzip = {
   `,
 }
 
-const missingApp = {
-  description: 'No version of Cypress is installed.',
+const missingApp = (binaryDir) => ({
+  description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
   solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
-}
+})
 
 const nonZeroExitCodeXvfb = {
   description: 'XVFB exited with a non zero exit code.',

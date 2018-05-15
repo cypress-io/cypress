@@ -27,7 +27,6 @@ describe('exec open', function () {
           detached: false,
           stdio: 'inherit',
           dev: true,
-          binaryFolder: undefined,
         })
       })
     })
@@ -103,15 +102,6 @@ describe('exec open', function () {
       return open.start()
       .then(() => {
         expect(spawn.start).to.be.calledWith([])
-      })
-    })
-
-    it('can accept option.binaryFolder', function () {
-      const binaryFolder = '/path/to/cypress/'
-      return open.start({ binaryFolder })
-      .then(() => {
-        expect(verify.start).to.be.calledWith({ binaryFolder })
-        expect(spawn.start).to.be.calledWithMatch([], { binaryFolder })
       })
     })
   })

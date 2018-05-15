@@ -6,6 +6,7 @@ const debug = require('debug')('cypress:cli')
 const Listr = require('listr')
 const verbose = require('@cypress/listr-verbose-renderer')
 const Promise = require('bluebird')
+const logSymbols = require('log-symbols')
 const { stripIndent } = require('common-tags')
 const fs = require('../fs')
 const download = require('./download')
@@ -15,36 +16,29 @@ const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 
-const alreadyInstalledMsg = (installDir, binaryVersion) => {
-  logger.log()
-  logger.log(chalk.yellow(stripIndent`
-    Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
-    
+const alreadyInstalledMsg = () => {
+  logger.log(stripIndent`    
     Skipping installation:
-  `))
 
-  logger.log()
-
-  logger.log(chalk.yellow(stripIndent`
-    Pass the ${chalk.white('--force')} option if you'd like to reinstall anyway.
-  `))
+      Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
+  `)
   logger.log()
 }
 
 const displayCompletionMsg = () => {
-  logger.log()
 
   // check here to see if we are globally installed
   if (util.isInstalledGlobally()) {
     // if we are display a warning
+    logger.log()
     logger.warn(stripIndent`
-      It looks like you\'ve installed Cypress globally.
+      ${logSymbols.warning} Warning: It looks like you\'ve installed Cypress globally.
 
-      This will work, but it'\s not recommended.
+        This will work, but it'\s not recommended.
 
-      The recommended way to install Cypress is as a devDependency per project.
+        The recommended way to install Cypress is as a devDependency per project.
 
-      You should probably run these commands:
+        You should probably run these commands:
 
         - ${chalk.cyan('npm uninstall -g cypress')}
         - ${chalk.cyan('npm install --save-dev cypress')}
@@ -53,16 +47,15 @@ const displayCompletionMsg = () => {
     return
   }
 
+  logger.log()
   logger.log(
-    chalk.yellow('You can now open Cypress by running:'),
+    'You can now open Cypress by running:',
     chalk.cyan(path.join('node_modules', '.bin', 'cypress'), 'open')
   )
 
   logger.log()
-
-  logger.log(
-    chalk.yellow('https://on.cypress.io/installing-cypress')
-  )
+  logger.log(chalk.grey('https://on.cypress.io/installing-cypress'))
+  logger.log()
 }
 
 const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
@@ -74,8 +67,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
   const rendererOptions = getRendererOptions()
 
   // let the user know what version of cypress we're downloading!
-  const message = chalk.yellow(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
-  logger.log(message)
+  logger.log(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
   logger.log()
 
   const tasks = new Listr([
@@ -169,11 +161,12 @@ const start = (options = {}) => {
     const envCache = process.env.CYPRESS_CACHE_DIRECTORY
     logger.log(
       chalk.yellow(stripIndent`
-        Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
-        Previous installs of Cypress may not be found.
+        ${logSymbols.warning} Warning: Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
+
+          Previous installs of Cypress may not be found.
       `)
     )
-    logger.log('')
+    logger.log()
   }
 
   const installDir = state.getVersionDir(util.pkgVersion())
@@ -195,7 +188,11 @@ const start = (options = {}) => {
       return true
     }
 
-    debug('installed version is', binaryVersion, 'version needed is', needVersion)
+    // debug('installed version is', binaryVersion, 'version needed is', needVersion)
+    logger.log(stripIndent`
+    Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
+    `)
+    logger.log()
 
     if (options.force) {
       debug('performing force install over existing binary')
@@ -204,15 +201,10 @@ const start = (options = {}) => {
 
     if ((binaryVersion === needVersion) || !util.isSemver(needVersion)) {
       // our version matches, tell the user this is a noop
-      alreadyInstalledMsg(installDir, binaryVersion)
+      alreadyInstalledMsg()
       return false
     }
 
-    logger.warn(stripIndent`
-      Installed version ${chalk.cyan(`(${binaryVersion})`)} does not match needed version ${chalk.cyan(`(${needVersion})`)}.
-    `)
-
-    logger.log()
 
     return true
   })
@@ -226,16 +218,16 @@ const start = (options = {}) => {
     if (needVersion !== pkgVersion) {
       logger.log(
         chalk.yellow(stripIndent`
-          Forcing a binary version different than the default.
+          ${logSymbols.warning} Warning: Forcing a binary version different than the default.
 
-          The CLI expected to install version: ${chalk.cyan(pkgVersion)}
+            The CLI expected to install version: ${chalk.green(pkgVersion)}
 
-          Instead we will install version: ${chalk.cyan(needVersion)}
+            Instead we will install version: ${chalk.green(needVersion)}
 
-          Note: there is no guarantee these versions will work properly together.
+            Note: These versions may not work properly together.
         `)
       )
-      logger.log('')
+      logger.log()
     }
 
     // see if version supplied is a path to a binary

@@ -360,21 +360,5 @@ context('lib/tasks/verify', function () {
         )
       })
     })
-
-    describe('with options.binaryFolder', function () {
-      it('verifies the binary when passed with options.binaryFolder', function () {
-        state.getBinaryDir.restore()
-        state.getPathToExecutable.restore()
-        const customBinaryDir = 'custom/path/to/binary'
-        const customExecPath = state.getPathToExecutable(customBinaryDir)
-        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(customExecPath).resolves(true)
-        this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
-        this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
-        return verify.start({ binaryFolder: customBinaryDir })
-        .then(() => {
-          expect(cp.spawn).to.be.calledWith(customExecPath)
-        })
-      })
-    })
   })
 })

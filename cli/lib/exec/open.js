@@ -35,7 +35,6 @@ module.exports = {
         dev: options.dev,
         detached: Boolean(options.detached),
         stdio: 'inherit',
-        binaryFolder: options.binaryFolder,
       })
     }
 
@@ -43,7 +42,7 @@ module.exports = {
       return open()
     }
 
-    return verify.start({ binaryFolder: options.binaryFolder })
+    return verify.start()
     .then(open)
   },
 }

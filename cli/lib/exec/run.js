@@ -104,7 +104,6 @@ module.exports = {
 
       return spawn.start(args, {
         dev: options.dev,
-        binaryFolder: options.binaryFolder,
       })
     }
 
@@ -112,7 +111,7 @@ module.exports = {
       return run()
     }
 
-    return verify.start({ binaryFolder: options.binaryFolder })
+    return verify.start()
     .then(run)
   },
 }

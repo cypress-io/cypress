@@ -14,7 +14,7 @@ const parseOpts = (opts) => {
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed',
-    'group', 'groupId', 'global', 'dev', 'force', 'binaryFolder')
+    'group', 'groupId', 'global', 'dev', 'force')
 
   debug('parsed cli options', opts)
 
@@ -43,7 +43,6 @@ const descriptions = {
   groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
   dev: 'runs cypress in development and bypasses binary check',
   forceInstall: 'force install the Cypress binary',
-  binaryFolder: 'path to Cypress binary folder',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -116,7 +115,6 @@ module.exports = {
     .option('--group', text('group'), coerceFalse)
     .option('--group-id <group-id>', text('groupId'))
     .option('--dev', text('dev'), coerceFalse)
-    .option('--binary-folder <binary-folder>', text('binaryFolder'))
     .action((opts) => {
       debug('running Cypress')
       require('./exec/run')
@@ -134,8 +132,6 @@ module.exports = {
     .option('-c, --config <config>', text('config'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('-P, --project <project path>', text('project'))
-    .option('--binary-folder <binary-folder>', text('binaryFolder'))
-
     .option('--global', text('global'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
@@ -160,7 +156,6 @@ module.exports = {
     .command('verify')
     .usage('[options]')
     .description('Verifies that Cypress is installed correctly and executable')
-    .option('--binary-folder <binary-folder>', text('binaryFolder'))
     .action((opts) => {
       const defaultOpts = { force: true, welcomeMessage: false }
       const parsedOpts = parseOpts(opts)
@@ -169,6 +164,8 @@ module.exports = {
       .start(options)
       .catch(util.logErrorExit1)
     })
+
+    logger.log()
 
     debug('cli starts with arguments %j', args)
 

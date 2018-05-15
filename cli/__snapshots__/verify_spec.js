@@ -8,12 +8,12 @@ Opening Cypress...
 `
 
 exports['no version of Cypress installed 1'] = `
-Error: No version of Cypress is installed.
+Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
 
 Please reinstall Cypress by running: cypress install
 ----------
 
-Cypress executable not found in: /cache/Cypress/1.2.3/Cypress.app
+Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
 ----------
 
 Platform: darwin (test release)
@@ -22,22 +22,22 @@ Cypress Version: 1.2.3
 `
 
 exports['warning installed version does not match verified version 1'] = `
-Found Cypress binary executable at: /cache/Cypress/1.2.3/Cypress.app
+Found binary version bloop installed in: /cache/Cypress/1.2.3/Cypress.app
 
-This version bloop does not match the expected package version 1.2.3
+⚠ Warning: Binary version bloop does not match the expected package version 1.2.3
 
-Note: there is no guarantee these versions will work properly together.
+  These versions may not work properly together.
 
 
 `
 
 exports['executable cannot be found 1'] = `
-Error: No version of Cypress is installed.
+Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
 
 Please reinstall Cypress by running: cypress install
 ----------
 
-Cypress executable not found in: /cache/Cypress/1.2.3/Cypress.app
+Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
 ----------
 
 Platform: darwin (test release)
@@ -88,11 +88,11 @@ Opening Cypress...
 `
 
 exports['current version has not been verified 1'] = `
-Found Cypress binary executable at: /cache/Cypress/1.2.3/Cypress.app
+Found binary version different version installed in: /cache/Cypress/1.2.3/Cypress.app
 
-This version different version does not match the expected package version 1.2.3
+⚠ Warning: Binary version different version does not match the expected package version 1.2.3
 
-Note: there is no guarantee these versions will work properly together.
+  These versions may not work properly together.
 
 It looks like this is your first time using Cypress: different version
 
@@ -103,11 +103,11 @@ Opening Cypress...
 `
 
 exports['current version has not been verified 2'] = `
-Found Cypress binary executable at: /cache/Cypress/1.2.3/Cypress.app
+Found binary version 9.8.7 installed in: /cache/Cypress/1.2.3/Cypress.app
 
-This version 9.8.7 does not match the expected package version 1.2.3
+⚠ Warning: Binary version 9.8.7 does not match the expected package version 1.2.3
 
-Note: there is no guarantee these versions will work properly together.
+  These versions may not work properly together.
 
 It looks like this is your first time using Cypress: 9.8.7
 
@@ -118,11 +118,11 @@ Opening Cypress...
 `
 
 exports['no welcome message 1'] = `
-Found Cypress binary executable at: /cache/Cypress/1.2.3/Cypress.app
+Found binary version different version installed in: /cache/Cypress/1.2.3/Cypress.app
 
-This version different version does not match the expected package version 1.2.3
+⚠ Warning: Binary version different version does not match the expected package version 1.2.3
 
-Note: there is no guarantee these versions will work properly together.
+  These versions may not work properly together.
 
 
 `

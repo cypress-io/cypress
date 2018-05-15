@@ -195,11 +195,6 @@ describe('cli', function () {
       expect(run.start).to.be.calledWith({ headed: true })
     })
 
-    it('calls run.start with --binary-folder', function () {
-      this.exec('run --binary-folder /custom/path')
-      expect(run.start).to.be.calledWith({ binaryFolder: '/custom/path' })
-    })
-
   })
 
   context('cypress open', function () {
@@ -221,11 +216,6 @@ describe('cli', function () {
       // this.sandbox.stub(open, 'start').resolves()
       this.exec('open --port 7878')
       expect(open.start).to.be.calledWith({ port: '7878' })
-    })
-
-    it('calls open.start with --binary-folder', function () {
-      this.exec('open --binary-folder /custom/path')
-      expect(open.start).to.be.calledWith({ binaryFolder: '/custom/path' })
     })
 
     it('calls open.start with global', function () {
@@ -290,12 +280,6 @@ describe('cli', function () {
         expect(e).to.eq(err)
         done()
       })
-    })
-
-    it('calls verify.start with --binary-path when passed', function () {
-      this.sandbox.stub(verify, 'start').resolves()
-      this.exec('verify --binary-folder /custom/path')
-      expect(verify.start).to.be.calledWithMatch({ binaryFolder: '/custom/path' })
     })
   })
 })

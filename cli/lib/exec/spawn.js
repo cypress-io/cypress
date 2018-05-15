@@ -41,7 +41,7 @@ module.exports = {
     _.defaults(options, {
       detached: false,
       stdio: getStdio(needsXvfb),
-      binaryFolder: state.getBinaryDir(),
+      binaryFolder: process.env.CYPRESS_BINARY_FOLDER || state.getBinaryDir(),
     })
 
     const spawn = () => {

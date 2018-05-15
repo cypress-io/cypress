@@ -6,6 +6,8 @@ const debug = require('debug')('cypress:cli')
 const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
+const logSymbols = require('log-symbols')
+
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
@@ -28,8 +30,8 @@ const isMissingExecutable = (binaryDir) => {
   return fs.pathExistsAsync(executable)
   .then((exists) => {
     if (!exists) {
-      return throwFormErrorText(errors.missingApp)(stripIndent`
-      Cypress executable not found in: ${chalk.cyan(binaryDir)}
+      return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
+      Cypress executable not found at: ${chalk.cyan(executable)}
     `)
     }
   })
@@ -110,11 +112,9 @@ function testBinary (version, binaryDir) {
 
 
   // let the user know what version of cypress we're downloading!
-  logger.log(
-    chalk.yellow(
-      `It looks like this is your first time using Cypress: ${chalk.cyan(version)}`
-    )
-  )
+  logger.log(stripIndent`
+  It looks like this is your first time using Cypress: ${chalk.cyan(version)}
+  `)
 
   logger.log()
 
@@ -179,7 +179,7 @@ const maybeVerify = (installedVersion, installPath, options = {}) => {
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
-          logger.warn('Opening Cypress...')
+          logger.log('Opening Cypress...')
         }
       })
     }
@@ -190,9 +190,17 @@ const start = (options = {}) => {
   debug('verifying Cypress app')
 
   const packageVersion = util.pkgVersion()
-  options.binaryFolder && debug('supplied binaryFolder', options.binaryFolder)
-  const binaryDir = options.binaryFolder || state.getBinaryDir(packageVersion)
-  options.binaryFolder && debug('supplied binaryFolder', options.binaryFolder)
+  let binaryDir = state.getBinaryDir(packageVersion)
+  if (process.env.CYPRESS_BINARY_FOLDER) {
+    const envBinaryDir = process.env.CYPRESS_BINARY_FOLDER
+    logger.warn(stripIndent`
+    ${logSymbols.warning} Warning: You have set the environment variable: ${chalk.white('CYPRESS_BINARY_FOLDER=')}${chalk.cyan(envBinaryDir)}
+    
+      This overrides the default Cypress binary version used.
+    `)
+    logger.log()
+    binaryDir = envBinaryDir
+  }
 
   _.defaults(options, {
     force: false,
@@ -205,25 +213,26 @@ const start = (options = {}) => {
 
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
-      return throwFormErrorText(errors.missingApp)(stripIndent`
-      Cypress binary version not found in: ${chalk.cyan(binaryDir)}
+      return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
+      Cannot read binary version from: ${chalk.cyan(state.getBinaryPkgPath(binaryDir))}
     `)
     }
 
-    debug('installed version is', binaryVersion, 'comparing to', packageVersion)
+    debug(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
 
     if (binaryVersion !== packageVersion) {
       // warn if we installed with CYPRESS_BINARY_VERSION or changed version
       // in the package.json
-      const msg = stripIndent`
-      Found Cypress binary executable at: ${chalk.cyan(binaryDir)}
+      logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
+      logger.log()
+      logger.warn(stripIndent`
       
-      This version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
+      
+      ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
 
-      Note: there is no guarantee these versions will work properly together.
-      `
+        These versions may not work properly together.
+      `)
 
-      logger.warn(msg)
 
       logger.log()
     }

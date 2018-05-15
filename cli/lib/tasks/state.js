@@ -29,12 +29,12 @@ const getPlatFormBinaryFolder = () => {
   }
 }
 
-const getBinaryPkgPath = () => {
+const getBinaryPkgPath = (binaryDir) => {
   const platform = os.platform()
   switch (platform) {
-    case 'darwin': return path.join('Contents', 'Resources', 'app', 'package.json')
-    case 'linux': return path.join('resources', 'app', 'package.json')
-    case 'win32': return path.join('resources', 'app', 'package.json')
+    case 'darwin': return path.join(binaryDir, 'Contents', 'Resources', 'app', 'package.json')
+    case 'linux': return path.join(binaryDir, 'resources', 'app', 'package.json')
+    case 'win32': return path.join(binaryDir, 'resources', 'app', 'package.json')
       // TODO handle this error using our standard
     default: throw new Error(`Platform: "${platform}" is not supported.`)
   }
@@ -84,7 +84,7 @@ const getBinaryVerifiedAsync = (binaryDir = getBinaryDir()) => {
 }
 
 const clearBinaryStateAsync = (binaryDir = getBinaryDir()) => {
-  return fs.removeAsync(path.join(binaryDir, getBinaryStatePath(binaryDir)))
+  return fs.removeAsync(getBinaryStatePath(binaryDir))
 }
 
 /**
@@ -105,7 +105,7 @@ const getPathToExecutable = (binaryDir = getBinaryDir()) => {
 }
 
 const getBinaryPkgVersionAsync = (binaryDir = getBinaryDir()) => {
-  const pathToPackageJson = path.join(binaryDir, getBinaryPkgPath())
+  const pathToPackageJson = getBinaryPkgPath(binaryDir)
   return fs.pathExistsAsync(pathToPackageJson)
   .then((exists) => {
     if (!exists) {
@@ -121,6 +121,7 @@ module.exports = {
   getPathToExecutable,
   getBinaryPkgVersionAsync,
   getBinaryVerifiedAsync,
+  getBinaryPkgPath,
   getBinaryDir,
   getCacheDir,
   clearBinaryStateAsync,

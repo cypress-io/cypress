@@ -25,7 +25,7 @@ exports['cli help command shows help 1'] = `
     run [options]       Runs Cypress tests from the CLI without the GUI
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
-    verify [options]    Verifies that Cypress is installed correctly and executable
+    verify              Verifies that Cypress is installed correctly and executable
   -------
   stderr:
   -------
@@ -61,7 +61,7 @@ exports['cli help command shows help for -h 1'] = `
     run [options]       Runs Cypress tests from the CLI without the GUI
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
-    verify [options]    Verifies that Cypress is installed correctly and executable
+    verify              Verifies that Cypress is installed correctly and executable
   -------
   stderr:
   -------
@@ -97,7 +97,7 @@ exports['cli help command shows help for --help 1'] = `
     run [options]       Runs Cypress tests from the CLI without the GUI
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
-    verify [options]    Verifies that Cypress is installed correctly and executable
+    verify              Verifies that Cypress is installed correctly and executable
   -------
   stderr:
   -------
@@ -135,7 +135,7 @@ exports['cli unknown command shows usage and exits 1'] = `
       run [options]       Runs Cypress tests from the CLI without the GUI
       open [options]      Opens Cypress in the interactive GUI.
       install [options]   Installs the Cypress executable matching this package's version
-      verify [options]    Verifies that Cypress is installed correctly and executable
+      verify              Verifies that Cypress is installed correctly and executable
   -------
   stderr:
   -------
@@ -185,26 +185,31 @@ Cypress binary version: not installed
 `
 
 exports['cli version and binary version 1'] = `
+
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
 `
 
 exports['cli version and binary version 2'] = `
+
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
 `
 
 exports['cli version no binary version 1'] = `
+
 Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
 
 exports['cli --version no binary version 1'] = `
+
 Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
 
 exports['cli -v no binary version 1'] = `
+
 Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
