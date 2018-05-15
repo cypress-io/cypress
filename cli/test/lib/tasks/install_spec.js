@@ -277,7 +277,10 @@ describe('install', function () {
         it('logs error on failure', function () {
           this.sandbox.stub(os, 'platform').returns('darwin')
           this.sandbox.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
-          fs.ensureDirAsync.restore()
+
+          const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
+          err.code = 'EACCES'
+          fs.ensureDirAsync.rejects(err)
 
           return install.start()
           .then(() => {

@@ -216,7 +216,9 @@ const start = (options = {}) => {
       // warn if we installed with CYPRESS_BINARY_VERSION or changed version
       // in the package.json
       const msg = stripIndent`
-      Installed version ${chalk.cyan(binaryVersion)} does not match the expected package version ${chalk.cyan(packageVersion)}
+      Found Cypress binary executable at: ${chalk.cyan(binaryDir)}
+      
+      This version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
 
       Note: there is no guarantee these versions will work properly together.
       `

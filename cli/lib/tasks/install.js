@@ -19,7 +19,8 @@ const alreadyInstalledMsg = (installDir, binaryVersion) => {
   logger.log()
   logger.log(chalk.yellow(stripIndent`
     Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
-    Skipping installation
+    
+    Skipping installation:
   `))
 
   logger.log()

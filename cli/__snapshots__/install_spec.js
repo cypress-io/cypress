@@ -1,7 +1,8 @@
 exports['version already installed 1'] = `
 
 Cypress 1.2.3 is already installed in /cache/Cypress/1.2.3
-Skipping installation
+
+Skipping installation:
 
 Pass the --force option if you'd like to reinstall anyway.
 
