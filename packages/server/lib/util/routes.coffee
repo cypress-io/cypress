@@ -10,15 +10,15 @@ routes = {
   ping:          "ping"
   signin:        "signin"
   signout:       "signout"
-  runs:          "builds"
-  instances:     "builds/:id/instances"
+  runs:          "runs"
+  instances:     "runs/:id/instances"
   instance:      "instances/:id"
   instanceStdout:"instances/:id/stdout"
   orgs:          "organizations"
   projects:      "projects"
   project:       "projects/:id"
   projectToken:  "projects/:id/token"
-  projectRuns:   "projects/:id/builds"
+  projectRuns:   "projects/:id/runs"
   projectRecordKeys: "projects/:id/keys"
   exceptions:    "exceptions"
   membershipRequests: "projects/:id/membership_requests"
@@ -35,7 +35,7 @@ parseArgs = (url, args = []) ->
 
   return url
 
-Routes = _.reduce routes, (memo, value, key) ->
+routes = _.reduce routes, (memo, value, key) ->
   memo[key] = (args...) ->
     url = new UrlParse(api_url, true)
     url.set("pathname", value) if value
@@ -44,4 +44,4 @@ Routes = _.reduce routes, (memo, value, key) ->
   memo
 , {}
 
-module.exports = Routes
+module.exports = routes

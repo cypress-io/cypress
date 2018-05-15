@@ -7,13 +7,14 @@
 // TypeScript Version: 2.5
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="blob-util" />
-/// <reference types="bluebird" />
+/// <reference path="./blob-util.d.ts" />
+/// <reference path="./bluebird.d.ts" />
+/// <reference path="./minimatch.d.ts" />
+
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
 /// <reference types="lodash" />
-/// <reference types="minimatch" />
 /// <reference types="mocha" />
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
@@ -138,7 +139,7 @@ declare namespace Cypress {
     env(key: string, value: any): void
     env(object: ObjectLike): void
 
-    log(options: Partial<Log>): void
+    log(options: Partial<LogConfig>): Log
 
     /**
      * @see https://on.cypress.io/api/commands
@@ -173,7 +174,17 @@ declare namespace Cypress {
       defaults(options: Partial<ServerOptions>): void
     }
 
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
     on: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    off: Actions
   }
 
   /**
@@ -421,6 +432,7 @@ declare namespace Cypress {
      */
     filter<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>> // automatically returns the correct HTMLElement type
     filter<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    filter<E extends Node = HTMLElement>(fn: (index: number, element: E) => boolean, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Get the descendent DOM elements of a specific selector.
@@ -607,6 +619,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     on: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    off: Actions
 
     /**
      * Get the parent DOM element of a set of DOM elements.
@@ -3106,15 +3124,31 @@ declare namespace Cypress {
     stderr: string
   }
 
+  interface LogAttrs {
+    url: string
+    consoleProps: ObjectLike
+  }
+
   interface Log {
-    $el: any
+    end(): Log
+    finish(): void
+    get<K extends keyof LogConfig>(attr: K): LogConfig[K]
+    get(): LogConfig
+    set<K extends keyof LogConfig>(key: K, value: LogConfig[K]): Log
+    set(options: Partial<LogConfig>): Log
+    snapshot(name?: string, options?: { at?: number, next: string }): Log
+  }
+
+  interface LogConfig {
+    /** The JQuery element for the command. This will highlight the command in the main window when debugging */
+    $el: JQuery
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any
+    message: any[]
     /** Return an object that will be printed in the dev tools console */
-    consoleProps(): any
+    consoleProps(): ObjectLike
   }
 
   interface Response {

@@ -62,10 +62,11 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Tests Finished)
 
-  - Tests:           5
+  - Tests:           11
   - Passes:          5
   - Failures:        3
   - Pending:         0
+  - Skipped:         3
   - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
@@ -127,10 +128,11 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Tests Finished)
 
-  - Tests:           4
+  - Tests:           7
   - Passes:          4
   - Failures:        1
   - Pending:         0
+  - Skipped:         2
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -182,10 +184,11 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
   (Tests Finished)
 
-  - Tests:           0
+  - Tests:           4
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         3
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -243,10 +246,11 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Tests Finished)
 
-  - Tests:           2
+  - Tests:           3
   - Passes:          2
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true

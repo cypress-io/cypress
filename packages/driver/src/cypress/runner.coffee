@@ -15,7 +15,7 @@ TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
-RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body".split(" ")
+RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings".split(" ")
 
 # ## initial payload
 # {
@@ -87,6 +87,7 @@ runnableAfterRunAsync = (runnable, Cypress) ->
 
 testAfterRun = (test, Cypress) ->
   if not fired(TEST_AFTER_RUN_EVENT, test)
+    setWallClockDuration(test)
     fire(TEST_AFTER_RUN_EVENT, test, Cypress)
 
     ## perf loop only through
@@ -107,6 +108,18 @@ testAfterRun = (test, Cypress) ->
 
     ## prevent loop comprehension
     return null
+
+setTestTimingsForHook = (test, hookName, obj) ->
+  test.timings ?= {}
+  test.timings[hookName] ?= []
+  test.timings[hookName].push(obj)
+
+setTestTimings = (test, name, obj) ->
+  test.timings ?= {}
+  test.timings[name] = obj
+
+setWallClockDuration = (test) ->
+  test.wallClockDuration = new Date() - test.wallClockStartedAt
 
 reduceProps = (obj, props) ->
   _.reduce props, (memo, prop) ->
@@ -239,7 +252,7 @@ isLastSuite = (suite, tests) ->
 ## if we failed from a hook and that hook was 'before'
 ## since then mocha skips the remaining tests in the suite
 lastTestThatWillRunInSuite = (test, tests) ->
-  isLastTest(test, tests) or (test.failedFromHook and test.hookName is "before all")
+  isLastTest(test, tests) or (test.failedFromHookId and test.hookName is "before all")
 
 isLastTest = (test, tests) ->
   test is _.last(tests)
@@ -333,7 +346,7 @@ getTestResults = (tests) ->
       obj.state = "skipped"
     obj
 
-normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getId) ->
+normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getTestId) ->
   hasTests = false
 
   ## only loop until we find the first test
@@ -350,7 +363,7 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
   tests         = {}
   grepIsDefault = _.isEqual(grep, defaultGrepRe)
 
-  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId)
+  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
 
   if setTestsById
     ## use callback here to hand back
@@ -363,9 +376,9 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
 
   return obj
 
-normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId) ->
+normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId) ->
   normalizer = (runnable) =>
-    runnable.id = getId()
+    runnable.id = getTestId()
 
     ## tests have a type of 'test' whereas suites do not have a type property
     runnable.type ?= "suite"
@@ -401,7 +414,7 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
     _.each {tests: runnable.tests, suites: runnable.suites}, (_runnables, key) =>
       if runnable[key]
         obj[key] = _.map _runnables, (runnable) =>
-          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getId)
+          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
   else
     ## iterate through all tests and only push them in
     ## if they match the current grep
@@ -431,7 +444,7 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
             grepIsDefault,
             onRunnable,
             onLogsById,
-            getId
+            getTestId
           )
         )
 
@@ -453,9 +466,9 @@ hookFailed = (hook, err, hookName, getTestById, getTest) ->
   test = getTest() or getTestFromHook(hook, hook.parent, getTestById)
   test.err = err
   test.state = "failed"
-  test.duration = hook.duration
-  test.hookName = hookName
-  test.failedFromHook = true
+  test.duration = hook.duration ## TODO: nope (?)
+  test.hookName = hookName ## TODO: why are we doing this?
+  test.failedFromHookId = hook.hookId
 
   if hook.alreadyEmittedMocha
     ## TODO: won't this always hit right here???
@@ -464,12 +477,16 @@ hookFailed = (hook, err, hookName, getTestById, getTest) ->
   else
     Cypress.action("runner:test:end", wrap(test))
 
-_runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest) ->
+_runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId) ->
   _runner.on "start", ->
-    Cypress.action("runner:start")
+    Cypress.action("runner:start", {
+      start: new Date()
+    })
 
   _runner.on "end", ->
-    Cypress.action("runner:end")
+    Cypress.action("runner:end", {
+      end: new Date()
+    })
 
   _runner.on "suite", (suite) ->
     return if _emissions.started[suite.id]
@@ -490,13 +507,14 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest)
     Cypress.action("runner:suite:end", wrap(suite))
 
   _runner.on "hook", (hook) ->
-    hookName = getHookName(hook)
+    hook.hookId ?= getHookId()
+    hook.hookName ?= getHookName(hook)
 
     ## mocha incorrectly sets currentTest on before all's.
     ## if there is a nested suite with a before, then
     ## currentTest will refer to the previous test run
     ## and not our current
-    if hookName is "before all" and hook.ctx.currentTest
+    if hook.hookName is "before all" and hook.ctx.currentTest
       delete hook.ctx.currentTest
 
     ## set the hook's id from the test because
@@ -515,8 +533,6 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest)
     Cypress.action("runner:hook:start", wrap(hook))
 
   _runner.on "hook end", (hook) ->
-    hookName = getHookName(hook)
-
     Cypress.action("runner:hook:end", wrap(hook))
 
   _runner.on "test", (test) ->
@@ -608,6 +624,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest)
 
 create = (specWindow, mocha, Cypress, cy) ->
   _id = 0
+  _hookId = 0
   _uncaughtFn = null
 
   _runner = mocha.getRunner()
@@ -662,9 +679,12 @@ create = (specWindow, mocha, Cypress, cy) ->
   }
   _startTime = null
 
-  getId = ->
+  getTestId = ->
     ## increment the id counter
     "r" + (_id += 1)
+
+  getHookId = ->
+    "h" + (_hookId += 1)
 
   setTestsById = (tbid) ->
     _testsById = tbid
@@ -734,13 +754,13 @@ create = (specWindow, mocha, Cypress, cy) ->
         setTests,
         onRunnable,
         onLogsById,
-        getId
+        getTestId
       )
 
     run: (fn) ->
       _startTime ?= moment().toJSON()
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest)
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId)
 
       _runner.run (failures) ->
         ## if we happen to make it all the way through
@@ -757,14 +777,36 @@ create = (specWindow, mocha, Cypress, cy) ->
       if not runnable.id
         throw new Error("runnable must have an id", runnable.id)
 
-      ## if this isnt a hook, then the name is 'test'
-      hookName = getHookName(runnable) or "test"
-
       switch runnable.type
         when "hook"
           test = getTest() or getTestFromHook(runnable, runnable.parent, getTestById)
+
         when "test"
           test = runnable
+
+      ## closure for calculating the actual
+      ## runtime of a runnables fn exection duration
+      ## and also the run of the runnable:after:run:async event
+      wallClockStartedAt = null
+      wallClockEnd = null
+      fnDurationStart = null
+      fnDurationEnd = null
+      afterFnDurationStart = null
+      afterFnDurationEnd = null
+
+      ## when this is a hook, capture the real start
+      ## date so we can calculate our test's duration
+      ## including all of its hooks
+      wallClockStartedAt = new Date()
+
+      if not test.wallClockStartedAt
+        ## if we don't have lifecycle timings yet
+        lifecycleStart = wallClockStartedAt
+
+      test.wallClockStartedAt ?= wallClockStartedAt
+
+      ## if this isnt a hook, then the name is 'test'
+      hookName = getHookName(runnable) or "test"
 
       ## if we haven't yet fired this event for this test
       ## that means that we need to reset the previous state
@@ -775,16 +817,47 @@ create = (specWindow, mocha, Cypress, cy) ->
 
       ## extract out the next(fn) which mocha uses to
       ## move to the next runnable - this will be our async seam
-      next = args[0]
+      _next = args[0]
 
-      ## our runnable is about to run, so let cy know. this enables
-      ## us to always have a correct runnable set even when we are
-      ## running lifecycle events
-      ## and also get back a function result handler that we use as
-      ## an async seam
-      cy.setRunnable(runnable, hookName)
+      next = (err) ->
+        ## now set the duration of the after runnable run async event
+        afterFnDurationEnd = wallClockEnd = new Date()
+
+        switch runnable.type
+          when "hook"
+            ## reset runnable duration to include lifecycle
+            ## and afterFn timings purely for the mocha runner.
+            ## this is what it 'feels' like to the user
+            runnable.duration = wallClockEnd - wallClockStartedAt
+
+            setTestTimingsForHook(test, hookName, {
+              hookId: runnable.hookId
+              fnDuration: fnDurationEnd - fnDurationStart
+              afterFnDuration: afterFnDurationEnd - afterFnDurationStart
+            })
+
+          when "test"
+            ## if we are currently on a test then
+            ## recalculate its duration to be based
+            ## against that (purely for the mocha reporter)
+            test.duration = wallClockEnd - test.wallClockStartedAt
+
+            ## but still preserve its actual function
+            ## body duration for timings
+            setTestTimings(test, "test", {
+              fnDuration: fnDurationEnd - fnDurationStart
+              afterFnDuration: afterFnDurationEnd - afterFnDurationStart
+            })
+
+        _next(err)
 
       onNext = (err) ->
+        ## when done with the function set that to end
+        fnDurationEnd = new Date()
+
+        ## and also set the afterFnDuration to this same date
+        afterFnDurationStart = fnDurationEnd
+
         ## attach error right now
         ## if we have one
         if err
@@ -813,6 +886,13 @@ create = (specWindow, mocha, Cypress, cy) ->
           ## the test.run(fn)
           return null
 
+      ## our runnable is about to run, so let cy know. this enables
+      ## us to always have a correct runnable set even when we are
+      ## running lifecycle events
+      ## and also get back a function result handler that we use as
+      ## an async seam
+      cy.setRunnable(runnable, hookName)
+
       ## TODO: handle promise timeouts here!
       ## whenever any runnable is about to run
       ## we figure out what test its associated to
@@ -835,6 +915,15 @@ create = (specWindow, mocha, Cypress, cy) ->
 
           throw err
       .finally ->
+        if lifecycleStart
+          ## capture how long the lifecycle took as part
+          ## of the overall wallClockDuration of our test
+          setTestTimings(test, "lifecycle", new Date() - lifecycleStart)
+
+        ## capture the moment we're about to invoke
+        ## the runnable's callback function
+        fnDurationStart = new Date()
+
         ## call the original method with our
         ## custom onNext function
         runnableRun.call(runnable, onNext)

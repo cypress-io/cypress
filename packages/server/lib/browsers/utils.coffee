@@ -1,10 +1,8 @@
-fs       = require("fs-extra")
 path     = require("path")
 Promise  = require("bluebird")
 launcher = require("@packages/launcher")
+fs       = require("../util/fs")
 appData  = require("../util/app_data")
-
-fs = Promise.promisifyAll(fs)
 
 profiles = appData.path("browsers")
 

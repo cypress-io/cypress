@@ -1,7 +1,6 @@
 require("../../spec_helper")
 
 _            = require("lodash")
-fs           = require("fs-extra")
 cp           = require("child_process")
 niv          = require("npm-install-version")
 path         = require("path")
@@ -13,22 +12,21 @@ Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
 debug        = require("debug")("cypress:support:e2e")
 Fixtures     = require("./fixtures")
+fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
-stdout       = require("#{root}../lib/stdout")
+video        = require("#{root}../lib/video")
+stdout       = require("#{root}../lib/capture")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
+screenshots  = require("#{root}../lib/screenshots")
 settings     = require("#{root}../lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
-fs = Promise.promisifyAll(fs)
 
 Promise.config({
   longStackTraces: true
 })
-
-env = process.env
-env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
@@ -48,9 +46,9 @@ normalizeStdout = (str) ->
   .replace(/\s\(\d+m?s\)/g, "")
   .replace(/coffee-\d{3}/g, "coffee-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
-  .replace(/Duration\: (.+)/, "Duration:        10 seconds")
-  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
+  .replace(/Cypress Version\: (.+)/g, "Cypress Version: 1.2.3")
+  .replace(/Duration\: (.+)/g, "Duration:        10 seconds")
+  .replace(/\(\d+ seconds?\)/g, "(0 seconds)")
   .replace(/\r/g, "")
   .split("\n")
     .map(replaceStackTraceLines)
@@ -76,14 +74,51 @@ startServer = (obj) ->
   new Promise (resolve) ->
     srv.listen port, =>
       console.log "listening on port: #{port}"
-      onServer?(app)
+      onServer?(app, srv)
 
       resolve(srv)
 
 stopServer = (srv) ->
   srv.destroyAsync()
 
+copy = ->
+  ca = process.env.CIRCLE_ARTIFACTS
+
+  debug("Should copy Circle Artifacts?", Boolean(ca))
+
+  if ca
+    videosFolder = path.join(e2ePath, "cypress/videos")
+    screenshotsFolder = path.join(e2ePath, "cypress/screenshots")
+
+    debug("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
+
+    ## copy each of the screenshots and videos
+    ## to artifacts using each basename of the folders
+    Promise.join(
+      screenshots.copy(
+        screenshotsFolder,
+        path.join(ca, path.basename(screenshotsFolder))
+      ),
+      video.copy(
+        videosFolder,
+        path.join(ca, path.basename(videosFolder))
+      )
+    )
+
 module.exports = {
+  normalizeStdout
+
+  snapshot: (args...) ->
+    args = _.compact(args)
+
+    ## grab the last element in index
+    index = args.length - 1
+
+    ## normalize the stdout of it
+    args[index] = normalizeStdout(args[index])
+
+    snapshot.apply(null, args)
+
   setup: (options = {}) ->
     if npmI = options.npmInstall
       before ->
@@ -124,7 +159,7 @@ module.exports = {
 
       Fixtures.scaffold()
 
-      @sandbox.stub(process, "exit")
+      sinon.stub(process, "exit")
 
       Promise.try =>
         if servers = options.servers
@@ -136,10 +171,8 @@ module.exports = {
         else
           @servers = null
       .then =>
-
         if s = options.settings
           settings.write(e2ePath, s)
-      .then =>
 
     afterEach ->
       @timeout(human("2 minutes"))
@@ -179,6 +212,12 @@ module.exports = {
     if options.headed
       args.push("--headed")
 
+    if options.record
+      args.push("--record")
+
+    if options.key
+      args.push("--key=#{options.key}")
+
     if options.reporter
       args.push("--reporter=#{options.reporter}")
 
@@ -186,7 +225,7 @@ module.exports = {
       args.push("--reporter-options=#{options.reporterOptions}")
 
     ## prefer options if set, else use env
-    if browser = (options.browser or env.BROWSER)
+    if browser = (options.browser or process.env.BROWSER)
       args.push("--browser=#{browser}")
 
     if options.config
@@ -194,6 +233,9 @@ module.exports = {
 
     if options.env
       args.push("--env", options.env)
+
+    if options.outputPath
+      args.push("--output-path", options.outputPath)
 
     if options.exit?
       args.push("--exit", options.exit)
@@ -218,8 +260,31 @@ module.exports = {
     stdout = ""
     stderr = ""
 
+    exit = (code) ->
+      if (expected = options.expectedExitCode)?
+        expect(expected).to.eq(code)
+
+      ## snapshot the stdout!
+      if options.snapshot
+        ## enable callback to modify stdout
+        if ostd = options.onStdout
+          stdout = ostd(stdout)
+
+        str = normalizeStdout(stdout)
+        snapshot(str)
+
+      return {
+        code:   code
+        stdout: stdout
+        stderr: stderr
+      }
+
     new Promise (resolve, reject) ->
-      sp = cp.spawn "node", args, {env: _.omit(env, "CYPRESS_DEBUG")}
+      sp = cp.spawn "node", args, {
+        env: _.omit(process.env, "CYPRESS_DEBUG")
+      }
+
+
 
       ## pipe these to our current process
       ## so we can see them in the terminal
@@ -230,29 +295,8 @@ module.exports = {
         stdout += buf.toString()
       sp.stderr.on "data", (buf) ->
         stderr += buf.toString()
-      sp.on "error", reject
-      sp.on "exit", (code) ->
-        if (expected = options.expectedExitCode)?
-          try
-            expect(expected).to.eq(code)
-          catch err
-            return reject(err)
-
-        ## snapshot the stdout!
-        if options.snapshot
-          try
-            ## enable callback to modify stdout
-            if ostd = options.onStdout
-              stdout = ostd(stdout)
-
-            str = normalizeStdout(stdout)
-            snapshot(str)
-          catch err
-            reject(err)
-
-        resolve({
-          code:   code
-          stdout: stdout
-          stderr: stderr
-        })
+      sp.on("error", reject)
+      sp.on("exit", resolve)
+    .tap(copy)
+    .then(exit)
 }

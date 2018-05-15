@@ -769,7 +769,7 @@ describe "src/cy/commands/querying", ->
           .visit("http://localhost:3500/fixtures/jquery.html")
           .server()
           .route(/users/, {}).as("getUsers")
-          .window().then (win) ->
+          .window().then { timeout: 2000 }, (win) ->
             win.$.get("/users")
           .get("@getUsers").then ->
             expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
@@ -859,7 +859,7 @@ describe "src/cy/commands/querying", ->
           .server()
           .route(/users/, {}).as("getUsers")
           .visit("http://localhost:3500/fixtures/jquery.html")
-          .window().then (win) ->
+          .window().then { timeout: 2000 }, (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
@@ -870,7 +870,7 @@ describe "src/cy/commands/querying", ->
 
     describe "alias references", ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 200)
+        Cypress.config("defaultCommandTimeout", 100)
 
       it "can get alias primitives", ->
         cy
@@ -913,7 +913,7 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .visit("http://localhost:3500/fixtures/jquery.html")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               win.$.get("/users")
             .get("@getUsers").then (xhr) ->
               expect(xhr.url).to.include "/users"
@@ -931,7 +931,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -946,7 +946,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -959,7 +959,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -972,7 +972,7 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .visit("http://localhost:3500/fixtures/jquery.html")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})

@@ -84,10 +84,11 @@ The internal Cypress web server responded with:
 
   (Tests Finished)
 
-  - Tests:           4
+  - Tests:           5
   - Passes:          2
   - Failures:        3
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
@@ -139,6 +140,7 @@ Fix the error in your code and re-run your tests.
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -185,6 +187,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          8
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true

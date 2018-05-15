@@ -1,13 +1,11 @@
 _         = require("lodash")
-fs        = require("fs-extra")
 path      = require("path")
 check     = require("syntax-error")
 coffee    = require("../../../packages/coffee")
 Promise   = require("bluebird")
 jsonlint  = require("jsonlint")
 cwd       = require("./cwd")
-
-fs = Promise.promisifyAll(fs)
+fs        = require("./util/fs")
 
 extensions = ".json .js .coffee .html .txt .csv .png .jpg .jpeg .gif .tif .tiff .zip".split(" ")
 

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Issue 1436</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      window.getParent = function (n) {
+        for (; !function (n) {
+          return n === n.parent
+        }(n) && function (n) {
+            try {
+              if (void 0 == n.location.href) { return !1 }
+            } catch (n) {
+              return !1
+            }
+            return !0
+          }(n.parent);) { n = n.parent }
+        return n
+      }
+
+      window.getParentMin = function(n){for(;!function(n){return n===n.parent}(n)&&function(n){try{if(void 0==n.location.href)return!1}catch(n){return!1}return!0}(n.parent);)n=n.parent;return n}
+    </script>
+  </body>
+</html>

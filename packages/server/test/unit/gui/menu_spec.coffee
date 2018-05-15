@@ -18,10 +18,10 @@ getLabels = (menu) ->
 
 describe "gui/menu", ->
   beforeEach ->
-    @sandbox.stub(os, "platform").returns("darwin")
-    @sandbox.stub(electron.Menu, "buildFromTemplate")
-    @sandbox.stub(electron.Menu, "setApplicationMenu")
-    electron.shell.openExternal = @sandbox.stub()
+    sinon.stub(os, "platform").returns("darwin")
+    sinon.stub(electron.Menu, "buildFromTemplate")
+    sinon.stub(electron.Menu, "setApplicationMenu")
+    electron.shell.openExternal = sinon.stub()
 
   it "builds menu from template and sets it", ->
     electron.Menu.buildFromTemplate.returns("menu")
@@ -59,7 +59,7 @@ describe "gui/menu", ->
         expect(getSubMenuItem(cyMenu, "Quit").accelerator).to.equal("Command+Q")
 
       it "exits process when Quit is clicked", ->
-        @sandbox.stub(process, "exit")
+        sinon.stub(process, "exit")
         menu.set()
         getSubMenuItem(getMenuItem("Cypress"), "Quit").click()
         expect(process.exit).to.be.calledWith(0)
@@ -94,19 +94,19 @@ describe "gui/menu", ->
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/dashboard")
 
     it "opens app data directory when View App Data is clicked", ->
-      @sandbox.stub(open, "opn")
+      sinon.stub(open, "opn")
       menu.set()
       getSubMenuItem(getMenuItem("File"), "View App Data").click()
       expect(open.opn).to.be.calledWith(appData.path())
 
     it "calls logout callback when Log Out is clicked", ->
-      onLogOutClicked = @sandbox.stub()
+      onLogOutClicked = sinon.stub()
       menu.set({onLogOutClicked})
       getSubMenuItem(getMenuItem("File"), "Log Out").click()
       expect(onLogOutClicked).to.be.called
 
     it "calls original logout callback when menu is reset without new callback", ->
-      onLogOutClicked = @sandbox.stub()
+      onLogOutClicked = sinon.stub()
       menu.set({onLogOutClicked})
       menu.set()
       getSubMenuItem(getMenuItem("File"), "Log Out").click()
@@ -232,7 +232,7 @@ describe "gui/menu", ->
         expect(@devSubmenu[0].accelerator).to.equal("CmdOrCtrl+R")
 
       it "reloads focused window when Reload is clicked", ->
-        reload = @sandbox.stub()
+        reload = sinon.stub()
         @devSubmenu[0].click(null, {reload})
         expect(reload).to.be.called
 
@@ -248,7 +248,7 @@ describe "gui/menu", ->
         expect(getMenuItem("Developer Tools").submenu[1].accelerator).to.equal("Ctrl+Shift+I")
 
       it "toggles dev tools on focused window when Toggle Developer Tools is clicked", ->
-        toggleDevTools = @sandbox.stub()
+        toggleDevTools = sinon.stub()
         @devSubmenu[1].click(null, {toggleDevTools})
         expect(toggleDevTools).to.be.called
 

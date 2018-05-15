@@ -1,25 +1,23 @@
 require("../spec_helper")
 
-fs = require("fs-extra")
 path = require("path")
 Promise = require("bluebird")
+savedState = require("#{root}lib/saved_state")
+fs = require("#{root}lib/util/fs")
 FileUtil = require("#{root}lib/util/file")
 appData = require("#{root}lib/util/app_data")
-savedState = require("#{root}lib/saved_state")
 savedStateUtil = require("#{root}lib/util/saved_state")
-
-fs = Promise.promisifyAll(fs)
 
 describe "lib/util/saved_state", ->
   describe "project name hash", ->
-    projectPath = "/foo/bar"
+    projectRoot = "/foo/bar"
 
     it "starts with folder name", ->
-      hash = savedStateUtil.toHashName projectPath
+      hash = savedStateUtil.toHashName projectRoot
       expect(hash).to.match(/^bar-/)
 
     it "computed for given path", ->
-      hash = savedStateUtil.toHashName projectPath
+      hash = savedStateUtil.toHashName projectRoot
       expected = "bar-1df481b1ec67d4d8bec721f521d4937d"
       expect(hash).to.equal(expected)
 
@@ -52,12 +50,12 @@ describe "lib/saved_state", ->
     b = savedState("/foo/baz")
     expect(a).to.not.equal(b)
 
-  it "sets path to project name + hash if projectPath", ->
+  it "sets path to project name + hash if projectRoot", ->
     savedState("/foo/the-project-name")
     .then (state) ->
       expect(state.path).to.include("the-project-name")
 
-  it "sets path __global__ if no projectPath", ->
+  it "sets path __global__ if no projectRoot", ->
     savedState()
     .then (state) ->
       expected = path.join(appData.path(), "projects", "__global__", "state.json")

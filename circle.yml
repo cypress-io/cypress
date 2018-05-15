@@ -7,6 +7,8 @@ defaults: &defaults
     # the Docker image with Cypress dependencies and Chrome browser
     - image: cypress/browsers:chrome64
       environment:
+        # set specific timezone
+        TZ: "/usr/share/zoneinfo/America/New_York"
         CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
 
 jobs:
@@ -22,6 +24,12 @@ jobs:
       - run:
           name: print global NPM cache path
           command: echo $(npm -g bin)
+      - run:
+          name: print Node version
+          command: node -v
+      - run:
+          name: print NPM version
+          command: npm -v
       - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node
@@ -712,7 +720,6 @@ workflows:
             branches:
               only:
                 - develop
-                - fix-engines-1373
           requires:
             - build
       - build-binary:
@@ -720,7 +727,6 @@ workflows:
             branches:
               only:
                 - develop
-                - fix-engines-1373
           requires:
             - build
       - test-next-version:
@@ -728,7 +734,6 @@ workflows:
             branches:
               only:
                 - develop
-                - fix-engines-1373
           requires:
             - build-npm-package
             - build-binary
@@ -745,7 +750,6 @@ workflows:
             branches:
               only:
                 - develop
-                - issue-895
           requires:
             - build-npm-package
             - build-binary

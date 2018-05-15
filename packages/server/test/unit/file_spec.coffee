@@ -3,10 +3,10 @@ require("../spec_helper")
 os = require("os")
 path = require("path")
 Promise = require("bluebird")
-FileUtil = require("#{root}lib/util/file")
-exit = require("#{root}lib/util/exit")
 lockFile = Promise.promisifyAll(require("lockfile"))
-fs = Promise.promisifyAll(require("fs-extra"))
+fs = require("#{root}lib/util/fs")
+exit = require("#{root}lib/util/exit")
+FileUtil = require("#{root}lib/util/file")
 
 describe "lib/util/file", ->
   beforeEach ->
@@ -19,8 +19,8 @@ describe "lib/util/file", ->
     expect(-> new FileUtil()).to.throw("Must specify path to file when creating new FileUtil()")
 
   it "unlocks file on exit", ->
-    @sandbox.spy(lockFile, "unlockSync")
-    @sandbox.stub(exit, "ensure")
+    sinon.spy(lockFile, "unlockSync")
+    sinon.stub(exit, "ensure")
     new FileUtil({path: @path})
     exit.ensure.yield()
     expect(lockFile.unlockSync).to.be.called
@@ -106,7 +106,7 @@ describe "lib/util/file", ->
       .then =>
         fs.writeJsonAsync(@path, {foo: "bar"})
       .then =>
-        @sandbox.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
+        sinon.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
         @fileUtil.get()
       .then (contents) ->
         expect(contents).to.eql({})
@@ -114,7 +114,7 @@ describe "lib/util/file", ->
     it "resolves cached contents when it can't get lock on file after an initial read", ->
       @fileUtil.set("foo", "bar")
       .then =>
-        @sandbox.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
+        sinon.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
         @fileUtil.get()
       .then (contents) ->
         expect(contents).to.eql({foo: "bar"})
@@ -129,7 +129,7 @@ describe "lib/util/file", ->
         expect(contents).to.eql({})
 
     it "debounces reading from disk", ->
-      @sandbox.stub(fs, "readJsonAsync").resolves({})
+      sinon.stub(fs, "readJsonAsync").resolves({})
       Promise.all([
         @fileUtil.get()
         @fileUtil.get()
@@ -139,18 +139,18 @@ describe "lib/util/file", ->
         expect(fs.readJsonAsync).to.be.calledOnce
 
     it "locks file while reading", ->
-      @sandbox.spy(lockFile, "lockAsync")
+      sinon.spy(lockFile, "lockAsync")
       @fileUtil.get().then ->
         expect(lockFile.lockAsync).to.be.called
 
     it "unlocks file when finished reading", ->
-      @sandbox.spy(lockFile, "unlockAsync")
+      sinon.spy(lockFile, "unlockAsync")
       @fileUtil.get().then ->
         expect(lockFile.unlockAsync).to.be.called
 
     it "unlocks file even if reading fails", ->
-      @sandbox.spy(lockFile, "unlockAsync")
-      @sandbox.stub(fs, "readJsonAsync").rejects(new Error("fail!"))
+      sinon.spy(lockFile, "unlockAsync")
+      sinon.stub(fs, "readJsonAsync").rejects(new Error("fail!"))
       @fileUtil.get().catch ->
         expect(lockFile.unlockAsync).to.be.called
 
@@ -217,18 +217,18 @@ describe "lib/util/file", ->
         expect(JSON.parse(contents)).to.eql({foo: "bar"})
 
     it "locks file while writing", ->
-      @sandbox.spy(lockFile, "lockAsync")
+      sinon.spy(lockFile, "lockAsync")
       @fileUtil.set("foo", "bar").then ->
         expect(lockFile.lockAsync).to.be.called
 
     it "unlocks file when finished writing", ->
-      @sandbox.spy(lockFile, "unlockAsync")
+      sinon.spy(lockFile, "unlockAsync")
       @fileUtil.set("foo", "bar").then ->
         expect(lockFile.unlockAsync).to.be.called
 
     it "unlocks file even if writing fails", ->
-      @sandbox.spy(lockFile, "unlockAsync")
-      @sandbox.stub(fs, "outputJsonAsync").rejects(new Error("fail!"))
+      sinon.spy(lockFile, "unlockAsync")
+      sinon.stub(fs, "outputJsonAsync").rejects(new Error("fail!"))
       @fileUtil.set("foo", "bar").catch ->
         expect(lockFile.unlockAsync).to.be.called
 
@@ -243,17 +243,17 @@ describe "lib/util/file", ->
       .catch ->
 
     it "locks file while removing", ->
-      @sandbox.spy(lockFile, "lockAsync")
+      sinon.spy(lockFile, "lockAsync")
       @fileUtil.remove().then ->
         expect(lockFile.lockAsync).to.be.called
 
     it "unlocks file when finished removing", ->
-      @sandbox.spy(lockFile, "unlockAsync")
+      sinon.spy(lockFile, "unlockAsync")
       @fileUtil.remove().then ->
         expect(lockFile.unlockAsync).to.be.called
 
     it "unlocks file even if removing fails", ->
-      @sandbox.spy(lockFile, "unlockAsync")
-      @sandbox.stub(fs, "removeAsync").rejects(new Error("fail!"))
+      sinon.spy(lockFile, "unlockAsync")
+      sinon.stub(fs, "removeAsync").rejects(new Error("fail!"))
       @fileUtil.remove().catch ->
         expect(lockFile.unlockAsync).to.be.called

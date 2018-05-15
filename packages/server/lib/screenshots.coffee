@@ -1,14 +1,11 @@
-fs              = require("fs-extra")
 mime            = require("mime")
 path            = require("path")
-glob            = require("glob")
 bytes           = require("bytes")
 sizeOf          = require("image-size")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
-
-fs   = Promise.promisifyAll(fs)
-glob = Promise.promisify(glob)
+fs              = require("./util/fs")
+glob            = require("./util/glob")
 
 RUNNABLE_SEPARATOR = " -- "
 invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
@@ -46,6 +43,12 @@ module.exports = {
 
     pathToScreenshot = path.join(screenshotsFolder, name)
 
+    ## TODO: this should be done at the time the
+    ## screenshot is taken, not asynchronously after
+    ## ---
+    ## capture screenshot takenAt timestamp
+    takenAt = (new Date()).toJSON()
+
     fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->
       fs.statAsync(pathToScreenshot)
@@ -54,6 +57,7 @@ module.exports = {
       dimensions = sizeOf(buffer)
 
       {
+        takenAt
         size:   bytes(size, {unitSeparator: " "})
         path:   pathToScreenshot
         width:  dimensions.width

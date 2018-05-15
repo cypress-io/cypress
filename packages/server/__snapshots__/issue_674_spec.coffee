@@ -29,10 +29,11 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Tests Finished)
 
-  - Tests:           0
+  - Tests:           1
   - Passes:          0
-  - Failures:        2
+  - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     2
   - Video Recorded:  true

@@ -2,7 +2,6 @@ require("../../spec_helper")
 
 EE = require("events")
 Fixtures = require("../../support/helpers/fixtures")
-fs = require("fs-extra")
 path = require("path")
 snapshot = require("snap-shot-it")
 appData = require("#{root}../lib/util/app_data")
@@ -22,7 +21,7 @@ describe "lib/plugins/preprocessor", ->
     @testPath = path.join(@todosPath, "test.coffee")
     @localPreprocessorPath = path.join(@todosPath, "prep.coffee")
 
-    @plugin = @sandbox.stub().returns("/path/to/output.js")
+    @plugin = sinon.stub().returns("/path/to/output.js")
     plugins.register("file:preprocessor", @plugin)
 
     preprocessor.close()
@@ -48,7 +47,7 @@ describe "lib/plugins/preprocessor", ->
         expect(filePath).to.equal("/path/to/output.js")
 
     it "emits 'file:updated' with filePath when 'rerun' is emitted", ->
-      fileUpdated = @sandbox.spy()
+      fileUpdated = sinon.spy()
       preprocessor.emitter.on("file:updated", fileUpdated)
       preprocessor.getFile(@filePath, @config)
       @plugin.lastCall.args[0].emit("rerun")
@@ -68,10 +67,10 @@ describe "lib/plugins/preprocessor", ->
 
     it "uses default preprocessor if none registered", ->
       plugins._reset()
-      @sandbox.stub(plugins, "register")
-      @sandbox.stub(plugins, "execute").returns(->)
+      sinon.stub(plugins, "register")
+      sinon.stub(plugins, "execute").returns(->)
       browserifyFn = ->
-      browserify = @sandbox.stub().returns(browserifyFn)
+      browserify = sinon.stub().returns(browserifyFn)
       mockery.registerMock("@cypress/browserify-preprocessor", browserify)
       preprocessor.getFile(@filePath, @config)
       expect(plugins.register).to.be.calledWith("file:preprocessor", browserifyFn)
@@ -80,13 +79,13 @@ describe "lib/plugins/preprocessor", ->
   context "#removeFile", ->
     it "emits 'close'", ->
       preprocessor.getFile(@filePath, @config)
-      onClose = @sandbox.spy()
+      onClose = sinon.spy()
       @plugin.lastCall.args[0].on("close", onClose)
       preprocessor.removeFile(@filePath, @config)
       expect(onClose).to.be.called
 
     it "emits 'close' with file path on base emitter", ->
-      onClose = @sandbox.spy()
+      onClose = sinon.spy()
       preprocessor.emitter.on("close", onClose)
       preprocessor.getFile(@filePath, @config)
       preprocessor.removeFile(@filePath, @config)
@@ -95,13 +94,13 @@ describe "lib/plugins/preprocessor", ->
   context "#close", ->
     it "emits 'close' on config emitter", ->
       preprocessor.getFile(@filePath, @config)
-      onClose = @sandbox.spy()
+      onClose = sinon.spy()
       @plugin.lastCall.args[0].on("close", onClose)
       preprocessor.close()
       expect(onClose).to.be.called
 
     it "emits 'close' on base emitter", ->
-      onClose = @sandbox.spy()
+      onClose = sinon.spy()
       preprocessor.emitter.on "close", onClose
       preprocessor.getFile(@filePath, @config)
       preprocessor.close()
@@ -109,7 +108,7 @@ describe "lib/plugins/preprocessor", ->
 
   context "#clientSideError", ->
     beforeEach ->
-      @sandbox.stub(console, "error") ## keep noise out of console
+      sinon.stub(console, "error") ## keep noise out of console
 
     it "send javascript string with the error", ->
       expect(preprocessor.clientSideError("an error")).to.equal("""
