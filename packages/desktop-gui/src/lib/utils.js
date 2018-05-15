@@ -1,18 +1,15 @@
 import _ from 'lodash'
 import moment from 'moment'
 import gravatar from 'gravatar'
+import padStart from 'string.prototype.padstart'
 
-const osNameLookup = {
-  darwin: 'apple',
-}
+const cyDirRegex = /^cypress\/integration\//g
 
 const osIconLookup = {
-  windows: 'windows',
+  win32: 'windows',
   darwin: 'apple',
   linux: 'linux',
 }
-
-const browserNameLookup = {}
 
 const browserIconLookup = {
   chrome: 'chrome',
@@ -28,24 +25,11 @@ module.exports = {
     return osIconLookup[osName] || 'desktop'
   },
 
-  osNameFormatted: (osName) => {
-    if (!osName) return ''
-
-    return _.capitalize(osNameLookup[osName] || osName)
-  },
-
   browserIcon: (browserName) => {
     if (!browserName) return ''
 
     return browserIconLookup[browserName] || 'globe'
   },
-
-  browserNameFormatted: (browserName) => {
-    if (!browserName) return ''
-
-    return _.capitalize(browserNameLookup[browserName] || browserName)
-  },
-
 
   browserVersionFormatted: (browserVersion) => {
     if (!browserVersion) return ''
@@ -85,13 +69,31 @@ module.exports = {
     }
   },
 
-  durationFormatted: (durationInMs) => {
+  durationFormatted: (durationInMs, padMinutes = true) => {
     const duration = moment.duration(durationInMs)
 
-    let durationHours = duration.hours() ? `${duration.hours()}h ` : ''
-    let durationMinutes = duration.minutes() ? `${duration.minutes()}m ` : ''
-    let durationSeconds = duration.seconds() ? `${duration.seconds()}s ` : ''
+    const durationSecs = duration.seconds() ? `${duration.seconds()}` : ''
+    const durationMins = duration.minutes() ? `${duration.minutes()}` : ''
+    const durationHrs = duration.hours() ? `${duration.hours()}` : ''
 
-    return durationHours + durationMinutes + durationSeconds
+    const total = _.compact([
+      durationHrs,
+      !!durationHrs || padMinutes ? padStart(durationMins, 2, '0') : durationMins,
+      padStart(durationSecs, 2, '0'),
+    ])
+
+    const totalMinSec = total.join(':')
+
+    if (totalMinSec === '00:00') {
+      return `${duration.milliseconds()}ms`
+    } else {
+      return totalMinSec
+    }
+  },
+
+  stripLeadingCyDirs (spec) {
+    if (!spec) return null
+    // remove leading 'cypress/integration' from spec
+    return spec.replace(cyDirRegex, '')
   },
 }

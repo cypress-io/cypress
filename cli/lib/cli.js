@@ -5,6 +5,18 @@ const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
 
+// patch "commander" method called when a user passed an unknown option
+// we want to print help for the current command and exit with an error
+commander.Command.prototype.unknownOption = function (flag) {
+  if (this._allowUnknownOption) return
+  logger.error()
+  logger.error('  error: unknown option:', flag)
+  logger.error()
+  this.outputHelp()
+  logger.error()
+  process.exit(1)
+}
+
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
@@ -159,6 +171,7 @@ module.exports = {
     })
 
     debug('cli starts with arguments %j', args)
+    util.printNodeOptions()
 
     // if there are no arguments
     if (args.length <= 2) {

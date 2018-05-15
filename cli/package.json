@@ -27,7 +27,7 @@
   "types": "types",
   "dependencies": {
     "@cypress/listr-verbose-renderer": "0.4.1",
-    "@cypress/xvfb": "1.1.3",
+    "@cypress/xvfb": "1.2.3",
     "@types/blob-util": "1.3.3",
     "@types/bluebird": "3.5.18",
     "@types/chai": "4.0.8",
@@ -78,7 +78,7 @@
     "nock": "^9.0.9",
     "shelljs": "0.7.8",
     "sinon": "3.2.1",
-    "snap-shot-it": "4.0.1",
+    "snap-shot-it": "4.1.4",
     "strip-ansi": "4.0.0"
   },
   "files": [

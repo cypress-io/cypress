@@ -224,7 +224,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
         assert(
           @,
           attr,
-          actual and actual is val,
+          actual? and actual is val,
           message,
           negatedMessage,
           val,

@@ -1,8 +1,6 @@
-fs = require("fs")
 path = require("path")
 Promise = require("bluebird")
-
-fs = Promise.promisifyAll(fs)
+fs = require("./fs")
 
 isIntegrationTestRe = /^integration/
 isUnitTestRe        = /^unit/

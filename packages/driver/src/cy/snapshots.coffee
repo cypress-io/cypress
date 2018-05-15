@@ -21,8 +21,17 @@ getCssRulesString = (stylesheet) ->
   catch e
     null
 
+screenStylesheetRe = /(screen|all)/
+
+isScreenStylesheet = (stylesheet) ->
+  media = stylesheet.getAttribute("media")
+  return not _.isString(media) or screenStylesheetRe.test(media)
+
 getStylesFor = (doc, $$, stylesheets, location) ->
-  _.map $$(location).find("link[rel='stylesheet'],style"), (stylesheet) =>
+  styles = $$(location).find("link[rel='stylesheet'],style")
+  styles = _.filter(styles, isScreenStylesheet)
+
+  _.map styles, (stylesheet) =>
     ## in cases where we can get the CSS as a string, make the paths
     ## absolute so that when they're restored by appending them to the page
     ## in <style> tags, background images and fonts still properly load

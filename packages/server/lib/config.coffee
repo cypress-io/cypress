@@ -1,11 +1,11 @@
 _        = require("lodash")
 path     = require("path")
 Promise  = require("bluebird")
-fs       = require("fs-extra")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 errors   = require("./errors")
+fs       = require("./util/fs")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
@@ -327,10 +327,8 @@ module.exports = {
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
 
-    fileName = scaffold.integrationExampleName()
-
-    obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
-    obj.integrationExampleName = fileName
+    obj.integrationExampleName = scaffold.integrationExampleName()
+    obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
     obj.scaffoldedFiles = scaffold.fileTree(obj)
 
     return obj
