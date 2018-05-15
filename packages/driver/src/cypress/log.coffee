@@ -488,7 +488,7 @@ create = (Cypress, cy, state, config) ->
     ## dont trigger log if this function
     ## explicitly returns false
     if _.isFunction(onBeforeLog)
-      return if onBeforeLog.call(cy, log) is false
+      return log if onBeforeLog.call(cy, log) is false
 
     ## set the log on the command
     state("current")?.log(log)
