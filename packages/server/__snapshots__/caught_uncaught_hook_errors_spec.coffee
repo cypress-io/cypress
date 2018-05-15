@@ -66,6 +66,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   - Passes:          5
   - Failures:        3
   - Pending:         0
+  - Skipped:         3
   - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
@@ -131,6 +132,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Passes:          4
   - Failures:        1
   - Pending:         0
+  - Skipped:         2
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -186,6 +188,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         3
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -247,6 +250,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Passes:          2
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -267,3 +271,4 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (All Done)
 
 `
+

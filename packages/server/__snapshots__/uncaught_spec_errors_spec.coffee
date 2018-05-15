@@ -33,6 +33,7 @@ We dynamically generated a new test to display this failure.
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -90,6 +91,7 @@ We dynamically generated a new test to display this failure.
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -141,6 +143,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -197,6 +200,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   - Passes:          1
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -263,6 +267,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          4
   - Failures:        4
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     4
   - Video Recorded:  true
@@ -286,4 +291,3 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (All Done)
 
 `
-

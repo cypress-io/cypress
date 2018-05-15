@@ -31,6 +31,7 @@ collectTestResults = (obj = {}) ->
     passes:      _.get(obj, 'stats.passes')
     pending:     _.get(obj, 'stats.pending')
     failures:    _.get(obj, 'stats.failures')
+    skipped:     _.get(obj, 'stats.skipped' )
     duration:    humanTime(_.get(obj, 'stats.duration'))
     screenshots: obj.screenshots and obj.screenshots.length
     video:       Boolean(obj.video)

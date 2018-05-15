@@ -24,6 +24,7 @@ Fix the error in your code and re-run your tests.
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -67,6 +68,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         1
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -109,6 +111,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         1
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -158,6 +161,7 @@ We dynamically generated a new test to display this failure.
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -237,6 +241,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         1
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -280,6 +285,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         1
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -316,6 +322,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         1
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -363,6 +370,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         1
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true
@@ -456,6 +464,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (T
   - Passes:          1
   - Failures:        0
   - Pending:         1
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  false
@@ -497,6 +506,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         1
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true

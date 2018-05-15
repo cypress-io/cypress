@@ -110,7 +110,7 @@ context('Traversal', () => {
   it('.prevUntil() - get all previous sibling DOM elements until el', () => {
     // https://on.cypress.io/prevUntil
     cy.get('.foods-list').find('#nuts')
-      .prevUntil('#veggies')
+      .prevUntil('#veggies').should('have.length', 3)
   })
 
   it('.siblings() - get all sibling DOM elements', () => {

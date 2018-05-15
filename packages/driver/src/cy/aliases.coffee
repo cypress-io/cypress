@@ -18,6 +18,14 @@ validateAlias = (alias) ->
   if not _.isString(alias)
     $utils.throwErrByPath "as.invalid_type"
 
+  if aliasDisplayRe.test(alias)
+    $utils.throwErrByPath "as.invalid_first_token", {
+      args: {
+        alias,
+        suggestedName: alias.replace(aliasDisplayRe, '')
+      }
+    }
+
   if _.isBlank(alias)
     $utils.throwErrByPath "as.empty_string"
 
