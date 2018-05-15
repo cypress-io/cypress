@@ -36,7 +36,8 @@ collectTestResults = (obj = {}) ->
     duration:    humanTime(_.get(obj, 'stats.duration'))
     screenshots: obj.screenshots and obj.screenshots.length
     video:       Boolean(obj.video)
-    version:     pkg.version
+    spec:        obj.spec
+    # version:     pkg.version
   }
 
 renderSummaryTable = (results) ->
@@ -48,7 +49,7 @@ renderSummaryTable = (results) ->
 
   console.log("")
 
-  terminal.header("All Done", {
+  terminal.header("Run Finished", {
     color: ["gray"]
   })
 
@@ -56,7 +57,7 @@ renderSummaryTable = (results) ->
     # color = if results.totalFailures then "red" else "green"
 
     table = new Table({
-      head: ["Spec", "Duration", "Passes", "Failures", "Pending", "Skipped"]
+      head: ["Spec", "Passes", "Failures", "Pending", "Skipped"]
       chars: {
         "top-mid": ""
         # "mid": "0"
@@ -93,8 +94,8 @@ renderSummaryTable = (results) ->
       char = if stats.failures then c("×", "red") else c("✓", "green")
 
       table.push([
-        c(char + " " + c(spec.name, "white"), "white"),
-        c(humanTime(wallClockDuration), "gray"),
+        c(char + " " + c(spec.name, "white") + " " + c("(2s)", "gray"), "white"),
+        # c(humanTime(wallClockDuration), "gray"),
         ct(passes, "green"),
         ct(failures, "red"),
         ct(pending, "cyan"),
@@ -226,9 +227,55 @@ module.exports = {
       color: [color]
     })
 
-    console.log("")
+    # console.log("")
 
-    statsUtil.display(color, obj)
+    table = new Table({
+      head: ["Spec", "Passes", "Failures", "Pending", "Skipped"]
+      chars: {
+        "top-mid": ""
+        # "mid": "0"
+        # "mid-mid": ""
+        # "left-mid": "2"
+        "middle": ""
+        "bottom-mid": ""
+        # "right-mid": "4"
+        "mid-mid": ""
+      }
+      style: {
+        head: ['gray']
+      }
+    })
+
+    { spec, wallClockDuration, passes, failures, pending, skipped } = obj
+
+    ct = (num, color) ->
+      if num is 0
+        color = "gray"
+
+      c(num, color)
+
+    c = (text, color) ->
+      chalk[color](text)
+      # switch
+      #   when stats.failures then chalk.red
+      #   when stats.passes then chalk.green
+      #   else chalk.gray
+
+    char = if obj.failures then c("×", "red") else c("✓", "green")
+
+    table.push([
+      c(char + " " + c(spec.name, "white") + " " + c("(2s)", "gray"), "white"),
+      # c(humanTime(wallClockDuration), "gray"),
+      ct(passes, "green"),
+      ct(failures, "red"),
+      ct(pending, "cyan"),
+      ct(skipped, "gray")
+    ])
+
+    console.log("")
+    console.log(table.toString())
+
+    # statsUtil.display(color, obj)
 
   displayScreenshots: (screenshots = []) ->
     console.log("")
@@ -529,10 +576,12 @@ module.exports = {
     console.log("")
 
     statsUtil.display("white", {
-      browser: "Electron 59 (headless)"
-      runUrl: "https://dashboard.cypress.io/foo/bar/baz"
-      specsGlob: "**/*.js"
-      specs: "28 [app_spec.coffee, foo_spec.js, bar_spec.js, ...25 more]"
+      browser: chalk.gray("Electron 59 (headless)")
+      os: chalk.gray("Mac OSX 59")
+      version: chalk.gray("2.1.0")
+      specPattern: chalk.gray("**/*.js")
+      specs: chalk.gray("28 [app_spec.coffee, foo_spec.js, bar_spec.js, ...25 more]")
+      runUrl: chalk.gray("https://dashboard.cypress.io/foo/bar/baz")
     })
 
     console.log("")
@@ -559,20 +608,20 @@ module.exports = {
           colWidths: [85, 15]
           colAligns: ["left", "right"]
           chars: {
-          #   "top": ""
+            "top": "─"
             "top-mid": ""
-            # "top-left": ""
-            # "top-right": ""
+            "top-left": ""
+            "top-right": ""
             "bottom": ""
             "bottom-mid": ""
             "bottom-left": ""
             "bottom-right": ""
-            # "left": ""
-          #   "left-mid": ""
-            # "mid": "2"
-            # "mid-mid": "3"
-            # "right": ""
-            # "right-mid": "4"
+            "left": ""
+            "left-mid": ""
+            "mid": ""
+            "mid-mid": ""
+            "right": ""
+            "right-mid": ""
             "middle": ""
           }
           style: {
@@ -581,8 +630,9 @@ module.exports = {
           }
         })
 
+        table.push(["", ""])
         table.push([
-          chalk.gray(spec.name),
+          chalk.cyan(" (") + chalk.underline.cyan("Running") + chalk.cyan(") ") + chalk.gray(spec.name + "..."),
           chalk.gray("(100 of 200)")
         ])
 

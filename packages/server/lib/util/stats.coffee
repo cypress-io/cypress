@@ -13,6 +13,7 @@ TRANSLATION = {
   version:      "Cypress Version"
   browser:      "Browser"
   runUrl:       "Run URL"
+  os:           "Operating System"
   specPattern:  "Spec Pattern"
   spec:         "Spec"
   specs:        "Specs Found"
