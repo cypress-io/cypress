@@ -33,6 +33,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     2
   - Video Recorded:  true

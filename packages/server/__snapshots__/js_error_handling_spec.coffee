@@ -94,6 +94,7 @@ https://on.cypress.io/uncaught-exception-from-application
   - Passes:          2
   - Failures:        5
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     5
   - Video Recorded:  true
