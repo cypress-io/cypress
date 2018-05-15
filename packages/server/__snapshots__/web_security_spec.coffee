@@ -118,6 +118,7 @@ https://on.cypress.io/cross-origin-violation
   - Passes:          0
   - Failures:        3
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
@@ -162,6 +163,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          3
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true

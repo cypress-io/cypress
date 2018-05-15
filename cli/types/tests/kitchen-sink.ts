@@ -429,6 +429,13 @@ describe('Kitchen Sink', function() {
       // Cypress knows to scroll to the right and down
       cy.get('#scroll-both button').scrollIntoView()
         .should('be.visible')
+
+      // We can set scroll duration
+      cy.get('#scroll-both button').scrollIntoView({
+        duration: 1000,
+        easing: 'swing',
+        offset: {top: 0, left: 0}
+      })
     })
 
     it('cy.scrollTo() - scroll the window or element to a position', function() {

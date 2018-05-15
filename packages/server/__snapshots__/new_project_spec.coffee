@@ -15,6 +15,7 @@ Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
