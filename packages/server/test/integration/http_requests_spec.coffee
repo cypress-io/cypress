@@ -3,11 +3,9 @@ require("../spec_helper")
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 _             = require("lodash")
-fs            = require("fs-extra")
 rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
-glob          = require("glob")
 path          = require("path")
 str           = require("underscore.string")
 browserify    = require("browserify")
@@ -21,18 +19,16 @@ pkg           = require("@packages/root")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Watchers      = require("#{root}lib/watchers")
-files         = require("#{root}lib/controllers/files")
-CacheBuster   = require("#{root}lib/util/cache_buster")
-Fixtures      = require("#{root}test/support/helpers/fixtures")
 errors        = require("#{root}lib/errors")
+files         = require("#{root}lib/controllers/files")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
-
-fs = Promise.promisifyAll(fs)
+CacheBuster   = require("#{root}lib/util/cache_buster")
+fs            = require("#{root}lib/util/fs")
+glob          = require("#{root}lib/util/glob")
+Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
-
-glob = Promise.promisify(glob)
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -52,8 +48,8 @@ browserifyFile = (filePath) ->
 
 describe "Routes", ->
   beforeEach ->
-    @sandbox.stub(CacheBuster, "get").returns("-123")
-    @sandbox.stub(Server.prototype, "reset")
+    sinon.stub(CacheBuster, "get").returns("-123")
+    sinon.stub(Server.prototype, "reset")
 
     nock.enableNetConnect()
 
@@ -509,7 +505,7 @@ describe "Routes", ->
 
     describe "delay", ->
       it "can set delay to 10ms", ->
-        delay = @sandbox.spy(Promise, "delay")
+        delay = sinon.spy(Promise, "delay")
 
         @rp({
           url: "http://localhost:2020/__cypress/xhrs/users/1"
@@ -522,7 +518,7 @@ describe "Routes", ->
           expect(delay).to.be.calledWith(10)
 
       it "does not call Promise.delay when no delay", ->
-        delay = @sandbox.spy(Promise, "delay")
+        delay = sinon.spy(Promise, "delay")
 
         @rp("http://localhost:2020/__cypress/xhrs/users/1")
         .then (res) ->

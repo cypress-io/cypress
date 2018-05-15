@@ -87,7 +87,7 @@ describe "timers/parent", ->
             done()
           , 100
 
-        fn = @sandbox.spy(poller)
+        fn = sinon.spy(poller)
 
         t = setInterval(fn, 10)
 

@@ -2,13 +2,14 @@ require("../spec_helper")
 
 Promise = require("bluebird")
 pkg = require("@packages/root")
+fs = require("#{root}lib/util/fs")
 
 describe "lib/environment", ->
   before ->
     @env = process.env["CYPRESS_ENV"]
 
   beforeEach ->
-    @sandbox.stub(Promise, "config")
+    sinon.stub(Promise, "config")
 
     @expectedEnv = (env) ->
       require("#{root}lib/environment")
@@ -56,7 +57,7 @@ describe "lib/environment", ->
 
   context "it uses development by default", ->
     beforeEach ->
-      @sandbox.stub(fs, "readJsonSync").returns({})
+      sinon.stub(fs, "readJsonSync").returns({})
 
     it "is development", ->
       @expectedEnv("development")

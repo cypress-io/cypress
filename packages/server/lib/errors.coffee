@@ -11,7 +11,7 @@ listPaths = (paths) ->
 API = {
   # forms well-formatted user-friendly error for most common
   # errors Cypress can encounter
-  getMsgByType: (type, arg1 = {}, arg2 = {}) ->
+  getMsgByType: (type, arg1 = {}, arg2) ->
     switch type
       when "CANNOT_TRASH_ASSETS"
         """
@@ -135,6 +135,20 @@ API = {
 
         https://on.cypress.io/cypress-ci-deprecated
         """
+      when "DASHBOARD_INVALID_RUN_REQUEST"
+        """
+        Recording this run failed because the request was invalid.
+
+        #{arg1.message}
+
+        Errors:
+
+        #{JSON.stringify(arg1.errors, null, 2)}
+
+        Request Sent:
+
+        #{JSON.stringify(arg1.object, null, 2)}
+        """
       when "RECORDING_FROM_FORK_PR"
         """
         Warning: Trying to record from fork PR without Record Key
@@ -166,7 +180,7 @@ API = {
         """
       when "RECORD_KEY_NOT_VALID"
         """
-        We failed trying to authenticate this project.
+        We failed trying to authenticate this project: #{chalk.blue(arg2)}
 
         Your Record Key is invalid: #{chalk.yellow(arg1)}
 
@@ -218,8 +232,25 @@ API = {
 
         #{chalk.yellow(arg2)}
         """
-      when "SPEC_FILE_NOT_FOUND"
-        "Can't find test spec: " + chalk.blue(arg1)
+      when "NO_SPECS_FOUND"
+        ## no glob provided, searched all specs
+        if not arg2
+          """
+          Can't run because no spec files were found.
+
+          We searched for any files inside of this folder:
+
+          #{chalk.blue(arg1)}
+          """
+        else
+          """
+          Can't run because no spec files were found.
+
+          We searched for any files matching this glob pattern:
+
+          #{chalk.blue(arg2)}
+          """
+
       when "RENDERER_CRASHED"
         """
         We detected that the Chromium Renderer process just crashed.
