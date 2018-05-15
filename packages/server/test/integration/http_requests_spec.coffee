@@ -48,8 +48,8 @@ browserifyFile = (filePath) ->
 
 describe "Routes", ->
   beforeEach ->
-    @sandbox.stub(CacheBuster, "get").returns("-123")
-    @sandbox.stub(Server.prototype, "reset")
+    sinon.stub(CacheBuster, "get").returns("-123")
+    sinon.stub(Server.prototype, "reset")
 
     nock.enableNetConnect()
 
@@ -505,7 +505,7 @@ describe "Routes", ->
 
     describe "delay", ->
       it "can set delay to 10ms", ->
-        delay = @sandbox.spy(Promise, "delay")
+        delay = sinon.spy(Promise, "delay")
 
         @rp({
           url: "http://localhost:2020/__cypress/xhrs/users/1"
@@ -518,7 +518,7 @@ describe "Routes", ->
           expect(delay).to.be.calledWith(10)
 
       it "does not call Promise.delay when no delay", ->
-        delay = @sandbox.spy(Promise, "delay")
+        delay = sinon.spy(Promise, "delay")
 
         @rp("http://localhost:2020/__cypress/xhrs/users/1")
         .then (res) ->

@@ -33,6 +33,7 @@ We dynamically generated a new test to display this failure.
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     1
   - Video Recorded:  true

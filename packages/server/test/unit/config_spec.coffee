@@ -41,21 +41,21 @@ describe "lib/config", ->
 
   context ".get", ->
     beforeEach ->
-      @projectPath = "/_test-output/path/to/project"
+      @projectRoot = "/_test-output/path/to/project"
       @setup = (cypressJson = {}, cypressEnvJson = {}) =>
-        @sandbox.stub(settings, "read").withArgs(@projectPath).resolves(cypressJson)
-        @sandbox.stub(settings, "readEnv").withArgs(@projectPath).resolves(cypressEnvJson)
+        sinon.stub(settings, "read").withArgs(@projectRoot).resolves(cypressJson)
+        sinon.stub(settings, "readEnv").withArgs(@projectRoot).resolves(cypressEnvJson)
 
     it "sets projectRoot", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) =>
-        expect(obj.projectRoot).to.eq(@projectPath)
+        expect(obj.projectRoot).to.eq(@projectRoot)
         expect(obj.env).to.deep.eq({foo: "bar"})
 
     it "sets projectName", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) ->
         expect(obj.projectName).to.eq("project")
 
@@ -64,27 +64,27 @@ describe "lib/config", ->
         @setup({}, {foo: "bar"})
 
       it "can override default port", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.port).to.eq(8080)
 
       it "updates browserUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.browserUrl).to.eq "http://localhost:8080/__/"
 
       it "updates proxyUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.proxyUrl).to.eq "http://localhost:8080"
 
     context "validation", ->
       beforeEach ->
         @expectValidationPasses = =>
-          config.get(@projectPath) ## shouldn't throw
+          config.get(@projectRoot) ## shouldn't throw
 
         @expectValidationFails = (errorMessage = "validation error") =>
-          config.get(@projectPath)
+          config.get(@projectRoot)
           .then ->
             throw new Error("should throw validation error")
           .catch (err) ->
@@ -771,7 +771,7 @@ describe "lib/config", ->
           })
 
       it "sets config, envFile and env", ->
-        @sandbox.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+        sinon.stub(config, "getProcessEnvVars").returns({quux: "quux"})
 
         obj = {
           projectRoot: "/foo/bar"
@@ -904,7 +904,7 @@ describe "lib/config", ->
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
-      @sandbox.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
+      sinon.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
 
       obj = {
         env: {
@@ -992,16 +992,16 @@ describe "lib/config", ->
       expect(urls.proxyUrl).to.eq("http://localhost:65432")
 
   context ".setScaffoldPaths", ->
-    it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->
+    it "sets integrationExamplePath + integrationExampleName + scaffoldedFiles", ->
       obj = {
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
-      @sandbox.stub(scaffold, "fileTree").returns([])
+      sinon.stub(scaffold, "fileTree").returns([])
 
       expect(config.setScaffoldPaths(obj)).to.deep.eq({
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
-        integrationExampleFile: "/_test-output/path/to/project/cypress/integration/example_spec.js"
-        integrationExampleName: "example_spec.js"
+        integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
+        integrationExampleName: "examples"
         scaffoldedFiles: []
       })
 

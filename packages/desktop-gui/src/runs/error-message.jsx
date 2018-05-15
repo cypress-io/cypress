@@ -29,7 +29,7 @@ const ErrorMessage = observer(({ error }) => {
       <div className='empty'>
         <h4>
           <i className='fa fa-warning red'></i>{' '}
-          Runs Could Not Be Loaded
+          Runs could not be loaded
         </h4>
         {errorMessage}
       </div>

@@ -7,6 +7,7 @@ const debugXvfb = require('debug')('cypress:xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
 const xvfb = Promise.promisifyAll(new Xvfb({
+  timeout: 5000, // milliseconds
   onStderrData (data) {
     if (debugXvfb.enabled) {
       debugXvfb(data.toString())

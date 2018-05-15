@@ -8,7 +8,7 @@ describe "Project Nav", ->
     cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "getRuns").resolves(@runs)
@@ -33,14 +33,12 @@ describe "Project Nav", ->
       @openProject.resolve(@config)
 
     it "displays projects nav", ->
-      cy
-        .get(".empty").should("not.be.visible")
-        .get(".navbar-default")
+      cy.get(".empty").should("not.be.visible")
+      cy.get(".navbar-default")
 
     it "displays 'Tests' nav as active", ->
-      cy
-      .get(".navbar-default").contains("a", "Tests")
-      .should("have.class", "active")
+      cy.get(".navbar-default").contains("a", "Tests")
+        .should("have.class", "active")
 
     describe "when project loads", ->
       beforeEach ->
@@ -51,31 +49,26 @@ describe "Project Nav", ->
 
     describe "runs page", ->
       beforeEach ->
-        cy
-          .fixture("runs").as("runs")
-          .get(".navbar-default")
-            .contains("a", "Runs").as("runsNav").click()
+        cy.fixture("runs").as("runs")
+        cy.get(".navbar-default")
+          .contains("a", "Runs").as("runsNav").click()
 
       it "highlights runs on click", ->
-        cy
-          .get("@runsNav")
-            .should("have.class", "active")
+        cy.get("@runsNav")
+          .should("have.class", "active")
 
       it "displays runs page", ->
-        cy
-          .get(".runs-container li")
-          .should("have.length", 4)
+        cy.get(".runs-container li")
+          .should("have.length", @runs.length)
 
     describe "settings page", ->
       beforeEach ->
-        cy
-          .get(".navbar-default")
-            .contains("a", "Settings").as("settingsNav").click()
+        cy.get(".navbar-default")
+          .contains("a", "Settings").as("settingsNav").click()
 
       it "highlights config on click", ->
-        cy
-          .get("@settingsNav")
-            .should("have.class", "active")
+        cy.get("@settingsNav")
+          .should("have.class", "active")
 
       it "displays settings page", ->
         cy.contains("Configuration")
@@ -87,45 +80,38 @@ describe "Project Nav", ->
 
       context "normal browser list behavior", ->
         it "lists browsers", ->
-          cy
-            .get(".browsers-list").parent()
+          cy.get(".browsers-list").parent()
             .find(".dropdown-menu").first().find("li").should("have.length", 2)
             .should ($li) ->
               expect($li.first()).to.contain("Chromium")
               expect($li.last()).to.contain("Canary")
 
         it "does not display stop button", ->
-          cy
-            .get(".close-browser").should("not.exist")
+          cy.get(".close-browser").should("not.exist")
 
         describe "default browser", ->
           it "displays default browser name in chosen", ->
-            cy
-              .get(".browsers-list>a").first()
-                .should("contain", "Chrome")
+            cy.get(".browsers-list>a").first()
+              .should("contain", "Chrome")
 
           it "displays default browser icon in chosen", ->
-            cy
-              .get(".browsers-list>a").first()
-                .find(".fa-chrome")
+            cy.get(".browsers-list>a").first()
+              .find(".fa-chrome")
 
       context "switch browser", ->
         beforeEach ->
-          cy
-            .get(".browsers-list>a").first().click()
-            .get(".browsers-list").find(".dropdown-menu")
-              .contains("Chromium").click()
+          cy.get(".browsers-list>a").first().click()
+          cy.get(".browsers-list").find(".dropdown-menu")
+            .contains("Chromium").click()
 
         afterEach ->
           cy.clearLocalStorage()
 
         it "switches text in button on switching browser", ->
-          cy
-            .get(".browsers-list>a").first().contains("Chromium")
+          cy.get(".browsers-list>a").first().contains("Chromium")
 
         it "swaps the chosen browser into the dropdown", ->
-          cy
-            .get(".browsers-list").find(".dropdown-menu")
+          cy.get(".browsers-list").find(".dropdown-menu")
             .find("li").should("have.length", 2)
             .should ($li) ->
               expect($li.first()).to.contain("Chrome")
@@ -139,14 +125,12 @@ describe "Project Nav", ->
           cy.contains(".file", "app_spec").click()
 
         it "displays browser icon as spinner", ->
-          cy
-            .get(".browsers-list>a").first().find("i")
-              .should("have.class", "fa fa-refresh fa-spin")
+          cy.get(".browsers-list>a").first().find("i")
+            .should("have.class", "fa fa-refresh fa-spin")
 
         it "disables browser dropdown", ->
-          cy
-            .get(".browsers-list>a").first()
-              .and("have.class", "disabled")
+          cy.get(".browsers-list>a").first()
+            .should("have.class", "disabled")
 
       context "browser opened after choosing spec", ->
         beforeEach ->
@@ -154,18 +138,15 @@ describe "Project Nav", ->
           cy.contains(".file", "app_spec").click()
 
         it "displays browser icon as opened", ->
-          cy
-            .get(".browsers-list>a").first().find("i")
-              .should("have.class", "fa fa-check-circle-o")
+          cy.get(".browsers-list>a").first().find("i")
+            .should("have.class", "fa fa-check-circle-o")
 
         it "disables browser dropdown", ->
-          cy
-            .get(".browsers-list>a").first()
-              .should("have.class", "disabled")
+          cy.get(".browsers-list>a").first()
+            .should("have.class", "disabled")
 
         it "displays stop browser button", ->
-          cy
-            .get(".close-browser").should("be.visible")
+          cy.get(".close-browser").should("be.visible")
 
         describe "stop browser", ->
           beforeEach ->
@@ -178,14 +159,12 @@ describe "Project Nav", ->
             cy.get(".close-browser").should("not.exist")
 
           it "re-enables browser dropdown", ->
-            cy
-              .get(".browsers-list>a").first()
-                .should("not.have.class", "disabled")
+            cy.get(".browsers-list>a").first()
+              .should("not.have.class", "disabled")
 
           it "displays default browser icon", ->
-            cy
-              .get(".browsers-list>a").first()
-                .find(".fa-chrome")
+            cy.get(".browsers-list>a").first()
+              .find(".fa-chrome")
 
         describe "browser is closed manually", ->
           beforeEach ->
@@ -211,14 +190,12 @@ describe "Project Nav", ->
         cy.clearLocalStorage()
 
       it "displays local storage browser name in chosen", ->
-        cy
-          .get(".browsers-list>a").first()
-            .should("contain", "Chromium")
+        cy.get(".browsers-list>a").first()
+          .should("contain", "Chromium")
 
       it "displays local storage browser icon in chosen", ->
-        cy
-          .get(".browsers-list>a").first()
-            .find(".fa-chrome")
+        cy.get(".browsers-list>a").first()
+          .find(".fa-chrome")
 
     describe "when browser saved in local storage no longer exists", ->
       beforeEach ->
@@ -226,9 +203,8 @@ describe "Project Nav", ->
         @openProject.resolve(@config)
 
       it "defaults to first browser", ->
-        cy
-          .get(".browsers-list>a").first()
-            .should("contain", "Chrome")
+        cy.get(".browsers-list>a").first()
+          .should("contain", "Chrome")
 
     describe "only one browser available", ->
       beforeEach ->
@@ -243,9 +219,8 @@ describe "Project Nav", ->
         @openProject.resolve(@config)
 
       it "displays no dropdown btn", ->
-        cy
-          .get(".browsers-list")
-            .find(".dropdown-toggle").should("not.be.visible")
+        cy.get(".browsers-list")
+          .find(".dropdown-toggle").should("not.be.visible")
 
     describe "browser with info", ->
       beforeEach ->
@@ -261,9 +236,8 @@ describe "Project Nav", ->
         @openProject.resolve(@config)
 
       it "shows info icon with tooltip", ->
-        cy
-          .get(".browsers .fa-info-circle")
+        cy.get(".browsers .fa-info-circle")
           .then ($el) ->
             $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
-          .get(".cy-tooltip")
+        cy.get(".cy-tooltip")
           .should("contain", @info)

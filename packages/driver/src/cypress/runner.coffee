@@ -15,7 +15,7 @@ TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
-RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration wallClockStart wallClockDuration timings".split(" ")
+RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings".split(" ")
 
 # ## initial payload
 # {
@@ -119,7 +119,7 @@ setTestTimings = (test, name, obj) ->
   test.timings[name] = obj
 
 setWallClockDuration = (test) ->
-  test.wallClockDuration = new Date() - test.wallClockStart
+  test.wallClockDuration = new Date() - test.wallClockStartedAt
 
 reduceProps = (obj, props) ->
   _.reduce props, (memo, prop) ->
@@ -787,7 +787,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## closure for calculating the actual
       ## runtime of a runnables fn exection duration
       ## and also the run of the runnable:after:run:async event
-      wallClockStart = null
+      wallClockStartedAt = null
       wallClockEnd = null
       fnDurationStart = null
       fnDurationEnd = null
@@ -797,13 +797,13 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## when this is a hook, capture the real start
       ## date so we can calculate our test's duration
       ## including all of its hooks
-      wallClockStart = new Date()
+      wallClockStartedAt = new Date()
 
-      if not test.wallClockStart
+      if not test.wallClockStartedAt
         ## if we don't have lifecycle timings yet
-        lifecycleStart = wallClockStart
+        lifecycleStart = wallClockStartedAt
 
-      test.wallClockStart ?= wallClockStart
+      test.wallClockStartedAt ?= wallClockStartedAt
 
       ## if this isnt a hook, then the name is 'test'
       hookName = getHookName(runnable) or "test"
@@ -828,7 +828,7 @@ create = (specWindow, mocha, Cypress, cy) ->
             ## reset runnable duration to include lifecycle
             ## and afterFn timings purely for the mocha runner.
             ## this is what it 'feels' like to the user
-            runnable.duration = wallClockEnd - wallClockStart
+            runnable.duration = wallClockEnd - wallClockStartedAt
 
             setTestTimingsForHook(test, hookName, {
               hookId: runnable.hookId
@@ -840,7 +840,7 @@ create = (specWindow, mocha, Cypress, cy) ->
             ## if we are currently on a test then
             ## recalculate its duration to be based
             ## against that (purely for the mocha reporter)
-            test.duration = wallClockEnd - test.wallClockStart
+            test.duration = wallClockEnd - test.wallClockStartedAt
 
             ## but still preserve its actual function
             ## body duration for timings
