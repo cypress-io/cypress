@@ -78,7 +78,7 @@
     "nock": "^9.0.9",
     "shelljs": "0.7.8",
     "sinon": "3.2.1",
-    "snap-shot-it": "4.0.1",
+    "snap-shot-it": "4.1.4",
     "strip-ansi": "4.0.0"
   },
   "files": [
