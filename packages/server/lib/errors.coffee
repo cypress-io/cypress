@@ -151,12 +151,13 @@ API = {
         """
       when "RECORDING_FROM_FORK_PR"
         """
-        Warning: Trying to record from fork PR without Record Key
+        Warning: It looks like you are trying to record this run from a forked PR.
 
-        Normally CI does not pass private environment variables to builds from forks, so this is expected.
+        The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+
         These results will not be recorded.
 
-        This error will not alter or the exit code.
+        This error will not alter the exit code.
         """
       when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
         """
@@ -164,7 +165,7 @@ API = {
 
         These results will not be recorded.
 
-        This error will not alter or the exit code.
+        This error will not alter the exit code.
 
         #{arg1}
         """
