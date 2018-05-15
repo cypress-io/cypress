@@ -11,7 +11,7 @@ describe "Set Up Project", ->
     cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "closeBrowser").resolves(null)
       @config.projectId = null
