@@ -1,17 +1,18 @@
 require("../spec_helper")
 
-_        = require("lodash")
+_ = require("lodash")
 chokidar = require("chokidar")
+dependencyTree = require("dependency-tree")
 Watchers = require("#{root}lib/watchers")
 
 describe "lib/watchers", ->
   beforeEach ->
-    @standardWatcher = @sandbox.stub({
+    @standardWatcher = sinon.stub({
       on:    ->
       close: ->
     })
 
-    @sandbox.stub(chokidar, "watch").returns(@standardWatcher)
+    sinon.stub(chokidar, "watch").returns(@standardWatcher)
     @watchers = Watchers()
 
   it "returns instance of watcher class", ->
@@ -28,12 +29,36 @@ describe "lib/watchers", ->
       expect(_.keys(@watchers.watchers)).to.have.length(1)
       expect(@watchers.watchers).to.have.property("/foo/bar")
 
+  context "#watchTree", ->
+    beforeEach ->
+      sinon.stub(dependencyTree, "toList").returns([
+        "/foo/bar"
+        "/dep/a"
+        "/dep/b"
+      ])
+      @watchers.watchTree("/foo/bar")
+
+    it "watches each file in dependency tree", ->
+      expect(chokidar.watch).to.be.calledWith("/foo/bar")
+      expect(chokidar.watch).to.be.calledWith("/dep/a")
+      expect(chokidar.watch).to.be.calledWith("/dep/b")
+
+    it "stores a reference to the watcher", ->
+      expect(_.keys(@watchers.watchers)).to.have.length(3)
+      expect(@watchers.watchers).to.have.property("/foo/bar")
+      expect(@watchers.watchers).to.have.property("/dep/a")
+      expect(@watchers.watchers).to.have.property("/dep/b")
+
+    it "ignores node_modules", ->
+      expect(dependencyTree.toList.lastCall.args[0].filter("/foo/bar")).to.be.true
+      expect(dependencyTree.toList.lastCall.args[0].filter("/node_modules/foo")).to.be.false
+
   context "#close", ->
     it "removes each watched property", ->
-      watched1 = {close: @sandbox.spy()}
+      watched1 = {close: sinon.spy()}
       @watchers._add("/one", watched1)
 
-      watched2 = {close: @sandbox.spy()}
+      watched2 = {close: sinon.spy()}
       @watchers._add("/two", watched2)
 
       expect(_.keys(@watchers.watchers)).to.have.length(2)

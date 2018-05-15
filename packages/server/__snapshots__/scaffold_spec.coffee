@@ -3,7 +3,66 @@ exports['lib/scaffold .fileTree returns tree-like structure of scaffolded 1'] = 
     "name": "tests",
     "children": [
       {
-        "name": "example_spec.js"
+        "name": "examples",
+        "children": [
+          {
+            "name": "actions.spec.js"
+          },
+          {
+            "name": "aliasing.spec.js"
+          },
+          {
+            "name": "assertions.spec.js"
+          },
+          {
+            "name": "connectors.spec.js"
+          },
+          {
+            "name": "cookies.spec.js"
+          },
+          {
+            "name": "cypress_api.spec.js"
+          },
+          {
+            "name": "files.spec.js"
+          },
+          {
+            "name": "local_storage.spec.js"
+          },
+          {
+            "name": "location.spec.js"
+          },
+          {
+            "name": "misc.spec.js"
+          },
+          {
+            "name": "navigation.spec.js"
+          },
+          {
+            "name": "network_requests.spec.js"
+          },
+          {
+            "name": "querying.spec.js"
+          },
+          {
+            "name": "spies_stubs_clocks.spec.js"
+          },
+          {
+            "name": "traversal.spec.js"
+          },
+          {
+            "name": "utilities.spec.js"
+          },
+          {
+            "name": "viewport.spec.js"
+          },
+          {
+            "name": "waiting.spec.js"
+          },
+          {
+            "name": "window.spec.js"
+          }
+        ]
       },
       {
         "name": "_fixtures",
@@ -46,7 +105,66 @@ exports['lib/scaffold .fileTree leaves out fixtures if configured to false 1'] =
     "name": "tests",
     "children": [
       {
-        "name": "example_spec.js"
+        "name": "examples",
+        "children": [
+          {
+            "name": "actions.spec.js"
+          },
+          {
+            "name": "aliasing.spec.js"
+          },
+          {
+            "name": "assertions.spec.js"
+          },
+          {
+            "name": "connectors.spec.js"
+          },
+          {
+            "name": "cookies.spec.js"
+          },
+          {
+            "name": "cypress_api.spec.js"
+          },
+          {
+            "name": "files.spec.js"
+          },
+          {
+            "name": "local_storage.spec.js"
+          },
+          {
+            "name": "location.spec.js"
+          },
+          {
+            "name": "misc.spec.js"
+          },
+          {
+            "name": "navigation.spec.js"
+          },
+          {
+            "name": "network_requests.spec.js"
+          },
+          {
+            "name": "querying.spec.js"
+          },
+          {
+            "name": "spies_stubs_clocks.spec.js"
+          },
+          {
+            "name": "traversal.spec.js"
+          },
+          {
+            "name": "utilities.spec.js"
+          },
+          {
+            "name": "viewport.spec.js"
+          },
+          {
+            "name": "waiting.spec.js"
+          },
+          {
+            "name": "window.spec.js"
+          }
+        ]
       },
       {
         "name": "_support",
@@ -81,7 +199,66 @@ exports['lib/scaffold .fileTree leaves out support if configured to false 1'] = 
     "name": "tests",
     "children": [
       {
-        "name": "example_spec.js"
+        "name": "examples",
+        "children": [
+          {
+            "name": "actions.spec.js"
+          },
+          {
+            "name": "aliasing.spec.js"
+          },
+          {
+            "name": "assertions.spec.js"
+          },
+          {
+            "name": "connectors.spec.js"
+          },
+          {
+            "name": "cookies.spec.js"
+          },
+          {
+            "name": "cypress_api.spec.js"
+          },
+          {
+            "name": "files.spec.js"
+          },
+          {
+            "name": "local_storage.spec.js"
+          },
+          {
+            "name": "location.spec.js"
+          },
+          {
+            "name": "misc.spec.js"
+          },
+          {
+            "name": "navigation.spec.js"
+          },
+          {
+            "name": "network_requests.spec.js"
+          },
+          {
+            "name": "querying.spec.js"
+          },
+          {
+            "name": "spies_stubs_clocks.spec.js"
+          },
+          {
+            "name": "traversal.spec.js"
+          },
+          {
+            "name": "utilities.spec.js"
+          },
+          {
+            "name": "viewport.spec.js"
+          },
+          {
+            "name": "waiting.spec.js"
+          },
+          {
+            "name": "window.spec.js"
+          }
+        ]
       },
       {
         "name": "_fixtures",
@@ -162,7 +339,66 @@ exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = 
     "name": "tests",
     "children": [
       {
-        "name": "example_spec.js"
+        "name": "examples",
+        "children": [
+          {
+            "name": "actions.spec.js"
+          },
+          {
+            "name": "aliasing.spec.js"
+          },
+          {
+            "name": "assertions.spec.js"
+          },
+          {
+            "name": "connectors.spec.js"
+          },
+          {
+            "name": "cookies.spec.js"
+          },
+          {
+            "name": "cypress_api.spec.js"
+          },
+          {
+            "name": "files.spec.js"
+          },
+          {
+            "name": "local_storage.spec.js"
+          },
+          {
+            "name": "location.spec.js"
+          },
+          {
+            "name": "misc.spec.js"
+          },
+          {
+            "name": "navigation.spec.js"
+          },
+          {
+            "name": "network_requests.spec.js"
+          },
+          {
+            "name": "querying.spec.js"
+          },
+          {
+            "name": "spies_stubs_clocks.spec.js"
+          },
+          {
+            "name": "traversal.spec.js"
+          },
+          {
+            "name": "utilities.spec.js"
+          },
+          {
+            "name": "viewport.spec.js"
+          },
+          {
+            "name": "waiting.spec.js"
+          },
+          {
+            "name": "window.spec.js"
+          }
+        ]
       },
       {
         "name": "_fixtures",

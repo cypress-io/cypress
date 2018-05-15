@@ -160,7 +160,7 @@ describe('<Controls />', () => {
 
     it('renders tooltip around restart button', () => {
       const component = shallow(<Controls events={eventsStub()} appState={appState} />)
-      expect(component.find('.restart').parent()).to.have.prop('title', 'Run All Tests')
+      expect(component.find('.restart').parent()).to.have.prop('title', 'Run all tests')
     })
 
     it('emits restart event when restart button is clicked', () => {

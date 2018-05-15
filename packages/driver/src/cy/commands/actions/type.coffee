@@ -92,7 +92,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if not isBody and not isTextLike and not hasTabIndex
         node = $dom.stringify(options.$el)
-        $utils.throwErrByPath("type.not_on_text_field", {
+        $utils.throwErrByPath("type.not_on_typeable_element", {
           onFail: options._log
           args: { node }
         })
@@ -369,7 +369,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       ## blow up if any member of the subject
-      ## isnt a textarea or :text
+      ## isnt a textarea or text-like
       clear = (el, index) ->
         $el = $(el)
 

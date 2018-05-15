@@ -86,7 +86,6 @@
           border-top: 1px solid lighten($pass, 54%);
           background-color: lighten($pass, 58%);
           overflow: auto;
-
         }
 
         &>ul {
@@ -101,11 +100,10 @@
       &>li {
         margin-bottom: 0;
         padding-left: 10px;
-
       }
     }
 
-    ul:first-child>li>ul>li:last-child:after {
+    .new-item:after {
       color: lighten($pass, 5%);
       content: "+";
       position: absolute;
@@ -113,20 +111,27 @@
       left: 10px;
     }
 
-    ul:first-child>li>ul>li>ul>li:after {
-      color: lighten($pass, 5%);
-      content: "+";
-      position: absolute;
+    .new-item .new-item:after {
       top: -2px;
       left: -40px;
     }
 
-    ul:first-child>li>ul>li>ul>li>ul>li:after {
-      color: lighten($pass, 5%);
-      content: "+";
-      position: absolute;
+    .new-item .new-item .new-item:after {
       top: -2px;
       left: -60px;
+    }
+
+    .new-item .new-item .new-item .new-item:after {
+      top: -2px;
+      left: -80px;
+    }
+
+    .is-more {
+      i {
+        display: none;
+      }
+
+      opacity: 0.7;
     }
   }
 }

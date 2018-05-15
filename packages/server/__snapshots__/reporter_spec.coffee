@@ -1,11 +1,12 @@
-exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
+exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
   "stats": {
     "suites": 2,
     "tests": 2,
     "passes": 0,
     "pending": 1,
     "skipped": 0,
-    "failures": 1
+    "failures": 1,
+    "wallClockDuration": 0
   },
   "reporter": "foo",
   "reporterStats": {
@@ -32,9 +33,14 @@ exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
         3
       ],
       "error": "foo",
-      "wallClockStart": null
+      "timings": null,
+      "failedFromHookId": null,
+      "wallClockStartedAt": null,
+      "wallClockDuration": null,
+      "videoTimestamp": null
     },
     {
+      "testId": "r5",
       "title": [
         "TodoMVC - React",
         "When page is initially opened",
@@ -42,7 +48,13 @@ exports['lib/reporter #stats has reporterName and failingTests in stats 1'] = {
       ],
       "state": "pending",
       "body": "",
-      "wallClockStart": null
+      "stack": null,
+      "error": null,
+      "timings": null,
+      "failedFromHookId": null,
+      "wallClockStartedAt": null,
+      "wallClockDuration": null,
+      "videoTimestamp": null
     }
   ]
 }
