@@ -1,20 +1,22 @@
 import { action, observable } from 'mobx'
-import { SpecsStore } from './specs-store'
 
 export default class Spec {
   @observable name
+  @observable displayName
+  @observable path
   @observable isChosen = false
   @observable isExpanded = false
-  @observable children = new SpecsStore()
+  @observable children = []
 
-  constructor ({ name, displayName }) {
+  constructor ({ name, displayName, path }) {
     this.name = name
     this.displayName = displayName
+    this.path = path
     this.isExpanded = true
   }
 
   hasChildren () {
-    return this.children.specs && this.children.specs.length;
+    return this.children && this.children.length
   }
 
   @action setChosen (isChosen) {

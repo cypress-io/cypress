@@ -79,7 +79,7 @@ describe "Update Banner", ->
 
   describe "in project mode", ->
     beforeEach ->
-      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectRoot: "/foo/bar"})
       @start()
       @updaterCheck.resolve(NEW_VERSION)
       cy.contains("Update").click()
@@ -97,7 +97,7 @@ describe "Update Banner", ->
 
   describe "in specs list", ->
     beforeEach ->
-      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectRoot: "/foo/bar"})
       cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       @start()
