@@ -33,17 +33,23 @@
       transform: translate(0, -50%);
     }
 
-    #clear {
-      text-decoration: none;
+    .clear-filter {
+      color: #b3b3b3;
+      display: none;
       position: absolute;
       right: 10px;
+      text-decoration: none;
       top: 50%;
       transform: translate(0, -50%);
-      color: #b3b3b3;
     }
 
-    input[type=text] {
+    &.show-clear-filter .clear-filter {
+      display: block;
+    }
+
+    .filter {
       padding-left: 30px;
+      padding-right: 25px;
       border-radius: 0;
       border: 0;
       border-bottom: 2px solid transparent;
@@ -103,12 +109,7 @@
     margin-bottom: 0;
   }
 
-  .all-files-container {
-    margin-top: 60px;
-    margin-bottom: 40px;
-  }
-
-  .file>a, .folder {
+  .file > a, .folder {
     color: #7c7f84;
 
     i {
@@ -142,7 +143,7 @@
     }
   }
 
-  .file>a {
+  .file > a {
     font-weight: 300;
     border-bottom: 1px dotted #eeeeee;
     padding: 4px 0;

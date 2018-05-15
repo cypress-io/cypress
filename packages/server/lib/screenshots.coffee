@@ -43,6 +43,12 @@ module.exports = {
 
     pathToScreenshot = path.join(screenshotsFolder, name)
 
+    ## TODO: this should be done at the time the
+    ## screenshot is taken, not asynchronously after
+    ## ---
+    ## capture screenshot takenAt timestamp
+    takenAt = (new Date()).toJSON()
+
     fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->
       fs.statAsync(pathToScreenshot)
@@ -51,6 +57,7 @@ module.exports = {
       dimensions = sizeOf(buffer)
 
       {
+        takenAt
         size:   bytes(size, {unitSeparator: " "})
         path:   pathToScreenshot
         width:  dimensions.width
