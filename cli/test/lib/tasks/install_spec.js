@@ -36,6 +36,7 @@ describe('install', function () {
     stdout.restore()
 
     chalk.enabled = true
+    delete process.env.CYPRESS_SKIP_BINARY_INSTALL
   })
 
   context('.start', function () {
@@ -56,9 +57,7 @@ describe('install', function () {
     })
 
     describe('skips install', function () {
-      afterEach(function () {
-        delete process.env.CYPRESS_SKIP_BINARY_INSTALL
-      })
+
 
       it('when environment variable is set', function () {
         process.env.CYPRESS_SKIP_BINARY_INSTALL = true
@@ -291,6 +290,50 @@ describe('install', function () {
               'invalid cache directory',
               normalize(this.stdout.toString())
             )
+          })
+        })
+      })
+
+      describe('CYPRESS_BINARY_INSTALL is URL or Zip', function () {
+        it('uses cache when correct version installed given URL', function () {
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('1.2.3')
+          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          return install.start()
+          .then(() => {
+            expect(download.start).to.not.be.called
+          })
+        })
+        it('uses cache when mismatch version given URL ', function () {
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('4.0.0')
+          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          return install.start()
+          .then(() => {
+            expect(download.start).to.not.be.called
+          })
+        })
+        it('uses cache when correct version installed given Zip', function () {
+          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('1.2.3')
+
+          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          return install.start()
+          .then(() => {
+            expect(unzip.start).to.not.be.called
+          })
+        })
+        it('uses cache when mismatch version given Zip ', function () {
+          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('4.0.0')
+          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          return install.start()
+          .then(() => {
+            expect(unzip.start).to.not.be.called
           })
         })
       })

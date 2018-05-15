@@ -18,13 +18,13 @@ const { throwFormErrorText, errors } = require('../errors')
 const alreadyInstalledMsg = (installDir, binaryVersion) => {
   logger.log()
   logger.log(chalk.yellow(stripIndent`
-    Cypress ${chalk.cyan(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
+    Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
     Skipping installation
   `))
 
   logger.log()
 
-  logger.log(chalk.gray(stripIndent`
+  logger.log(chalk.yellow(stripIndent`
     Pass the ${chalk.white('--force')} option if you'd like to reinstall anyway.
   `))
   logger.log()
@@ -70,35 +70,12 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
     onProgress: null,
   }
   const downloadDestination = path.join(downloadDir, 'cypress.zip')
-
+  const rendererOptions = getRendererOptions()
 
   // let the user know what version of cypress we're downloading!
   const message = chalk.yellow(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
   logger.log(message)
   logger.log()
-
-  const progessify = (task, title) => {
-    // return higher order function
-    return (percentComplete, remaining) => {
-      percentComplete = chalk.white(` ${percentComplete}%`)
-
-      // pluralize seconds remaining
-      remaining = chalk.gray(`${remaining}s`)
-
-      util.setTaskTitle(
-        task,
-        util.titleize(title, percentComplete, remaining),
-        rendererOptions.renderer
-      )
-    }
-  }
-
-  // if we are running in CI then use
-  // the verbose renderer else use
-  // the default
-  const rendererOptions = {
-    renderer: util.isCi() ? verbose : 'default',
-  }
 
   const tasks = new Listr([
     {
@@ -122,22 +99,12 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
         })
       },
     },
-    {
-      title: util.titleize('Unzipping Cypress'),
-      task: (ctx, task) => {
-        // as our unzip progresses indicate the status
-        progress.onProgress = progessify(task, 'Unzipping Cypress')
-
-        return unzip.start({ zipFilePath: downloadDestination, installDir, progress })
-        .then(() => {
-          util.setTaskTitle(
-            task,
-            util.titleize(chalk.green('Unzipped Cypress')),
-            rendererOptions.renderer
-          )
-        })
-      },
-    },
+    unzipTask({
+      progress,
+      zipFilePath: downloadDestination,
+      installDir,
+      rendererOptions,
+    }),
     {
       title: util.titleize('Finishing Installation'),
       task: (ctx, task) => {
@@ -179,7 +146,8 @@ const start = (options = {}) => {
     force: false,
   })
 
-  let needVersion = util.pkgVersion()
+  const pkgVersion = util.pkgVersion()
+  let needVersion = pkgVersion
   debug('version in package.json is', needVersion)
 
   // let this env var reset the binary version we need
@@ -190,18 +158,6 @@ const start = (options = {}) => {
     // then print warning to the user
     if (envVarVersion !== needVersion) {
       debug('using env var CYPRESS_BINARY_VERSION %s', needVersion)
-      logger.log(
-        chalk.yellow(stripIndent`
-          Forcing a binary version different than the default.
-
-          The CLI expected to install version: ${chalk.cyan(needVersion)}
-
-          Instead we will install version: ${chalk.cyan(envVarVersion)}
-
-          Note: there is no guarantee these versions will work properly together.
-        `)
-      )
-      logger.log('')
 
       // reset the version to the env var version
       needVersion = envVarVersion
@@ -245,7 +201,7 @@ const start = (options = {}) => {
       return true
     }
 
-    if (binaryVersion === needVersion) {
+    if ((binaryVersion === needVersion) || !util.isSemver(needVersion)) {
       // our version matches, tell the user this is a noop
       alreadyInstalledMsg(installDir, binaryVersion)
       return false
@@ -264,6 +220,21 @@ const start = (options = {}) => {
     if (!shouldInstall) {
       debug('Not downloading or installing binary')
       return
+    }
+
+    if (needVersion !== pkgVersion) {
+      logger.log(
+        chalk.yellow(stripIndent`
+          Forcing a binary version different than the default.
+
+          The CLI expected to install version: ${chalk.cyan(pkgVersion)}
+
+          Instead we will install version: ${chalk.cyan(needVersion)}
+
+          Note: there is no guarantee these versions will work properly together.
+        `)
+      )
+      logger.log('')
     }
 
     // see if version supplied is a path to a binary
@@ -291,10 +262,16 @@ const start = (options = {}) => {
         debug('found local file at', needVersion)
         debug('skipping download')
 
-        return unzip.start({
+        const rendererOptions = getRendererOptions()
+        return new Listr([unzipTask({
+          progress: {
+            throttle: 100,
+            onProgress: null,
+          },
           zipFilePath: needVersion,
           installDir,
-        })
+          rendererOptions,
+        })], rendererOptions).run()
       }
 
       if (options.force) {
@@ -316,3 +293,43 @@ const start = (options = {}) => {
 module.exports = {
   start,
 }
+
+const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => ({
+  title: util.titleize('Unzipping Cypress'),
+  task: (ctx, task) => {
+    // as our unzip progresses indicate the status
+    progress.onProgress = progessify(task, 'Unzipping Cypress')
+
+    return unzip.start({ zipFilePath, installDir, progress })
+    .then(() => {
+      util.setTaskTitle(
+        task,
+        util.titleize(chalk.green('Unzipped Cypress')),
+        rendererOptions.renderer
+      )
+    })
+  },
+})
+
+const progessify = (task, title) => {
+  // return higher order function
+  return (percentComplete, remaining) => {
+    percentComplete = chalk.white(` ${percentComplete}%`)
+
+    // pluralize seconds remaining
+    remaining = chalk.gray(`${remaining}s`)
+
+    util.setTaskTitle(
+      task,
+      util.titleize(title, percentComplete, remaining),
+      getRendererOptions().renderer
+    )
+  }
+}
+
+// if we are running in CI then use
+// the verbose renderer else use
+// the default
+const getRendererOptions = () => ({
+  renderer: util.isCi() ? verbose : 'default',
+})
