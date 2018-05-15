@@ -2581,7 +2581,7 @@ describe "src/cy/commands/actions/type", ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<form id=\"checkboxes\">...</form>"
-          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get("textarea:first,form#checkboxes").clear()
@@ -2591,7 +2591,7 @@ describe "src/cy/commands/actions/type", ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<div id=\"dom\">...</div>"
-          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get("div").clear()
@@ -2601,7 +2601,7 @@ describe "src/cy/commands/actions/type", ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<input type=\"radio\" name=\"gender\" value=\"male\">"
-          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get(":radio").clear()
@@ -2611,7 +2611,7 @@ describe "src/cy/commands/actions/type", ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<input type=\"checkbox\" name=\"colors\" value=\"blue\">"
-          expect(err.message).to.include "Cypress considers the 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get(":checkbox").clear()
