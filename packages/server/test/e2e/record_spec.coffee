@@ -585,7 +585,7 @@ describe "e2e record", ->
         .then ->
           urls = getRequestUrls()
 
-          expect(urls).to.deep.eq([
+          expect(urls).to.have.members([
             "POST /runs"
             "POST /runs/#{runId}/instances"
             "PUT /instances/#{instanceId}"

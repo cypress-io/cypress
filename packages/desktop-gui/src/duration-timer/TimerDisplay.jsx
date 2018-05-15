@@ -1,22 +1,28 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import timerStore from './duration-timer-store'
+import TimerStore from './duration-timer-store'
 
 @observer
 export default class TimerDisplay extends Component {
-  componentWillMount () {
-    timerStore.startTimer(this.props.startTime)
+  constructor (...props) {
+    super(...props)
+
+    this.timerStore = new TimerStore(this.props.startTime)
+  }
+
+  componentDidMount () {
+    this.timerStore.startTimer()
   }
 
   componentWillUnmount () {
-    timerStore.resetTimer()
+    this.timerStore.resetTimer()
   }
 
   render () {
     return (
       <span>
         <i className='fa fa-hourglass-end'></i>{' '}
-        {timerStore.mainDisplay}
+        {this.timerStore.mainDisplay}
       </span>
     )
   }
