@@ -1,4 +1,4 @@
-## Example 
+## Example
 
 This repo contains the source code for pushing out [https://example.cypress.io](https://example.cypress.io).
 

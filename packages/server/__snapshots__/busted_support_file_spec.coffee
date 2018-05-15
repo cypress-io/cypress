@@ -24,6 +24,7 @@ Fix the error in your code and re-run your tests.
   - Passes:          0
   - Failures:        1
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true

@@ -105,10 +105,10 @@ mergeErr = (runnable, runnables, stats) ->
 
 setDate = (obj, runnables, stats) ->
   if s = obj.start
-    stats.start = new Date(s)
+    stats.wallClockStartedAt = new Date(s)
 
   if e = obj.end
-    stats.end = new Date(e)
+    stats.wallClockEndedAt = new Date(e)
 
   return null
 
@@ -170,6 +170,8 @@ class Reporter
       else
         throw new Error("Unknown runnable type: '#{type}'")
 
+    runnable.id = runnableProps.id
+
     @runnables[runnableProps.id] = runnable
     return runnable
 
@@ -197,15 +199,13 @@ class Reporter
     }
 
   normalizeTest: (test = {}) ->
-    err = test.err ? {}
+    get = (prop) ->
+      _.get(test, prop, null)
 
     ## use this or null
-    wcs = test.wallClockStart ? null
-
-    if wcs
+    if wcs = get("wallClockStartedAt")
       ## convert to actual date object
       wcs = new Date(wcs)
-
 
     ## wallClockDuration:
     ## this is the 'real' duration of wall clock time that the
@@ -215,19 +215,17 @@ class Reporter
     ## than summing the durations of the timings.
     ##
     {
-      testId:         test.id
+      testId:         get("id")
       title:          getParentTitle(test)
-      state:          test.state
-      start:          test.start
-      end:            test.end
-      body:           test.body
-      stack:          err.stack
-      error:          err.message
-      timings:        test.timings
-      failedFromHookId: test.failedFromHookId
-      wallClockStart: wcs
-      wallClockDuration: test.wallClockDuration
-      # videoTimestamp: test.started - videoStart
+      state:          get("state")
+      body:           get("body")
+      stack:          get("err.stack")
+      error:          get("err.message")
+      timings:        get("timings")
+      failedFromHookId: get("failedFromHookId")
+      wallClockStartedAt: wcs
+      wallClockDuration: get("wallClockDuration")
+      videoTimestamp: null ## always start this as null
     }
 
   end: ->
@@ -259,10 +257,13 @@ class Reporter
     .filter({root: false}) ## don't include root suite
     .value()
 
-    { start, end } = @stats
+    ## default to 0
+    @stats.wallClockDuration = 0
 
-    if start and end
-      @stats.duration = end - start
+    { wallClockStartedAt, wallClockEndedAt } = @stats
+
+    if wallClockStartedAt and wallClockEndedAt
+      @stats.wallClockDuration = wallClockEndedAt - wallClockStartedAt
 
     @stats.suites = suites.length
     @stats.tests = tests.length
@@ -288,9 +289,9 @@ class Reporter
 
   @setVideoTimestamp = (videoStart, tests = []) ->
     _.map tests, (test) ->
-      ## if we have a wallClockStart
-      if wcs = test.wallClockStart
-        test.videoTimestamp = test.wallClockStart - videoStart
+      ## if we have a wallClockStartedAt
+      if wcs = test.wallClockStartedAt
+        test.videoTimestamp = test.wallClockStartedAt - videoStart
       test
 
   @create = (reporterName, reporterOptions, projectRoot) ->

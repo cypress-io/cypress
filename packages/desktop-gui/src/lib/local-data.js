@@ -7,4 +7,8 @@ export default {
   set (key, value) {
     localStorage[key] = JSON.stringify(value)
   },
+
+  remove (key) {
+    localStorage.removeItem(key)
+  },
 }

@@ -8,11 +8,11 @@ preprocessor = require("#{root}../../lib/plugins/child/preprocessor")
 describe "lib/plugins/child/preprocessor", ->
   beforeEach ->
     @ipc = {
-      send: @sandbox.spy()
-      on: @sandbox.stub()
-      removeListener: @sandbox.spy()
+      send: sinon.spy()
+      on: sinon.stub()
+      removeListener: sinon.spy()
     }
-    @invoke = @sandbox.spy()
+    @invoke = sinon.spy()
     @ids = {}
     @file = {
       filePath: 'file/path'
@@ -25,7 +25,7 @@ describe "lib/plugins/child/preprocessor", ->
       shouldWatch: true
     }
 
-    @sandbox.stub(util, "wrapChildPromise")
+    sinon.stub(util, "wrapChildPromise")
 
     preprocessor.wrap(@ipc, @invoke, @ids, [@file])
 
@@ -51,14 +51,14 @@ describe "lib/plugins/child/preprocessor", ->
 
   it "emits 'close' when ipc emits 'preprocessor:close' with same file path", ->
     file = util.wrapChildPromise.lastCall.args[3][0]
-    handler = @sandbox.spy()
+    handler = sinon.spy()
     file.on("close", handler)
     @ipc.on.withArgs("preprocessor:close").yield(@file.filePath)
     expect(handler).to.be.called
 
   it "does not close file when ipc emits 'preprocessor:close' with different file path", ->
     file = util.wrapChildPromise.lastCall.args[3][0]
-    handler = @sandbox.spy()
+    handler = sinon.spy()
     file.on("close", handler)
     @ipc.on.withArgs("preprocessor:close").yield("different/path")
     expect(handler).not.to.be.called

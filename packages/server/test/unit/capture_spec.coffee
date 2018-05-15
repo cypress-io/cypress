@@ -1,15 +1,15 @@
 require("../spec_helper")
 
-stdout = require("#{root}lib/stdout")
+capture = require("#{root}lib/capture")
 
-describe "lib/stdout", ->
+describe "lib/capture", ->
   afterEach ->
-    stdout.restore()
+    capture.restore()
 
   context "process.stdout.write", ->
     beforeEach ->
-      @write    = @sandbox.spy(process.stdout, "write")
-      @captured = stdout.capture()
+      @write    = sinon.spy(process.stdout, "write")
+      @captured = capture.stdout()
 
     it "slurps up stdout", ->
       console.log("foo")
@@ -32,9 +32,9 @@ describe "lib/stdout", ->
   context "process.log", ->
     beforeEach ->
       @log = process.log
-      @logStub = process.log = @sandbox.stub()
+      @logStub = process.log = sinon.stub()
 
-      @captured = stdout.capture()
+      @captured = capture.stdout()
 
     afterEach ->
       process.log = @log

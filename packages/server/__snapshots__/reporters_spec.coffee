@@ -23,6 +23,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -52,6 +53,7 @@ finished!
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -93,6 +95,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -172,6 +175,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   - Passes:          1
   - Failures:        3
   - Pending:         1
+  - Skipped:         1
   - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
@@ -218,6 +222,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -295,6 +300,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   - Passes:          1
   - Failures:        3
   - Pending:         1
+  - Skipped:         1
   - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
@@ -341,6 +347,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     0
   - Video Recorded:  true
@@ -418,6 +425,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   - Passes:          1
   - Failures:        3
   - Pending:         1
+  - Skipped:         1
   - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
