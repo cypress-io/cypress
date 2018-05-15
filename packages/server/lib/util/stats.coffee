@@ -11,6 +11,11 @@ TRANSLATION = {
   screenshots:  "Screenshots"
   video:        "Video Recorded"
   version:      "Cypress Version"
+  browser:      "Browser"
+  runUrl:       "Run URL"
+  specPattern:  "Spec Pattern"
+  spec:         "Spec"
+  specs:        "Specs Found"
 }
 
 KEYS =  _.keys(TRANSLATION)

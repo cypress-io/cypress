@@ -6,6 +6,7 @@ human      = require("human-interval")
 Promise    = require("bluebird")
 pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
+Table      = require("cli-table2")
 recordMode = require("./record")
 user       = require("../user")
 video      = require("../video")
@@ -38,15 +39,70 @@ collectTestResults = (obj = {}) ->
     version:     pkg.version
   }
 
-allDone = ->
+renderSummaryTable = (results) ->
+  { runs } = results
+
   console.log("")
+
+  console.log(chalk.gray(Array(102).join("-")))
+
   console.log("")
 
   terminal.header("All Done", {
     color: ["gray"]
   })
 
-  console.log("")
+  if runs and runs.length
+    # color = if results.totalFailures then "red" else "green"
+
+    table = new Table({
+      head: ["Spec", "Duration", "Passes", "Failures", "Pending", "Skipped"]
+      chars: {
+        "top-mid": ""
+        # "mid": "0"
+        # "mid-mid": ""
+        # "left-mid": "2"
+        "middle": ""
+        "bottom-mid": ""
+        # "right-mid": "4"
+        "mid-mid": ""
+      }
+      style: {
+        head: ['gray']
+      }
+    })
+
+    _.each runs, (run) ->
+      { spec, stats } = run
+      { wallClockDuration, passes, failures, pending, skipped } = stats
+
+      ct = (num, color) ->
+        if num is 0
+          color = "gray"
+
+        c(num, color)
+
+
+      c = (text, color) ->
+        chalk[color](text)
+        # switch
+        #   when stats.failures then chalk.red
+        #   when stats.passes then chalk.green
+        #   else chalk.gray
+
+      char = if stats.failures then c("×", "red") else c("✓", "green")
+
+      table.push([
+        c(char + " " + c(spec.name, "white"), "white"),
+        c(humanTime(wallClockDuration), "gray"),
+        ct(passes, "green"),
+        ct(failures, "red"),
+        ct(pending, "cyan"),
+        ct(skipped, "gray")
+      ])
+
+    console.log("")
+    console.log(table.toString())
 
 getProjectId = (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
@@ -88,7 +144,7 @@ openProjectCreate = (projectRoot, socketId, options) ->
     report:       true
     isTextTerminal:   options.isTextTerminal ? true
     onError: (err) ->
-      console.log()
+      console.log("")
       console.log(err.stack)
       openProject.emit("exitEarlyWithErr", err.message)
   })
@@ -126,10 +182,9 @@ module.exports = {
   createRecording: (name) ->
     outputDir = path.dirname(name)
 
-    fs.ensureDirAsync(outputDir)
+    fs
+    .ensureDirAsync(outputDir)
     .then ->
-      console.log("\nStarted video recording: #{chalk.cyan(name)}\n")
-
       video.start(name, {
         onError: (err) ->
           ## catch video recording failures and log them out
@@ -163,12 +218,11 @@ module.exports = {
     obj
 
   displayStats: (obj = {}) ->
-    bgColor = if obj.failures then "bgRed" else "bgGreen"
-    color   = if obj.failures then "red"   else "green"
+    color = if obj.failures then "red" else "green"
 
     console.log("")
 
-    terminal.header("Tests Finished", {
+    terminal.header("Results", {
       color: [color]
     })
 
@@ -371,7 +425,7 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
-      obj.spec = spec?.path
+      obj.spec = spec
 
       testResults = collectTestResults(obj)
 
@@ -454,6 +508,8 @@ module.exports = {
       totalPending: null,
       totalSkipped: null,
       runs: null
+
+      ## TODO: whoops, forgot that this was hard coded
       browserName: 'chrome',
       browserVersion: '41.2.3.4',
       osName: 'darwin',
@@ -461,6 +517,28 @@ module.exports = {
       cypressVersion: '2.0.0',
       config
     }
+
+    console.log(chalk.gray(Array(102).join("-")))
+
+    console.log("")
+
+    terminal.header("Run Starting", {
+      color: ["gray"]
+    })
+
+    console.log("")
+
+    statsUtil.display("white", {
+      browser: "Electron 59 (headless)"
+      runUrl: "https://dashboard.cypress.io/foo/bar/baz"
+      specsGlob: "**/*.js"
+      specs: "28 [app_spec.coffee, foo_spec.js, bar_spec.js, ...25 more]"
+    })
+
+    console.log("")
+    # console.log("")
+
+    # console.log(chalk.gray(Array(100).join("-")))
 
     runEachSpec = (spec) =>
       Promise
@@ -470,9 +548,55 @@ module.exports = {
 
           beforeSpecRun(spec)
       .then =>
+        console.log("")
+        # console.log("")
+
+        # terminalBanner(chalk.cyan(spec.name), chalk.gray("-"))
+        # console.log(chalk.gray("  (" + (chalk.underline.bold(spec.name)) + ")"), Array(68).join(" "), chalk.gray("20 more to run"))
+        # console.log(chalk.gray("  " + spec.name), Array(68).join(" "), chalk.gray("(1 of 20)"))
+        # console.log(chalk.gray("┌" + Array(100).join("─") + "┐"))
+        table = new Table({
+          colWidths: [85, 15]
+          colAligns: ["left", "right"]
+          chars: {
+          #   "top": ""
+            "top-mid": ""
+            # "top-left": ""
+            # "top-right": ""
+            "bottom": ""
+            "bottom-mid": ""
+            "bottom-left": ""
+            "bottom-right": ""
+            # "left": ""
+          #   "left-mid": ""
+            # "mid": "2"
+            # "mid-mid": "3"
+            # "right": ""
+            # "right-mid": "4"
+            "middle": ""
+          }
+          style: {
+            "padding-left": 1
+            "padding-right": 1
+          }
+        })
+
+        table.push([
+          chalk.gray(spec.name),
+          chalk.gray("(100 of 200)")
+        ])
+
+        console.log(table.toString())
+
         @runSpec(spec, options)
       .get("results")
       .tap (results) ->
+        console.log("")
+        # console.log(chalk.gray(Array(100).join("┄")))
+        # console.log(chalk.gray("└" + Array(100).join("─") + "┘"))
+        # console.log("")
+        # console.log(chalk.gray(Array(50).join(" "), Array(10).join("─")))
+
         debug("spec results %o", results)
 
         if afterSpecRun
@@ -542,7 +666,35 @@ module.exports = {
       ## extract the started + ended promises from recording
       {start, end, write} = props
 
-      terminal.header("Tests Starting", {color: ["gray"]})
+      # console.log("")
+      # console.log("")
+      #
+      # # terminalBanner(chalk.cyan(spec.name), chalk.gray("-"))
+      # # console.log(chalk.gray("  (" + (chalk.underline.bold(spec.name)) + ")"), Array(68).join(" "), chalk.gray("20 more to run"))
+      # console.log(chalk.gray("  " + spec.name), Array(68).join(" "), chalk.gray("20 more to run"))
+      # console.log(chalk.gray("┌" + Array(100).join("─") + "┐"))
+      # console.log("")
+      # console.log("", chalk.cyan(spec.name), Array(68).join(" "), chalk.gray("20 more to run"))
+      # console.log(chalk.gray(Array(100).join(".")))
+      # console.log("")
+      # console.log(chalk.gray(Array(100).join("-")))
+
+      # console.log("")
+
+      # msg = chalk.gray("  (" + (chalk.underline.bold("Spec Starting")) + ")")
+
+      # console.log(msg, chalk.cyan(spec.name))
+
+      # terminal.header("Spec Starting", {
+      #   color: ["gray"]
+      # })
+
+      # console.log("")
+
+      # console.log("  ", chalk.cyan(spec.name))
+      # statsUtil.display("cyan", {
+      #   spec: spec.name
+      # })
 
       ## make sure we start the recording first
       ## before doing anything
@@ -644,7 +796,7 @@ module.exports = {
               headed:               options.headed
               outputPath:           options.outputPath
             })
-          .finally(allDone)
+            .tap(renderSummaryTable)
 
         ## TODO: we may still want to capture
         ## stdout even when no specs were found

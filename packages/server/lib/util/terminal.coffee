@@ -4,7 +4,7 @@ chalk = require("chalk")
 module.exports = {
   header: (message, options = {}) ->
     _.defaults(options, {
-      color:     null
+      color: null
     })
 
     message = "  (" + chalk.underline.bold(message) + ")"
