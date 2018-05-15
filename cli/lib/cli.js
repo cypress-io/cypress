@@ -171,6 +171,7 @@ module.exports = {
     })
 
     debug('cli starts with arguments %j', args)
+    util.printNodeOptions()
 
     // if there are no arguments
     if (args.length <= 2) {
