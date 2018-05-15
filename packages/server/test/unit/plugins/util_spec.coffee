@@ -55,7 +55,7 @@ describe "lib/plugins/util", ->
       }
       @invoke = sinon.stub()
       @ids = {
-        callbackId: 0
+        eventId: 0
         invocationId: "00"
       }
       @args = []

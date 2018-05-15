@@ -13,4 +13,4 @@ describe "e2e task", ->
       ## should include a stack trace from plugins file
       match = stdout.match(/at errors(.*)\n/)
       expect(match).not.to.be.null
-      expect(match[0].indexOf("plugins/index.js")).to.be.gt(-1)
+      expect(match[0]).to.include("plugins/index.js")

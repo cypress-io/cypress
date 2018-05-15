@@ -32,7 +32,7 @@ module.exports = {
 
   wrapChildPromise: (ipc, invoke, ids, args = []) ->
     Promise.try ->
-      return invoke(ids.callbackId, args)
+      return invoke(ids.eventId, args)
     .then (value) ->
       ## undefined is coerced into null when sent over ipc, but we need
       ## to differentiate between them for 'task' event
@@ -42,7 +42,7 @@ module.exports = {
     .catch (err) ->
       ipc.send("promise:fulfilled:#{ids.invocationId}", serializeError(err))
 
-  wrapParentPromise: (ipc, callbackId, callback) ->
+  wrapParentPromise: (ipc, eventId, callback) ->
     invocationId = _.uniqueId("inv")
 
     new Promise (resolve, reject) ->

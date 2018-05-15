@@ -112,7 +112,7 @@ describe "lib/plugins/child/run_plugins", ->
 
     context "file:preprocessor", ->
       beforeEach ->
-        @ids = { callbackId: 0, invocationId: "00" }
+        @ids = { eventId: 0, invocationId: "00" }
 
       it "calls preprocessor handler", ->
         args = ["arg1", "arg2"]
@@ -125,14 +125,13 @@ describe "lib/plugins/child/run_plugins", ->
 
       it "invokes registered function when invoked by preprocessor handler", ->
         @ipc.on.withArgs("execute").yield("file:preprocessor", @ids, [])
-        args = ["one", "two"]
-        preprocessor.wrap.lastCall.args[1](0, args)
+        preprocessor.wrap.lastCall.args[1](2, ["one", "two"])
         expect(@onFilePreprocessor).to.be.calledWith("one", "two")
 
     context "before:browser:launch", ->
       beforeEach ->
         sinon.stub(util, "wrapChildPromise")
-        @ids = { callbackId: 1, invocationId: "00" }
+        @ids = { eventId: 1, invocationId: "00" }
 
       it "wraps child promise", ->
         args = ["arg1", "arg2"]
@@ -146,13 +145,13 @@ describe "lib/plugins/child/run_plugins", ->
       it "invokes registered function when invoked by preprocessor handler", ->
         @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, [])
         args = ["one", "two"]
-        util.wrapChildPromise.lastCall.args[1](1, args)
+        util.wrapChildPromise.lastCall.args[1](3, args)
         expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")
 
     context "task", ->
       beforeEach ->
         sinon.stub(task, "wrap")
-        @ids = { callbackId: 2, invocationId: "00" }
+        @ids = { eventId: 2, invocationId: "00" }
 
       it "calls task handler", ->
         args = ["arg1"]
