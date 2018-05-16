@@ -147,7 +147,8 @@ describe "src/cy/commands/task", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("cy.task('foo') failed with the following error:\n\n> \"Error: task failed\"")
+          expect(err.message).to.include("cy.task('foo') failed with the following error:")
+          expect(err.message).to.include("Error: task failed")
           done()
 
         cy.task("foo")
@@ -160,7 +161,7 @@ describe "src/cy/commands/task", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("cy.task('bar') failed with the following error:\n\n> \"Error: The task 'bar' was not handled in the plugins file\"")
+          expect(err.message).to.eq("cy.task('bar') failed with the following error:\n\nThe task 'bar' was not handled in the plugins file. The following tasks are registered: return:arg, wait\n\nFix this in your plugins file here:\n#{Cypress.config('pluginsFile')}\n\nhttps://on.cypress.io/api/task")
           done()
 
         cy.task("bar")
@@ -194,7 +195,7 @@ describe "src/cy/commands/task", ->
 
       it "can timeout from the backend's response", (done) ->
         err = new Error("timeout")
-        err.timedout = true
+        err.timedOut = true
 
         Cypress.backend.rejects(err)
 

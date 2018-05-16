@@ -52,14 +52,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { cmd, output, code: result.code }
         }
 
-      .catch Promise.TimeoutError, { timedout: true }, (err) ->
+      .catch Promise.TimeoutError, { timedOut: true }, (err) ->
         $utils.throwErrByPath "exec.timed_out", {
           onFail: options._log
           args: { cmd, timeout: options.timeout }
         }
 
       .catch (error) ->
-        ## re-throw if timedout error from above
+        ## re-throw if timedOut error from above
         throw error if error.name is "CypressError"
 
         $utils.throwErrByPath("exec.failed", {

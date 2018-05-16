@@ -59,6 +59,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - Passes:          11
   - Failures:        3
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     16
   - Video Recorded:  true

@@ -10,6 +10,7 @@ const util = require('./util')
 
 const cypressModuleApi = {
   open (options = {}) {
+    options = util.normalizeModuleOptions(options)
     return open.start(options)
   },
 

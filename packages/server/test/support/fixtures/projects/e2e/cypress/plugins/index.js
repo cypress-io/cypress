@@ -17,6 +17,12 @@ module.exports = (on) => {
   }
 
   on('task', {
+    'returns:undefined' () {},
+
+    'errors' (message) {
+      throw new Error(message)
+    },
+
     'compare:screenshots' ({ a, b, blackout = false }) {
       function isBlack (rgba) {
         return `${rgba.r}${rgba.g}${rgba.b}` === '000'

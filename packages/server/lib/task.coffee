@@ -1,34 +1,46 @@
+_ = require("lodash")
 Promise = require("bluebird")
-log = require("debug")("cypress:server:task")
+debug = require("debug")("cypress:server:task")
 plugins = require("./plugins")
 
+docsUrl = "https://on.cypress.io/api/task"
+
+throwKnownError = (message, props = {}) ->
+  err = new Error(message)
+  _.extend(err, props, { isKnownError: true })
+  throw err
+
 module.exports = {
-  run: (options) ->
-    log("run task", options.task, "with arg", options.arg)
+  run: (pluginsFilePath, options) ->
+    debug("run task", options.task, "with arg", options.arg)
+
+    fileAndDocsUrl = "\n\nFix this in your plugins file here:\n#{pluginsFilePath}\n\n#{docsUrl}"
 
     Promise
     .try ->
       if not plugins.has("task")
-        log("'task' event is not registered")
-        throw new Error("The 'task' event has not been registered in the plugins file, so cy.task() cannot run")
+        debug("'task' event is not registered")
+        throwKnownError("The 'task' event has not been registered in the plugins file. You must register it before using cy.task()#{fileAndDocsUrl}")
 
       plugins.execute("task", options.task, options.arg)
     .then (result) ->
       if result is "__cypress_unhandled__"
-        throw new Error("The task '#{options.task}' was not handled in the plugins file")
+        debug("task is unhandled")
+        return plugins.execute("_get:task:keys").then (keys) ->
+          throwKnownError("The task '#{options.task}' was not handled in the plugins file. The following tasks are registered: #{keys.join(", ")}#{fileAndDocsUrl}")
 
       if result is undefined
-        log("result is undefined")
-        throw new Error("The task '#{options.task}' returned undefined. Return a promise, a value, or null to indicate that the task was handled.")
+        debug("result is undefined")
+        return plugins.execute("_get:task:body", options.task).then (body) ->
+          throwKnownError("The task '#{options.task}' returned undefined. You must return a promise, a value, or null to indicate that the task was handled.\n\nThe task handler was:\n\n#{body}#{fileAndDocsUrl}")
 
-      log("result is:", result)
+      debug("result is:", result)
       return result
     .timeout(options.timeout)
     .catch Promise.TimeoutError, ->
-      log("timed out after #{options.timeout}ms")
-      err = new Error("Process timed out\ntask: #{options.task}")
-      err.timedout = true
-      throw err
-    .catch (err) ->
-      throw err
+      debug("timed out after #{options.timeout}ms")
+      plugins.execute("_get:task:body", options.task).then (body) ->
+        err = new Error("The task handler was:\n\n#{body}#{fileAndDocsUrl}")
+        err.timedOut = true
+        throw err
 }

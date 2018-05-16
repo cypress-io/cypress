@@ -14,10 +14,32 @@ const cypress = require(`${lib}/cypress`)
 
 describe('cypress', function () {
   context('.open', function () {
-    it('calls open#start, passing in options', function () {
+    beforeEach(function () {
       this.sandbox.stub(open, 'start').resolves()
+    })
+
+    const getCallArgs = R.path(['lastCall', 'args', 0])
+    const getStartArgs = () => {
+      expect(open.start).to.be.called
+      return getCallArgs(open.start)
+    }
+
+    it('calls open#start, passing in options', function () {
       cypress.open({ foo: 'foo' })
-      expect(open.start).to.be.calledWith({ foo: 'foo' })
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args.foo).to.equal('foo')
+      })
+    })
+
+    it('normalizes config object', () => {
+      const config = {
+        pageLoadTime: 10000,
+        watchForFileChanges: false,
+      }
+      cypress.open({ config })
+      .then(getStartArgs)
+      .then(snapshot)
     })
   })
 

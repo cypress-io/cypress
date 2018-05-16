@@ -306,7 +306,7 @@ class Socket
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
-              task.run(args[0])
+              task.run(config.pluginsFile, args[0])
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"

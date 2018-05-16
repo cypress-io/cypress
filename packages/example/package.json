@@ -22,7 +22,7 @@
     "bin-up": "^1.1.0",
     "chai": "^3.5.0",
     "cross-env": "^5.0.5",
-    "cypress-example-kitchensink": "1.0.0",
+    "cypress-example-kitchensink": "1.0.1",
     "glob": "^7.0.3",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.1",

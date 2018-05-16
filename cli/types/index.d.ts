@@ -845,6 +845,13 @@ declare namespace Cypress {
     spread(fn: (...args: any[]) => void): Chainable<Subject>
 
     /**
+     * Run a task in Node via the plugins file.
+     *
+     * @see https://on.cypress.io/task
+     */
+    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
+
+    /**
      * Enables you to work with the subject yielded from the previous command.
      *
      * @see https://on.cypress.io/then
@@ -1298,7 +1305,16 @@ declare namespace Cypress {
      *
      * @default 'swing'
      */
-    easing: 'swing' | 'linear'
+    easing: 'swing' | 'linear',
+  }
+
+  interface ScrollIntoViewOptions extends ScrollToOptions {
+    /**
+     * Amount to scroll after the element has been scrolled into view
+     *
+     * @default {top: 0, left: 0}
+     */
+    offset: Offset
   }
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
@@ -3227,6 +3243,10 @@ declare namespace Cypress {
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  interface Offset {
+    top: number,
+    left: number
+  }
 
   // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]

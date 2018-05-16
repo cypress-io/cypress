@@ -429,6 +429,13 @@ describe('Kitchen Sink', function() {
       // Cypress knows to scroll to the right and down
       cy.get('#scroll-both button').scrollIntoView()
         .should('be.visible')
+
+      // We can set scroll duration
+      cy.get('#scroll-both button').scrollIntoView({
+        duration: 1000,
+        easing: 'swing',
+        offset: {top: 0, left: 0}
+      })
     })
 
     it('cy.scrollTo() - scroll the window or element to a position', function() {
@@ -785,6 +792,11 @@ describe('Kitchen Sink', function() {
         beforeScreenshot() {},
         afterScreenshot() {},
       })
+    })
+
+    it('cy.task() - run a task', function() {
+      // https://on.cypress.io/task
+      cy.task('my-task', 'my-arg')
     })
 
     it('cy.wrap() - wrap an object', function() {
