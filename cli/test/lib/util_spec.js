@@ -140,6 +140,24 @@ describe('util', function () {
     expect(logger.error).to.be.calledWith('foo')
   })
 
+  describe('.isSemver', function () {
+    it('is true with 3-digit version', function () {
+      expect(util.isSemver('1.2.3')).to.equal(true)
+    })
+    it('is true with 2-digit version', function () {
+      expect(util.isSemver('1.2')).to.equal(true)
+    })
+    it('is true with 1-digit version', function () {
+      expect(util.isSemver('1')).to.equal(true)
+    })
+    it('is false with URL', function () {
+      expect(util.isSemver('www.cypress.io/download/1.2.3')).to.equal(false)
+    })
+    it('is false with file path', function () {
+      expect(util.isSemver('0/path/1.2.3/mypath/2.3')).to.equal(false)
+    })
+  })
+
   context('.printNodeOptions', function () {
     describe('NODE_OPTIONS is not set', function () {
       beforeEach(function () {

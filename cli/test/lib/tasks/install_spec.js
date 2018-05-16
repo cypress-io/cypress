@@ -1,5 +1,6 @@
 require('../../spec_helper')
-
+const os = require('os')
+const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
@@ -9,7 +10,7 @@ const stdout = require('../../support/stdout')
 const fs = require(`${lib}/fs`)
 const download = require(`${lib}/tasks/download`)
 const install = require(`${lib}/tasks/install`)
-const info = require(`${lib}/tasks/info`)
+const state = require(`${lib}/tasks/state`)
 const unzip = require(`${lib}/tasks/unzip`)
 const logger = require(`${lib}/logger`)
 const util = require(`${lib}/util`)
@@ -17,10 +18,8 @@ const util = require(`${lib}/util`)
 const normalize = require('../../support/normalize')
 
 const packageVersion = '1.2.3'
-const downloadDestination = {
-  filename: 'path/to/cypress.zip',
-  downloaded: true,
-}
+const downloadDestination = path.join(os.tmpdir(), 'cypress.zip')
+const installDir = '/cache/Cypress/1.2.3'
 
 describe('install', function () {
   require('mocha-banner').register()
@@ -37,28 +36,28 @@ describe('install', function () {
     stdout.restore()
 
     chalk.enabled = true
+    delete process.env.CYPRESS_SKIP_BINARY_INSTALL
   })
 
   context('.start', function () {
     beforeEach(function () {
       logger.reset()
 
+      // this.sandbox.stub(os, 'tmpdir').returns('/tmp')
       this.sandbox.stub(util, 'isCi').returns(false)
       this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
-      this.sandbox.stub(download, 'start').resolves(downloadDestination)
+      this.sandbox.stub(download, 'start').resolves(packageVersion)
       this.sandbox.stub(unzip, 'start').resolves()
-      this.sandbox.stub(Promise, 'delay').resolves()
+      this.sandbox.stub(Promise.prototype, 'delay').resolves()
       this.sandbox.stub(fs, 'removeAsync').resolves()
-      this.sandbox.stub(info, 'getPathToUserExecutableDir').returns('/path/to/binary/dir/')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves()
-      this.sandbox.stub(info, 'writeInstalledVersion').resolves()
-      this.sandbox.stub(info, 'clearVersionState').resolves()
+      this.sandbox.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
+      this.sandbox.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
+      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves()
+      this.sandbox.stub(fs, 'ensureDirAsync').resolves(undefined)
     })
 
     describe('skips install', function () {
-      afterEach(function () {
-        delete process.env.CYPRESS_SKIP_BINARY_INSTALL
-      })
+
 
       it('when environment variable is set', function () {
         process.env.CYPRESS_SKIP_BINARY_INSTALL = true
@@ -91,7 +90,7 @@ describe('install', function () {
           })
 
           expect(unzip.start).to.be.calledWithMatch({
-            version,
+            zipFilePath: downloadDestination,
           })
 
           snapshot(
@@ -104,177 +103,243 @@ describe('install', function () {
       it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
         process.env.CYPRESS_BINARY_VERSION = version
-        this.sandbox.stub(fs, 'statAsync').withArgs(version).resolves()
+        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
 
+        const installDir = state.getVersionDir()
         return install.start()
         .then(() => {
-          expect(unzip.start).calledWith({
-            zipDestination: version,
-            destination: info.getInstallationDir(),
-            executable: info.getPathToUserExecutableDir(),
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: version,
+            installDir,
           })
-          expect(info.writeInstalledVersion).calledWith('unknown')
         })
       })
-    })
 
-    describe('when version is already installed', function () {
-      beforeEach(function () {
-        info.getInstalledVersion.resolves(packageVersion)
+      describe('when version is already installed', function () {
+        beforeEach(function () {
+          state.getBinaryPkgVersionAsync.resolves(packageVersion)
 
-        return install.start()
-      })
-
-      it('logs noop message', function () {
-        expect(download.start).not.to.be.called
-
-        snapshot(
-          'version already installed',
-          normalize(this.stdout.toString())
-        )
-      })
-    })
-
-    describe('when getting installed version fails', function () {
-      beforeEach(function () {
-        info.getInstalledVersion.rejects(new Error('no'))
-
-        return install.start()
-      })
-
-      it('logs message and starts download', function () {
-        expect(download.start).to.be.calledWithMatch({
-          version: packageVersion,
+          return install.start()
         })
 
-        expect(unzip.start).to.be.calledWithMatch({
-          version: packageVersion,
+        it('logs noop message', function () {
+          expect(download.start).not.to.be.called
+
+          snapshot(
+            'version already installed',
+            normalize(this.stdout.toString())
+          )
+        })
+      })
+
+      describe('when getting installed version fails', function () {
+        beforeEach(function () {
+          state.getBinaryPkgVersionAsync.resolves(null)
+
+          return install.start()
         })
 
-        snapshot(
-          'continues installing on failure',
-          normalize(this.stdout.toString())
-        )
+        it('logs message and starts download', function () {
+          expect(download.start).to.be.calledWithMatch({
+            version: packageVersion,
+          })
+
+          expect(unzip.start).to.be.calledWithMatch({
+            installDir,
+          })
+
+          snapshot(
+            'continues installing on failure',
+            normalize(this.stdout.toString())
+          )
+        })
       })
-    })
 
-    describe('when there is no install version', function () {
-      beforeEach(function () {
-        info.getInstalledVersion.resolves(null)
+      describe('when there is no install version', function () {
+        beforeEach(function () {
+          state.getBinaryPkgVersionAsync.resolves(null)
 
-        return install.start()
-      })
-
-      it('logs message and starts download', function () {
-        expect(info.clearVersionState).to.be.called
-
-        expect(download.start).to.be.calledWithMatch({
-          version: packageVersion,
+          return install.start()
         })
 
-        expect(unzip.start).to.be.calledWithMatch({
-          version: packageVersion,
+        it('logs message and starts download', function () {
+
+          expect(download.start).to.be.calledWithMatch({
+            version: packageVersion,
+          })
+
+          expect(unzip.start).to.be.calledWithMatch({
+            installDir,
+          })
+
+          // cleans up the zip file
+          expect(fs.removeAsync).to.be.calledWith(
+            downloadDestination
+          )
+
+          snapshot(
+            'installs without existing installation',
+            normalize(this.stdout.toString())
+          )
+        })
+      })
+
+      describe('when getting installed version does not match needed version', function () {
+        beforeEach(function () {
+          state.getBinaryPkgVersionAsync.resolves('x.x.x')
+
+          return install.start()
         })
 
-        // cleans up the zip file
-        expect(fs.removeAsync).to.be.calledWith(
-          downloadDestination.filename
-        )
+        it('logs message and starts download', function () {
+          expect(download.start).to.be.calledWithMatch({
+            version: packageVersion,
+          })
 
-        snapshot(
-          'installs without existing installation',
-          normalize(this.stdout.toString())
-        )
-      })
-    })
+          expect(unzip.start).to.be.calledWithMatch({
+            installDir,
+          })
 
-    describe('when getting installed version does not match needed version', function () {
-      beforeEach(function () {
-        info.getInstalledVersion.resolves('x.x.x')
-
-        return install.start()
+          snapshot(
+            'installed version does not match needed version',
+            normalize(this.stdout.toString())
+          )
+        })
       })
 
-      it('logs message and starts download', function () {
-        expect(download.start).to.be.calledWithMatch({
-          version: packageVersion,
+      describe('with force: true', function () {
+        beforeEach(function () {
+          state.getBinaryPkgVersionAsync.resolves(packageVersion)
+
+          return install.start({ force: true })
         })
 
-        expect(unzip.start).to.be.calledWithMatch({
-          version: packageVersion,
+        it('logs message and starts download', function () {
+
+          expect(download.start).to.be.calledWithMatch({
+            version: packageVersion,
+          })
+
+          expect(unzip.start).to.be.calledWithMatch({
+            installDir,
+          })
+
+          snapshot(
+            'forcing true always installs',
+            normalize(this.stdout.toString())
+          )
+        })
+      })
+
+      describe('as a global install', function () {
+        beforeEach(function () {
+          this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
+
+          state.getBinaryPkgVersionAsync.resolves('x.x.x')
+
+          return install.start()
         })
 
-        snapshot(
-          'installed version does not match needed version',
-          normalize(this.stdout.toString())
-        )
+        it('logs global warning and download', function () {
+          expect(download.start).to.be.calledWithMatch({
+            version: packageVersion,
+          })
+
+          expect(unzip.start).to.be.calledWithMatch({
+            installDir,
+          })
+
+          snapshot(
+            'warning installing as global',
+            normalize(this.stdout.toString())
+          )
+        })
       })
-    })
 
-    describe('with force: true', function () {
-      beforeEach(function () {
-        info.getInstalledVersion.resolves(packageVersion)
+      describe('when running in CI', function () {
+        beforeEach(function () {
+          util.isCi.returns(true)
 
-        return install.start({ force: true })
-      })
+          state.getBinaryPkgVersionAsync.resolves('x.x.x')
 
-      it('logs message and starts download', function () {
-        expect(info.clearVersionState).to.be.called
-
-        expect(download.start).to.be.calledWithMatch({
-          version: packageVersion,
+          return install.start()
         })
 
-        expect(unzip.start).to.be.calledWithMatch({
-          version: packageVersion,
+        it('uses verbose renderer', function () {
+          snapshot(
+            'installing in ci',
+            normalize(this.stdout.toString())
+          )
         })
-
-        snapshot(
-          'forcing true always installs',
-          normalize(this.stdout.toString())
-        )
-      })
-    })
-
-    describe('as a global install', function () {
-      beforeEach(function () {
-        this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
-
-        info.getInstalledVersion.resolves('x.x.x')
-
-        return install.start()
       })
 
-      it('logs global warning and download', function () {
-        expect(download.start).to.be.calledWithMatch({
-          version: packageVersion,
+      describe('failed write access to cache directory', function () {
+        it('logs error on failure', function () {
+          this.sandbox.stub(os, 'platform').returns('darwin')
+          this.sandbox.stub(os, 'release').returns('1.1.1-generic')
+          this.sandbox.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
+
+          const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
+          err.code = 'EACCES'
+          fs.ensureDirAsync.rejects(err)
+
+          return install.start()
+          .then(() => {
+            throw new Error('should have caught error')
+          })
+          .catch((err) => {
+            logger.error(err)
+
+            snapshot(
+              'invalid cache directory',
+              normalize(this.stdout.toString())
+            )
+          })
         })
+      })
 
-        expect(unzip.start).to.be.calledWithMatch({
-          version: packageVersion,
+      describe('CYPRESS_BINARY_INSTALL is URL or Zip', function () {
+        it('uses cache when correct version installed given URL', function () {
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('1.2.3')
+          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          return install.start()
+          .then(() => {
+            expect(download.start).to.not.be.called
+          })
         })
+        it('uses cache when mismatch version given URL ', function () {
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('4.0.0')
+          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          return install.start()
+          .then(() => {
+            expect(download.start).to.not.be.called
+          })
+        })
+        it('uses cache when correct version installed given Zip', function () {
+          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
-        snapshot(
-          'warning installing as global',
-          normalize(this.stdout.toString())
-        )
-      })
-    })
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('1.2.3')
 
-    describe('when running in CI', function () {
-      beforeEach(function () {
-        util.isCi.returns(true)
+          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          return install.start()
+          .then(() => {
+            expect(unzip.start).to.not.be.called
+          })
+        })
+        it('uses cache when mismatch version given Zip ', function () {
+          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
-        info.getInstalledVersion.resolves('x.x.x')
-
-        return install.start()
-      })
-
-      it('uses verbose renderer', function () {
-        snapshot(
-          'installing in ci',
-          normalize(this.stdout.toString())
-        )
+          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          util.pkgVersion.returns('4.0.0')
+          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          return install.start()
+          .then(() => {
+            expect(unzip.start).to.not.be.called
+          })
+        })
       })
     })
   })

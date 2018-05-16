@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 
 const util = require('../util')
-const info = require('../tasks/info')
+const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
@@ -41,24 +41,26 @@ module.exports = {
     _.defaults(options, {
       detached: false,
       stdio: getStdio(needsXvfb),
+      binaryFolder: process.env.CYPRESS_BINARY_FOLDER || state.getBinaryDir(),
     })
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let cypressPath = info.getPathToExecutable()
+        let binaryFolder = state.getPathToExecutable(options.binaryFolder)
 
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          cypressPath = 'node'
+          binaryFolder = 'node'
           args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
-        debug('spawning Cypress %s', cypressPath)
+        debug('spawning Cypress %s', binaryFolder)
         debug('spawn args %j', args, options)
 
         // strip dev out of child process options
         options = _.omit(options, 'dev')
+        options = _.omit(options, 'binaryFolder')
 
         // when running in electron in windows
         // it never supports color but we're
@@ -87,7 +89,7 @@ module.exports = {
           process.env.FORCE_STDERR_TTY = 1
         }
 
-        const child = cp.spawn(cypressPath, args, options)
+        const child = cp.spawn(binaryFolder, args, options)
         child.on('close', resolve)
         child.on('error', reject)
 
@@ -109,8 +111,9 @@ module.exports = {
       })
     }
 
-    const userFriendlySpawn = () =>
-      spawn().catch(throwFormErrorText(errors.unexpected))
+    const userFriendlySpawn = () => {
+      return spawn().catch(throwFormErrorText(errors.unexpected))
+    }
 
     if (needsXvfb) {
       return xvfb.start()

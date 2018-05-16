@@ -1,12 +1,12 @@
 const util = require('../util')
-const info = require('../tasks/info')
+const state = require('../tasks/state')
 
 const getVersions = () => {
-  return info.getInstalledVersion()
-  .then((binary) => {
+  return state.getBinaryPkgVersionAsync()
+  .then((binaryVersion) => {
     return {
       package: util.pkgVersion(),
-      binary: binary || 'not installed',
+      binary: binaryVersion || 'not installed',
     }
   })
 }
