@@ -3,20 +3,15 @@ os         = require("os")
 chalk      = require("chalk")
 Promise    = require("bluebird")
 debug      = require("debug")("cypress:server:record")
+commitInfo = require("@cypress/commit-info")
 api        = require("../api")
 logger     = require("../logger")
 errors     = require("../errors")
 capture    = require("../capture")
 upload     = require("../upload")
-# Project    = require("../project")
-browsers   = require('../browsers')
 env        = require("../util/env")
-system     = require("../util/system")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
-commitInfo = require("@cypress/commit-info")
-la         = require("lazy-ass")
-check      = require("check-more-types")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -251,16 +246,15 @@ createInstance = (options = {}) ->
       null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { specPattern, specs, browser, projectId, projectRoot, runAllSpecs } = options
+  { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs } = options
 
   recordKey = options.key
 
   Promise.all([
-    system.info()
-    commitInfo.commitInfo(projectRoot)
-    browsers.getByName(browser)
+    system.info(),
+    commitInfo.commitInfo(projectRoot),
   ])
-  .spread (sys, git, browser) ->
+  .spread (sys, git) ->
     platform = {
       osCpus: sys.osCpus
       osName: sys.osName

@@ -534,3 +534,17 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
+exports['e2e record misconfiguration errors and exits when no browser found 1'] = `Can't run because you've entered an invalid browser.
+
+Browser: 'browserDoesNotExist' was not found on your system.
+
+Available browsers found are: chrome, chromium, canary, electron
+`
+
+exports['e2e record misconfiguration errors and exits when no specs found 1'] = `Can't run because no spec files were found.
+
+We searched for any files matching this glob pattern:
+
+cypress/integration/notfound/**
+`
+

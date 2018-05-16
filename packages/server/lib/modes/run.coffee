@@ -8,17 +8,18 @@ pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
 Table      = require("cli-table2")
 recordMode = require("./record")
-user       = require("../user")
 video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
+browsers   = require("../browsers")
 openProject = require("../open_project")
 Windows    = require("../gui/windows")
 fs         = require("../util/fs")
 env        = require("../util/env")
 trash      = require("../util/trash")
 random     = require("../util/random")
+system     = require("../util/system")
 progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 statsUtil  = require("../util/stats")
@@ -347,11 +348,11 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   launchBrowser: (options = {}) ->
-    { browser, spec, write, headed, project, screenshots } = options
+    { browserName, spec, write, headed, project, screenshots } = options
 
     headed = !!headed
 
-    browserOpts = switch browser
+    browserOpts = switch browserName
       when "electron"
         @getElectronProps(headed, project, write)
       else
@@ -367,7 +368,7 @@ module.exports = {
 
     browserOpts.projectRoot = options.projectRoot
 
-    openProject.launch(browser, spec.absolute, browserOpts)
+    openProject.launch(browserName, spec.absolute, browserOpts)
 
   listenForProjectEnd: (project, headed, exit) ->
     new Promise (resolve) ->
@@ -542,7 +543,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, outputPath, specs, beforeSpecRun, afterSpecRun } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, webUrl } = options
 
     results = {
       startedTestsAt: null
@@ -554,15 +555,14 @@ module.exports = {
       totalPasses: null,
       totalPending: null,
       totalSkipped: null,
-      runs: null
-
-      ## TODO: whoops, forgot that this was hard coded
-      browserName: 'chrome',
-      browserVersion: '41.2.3.4',
-      osName: 'darwin',
-      osVersion: '1.2.3.4',
-      cypressVersion: '2.0.0',
-      config
+      runs: null,
+      browserPath: browser.path,
+      browserName: browser.name,
+      browserVersion: browser.version,
+      osName: sys.osName,
+      osVersion: sys.osVersion,
+      cypressVersion: pkg.version,
+      config,
     }
 
     console.log(chalk.gray(Array(102).join("-")))
@@ -677,12 +677,12 @@ module.exports = {
   runSpec: (spec = {}, options = {}) ->
     { project, headed, browser, videoRecording, videosFolder } = options
 
-    browser ?= "electron"
+    browserName = browser.name
 
     debug("about to run spec %o", {
       spec
       headed
-      browser
+      browserName
     })
 
     screenshots = []
@@ -698,18 +698,19 @@ module.exports = {
       name is "electron" and not options.headed
 
     if videoRecording
-      if browserCanBeRecorded(browser)
+      if browserCanBeRecorded(browserName)
         if not videosFolder
           throw new Error("Missing videoFolder for recording")
 
-        name      = path.join(videosFolder, spec.name + ".mp4")
-        cname     = path.join(videosFolder, spec.name + "-compressed.mp4")
+        name  = path.join(videosFolder, spec.name + ".mp4")
+        cname = path.join(videosFolder, spec.name + "-compressed.mp4")
+
         recording = @createRecording(name)
       else
-        if browser is "electron" and options.headed
+        if browserName is "electron" and options.headed
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
+          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -769,9 +770,9 @@ module.exports = {
             spec
             write
             headed
-            browser
             project
             screenshots
+            browserName
             socketId:    options.socketId
             webSecurity: options.webSecurity
             projectRoot: options.projectRoot
@@ -780,9 +781,9 @@ module.exports = {
 
   findSpecs: (config, specPattern) ->
     specsUtil.find(config, specPattern)
-    .tap (files = []) =>
+    .tap (specs = []) =>
       if debug.enabled
-        names = _.map(files, "name")
+        names = _.map(specs, "name")
         debug(
           "found '%d' specs using spec pattern '%s': %o",
           names.length,
@@ -799,7 +800,9 @@ module.exports = {
 
     socketId = random.id()
 
-    { projectRoot, record, key, browser } = options
+    { projectRoot, record, key } = options
+
+    browserName = options.browser
 
     ## alias and coerce to null
     specPattern = options.spec ? null
@@ -817,44 +820,49 @@ module.exports = {
       if record
         recordMode.throwIfNoProjectId(projectId)
 
-      @findSpecs(config, specPattern)
-      .then (specs = []) =>
+      Promise.all([
+        system.info(),
+        browsers.ensureAndGetByName(browserName),
+        @findSpecs(config, specPattern),
+        trashAssets(config),
+      ])
+      .spread (sys = {}, browser = {}, specs = []) =>
         ## return only what is return to the specPattern
         if specPattern
           specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun) =>
-          if not specs.length
-            errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+        if not specs.length
+          errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-          @trashAssets(config)
-          .then =>
-            @runSpecs({
-              beforeSpecRun
-              afterSpecRun
-              projectRoot
-              socketId
-              browser
-              project
-              config
-              specs
-              videosFolder:         config.videosFolder
-              videoRecording:       config.videoRecording
-              videoCompression:     config.videoCompression
-              videoUploadOnPasses:  config.videoUploadOnPasses
-              exit:                 options.exit
-              headed:               options.headed
-              outputPath:           options.outputPath
-            })
-            .tap(renderSummaryTable)
+        runAllSpecs = (beforeSpecRun, afterSpecRun, webUrl) =>
+          @runSpecs({
+            beforeSpecRun
+            afterSpecRun
+            projectRoot
+            specPattern
+            socketId
+            browser
+            project
+            webUrl
+            config
+            specs
+            sys
+            videosFolder:         config.videosFolder
+            videoRecording:       config.videoRecording
+            videoCompression:     config.videoCompression
+            videoUploadOnPasses:  config.videoUploadOnPasses
+            exit:                 options.exit
+            headed:               options.headed
+            outputPath:           options.outputPath
+          })
+          .tap(renderSummaryTable)
 
-        ## TODO: we may still want to capture
-        ## stdout even when no specs were found
         if record
           { projectName } = config
 
           recordMode.createRunAndRecordSpecs({
             key
+            sys
             specs
             browser
             projectId

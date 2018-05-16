@@ -284,8 +284,6 @@ module.exports = {
         env: _.omit(process.env, "CYPRESS_DEBUG")
       }
 
-
-
       ## pipe these to our current process
       ## so we can see them in the terminal
       sp.stdout.pipe(process.stdout)

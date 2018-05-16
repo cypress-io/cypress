@@ -39,6 +39,8 @@ API = {
         """
       when "BROWSER_NOT_FOUND"
         """
+        Can't run because you've entered an invalid browser.
+
         Browser: '#{arg1}' was not found on your system.
 
         Available browsers found are: #{arg2}
