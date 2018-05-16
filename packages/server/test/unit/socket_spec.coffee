@@ -366,14 +366,14 @@ describe "lib/socket", ->
           expect(resp.response).to.eq("Desktop Music Pictures")
           done()
 
-      it "errors when execution fails, passing through timedout", (done) ->
+      it "errors when execution fails, passing through timedOut", (done) ->
         error = new Error("command not found: lsd")
-        error.timedout = true
+        error.timedOut = true
         sinon.stub(exec, "run").rejects(error)
 
         @client.emit "backend:request", "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.error.message).to.equal("command not found: lsd")
-          expect(resp.error.timedout).to.be.true
+          expect(resp.error.timedOut).to.be.true
           done()
 
     context "on(save:app:state)", ->

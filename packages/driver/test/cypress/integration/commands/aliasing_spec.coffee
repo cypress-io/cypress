@@ -123,6 +123,17 @@ describe "src/cy/commands/aliasing", ->
 
         cy.get("div:first").as("")
 
+      it "throws on alias starting with @ char", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "'@myAlias' cannot be named starting with the '@' symbol. Try renaming the alias to 'myAlias', or something else that does not start with the '@' symbol."
+          done()
+
+        cy.get("div:first").as("@myAlias")
+
+      it "does not throw on alias with @ char in non-starting position", () ->
+        cy.get("div:first").as("my@Alias")
+        cy.get("@my@Alias")
+
       _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
         it "throws on a blacklisted word: #{blacklist}", (done) ->
           cy.on "fail", (err) ->

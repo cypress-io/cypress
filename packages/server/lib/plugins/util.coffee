@@ -3,6 +3,8 @@ _ = require("lodash")
 Promise = require("bluebird")
 log = require("debug")("cypress:server:plugins")
 
+UNDEFINED_SERIALIZED = "__cypress_undefined__"
+
 serializeError = (err) ->
   _.pick(err, "name", "message", "stack", "code", "annotated")
 
@@ -30,13 +32,17 @@ module.exports = {
 
   wrapChildPromise: (ipc, invoke, ids, args = []) ->
     Promise.try ->
-      return invoke(ids.callbackId, args)
+      return invoke(ids.eventId, args)
     .then (value) ->
+      ## undefined is coerced into null when sent over ipc, but we need
+      ## to differentiate between them for 'task' event
+      if value is undefined
+        value = UNDEFINED_SERIALIZED
       ipc.send("promise:fulfilled:#{ids.invocationId}", null, value)
     .catch (err) ->
       ipc.send("promise:fulfilled:#{ids.invocationId}", serializeError(err))
 
-  wrapParentPromise: (ipc, callbackId, callback) ->
+  wrapParentPromise: (ipc, eventId, callback) ->
     invocationId = _.uniqueId("inv")
 
     new Promise (resolve, reject) ->
@@ -46,6 +52,9 @@ module.exports = {
           log("promise rejected for id", invocationId, ":", err)
           reject(_.extend(new Error(err.message), err))
           return
+
+        if value is UNDEFINED_SERIALIZED
+          value = undefined
 
         log("promise resolved for id '#{invocationId}' with value", value)
         resolve(value)
