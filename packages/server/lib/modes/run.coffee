@@ -33,7 +33,7 @@ collectTestResults = (obj = {}) ->
     pending:     _.get(obj, 'stats.pending')
     failures:    _.get(obj, 'stats.failures')
     skipped:     _.get(obj, 'stats.skipped' )
-    duration:    humanTime(_.get(obj, 'stats.duration'))
+    duration:    humanTime.long(_.get(obj, 'stats.duration'))
     screenshots: obj.screenshots and obj.screenshots.length
     video:       Boolean(obj.video)
     spec:        obj.spec
@@ -324,7 +324,7 @@ module.exports = {
         switch
           when float is 1
             finished = new Date - started
-            duration = "(#{humanTime(finished)})"
+            duration = "(#{humanTime.long(finished)})"
             console.log("  - Finished processing: ", chalk.cyan(name), chalk.gray(duration))
 
           when (new Date - progress) > tenSecs
