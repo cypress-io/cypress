@@ -57,7 +57,7 @@ ensureSchema = (requestSchema, responseSchema) ->
         body
       })
     catch err
-      res.status(400).json(getSchemaErr(err, requestSchema))
+      res.status(412).json(getSchemaErr(err, requestSchema))
 
 sendUploadUrls = (req, res) ->
   { body } = req

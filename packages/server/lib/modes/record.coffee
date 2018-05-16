@@ -208,13 +208,13 @@ createRun = (options = {}) ->
     })
 
     switch err.statusCode
-      when 400
-        errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
       when 401
         recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
         errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
+      when 412
+        errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
       else
         ## warn the user that assets will be not recorded
         errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
