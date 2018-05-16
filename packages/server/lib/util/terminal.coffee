@@ -118,21 +118,35 @@ getChars = (type) ->
         "middle": ""
       }
 
+wrapBordersInGray = (chars) ->
+  _.mapValues chars, (char) ->
+    if char
+      chalk.gray(char)
+    else
+      char
+
 table = (options = {}) ->
   { colWidths, type } = options
 
   defaults = utils.mergeOptions({})
 
+  chars = _.defaults(getChars(type), defaults.chars)
+
   _.defaultsDeep(options, {
-    chars: getChars(type)
+    chars
     style: {
-      head: ["gray"]
+      head: []
+      border: []
+      'padding-left': 1
+      'padding-right': 1
     }
-  }, defaults)
+  })
 
   { chars } = options
 
   borders = getBordersLength(chars.left, chars.right)
+
+  options.chars = wrapBordersInGray(chars)
 
   if colWidths
     ## subtract borders to get the actual size

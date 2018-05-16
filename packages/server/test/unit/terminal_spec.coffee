@@ -2,9 +2,13 @@ require("../spec_helper")
 
 _ = require("lodash")
 snapshot = require("snap-shot-it")
+stripAnsi = require("strip-ansi")
 widestLine = require("widest-line")
 terminal = require("#{root}lib/util/terminal")
 terminalSize = require("#{root}lib/util/terminal-size")
+
+sanitizeSnapshot = (str) ->
+  snapshot(stripAnsi(str))
 
 render = (tables...) ->
   str = terminal.renderTables(tables...)
@@ -85,7 +89,7 @@ describe "lib/util/terminal", ->
 
       expectLength(str, 100)
 
-      snapshot(str)
+      sanitizeSnapshot(str)
 
     it "draws single spec summary table", ->
       table = terminal.table({
@@ -104,7 +108,9 @@ describe "lib/util/terminal", ->
         ["Spec:", "foo/bar/baz.js"]
       )
 
-      render(table)
+      str = render(table)
+
+      sanitizeSnapshot(str)
 
     it "draws a page divider", ->
       table = terminal.table({
@@ -127,4 +133,4 @@ describe "lib/util/terminal", ->
 
       expectLength(str, 100)
 
-      snapshot(str)
+      sanitizeSnapshot(str)
