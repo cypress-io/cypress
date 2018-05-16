@@ -838,6 +838,13 @@ declare namespace Cypress {
     spread(fn: (...args: any[]) => void): Chainable<Subject>
 
     /**
+     * Run a task in Node via the plugins file.
+     *
+     * @see https://on.cypress.io/task
+     */
+    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
+
+    /**
      * Enables you to work with the subject yielded from the previous command.
      *
      * @see https://on.cypress.io/then

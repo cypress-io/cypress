@@ -786,6 +786,11 @@ describe('Kitchen Sink', function() {
       cy.screenshot('my-image')
     })
 
+    it('cy.task() - run a task', function() {
+      // https://on.cypress.io/task
+      cy.task('my-task', 'my-arg')
+    })
+
     it('cy.wrap() - wrap an object', function() {
       // https://on.cypress.io/wrap
       cy.wrap({ foo: 'bar' })
