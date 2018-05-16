@@ -84,9 +84,15 @@ https://on.cypress.io/api/task
   - Pending:         0
   - Skipped:         0
   - Duration:        10 seconds
-  - Screenshots:     0
+  - Screenshots:     2
   - Video Recorded:  true
   - Cypress Version: 1.2.3
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/throws when task returns undefined.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/includes stack trace in error.png (1280x720)
 
 
   (Video)

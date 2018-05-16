@@ -43,9 +43,14 @@ https://on.cypress.io/api/task
   - Pending:         0
   - Skipped:         0
   - Duration:        10 seconds
-  - Screenshots:     0
+  - Screenshots:     1
   - Video Recorded:  true
   - Cypress Version: 1.2.3
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/task-not-registered/cypress/screenshots/fails because the task event is not registered in plugins file.png (1280x720)
 
 
   (Video)
