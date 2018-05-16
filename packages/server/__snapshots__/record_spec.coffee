@@ -1,9 +1,24 @@
 exports['e2e record passing passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Dashboard Recording)
 
   - https://dashboard.cypress.io/#/projects/cjvoj7/runs/d5db9cf7-bfa4-490c-a6a1-2f85da0c52fb
+
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:       2.1.0                                                                           │
+  │ Browser:       Electron 59 (headless)                                                          │
+  │ Specs:         4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.c… │
+  │ Spec Pattern:  cypress/integration/record*                                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_error_spec.coffee...                                                     (1 of 4) 
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/record_error_spec.coffee
@@ -20,17 +35,20 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 
 Fix the error in your code and re-run your tests.
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           0
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────┐
+  │ Tests:           0                        │
+  │ Passing:         0                        │
+  │ Failing:         1                        │
+  │ Pending:         0                        │
+  │ Skipped:         0                        │
+  │ Screenshots:     0                        │
+  │ Video Captured:  true                     │
+  │ Duration:        10 seconds
+  │ Spec Ran:        record_error_spec.coffee │
+  └───────────────────────────────────────────┘
+
 
 
   (Video)
@@ -43,9 +61,9 @@ Fix the error in your code and re-run your tests.
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_fail_spec.coffee...                                                      (2 of 4) 
 
 
   record fails
@@ -64,17 +82,19 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         1
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────┐
+  │ Tests:           2                       │
+  │ Passing:         0                       │
+  │ Failing:         1                       │
+  │ Pending:         0                       │
+  │ Skipped:         1                       │
+  │ Screenshots:     1                       │
+  │ Video Captured:  true                    │
+  │ Duration:        10 seconds
+  │ Spec Ran:        record_fail_spec.coffee │
+  └──────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -93,9 +113,9 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record fails -- fails 1 -- before each hook.png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (3 of 4) 
 
 
   record pass
@@ -107,17 +127,19 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────┐
+  │ Tests:           2                       │
+  │ Passing:         1                       │
+  │ Failing:         0                       │
+  │ Pending:         1                       │
+  │ Skipped:         0                       │
+  │ Screenshots:     1                       │
+  │ Video Captured:  true                    │
+  │ Duration:        10 seconds
+  │ Spec Ran:        record_pass_spec.coffee │
+  └──────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -129,9 +151,9 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_uncaught_spec.coffee...                                                  (4 of 4) 
 
 
   1) An uncaught error was detected outside of a test
@@ -157,17 +179,19 @@ We dynamically generated a new test to display this failure.
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────────┐
+  │ Tests:           1                           │
+  │ Passing:         0                           │
+  │ Failing:         1                           │
+  │ Pending:         0                           │
+  │ Skipped:         0                           │
+  │ Screenshots:     1                           │
+  │ Video Captured:  true                        │
+  │ Duration:        10 seconds
+  │ Spec Ran:        record_uncaught_spec.coffee │
+  └──────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -186,8 +210,19 @@ We dynamically generated a new test to display this failure.
   - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
+====================================================================================================
 
-  (All Done)
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ record_error_spec.coffee                     0s        -        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖ record_uncaught_spec.coffee               214ms        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 `
 

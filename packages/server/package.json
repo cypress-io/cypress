@@ -30,7 +30,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/json-schemas": "4.9.1",
+    "@cypress/json-schemas": "4.9.5",
     "@cypress/sinon-chai": "^1.0.0",
     "bin-up": "^1.1.0",
     "body-parser": "1.12.4",
@@ -120,6 +120,7 @@
     "lazy-ass": "^1.6.0",
     "lockfile": "^1.0.3",
     "lodash": "4.17.4",
+    "log-symbols": "^2.2.0",
     "md5": "^2.2.1",
     "method-override": "^2.3.1",
     "mime": "1.2.11",

@@ -154,11 +154,11 @@ describe "e2e record", ->
         snapshot: true
         expectedExitCode: 3
       })
-      .then ->
       .get("stdout")
       .then (stdout) ->
         expect(stdout).to.include("Run URL:")
         expect(stdout).to.include(webUrl)
+
         urls = getRequestUrls()
 
         ## first create run request
