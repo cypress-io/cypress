@@ -18,6 +18,7 @@ const defaultBinaryDir = '/default/binary/dir'
 describe('lib/exec/spawn', function () {
   beforeEach(function () {
     this.sandbox.stub(os, 'platform').returns('darwin')
+    this.sandbox.stub(os, 'release').returns('1.1.1-generic')
     this.sandbox.stub(process, 'exit')
     this.spawnedProcess = this.sandbox.stub({
       on: () => {},
@@ -119,6 +120,7 @@ describe('lib/exec/spawn', function () {
     it('rejects with error from spawn', function () {
       const msg = 'the error message'
       this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
+
 
       return spawn.start('--foo')
       .then(() => {

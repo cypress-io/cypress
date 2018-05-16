@@ -14,6 +14,9 @@ before(function () {
   os.platform = () => {
     throw new Error('you called os.platform() without stubbing it')
   }
+  os.release = () => {
+    throw new Error('you called os.release() without stubbing it')
+  }
   delete process.env.CYPRESS_BINARY_FOLDER
   delete process.env.CYPRESS_BINARY_VERSION
   delete process.env.CYPRESS_CACHE_DIRECTORY

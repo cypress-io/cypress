@@ -276,6 +276,7 @@ describe('install', function () {
       describe('failed write access to cache directory', function () {
         it('logs error on failure', function () {
           this.sandbox.stub(os, 'platform').returns('darwin')
+          this.sandbox.stub(os, 'release').returns('1.1.1-generic')
           this.sandbox.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
 
           const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')

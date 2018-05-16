@@ -145,7 +145,7 @@ Failed to access /invalid/cache/dir:
 EACCES: permission denied, mkdir '/invalid'
 ----------
 
-Platform: darwin (4.13.0-39-generic)
+Platform: darwin (1.1.1-generic)
 Cypress Version: 1.2.3
 
 `
