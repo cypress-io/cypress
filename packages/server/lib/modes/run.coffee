@@ -1,11 +1,11 @@
 _          = require("lodash")
+pkg        = require("@packages/root")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
-Promise    = require("bluebird")
-pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
+Promise    = require("bluebird")
 logSymbols = require("log-symbols")
 recordMode = require("./record")
 video      = require("../video")
@@ -29,6 +29,9 @@ electronApp = require("../util/electron_app")
 color = (val, c) ->
   chalk[c](val)
 
+gray = (val) ->
+  color(val, "gray")
+
 colorIf = (val, c) ->
   if val is 0
     val = "-"
@@ -46,7 +49,7 @@ formatBrowser = (browser, headed) ->
   _.compact([
     browser.displayName,
     browser.majorVersion,
-    isHeadless and "(headless)"
+    isHeadless and gray("(headless)")
   ]).join(" ")
 
 formatFooterSummary = (results) ->
@@ -69,8 +72,8 @@ formatFooterSummary = (results) ->
 
   return [
     color(phrase, c),
-    humanTime.short(results.totalDuration),
-    colorIf(results.totalTests, "white"),
+    gray(humanTime.short(results.totalDuration)),
+    colorIf(results.totalTests, "reset"),
     colorIf(results.totalPasses, "green"),
     colorIf(totalFailures, "red"),
     colorIf(results.totalPending, "cyan"),
@@ -80,7 +83,7 @@ formatFooterSummary = (results) ->
 formatSpecSummary = (name, failures) ->
   [
     getSymbol(failures),
-    color(name, "white")
+    color(name, "reset")
   ]
   .join(" ")
 
@@ -94,9 +97,9 @@ formatSpecs = (specs) ->
   ## 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
   [
     "#{names.length} found "
-    chalk.gray("("),
-    chalk.gray(names.join(', ')),
-    chalk.gray(")")
+    gray("("),
+    gray(names.join(', ')),
+    gray(")")
   ]
   .join("")
 
@@ -109,39 +112,24 @@ displayRunStarting = (options = {}) ->
 
   console.log("")
 
-  if webUrl
-    terminal.header("Dashboard Recording", {
-      color: ["cyan"]
-    })
-
-    console.log("")
-    console.log(chalk.gray("  - " + webUrl))
-    console.log("")
-    console.log("")
-
   terminal.header("Run Starting", {
-    color: ["white"]
+    color: ["reset"]
   })
 
   console.log("")
 
   table = terminal.table({
-    colWidths: [15, 85]
+    colWidths: [12, 88]
     type: "outsideBorder"
   })
 
-  w = (v) ->
-    color(v, "white")
-
-  g = (v) ->
-    color(v, "gray")
-
   data = _
   .chain([
-    ["Cypress:", pkg.version]
-    ["Browser:", formatBrowser(browser, headed)]
-    ["Specs:", formatSpecs(specs)]
-    ["Spec Pattern:", formatSpecPattern(specPattern)]
+    [gray("Cypress:"), pkg.version]
+    [gray("Browser:"), formatBrowser(browser, headed)]
+    [gray("Specs:"), formatSpecs(specs)]
+    [gray("Searched:"), formatSpecPattern(specPattern)]
+    [gray("Run URL:"), webUrl]
   ])
   .filter(_.property(1))
   .value()
@@ -166,8 +154,8 @@ displaySpecHeader = (name, curr, total) ->
 
   table.push(["", ""])
   table.push([
-    "Running: " + chalk.gray(name + "..."),
-    chalk.gray("(#{curr} of #{total})")
+    "Running: " + gray(name + "..."),
+    gray("(#{curr} of #{total})")
   ])
 
   console.log(table.toString())
@@ -185,7 +173,7 @@ collectTestResults = (obj = {}) ->
     video:       Boolean(obj.video)
   }
 
-renderSummaryTable = (results) ->
+renderSummaryTable = (webUrl, results) ->
   { runs } = results
 
   console.log("")
@@ -195,10 +183,11 @@ renderSummaryTable = (results) ->
   console.log("")
 
   terminal.header("Run Finished", {
-    color: ["white"]
+    color: ["reset"]
   })
 
   if runs and runs.length
+    head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
     colAligns = ["left", "right", "right", "right", "right", "right", "right"]
     colWidths = [40, 10, 10, 10, 10, 10, 10]
 
@@ -206,7 +195,7 @@ renderSummaryTable = (results) ->
       colAligns
       colWidths
       type: "noBorder"
-      head: ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
+      head: _.map(head, gray)
     })
 
     table2 = terminal.table({
@@ -233,7 +222,7 @@ renderSummaryTable = (results) ->
       table2.push([
         formatSpecSummary(spec.name, stats.failures)
         color(ms, "gray")
-        colorIf(stats.tests, "white")
+        colorIf(stats.tests, "reset")
         colorIf(stats.passes, "green"),
         colorIf(stats.failures, "red"),
         colorIf(stats.pending, "cyan"),
@@ -244,6 +233,23 @@ renderSummaryTable = (results) ->
     console.log("")
     console.log(terminal.renderTables(table1, table2, table3))
     console.log("")
+
+    if webUrl
+      console.log("")
+
+      table4 = terminal.table({
+        colWidths: [100]
+        type: "pageDivider"
+        style: {
+          "padding-left": 2
+        }
+      })
+
+      table4.push(["", ""])
+      table4.push(["Recorded Run: " + gray(webUrl)])
+
+      console.log(terminal.renderTables(table4))
+      console.log("")
 
 getProjectId = (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
@@ -414,7 +420,7 @@ module.exports = {
     console.log("")
 
     format = (s) ->
-      dimensions = chalk.gray("(#{s.width}x#{s.height})")
+      dimensions = gray("(#{s.width}x#{s.height})")
 
       "  - #{s.path} #{dimensions}"
 
@@ -444,7 +450,10 @@ module.exports = {
       console.log("")
 
       # bar = progress.create("Post Processing Video")
-      console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression} CRF"))
+      console.log(
+        gray("  - Started processing:  "),
+        chalk.cyan("Compressing to #{videoCompression} CRF")
+      )
 
       started  = new Date
       progress = Date.now()
@@ -455,7 +464,11 @@ module.exports = {
           when float is 1
             finished = new Date - started
             duration = "(#{humanTime.long(finished)})"
-            console.log("  - Finished processing: ", chalk.cyan(name), chalk.gray(duration))
+            console.log(
+              gray("  - Finished processing: "),
+              chalk.cyan(name),
+              gray(duration)
+            )
 
           when (new Date - progress) > tenSecs
             ## bump up the progress so we dont
@@ -875,7 +888,7 @@ module.exports = {
             headed:               options.headed
             outputPath:           options.outputPath
           })
-          .tap(renderSummaryTable)
+          .tap(_.partial(renderSummaryTable, webUrl))
 
         if record
           { projectName } = config
