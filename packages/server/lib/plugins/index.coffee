@@ -1,7 +1,7 @@
 _ = require("lodash")
 cp = require("child_process")
 path = require("path")
-log = require("debug")("cypress:server:plugins")
+debug = require("debug")("cypress:server:plugins")
 Promise = require("bluebird")
 errors = require("../errors")
 util = require("./util")
@@ -11,7 +11,7 @@ registeredEvents = {}
 handlers = []
 
 register = (event, callback) ->
-  log("register event '#{event}'")
+  debug("register event '#{event}'")
 
   if not _.isString(event)
     throw new Error("The plugin register function must be called with an event as its 1st argument. You passed '#{event}'.")
@@ -26,13 +26,13 @@ module.exports = {
     handlers.push(handler)
 
   init: (config, options) ->
-    log("plugins.init", config.pluginsFile)
+    debug("plugins.init", config.pluginsFile)
 
     new Promise (resolve, reject) ->
       return resolve() if not config.pluginsFile
 
       if pluginsProcess
-        log("kill existing plugins process")
+        debug("kill existing plugins process")
         pluginsProcess.kill()
 
       registeredEvents = {}
@@ -46,10 +46,10 @@ module.exports = {
 
       ipc.on "loaded", (newCfg, registrations) ->
         _.each registrations, (registration) ->
-          log("register plugins process event", registration.event, "with id", registration.callbackId)
+          debug("register plugins process event", registration.event, "with id", registration.callbackId)
           register registration.event, (args...) ->
             util.wrapParentPromise ipc, registration.callbackId, (invocationId) ->
-              log("call event", registration.event, "for invocation id", invocationId)
+              debug("call event", registration.event, "for invocation id", invocationId)
               ids = {
                 callbackId: registration.callbackId
                 invocationId: invocationId
@@ -66,7 +66,7 @@ module.exports = {
         pluginsProcess = null
 
       handleError = (err) ->
-        log("plugins process error:", err.stack)
+        debug("plugins process error:", err.stack)
         killPluginsProcess()
         err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
         err.title = "Error running plugin"
@@ -84,7 +84,7 @@ module.exports = {
     !!registeredEvents[event]
 
   execute: (event, args...) ->
-    log("execute plugin event '#{event}' with args: %s", args...)
+    debug("execute plugin event '#{event}' with args: %o %o %o", args...)
     registeredEvents[event](args...)
 
   ## for testing purposes

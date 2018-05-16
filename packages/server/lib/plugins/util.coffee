@@ -1,7 +1,7 @@
-EE = require("events")
 _ = require("lodash")
+EE = require("events")
+debug = require("debug")("cypress:server:plugins")
 Promise = require("bluebird")
-log = require("debug")("cypress:server:plugins")
 
 serializeError = (err) ->
   _.pick(err, "name", "message", "stack", "code", "annotated")
@@ -42,12 +42,13 @@ module.exports = {
     new Promise (resolve, reject) ->
       handler = (err, value) ->
         ipc.removeListener("promise:fulfilled:#{invocationId}", handler)
+        
         if err
-          log("promise rejected for id", invocationId, ":", err)
+          debug("promise rejected for id %s %o", invocationId, ":", err.stack)
           reject(_.extend(new Error(err.message), err))
           return
 
-        log("promise resolved for id '#{invocationId}' with value", value)
+        debug("promise resolved for id '#{invocationId}' with value %o", value)
         resolve(value)
 
       ipc.on("promise:fulfilled:#{invocationId}", handler)
