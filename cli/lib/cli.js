@@ -25,8 +25,7 @@ const parseOpts = (opts) => {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
-    'browser', 'detached', 'headed',
-    'group', 'groupId', 'global', 'dev', 'force')
+    'browser', 'detached', 'headed', 'global', 'dev', 'force')
 
   debug('parsed cli options', opts)
 
@@ -51,8 +50,6 @@ const descriptions = {
   global: 'force Cypress into global mode as if its globally installed',
   version: 'Prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
-  group: 'flag to group individual runs by using common --group-id',
-  groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
   dev: 'runs cypress in development and bypasses binary check',
   forceInstall: 'force install the Cypress binary',
 }
@@ -124,8 +121,6 @@ module.exports = {
     .option('-c, --config <config>', text('config'))
     .option('-b, --browser <browser-name>', text('browser'))
     .option('-P, --project <project-path>', text('project'))
-    .option('--group', text('group'), coerceFalse)
-    .option('--group-id <group-id>', text('groupId'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress')

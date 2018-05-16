@@ -140,21 +140,6 @@ describe('cli', function () {
       })
     })
 
-    it('calls run without group flag', function () {
-      this.exec('run')
-      expect(run.start).to.be.calledWith({})
-    })
-
-    it('calls run with group flag', function () {
-      this.exec('run --group')
-      expect(run.start).to.be.calledWith({ group: true })
-    })
-
-    it('calls run with groupId', function () {
-      this.exec('run --group-id foo')
-      expect(run.start).to.be.calledWith({ groupId: 'foo' })
-    })
-
     it('calls run with port', function () {
       this.exec('run --port 7878')
       expect(run.start).to.be.calledWith({ port: '7878' })
