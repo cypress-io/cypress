@@ -1,7 +1,9 @@
 exports['e2e record passing passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Dashboard Recording)
+
+  - https://dashboard.cypress.io/#/projects/cjvoj7/runs/d5db9cf7-bfa4-490c-a6a1-2f85da0c52fb
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/record_error_spec.coffee

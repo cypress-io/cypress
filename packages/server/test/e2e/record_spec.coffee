@@ -7,7 +7,7 @@ e2e = require("../support/helpers/e2e")
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.0.0")
 
-{ runId, planId, machineId } = postRunResponse
+{ runId, planId, machineId, webUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
 
 requests = null
@@ -155,6 +155,10 @@ describe "e2e record", ->
         expectedExitCode: 3
       })
       .then ->
+      .get("stdout")
+      .then (stdout) ->
+        expect(stdout).to.include("Run URL:")
+        expect(stdout).to.include(webUrl)
         urls = getRequestUrls()
 
         ## first create run request
@@ -312,7 +316,7 @@ describe "e2e record", ->
       .then ->
         expect(getRequestUrls()).to.be.empty
 
-    it.only "errors and exits when no browser found", ->
+    it "errors and exits when no browser found", ->
       e2e.exec(@, {
         browser: "browserDoesNotExist"
         spec: "record_pass*"

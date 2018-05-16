@@ -250,11 +250,8 @@ createRunAndRecordSpecs = (options = {}) ->
 
   recordKey = options.key
 
-  Promise.all([
-    system.info(),
-    commitInfo.commitInfo(projectRoot),
-  ])
-  .spread (sys, git) ->
+  commitInfo.commitInfo(projectRoot)
+  .then (git) ->
     platform = {
       osCpus: sys.osCpus
       osName: sys.osName
@@ -276,7 +273,7 @@ createRunAndRecordSpecs = (options = {}) ->
       if not resp
         runAllSpecs()
       else
-        { runId, machineId, planId } = resp
+        { webUrl, runId, machineId, planId } = resp
 
         captured = null
         instanceId = null
@@ -337,7 +334,7 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs(beforeSpecRun, afterSpecRun)
+        runAllSpecs(beforeSpecRun, afterSpecRun, webUrl)
 
 module.exports = {
   createRun
