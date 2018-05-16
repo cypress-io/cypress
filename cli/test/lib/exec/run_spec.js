@@ -47,9 +47,10 @@ describe('exec run', function () {
       it('spawns with --group true', function () {
         return run.start({ group: true, dev: true })
         .then(() => {
-          expect(spawn.start).to.be.calledWith(
+          expect(spawn.start).to.be.calledWithMatch(
             ['--run-project', process.cwd(), '--group', true],
-            { dev: true }
+            { dev: true,
+            }
           )
         })
       })

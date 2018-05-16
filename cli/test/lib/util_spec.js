@@ -139,4 +139,78 @@ describe('util', function () {
     expect(process.exit).to.be.calledWith(1)
     expect(logger.error).to.be.calledWith('foo')
   })
+
+  describe('.isSemver', function () {
+    it('is true with 3-digit version', function () {
+      expect(util.isSemver('1.2.3')).to.equal(true)
+    })
+    it('is true with 2-digit version', function () {
+      expect(util.isSemver('1.2')).to.equal(true)
+    })
+    it('is true with 1-digit version', function () {
+      expect(util.isSemver('1')).to.equal(true)
+    })
+    it('is false with URL', function () {
+      expect(util.isSemver('www.cypress.io/download/1.2.3')).to.equal(false)
+    })
+    it('is false with file path', function () {
+      expect(util.isSemver('0/path/1.2.3/mypath/2.3')).to.equal(false)
+    })
+  })
+
+  context('.printNodeOptions', function () {
+    describe('NODE_OPTIONS is not set', function () {
+      beforeEach(function () {
+        this.node_options = process.env.NODE_OPTIONS
+        delete process.env.NODE_OPTIONS
+      })
+
+      afterEach(function () {
+        if (typeof this.node_options !== 'undefined') {
+          process.env.NODE_OPTIONS = this.node_options
+        }
+      })
+
+      it('does nothing if debug is not enabled', function () {
+        const log = this.sandbox.spy()
+        log.enabled = false
+        util.printNodeOptions(log)
+        expect(log).not.have.been.called
+      })
+
+      it('prints message when debug is enabled', function () {
+        const log = this.sandbox.spy()
+        log.enabled = true
+        util.printNodeOptions(log)
+        expect(log).to.be.calledWith('NODE_OPTIONS is not set')
+      })
+    })
+
+    describe('NODE_OPTIONS is set', function () {
+      beforeEach(function () {
+        this.node_options = process.env.NODE_OPTIONS
+        process.env.NODE_OPTIONS = 'foo'
+      })
+
+      afterEach(function () {
+        if (typeof this.node_options !== 'undefined') {
+          process.env.NODE_OPTIONS = this.node_options
+        }
+      })
+
+      it('does nothing if debug is not enabled', function () {
+        const log = this.sandbox.spy()
+        log.enabled = false
+        util.printNodeOptions(log)
+        expect(log).not.have.been.called
+      })
+
+      it('prints value when debug is enabled', function () {
+        const log = this.sandbox.spy()
+        log.enabled = true
+        util.printNodeOptions(log)
+        expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
+      })
+    })
+  })
 })
