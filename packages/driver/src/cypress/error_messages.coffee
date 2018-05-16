@@ -102,12 +102,12 @@ module.exports = {
 
   clear:
     invalid_element: """
-      #{cmd('clear')} failed because it requires a valid clearable element. 
-      
+      #{cmd('clear')} failed because it requires a valid clearable element.
+
       The element cleared was:
 
         > {{node}}
-      
+
       Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
     """
 
@@ -735,6 +735,7 @@ module.exports = {
     multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
     not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
 
+  task:
     known_error: """#{cmd('task', '\'{{task}}\'')} failed with the following error:
 
         {{error}}
@@ -780,12 +781,12 @@ module.exports = {
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
     not_on_typeable_element: """
-      #{cmd('type')} failed because it requires a valid typeable element. 
-      
+      #{cmd('type')} failed because it requires a valid typeable element.
+
       The element typed into was:
 
         > {{node}}
-      
+
       Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
     """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."

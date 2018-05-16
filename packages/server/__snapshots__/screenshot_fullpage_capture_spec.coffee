@@ -15,6 +15,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Passes:          1
   - Failures:        0
   - Pending:         0
+  - Skipped:         0
   - Duration:        10 seconds
   - Screenshots:     11
   - Video Recorded:  true

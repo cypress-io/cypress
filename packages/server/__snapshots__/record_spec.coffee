@@ -571,7 +571,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
   (All Done)
