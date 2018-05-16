@@ -534,3 +534,47 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
+exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `Warning: It looks like you are trying to record this run from a forked PR.
+
+The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+
+These results will not be recorded.
+
+This error will not alter the exit code.
+
+Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+  (Tests Starting)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Tests Finished)
+
+  - Tests:           2
+  - Passes:          1
+  - Failures:        0
+  - Pending:         1
+  - Skipped:         0
+  - Duration:        10 seconds
+  - Screenshots:     1
+  - Video Recorded:  true
+  - Cypress Version: 1.2.3
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+
+
+  (All Done)
+
+`
+
