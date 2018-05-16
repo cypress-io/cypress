@@ -42,7 +42,7 @@ normalizeStdout = (str) ->
   str
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
-  .replace(/\(\d{1,2}s\)/g, "(10s)")
+  .replace(/\(\d{1,2}[sm]\)/g, "(10s)")
   .replace(/\s\(\d+m?s\)/g, "")
   .replace(/coffee-\d{3}/g, "coffee-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
@@ -284,8 +284,6 @@ module.exports = {
         env: _.omit(process.env, "CYPRESS_DEBUG")
       }
 
-
-
       ## pipe these to our current process
       ## so we can see them in the terminal
       sp.stdout.pipe(process.stdout)
@@ -299,4 +297,15 @@ module.exports = {
       sp.on("exit", resolve)
     .tap(copy)
     .then(exit)
+
+  sendHtml: (contents) -> (req, res) ->
+    res.set('Content-Type', 'text/html')
+    res.send("""
+      <!DOCTYPE html>
+      <html lang="en">
+      <body>
+        #{contents}
+      </body>
+      </html>
+    """)
 }

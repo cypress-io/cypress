@@ -102,12 +102,12 @@ module.exports = {
 
   clear:
     invalid_element: """
-      #{cmd('clear')} failed because it requires a valid clearable element. 
-      
+      #{cmd('clear')} failed because it requires a valid clearable element.
+
       The element cleared was:
 
         > {{node}}
-      
+
       Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
     """
 
@@ -636,6 +636,13 @@ module.exports = {
     animation_failed: "#{cmd('scrollTo')} failed."
 
   screenshot:
+    invalid_arg: "{{cmd}}() must be called with an object. You passed: {{arg}}"
+    invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: {{arg}}"
+    invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
+    invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
+    invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
+    multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
   select:
@@ -774,12 +781,12 @@ module.exports = {
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
     not_on_typeable_element: """
-      #{cmd('type')} failed because it requires a valid typeable element. 
-      
+      #{cmd('type')} failed because it requires a valid typeable element.
+
       The element typed into was:
 
         > {{node}}
-      
+
       Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
     """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
