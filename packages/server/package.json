@@ -158,6 +158,7 @@
     "supports-color": "^5.1.0",
     "syntax-error": "^1.1.4",
     "tar-fs": "^1.11.1",
+    "term-size": "^1.2.0",
     "through": "2.3.6",
     "tough-cookie": "2.3.0",
     "trash": "4.0.0",
