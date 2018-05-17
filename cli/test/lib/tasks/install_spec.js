@@ -351,7 +351,7 @@ describe('install', function () {
         install.start()
         .catch((err) => {
           logger.error(err)
-          snapshot(normalize(this.stdout.toString()))
+          snapshot(normalize('error message CYPRESS_BINARY_VERSION', this.stdout.toString()))
         })
       })
     })

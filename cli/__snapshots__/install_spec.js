@@ -9,7 +9,8 @@ Skipping installation:
 `
 
 exports['skip installation 1'] = `
-Skipping binary installation. Env var 'CYPRESS_SKIP_BINARY_INSTALL' was found.
+⚠ Warning: Skipping binary installation. Env var CYPRESS_INSTALL_BINARY was 0.
+
 
 `
 
@@ -151,12 +152,5 @@ Cypress Version: 1.2.3
 `
 
 exports['install .start override version throws when env var CYPRESS_BINARY_VERSION 1'] = `
-Error: The environment variable CYPRESS_BINARY_VERSION has been removed as of version [32m3.0.0[39m
-
-You should use the equivalent environment variable CYPRESS_INSTALL_BINARY instead.
-----------
-
-Platform: darwin (1.1.1-generic)
-Cypress Version: 1.2.3
-
+error message CYPRESS_BINARY_VERSION
 `
