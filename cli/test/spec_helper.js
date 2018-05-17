@@ -1,16 +1,68 @@
+const _ = require('lodash')
+const os = require('os')
 const path = require('path')
 const sinon = require('sinon')
 const Promise = require('bluebird')
-const os = require('os')
-const chalk = require('chalk')
-const { stripIndent } = require('common-tags')
 
+global.sinon = sinon
 global.expect = require('chai').expect
 global.lib = path.join(__dirname, '..', 'lib')
 
 require('chai')
 .use(require('@cypress/sinon-chai'))
 .use(require('chai-string'))
+
+sinon.usingPromise(Promise)
+
+function throwIfFnNotStubbed (stub, method) {
+  const sig = `.${method}(...)`
+
+  stub.callsFake(function (...args) {
+    const err = new Error(`${sig} was called without being stubbed.
+
+      ${sig} was called with arguments:
+
+      ${args.map(JSON.stringify).join(', ')}
+    `)
+
+    err.stack = _
+    .chain(err.stack)
+    .split('\n')
+    .reject((str) => _.includes(str, 'sinon'))
+    .join('\n')
+    .value()
+
+    throw err
+  })
+}
+
+const $stub = sinon.stub
+sinon.stub = function (obj, method) {
+  /* eslint-disable prefer-rest-params */
+  const stub = $stub.apply(this, arguments)
+
+  let fns = [method]
+
+  if (arguments.length === 1) {
+    fns = _.functions(obj)
+  }
+
+  if (arguments.length === 0) {
+    throwIfFnNotStubbed(stub, '[anonymous function]')
+
+    return stub
+  }
+
+  fns.forEach((name) => {
+    const fn = obj[name]
+
+    if (_.isFunction(fn)) {
+      throwIfFnNotStubbed(fn, name)
+    }
+  })
+
+  return stub
+}
 
 before(function () {
   delete process.env.CYPRESS_RUN_BINARY
@@ -21,23 +73,10 @@ before(function () {
 })
 
 beforeEach(function () {
-  this.sandbox = sinon.sandbox.create().usingPromise(Promise)
-
-  this.onlyCall = function (module, method) {
-    const stub = this.sandbox.stub(module, method)
-    stub.callsFake((args) => {
-      throw new Error(stripIndent`
-      ${chalk.magenta(`.${method}`)} called without matching '.withArgs(...)'
-        with args: ${chalk.magenta(args)}
-      `)
-    })
-    return stub
-  }
-
-  this.onlyCall(os, 'platform')
-  this.onlyCall(os, 'release')
+  sinon.stub(os, 'platform')
+  sinon.stub(os, 'release')
 })
 
 afterEach(function () {
-  this.sandbox.restore()
+  sinon.restore()
 })

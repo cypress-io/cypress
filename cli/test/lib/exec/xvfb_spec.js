@@ -3,15 +3,16 @@ require('../../spec_helper')
 const os = require('os')
 const xvfb = require(`${lib}/exec/xvfb`)
 
-describe('exec xvfb', function () {
+describe('lib/exec/xvfb', function () {
   beforeEach(function () {
     os.platform.returns('win32')
     os.release.returns('1.1.1-generic')
   })
+
   context('debugXvfb', function () {
     it('outputs when enabled', function () {
-      this.sandbox.stub(process.stderr, 'write')
-      this.sandbox.stub(xvfb._debugXvfb, 'enabled').value(true)
+      sinon.stub(process.stderr, 'write').returns(undefined)
+      sinon.stub(xvfb._debugXvfb, 'enabled').value(true)
 
       xvfb._xvfb._onStderrData('asdf')
 
@@ -20,8 +21,8 @@ describe('exec xvfb', function () {
     })
 
     it('does not output when disabled', function () {
-      this.sandbox.stub(process.stderr, 'write')
-      this.sandbox.stub(xvfb._debugXvfb, 'enabled').value(false)
+      sinon.stub(process.stderr, 'write')
+      sinon.stub(xvfb._debugXvfb, 'enabled').value(false)
 
       xvfb._xvfb._onStderrData('asdf')
 
@@ -32,13 +33,13 @@ describe('exec xvfb', function () {
 
   context('#start', function () {
     it('passes', function () {
-      this.sandbox.stub(xvfb._xvfb, 'startAsync').resolves()
+      sinon.stub(xvfb._xvfb, 'startAsync').resolves()
       return xvfb.start()
     })
 
     it('fails with error message', function () {
       const message = 'nope'
-      this.sandbox.stub(xvfb._xvfb, 'startAsync').rejects(new Error(message))
+      sinon.stub(xvfb._xvfb, 'startAsync').rejects(new Error(message))
 
       return xvfb.start()
       .then(() => {
@@ -53,7 +54,7 @@ describe('exec xvfb', function () {
       const e = new Error('something bad happened')
       e.nonZeroExitCode = true
 
-      this.sandbox.stub(xvfb._xvfb, 'startAsync').rejects(e)
+      sinon.stub(xvfb._xvfb, 'startAsync').rejects(e)
 
       return xvfb.start()
       .then(() => {

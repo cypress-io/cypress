@@ -43,17 +43,17 @@ describe('install', function () {
     beforeEach(function () {
       logger.reset()
 
-      // this.sandbox.stub(os, 'tmpdir').returns('/tmp')
-      this.sandbox.stub(util, 'isCi').returns(false)
-      this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
-      this.sandbox.stub(download, 'start').resolves(packageVersion)
-      this.sandbox.stub(unzip, 'start').resolves()
-      this.sandbox.stub(Promise.prototype, 'delay').resolves()
-      this.sandbox.stub(fs, 'removeAsync').resolves()
-      this.sandbox.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
-      this.sandbox.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
-      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves()
-      this.sandbox.stub(fs, 'ensureDirAsync').resolves(undefined)
+      // sinon.stub(os, 'tmpdir').returns('/tmp')
+      sinon.stub(util, 'isCi').returns(false)
+      sinon.stub(util, 'pkgVersion').returns(packageVersion)
+      sinon.stub(download, 'start').resolves(packageVersion)
+      sinon.stub(unzip, 'start').resolves()
+      sinon.stub(Promise.prototype, 'delay').resolves()
+      sinon.stub(fs, 'removeAsync').resolves()
+      sinon.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
+      sinon.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves()
+      sinon.stub(fs, 'ensureDirAsync').resolves(undefined)
       os.platform.returns('darwin')
       os.release.returns('1.1.1-generic')
     })
@@ -105,7 +105,7 @@ describe('install', function () {
       it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
         process.env.CYPRESS_INSTALL_BINARY = version
-        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
+        sinon.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
 
         const installDir = state.getVersionDir()
         return install.start()
@@ -235,7 +235,7 @@ describe('install', function () {
 
       describe('as a global install', function () {
         beforeEach(function () {
-          this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
+          sinon.stub(util, 'isInstalledGlobally').returns(true)
 
           state.getBinaryPkgVersionAsync.resolves('x.x.x')
 
@@ -279,7 +279,7 @@ describe('install', function () {
         it('logs error on failure', function () {
           os.platform.returns('darwin')
           os.release.returns('1.1.1-generic')
-          this.sandbox.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
+          sinon.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
 
           const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
           err.code = 'EACCES'
@@ -320,7 +320,7 @@ describe('install', function () {
           })
         })
         it('uses cache when correct version installed given Zip', function () {
-          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+          sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
@@ -332,7 +332,7 @@ describe('install', function () {
           })
         })
         it('uses cache when mismatch version given Zip ', function () {
-          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+          sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
