@@ -223,15 +223,12 @@ describe('lib/exec/spawn', function () {
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      sinon.stub(process.stderr, 'write')
+      sinon.stub(process.stderr, 'write').withArgs(buf1)
       sinon.stub(tty, 'isatty').returns(false)
       os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
       return spawn.start()
-      .then(() => {
-        expect(process.stderr.write).to.be.calledWith(buf1)
-      })
     })
 
     it('does not write to process.stderr when from xlib or libudev', function () {

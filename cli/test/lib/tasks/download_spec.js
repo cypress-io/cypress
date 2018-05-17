@@ -86,7 +86,7 @@ describe('lib/tasks/download', function () {
     })
 
 
-    const onProgress = sinon.stub()
+    const onProgress = sinon.stub().returns(undefined)
 
     return download.start({
       downloadDestination: this.options.downloadDestination,
