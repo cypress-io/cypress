@@ -51,7 +51,7 @@ describe('lib/tasks/unzip', function () {
   })
 
   it('can really unzip', function () {
-    const onProgress = sinon.stub()
+    const onProgress = sinon.stub().returns(undefined)
 
     return unzip
     .start({

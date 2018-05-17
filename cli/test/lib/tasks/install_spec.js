@@ -351,7 +351,7 @@ describe('install', function () {
         install.start()
         .catch((err) => {
           logger.error(err)
-          snapshot(this.stdout.toString())
+          snapshot(normalize(this.stdout.toString()))
         })
       })
     })
