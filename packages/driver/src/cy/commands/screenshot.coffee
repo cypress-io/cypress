@@ -172,19 +172,26 @@ takeElementScreenshot = ($el, state, automationOptions) ->
   takeScrollingScreenshots(scrolls, win, automationOptions)
   .finally(resetScrollOverrides)
 
+isAppOnly = ({ capture }) ->
+  capture is "app" or capture is "fullpage"
+
+getShouldScale = ({ capture, scaleAppCaptures }) ->
+  if isAppOnly({ capture }) then scaleAppCaptures else true
+
+getShouldWait = ({ capture, waitForCommandSynchronization }) ->
+  if isAppOnly({ capture }) then false else waitForCommandSynchronization
+
+getBlackout = ({ capture, blackout }) ->
+  if isAppOnly({ capture }) then blackout else []
+
 takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
-    blackout
     capture
     clip
     disableTimersAndAnimations
-    scaleAppCaptures
-    waitForCommandSynchronization
   } = screenshotConfig
 
   { subject, runnable } = options
-
-  appOnly = capture is "app" or capture is "fullpage"
 
   send = (event, props) ->
     new Promise (resolve) ->
@@ -194,11 +201,11 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     {
       id: runnable.id
       isOpen: isOpen
-      appOnly: appOnly
-      scale: if appOnly then scaleAppCaptures else true
-      waitForCommandSynchronization: if appOnly then false else waitForCommandSynchronization
+      appOnly: isAppOnly(screenshotConfig)
+      scale: getShouldScale(screenshotConfig)
+      waitForCommandSynchronization: getShouldWait(screenshotConfig)
       disableTimersAndAnimations: disableTimersAndAnimations
-      blackout: if appOnly then blackout else []
+      blackout: getBlackout(screenshotConfig)
     }
 
   before = ->
@@ -280,12 +287,19 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
 
-      if options.log
-        consoleProps = {
-          options: userOptions
-          config: screenshotConfig
-        }
+      ## set this regardless of options.log b/c its used by the
+      ## yielded value below
+      consoleProps = _.omit(screenshotConfig, "scaleAppCaptures", "screenshotOnRunFailure")
+      consoleProps = _.extend(consoleProps, {
+        scaled: getShouldScale(screenshotConfig)
+        blackout: getBlackout(screenshotConfig)
+        waitForCommandSynchronization: getShouldWait(screenshotConfig)
+      })
 
+      if name
+        consoleProps.name = name
+
+      if options.log
         options._log = Cypress.log({
           message: name
           consoleProps: ->
@@ -301,6 +315,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if subject
         screenshotConfig.capture = "app"
 
+      startTime = Date.now()
+
       takeScreenshot(Cypress, state, screenshotConfig, {
         subject: subject
         runnable: runnable
@@ -308,10 +324,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         log: options._log
         timeout: options.timeout
       })
-      .then ({ path, size }) ->
-        _.extend(consoleProps, {
-          "Saved": path
-          "Size": size
+      .then (props) ->
+        duration = Date.now() - startTime
+
+        yieldValue = _.extend({}, consoleProps, props, { duration })
+
+        { width, height } = props.dimensions
+
+        _.extend(consoleProps, yieldValue, {
+          duration: "#{duration}ms"
+          dimensions: "#{width}px x #{height}px"
         })
-      .return(null)
+
+        if subject
+          consoleProps.subject = subject
+          yieldValue.el = subject
+
+        return yieldValue
   })

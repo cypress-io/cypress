@@ -436,8 +436,8 @@ module.exports = {
       testId:    data.testId
       takenAt:   resp.takenAt
       path:      resp.path
-      height:    resp.height
-      width:     resp.width
+      height:    resp.dimensions.height
+      width:     resp.dimensions.width
     }
 
   runSpecs: (options = {}) ->
