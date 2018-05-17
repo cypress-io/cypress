@@ -19,20 +19,20 @@ describe('lib/exec/spawn', function () {
   beforeEach(function () {
     os.platform.returns('darwin')
     os.release.returns('1.1.1-generic')
-    this.sandbox.stub(process, 'exit')
-    this.spawnedProcess = this.sandbox.stub({
-      on: () => {},
-      unref: () => {},
-      stderr: this.sandbox.stub({
-        on: () => {},
-      }),
-    })
-    this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
-    this.sandbox.stub(xvfb, 'start').resolves()
-    this.sandbox.stub(xvfb, 'stop').resolves()
-    this.sandbox.stub(xvfb, 'isNeeded').returns(false)
-    this.sandbox.stub(state, 'getBinaryDir').returns(defaultBinaryDir)
-    this.sandbox.stub(state, 'getPathToExecutable').withArgs(defaultBinaryDir).returns('/path/to/cypress')
+    sinon.stub(process, 'exit')
+    this.spawnedProcess = {
+      on: sinon.stub().returns(undefined),
+      unref: sinon.stub().returns(undefined),
+      stderr: {
+        on: sinon.stub().returns(undefined),
+      },
+    }
+    sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
+    sinon.stub(xvfb, 'start').resolves()
+    sinon.stub(xvfb, 'stop').resolves()
+    sinon.stub(xvfb, 'isNeeded').returns(false)
+    sinon.stub(state, 'getBinaryDir').returns(defaultBinaryDir)
+    sinon.stub(state, 'getPathToExecutable').withArgs(defaultBinaryDir).returns('/path/to/cypress')
   })
 
   context('.start', function () {
@@ -151,7 +151,7 @@ describe('lib/exec/spawn', function () {
     it('forces colors when colors are supported', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      this.sandbox.stub(util, 'supportsColor').returns(true)
+      sinon.stub(util, 'supportsColor').returns(true)
 
       return spawn.start()
       .then(() => {
@@ -164,7 +164,7 @@ describe('lib/exec/spawn', function () {
     it('does not force colors when colors are not supported', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      this.sandbox.stub(util, 'supportsColor').returns(false)
+      sinon.stub(util, 'supportsColor').returns(false)
 
       return spawn.start()
       .then(() => {
@@ -177,7 +177,7 @@ describe('lib/exec/spawn', function () {
     it('forces stderr tty when needs xvfb and stderr is tty', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      this.sandbox.stub(tty, 'isatty').returns(true)
+      sinon.stub(tty, 'isatty').returns(true)
       os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
@@ -190,7 +190,7 @@ describe('lib/exec/spawn', function () {
     it('does not force stderr tty when needs xvfb isnt needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      this.sandbox.stub(tty, 'isatty').returns(true)
+      sinon.stub(tty, 'isatty').returns(true)
       os.platform.returns('linux')
 
       return spawn.start()
@@ -202,7 +202,7 @@ describe('lib/exec/spawn', function () {
     it('does not force stderr tty when stderr is not currently tty', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      this.sandbox.stub(tty, 'isatty').returns(false)
+      sinon.stub(tty, 'isatty').returns(false)
       os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
@@ -223,8 +223,8 @@ describe('lib/exec/spawn', function () {
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      this.sandbox.stub(process.stderr, 'write')
-      this.sandbox.stub(tty, 'isatty').returns(false)
+      sinon.stub(process.stderr, 'write')
+      sinon.stub(tty, 'isatty').returns(false)
       os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
@@ -249,8 +249,8 @@ describe('lib/exec/spawn', function () {
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      this.sandbox.stub(process.stderr, 'write')
-      this.sandbox.stub(tty, 'isatty').returns(false)
+      sinon.stub(process.stderr, 'write')
+      sinon.stub(tty, 'isatty').returns(false)
       os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 

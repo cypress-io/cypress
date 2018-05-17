@@ -9,8 +9,8 @@ const verify = require(`${lib}/tasks/verify`)
 
 describe('exec run', function () {
   beforeEach(function () {
-    this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
-    this.sandbox.stub(process, 'exit')
+    sinon.stub(util, 'isInstalledGlobally').returns(true)
+    sinon.stub(process, 'exit')
   })
 
   context('.processRunOptions', function () {
@@ -39,8 +39,8 @@ describe('exec run', function () {
 
   context('.start', function () {
     beforeEach(function () {
-      this.sandbox.stub(spawn, 'start').resolves()
-      this.sandbox.stub(verify, 'start').resolves()
+      sinon.stub(spawn, 'start').resolves()
+      sinon.stub(verify, 'start').resolves()
     })
 
     describe('group and group-id', () => {

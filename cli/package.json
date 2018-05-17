@@ -90,7 +90,7 @@
     "nyc": "11.7.1",
     "proxyquire": "2.0.1",
     "shelljs": "0.7.8",
-    "sinon": "3.2.1",
+    "sinon": "5.0.7",
     "snap-shot-it": "^5.0.0",
     "strip-ansi": "4.0.0"
   },

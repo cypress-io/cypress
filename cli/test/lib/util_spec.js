@@ -8,8 +8,8 @@ const logger = require(`${lib}/logger`)
 
 describe('util', function () {
   beforeEach(function () {
-    this.sandbox.stub(process, 'exit')
-    this.sandbox.stub(logger, 'error')
+    sinon.stub(process, 'exit')
+    sinon.stub(logger, 'error')
   })
 
   context('.stdoutLineMatches', () => {
@@ -111,33 +111,31 @@ describe('util', function () {
   context('.supportsColor', function () {
     it('is true on obj return for stderr', function () {
       const obj = {}
-      this.sandbox.stub(supportsColor, 'stderr').value(obj)
+      sinon.stub(supportsColor, 'stderr').value(obj)
 
       expect(util.supportsColor()).to.be.true
     })
 
     it('is false on false return for stderr', function () {
-      this.sandbox.stub(supportsColor, 'stderr').value(false)
+      sinon.stub(supportsColor, 'stderr').value(false)
 
       expect(util.supportsColor()).to.be.false
     })
   })
 
   it('.exit', function () {
+    process.exit.withArgs(2).withArgs(0)
     util.exit(2)
-    expect(process.exit).to.be.calledWith(2)
-
     util.exit(0)
-    expect(process.exit).to.be.calledWith(0)
   })
 
   it('.logErrorExit1', function () {
     const err = new Error('foo')
 
-    util.logErrorExit1(err)
+    logger.error.withArgs('foo')
+    process.exit.withArgs(1)
 
-    expect(process.exit).to.be.calledWith(1)
-    expect(logger.error).to.be.calledWith('foo')
+    util.logErrorExit1(err)
   })
 
   describe('.isSemver', function () {
@@ -172,14 +170,14 @@ describe('util', function () {
       })
 
       it('does nothing if debug is not enabled', function () {
-        const log = this.sandbox.spy()
+        const log = sinon.spy()
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
       })
 
       it('prints message when debug is enabled', function () {
-        const log = this.sandbox.spy()
+        const log = sinon.spy()
         log.enabled = true
         util.printNodeOptions(log)
         expect(log).to.be.calledWith('NODE_OPTIONS is not set')
@@ -199,14 +197,14 @@ describe('util', function () {
       })
 
       it('does nothing if debug is not enabled', function () {
-        const log = this.sandbox.spy()
+        const log = sinon.spy()
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
       })
 
       it('prints value when debug is enabled', function () {
-        const log = this.sandbox.spy()
+        const log = sinon.spy()
         log.enabled = true
         util.printNodeOptions(log)
         expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
