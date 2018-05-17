@@ -111,7 +111,6 @@ function testBinary (version, binaryDir) {
   debug('running binary verification check', version)
 
 
-  // let the user know what version of cypress we're downloading!
   logger.log(stripIndent`
   It looks like this is your first time using Cypress: ${chalk.cyan(version)}
   `)
@@ -161,8 +160,8 @@ function testBinary (version, binaryDir) {
   return tasks.run()
 }
 
-const maybeVerify = (installedVersion, installPath, options = {}) => {
-  return state.getBinaryVerifiedAsync(state.getBinaryDir())
+const maybeVerify = (installedVersion, binaryDir, options = {}) => {
+  return state.getBinaryVerifiedAsync(binaryDir)
   .then((isVerified) => {
 
     debug('is Verified ?', isVerified)
@@ -175,7 +174,7 @@ const maybeVerify = (installedVersion, installPath, options = {}) => {
     }
 
     if (shouldVerify) {
-      return testBinary(installedVersion, installPath)
+      return testBinary(installedVersion, binaryDir)
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
@@ -213,7 +212,9 @@ const start = (options = {}) => {
       .then((isExecutable) => {
         debug('CYPRESS_RUN_BINARY is executable? :', isExecutable)
         if (!isExecutable) {
-          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
+          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(stripIndent`
+          The supplied binary path is not executable
+          `)
         }
       })
       .then(() => fs.realpathAsync(envBinaryPath))
@@ -227,6 +228,9 @@ const start = (options = {}) => {
 
         binaryDir = envBinaryDir
       })
+      .catch({ code: 'ENOENT' }, (err) => {
+        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(err.message)
+      })
     }
     return Promise.resolve()
   }
@@ -234,6 +238,7 @@ const start = (options = {}) => {
 
   return checkEnvVar()
   .then(() => isMissingExecutable(binaryDir))
+  .tap(() => debug('binaryDir is ', binaryDir))
   .then(() => state.getBinaryPkgVersionAsync(binaryDir))
   .then((binaryVersion) => {
 

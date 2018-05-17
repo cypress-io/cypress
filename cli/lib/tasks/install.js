@@ -155,8 +155,9 @@ const start = (options = {}) => {
     if (envVarVersion === '0') {
       debug('env var CYPRESS_INSTALL_BINARY = 0, skipping install')
       logger.log(
-        chalk.yellow('Skipping binary installation. Env var \'CYPRESS_SKIP_BINARY_INSTALL\' was found.')
+        chalk.yellow(`${logSymbols.warning} Warning: Skipping binary installation. Env var CYPRESS_INSTALL_BINARY was 0.`)
       )
+      logger.log()
       return Promise.resolve()
     }
 
