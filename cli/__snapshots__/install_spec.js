@@ -149,3 +149,15 @@ Platform: darwin (1.1.1-generic)
 Cypress Version: 1.2.3
 
 `
+
+exports['install .start override version throws when env var CYPRESS_BINARY_VERSION 1'] = `
+      [32m  ✓[0m[90m throws when env var CYPRESS_BINARY_VERSION[0m
+Error: The environment variable CYPRESS_BINARY_VERSION has been removed as of version [32m3.0.0[39m
+
+You should use the equivalent environment variable CYPRESS_INSTALL_BINARY instead.
+----------
+
+Platform: darwin (1.1.1-generic)
+Cypress Version: 1.2.3
+
+`

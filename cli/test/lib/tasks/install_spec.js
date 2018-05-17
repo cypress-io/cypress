@@ -54,13 +54,15 @@ describe('install', function () {
       this.sandbox.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
       this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves()
       this.sandbox.stub(fs, 'ensureDirAsync').resolves(undefined)
+      os.platform.returns('darwin')
+      os.release.returns('1.1.1-generic')
     })
 
     describe('skips install', function () {
 
 
       it('when environment variable is set', function () {
-        process.env.CYPRESS_SKIP_BINARY_INSTALL = true
+        process.env.CYPRESS_INSTALL_BINARY = 0
 
         return install.start()
         .then(() => {
@@ -76,12 +78,12 @@ describe('install', function () {
 
     describe('override version', function () {
       afterEach(function () {
-        delete process.env.CYPRESS_BINARY_VERSION
+        delete process.env.CYPRESS_INSTALL_BINARY
       })
 
       it('warns when specifying cypress version in env', function () {
         const version = '0.12.1'
-        process.env.CYPRESS_BINARY_VERSION = version
+        process.env.CYPRESS_INSTALL_BINARY = version
 
         return install.start()
         .then(() => {
@@ -102,7 +104,7 @@ describe('install', function () {
 
       it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
-        process.env.CYPRESS_BINARY_VERSION = version
+        process.env.CYPRESS_INSTALL_BINARY = version
         this.sandbox.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
 
         const installDir = state.getVersionDir()
@@ -275,8 +277,8 @@ describe('install', function () {
 
       describe('failed write access to cache directory', function () {
         it('logs error on failure', function () {
-          this.sandbox.stub(os, 'platform').returns('darwin')
-          this.sandbox.stub(os, 'release').returns('1.1.1-generic')
+          os.platform.returns('darwin')
+          os.release.returns('1.1.1-generic')
           this.sandbox.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
 
           const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
@@ -298,11 +300,11 @@ describe('install', function () {
         })
       })
 
-      describe('CYPRESS_BINARY_INSTALL is URL or Zip', function () {
+      describe('CYPRESS_INSTALL_BINARY is URL or Zip', function () {
         it('uses cache when correct version installed given URL', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
-          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
           return install.start()
           .then(() => {
             expect(download.start).to.not.be.called
@@ -311,7 +313,7 @@ describe('install', function () {
         it('uses cache when mismatch version given URL ', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
-          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
           return install.start()
           .then(() => {
             expect(download.start).to.not.be.called
@@ -323,7 +325,7 @@ describe('install', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
 
-          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
           return install.start()
           .then(() => {
             expect(unzip.start).to.not.be.called
@@ -334,11 +336,22 @@ describe('install', function () {
 
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
-          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
           return install.start()
           .then(() => {
             expect(unzip.start).to.not.be.called
           })
+        })
+      })
+      it('throws when env var CYPRESS_BINARY_VERSION', function () {
+        afterEach(function () {
+          delete process.env.CYPRESS_BINARY_VERSION
+        })
+        process.env.CYPRESS_BINARY_VERSION = '/asf/asf'
+        install.start()
+        .catch((err) => {
+          logger.error(err)
+          snapshot(this.stdout.toString())
         })
       })
     })

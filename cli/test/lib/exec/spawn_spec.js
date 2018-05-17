@@ -17,8 +17,8 @@ const defaultBinaryDir = '/default/binary/dir'
 
 describe('lib/exec/spawn', function () {
   beforeEach(function () {
-    this.sandbox.stub(os, 'platform').returns('darwin')
-    this.sandbox.stub(os, 'release').returns('1.1.1-generic')
+    os.platform.returns('darwin')
+    os.release.returns('1.1.1-generic')
     this.sandbox.stub(process, 'exit')
     this.spawnedProcess = this.sandbox.stub({
       on: () => {},
@@ -293,15 +293,8 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('can accept --binary-folder option', function () {
-      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-      state.getPathToExecutable.withArgs('custom/binary/dir').returns('custom/binary/dir/executable')
+    it('can spawn using env var CYPRESS_RUN_BINARY', function () {
 
-      return spawn.start([], { binaryFolder: 'custom/binary/dir' })
-      .then(() => {
-        expect(cp.spawn.firstCall.args[0]).to.equal('custom/binary/dir/executable')
-        expect(cp.spawn.firstCall.args[2]).to.not.have.property('binaryFolder')
-      })
     })
   })
 })

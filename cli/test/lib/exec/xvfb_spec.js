@@ -5,8 +5,8 @@ const xvfb = require(`${lib}/exec/xvfb`)
 
 describe('exec xvfb', function () {
   beforeEach(function () {
-    this.sandbox.stub(os, 'platform').returns('win32')
-    this.sandbox.stub(os, 'release').returns('1.1.1-generic')
+    os.platform.returns('win32')
+    os.release.returns('1.1.1-generic')
   })
   context('debugXvfb', function () {
     it('outputs when enabled', function () {

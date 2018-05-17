@@ -162,7 +162,7 @@ function testBinary (version, binaryDir) {
 }
 
 const maybeVerify = (installedVersion, installPath, options = {}) => {
-  return state.getBinaryVerifiedAsync()
+  return state.getBinaryVerifiedAsync(state.getBinaryDir())
   .then((isVerified) => {
 
     debug('is Verified ?', isVerified)
@@ -191,29 +191,55 @@ const start = (options = {}) => {
 
   const packageVersion = util.pkgVersion()
   let binaryDir = state.getBinaryDir(packageVersion)
-  if (process.env.CYPRESS_BINARY_FOLDER) {
-    const envBinaryDir = process.env.CYPRESS_BINARY_FOLDER
-    logger.warn(stripIndent`
-    ${logSymbols.warning} Warning: You have set the environment variable: ${chalk.white('CYPRESS_BINARY_FOLDER=')}${chalk.cyan(envBinaryDir)}
-    
-      This overrides the default Cypress binary version used.
-    `)
-    logger.log()
-    binaryDir = envBinaryDir
-  }
 
   _.defaults(options, {
     force: false,
     welcomeMessage: true,
   })
 
-  return isMissingExecutable(binaryDir)
+  const checkEnvVar = () => {
+    debug('checking env variables')
+    if (process.env.CYPRESS_RUN_BINARY) {
+      const envBinaryPath = process.env.CYPRESS_RUN_BINARY
+      debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
+      logger.warn(stripIndent`
+        ${logSymbols.warning} Warning: You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}
+        
+          This overrides the default Cypress binary version used.
+        `)
+      logger.log()
+
+      return util.isExecutableAsync(envBinaryPath)
+      .then((isExecutable) => {
+        debug('CYPRESS_RUN_BINARY is executable? :', isExecutable)
+        if (!isExecutable) {
+          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))
+        }
+      })
+      .then(() => fs.realpathAsync(envBinaryPath))
+      .then((realPath) => {
+        debug('CYPRESS_RUN_BINARY has realPath:', realPath)
+        const envBinaryDir = state.parsePlatformBinaryFolder(realPath)
+        if (!envBinaryDir) {
+          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))
+        }
+        debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
+
+        binaryDir = envBinaryDir
+      })
+    }
+    return Promise.resolve()
+  }
+
+
+  return checkEnvVar()
+  .then(() => isMissingExecutable(binaryDir))
   .then(() => state.getBinaryPkgVersionAsync(binaryDir))
   .then((binaryVersion) => {
 
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
-      return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
+      return throwFormErrorText(errors.missingApp(binaryDir))(`
       Cannot read binary version from: ${chalk.cyan(state.getBinaryPkgPath(binaryDir))}
     `)
     }
@@ -221,7 +247,7 @@ const start = (options = {}) => {
     debug(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
 
     if (binaryVersion !== packageVersion) {
-      // warn if we installed with CYPRESS_BINARY_VERSION or changed version
+      // warn if we installed with CYPRESS_INSTALL_BINARY or changed version
       // in the package.json
       logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
       logger.log()

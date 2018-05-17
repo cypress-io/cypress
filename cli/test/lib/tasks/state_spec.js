@@ -24,7 +24,7 @@ describe('lib/tasks/state', function () {
     logger.reset()
     this.sandbox.stub(process, 'exit')
     this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-    this.sandbox.stub(os, 'platform').returns('darwin')
+    os.platform.returns('darwin')
   })
 
   context('.getBinaryPkgVersionAsync', function () {
@@ -32,7 +32,7 @@ describe('lib/tasks/state', function () {
     it('resolves version from version file when it exists', function () {
       this.sandbox.stub(fs, 'pathExistsAsync').withArgs(binaryPkgPath).resolves(true)
       this.sandbox.stub(fs, 'readJsonAsync').withArgs(binaryPkgPath).resolves({ version: '2.0.48' })
-      return state.getBinaryPkgVersionAsync()
+      return state.getBinaryPkgVersionAsync(binaryDir)
       .then((binaryVersion) => {
         expect(binaryVersion).to.equal('2.0.48')
       })
@@ -40,7 +40,7 @@ describe('lib/tasks/state', function () {
 
     it('returns null if no version found', function () {
       this.sandbox.stub(fs, 'pathExistsAsync').resolves(false)
-      return state.getBinaryPkgVersionAsync()
+      return state.getBinaryPkgVersionAsync(binaryDir)
       .then((binaryVersion) => expect(binaryVersion).to.equal(null))
     })
 
@@ -59,16 +59,16 @@ describe('lib/tasks/state', function () {
   context('.getPathToExecutable', function () {
     it('resolves path on macOS', function () {
       const macExecutable = '.cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
-      expect(state.getPathToExecutable()).to.equal(macExecutable)
+      expect(state.getPathToExecutable(state.getBinaryDir())).to.equal(macExecutable)
     })
     it('resolves path on linux', function () {
       os.platform.returns('linux')
-      const macExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
-      expect(state.getPathToExecutable()).to.equal(macExecutable)
+      const linuxExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
+      expect(state.getPathToExecutable(state.getBinaryDir())).to.equal(linuxExecutable)
     })
     it('resolves path on windows', function () {
       os.platform.returns('win32')
-      expect(state.getPathToExecutable()).to.endWith('.exe')
+      expect(state.getPathToExecutable(state.getBinaryDir())).to.endWith('.exe')
     })
     it('resolves from custom binaryDir', function () {
       const customBinaryDir = 'home/downloads/cypress.app'
@@ -111,12 +111,12 @@ describe('lib/tasks/state', function () {
   context('.getBinaryVerifiedAsync', function () {
     it('resolves true if verified', function () {
       this.sandbox.stub(fs, 'readJsonAsync').resolves({ verified: true })
-      return state.getBinaryVerifiedAsync()
+      return state.getBinaryVerifiedAsync('/asdf')
       .then((isVerified) => expect(isVerified).to.be.equal(true))
     })
     it('resolves undefined if not verified', function () {
       this.sandbox.stub(fs, 'readJsonAsync').rejects({ code: 'ENOENT' })
-      return state.getBinaryVerifiedAsync()
+      return state.getBinaryVerifiedAsync('/asdf')
       .then((isVerified) => expect(isVerified).to.be.equal(undefined))
     })
     it('can accept custom binaryDir', function () {
@@ -130,7 +130,7 @@ describe('lib/tasks/state', function () {
   context('.writeBinaryVerified', function () {
     it('writes to binary state verified:true', function () {
       this.sandbox.stub(fs, 'outputJsonAsync').resolves()
-      return state.writeBinaryVerifiedAsync(true)
+      return state.writeBinaryVerifiedAsync(true, binaryDir)
       .then(() => expect(fs.outputJsonAsync).to.be.calledWith(
         path.join(binaryDir, 'binary_state.json'), { verified: true }), { spaces: 2 }
       )
@@ -138,7 +138,7 @@ describe('lib/tasks/state', function () {
 
     it('write to binary state verified:false', function () {
       this.sandbox.stub(fs, 'outputJsonAsync').resolves()
-      return state.writeBinaryVerifiedAsync(false)
+      return state.writeBinaryVerifiedAsync(false, binaryDir)
       .then(() => expect(fs.outputJsonAsync).to.be.calledWith(
         path.join(binaryDir, 'binary_state.json'), { verified: false }, { spaces: 2 })
       )
@@ -146,17 +146,44 @@ describe('lib/tasks/state', function () {
   })
   context('.getCacheDir', function () {
     afterEach(() => {
-      delete process.env.CYPRESS_CACHE_DIRECTORY
+      delete process.env.CYPRESS_CACHE_FOLDER
     })
     it('uses cachedir()', function () {
       const ret = state.getCacheDir()
       expect(ret).to.equal(cacheDir)
     })
 
-    it('uses env variable CYPRESS_CACHE_DIRECTORY', function () {
-      process.env.CYPRESS_CACHE_DIRECTORY = '/path/to/dir'
+    it('uses env variable CYPRESS_CACHE_FOLDER', function () {
+      process.env.CYPRESS_CACHE_FOLDER = '/path/to/dir'
       const ret = state.getCacheDir()
       expect(ret).to.equal('/path/to/dir')
+    })
+  })
+  context('.parsePlatformBinaryFolder', function () {
+
+    it('can parse on darwin', function () {
+      os.platform.returns('darwin')
+      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app/Contents/MacOS/Cypress')).to.equal('/Documents/Cypress.app')
+    })
+    it('can parse on linux', function () {
+      os.platform.returns('linux')
+      expect(state.parsePlatformBinaryFolder('/Documents/Cypress/Cypress')).to.equal('/Documents/Cypress')
+    })
+    it('can parse on darwin', function () {
+      os.platform.returns('win32')
+      expect(state.parsePlatformBinaryFolder('/Documents/Cypress/Cypress.exe')).to.equal('/Documents/Cypress')
+    })
+    it('throws when invalid on darwin', function () {
+      os.platform.returns('darwin')
+      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app')).to.equal(false)
+    })
+    it('throws when invalid on linux', function () {
+      os.platform.returns('linux')
+      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app')).to.equal(false)
+    })
+    it('throws when invalid on windows', function () {
+      os.platform.returns('win32')
+      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app')).to.equal(false)
     })
   })
 })

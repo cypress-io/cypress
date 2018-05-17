@@ -33,8 +33,8 @@ describe('lib/tasks/download', function () {
       version,
     }
 
-    this.sandbox.stub(os, 'platform').returns('darwin')
-    this.sandbox.stub(os, 'release').returns('test release')
+    os.platform.returns('darwin')
+    os.release.returns('test release')
     this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
     this.sandbox.stub(util, 'cwd').returns(rootFolder)
   })
