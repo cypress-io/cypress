@@ -116,9 +116,9 @@ const removed = {
 
 const CYPRESS_RUN_BINARY = {
   notValid: (value) => {
-    const properFormat = `../${state.getPlatformExecutable()}`
+    const properFormat = `**/${state.getPlatformExecutable()}`
     return {
-      description: `Could not run binary set in CYPRESS_RUN_BINARY=${value}`,
+      description: `Could not run binary set by CYPRESS_RUN_BINARY=${value}`,
       solution: `Ensure the environment variable is a path to the Cypress binary, matching ${properFormat}`,
     }
   },
