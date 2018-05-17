@@ -133,7 +133,7 @@ const util = {
   },
 
   isExecutableAsync (filePath) {
-    return Promise.resolve(() => executable(filePath))
+    return Promise.resolve(executable(filePath))
   },
 
   // attention:
