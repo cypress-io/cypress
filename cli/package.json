@@ -12,17 +12,24 @@
   "scripts": {
     "test": "npm run test-unit",
     "test-unit": "npm run dtslint && npm run unit",
-    "test-watch": "bin-up mocha --watch",
+    "test-watch": "npm run unit -- --watch",
     "test-dependencies": "bin-up deps-ok && dependency-check . --no-dev",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
+    "test-cov": "nyc npm run unit",
+    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
     "lint": "bin-up eslint --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "dtslint": "dtslint types",
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
-    "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
+    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
+  },
+  "nyc": {
+    "exclude": [
+      "test",
+      "scripts"
+    ]
   },
   "types": "types",
   "dependencies": {
@@ -32,6 +39,7 @@
     "@types/bluebird": "3.5.18",
     "@types/chai": "4.0.8",
     "@types/chai-jquery": "1.1.35",
+    "@types/chalk": "2.2.0",
     "@types/jquery": "3.2.16",
     "@types/lodash": "4.14.87",
     "@types/minimatch": "3.0.1",
@@ -39,6 +47,7 @@
     "@types/sinon": "4.0.0",
     "@types/sinon-chai": "2.7.29",
     "bluebird": "3.5.0",
+    "cachedir": "1.2.0",
     "chalk": "2.1.0",
     "check-more-types": "2.24.0",
     "commander": "2.11.0",
@@ -53,6 +62,7 @@
     "lazy-ass": "1.6.0",
     "listr": "0.12.0",
     "lodash": "4.17.4",
+    "log-symbols": "2.2.0",
     "minimist": "1.2.0",
     "progress": "1.1.8",
     "ramda": "0.24.1",
@@ -76,6 +86,8 @@
     "dtslint": "0.2.0",
     "execa-wrap": "1.1.0",
     "nock": "^9.0.9",
+    "nyc": "11.7.1",
+    "proxyquire": "2.0.1",
     "shelljs": "0.7.8",
     "sinon": "3.2.1",
     "snap-shot-it": "4.1.4",

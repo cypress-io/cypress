@@ -6,7 +6,7 @@
   "browser": "src/main",
   "scripts": {
     "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee",
-    "cypress:open": "node ../../scripts/start.js --project ./test",
+    "cypress:open": "node ../../cli/bin/cypress open --dev --project ./test",
     "cypress:run": "node ../../scripts/run-cypress-tests.js --browser chrome --dir test",
     "clean-deps": "rm -rf node_modules"
   },

@@ -5,15 +5,20 @@ const os = require('os')
 const tty = require('tty')
 const path = require('path')
 
-const info = require(`${lib}/tasks/info`)
+const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
 const spawn = require(`${lib}/exec/spawn`)
 const util = require(`${lib}/util.js`)
+const expect = require('chai').expect
 
 const cwd = process.cwd()
 
-describe('exec spawn', function () {
+const defaultBinaryDir = '/default/binary/dir'
+
+describe('lib/exec/spawn', function () {
   beforeEach(function () {
+    this.sandbox.stub(os, 'platform').returns('darwin')
+    this.sandbox.stub(os, 'release').returns('1.1.1-generic')
     this.sandbox.stub(process, 'exit')
     this.spawnedProcess = this.sandbox.stub({
       on: () => {},
@@ -26,7 +31,8 @@ describe('exec spawn', function () {
     this.sandbox.stub(xvfb, 'start').resolves()
     this.sandbox.stub(xvfb, 'stop').resolves()
     this.sandbox.stub(xvfb, 'isNeeded').returns(false)
-    this.sandbox.stub(info, 'getPathToExecutable').returns('/path/to/cypress')
+    this.sandbox.stub(state, 'getBinaryDir').returns(defaultBinaryDir)
+    this.sandbox.stub(state, 'getPathToExecutable').withArgs(defaultBinaryDir).returns('/path/to/cypress')
   })
 
   context('.start', function () {
@@ -115,6 +121,7 @@ describe('exec spawn', function () {
       const msg = 'the error message'
       this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
 
+
       return spawn.start('--foo')
       .then(() => {
         throw new Error('should have hit error handler but did not')
@@ -171,7 +178,7 @@ describe('exec spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       this.sandbox.stub(tty, 'isatty').returns(true)
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
       return spawn.start()
@@ -184,7 +191,7 @@ describe('exec spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       this.sandbox.stub(tty, 'isatty').returns(true)
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
 
       return spawn.start()
       .then(() => {
@@ -196,7 +203,7 @@ describe('exec spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       this.sandbox.stub(tty, 'isatty').returns(false)
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
       return spawn.start()
@@ -218,7 +225,7 @@ describe('exec spawn', function () {
 
       this.sandbox.stub(process.stderr, 'write')
       this.sandbox.stub(tty, 'isatty').returns(false)
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
       return spawn.start()
@@ -244,7 +251,7 @@ describe('exec spawn', function () {
 
       this.sandbox.stub(process.stderr, 'write')
       this.sandbox.stub(tty, 'isatty').returns(false)
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
       return spawn.start()
@@ -254,12 +261,10 @@ describe('exec spawn', function () {
       })
     })
 
-    it('filters out process.stderr when piping')
-
     it('uses inherit/inherit/pipe when linux and xvfb is needed', function () {
       xvfb.isNeeded.returns(true)
 
-      this.sandbox.stub(os, 'platform').returns('linux')
+      os.platform.returns('linux')
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
@@ -274,7 +279,7 @@ describe('exec spawn', function () {
 
     ;['win32', 'darwin', 'linux'].forEach((platform) => {
       it(`uses inherit when '${platform}' and xvfb is not needed`, function () {
-        this.sandbox.stub(os, 'platform').returns(platform)
+        os.platform.returns(platform)
 
         this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
@@ -285,6 +290,17 @@ describe('exec spawn', function () {
             stdio: 'inherit',
           })
         })
+      })
+    })
+
+    it('can accept --binary-folder option', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      state.getPathToExecutable.withArgs('custom/binary/dir').returns('custom/binary/dir/executable')
+
+      return spawn.start([], { binaryFolder: 'custom/binary/dir' })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[0]).to.equal('custom/binary/dir/executable')
+        expect(cp.spawn.firstCall.args[2]).to.not.have.property('binaryFolder')
       })
     })
   })

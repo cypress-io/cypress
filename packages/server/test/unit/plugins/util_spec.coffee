@@ -55,7 +55,7 @@ describe "lib/plugins/util", ->
       }
       @invoke = sinon.stub()
       @ids = {
-        callbackId: 0
+        eventId: 0
         invocationId: "00"
       }
       @args = []
@@ -72,6 +72,11 @@ describe "lib/plugins/util", ->
       @invoke.resolves("value")
       util.wrapChildPromise(@ipc, @invoke, @ids).then =>
         expect(@ipc.send).to.be.calledWith("promise:fulfilled:00", null, "value")
+
+    it "serializes undefined", ->
+      @invoke.resolves(undefined)
+      util.wrapChildPromise(@ipc, @invoke, @ids).then =>
+        expect(@ipc.send).to.be.calledWith("promise:fulfilled:00", null, "__cypress_undefined__")
 
     it "sends 'promise:fulfilled:{invocatationId}' with error when promise rejects", ->
       err = new Error("fail")
@@ -105,6 +110,13 @@ describe "lib/plugins/util", ->
       @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(null, "value")
       promise.then (value) ->
         expect(value).to.equal("value")
+
+    it "deserializes undefined", ->
+      promise = util.wrapParentPromise(@ipc, 0, @callback)
+      invocationId = @callback.lastCall.args[0]
+      @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(null, "__cypress_undefined__")
+      promise.then (value) ->
+        expect(value).to.equal(undefined)
 
     it "rejects the promise when 'promise:fulfilled:{invocationId}' event is received with error", ->
       promise = util.wrapParentPromise(@ipc, 0, @callback)

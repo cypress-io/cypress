@@ -6,15 +6,15 @@ const debug = require('debug')('cypress:cli')
 const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
+const logSymbols = require('log-symbols')
+
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
 const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
-const info = require('./info')
-
-const differentFrom = (a, b) => a !== b
+const state = require('./state')
 
 const verificationError = (message) => {
   return _.extend(new Error(''), { name: '', message, isVerificationError: true })
@@ -24,41 +24,24 @@ const xvfbError = (message) => {
   return _.extend(new Error(''), { name: '', message, isXvfbError: true })
 }
 
-const checkIfNotInstalledOrMissingExecutable = (installedVersion, executable) => {
+const isMissingExecutable = (binaryDir) => {
+  const executable = state.getPathToExecutable(binaryDir)
   debug('checking if executable exists', executable)
-
-  return fs.statAsync(executable)
-  .then(() => {
-    // after verifying its physically accessible
-    // we can now check that its installed in info.json
-    if (!installedVersion) {
-      throw new Error()
-    }
-  })
-  .catch(() => {
-    // bail if we don't have an installed version
-    // because its physically missing or its
-    // not in info.json
-    return throwFormErrorText(errors.missingApp)(stripIndent`
+  return fs.pathExistsAsync(executable)
+  .then((exists) => {
+    if (!exists) {
+      return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
       Cypress executable not found at: ${chalk.cyan(executable)}
     `)
+    }
   })
 }
 
-const writeVerifiedVersion = (verifiedVersion) => {
-  debug('writing verified version string "%s"', verifiedVersion)
-
-  return info.ensureFileInfoContents()
-  .then((contents) => {
-    return info.writeInfoFileContents(_.extend(contents, { verifiedVersion }))
-  })
-}
-
-const runSmokeTest = () => {
+const runSmokeTest = (binaryDir) => {
   debug('running smoke test')
   let stderr = ''
   let stdout = ''
-  const cypressExecPath = info.getPathToExecutable()
+  const cypressExecPath = state.getPathToExecutable(binaryDir)
   debug('using Cypress executable %s', cypressExecPath)
 
   // TODO switch to execa for this?
@@ -124,17 +107,14 @@ const runSmokeTest = () => {
   }
 }
 
-function testBinary (version) {
+function testBinary (version, binaryDir) {
   debug('running binary verification check', version)
 
-  const dir = info.getPathToUserExecutableDir()
 
   // let the user know what version of cypress we're downloading!
-  logger.log(
-    chalk.yellow(
-      `It looks like this is your first time using Cypress: ${chalk.cyan(version)}`
-    )
-  )
+  logger.log(stripIndent`
+  It looks like this is your first time using Cypress: ${chalk.cyan(version)}
+  `)
 
   logger.log()
 
@@ -148,25 +128,26 @@ function testBinary (version) {
 
   const tasks = new Listr([
     {
-      title: util.titleize('Verifying Cypress can run', chalk.gray(dir)),
+      title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
       task: (ctx, task) => {
-        // clear out the verified version
-        return writeVerifiedVersion(null)
+        debug('clearing out the verified version')
+        return state.clearBinaryStateAsync(binaryDir)
         .then(() => {
           return Promise.all([
-            runSmokeTest(),
-            Promise.delay(1500), // good user experience
+            runSmokeTest(binaryDir),
+            Promise.resolve().delay(1500), // good user experience
           ])
         })
         .then(() => {
-          return writeVerifiedVersion(version)
+          debug('write verified: true')
+          return state.writeBinaryVerifiedAsync(true, binaryDir)
         })
         .then(() => {
           util.setTaskTitle(
             task,
             util.titleize(
               chalk.green('Verified Cypress!'),
-              chalk.gray(dir)
+              chalk.gray(binaryDir)
             ),
             rendererOptions.renderer
           )
@@ -180,22 +161,25 @@ function testBinary (version) {
   return tasks.run()
 }
 
-const maybeVerify = (installedVersion, options = {}) => {
-  return info.getVerifiedVersion()
-  .then((verifiedVersion) => {
-    debug('has verified version', verifiedVersion)
+const maybeVerify = (installedVersion, installPath, options = {}) => {
+  return state.getBinaryVerifiedAsync()
+  .then((isVerified) => {
 
-    // verify if packageVersion and verifiedVersion are different
-    const shouldVerify = options.force || differentFrom(installedVersion, verifiedVersion)
+    debug('is Verified ?', isVerified)
 
-    debug('run verification check?', shouldVerify)
+    let shouldVerify = !isVerified
+    // force verify if options.force
+    if (options.force) {
+      debug('force verify')
+      shouldVerify = true
+    }
 
     if (shouldVerify) {
-      return testBinary(installedVersion)
+      return testBinary(installedVersion, installPath)
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
-          logger.warn('Opening Cypress...')
+          logger.log('Opening Cypress...')
         }
       })
     }
@@ -206,39 +190,56 @@ const start = (options = {}) => {
   debug('verifying Cypress app')
 
   const packageVersion = util.pkgVersion()
+  let binaryDir = state.getBinaryDir(packageVersion)
+  if (process.env.CYPRESS_BINARY_FOLDER) {
+    const envBinaryDir = process.env.CYPRESS_BINARY_FOLDER
+    logger.warn(stripIndent`
+    ${logSymbols.warning} Warning: You have set the environment variable: ${chalk.white('CYPRESS_BINARY_FOLDER=')}${chalk.cyan(envBinaryDir)}
+    
+      This overrides the default Cypress binary version used.
+    `)
+    logger.log()
+    binaryDir = envBinaryDir
+  }
 
   _.defaults(options, {
     force: false,
     welcomeMessage: true,
   })
 
-  return info.getInstalledVersion()
-  .then((installedVersion) => {
-    debug('installed version is', installedVersion, 'comparing to', packageVersion)
+  return isMissingExecutable(binaryDir)
+  .then(() => state.getBinaryPkgVersionAsync(binaryDir))
+  .then((binaryVersion) => {
 
-    // figure out where this executable is supposed to be at
-    const executable = info.getPathToExecutable()
+    if (!binaryVersion) {
+      debug('no Cypress binary found for cli version ', packageVersion)
+      return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
+      Cannot read binary version from: ${chalk.cyan(state.getBinaryPkgPath(binaryDir))}
+    `)
+    }
 
-    return checkIfNotInstalledOrMissingExecutable(installedVersion, executable)
-    .return(installedVersion)
-  })
-  .then((installedVersion) => {
-    if (installedVersion !== packageVersion) {
+    debug(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
+
+    if (binaryVersion !== packageVersion) {
       // warn if we installed with CYPRESS_BINARY_VERSION or changed version
       // in the package.json
-      const msg = stripIndent`
-      Installed version ${chalk.cyan(installedVersion)} does not match the expected package version ${chalk.cyan(packageVersion)}
+      logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
+      logger.log()
+      logger.warn(stripIndent`
+      
+      
+      ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
 
-      Note: there is no guarantee these versions will work properly together.
-      `
+        These versions may not work properly together.
+      `)
 
-      logger.warn(msg)
 
       logger.log()
     }
 
-    return maybeVerify(installedVersion, options)
+    return maybeVerify(binaryVersion, binaryDir, options)
   })
+
   .catch((err) => {
     if (err.known) {
       throw err

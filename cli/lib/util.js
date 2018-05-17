@@ -127,6 +127,21 @@ const util = {
     return isInstalledGlobally
   },
 
+  isSemver (str) {
+    return /^(\d+\.)?(\d+\.)?(\*|\d+)$/.test(str)
+  },
+
+  // attention:
+  // when passing relative path to NPM post install hook, the current working
+  // directory is set to the `node_modules/cypress` folder
+  // the user is probably passing relative path with respect to root package folder
+  formAbsolutePath (filename) {
+    if (path.isAbsolute(filename)) {
+      return filename
+    }
+    return path.join(process.cwd(), '..', '..', filename)
+  },
+
   stdoutLineMatches,
 }
 

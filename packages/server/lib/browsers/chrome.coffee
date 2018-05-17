@@ -39,6 +39,7 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
   "--disable-device-discovery-notifications"
+  "--disable-blink-features=RootLayerScrolling"
 
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70

@@ -26,12 +26,12 @@ const failedUnzip = {
   `,
 }
 
-const missingApp = {
-  description: 'No version of Cypress is installed.',
+const missingApp = (binaryDir) => ({
+  description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
   solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
-}
+})
 
 const nonZeroExitCodeXvfb = {
   description: 'XVFB exited with a non zero exit code.',
@@ -67,6 +67,11 @@ const missingDependency = {
 
     If you are using Docker, we provide containers with all required dependencies installed.
   `,
+}
+
+const invalidCacheDirectory = {
+  description: 'Cypress cannot write to the cache directory due to file permissions',
+  solution: '',
 }
 
 const versionMismatch = {
@@ -185,5 +190,6 @@ module.exports = {
     unexpected,
     failedDownload,
     failedUnzip,
+    invalidCacheDirectory,
   },
 }

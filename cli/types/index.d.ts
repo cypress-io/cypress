@@ -175,6 +175,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/api/screenshot-api
+     */
+    Screenshot: {
+      defaults(options: Partial<ScreenshotOptions & ScreenshotDefaultsOptions>): void
+    }
+
+    /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -751,7 +758,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      */
     screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
-    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
 
     /**
      * Scroll an element into view.
@@ -836,6 +843,13 @@ declare namespace Cypress {
 
     spread<S extends object | any[] | string | number | boolean>(fn: (...args: any[]) => S): Chainable<S>
     spread(fn: (...args: any[]) => void): Chainable<Subject>
+
+    /**
+     * Run a task in Node via the plugins file.
+     *
+     * @see https://on.cypress.io/task
+     */
+    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -1255,6 +1269,28 @@ declare namespace Cypress {
     onRequest(...args: any[]): void
     onResponse(...args: any[]): void
     onAbort(...args: any[]): void
+  }
+
+  interface Dimensions {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+
+  interface ScreenshotOptions {
+    blackout: string[]
+    capture: 'runner' | 'app' | 'fullpage'
+    clip: Dimensions
+    disableTimersAndAnimations: boolean
+    waitForCommandSynchronization: boolean
+    beforeScreenshot(doc: Document): void
+    afterScreenshot(doc: Document): void
+  }
+
+  interface ScreenshotDefaultsOptions {
+    scaleAppCaptures: boolean
+    screenshotOnRunFailure: boolean
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {

@@ -1,9 +1,22 @@
+$ = require("jquery")
+
 _ = Cypress._
 Promise = Cypress.Promise
+Screenshot = Cypress.Screenshot
 
 describe "src/cy/commands/screenshot", ->
   beforeEach ->
     cy.stub(Cypress, "automation").callThrough()
+
+    @screenshotConfig = {
+      capture: "app"
+      screenshotOnRunFailure: true
+      disableTimersAndAnimations: true
+      waitForCommandSynchronization: true
+      scaleAppCaptures: true
+      fullPage: false
+      blackout: [".foo"]
+    }
 
   context "runnable:after:run:async", ->
     it "is noop when not isTextTerminal", ->
@@ -36,9 +49,11 @@ describe "src/cy/commands/screenshot", ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
 
-    it "is noop when screenshotOnHeadlessFailure is false", ->
+    it "is noop when screenshotOnRunFailure is false", ->
       Cypress.config("isInteractive", false)
-      Cypress.config("screenshotOnHeadlessFailure", false)
+      cy.stub(Screenshot, "getConfig").returns({
+        screenshotOnRunFailure: false
+      })
 
       cy.spy(Cypress, "action").log(false)
 
@@ -53,17 +68,36 @@ describe "src/cy/commands/screenshot", ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
 
-    it "sets test state and takes screenshot when not isInteractive", ->
+    it "does not send before/after events", ->
       Cypress.config("isInteractive", false)
+      @screenshotConfig.scaleAppCaptures = false
+      cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
 
       Cypress.automation.withArgs("take:screenshot").resolves({})
 
       cy.stub(Cypress, "action").log(false)
       .callThrough()
-      .withArgs("cy:test:set:state")
+      .withArgs("cy:before:screenshot")
+      .yieldsAsync()
+      .withArgs("cy:after:screenshot")
       .yieldsAsync()
 
+      test = { id: "123", err: new Error() }
+      runnable = cy.state("runnable")
+
+      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      .then ->
+        expect(Cypress.action).not.to.be.calledWith("cy:before:screenshot")
+        expect(Cypress.action).not.to.be.calledWith("cy:after:screenshot")
+
+    it "takes screenshot when not isInteractive", ->
+      Cypress.config("isInteractive", false)
+      cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
+
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+
       test = {
+        id: "123"
         err: new Error
       }
 
@@ -71,45 +105,37 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        ## this should mutate this property
-        expect(test.isOpen).to.be.true
-
-        expect(Cypress.action).to.be.calledWith("cy:test:set:state", test)
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: undefined
+        expect(Cypress.automation).to.be.calledWith("take:screenshot")
+        args = Cypress.automation.withArgs("take:screenshot").args[0][1]
+        expect(args).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
             "runnable:after:run:async",
             runnable.title
           ]
+          capture: "runner"
+          simple: true
         })
 
   context "runnable:after:run:async hooks", ->
     beforeEach ->
       Cypress.config("isInteractive", false)
+      cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
 
       Cypress.automation.withArgs("take:screenshot").resolves({})
 
-      cy.stub(Cypress, "action").log(false)
-      .callThrough()
-      .withArgs("cy:test:set:state")
-      .yieldsAsync()
-
       test = {
+        id: "123"
         err: new Error
       }
-
       runnable = cy.state("runnable")
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        ## this should mutate this property
-        expect(test.isOpen).to.be.true
-
-        expect(Cypress.action).to.be.calledWith("cy:test:set:state", test)
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: undefined
+        expect(Cypress.automation).to.be.calledWith("take:screenshot")
+        args = Cypress.automation.withArgs("take:screenshot").args[0][1]
+        expect(_.omit(args, "clip", "userClip", "viewport")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -117,11 +143,16 @@ describe "src/cy/commands/screenshot", ->
             "takes screenshot of hook title with test",
             '"before each" hook'
           ]
+          capture: "runner"
+          simple: true
         })
 
     it "takes screenshot of hook title with test", ->
 
   context "#screenshot", ->
+    beforeEach ->
+      cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
+
     it "nulls out current subject", ->
       Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
 
@@ -134,15 +165,7 @@ describe "src/cy/commands/screenshot", ->
       Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
 
       cy.screenshot().then ->
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: undefined
-          testId: runnable.id
-          titles: [
-            "src/cy/commands/screenshot",
-            "#screenshot",
-            "foo bar"
-          ]
-        })
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].name).to.be.undefined
 
     it "can pass name", ->
       runnable = cy.state("runnable")
@@ -151,35 +174,275 @@ describe "src/cy/commands/screenshot", ->
       Cypress.automation.withArgs("take:screenshot").resolves({path: "foo/bar.png", size: "100 kB"})
 
       cy.screenshot("my/file").then ->
-        expect(Cypress.automation).to.be.calledWith("take:screenshot", {
-          name: "my/file"
-          testId: runnable.id
-          titles: [
-            "src/cy/commands/screenshot",
-            "#screenshot",
-            "foo bar"
-          ]
-        })
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].name).to.equal("my/file")
 
-    it "opens and closes the test", ->
-      runnable = cy.state("runnable")
-
+    it "calls beforeScreenshot callback with document", ->
       Cypress.automation.withArgs("take:screenshot").resolves({})
-
-      testSetState = cy.spy(Cypress, "action").log(false).withArgs("cy:test:set:state")
+      cy.stub(Screenshot, "callBeforeScreenshot")
+      cy.spy(Cypress, "action").log(false)
 
       cy
       .screenshot("foo")
       .then ->
-        expect(testSetState.firstCall).to.be.calledWith("cy:test:set:state", {
-          id: runnable.id
-          isOpen: true
+        expect(Screenshot.callBeforeScreenshot).to.be.calledWith(cy.state("document"))
+
+    it "calls afterScreenshot callback with document", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.stub(Screenshot, "callAfterScreenshot")
+      cy.spy(Cypress, "action").log(false)
+
+      cy
+      .screenshot("foo")
+      .then ->
+        expect(Screenshot.callAfterScreenshot).to.be.calledWith(cy.state("document"))
+
+    it "pauses then unpauses timers if disableTimersAndAnimations is true", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.spy(Cypress, "action").log(false)
+      cy.spy(cy, "pauseTimers")
+
+      cy
+      .screenshot("foo")
+      .then ->
+        expect(cy.pauseTimers).to.be.calledWith(true)
+        expect(cy.pauseTimers).to.be.calledWith(false)
+
+    it "does not pause timers if disableTimersAndAnimations is false", ->
+      @screenshotConfig.disableTimersAndAnimations = false
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.spy(Cypress, "action").log(false)
+
+      cy
+      .screenshot("foo")
+      .then ->
+        expect(Cypress.action.withArgs("cy:pause:timers")).not.to.be.called
+
+    it "sends clip as userClip if specified", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.spy(Cypress, "action").log(false)
+      clip = { width: 100, height: 100, x: 0, y: 0 }
+
+      cy
+      .screenshot({ clip })
+      .then ->
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].userClip).to.equal(clip)
+
+    it "sends viewport dimensions of main browser window", ->
+      Cypress.automation.withArgs("take:screenshot").resolves({})
+      cy.spy(Cypress, "action").log(false)
+
+      cy
+      .screenshot()
+      .then ->
+        expect(Cypress.automation.withArgs("take:screenshot").args[0][1].viewport).to.eql({
+          width: $(window.parent).width()
+          height: $(window.parent).height()
         })
 
-        expect(testSetState.secondCall).to.be.calledWith("cy:test:set:state", {
-          id: runnable.id
-          isOpen: false
-        })
+    describe "before/after events", ->
+      beforeEach ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+        cy.spy(Cypress, "action").log(false)
+
+      it "sends before:screenshot", ->
+        runnable = cy.state("runnable")
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot")).to.be.calledOnce
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: true
+            appOnly: true
+            scale: true
+            waitForCommandSynchronization: false
+            disableTimersAndAnimations: true
+            blackout: [".foo"]
+          })
+
+      it "sends after:screenshot", ->
+        runnable = cy.state("runnable")
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:after:screenshot")).to.be.calledOnce
+          expect(Cypress.action.withArgs("cy:after:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: false
+            appOnly: true
+            scale: true
+            waitForCommandSynchronization: false
+            disableTimersAndAnimations: true
+            blackout: [".foo"]
+          })
+
+      it "always sends scale: true and blackout: [] for non-app captures", ->
+        runnable = cy.state("runnable")
+        @screenshotConfig.capture = "runner"
+        @screenshotConfig.scaleAppCaptures = false
+
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: true
+            appOnly: false
+            scale: true
+            waitForCommandSynchronization: true
+            disableTimersAndAnimations: true
+            blackout: []
+          })
+
+      it "always sends waitForCommandSynchronization: false for app captures", ->
+        runnable = cy.state("runnable")
+        @screenshotConfig.waitForAnimations = true
+
+        cy
+        .screenshot("foo")
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1]).to.eql({
+            id: runnable.id
+            isOpen: true
+            appOnly: true
+            scale: true
+            waitForCommandSynchronization: false
+            disableTimersAndAnimations: true
+            blackout: [".foo"]
+          })
+
+    describe "capture: fullpage", ->
+      beforeEach ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+        cy.spy(Cypress, "action").log(false)
+        cy.viewport(600, 200)
+        cy.visit("/fixtures/screenshots.html")
+
+      it "takes a screenshot for each time it needs to scroll", ->
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledThrice
+
+      it "sends capture: fullpage", ->
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].capture).to.equal("fullpage")
+          expect(take.args[1][1].capture).to.equal("fullpage")
+          expect(take.args[2][1].capture).to.equal("fullpage")
+
+      it "sends number of current screenshot for each time it needs to scroll", ->
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].current).to.equal(1)
+          expect(take.args[1][1].current).to.equal(2)
+          expect(take.args[2][1].current).to.equal(3)
+
+      it "sends total number of screenshots for each time it needs to scroll", ->
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].total).to.equal(3)
+          expect(take.args[1][1].total).to.equal(3)
+          expect(take.args[2][1].total).to.equal(3)
+
+      it "scrolls the window to the right place for each screenshot", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          expect(scrollTo.getCall(0).args.join(",")).to.equal("0,0")
+          expect(scrollTo.getCall(1).args.join(",")).to.equal("0,200")
+          expect(scrollTo.getCall(2).args.join(",")).to.equal("0,400")
+
+      it "scrolls the window back to the original place", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          expect(scrollTo.getCall(3).args.join(",")).to.equal("0,100")
+
+      it "sends the right clip values", ->
+        cy.screenshot({ capture: "fullpage" })
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 0, y: 0, width: 600, height: 200 })
+          expect(take.args[1][1].clip).to.eql({ x: 0, y: 0, width: 600, height: 200 })
+          expect(take.args[2][1].clip).to.eql({ x: 0, y: 120, width: 600, height: 80 })
+
+    describe "element capture", ->
+      beforeEach ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+        cy.spy(Cypress, "action").log(false)
+        cy.viewport(600, 200)
+        cy.visit("/fixtures/screenshots.html")
+
+      it "takes a screenshot for each time it needs to scroll", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledTwice
+
+      it "sends number of current screenshot for each time it needs to scroll", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].current).to.equal(1)
+          expect(take.args[1][1].current).to.equal(2)
+
+      it "sends total number of screenshots for each time it needs to scroll", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].total).to.equal(2)
+          expect(take.args[1][1].total).to.equal(2)
+
+      it "scrolls the window to the right place for each screenshot", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.get(".tall-element").screenshot()
+        .then ->
+          expect(scrollTo.getCall(0).args.join(",")).to.equal("0,140")
+          expect(scrollTo.getCall(1).args.join(",")).to.equal("0,340")
+
+      it "scrolls the window back to the original place", ->
+        win = cy.state("window")
+        win.scrollTo(0, 100)
+        scrollTo = cy.spy(win, "scrollTo")
+        cy.get(".tall-element").screenshot()
+        .then ->
+          expect(scrollTo.getCall(2).args.join(",")).to.equal("0,100")
+
+      it "sends the right clip values for elements that need scrolling", ->
+        cy.get(".tall-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 20, y: 0, width: 560, height: 200 })
+          expect(take.args[1][1].clip).to.eql({ x: 20, y: 60, width: 560, height: 120 })
+
+      it "sends the right clip values for elements that don't need scrolling", ->
+        cy.get(".short-element").screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
+
+      it "works with cy.within()", ->
+        cy.get(".short-element").within ->
+          cy.screenshot()
+        .then ->
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
+
+      it "coerces capture option into 'app'", ->
+        Cypress.automation.withArgs("take:screenshot").resolves({})
+
+        cy.get(".short-element").screenshot({ capture: "runner" })
+        .then ->
+          expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1].appOnly).to.be.true
+          expect(Cypress.automation.withArgs("take:screenshot").args[0][1].capture).to.equal("app")
 
     describe "timeout", ->
       beforeEach ->
@@ -227,7 +490,61 @@ describe "src/cy/commands/screenshot", ->
             @lastLog = log
             @logs.push(log)
 
+        @assertErrorMessage = (message, done) =>
+          cy.on "fail", (err) =>
+            expect(@lastLog.get("error").message).to.eq(message)
+            done()
+
         return null
+
+      it "throws if capture is not a string", (done) ->
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: true", done)
+        cy.screenshot({ capture: true })
+
+      it "throws if capture is not a valid option", (done) ->
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: foo", done)
+        cy.screenshot({ capture: "foo" })
+
+      it "throws if waitForCommandSynchronization is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'waitForCommandSynchronization' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ waitForCommandSynchronization: "foo" })
+
+      it "throws if scaleAppCaptures is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'scaleAppCaptures' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ scaleAppCaptures: "foo" })
+
+      it "throws if disableTimersAndAnimations is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'disableTimersAndAnimations' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ disableTimersAndAnimations: "foo" })
+
+      it "throws if blackout is not an array", (done) ->
+        @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: foo", done)
+        cy.screenshot({ blackout: "foo" })
+
+      it "throws if blackout is not an array of strings", (done) ->
+        @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: true", done)
+        cy.screenshot({ blackout: [true] })
+
+      it "throws if clip is not an object", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: true", done)
+        cy.screenshot({ clip: true })
+
+      it "throws if clip is lacking proper keys", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {x: 5}", done)
+        cy.screenshot({ clip: { x: 5 } })
+
+      it "throws if clip has extraneous keys", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{5}", done)
+        cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
+
+      it "throws if clip has non-number values", (done) ->
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{4}", done)
+        cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: "5" } })
+
+      it "throws if element capture with multiple elements", (done) ->
+        @assertErrorMessage("cy.screenshot() only works for a single element. You attempted to screenshot 4 elements.", done)
+        cy.visit("/fixtures/screenshots.html")
+        cy.get(".multiple").screenshot()
 
       it "logs once on error", (done) ->
         error = new Error("some error")
