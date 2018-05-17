@@ -21,8 +21,8 @@ describe('unzip', function () {
   beforeEach(function () {
     this.stdout = stdout.capture()
 
-    this.sandbox.stub(os, 'platform').returns('darwin')
-    this.sandbox.stub(os, 'release').returns('test release')
+    os.platform.returns('darwin')
+    os.release.returns('test release')
     this.sandbox.stub(util, 'pkgVersion').returns(version)
   })
 

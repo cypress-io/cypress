@@ -126,11 +126,14 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 }
 
 const start = (options = {}) => {
+
+  // handle deprecated / removed
+  if (process.env.CYPRESS_BINARY_VERSION) {
+    return throwFormErrorText(errors.removed.CYPRESS_BINARY_VERSION)()
+  }
+
   if (process.env.CYPRESS_SKIP_BINARY_INSTALL) {
-    logger.log(
-      chalk.yellow('Skipping binary installation. Env var \'CYPRESS_SKIP_BINARY_INSTALL\' was found.')
-    )
-    return Promise.resolve()
+    return throwFormErrorText(errors.removed.CYPRESS_SKIP_BINARY_INSTALL)()
   }
 
   debug('installing with options %j', options)
@@ -144,21 +147,30 @@ const start = (options = {}) => {
   debug('version in package.json is', needVersion)
 
   // let this env var reset the binary version we need
-  if (process.env.CYPRESS_BINARY_VERSION) {
-    const envVarVersion = process.env.CYPRESS_BINARY_VERSION
+  if (process.env.CYPRESS_INSTALL_BINARY) {
+
+    const envVarVersion = process.env.CYPRESS_INSTALL_BINARY
+    debug('using env var CYPRESS_INSTALL_BINARY %s', envVarVersion)
+
+    if (envVarVersion === '0') {
+      debug('env var CYPRESS_INSTALL_BINARY = 0, skipping install')
+      logger.log(
+        chalk.yellow('Skipping binary installation. Env var \'CYPRESS_SKIP_BINARY_INSTALL\' was found.')
+      )
+      return Promise.resolve()
+    }
 
     // if this doesn't match the expected version
     // then print warning to the user
     if (envVarVersion !== needVersion) {
-      debug('using env var CYPRESS_BINARY_VERSION %s', needVersion)
 
       // reset the version to the env var version
       needVersion = envVarVersion
     }
   }
 
-  if (process.env.CYPRESS_CACHE_DIRECTORY) {
-    const envCache = process.env.CYPRESS_CACHE_DIRECTORY
+  if (process.env.CYPRESS_CACHE_FOLDER) {
+    const envCache = process.env.CYPRESS_CACHE_FOLDER
     logger.log(
       chalk.yellow(stripIndent`
         ${logSymbols.warning} Warning: Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
@@ -180,7 +192,7 @@ const start = (options = {}) => {
     ${err.message}
     `)
   })
-  .then(() => state.getBinaryPkgVersionAsync())
+  .then(() => state.getBinaryPkgVersionAsync(installDir))
   .then((binaryVersion) => {
 
     if (!binaryVersion) {

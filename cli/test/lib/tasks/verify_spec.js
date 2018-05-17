@@ -44,14 +44,13 @@ context('lib/tasks/verify', function () {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    this.sandbox.restore()
     this.stdout = stdout.capture()
     this.cpstderr = new EE()
     this.cpstdout = new EE()
     this.sandbox.stub(util, 'isCi').returns(false)
     this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
-    this.sandbox.stub(os, 'platform').returns('darwin')
-    this.sandbox.stub(os, 'release').returns('test release')
+    os.platform.returns('darwin')
+    os.release.returns('test release')
     this.spawnedProcess = _.extend(new EE(), {
       unref: this.sandbox.stub(),
       stderr: this.cpstderr,
@@ -68,6 +67,7 @@ context('lib/tasks/verify', function () {
     this.sandbox.stub(state, 'writeBinaryVerifiedAsync').resolves()
     this.sandbox.stub(state, 'clearBinaryStateAsync').resolves()
     this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+    this.sandbox.stub(fs, 'realpathAsync')
   })
 
   afterEach(function () {
@@ -358,6 +358,33 @@ context('lib/tasks/verify', function () {
           'verifying in ci',
           normalize(this.stdout.toString())
         )
+      })
+    })
+
+    describe('when env var CYPRESS_RUN_BINARY', function () {
+      beforeEach(function () {
+        xvfb.isNeeded.returns(true)
+        this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves(packageVersion)
+        this.sandbox.stub(state, 'getBinaryVerifiedAsync').resolves(false)
+        this.sandbox.stub(util, 'isExecutableAsync').resolves(true)
+      })
+
+      it('can validate and use executable', function () {
+
+        const envBinaryPath = '/custom/Contents/MacOS/Cypress'
+        const realEnvBinaryPath = `/real${envBinaryPath}`
+        fs.realpathAsync.resolves(realEnvBinaryPath)
+        state.getPathToExecutable.restore()
+        this.onlyCall(state, 'getPathToExecutable').withArgs('/real/custom').returns(realEnvBinaryPath)
+        this.onlyCall(fs, 'pathExistsAsync').withArgs(realEnvBinaryPath).resolves(true)
+
+        process.env.CYPRESS_RUN_BINARY = envBinaryPath
+        return verify.start()
+        .then(() => {
+          expect(cp.spawn.firstCall.args[0]).to.equal(realEnvBinaryPath)
+        })
+
+
       })
     })
   })

@@ -32,7 +32,11 @@ function getStdio (needsXvfb) {
 module.exports = {
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
+    let executable = state.getPathToExecutable(state.getBinaryDir())
 
+    if (process.env.CYPRESS_RUN_BINARY) {
+      executable = process.env.CYPRESS_RUN_BINARY
+    }
     debug('needs XVFB?', needsXvfb)
 
     // always push cwd into the args
@@ -41,21 +45,19 @@ module.exports = {
     _.defaults(options, {
       detached: false,
       stdio: getStdio(needsXvfb),
-      binaryFolder: process.env.CYPRESS_BINARY_FOLDER || state.getBinaryDir(),
     })
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let binaryFolder = state.getPathToExecutable(options.binaryFolder)
 
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          binaryFolder = 'node'
+          executable = 'node'
           args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
-        debug('spawning Cypress %s', binaryFolder)
+        debug('spawning Cypress %s', executable)
         debug('spawn args %j', args, options)
 
         // strip dev out of child process options
@@ -89,7 +91,7 @@ module.exports = {
           process.env.FORCE_STDERR_TTY = 1
         }
 
-        const child = cp.spawn(binaryFolder, args, options)
+        const child = cp.spawn(executable, args, options)
         child.on('close', resolve)
         child.on('error', reject)
 

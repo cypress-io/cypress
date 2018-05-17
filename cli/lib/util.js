@@ -3,6 +3,7 @@ const R = require('ramda')
 const path = require('path')
 const isCi = require('is-ci')
 const chalk = require('chalk')
+const executable = require('executable')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
@@ -129,6 +130,10 @@ const util = {
 
   isSemver (str) {
     return /^(\d+\.)?(\d+\.)?(\*|\d+)$/.test(str)
+  },
+
+  isExecutableAsync (filePath) {
+    return Promise.resolve(() => executable(filePath))
   },
 
   // attention:

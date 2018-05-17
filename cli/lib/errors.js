@@ -6,6 +6,7 @@ const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
 
 const util = require('./util')
+const state = require('./tasks/state')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
@@ -92,6 +93,35 @@ const unexpected = {
 
     Consider opening a new issue.
   `,
+}
+
+const removed = {
+  CYPRESS_BINARY_VERSION: {
+    description: stripIndent`
+    The environment variable CYPRESS_BINARY_VERSION has been removed as of version ${chalk.green('3.0.0')}
+    `,
+    solution: stripIndent`
+      You should use the equivalent environment variable CYPRESS_INSTALL_BINARY instead.
+    `,
+  },
+  CYPRESS_SKIP_BINARY_INSTALL: {
+    description: stripIndent`
+    The environment variable CYPRESS_SKIP_BINARY_INSTALL has been removed as of version ${chalk.green('3.0.0')}
+    `,
+    solution: stripIndent`
+      To skip the binary install, set CYPRESS_INSTALL_BINARY=0
+    `,
+  },
+}
+
+const CYPRESS_RUN_BINARY = {
+  notValid: (value) => {
+    const properFormat = `../${state.getPlatformExecutable()}`
+    return {
+      description: `Could not run binary set in CYPRESS_RUN_BINARY=${value}`,
+      solution: `Ensure the environment variable is a path to the Cypress binary, matching ${properFormat}`,
+    }
+  },
 }
 
 const getOsVersion = () => {
@@ -191,5 +221,7 @@ module.exports = {
     failedDownload,
     failedUnzip,
     invalidCacheDirectory,
+    removed,
+    CYPRESS_RUN_BINARY,
   },
 }

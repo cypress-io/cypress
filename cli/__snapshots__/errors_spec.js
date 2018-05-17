@@ -7,7 +7,9 @@ exports['errors individual has the following errors 1'] = [
   "unexpected",
   "failedDownload",
   "failedUnzip",
-  "invalidCacheDirectory"
+  "invalidCacheDirectory",
+  "removed",
+  "CYPRESS_RUN_BINARY"
 ]
 
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `
