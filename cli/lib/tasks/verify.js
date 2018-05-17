@@ -213,7 +213,7 @@ const start = (options = {}) => {
       .then((isExecutable) => {
         debug('CYPRESS_RUN_BINARY is executable? :', isExecutable)
         if (!isExecutable) {
-          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))
+          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
         }
       })
       .then(() => fs.realpathAsync(envBinaryPath))
@@ -221,7 +221,7 @@ const start = (options = {}) => {
         debug('CYPRESS_RUN_BINARY has realPath:', realPath)
         const envBinaryDir = state.parsePlatformBinaryFolder(realPath)
         if (!envBinaryDir) {
-          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))
+          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
         }
         debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
 
