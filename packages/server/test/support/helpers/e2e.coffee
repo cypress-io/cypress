@@ -45,6 +45,12 @@ replaceBrowserName = (str, p1, p2, p3, p4) ->
   ## this ensures we add whitespace so the border is not shifted
   p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
+replaceDurationSeconds = (str, p1, p2, p3) ->
+  ## get the padding for the existing duration
+  lengthOfExistingDuration = _.sum([p2.length, p3.length])
+
+  p1 + _.padEnd("X seconds", lengthOfExistingDuration)
+
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
@@ -57,16 +63,15 @@ normalizeStdout = (str) ->
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
   .replace(browserNameVersionRe, replaceBrowserName)
-  .replace(/\(\d{1,2}s\)/g, "(10s)")
   .replace(/\s\(\d+m?s\)/g, "") ## numbers in parenths
-  .replace(/(.+?)(\d+m?s)/g, replaceDurationInTables) ## durations in tables
+  .replace(/(\s+?)(\d+m?s)/g, replaceDurationInTables) ## durations in tables
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
-  .replace(/(Duration\:\s+)(\d+m?s)/g, "$1" + "999 seconds")
-  .replace(/\(\d+ seconds?\)/g, "(555 seconds)")
+  .replace(/(Duration\:\s+)(\d+)(\sseconds?)/g, replaceDurationSeconds)
+  .replace(/\(\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
-  .replace("/\(\d{2,4}x\d{2,4}\)/g", "(9999x8888)") ## screenshot dimensions
+  .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
   .split("\n")
     .map(replaceStackTraceLines)
     .join("\n")
