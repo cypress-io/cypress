@@ -18,11 +18,10 @@ describe "src/cy/commands/screenshot", ->
     }
 
     @screenshotConfig = {
-      capture: "app"
+      capture: "viewport"
       screenshotOnRunFailure: true
       disableTimersAndAnimations: true
-      waitForCommandSynchronization: true
-      scaleAppCaptures: true
+      scale: true
       blackout: [".foo"]
     }
 
@@ -78,7 +77,7 @@ describe "src/cy/commands/screenshot", ->
 
     it "does not send before/after events", ->
       Cypress.config("isInteractive", false)
-      @screenshotConfig.scaleAppCaptures = false
+      @screenshotConfig.scale = false
       cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
 
       Cypress.automation.withArgs("take:screenshot").resolves(@serverResult)
@@ -248,9 +247,8 @@ describe "src/cy/commands/screenshot", ->
       expected = _.extend({}, @serverResult, @screenshotConfig, {
         name: "name"
         scaled: true
-        waitForCommandSynchronization: false
       })
-      expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scaleAppCaptures")
+      expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scale")
 
       cy
       .screenshot("name")
@@ -299,10 +297,10 @@ describe "src/cy/commands/screenshot", ->
             blackout: [".foo"]
           })
 
-      it "always sends scale: true and blackout: [] for non-app captures", ->
+      it "always sends scale: true, waitForCommandSynchronization: true, and blackout: [] for non-app captures", ->
         runnable = cy.state("runnable")
         @screenshotConfig.capture = "runner"
-        @screenshotConfig.scaleAppCaptures = false
+        @screenshotConfig.scale = false
 
         cy
         .screenshot("foo")
@@ -317,7 +315,7 @@ describe "src/cy/commands/screenshot", ->
             blackout: []
           })
 
-      it "always sends waitForCommandSynchronization: false for app captures", ->
+      it "always sends waitForCommandSynchronization: false for viewport/fullpage captures", ->
         runnable = cy.state("runnable")
         @screenshotConfig.waitForAnimations = true
 
@@ -465,7 +463,7 @@ describe "src/cy/commands/screenshot", ->
         cy.get(".short-element").screenshot({ capture: "runner" })
         .then ->
           expect(Cypress.action.withArgs("cy:before:screenshot").args[0][1].appOnly).to.be.true
-          expect(Cypress.automation.withArgs("take:screenshot").args[0][1].capture).to.equal("app")
+          expect(Cypress.automation.withArgs("take:screenshot").args[0][1].capture).to.equal("viewport")
 
       it "yields an object with el set to subject", ->
         cy.get(".short-element").then ($el) ->
@@ -529,20 +527,16 @@ describe "src/cy/commands/screenshot", ->
         return null
 
       it "throws if capture is not a string", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: true", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: true", done)
         cy.screenshot({ capture: true })
 
       it "throws if capture is not a valid option", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: foo", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: foo", done)
         cy.screenshot({ capture: "foo" })
 
-      it "throws if waitForCommandSynchronization is not a boolean", (done) ->
-        @assertErrorMessage("cy.screenshot() 'waitForCommandSynchronization' option must be a boolean. You passed: foo", done)
-        cy.screenshot({ waitForCommandSynchronization: "foo" })
-
-      it "throws if scaleAppCaptures is not a boolean", (done) ->
-        @assertErrorMessage("cy.screenshot() 'scaleAppCaptures' option must be a boolean. You passed: foo", done)
-        cy.screenshot({ scaleAppCaptures: "foo" })
+      it "throws if scale is not a boolean", (done) ->
+        @assertErrorMessage("cy.screenshot() 'scale' option must be a boolean. You passed: foo", done)
+        cy.screenshot({ scale: "foo" })
 
       it "throws if disableTimersAndAnimations is not a boolean", (done) ->
         @assertErrorMessage("cy.screenshot() 'disableTimersAndAnimations' option must be a boolean. You passed: foo", done)
@@ -646,9 +640,8 @@ describe "src/cy/commands/screenshot", ->
         expected = _.extend({}, @serverResult, @screenshotConfig, {
           Command: "screenshot"
           scaled: true
-          waitForCommandSynchronization: false
         })
-        expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scaleAppCaptures")
+        expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scale")
 
         cy.screenshot().then =>
           consoleProps = @lastLog.invoke("consoleProps")

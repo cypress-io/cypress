@@ -2,8 +2,7 @@
 
 DEFAULTS = {
   capture: "fullpage"
-  waitForCommandSynchronization: true
-  scaleAppCaptures: false
+  scale: false
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
@@ -38,17 +37,11 @@ describe "src/cypress/screenshot", ->
       })
       expect(Screenshot.getConfig().capture).to.eql("runner")
 
-    it "sets waitForCommandSynchronization if specified", ->
+    it "sets scale if specified", ->
       Screenshot.defaults({
-        waitForCommandSynchronization: false
+        scale: true
       })
-      expect(Screenshot.getConfig().waitForCommandSynchronization).to.equal(false)
-
-    it "sets scaleAppCaptures if specified", ->
-      Screenshot.defaults({
-        scaleAppCaptures: true
-      })
-      expect(Screenshot.getConfig().scaleAppCaptures).to.equal(true)
+      expect(Screenshot.getConfig().scale).to.equal(true)
 
     it "sets disableTimersAndAnimations if specified", ->
       Screenshot.defaults({
@@ -89,22 +82,17 @@ describe "src/cypress/screenshot", ->
       it "throws if capture is not a string", ->
         expect =>
           Screenshot.defaults({ capture: true })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: true")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: true")
 
       it "throws if capture is not a valid option", ->
         expect =>
           Screenshot.defaults({ capture: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'app', 'runner', or 'fullpage'. You passed: foo")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: foo")
 
-      it "throws if waitForCommandSynchronization is not a boolean", ->
+      it "throws if scale is not a boolean", ->
         expect =>
-          Screenshot.defaults({ waitForCommandSynchronization: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'waitForCommandSynchronization' option must be a boolean. You passed: foo")
-
-      it "throws if scaleAppCaptures is not a boolean", ->
-        expect =>
-          Screenshot.defaults({ scaleAppCaptures: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'scaleAppCaptures' option must be a boolean. You passed: foo")
+          Screenshot.defaults({ scale: "foo" })
+        .to.throw("Cypress.Screenshot.defaults() 'scale' option must be a boolean. You passed: foo")
 
       it "throws if disableTimersAndAnimations is not a boolean", ->
         expect =>

@@ -22,7 +22,7 @@ describe "lib/screenshots", ->
     @todosPath = Fixtures.projectPath("todos")
 
     @appData = {
-      capture: "app"
+      capture: "viewport"
       clip: { x: 0, y: 0, width: 10, height: 10 }
       viewport: { width: 40, height: 40 }
     }
@@ -77,7 +77,7 @@ describe "lib/screenshots", ->
         expect(@automate).to.be.calledOnce
         expect(@automate).to.be.calledWith(data)
 
-    it "retries until helper pixels are no longer present for app capture", ->
+    it "retries until helper pixels are no longer present for viewport capture", ->
       @getPixelColor.withArgs(0, 0).onCall(1).returns("white")
       screenshots.capture(@appData, @automate).then =>
         expect(@automate).to.be.calledTwice

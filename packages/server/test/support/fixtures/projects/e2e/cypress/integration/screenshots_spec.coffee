@@ -24,7 +24,7 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 400)
       .visit('http://localhost:3322/color/yellow')
-      .screenshot("crop-check", { capture: "app" })
+      .screenshot("crop-check", { capture: "viewport" })
       .task("check:screenshot:size", { name: 'crop-check.png', width: 600, height: 400 })
 
   it "can capture fullpage screenshots", ->
@@ -45,7 +45,7 @@ describe "taking screenshots", ->
     cy
       .viewport(1280, 720)
       .visit('http://localhost:3322/pathological')
-      .screenshot("pathological", { capture: "app" })
+      .screenshot("pathological", { capture: "viewport" })
 
   it "can capture element screenshots", ->
     cy
@@ -60,7 +60,7 @@ describe "taking screenshots", ->
       cy
         .viewport(600, 200)
         .visit('http://localhost:3322/color/yellow')
-        .screenshot("app-clip", { capture: "app", clip: { x: 10, y: 10, width: 100, height: 50 }})
+        .screenshot("app-clip", { capture: "viewport", clip: { x: 10, y: 10, width: 100, height: 50 }})
         .task("check:screenshot:size", { name: 'app-clip.png', width: 100, height: 50 })
 
     it "can clip runner screenshots", ->
