@@ -3,6 +3,7 @@ const os = require('os')
 const path = require('path')
 const sinon = require('sinon')
 const Promise = require('bluebird')
+const util = require('../lib/util')
 
 global.sinon = sinon
 global.expect = require('chai').expect
@@ -13,6 +14,15 @@ require('chai')
 .use(require('chai-string'))
 
 sinon.usingPromise(Promise)
+
+delete process.env.CYPRESS_RUN_BINARY
+delete process.env.CYPRESS_INSTALL_BINARY
+delete process.env.CYPRESS_CACHE_FOLDER
+delete process.env.CYPRESS_BINARY_VERSION
+delete process.env.CYPRESS_SKIP_BINARY_INSTALL
+delete process.env.DISPLAY
+
+const env = _.clone(process.env)
 
 function throwIfFnNotStubbed (stub, method) {
   const sig = `.${method}(...)`
@@ -64,19 +74,13 @@ sinon.stub = function (obj, method) {
   return stub
 }
 
-before(function () {
-  delete process.env.CYPRESS_RUN_BINARY
-  delete process.env.CYPRESS_INSTALL_BINARY
-  delete process.env.CYPRESS_CACHE_FOLDER
-  delete process.env.CYPRESS_BINARY_VERSION
-  delete process.env.CYPRESS_SKIP_BINARY_INSTALL
-})
-
 beforeEach(function () {
   sinon.stub(os, 'platform')
   sinon.stub(os, 'release')
+  sinon.stub(util, 'getOsVersionAsync').resolves('Foo-OsVersion')
 })
 
 afterEach(function () {
+  process.env = _.clone(env)
   sinon.restore()
 })

@@ -11,7 +11,6 @@ describe('errors', function () {
   beforeEach(function () {
     sinon.stub(util, 'pkgVersion').returns('1.2.3')
     os.platform.returns('test platform')
-    os.release.returns('test release')
   })
 
   describe('individual', () => {

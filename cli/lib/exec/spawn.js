@@ -74,9 +74,9 @@ module.exports = {
         // option our process.stderr.isTTY will not be true
         // which ends up disabling the colors =(
         if (util.supportsColor()) {
-          process.env.FORCE_COLOR = 1
-          process.env.DEBUG_COLORS = 1
-          process.env.MOCHA_COLORS = 1
+          process.env.FORCE_COLOR = '1'
+          process.env.DEBUG_COLORS = '1'
+          process.env.MOCHA_COLORS = '1'
         }
 
         // if we needed to pipe stderr and we're currently
@@ -88,7 +88,7 @@ module.exports = {
           // electron browser to behave _THE SAME WAY_ as
           // if we aren't using pipe. pipe is necessary only
           // to filter out garbage on stderr -____________-
-          process.env.FORCE_STDERR_TTY = 1
+          process.env.FORCE_STDERR_TTY = '1'
         }
 
         const child = cp.spawn(executable, args, options)

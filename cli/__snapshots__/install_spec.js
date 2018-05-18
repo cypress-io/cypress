@@ -146,11 +146,18 @@ Failed to access /invalid/cache/dir:
 EACCES: permission denied, mkdir '/invalid'
 ----------
 
-Platform: darwin (1.1.1-generic)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
 
-exports['install .start override version throws when env var CYPRESS_BINARY_VERSION 1'] = `
-error message CYPRESS_BINARY_VERSION
+exports['error for removed CYPRESS_BINARY_VERSION 1'] = `
+Error: The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version 3.0.0
+
+You should setCYPRESS_INSTALL_BINARY instead.
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
 `

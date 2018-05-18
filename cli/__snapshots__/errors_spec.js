@@ -24,6 +24,6 @@ https://on.cypress.io/required-dependencies
 If you are using Docker, we provide containers with all required dependencies installed.
 ----------
 
-Platform: test platform (test release)
+Platform: test platform (Foo-OsVersion)
 Cypress Version: 1.2.3
 `

@@ -145,9 +145,7 @@ describe('lib/tasks/state', function () {
     })
   })
   context('.getCacheDir', function () {
-    afterEach(() => {
-      delete process.env.CYPRESS_CACHE_FOLDER
-    })
+
     it('uses cachedir()', function () {
       const ret = state.getCacheDir()
       expect(ret).to.equal(cacheDir)

@@ -1,7 +1,9 @@
 const _ = require('lodash')
 const R = require('ramda')
+const os = require('os')
 const path = require('path')
 const isCi = require('is-ci')
+const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const executable = require('executable')
@@ -11,6 +13,7 @@ const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
 
+const getosAsync = Promise.promisify(getos)
 const joinWithEq = (x, y) => `${x}=${y}`
 
 // converts an object (single level) into
@@ -135,6 +138,18 @@ const util = {
 
   isExecutableAsync (filePath) {
     return Promise.resolve(executable(filePath))
+  },
+
+  getOsVersionAsync () {
+    return Promise.try(() => {
+      if (os.platform() === 'linux') {
+        return getosAsync()
+        .then((osInfo) => [osInfo.dist, osInfo.release].join(' - '))
+        .catch(() => os.release())
+      } else {
+        return os.release()
+      }
+    })
   },
 
   // attention:

@@ -22,7 +22,6 @@ describe('lib/tasks/unzip', function () {
     this.stdout = stdout.capture()
 
     os.platform.returns('darwin')
-    os.release.returns('test release')
     sinon.stub(util, 'pkgVersion').returns(version)
   })
 

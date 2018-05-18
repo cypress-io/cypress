@@ -1,7 +1,5 @@
 const os = require('os')
 const chalk = require('chalk')
-const Promise = require('bluebird')
-const getos = Promise.promisify(require('getos'))
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
 
@@ -98,10 +96,10 @@ const unexpected = {
 const removed = {
   CYPRESS_BINARY_VERSION: {
     description: stripIndent`
-    The environment variable CYPRESS_BINARY_VERSION has been removed as of version ${chalk.green('3.0.0')}
+    The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green('3.0.0')}
     `,
     solution: stripIndent`
-      You should use the equivalent environment variable CYPRESS_INSTALL_BINARY instead.
+    You should setCYPRESS_INSTALL_BINARY instead.
     `,
   },
   CYPRESS_SKIP_BINARY_INSTALL: {
@@ -124,18 +122,8 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-const getOsVersion = () => {
-  if (os.platform() === 'linux') {
-    return getos()
-    .then((osInfo) => [osInfo.dist, osInfo.release].join(' - '))
-    .catch(() => os.release())
-  } else {
-    return Promise.resolve(os.release())
-  }
-}
-
 function getPlatformInfo () {
-  return getOsVersion()
+  return util.getOsVersionAsync()
   .then((version) => stripIndent`
     Platform: ${os.platform()} (${version})
     Cypress Version: ${util.pkgVersion()}

@@ -53,7 +53,6 @@ context('lib/tasks/verify', function () {
     sinon.stub(util, 'isCi').returns(false)
     sinon.stub(util, 'pkgVersion').returns(packageVersion)
     os.platform.returns('darwin')
-    os.release.returns('test release')
     this.spawnedProcess = _.extend(new EE(), {
       on: sinon.stub(),
       unref: sinon.stub(),

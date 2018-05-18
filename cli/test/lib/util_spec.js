@@ -1,7 +1,9 @@
 require('../spec_helper')
 
+const os = require('os')
 const snapshot = require('snap-shot-it')
 const supportsColor = require('supports-color')
+const proxyquire = require('proxyquire')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
@@ -158,16 +160,6 @@ describe('util', function () {
 
   context('.printNodeOptions', function () {
     describe('NODE_OPTIONS is not set', function () {
-      beforeEach(function () {
-        this.node_options = process.env.NODE_OPTIONS
-        delete process.env.NODE_OPTIONS
-      })
-
-      afterEach(function () {
-        if (typeof this.node_options !== 'undefined') {
-          process.env.NODE_OPTIONS = this.node_options
-        }
-      })
 
       it('does nothing if debug is not enabled', function () {
         const log = sinon.spy()
@@ -208,6 +200,31 @@ describe('util', function () {
         log.enabled = true
         util.printNodeOptions(log)
         expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
+      })
+    })
+
+    describe('.getOsVersionAsync', function () {
+      let util
+      let getos = sinon.stub().resolves(['distro-release'])
+      beforeEach(function () {
+        util = proxyquire(`${lib}/util`, { getos })
+      })
+      it('calls os.release on non-linux', function () {
+        os.platform.returns('darwin')
+        os.release.returns('some-release')
+        util.getOsVersionAsync()
+        .then(() => {
+          expect(os.release).to.be.called
+          expect(getos).to.not.be.called
+        })
+      })
+      it('NOT calls os.release on linux', function () {
+        os.platform.returns('linux')
+        util.getOsVersionAsync()
+        .then(() => {
+          expect(os.release).to.not.be.called
+          expect(getos).to.be.called
+        })
       })
     })
   })

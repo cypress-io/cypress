@@ -16,7 +16,7 @@ Please reinstall Cypress by running: cypress install
 Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
 ----------
 
-Platform: darwin (test release)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -40,7 +40,7 @@ Please reinstall Cypress by running: cypress install
 Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/executable
 ----------
 
-Platform: darwin (test release)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -73,7 +73,7 @@ If you are using Docker, we provide containers with all required dependencies in
 an error about dependencies
 ----------
 
-Platform: darwin (test release)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -146,7 +146,7 @@ If you are using Docker, we provide containers with all required dependencies in
 Caught error trying to run XVFB: "test without xvfb"
 ----------
 
-Platform: darwin (test release)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -184,7 +184,7 @@ Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/cust
 Ensure the environment variable is a path to the Cypress binary, matching **/Contents/MacOS/Cypress
 ----------
 
-Platform: darwin (test release)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -199,7 +199,7 @@ Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/cust
 Ensure the environment variable is a path to the Cypress binary, matching **/Cypress
 ----------
 
-Platform: linux (Ubuntu Linux - 16.04)
+Platform: linux (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -214,7 +214,7 @@ Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/cust
 Ensure the environment variable is a path to the Cypress binary, matching **/Cypress.exe
 ----------
 
-Platform: win32 (test release)
+Platform: win32 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `

@@ -6,7 +6,6 @@ const xvfb = require(`${lib}/exec/xvfb`)
 describe('lib/exec/xvfb', function () {
   beforeEach(function () {
     os.platform.returns('win32')
-    os.release.returns('1.1.1-generic')
   })
 
   context('debugXvfb', function () {
@@ -69,7 +68,6 @@ describe('lib/exec/xvfb', function () {
   })
 
   context('#isNeeded', function () {
-    afterEach(() => delete process.env.DISPLAY)
 
     it('does not need xvfb on osx', function () {
       os.platform.returns('darwin')

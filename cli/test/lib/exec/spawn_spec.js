@@ -18,7 +18,6 @@ const defaultBinaryDir = '/default/binary/dir'
 describe('lib/exec/spawn', function () {
   beforeEach(function () {
     os.platform.returns('darwin')
-    os.release.returns('1.1.1-generic')
     sinon.stub(process, 'exit')
     this.spawnedProcess = {
       on: sinon.stub().returns(undefined),
@@ -36,12 +35,6 @@ describe('lib/exec/spawn', function () {
   })
 
   context('.start', function () {
-    afterEach(() => {
-      delete process.env.FORCE_COLOR
-      delete process.env.DEBUG_COLORS
-      delete process.env.MOCHA_COLORS
-      delete process.env.FORCE_STDERR_TTY
-    })
 
     it('passes args + options to spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)

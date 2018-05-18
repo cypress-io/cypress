@@ -34,7 +34,6 @@ describe('lib/tasks/download', function () {
     }
 
     os.platform.returns('darwin')
-    os.release.returns('test release')
     sinon.stub(util, 'pkgVersion').returns('1.2.3')
     sinon.stub(util, 'cwd').returns(rootFolder)
   })
