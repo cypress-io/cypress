@@ -87,7 +87,7 @@
     "deps-ok": "1.4.1",
     "git-issues": "1.3.1",
     "license-checker": "19.0.0",
-    "mocha": "5.1.1",
+    "mocha": "5.2.0",
     "nsp": "3.2.1",
     "pre-git": "3.17.1",
     "prettier-standard": "8.0.1",
