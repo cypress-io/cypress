@@ -9,6 +9,7 @@ defaults: &defaults
       environment:
         # set specific timezone
         TZ: "/usr/share/zoneinfo/America/New_York"
+        COLUMNS: 100
         CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
 
 jobs:
@@ -42,7 +43,9 @@ jobs:
           command: |
             echo 'term env var is:' $TERM
             node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
+            node -e 'assert.equal(process.stdout.columns, 100, "need columns to be 100 for snapshots to pass")'
             node -e 'console.log("TERM %s stdout.isTTY?", process.env.TERM, process.stdout.isTTY)'
+            node -e 'console.log("TERM %s stderr.isTTY?", process.env.TERM, process.stderr.isTTY)'
 
       # need to restore a separate cache for each package.json
       - restore_cache:
