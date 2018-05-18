@@ -104,7 +104,7 @@ formatSpecs = (specs) ->
   .join("")
 
 displayRunStarting = (options = {}) ->
-  { specs, specPattern, browser, headed, webUrl } = options
+  { specs, specPattern, browser, headed, runUrl } = options
 
   console.log("")
 
@@ -129,7 +129,7 @@ displayRunStarting = (options = {}) ->
     [gray("Browser:"), formatBrowser(browser, headed)]
     [gray("Specs:"), formatSpecs(specs)]
     [gray("Searched:"), formatSpecPattern(specPattern)]
-    [gray("Run URL:"), webUrl]
+    [gray("Run URL:"), runUrl]
   ])
   .filter(_.property(1))
   .value()
@@ -173,7 +173,7 @@ collectTestResults = (obj = {}) ->
     video:       Boolean(obj.video)
   }
 
-renderSummaryTable = (webUrl, results) ->
+renderSummaryTable = (runUrl, results) ->
   { runs } = results
 
   console.log("")
@@ -234,7 +234,7 @@ renderSummaryTable = (webUrl, results) ->
     console.log(terminal.renderTables(table1, table2, table3))
     console.log("")
 
-    if webUrl
+    if runUrl
       console.log("")
 
       table4 = terminal.table({
@@ -246,7 +246,7 @@ renderSummaryTable = (webUrl, results) ->
       })
 
       table4.push(["", ""])
-      table4.push(["Recorded Run: " + gray(webUrl)])
+      table4.push(["Recorded Run: " + gray(runUrl)])
 
       console.log(terminal.renderTables(table4))
       console.log("")
@@ -426,8 +426,6 @@ module.exports = {
 
     screenshots.forEach (screenshot) ->
       console.log(format(screenshot))
-
-    console.log("")
 
   postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
     debug("ending the video recording %o", { name, videoCompression, shouldUploadVideo })
@@ -668,7 +666,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, webUrl } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl } = options
 
     results = {
       startedTestsAt: null
@@ -692,7 +690,7 @@ module.exports = {
 
     displayRunStarting({
       specs
-      webUrl
+      runUrl
       headed
       browser
       specPattern
@@ -867,7 +865,7 @@ module.exports = {
         if not specs.length
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun, webUrl) =>
+        runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
           @runSpecs({
             beforeSpecRun
             afterSpecRun
@@ -876,7 +874,7 @@ module.exports = {
             socketId
             browser
             project
-            webUrl
+            runUrl
             config
             specs
             sys
@@ -888,7 +886,7 @@ module.exports = {
             headed:               options.headed
             outputPath:           options.outputPath
           })
-          .tap(_.partial(renderSummaryTable, webUrl))
+          .tap(_.partial(renderSummaryTable, runUrl))
 
         if record
           { projectName } = config

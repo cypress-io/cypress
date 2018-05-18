@@ -7,7 +7,7 @@ e2e = require("../support/helpers/e2e")
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.0.0")
 
-{ runId, planId, machineId, webUrl } = postRunResponse
+{ runId, planId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
 
 requests = null
@@ -157,7 +157,7 @@ describe "e2e record", ->
       .get("stdout")
       .then (stdout) ->
         expect(stdout).to.include("Run URL:")
-        expect(stdout).to.include(webUrl)
+        expect(stdout).to.include(runUrl)
 
         urls = getRequestUrls()
 

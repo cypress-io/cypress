@@ -23,6 +23,8 @@ settings     = require("#{root}../lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
 
+env = _.clone(process.env)
+
 Promise.config({
   longStackTraces: true
 })
@@ -31,9 +33,22 @@ e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
+browserNameVersionRe = /(Browser\:\s+)(Electron|Chrome|Canary|Chromium)(\s\d+)(\s\(\w+\))?/
 
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
+
+replaceBrowserName = (str, p1, p2, p3, p4) ->
+  ## get the padding for the existing browser string
+  lengthOfExistingBrowserString = _.sum([p2.length, p3.length, _.get(p4, "length", 0)])
+
+  ## this ensures we add whitespace so the border is not shifted
+  p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
+
+replaceDurationInTables = (str, p1, p2) ->
+  ## when swapping out the duration, ensure we pad the
+  ## full length of the duration so it doesn't shift content
+  p1 + _.padStart("Xs", p2.length)
 
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
@@ -41,19 +56,20 @@ normalizeStdout = (str) ->
   str
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
+  .replace(browserNameVersionRe, replaceBrowserName)
   .replace(/\(\d{1,2}s\)/g, "(10s)")
-  .replace(/\s\(\d+m?s\)/g, "")
-  .replace(/coffee-\d{3}/g, "coffee-456")
+  .replace(/\s\(\d+m?s\)/g, "") ## numbers in parenths
+  .replace(/(.+?)(\d+m?s)/g, replaceDurationInTables) ## durations in tables
+  .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/Cypress Version\: (.+)/g, "Cypress Version: 1.2.3")
-  .replace(/Duration\: (.+)/g, "Duration:        10 seconds")
-  .replace(/\(\d+ seconds?\)/g, "(0 seconds)")
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
+  .replace(/(Duration\:\s+)(\d+m?s)/g, "$1" + "999 seconds")
+  .replace(/\(\d+ seconds?\)/g, "(555 seconds)")
   .replace(/\r/g, "")
+  .replace("/\(\d{2,4}x\d{2,4}\)/g", "(9999x8888)") ## screenshot dimensions
   .split("\n")
     .map(replaceStackTraceLines)
     .join("\n")
-  .split("2560x1440") ## normalize resolutions
-    .join("1280x720")
 
 startServer = (obj) ->
   {onServer, port} = obj
@@ -183,6 +199,7 @@ module.exports = {
 
   options: (ctx, options = {}) ->
     _.defaults(options, {
+      browser: process.env.BROWSER
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
     })
@@ -223,8 +240,7 @@ module.exports = {
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    ## prefer options if set, else use env
-    if browser = (options.browser or process.env.BROWSER)
+    if browser = (options.browser)
       args.push("--browser=#{browser}")
 
     if options.config
@@ -269,6 +285,23 @@ module.exports = {
         if ostd = options.onStdout
           stdout = ostd(stdout)
 
+        ## if we have browser in the stdout make
+        ## sure its legit
+        if matches = browserNameVersionRe.exec(stdout)
+          [str, key, browserName, version, headless] = matches
+
+          if b = options.browser
+            expect(_.capitalize(b)).to.eq(browserName)
+
+          expect(parseFloat(version)).to.be.a.number
+
+          ## if we are in headed mode or in a browser other
+          ## than electron
+          if options.headed or (b and b isnt "electron")
+            expect(headless).not.to.exist
+          else
+            expect(headless).to.include("(headless)")
+
         str = normalizeStdout(stdout)
         snapshot(str)
 
@@ -280,7 +313,10 @@ module.exports = {
 
     new Promise (resolve, reject) ->
       sp = cp.spawn "node", args, {
-        env: _.omit(process.env, "CYPRESS_DEBUG")
+        env: _.chain(env)
+        .omit("CYPRESS_DEBUG")
+        # .extend({ FORCE_COLOR: 0 })
+        .value()
       }
 
       ## pipe these to our current process

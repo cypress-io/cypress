@@ -273,7 +273,7 @@ createRunAndRecordSpecs = (options = {}) ->
       if not resp
         runAllSpecs()
       else
-        { webUrl, runId, machineId, planId } = resp
+        { runUrl, runId, machineId, planId } = resp
 
         captured = null
         instanceId = null
@@ -334,7 +334,7 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs(beforeSpecRun, afterSpecRun, webUrl)
+        runAllSpecs(beforeSpecRun, afterSpecRun, runUrl)
 
 module.exports = {
   createRun
