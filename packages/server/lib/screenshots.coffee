@@ -69,6 +69,8 @@ captureAndCheck = (data, automate, condition) ->
     tries++
     debug("capture and check attempt ##{tries}")
 
+    takenAt = new Date().toISOString()
+
     automate(data)
     .then (dataUrl) ->
       debug("received screenshot data from automation layer")
@@ -78,7 +80,7 @@ captureAndCheck = (data, automate, condition) ->
       debug("read buffer to image #{image.bitmap.width} x #{image.bitmap.height}")
 
       if tries >= MAX_TRIES or condition(data, image)
-        return image
+        return { image, takenAt }
       else
         attempt()
 
@@ -134,39 +136,42 @@ stitchScreenshots = (pixelRatio) ->
 
   debug("stitch #{multipartImages.length} images together")
 
+  takenAts = []
+
   fullImage = new Jimp(width, height)
   heightMarker = 0
-  _.each multipartImages, ({ data, image }) ->
+  _.each multipartImages, ({ data, image, takenAt }) ->
     croppedImage = image.clone()
     crop(croppedImage, data.clip, pixelRatio)
 
     debug("stitch: add image at (0, #{heightMarker})")
 
+    takenAts.push(takenAt)
     fullImage.composite(croppedImage, 0, heightMarker)
     heightMarker += croppedImage.bitmap.height
 
-  return { image: fullImage, pixelRatio }
+  return { image: fullImage, takenAt: takenAts }
 
-isBuffer = (imageOrBuffer) ->
-  Buffer.isBuffer(imageOrBuffer)
+isBuffer = (details) ->
+  !!details.buffer
 
-getType = (imageOrBuffer) ->
-  if isBuffer(imageOrBuffer)
-    imageOrBuffer.type
+getType = (details) ->
+  if isBuffer(details)
+    details.buffer.type
   else
-    imageOrBuffer.getMIME()
+    details.image.getMIME()
 
-getBuffer = (imageOrBuffer) ->
-  if isBuffer(imageOrBuffer)
-    Promise.resolve(imageOrBuffer)
+getBuffer = (details) ->
+  if isBuffer(details)
+    Promise.resolve(details.buffer)
   else
-    imageOrBuffer.getBuffer(Jimp.AUTO)
+    details.image.getBuffer(Jimp.AUTO)
 
-getDimensions = (imageOrBuffer) ->
-  if isBuffer(imageOrBuffer)
-    sizeOf(imageOrBuffer)
+getDimensions = (details) ->
+  if isBuffer(details)
+    sizeOf(details.buffer)
   else
-    imageOrBuffer.bitmap
+    _.pick(details.image.bitmap, "width", "height")
 
 module.exports = {
   crop
@@ -189,20 +194,26 @@ module.exports = {
     ## for failure screenshots, we keep it simple to avoid latency
     ## caused by jimp reading the image buffer
     if data.simple
+      takenAt = new Date().toISOString()
       return automate(data).then (dataUrl) ->
-        dataUriToBuffer(dataUrl)
+        {
+          takenAt
+          multipart: false
+          buffer: dataUriToBuffer(dataUrl)
+        }
 
     condition = if isMultipart(data) then multipartCondition else pixelCondition
 
     captureAndCheck(data, automate, condition)
-    .then (image) ->
+    .then ({ image, takenAt }) ->
       pixelRatio = image.bitmap.width / data.viewport.width
+      multipart = isMultipart(data)
       debug("pixel ratio is", pixelRatio)
 
-      if isMultipart(data)
+      if multipart
         debug("multi-part #{data.current}/#{data.total}")
 
-      if isMultipart(data) and data.total > 1
+      if multipart and data.total > 1
         ## keep previous screenshot partials around b/c if two screenshots are
         ## taken in a row, the UI might not be caught up so we need something
         ## to compare the new one to
@@ -211,25 +222,28 @@ module.exports = {
         if data.current is 1
           clearMultipartState()
 
-        multipartImages.push({ data, image })
+        multipartImages.push({ data, image, takenAt })
 
         if data.current is data.total
-          return stitchScreenshots(pixelRatio)
+          { image, takenAt } = stitchScreenshots(pixelRatio)
+          return { image, pixelRatio, multipart, takenAt }
         else
           return {}
 
       if isAppOnly(data) or isMultipart(data)
         crop(image, data.clip, pixelRatio)
 
-      return { image, pixelRatio }
-    .then ({ image, pixelRatio }) ->
+      return { image, pixelRatio, multipart, takenAt }
+    .then ({ image, pixelRatio, multipart, takenAt }) ->
+      return null if not image
+
       if image and data.userClip
         crop(image, data.userClip, pixelRatio)
 
-      return image
+      return { image, pixelRatio, multipart, takenAt }
 
-  save: (data, imageOrBuffer, screenshotsFolder) ->
-    type = getType(imageOrBuffer)
+  save: (data, details, screenshotsFolder) ->
+    type = getType(details)
 
     name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
     name = name.replace(invalidCharsRe, "")
@@ -239,23 +253,24 @@ module.exports = {
 
     debug("save", pathToScreenshot)
 
-    ## TODO: this should be done at the time the
-    ## screenshot is taken, not asynchronously after
-    takenAt = (new Date()).toJSON()
-
-    getBuffer(imageOrBuffer)
+    getBuffer(details)
     .then (buffer) ->
       fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->
       fs.statAsync(pathToScreenshot).get("size")
     .then (size) ->
-      dimensions = getDimensions(imageOrBuffer)
+      dimensions = getDimensions(details)
+
+      { multipart, pixelRatio, takenAt } = details
+
       {
         takenAt
-        size:   bytes(size, {unitSeparator: " "})
-        path:   pathToScreenshot
-        width:  dimensions.width
-        height: dimensions.height
+        dimensions
+        multipart
+        pixelRatio
+        takenAt
+        size: bytes(size, {unitSeparator: " "})
+        path: pathToScreenshot
       }
 
 }

@@ -14,6 +14,7 @@ settings    = require("#{root}lib/util/settings")
 screenshotAutomation = require("#{root}lib/automation/screenshot")
 
 image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC"
+iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 
 describe "lib/screenshots", ->
   beforeEach ->
@@ -98,10 +99,14 @@ describe "lib/screenshots", ->
       screenshots.capture(@appData, @automate).then =>
         expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
-    it "resolves image", ->
+    it "resolves details w/ image", ->
       @passPixelTest()
-      screenshots.capture(@appData, @automate).then (image) =>
-        expect(image).to.equal(@jimpImage)
+
+      screenshots.capture(@appData, @automate).then (details) =>
+        expect(details.image).to.equal(@jimpImage)
+        expect(details.multipart).to.be.false
+        expect(details.pixelRatio).to.equal(1)
+        expect(details.takenAt).to.match(iso8601Regex)
 
     describe "simple capture", ->
       beforeEach ->
@@ -111,9 +116,11 @@ describe "lib/screenshots", ->
         screenshots.capture(@appData, @automate).then ->
           expect(Jimp.read).not.to.be.called
 
-      it "resolves the buffer", ->
-        screenshots.capture(@appData, @automate).then (buffer) ->
-          expect(buffer).to.be.instanceOf(Buffer)
+      it "resolves details w/ buffer", ->
+        screenshots.capture(@appData, @automate).then (details) ->
+          expect(details.takenAt).to.match(iso8601Regex)
+          expect(details.multipart).to.be.false
+          expect(details.buffer).to.be.instanceOf(Buffer)
 
     describe "userClip", ->
       it "crops final image if userClip specified", ->
@@ -166,14 +173,14 @@ describe "lib/screenshots", ->
 
       it "resolves no image on non-last captures", ->
         screenshots.capture(@appData, @automate).then (image) ->
-          expect(image).to.be.undefined
+          expect(image).to.be.null
 
-      it "resolves image on last capture", ->
+      it "resolves details w/ image on last capture", ->
         screenshots.capture(@appData, @automate)
         .then =>
           @appData.current = 3
           screenshots.capture(@appData, @automate)
-        .then (image) =>
+        .then ({ image }) =>
           expect(image).to.be.an.instanceOf(Jimp)
 
       it "composites images into one image", ->
@@ -246,31 +253,44 @@ describe "lib/screenshots", ->
       expect(@jimpImage.crop).to.be.calledWith(0, 0, 40, 10)
 
   context ".save", ->
-    it "outputs file and returns size and path", ->
-      screenshots.save({name: "foo/tweet"}, @jimpImage, @config.screenshotsFolder)
-      .then (obj) =>
-        expectedPath = path.normalize(@config.screenshotsFolder + "/footweet.png")
-        actualPath = path.normalize(obj.path)
+    it "outputs file and returns details", ->
+      details = {
+        image: @jimpImage
+        multipart: false
+        pixelRatio: 2
+        takenAt: "taken:at:date"
+      }
 
-        expect(obj.size).to.eq("15 B")
+      screenshots.save({name: "foo/tweet"}, details, @config.screenshotsFolder)
+      .then (result) =>
+        expectedPath = path.normalize(@config.screenshotsFolder + "/footweet.png")
+        actualPath = path.normalize(result.path)
+
         expect(actualPath).to.eq(expectedPath)
-        expect(obj.width).to.eq(40)
-        expect(obj.height).to.eq(40)
+        expect(result.size).to.eq("15 B")
+        expect(result.dimensions).to.eql({ width: 40, height: 40 })
+        expect(result.multipart).to.be.false
+        expect(result.pixelRatio).to.be.eq(2)
+        expect(result.takenAt).to.eq("taken:at:date")
 
         fs.statAsync(expectedPath)
 
     it "can handle saving buffer", ->
-      buffer = dataUriToBuffer(image)
-      dimensions = sizeOf(buffer)
-      screenshots.save({name: "bar/tweet"}, buffer, @config.screenshotsFolder)
-      .then (obj) =>
+      details = {
+        multipart: false
+        pixelRatio: 1
+        buffer: dataUriToBuffer(image)
+      }
+      dimensions = sizeOf(details.buffer)
+      screenshots.save({name: "bar/tweet"}, details, @config.screenshotsFolder)
+      .then (result) =>
         expectedPath = path.normalize(@config.screenshotsFolder + "/bartweet.png")
-        actualPath = path.normalize(obj.path)
+        actualPath = path.normalize(result.path)
 
-        expect(obj.size).to.eq("279 B")
+        expect(result.multipart).to.be.false
+        expect(result.pixelRatio).to.equal(1)
         expect(actualPath).to.eq(expectedPath)
-        expect(obj.width).to.eq(dimensions.width)
-        expect(obj.height).to.eq(dimensions.height)
+        expect(result.dimensions).to.eql(dimensions)
 
         fs.statAsync(expectedPath)
 
