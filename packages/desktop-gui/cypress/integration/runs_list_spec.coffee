@@ -110,7 +110,7 @@ describe "Runs List", ->
         it "displays seperate timers for incomplete runs", ->
           cy.get("@firstRunRow").contains("47:02")
           cy.get(".runs-container li").last().contains("57:02")
-          .then -> cy.tick(1000)
+            .then -> cy.tick(1000)
           cy.get("@firstRunRow").contains("47:03")
           cy.get(".runs-container li").last().contains("57:03")
 
@@ -175,8 +175,7 @@ describe "Runs List", ->
 
       timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
-      cy
-        .clock(timestamp)
+      cy.clock(timestamp)
         .then =>
           @goToRuns()
         .then =>
@@ -186,30 +185,26 @@ describe "Runs List", ->
       expect(@ipc.getRuns).to.be.called
 
     it "lists runs", ->
-      cy
-        .get(".runs-container li")
+      cy.get(".runs-container li")
         .should("have.length", @runs.length)
 
     it "displays link to dashboard that goes to admin project runs", ->
-      cy
-        .contains("See all").click()
+      cy.contains("See all").click()
         .then ->
           expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
 
     it "displays run status icon", ->
-      cy
-        .get(".runs-container li").first().find("> div")
+      cy.get(".runs-container li").first().find("> div")
         .should("have.class", "running")
 
     it "displays last updated", ->
       cy.contains("Last updated: 10:00:00am")
 
     it "clicking run opens admin", ->
-      cy
-        .get(".runs-container li").first()
+      cy.get(".runs-container li").first()
         .click()
         .then =>
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].buildNumber}")
 
   context "without a current user", ->
     beforeEach ->
@@ -264,17 +259,16 @@ describe "Runs List", ->
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
-      cy
-        .clock()
+      cy.clock()
         .then =>
           @goToRuns()
         .then =>
           @getRuns.resolve(@runs)
-        .get(".runs-container") ## wait for original runs to show
-        .clock().then (clock) =>
+      cy.get(".runs-container") ## wait for original runs to show
+      cy.clock().then (clock) =>
           @getRunsAgain = @util.deferred()
           @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
-        .tick(10000)
+      cy.tick(10000)
 
     it "has original state of runs", ->
       cy.get(".runs-container li").first().find("> div")

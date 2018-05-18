@@ -119,13 +119,13 @@
     "pending": 6,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
-    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
     "skipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "running",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
     "buildNumber": 1892,
@@ -247,13 +247,13 @@
     "pending": 6,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
-    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
     "skipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "failed",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
     "buildNumber": 1893,
@@ -331,13 +331,13 @@
     "pending": 6,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
-    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
     "skipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "errored",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
     "buildNumber": 1894,
@@ -491,13 +491,13 @@
     "pending": 6,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
-    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
     "skipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "passed",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
     "buildNumber": 1891,
@@ -619,12 +619,12 @@
     "pending": 6,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
-    "projectWebUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
     "skipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "running",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "webUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   }
 ]
