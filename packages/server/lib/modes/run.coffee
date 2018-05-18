@@ -768,6 +768,8 @@ module.exports = {
 
         recording = @createRecording(name)
       else
+        console.log("")
+        
         if browserName is "electron" and options.headed
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else

@@ -204,3 +204,117 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 `
 
+exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                        │
+  │ Specs:      1 found (simple_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_spec.coffee...                                                           (1 of 1) 
+
+Warning: Cypress can only record videos when running headlessly.
+
+You have set the 'electron' browser to run headed.
+
+A video will not be recorded when using this mode.
+
+
+  ✓ is true
+
+  1 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────┐
+  │ Tests:        1                  │
+  │ Passing:      1                  │
+  │ Failing:      0                  │
+  │ Pending:      0                  │
+  │ Skipped:      0                  │
+  │ Screenshots:  0                  │
+  │ Video:        false              │
+  │ Duration:     0 seconds          │
+  │ Spec Ran:     simple_spec.coffee │
+  └──────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ simple_spec.coffee                           Xs        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        1        1        -        -        -  
+
+`
+
+exports['e2e stdout logs that chrome cannot be recorded 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                          │
+  │ Specs:      1 found (simple_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_spec.coffee...                                                           (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
+
+
+  ✓ is true
+
+  1 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────┐
+  │ Tests:        1                  │
+  │ Passing:      1                  │
+  │ Failing:      0                  │
+  │ Pending:      0                  │
+  │ Skipped:      0                  │
+  │ Screenshots:  0                  │
+  │ Video:        false              │
+  │ Duration:     0 seconds          │
+  │ Spec Ran:     simple_spec.coffee │
+  └──────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ simple_spec.coffee                           Xs        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        1        1        -        -        -  
+
+`
+
