@@ -54,7 +54,7 @@ exports['e2e issue 173 failing 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

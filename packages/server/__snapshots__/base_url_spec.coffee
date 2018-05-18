@@ -30,7 +30,7 @@ exports['e2e baseUrl https passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -66,7 +66,7 @@ exports['e2e baseUrl http passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

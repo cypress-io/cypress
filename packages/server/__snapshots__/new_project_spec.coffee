@@ -28,7 +28,7 @@ Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123
   - Finished processing:  /foo/bar/.projects/no-scaffolding/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

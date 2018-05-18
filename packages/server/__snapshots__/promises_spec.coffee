@@ -47,7 +47,7 @@ exports['e2e promises failing1 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

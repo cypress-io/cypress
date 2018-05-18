@@ -51,7 +51,7 @@ We dynamically generated a new test to display this failure.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -109,7 +109,7 @@ We dynamically generated a new test to display this failure.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -161,7 +161,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -218,7 +218,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -288,6 +288,6 @@ exports['e2e uncaught errors failing5 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `

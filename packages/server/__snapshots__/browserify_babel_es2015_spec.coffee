@@ -32,7 +32,7 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -77,7 +77,7 @@ Fix the error in your code and re-run your tests.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

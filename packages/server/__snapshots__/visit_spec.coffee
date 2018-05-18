@@ -47,7 +47,7 @@ exports['e2e visit low response timeout passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -131,7 +131,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -203,7 +203,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -275,7 +275,7 @@ The internal Cypress web server responded with:
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -349,7 +349,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -449,7 +449,7 @@ When this 'load' event occurs, Cypress will continue running commands.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

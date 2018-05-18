@@ -86,7 +86,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -150,7 +150,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -206,7 +206,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -268,7 +268,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

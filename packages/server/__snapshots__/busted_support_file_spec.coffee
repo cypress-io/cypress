@@ -37,7 +37,7 @@ Fix the error in your code and re-run your tests.
   - Finished processing:  /foo/bar/.projects/busted-support-file/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

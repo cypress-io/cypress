@@ -42,7 +42,7 @@ Error: Async error from plugins file
   - Finished processing:  /foo/bar/.projects/plugins-async-error/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -77,7 +77,7 @@ Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/
   - Finished processing:  /foo/bar/.projects/working-preprocessor/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -112,7 +112,7 @@ Started video recording: /foo/bar/.projects/plugin-config/cypress/videos/abc123.
   - Finished processing:  /foo/bar/.projects/plugin-config/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -142,7 +142,7 @@ A video will not be recorded when using this browser.
   - Cypress Version: 1.2.3
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

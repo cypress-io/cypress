@@ -36,7 +36,7 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -66,7 +66,7 @@ finished!
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -108,7 +108,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -195,7 +195,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -235,7 +235,7 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -320,7 +320,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -360,7 +360,7 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -445,7 +445,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

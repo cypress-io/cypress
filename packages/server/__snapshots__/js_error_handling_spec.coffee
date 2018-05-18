@@ -116,7 +116,7 @@ https://on.cypress.io/uncaught-exception-from-application
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

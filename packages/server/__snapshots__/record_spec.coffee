@@ -290,7 +290,7 @@ StatusCodeError: 500 - "Internal Server Error"
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -334,7 +334,7 @@ StatusCodeError: 500 - "Internal Server Error"
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -382,7 +382,7 @@ This error will not alter the exit code.
 StatusCodeError: 500 - "Internal Server Error"
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -431,7 +431,7 @@ This error will not alter the exit code.
 StatusCodeError: 500 - "Internal Server Error"
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -518,7 +518,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (R
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
@@ -567,7 +567,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   - Failed Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

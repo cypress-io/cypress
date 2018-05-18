@@ -52,7 +52,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 

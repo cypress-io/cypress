@@ -51,7 +51,7 @@ We dynamically generated a new test to display this failure.
   - Finished processing:  /foo/bar/.projects/uncaught-support-file/cypress/videos/abc123.mp4 (0 seconds)
 
 
-  (All Done)
+  (Run Finished)
 
 `
 
