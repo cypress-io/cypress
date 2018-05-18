@@ -1,5 +1,5 @@
 exports['e2e uncaught errors failing1 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -56,7 +56,7 @@ We dynamically generated a new test to display this failure.
 `
 
 exports['e2e uncaught errors failing2 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -114,7 +114,7 @@ We dynamically generated a new test to display this failure.
 `
 
 exports['e2e uncaught errors failing3 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -166,7 +166,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 `
 
 exports['e2e uncaught errors failing4 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -223,7 +223,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 `
 
 exports['e2e uncaught errors failing5 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

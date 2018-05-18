@@ -32,7 +32,7 @@ A video will not be recorded when using this browser.
 `
 
 exports['e2e user agent passes on electron 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

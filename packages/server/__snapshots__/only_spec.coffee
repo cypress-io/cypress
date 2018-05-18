@@ -1,5 +1,5 @@
 exports['e2e only spec failing 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

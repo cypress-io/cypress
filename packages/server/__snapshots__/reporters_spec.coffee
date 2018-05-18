@@ -13,7 +13,7 @@ Learn more at stack trace line
 `
 
 exports['e2e reporters supports junit reporter and reporter options 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -41,7 +41,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 `
 
 exports['e2e reporters supports local custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 passes
@@ -71,7 +71,7 @@ finished!
 `
 
 exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 [mochawesome] Generating report files...
@@ -113,7 +113,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 `
 
 exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 [mochawesome] Generating report files...
@@ -200,7 +200,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 `
 
 exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -240,7 +240,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 `
 
 exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -325,7 +325,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 `
 
 exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -365,7 +365,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 `
 
 exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom reporter 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

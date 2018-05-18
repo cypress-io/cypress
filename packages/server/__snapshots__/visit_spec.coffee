@@ -1,5 +1,5 @@
 exports['e2e visit low response timeout passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -52,7 +52,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 `
 
 exports['e2e visit low response timeout fails when network connection immediately fails 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -136,7 +136,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 `
 
 exports['e2e visit low response timeout fails when server responds with 500 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -208,7 +208,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 `
 
 exports['e2e visit low response timeout fails when file server responds with 404 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -280,7 +280,7 @@ The internal Cypress web server responded with:
 `
 
 exports['e2e visit low response timeout fails when content type isnt html 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -354,7 +354,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 `
 
 exports['e2e visit normal response timeouts fails when visit times out 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

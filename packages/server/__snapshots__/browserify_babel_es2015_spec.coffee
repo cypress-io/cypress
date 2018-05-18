@@ -1,5 +1,5 @@
 exports['e2e browserify, babel, es2015 passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -37,7 +37,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 `
 
 exports['e2e browserify, babel, es2015 fails 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 Oops...we found an error preparing this test file:

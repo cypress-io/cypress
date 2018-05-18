@@ -258,7 +258,7 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -302,7 +302,7 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -339,7 +339,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 `
 
 exports['e2e record api interaction errors update instance does not update instance stdout 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -387,7 +387,7 @@ StatusCodeError: 500 - "Internal Server Error"
 `
 
 exports['e2e record api interaction errors update instance stdout warns but proceeds 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -523,7 +523,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (R
 `
 
 exports['e2e record api interaction errors uploading assets warns but proceeds 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

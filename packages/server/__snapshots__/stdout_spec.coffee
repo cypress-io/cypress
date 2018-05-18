@@ -1,5 +1,5 @@
 exports['e2e stdout displays errors from failures 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -113,7 +113,7 @@ The internal Cypress web server responded with:
 `
 
 exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 Oops...we found an error preparing this test file:
@@ -158,7 +158,7 @@ Fix the error in your code and re-run your tests.
 `
 
 exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

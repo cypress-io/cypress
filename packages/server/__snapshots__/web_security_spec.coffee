@@ -1,5 +1,5 @@
 exports['e2e web security when enabled fails 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -143,7 +143,7 @@ https://on.cypress.io/cross-origin-violation
 `
 
 exports['e2e web security when disabled fails 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 

@@ -1,5 +1,5 @@
 exports['e2e caught and uncaught hooks errors failing1 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -91,7 +91,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 `
 
 exports['e2e caught and uncaught hooks errors failing2 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -155,7 +155,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 `
 
 exports['e2e caught and uncaught hooks errors failing3 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
@@ -211,7 +211,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 `
 
 exports['e2e caught and uncaught hooks errors failing4 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
   (Run Starting)
 
