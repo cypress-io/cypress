@@ -1,7 +1,7 @@
 exports['e2e async timeouts failing1 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   async
@@ -18,7 +18,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0

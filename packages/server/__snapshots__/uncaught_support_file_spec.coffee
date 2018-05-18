@@ -1,7 +1,7 @@
 exports['e2e uncaught support file errors failing 1'] = `
 Started video recording: /foo/bar/.projects/uncaught-support-file/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   1) An uncaught error was detected outside of a test
@@ -27,7 +27,7 @@ We dynamically generated a new test to display this failure.
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0

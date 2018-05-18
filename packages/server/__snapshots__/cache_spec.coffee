@@ -1,7 +1,7 @@
 exports['e2e cache passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   caching
@@ -14,7 +14,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   4 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           4
   - Passes:          4

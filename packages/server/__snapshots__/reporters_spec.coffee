@@ -15,9 +15,9 @@ Learn more at stack trace line
 exports['e2e reporters supports junit reporter and reporter options 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          1
@@ -43,11 +43,11 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e reporters supports local custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 passes
 finished!
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          1
@@ -73,7 +73,7 @@ finished!
 exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 [mochawesome] Generating report files...
 
 
@@ -89,7 +89,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          1
@@ -115,7 +115,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 [mochawesome] Generating report files...
 
 
@@ -169,7 +169,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           6
   - Passes:          1
@@ -202,7 +202,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   simple passing spec
@@ -216,7 +216,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 [mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          1
@@ -242,7 +242,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   simple failing hook spec
@@ -294,7 +294,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 [mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           6
   - Passes:          1
@@ -327,7 +327,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   simple passing spec
@@ -341,7 +341,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 [mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          1
@@ -367,7 +367,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom reporter 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   simple failing hook spec
@@ -419,7 +419,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 [mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           6
   - Passes:          1

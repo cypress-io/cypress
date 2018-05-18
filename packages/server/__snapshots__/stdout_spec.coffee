@@ -1,7 +1,7 @@
 exports['e2e stdout displays errors from failures 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   stdout_failing_spec
@@ -82,7 +82,7 @@ The internal Cypress web server responded with:
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           5
   - Passes:          2
@@ -115,7 +115,7 @@ The internal Cypress web server responded with:
 exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee
@@ -134,7 +134,7 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 
 Fix the error in your code and re-run your tests.
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           0
   - Passes:          0
@@ -160,7 +160,7 @@ Fix the error in your code and re-run your tests.
 exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   stdout_passing_spec
@@ -181,7 +181,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   8 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           8
   - Passes:          8

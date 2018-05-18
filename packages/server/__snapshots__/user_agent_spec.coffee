@@ -3,7 +3,7 @@ exports['e2e user agent passes on chrome 1'] = `Warning: Cypress can only record
 You have set the browser to: 'chrome'
 
 A video will not be recorded when using this browser.
-  (Tests Starting)
+  (Run Starting)
 
 
   user agent
@@ -14,7 +14,7 @@ A video will not be recorded when using this browser.
   2 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          2
@@ -34,7 +34,7 @@ A video will not be recorded when using this browser.
 exports['e2e user agent passes on electron 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   user agent
@@ -45,7 +45,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   2 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          2

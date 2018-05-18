@@ -260,7 +260,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   record pass
@@ -272,7 +272,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          1
@@ -304,7 +304,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   record pass
@@ -316,7 +316,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          1
@@ -341,7 +341,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e record api interaction errors update instance does not update instance stdout 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   record pass
@@ -353,7 +353,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          1
@@ -389,7 +389,7 @@ StatusCodeError: 500 - "Internal Server Error"
 exports['e2e record api interaction errors update instance stdout warns but proceeds 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   record pass
@@ -401,7 +401,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          1
@@ -483,7 +483,7 @@ Please log into the Dashboard to see the updated token.
 https://on.cypress.io/dashboard/projects/pid123
 `
 
-exports['e2e record video recording does not upload when not enabled 1'] = `  (Tests Starting)
+exports['e2e record video recording does not upload when not enabled 1'] = `  (Run Starting)
 
 
   record pass
@@ -495,7 +495,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (T
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          1
@@ -525,7 +525,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (T
 exports['e2e record api interaction errors uploading assets warns but proceeds 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   record pass
@@ -537,7 +537,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          1

@@ -1,7 +1,7 @@
 exports['e2e uncaught errors failing1 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   1) An uncaught error was detected outside of a test
@@ -27,7 +27,7 @@ We dynamically generated a new test to display this failure.
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0
@@ -58,7 +58,7 @@ We dynamically generated a new test to display this failure.
 exports['e2e uncaught errors failing2 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   1) An uncaught error was detected outside of a test
@@ -85,7 +85,7 @@ We dynamically generated a new test to display this failure.
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0
@@ -116,7 +116,7 @@ We dynamically generated a new test to display this failure.
 exports['e2e uncaught errors failing3 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   foo
@@ -137,7 +137,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0
@@ -168,7 +168,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 exports['e2e uncaught errors failing4 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   foo
@@ -194,7 +194,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          1
@@ -225,7 +225,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 exports['e2e uncaught errors failing5 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   foo
@@ -261,7 +261,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           8
   - Passes:          4

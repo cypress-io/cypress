@@ -1,7 +1,7 @@
 exports['e2e browserify, babel, es2015 passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   imports work
@@ -13,7 +13,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   3 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           3
   - Passes:          3
@@ -39,7 +39,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e browserify, babel, es2015 fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/browserify_babel_es2015_failing_spec.js
@@ -58,7 +58,7 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 
 Fix the error in your code and re-run your tests.
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           0
   - Passes:          0

@@ -1,7 +1,7 @@
 exports['e2e caught and uncaught hooks errors failing1 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   ✓ t1a
@@ -60,7 +60,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           11
   - Passes:          5
@@ -93,7 +93,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 exports['e2e caught and uncaught hooks errors failing2 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   ✓ t1b
@@ -126,7 +126,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           7
   - Passes:          4
@@ -157,7 +157,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 exports['e2e caught and uncaught hooks errors failing3 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   1) "before each" hook for "t1c"
@@ -182,7 +182,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           4
   - Passes:          0
@@ -213,7 +213,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 exports['e2e caught and uncaught hooks errors failing4 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   uncaught hook error should continue to fire all mocha events
@@ -244,7 +244,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           3
   - Passes:          2

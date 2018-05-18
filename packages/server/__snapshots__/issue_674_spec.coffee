@@ -1,7 +1,7 @@
 exports['e2e issue 674 fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   issue 674
@@ -27,7 +27,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0

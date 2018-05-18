@@ -1,7 +1,7 @@
 exports['e2e form submissions passing 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   form submissions
@@ -12,7 +12,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   2 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          2
@@ -38,7 +38,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e form submissions failing 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   form submission fails
@@ -69,7 +69,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0

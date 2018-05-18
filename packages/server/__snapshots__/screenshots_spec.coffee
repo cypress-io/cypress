@@ -1,7 +1,7 @@
 exports['e2e screenshots passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   taking screenshots
@@ -43,7 +43,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           5
   - Passes:          2

@@ -1,7 +1,7 @@
 exports['e2e viewport passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   viewport
@@ -13,7 +13,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   3 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           3
   - Passes:          3

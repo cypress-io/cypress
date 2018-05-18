@@ -1,4 +1,4 @@
-  (Tests Finished)
+  (Results)
 
   - Tests:           4
   - Passes:          2

@@ -1,7 +1,7 @@
 exports['e2e return value failing1 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   1) errors when invoking commands and return a different value
@@ -81,7 +81,7 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          0

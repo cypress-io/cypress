@@ -1,7 +1,7 @@
 exports['e2e busted support file passes 1'] = `
 Started video recording: /foo/bar/.projects/busted-support-file/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/busted-support-file/cypress/support/index.js
@@ -18,7 +18,7 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 
 Fix the error in your code and re-run your tests.
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           0
   - Passes:          0

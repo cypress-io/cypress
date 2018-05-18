@@ -1,7 +1,7 @@
 exports['e2e new project passes 1'] = `
 Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   ✓ is true
@@ -9,7 +9,7 @@ Started video recording: /foo/bar/.projects/no-scaffolding/cypress/videos/abc123
   1 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          1

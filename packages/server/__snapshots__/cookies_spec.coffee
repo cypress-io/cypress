@@ -1,7 +1,7 @@
 exports['e2e cookies passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   cookies
@@ -16,7 +16,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   6 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           6
   - Passes:          6

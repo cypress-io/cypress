@@ -1,7 +1,7 @@
 exports['e2e js error handling fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   s1
@@ -88,7 +88,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           7
   - Passes:          2

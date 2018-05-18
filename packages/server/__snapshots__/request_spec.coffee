@@ -1,7 +1,7 @@
 exports['e2e requests passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   redirects + requests
@@ -22,7 +22,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   12 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           12
   - Passes:          12
@@ -48,7 +48,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e requests fails when network immediately fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   when network connection cannot be established
@@ -122,7 +122,7 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0
@@ -153,7 +153,7 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 exports['e2e requests fails on status code 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   when status code isnt 2xx or 3xx
@@ -220,7 +220,7 @@ Body: Service Unavailable
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0

@@ -1,7 +1,7 @@
 exports['e2e plugins fails 1'] = `
 Started video recording: /foo/bar/.projects/plugins-async-error/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
@@ -23,7 +23,7 @@ Error: Async error from plugins file
     at stack trace line
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           0
   - Passes:          0
@@ -49,7 +49,7 @@ Error: Async error from plugins file
 exports['e2e plugins passes 1'] = `
 Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   ✓ is another spec
@@ -58,7 +58,7 @@ Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/
   2 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          2
@@ -84,7 +84,7 @@ Started video recording: /foo/bar/.projects/working-preprocessor/cypress/videos/
 exports['e2e plugins can modify config from plugins 1'] = `
 Started video recording: /foo/bar/.projects/plugin-config/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   ✓ overrides config
@@ -93,7 +93,7 @@ Started video recording: /foo/bar/.projects/plugin-config/cypress/videos/abc123.
   2 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           2
   - Passes:          2
@@ -121,7 +121,7 @@ exports['e2e plugins works with user extensions 1'] = `Warning: Cypress can only
 You have set the browser to: 'chrome'
 
 A video will not be recorded when using this browser.
-  (Tests Starting)
+  (Run Starting)
 
 
   ✓ can inject text from an extension
@@ -129,7 +129,7 @@ A video will not be recorded when using this browser.
   1 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          1

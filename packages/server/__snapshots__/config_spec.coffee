@@ -1,7 +1,7 @@
 exports['e2e config passes 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   Cypress.config()
@@ -13,7 +13,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   3 passing
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           3
   - Passes:          3
@@ -39,7 +39,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 exports['e2e config fails 1'] = `
 Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-  (Tests Starting)
+  (Run Starting)
 
 
   config
@@ -69,7 +69,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           1
   - Passes:          0
