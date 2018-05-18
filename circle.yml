@@ -9,7 +9,7 @@ defaults: &defaults
       environment:
         # set specific timezone
         TZ: "/usr/share/zoneinfo/America/New_York"
-        COLUMNS: "100"
+        # COLUMNS: "100"
         CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
 
 jobs:
