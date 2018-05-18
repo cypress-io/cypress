@@ -40,6 +40,7 @@ jobs:
       - run:
           name: Checking TERM is set
           command: |
+            echo columns are: $COLUMNS
             node -e 'assert.ok(process.env.TERM === "xterm", `process.env.TERM=${process.env.TERM} and must be set to "xterm" for Docker to work`)'
             node -e 'assert.ok(process.stdout.columns === 100, `process.stdout.columns=${process.stdout.columns} must be set to 100 for snapshots to pass`)'
             node -e 'console.log("stdout.isTTY?", process.stdout.isTTY)'
