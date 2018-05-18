@@ -174,7 +174,7 @@ takeElementScreenshot = ($el, state, automationOptions) ->
 
 ## "app only" means we're hiding the runner UI
 isAppOnly = ({ capture }) ->
-  capture is "viewport" or capture is "fullpage"
+  capture is "viewport" or capture is "fullPage"
 
 getShouldScale = ({ capture, scale }) ->
   if isAppOnly({ capture }) then scale else true
@@ -241,7 +241,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   .then ->
     if subject
       takeElementScreenshot(subject, state, automationOptions)
-    else if capture is "fullpage"
+    else if capture is "fullPage"
       takeFullPageScreenshot(state, automationOptions)
     else
       automateScreenshot(automationOptions)

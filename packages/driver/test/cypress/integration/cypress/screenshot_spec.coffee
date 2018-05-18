@@ -1,7 +1,7 @@
 { Screenshot, $ } = Cypress
 
 DEFAULTS = {
-  capture: "fullpage"
+  capture: "fullPage"
   scale: false
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true

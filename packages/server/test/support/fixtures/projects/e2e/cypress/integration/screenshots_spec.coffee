@@ -31,14 +31,14 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 200)
       .visit('http://localhost:3322/fullpage')
-      .screenshot("fullpage", { capture: "fullpage" })
+      .screenshot("fullPage", { capture: "fullPage" })
       .task("check:screenshot:size", { name: 'fullpage.png', width: 600, height: 500 })
 
   it "accepts subsequent same captures after multiple tries", ->
     cy
       .viewport(600, 200)
       .visit('http://localhost:3322/fullpage-same')
-      .screenshot("fullpage-same", { capture: "fullpage" })
+      .screenshot("fullpage-same", { capture: "fullPage" })
       .task("check:screenshot:size", { name: 'fullpage-same.png', width: 600, height: 500 })
 
   it "accepts screenshot after multiple tries if somehow app has pixels that match helper pixels", ->
@@ -74,7 +74,7 @@ describe "taking screenshots", ->
       cy
         .viewport(600, 200)
         .visit('http://localhost:3322/fullpage')
-        .screenshot("fullpage-clip", { capture: "fullpage", clip: { x: 20, y: 20, width: 140, height: 70 }})
+        .screenshot("fullpage-clip", { capture: "fullPage", clip: { x: 20, y: 20, width: 140, height: 70 }})
         .task("check:screenshot:size", { name: 'fullpage-clip.png', width: 140, height: 70 })
 
     it "can clip element screenshots", ->

@@ -340,20 +340,20 @@ describe "src/cy/commands/screenshot", ->
         cy.visit("/fixtures/screenshots.html")
 
       it "takes a screenshot for each time it needs to scroll", ->
-        cy.screenshot({ capture: "fullpage" })
+        cy.screenshot({ capture: "fullPage" })
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledThrice
 
       it "sends capture: fullpage", ->
-        cy.screenshot({ capture: "fullpage" })
+        cy.screenshot({ capture: "fullPage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
-          expect(take.args[0][1].capture).to.equal("fullpage")
-          expect(take.args[1][1].capture).to.equal("fullpage")
-          expect(take.args[2][1].capture).to.equal("fullpage")
+          expect(take.args[0][1].capture).to.equal("fullPage")
+          expect(take.args[1][1].capture).to.equal("fullPage")
+          expect(take.args[2][1].capture).to.equal("fullPage")
 
       it "sends number of current screenshot for each time it needs to scroll", ->
-        cy.screenshot({ capture: "fullpage" })
+        cy.screenshot({ capture: "fullPage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].current).to.equal(1)
@@ -361,7 +361,7 @@ describe "src/cy/commands/screenshot", ->
           expect(take.args[2][1].current).to.equal(3)
 
       it "sends total number of screenshots for each time it needs to scroll", ->
-        cy.screenshot({ capture: "fullpage" })
+        cy.screenshot({ capture: "fullPage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].total).to.equal(3)
@@ -372,7 +372,7 @@ describe "src/cy/commands/screenshot", ->
         win = cy.state("window")
         win.scrollTo(0, 100)
         scrollTo = cy.spy(win, "scrollTo")
-        cy.screenshot({ capture: "fullpage" })
+        cy.screenshot({ capture: "fullPage" })
         .then ->
           expect(scrollTo.getCall(0).args.join(",")).to.equal("0,0")
           expect(scrollTo.getCall(1).args.join(",")).to.equal("0,200")
@@ -382,12 +382,12 @@ describe "src/cy/commands/screenshot", ->
         win = cy.state("window")
         win.scrollTo(0, 100)
         scrollTo = cy.spy(win, "scrollTo")
-        cy.screenshot({ capture: "fullpage" })
+        cy.screenshot({ capture: "fullPage" })
         .then ->
           expect(scrollTo.getCall(3).args.join(",")).to.equal("0,100")
 
       it "sends the right clip values", ->
-        cy.screenshot({ capture: "fullpage" })
+        cy.screenshot({ capture: "fullPage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].clip).to.eql({ x: 0, y: 0, width: 600, height: 200 })

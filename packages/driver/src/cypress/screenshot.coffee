@@ -3,7 +3,7 @@ _ = require("lodash")
 $utils = require("./utils")
 
 reset = -> {
-  capture: "fullpage"
+  capture: "fullPage"
   scale: false
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
@@ -14,7 +14,7 @@ reset = -> {
 
 defaults = reset()
 
-validCaptures = ["fullpage", "viewport", "runner"]
+validCaptures = ["fullPage", "viewport", "runner"]
 
 validateAndSetBoolean = (props, values, cmd, log, option) ->
   value = props[option]

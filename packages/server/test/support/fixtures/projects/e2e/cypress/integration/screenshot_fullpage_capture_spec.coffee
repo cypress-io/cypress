@@ -1,5 +1,5 @@
 it "takes consistent fullpage captures", ->
-  options = { capture: "fullpage", blackout: [".black-me-out"] }
+  options = { capture: "fullPage", blackout: [".black-me-out"] }
 
   cy
     .viewport(600, 200)
