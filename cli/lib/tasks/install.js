@@ -146,17 +146,17 @@ const start = (options = {}) => {
   let needVersion = pkgVersion
   debug('version in package.json is', needVersion)
 
-  // let this env var reset the binary version we need
+  // let this environment variable reset the binary version we need
   if (process.env.CYPRESS_INSTALL_BINARY) {
 
     const envVarVersion = process.env.CYPRESS_INSTALL_BINARY
-    debug('using env var CYPRESS_INSTALL_BINARY %s', envVarVersion)
+    debug('using environment variable CYPRESS_INSTALL_BINARY %s', envVarVersion)
 
     if (envVarVersion === '0') {
-      debug('env var CYPRESS_INSTALL_BINARY = 0, skipping install')
+      debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
       logger.log(
-        chalk.yellow(`${logSymbols.warning} Warning: Skipping binary installation. Env var CYPRESS_INSTALL_BINARY was 0.`)
-      )
+        stripIndent`
+        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`)
       logger.log()
       return Promise.resolve()
     }
@@ -173,12 +173,11 @@ const start = (options = {}) => {
   if (process.env.CYPRESS_CACHE_FOLDER) {
     const envCache = process.env.CYPRESS_CACHE_FOLDER
     logger.log(
-      chalk.yellow(stripIndent`
-        ${logSymbols.warning} Warning: Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
+      stripIndent`
+        ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
 
-          Previous installs of Cypress may not be found.
+              Previous installs of Cypress may not be found.
       `)
-    )
     logger.log()
   }
 
@@ -237,7 +236,7 @@ const start = (options = {}) => {
 
             Instead we will install version: ${chalk.green(needVersion)}
 
-            Note: These versions may not work properly together.
+            These versions may not work properly together.
         `)
       )
       logger.log()

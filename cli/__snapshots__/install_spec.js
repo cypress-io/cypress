@@ -9,7 +9,7 @@ Skipping installation:
 `
 
 exports['skip installation 1'] = `
-⚠ Warning: Skipping binary installation. Env var CYPRESS_INSTALL_BINARY was 0.
+Note: Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.
 
 
 `
@@ -21,7 +21,7 @@ exports['specify version in env vars 1'] = `
 
   Instead we will install version: 0.12.1
 
-  Note: These versions may not work properly together.
+  These versions may not work properly together.
 
 Installing Cypress (version: 0.12.1)
 

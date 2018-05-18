@@ -197,14 +197,14 @@ const start = (options = {}) => {
   })
 
   const checkEnvVar = () => {
-    debug('checking env variables')
+    debug('checking environment variables')
     if (process.env.CYPRESS_RUN_BINARY) {
       const envBinaryPath = process.env.CYPRESS_RUN_BINARY
       debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
-      logger.warn(stripIndent`
-        ${logSymbols.warning} Warning: You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}
+      logger.log(stripIndent`
+        ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:
         
-          This overrides the default Cypress binary version used.
+              This overrides the default Cypress binary path used.
         `)
       logger.log()
 

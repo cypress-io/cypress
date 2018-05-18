@@ -55,7 +55,7 @@ const getCacheDir = () => {
   let cache_directory = cachedir('Cypress')
   if (process.env.CYPRESS_CACHE_FOLDER) {
     const envVarCacheDir = process.env.CYPRESS_CACHE_FOLDER
-    debug('using env var CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
+    debug('using environment variable CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
     cache_directory = envVarCacheDir
   }
   return cache_directory

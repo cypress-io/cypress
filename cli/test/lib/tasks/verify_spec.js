@@ -390,10 +390,32 @@ context('lib/tasks/verify', function () {
         return verify.start()
         .then(() => {
           expect(cp.spawn.firstCall.args[0]).to.equal(realEnvBinaryPath)
+          snapshot('valid CYPRESS_RUN_BINARY', normalize(this.stdout.toString()))
+        })
+      })
+
+
+      ;['darwin', 'linux', 'win32'].forEach((platform) => it('can log error to user', function () {
+        os.platform.returns(platform)
+        const envBinaryPath = '/custom/'
+        const realEnvBinaryPath = `/real${envBinaryPath}`
+
+        fs.realpathAsync.resolves(realEnvBinaryPath)
+        state.getPathToExecutable.restore()
+
+        process.env.CYPRESS_RUN_BINARY = envBinaryPath
+        return verify.start()
+        .then(() => { throw new Error('Should have thrown') })
+        .catch((err) => {
+          logger.error(err)
+          snapshot(
+            `${platform}: error when invalid CYPRESS_RUN_BINARY`,
+            normalize(this.stdout.toString())
+          )
         })
 
 
-      })
+      }))
     })
   })
 })

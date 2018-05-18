@@ -160,3 +160,61 @@ It looks like this is your first time using Cypress: 1.2.3
 Opening Cypress...
 
 `
+
+exports['valid CYPRESS_RUN_BINARY 1'] = `
+Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/Contents/MacOS/Cypress:
+
+      This overrides the default Cypress binary path used.
+
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /real/custom
+
+Opening Cypress...
+
+`
+
+exports['darwin: error when invalid CYPRESS_RUN_BINARY 1'] = `
+Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/:
+
+      This overrides the default Cypress binary path used.
+
+Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/custom/
+
+Ensure the environment variable is a path to the Cypress binary, matching **/Contents/MacOS/Cypress
+----------
+
+Platform: darwin (test release)
+Cypress Version: 1.2.3
+
+`
+
+exports['linux: error when invalid CYPRESS_RUN_BINARY 1'] = `
+Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/:
+
+      This overrides the default Cypress binary path used.
+
+Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/custom/
+
+Ensure the environment variable is a path to the Cypress binary, matching **/Cypress
+----------
+
+Platform: linux (Ubuntu Linux - 16.04)
+Cypress Version: 1.2.3
+
+`
+
+exports['win32: error when invalid CYPRESS_RUN_BINARY 1'] = `
+Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/:
+
+      This overrides the default Cypress binary path used.
+
+Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/custom/
+
+Ensure the environment variable is a path to the Cypress binary, matching **/Cypress.exe
+----------
+
+Platform: win32 (test release)
+Cypress Version: 1.2.3
+
+`
