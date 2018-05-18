@@ -41,11 +41,10 @@ jobs:
       - run:
           name: Checking TERM is set
           command: |
-            echo 'term env var is:' $TERM
-            node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
-            node -e 'assert.equal(process.stdout.columns, 100, "need columns to be 100 for snapshots to pass")'
-            node -e 'console.log("TERM %s stdout.isTTY?", process.env.TERM, process.stdout.isTTY)'
-            node -e 'console.log("TERM %s stderr.isTTY?", process.env.TERM, process.stderr.isTTY)'
+            node -e 'assert.ok(process.env.TERM === "xterm", `process.env.TERM=${process.env.TERM} and must be set to "xterm" for Docker to work`)'
+            node -e 'assert.ok(process.stdout.columns === 100, `process.env.columns=${process.env.columns} must be set to 100 for snapshots to pass`)'
+            node -e 'console.log("stdout.isTTY?", process.stdout.isTTY)'
+            node -e 'console.log("stderr.isTTY?", process.stderr.isTTY)'
 
       # need to restore a separate cache for each package.json
       - restore_cache:
