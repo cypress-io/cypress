@@ -9,7 +9,6 @@ defaults: &defaults
       environment:
         # set specific timezone
         TZ: "/usr/share/zoneinfo/America/New_York"
-        # COLUMNS: "100"
         CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
 
 jobs:
@@ -41,6 +40,7 @@ jobs:
       - run:
           name: Checking TERM is set
           command: |
+            stty cols 100
             echo columns are: $COLUMNS
             node -e 'assert.ok(process.env.TERM === "xterm", `process.env.TERM=${process.env.TERM} and must be set to "xterm" for Docker to work`)'
             node -e 'assert.ok(process.stdout.columns === 100, `process.stdout.columns=${process.stdout.columns} must be set to 100 for snapshots to pass`)'
