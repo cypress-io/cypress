@@ -398,7 +398,7 @@ module.exports = {
       ["Pending:", results.pending]
       ["Skipped:", results.skipped]
       ["Screenshots:", results.screenshots]
-      ["Video Captured:", results.video]
+      ["Video:", results.video]
       ["Duration:", results.duration]
       ["Spec Ran:", results.name]
     ], (arr) ->

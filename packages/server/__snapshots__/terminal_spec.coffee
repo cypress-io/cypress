@@ -26,17 +26,17 @@ exports['lib/util/terminal .table draws multiple specs summary table 1'] = `    
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     2 of 3 passed (66%)                        5m 36s       37       29        8      102       18  `
 
-exports['lib/util/terminal .table draws single spec summary table 1'] = `  ┌─────────────────────────────────┐
-  │ Tests:           1              │
-  │ Passing:         2              │
-  │ Failing:         3              │
-  │ Pending:         4              │
-  │ Skipped:         5              │
-  │ Duration:        6              │
-  │ Screenshots:     7              │
-  │ Video Captured:  true           │
-  │ Spec:            foo/bar/baz.js │
-  └─────────────────────────────────┘`
+exports['lib/util/terminal .table draws single spec summary table 1'] = `  ┌──────────────────────────────┐
+  │ Tests:        1              │
+  │ Passing:      2              │
+  │ Failing:      3              │
+  │ Pending:      4              │
+  │ Skipped:      5              │
+  │ Duration:     6              │
+  │ Screenshots:  7              │
+  │ Video:        true           │
+  │ Spec:         foo/bar/baz.js │
+  └──────────────────────────────┘`
 
 exports['lib/util/terminal .table draws a page divider 1'] = `────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     

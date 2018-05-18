@@ -104,7 +104,7 @@ describe "lib/util/terminal", ->
         ["Skipped:", 5]
         ["Duration:", 6]
         ["Screenshots:", 7]
-        ["Video Captured:", true]
+        ["Video:", true]
         ["Spec:", "foo/bar/baz.js"]
       )
 
