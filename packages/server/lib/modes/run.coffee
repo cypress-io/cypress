@@ -427,6 +427,8 @@ module.exports = {
     screenshots.forEach (screenshot) ->
       console.log(format(screenshot))
 
+    console.log("")
+
   postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
     debug("ending the video recording %o", { name, videoCompression, shouldUploadVideo })
 
@@ -438,7 +440,6 @@ module.exports = {
       ## or we've been told not to upload the video
       return if videoCompression is false or shouldUploadVideo is false
 
-      console.log("")
       console.log("")
 
       terminal.header("Video", {
@@ -467,6 +468,7 @@ module.exports = {
               chalk.cyan(name),
               gray(duration)
             )
+            console.log("")
 
           when (new Date - progress) > tenSecs
             ## bump up the progress so we dont
@@ -769,7 +771,7 @@ module.exports = {
         recording = @createRecording(name)
       else
         console.log("")
-        
+
         if browserName is "electron" and options.headed
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else

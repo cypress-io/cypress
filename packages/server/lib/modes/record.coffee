@@ -299,7 +299,6 @@ createRunAndRecordSpecs = (options = {}) ->
           return if not instanceId
 
           console.log("")
-          console.log("")
 
           terminal.header("Uploading Results", {
             color: ["blue"]
