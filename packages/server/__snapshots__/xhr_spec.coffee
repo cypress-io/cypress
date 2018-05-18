@@ -3,6 +3,18 @@ exports['e2e xhr passes 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (xhr_spec.coffee)                                                          │
+  │ Searched:   cypress/integration/xhr_spec.coffee                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: xhr_spec.coffee...                                                              (1 of 1) 
+
 
   xhrs
     ✓ can encode + decode headers
@@ -21,15 +33,17 @@ exports['e2e xhr passes 1'] = `
 
   (Results)
 
-  - Tests:           8
-  - Passes:          8
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────┐
+  │ Tests:        8               │
+  │ Passing:      8               │
+  │ Failing:      0               │
+  │ Pending:      0               │
+  │ Skipped:      0               │
+  │ Screenshots:  0               │
+  │ Video:        true            │
+  │ Duration:     X seconds       │
+  │ Spec Ran:     xhr_spec.coffee │
+  └───────────────────────────────┘
 
 
   (Video)
@@ -38,7 +52,16 @@ exports['e2e xhr passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ xhr_spec.coffee                              Xs        8        8        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        8        8        -        -        -  
 
 `
 

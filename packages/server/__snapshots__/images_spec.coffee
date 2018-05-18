@@ -3,6 +3,18 @@ exports['e2e images passes 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (images_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/images_spec.coffee                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: images_spec.coffee...                                                           (1 of 1) 
+
 
   images
     ✓ can correctly load images when served from http server
@@ -14,15 +26,17 @@ exports['e2e images passes 1'] = `
 
   (Results)
 
-  - Tests:           2
-  - Passes:          2
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────┐
+  │ Tests:        2                  │
+  │ Passing:      2                  │
+  │ Failing:      0                  │
+  │ Pending:      0                  │
+  │ Skipped:      0                  │
+  │ Screenshots:  0                  │
+  │ Video:        true               │
+  │ Duration:     X seconds          │
+  │ Spec Ran:     images_spec.coffee │
+  └──────────────────────────────────┘
 
 
   (Video)
@@ -31,7 +45,16 @@ exports['e2e images passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ images_spec.coffee                           Xs        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        2        -        -        -  
 
 `
 

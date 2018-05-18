@@ -3,6 +3,18 @@ exports['e2e visit low response timeout passes 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_spec.coffee)                                                        │
+  │ Searched:   cypress/integration/visit_spec.coffee                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_spec.coffee...                                                            (1 of 1) 
+
 
   visits
     ✓ scrolls automatically to div with id=foo
@@ -30,15 +42,17 @@ exports['e2e visit low response timeout passes 1'] = `
 
   (Results)
 
-  - Tests:           13
-  - Passes:          13
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌─────────────────────────────────┐
+  │ Tests:        13                │
+  │ Passing:      13                │
+  │ Failing:      0                 │
+  │ Pending:      0                 │
+  │ Skipped:      0                 │
+  │ Screenshots:  0                 │
+  │ Video:        true              │
+  │ Duration:     X seconds         │
+  │ Spec Ran:     visit_spec.coffee │
+  └─────────────────────────────────┘
 
 
   (Video)
@@ -47,7 +61,16 @@ exports['e2e visit low response timeout passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ visit_spec.coffee                            Xs       13       13        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs       13       13        -        -        -  
 
 `
 
@@ -55,6 +78,18 @@ exports['e2e visit low response timeout fails when network connection immediatel
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_http_network_error_failing_spec.coffee)                             │
+  │ Searched:   cypress/integration/visit_http_network_error_failing_spec.coffee                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_http_network_error_failing_spec.coffee...                                 (1 of 1) 
 
 
   when network connection cannot be established
@@ -109,15 +144,17 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                            │
+  │ Passing:      0                                            │
+  │ Failing:      1                                            │
+  │ Pending:      0                                            │
+  │ Skipped:      0                                            │
+  │ Screenshots:  1                                            │
+  │ Video:        true                                         │
+  │ Duration:     X seconds                                    │
+  │ Spec Ran:     visit_http_network_error_failing_spec.coffee │
+  └────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -131,7 +168,16 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_http_network_error_failing_spec…       Xs        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
 
 `
 
@@ -139,6 +185,18 @@ exports['e2e visit low response timeout fails when server responds with 500 1'] 
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_http_500_response_failing_spec.coffee)                              │
+  │ Searched:   cypress/integration/visit_http_500_response_failing_spec.coffee                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_http_500_response_failing_spec.coffee...                                  (1 of 1) 
 
 
   when server response is 500
@@ -181,15 +239,17 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
   (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────────┐
+  │ Tests:        1                                           │
+  │ Passing:      0                                           │
+  │ Failing:      1                                           │
+  │ Pending:      0                                           │
+  │ Skipped:      0                                           │
+  │ Screenshots:  1                                           │
+  │ Video:        true                                        │
+  │ Duration:     X seconds                                   │
+  │ Spec Ran:     visit_http_500_response_failing_spec.coffee │
+  └───────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -203,7 +263,16 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_http_500_response_failing_spec.…       Xs        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
 
 `
 
@@ -211,6 +280,18 @@ exports['e2e visit low response timeout fails when file server responds with 404
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_file_404_response_failing_spec.coffee)                              │
+  │ Searched:   cypress/integration/visit_file_404_response_failing_spec.coffee                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1) 
 
 
   when file server response is 404
@@ -253,15 +334,17 @@ The internal Cypress web server responded with:
 
   (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────────┐
+  │ Tests:        1                                           │
+  │ Passing:      0                                           │
+  │ Failing:      1                                           │
+  │ Pending:      0                                           │
+  │ Skipped:      0                                           │
+  │ Screenshots:  1                                           │
+  │ Video:        true                                        │
+  │ Duration:     X seconds                                   │
+  │ Spec Ran:     visit_file_404_response_failing_spec.coffee │
+  └───────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -275,7 +358,16 @@ The internal Cypress web server responded with:
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_file_404_response_failing_spec.…       Xs        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
 
 `
 
@@ -283,6 +375,18 @@ exports['e2e visit low response timeout fails when content type isnt html 1'] = 
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_non_html_content_type_failing_spec.coffee)                          │
+  │ Searched:   cypress/integration/visit_non_html_content_type_failing_spec.coffee                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1) 
 
 
   when content type is plain/text
@@ -327,15 +431,17 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
   (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                               │
+  │ Passing:      0                                               │
+  │ Failing:      1                                               │
+  │ Pending:      0                                               │
+  │ Skipped:      0                                               │
+  │ Screenshots:  1                                               │
+  │ Video:        true                                            │
+  │ Duration:     X seconds                                       │
+  │ Spec Ran:     visit_non_html_content_type_failing_spec.coffee │
+  └───────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -349,7 +455,16 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_non_html_content_type_failing_s…       Xs        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
 
 `
 
@@ -357,6 +472,18 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_http_timeout_failing_spec.coffee)                                   │
+  │ Searched:   cypress/integration/visit_http_timeout_failing_spec.coffee                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1) 
 
 
   when visit times out
@@ -426,15 +553,17 @@ When this 'load' event occurs, Cypress will continue running commands.
 
   (Results)
 
-  - Tests:           2
-  - Passes:          0
-  - Failures:        2
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     2
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────────────────┐
+  │ Tests:        2                                      │
+  │ Passing:      0                                      │
+  │ Failing:      2                                      │
+  │ Pending:      0                                      │
+  │ Skipped:      0                                      │
+  │ Screenshots:  2                                      │
+  │ Video:        true                                   │
+  │ Duration:     X seconds                               │
+  │ Spec Ran:     visit_http_timeout_failing_spec.coffee │
+  └──────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -449,7 +578,16 @@ When this 'load' event occurs, Cypress will continue running commands.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_http_timeout_failing_spec.coffee       Xs        2        -        2        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        2        -        2        -        -  
 
 `
 

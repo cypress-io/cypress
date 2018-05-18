@@ -3,6 +3,18 @@ exports['e2e stdout displays errors from failures 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_failing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/stdout_failing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: stdout_failing_spec.coffee...                                                   (1 of 1) 
+
 
   stdout_failing_spec
     ✓ passes
@@ -84,15 +96,17 @@ The internal Cypress web server responded with:
 
   (Results)
 
-  - Tests:           5
-  - Passes:          2
-  - Failures:        3
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     3
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────┐
+  │ Tests:        5                          │
+  │ Passing:      2                          │
+  │ Failing:      3                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  3                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     stdout_failing_spec.coffee │
+  └──────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -108,7 +122,16 @@ The internal Cypress web server responded with:
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ stdout_failing_spec.coffee                   Xs        5        2        3        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        5        2        3        -        -  
 
 `
 
@@ -116,6 +139,19 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_exit_early_failing_spec.coffee)                                    │
+  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.coffee                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: stdout_exit_early_failing_spec.coffee...                                        (1 of 1) 
+
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee
@@ -136,15 +172,17 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  - Tests:           0
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌─────────────────────────────────────────────────────┐
+  │ Tests:        0                                     │
+  │ Passing:      0                                     │
+  │ Failing:      1                                     │
+  │ Pending:      0                                     │
+  │ Skipped:      0                                     │
+  │ Screenshots:  0                                     │
+  │ Video:        true                                  │
+  │ Duration:     X seconds                             │
+  │ Spec Ran:     stdout_exit_early_failing_spec.coffee │
+  └─────────────────────────────────────────────────────┘
 
 
   (Video)
@@ -153,7 +191,16 @@ Fix the error in your code and re-run your tests.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ stdout_exit_early_failing_spec.coffee        Xs        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        -        -        1        -        -  
 
 `
 
@@ -161,6 +208,18 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_passing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/stdout_passing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: stdout_passing_spec.coffee...                                                   (1 of 1) 
 
 
   stdout_passing_spec
@@ -183,15 +242,17 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
   (Results)
 
-  - Tests:           8
-  - Passes:          8
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────┐
+  │ Tests:        8                          │
+  │ Passing:      8                          │
+  │ Failing:      0                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  0                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     stdout_passing_spec.coffee │
+  └──────────────────────────────────────────┘
 
 
   (Video)
@@ -200,7 +261,16 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ stdout_passing_spec.coffee                   Xs        8        8        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        8        8        -        -        -  
 
 `
 
@@ -243,7 +313,7 @@ A video will not be recorded when using this mode.
   │ Skipped:      0                  │
   │ Screenshots:  0                  │
   │ Video:        false              │
-  │ Duration:     0 seconds          │
+  │ Duration:     X seconds          │
   │ Spec Ran:     simple_spec.coffee │
   └──────────────────────────────────┘
 
@@ -300,7 +370,7 @@ A video will not be recorded when using this browser.
   │ Skipped:      0                  │
   │ Screenshots:  0                  │
   │ Video:        false              │
-  │ Duration:     0 seconds          │
+  │ Duration:     X seconds          │
   │ Spec Ran:     simple_spec.coffee │
   └──────────────────────────────────┘
 

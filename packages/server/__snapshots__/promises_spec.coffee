@@ -3,6 +3,18 @@ exports['e2e promises failing1 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (promises_spec.coffee)                                                     │
+  │ Searched:   cypress/integration/promises_spec.coffee                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: promises_spec.coffee...                                                         (1 of 1) 
+
 
   1) catches regular promise errors
   2) catches promise errors and calls done with err even when async
@@ -24,15 +36,17 @@ exports['e2e promises failing1 1'] = `
 
   (Results)
 
-  - Tests:           2
-  - Passes:          0
-  - Failures:        2
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     2
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────┐
+  │ Tests:        2                    │
+  │ Passing:      0                    │
+  │ Failing:      2                    │
+  │ Pending:      0                    │
+  │ Skipped:      0                    │
+  │ Screenshots:  2                    │
+  │ Video:        true                 │
+  │ Duration:     X seconds            │
+  │ Spec Ran:     promises_spec.coffee │
+  └────────────────────────────────────┘
 
 
   (Screenshots)
@@ -47,7 +61,16 @@ exports['e2e promises failing1 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ promises_spec.coffee                         Xs        2        -        2        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        2        -        2        -        -  
 
 `
 

@@ -3,6 +3,18 @@ exports['e2e web security when enabled fails 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (web_security_spec.coffee)                                                 │
+  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: web_security_spec.coffee...                                                     (1 of 1) 
+
 
   web security
     1) fails when clicking <a> to another origin
@@ -114,15 +126,17 @@ https://on.cypress.io/cross-origin-violation
 
   (Results)
 
-  - Tests:           3
-  - Passes:          0
-  - Failures:        3
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     3
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────────┐
+  │ Tests:        3                        │
+  │ Passing:      0                        │
+  │ Failing:      3                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  3                        │
+  │ Video:        true                     │
+  │ Duration:     X seconds                │
+  │ Spec Ran:     web_security_spec.coffee │
+  └────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -138,7 +152,16 @@ https://on.cypress.io/cross-origin-violation
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ web_security_spec.coffee                     Xs        3        -        3        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        3        -        3        -        -  
 
 `
 
@@ -146,6 +169,18 @@ exports['e2e web security when disabled fails 1'] = `
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (web_security_spec.coffee)                                                 │
+  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: web_security_spec.coffee...                                                     (1 of 1) 
 
 
   web security
@@ -159,15 +194,17 @@ exports['e2e web security when disabled fails 1'] = `
 
   (Results)
 
-  - Tests:           3
-  - Passes:          3
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────────┐
+  │ Tests:        3                        │
+  │ Passing:      3                        │
+  │ Failing:      0                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  0                        │
+  │ Video:        true                     │
+  │ Duration:     X seconds                 │
+  │ Spec Ran:     web_security_spec.coffee │
+  └────────────────────────────────────────┘
 
 
   (Video)
@@ -176,7 +213,16 @@ exports['e2e web security when disabled fails 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ web_security_spec.coffee                     Xs        3        3        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        3        3        -        -        -  
 
 `
 

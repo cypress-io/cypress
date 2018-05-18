@@ -3,6 +3,18 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (browserify_babel_es2015_passing_spec.coffee)                              │
+  │ Searched:   cypress/integration/browserify_babel_es2015_passing_spec.coffee                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: browserify_babel_es2015_passing_spec.coffee...                                  (1 of 1) 
+
 
   imports work
     ✓ foo coffee
@@ -15,15 +27,17 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
 
   (Results)
 
-  - Tests:           3
-  - Passes:          3
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────────┐
+  │ Tests:        3                                           │
+  │ Passing:      3                                           │
+  │ Failing:      0                                           │
+  │ Pending:      0                                           │
+  │ Skipped:      0                                           │
+  │ Screenshots:  0                                           │
+  │ Video:        true                                        │
+  │ Duration:     X seconds                                   │
+  │ Spec Ran:     browserify_babel_es2015_passing_spec.coffee │
+  └───────────────────────────────────────────────────────────┘
 
 
   (Video)
@@ -32,7 +46,16 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ browserify_babel_es2015_passing_spec.…       Xs        3        3        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        3        3        -        -        -  
 
 `
 
@@ -40,6 +63,19 @@ exports['e2e browserify, babel, es2015 fails 1'] = `
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (browserify_babel_es2015_failing_spec.js)                                  │
+  │ Searched:   cypress/integration/browserify_babel_es2015_failing_spec.js                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: browserify_babel_es2015_failing_spec.js...                                      (1 of 1) 
+
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/browserify_babel_es2015_failing_spec.js
@@ -60,15 +96,17 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  - Tests:           0
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────┐
+  │ Tests:        0                                       │
+  │ Passing:      0                                       │
+  │ Failing:      1                                       │
+  │ Pending:      0                                       │
+  │ Skipped:      0                                       │
+  │ Screenshots:  0                                       │
+  │ Video:        true                                    │
+  │ Duration:     X seconds                               │
+  │ Spec Ran:     browserify_babel_es2015_failing_spec.js │
+  └───────────────────────────────────────────────────────┘
 
 
   (Video)
@@ -77,7 +115,16 @@ Fix the error in your code and re-run your tests.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ browserify_babel_es2015_failing_spec.…       Xs        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        -        -        1        -        -  
 
 `
 

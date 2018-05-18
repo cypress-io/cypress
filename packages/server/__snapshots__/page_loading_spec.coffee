@@ -3,6 +3,18 @@ exports['e2e page_loading passes 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (page_loading_spec.coffee)                                                 │
+  │ Searched:   cypress/integration/page_loading_spec.coffee                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: page_loading_spec.coffee...                                                     (1 of 1) 
+
 
   page_loading
     ✓ sets __cypress.initial, properly injects, and avoids json injection
@@ -15,15 +27,17 @@ exports['e2e page_loading passes 1'] = `
 
   (Results)
 
-  - Tests:           2
-  - Passes:          2
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────────┐
+  │ Tests:        2                        │
+  │ Passing:      2                        │
+  │ Failing:      0                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  0                        │
+  │ Video:        true                     │
+  │ Duration:     X seconds                │
+  │ Spec Ran:     page_loading_spec.coffee │
+  └────────────────────────────────────────┘
 
 
   (Video)
@@ -32,7 +46,16 @@ exports['e2e page_loading passes 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ page_loading_spec.coffee                     Xs        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        2        -        -        -  
 
 `
 

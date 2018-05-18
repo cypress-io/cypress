@@ -1,24 +1,21 @@
 exports['e2e record passing passes 1'] = `
 ====================================================================================================
 
-  (Dashboard Recording)
-
-  - https://dashboard.cypress.io/#/projects/cjvoj7/runs/d5db9cf7-bfa4-490c-a6a1-2f85da0c52fb
-
-
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:       2.1.0                                                                           │
-  │ Browser:       Electron 59 (headless)                                                          │
-  │ Specs:         4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.c… │
-  │ Spec Pattern:  cypress/integration/record*                                                     │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
+  │ Searched:   cypress/integration/record*                                                        │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_error_spec.coffee...                                                     (1 of 4) 
+
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/record_error_spec.coffee
@@ -37,18 +34,17 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  ┌───────────────────────────────────────────┐
-  │ Tests:           0                        │
-  │ Passing:         0                        │
-  │ Failing:         1                        │
-  │ Pending:         0                        │
-  │ Skipped:         0                        │
-  │ Screenshots:     0                        │
-  │ Video Captured:  true                     │
-  │ Duration:        10 seconds
-  │ Spec Ran:        record_error_spec.coffee │
-  └───────────────────────────────────────────┘
-
+  ┌────────────────────────────────────────┐
+  │ Tests:        0                        │
+  │ Passing:      0                        │
+  │ Failing:      1                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  0                        │
+  │ Video:        true                     │
+  │ Duration:     X seconds                │
+  │ Spec Ran:     record_error_spec.coffee │
+  └────────────────────────────────────────┘
 
 
   (Video)
@@ -84,17 +80,17 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:           2                       │
-  │ Passing:         0                       │
-  │ Failing:         1                       │
-  │ Pending:         0                       │
-  │ Skipped:         1                       │
-  │ Screenshots:     1                       │
-  │ Video Captured:  true                    │
-  │ Duration:        10 seconds
-  │ Spec Ran:        record_fail_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      0                       │
+  │ Failing:      1                       │
+  │ Pending:      0                       │
+  │ Skipped:      1                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_fail_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -129,17 +125,17 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:           2                       │
-  │ Passing:         1                       │
-  │ Failing:         0                       │
-  │ Pending:         1                       │
-  │ Skipped:         0                       │
-  │ Screenshots:     1                       │
-  │ Video Captured:  true                    │
-  │ Duration:        10 seconds
-  │ Spec Ran:        record_pass_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -181,17 +177,17 @@ We dynamically generated a new test to display this failure.
 
   (Results)
 
-  ┌──────────────────────────────────────────────┐
-  │ Tests:           1                           │
-  │ Passing:         0                           │
-  │ Failing:         1                           │
-  │ Pending:         0                           │
-  │ Skipped:         0                           │
-  │ Screenshots:     1                           │
-  │ Video Captured:  true                        │
-  │ Duration:        10 seconds
-  │ Spec Ran:        record_uncaught_spec.coffee │
-  └──────────────────────────────────────────────┘
+  ┌───────────────────────────────────────────┐
+  │ Tests:        1                           │
+  │ Passing:      0                           │
+  │ Failing:      1                           │
+  │ Pending:      0                           │
+  │ Skipped:      0                           │
+  │ Screenshots:  1                           │
+  │ Video:        true                        │
+  │ Duration:     X seconds                   │
+  │ Spec Ran:     record_uncaught_spec.coffee │
+  └───────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -217,12 +213,20 @@ We dynamically generated a new test to display this failure.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ record_error_spec.coffee                     0s        -        -        1        -        - │
+  │ ✖ record_error_spec.coffee                     Xs        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖ record_fail_spec.coffee                      Xs        2        -        1        -        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_uncaught_spec.coffee               214ms        1        -        1        -        - │
+  │ ✖ record_uncaught_spec.coffee                  Xs        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    3 of 4 failed (75%)                            Xs        5        1        3        1        1  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
@@ -262,6 +266,18 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+
 
   record pass
     ✓ passes
@@ -274,15 +290,17 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -290,11 +308,33 @@ StatusCodeError: 500 - "Internal Server Error"
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        1        -        1        -  
 
 `
 
-exports['e2e record api interaction errors create instance does not update instance 1'] = `Warning: We encountered an error talking to our servers.
+exports['e2e record api interaction errors create instance does not update instance 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Warning: We encountered an error talking to our servers.
 
 This run will not be recorded.
 
@@ -302,9 +342,9 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
-====================================================================================================
-
-  (Run Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -318,15 +358,17 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -334,7 +376,21 @@ StatusCodeError: 500 - "Internal Server Error"
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
@@ -343,6 +399,19 @@ exports['e2e record api interaction errors update instance does not update insta
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+
 
   record pass
     ✓ passes
@@ -355,15 +424,17 @@ exports['e2e record api interaction errors update instance does not update insta
 
   (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -381,8 +452,21 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
+====================================================================================================
 
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
@@ -390,6 +474,19 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -403,15 +500,17 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -430,8 +529,21 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
+====================================================================================================
 
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
@@ -483,7 +595,23 @@ Please log into the Dashboard to see the updated token.
 https://on.cypress.io/dashboard/projects/pid123
 `
 
-exports['e2e record video recording does not upload when not enabled 1'] = `  (Run Starting)
+exports['e2e record video recording does not upload when not enabled 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -497,15 +625,17 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (R
 
   (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  false
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        false                   │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -517,8 +647,21 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (R
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
 
+====================================================================================================
 
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
@@ -526,6 +669,19 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -539,15 +695,17 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -566,8 +724,21 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   - Failed Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
   - Failed Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
+====================================================================================================
 
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 

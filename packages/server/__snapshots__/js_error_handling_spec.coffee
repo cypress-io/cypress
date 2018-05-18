@@ -3,6 +3,18 @@ exports['e2e js error handling fails 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (js_error_handling_failing_spec.coffee)                                    │
+  │ Searched:   cypress/integration/js_error_handling_failing_spec.coffee                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: js_error_handling_failing_spec.coffee...                                        (1 of 1) 
+
 
   s1
     without an afterEach hook
@@ -90,15 +102,17 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Results)
 
-  - Tests:           7
-  - Passes:          2
-  - Failures:        5
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     5
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌─────────────────────────────────────────────────────┐
+  │ Tests:        7                                     │
+  │ Passing:      2                                     │
+  │ Failing:      5                                     │
+  │ Pending:      0                                     │
+  │ Skipped:      0                                     │
+  │ Screenshots:  5                                     │
+  │ Video:        true                                  │
+  │ Duration:     X seconds                              │
+  │ Spec Ran:     js_error_handling_failing_spec.coffee │
+  └─────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -116,7 +130,16 @@ https://on.cypress.io/uncaught-exception-from-application
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ js_error_handling_failing_spec.coffee        Xs        7        2        5        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        7        2        5        -        -  
 
 `
 

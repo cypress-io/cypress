@@ -3,6 +3,18 @@ exports['e2e screenshots passes 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (screenshots_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/screenshots_spec.coffee                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: screenshots_spec.coffee...                                                      (1 of 1) 
+
 
   taking screenshots
     ✓ manually generates pngs
@@ -45,15 +57,17 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Results)
 
-  - Tests:           5
-  - Passes:          2
-  - Failures:        3
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     7
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        5                       │
+  │ Passing:      2                       │
+  │ Failing:      3                       │
+  │ Pending:      0                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  7                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     screenshots_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -73,7 +87,16 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ screenshots_spec.coffee                      Xs        5        2        3        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        5        2        3        -        -  
 
 `
 

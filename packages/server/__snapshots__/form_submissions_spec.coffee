@@ -3,6 +3,18 @@ exports['e2e form submissions passing 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (form_submission_passing_spec.coffee)                                      │
+  │ Searched:   cypress/integration/form_submission_passing_spec.coffee                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: form_submission_passing_spec.coffee...                                          (1 of 1) 
+
 
   form submissions
     ✓ will find 'form success' message by default (after retrying)
@@ -14,15 +26,17 @@ exports['e2e form submissions passing 1'] = `
 
   (Results)
 
-  - Tests:           2
-  - Passes:          2
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────┐
+  │ Tests:        2                                   │
+  │ Passing:      2                                   │
+  │ Failing:      0                                   │
+  │ Pending:      0                                   │
+  │ Skipped:      0                                   │
+  │ Screenshots:  0                                   │
+  │ Video:        true                                │
+  │ Duration:     X seconds                           │
+  │ Spec Ran:     form_submission_passing_spec.coffee │
+  └───────────────────────────────────────────────────┘
 
 
   (Video)
@@ -31,7 +45,16 @@ exports['e2e form submissions passing 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ form_submission_passing_spec.coffee          Xs        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        2        -        -        -  
 
 `
 
@@ -39,6 +62,18 @@ exports['e2e form submissions failing 1'] = `
 ====================================================================================================
 
   (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (form_submission_failing_spec.coffee)                                      │
+  │ Searched:   cypress/integration/form_submission_failing_spec.coffee                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: form_submission_failing_spec.coffee...                                          (1 of 1) 
 
 
   form submission fails
@@ -71,15 +106,17 @@ exports['e2e form submissions failing 1'] = `
 
   (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────┐
+  │ Tests:        1                                   │
+  │ Passing:      0                                   │
+  │ Failing:      1                                   │
+  │ Pending:      0                                   │
+  │ Skipped:      0                                   │
+  │ Screenshots:  1                                   │
+  │ Video:        true                                │
+  │ Duration:     X seconds                           │
+  │ Spec Ran:     form_submission_failing_spec.coffee │
+  └───────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -93,7 +130,16 @@ exports['e2e form submissions failing 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ form_submission_failing_spec.coffee          Xs        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
 
 `
 

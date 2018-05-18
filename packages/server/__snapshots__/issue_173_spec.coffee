@@ -3,6 +3,18 @@ exports['e2e issue 173 failing 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (issue_173_spec.coffee)                                                    │
+  │ Searched:   cypress/integration/issue_173_spec.coffee                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: issue_173_spec.coffee...                                                        (1 of 1) 
+
 
   1) fails
   ✓ should be able to log
@@ -32,15 +44,17 @@ exports['e2e issue 173 failing 1'] = `
 
   (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌─────────────────────────────────────┐
+  │ Tests:        2                     │
+  │ Passing:      1                     │
+  │ Failing:      1                     │
+  │ Pending:      0                     │
+  │ Skipped:      0                     │
+  │ Screenshots:  1                     │
+  │ Video:        true                  │
+  │ Duration:     X seconds             │
+  │ Spec Ran:     issue_173_spec.coffee │
+  └─────────────────────────────────────┘
 
 
   (Screenshots)
@@ -54,7 +68,16 @@ exports['e2e issue 173 failing 1'] = `
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ issue_173_spec.coffee                        Xs        2        1        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        2        1        1        -        -  
 
 `
 

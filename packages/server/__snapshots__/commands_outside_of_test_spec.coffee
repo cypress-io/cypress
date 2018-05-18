@@ -3,6 +3,18 @@ exports['e2e commands outside of test fails 1'] = `
 
   (Run Starting)
 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (commands_outside_of_test_spec.coffee)                                     │
+  │ Searched:   cypress/integration/commands_outside_of_test_spec.coffee                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: commands_outside_of_test_spec.coffee...                                         (1 of 1) 
+
 
   1) An uncaught error was detected outside of a test
 
@@ -40,15 +52,17 @@ We dynamically generated a new test to display this failure.
 
   (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────────────────────┐
+  │ Tests:        1                                    │
+  │ Passing:      0                                    │
+  │ Failing:      1                                    │
+  │ Pending:      0                                    │
+  │ Skipped:      0                                    │
+  │ Screenshots:  1                                    │
+  │ Video:        true                                 │
+  │ Duration:     X seconds                            │
+  │ Spec Ran:     commands_outside_of_test_spec.coffee │
+  └────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -62,7 +76,16 @@ We dynamically generated a new test to display this failure.
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
+====================================================================================================
+
   (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ commands_outside_of_test_spec.coffee         Xs        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
 
 `
 
