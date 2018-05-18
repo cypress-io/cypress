@@ -31,7 +31,7 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 200)
       .visit('http://localhost:3322/fullpage')
-      .screenshot("fullPage", { capture: "fullPage" })
+      .screenshot("fullpage", { capture: "fullPage" })
       .task("check:screenshot:size", { name: 'fullpage.png', width: 600, height: 500 })
 
   it "accepts subsequent same captures after multiple tries", ->
