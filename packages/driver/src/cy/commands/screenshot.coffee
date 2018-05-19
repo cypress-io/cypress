@@ -172,14 +172,12 @@ takeElementScreenshot = ($el, state, automationOptions) ->
   takeScrollingScreenshots(scrolls, win, automationOptions)
   .finally(resetScrollOverrides)
 
+## "app only" means we're hiding the runner UI
 isAppOnly = ({ capture }) ->
-  capture is "app" or capture is "fullpage"
+  capture is "viewport" or capture is "fullPage"
 
-getShouldScale = ({ capture, scaleAppCaptures }) ->
-  if isAppOnly({ capture }) then scaleAppCaptures else true
-
-getShouldWait = ({ capture, waitForCommandSynchronization }) ->
-  if isAppOnly({ capture }) then false else waitForCommandSynchronization
+getShouldScale = ({ capture, scale }) ->
+  if isAppOnly({ capture }) then scale else true
 
 getBlackout = ({ capture, blackout }) ->
   if isAppOnly({ capture }) then blackout else []
@@ -203,7 +201,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       isOpen: isOpen
       appOnly: isAppOnly(screenshotConfig)
       scale: getShouldScale(screenshotConfig)
-      waitForCommandSynchronization: getShouldWait(screenshotConfig)
+      waitForCommandSynchronization: not isAppOnly(screenshotConfig)
       disableTimersAndAnimations: disableTimersAndAnimations
       blackout: getBlackout(screenshotConfig)
     }
@@ -243,7 +241,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   .then ->
     if subject
       takeElementScreenshot(subject, state, automationOptions)
-    else if capture is "fullpage"
+    else if capture is "fullPage"
       takeFullPageScreenshot(state, automationOptions)
     else
       automateScreenshot(automationOptions)
@@ -283,17 +281,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: config("responseTimeout")
       }
 
-      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip")
+      screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip")
       screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
 
       ## set this regardless of options.log b/c its used by the
       ## yielded value below
-      consoleProps = _.omit(screenshotConfig, "scaleAppCaptures", "screenshotOnRunFailure")
+      consoleProps = _.omit(screenshotConfig, "scale", "screenshotOnRunFailure")
       consoleProps = _.extend(consoleProps, {
         scaled: getShouldScale(screenshotConfig)
         blackout: getBlackout(screenshotConfig)
-        waitForCommandSynchronization: getShouldWait(screenshotConfig)
       })
 
       if name
@@ -313,7 +310,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if subject
-        screenshotConfig.capture = "app"
+        screenshotConfig.capture = "viewport"
 
       startTime = Date.now()
 
@@ -328,6 +325,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         duration = Date.now() - startTime
 
         yieldValue = _.extend({}, consoleProps, props, { duration })
+        yieldValue.path = yieldValue.path.replace(/^.*_playground/, '<redacted>')
 
         { width, height } = props.dimensions
 

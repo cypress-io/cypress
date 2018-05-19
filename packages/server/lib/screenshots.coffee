@@ -85,7 +85,7 @@ captureAndCheck = (data, automate, condition) ->
         attempt()
 
 isAppOnly = (data) ->
-  data.capture is "app" or data.capture is "fullpage"
+  data.capture is "viewport" or data.capture is "fullPage"
 
 isMultipart = (data) ->
   _.isNumber(data.current) and _.isNumber(data.total)

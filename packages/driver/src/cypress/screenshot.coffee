@@ -3,9 +3,8 @@ _ = require("lodash")
 $utils = require("./utils")
 
 reset = -> {
-  capture: "fullpage"
-  waitForCommandSynchronization: true
-  scaleAppCaptures: false
+  capture: "fullPage"
+  scale: false
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
@@ -15,7 +14,7 @@ reset = -> {
 
 defaults = reset()
 
-validCaptures = ["app", "runner", "fullpage"]
+validCaptures = ["fullPage", "viewport", "runner"]
 
 validateAndSetBoolean = (props, values, cmd, log, option) ->
   value = props[option]
@@ -69,8 +68,7 @@ validate = (props, cmd, log) ->
 
     values.capture = capture
 
-  validateAndSetBoolean(props, values, cmd, log, "waitForCommandSynchronization")
-  validateAndSetBoolean(props, values, cmd, log, "scaleAppCaptures")
+  validateAndSetBoolean(props, values, cmd, log, "scale")
   validateAndSetBoolean(props, values, cmd, log, "disableTimersAndAnimations")
   validateAndSetBoolean(props, values, cmd, log, "screenshotOnRunFailure")
 

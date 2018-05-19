@@ -24,28 +24,28 @@ describe "taking screenshots", ->
     cy
       .viewport(600, 400)
       .visit('http://localhost:3322/color/yellow')
-      .screenshot("crop-check", { capture: "app" })
+      .screenshot("crop-check", { capture: "viewport" })
       .task("check:screenshot:size", { name: 'crop-check.png', width: 600, height: 400 })
 
   it "can capture fullpage screenshots", ->
     cy
       .viewport(600, 200)
       .visit('http://localhost:3322/fullpage')
-      .screenshot("fullpage", { capture: "fullpage" })
+      .screenshot("fullpage", { capture: "fullPage" })
       .task("check:screenshot:size", { name: 'fullpage.png', width: 600, height: 500 })
 
   it "accepts subsequent same captures after multiple tries", ->
     cy
       .viewport(600, 200)
       .visit('http://localhost:3322/fullpage-same')
-      .screenshot("fullpage-same", { capture: "fullpage" })
+      .screenshot("fullpage-same", { capture: "fullPage" })
       .task("check:screenshot:size", { name: 'fullpage-same.png', width: 600, height: 500 })
 
   it "accepts screenshot after multiple tries if somehow app has pixels that match helper pixels", ->
     cy
       .viewport(1280, 720)
       .visit('http://localhost:3322/pathological')
-      .screenshot("pathological", { capture: "app" })
+      .screenshot("pathological", { capture: "viewport" })
 
   it "can capture element screenshots", ->
     cy
@@ -60,7 +60,7 @@ describe "taking screenshots", ->
       cy
         .viewport(600, 200)
         .visit('http://localhost:3322/color/yellow')
-        .screenshot("app-clip", { capture: "app", clip: { x: 10, y: 10, width: 100, height: 50 }})
+        .screenshot("app-clip", { capture: "viewport", clip: { x: 10, y: 10, width: 100, height: 50 }})
         .task("check:screenshot:size", { name: 'app-clip.png', width: 100, height: 50 })
 
     it "can clip runner screenshots", ->
@@ -74,7 +74,7 @@ describe "taking screenshots", ->
       cy
         .viewport(600, 200)
         .visit('http://localhost:3322/fullpage')
-        .screenshot("fullpage-clip", { capture: "fullpage", clip: { x: 20, y: 20, width: 140, height: 70 }})
+        .screenshot("fullpage-clip", { capture: "fullPage", clip: { x: 20, y: 20, width: 140, height: 70 }})
         .task("check:screenshot:size", { name: 'fullpage-clip.png', width: 140, height: 70 })
 
     it "can clip element screenshots", ->
