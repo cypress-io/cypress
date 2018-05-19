@@ -16,14 +16,13 @@ const version = '1.2.3'
 const installDir = path.join(os.tmpdir(), 'Cypress', version)
 
 
-describe('unzip', function () {
+describe('lib/tasks/unzip', function () {
   require('mocha-banner').register()
   beforeEach(function () {
     this.stdout = stdout.capture()
 
-    this.sandbox.stub(os, 'platform').returns('darwin')
-    this.sandbox.stub(os, 'release').returns('test release')
-    this.sandbox.stub(util, 'pkgVersion').returns(version)
+    os.platform.returns('darwin')
+    sinon.stub(util, 'pkgVersion').returns(version)
   })
 
   afterEach(function () {
@@ -51,7 +50,7 @@ describe('unzip', function () {
   })
 
   it('can really unzip', function () {
-    const onProgress = this.sandbox.stub()
+    const onProgress = sinon.stub().returns(undefined)
 
     return unzip
     .start({

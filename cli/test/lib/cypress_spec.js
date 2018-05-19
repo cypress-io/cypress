@@ -15,7 +15,7 @@ const cypress = require(`${lib}/cypress`)
 describe('cypress', function () {
   context('.open', function () {
     beforeEach(function () {
-      this.sandbox.stub(open, 'start').resolves()
+      sinon.stub(open, 'start').resolves()
     })
 
     const getCallArgs = R.path(['lastCall', 'args', 0])
@@ -47,8 +47,8 @@ describe('cypress', function () {
     let outputPath
     beforeEach(function () {
       outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
-      this.sandbox.stub(tmp, 'fileAsync').resolves(outputPath)
-      this.sandbox.stub(run, 'start').resolves()
+      sinon.stub(tmp, 'fileAsync').resolves(outputPath)
+      sinon.stub(run, 'start').resolves()
       return fs.outputJsonAsync(outputPath, {
         code: 0,
         failingTests: [],

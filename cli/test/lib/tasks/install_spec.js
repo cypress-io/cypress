@@ -21,7 +21,7 @@ const packageVersion = '1.2.3'
 const downloadDestination = path.join(os.tmpdir(), 'cypress.zip')
 const installDir = '/cache/Cypress/1.2.3'
 
-describe('install', function () {
+describe('/lib/tasks/install', function () {
   require('mocha-banner').register()
 
   beforeEach(function () {
@@ -36,31 +36,30 @@ describe('install', function () {
     stdout.restore()
 
     chalk.enabled = true
-    delete process.env.CYPRESS_SKIP_BINARY_INSTALL
   })
 
   context('.start', function () {
     beforeEach(function () {
       logger.reset()
 
-      // this.sandbox.stub(os, 'tmpdir').returns('/tmp')
-      this.sandbox.stub(util, 'isCi').returns(false)
-      this.sandbox.stub(util, 'pkgVersion').returns(packageVersion)
-      this.sandbox.stub(download, 'start').resolves(packageVersion)
-      this.sandbox.stub(unzip, 'start').resolves()
-      this.sandbox.stub(Promise.prototype, 'delay').resolves()
-      this.sandbox.stub(fs, 'removeAsync').resolves()
-      this.sandbox.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
-      this.sandbox.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
-      this.sandbox.stub(state, 'getBinaryPkgVersionAsync').resolves()
-      this.sandbox.stub(fs, 'ensureDirAsync').resolves(undefined)
+      // sinon.stub(os, 'tmpdir').returns('/tmp')
+      sinon.stub(util, 'isCi').returns(false)
+      sinon.stub(util, 'pkgVersion').returns(packageVersion)
+      sinon.stub(download, 'start').resolves(packageVersion)
+      sinon.stub(unzip, 'start').resolves()
+      sinon.stub(Promise, 'delay').resolves()
+      sinon.stub(fs, 'removeAsync').resolves()
+      sinon.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
+      sinon.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves()
+      sinon.stub(fs, 'ensureDirAsync').resolves(undefined)
+      os.platform.returns('darwin')
     })
 
     describe('skips install', function () {
 
-
       it('when environment variable is set', function () {
-        process.env.CYPRESS_SKIP_BINARY_INSTALL = true
+        process.env.CYPRESS_INSTALL_BINARY = '0'
 
         return install.start()
         .then(() => {
@@ -75,13 +74,10 @@ describe('install', function () {
     })
 
     describe('override version', function () {
-      afterEach(function () {
-        delete process.env.CYPRESS_BINARY_VERSION
-      })
 
       it('warns when specifying cypress version in env', function () {
         const version = '0.12.1'
-        process.env.CYPRESS_BINARY_VERSION = version
+        process.env.CYPRESS_INSTALL_BINARY = version
 
         return install.start()
         .then(() => {
@@ -102,8 +98,8 @@ describe('install', function () {
 
       it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
-        process.env.CYPRESS_BINARY_VERSION = version
-        this.sandbox.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
+        process.env.CYPRESS_INSTALL_BINARY = version
+        sinon.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
 
         const installDir = state.getVersionDir()
         return install.start()
@@ -233,7 +229,7 @@ describe('install', function () {
 
       describe('as a global install', function () {
         beforeEach(function () {
-          this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
+          sinon.stub(util, 'isInstalledGlobally').returns(true)
 
           state.getBinaryPkgVersionAsync.resolves('x.x.x')
 
@@ -275,9 +271,8 @@ describe('install', function () {
 
       describe('failed write access to cache directory', function () {
         it('logs error on failure', function () {
-          this.sandbox.stub(os, 'platform').returns('darwin')
-          this.sandbox.stub(os, 'release').returns('1.1.1-generic')
-          this.sandbox.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
+          os.platform.returns('darwin')
+          sinon.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
 
           const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
           err.code = 'EACCES'
@@ -298,11 +293,11 @@ describe('install', function () {
         })
       })
 
-      describe('CYPRESS_BINARY_INSTALL is URL or Zip', function () {
+      describe('CYPRESS_INSTALL_BINARY is URL or Zip', function () {
         it('uses cache when correct version installed given URL', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
-          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
           return install.start()
           .then(() => {
             expect(download.start).to.not.be.called
@@ -311,33 +306,52 @@ describe('install', function () {
         it('uses cache when mismatch version given URL ', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
-          process.env.CYPRESS_BINARY_VERSION = 'www.cypress.io/cannot-download/2.4.5'
+          process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
           return install.start()
           .then(() => {
             expect(download.start).to.not.be.called
           })
         })
         it('uses cache when correct version installed given Zip', function () {
-          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+          sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
 
-          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
           return install.start()
           .then(() => {
             expect(unzip.start).to.not.be.called
           })
         })
         it('uses cache when mismatch version given Zip ', function () {
-          this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+          sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
-          process.env.CYPRESS_BINARY_VERSION = '/path/to/zip.zip'
+          process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
           return install.start()
           .then(() => {
             expect(unzip.start).to.not.be.called
+          })
+        })
+      })
+
+      describe('CYPRESS_BINARY_VERSION', function () {
+        it('throws when env var CYPRESS_BINARY_VERSION', function () {
+          process.env.CYPRESS_BINARY_VERSION = '/asf/asf'
+
+          return install.start()
+          .then(() => {
+            throw new Error('should have thrown')
+          })
+          .catch((err) => {
+            logger.error(err)
+
+            snapshot(
+              'error for removed CYPRESS_BINARY_VERSION',
+              normalize(this.stdout.toString())
+            )
           })
         })
       })

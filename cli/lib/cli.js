@@ -184,6 +184,8 @@ module.exports = {
       // exits
     }
 
+    // Deprecated Catches
+
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
       debug('unknwon command %s', firstCommand)

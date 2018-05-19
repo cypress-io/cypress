@@ -7,7 +7,9 @@ exports['errors individual has the following errors 1'] = [
   "unexpected",
   "failedDownload",
   "failedUnzip",
-  "invalidCacheDirectory"
+  "invalidCacheDirectory",
+  "removed",
+  "CYPRESS_RUN_BINARY"
 ]
 
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `
@@ -22,6 +24,6 @@ https://on.cypress.io/required-dependencies
 If you are using Docker, we provide containers with all required dependencies installed.
 ----------
 
-Platform: test platform (test release)
+Platform: test platform (Foo-OsVersion)
 Cypress Version: 1.2.3
 `

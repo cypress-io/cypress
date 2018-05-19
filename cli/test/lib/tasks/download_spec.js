@@ -33,10 +33,9 @@ describe('lib/tasks/download', function () {
       version,
     }
 
-    this.sandbox.stub(os, 'platform').returns('darwin')
-    this.sandbox.stub(os, 'release').returns('test release')
-    this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-    this.sandbox.stub(util, 'cwd').returns(rootFolder)
+    os.platform.returns('darwin')
+    sinon.stub(util, 'pkgVersion').returns('1.2.3')
+    sinon.stub(util, 'cwd').returns(rootFolder)
   })
 
   afterEach(function () {
@@ -86,7 +85,7 @@ describe('lib/tasks/download', function () {
     })
 
 
-    const onProgress = this.sandbox.stub()
+    const onProgress = sinon.stub().returns(undefined)
 
     return download.start({
       downloadDestination: this.options.downloadDestination,
@@ -148,7 +147,7 @@ describe('lib/tasks/download', function () {
 
     // not really the download error, but the easiest way to
     // test the error handling
-    this.sandbox.stub(fs, 'ensureDirAsync').rejects(err)
+    sinon.stub(fs, 'ensureDirAsync').rejects(err)
 
     return download
     .start(this.options)

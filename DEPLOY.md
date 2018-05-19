@@ -85,7 +85,7 @@ impossible. Instead we:
 A typical installation looks like this:
 
 ```
-export CYPRESS_BINARY_VERSION=https://cdn.../binary/<new version>/hash/cypress.zip
+export CYPRESS_INSTALL_BINARY=https://cdn.../binary/<new version>/hash/cypress.zip
 npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 ```
 
