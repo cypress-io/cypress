@@ -12,8 +12,8 @@ exports['e2e screenshots passes 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: screenshots_spec.coffee...                                                      (1 of 1)
+                                                                                                    
+  Running: screenshots_spec.coffee...                                                      (1 of 1) 
 
 
   taking screenshots
@@ -68,12 +68,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        5                       │
-  │ Passing:      2                       │
+  │ Tests:        14                      │
+  │ Passing:      11                      │
   │ Failing:      3                       │
   │ Pending:      0                       │
   │ Skipped:      0                       │
-  │ Screenshots:  7                       │
+  │ Screenshots:  16                      │
   │ Video:        true                    │
   │ Duration:     X seconds               │
   │ Spec Ran:     screenshots_spec.coffee │
@@ -111,10 +111,11 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                      Xs        5        2        3        -        - │
+  │ ✖ screenshots_spec.coffee                      Xs       14       11        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        5        2        3        -        -
+    1 of 1 failed (100%)                           Xs       14       11        3        -        -  
 
 `
+

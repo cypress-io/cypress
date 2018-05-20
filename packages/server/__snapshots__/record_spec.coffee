@@ -764,9 +764,21 @@ These results will not be recorded.
 
 This error will not alter the exit code.
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -778,17 +790,19 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -796,7 +810,16 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        2        1        -        1        -  
 
 `
 
