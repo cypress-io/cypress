@@ -12,6 +12,7 @@ describe "lib/util/file", ->
   beforeEach ->
     @dir = path.join(os.tmpdir(), "cypress", "file_spec")
     @path = path.join(@dir, "file.json")
+
     fs.removeAsync(@dir).catch ->
       ## ignore error if directory didn't exist in the first place
 
@@ -249,11 +250,17 @@ describe "lib/util/file", ->
 
     it "unlocks file when finished removing", ->
       sinon.spy(lockFile, "unlockAsync")
-      @fileUtil.remove().then ->
+      @fileUtil.remove()
+      .then ->
         expect(lockFile.unlockAsync).to.be.called
 
     it "unlocks file even if removing fails", ->
       sinon.spy(lockFile, "unlockAsync")
       sinon.stub(fs, "removeAsync").rejects(new Error("fail!"))
-      @fileUtil.remove().catch ->
+
+      @fileUtil.remove()
+      .then ->
+        throw new Error("should have caught!")
+      .catch (err) ->
+        expect(err.message).to.eq("fail!")
         expect(lockFile.unlockAsync).to.be.called

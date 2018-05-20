@@ -58,14 +58,14 @@ beforeEach ->
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 
+  ## always clean up the cache
+  ## before each test
+  cache.remove()
+
 afterEach ->
   sinon.restore()
 
   nock.cleanAll()
   nock.enableNetConnect()
-
-  ## always clean up the cache
-  ## after each test
-  cache.remove()
 
   process.env = _.clone(env)
