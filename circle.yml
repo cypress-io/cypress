@@ -7,9 +7,15 @@ defaults: &defaults
     # the Docker image with Cypress dependencies and Chrome browser
     - image: cypress/browsers:chrome64
       environment:
-        # set specific timezone
+        ## set specific timezone
         TZ: "/usr/share/zoneinfo/America/New_York"
-        CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
+
+        ## store artifacts here
+        CIRCLE_ARTIFACTS: /tmp/artifacts
+
+        ## set so that e2e tests are consistent
+        COLUMNS: 100
+        LINES: 24
 
 jobs:
   ## code checkout and NPM installs
@@ -40,7 +46,6 @@ jobs:
       - run:
           name: Checking TERM and COLUMNS are set
           command: |
-            stty cols 100
             node -e 'assert.ok(process.env.TERM === "xterm", `process.env.TERM=${process.env.TERM} and must be set to "xterm" for Docker to work`)'
             node -e 'assert.ok(process.stdout.columns === 100, `process.stdout.columns=${process.stdout.columns} must be set to 100 for snapshots to pass`)'
             node -e 'console.log("stdout.isTTY?", process.stdout.isTTY)'
@@ -216,7 +221,6 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run: stty cols 100
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -227,7 +231,6 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run: stty cols 100
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -237,7 +240,6 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 0
           working_directory: packages/server
@@ -249,7 +251,6 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 1
           working_directory: packages/server
@@ -261,7 +262,6 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 2
           working_directory: packages/server
@@ -273,7 +273,6 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 3
           working_directory: packages/server
@@ -285,7 +284,6 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 4
           working_directory: packages/server
