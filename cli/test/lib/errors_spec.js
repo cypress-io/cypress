@@ -9,9 +9,8 @@ describe('errors', function () {
   const { missingXvfb } = errors
 
   beforeEach(function () {
-    this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-    this.sandbox.stub(os, 'platform').returns('test platform')
-    this.sandbox.stub(os, 'release').returns('test release')
+    sinon.stub(util, 'pkgVersion').returns('1.2.3')
+    os.platform.returns('test platform')
   })
 
   describe('individual', () => {

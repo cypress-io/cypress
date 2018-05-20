@@ -1,18 +1,19 @@
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
+const task = require('./task')
 const util = require('../util')
 
-const callbacks = {}
+const registeredEvents = {}
 
-const invoke = (callbackId, args = []) => {
-  const callback = callbacks[callbackId]
-  if (!callback) {
-    sendError(new Error(`No callback registered for callback id ${callbackId}`))
+const invoke = (eventId, args = []) => {
+  const event = registeredEvents[eventId]
+  if (!event) {
+    sendError(new Error(`No handler registered for event id ${eventId}`))
     return
   }
 
-  return callback(...args)
+  return event.handler(...args)
 }
 
 const sendError = (ipc, err) => {
@@ -24,22 +25,26 @@ let plugins
 const load = (ipc, config, pluginsFile) => {
   debug('run plugins function')
 
-  let callbackIdCount = 0
+  let eventIdCount = 0
   const registrations = []
 
   // we track the register calls and then send them all at once
   // to the parent process
-  const register = (event, fn) => {
-    const callbackId = callbackIdCount++
-    callbacks[callbackId] = fn
+  const register = (event, handler) => {
+    const eventId = eventIdCount++
+    registeredEvents[eventId] = { event, handler }
 
-    debug('register event', event, 'with id', callbackId)
+    debug('register event', event, 'with id', eventId)
 
     registrations.push({
       event,
-      callbackId,
+      eventId,
     })
   }
+
+  // events used for parent/child communication
+  register('_get:task:body', () => {})
+  register('_get:task:keys', () => {})
 
   Promise
   .try(() => {
@@ -54,7 +59,7 @@ const load = (ipc, config, pluginsFile) => {
 }
 
 const execute = (ipc, event, ids, args = []) => {
-  debug('execute plugin with id', ids.invocationId)
+  debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
     case 'file:preprocessor':
@@ -62,6 +67,15 @@ const execute = (ipc, event, ids, args = []) => {
       return
     case 'before:browser:launch':
       util.wrapChildPromise(ipc, invoke, ids, args)
+      return
+    case 'task':
+      task.wrap(ipc, registeredEvents, ids, args)
+      return
+    case '_get:task:keys':
+      task.getKeys(ipc, registeredEvents, ids)
+      return
+    case '_get:task:body':
+      task.getBody(ipc, registeredEvents, ids, args)
       return
     default:
       debug('unexpected execute message:', event, args)

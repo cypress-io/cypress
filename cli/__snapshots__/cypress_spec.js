@@ -14,3 +14,7 @@ exports['cypress .run resolves with contents of tmp file 1'] = {
   "code": 0,
   "failingTests": []
 }
+
+exports['cypress .open normalizes config object 1'] = {
+  "config": "pageLoadTime=10000,watchForFileChanges=false"
+}

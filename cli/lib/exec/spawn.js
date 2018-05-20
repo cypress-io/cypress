@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 
 const util = require('../util')
-const info = require('../tasks/info')
+const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
@@ -32,7 +32,11 @@ function getStdio (needsXvfb) {
 module.exports = {
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
+    let executable = state.getPathToExecutable(state.getBinaryDir())
 
+    if (process.env.CYPRESS_RUN_BINARY) {
+      executable = process.env.CYPRESS_RUN_BINARY
+    }
     debug('needs XVFB?', needsXvfb)
 
     // always push cwd into the args
@@ -45,20 +49,20 @@ module.exports = {
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let cypressPath = info.getPathToExecutable()
 
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          cypressPath = 'node'
+          executable = 'node'
           args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
-        debug('spawning Cypress %s', cypressPath)
+        debug('spawning Cypress %s', executable)
         debug('spawn args %j', args, options)
 
         // strip dev out of child process options
         options = _.omit(options, 'dev')
+        options = _.omit(options, 'binaryFolder')
 
         // when running in electron in windows
         // it never supports color but we're
@@ -70,9 +74,9 @@ module.exports = {
         // option our process.stderr.isTTY will not be true
         // which ends up disabling the colors =(
         if (util.supportsColor()) {
-          process.env.FORCE_COLOR = 1
-          process.env.DEBUG_COLORS = 1
-          process.env.MOCHA_COLORS = 1
+          process.env.FORCE_COLOR = '1'
+          process.env.DEBUG_COLORS = '1'
+          process.env.MOCHA_COLORS = '1'
         }
 
         // if we needed to pipe stderr and we're currently
@@ -84,10 +88,10 @@ module.exports = {
           // electron browser to behave _THE SAME WAY_ as
           // if we aren't using pipe. pipe is necessary only
           // to filter out garbage on stderr -____________-
-          process.env.FORCE_STDERR_TTY = 1
+          process.env.FORCE_STDERR_TTY = '1'
         }
 
-        const child = cp.spawn(cypressPath, args, options)
+        const child = cp.spawn(executable, args, options)
         child.on('close', resolve)
         child.on('error', reject)
 
@@ -109,8 +113,9 @@ module.exports = {
       })
     }
 
-    const userFriendlySpawn = () =>
-      spawn().catch(throwFormErrorText(errors.unexpected))
+    const userFriendlySpawn = () => {
+      return spawn().catch(throwFormErrorText(errors.unexpected))
+    }
 
     if (needsXvfb) {
       return xvfb.start()

@@ -1,15 +1,17 @@
 require('../spec_helper')
 
+const os = require('os')
 const snapshot = require('snap-shot-it')
 const supportsColor = require('supports-color')
+const proxyquire = require('proxyquire')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 
 describe('util', function () {
   beforeEach(function () {
-    this.sandbox.stub(process, 'exit')
-    this.sandbox.stub(logger, 'error')
+    sinon.stub(process, 'exit')
+    sinon.stub(logger, 'error')
   })
 
   context('.stdoutLineMatches', () => {
@@ -111,32 +113,119 @@ describe('util', function () {
   context('.supportsColor', function () {
     it('is true on obj return for stderr', function () {
       const obj = {}
-      this.sandbox.stub(supportsColor, 'stderr').value(obj)
+      sinon.stub(supportsColor, 'stderr').value(obj)
 
       expect(util.supportsColor()).to.be.true
     })
 
     it('is false on false return for stderr', function () {
-      this.sandbox.stub(supportsColor, 'stderr').value(false)
+      sinon.stub(supportsColor, 'stderr').value(false)
 
       expect(util.supportsColor()).to.be.false
     })
   })
 
   it('.exit', function () {
+    process.exit.withArgs(2).withArgs(0)
     util.exit(2)
-    expect(process.exit).to.be.calledWith(2)
-
     util.exit(0)
-    expect(process.exit).to.be.calledWith(0)
   })
 
   it('.logErrorExit1', function () {
     const err = new Error('foo')
 
-    util.logErrorExit1(err)
+    logger.error.withArgs('foo')
+    process.exit.withArgs(1)
 
-    expect(process.exit).to.be.calledWith(1)
-    expect(logger.error).to.be.calledWith('foo')
+    util.logErrorExit1(err)
+  })
+
+  describe('.isSemver', function () {
+    it('is true with 3-digit version', function () {
+      expect(util.isSemver('1.2.3')).to.equal(true)
+    })
+    it('is true with 2-digit version', function () {
+      expect(util.isSemver('1.2')).to.equal(true)
+    })
+    it('is true with 1-digit version', function () {
+      expect(util.isSemver('1')).to.equal(true)
+    })
+    it('is false with URL', function () {
+      expect(util.isSemver('www.cypress.io/download/1.2.3')).to.equal(false)
+    })
+    it('is false with file path', function () {
+      expect(util.isSemver('0/path/1.2.3/mypath/2.3')).to.equal(false)
+    })
+  })
+
+  context('.printNodeOptions', function () {
+    describe('NODE_OPTIONS is not set', function () {
+
+      it('does nothing if debug is not enabled', function () {
+        const log = sinon.spy()
+        log.enabled = false
+        util.printNodeOptions(log)
+        expect(log).not.have.been.called
+      })
+
+      it('prints message when debug is enabled', function () {
+        const log = sinon.spy()
+        log.enabled = true
+        util.printNodeOptions(log)
+        expect(log).to.be.calledWith('NODE_OPTIONS is not set')
+      })
+    })
+
+    describe('NODE_OPTIONS is set', function () {
+      beforeEach(function () {
+        this.node_options = process.env.NODE_OPTIONS
+        process.env.NODE_OPTIONS = 'foo'
+      })
+
+      afterEach(function () {
+        if (typeof this.node_options !== 'undefined') {
+          process.env.NODE_OPTIONS = this.node_options
+        }
+      })
+
+      it('does nothing if debug is not enabled', function () {
+        const log = sinon.spy()
+        log.enabled = false
+        util.printNodeOptions(log)
+        expect(log).not.have.been.called
+      })
+
+      it('prints value when debug is enabled', function () {
+        const log = sinon.spy()
+        log.enabled = true
+        util.printNodeOptions(log)
+        expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
+      })
+    })
+
+    describe('.getOsVersionAsync', function () {
+      let util
+      let getos = sinon.stub().resolves(['distro-release'])
+      beforeEach(function () {
+        util = proxyquire(`${lib}/util`, { getos })
+      })
+      it('calls os.release on non-linux', function () {
+        os.platform.returns('darwin')
+        os.release.returns('some-release')
+        util.getOsVersionAsync()
+        .then(() => {
+          expect(os.release).to.be.called
+          expect(getos).to.not.be.called
+        })
+      })
+      it('NOT calls os.release on linux', function () {
+        os.platform.returns('linux')
+        util.getOsVersionAsync()
+        .then(() => {
+          expect(os.release).to.not.be.called
+          expect(getos).to.be.called
+        })
+      })
+    })
   })
 })

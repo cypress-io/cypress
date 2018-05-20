@@ -1,8 +1,11 @@
 _          = require("lodash")
 os         = require("os")
+la         = require("lazy-ass")
 chalk      = require("chalk")
-Promise    = require("bluebird")
+check      = require("check-more-types")
 debug      = require("debug")("cypress:server:record")
+Promise    = require("bluebird")
+isForkPr   = require("is-fork-pr")
 commitInfo = require("@cypress/commit-info")
 api        = require("../api")
 logger     = require("../logger")
@@ -169,6 +172,11 @@ createRun = (options = {}) ->
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
+    if isForkPr.isForkPr()
+      ## bail with a warning
+      return errors.warning("RECORDING_FROM_FORK_PR")
+
+    ## else throw
     errors.throw("RECORD_KEY_MISSING")
 
   ## go back to being a string

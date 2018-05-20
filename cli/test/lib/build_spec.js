@@ -20,11 +20,11 @@ describe('package.json build', () => {
     // stub package.json in CLI
     // with a few test props
     // the rest should come from root package.json file
-    this.sandbox.stub(fs, 'readJsonAsync').resolves({
+    sinon.stub(fs, 'readJsonAsync').resolves({
       name: 'test',
       engines: 'test engines',
     })
-    this.sandbox.stub(fs, 'outputJsonAsync').resolves()
+    sinon.stub(fs, 'outputJsonAsync').resolves()
   })
 
   it('author name and version', () => {

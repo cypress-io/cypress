@@ -140,7 +140,11 @@ defaultRoutes = [
 ]
 
 describe "e2e record", ->
+  env = _.clone(process.env)
+
   beforeEach ->
+    process.env = env
+
     requests = []
 
   context "passing", ->
@@ -339,7 +343,7 @@ describe "e2e record", ->
       })
 
   context "recordKey", ->
-    setup([])
+    setup(defaultRoutes)
 
     it "errors and exits without recordKey", ->
       e2e.exec(@, {
@@ -348,6 +352,22 @@ describe "e2e record", ->
         snapshot: true
         expectedExitCode: 1
       })
+      .then ->
+        expect(getRequestUrls()).to.be.empty
+
+    it "warns but does not exit when is forked pr", ->
+      process.env.CIRCLE_PR_NUMBER = "123"
+      process.env.CIRCLE_PR_USERNAME = "brian-mann"
+      process.env.CIRCLE_PR_REPONAME = "cypress"
+
+      e2e.exec(@, {
+        spec: "record_pass*"
+        record: true
+        snapshot: true
+        expectedExitCode: 0
+      })
+      .then ->
+        expect(getRequestUrls()).to.be.empty
 
   context "video recording", ->
     setup(defaultRoutes, {

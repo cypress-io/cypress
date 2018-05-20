@@ -228,6 +228,6 @@ export default class RunsListItem extends Component {
   }
 
   _goToRun = () => {
-    this.props.goToRun(this.props.run.id)
+    this.props.goToRun(this.props.run.buildNumber)
   }
 }

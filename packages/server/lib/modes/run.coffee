@@ -502,7 +502,7 @@ module.exports = {
 
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) =>
-        if message is "take:screenshot"
+        if message is "take:screenshot" and resp
           screenshots.push @screenshotMetadata(data, resp)
 
         resp
@@ -663,8 +663,8 @@ module.exports = {
       testId:    data.testId
       takenAt:   resp.takenAt
       path:      resp.path
-      height:    resp.height
-      width:     resp.width
+      height:    resp.dimensions.height
+      width:     resp.dimensions.width
     }
 
   runSpecs: (options = {}) ->

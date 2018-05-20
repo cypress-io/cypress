@@ -175,6 +175,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/api/screenshot-api
+     */
+    Screenshot: {
+      defaults(options: Partial<ScreenshotOptions & ScreenshotDefaultsOptions>): void
+    }
+
+    /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -751,7 +758,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      */
     screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
-    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
 
     /**
      * Scroll an element into view.
@@ -836,6 +843,13 @@ declare namespace Cypress {
 
     spread<S extends object | any[] | string | number | boolean>(fn: (...args: any[]) => S): Chainable<S>
     spread(fn: (...args: any[]) => void): Chainable<Subject>
+
+    /**
+     * Run a task in Node via the plugins file.
+     *
+     * @see https://on.cypress.io/task
+     */
+    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -1257,6 +1271,28 @@ declare namespace Cypress {
     onAbort(...args: any[]): void
   }
 
+  interface Dimensions {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+
+  interface ScreenshotOptions {
+    blackout: string[]
+    capture: 'runner' | 'app' | 'fullpage'
+    clip: Dimensions
+    disableTimersAndAnimations: boolean
+    waitForCommandSynchronization: boolean
+    beforeScreenshot(doc: Document): void
+    afterScreenshot(doc: Document): void
+  }
+
+  interface ScreenshotDefaultsOptions {
+    scaleAppCaptures: boolean
+    screenshotOnRunFailure: boolean
+  }
+
   interface ScrollToOptions extends Loggable, Timeoutable {
     /**
      * Scrolls over the duration (in ms)
@@ -1269,7 +1305,16 @@ declare namespace Cypress {
      *
      * @default 'swing'
      */
-    easing: 'swing' | 'linear'
+    easing: 'swing' | 'linear',
+  }
+
+  interface ScrollIntoViewOptions extends ScrollToOptions {
+    /**
+     * Amount to scroll after the element has been scrolled into view
+     *
+     * @default {top: 0, left: 0}
+     */
+    offset: Offset
   }
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
@@ -3198,6 +3243,10 @@ declare namespace Cypress {
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  interface Offset {
+    top: number,
+    left: number
+  }
 
   // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]

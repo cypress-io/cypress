@@ -157,7 +157,7 @@ describe "lib/modes/run", ->
 
       expect(onAfterResponse).to.be.a("function")
 
-      onAfterResponse("take:screenshot")
+      onAfterResponse("take:screenshot", {}, {})
       onAfterResponse("get:cookies")
 
       expect(screenshots).to.deep.eq([{a: "a"}])

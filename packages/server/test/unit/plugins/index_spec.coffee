@@ -65,7 +65,7 @@ describe "lib/plugins/index", ->
 
         @ipc.on.withArgs("loaded").yields(@config, [{
           event: "some:event"
-          callbackId: 0
+          eventId: 0
         }])
         plugins.init({ pluginsFile: "cypress-plugin" })
 
@@ -77,7 +77,7 @@ describe "lib/plugins/index", ->
           expect(@ipc.send).to.be.calledWith(
             "execute",
             "some:event",
-            { callbackId: 0, invocationId: "00" }
+            { eventId: 0, invocationId: "00" }
             ["foo", "bar"]
           )
           expect(value).to.equal("value")

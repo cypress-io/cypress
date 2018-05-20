@@ -140,7 +140,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
   (Uploading Results)
@@ -305,7 +305,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
 ====================================================================================================
@@ -373,7 +373,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
 ====================================================================================================
@@ -439,7 +439,7 @@ exports['e2e record api interaction errors update instance does not update insta
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
   (Uploading Results)
@@ -515,7 +515,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
   (Uploading Results)
@@ -640,7 +640,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
   (Uploading Results)
@@ -710,7 +710,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
 
 
   (Video)
@@ -754,5 +754,49 @@ exports['e2e record misconfiguration errors and exits when no specs found 1'] = 
 We searched for any files matching this glob pattern:
 
 cypress/integration/notfound/**
+`
+
+exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `Warning: It looks like you are trying to record this run from a forked PR.
+
+The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+
+These results will not be recorded.
+
+This error will not alter the exit code.
+
+Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+  (Tests Starting)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Tests Finished)
+
+  - Tests:           2
+  - Passes:          1
+  - Failures:        0
+  - Pending:         1
+  - Skipped:         0
+  - Duration:        10 seconds
+  - Screenshots:     1
+  - Video Recorded:  true
+  - Cypress Version: 1.2.3
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+
+
+  (All Done)
+
 `
 

@@ -37,7 +37,7 @@ module.exports = {
 
       registeredEvents = {}
 
-      pluginsProcess = cp.fork(path.join(__dirname, "child", "index.js"), ["--file", config.pluginsFile])
+      pluginsProcess = cp.fork(path.join(__dirname, "child", "index.js"), ["--file", config.pluginsFile], { stdio: "inherit" })
       ipc = util.wrapIpc(pluginsProcess)
 
       handler(ipc) for handler in handlers
@@ -46,12 +46,13 @@ module.exports = {
 
       ipc.on "loaded", (newCfg, registrations) ->
         _.each registrations, (registration) ->
-          debug("register plugins process event", registration.event, "with id", registration.callbackId)
+          debug("register plugins process event", registration.event, "with id", registration.eventId)
+
           register registration.event, (args...) ->
-            util.wrapParentPromise ipc, registration.callbackId, (invocationId) ->
+            util.wrapParentPromise ipc, registration.eventId, (invocationId) ->
               debug("call event", registration.event, "for invocation id", invocationId)
               ids = {
-                callbackId: registration.callbackId
+                eventId: registration.eventId
                 invocationId: invocationId
               }
               ipc.send("execute", registration.event, ids, args)

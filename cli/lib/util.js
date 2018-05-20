@@ -1,13 +1,19 @@
 const _ = require('lodash')
 const R = require('ramda')
+const os = require('os')
 const path = require('path')
 const isCi = require('is-ci')
+const getos = require('getos')
 const chalk = require('chalk')
+const Promise = require('bluebird')
+const executable = require('executable')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
+const debug = require('debug')('cypress:cli')
 
+const getosAsync = Promise.promisify(getos)
 const joinWithEq = (x, y) => `${x}=${y}`
 
 // converts an object (single level) into
@@ -36,8 +42,26 @@ function stdoutLineMatches (expectedLine, stdout) {
   return lines.some(lineMatches)
 }
 
+/**
+ * Prints NODE_OPTIONS using debug() module, but only
+ * if DEBUG=cypress... is set
+ */
+function printNodeOptions (log = debug) {
+  if (!log.enabled) {
+    return
+  }
+
+  if (process.env.NODE_OPTIONS) {
+    log('NODE_OPTIONS=%s', process.env.NODE_OPTIONS)
+  } else {
+    log('NODE_OPTIONS is not set')
+  }
+}
+
 const util = {
   normalizeModuleOptions,
+
+  printNodeOptions,
 
   isCi () {
     return isCi
@@ -106,6 +130,37 @@ const util = {
 
   isInstalledGlobally () {
     return isInstalledGlobally
+  },
+
+  isSemver (str) {
+    return /^(\d+\.)?(\d+\.)?(\*|\d+)$/.test(str)
+  },
+
+  isExecutableAsync (filePath) {
+    return Promise.resolve(executable(filePath))
+  },
+
+  getOsVersionAsync () {
+    return Promise.try(() => {
+      if (os.platform() === 'linux') {
+        return getosAsync()
+        .then((osInfo) => [osInfo.dist, osInfo.release].join(' - '))
+        .catch(() => os.release())
+      } else {
+        return os.release()
+      }
+    })
+  },
+
+  // attention:
+  // when passing relative path to NPM post install hook, the current working
+  // directory is set to the `node_modules/cypress` folder
+  // the user is probably passing relative path with respect to root package folder
+  formAbsolutePath (filename) {
+    if (path.isAbsolute(filename)) {
+      return filename
+    }
+    return path.join(process.cwd(), '..', '..', filename)
   },
 
   stdoutLineMatches,
