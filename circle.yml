@@ -216,6 +216,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run: stty cols 100
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -226,6 +227,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run: stty cols 100
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -235,6 +237,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 0
           working_directory: packages/server
@@ -246,6 +249,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 1
           working_directory: packages/server
@@ -257,6 +261,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 2
           working_directory: packages/server
@@ -268,6 +273,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 3
           working_directory: packages/server
@@ -279,6 +285,7 @@ jobs:
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run: stty cols 100
       - run:
           command: npm run test-e2e -- --parallel 5 --index 4
           working_directory: packages/server
