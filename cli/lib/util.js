@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const tty = require('tty')
 const path = require('path')
 const isCi = require('is-ci')
 const getos = require('getos')
@@ -67,10 +68,55 @@ const util = {
     return isCi
   },
 
+  getEnvOverrides () {
+    return _
+    .chain({})
+    .extend(util.getEnvColors())
+    .extend(util.getForceTty())
+    .omitBy(_.isUndefined) // remove undefined values
+    .mapValues((value) => { // stringify to 1 or 0
+      return value ? '1' : '0'
+    })
+    .value()
+  },
+
+  getForceTty () {
+    return {
+      FORCE_STDIN_TTY: util.isTty(process.stdin.fd),
+      FORCE_STDOUT_TTY: util.isTty(process.stdout.fd),
+      FORCE_STDERR_TTY: util.isTty(process.stderr.fd),
+    }
+  },
+
+  getEnvColors () {
+    const sc = util.supportsColor()
+
+    return {
+      FORCE_COLOR: sc,
+      DEBUG_COLORS: sc,
+      MOCHA_COLORS: sc ? true : undefined,
+    }
+  },
+
+  isTty (fd) {
+    return tty.isatty(fd)
+  },
+
   supportsColor () {
-    // we only care about stderr supporting color
-    // since thats what our DEBUG logs use
-    return Boolean(supportsColor.stderr)
+    // if we've been explictly told not to support
+    // color then turn this off
+    if (process.env.NO_COLOR) {
+      return false
+    }
+
+    // https://github.com/cypress-io/cypress/issues/1747
+    // always return true in CI providers
+    if (process.env.CI) {
+      return true
+    }
+
+    // ensure that both stdout and stderr support color
+    return Boolean(supportsColor.stdout) && Boolean(supportsColor.stderr)
   },
 
   cwd () {

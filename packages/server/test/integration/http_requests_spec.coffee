@@ -1,7 +1,5 @@
 require("../spec_helper")
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
 _             = require("lodash")
 rp            = require("request-promise")
 dns           = require("dns")
@@ -48,6 +46,8 @@ browserifyFile = (filePath) ->
 
 describe "Routes", ->
   beforeEach ->
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
     sinon.stub(CacheBuster, "get").returns("-123")
     sinon.stub(Server.prototype, "reset")
 
