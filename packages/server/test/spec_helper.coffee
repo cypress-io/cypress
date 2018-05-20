@@ -7,6 +7,7 @@ global.expect    = require("chai").expect
 global.mockery   = require("mockery")
 global.proxyquire = require("proxyquire")
 global.sinon     = require("sinon")
+_                = require("lodash")
 Promise          = require("bluebird")
 path             = require("path")
 cache            = require("../lib/cache")
@@ -16,6 +17,8 @@ agent            = require("superagent")
 require("chai")
 .use(require("@cypress/sinon-chai"))
 .use(require("chai-uuid"))
+
+env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
 
@@ -64,3 +67,5 @@ afterEach ->
   ## always clean up the cache
   ## after each test
   cache.remove()
+
+  process.env = _.clone(env)
