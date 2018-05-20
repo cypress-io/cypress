@@ -45,9 +45,9 @@ replaceBrowserName = (str, p1, p2, p3, p4) ->
   ## this ensures we add whitespace so the border is not shifted
   p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
-replaceDurationSeconds = (str, p1, p2, p3) ->
+replaceDurationSeconds = (str, p1, p2, p3, p4) ->
   ## get the padding for the existing duration
-  lengthOfExistingDuration = _.sum([p2.length, p3.length])
+  lengthOfExistingDuration = _.sum([p2.length, p3.length, p4.length])
 
   p1 + _.padEnd("X seconds", lengthOfExistingDuration)
 
@@ -68,7 +68,7 @@ normalizeStdout = (str) ->
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
-  .replace(/(Duration\:\s+)(\d+)(\sseconds?)/g, replaceDurationSeconds)
+  .replace(/(Duration\:\s+)(\d+)(\sseconds?)(\s+)/g, replaceDurationSeconds)
   .replace(/\(\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
   .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
