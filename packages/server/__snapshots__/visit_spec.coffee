@@ -561,7 +561,7 @@ When this 'load' event occurs, Cypress will continue running commands.
   │ Skipped:      0                                      │
   │ Screenshots:  2                                      │
   │ Video:        true                                   │
-  │ Duration:     X seconds                               │
+  │ Duration:     X seconds                              │
   │ Spec Ran:     visit_http_timeout_failing_spec.coffee │
   └──────────────────────────────────────────────────────┘
 

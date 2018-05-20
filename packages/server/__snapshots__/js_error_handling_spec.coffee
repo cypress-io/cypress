@@ -110,7 +110,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Skipped:      0                                     │
   │ Screenshots:  5                                     │
   │ Video:        true                                  │
-  │ Duration:     X seconds                              │
+  │ Duration:     X seconds                             │
   │ Spec Ran:     js_error_handling_failing_spec.coffee │
   └─────────────────────────────────────────────────────┘
 

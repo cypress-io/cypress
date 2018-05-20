@@ -335,7 +335,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   │ Skipped:      0                                              │
   │ Screenshots:  1                                              │
   │ Video:        true                                           │
-  │ Duration:     X seconds                                       │
+  │ Duration:     X seconds                                      │
   │ Spec Ran:     hook_uncaught_error_events_failing_spec.coffee │
   └──────────────────────────────────────────────────────────────┘
 

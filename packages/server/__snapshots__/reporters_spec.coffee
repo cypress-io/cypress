@@ -39,7 +39,7 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   │ Skipped:      0                          │
   │ Screenshots:  0                          │
   │ Video:        true                       │
-  │ Duration:     X seconds                   │
+  │ Duration:     X seconds                  │
   │ Spec Ran:     simple_passing_spec.coffee │
   └──────────────────────────────────────────┘
 
@@ -92,7 +92,7 @@ finished!
   │ Skipped:      0                          │
   │ Screenshots:  0                          │
   │ Video:        true                       │
-  │ Duration:     X seconds                   │
+  │ Duration:     X seconds                  │
   │ Spec Ran:     simple_passing_spec.coffee │
   └──────────────────────────────────────────┘
 
@@ -157,7 +157,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
   │ Skipped:      0                          │
   │ Screenshots:  0                          │
   │ Video:        true                       │
-  │ Duration:     X seconds                   │
+  │ Duration:     X seconds                  │
   │ Spec Ran:     simple_passing_spec.coffee │
   └──────────────────────────────────────────┘
 
@@ -330,7 +330,7 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
   │ Skipped:      0                          │
   │ Screenshots:  0                          │
   │ Video:        true                       │
-  │ Duration:     X seconds                   │
+  │ Duration:     X seconds                  │
   │ Spec Ran:     simple_passing_spec.coffee │
   └──────────────────────────────────────────┘
 
@@ -501,7 +501,7 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
   │ Skipped:      0                          │
   │ Screenshots:  0                          │
   │ Video:        true                       │
-  │ Duration:     X seconds                   │
+  │ Duration:     X seconds                  │
   │ Spec Ran:     simple_passing_spec.coffee │
   └──────────────────────────────────────────┘
 

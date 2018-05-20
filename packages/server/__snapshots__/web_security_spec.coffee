@@ -202,7 +202,7 @@ exports['e2e web security when disabled fails 1'] = `
   │ Skipped:      0                        │
   │ Screenshots:  0                        │
   │ Video:        true                     │
-  │ Duration:     X seconds                 │
+  │ Duration:     X seconds                │
   │ Spec Ran:     web_security_spec.coffee │
   └────────────────────────────────────────┘
 

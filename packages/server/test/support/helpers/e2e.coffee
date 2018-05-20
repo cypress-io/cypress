@@ -323,8 +323,8 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          FORCE_COLOR: 0
-          DEBUG_COLORS: 0
+          ## FYI: color will already be disabled
+          ## because we are piping the child process
           COLUMNS: 100
           LINES: 24
         })
