@@ -1,6 +1,7 @@
 require('../spec_helper')
 
 const os = require('os')
+const tty = require('tty')
 const snapshot = require('snap-shot-it')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
@@ -8,8 +9,8 @@ const proxyquire = require('proxyquire')
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 
-describe('util', function () {
-  beforeEach(function () {
+describe('util', () => {
+  beforeEach(() => {
     sinon.stub(process, 'exit')
     sinon.stub(logger, 'error')
   })
@@ -110,65 +111,147 @@ describe('util', function () {
     })
   })
 
-  context('.supportsColor', function () {
-    it('is true on obj return for stderr', function () {
-      const obj = {}
-      sinon.stub(supportsColor, 'stderr').value(obj)
+  context('.supportsColor', () => {
+    it('is true on obj return for stdout and stderr', () => {
+      sinon.stub(supportsColor, 'stdout').value({})
+      sinon.stub(supportsColor, 'stderr').value({})
 
       expect(util.supportsColor()).to.be.true
     })
 
-    it('is false on false return for stderr', function () {
+    it('is false on false return for stdout', () => {
+      sinon.stub(supportsColor, 'stdout').value(false)
+      sinon.stub(supportsColor, 'stderr').value({})
+
+      expect(util.supportsColor()).to.be.false
+    })
+
+    it('is false on false return for stderr', () => {
+      sinon.stub(supportsColor, 'stdout').value({})
       sinon.stub(supportsColor, 'stderr').value(false)
 
       expect(util.supportsColor()).to.be.false
     })
+
+    it('is true when running in CI', () => {
+      process.env.CI = '1'
+      sinon.stub(supportsColor, 'stdout').value(false)
+
+      expect(util.supportsColor()).to.be.true
+    })
+
+    it('is false when NO_COLOR has been set', () => {
+      process.env.CI = '1'
+      process.env.NO_COLOR = '1'
+      sinon.stub(supportsColor, 'stdout').value({})
+      sinon.stub(supportsColor, 'stderr').value({})
+
+      expect(util.supportsColor()).to.be.FALSE
+    })
   })
 
-  it('.exit', function () {
-    process.exit.withArgs(2).withArgs(0)
-    util.exit(2)
-    util.exit(0)
+  context('.getEnvOverrides', () => {
+    it('returns object with colors + process overrides', () => {
+      // shouldn't be stubbing 'what we own' but its easiest in this case
+      sinon.stub(util, 'supportsColor').returns(true)
+      sinon.stub(tty, 'isatty').returns(true)
+
+      expect(util.getEnvOverrides()).to.deep.eq({
+        FORCE_STDIN_TTY: '1',
+        FORCE_STDOUT_TTY: '1',
+        FORCE_STDERR_TTY: '1',
+        FORCE_COLOR: '1',
+        DEBUG_COLORS: '1',
+        MOCHA_COLORS: '1',
+      })
+
+      util.supportsColor.returns(false)
+      tty.isatty.returns(false)
+
+      expect(util.getEnvOverrides()).to.deep.eq({
+        FORCE_STDIN_TTY: '0',
+        FORCE_STDOUT_TTY: '0',
+        FORCE_STDERR_TTY: '0',
+        FORCE_COLOR: '0',
+        DEBUG_COLORS: '0',
+      })
+    })
   })
 
-  it('.logErrorExit1', function () {
-    const err = new Error('foo')
+  context('.getForceTty', () => {
+    it('forces when each stream is a tty', () => {
+      sinon.stub(tty, 'isatty')
+      .withArgs(0).returns(true)
+      .withArgs(1).returns(true)
+      .withArgs(2).returns(true)
 
-    logger.error.withArgs('foo')
-    process.exit.withArgs(1)
+      expect(util.getForceTty()).to.deep.eq({
+        FORCE_STDIN_TTY: true,
+        FORCE_STDOUT_TTY: true,
+        FORCE_STDERR_TTY: true,
+      })
 
-    util.logErrorExit1(err)
+      tty.isatty
+      .withArgs(0).returns(false)
+      .withArgs(1).returns(false)
+      .withArgs(2).returns(false)
+
+      expect(util.getForceTty()).to.deep.eq({
+        FORCE_STDIN_TTY: false,
+        FORCE_STDOUT_TTY: false,
+        FORCE_STDERR_TTY: false,
+      })
+    })
   })
 
-  describe('.isSemver', function () {
-    it('is true with 3-digit version', function () {
+  context('.exit', () => {
+    it('calls process.exit', () => {
+      process.exit.withArgs(2).withArgs(0)
+      util.exit(2)
+      util.exit(0)
+    })
+  })
+
+  context('.logErrorExit1', () => {
+    it('calls logger.error and process.exit', () => {
+      const err = new Error('foo')
+
+      logger.error.withArgs('foo')
+      process.exit.withArgs(1)
+
+      util.logErrorExit1(err)
+    })
+  })
+
+  describe('.isSemver', () => {
+    it('is true with 3-digit version', () => {
       expect(util.isSemver('1.2.3')).to.equal(true)
     })
-    it('is true with 2-digit version', function () {
+    it('is true with 2-digit version', () => {
       expect(util.isSemver('1.2')).to.equal(true)
     })
-    it('is true with 1-digit version', function () {
+    it('is true with 1-digit version', () => {
       expect(util.isSemver('1')).to.equal(true)
     })
-    it('is false with URL', function () {
+    it('is false with URL', () => {
       expect(util.isSemver('www.cypress.io/download/1.2.3')).to.equal(false)
     })
-    it('is false with file path', function () {
+    it('is false with file path', () => {
       expect(util.isSemver('0/path/1.2.3/mypath/2.3')).to.equal(false)
     })
   })
 
-  context('.printNodeOptions', function () {
-    describe('NODE_OPTIONS is not set', function () {
+  context('.printNodeOptions', () => {
+    describe('NODE_OPTIONS is not set', () => {
 
-      it('does nothing if debug is not enabled', function () {
+      it('does nothing if debug is not enabled', () => {
         const log = sinon.spy()
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
       })
 
-      it('prints message when debug is enabled', function () {
+      it('prints message when debug is enabled', () => {
         const log = sinon.spy()
         log.enabled = true
         util.printNodeOptions(log)
@@ -176,26 +259,19 @@ describe('util', function () {
       })
     })
 
-    describe('NODE_OPTIONS is set', function () {
-      beforeEach(function () {
-        this.node_options = process.env.NODE_OPTIONS
+    describe('NODE_OPTIONS is set', () => {
+      beforeEach(() => {
         process.env.NODE_OPTIONS = 'foo'
       })
 
-      afterEach(function () {
-        if (typeof this.node_options !== 'undefined') {
-          process.env.NODE_OPTIONS = this.node_options
-        }
-      })
-
-      it('does nothing if debug is not enabled', function () {
+      it('does nothing if debug is not enabled', () => {
         const log = sinon.spy()
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
       })
 
-      it('prints value when debug is enabled', function () {
+      it('prints value when debug is enabled', () => {
         const log = sinon.spy()
         log.enabled = true
         util.printNodeOptions(log)
@@ -203,13 +279,13 @@ describe('util', function () {
       })
     })
 
-    describe('.getOsVersionAsync', function () {
+    describe('.getOsVersionAsync', () => {
       let util
       let getos = sinon.stub().resolves(['distro-release'])
-      beforeEach(function () {
+      beforeEach(() => {
         util = proxyquire(`${lib}/util`, { getos })
       })
-      it('calls os.release on non-linux', function () {
+      it('calls os.release on non-linux', () => {
         os.platform.returns('darwin')
         os.release.returns('some-release')
         util.getOsVersionAsync()
@@ -218,7 +294,7 @@ describe('util', function () {
           expect(getos).to.not.be.called
         })
       })
-      it('NOT calls os.release on linux', function () {
+      it('NOT calls os.release on linux', () => {
         os.platform.returns('linux')
         util.getOsVersionAsync()
         .then(() => {
