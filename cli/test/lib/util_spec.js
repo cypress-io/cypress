@@ -120,6 +120,8 @@ describe('util', () => {
     })
 
     it('is false on false return for stdout', () => {
+      delete process.env.CI
+
       sinon.stub(supportsColor, 'stdout').value(false)
       sinon.stub(supportsColor, 'stderr').value({})
 
@@ -127,6 +129,8 @@ describe('util', () => {
     })
 
     it('is false on false return for stderr', () => {
+      delete process.env.CI
+
       sinon.stub(supportsColor, 'stdout').value({})
       sinon.stub(supportsColor, 'stderr').value(false)
 
