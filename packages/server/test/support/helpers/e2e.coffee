@@ -195,6 +195,8 @@ module.exports = {
           settings.write(e2ePath, s)
 
     afterEach ->
+      process.env = _.clone(env)
+
       @timeout(human("2 minutes"))
 
       Fixtures.remove()
@@ -282,7 +284,7 @@ module.exports = {
 
     exit = (code) ->
       if (expected = options.expectedExitCode)?
-        expect(expected).to.eq(code)
+        expect(expected).to.eq(code, "expected exit code")
 
       ## snapshot the stdout!
       if options.snapshot
@@ -318,9 +320,14 @@ module.exports = {
 
     new Promise (resolve, reject) ->
       sp = cp.spawn "node", args, {
-        env: _.chain(env)
+        env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
-        # .extend({ FORCE_COLOR: 0 })
+        .extend({
+          FORCE_COLOR: 0
+          DEBUG_COLORS: 0
+          COLUMNS: 100
+          LINES: 24
+        })
         .value()
       }
 
