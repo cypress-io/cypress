@@ -34,6 +34,7 @@ pathUpToProjectName = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
 browserNameVersionRe = /(Browser\:\s+)(Electron|Chrome|Canary|Chromium)(\s\d+)(\s\(\w+\))?/
+availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
@@ -62,6 +63,7 @@ normalizeStdout = (str) ->
   str
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
+  .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
   .replace(browserNameVersionRe, replaceBrowserName)
   .replace(/\s\(\d+m?s\)/g, "") ## numbers in parenths
   .replace(/(\s+?)(\d+m?s)/g, replaceDurationInTables) ## durations in tables

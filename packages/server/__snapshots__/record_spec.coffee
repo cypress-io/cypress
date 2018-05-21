@@ -746,7 +746,7 @@ exports['e2e record misconfiguration errors and exits when no browser found 1'] 
 
 Browser: 'browserDoesNotExist' was not found on your system.
 
-Available browsers found are: chrome, chromium, canary, electron
+Available browsers found are: browser1, browser2, browser3
 `
 
 exports['e2e record misconfiguration errors and exits when no specs found 1'] = `Can't run because no spec files were found.

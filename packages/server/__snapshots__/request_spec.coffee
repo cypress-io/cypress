@@ -44,7 +44,7 @@ exports['e2e requests passes 1'] = `
   │ Skipped:      0                   │
   │ Screenshots:  0                   │
   │ Video:        true                │
-  │ Duration:     X seconds            │
+  │ Duration:     X seconds           │
   │ Spec Ran:     request_spec.coffee │
   └───────────────────────────────────┘
 
