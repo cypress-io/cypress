@@ -1,7 +1,19 @@
 exports['e2e iframes passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (iframe_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/iframe_spec.coffee                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: iframe_spec.coffee...                                                           (1 of 1) 
 
 
   iframes
@@ -18,26 +30,37 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   8 passing
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           8
-  - Passes:          8
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────┐
+  │ Tests:        8                  │
+  │ Passing:      8                  │
+  │ Failing:      0                  │
+  │ Pending:      0                  │
+  │ Skipped:      0                  │
+  │ Screenshots:  0                  │
+  │ Video:        true               │
+  │ Duration:     X seconds          │
+  │ Spec Ran:     iframe_spec.coffee │
+  └──────────────────────────────────┘
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ iframe_spec.coffee                           Xs        8        8        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        8        8        -        -        -  
 
 `
 

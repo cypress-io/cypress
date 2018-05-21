@@ -7,7 +7,7 @@ e2e = require("../support/helpers/e2e")
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.0.0")
 
-{ runId, planId, machineId } = postRunResponse
+{ runId, planId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
 
 requests = null
@@ -57,7 +57,7 @@ ensureSchema = (requestSchema, responseSchema) ->
         body
       })
     catch err
-      res.status(400).json(getSchemaErr(err, requestSchema))
+      res.status(412).json(getSchemaErr(err, requestSchema))
 
 sendUploadUrls = (req, res) ->
   { body } = req
@@ -158,7 +158,11 @@ describe "e2e record", ->
         snapshot: true
         expectedExitCode: 3
       })
-      .then ->
+      .get("stdout")
+      .then (stdout) ->
+        expect(stdout).to.include("Run URL:")
+        expect(stdout).to.include(runUrl)
+
         urls = getRequestUrls()
 
         ## first create run request
@@ -303,6 +307,28 @@ describe "e2e record", ->
         expect(forthInstanceStdout.body.stdout).not.to.include("record_error_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
+
+  context "misconfiguration", ->
+    setup([])
+
+    it "errors and exits when no specs found", ->
+      e2e.exec(@, {
+        spec: "notfound/**"
+        snapshot: true
+        expectedExitCode: 1
+      })
+      .then ->
+        expect(getRequestUrls()).to.be.empty
+
+    it "errors and exits when no browser found", ->
+      e2e.exec(@, {
+        browser: "browserDoesNotExist"
+        spec: "record_pass*"
+        snapshot: true
+        expectedExitCode: 1
+      })
+      .then ->
+        expect(getRequestUrls()).to.be.empty
 
   context "projectId", ->
     e2e.setup()

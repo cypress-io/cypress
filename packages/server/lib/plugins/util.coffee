@@ -1,7 +1,7 @@
-EE = require("events")
 _ = require("lodash")
+EE = require("events")
+debug = require("debug")("cypress:server:plugins")
 Promise = require("bluebird")
-log = require("debug")("cypress:server:plugins")
 
 UNDEFINED_SERIALIZED = "__cypress_undefined__"
 
@@ -48,15 +48,17 @@ module.exports = {
     new Promise (resolve, reject) ->
       handler = (err, value) ->
         ipc.removeListener("promise:fulfilled:#{invocationId}", handler)
+
         if err
-          log("promise rejected for id", invocationId, ":", err)
+          debug("promise rejected for id %s %o", invocationId, ":", err.stack)
           reject(_.extend(new Error(err.message), err))
           return
 
         if value is UNDEFINED_SERIALIZED
           value = undefined
 
-        log("promise resolved for id '#{invocationId}' with value", value)
+        debug("promise resolved for id '#{invocationId}' with value", value)
+        
         resolve(value)
 
       ipc.on("promise:fulfilled:#{invocationId}", handler)

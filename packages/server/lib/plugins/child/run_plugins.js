@@ -1,4 +1,4 @@
-const log = require('debug')('cypress:server:plugins:child')
+const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
@@ -23,7 +23,7 @@ const sendError = (ipc, err) => {
 let plugins
 
 const load = (ipc, config, pluginsFile) => {
-  log('run plugins function')
+  debug('run plugins function')
 
   let eventIdCount = 0
   const registrations = []
@@ -34,7 +34,7 @@ const load = (ipc, config, pluginsFile) => {
     const eventId = eventIdCount++
     registeredEvents[eventId] = { event, handler }
 
-    log('register event', event, 'with id', eventId)
+    debug('register event', event, 'with id', eventId)
 
     registrations.push({
       event,
@@ -59,7 +59,7 @@ const load = (ipc, config, pluginsFile) => {
 }
 
 const execute = (ipc, event, ids, args = []) => {
-  log(`execute plugin event ${event} (%o)`, ids)
+  debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
     case 'file:preprocessor':
@@ -78,38 +78,38 @@ const execute = (ipc, event, ids, args = []) => {
       task.getBody(ipc, registeredEvents, ids, args)
       return
     default:
-      log('unexpected execute message:', event, args)
+      debug('unexpected execute message:', event, args)
       return
   }
 }
 
 module.exports = (ipc, pluginsFile) => {
-  log('pluginsFile:', pluginsFile)
+  debug('pluginsFile:', pluginsFile)
 
   process.on('uncaughtException', (err) => {
-    log('uncaught exception:', util.serializeError(err))
+    debug('uncaught exception:', util.serializeError(err))
     ipc.send('error', util.serializeError(err))
     return false
   })
 
   process.on('unhandledRejection', (event) => {
     const err = (event && event.reason) || event
-    log('unhandled rejection:', util.serializeError(err))
+    debug('unhandled rejection:', util.serializeError(err))
     ipc.send('error', util.serializeError(err))
     return false
   })
 
   try {
-    log('require pluginsFile')
+    debug('require pluginsFile')
     plugins = require(pluginsFile)
   } catch (err) {
-    log('failed to require pluginsFile:\n%s', err.stack)
+    debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
     return
   }
 
   if (typeof plugins !== 'function') {
-    log('not a function')
+    debug('not a function')
     ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
     return
   }

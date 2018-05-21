@@ -30,7 +30,7 @@ exitErr = (err) ->
   ## and potentially raygun
   ## and exit with 1
   debug('exiting with err', err)
-  
+
   require("./errors").log(err)
   .then -> exit(1)
 
@@ -108,7 +108,7 @@ module.exports = {
     #   require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
-    require("./logger").info("starting desktop app", args: argv)
+    debug("starting cypress with argv %o", argv)
 
     ## make sure we have the appData folder
     require("./util/app_data").ensure()

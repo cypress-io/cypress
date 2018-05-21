@@ -1,52 +1,255 @@
 _          = require("lodash")
+pkg        = require("@packages/root")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
-Promise    = require("bluebird")
-pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
+Promise    = require("bluebird")
+logSymbols = require("log-symbols")
 recordMode = require("./record")
-user       = require("../user")
 video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
+browsers   = require("../browsers")
 openProject = require("../open_project")
 Windows    = require("../gui/windows")
 fs         = require("../util/fs")
 env        = require("../util/env")
 trash      = require("../util/trash")
 random     = require("../util/random")
+system     = require("../util/system")
 progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
-statsUtil  = require("../util/stats")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
 
+color = (val, c) ->
+  chalk[c](val)
+
+gray = (val) ->
+  color(val, "gray")
+
+colorIf = (val, c) ->
+  if val is 0
+    val = "-"
+    c = "gray"
+
+  color(val, c)
+
+getSymbol = (num) ->
+  if num then logSymbols.error else logSymbols.success
+
+formatBrowser = (browser, headed) ->
+  isHeadless = browser.name is "electron" and not headed
+
+  ## todo finish browser
+  _.compact([
+    browser.displayName,
+    browser.majorVersion,
+    isHeadless and gray("(headless)")
+  ]).join(" ")
+
+formatFooterSummary = (results) ->
+  { totalFailures, runs } = results
+
+  ## pass or fail color
+  c = if totalFailures then "red" else "green"
+
+  phrase = do ->
+    ## if we have any specs failing...
+    if not totalFailures
+      return "All specs passed!"
+
+    ## number of specs
+    total = runs.length
+    failingRuns = _.filter(runs, "stats.failures").length
+    percent = Math.round(failingRuns / total * 100)
+
+    "#{failingRuns} of #{total} failed (#{percent}%)"
+
+  return [
+    color(phrase, c),
+    gray(humanTime.short(results.totalDuration)),
+    colorIf(results.totalTests, "reset"),
+    colorIf(results.totalPasses, "green"),
+    colorIf(totalFailures, "red"),
+    colorIf(results.totalPending, "cyan"),
+    colorIf(results.totalSkipped, "blue"),
+  ]
+
+formatSpecSummary = (name, failures) ->
+  [
+    getSymbol(failures),
+    color(name, "reset")
+  ]
+  .join(" ")
+
+formatSpecPattern = (specPattern) ->
+  if specPattern
+    specPattern.join(", ")
+
+formatSpecs = (specs) ->
+  names = _.map(specs, "name")
+
+  ## 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
+  [
+    "#{names.length} found "
+    gray("("),
+    gray(names.join(', ')),
+    gray(")")
+  ]
+  .join("")
+
+displayRunStarting = (options = {}) ->
+  { specs, specPattern, browser, headed, runUrl } = options
+
+  console.log("")
+
+  terminal.divider("=")
+
+  console.log("")
+
+  terminal.header("Run Starting", {
+    color: ["reset"]
+  })
+
+  console.log("")
+
+  table = terminal.table({
+    colWidths: [12, 88]
+    type: "outsideBorder"
+  })
+
+  data = _
+  .chain([
+    [gray("Cypress:"), pkg.version]
+    [gray("Browser:"), formatBrowser(browser, headed)]
+    [gray("Specs:"), formatSpecs(specs)]
+    [gray("Searched:"), formatSpecPattern(specPattern)]
+    [gray("Run URL:"), runUrl]
+  ])
+  .filter(_.property(1))
+  .value()
+
+  table.push(data...)
+
+  console.log(table.toString())
+
+  console.log("")
+
+displaySpecHeader = (name, curr, total) ->
+  console.log("")
+
+  table = terminal.table({
+    colWidths: [80, 20]
+    colAligns: ["left", "right"]
+    type: "pageDivider"
+    style: {
+      "padding-left": 2
+    }
+  })
+
+  table.push(["", ""])
+  table.push([
+    "Running: " + gray(name + "..."),
+    gray("(#{curr} of #{total})")
+  ])
+
+  console.log(table.toString())
+
 collectTestResults = (obj = {}) ->
   {
+    name:        _.get(obj, 'spec.name')
     tests:       _.get(obj, 'stats.tests')
     passes:      _.get(obj, 'stats.passes')
     pending:     _.get(obj, 'stats.pending')
     failures:    _.get(obj, 'stats.failures')
     skipped:     _.get(obj, 'stats.skipped' )
-    duration:    humanTime(_.get(obj, 'stats.duration'))
+    duration:    humanTime.long(_.get(obj, 'stats.wallClockDuration'))
     screenshots: obj.screenshots and obj.screenshots.length
     video:       Boolean(obj.video)
-    version:     pkg.version
   }
 
-allDone = ->
-  console.log("")
+renderSummaryTable = (runUrl, results) ->
+  { runs } = results
+
   console.log("")
 
-  terminal.header("All Done", {
-    color: ["gray"]
+  terminal.divider("=")
+
+  console.log("")
+
+  terminal.header("Run Finished", {
+    color: ["reset"]
   })
 
-  console.log("")
+  if runs and runs.length
+    head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
+    colAligns = ["left", "right", "right", "right", "right", "right", "right"]
+    colWidths = [40, 10, 10, 10, 10, 10, 10]
+
+    table1 = terminal.table({
+      colAligns
+      colWidths
+      type: "noBorder"
+      head: _.map(head, gray)
+    })
+
+    table2 = terminal.table({
+      colAligns
+      colWidths
+      type: "border"
+    })
+
+    table3 = terminal.table({
+      colAligns
+      colWidths
+      type: "noBorder"
+      head: formatFooterSummary(results)
+      style: {
+        "padding-right": 2
+      }
+    })
+
+    _.each runs, (run) ->
+      { spec, stats } = run
+
+      ms = humanTime.short(stats.wallClockDuration)
+
+      table2.push([
+        formatSpecSummary(spec.name, stats.failures)
+        color(ms, "gray")
+        colorIf(stats.tests, "reset")
+        colorIf(stats.passes, "green"),
+        colorIf(stats.failures, "red"),
+        colorIf(stats.pending, "cyan"),
+        colorIf(stats.skipped, "blue")
+      ])
+
+    console.log("")
+    console.log("")
+    console.log(terminal.renderTables(table1, table2, table3))
+    console.log("")
+
+    if runUrl
+      console.log("")
+
+      table4 = terminal.table({
+        colWidths: [100]
+        type: "pageDivider"
+        style: {
+          "padding-left": 2
+        }
+      })
+
+      table4.push(["", ""])
+      table4.push(["Recorded Run: " + gray(runUrl)])
+
+      console.log(terminal.renderTables(table4))
+      console.log("")
 
 getProjectId = (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
@@ -88,7 +291,7 @@ openProjectCreate = (projectRoot, socketId, options) ->
     report:       true
     isTextTerminal:   options.isTextTerminal ? true
     onError: (err) ->
-      console.log()
+      console.log("")
       console.log(err.stack)
       openProject.emit("exitEarlyWithErr", err.message)
   })
@@ -114,6 +317,18 @@ createAndOpenProject = (socketId, options) ->
       projectId: getProjectId(project, projectId)
     })
 
+trashAssets = (config = {}) ->
+  if config.trashAssetsBeforeHeadlessRuns isnt true
+    return Promise.resolve()
+
+  Promise.join(
+    trash.folder(config.videosFolder)
+    trash.folder(config.screenshotsFolder)
+  )
+  .catch (err) ->
+    ## dont make trashing assets fail the build
+    errors.warning("CANNOT_TRASH_ASSETS", err.stack)
+
 module.exports = {
   collectTestResults
 
@@ -126,10 +341,9 @@ module.exports = {
   createRecording: (name) ->
     outputDir = path.dirname(name)
 
-    fs.ensureDirAsync(outputDir)
+    fs
+    .ensureDirAsync(outputDir)
     .then ->
-      console.log("\nStarted video recording: #{chalk.cyan(name)}\n")
-
       video.start(name, {
         onError: (err) ->
           ## catch video recording failures and log them out
@@ -162,22 +376,43 @@ module.exports = {
 
     obj
 
-  displayStats: (obj = {}) ->
-    bgColor = if obj.failures then "bgRed" else "bgGreen"
-    color   = if obj.failures then "red"   else "green"
+  displayResults: (obj = {}) ->
+    results = collectTestResults(obj)
+
+    c = if results.failures then "red" else "green"
 
     console.log("")
 
-    terminal.header("Tests Finished", {
-      color: [color]
+    terminal.header("Results", {
+      color: [c]
     })
 
-    console.log("")
+    table = terminal.table({
+      type: "outsideBorder"
+    })
 
-    statsUtil.display(color, obj)
+    data = _.map [
+      ["Tests:", results.tests]
+      ["Passing:", results.passes]
+      ["Failing:", results.failures]
+      ["Pending:", results.pending]
+      ["Skipped:", results.skipped]
+      ["Screenshots:", results.screenshots]
+      ["Video:", results.video]
+      ["Duration:", results.duration]
+      ["Spec Ran:", results.name]
+    ], (arr) ->
+      [key, val] = arr
+
+      [color(key, "gray"), color(val, c)]
+
+    table.push(data...)
+
+    console.log("")
+    console.log(table.toString())
+    console.log("")
 
   displayScreenshots: (screenshots = []) ->
-    console.log("")
     console.log("")
 
     terminal.header("Screenshots", {color: ["yellow"]})
@@ -185,15 +420,17 @@ module.exports = {
     console.log("")
 
     format = (s) ->
-      dimensions = chalk.gray("(#{s.width}x#{s.height})")
+      dimensions = gray("(#{s.width}x#{s.height})")
 
       "  - #{s.path} #{dimensions}"
 
     screenshots.forEach (screenshot) ->
       console.log(format(screenshot))
 
+    console.log("")
+
   postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
-    debug("ending the video recording %o", { name })
+    debug("ending the video recording %o", { name, videoCompression, shouldUploadVideo })
 
     ## once this ended promises resolves
     ## then begin processing the file
@@ -204,7 +441,6 @@ module.exports = {
       return if videoCompression is false or shouldUploadVideo is false
 
       console.log("")
-      console.log("")
 
       terminal.header("Video", {
         color: ["cyan"]
@@ -213,7 +449,10 @@ module.exports = {
       console.log("")
 
       # bar = progress.create("Post Processing Video")
-      console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression} CRF"))
+      console.log(
+        gray("  - Started processing:  "),
+        chalk.cyan("Compressing to #{videoCompression} CRF")
+      )
 
       started  = new Date
       progress = Date.now()
@@ -223,8 +462,13 @@ module.exports = {
         switch
           when float is 1
             finished = new Date - started
-            duration = "(#{humanTime(finished)})"
-            console.log("  - Finished processing: ", chalk.cyan(name), chalk.gray(duration))
+            duration = "(#{humanTime.long(finished)})"
+            console.log(
+              gray("  - Finished processing: "),
+              chalk.cyan(name),
+              gray(duration)
+            )
+            console.log("")
 
           when (new Date - progress) > tenSecs
             ## bump up the progress so we dont
@@ -246,11 +490,11 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   launchBrowser: (options = {}) ->
-    { browser, spec, write, headed, project, screenshots } = options
+    { browserName, spec, write, headed, project, screenshots } = options
 
     headed = !!headed
 
-    browserOpts = switch browser
+    browserOpts = switch browserName
       when "electron"
         @getElectronProps(headed, project, write)
       else
@@ -266,7 +510,7 @@ module.exports = {
 
     browserOpts.projectRoot = options.projectRoot
 
-    openProject.launch(browser, spec.absolute, browserOpts)
+    openProject.launch(browserName, spec.absolute, browserOpts)
 
   listenForProjectEnd: (project, headed, exit) ->
     new Promise (resolve) ->
@@ -371,14 +615,12 @@ module.exports = {
       if screenshots
         obj.screenshots = screenshots
 
-      obj.spec = spec?.path
-
-      testResults = collectTestResults(obj)
+      obj.spec = spec
 
       finish = ->
         return obj
 
-      @displayStats(testResults)
+      @displayResults(obj)
 
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
@@ -414,24 +656,9 @@ module.exports = {
         else
           finish()
 
-  trashAssets: (config = {}) ->
-    if config.trashAssetsBeforeHeadlessRuns is true
-      Promise.join(
-        trash.folder(config.videosFolder)
-        trash.folder(config.screenshotsFolder)
-      )
-      .catch (err) ->
-        ## dont make trashing assets fail the build
-        errors.warning("CANNOT_TRASH_ASSETS", err.stack)
-    else
-      Promise.resolve()
-
   screenshotMetadata: (data, resp) ->
-    ## TODO: update all of these properties
-    ## because we have a full array of tests
-    ## no need for testTitle
     {
-      screenshotId:  random.id()
+      screenshotId: random.id()
       name:      data.name ? null
       testId:    data.testId
       takenAt:   resp.takenAt
@@ -441,7 +668,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, outputPath, specs, beforeSpecRun, afterSpecRun } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl } = options
 
     results = {
       startedTestsAt: null
@@ -453,16 +680,25 @@ module.exports = {
       totalPasses: null,
       totalPending: null,
       totalSkipped: null,
-      runs: null
-      browserName: 'chrome',
-      browserVersion: '41.2.3.4',
-      osName: 'darwin',
-      osVersion: '1.2.3.4',
-      cypressVersion: '2.0.0',
-      config
+      runs: null,
+      browserPath: browser.path,
+      browserName: browser.name,
+      browserVersion: browser.version,
+      osName: sys.osName,
+      osVersion: sys.osVersion,
+      cypressVersion: pkg.version,
+      config,
     }
 
-    runEachSpec = (spec) =>
+    displayRunStarting({
+      specs
+      runUrl
+      headed
+      browser
+      specPattern
+    })
+
+    runEachSpec = (spec, index, length) =>
       Promise
       .try ->
         if beforeSpecRun
@@ -470,6 +706,8 @@ module.exports = {
 
           beforeSpecRun(spec)
       .then =>
+        displaySpecHeader(spec.name, index + 1, length)
+
         @runSpec(spec, options)
       .get("results")
       .tap (results) ->
@@ -480,19 +718,18 @@ module.exports = {
 
           afterSpecRun(results, config)
 
-    Promise.mapSeries(specs, runEachSpec)
+    Promise
+    .mapSeries(specs, runEachSpec)
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
       results.totalDuration = reduceRuns(runs, "stats.wallClockDuration")
-
       results.totalSuites = reduceRuns(runs, "stats.suites")
       results.totalTests = reduceRuns(runs, "stats.tests")
       results.totalPasses = reduceRuns(runs, "stats.passes")
       results.totalPending = reduceRuns(runs, "stats.pending")
       results.totalFailures = reduceRuns(runs, "stats.failures")
       results.totalSkipped = reduceRuns(runs, "stats.skipped")
-
       results.runs = runs
 
       debug("final results of all runs: %o", results)
@@ -503,12 +740,12 @@ module.exports = {
   runSpec: (spec = {}, options = {}) ->
     { project, headed, browser, videoRecording, videosFolder } = options
 
-    browser ?= "electron"
+    browserName = browser.name
 
     debug("about to run spec %o", {
       spec
       headed
-      browser
+      browserName
     })
 
     screenshots = []
@@ -524,25 +761,26 @@ module.exports = {
       name is "electron" and not options.headed
 
     if videoRecording
-      if browserCanBeRecorded(browser)
+      if browserCanBeRecorded(browserName)
         if not videosFolder
           throw new Error("Missing videoFolder for recording")
 
-        name      = path.join(videosFolder, spec.name + ".mp4")
-        cname     = path.join(videosFolder, spec.name + "-compressed.mp4")
+        name  = path.join(videosFolder, spec.name + ".mp4")
+        cname = path.join(videosFolder, spec.name + "-compressed.mp4")
+
         recording = @createRecording(name)
       else
-        if browser is "electron" and options.headed
+        console.log("")
+
+        if browserName is "electron" and options.headed
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
+          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
 
     Promise.resolve(recording)
     .then (props = {}) =>
       ## extract the started + ended promises from recording
       {start, end, write} = props
-
-      terminal.header("Tests Starting", {color: ["gray"]})
 
       ## make sure we start the recording first
       ## before doing anything
@@ -567,9 +805,9 @@ module.exports = {
             spec
             write
             headed
-            browser
             project
             screenshots
+            browserName
             socketId:    options.socketId
             webSecurity: options.webSecurity
             projectRoot: options.projectRoot
@@ -578,9 +816,9 @@ module.exports = {
 
   findSpecs: (config, specPattern) ->
     specsUtil.find(config, specPattern)
-    .tap (files = []) =>
+    .tap (specs = []) =>
       if debug.enabled
-        names = _.map(files, "name")
+        names = _.map(specs, "name")
         debug(
           "found '%d' specs using spec pattern '%s': %o",
           names.length,
@@ -597,7 +835,9 @@ module.exports = {
 
     socketId = random.id()
 
-    { projectRoot, record, key, browser } = options
+    { projectRoot, record, key } = options
+
+    browserName = options.browser
 
     ## alias and coerce to null
     specPattern = options.spec ? null
@@ -615,44 +855,49 @@ module.exports = {
       if record
         recordMode.throwIfNoProjectId(projectId)
 
-      @findSpecs(config, specPattern)
-      .then (specs = []) =>
+      Promise.all([
+        system.info(),
+        browsers.ensureAndGetByName(browserName),
+        @findSpecs(config, specPattern),
+        trashAssets(config),
+      ])
+      .spread (sys = {}, browser = {}, specs = []) =>
         ## return only what is return to the specPattern
         if specPattern
           specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun) =>
-          if not specs.length
-            errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+        if not specs.length
+          errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-          @trashAssets(config)
-          .then =>
-            @runSpecs({
-              beforeSpecRun
-              afterSpecRun
-              projectRoot
-              socketId
-              browser
-              project
-              config
-              specs
-              videosFolder:         config.videosFolder
-              videoRecording:       config.videoRecording
-              videoCompression:     config.videoCompression
-              videoUploadOnPasses:  config.videoUploadOnPasses
-              exit:                 options.exit
-              headed:               options.headed
-              outputPath:           options.outputPath
-            })
-          .finally(allDone)
+        runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
+          @runSpecs({
+            beforeSpecRun
+            afterSpecRun
+            projectRoot
+            specPattern
+            socketId
+            browser
+            project
+            runUrl
+            config
+            specs
+            sys
+            videosFolder:         config.videosFolder
+            videoRecording:       config.videoRecording
+            videoCompression:     config.videoCompression
+            videoUploadOnPasses:  config.videoUploadOnPasses
+            exit:                 options.exit
+            headed:               options.headed
+            outputPath:           options.outputPath
+          })
+          .tap(_.partial(renderSummaryTable, runUrl))
 
-        ## TODO: we may still want to capture
-        ## stdout even when no specs were found
         if record
           { projectName } = config
 
           recordMode.createRunAndRecordSpecs({
             key
+            sys
             specs
             browser
             projectId

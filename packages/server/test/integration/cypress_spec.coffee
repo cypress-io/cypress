@@ -800,7 +800,8 @@ describe "lib/cypress", ->
           passes: 2
           failures: 3
           pending: 4
-          wallClockDuration: 5
+          skipped: 5
+          wallClockDuration: 6
         }
         tests: []
         hooks: []
@@ -808,6 +809,7 @@ describe "lib/cypress", ->
         shouldUploadVideo: true
         screenshots: []
         config: {}
+        spec: {}
       })
 
       Promise.all([

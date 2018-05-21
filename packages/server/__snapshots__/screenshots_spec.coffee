@@ -1,7 +1,19 @@
 exports['e2e screenshots passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (screenshots_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/screenshots_spec.coffee                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: screenshots_spec.coffee...                                                      (1 of 1) 
 
 
   taking screenshots
@@ -53,17 +65,19 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           14
-  - Passes:          11
-  - Failures:        3
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     16
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        14                      │
+  │ Passing:      11                      │
+  │ Failing:      3                       │
+  │ Pending:      0                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  16                      │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     screenshots_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -89,10 +103,19 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ screenshots_spec.coffee                      Xs       14       11        3        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs       14       11        3        -        -  
 
 `
 

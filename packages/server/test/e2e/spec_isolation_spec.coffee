@@ -105,6 +105,8 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       ## add these two together
       obj.fnDuration + obj.afterFnDuration
 
+    run.spec.absolute = e2e.normalizeStdout(run.spec.absolute)
+
     ## now make sure that each tests wallclock duration
     ## is around the sum of all of its timings
     run.tests.forEach (test) ->
@@ -180,6 +182,22 @@ describe "e2e spec_isolation", ->
 
         ## but zero out config because it's too volatile
         json.config = {}
+
+        expect(json.browserPath).to.be.a('string')
+        expect(json.browserName).to.be.a('string')
+        expect(json.browserVersion).to.be.a('string')
+        expect(json.osName).to.be.a('string')
+        expect(json.osVersion).to.be.a('string')
+        expect(json.cypressVersion).to.be.a('string')
+
+        _.extend(json, {
+          browserPath: 'path/to/browser'
+          browserName: 'FooBrowser'
+          browserVersion: '88'
+          osName: 'FooOS'
+          osVersion: '1234'
+          cypressVersion: '9.9.9'
+        })
 
         ## ensure the totals are accurate
         expect(json.totalTests).to.eq(

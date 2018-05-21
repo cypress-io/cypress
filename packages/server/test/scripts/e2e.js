@@ -75,7 +75,7 @@ glob('test/e2e/**/*')
 .then(() => {
   const duration = new Date() - started
 
-  console.log('Total duration:', humanTime(duration))
+  console.log('Total duration:', humanTime.long(duration))
   console.log('Exiting with final code:', numFailed)
 
   process.exit(numFailed)
