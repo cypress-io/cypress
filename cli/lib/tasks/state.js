@@ -53,12 +53,22 @@ const getVersionDir = (version = util.pkgVersion()) => {
 
 const getCacheDir = () => {
   let cache_directory = cachedir('Cypress')
-  if (process.env.CYPRESS_CACHE_DIRECTORY) {
-    const envVarCacheDir = process.env.CYPRESS_CACHE_DIRECTORY
-    debug('using env var CYPRESS_CACHE_DIRECTORY %s', envVarCacheDir)
+  if (process.env.CYPRESS_CACHE_FOLDER) {
+    const envVarCacheDir = process.env.CYPRESS_CACHE_FOLDER
+    debug('using environment variable CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
     cache_directory = envVarCacheDir
   }
   return cache_directory
+}
+
+const parsePlatformBinaryFolder = (executable) => {
+  if (!executable.toString().endsWith(getPlatformExecutable())) {
+    return false
+  }
+  if (os.platform() === 'darwin') {
+    return path.resolve(executable, '..', '..', '..')
+  }
+  return path.resolve(executable, '..')
 }
 
 const getDistDir = () => {
@@ -69,7 +79,7 @@ const getBinaryStatePath = (binaryDir) => {
   return path.join(binaryDir, 'binary_state.json')
 }
 
-const getBinaryStateContentsAsync = (binaryDir = getBinaryDir()) => {
+const getBinaryStateContentsAsync = (binaryDir) => {
   return fs.readJsonAsync(getBinaryStatePath(binaryDir))
   .catch({ code: 'ENOENT' }, SyntaxError, () => {
     debug('could not read binary_state.json file')
@@ -77,20 +87,20 @@ const getBinaryStateContentsAsync = (binaryDir = getBinaryDir()) => {
   })
 }
 
-const getBinaryVerifiedAsync = (binaryDir = getBinaryDir()) => {
+const getBinaryVerifiedAsync = (binaryDir) => {
   return getBinaryStateContentsAsync(binaryDir)
   .tap(debug)
   .get('verified')
 }
 
-const clearBinaryStateAsync = (binaryDir = getBinaryDir()) => {
+const clearBinaryStateAsync = (binaryDir) => {
   return fs.removeAsync(getBinaryStatePath(binaryDir))
 }
 
 /**
  * @param {boolean} verified
  */
-const writeBinaryVerifiedAsync = (verified, binaryDir = getBinaryDir()) => {
+const writeBinaryVerifiedAsync = (verified, binaryDir) => {
   return getBinaryStateContentsAsync(binaryDir)
   .then((contents) => {
     return fs.outputJsonAsync(
@@ -100,11 +110,11 @@ const writeBinaryVerifiedAsync = (verified, binaryDir = getBinaryDir()) => {
   })
 }
 
-const getPathToExecutable = (binaryDir = getBinaryDir()) => {
+const getPathToExecutable = (binaryDir) => {
   return path.join(binaryDir, getPlatformExecutable())
 }
 
-const getBinaryPkgVersionAsync = (binaryDir = getBinaryDir()) => {
+const getBinaryPkgVersionAsync = (binaryDir) => {
   const pathToPackageJson = getBinaryPkgPath(binaryDir)
   return fs.pathExistsAsync(pathToPackageJson)
   .then((exists) => {
@@ -119,6 +129,7 @@ const getBinaryPkgVersionAsync = (binaryDir = getBinaryDir()) => {
 
 module.exports = {
   getPathToExecutable,
+  getPlatformExecutable,
   getBinaryPkgVersionAsync,
   getBinaryVerifiedAsync,
   getBinaryPkgPath,
@@ -126,6 +137,7 @@ module.exports = {
   getCacheDir,
   clearBinaryStateAsync,
   writeBinaryVerifiedAsync,
+  parsePlatformBinaryFolder,
   getDistDir,
   getVersionDir,
 }

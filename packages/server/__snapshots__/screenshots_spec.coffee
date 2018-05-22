@@ -1,13 +1,35 @@
 exports['e2e screenshots passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (screenshots_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/screenshots_spec.coffee                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: screenshots_spec.coffee...                                                      (1 of 1) 
 
 
   taking screenshots
     ✓ manually generates pngs
     ✓ can nest screenshots in folders
     1) generates pngs on failure
+    ✓ crops app captures to just app size
+    ✓ can capture fullpage screenshots
+    ✓ accepts subsequent same captures after multiple tries
+    ✓ accepts screenshot after multiple tries if somehow app has pixels that match helper pixels
+    ✓ can capture element screenshots
+    clipping
+      ✓ can clip app screenshots
+      ✓ can clip runner screenshots
+      ✓ can clip fullpage screenshots
+      ✓ can clip element screenshots
     before hooks
       2) "before all" hook for "empty test 1"
     each hooks
@@ -15,7 +37,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
       4) "after each" hook for "empty test 2"
 
 
-  2 passing
+  11 passing
   4 failing
 
   1) taking screenshots generates pngs on failure:
@@ -43,17 +65,19 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           5
-  - Passes:          2
-  - Failures:        3
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     7
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        14                      │
+  │ Passing:      11                      │
+  │ Failing:      3                       │
+  │ Pending:      0                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  16                      │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     screenshots_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -62,6 +86,15 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/red.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/foobarbaz.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/crop-check.png (600x400)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-same.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/pathological.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element.png (400x300)
+  - /foo/bar/.projects/e2e/cypress/screenshots/app-clip.png (100x50)
+  - /foo/bar/.projects/e2e/cypress/screenshots/runner-clip.png (120x60)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-clip.png (140x70)
+  - /foo/bar/.projects/e2e/cypress/screenshots/element-clip.png (160x80)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- before hooks -- empty test 1 -- before all hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- before each hook.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- after each hook.png (1280x720)
@@ -70,10 +103,19 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ screenshots_spec.coffee                      Xs       14       11        3        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs       14       11        3        -        -  
 
 `
 

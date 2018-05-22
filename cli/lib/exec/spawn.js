@@ -1,7 +1,6 @@
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
-const tty = require('tty')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
@@ -11,15 +10,30 @@ const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
-const isXlibOrLibudevRe = /^(Xlib|libudev)/
+const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
+const isHighSierraWarningRe = /\*\*\* WARNING/
 
-function needsStderrPipe (needsXvfb) {
-  return needsXvfb && os.platform() === 'linux'
+function isPlatform (platform) {
+  return os.platform() === platform
+}
+
+function needsStderrPiped (needsXvfb) {
+  return isPlatform('darwin') || (needsXvfb && isPlatform('linux'))
+}
+
+function needsEverythingPipedDirectly () {
+  return isPlatform('win32')
 }
 
 function getStdio (needsXvfb) {
+  if (needsEverythingPipedDirectly()) {
+    return 'pipe'
+  }
+
   // https://github.com/cypress-io/cypress/issues/921
-  if (needsStderrPipe(needsXvfb)) {
+  // https://github.com/cypress-io/cypress/issues/1143
+  // https://github.com/cypress-io/cypress/issues/1745
+  if (needsStderrPiped(needsXvfb)) {
     // returning pipe here so we can massage stderr
     // and remove garbage from Xlib and libuv
     // due to starting the XVFB process on linux
@@ -32,6 +46,11 @@ function getStdio (needsXvfb) {
 module.exports = {
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
+    let executable = state.getPathToExecutable(state.getBinaryDir())
+
+    if (process.env.CYPRESS_RUN_BINARY) {
+      executable = process.env.CYPRESS_RUN_BINARY
+    }
 
     debug('needs XVFB?', needsXvfb)
 
@@ -39,65 +58,46 @@ module.exports = {
     args = [].concat(args, '--cwd', process.cwd())
 
     _.defaults(options, {
+      env: process.env,
       detached: false,
       stdio: getStdio(needsXvfb),
-      binaryFolder: process.env.CYPRESS_BINARY_FOLDER || state.getBinaryDir(),
     })
 
     const spawn = () => {
       return new Promise((resolve, reject) => {
-        let binaryFolder = state.getPathToExecutable(options.binaryFolder)
-
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          binaryFolder = 'node'
+          executable = 'node'
           args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
-        debug('spawning Cypress %s', binaryFolder)
+        debug('spawning Cypress %s', executable)
         debug('spawn args %j', args, options)
 
         // strip dev out of child process options
         options = _.omit(options, 'dev')
         options = _.omit(options, 'binaryFolder')
 
-        // when running in electron in windows
-        // it never supports color but we're
-        // going to force it anyway as long
-        // as our parent cli process can support
-        // colors!
-        //
-        // also when we are in linux and using the 'pipe'
-        // option our process.stderr.isTTY will not be true
-        // which ends up disabling the colors =(
-        if (util.supportsColor()) {
-          process.env.FORCE_COLOR = 1
-          process.env.DEBUG_COLORS = 1
-          process.env.MOCHA_COLORS = 1
-        }
+        // figure out if we're going to be force enabling or disabling colors.
+        // also figure out whether we should force stdout and stderr into thinking
+        // it is a tty as opposed to a pipe.
+        options.env = _.extend({}, options.env, util.getEnvOverrides())
 
-        // if we needed to pipe stderr and we're currently
-        // a tty on stderr
-        if (needsStderrPipe(needsXvfb) && tty.isatty(2)) {
-          // then force stderr tty
-          //
-          // this is necessary because we want our child
-          // electron browser to behave _THE SAME WAY_ as
-          // if we aren't using pipe. pipe is necessary only
-          // to filter out garbage on stderr -____________-
-          process.env.FORCE_STDERR_TTY = 1
-        }
-
-        const child = cp.spawn(binaryFolder, args, options)
+        const child = cp.spawn(executable, args, options)
         child.on('close', resolve)
         child.on('error', reject)
+
+        child.stdin && child.stdin.pipe(process.stdin)
+        child.stdout && child.stdout.pipe(process.stdout)
 
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
         child.stderr && child.stderr.on('data', (data) => {
-          // bail if this is a line from xlib or libudev
-          if (isXlibOrLibudevRe.test(data.toString())) {
+          const str = data.toString()
+
+          // bail if this is warning line garbage
+          if (isXlibOrLibudevRe.test(str) || isHighSierraWarningRe.test(str)) {
             return
           }
 
@@ -112,7 +112,8 @@ module.exports = {
     }
 
     const userFriendlySpawn = () => {
-      return spawn().catch(throwFormErrorText(errors.unexpected))
+      return spawn()
+      .catch(throwFormErrorText(errors.unexpected))
     }
 
     if (needsXvfb) {

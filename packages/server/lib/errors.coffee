@@ -39,6 +39,8 @@ API = {
         """
       when "BROWSER_NOT_FOUND"
         """
+        Can't run because you've entered an invalid browser.
+
         Browser: '#{arg1}' was not found on your system.
 
         Available browsers found are: #{arg2}
@@ -149,13 +151,23 @@ API = {
 
         #{JSON.stringify(arg1.object, null, 2)}
         """
+      when "RECORDING_FROM_FORK_PR"
+        """
+        Warning: It looks like you are trying to record this run from a forked PR.
+
+        The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+
+        These results will not be recorded.
+
+        This error will not alter the exit code.
+        """
       when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
         """
         Warning: We encountered an error while uploading results from your run.
 
         These results will not be recorded.
 
-        This error will not alter or the exit code.
+        This error will not alter the exit code.
 
         #{arg1}
         """

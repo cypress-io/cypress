@@ -376,8 +376,8 @@ class RunsList extends Component {
     ipc.externalOpen('https://on.cypress.io/what-is-a-project-id')
   }
 
-  _openRun = (runId) => {
-    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${runId}`)
+  _openRun = (buildNumber) => {
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${buildNumber}`)
   }
 
   _openAPIHelp () {

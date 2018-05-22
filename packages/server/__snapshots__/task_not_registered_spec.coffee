@@ -1,7 +1,19 @@
 exports['e2e task fails 1'] = `
-Started video recording: /foo/bar/.projects/task-not-registered/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (task_not_registered_spec.coffee)                                          │
+  │ Searched:   cypress/integration/task_not_registered_spec.coffee                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: task_not_registered_spec.coffee...                                              (1 of 1) 
 
 
   1) fails because the 'task' event is not registered in plugins file
@@ -35,17 +47,19 @@ https://on.cypress.io/api/task
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────┐
+  │ Tests:        1                               │
+  │ Passing:      0                               │
+  │ Failing:      1                               │
+  │ Pending:      0                               │
+  │ Skipped:      0                               │
+  │ Screenshots:  1                               │
+  │ Video:        true                            │
+  │ Duration:     X seconds                       │
+  │ Spec Ran:     task_not_registered_spec.coffee │
+  └───────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -56,10 +70,19 @@ https://on.cypress.io/api/task
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/task-not-registered/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/task-not-registered/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ task_not_registered_spec.coffee              Xs        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
 
 `
 

@@ -151,7 +151,7 @@ describe "lib/plugins/child/run_plugins", ->
     context "task", ->
       beforeEach ->
         sinon.stub(task, "wrap")
-        @ids = { eventId: 2, invocationId: "00" }
+        @ids = { eventId: 5, invocationId: "00" }
 
       it "calls task handler", ->
         args = ["arg1"]

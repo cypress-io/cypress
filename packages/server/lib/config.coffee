@@ -41,13 +41,12 @@ configKeys = toWords """
   port                            supportFolder
   reporter                        videosFolder
   reporterOptions
-  screenshotOnHeadlessFailure     defaultCommandTimeout
-  testFiles                       execTimeout
-  trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  blacklistHosts                  requestTimeout
-  userAgent                       responseTimeout
-  viewportWidth                   taskTimeout
-  viewportHeight
+  testFiles                       defaultCommandTimeout
+  trashAssetsBeforeHeadlessRuns   execTimeout
+  blacklistHosts                  pageLoadTimeout
+  userAgent                       requestTimeout
+  viewportWidth                   responseTimeout
+  viewportHeight                  taskTimeout
   videoRecording
   videoCompression
   videoUploadOnPasses
@@ -109,7 +108,6 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  screenshotOnHeadlessFailure:   true
   trashAssetsBeforeHeadlessRuns: true
   autoOpen:                      false
   viewportWidth:                 1000
@@ -148,7 +146,6 @@ validationRules = {
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
   testFiles: v.isString
-  screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
   trashAssetsBeforeHeadlessRuns: v.isBoolean

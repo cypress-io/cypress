@@ -8,7 +8,7 @@ URL: https://download.cypress.io/desktop?platform=OS&arch=ARCH
 404 - Not Found
 ----------
 
-Platform: darwin (test release)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
