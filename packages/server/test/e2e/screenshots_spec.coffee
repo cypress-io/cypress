@@ -14,14 +14,14 @@ onServer = (app) ->
   app.get "/color/:color", (req, res) ->
     e2e.sendHtml("""<div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>""")(req, res)
 
-  app.get "/fullpage", e2e.sendHtml("""
+  app.get "/fullPage", e2e.sendHtml("""
     <style>body { margin: 0; }</style>
     <div style="background: white; height: 200px;"></div>
     <div style="background: black; height: 200px;"></div>
     <div style="background: white; height: 100px;"></div>
   """)
 
-  app.get "/fullpage-same", e2e.sendHtml("""
+  app.get "/fullPage-same", e2e.sendHtml("""
     <style>body { margin: 0; }</style>
     <div style="height: 500px;"></div>
   """)

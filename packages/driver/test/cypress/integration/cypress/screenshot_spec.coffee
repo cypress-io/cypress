@@ -82,12 +82,12 @@ describe "src/cypress/screenshot", ->
       it "throws if capture is not a string", ->
         expect =>
           Screenshot.defaults({ capture: true })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: true")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: true")
 
       it "throws if capture is not a valid option", ->
         expect =>
           Screenshot.defaults({ capture: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: foo")
+        .to.throw("Cypress.Screenshot.defaults() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: foo")
 
       it "throws if scale is not a boolean", ->
         expect =>

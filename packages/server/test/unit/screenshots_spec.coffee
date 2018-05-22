@@ -144,7 +144,7 @@ describe "lib/screenshots", ->
         screenshots.capture(@appData, @automate).then =>
           expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
-    describe "multi-part capture (fullpage or element)", ->
+    describe "multi-part capture (fullPage or element)", ->
       beforeEach ->
         screenshots.clearMultipartState()
 

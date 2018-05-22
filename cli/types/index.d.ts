@@ -1280,7 +1280,7 @@ declare namespace Cypress {
 
   interface ScreenshotOptions {
     blackout: string[]
-    capture: 'runner' | 'viewport' | 'fullpage'
+    capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
     scale: boolean

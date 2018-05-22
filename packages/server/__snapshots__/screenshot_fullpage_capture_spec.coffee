@@ -1,4 +1,4 @@
-exports['e2e screenshot fullpage capture passes 1'] = `
+exports['e2e screenshot fullPage capture passes 1'] = `
 ====================================================================================================
 
   (Run Starting)
@@ -16,7 +16,7 @@ exports['e2e screenshot fullpage capture passes 1'] = `
   Running: screenshot_fullpage_capture_spec.coffee...                                      (1 of 1) 
 
 
-  ✓ takes consistent fullpage captures
+  ✓ takes consistent fullPage captures
 
   1 passing
 
@@ -38,17 +38,17 @@ exports['e2e screenshot fullpage capture passes 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-original.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-original.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
 
 
   (Video)
