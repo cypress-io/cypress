@@ -315,7 +315,7 @@ describe "src/cy/commands/screenshot", ->
             blackout: []
           })
 
-      it "always sends waitForCommandSynchronization: false for viewport/fullpage captures", ->
+      it "always sends waitForCommandSynchronization: false for viewport/fullPage captures", ->
         runnable = cy.state("runnable")
         @screenshotConfig.waitForAnimations = true
 
@@ -332,7 +332,7 @@ describe "src/cy/commands/screenshot", ->
             blackout: [".foo"]
           })
 
-    describe "capture: fullpage", ->
+    describe "capture: fullPage", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves(@serverResult)
         cy.spy(Cypress, "action").log(false)
@@ -344,7 +344,7 @@ describe "src/cy/commands/screenshot", ->
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledThrice
 
-      it "sends capture: fullpage", ->
+      it "sends capture: fullPage", ->
         cy.screenshot({ capture: "fullPage" })
         .then ->
           take = Cypress.automation.withArgs("take:screenshot")
@@ -527,11 +527,11 @@ describe "src/cy/commands/screenshot", ->
         return null
 
       it "throws if capture is not a string", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: true", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: true", done)
         cy.screenshot({ capture: true })
 
       it "throws if capture is not a valid option", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullpage', 'viewport', or 'runner'. You passed: foo", done)
+        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: foo", done)
         cy.screenshot({ capture: "foo" })
 
       it "throws if scale is not a boolean", (done) ->

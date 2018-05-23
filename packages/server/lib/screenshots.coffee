@@ -26,7 +26,7 @@ isBlack = (rgba) ->
 isWhite = (rgba) ->
   "#{rgba.r}#{rgba.g}#{rgba.b}" is "255255255"
 
-## when we hide the runner UI for an app or fullpage capture
+## when we hide the runner UI for an app or fullPage capture
 ## the browser doesn't paint synchronously, it can take 100+ ms
 ## to ensure that the runner UI has been hidden, we put
 ## pixels in the corners of the runner UI like so:
@@ -38,7 +38,7 @@ isWhite = (rgba) ->
 ## |w           b|
 ##  -------------
 ##
-## when taking an 'app' or 'fullpage' capture, we ensure that the pixels
+## when taking an 'app' or 'fullPage' capture, we ensure that the pixels
 ## are NOT there before accepting the screenshot
 ## when taking a 'runner' capture, we ensure the pixels ARE there
 
