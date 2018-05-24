@@ -53,14 +53,14 @@ formatBrowser = (browser, headed) ->
   ]).join(" ")
 
 formatFooterSummary = (results) ->
-  { totalFailures, runs } = results
+  { totalFailed, runs } = results
 
   ## pass or fail color
-  c = if totalFailures then "red" else "green"
+  c = if totalFailed then "red" else "green"
 
   phrase = do ->
     ## if we have any specs failing...
-    if not totalFailures
+    if not totalFailed
       return "All specs passed!"
 
     ## number of specs
@@ -74,8 +74,8 @@ formatFooterSummary = (results) ->
     color(phrase, c),
     gray(humanTime.short(results.totalDuration)),
     colorIf(results.totalTests, "reset"),
-    colorIf(results.totalPasses, "green"),
-    colorIf(totalFailures, "red"),
+    colorIf(results.totalPassed, "green"),
+    colorIf(totalFailed, "red"),
     colorIf(results.totalPending, "cyan"),
     colorIf(results.totalSkipped, "blue"),
   ]
@@ -676,8 +676,8 @@ module.exports = {
       totalDuration: null
       totalSuites: null,
       totalTests: null,
-      totalFailures: null,
-      totalPasses: null,
+      totalFailed: null,
+      totalPassed: null,
       totalPending: null,
       totalSkipped: null,
       runs: null,
@@ -726,9 +726,9 @@ module.exports = {
       results.totalDuration = reduceRuns(runs, "stats.wallClockDuration")
       results.totalSuites = reduceRuns(runs, "stats.suites")
       results.totalTests = reduceRuns(runs, "stats.tests")
-      results.totalPasses = reduceRuns(runs, "stats.passes")
+      results.totalPassed = reduceRuns(runs, "stats.passes")
       results.totalPending = reduceRuns(runs, "stats.pending")
-      results.totalFailures = reduceRuns(runs, "stats.failures")
+      results.totalFailed = reduceRuns(runs, "stats.failures")
       results.totalSkipped = reduceRuns(runs, "stats.skipped")
       results.runs = runs
 

@@ -4,8 +4,8 @@ exports['e2e spec_isolation failing 1'] = {
   "totalDuration": 5555,
   "totalSuites": 8,
   "totalTests": 12,
-  "totalFailures": 5,
-  "totalPasses": 5,
+  "totalFailed": 5,
+  "totalPassed": 5,
   "totalPending": 1,
   "totalSkipped": 1,
   "runs": [

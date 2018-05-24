@@ -202,8 +202,8 @@ describe "e2e spec_isolation", ->
         ## ensure the totals are accurate
         expect(json.totalTests).to.eq(
           _.sum([
-            json.totalFailures,
-            json.totalPasses,
+            json.totalFailed,
+            json.totalPassed,
             json.totalPending,
             json.totalSkipped
           ])

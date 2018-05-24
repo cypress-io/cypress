@@ -552,10 +552,10 @@ describe "lib/modes/run", ->
       .then ->
         expect(user.ensureAuthToken).not.to.be.called
 
-    it "resolves with object and totalFailures", ->
+    it "resolves with object and totalFailed", ->
       runMode.run()
       .then (results) ->
-        expect(results).to.have.property("totalFailures", 10)
+        expect(results).to.have.property("totalFailed", 10)
 
     it "passes projectRoot + options to openProject", ->
       opts = { projectRoot: "/path/to/project", foo: "bar" }
