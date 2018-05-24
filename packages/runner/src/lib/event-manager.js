@@ -167,7 +167,7 @@ const eventManager = {
   },
 
   setup (config, specPath) {
-    Cypress = $Cypress.create(config)
+    Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
     window.Cypress = Cypress
@@ -175,6 +175,12 @@ const eventManager = {
     this._addListeners()
 
     channel.emit('watch:test:file', specPath)
+  },
+
+  isBrowserType (browserName) {
+    if (!this.Cypress) return false
+
+    return this.Cypress.isBrowserType(browserName)
   },
 
   initialize ($autIframe, config) {

@@ -38,6 +38,21 @@ function formChromeCanaryAppPath() {
   return normalize(exe)
 }
 
+function formFirefoxAppPath() {
+  const exe = 'C:/Program Files (x86)/Mozilla Firefox/firefox.exe'
+  return normalize(exe)
+}
+
+function formFirefoxDeveloperEditionAppPath() {
+  const exe = 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe'
+  return normalize(exe)
+}
+
+function formFirefoxNightlyAppPath() {
+  const exe = 'C:/Program Files (x86)/Firefox Nightly/firefox.exe'
+  return normalize(exe)
+}
+
 type NameToPath = (name: string) => string
 
 interface WindowsBrowserPaths {
@@ -45,12 +60,16 @@ interface WindowsBrowserPaths {
   chrome: NameToPath
   canary: NameToPath
   chromium: NameToPath
+  firefox: NameToPath
 }
 
 const formPaths: WindowsBrowserPaths = {
   chrome: formFullAppPath,
   canary: formChromeCanaryAppPath,
-  chromium: formChromiumAppPath
+  chromium: formChromiumAppPath,
+  firefox: formFirefoxAppPath,
+  firefoxDeveloperEdition: formFirefoxDeveloperEditionAppPath,
+  firefoxNightly: formFirefoxNightlyAppPath,
 }
 
 function getWindowsBrowser(

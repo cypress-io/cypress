@@ -2,9 +2,14 @@ path     = require("path")
 Promise  = require("bluebird")
 launcher = require("@packages/launcher")
 fs       = require("../util/fs")
+extension = require("@packages/extension")
 appData  = require("../util/app_data")
 
 profiles = appData.path("browsers")
+
+pathToExtension = extension.getPathToExtension()
+extensionDest = appData.path("web-extension")
+extensionBg = appData.path("web-extension", "background.js")
 
 module.exports = {
   getProfileDir: (name) ->
@@ -21,6 +26,17 @@ module.exports = {
 
   copyExtension: (src, dest) ->
     fs.copyAsync(src, dest)
+
+  writeExtension: (proxyUrl, socketIoRoute) ->
+    ## get the string bytes for the final extension file
+    extension.setHostAndPath(proxyUrl, socketIoRoute)
+    .then (str) =>
+      ## copy the extension src to the extension dist
+      @copyExtension(pathToExtension, extensionDest)
+      .then ->
+        ## and overwrite background.js with the final string bytes
+        fs.writeFileAsync(extensionBg, str)
+      .return(extensionDest)
 
   getBrowsers: ->
     ## TODO: accept an options object which

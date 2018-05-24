@@ -205,7 +205,7 @@ describe "src/cy/commands/actions/click", ->
       $btn.on "mouseup", -> fail("should not have gotten mouseup")
       $btn.on "click", -> fail("should not have gotten click")
 
-      cy.contains("button").click()
+      cy.contains("button", "button").click()
 
     it "does not fire a click when element has been removed on mouseup", ->
       $btn = cy.$$("button:first")
@@ -216,7 +216,7 @@ describe "src/cy/commands/actions/click", ->
 
       $btn.on "click", -> fail("should not have gotten click")
 
-      cy.contains("button").click()
+      cy.contains("button", "button").click()
 
     it "silences errors on unfocusable elements", ->
       div = cy.$$("div:first")
@@ -649,7 +649,7 @@ describe "src/cy/commands/actions/click", ->
 
     describe "position argument", ->
       it "can click center by default", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -657,10 +657,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click()
+        cy.get("#div-covered-in-span").click()
 
       it "can click topLeft", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
 
         $span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
@@ -669,10 +669,10 @@ describe "src/cy/commands/actions/click", ->
         $span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("topLeft")
+        cy.get("#div-covered-in-span").click("topLeft")
 
       it "can click top", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -680,10 +680,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("top")
+        cy.get("#div-covered-in-span").click("top")
 
       it "can click topRight", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -691,10 +691,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("topRight")
+        cy.get("#div-covered-in-span").click("topRight")
 
       it "can click left", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -702,10 +702,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("left")
+        cy.get("#div-covered-in-span").click("left")
 
       it "can click center", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -713,10 +713,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("center")
+        cy.get("#div-covered-in-span").click("center")
 
       it "can click right", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -724,10 +724,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("right")
+        cy.get("#div-covered-in-span").click("right")
 
       it "can click bottomLeft", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -735,10 +735,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("bottomLeft")
+        cy.get("#div-covered-in-span").click("bottomLeft")
 
       it "can click bottom", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -746,10 +746,10 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("bottom")
+        cy.get("#div-covered-in-span").click("bottom")
 
       it "can click bottomRight", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
         clicked = _.after 2, -> done()
@@ -757,21 +757,21 @@ describe "src/cy/commands/actions/click", ->
         span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click("bottomRight")
+        cy.get("#div-covered-in-span").click("bottomRight")
 
       it "can pass options along with position", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(cy.$$("body"))
 
         $btn.on "click", -> done()
 
-        cy.get("#button-covered-in-span").click("bottomRight", {force: true})
+        cy.get("#div-covered-in-span").click("bottomRight", {force: true})
 
     describe "relative coordinate arguments", ->
       it "can specify x and y", (done) ->
-        $btn = $("<button>button covered</button>")
-        .attr("id", "button-covered-in-span")
-        .css({height: 100, width: 100})
+        $btn = $("<div>div covered</div>")
+        .attr("id", "div-covered-in-span")
+        .css({height: 100, width: 100, border: "solid 1px #000"})
         .prependTo(cy.$$("body"))
 
         $span = $("<span>span</span>")
@@ -783,15 +783,15 @@ describe "src/cy/commands/actions/click", ->
         $span.on "click", clicked
         $btn.on "click", clicked
 
-        cy.get("#button-covered-in-span").click(75, 78)
+        cy.get("#div-covered-in-span").click(75, 78)
 
       it "can pass options along with x, y", (done) ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
+        $btn = $("<div>div covered</div>").attr("id", "div-covered-in-span").css({height: 100, width: 100, border: "solid 1px #000"}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(cy.$$("body"))
 
         $btn.on "click", -> done()
 
-        cy.get("#button-covered-in-span").click(75, 78, {force: true})
+        cy.get("#div-covered-in-span").click(75, 78, {force: true})
 
     describe "mousedown", ->
       it "gives focus after mousedown", (done) ->
@@ -1240,16 +1240,17 @@ describe "src/cy/commands/actions/click", ->
           expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1) ## ensure we are within 1
 
       it "#consoleProps actual element clicked", ->
-        $btn = $("<button>", {
-          id: "button-covered-in-span"
+        $btn = $("<div>", {
+          id: "div-covered-in-span"
         })
+        .css({ margin: 0, padding: 30, width: 100, height: 50, border: "solid 1px #000" })
         .prependTo(cy.$$("body"))
 
-        $span = $("<span>span in button</span>")
-        .css({ padding: 5, display: "inline-block", backgroundColor: "yellow" })
+        $span = $("<span>span in div</span>")
+        .css({ display: "block", width: 100, height: 50, backgroundColor: "yellow" })
         .appendTo($btn)
 
-        cy.get("#button-covered-in-span").click().then ->
+        cy.get("#div-covered-in-span").click().then ->
           expect(@lastLog.invoke("consoleProps")["Actual Element Clicked"]).to.eq $span.get(0)
 
       it "#consoleProps groups MouseDown", ->
@@ -1375,7 +1376,7 @@ describe "src/cy/commands/actions/click", ->
           ## synchronously remove this button
           $(@).remove()
 
-        cy.contains("button").click().then ->
+        cy.contains("button", "button").click().then ->
           expect(@lastLog.invoke("consoleProps").groups()).to.deep.eq [
             {
               name: "MouseDown"
@@ -1393,7 +1394,7 @@ describe "src/cy/commands/actions/click", ->
           ## synchronously remove this button
           $(@).remove()
 
-        cy.contains("button").click().then ->
+        cy.contains("button", "button").click().then ->
           expect(@lastLog.invoke("consoleProps").groups()).to.deep.eq [
             {
               name: "MouseDown"
@@ -1420,7 +1421,7 @@ describe "src/cy/commands/actions/click", ->
 
         $btn.on "click", -> fail("should not have gotten click")
 
-        cy.contains("button").click()
+        cy.contains("button", "button").click()
 
       it "logs deltaOptions", ->
         cy

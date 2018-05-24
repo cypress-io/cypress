@@ -1596,7 +1596,7 @@ describe "src/cy/commands/querying", ->
           expect(consoleProps.Elements).to.eq button.length
           done()
 
-        cy.contains("button").should("not.exist")
+        cy.contains("button", "button").should("not.exist")
 
       it "throws when assertion is have.length > 1", (done) ->
         cy.on "fail", (err) =>

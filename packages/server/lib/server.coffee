@@ -44,6 +44,13 @@ setProxiedUrl = (req) ->
 
   req.url = url.parse(req.url).path
 
+  debug("setting proxied url for request %o", {
+    url: req.url
+    proxiedUrl: req.proxiedUrl
+  })
+
+  return req
+
 ## currently not making use of event emitter
 ## but may do so soon
 class Server

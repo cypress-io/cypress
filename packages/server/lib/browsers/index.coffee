@@ -37,6 +37,8 @@ getBrowser = (name) ->
       require("./chrome")
     when "electron"
       require("./electron")
+    when "firefox", "firefoxDeveloperEdition", "firefoxNightly"
+      require("./firefox")
 
 find = (browser, browsers = []) ->
   _.find(browsers, { name: browser })
@@ -116,5 +118,8 @@ module.exports = {
           options.onBrowserOpen()
 
           return instance
+    .catch (err) ->
+      log("Error launching #{name}:", err)
+      throw err
 
 }
