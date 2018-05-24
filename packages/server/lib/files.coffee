@@ -1,8 +1,6 @@
-fs      = require("fs-extra")
 path    = require("path")
 Promise = require("bluebird")
-
-fs = Promise.promisifyAll(fs)
+fs      = require("./util/fs")
 
 module.exports = {
   readFile: (projectRoot, file, options = {}) ->

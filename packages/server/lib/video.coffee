@@ -1,12 +1,11 @@
 _          = require("lodash")
-fs         = require("fs-extra")
 utils      = require("fluent-ffmpeg/lib/utils")
+debug      = require("debug")("cypress:server:video")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
-
-fs = Promise.promisifyAll(fs)
+fs         = require("./util/fs")
 
 ffmpeg.setFfmpegPath(ffmpegPath)
 
@@ -75,11 +74,15 @@ module.exports = {
     .videoCodec("libx264")
     .outputOptions("-preset ultrafast")
     .on "start", (line) ->
+      debug("ffmpeg started")
+
       started.resolve(new Date)
       # .on "codecData", (data) ->
       # console.log "codec data", data
       # .on("error", options.onError)
     .on "error", (err, stdout, stderr) ->
+      debug("ffmpeg errored:", err.message)
+
       ## if we're supposed log errors then
       ## bubble them up
       if logErrors
@@ -91,6 +94,8 @@ module.exports = {
       ended.reject(err)
 
     .on "end", ->
+      debug("ffmpeg ended")
+
       ended.resolve()
     .save(name)
 

@@ -1,5 +1,6 @@
 _ = Cypress._
 $utils = Cypress.utils
+Promise = Cypress.Promise
 
 describe "driver/src/cypress/utils", ->
   context ".cloneErr", ->
@@ -31,3 +32,29 @@ describe "driver/src/cypress/utils", ->
       expect(err2.message).to.eq("foo\n\nbar")
 
       expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
+
+    it "handles error messages matching first stack", ->
+      err = new Error("r")
+
+      expect(err.message).to.eq("r")
+      expect(err.name).to.eq("Error")
+
+      stack = err.stack.split("\n").slice(1).join("\n")
+
+      err2 = $utils.appendErrMsg(err, "bar")
+      expect(err2.message).to.eq("r\n\nbar")
+
+      expect(err2.stack).to.eq("Error: r\n\nbar\n" + stack)
+
+    it "handles empty error messages", ->
+      err = new Error()
+
+      expect(err.message).to.eq("")
+      expect(err.name).to.eq("Error")
+
+      stack = err.stack.split("\n").slice(1).join("\n")
+
+      err2 = $utils.appendErrMsg(err, "bar")
+      expect(err2.message).to.eq("\n\nbar")
+
+      expect(err2.stack).to.eq("Error: \n\nbar\n" + stack)

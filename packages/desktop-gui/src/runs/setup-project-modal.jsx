@@ -82,7 +82,7 @@ class SetupProject extends Component {
     return (
       <div className='setup-project-modal modal-body os-dialog'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h4>Set Up Project</h4>
+        <h4>Set up project</h4>
         <form
           onSubmit={this._submit}>
           {this._nameField()}
@@ -101,7 +101,7 @@ class SetupProject extends Component {
                     <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
                     null
                 }
-                <span>Set Up Project</span>
+                <span>Set up project</span>
               </button>
             </div>
           </div>
@@ -114,7 +114,7 @@ class SetupProject extends Component {
     return (
       <div className='login modal-body'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h1><i className='fa fa-lock'></i> Log In</h1>
+        <h1><i className='fa fa-lock'></i> Log in</h1>
         <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
         <LoginForm />
       </div>
@@ -206,7 +206,7 @@ class SetupProject extends Component {
             </div>
           </div>
           <div className='select-orgs'>
-            <div className={cs({ 'hidden': this.state.owner !== 'org' || orgsStore.orgs.length })}>
+            <div className={cs({ 'hidden': this.state.owner !== 'org' || this._hasOrgsOtherThanDefault() })}>
               <div className='empty-select-orgs well'>
                 <p>You don't have any organizations yet.</p>
                 <p>Organizations can help you manage projects, including billing.</p>
@@ -216,7 +216,7 @@ class SetupProject extends Component {
                     className={cs('btn btn-link', { 'hidden': this.state.owner !== 'org' })}
                     onClick={this._manageOrgs}>
                     <i className='fa fa-plus'></i>{' '}
-                    Create Organization
+                    Create organization
                   </a>
                 </p>
               </div>
@@ -228,9 +228,13 @@ class SetupProject extends Component {
     )
   }
 
+  _hasOrgsOtherThanDefault () {
+    return orgsStore.orgs.length > 1
+  }
+
   _orgSelector () {
     return (
-      <div className={cs({ 'hidden': this.state.owner !== 'org' || !orgsStore.orgs.length })}>
+      <div className={cs({ 'hidden': this.state.owner !== 'org' || !(this._hasOrgsOtherThanDefault()) })}>
         <select
           ref='orgId'
           id='organizations-select'
@@ -238,7 +242,7 @@ class SetupProject extends Component {
           value={this.state.orgId || ''}
           onChange={this._updateOrgId}
         >
-          <option value=''>-- Select Organization --</option>
+          <option value=''>-- Select organization --</option>
           {_.map(orgsStore.orgs, (org) => {
             if (org.default) return null
 
@@ -302,8 +306,6 @@ class SetupProject extends Component {
               <i className='fa fa-lock'></i>{' '}
               <strong>Private:</strong>{' '}
               Only invited users have access.
-              <br/>
-              <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
             </p>
           </label>
         </div>

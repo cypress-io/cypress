@@ -1,14 +1,12 @@
 _         = require("lodash")
 os        = require("os")
-fs        = require("fs-extra")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
 plugins   = require("../plugins")
+fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
-
-fs = Promise.promisifyAll(fs)
 
 LOAD_EXTENSION = "--load-extension="
 
@@ -39,6 +37,8 @@ defaultArgs = [
   "--reduce-security-for-testing"
   "--enable-automation"
   "--disable-infobars"
+  "--disable-device-discovery-notifications"
+  "--disable-blink-features=RootLayerScrolling"
 
   ## the following come from chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
@@ -114,19 +114,23 @@ module.exports = {
           args = newArgs
     .then =>
       Promise.all([
-        ## ensure that we have a chrome profile dir
-        utils.ensureProfile(browserName)
+        ## ensure that we have a clean cache dir
+        ## before launching the browser every time
+        utils.ensureCleanCache(browserName)
 
         utils.writeExtension(options.proxyUrl, options.socketIoRoute)
       ])
-    .spread (dir, dest) ->
+    .spread (cacheDir, dest) ->
       ## normalize the --load-extensions argument by
       ## massaging what the user passed into our own
       args = _normalizeArgExtensions(dest, args)
 
+      userDir = utils.getProfileDir(browserName)
+
       ## this overrides any previous user-data-dir args
       ## by being the last one
-      args.push("--user-data-dir=#{dir}")
+      args.push("--user-data-dir=#{userDir}")
+      args.push("--disk-cache-dir=#{cacheDir}")
 
       debug("launch in chrome: %s, %s", url, args)
 

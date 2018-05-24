@@ -35,6 +35,7 @@ buildNums = (provider) -> {
   gitlab:   process.env.CI_BUILD_ID
   jenkins:  process.env.BUILD_NUMBER
   travis:   process.env.TRAVIS_BUILD_NUMBER
+  drone:    process.env.DRONE_BUILD_NUMBER
 }[provider]
 
 groupIds = (provider) -> {
@@ -64,6 +65,9 @@ params = (provider) -> {
   travis: {
     buildId:  process.env.TRAVIS_BUILD_ID
     repoSlug: process.env.TRAVIS_REPO_SLUG
+  }
+  drone: {
+    buildUrl:  process.env.DRONE_BUILD_LINK
   }
 }[provider]
 

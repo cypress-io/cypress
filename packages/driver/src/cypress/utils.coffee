@@ -1,6 +1,7 @@
 $ = require("jquery")
 _ = require("lodash")
 moment = require("moment")
+Promise = require("bluebird")
 
 $Location = require("./location")
 $errorMessages = require("./error_messages")
@@ -39,10 +40,9 @@ module.exports = {
     stack = err.stack
 
     ## preserve message
+    ## and toString
     msg = err.message
-
-    ## slice out message
-    stack = stack.split(msg)
+    str = err.toString()
 
     ## append message
     msg += "\n\n" + message
@@ -50,8 +50,9 @@ module.exports = {
     ## set message
     err.message = msg
 
-    ## reset stack
-    err.stack = stack.join(msg)
+    ## reset stack by replacing the original first line
+    ## with the new one
+    err.stack = stack.replace(str, err.toString())
 
     return err
 
@@ -292,4 +293,21 @@ module.exports = {
     deltaY = point1.y - point2.y
 
     Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+  runSerially: (fns) ->
+    values = []
+
+    run = (index) ->
+      Promise
+      .try ->
+        fns[index]()
+      .then (value) ->
+        values.push(value)
+        index++
+        if fns[index]
+          run(index)
+        else
+          values
+
+    run(0)
 }

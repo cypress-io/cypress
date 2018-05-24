@@ -7,12 +7,14 @@ const cp = require('child_process')
 const minimist = require('minimist')
 const Promise = require('bluebird')
 const terminalBanner = require('terminal-banner').terminalBanner
-
-const humanTime = require('../../lib/util/human_time.coffee')
-
-const glob = Promise.promisify(require('glob'))
+const glob = require('../../lib/util/glob')
+const humanTime = require('../../lib/util/human_time')
 
 const options = minimist(process.argv.slice(2))
+
+if (options.browser) {
+  process.env.BROWSER = options.browser
+}
 
 const started = new Date()
 
@@ -73,7 +75,7 @@ glob('test/e2e/**/*')
 .then(() => {
   const duration = new Date() - started
 
-  console.log('Total duration:', humanTime(duration))
+  console.log('Total duration:', humanTime.long(duration))
   console.log('Exiting with final code:', numFailed)
 
   process.exit(numFailed)

@@ -255,7 +255,9 @@ export default class AutIframe {
 
     this._highlightedEl = el
 
-    const selector = dom.getBestSelector(el)
+    const Cypress = eventManager.getCypress()
+
+    const selector = Cypress.SelectorPlayground.getSelector($el)
 
     dom.addOrUpdateSelectorPlaygroundHighlight({
       $el,
@@ -343,5 +345,37 @@ export default class AutIframe {
       Elements: $el.length,
       Yielded: Cypress.dom.getElements($el),
     })
+  }
+
+  beforeScreenshot = (config) => {
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (config.disableTimersAndAnimations) {
+        dom.addCssAnimationDisabler(this._body())
+      }
+      _.each(config.blackout, (selector) => {
+        dom.addBlackout(this._body(), selector)
+      })
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-disable no-console */
+    }
+  }
+
+  afterScreenshot = (config) => {
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (config.disableTimersAndAnimations) {
+        dom.removeCssAnimationDisabler(this._body())
+      }
+      dom.removeBlackouts(this._body())
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-disable no-console */
+    }
   }
 }

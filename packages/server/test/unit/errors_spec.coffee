@@ -8,7 +8,7 @@ logger = require("#{root}lib/logger")
 describe "lib/errors", ->
   beforeEach ->
     @env = process.env.CYPRESS_ENV
-    @log = @sandbox.stub(console, "log")
+    @log = sinon.stub(console, "log")
 
   afterEach ->
     process.env.CYPRESS_ENV = @env
@@ -43,7 +43,7 @@ describe "lib/errors", ->
         expect(@log).to.be.calledWith(chalk.red(foo.stack))
 
     it "calls logger.createException", ->
-      @sandbox.stub(logger, "createException").resolves()
+      sinon.stub(logger, "createException").resolves()
 
       process.env.CYPRESS_ENV = "production"
 

@@ -5,8 +5,8 @@
   "main": "index.js",
   "browser": "src/main",
   "scripts": {
-    "start": "coffee test/support/server.coffee",
-    "cypress:open": "node ../../scripts/start.js --project ./test",
+    "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee",
+    "cypress:open": "node ../../cli/bin/cypress open --dev --project ./test",
     "cypress:run": "node ../../scripts/run-cypress-tests.js --browser chrome --dir test",
     "clean-deps": "rm -rf node_modules"
   },
@@ -17,6 +17,7 @@
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/underscore.inflection": "^1.0.0",
+    "@cypress/unique-selector": "0.4.2",
     "angular": "^1.3.1",
     "backbone": "^1.3.3",
     "basic-auth": "^2.0.0",

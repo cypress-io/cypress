@@ -1,7 +1,11 @@
 require("../spec_helper")
 
+_ = require("lodash")
+rp = require("request-promise")
 concat = require("concat-stream")
+fs = require("#{root}lib/util/fs")
 security = require("#{root}lib/util/security")
+Fixtures = require("#{root}test/support/helpers/fixtures")
 
 original = """
 <html>
@@ -115,6 +119,108 @@ describe "lib/util/security", ->
   context ".strip", ->
     it "replaces obstructive code", ->
       expect(security.strip(original)).to.eq(expected)
+
+    it "replaces jira window getter", ->
+      jira = """
+        for (; !function (n) {
+          return n === n.parent
+        }(n)
+      """
+
+      jira2 = """
+        function(n){for(;!function(l){return l===l.parent}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}
+      """
+
+      expect(security.strip(jira)).to.eq("""
+        for (; !function (n) {
+          return n === n.parent || n.parent.__Cypress__
+        }(n)
+      """)
+
+      expect(security.strip(jira2)).to.eq("""
+        function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}
+      """)
+
+    describe "libs", ->
+      ## go out and download all of these libs and ensure
+      ## that we can run them through the security strip
+      ## and that they are not modified!
+
+      cdnUrl = "https://cdnjs.cloudflare.com/ajax/libs"
+
+      needsDash = ["backbone", "underscore"]
+
+      libs = {
+        jquery: "#{cdnUrl}/jquery/3.3.1/jquery.js"
+        jqueryui: "#{cdnUrl}/jqueryui/1.12.1/jquery-ui.js"
+        angular: "#{cdnUrl}/angular.js/1.6.5/angular.js"
+        bootstrap: "#{cdnUrl}/twitter-bootstrap/4.0.0/js/bootstrap.js"
+        fontawesome: "#{cdnUrl}/font-awesome/4.7.0/css/font-awesome.css"
+        moment: "#{cdnUrl}/moment.js/2.20.1/moment.js"
+        lodash: "#{cdnUrl}/lodash.js/4.17.5/lodash.js"
+        vue: "#{cdnUrl}/vue/2.5.13/vue.js"
+        backbone: "#{cdnUrl}/backbone.js/1.3.3/backbone.js"
+        cycle: "#{cdnUrl}/cyclejs-core/7.0.0/cycle.js"
+        d3: "#{cdnUrl}/d3/4.13.0/d3.js"
+        normalize: "#{cdnUrl}/normalize/8.0.0/normalize.css"
+        underscore: "#{cdnUrl}/underscore.js/1.8.3/underscore.js"
+        foundation: "#{cdnUrl}/foundation/6.4.3/js/foundation.js"
+        require: "#{cdnUrl}/require.js/2.3.5/require.js"
+        rxjs: "#{cdnUrl}/rxjs/5.5.6/Rx.js"
+        bluebird: "#{cdnUrl}/bluebird/3.5.1/bluebird.js"
+      }
+
+      libs = _
+      .chain(libs)
+      .clone()
+      .reduce (memo, url, lib) ->
+        memo[lib] = url
+        memo[lib + "Min"] = url
+          .replace(/js$/, "min.js")
+          .replace(/css$/, "min.css")
+
+        if lib in needsDash
+          memo[lib + "Min"] = url.replace("min", "-min")
+
+        memo
+      , {}
+      .extend({
+        knockoutDebug: "#{cdnUrl}/knockout/3.4.2/knockout-debug.js"
+        knockoutMin: "#{cdnUrl}/knockout/3.4.2/knockout-min.js"
+        emberMin: "#{cdnUrl}/ember.js/2.18.2/ember.min.js"
+        emberProd: "#{cdnUrl}/ember.js/2.18.2/ember.prod.js"
+        reactDev: "#{cdnUrl}/react/16.2.0/umd/react.development.js"
+        reactProd: "#{cdnUrl}/react/16.2.0/umd/react.production.min.js"
+        vendorBundle: "https://s3.amazonaws.com/assets.cypress.io/vendor.bundle.js"
+        hugeApp: "https://s3.amazonaws.com/assets.cypress.io/huge_app.js"
+      })
+      .value()
+
+      _.each libs, (url, lib) ->
+        it "does not alter code from: '#{lib}'", ->
+          nock.enableNetConnect()
+
+          @timeout(10000)
+
+          pathToLib = Fixtures.path("server/libs/#{lib}")
+
+          downloadFile = ->
+            rp(url)
+            .then (resp) ->
+              fs
+              .outputFileAsync(pathToLib, resp)
+              .return(resp)
+          fs
+          .readFileAsync(pathToLib, "utf8")
+          .catch(downloadFile)
+          .then (libCode) ->
+            stripped = security.strip(libCode)
+            ## nothing should have changed!
+            try
+              expect(stripped).to.eq(libCode)
+            catch err
+              fs.outputFileSync(pathToLib + "Diff", stripped)
+              throw new Error("code from '#{lib}' was different")
 
   context ".stripStream", ->
     it "replaces obstructive code", (done) ->

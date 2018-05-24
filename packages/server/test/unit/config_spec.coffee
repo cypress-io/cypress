@@ -19,21 +19,21 @@ describe "lib/config", ->
 
   context ".get", ->
     beforeEach ->
-      @projectPath = "/_test-output/path/to/project"
+      @projectRoot = "/_test-output/path/to/project"
       @setup = (cypressJson = {}, cypressEnvJson = {}) =>
-        @sandbox.stub(settings, "read").withArgs(@projectPath).resolves(cypressJson)
-        @sandbox.stub(settings, "readEnv").withArgs(@projectPath).resolves(cypressEnvJson)
+        sinon.stub(settings, "read").withArgs(@projectRoot).resolves(cypressJson)
+        sinon.stub(settings, "readEnv").withArgs(@projectRoot).resolves(cypressEnvJson)
 
     it "sets projectRoot", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) =>
-        expect(obj.projectRoot).to.eq(@projectPath)
+        expect(obj.projectRoot).to.eq(@projectRoot)
         expect(obj.env).to.deep.eq({foo: "bar"})
 
     it "sets projectName", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) ->
         expect(obj.projectName).to.eq("project")
 
@@ -42,27 +42,27 @@ describe "lib/config", ->
         @setup({}, {foo: "bar"})
 
       it "can override default port", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.port).to.eq(8080)
 
       it "updates browserUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.browserUrl).to.eq "http://localhost:8080/__/"
 
       it "updates proxyUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.proxyUrl).to.eq "http://localhost:8080"
 
     context "validation", ->
       beforeEach ->
         @expectValidationPasses = =>
-          config.get(@projectPath) ## shouldn't throw
+          config.get(@projectRoot) ## shouldn't throw
 
         @expectValidationFails = (errorMessage = "validation error") =>
-          config.get(@projectPath)
+          config.get(@projectRoot)
           .then ->
             throw new Error("should throw validation error")
           .catch (err) ->
@@ -157,6 +157,15 @@ describe "lib/config", ->
 
         it "fails if not a number", ->
           @setup({execTimeout: "foo"})
+          @expectValidationFails("be a number")
+
+      context "taskTimeout", ->
+        it "passes if a number", ->
+          @setup({taskTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({taskTimeout: "foo"})
           @expectValidationFails("be a number")
 
       context "fileServerFolder", ->
@@ -284,15 +293,6 @@ describe "lib/config", ->
         it "fails if not a number", ->
           @setup({responseTimeout: "foo"})
           @expectValidationFails("be a number")
-
-      context "screenshotOnHeadlessFailure", ->
-        it "passes if a boolean", ->
-          @setup({screenshotOnHeadlessFailure: false})
-          @expectValidationPasses()
-
-        it "fails if not a boolean", ->
-          @setup({screenshotOnHeadlessFailure: 42})
-          @expectValidationFails("be a boolean")
 
       context "testFiles", ->
         it "passes if a string", ->
@@ -580,9 +580,6 @@ describe "lib/config", ->
     it "numTestsKeptInMemory=50", ->
       @defaults "numTestsKeptInMemory", 50
 
-    it "screenshotOnHeadlessFailure=true", ->
-      @defaults "screenshotOnHeadlessFailure", true
-
     it "modifyObstructiveCode=true", ->
       @defaults "modifyObstructiveCode", true
 
@@ -624,12 +621,12 @@ describe "lib/config", ->
         hosts: "foo=bar|baz=quux"
       })
 
-    it "resets numTestsKeptInMemory to 0 when headless", ->
+    it "resets numTestsKeptInMemory to 0 when runMode", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
       .then (cfg) ->
         expect(cfg.numTestsKeptInMemory).to.eq(0)
 
-    it "resets watchForFileChanges to false when headless", ->
+    it "resets watchForFileChanges to false when runMode", ->
       config.mergeDefaults({projectRoot: "/foo/bar/"}, {isTextTerminal: true})
       .then (cfg) ->
         expect(cfg.watchForFileChanges).to.be.false
@@ -725,7 +722,7 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
@@ -749,7 +746,7 @@ describe "lib/config", ->
           })
 
       it "sets config, envFile and env", ->
-        @sandbox.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+        sinon.stub(config, "getProcessEnvVars").returns({quux: "quux"})
 
         obj = {
           projectRoot: "/foo/bar"
@@ -784,10 +781,10 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
             trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
@@ -882,7 +879,7 @@ describe "lib/config", ->
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
-      @sandbox.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
+      sinon.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
 
       obj = {
         env: {
@@ -970,16 +967,16 @@ describe "lib/config", ->
       expect(urls.proxyUrl).to.eq("http://localhost:65432")
 
   context ".setScaffoldPaths", ->
-    it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->
+    it "sets integrationExamplePath + integrationExampleName + scaffoldedFiles", ->
       obj = {
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
-      @sandbox.stub(scaffold, "fileTree").returns([])
+      sinon.stub(scaffold, "fileTree").returns([])
 
       expect(config.setScaffoldPaths(obj)).to.deep.eq({
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
-        integrationExampleFile: "/_test-output/path/to/project/cypress/integration/example_spec.js"
-        integrationExampleName: "example_spec.js"
+        integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
+        integrationExampleName: "examples"
         scaffoldedFiles: []
       })
 

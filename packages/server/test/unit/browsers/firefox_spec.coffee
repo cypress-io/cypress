@@ -16,18 +16,18 @@ describe "lib/browsers/firefox", ->
         socketIoRoute: "socket/io/route"
       }
 
-      @sandbox.stub(plugins, "has")
-      @sandbox.stub(plugins, "execute")
-      @sandbox.stub(utils, "writeExtension").resolves("/path/to/ext")
-      @sandbox.stub(utils, "ensureProfile").resolves("/path/to/profile")
-      @sandbox.stub(firefoxUtil, "findRemotePort").resolves(6005)
-      @firefoxClient = { installTemporaryAddon: @sandbox.stub().resolves() }
-      @sandbox.stub(firefoxUtil, "connect").resolves(@firefoxClient)
+      sinon.stub(plugins, "has")
+      sinon.stub(plugins, "execute")
+      sinon.stub(utils, "writeExtension").resolves("/path/to/ext")
+      sinon.stub(utils, "ensureProfile").resolves("/path/to/profile")
+      sinon.stub(firefoxUtil, "findRemotePort").resolves(6005)
+      @firefoxClient = { installTemporaryAddon: sinon.stub().resolves() }
+      sinon.stub(firefoxUtil, "connect").resolves(@firefoxClient)
       @browserInstance = {}
-      @sandbox.stub(utils, "launch").resolves(@browserInstance)
-      @sandbox.stub(FirefoxProfile.prototype, "setPreference")
-      @sandbox.stub(FirefoxProfile.prototype, "updatePreferences")
-      @sandbox.stub(FirefoxProfile.prototype, "path").returns("/path/to/profile")
+      sinon.stub(utils, "launch").resolves(@browserInstance)
+      sinon.stub(FirefoxProfile.prototype, "setPreference")
+      sinon.stub(FirefoxProfile.prototype, "updatePreferences")
+      sinon.stub(FirefoxProfile.prototype, "path").returns("/path/to/profile")
 
     it "executes before:browser:launch if registered", ->
       plugins.has.returns(true)

@@ -68,6 +68,11 @@ module.exports = {
         ## and set a custom header
         res.set("x-cypress-matched-blacklisted-host", matched)
 
+        debug("blacklisting request %o", {
+          url: req.proxiedUrl
+          matched: matched
+        })
+
         return res.status(503).end()
 
     thr = through (d) -> @queue(d)
@@ -138,7 +143,11 @@ module.exports = {
       ## turn off __cypress.initial by setting false here
       setCookies(false, wantsInjection)
 
-      debug("received request response for #{remoteUrl} %o", { headers })
+      debug("received response for %o", {
+        url: remoteUrl
+        headers,
+        statusCode
+      })
 
       encoding = headers["content-encoding"]
 

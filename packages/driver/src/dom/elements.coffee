@@ -193,10 +193,8 @@ getElements = ($el) ->
     els
 
 getContainsSelector = (text, filter = "") ->
-  if _.isString(text)
-    text = $utils.escapeQuotes(text)
-
-  "#{filter}:not(script):contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
+  escapedText = $utils.escapeQuotes(text)
+  "#{filter}:not(script):contains('#{escapedText}'), #{filter}[type='submit'][value~='#{escapedText}']"
 
 priorityElement = "input[type='submit'], button, a, label"
 

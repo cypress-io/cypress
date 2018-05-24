@@ -12,12 +12,12 @@ describe "lib/browsers/chrome", ->
     beforeEach ->
       @args = []
 
-      @sandbox.stub(chrome, "_getArgs").returns(@args)
-      @sandbox.stub(utils, "writeExtension").resolves("/path/to/ext")
-      @sandbox.stub(plugins, "has")
-      @sandbox.stub(plugins, "execute")
-      @sandbox.stub(utils, "launch")
-      @sandbox.stub(utils, "ensureProfile").resolves("/profile/dir")
+      sinon.stub(chrome, "_getArgs").returns(@args)
+      sinon.stub(utils, "writeExtension").resolves("/path/to/ext")
+      sinon.stub(plugins, "has")
+      sinon.stub(plugins, "execute")
+      sinon.stub(utils, "launch")
+      sinon.stub(utils, "ensureProfile").resolves("/profile/dir")
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
@@ -51,6 +51,7 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
     it "normalizes multiple extensions from plugins", ->
@@ -72,32 +73,33 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
   context "#_getArgs", ->
     it "disables gpu when linux", ->
-      @sandbox.stub(os, "platform").returns("linux")
+      sinon.stub(os, "platform").returns("linux")
 
       args = chrome._getArgs()
 
       expect(args).to.include("--disable-gpu")
 
     it "does not disable gpu when not linux", ->
-      @sandbox.stub(os, "platform").returns("darwin")
+      sinon.stub(os, "platform").returns("darwin")
 
       args = chrome._getArgs()
 
       expect(args).not.to.include("--disable-gpu")
 
     it "turns off sandbox when linux", ->
-      @sandbox.stub(os, "platform").returns("linux")
+      sinon.stub(os, "platform").returns("linux")
 
       args = chrome._getArgs()
 
       expect(args).to.include("--no-sandbox")
 
     it "does not turn off sandbox when not linux", ->
-      @sandbox.stub(os, "platform").returns("win32")
+      sinon.stub(os, "platform").returns("win32")
 
       args = chrome._getArgs()
 
