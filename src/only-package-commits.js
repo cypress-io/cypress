@@ -2,6 +2,7 @@ const { identity, memoizeWith, pipeP } = require('ramda');
 const pkgUp = require('pkg-up');
 const readPkg = require('read-pkg');
 const path = require('path');
+const pLimit = require('p-limit');
 const debug = require('debug')('semantic-release:monorepo');
 const { getCommitFiles, getRoot } = require('./git-utils');
 const { mapCommits } = require('./options-transforms');
@@ -14,19 +15,19 @@ const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
 const getPackagePath = async () => {
   const packagePath = await pkgUp();
   const gitRoot = await getRoot();
-  
-  return path.relative(
-    gitRoot,
-    path.resolve(packagePath, '..')
-  );
+
+  return path.relative(gitRoot, path.resolve(packagePath, '..'));
 };
 
 const withFiles = async commits => {
+  const limit = pLimit(Number(process.env.SRM_MAX_THREADS) || 500);
   return Promise.all(
-    commits.map(async commit => {
-      const files = await memoizedGetCommitFiles(commit.hash);
-      return { ...commit, files };
-    })
+    commits.map(commit =>
+      limit(async () => {
+        const files = await memoizedGetCommitFiles(commit.hash);
+        return { ...commit, files };
+      })
+    )
   );
 };
 
@@ -40,13 +41,13 @@ const onlyPackageCommits = async commits => {
   return commitsWithFiles.filter(({ files, subject }) => {
     // Normalise paths and check if any changed files' path segments start
     // with that of the package root.
-    const packageFile = files
-      .find(file => {
-        const fileSegments = path.normalize(file).split(path.sep);
-        // Check the file is a *direct* descendent of the package folder (or the folder itself)
-        return packageSegments
-          .every((packageSegment, i) => packageSegment === fileSegments[i])
-      });
+    const packageFile = files.find(file => {
+      const fileSegments = path.normalize(file).split(path.sep);
+      // Check the file is a *direct* descendent of the package folder (or the folder itself)
+      return packageSegments.every(
+        (packageSegment, i) => packageSegment === fileSegments[i]
+      );
+    });
 
     if (packageFile) {
       debug(
