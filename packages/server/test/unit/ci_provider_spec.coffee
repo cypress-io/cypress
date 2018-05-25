@@ -164,11 +164,15 @@ describe "lib/util/ci_provider", ->
 
   it "semaphore", ->
     process.env.SEMAPHORE = true
+    process.env.SEMAPHORE_BUILD_NUMBER = "46"
+    process.env.SEMAPHORE_REPO_SLUG = "rails/rails"
 
     @expects({
       name: "semaphore"
-      buildNum: null
-      params: null
+      buildNum: "46"
+      params: {
+        repoSlug: "rails/rails"
+      }
     })
 
   it "shippable", ->
