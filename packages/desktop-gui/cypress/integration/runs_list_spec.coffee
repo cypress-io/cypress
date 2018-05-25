@@ -100,8 +100,8 @@ describe "Runs List", ->
             cy.get(".fa-chrome")
 
         it "displays totals", ->
-          cy.get("@runRow").contains(@runs[1].failed)
-          cy.get("@runRow").contains(@runs[1].passed)
+          cy.get("@runRow").contains(@runs[1].totalFailed)
+          cy.get("@runRow").contains(@runs[1].totalPassed)
 
         it "displays times", ->
           cy.get("@runRow").contains("a few secs ago")
