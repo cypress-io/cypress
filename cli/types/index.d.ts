@@ -178,7 +178,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/screenshot-api
      */
     Screenshot: {
-      defaults(options: Partial<ScreenshotOptions & ScreenshotDefaultsOptions>): void
+      defaults(options: Partial<ScreenshotDefaultsOptions>): void
     }
 
     /**
@@ -1280,16 +1280,15 @@ declare namespace Cypress {
 
   interface ScreenshotOptions {
     blackout: string[]
-    capture: 'runner' | 'app' | 'fullpage'
+    capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
-    waitForCommandSynchronization: boolean
+    scale: boolean
     beforeScreenshot(doc: Document): void
     afterScreenshot(doc: Document): void
   }
 
-  interface ScreenshotDefaultsOptions {
-    scaleAppCaptures: boolean
+  interface ScreenshotDefaultsOptions extends ScreenshotOptions {
     screenshotOnRunFailure: boolean
   }
 

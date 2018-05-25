@@ -247,7 +247,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      sinon.stub(runMode, "runSpecs").resolves({ totalFailures: 10 })
+      sinon.stub(runMode, "runSpecs").resolves({ totalFailed: 10 })
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
