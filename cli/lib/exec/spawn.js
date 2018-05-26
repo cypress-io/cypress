@@ -73,7 +73,7 @@ module.exports = {
         }
 
         debug('spawning Cypress %s', executable)
-        debug('spawn args %j', args, options)
+        debug('spawn args %o %o', args, options)
 
         // strip dev out of child process options
         options = _.omit(options, 'dev')
