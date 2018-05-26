@@ -72,8 +72,11 @@ module.exports = {
           args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
         }
 
-        debug('spawning Cypress %s', executable)
-        debug('spawn args %o %o', args, options)
+        const overrides = util.getEnvOverrides()
+
+        debug('spawning Cypress with executable: %s', executable)
+        debug('spawn forcing env overrides %o', overrides)
+        debug('spawn args %o %o', args, _.omit(options, 'env'))
 
         // strip dev out of child process options
         options = _.omit(options, 'dev')
@@ -82,7 +85,7 @@ module.exports = {
         // figure out if we're going to be force enabling or disabling colors.
         // also figure out whether we should force stdout and stderr into thinking
         // it is a tty as opposed to a pipe.
-        options.env = _.extend({}, options.env, util.getEnvOverrides())
+        options.env = _.extend({}, options.env, overrides)
 
         const child = cp.spawn(executable, args, options)
         child.on('close', resolve)
