@@ -140,7 +140,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
@@ -213,15 +213,15 @@ We dynamically generated a new test to display this failure.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ record_error_spec.coffee                     Xs        -        -        1        -        - │
+  │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_fail_spec.coffee                      Xs        2        -        1        -        1 │
+  │ ✖ record_fail_spec.coffee                   XX:XX        2        -        1        -        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_uncaught_spec.coffee                  Xs        1        -        1        -        - │
+  │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    3 of 4 failed (75%)                            Xs        5        1        3        1        1  
+    3 of 4 failed (75%)                         XX:XX        5        1        3        1        1  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -305,7 +305,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
 ====================================================================================================
@@ -315,9 +315,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 `
 
@@ -373,7 +373,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
 ====================================================================================================
@@ -383,9 +383,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -439,7 +439,7 @@ exports['e2e record api interaction errors update instance does not update insta
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
@@ -459,9 +459,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -515,7 +515,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
@@ -536,9 +536,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -640,7 +640,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
@@ -654,9 +654,9 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -710,7 +710,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Video)
@@ -731,9 +731,9 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -807,7 +807,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
 ====================================================================================================
@@ -817,9 +817,9 @@ This error will not alter the exit code.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 `
 

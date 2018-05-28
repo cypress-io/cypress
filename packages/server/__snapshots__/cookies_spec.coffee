@@ -56,9 +56,9 @@ exports['e2e cookies passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cookies_spec.coffee                          Xs        6        6        -        -        - │
+  │ ✔ cookies_spec.coffee                       XX:XX        6        6        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        6        6        -        -        -  
+    All specs passed!                           XX:XX        6        6        -        -        -  
 
 `
 

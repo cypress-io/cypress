@@ -68,9 +68,9 @@ exports['e2e promises failing1 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ promises_spec.coffee                         Xs        2        -        2        -        - │
+  │ ✖ promises_spec.coffee                      XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        2        -        2        -        -  
+    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 
 `
 
