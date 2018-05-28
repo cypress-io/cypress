@@ -318,7 +318,7 @@ createAndOpenProject = (socketId, options) ->
     })
 
 trashAssets = (config = {}) ->
-  if config.trashAssetsBeforeHeadlessRuns isnt true
+  if config.trashAssetsBeforeRuns isnt true
     return Promise.resolve()
 
   Promise.join(

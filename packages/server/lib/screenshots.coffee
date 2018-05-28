@@ -69,7 +69,7 @@ captureAndCheck = (data, automate, condition) ->
     tries++
     debug("capture and check attempt ##{tries}")
 
-    takenAt = new Date().toISOString()
+    takenAt = new Date().toJSON()
 
     automate(data)
     .then (dataUrl) ->
@@ -194,7 +194,7 @@ module.exports = {
     ## for failure screenshots, we keep it simple to avoid latency
     ## caused by jimp reading the image buffer
     if data.simple
-      takenAt = new Date().toISOString()
+      takenAt = new Date().toJSON()
       return automate(data).then (dataUrl) ->
         {
           takenAt
@@ -225,7 +225,7 @@ module.exports = {
         multipartImages.push({ data, image, takenAt })
 
         if data.current is data.total
-          { image, takenAt } = stitchScreenshots(pixelRatio)
+          { image } = stitchScreenshots(pixelRatio)
           return { image, pixelRatio, multipart, takenAt }
         else
           return {}
@@ -268,7 +268,6 @@ module.exports = {
         dimensions
         multipart
         pixelRatio
-        takenAt
         size: bytes(size, {unitSeparator: " "})
         path: pathToScreenshot
       }

@@ -67,10 +67,10 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             {
-              run.duration ?
+              run.totalDuration ?
                 <span>
                   <i className='fa fa-hourglass-end'></i>{' '}
-                  {durationFormatted(run.duration)}
+                  {durationFormatted(run.totalDuration)}
                 </span> :
                 run.createdAt ?
                   <TimerDisplay startTime={run.createdAt} /> :
@@ -118,7 +118,7 @@ export default class RunsListItem extends Component {
               <div className='result'>
                 <i className='fa fa-check'></i>{' '}
                 <span>
-                  {run.passed ? run.passed : '0'}
+                  {run.totalPassed || '0'}
                 </span>
               </div> :
               null
@@ -130,7 +130,7 @@ export default class RunsListItem extends Component {
               <div className='result'>
                 <i className='fa fa-times'></i>{' '}
                 <span>
-                  {run.failed ? run.failed : '0'}
+                  {run.totalFailed || '0'}
                 </span>
               </div> :
               null

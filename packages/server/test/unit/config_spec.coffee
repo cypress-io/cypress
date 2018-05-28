@@ -316,13 +316,13 @@ describe "lib/config", ->
           @setup({supportFile: true})
           @expectValidationFails("be a string or false")
 
-      context "trashAssetsBeforeHeadlessRuns", ->
+      context "trashAssetsBeforeRuns", ->
         it "passes if a boolean", ->
-          @setup({trashAssetsBeforeHeadlessRuns: false})
+          @setup({trashAssetsBeforeRuns: false})
           @expectValidationPasses()
 
         it "fails if not a boolean", ->
-          @setup({trashAssetsBeforeHeadlessRuns: 42})
+          @setup({trashAssetsBeforeRuns: 42})
           @expectValidationFails("be a boolean")
 
       context "videoCompression", ->
@@ -559,8 +559,8 @@ describe "lib/config", ->
     it "videoUploadOnPasses=true", ->
       @defaults "videoUploadOnPasses", true
 
-    it "trashAssetsBeforeHeadlessRuns=32", ->
-      @defaults "trashAssetsBeforeHeadlessRuns", true
+    it "trashAssetsBeforeRuns=32", ->
+      @defaults "trashAssetsBeforeRuns", true
 
     it "morgan=true", ->
       @defaults "morgan", true
@@ -726,7 +726,7 @@ describe "lib/config", ->
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            trashAssetsBeforeRuns: { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
@@ -785,7 +785,7 @@ describe "lib/config", ->
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            trashAssetsBeforeRuns: { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
