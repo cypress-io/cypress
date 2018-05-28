@@ -117,7 +117,6 @@ module.exports = {
         "-preset fast"
         "-crf #{videoCompression}"
       ])
-      .save(cname)
       .on "codecData", (data) ->
         total = utils.timemarkToSeconds(data.duration)
       .on "progress", (progress) ->
@@ -139,6 +138,7 @@ module.exports = {
         })
         .then ->
           resolve()
+      .save(cname)
 
       # setTimeout ->
       #   cmd.kill()

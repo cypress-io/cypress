@@ -456,7 +456,7 @@ module.exports = {
 
       started  = new Date
       progress = Date.now()
-      tenSecs = human("10 seconds")
+      throttle = env.get("VIDEO_COMPRESSION_THROTTLE") or human("10 seconds")
 
       onProgress = (float) ->
         switch
@@ -470,10 +470,10 @@ module.exports = {
             )
             console.log("")
 
-          when (new Date - progress) > tenSecs
+          when (new Date - progress) > throttle
             ## bump up the progress so we dont
             ## continuously get notifications
-            progress += tenSecs
+            progress += throttle
             percentage = Math.ceil(float * 100) + "%"
             console.log("  - Compression progress: ", chalk.cyan(percentage))
 

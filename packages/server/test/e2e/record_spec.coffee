@@ -140,11 +140,7 @@ defaultRoutes = [
 ]
 
 describe "e2e record", ->
-  env = _.clone(process.env)
-
   beforeEach ->
-    process.env = env
-
     requests = []
 
   context "passing", ->
