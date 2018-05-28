@@ -190,7 +190,7 @@ renderSummaryTable = (runUrl, results) ->
   if runs and runs.length
     head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
     colAligns = ["left", "right", "right", "right", "right", "right", "right"]
-    colWidths = [40, 10, 10, 10, 10, 10, 10]
+    colWidths = [39, 11, 10, 10, 10, 10, 10]
 
     table1 = terminal.table({
       colAligns
