@@ -104,12 +104,7 @@
       "default": "cypress/videos",
       "description": "Path to folder where videos will be saved after a headless or CI run"
     },
-    "screenshotOnHeadlessFailure": {
-      "type": "boolean",
-      "default": true,
-      "description": "Whether Cypress will automatically take a screenshot when a test fails when running tests headlessly or in CI."
-    },
-    "trashAssetsBeforeHeadlessRuns": {
+    "trashAssetsBeforeRuns": {
       "type": "boolean",
       "default": true,
       "description": "Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs."

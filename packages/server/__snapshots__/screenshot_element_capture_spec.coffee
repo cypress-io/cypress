@@ -64,9 +64,9 @@ exports['e2e screenshot element capture passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ screenshot_element_capture_spec.coffee       Xs        1        1        -        -        - │
+  │ ✔ screenshot_element_capture_spec.coff…     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

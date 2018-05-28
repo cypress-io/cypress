@@ -52,9 +52,9 @@ A video will not be recorded when using this browser.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ user_agent_spec.coffee                       Xs        2        2        -        -        - │
+  │ ✔ user_agent_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 `
 
@@ -112,9 +112,9 @@ exports['e2e user agent passes on electron 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ user_agent_spec.coffee                       Xs        2        2        -        -        - │
+  │ ✔ user_agent_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 `
 
