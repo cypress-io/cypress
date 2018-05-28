@@ -345,11 +345,17 @@ API = {
 
         Fix the error in your code and re-run your tests.
         """
-      when "CONFIG_VALIDATION_ERROR"
+      when "SETTINGS_VALIDATION_ERROR"
         """
         We found an invalid value in the file: '#{chalk.blue(arg1)}'
 
         #{chalk.yellow(arg2)}
+        """
+      when "CONFIG_VALIDATION_ERROR"
+        """
+        We found an invalid configuration value:
+
+        #{chalk.yellow(arg1)}
         """
       when "CANNOT_CONNECT_BASE_URL"
         """

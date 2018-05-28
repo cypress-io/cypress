@@ -4,7 +4,6 @@ Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
-errors   = require("./errors")
 fs       = require("./util/fs")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
@@ -54,26 +53,6 @@ configKeys = toWords """
   waitForAnimations
 """
 
-toArrayFromPipes = (str) ->
-  if _.isArray(str)
-    return str
-
-  [].concat(str.split('|'))
-
-toObjectFromPipes = (str) ->
-  if _.isObject(str)
-    return str
-
-  ## convert foo=bar|version=1.2.3 to
-  ## {foo: 'bar', version: '1.2.3'}
-  _
-  .chain(str)
-  .split("|")
-  .map (pair) ->
-    pair.split("=")
-  .fromPairs()
-  .mapValues(coerce)
-  .value()
 
 defaults = {
   port:                          null
@@ -160,6 +139,27 @@ validationRules = {
   watchForFileChanges: v.isBoolean
 }
 
+toArrayFromPipes = (str) ->
+  if _.isArray(str)
+    return str
+
+  [].concat(str.split('|'))
+
+toObjectFromPipes = (str) ->
+  if _.isObject(str)
+    return str
+
+  ## convert foo=bar|version=1.2.3 to
+  ## {foo: 'bar', version: '1.2.3'}
+  _
+  .chain(str)
+  .split("|")
+  .map (pair) ->
+    pair.split("=")
+  .fromPairs()
+  .mapValues(coerce)
+  .value()
+
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
@@ -168,13 +168,20 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
     return memo
   , {}
 
-validate = (file) ->
-  return (settings) ->
-    _.each settings, (value, key) ->
-      if validationFn = validationRules[key]
+validate = (cfg, onErr) ->
+  _.each cfg, (value, key) ->
+    ## does this key have a validation rule?
+    if validationFn = validationRules[key]
+      ## and is the value different from the default?
+      if value isnt defaults[key]
         result = validationFn(key, value)
         if result isnt true
-          errors.throw("CONFIG_VALIDATION_ERROR", file, result)
+          onErr(result)
+
+validateFile = (file) ->
+  return (settings) ->
+    validate settings, (errMsg) ->
+      errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
 module.exports = {
   getConfigKeys: -> configKeys
@@ -184,8 +191,8 @@ module.exports = {
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validate("cypress.json"))
-      settings.readEnv(projectRoot).then(validate("cypress.env.json"))
+      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
       @set({
@@ -261,6 +268,12 @@ module.exports = {
     config = @setAbsolutePaths(config, defaults)
 
     config = @setParentTestsPaths(config)
+
+    ## validate config again here so that we catch
+    ## configuration errors coming from the CLI overrides
+    ## or env var overrides
+    validate config, (errMsg) ->
+      errors.throw("CONFIG_VALIDATION_ERROR", errMsg)
 
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)

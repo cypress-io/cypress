@@ -547,7 +547,25 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "cypress.json")
+        @expectExitWithErr("SETTINGS_VALIDATION_ERROR", "cypress.json")
+
+    it "logs error and exits when project has invalid config values from the CLI", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=baseUrl=localhost:9999"
+      ])
+      .then =>
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "localhost:9999")
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "We found an invalid configuration value")
+
+    it "logs error and exits when project has invalid config values from env vars", ->
+      process.env.CYPRESS_BASE_URL = "localhost:9999"
+
+      cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "localhost:9999")
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "We found an invalid configuration value")
+
 
     it "logs error and exits when baseUrl cannot be verified", ->
       settings.write(@todosPath, {baseUrl: "http://localhost:90874"})
@@ -965,7 +983,7 @@ describe "lib/cypress", ->
       open      = sinon.stub(Server.prototype, "open").resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = "foo"
-      process.env.CYPRESS_BASE_URL = "localhost"
+      process.env.CYPRESS_BASE_URL = "http://localhost"
       process.env.CYPRESS_port = "2222"
       process.env.CYPRESS_responseTimeout = "5555"
       process.env.CYPRESS_watch_for_file_changes = "false"
@@ -978,7 +996,13 @@ describe "lib/cypress", ->
         json.baseUrl = "http://localhost:8080"
         settings.write(@todosPath, json)
       .then =>
-        cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
+        cypress.start([
+          "--port=2121",
+          "--config",
+          "pageLoadTimeout=1000",
+          "--foo=bar",
+          "--env=baz=baz"
+        ])
       .then =>
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
@@ -990,12 +1014,14 @@ describe "lib/cypress", ->
           env: { baz: "baz" }
         })
 
+        expect(open).to.be.called
+
         cfg = open.getCall(0).args[0]
 
         expect(cfg.fileServerFolder).to.eq(path.join(@todosPath, "foo"))
         expect(cfg.pageLoadTimeout).to.eq(1000)
         expect(cfg.port).to.eq(2121)
-        expect(cfg.baseUrl).to.eq("localhost")
+        expect(cfg.baseUrl).to.eq("http://localhost")
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
         expect(cfg.env.baz).to.eq("baz")
@@ -1018,7 +1044,7 @@ describe "lib/cypress", ->
           from: "cli"
         })
         expect(cfg.resolved.baseUrl).to.deep.eq({
-          value: "localhost"
+          value: "http://localhost"
           from: "env"
         })
         expect(cfg.resolved.watchForFileChanges).to.deep.eq({
