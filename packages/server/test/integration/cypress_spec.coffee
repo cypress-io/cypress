@@ -581,7 +581,7 @@ describe "lib/cypress", ->
         "--config=screenshotOnHeadlessFailure=false"
       ])
       .then =>
-        @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "trashAssetsBeforeHeadlessRuns")
+        @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "screenshotOnHeadlessFailure")
         @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "You now configure this behavior in your test code")
 
     it "logs error and exits when baseUrl cannot be verified", ->
