@@ -1,5 +1,5 @@
 import gravatar from 'gravatar'
-import durationFormatted from '../../../server/lib/util/duration'
+import duration from '../../../server/lib/util/duration'
 
 const cyDirRegex = /^cypress\/integration\//g
 
@@ -17,7 +17,7 @@ const browserIconLookup = {
 }
 
 module.exports = {
-  durationFormatted,
+  durationFormatted: duration.format,
 
   osIcon: (osName) => {
     if (!osName) return ''
