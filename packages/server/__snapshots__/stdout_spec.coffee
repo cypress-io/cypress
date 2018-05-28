@@ -281,7 +281,7 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
+  │ Browser:    FooBrowser 88                                                                        │
   │ Specs:      1 found (simple_spec.coffee)                                                       │
   │ Searched:   cypress/integration/simple_spec.coffee                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -338,7 +338,7 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
+  │ Browser:    FooBrowser 88                                                                          │
   │ Specs:      1 found (simple_spec.coffee)                                                       │
   │ Searched:   cypress/integration/simple_spec.coffee                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -387,3 +387,4 @@ A video will not be recorded when using this browser.
     All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
+

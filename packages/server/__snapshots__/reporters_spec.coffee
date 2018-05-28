@@ -172,6 +172,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
 
   (Run Finished)
 
+
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
