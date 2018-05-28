@@ -4,6 +4,7 @@ _ = require("lodash")
 snapshot = require("snap-shot-it")
 stripAnsi = require("strip-ansi")
 widestLine = require("widest-line")
+env = require("#{root}lib/util/env")
 terminal = require("#{root}lib/util/terminal")
 terminalSize = require("#{root}lib/util/terminal-size")
 
@@ -47,6 +48,10 @@ describe "lib/util/terminal", ->
     it "uses terminalSize when less than 100", ->
       sinon.stub(terminalSize, "get").returns({ columns: 99 })
       expect(terminal.getMaximumColumns()).to.eq(99)
+
+    it "overrides terminalSize when in CI", ->
+      sinon.stub(env, "get").withArgs("CI").returns("1")
+      expect(terminal.getMaximumColumns()).to.eq(100)
 
   context ".table", ->
     beforeEach ->
