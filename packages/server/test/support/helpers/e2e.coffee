@@ -330,6 +330,11 @@ module.exports = {
           COLUMNS: 100
           LINES: 24
         })
+        .defaults({
+          ## prevent any Compression progress
+          ## messages from showing up
+          VIDEO_COMPRESSION_THROTTLE: 20000
+        })
         .value()
       }
 
