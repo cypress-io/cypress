@@ -334,6 +334,9 @@ module.exports = {
           ## prevent any Compression progress
           ## messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 20000
+
+          ## don't fail our own tests running from forked PR's
+          CYPRESS_INTERNAL_E2E_TESTS: "1"
         })
         .value()
       }
