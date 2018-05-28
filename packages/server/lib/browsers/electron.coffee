@@ -8,7 +8,7 @@ Windows       = require("../gui/windows")
 savedState    = require("../saved_state")
 
 module.exports = {
-  _defaultOptions: (projectPath, state, options) ->
+  _defaultOptions: (projectRoot, state, options) ->
     _this = @
 
     defaults = {
@@ -32,7 +32,7 @@ module.exports = {
       onNewWindow: (e, url) ->
         _win = @
 
-        _this._launchChild(e, url, _win, projectPath, state, options)
+        _this._launchChild(e, url, _win, projectRoot, state, options)
         .then (child) ->
           ## close child on parent close
           _win.on "close", ->
@@ -42,17 +42,17 @@ module.exports = {
 
     _.defaultsDeep({}, options, defaults)
 
-  _render: (url, projectPath, options = {}) ->
-    win = Windows.create(projectPath, options)
+  _render: (url, projectRoot, options = {}) ->
+    win = Windows.create(projectRoot, options)
 
     @_launch(win, url, options)
 
-  _launchChild: (e, url, parent, projectPath, state, options) ->
+  _launchChild: (e, url, parent, projectRoot, state, options) ->
     e.preventDefault()
 
     [parentX, parentY] = parent.getPosition()
 
-    options = @_defaultOptions(projectPath, state, options)
+    options = @_defaultOptions(projectRoot, state, options)
 
     _.extend(options, {
       x: parentX + 100
@@ -61,7 +61,7 @@ module.exports = {
       onPaint: null ## dont capture paint events
     })
 
-    win = Windows.create(projectPath, options)
+    win = Windows.create(projectRoot, options)
 
     ## needed by electron since we prevented default and are creating
     ## our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
@@ -107,14 +107,14 @@ module.exports = {
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
-    { projectPath } = options
+    { projectRoot } = options
 
-    savedState(projectPath)
+    savedState(projectRoot)
     .then (state) ->
       state.get()
     .then (state) =>
       ## get our electron default options
-      options = @_defaultOptions(projectPath, state, options)
+      options = @_defaultOptions(projectRoot, state, options)
 
       ## get the GUI window defaults now
       options = Windows.defaults(options)
@@ -128,7 +128,7 @@ module.exports = {
         .then (newOptions) ->
           return newOptions ? options
     .then (options) =>
-      @_render(url, projectPath, options)
+      @_render(url, projectRoot, options)
       .then (win) =>
         a = Windows.automation(win)
 

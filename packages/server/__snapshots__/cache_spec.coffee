@@ -1,7 +1,19 @@
 exports['e2e cache passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (cache_spec.coffee)                                                        │
+  │ Searched:   cypress/integration/cache_spec.coffee                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: cache_spec.coffee...                                                            (1 of 1) 
 
 
   caching
@@ -14,25 +26,37 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   4 passing
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           4
-  - Passes:          4
-  - Failures:        0
-  - Pending:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌─────────────────────────────────┐
+  │ Tests:        4                 │
+  │ Passing:      4                 │
+  │ Failing:      0                 │
+  │ Pending:      0                 │
+  │ Skipped:      0                 │
+  │ Screenshots:  0                 │
+  │ Video:        true              │
+  │ Duration:     X seconds         │
+  │ Spec Ran:     cache_spec.coffee │
+  └─────────────────────────────────┘
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ cache_spec.coffee                            Xs        4        4        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                              Xs        4        4        -        -        -  
 
 `
 

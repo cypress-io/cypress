@@ -1,14 +1,12 @@
 _         = require("lodash")
 os        = require("os")
-fs        = require("fs-extra")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
 plugins   = require("../plugins")
+fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
-
-fs = Promise.promisifyAll(fs)
 
 LOAD_EXTENSION = "--load-extension="
 
@@ -40,6 +38,8 @@ defaultArgs = [
   "--reduce-security-for-testing"
   "--enable-automation"
   "--disable-infobars"
+  "--disable-device-discovery-notifications"
+  "--disable-blink-features=RootLayerScrolling"
 
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70

@@ -77,7 +77,7 @@ if (commitInfo) {
 // instructions for installing this binary
 // using https://github.com/bahmutov/commit-message-install
 const env = {
-  CYPRESS_BINARY_VERSION: binary,
+  CYPRESS_INSTALL_BINARY: binary,
 }
 const commitMessageInstructions = getInstallJson(
   npm,

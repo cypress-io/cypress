@@ -1,143 +1,630 @@
 [
   {
-    "buildNumber": "1891",
-    "ciProvider": "CircleCI",
-    "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthorEmail": "julie@devs.com",
-    "commitAuthorName": "Julie Pearson",
-    "commitBranch": "search-todos",
-    "commitMessage": "remove listings from search results on clear",
-    "commitSha": "abc1234",
-    "createdAt": "2016-05-13T02:35:12.748Z",
-    "expectedInstances": 1,
+    "buildNumber": 1891,
+    "ci": {
+      "buildNumber": "140",
+      "provider": "CircleCI",
+      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
+    },
+    "commit": {
+      "authorEmail": "julie@devs.com",
+      "authorName": "Julie Pearson",
+      "branch": "search-todos",
+      "message": "remove listings from search results on clear",
+      "sha": "abc1234",
+      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
+    },
+    "createdAt": "2016-12-19T14:12:57.328Z",
+    "cypressVersion": "0.18.5",
+    "completedAt": null,
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      }
+    ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d5",
     "instances": [
       {
-        "browserName": "chrome",
-        "browserVersion": "43",
-        "createdAt": "2016-05-13T02:35:12.748Z",
-        "duration": 1424424,
+        "createdAt": "2016-12-19T14:12:57.748Z",
+        "claimedAt": "2016-12-19T14:12:57.748Z",
+        "completedAt": null,
         "error": null,
-        "failures": 0,
-        "id": "od9809-0352-4ad9-85d3-feeb1e0505d5",
-        "osName": "windows",
-        "osVersion": "7",
-        "osVersionFormatted": "7",
-        "passes": 28,
+        "failed": 0,
+        "id": "923886c6-dbe4-5a7e-988c-97dbbf9d17ff",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
+        "passed": 28,
         "pending": 4,
-        "status": "passed"
+        "platform": {
+          "browserName": "chrome",
+          "browserVersion": "43",
+          "osCpus": [],
+          "osMemory": {
+            "free": 985665536,
+            "total": 63321108480
+          },
+          "osName": "win32",
+          "osVersion": "7",
+          "osVersionFormatted": "7"
+        },
+        "screenshots": [],
+        "skipped": 1,
+        "spec": "users_list_spec.js",
+        "stdout": "\u001b[90m  <select>(\u001b[4m\u001b[1mTests Starting\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[0m\u001b[0m\n\u001b[0m  Kitchen Sink\u001b[0m\n\u001b[2K\u001b[0G  \u001b[32m  ✓\u001b[0m\u001b[90m .should() - assert that <title> is correct\u001b[0m\u001b[31m (358ms)\u001b[0m\n\u001b[0m    Querying\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.get() - query DOM elements\u001b[0m\u001b[31m (84ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.contains() - query DOM elements with matching content\u001b[0m\u001b[31m (145ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .within() - query DOM elements within a specific element\u001b[0m\u001b[33m (63ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.root() - query the root DOM element\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[0m    Traversal\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .children() - get child DOM elements\u001b[0m\u001b[33m (46ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .closest() - get closest ancestor DOM element\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .eq() - get a DOM element at a specific index\u001b[0m\u001b[33m (61ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .filter() - get DOM elements that match the selector\u001b[0m\u001b[33m (51ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .find() - get descendant DOM elements of the selector\u001b[0m\u001b[31m (82ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .first() - get first DOM element\u001b[0m\u001b[31m (86ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .last() - get last DOM element\u001b[0m\u001b[33m (40ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .next() - get next sibling DOM element\u001b[0m\u001b[33m (42ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextAll() - get all next sibling DOM elements\u001b[0m\u001b[33m (58ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextUntil() - get next sibling DOM elements until next el\u001b[0m\u001b[33m (44ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .not() - remove DOM elements from set of DOM elements\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parent() - get parent DOM element from DOM elements\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parents() - get parent DOM elements from DOM elements\u001b[0m\u001b[33m (52ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parentsUntil() - get parent DOM elements from DOM elements until el\u001b[0m\u001b[33m (54ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prev() - get previous sibling DOM element\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevAll() - get all previous sibling DOM elements\u001b[0m\u001b[33m (48ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevUntil() - get all previous sibling DOM elements until el\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .siblings() - get all sibling DOM elements\u001b[0m\u001b[33m (38ms)\u001b[0m\n\u001b[0m    Actions\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .type() - type into a DOM element\u001b[0m\u001b[31m (4045ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .focus() - focus on a DOM element\u001b[0m\u001b[31m (118ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .blur() - blur off a DOM element\u001b[0m\u001b[31m (537ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .clear() - clears an input or textarea element\u001b[0m\u001b[31m (825ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .submit() - submit a form\u001b[0m\u001b[31m (423ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .click() - click on a DOM element\u001b[0m\u001b[31m (2555ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .dblclick() - double click on a DOM element\u001b[0m\u001b[31m (120ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.check() - check a checkbox or radio element\u001b[0m\u001b[31m (1968ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .uncheck() - uncheck a checkbox element\u001b[0m\u001b[31m (1637ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .select() - select an option in a <select> element\u001b[0m\u001b[31m (1092ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .scrollIntoView() - scroll an element into view\u001b[0m\u001b[31m (148ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.scrollTo() - scroll the window or element to a position\u001b[0m\u001b[31m (2043ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .trigger() - trigger an event on a DOM element\u001b[0m\u001b[31m (114ms)\u001b[0m\n\u001b[0m    Window\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.window() - get the global window object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.document() - get the document object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.title() - get the title\u001b[0m\n\u001b[0m    Viewport\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.viewport() - set the viewport size and dimension\u001b[0m\u001b[31m (2771ms)\u001b[0m\n\u001b[0m    Location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.hash() - get the current URL hash\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.location() - get window.location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.url() - get the current URL\u001b[0m\n\u001b[0m    Navigation\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.go() - go back or forward in the browser's history\u001b[0m\u001b[31m (664ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.reload() - reload the page\u001b[0m\u001b[31m (613ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.visit() - visit a remote url\u001b[0m\u001b[31m (378ms)\u001b[0m\n\u001b[0m    Assertions\u001b[0m\n\u001b[0m      Implicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .should() - make an assertion about the current subject\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .and() - chain multiple assertions together\u001b[0m\n\u001b[0m      Explicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - assert shape of an object\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - make an assertion about a specified subject\u001b[0m\n\u001b[0m    Misc\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .end() - end the command chain\u001b[0m\u001b[31m (269ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.exec() - execute a system command\u001b[0m\u001b[31m (732ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.focused() - get the DOM element that has focus\u001b[0m\u001b[31m (426ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.screenshot() - take a screenshot\u001b[0m\u001b[31m (234ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wrap() - wrap an object\u001b[0m\n\u001b[0m    Connectors\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .each() - iterate over an array of elements\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .its() - get properties on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .invoke() - invoke a function on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .spread() - spread an array as individual args to callback function\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .then() - invoke a callback function with the current subject\u001b[0m\u001b[33m (67ms)\u001b[0m\n\u001b[0m    Aliasing\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .as() - alias a route or DOM element for later use\u001b[0m\u001b[31m (240ms)\u001b[0m\n\u001b[0m    Waiting\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wait() - wait for a specific amount of time\u001b[0m\u001b[31m (4726ms)\u001b[0m\n\u001b[0m    Network Requests\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.server() - control behavior of network requests and responses\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.request() - make an XHR request\u001b[0m\u001b[31m (457ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.route() - route responses to matching requests\u001b[0m\u001b[31m (1565ms)\u001b[0m\n\u001b[0m    Files\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.fixture() - load a fixture\u001b[0m\u001b[31m (444ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.readFile() - read a files contents\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.writeFile() - write to a file\u001b[0m\u001b[31m (146ms)\u001b[0m\n\u001b[0m    Local Storage\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearLocalStorage() - clear all data in local storage\u001b[0m\u001b[31m (402ms)\u001b[0m\n\u001b[0m    Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookie() - get a browser cookie\u001b[0m\u001b[31m (168ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookies() - get browser cookies\u001b[0m\u001b[31m (184ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.setCookie() - set a browser cookie\u001b[0m\u001b[33m (39ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookie() - clear a browser cookie\u001b[0m\u001b[31m (189ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookies() - clear browser cookies\u001b[0m\u001b[31m (197ms)\u001b[0m\n\u001b[0m    Spies, Stubs, and Clock\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.spy() - wrap a method in a spy\u001b[0m\u001b[31m (472ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.stub() - create a stub and/or replace a function with a stub\u001b[0m\u001b[31m (225ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clock() - control time in the browser\u001b[0m\u001b[31m (383ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.tick() - move time in the browser\u001b[0m\u001b[31m (616ms)\u001b[0m\n\u001b[0m    Utilities\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress._.method() - call a lodash method\u001b[0m\u001b[31m (154ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.$(selector) - call a jQuery method\u001b[0m\u001b[31m (188ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.moment() - format or parse dates using a moment method\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Blob.method() - blob utilities and base64 string conversion\u001b[0m\u001b[31m (321ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m new Cypress.Promise(function) - instantiate a bluebird promise\u001b[0m\u001b[31m (1009ms)\u001b[0m\n\u001b[0m    Cypress.config()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.config() - get and set configuration options\u001b[0m\u001b[33m (59ms)\u001b[0m\n\u001b[0m    Cypress.env()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.env() - get environment variables\u001b[0m\n\u001b[0m    Cypress.Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.debug() - enable or disable debugging\u001b[0m\u001b[31m (79ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.preserveOnce() - preserve cookies by key\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.defaults() - set defaults for all cookies\u001b[0m\n\u001b[0m    Cypress.dom\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.dom.isHidden() - determine if a DOM element is hidden\u001b[0m\n\u001b[0m    Cypress.Server\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Server.defaults() - change default config of server\u001b[0m\n\n\n\u001b[92m \u001b[0m\u001b[32m 90 passing\u001b[0m\u001b[90m (1m)\u001b[0m\n\n\n\u001b[32m  (\u001b[4m\u001b[1mTests Finished\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[37m  - Tests:           \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Passes:          \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Failures:        \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Pending:         \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Duration:        \u001b[39m\u001b[32m1 minute, 11 seconds\u001b[39m\n\u001b[37m  - Screenshots:     \u001b[39m\u001b[32m1\u001b[39m\n\u001b[37m  - Video Recorded:  \u001b[39m\u001b[32mfalse\u001b[39m\n\u001b[37m  - Cypress Version: \u001b[39m\u001b[32m1.4.1\u001b[39m\n\n\n\u001b[33m  (\u001b[4m\u001b[1mScreenshots\u001b[22m\u001b[24m)\u001b[39m\n\n  - /tmp/repo/cypress/screenshots/my-image.png \u001b[90m(1280x720)\u001b[39m\n\n\n\u001b[34m  (\u001b[4m\u001b[1mUploading Assets\u001b[22m\u001b[24m)\u001b[39m\n\n  - Done Uploading \u001b[90m(1/1)\u001b[39m \u001b[34m/tmp/repo/cypress/screenshots/my-image.png\u001b[39m\n\n\n\u001b[90m  (\u001b[4m\u001b[1mAll Done\u001b[22m\u001b[24m)\u001b[39m\n\n",
+        "status": "passed",
+        "videos": [],
+        "wallClockDuration": 16000,
+        "wallClockEndedAt": null,
+        "wallClockStartedAt": "2016-12-19T14:12:58.748Z"
       }
     ],
-    "projectId": "3d89712jdha0wef082h98ha-8f98h3",
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "specIsolation": false,
+    "specPattern": null,
     "status": "running",
-    "totalDuration": 1424424,
-    "totalFailures": 0,
-    "totalPasses": 28,
-    "totalPending": 4
+    "totalDuration": null,
+    "totalFailed": 2,
+    "totalPassed": 45,
+    "totalPending": 6,
+    "totalSkipped": 1,
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
-    "buildNumber": "1892",
-    "ciProvider": "CircleCI",
-    "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthor": "Brian Mann",
-    "commitBranch": "master",
-    "commitEmail": "brian@devs.com",
-    "commitMessage": "fix for smaller screens widths so todos display completely",
-    "createdAt": "2016-04-21T02:35:12.748Z",
-    "expectedInstances": 1,
+    "buildNumber": 1892,
+    "ci": {
+      "buildNumber": "140",
+      "provider": "Circle",
+      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
+    },
+    "commit": {
+      "authorEmail": "brian@devs.com",
+      "authorName": "Brian Mann",
+      "branch": "master",
+      "message": "fix for smaller screens widths so todos display completely",
+      "sha": "abc1234",
+      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
+    },
+    "createdAt": "2016-12-19T14:59:59.328Z",
+    "cypressVersion": "0.18.5",
+    "completedAt": "2016-05-13T02:52:57.748Z",
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      }
+    ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d4",
     "instances": [
       {
-        "browserName": "chrome",
-        "browserVersion": "43",
         "createdAt": "2016-05-13T02:35:12.748Z",
-        "duration": 16,
+        "claimedAt": "2016-05-13T02:31:12.748Z",
+        "completedAt": "2016-05-13T02:35:12.748Z",
         "error": "The tests couldn't run.",
-        "failures": 0,
-        "osName": "windows",
-        "osVersion": "7",
-        "osVersionFormatted": "7",
-        "passes": 0,
+        "failed": 0,
+        "id": "1dca4de7-eb48-51ee-9bb9-e4c272e6bbc6",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
+        "passed": 0,
         "pending": 0,
-        "status": "errored"
+        "platform": {
+          "browserName": "chrome",
+          "browserVersion": "43",
+          "osCpus": [],
+          "osMemory": {
+            "free": 985665536,
+            "total": 63321108480
+          },
+          "osName": "win32",
+          "osVersion": "7",
+          "osVersionFormatted": "7"
+        },
+        "screenshots": [],
+        "skipped": 1,
+        "spec": "login_spec.js",
+        "stdout": "\u001b[90m  <select>(\u001b[4m\u001b[1mTests Starting\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[0m\u001b[0m\n\u001b[0m  Kitchen Sink\u001b[0m\n\u001b[2K\u001b[0G  \u001b[32m  ✓\u001b[0m\u001b[90m .should() - assert that <title> is correct\u001b[0m\u001b[31m (358ms)\u001b[0m\n\u001b[0m    Querying\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.get() - query DOM elements\u001b[0m\u001b[31m (84ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.contains() - query DOM elements with matching content\u001b[0m\u001b[31m (145ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .within() - query DOM elements within a specific element\u001b[0m\u001b[33m (63ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.root() - query the root DOM element\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[0m    Traversal\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .children() - get child DOM elements\u001b[0m\u001b[33m (46ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .closest() - get closest ancestor DOM element\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .eq() - get a DOM element at a specific index\u001b[0m\u001b[33m (61ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .filter() - get DOM elements that match the selector\u001b[0m\u001b[33m (51ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .find() - get descendant DOM elements of the selector\u001b[0m\u001b[31m (82ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .first() - get first DOM element\u001b[0m\u001b[31m (86ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .last() - get last DOM element\u001b[0m\u001b[33m (40ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .next() - get next sibling DOM element\u001b[0m\u001b[33m (42ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextAll() - get all next sibling DOM elements\u001b[0m\u001b[33m (58ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextUntil() - get next sibling DOM elements until next el\u001b[0m\u001b[33m (44ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .not() - remove DOM elements from set of DOM elements\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parent() - get parent DOM element from DOM elements\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parents() - get parent DOM elements from DOM elements\u001b[0m\u001b[33m (52ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parentsUntil() - get parent DOM elements from DOM elements until el\u001b[0m\u001b[33m (54ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prev() - get previous sibling DOM element\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevAll() - get all previous sibling DOM elements\u001b[0m\u001b[33m (48ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevUntil() - get all previous sibling DOM elements until el\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .siblings() - get all sibling DOM elements\u001b[0m\u001b[33m (38ms)\u001b[0m\n\u001b[0m    Actions\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .type() - type into a DOM element\u001b[0m\u001b[31m (4045ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .focus() - focus on a DOM element\u001b[0m\u001b[31m (118ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .blur() - blur off a DOM element\u001b[0m\u001b[31m (537ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .clear() - clears an input or textarea element\u001b[0m\u001b[31m (825ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .submit() - submit a form\u001b[0m\u001b[31m (423ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .click() - click on a DOM element\u001b[0m\u001b[31m (2555ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .dblclick() - double click on a DOM element\u001b[0m\u001b[31m (120ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.check() - check a checkbox or radio element\u001b[0m\u001b[31m (1968ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .uncheck() - uncheck a checkbox element\u001b[0m\u001b[31m (1637ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .select() - select an option in a <select> element\u001b[0m\u001b[31m (1092ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .scrollIntoView() - scroll an element into view\u001b[0m\u001b[31m (148ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.scrollTo() - scroll the window or element to a position\u001b[0m\u001b[31m (2043ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .trigger() - trigger an event on a DOM element\u001b[0m\u001b[31m (114ms)\u001b[0m\n\u001b[0m    Window\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.window() - get the global window object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.document() - get the document object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.title() - get the title\u001b[0m\n\u001b[0m    Viewport\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.viewport() - set the viewport size and dimension\u001b[0m\u001b[31m (2771ms)\u001b[0m\n\u001b[0m    Location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.hash() - get the current URL hash\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.location() - get window.location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.url() - get the current URL\u001b[0m\n\u001b[0m    Navigation\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.go() - go back or forward in the browser's history\u001b[0m\u001b[31m (664ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.reload() - reload the page\u001b[0m\u001b[31m (613ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.visit() - visit a remote url\u001b[0m\u001b[31m (378ms)\u001b[0m\n\u001b[0m    Assertions\u001b[0m\n\u001b[0m      Implicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .should() - make an assertion about the current subject\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .and() - chain multiple assertions together\u001b[0m\n\u001b[0m      Explicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - assert shape of an object\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - make an assertion about a specified subject\u001b[0m\n\u001b[0m    Misc\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .end() - end the command chain\u001b[0m\u001b[31m (269ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.exec() - execute a system command\u001b[0m\u001b[31m (732ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.focused() - get the DOM element that has focus\u001b[0m\u001b[31m (426ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.screenshot() - take a screenshot\u001b[0m\u001b[31m (234ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wrap() - wrap an object\u001b[0m\n\u001b[0m    Connectors\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .each() - iterate over an array of elements\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .its() - get properties on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .invoke() - invoke a function on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .spread() - spread an array as individual args to callback function\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .then() - invoke a callback function with the current subject\u001b[0m\u001b[33m (67ms)\u001b[0m\n\u001b[0m    Aliasing\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .as() - alias a route or DOM element for later use\u001b[0m\u001b[31m (240ms)\u001b[0m\n\u001b[0m    Waiting\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wait() - wait for a specific amount of time\u001b[0m\u001b[31m (4726ms)\u001b[0m\n\u001b[0m    Network Requests\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.server() - control behavior of network requests and responses\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.request() - make an XHR request\u001b[0m\u001b[31m (457ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.route() - route responses to matching requests\u001b[0m\u001b[31m (1565ms)\u001b[0m\n\u001b[0m    Files\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.fixture() - load a fixture\u001b[0m\u001b[31m (444ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.readFile() - read a files contents\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.writeFile() - write to a file\u001b[0m\u001b[31m (146ms)\u001b[0m\n\u001b[0m    Local Storage\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearLocalStorage() - clear all data in local storage\u001b[0m\u001b[31m (402ms)\u001b[0m\n\u001b[0m    Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookie() - get a browser cookie\u001b[0m\u001b[31m (168ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookies() - get browser cookies\u001b[0m\u001b[31m (184ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.setCookie() - set a browser cookie\u001b[0m\u001b[33m (39ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookie() - clear a browser cookie\u001b[0m\u001b[31m (189ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookies() - clear browser cookies\u001b[0m\u001b[31m (197ms)\u001b[0m\n\u001b[0m    Spies, Stubs, and Clock\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.spy() - wrap a method in a spy\u001b[0m\u001b[31m (472ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.stub() - create a stub and/or replace a function with a stub\u001b[0m\u001b[31m (225ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clock() - control time in the browser\u001b[0m\u001b[31m (383ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.tick() - move time in the browser\u001b[0m\u001b[31m (616ms)\u001b[0m\n\u001b[0m    Utilities\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress._.method() - call a lodash method\u001b[0m\u001b[31m (154ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.$(selector) - call a jQuery method\u001b[0m\u001b[31m (188ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.moment() - format or parse dates using a moment method\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Blob.method() - blob utilities and base64 string conversion\u001b[0m\u001b[31m (321ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m new Cypress.Promise(function) - instantiate a bluebird promise\u001b[0m\u001b[31m (1009ms)\u001b[0m\n\u001b[0m    Cypress.config()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.config() - get and set configuration options\u001b[0m\u001b[33m (59ms)\u001b[0m\n\u001b[0m    Cypress.env()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.env() - get environment variables\u001b[0m\n\u001b[0m    Cypress.Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.debug() - enable or disable debugging\u001b[0m\u001b[31m (79ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.preserveOnce() - preserve cookies by key\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.defaults() - set defaults for all cookies\u001b[0m\n\u001b[0m    Cypress.dom\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.dom.isHidden() - determine if a DOM element is hidden\u001b[0m\n\u001b[0m    Cypress.Server\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Server.defaults() - change default config of server\u001b[0m\n\n\n\u001b[92m \u001b[0m\u001b[32m 90 passing\u001b[0m\u001b[90m (1m)\u001b[0m\n\n\n\u001b[32m  (\u001b[4m\u001b[1mTests Finished\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[37m  - Tests:           \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Passes:          \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Failures:        \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Pending:         \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Duration:        \u001b[39m\u001b[32m1 minute, 11 seconds\u001b[39m\n\u001b[37m  - Screenshots:     \u001b[39m\u001b[32m1\u001b[39m\n\u001b[37m  - Video Recorded:  \u001b[39m\u001b[32mfalse\u001b[39m\n\u001b[37m  - Cypress Version: \u001b[39m\u001b[32m1.4.1\u001b[39m\n\n\n\u001b[33m  (\u001b[4m\u001b[1mScreenshots\u001b[22m\u001b[24m)\u001b[39m\n\n  - /tmp/repo/cypress/screenshots/my-image.png \u001b[90m(1280x720)\u001b[39m\n\n\n\u001b[34m  (\u001b[4m\u001b[1mUploading Assets\u001b[22m\u001b[24m)\u001b[39m\n\n  - Done Uploading \u001b[90m(1/1)\u001b[39m \u001b[34m/tmp/repo/cypress/screenshots/my-image.png\u001b[39m\n\n\n\u001b[90m  (\u001b[4m\u001b[1mAll Done\u001b[22m\u001b[24m)\u001b[39m\n\n",
+        "status": "errored",
+        "videos": [],
+        "wallClockDuration": 16,
+        "wallClockEndedAt": "2016-05-13T02:35:12.748Z",
+        "wallClockStartedAt": "2016-05-13T02:31:12.748Z"
       }
     ],
-    "projectId": "4d89712jdha0wef082h98h9098h3",
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "specIsolation": false,
+    "specPattern": null,
     "status": "failed",
-    "totalDuration": 16,
-    "totalFailures": 0,
-    "totalPasses": 0,
-    "totalPending": 0
+    "totalDuration": 12908,
+    "totalFailed": 2,
+    "totalPassed": 45,
+    "totalPending": 6,
+    "totalSkipped": 1,
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
-    "buildNumber": "1893",
-    "ciProvider": "CircleCI",
-    "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthor": "Julie Pearson",
-    "commitBranch": "search-todos",
-    "commitEmail": "julie@devs.com",
-    "commitMessage": "regex remove whitespace",
+    "buildNumber": 1893,
+    "ci": null,
+    "commit": null,
     "createdAt": "2016-03-21T02:35:12.748Z",
-    "expectedInstances": 1,
-    "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d3",
-    "instances": [
-      
+    "cypressVersion": "0.18.5",
+    "completedAt": "2016-05-13T02:52:57.748Z",
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      }
     ],
-    "projectId": "4d89712jdha0wef082h98h9098h3",
+    "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d3",
+    "instances": [],
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "specIsolation": false,
+    "specPattern": null,
     "status": "errored",
-    "totalDuration": 1424424,
-    "totalFailures": 0,
-    "totalPasses": 28,
-    "totalPending": 0
+    "totalDuration": 1290384,
+    "totalFailed": 2,
+    "totalPassed": 45,
+    "totalPending": 6,
+    "totalSkipped": 1,
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   },
   {
-    "buildNumber": "1894",
-    "ciProvider": "CircleCI",
-    "ciUrl": "https://circleci.com/gh/cypress-io/cypress-core-example/140",
-    "commitAuthor": "Julie Pearson",
-    "commitBranch": "search-todos",
-    "commitEmail": "julie@devs.com",
-    "commitMessage": "remove listings from search results on clear",
+    "buildNumber": 1894,
+    "ci": {
+      "buildNumber": "140",
+      "provider": "Circle",
+      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
+    },
+    "commit": {
+      "authorEmail": "julie@devs.com",
+      "authorName": "Julie Pearson",
+      "branch": "search-todos",
+      "message": "remove listings from search results on clear",
+      "sha": "abc1234",
+      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
+    },
     "createdAt": "2015-08-21T02:35:12.748Z",
-    "expectedInstances": 2,
+    "cypressVersion": "0.18.5",
+    "completedAt": "2016-05-13T02:52:57.748Z",
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      }
+    ],
     "id": "e474ccb9-0352-4ad9-85d3-feeb1e0505d2",
     "instances": [
       {
-        "browserName": "chrome",
-        "browserVersion": "43",
         "createdAt": "2016-05-13T02:35:12.748Z",
-        "duration": 1424424,
+        "claimedAt": "2016-05-13T02:34:12.748Z",
+        "completedAt": "2016-05-13T02:35:12.748Z",
         "error": "The tests couldn't run.",
-        "failures": 0,
-        "id": "dkwd809-0352-4ad9-85d3-feeb1e0505d5",
-        "osName": "windows",
-        "osVersion": "7",
-        "osVersionFormatted": "7",
-        "passes": 0,
+        "failed": 0,
+        "id": "228c2dee-167d-53b1-98be-da38c5b7bd9a",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
+        "passed": 0,
         "pending": 0,
-        "status": "errored"
+        "platform": {
+          "browserName": "chrome",
+          "browserVersion": "43",
+          "osCpus": [],
+          "osMemory": {
+            "free": 985665536,
+            "total": 63321108480
+          },
+          "osName": "linux",
+          "osVersion": "14.5",
+          "osVersionFormatted": "14.5"
+        },
+        "screenshots": [],
+        "skipped": 1,
+        "spec": "filters_spec.js",
+        "stdout": "\u001b[90m  <select>(\u001b[4m\u001b[1mTests Starting\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[0m\u001b[0m\n\u001b[0m  Kitchen Sink\u001b[0m\n\u001b[2K\u001b[0G  \u001b[32m  ✓\u001b[0m\u001b[90m .should() - assert that <title> is correct\u001b[0m\u001b[31m (358ms)\u001b[0m\n\u001b[0m    Querying\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.get() - query DOM elements\u001b[0m\u001b[31m (84ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.contains() - query DOM elements with matching content\u001b[0m\u001b[31m (145ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .within() - query DOM elements within a specific element\u001b[0m\u001b[33m (63ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.root() - query the root DOM element\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[0m    Traversal\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .children() - get child DOM elements\u001b[0m\u001b[33m (46ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .closest() - get closest ancestor DOM element\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .eq() - get a DOM element at a specific index\u001b[0m\u001b[33m (61ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .filter() - get DOM elements that match the selector\u001b[0m\u001b[33m (51ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .find() - get descendant DOM elements of the selector\u001b[0m\u001b[31m (82ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .first() - get first DOM element\u001b[0m\u001b[31m (86ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .last() - get last DOM element\u001b[0m\u001b[33m (40ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .next() - get next sibling DOM element\u001b[0m\u001b[33m (42ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextAll() - get all next sibling DOM elements\u001b[0m\u001b[33m (58ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextUntil() - get next sibling DOM elements until next el\u001b[0m\u001b[33m (44ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .not() - remove DOM elements from set of DOM elements\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parent() - get parent DOM element from DOM elements\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parents() - get parent DOM elements from DOM elements\u001b[0m\u001b[33m (52ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parentsUntil() - get parent DOM elements from DOM elements until el\u001b[0m\u001b[33m (54ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prev() - get previous sibling DOM element\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevAll() - get all previous sibling DOM elements\u001b[0m\u001b[33m (48ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevUntil() - get all previous sibling DOM elements until el\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .siblings() - get all sibling DOM elements\u001b[0m\u001b[33m (38ms)\u001b[0m\n\u001b[0m    Actions\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .type() - type into a DOM element\u001b[0m\u001b[31m (4045ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .focus() - focus on a DOM element\u001b[0m\u001b[31m (118ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .blur() - blur off a DOM element\u001b[0m\u001b[31m (537ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .clear() - clears an input or textarea element\u001b[0m\u001b[31m (825ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .submit() - submit a form\u001b[0m\u001b[31m (423ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .click() - click on a DOM element\u001b[0m\u001b[31m (2555ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .dblclick() - double click on a DOM element\u001b[0m\u001b[31m (120ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.check() - check a checkbox or radio element\u001b[0m\u001b[31m (1968ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .uncheck() - uncheck a checkbox element\u001b[0m\u001b[31m (1637ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .select() - select an option in a <select> element\u001b[0m\u001b[31m (1092ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .scrollIntoView() - scroll an element into view\u001b[0m\u001b[31m (148ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.scrollTo() - scroll the window or element to a position\u001b[0m\u001b[31m (2043ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .trigger() - trigger an event on a DOM element\u001b[0m\u001b[31m (114ms)\u001b[0m\n\u001b[0m    Window\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.window() - get the global window object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.document() - get the document object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.title() - get the title\u001b[0m\n\u001b[0m    Viewport\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.viewport() - set the viewport size and dimension\u001b[0m\u001b[31m (2771ms)\u001b[0m\n\u001b[0m    Location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.hash() - get the current URL hash\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.location() - get window.location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.url() - get the current URL\u001b[0m\n\u001b[0m    Navigation\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.go() - go back or forward in the browser's history\u001b[0m\u001b[31m (664ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.reload() - reload the page\u001b[0m\u001b[31m (613ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.visit() - visit a remote url\u001b[0m\u001b[31m (378ms)\u001b[0m\n\u001b[0m    Assertions\u001b[0m\n\u001b[0m      Implicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .should() - make an assertion about the current subject\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .and() - chain multiple assertions together\u001b[0m\n\u001b[0m      Explicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - assert shape of an object\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - make an assertion about a specified subject\u001b[0m\n\u001b[0m    Misc\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .end() - end the command chain\u001b[0m\u001b[31m (269ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.exec() - execute a system command\u001b[0m\u001b[31m (732ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.focused() - get the DOM element that has focus\u001b[0m\u001b[31m (426ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.screenshot() - take a screenshot\u001b[0m\u001b[31m (234ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wrap() - wrap an object\u001b[0m\n\u001b[0m    Connectors\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .each() - iterate over an array of elements\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .its() - get properties on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .invoke() - invoke a function on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .spread() - spread an array as individual args to callback function\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .then() - invoke a callback function with the current subject\u001b[0m\u001b[33m (67ms)\u001b[0m\n\u001b[0m    Aliasing\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .as() - alias a route or DOM element for later use\u001b[0m\u001b[31m (240ms)\u001b[0m\n\u001b[0m    Waiting\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wait() - wait for a specific amount of time\u001b[0m\u001b[31m (4726ms)\u001b[0m\n\u001b[0m    Network Requests\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.server() - control behavior of network requests and responses\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.request() - make an XHR request\u001b[0m\u001b[31m (457ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.route() - route responses to matching requests\u001b[0m\u001b[31m (1565ms)\u001b[0m\n\u001b[0m    Files\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.fixture() - load a fixture\u001b[0m\u001b[31m (444ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.readFile() - read a files contents\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.writeFile() - write to a file\u001b[0m\u001b[31m (146ms)\u001b[0m\n\u001b[0m    Local Storage\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearLocalStorage() - clear all data in local storage\u001b[0m\u001b[31m (402ms)\u001b[0m\n\u001b[0m    Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookie() - get a browser cookie\u001b[0m\u001b[31m (168ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookies() - get browser cookies\u001b[0m\u001b[31m (184ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.setCookie() - set a browser cookie\u001b[0m\u001b[33m (39ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookie() - clear a browser cookie\u001b[0m\u001b[31m (189ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookies() - clear browser cookies\u001b[0m\u001b[31m (197ms)\u001b[0m\n\u001b[0m    Spies, Stubs, and Clock\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.spy() - wrap a method in a spy\u001b[0m\u001b[31m (472ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.stub() - create a stub and/or replace a function with a stub\u001b[0m\u001b[31m (225ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clock() - control time in the browser\u001b[0m\u001b[31m (383ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.tick() - move time in the browser\u001b[0m\u001b[31m (616ms)\u001b[0m\n\u001b[0m    Utilities\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress._.method() - call a lodash method\u001b[0m\u001b[31m (154ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.$(selector) - call a jQuery method\u001b[0m\u001b[31m (188ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.moment() - format or parse dates using a moment method\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Blob.method() - blob utilities and base64 string conversion\u001b[0m\u001b[31m (321ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m new Cypress.Promise(function) - instantiate a bluebird promise\u001b[0m\u001b[31m (1009ms)\u001b[0m\n\u001b[0m    Cypress.config()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.config() - get and set configuration options\u001b[0m\u001b[33m (59ms)\u001b[0m\n\u001b[0m    Cypress.env()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.env() - get environment variables\u001b[0m\n\u001b[0m    Cypress.Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.debug() - enable or disable debugging\u001b[0m\u001b[31m (79ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.preserveOnce() - preserve cookies by key\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.defaults() - set defaults for all cookies\u001b[0m\n\u001b[0m    Cypress.dom\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.dom.isHidden() - determine if a DOM element is hidden\u001b[0m\n\u001b[0m    Cypress.Server\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Server.defaults() - change default config of server\u001b[0m\n\n\n\u001b[92m \u001b[0m\u001b[32m 90 passing\u001b[0m\u001b[90m (1m)\u001b[0m\n\n\n\u001b[32m  (\u001b[4m\u001b[1mTests Finished\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[37m  - Tests:           \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Passes:          \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Failures:        \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Pending:         \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Duration:        \u001b[39m\u001b[32m1 minute, 11 seconds\u001b[39m\n\u001b[37m  - Screenshots:     \u001b[39m\u001b[32m1\u001b[39m\n\u001b[37m  - Video Recorded:  \u001b[39m\u001b[32mfalse\u001b[39m\n\u001b[37m  - Cypress Version: \u001b[39m\u001b[32m1.4.1\u001b[39m\n\n\n\u001b[33m  (\u001b[4m\u001b[1mScreenshots\u001b[22m\u001b[24m)\u001b[39m\n\n  - /tmp/repo/cypress/screenshots/my-image.png \u001b[90m(1280x720)\u001b[39m\n\n\n\u001b[34m  (\u001b[4m\u001b[1mUploading Assets\u001b[22m\u001b[24m)\u001b[39m\n\n  - Done Uploading \u001b[90m(1/1)\u001b[39m \u001b[34m/tmp/repo/cypress/screenshots/my-image.png\u001b[39m\n\n\n\u001b[90m  (\u001b[4m\u001b[1mAll Done\u001b[22m\u001b[24m)\u001b[39m\n\n",
+        "status": "errored",
+        "videos": [],
+        "wallClockDuration": 1424424,
+        "wallClockEndedAt": "2016-05-13T02:35:12.748Z",
+        "wallClockStartedAt": "2016-05-13T02:34:12.748Z"
       },
       {
-        "browserName": "safari",
-        "browserVersion": "13.5",
         "createdAt": "2016-05-13T02:35:12.748Z",
-        "duration": 1424424,
+        "claimedAt": "2016-05-13T02:34:12.748Z",
+        "completedAt": "2016-05-13T02:35:12.748Z",
         "error": null,
-        "failures": 0,
-        "id": "as9d0809-0352-4ad9-85d3-feeb1e0505d5",
-        "osName": "darwin",
-        "osVersion": "10",
-        "osVersionFormatted": "OSX Mountain Lion",
-        "passes": 0,
+        "failed": 0,
+        "id": "71272f43-0891-588a-a822-5ad143985fc3",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
+        "passed": 0,
         "pending": 0,
-        "status": "running"
+        "platform": {
+          "browserName": "safari",
+          "browserVersion": "13.5",
+          "osCpus": [],
+          "osMemory": {
+            "free": 985665536,
+            "total": 63321108480
+          },
+          "osName": "darwin",
+          "osVersion": "10",
+          "osVersionFormatted": "OSX Mountain Lion"
+        },
+        "screenshots": [],
+        "skipped": 1,
+        "spec": "search_spec.js",
+        "stdout": "\u001b[90m  <select>(\u001b[4m\u001b[1mTests Starting\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[0m\u001b[0m\n\u001b[0m  Kitchen Sink\u001b[0m\n\u001b[2K\u001b[0G  \u001b[32m  ✓\u001b[0m\u001b[90m .should() - assert that <title> is correct\u001b[0m\u001b[31m (358ms)\u001b[0m\n\u001b[0m    Querying\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.get() - query DOM elements\u001b[0m\u001b[31m (84ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.contains() - query DOM elements with matching content\u001b[0m\u001b[31m (145ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .within() - query DOM elements within a specific element\u001b[0m\u001b[33m (63ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.root() - query the root DOM element\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[0m    Traversal\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .children() - get child DOM elements\u001b[0m\u001b[33m (46ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .closest() - get closest ancestor DOM element\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .eq() - get a DOM element at a specific index\u001b[0m\u001b[33m (61ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .filter() - get DOM elements that match the selector\u001b[0m\u001b[33m (51ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .find() - get descendant DOM elements of the selector\u001b[0m\u001b[31m (82ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .first() - get first DOM element\u001b[0m\u001b[31m (86ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .last() - get last DOM element\u001b[0m\u001b[33m (40ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .next() - get next sibling DOM element\u001b[0m\u001b[33m (42ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextAll() - get all next sibling DOM elements\u001b[0m\u001b[33m (58ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextUntil() - get next sibling DOM elements until next el\u001b[0m\u001b[33m (44ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .not() - remove DOM elements from set of DOM elements\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parent() - get parent DOM element from DOM elements\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parents() - get parent DOM elements from DOM elements\u001b[0m\u001b[33m (52ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parentsUntil() - get parent DOM elements from DOM elements until el\u001b[0m\u001b[33m (54ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prev() - get previous sibling DOM element\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevAll() - get all previous sibling DOM elements\u001b[0m\u001b[33m (48ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevUntil() - get all previous sibling DOM elements until el\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .siblings() - get all sibling DOM elements\u001b[0m\u001b[33m (38ms)\u001b[0m\n\u001b[0m    Actions\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .type() - type into a DOM element\u001b[0m\u001b[31m (4045ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .focus() - focus on a DOM element\u001b[0m\u001b[31m (118ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .blur() - blur off a DOM element\u001b[0m\u001b[31m (537ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .clear() - clears an input or textarea element\u001b[0m\u001b[31m (825ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .submit() - submit a form\u001b[0m\u001b[31m (423ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .click() - click on a DOM element\u001b[0m\u001b[31m (2555ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .dblclick() - double click on a DOM element\u001b[0m\u001b[31m (120ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.check() - check a checkbox or radio element\u001b[0m\u001b[31m (1968ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .uncheck() - uncheck a checkbox element\u001b[0m\u001b[31m (1637ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .select() - select an option in a <select> element\u001b[0m\u001b[31m (1092ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .scrollIntoView() - scroll an element into view\u001b[0m\u001b[31m (148ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.scrollTo() - scroll the window or element to a position\u001b[0m\u001b[31m (2043ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .trigger() - trigger an event on a DOM element\u001b[0m\u001b[31m (114ms)\u001b[0m\n\u001b[0m    Window\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.window() - get the global window object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.document() - get the document object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.title() - get the title\u001b[0m\n\u001b[0m    Viewport\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.viewport() - set the viewport size and dimension\u001b[0m\u001b[31m (2771ms)\u001b[0m\n\u001b[0m    Location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.hash() - get the current URL hash\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.location() - get window.location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.url() - get the current URL\u001b[0m\n\u001b[0m    Navigation\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.go() - go back or forward in the browser's history\u001b[0m\u001b[31m (664ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.reload() - reload the page\u001b[0m\u001b[31m (613ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.visit() - visit a remote url\u001b[0m\u001b[31m (378ms)\u001b[0m\n\u001b[0m    Assertions\u001b[0m\n\u001b[0m      Implicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .should() - make an assertion about the current subject\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .and() - chain multiple assertions together\u001b[0m\n\u001b[0m      Explicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - assert shape of an object\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - make an assertion about a specified subject\u001b[0m\n\u001b[0m    Misc\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .end() - end the command chain\u001b[0m\u001b[31m (269ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.exec() - execute a system command\u001b[0m\u001b[31m (732ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.focused() - get the DOM element that has focus\u001b[0m\u001b[31m (426ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.screenshot() - take a screenshot\u001b[0m\u001b[31m (234ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wrap() - wrap an object\u001b[0m\n\u001b[0m    Connectors\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .each() - iterate over an array of elements\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .its() - get properties on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .invoke() - invoke a function on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .spread() - spread an array as individual args to callback function\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .then() - invoke a callback function with the current subject\u001b[0m\u001b[33m (67ms)\u001b[0m\n\u001b[0m    Aliasing\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .as() - alias a route or DOM element for later use\u001b[0m\u001b[31m (240ms)\u001b[0m\n\u001b[0m    Waiting\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wait() - wait for a specific amount of time\u001b[0m\u001b[31m (4726ms)\u001b[0m\n\u001b[0m    Network Requests\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.server() - control behavior of network requests and responses\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.request() - make an XHR request\u001b[0m\u001b[31m (457ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.route() - route responses to matching requests\u001b[0m\u001b[31m (1565ms)\u001b[0m\n\u001b[0m    Files\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.fixture() - load a fixture\u001b[0m\u001b[31m (444ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.readFile() - read a files contents\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.writeFile() - write to a file\u001b[0m\u001b[31m (146ms)\u001b[0m\n\u001b[0m    Local Storage\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearLocalStorage() - clear all data in local storage\u001b[0m\u001b[31m (402ms)\u001b[0m\n\u001b[0m    Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookie() - get a browser cookie\u001b[0m\u001b[31m (168ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookies() - get browser cookies\u001b[0m\u001b[31m (184ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.setCookie() - set a browser cookie\u001b[0m\u001b[33m (39ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookie() - clear a browser cookie\u001b[0m\u001b[31m (189ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookies() - clear browser cookies\u001b[0m\u001b[31m (197ms)\u001b[0m\n\u001b[0m    Spies, Stubs, and Clock\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.spy() - wrap a method in a spy\u001b[0m\u001b[31m (472ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.stub() - create a stub and/or replace a function with a stub\u001b[0m\u001b[31m (225ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clock() - control time in the browser\u001b[0m\u001b[31m (383ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.tick() - move time in the browser\u001b[0m\u001b[31m (616ms)\u001b[0m\n\u001b[0m    Utilities\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress._.method() - call a lodash method\u001b[0m\u001b[31m (154ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.$(selector) - call a jQuery method\u001b[0m\u001b[31m (188ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.moment() - format or parse dates using a moment method\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Blob.method() - blob utilities and base64 string conversion\u001b[0m\u001b[31m (321ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m new Cypress.Promise(function) - instantiate a bluebird promise\u001b[0m\u001b[31m (1009ms)\u001b[0m\n\u001b[0m    Cypress.config()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.config() - get and set configuration options\u001b[0m\u001b[33m (59ms)\u001b[0m\n\u001b[0m    Cypress.env()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.env() - get environment variables\u001b[0m\n\u001b[0m    Cypress.Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.debug() - enable or disable debugging\u001b[0m\u001b[31m (79ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.preserveOnce() - preserve cookies by key\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.defaults() - set defaults for all cookies\u001b[0m\n\u001b[0m    Cypress.dom\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.dom.isHidden() - determine if a DOM element is hidden\u001b[0m\n\u001b[0m    Cypress.Server\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Server.defaults() - change default config of server\u001b[0m\n\n\n\u001b[92m \u001b[0m\u001b[32m 90 passing\u001b[0m\u001b[90m (1m)\u001b[0m\n\n\n\u001b[32m  (\u001b[4m\u001b[1mTests Finished\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[37m  - Tests:           \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Passes:          \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Failures:        \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Pending:         \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Duration:        \u001b[39m\u001b[32m1 minute, 11 seconds\u001b[39m\n\u001b[37m  - Screenshots:     \u001b[39m\u001b[32m1\u001b[39m\n\u001b[37m  - Video Recorded:  \u001b[39m\u001b[32mfalse\u001b[39m\n\u001b[37m  - Cypress Version: \u001b[39m\u001b[32m1.4.1\u001b[39m\n\n\n\u001b[33m  (\u001b[4m\u001b[1mScreenshots\u001b[22m\u001b[24m)\u001b[39m\n\n  - /tmp/repo/cypress/screenshots/my-image.png \u001b[90m(1280x720)\u001b[39m\n\n\n\u001b[34m  (\u001b[4m\u001b[1mUploading Assets\u001b[22m\u001b[24m)\u001b[39m\n\n  - Done Uploading \u001b[90m(1/1)\u001b[39m \u001b[34m/tmp/repo/cypress/screenshots/my-image.png\u001b[39m\n\n\n\u001b[90m  (\u001b[4m\u001b[1mAll Done\u001b[22m\u001b[24m)\u001b[39m\n\n",
+        "status": "running",
+        "videos": [],
+        "wallClockDuration": 1424424,
+        "wallClockEndedAt": "2016-05-13T02:35:12.748Z",
+        "wallClockStartedAt": "2016-05-13T02:34:12.748Z"
       }
     ],
-    "projectId": "2d89712jdha0wef082h98h9098h3",
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "specIsolation": false,
+    "specPattern": null,
     "status": "passed",
-    "totalDuration": 1424424,
-    "totalFailures": 0,
-    "totalPasses": 28,
-    "totalPending": 2
+    "totalDuration": 9018203,
+    "totalFailed": 0,
+    "totalPassed": 45,
+    "totalPending": 6,
+    "totalSkipped": 1,
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
+  },
+  {
+    "buildNumber": 1891,
+    "ci": {
+      "buildNumber": "140",
+      "provider": "CircleCI",
+      "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
+    },
+    "commit": {
+      "authorEmail": "julie@devs.com",
+      "authorName": "Julie Pearson",
+      "branch": "search-todos",
+      "message": "remove listings from search results on clear",
+      "sha": "abc1234",
+      "url": "https://github.com/cypress-io/cypress-core-example/commit/abc1234"
+    },
+    "createdAt": "2016-12-19T14:02:57.328Z",
+    "cypressVersion": "0.18.5",
+    "completedAt": null,
+    "failedTests": [
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "id": "175e807c-ce85-5f94-938c-e2e30b090633",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r2",
+        "timings": {
+          "before each": [
+            {
+              "hookId": "h5a7b63e34b846429cd32b596",
+              "fnDuration": 6,
+              "afterFnDuration": 55
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Projects",
+          "lists projects",
+          "displays all"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      },
+      {
+        "body": "function () {}",
+        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "failedFromHookId": "h1",
+        "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
+        "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
+        "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
+        "state": "failed",
+        "testId": "r1",
+        "timings": {
+          "before each": [
+            {
+              "afterFnDuration": 55,
+              "fnDuration": 6,
+              "hookId": "h5a7b63e34b846429cd32b596"
+            }
+          ],
+          "lifecycle": 15
+        },
+        "title": [
+          "Users List",
+          "lists users",
+          "displays users roles <select />"
+        ],
+        "videoTimestamp": 1000,
+        "wallClockDuration": 1234,
+        "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
+      }
+    ],
+    "id": "5c0ef8fa-c61c-5a63-a450-2598dada80f7",
+    "instances": [
+      {
+        "createdAt": "2016-12-19T14:22:57.748Z",
+        "claimedAt": "2016-12-19T14:12:57.748Z",
+        "completedAt": null,
+        "error": null,
+        "failed": 0,
+        "id": "923886c6-dbe4-5a7e-988c-97dbbf9d17ff",
+        "machineId": "bc98ade3-b54a-5047-922a-aa7cee15a3ae",
+        "passed": 28,
+        "pending": 4,
+        "platform": {
+          "browserName": "chrome",
+          "browserVersion": "43",
+          "osCpus": [],
+          "osMemory": {
+            "free": 985665536,
+            "total": 63321108480
+          },
+          "osName": "win32",
+          "osVersion": "7",
+          "osVersionFormatted": "7"
+        },
+        "screenshots": [],
+        "skipped": 1,
+        "spec": "users_list_spec.js",
+        "stdout": "\u001b[90m  <select>(\u001b[4m\u001b[1mTests Starting\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[0m\u001b[0m\n\u001b[0m  Kitchen Sink\u001b[0m\n\u001b[2K\u001b[0G  \u001b[32m  ✓\u001b[0m\u001b[90m .should() - assert that <title> is correct\u001b[0m\u001b[31m (358ms)\u001b[0m\n\u001b[0m    Querying\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.get() - query DOM elements\u001b[0m\u001b[31m (84ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.contains() - query DOM elements with matching content\u001b[0m\u001b[31m (145ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .within() - query DOM elements within a specific element\u001b[0m\u001b[33m (63ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.root() - query the root DOM element\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[0m    Traversal\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .children() - get child DOM elements\u001b[0m\u001b[33m (46ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .closest() - get closest ancestor DOM element\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .eq() - get a DOM element at a specific index\u001b[0m\u001b[33m (61ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .filter() - get DOM elements that match the selector\u001b[0m\u001b[33m (51ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .find() - get descendant DOM elements of the selector\u001b[0m\u001b[31m (82ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .first() - get first DOM element\u001b[0m\u001b[31m (86ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .last() - get last DOM element\u001b[0m\u001b[33m (40ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .next() - get next sibling DOM element\u001b[0m\u001b[33m (42ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextAll() - get all next sibling DOM elements\u001b[0m\u001b[33m (58ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextUntil() - get next sibling DOM elements until next el\u001b[0m\u001b[33m (44ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .not() - remove DOM elements from set of DOM elements\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parent() - get parent DOM element from DOM elements\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parents() - get parent DOM elements from DOM elements\u001b[0m\u001b[33m (52ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parentsUntil() - get parent DOM elements from DOM elements until el\u001b[0m\u001b[33m (54ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prev() - get previous sibling DOM element\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevAll() - get all previous sibling DOM elements\u001b[0m\u001b[33m (48ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevUntil() - get all previous sibling DOM elements until el\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .siblings() - get all sibling DOM elements\u001b[0m\u001b[33m (38ms)\u001b[0m\n\u001b[0m    Actions\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .type() - type into a DOM element\u001b[0m\u001b[31m (4045ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .focus() - focus on a DOM element\u001b[0m\u001b[31m (118ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .blur() - blur off a DOM element\u001b[0m\u001b[31m (537ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .clear() - clears an input or textarea element\u001b[0m\u001b[31m (825ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .submit() - submit a form\u001b[0m\u001b[31m (423ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .click() - click on a DOM element\u001b[0m\u001b[31m (2555ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .dblclick() - double click on a DOM element\u001b[0m\u001b[31m (120ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.check() - check a checkbox or radio element\u001b[0m\u001b[31m (1968ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .uncheck() - uncheck a checkbox element\u001b[0m\u001b[31m (1637ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .select() - select an option in a <select> element\u001b[0m\u001b[31m (1092ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .scrollIntoView() - scroll an element into view\u001b[0m\u001b[31m (148ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.scrollTo() - scroll the window or element to a position\u001b[0m\u001b[31m (2043ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .trigger() - trigger an event on a DOM element\u001b[0m\u001b[31m (114ms)\u001b[0m\n\u001b[0m    Window\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.window() - get the global window object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.document() - get the document object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.title() - get the title\u001b[0m\n\u001b[0m    Viewport\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.viewport() - set the viewport size and dimension\u001b[0m\u001b[31m (2771ms)\u001b[0m\n\u001b[0m    Location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.hash() - get the current URL hash\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.location() - get window.location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.url() - get the current URL\u001b[0m\n\u001b[0m    Navigation\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.go() - go back or forward in the browser's history\u001b[0m\u001b[31m (664ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.reload() - reload the page\u001b[0m\u001b[31m (613ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.visit() - visit a remote url\u001b[0m\u001b[31m (378ms)\u001b[0m\n\u001b[0m    Assertions\u001b[0m\n\u001b[0m      Implicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .should() - make an assertion about the current subject\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .and() - chain multiple assertions together\u001b[0m\n\u001b[0m      Explicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - assert shape of an object\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - make an assertion about a specified subject\u001b[0m\n\u001b[0m    Misc\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .end() - end the command chain\u001b[0m\u001b[31m (269ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.exec() - execute a system command\u001b[0m\u001b[31m (732ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.focused() - get the DOM element that has focus\u001b[0m\u001b[31m (426ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.screenshot() - take a screenshot\u001b[0m\u001b[31m (234ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wrap() - wrap an object\u001b[0m\n\u001b[0m    Connectors\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .each() - iterate over an array of elements\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .its() - get properties on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .invoke() - invoke a function on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .spread() - spread an array as individual args to callback function\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .then() - invoke a callback function with the current subject\u001b[0m\u001b[33m (67ms)\u001b[0m\n\u001b[0m    Aliasing\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .as() - alias a route or DOM element for later use\u001b[0m\u001b[31m (240ms)\u001b[0m\n\u001b[0m    Waiting\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wait() - wait for a specific amount of time\u001b[0m\u001b[31m (4726ms)\u001b[0m\n\u001b[0m    Network Requests\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.server() - control behavior of network requests and responses\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.request() - make an XHR request\u001b[0m\u001b[31m (457ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.route() - route responses to matching requests\u001b[0m\u001b[31m (1565ms)\u001b[0m\n\u001b[0m    Files\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.fixture() - load a fixture\u001b[0m\u001b[31m (444ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.readFile() - read a files contents\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.writeFile() - write to a file\u001b[0m\u001b[31m (146ms)\u001b[0m\n\u001b[0m    Local Storage\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearLocalStorage() - clear all data in local storage\u001b[0m\u001b[31m (402ms)\u001b[0m\n\u001b[0m    Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookie() - get a browser cookie\u001b[0m\u001b[31m (168ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookies() - get browser cookies\u001b[0m\u001b[31m (184ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.setCookie() - set a browser cookie\u001b[0m\u001b[33m (39ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookie() - clear a browser cookie\u001b[0m\u001b[31m (189ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookies() - clear browser cookies\u001b[0m\u001b[31m (197ms)\u001b[0m\n\u001b[0m    Spies, Stubs, and Clock\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.spy() - wrap a method in a spy\u001b[0m\u001b[31m (472ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.stub() - create a stub and/or replace a function with a stub\u001b[0m\u001b[31m (225ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clock() - control time in the browser\u001b[0m\u001b[31m (383ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.tick() - move time in the browser\u001b[0m\u001b[31m (616ms)\u001b[0m\n\u001b[0m    Utilities\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress._.method() - call a lodash method\u001b[0m\u001b[31m (154ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.$(selector) - call a jQuery method\u001b[0m\u001b[31m (188ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.moment() - format or parse dates using a moment method\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Blob.method() - blob utilities and base64 string conversion\u001b[0m\u001b[31m (321ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m new Cypress.Promise(function) - instantiate a bluebird promise\u001b[0m\u001b[31m (1009ms)\u001b[0m\n\u001b[0m    Cypress.config()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.config() - get and set configuration options\u001b[0m\u001b[33m (59ms)\u001b[0m\n\u001b[0m    Cypress.env()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.env() - get environment variables\u001b[0m\n\u001b[0m    Cypress.Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.debug() - enable or disable debugging\u001b[0m\u001b[31m (79ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.preserveOnce() - preserve cookies by key\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.defaults() - set defaults for all cookies\u001b[0m\n\u001b[0m    Cypress.dom\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.dom.isHidden() - determine if a DOM element is hidden\u001b[0m\n\u001b[0m    Cypress.Server\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Server.defaults() - change default config of server\u001b[0m\n\n\n\u001b[92m \u001b[0m\u001b[32m 90 passing\u001b[0m\u001b[90m (1m)\u001b[0m\n\n\n\u001b[32m  (\u001b[4m\u001b[1mTests Finished\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[37m  - Tests:           \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Passes:          \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Failures:        \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Pending:         \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Duration:        \u001b[39m\u001b[32m1 minute, 11 seconds\u001b[39m\n\u001b[37m  - Screenshots:     \u001b[39m\u001b[32m1\u001b[39m\n\u001b[37m  - Video Recorded:  \u001b[39m\u001b[32mfalse\u001b[39m\n\u001b[37m  - Cypress Version: \u001b[39m\u001b[32m1.4.1\u001b[39m\n\n\n\u001b[33m  (\u001b[4m\u001b[1mScreenshots\u001b[22m\u001b[24m)\u001b[39m\n\n  - /tmp/repo/cypress/screenshots/my-image.png \u001b[90m(1280x720)\u001b[39m\n\n\n\u001b[34m  (\u001b[4m\u001b[1mUploading Assets\u001b[22m\u001b[24m)\u001b[39m\n\n  - Done Uploading \u001b[90m(1/1)\u001b[39m \u001b[34m/tmp/repo/cypress/screenshots/my-image.png\u001b[39m\n\n\n\u001b[90m  (\u001b[4m\u001b[1mAll Done\u001b[22m\u001b[24m)\u001b[39m\n\n",
+        "status": "passed",
+        "videos": [],
+        "wallClockDuration": 16000,
+        "wallClockEndedAt": null,
+        "wallClockStartedAt": "2016-12-19T14:12:58.748Z"
+      }
+    ],
+    "loadBalancing": false,
+    "orgDefault": false,
+    "orgId": "777",
+    "orgName": "Acme Developers",
+    "projectId": "3d897a",
+    "projectName": "jekyl_blog",
+    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "specIsolation": false,
+    "specPattern": null,
+    "status": "running",
+    "totalDuration": null,
+    "totalFailed": 2,
+    "totalPassed": 45,
+    "totalPending": 6,
+    "totalSkipped": 1,
+    "updatedAt": "2016-05-15T02:35:38.687Z",
+    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e474ccb9-0352-4ad9-85d3-feeb1e0505d5"
   }
 ]

@@ -1,6 +1,6 @@
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
 
 
   stdout_failing_spec

@@ -1,17 +1,15 @@
 _        = require("lodash")
 Promise  = require("bluebird")
 path     = require("path")
-fs       = require("fs-extra")
 errors   = require("../errors")
 log      = require("../log")
+fs       = require("../util/fs")
 
 ## TODO:
 ## think about adding another PSemaphore
 ## here since we can read + write the
 ## settings at the same time something else
 ## is potentially reading it
-
-fs = Promise.promisifyAll(fs)
 
 flattenCypress = (obj) ->
   if cypress = obj.cypress
@@ -139,3 +137,6 @@ module.exports =
 
   pathToCypressJson: (projectRoot) ->
     @_pathToFile(projectRoot, "cypress.json")
+
+  pathToCypressEnvJson: (projectRoot) ->
+    @_pathToFile(projectRoot, "cypress.env.json")

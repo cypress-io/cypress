@@ -1,11 +1,11 @@
 _        = require("lodash")
 path     = require("path")
 Promise  = require("bluebird")
-fs       = require("fs-extra")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 errors   = require("./errors")
+fs       = require("./util/fs")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
@@ -41,13 +41,12 @@ configKeys = toWords """
   port                            supportFolder
   reporter                        videosFolder
   reporterOptions
-  screenshotOnHeadlessFailure     defaultCommandTimeout
-  testFiles                       execTimeout
-  trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  blacklistHosts                  requestTimeout
-  userAgent                       responseTimeout
-  viewportWidth
-  viewportHeight
+  testFiles                       defaultCommandTimeout
+  trashAssetsBeforeHeadlessRuns   execTimeout
+  blacklistHosts                  pageLoadTimeout
+  userAgent                       requestTimeout
+  viewportWidth                   responseTimeout
+  viewportHeight                  taskTimeout
   videoRecording
   videoCompression
   videoUploadOnPasses
@@ -99,6 +98,7 @@ defaults = {
   responseTimeout:               30000
   pageLoadTimeout:               60000
   execTimeout:                   60000
+  taskTimeout:                   60000
   videoRecording:                true
   videoCompression:              32
   videoUploadOnPasses:           true
@@ -108,7 +108,6 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  screenshotOnHeadlessFailure:   true
   trashAssetsBeforeHeadlessRuns: true
   autoOpen:                      false
   viewportWidth:                 1000
@@ -147,8 +146,8 @@ validationRules = {
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
   testFiles: v.isString
-  screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
+  taskTimeout: v.isNumber
   trashAssetsBeforeHeadlessRuns: v.isBoolean
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse
@@ -327,10 +326,8 @@ module.exports = {
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
 
-    fileName = scaffold.integrationExampleName()
-
-    obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
-    obj.integrationExampleName = fileName
+    obj.integrationExampleName = scaffold.integrationExampleName()
+    obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
     obj.scaffoldedFiles = scaffold.fileTree(obj)
 
     return obj

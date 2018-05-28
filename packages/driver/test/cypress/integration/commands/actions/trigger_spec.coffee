@@ -49,11 +49,20 @@ describe "src/cy/commands/actions/trigger", ->
         .then (win) ->
           $win = $(win)
 
-          $win.on "mouseover", ->
-            done(new Error("should not have bubbled up to window listener"))
+          $win.on "keydown", (e) ->
+            evt = JSON.stringify(e.originalEvent, [
+              "bubbles", "cancelable", "isTrusted", "type", "clientX", "clientY"
+            ])
 
-          cy.get("#button").trigger("mouseover", {bubbles: false}).then ->
-            $win.off "mouseover"
+            done(new Error("event should not have bubbled up to window listener: #{evt}"))
+
+          cy
+          .get("#button")
+          .trigger("keydown", {
+            bubbles: false
+          })
+          .then ->
+            $win.off "keydown"
 
             done()
 

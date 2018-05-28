@@ -24,6 +24,7 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
+$Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 
@@ -184,7 +185,7 @@ class $Cypress
         return if @_RESUMED_AT_TEST
 
         if @config("isTextTerminal")
-          @emit("mocha", "start")
+          @emit("mocha", "start", args[0])
 
       when "runner:end"
         ## mocha runner has finished running the tests
@@ -199,7 +200,7 @@ class $Cypress
         @emit("run:end")
 
         if @config("isTextTerminal")
-          @emit("mocha", "end")
+          @emit("mocha", "end", args[0])
 
       when "runner:set:runnable"
         ## when there is a hook / test (runnable) that
@@ -273,8 +274,22 @@ class $Cypress
         ## stats and runnable properties such as errors
         @emit("test:after:run", args...)
 
-      when "cy:test:set:state"
-        @emit("test:set:state", args...)
+        if @config("isTextTerminal")
+          ## needed for calculating wallClockDuration
+          ## and the timings of after + afterEach hooks
+          @emit("mocha", "test:after:run", args[0])
+
+      when "cy:before:all:screenshots"
+        @emit("before:all:screenshots", args...)
+
+      when "cy:before:screenshot"
+        @emit("before:screenshot", args...)
+
+      when "cy:after:screenshot"
+        @emit("after:screenshot", args...)
+
+      when "cy:after:all:screenshots"
+        @emit("after:all:screenshots", args...)
 
       when "command:log:added"
         @runner.addLog(args[0], @config("isInteractive"))
@@ -450,6 +465,7 @@ class $Cypress
   Mocha: $Mocha
   Runner: $Runner
   Server: $Server
+  Screenshot: $Screenshot
   SelectorPlayground: $SelectorPlayground
   utils: $utils
   _: _
