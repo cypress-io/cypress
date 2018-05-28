@@ -55,7 +55,7 @@ replaceDurationSeconds = (str, p1, p2, p3, p4) ->
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
-  p1 + _.padStart("Xs", p2.length)
+  _.padStart("XX:XX", p1.length + p2.length)
 
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
@@ -66,7 +66,7 @@ normalizeStdout = (str) ->
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
   .replace(browserNameVersionRe, replaceBrowserName)
   .replace(/\s\(\d+m?s\)/g, "") ## numbers in parenths
-  .replace(/(\s+?)(\d+m?s)/g, replaceDurationInTables) ## durations in tables
+  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0

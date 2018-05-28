@@ -68,9 +68,9 @@ exports['e2e visit low response timeout passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ visit_spec.coffee                            Xs       13       13        -        -        - │
+  │ ✔ visit_spec.coffee                         XX:XX       13       13        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs       13       13        -        -        -  
+    All specs passed!                           XX:XX       13       13        -        -        -  
 
 `
 
@@ -175,9 +175,9 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_http_network_error_failing_spec…       Xs        1        -        1        -        - │
+  │ ✖ visit_http_network_error_failing_spe…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -270,9 +270,9 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_http_500_response_failing_spec.…       Xs        1        -        1        -        - │
+  │ ✖ visit_http_500_response_failing_spec…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -365,9 +365,9 @@ The internal Cypress web server responded with:
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_file_404_response_failing_spec.…       Xs        1        -        1        -        - │
+  │ ✖ visit_file_404_response_failing_spec…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -462,9 +462,9 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_non_html_content_type_failing_s…       Xs        1        -        1        -        - │
+  │ ✖ visit_non_html_content_type_failing_…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -585,9 +585,9 @@ When this 'load' event occurs, Cypress will continue running commands.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_http_timeout_failing_spec.coffee       Xs        2        -        2        -        - │
+  │ ✖ visit_http_timeout_failing_spec.coff…     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        2        -        2        -        -  
+    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 
 `
 

@@ -107,9 +107,9 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_caught_error_failing_spec.coffee        Xs       11        5        3        -        3 │
+  │ ✖ hook_caught_error_failing_spec.coffee     XX:XX       11        5        3        -        3 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs       11        5        3        -        3  
+    1 of 1 failed (100%)                        XX:XX       11        5        3        -        3  
 
 `
 
@@ -194,9 +194,9 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_uncaught_error_failing_spec.coff…       Xs        7        4        1        -        2 │
+  │ ✖ hook_uncaught_error_failing_spec.cof…     XX:XX        7        4        1        -        2 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        7        4        1        -        2  
+    1 of 1 failed (100%)                        XX:XX        7        4        1        -        2  
 
 `
 
@@ -273,9 +273,9 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_uncaught_root_error_failing_spec…       Xs        4        -        1        -        3 │
+  │ ✖ hook_uncaught_root_error_failing_spe…     XX:XX        4        -        1        -        3 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        4        -        1        -        3  
+    1 of 1 failed (100%)                        XX:XX        4        -        1        -        3  
 
 `
 
@@ -358,9 +358,9 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_uncaught_error_events_failing_sp…       Xs        3        2        1        -        - │
+  │ ✖ hook_uncaught_error_events_failing_s…     XX:XX        3        2        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        3        2        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        3        2        1        -        -  
 
 `
 

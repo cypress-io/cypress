@@ -52,9 +52,9 @@ exports['e2e images passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ images_spec.coffee                           Xs        2        2        -        -        - │
+  │ ✔ images_spec.coffee                        XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 `
 

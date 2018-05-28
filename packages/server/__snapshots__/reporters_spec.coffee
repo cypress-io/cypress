@@ -57,9 +57,9 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                   Xs        1        1        -        -        - │
+  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 
@@ -110,9 +110,9 @@ finished!
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                   Xs        1        1        -        -        - │
+  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 
@@ -172,12 +172,11 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
 
   (Run Finished)
 
-
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                   Xs        1        1        -        -        - │
+  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 
@@ -285,9 +284,9 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ simple_failing_hook_spec.coffee              Xs        6        1        3        1        1 │
+  │ ✖ simple_failing_hook_spec.coffee           XX:XX        6        1        3        1        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        6        1        3        1        1  
+    1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
 
 `
 
@@ -348,9 +347,9 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                   Xs        1        1        -        -        - │
+  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 
@@ -456,9 +455,9 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ simple_failing_hook_spec.coffee              Xs        6        1        3        1        1 │
+  │ ✖ simple_failing_hook_spec.coffee           XX:XX        6        1        3        1        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        6        1        3        1        1  
+    1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
 
 `
 
@@ -519,9 +518,9 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                   Xs        1        1        -        -        - │
+  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 
@@ -627,9 +626,9 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ simple_failing_hook_spec.coffee              Xs        6        1        3        1        1 │
+  │ ✖ simple_failing_hook_spec.coffee           XX:XX        6        1        3        1        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        6        1        3        1        1  
+    1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
 
 `
 
@@ -678,4 +677,3 @@ Error: this reporter threw an error
 
 Learn more at stack trace line
 `
-

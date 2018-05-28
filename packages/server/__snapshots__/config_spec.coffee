@@ -53,9 +53,9 @@ exports['e2e config passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                   Xs        3        3        -        -        - │
+  │ ✔ config_passing_spec.coffee                XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        3        3        -        -        -  
+    All specs passed!                           XX:XX        3        3        -        -        -  
 
 `
 
@@ -137,9 +137,9 @@ exports['e2e config fails 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ config_failing_spec.coffee                   Xs        1        -        1        -        - │
+  │ ✖ config_failing_spec.coffee                XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 

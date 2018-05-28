@@ -63,9 +63,9 @@ exports['e2e async timeouts failing1 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ async_timeouts_spec.coffee                   Xs        1        -        1        -        - │
+  │ ✖ async_timeouts_spec.coffee                XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
