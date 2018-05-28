@@ -213,15 +213,15 @@ We dynamically generated a new test to display this failure.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ record_error_spec.coffee                     Xs        -        -        1        -        - │
+  │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_fail_spec.coffee                      Xs        2        -        1        -        1 │
+  │ ✖ record_fail_spec.coffee                   XX:XX        2        -        1        -        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_uncaught_spec.coffee                  Xs        1        -        1        -        - │
+  │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    3 of 4 failed (75%)                            Xs        5        1        3        1        1  
+    3 of 4 failed (75%)                         XX:XX        5        1        3        1        1  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -315,9 +315,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 `
 
@@ -383,9 +383,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -459,9 +459,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -536,9 +536,9 @@ StatusCodeError: 500 - "Internal Server Error"
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -654,9 +654,9 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -731,9 +731,9 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -817,9 +817,9 @@ This error will not alter the exit code.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                      Xs        2        1        -        1        - │
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 `
 

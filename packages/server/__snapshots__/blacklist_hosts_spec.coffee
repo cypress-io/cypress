@@ -51,9 +51,9 @@ exports['e2e blacklist passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ blacklist_hosts_spec.coffee                  Xs        1        1        -        -        - │
+  │ ✔ blacklist_hosts_spec.coffee               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

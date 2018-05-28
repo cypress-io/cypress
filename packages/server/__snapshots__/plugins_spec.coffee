@@ -63,9 +63,9 @@ Error: Async error from plugins file
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                              Xs        -        -        1        -        - │
+  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        -        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
 
@@ -121,9 +121,9 @@ exports['e2e plugins passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                              Xs        2        2        -        -        - │
+  │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 `
 
@@ -179,9 +179,9 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                              Xs        2        2        -        -        - │
+  │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 `
 
@@ -236,9 +236,9 @@ A video will not be recorded when using this browser.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                              Xs        1        1        -        -        - │
+  │ ✔ app_spec.coffee                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

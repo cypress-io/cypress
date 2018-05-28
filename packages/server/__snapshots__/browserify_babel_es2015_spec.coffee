@@ -53,9 +53,9 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ browserify_babel_es2015_passing_spec.…       Xs        3        3        -        -        - │
+  │ ✔ browserify_babel_es2015_passing_spec…     XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        3        3        -        -        -  
+    All specs passed!                           XX:XX        3        3        -        -        -  
 
 `
 
@@ -122,9 +122,9 @@ Fix the error in your code and re-run your tests.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ browserify_babel_es2015_failing_spec.…       Xs        -        -        1        -        - │
+  │ ✖ browserify_babel_es2015_failing_spec…     XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        -        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
 
