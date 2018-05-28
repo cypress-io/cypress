@@ -20,6 +20,7 @@ env        = require("../util/env")
 trash      = require("../util/trash")
 random     = require("../util/random")
 system     = require("../util/system")
+duration   = require("../util/duration")
 progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
@@ -72,7 +73,7 @@ formatFooterSummary = (results) ->
 
   return [
     color(phrase, c),
-    gray(humanTime.short(results.totalDuration)),
+    gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, "reset"),
     colorIf(results.totalPassed, "green"),
     colorIf(totalFailed, "red"),
@@ -217,7 +218,7 @@ renderSummaryTable = (runUrl, results) ->
     _.each runs, (run) ->
       { spec, stats } = run
 
-      ms = humanTime.short(stats.wallClockDuration)
+      ms = duration.format(stats.wallClockDuration)
 
       table2.push([
         formatSpecSummary(spec.name, stats.failures)
@@ -462,11 +463,11 @@ module.exports = {
         switch
           when float is 1
             finished = new Date - started
-            duration = "(#{humanTime.long(finished)})"
+            dur = "(#{humanTime.long(finished)})"
             console.log(
               gray("  - Finished processing: "),
               chalk.cyan(name),
-              gray(duration)
+              gray(dur)
             )
             console.log("")
 
