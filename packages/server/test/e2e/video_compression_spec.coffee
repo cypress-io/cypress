@@ -8,7 +8,7 @@ describe "e2e video compression", ->
 
     e2e.exec(@, {
       spec: "video_compression_spec.coffee"
-      snapshot: true
+      snapshot: false
       expectedExitCode: 0
     })
     .get("stdout")
