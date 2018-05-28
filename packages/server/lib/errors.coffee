@@ -357,6 +357,27 @@ API = {
 
         #{chalk.yellow(arg1)}
         """
+      when "SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED"
+        """
+        In Cypress v3.0.0 we removed the configuration option: #{chalk.yellow('screenshotOnHeadlessFailure')}
+
+        You now configure this behavior in your test code.
+
+        Example:
+
+          // cypress/support/index.js
+          Cypress.Screenshot.defaults({
+            screenshotOnRunFailure: false
+          })
+
+        https://on.cypress.io/screenshot-api
+        """
+      when "RENAMED_CONFIG_OPTION"
+        """
+        A configuration option you have supplied has been renamed.
+
+        Please rename #{chalk.yellow(arg1)} to #{chalk.blue(arg2)}
+        """
       when "CANNOT_CONNECT_BASE_URL"
         """
         Cypress could not verify that the server set as your 'baseUrl' is running:

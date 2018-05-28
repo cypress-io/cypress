@@ -566,6 +566,23 @@ describe "lib/cypress", ->
         @expectExitWithErr("CONFIG_VALIDATION_ERROR", "localhost:9999")
         @expectExitWithErr("CONFIG_VALIDATION_ERROR", "We found an invalid configuration value")
 
+    it "logs error and exits when using an old configuration option that has been renamed", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=trashAssetsBeforeHeadlessRuns=false"
+      ])
+      .then =>
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "trashAssetsBeforeHeadlessRuns")
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "trashAssetsBeforeRuns")
+
+    it "logs error and exits when using screenshotOnHeadlessFailure", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=screenshotOnHeadlessFailure=false"
+      ])
+      .then =>
+        @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "trashAssetsBeforeHeadlessRuns")
+        @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "You now configure this behavior in your test code")
 
     it "logs error and exits when baseUrl cannot be verified", ->
       settings.write(@todosPath, {baseUrl: "http://localhost:90874"})

@@ -41,7 +41,7 @@ configKeys = toWords """
   reporter                        videosFolder
   reporterOptions
   testFiles                       defaultCommandTimeout
-  trashAssetsBeforeHeadlessRuns   execTimeout
+  trashAssetsBeforeRuns           execTimeout
   blacklistHosts                  pageLoadTimeout
   userAgent                       requestTimeout
   viewportWidth                   responseTimeout
@@ -53,6 +53,10 @@ configKeys = toWords """
   waitForAnimations
 """
 
+breakingConfigKeys = toWords """
+  screenshotOnHeadlessFailure
+  trashAssetsBeforeHeadlessRuns
+"""
 
 defaults = {
   port:                          null
@@ -87,7 +91,7 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  trashAssetsBeforeHeadlessRuns: true
+  trashAssetsBeforeRuns: true
   autoOpen:                      false
   viewportWidth:                 1000
   viewportHeight:                660
@@ -127,7 +131,7 @@ validationRules = {
   testFiles: v.isString
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
-  trashAssetsBeforeHeadlessRuns: v.isBoolean
+  trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
@@ -168,6 +172,15 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
     return memo
   , {}
 
+validateNoBreakingConfig = (cfg) ->
+  _.each breakingConfigKeys, (key) ->
+    if _.has(cfg, key)
+      switch key
+        when "screenshotOnHeadlessFailure"
+          errors.throw("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED")
+        when "trashAssetsBeforeHeadlessRuns"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "trashAssetsBeforeRuns")
+
 validate = (cfg, onErr) ->
   _.each cfg, (value, key) ->
     ## does this key have a validation rule?
@@ -187,7 +200,7 @@ module.exports = {
   getConfigKeys: -> configKeys
 
   whitelist: (obj = {}) ->
-    _.pick(obj, configKeys)
+    _.pick(obj, configKeys.concat(breakingConfigKeys))
 
   get: (projectRoot, options = {}) ->
     Promise.all([
@@ -274,6 +287,8 @@ module.exports = {
     ## or env var overrides
     validate config, (errMsg) ->
       errors.throw("CONFIG_VALIDATION_ERROR", errMsg)
+
+    validateNoBreakingConfig(config)
 
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
