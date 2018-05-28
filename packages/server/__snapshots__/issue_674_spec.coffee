@@ -73,9 +73,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_674_spec.coffee                        Xs        1        -        1        -        - │
+  │ ✖ issue_674_spec.coffee                     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 

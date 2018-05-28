@@ -127,9 +127,9 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ return_value_spec.coffee                     Xs        2        -        2        -        - │
+  │ ✖ return_value_spec.coffee                  XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        2        -        2        -        -  
+    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 
 `
 

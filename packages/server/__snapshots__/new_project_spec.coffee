@@ -48,9 +48,9 @@ exports['e2e new project passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                              Xs        1        1        -        -        - │
+  │ ✔ app_spec.coffee                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

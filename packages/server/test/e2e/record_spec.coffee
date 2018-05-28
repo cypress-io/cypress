@@ -140,11 +140,7 @@ defaultRoutes = [
 ]
 
 describe "e2e record", ->
-  env = _.clone(process.env)
-
   beforeEach ->
-    process.env = env
-
     requests = []
 
   context "passing", ->
@@ -359,6 +355,7 @@ describe "e2e record", ->
       process.env.CIRCLE_PR_NUMBER = "123"
       process.env.CIRCLE_PR_USERNAME = "brian-mann"
       process.env.CIRCLE_PR_REPONAME = "cypress"
+      process.env.CYPRESS_INTERNAL_E2E_TESTS = "0"
 
       e2e.exec(@, {
         spec: "record_pass*"

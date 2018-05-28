@@ -4,7 +4,6 @@ Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
-errors   = require("./errors")
 fs       = require("./util/fs")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
@@ -42,7 +41,7 @@ configKeys = toWords """
   reporter                        videosFolder
   reporterOptions
   testFiles                       defaultCommandTimeout
-  trashAssetsBeforeHeadlessRuns   execTimeout
+  trashAssetsBeforeRuns           execTimeout
   blacklistHosts                  pageLoadTimeout
   userAgent                       requestTimeout
   viewportWidth                   responseTimeout
@@ -54,26 +53,10 @@ configKeys = toWords """
   waitForAnimations
 """
 
-toArrayFromPipes = (str) ->
-  if _.isArray(str)
-    return str
-
-  [].concat(str.split('|'))
-
-toObjectFromPipes = (str) ->
-  if _.isObject(str)
-    return str
-
-  ## convert foo=bar|version=1.2.3 to
-  ## {foo: 'bar', version: '1.2.3'}
-  _
-  .chain(str)
-  .split("|")
-  .map (pair) ->
-    pair.split("=")
-  .fromPairs()
-  .mapValues(coerce)
-  .value()
+breakingConfigKeys = toWords """
+  screenshotOnHeadlessFailure
+  trashAssetsBeforeHeadlessRuns
+"""
 
 defaults = {
   port:                          null
@@ -108,7 +91,7 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  trashAssetsBeforeHeadlessRuns: true
+  trashAssetsBeforeRuns: true
   autoOpen:                      false
   viewportWidth:                 1000
   viewportHeight:                660
@@ -148,7 +131,7 @@ validationRules = {
   testFiles: v.isString
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
-  trashAssetsBeforeHeadlessRuns: v.isBoolean
+  trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
@@ -160,6 +143,27 @@ validationRules = {
   watchForFileChanges: v.isBoolean
 }
 
+toArrayFromPipes = (str) ->
+  if _.isArray(str)
+    return str
+
+  [].concat(str.split('|'))
+
+toObjectFromPipes = (str) ->
+  if _.isObject(str)
+    return str
+
+  ## convert foo=bar|version=1.2.3 to
+  ## {foo: 'bar', version: '1.2.3'}
+  _
+  .chain(str)
+  .split("|")
+  .map (pair) ->
+    pair.split("=")
+  .fromPairs()
+  .mapValues(coerce)
+  .value()
+
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
@@ -168,24 +172,40 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
     return memo
   , {}
 
-validate = (file) ->
-  return (settings) ->
-    _.each settings, (value, key) ->
-      if validationFn = validationRules[key]
+validateNoBreakingConfig = (cfg) ->
+  _.each breakingConfigKeys, (key) ->
+    if _.has(cfg, key)
+      switch key
+        when "screenshotOnHeadlessFailure"
+          errors.throw("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED")
+        when "trashAssetsBeforeHeadlessRuns"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "trashAssetsBeforeRuns")
+
+validate = (cfg, onErr) ->
+  _.each cfg, (value, key) ->
+    ## does this key have a validation rule?
+    if validationFn = validationRules[key]
+      ## and is the value different from the default?
+      if value isnt defaults[key]
         result = validationFn(key, value)
         if result isnt true
-          errors.throw("CONFIG_VALIDATION_ERROR", file, result)
+          onErr(result)
+
+validateFile = (file) ->
+  return (settings) ->
+    validate settings, (errMsg) ->
+      errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
 module.exports = {
   getConfigKeys: -> configKeys
 
   whitelist: (obj = {}) ->
-    _.pick(obj, configKeys)
+    _.pick(obj, configKeys.concat(breakingConfigKeys))
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validate("cypress.json"))
-      settings.readEnv(projectRoot).then(validate("cypress.env.json"))
+      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
       @set({
@@ -261,6 +281,14 @@ module.exports = {
     config = @setAbsolutePaths(config, defaults)
 
     config = @setParentTestsPaths(config)
+
+    ## validate config again here so that we catch
+    ## configuration errors coming from the CLI overrides
+    ## or env var overrides
+    validate config, (errMsg) ->
+      errors.throw("CONFIG_VALIDATION_ERROR", errMsg)
+
+    validateNoBreakingConfig(config)
 
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
