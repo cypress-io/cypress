@@ -72,9 +72,9 @@ We dynamically generated a new test to display this failure.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_synchronous_before_tests_par…       Xs        1        -        1        -        - │
+  │ ✖ uncaught_synchronous_before_tests_pa…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -153,9 +153,9 @@ We dynamically generated a new test to display this failure.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_synchronous_during_hook_spec…       Xs        1        -        1        -        - │
+  │ ✖ uncaught_synchronous_during_hook_spe…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -228,9 +228,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_test_spec.coffee             Xs        1        -        1        -        - │
+  │ ✖ uncaught_during_test_spec.coffee          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -308,9 +308,9 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_hook_spec.coffee             Xs        2        1        1        -        - │
+  │ ✖ uncaught_during_hook_spec.coffee          XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        2        1        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
 
 `
 
@@ -401,9 +401,9 @@ exports['e2e uncaught errors failing5 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ caught_async_sync_test_spec.coffee           Xs        8        4        4        -        - │
+  │ ✖ caught_async_sync_test_spec.coffee        XX:XX        8        4        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        8        4        4        -        -  
+    1 of 1 failed (100%)                        XX:XX        8        4        4        -        -  
 
 `
 

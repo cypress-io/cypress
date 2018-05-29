@@ -137,9 +137,9 @@ https://on.cypress.io/uncaught-exception-from-application
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ js_error_handling_failing_spec.coffee        Xs        7        2        5        -        - │
+  │ ✖ js_error_handling_failing_spec.coffee     XX:XX        7        2        5        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        7        2        5        -        -  
+    1 of 1 failed (100%)                        XX:XX        7        2        5        -        -  
 
 `
 

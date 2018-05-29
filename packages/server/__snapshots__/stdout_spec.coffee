@@ -129,9 +129,9 @@ The internal Cypress web server responded with:
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ stdout_failing_spec.coffee                   Xs        5        2        3        -        - │
+  │ ✖ stdout_failing_spec.coffee                XX:XX        5        2        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        5        2        3        -        -  
+    1 of 1 failed (100%)                        XX:XX        5        2        3        -        -  
 
 `
 
@@ -198,9 +198,9 @@ Fix the error in your code and re-run your tests.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ stdout_exit_early_failing_spec.coffee        Xs        -        -        1        -        - │
+  │ ✖ stdout_exit_early_failing_spec.coffee     XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        -        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
 
@@ -268,9 +268,9 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ stdout_passing_spec.coffee                   Xs        8        8        -        -        - │
+  │ ✔ stdout_passing_spec.coffee                XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        8        8        -        -        -  
+    All specs passed!                           XX:XX        8        8        -        -        -  
 
 `
 
@@ -325,9 +325,9 @@ A video will not be recorded when using this mode.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_spec.coffee                           Xs        1        1        -        -        - │
+  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 
@@ -382,9 +382,9 @@ A video will not be recorded when using this browser.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_spec.coffee                           Xs        1        1        -        -        - │
+  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

@@ -60,9 +60,9 @@ exports['e2e subdomain passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ subdomain_spec.coffee                        Xs        9        7        -        2        - │
+  │ ✔ subdomain_spec.coffee                     XX:XX        9        7        -        2        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        9        7        -        2        -  
+    All specs passed!                           XX:XX        9        7        -        2        -  
 
 `
 

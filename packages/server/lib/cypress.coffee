@@ -110,11 +110,18 @@ module.exports = {
   start: (argv = []) ->
     debug("starting cypress with argv %o", argv)
 
+    options = require("./util/args").toObject(argv)
+
+    if options.runProject and not options.headed
+      # scale the electron browser window
+      # to force retina screens to not
+      # upsample their images when offscreen
+      # rendering
+      require("./util/electron_app").scale()
+
     ## make sure we have the appData folder
     require("./util/app_data").ensure()
     .then =>
-      options = require("./util/args").toObject(argv)
-
       ## else determine the mode by
       ## the passed in arguments / options
       ## and normalize this mode

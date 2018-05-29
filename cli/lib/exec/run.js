@@ -74,14 +74,6 @@ const processRunOptions = (options = {}) => {
     args.push('--headed', options.headed)
   }
 
-  if (options.group != null) {
-    args.push('--group', options.group)
-  }
-
-  if (options.groupId) {
-    args.push('--group-id', options.groupId)
-  }
-
   return args
 }
 

@@ -43,37 +43,6 @@ describe('exec run', function () {
       sinon.stub(verify, 'start').resolves()
     })
 
-    describe('group and group-id', () => {
-      it('spawns with --group true', function () {
-        return run.start({ group: true, dev: true })
-        .then(() => {
-          expect(spawn.start).to.be.calledWithMatch(
-            ['--run-project', process.cwd(), '--group', true],
-            { dev: true,
-            }
-          )
-        })
-      })
-
-      it('spawns with group false', function () {
-        return run.start({ group: false })
-        .then(() => {
-          expect(spawn.start).to.be.calledWith(
-            ['--run-project', process.cwd(), '--group', false]
-          )
-        })
-      })
-
-      it('spawns with group and group-id', function () {
-        return run.start({ group: false, groupId: 'foo' })
-        .then(() => {
-          expect(spawn.start).to.be.calledWith(
-            ['--run-project', process.cwd(), '--group', false, '--group-id', 'foo']
-          )
-        })
-      })
-    })
-
     it('verifies cypress', function () {
       return run.start()
       .then(() => {

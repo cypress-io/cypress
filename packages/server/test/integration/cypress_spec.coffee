@@ -795,14 +795,9 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
-        @env = process.env
-
         process.env = _.omit(process.env, "CYPRESS_DEBUG")
 
         runMode.listenForProjectEnd.resolves({stats: {failures: 0} })
-
-      afterEach ->
-        process.env = @env
 
       it "can set specific environment variables", ->
         cypress.start([
@@ -963,13 +958,6 @@ describe "lib/cypress", ->
       sinon.stub(Server.prototype, "startWebsockets")
       sinon.spy(Events, "start")
       sinon.stub(electron.ipcMain, "on")
-
-    afterEach ->
-      delete process.env.CYPRESS_FILE_SERVER_FOLDER
-      delete process.env.CYPRESS_BASE_URL
-      delete process.env.CYPRESS_port
-      delete process.env.CYPRESS_responseTimeout
-      delete process.env.CYPRESS_watch_for_file_changes
 
     it "passes options to interactiveMode.ready", ->
       sinon.stub(interactiveMode, "ready")

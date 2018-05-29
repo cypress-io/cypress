@@ -1,3 +1,5 @@
+{ devicePixelRatio } = window
+
 it "takes consistent fullPage captures", ->
   options = { capture: "fullPage", blackout: [".black-me-out"] }
 
@@ -10,6 +12,8 @@ it "takes consistent fullPage captures", ->
       ## to ensure fullPage screenshots are consistent
       fn = (index) ->
         cy.screenshot("fullPage-compare", options)
-        cy.task("compare:screenshots", { a: 'fullPage-original', b: 'fullPage-compare', blackout: true })
+        cy.task("compare:screenshots", { a: 'fullPage-original', b: 'fullPage-compare', blackout: true, devicePixelRatio })
 
-      Cypress.Promise.map(Cypress._.times(10), fn, { concurrency: 1 })
+      Cypress._.times(10, fn)
+
+      return

@@ -20,6 +20,7 @@ env        = require("../util/env")
 trash      = require("../util/trash")
 random     = require("../util/random")
 system     = require("../util/system")
+duration   = require("../util/duration")
 progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
@@ -72,7 +73,7 @@ formatFooterSummary = (results) ->
 
   return [
     color(phrase, c),
-    gray(humanTime.short(results.totalDuration)),
+    gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, "reset"),
     colorIf(results.totalPassed, "green"),
     colorIf(totalFailed, "red"),
@@ -189,7 +190,7 @@ renderSummaryTable = (runUrl, results) ->
   if runs and runs.length
     head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
     colAligns = ["left", "right", "right", "right", "right", "right", "right"]
-    colWidths = [40, 10, 10, 10, 10, 10, 10]
+    colWidths = [39, 11, 10, 10, 10, 10, 10]
 
     table1 = terminal.table({
       colAligns
@@ -217,7 +218,7 @@ renderSummaryTable = (runUrl, results) ->
     _.each runs, (run) ->
       { spec, stats } = run
 
-      ms = humanTime.short(stats.wallClockDuration)
+      ms = duration.format(stats.wallClockDuration)
 
       table2.push([
         formatSpecSummary(spec.name, stats.failures)
@@ -456,24 +457,24 @@ module.exports = {
 
       started  = new Date
       progress = Date.now()
-      tenSecs = human("10 seconds")
+      throttle = env.get("VIDEO_COMPRESSION_THROTTLE") or human("10 seconds")
 
       onProgress = (float) ->
         switch
           when float is 1
             finished = new Date - started
-            duration = "(#{humanTime.long(finished)})"
+            dur = "(#{humanTime.long(finished)})"
             console.log(
               gray("  - Finished processing: "),
               chalk.cyan(name),
-              gray(duration)
+              gray(dur)
             )
             console.log("")
 
-          when (new Date - progress) > tenSecs
+          when (new Date - progress) > throttle
             ## bump up the progress so we dont
             ## continuously get notifications
-            progress += tenSecs
+            progress += throttle
             percentage = Math.ceil(float * 100) + "%"
             console.log("  - Compression progress: ", chalk.cyan(percentage))
 

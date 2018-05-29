@@ -25,5 +25,4 @@ describe "e2e screenshot fullPage capture", ->
       spec: "screenshot_fullpage_capture_spec.coffee"
       expectedExitCode: 0
       snapshot: true
-      timeout: 180000 ## 3 minutes
     })

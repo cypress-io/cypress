@@ -64,9 +64,9 @@ exports['e2e screenshot fullPage capture passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ screenshot_fullpage_capture_spec.coff…       Xs        1        1        -        -        - │
+  │ ✔ screenshot_fullpage_capture_spec.cof…     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

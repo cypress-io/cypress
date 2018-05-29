@@ -315,7 +315,7 @@ describe "lib/api", ->
       @createProps = {
         runId: "run-id-123"
         spec: "cypress/integration/app_spec.js"
-        planId: "planId123"
+        groupId: "groupId123"
         machineId: "machineId123"
         platform: {}
       }

@@ -4,6 +4,7 @@ _ = require("lodash")
 snapshot = require("snap-shot-it")
 stripAnsi = require("strip-ansi")
 widestLine = require("widest-line")
+env = require("#{root}lib/util/env")
 terminal = require("#{root}lib/util/terminal")
 terminalSize = require("#{root}lib/util/terminal-size")
 
@@ -48,13 +49,17 @@ describe "lib/util/terminal", ->
       sinon.stub(terminalSize, "get").returns({ columns: 99 })
       expect(terminal.getMaximumColumns()).to.eq(99)
 
+    it "overrides terminalSize when in CI", ->
+      sinon.stub(env, "get").withArgs("CI").returns("1")
+      expect(terminal.getMaximumColumns()).to.eq(100)
+
   context ".table", ->
     beforeEach ->
-      sinon.stub(terminalSize, "get").returns({ columns: 200 })
+      sinon.stub(terminalSize, "get").returns({ columns: 100 })
 
     it "draws multiple specs summary table", ->
       colAligns = ["left", "right", "right", "right", "right", "right", "right"]
-      colWidths = [40, 10, 10, 10, 10, 10, 10]
+      colWidths = [39, 11, 10, 10, 10, 10, 10]
 
       table1 = terminal.table({
         colAligns
@@ -73,16 +78,16 @@ describe "lib/util/terminal", ->
         colAligns
         colWidths
         type: "noBorder"
-        head: ["2 of 3 passed (66%)", "5m 36s", 37, 29, 8, 102, 18]
+        head: ["2 of 3 passed (66%)", "1:05:36", 37, 29, 8, 102, 18]
         style: {
           "padding-right": 2
         }
       })
 
       table2.push(
-        ["foo.js", "49s", 7, 4, 3, 2, 1]
-        ["bar.js", "6s", 0, 0, 0, 0, 15]
-        ["fail/is/whale.js", "3m 28s", 30, 25, 5, 100, 3]
+        ["foo.js", "00:49", 7, 4, 3, 2, 1]
+        ["bar.js", "796ms", 0, 0, 0, 0, 15]
+        ["fail/is/whale.js", "03:28", 30, 25, 5, 100, 3]
       )
 
       str = render(table1, table2, table3)

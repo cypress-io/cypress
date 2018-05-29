@@ -159,9 +159,9 @@ https://on.cypress.io/cross-origin-violation
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ web_security_spec.coffee                     Xs        3        -        3        -        - │
+  │ ✖ web_security_spec.coffee                  XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        3        -        3        -        -  
+    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
 
 `
 
@@ -220,9 +220,9 @@ exports['e2e web security when disabled fails 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ web_security_spec.coffee                     Xs        3        3        -        -        - │
+  │ ✔ web_security_spec.coffee                  XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        3        3        -        -        -  
+    All specs passed!                           XX:XX        3        3        -        -        -  
 
 `
 
