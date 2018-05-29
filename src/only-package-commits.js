@@ -2,6 +2,7 @@ const { identity, memoizeWith, pipeP } = require('ramda');
 const pkgUp = require('pkg-up');
 const readPkg = require('read-pkg');
 const path = require('path');
+const pLimit = require('p-limit');
 const debug = require('debug')('semantic-release:monorepo');
 const { getCommitFiles, getRoot } = require('./git-utils');
 const { mapCommits } = require('./options-transforms');
@@ -19,11 +20,14 @@ const getPackagePath = async () => {
 };
 
 const withFiles = async commits => {
+  const limit = pLimit(Number(process.env.SRM_MAX_THREADS) || 500);
   return Promise.all(
-    commits.map(async commit => {
-      const files = await memoizedGetCommitFiles(commit.hash);
-      return { ...commit, files };
-    })
+    commits.map(commit =>
+      limit(async () => {
+        const files = await memoizedGetCommitFiles(commit.hash);
+        return { ...commit, files };
+      })
+    )
   );
 };
 
