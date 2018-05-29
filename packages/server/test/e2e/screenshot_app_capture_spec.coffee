@@ -21,5 +21,4 @@ describe "e2e screenshot app capture", ->
       spec: "screenshot_app_capture_spec.coffee"
       expectedExitCode: 0
       snapshot: true
-      timemout: 180000
     })

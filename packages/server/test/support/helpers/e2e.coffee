@@ -325,6 +325,8 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
+          DEBUG_COLORS: "1"
+
           ## FYI: color will already be disabled
           ## because we are piping the child process
           COLUMNS: 100

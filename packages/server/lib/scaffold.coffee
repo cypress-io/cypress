@@ -10,11 +10,12 @@ debug     = require("debug")("cypress:server:scaffold")
 { equals, head, isEmpty, always } = require("ramda")
 { isDefault } = require("./util/config")
 
+exampleFolderName = cypressEx.getFolderName()
+exampleSpecsFullPaths = cypressEx.getPathToExamples()
+
 getPathFromIntegrationFolder = (file) ->
   file.substring(file.indexOf("integration/") + "integration/".length)
 
-exampleSpecsFullPaths = cypressEx.getPathToExamples()
-exampleFolderName = cypressEx.getFolderName()
 ## short paths relative to integration folder (i.e. examples/actions.spec.js)
 exampleSpecs = _.map exampleSpecsFullPaths, (file) ->
   getPathFromIntegrationFolder(file)
@@ -26,6 +27,7 @@ isDifferentNumberOfFiles = (files) ->
 exampleSpecsIndex = _.transform(exampleSpecs, (memo, spec, i) ->
   memo[spec] = exampleSpecsFullPaths[i]
 , {})
+
 getIndexedExample = (file) ->
   exampleSpecsIndex[getPathFromIntegrationFolder(file)]
 

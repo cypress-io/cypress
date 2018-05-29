@@ -234,14 +234,14 @@ createRun = (options = {}) ->
         .return(null)
 
 createInstance = (options = {}) ->
-  { runId, planId, machineId, platform, spec } = options
+  { runId, groupId, machineId, platform, spec } = options
 
   spec = getSpecPath(spec)
 
   api.createInstance({
     spec
     runId
-    planId
+    groupId
     platform
     machineId
   })
@@ -287,7 +287,7 @@ createRunAndRecordSpecs = (options = {}) ->
       if not resp
         runAllSpecs()
       else
-        { runUrl, runId, machineId, planId } = resp
+        { runUrl, runId, machineId, groupId } = resp
 
         captured = null
         instanceId = null
@@ -300,7 +300,7 @@ createRunAndRecordSpecs = (options = {}) ->
           createInstance({
             spec
             runId
-            planId
+            groupId
             platform
             machineId
           })

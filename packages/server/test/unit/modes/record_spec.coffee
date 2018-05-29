@@ -184,7 +184,7 @@ describe "lib/modes/record", ->
 
       recordMode.createInstance({
         runId: "run-123",
-        planId: "plan-123"
+        groupId: "group-123"
         machineId: "machine-123"
         platform: {}
         spec: { path: "cypress/integration/app_spec.coffee" }
@@ -192,7 +192,7 @@ describe "lib/modes/record", ->
       .then ->
         expect(api.createInstance).to.be.calledWith({
           runId: "run-123",
-          planId: "plan-123"
+          groupId: "group-123"
           machineId: "machine-123"
           platform: {}
           spec: "cypress/integration/app_spec.coffee"
@@ -208,7 +208,7 @@ describe "lib/modes/record", ->
 
       recordMode.createInstance({
         runId: "run-123",
-        planId: "plan-123"
+        groupId: "group-123"
         machineId: "machine-123"
         platform: {}
         spec: { path: "cypress/integration/app_spec.coffee" }
