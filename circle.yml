@@ -86,6 +86,7 @@ jobs:
           key: v5-{{ .Branch }}-deps-ts
 
       # show what is already cached globally
+      - run: npm i -g npm
       - run: ls $(npm -g bin)
       - run: ls $(npm -g bin)/../lib/node_modules
 
