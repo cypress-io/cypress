@@ -14,11 +14,8 @@ const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
 const getPackagePath = async () => {
   const packagePath = await pkgUp();
   const gitRoot = await getRoot();
-  
-  return path.relative(
-    gitRoot,
-    path.resolve(packagePath, '..')
-  );
+
+  return path.relative(gitRoot, path.resolve(packagePath, '..'));
 };
 
 const withFiles = async commits => {
@@ -40,13 +37,13 @@ const onlyPackageCommits = async commits => {
   return commitsWithFiles.filter(({ files, subject }) => {
     // Normalise paths and check if any changed files' path segments start
     // with that of the package root.
-    const packageFile = files
-      .find(file => {
-        const fileSegments = path.normalize(file).split(path.sep);
-        // Check the file is a *direct* descendent of the package folder (or the folder itself)
-        return packageSegments
-          .every((packageSegment, i) => packageSegment === fileSegments[i])
-      });
+    const packageFile = files.find(file => {
+      const fileSegments = path.normalize(file).split(path.sep);
+      // Check the file is a *direct* descendent of the package folder (or the folder itself)
+      return packageSegments.every(
+        (packageSegment, i) => packageSegment === fileSegments[i]
+      );
+    });
 
     if (packageFile) {
       debug(
