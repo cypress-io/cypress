@@ -15,8 +15,8 @@ describe "src/cypress/screenshot", ->
 
   it "has defaults", ->
     expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
-    expect(-> Screenshot.callBeforeScreenshot()).not.to.throw()
-    expect(-> Screenshot.callAfterScreenshot()).not.to.throw()
+    expect(-> Screenshot.onBeforeScreenshot()).not.to.throw()
+    expect(-> Screenshot.onAfterScreenshot()).not.to.throw()
 
   context ".getConfig", ->
     it "returns copy of config", ->
@@ -28,8 +28,8 @@ describe "src/cypress/screenshot", ->
     it "is noop if not called with any valid properties", ->
       Screenshot.defaults({})
       expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
-      expect(-> Screenshot.callBeforeScreenshot()).not.to.throw()
-      expect(-> Screenshot.callAfterScreenshot()).not.to.throw()
+      expect(-> Screenshot.onBeforeScreenshot()).not.to.throw()
+      expect(-> Screenshot.onAfterScreenshot()).not.to.throw()
 
     it "sets capture if specified", ->
       Screenshot.defaults({
@@ -61,17 +61,17 @@ describe "src/cypress/screenshot", ->
       })
       expect(Screenshot.getConfig().clip).to.eql({ width: 200, height: 100, x: 0, y:0 })
 
-    it "sets beforeScreenshot if specified", ->
-      beforeScreenshot = cy.stub()
-      Screenshot.defaults({ beforeScreenshot })
-      Screenshot.callBeforeScreenshot()
-      expect(beforeScreenshot).to.be.called
+    it "sets onBeforeScreenshot if specified", ->
+      onBeforeScreenshot = cy.stub()
+      Screenshot.defaults({ onBeforeScreenshot })
+      Screenshot.onBeforeScreenshot()
+      expect(onBeforeScreenshot).to.be.called
 
-    it "sets afterScreenshot if specified", ->
-      afterScreenshot = cy.stub()
-      Screenshot.defaults({ afterScreenshot })
-      Screenshot.callAfterScreenshot()
-      expect(afterScreenshot).to.be.called
+    it "sets onAfterScreenshot if specified", ->
+      onAfterScreenshot = cy.stub()
+      Screenshot.defaults({ onAfterScreenshot })
+      Screenshot.onAfterScreenshot()
+      expect(onAfterScreenshot).to.be.called
 
     describe "errors", ->
       it "throws if not passed an object", ->
@@ -134,12 +134,12 @@ describe "src/cypress/screenshot", ->
           Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: "5" } })
         .to.throw("Cypress.Screenshot.defaults() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{4}")
 
-      it "throws if beforeScreenshot is not a function", ->
+      it "throws if onBeforeScreenshot is not a function", ->
         expect =>
-          Screenshot.defaults({ beforeScreenshot: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'beforeScreenshot' option must be a function. You passed: foo")
+          Screenshot.defaults({ onBeforeScreenshot: "foo" })
+        .to.throw("Cypress.Screenshot.defaults() 'onBeforeScreenshot' option must be a function. You passed: foo")
 
-      it "throws if afterScreenshot is not a function", ->
+      it "throws if onAfterScreenshot is not a function", ->
         expect =>
-          Screenshot.defaults({ afterScreenshot: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() 'afterScreenshot' option must be a function. You passed: foo")
+          Screenshot.defaults({ onAfterScreenshot: "foo" })
+        .to.throw("Cypress.Screenshot.defaults() 'onAfterScreenshot' option must be a function. You passed: foo")

@@ -1,3 +1,5 @@
+{ devicePixelRatio } = window
+
 it "takes consistent element captures", ->
   cy
     .viewport(600, 200)
@@ -9,6 +11,8 @@ it "takes consistent element captures", ->
       ## to ensure element screenshots are consistent
       fn = (index) ->
         cy.get(".capture-me").screenshot("element-compare")
-        cy.task("compare:screenshots", { a: 'element-original', b: 'element-compare' })
+        cy.task("compare:screenshots", { a: 'element-original', b: 'element-compare', devicePixelRatio })
 
-      Cypress.Promise.map(Cypress._.times(10), fn, { concurrency: 1 })
+      Cypress._.times(10, fn)
+
+      return
