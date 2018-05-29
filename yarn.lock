@@ -3465,9 +3465,9 @@ sax@^1.2.1, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release-github-pr@^5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/semantic-release-github-pr/-/semantic-release-github-pr-5.0.4.tgz#12187214f8864b2551ae60b5dd862a5f0ab250b4"
+semantic-release-github-pr@^5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/semantic-release-github-pr/-/semantic-release-github-pr-5.0.5.tgz#b8bd75509ec3795546cc65c5dc4bc855ea4885ea"
   dependencies:
     execa "^0.8.0"
     github "^12.1.0"
