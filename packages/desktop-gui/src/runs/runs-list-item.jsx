@@ -28,34 +28,41 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              { run.commit ?
+              { run.commit && run.commit.branch ?
                 <span>
-                  {run.commit.branch ? run.commit.branch : null}
-                  {run.commit.branch && this._displaySpec() ? ' / ' : null}
+                  {run.commit.branch}
+                  {this._displaySpec() ? ' / ' : null}
                 </span> :
                 null
               }
               {this._displaySpec()}
             </div>
-            <div className='msg'>
-              {
-                run.commit && run.commit.authorEmail ?
-                  <img
-                    className='user-avatar'
-                    height='13'
-                    width='13'
-                    src={`${gravatarUrl(run.commit.authorEmail)}`}
-                  /> :
-                  null
-              }
-              {
-                run.commit && run.commit.message ?
-                  <span className='commit-msg'>
-                    {run.commit.message.split(NEWLINE)[0]}
-                  </span> :
-                  null
-              }
-            </div>
+            {
+              run.commit ?
+                <div className='msg'>
+                  {
+                    run.commit.authorEmail ?
+                      <img
+                        className='user-avatar'
+                        height='13'
+                        width='13'
+                        src={`${gravatarUrl(run.commit.authorEmail)}`}
+                      /> :
+                      null
+                  }
+                  {
+                    run.commit.message ?
+                      <span className='commit-msg'>
+                        {run.commit.message.split(NEWLINE)[0]}
+                      </span> :
+                      null
+                  }
+                </div> :
+                <div className='msg italic'>
+                  - No commit info found -
+                </div>
+            }
+
           </div>
         </div>
         <div className='row-column-wrapper'>
