@@ -81,20 +81,21 @@ describe "taking screenshots", ->
     cy
       .viewport(400, 400)
       .visit('http://localhost:3322/identical')
-      .screenshot()
-      .then (results) ->
-        { duration } = results
+      .screenshot({
+        onAfterScreenshot: ($el, results) ->
+          { duration } = results
 
-        ## there should be 4 screenshots taken
-        ## because the height is 1300px.
-        ## the first will resolve super fast
-        ## but the other 3 will take at least 1500ms
-        ## but not much more!
-        first = 500
-        total = first + (1500 * 3)
-        padding = 1000 * 3 ## account for exceeding 1500
+          ## there should be 4 screenshots taken
+          ## because the height is 1300px.
+          ## the first will resolve super fast
+          ## but the other 3 will take at least 1500ms
+          ## but not much more!
+          first = 500
+          total = first + (1500 * 3)
+          padding = 1000 * 3 ## account for exceeding 1500
 
-        expect(duration).to.be.within(total, total + padding)
+          expect(duration).to.be.within(total, total + padding)
+      })
 
   describe "clipping", ->
     it "can clip app screenshots", ->
