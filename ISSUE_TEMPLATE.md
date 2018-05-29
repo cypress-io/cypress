@@ -1,11 +1,12 @@
+### Is this a Feature or Bug?
 
 <!-- Is this a question? Do not open an issue. Please ask your question in our chat https://gitter.im/cypress-io/cypress -->
 
-### Current behavior: <!-- (images, stack traces, etc) -->
+### Current behavior:
 
+<!-- images, stack traces, etc -->
 
 ### Desired behavior:
-
 
 ### Steps to reproduce:
 
@@ -15,5 +16,6 @@
 
 ```
 
-### Versions  <!-- (Cypress, operating system, browser) -->
+### Versions
 
+<!-- Cypress, operating system, browser -->
