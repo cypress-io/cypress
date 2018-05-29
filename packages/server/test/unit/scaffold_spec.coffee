@@ -93,14 +93,17 @@ describe "lib/scaffold", ->
         {@integrationFolder} = @cfg
 
     it "creates both integrationFolder and example specs when integrationFolder does not exist", ->
-      scaffold.integration(@integrationFolder, @cfg)
-      .then =>
-        Promise.all([
-          fs.statAsync(@integrationFolder + "/examples/actions.spec.js").get("size")
-          fs.statAsync(cypressEx.getPathToExamples()[0]).get("size")
-          fs.statAsync(@integrationFolder + "/examples/location.spec.js").get("size")
-          fs.statAsync(cypressEx.getPathToExamples()[8]).get("size")
-        ]).spread (size1, size2, size3, size4) ->
+      Promise.join(
+        cypressEx.getPathToExamples(),
+        scaffold.integration(@integrationFolder, @cfg)
+      )
+      .spread (exampleSpecs) =>
+        Promise.join(
+          fs.statAsync(@integrationFolder + "/examples/actions.spec.js").get("size"),
+          fs.statAsync(exampleSpecs[0]).get("size"),
+          fs.statAsync(@integrationFolder + "/examples/location.spec.js").get("size"),
+          fs.statAsync(exampleSpecs[8]).get("size")
+        ).spread (size1, size2, size3, size4) ->
           expect(size1).to.eq(size2)
           expect(size3).to.eq(size4)
 

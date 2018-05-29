@@ -356,9 +356,12 @@ module.exports = {
 
     obj.integrationExampleName = scaffold.integrationExampleName()
     obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
-    obj.scaffoldedFiles = scaffold.fileTree(obj)
 
-    return obj
+    scaffold.fileTree(obj)
+    .then (fileTree) ->
+      obj.scaffoldedFiles = fileTree
+
+      return obj
 
   # async function
   setSupportFileAndFolder: (obj) ->
