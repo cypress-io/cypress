@@ -3465,9 +3465,9 @@ sax@^1.2.1, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release-github-pr@^5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/semantic-release-github-pr/-/semantic-release-github-pr-5.0.3.tgz#ab8272d4e16ff74d00850bd538b013a40fe69f2a"
+semantic-release-github-pr@^5.0.4:
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/semantic-release-github-pr/-/semantic-release-github-pr-5.0.4.tgz#12187214f8864b2551ae60b5dd862a5f0ab250b4"
   dependencies:
     execa "^0.8.0"
     github "^12.1.0"
@@ -3477,8 +3477,8 @@ semantic-release-github-pr@^5.0.3:
     semantic-release-plugin-decorators "^1.2.1"
 
 semantic-release-plugin-decorators@^1.2.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/semantic-release-plugin-decorators/-/semantic-release-plugin-decorators-1.2.2.tgz#af881a1802650768a8cd6101def7de3323cd30fd"
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/semantic-release-plugin-decorators/-/semantic-release-plugin-decorators-1.2.3.tgz#12dd1a9a70192a46240dab009de82dd3563c28ee"
   dependencies:
     import-from "^2.1.0"
     lodash "^4.17.4"
