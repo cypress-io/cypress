@@ -15,10 +15,10 @@ Fixtures     = require("./fixtures")
 fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
-video        = require("#{root}../lib/video")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
 screenshots  = require("#{root}../lib/screenshots")
+videoCapture = require("#{root}../lib/video_capture")
 settings     = require("#{root}../lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
@@ -121,7 +121,7 @@ copy = ->
         screenshotsFolder,
         path.join(ca, path.basename(screenshotsFolder))
       ),
-      video.copy(
+      videoCapture.copy(
         videosFolder,
         path.join(ca, path.basename(videosFolder))
       )
