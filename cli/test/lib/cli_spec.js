@@ -58,9 +58,13 @@ describe('cli', function () {
   })
 
   context('cypress version', function () {
+    const binaryDir = '/binary/dir'
+    beforeEach(function () {
+      sinon.stub(state, 'getBinaryDir').returns(binaryDir)
+    })
     it('reports package version', function (done) {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').withArgs(binaryDir).resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {

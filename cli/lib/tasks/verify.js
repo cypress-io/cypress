@@ -217,10 +217,8 @@ const start = (options = {}) => {
           `)
         }
       })
-      .then(() => fs.realpathAsync(envBinaryPath))
-      .then((realPath) => {
-        debug('CYPRESS_RUN_BINARY has realPath:', realPath)
-        const envBinaryDir = state.parsePlatformBinaryFolder(realPath)
+      .then(() => state.parseRealPlatformBinaryFolderAsync(envBinaryPath))
+      .then((envBinaryDir) => {
         if (!envBinaryDir) {
           return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
         }
