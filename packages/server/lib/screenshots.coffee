@@ -6,6 +6,7 @@ Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
 Jimp            = require("jimp")
 sizeOf          = require("image-size")
+colorString     = require("color-string")
 debug           = require("debug")("cypress:server:screenshot")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
@@ -34,6 +35,18 @@ isBlack = (rgba) ->
 isWhite = (rgba) ->
   "#{rgba.r}#{rgba.g}#{rgba.b}" is "255255255"
 
+intToRGBA = (int) ->
+  obj = Jimp.intToRGBA(int)
+
+  if debug.enabled
+    obj.name = colorString.to.keyword([
+      obj.r,
+      obj.g,
+      obj.b
+    ])
+
+  obj
+
 ## when we hide the runner UI for an app or fullPage capture
 ## the browser doesn't paint synchronously, it can take 100+ ms
 ## to ensure that the runner UI has been hidden, we put
@@ -50,21 +63,37 @@ isWhite = (rgba) ->
 ## are NOT there before accepting the screenshot
 ## when taking a 'runner' capture, we ensure the pixels ARE there
 
-hasHelperPixels = (image) ->
-  topLeft = Jimp.intToRGBA(image.getPixelColor(0, 0))
-  topLeftRight = Jimp.intToRGBA(image.getPixelColor(1, 0))
-  topLeftDown = Jimp.intToRGBA(image.getPixelColor(0, 1))
-  topRight = Jimp.intToRGBA(image.getPixelColor(image.bitmap.width, 0))
-  bottomLeft = Jimp.intToRGBA(image.getPixelColor(0, image.bitmap.height))
-  bottomRight = Jimp.intToRGBA(image.getPixelColor(image.bitmap.width, image.bitmap.height))
+hasHelperPixels = (image, pixelRatio) ->
+  topLeft = intToRGBA(image.getPixelColor(0, 0))
+  topLeftRight = intToRGBA(image.getPixelColor(1 * pixelRatio, 0))
+  topLeftDown = intToRGBA(image.getPixelColor(0, 1 * pixelRatio))
+  bottomLeft = intToRGBA(image.getPixelColor(0, image.bitmap.height))
+  topRight = intToRGBA(image.getPixelColor(image.bitmap.width, 0))
+  bottomRight = intToRGBA(image.getPixelColor(image.bitmap.width, image.bitmap.height))
+
+  topLeft.isNotWhite = not isWhite(topLeft)
+  topLeftRight.isWhite = isWhite(topLeftRight)
+  topLeftDown.isWhite = isWhite(topLeftDown)
+  bottomLeft.isWhite = isWhite(bottomLeft)
+  topRight.isWhite = isWhite(topRight)
+  bottomRight.isBlack = isBlack(bottomRight)
+
+  debug("helper pixels %O", {
+    topLeft
+    topLeftRight
+    topLeftDown
+    bottomLeft
+    topRight
+    bottomRight
+  })
 
   return (
-    (not isWhite(topLeft)) and
-    isWhite(topLeftRight) and
-    isWhite(topLeftDown) and
-    isWhite(topRight) and
-    isBlack(bottomRight) and
-    isWhite(bottomLeft)
+    topLeft.isNotWhite and
+    topLeftRight.isWhite and
+    topLeftDown.isWhite and
+    bottomLeft.isWhite and
+    topRight.isWhite and
+    bottomRight.isBlack
   )
 
 captureAndCheck = (data, automate, conditionFn) ->
@@ -98,9 +127,11 @@ isMultipart = (data) ->
   _.isNumber(data.current) and _.isNumber(data.total)
 
 crop = (image, dimensions, pixelRatio = 1) ->
+  debug("dimensions before are %o", dimensions)
   dimensions = _.transform dimensions, (result, value, dimension) ->
     result[dimension] = value * pixelRatio
 
+  debug("dimensions for cropping are %o", dimensions)
   x = Math.min(dimensions.x, image.bitmap.width - 1)
   y = Math.min(dimensions.y, image.bitmap.height - 1)
   width = Math.min(dimensions.width, image.bitmap.width - x)
@@ -111,11 +142,17 @@ crop = (image, dimensions, pixelRatio = 1) ->
   image.crop(x, y, width, height)
 
 pixelConditionFn = (data, image) ->
-  hasPixels = hasHelperPixels(image)
-  return (
-    (isAppOnly(data) and not hasPixels) or
-    (not isAppOnly(data) and hasPixels)
-  )
+  pixelRatio = image.bitmap.width / data.viewport.width
+
+  hasPixels = hasHelperPixels(image, pixelRatio)
+  app = isAppOnly(data)
+
+  ## if we are app, we dont need helper pixels else we do!
+  passes = if app then not hasPixels else hasPixels
+
+  debug("pixelConditionFn", { pixelRatio, hasPixels, app, passes })
+
+  return passes
 
 multipartImages = []
 
@@ -211,7 +248,7 @@ module.exports = {
   capture: (data, automate) ->
     __ID__ = _.uniqueId("s")
 
-    debug("capturing screenshot with data %o", data)
+    debug("capturing screenshot %o", data)
 
     ## for failure screenshots, we keep it simple to avoid latency
     ## caused by jimp reading the image buffer
@@ -250,6 +287,7 @@ module.exports = {
 
         if data.current is data.total
           { image } = stitchScreenshots(pixelRatio)
+
           return { image, pixelRatio, multipart, takenAt }
         else
           return {}

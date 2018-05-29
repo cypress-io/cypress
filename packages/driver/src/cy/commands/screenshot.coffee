@@ -7,6 +7,7 @@ $dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
 getViewportHeight = (state) ->
+  ## TODO this doens't seem correct
   Math.min(state("viewportHeight"), $(window).height())
 
 getViewportWidth = (state) ->
@@ -223,7 +224,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       cy.pauseTimers(false)
 
   automationOptions = _.extend({}, options, {
-    capture: capture
+    capture
     clip: {
       x: 0
       y: 0

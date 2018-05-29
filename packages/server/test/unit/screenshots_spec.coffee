@@ -77,7 +77,7 @@ describe "lib/screenshots", ->
         @getPixelColor.withArgs(0, 0).returns("white")
 
     it "captures screenshot with automation", ->
-      data = { viewport: {} }
+      data = { viewport: @jimpImage.bitmap }
       screenshots.capture(data, @automate).then =>
         expect(@automate).to.be.calledOnce
         expect(@automate).to.be.calledWith(data)
@@ -90,14 +90,18 @@ describe "lib/screenshots", ->
     it "retries until helper pixels are present for runner capture", ->
       @passPixelTest()
       @getPixelColor.withArgs(0, 0).onCall(1).returns("black")
-      screenshots.capture({ viewport: {} }, @automate).then =>
+      screenshots.capture({ viewport: @jimpImage.bitmap }, @automate)
+      .then =>
         expect(@automate).to.be.calledTwice
 
     it "adjusts cropping based on pixel ratio", ->
       @appData.viewport = { width: 20, height: 20 }
       @appData.clip = { x: 5, y: 5, width: 10, height: 10 }
       @passPixelTest()
-      screenshots.capture(@appData, @automate).then =>
+      @getPixelColor.withArgs(2, 0).returns("white")
+      @getPixelColor.withArgs(0, 2).returns("white")
+      screenshots.capture(@appData, @automate)
+      .then =>
         expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
     it "resolves details w/ image", ->
@@ -142,6 +146,8 @@ describe "lib/screenshots", ->
         @appData.viewport = { width: 20, height: 20 }
         @appData.userClip = { x: 5, y: 5, width: 10, height: 10 }
         @passPixelTest()
+        @getPixelColor.withArgs(2, 0).returns("white")
+        @getPixelColor.withArgs(0, 2).returns("white")
         screenshots.capture(@appData, @automate).then =>
           expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 

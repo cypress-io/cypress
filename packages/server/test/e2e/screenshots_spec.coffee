@@ -12,7 +12,10 @@ e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
   app.get "/color/:color", (req, res) ->
-    e2e.sendHtml("""<div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>""")(req, res)
+    e2e.sendHtml("""
+      <style>body { margin: 0; }</style>
+      <div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>"""
+    )(req, res)
 
   app.get "/fullPage", e2e.sendHtml("""
     <style>body { margin: 0; }</style>
