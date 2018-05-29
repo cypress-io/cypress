@@ -3,7 +3,9 @@
   "version": "0.0.0-development",
   "description": "Plugins for `semantic-release` allowing it to be used with a monorepo.",
   "main": "src/index.js",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "format": "prettier --write --single-quote --trailing-comma es5",
     "format:all": "yarn format \"./**/*.js\"",
@@ -28,7 +30,7 @@
     "lint-staged": "^6.0.0",
     "prettier": "^1.9.2",
     "semantic-release": "^15.0.0",
-    "semantic-release-github-pr": "^5.0.4"
+    "semantic-release-github-pr": "^5.0.5"
   },
   "lint-staged": {
     "*.js": [
