@@ -13,12 +13,20 @@ glob            = require("./util/glob")
 RUNNABLE_SEPARATOR = " -- "
 invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
 
+## internal id incrementor
+__ID__ = null
+
 ## TODO: when we parallelize these builds we'll need
 ## a semaphore to access the file system when we write
 ## screenshots since its possible two screenshots with
 ## the same name will be written to the file system
 
 Jimp.prototype.getBuffer = Promise.promisify(Jimp.prototype.getBuffer)
+
+## when debugging logs automatically prefix the
+## screenshot id to the debug logs for easier association
+debug = _.wrap debug, (fn, str, args...) ->
+  fn("(#{__ID__}) #{str}", args...)
 
 isBlack = (rgba) ->
   "#{rgba.r}#{rgba.g}#{rgba.b}" is "000"
@@ -59,15 +67,13 @@ hasHelperPixels = (image) ->
     isWhite(bottomLeft)
   )
 
-## if somehow after 10 tries, the condition isn't met, just
-## accept the current screenshot
-MAX_TRIES = 10
-
-captureAndCheck = (data, automate, condition) ->
+captureAndCheck = (data, automate, conditionFn) ->
+  start = new Date()
   tries = 0
   do attempt = ->
     tries++
-    debug("capture and check attempt ##{tries}")
+    totalDuration = new Date() - start
+    debug("capture and check %o", { tries, totalDuration })
 
     takenAt = new Date().toJSON()
 
@@ -79,7 +85,8 @@ captureAndCheck = (data, automate, condition) ->
     .then (image) ->
       debug("read buffer to image #{image.bitmap.width} x #{image.bitmap.height}")
 
-      if tries >= MAX_TRIES or condition(data, image)
+      if (totalDuration > 1500) or conditionFn(data, image)
+        debug("resolving with image %o", { tries, totalDuration })
         return { image, takenAt }
       else
         attempt()
@@ -103,7 +110,7 @@ crop = (image, dimensions, pixelRatio = 1) ->
 
   image.crop(x, y, width, height)
 
-pixelCondition = (data, image) ->
+pixelConditionFn = (data, image) ->
   hasPixels = hasHelperPixels(image)
   return (
     (isAppOnly(data) and not hasPixels) or
@@ -120,13 +127,24 @@ compareLast = (data, image) ->
   ## page has not scrolled yet
   previous = _.last(multipartImages)
   if not previous
+    debug("no previous image to compare")
     return true
-  debug("compare", previous.image.hash(), "vs", image.hash())
-  return previous.image.hash() isnt image.hash()
 
-multipartCondition = (data, image) ->
+  prevHash = previous.image.hash()
+  currHash = image.hash()
+  matches = prevHash is currHash
+
+  debug("comparing previous and current image hashes %o", {
+    prevHash
+    currHash
+    matches
+  })
+
+  return prevHash isnt currHash
+
+multipartConditionFn = (data, image) ->
   if data.current is 1
-    pixelCondition(data, image) and compareLast(data, image)
+    pixelConditionFn(data, image) and compareLast(data, image)
   else
     compareLast(data, image)
 
@@ -188,9 +206,13 @@ module.exports = {
     ## find all files in all nested dirs
     screenshotsFolder = path.join(screenshotsFolder, "**", "*")
 
-    glob(screenshotsFolder, {nodir: true})
+    glob(screenshotsFolder, { nodir: true })
 
   capture: (data, automate) ->
+    __ID__ = _.uniqueId("s")
+
+    debug("capturing screenshot with data %o", data)
+
     ## for failure screenshots, we keep it simple to avoid latency
     ## caused by jimp reading the image buffer
     if data.simple
@@ -202,12 +224,14 @@ module.exports = {
           buffer: dataUriToBuffer(dataUrl)
         }
 
-    condition = if isMultipart(data) then multipartCondition else pixelCondition
+    multipart = isMultipart(data)
 
-    captureAndCheck(data, automate, condition)
+    conditionFn = if multipart then multipartConditionFn else pixelConditionFn
+
+    captureAndCheck(data, automate, conditionFn)
     .then ({ image, takenAt }) ->
       pixelRatio = image.bitmap.width / data.viewport.width
-      multipart = isMultipart(data)
+
       debug("pixel ratio is", pixelRatio)
 
       if multipart

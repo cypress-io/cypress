@@ -2,7 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 $ = require("jquery")
 
-Screenshot = require("../../cypress/screenshot")
+$Screenshot = require("../../cypress/screenshot")
 $dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
@@ -210,14 +210,14 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     if disableTimersAndAnimations
       cy.pauseTimers(true)
 
-    Screenshot.callBeforeScreenshot(state("document"))
+    $Screenshot.callBeforeScreenshot(state("document"))
 
     send("before:screenshot", getOptions(true))
 
   after = ->
     send("after:screenshot", getOptions(false))
 
-    Screenshot.callAfterScreenshot(state("document"))
+    $Screenshot.callAfterScreenshot(state("document"))
 
     if disableTimersAndAnimations
       cy.pauseTimers(false)
@@ -251,7 +251,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   ## failure screenshot when not interactive
   Cypress.on "runnable:after:run:async", (test, runnable) ->
-    screenshotConfig = Screenshot.getConfig()
+    screenshotConfig = $Screenshot.getConfig()
     return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
 
     if not state("screenshotTaken")
@@ -294,8 +294,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       }
 
       screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip")
-      screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
-      screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
+      screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
+      screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
 
       ## set this regardless of options.log b/c its used by the
       ## yielded value below
@@ -324,7 +324,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if subject
         screenshotConfig.capture = "viewport"
 
-      startTime = Date.now()
+      startTime = new Date()
 
       state("screenshotTaken", true)
 
@@ -336,10 +336,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: options.timeout
       })
       .then (props) ->
-        duration = Date.now() - startTime
+        duration = new Date() - startTime
 
         yieldValue = _.extend({}, consoleProps, props, { duration })
-        yieldValue.path = yieldValue.path.replace(/^.*_playground/, '<redacted>')
 
         { width, height } = props.dimensions
 

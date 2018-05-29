@@ -40,6 +40,11 @@ onServer = (app) ->
     <div style="right: 0; bottom: 0; background-color: black;"></div>
   """)
 
+  app.get "/identical", e2e.sendHtml("""
+    <style>div { height: 1300px; width: 200px; background-color: #ddd; }</style>
+    <div></div>
+  """)
+
 describe "e2e screenshots", ->
   e2e.setup({
     servers: {
