@@ -39,7 +39,7 @@ checkZipSize = (zipPath) ->
   stats = fs.statSync(zipPath)
   zipSize = filesize(stats.size, {round: 0})
   console.log("zip file size #{zipSize}")
-  MAX_ALLOWED_SIZE_MB = if os.platform() == "win32" then 200 else 120
+  MAX_ALLOWED_SIZE_MB = if os.platform() == "win32" then 200 else 130
   MAX_ZIP_FILE_SIZE = megaBytes(MAX_ALLOWED_SIZE_MB)
   if stats.size > MAX_ZIP_FILE_SIZE
     throw new Error("Zip file is too large: #{zipSize}")
