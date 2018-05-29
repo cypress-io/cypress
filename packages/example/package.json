@@ -19,6 +19,7 @@
     "lib"
   ],
   "dependencies": {
+    "bluebird": "^3.5.1",
     "glob": "^7.1.2"
   },
   "devDependencies": {

@@ -971,14 +971,15 @@ describe "lib/config", ->
       obj = {
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
-      sinon.stub(scaffold, "fileTree").returns([])
+      sinon.stub(scaffold, "fileTree").resolves([])
 
-      expect(config.setScaffoldPaths(obj)).to.deep.eq({
-        integrationFolder: "/_test-output/path/to/project/cypress/integration"
-        integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
-        integrationExampleName: "examples"
-        scaffoldedFiles: []
-      })
+      config.setScaffoldPaths(obj).then (result) ->
+        expect(result).to.deep.eq({
+          integrationFolder: "/_test-output/path/to/project/cypress/integration"
+          integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
+          integrationExampleName: "examples"
+          scaffoldedFiles: []
+        })
 
   context ".setSupportFileAndFolder", ->
     it "does nothing if supportFile is falsey", ->
