@@ -133,7 +133,7 @@ module.exports = {
 
     body = _.pick(options, [
       "spec"
-      "planId"
+      "groupId"
       "machineId"
       "platform"
     ])
