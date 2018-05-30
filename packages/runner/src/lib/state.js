@@ -102,7 +102,7 @@ export default class State {
     this.isLoading = isLoading
   }
 
-  updateDimensions (width, height) {
+  @action updateDimensions (width, height) {
     this.width = width
     this.height = height
   }
@@ -114,7 +114,7 @@ export default class State {
     if (headerHeight != null) this.headerHeight = headerHeight
   }
 
-  clearMessage () {
+  @action clearMessage () {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
@@ -128,7 +128,7 @@ export default class State {
     }
   }
 
-  resetUrl () {
+  @action resetUrl () {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl

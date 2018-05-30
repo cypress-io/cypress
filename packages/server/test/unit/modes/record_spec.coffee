@@ -80,30 +80,28 @@ describe "lib/modes/record", ->
         remote: "https://github.com/foo/bar.git"
       })
 
-      sinon.stub(browsers, "getByName").resolves({
-        displayName: "chrome"
-        version: "59"
-      })
-
-      sinon.stub(system, "info").resolves({
-        osCpus: 1
-        osName: 2
-        osMemory: 3
-        osVersion: 4
-      })
-
       sinon.stub(api, "createRun").resolves()
 
     it "calls api.createRun with the right args", ->
-      browser = "chrome"
       key = "recordKey"
       projectId = "pId123"
       specPattern = ["spec/pattern1", "spec/pattern2"]
       projectRoot = "project/root"
       runAllSpecs = sinon.stub()
+      sys = {
+        osCpus: 1
+        osName: 2
+        osMemory: 3
+        osVersion: 4
+      }
+      browser = {
+        displayName: "chrome"
+        version: "59"
+      }
 
       recordMode.createRunAndRecordSpecs({
         key
+        sys
         specs
         browser
         projectId
@@ -112,9 +110,7 @@ describe "lib/modes/record", ->
         runAllSpecs
       })
       .then ->
-        expect(system.info).to.be.calledOnce
         expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
-        expect(browsers.getByName).to.be.calledWith(browser)
         expect(api.createRun).to.be.calledWith({
           projectId
           recordKey: key
@@ -188,7 +184,7 @@ describe "lib/modes/record", ->
 
       recordMode.createInstance({
         runId: "run-123",
-        planId: "plan-123"
+        groupId: "group-123"
         machineId: "machine-123"
         platform: {}
         spec: { path: "cypress/integration/app_spec.coffee" }
@@ -196,7 +192,7 @@ describe "lib/modes/record", ->
       .then ->
         expect(api.createInstance).to.be.calledWith({
           runId: "run-123",
-          planId: "plan-123"
+          groupId: "group-123"
           machineId: "machine-123"
           platform: {}
           spec: "cypress/integration/app_spec.coffee"
@@ -212,7 +208,7 @@ describe "lib/modes/record", ->
 
       recordMode.createInstance({
         runId: "run-123",
-        planId: "plan-123"
+        groupId: "group-123"
         machineId: "machine-123"
         platform: {}
         spec: { path: "cypress/integration/app_spec.coffee" }

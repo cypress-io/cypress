@@ -783,7 +783,20 @@ describe('Kitchen Sink', function() {
 
     it('cy.screenshot() - take a screenshot', function() {
       // https://on.cypress.io/screenshot
-      cy.screenshot('my-image')
+      cy.screenshot('my-image', {
+        blackout: ['.foo'],
+        capture: 'viewport',
+        clip: { x: 0, y: 0, width: 200, height: 200 },
+        disableTimersAndAnimations: true,
+        scale: true,
+        beforeScreenshot() {},
+        afterScreenshot() {},
+      })
+    })
+
+    it('cy.task() - run a task', function() {
+      // https://on.cypress.io/task
+      cy.task('my-task', 'my-arg')
     })
 
     it('cy.wrap() - wrap an object', function() {
@@ -1471,6 +1484,22 @@ describe('Kitchen Sink', function() {
         whitelist(xhr) {
           // handle custom logic for whitelisting
         },
+      })
+    })
+  })
+
+  context('Cypress.Screenshot', function() {
+    // https://on.cypress.io/api/screenshot-api
+    it('Cypress.Screenshot.defaults() - change default config of screenshots', function() {
+      Cypress.Screenshot.defaults({
+        blackout: ['.foo'],
+        capture: 'viewport',
+        clip: { x: 0, y: 0, width: 200, height: 200 },
+        scale: false,
+        disableTimersAndAnimations: true,
+        screenshotOnRunFailure: true,
+        beforeScreenshot() { },
+        afterScreenshot() { },
       })
     })
   })

@@ -1,22 +1,20 @@
 _          = require("lodash")
 os         = require("os")
+la         = require("lazy-ass")
 chalk      = require("chalk")
-Promise    = require("bluebird")
+check      = require("check-more-types")
 debug      = require("debug")("cypress:server:record")
+Promise    = require("bluebird")
+isForkPr   = require("is-fork-pr")
+commitInfo = require("@cypress/commit-info")
 api        = require("../api")
 logger     = require("../logger")
 errors     = require("../errors")
 capture    = require("../capture")
 upload     = require("../upload")
-# Project    = require("../project")
-browsers   = require('../browsers')
 env        = require("../util/env")
-system     = require("../util/system")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
-commitInfo = require("@cypress/commit-info")
-la         = require("lazy-ass")
-check      = require("check-more-types")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -25,6 +23,9 @@ logException = (err) ->
   .timeout(1000)
   .catch ->
     ## dont yell about any errors either
+
+runningInternalTests = ->
+  env.get("CYPRESS_INTERNAL_E2E_TESTS") is "1"
 
 warnIfCiFlag = (ci) ->
   ## if we are using the ci flag that means
@@ -174,6 +175,14 @@ createRun = (options = {}) ->
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
+    ## are we a forked PR and are we NOT running our own internal
+    ## e2e tests? currently some e2e tests fail when a user submits
+    ## a PR because this logic triggers unintended here
+    if isForkPr.isForkPr() and not runningInternalTests()
+      ## bail with a warning
+      return errors.warning("RECORDING_FROM_FORK_PR")
+
+    ## else throw
     errors.throw("RECORD_KEY_MISSING")
 
   ## go back to being a string
@@ -208,13 +217,13 @@ createRun = (options = {}) ->
     })
 
     switch err.statusCode
-      when 400
-        errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
       when 401
         recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
         errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
+      when 412
+        errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
       else
         ## warn the user that assets will be not recorded
         errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
@@ -225,14 +234,14 @@ createRun = (options = {}) ->
         .return(null)
 
 createInstance = (options = {}) ->
-  { runId, planId, machineId, platform, spec } = options
+  { runId, groupId, machineId, platform, spec } = options
 
   spec = getSpecPath(spec)
 
   api.createInstance({
     spec
     runId
-    planId
+    groupId
     platform
     machineId
   })
@@ -251,16 +260,12 @@ createInstance = (options = {}) ->
       null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { specPattern, specs, browser, projectId, projectRoot, runAllSpecs } = options
+  { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs } = options
 
   recordKey = options.key
 
-  Promise.all([
-    system.info()
-    commitInfo.commitInfo(projectRoot)
-    browsers.getByName(browser)
-  ])
-  .spread (sys, git, browser) ->
+  commitInfo.commitInfo(projectRoot)
+  .then (git) ->
     platform = {
       osCpus: sys.osCpus
       osName: sys.osName
@@ -282,7 +287,7 @@ createRunAndRecordSpecs = (options = {}) ->
       if not resp
         runAllSpecs()
       else
-        { runId, machineId, planId } = resp
+        { runUrl, runId, machineId, groupId } = resp
 
         captured = null
         instanceId = null
@@ -295,7 +300,7 @@ createRunAndRecordSpecs = (options = {}) ->
           createInstance({
             spec
             runId
-            planId
+            groupId
             platform
             machineId
           })
@@ -307,7 +312,6 @@ createRunAndRecordSpecs = (options = {}) ->
           ## create the instance
           return if not instanceId
 
-          console.log("")
           console.log("")
 
           terminal.header("Uploading Results", {
@@ -343,7 +347,7 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs(beforeSpecRun, afterSpecRun)
+        runAllSpecs(beforeSpecRun, afterSpecRun, runUrl)
 
 module.exports = {
   createRun

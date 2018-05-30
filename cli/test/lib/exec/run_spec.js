@@ -9,8 +9,8 @@ const verify = require(`${lib}/tasks/verify`)
 
 describe('exec run', function () {
   beforeEach(function () {
-    this.sandbox.stub(util, 'isInstalledGlobally').returns(true)
-    this.sandbox.stub(process, 'exit')
+    sinon.stub(util, 'isInstalledGlobally').returns(true)
+    sinon.stub(process, 'exit')
   })
 
   context('.processRunOptions', function () {
@@ -39,38 +39,8 @@ describe('exec run', function () {
 
   context('.start', function () {
     beforeEach(function () {
-      this.sandbox.stub(spawn, 'start').resolves()
-      this.sandbox.stub(verify, 'start').resolves()
-    })
-
-    describe('group and group-id', () => {
-      it('spawns with --group true', function () {
-        return run.start({ group: true, dev: true })
-        .then(() => {
-          expect(spawn.start).to.be.calledWith(
-            ['--run-project', process.cwd(), '--group', true],
-            { dev: true }
-          )
-        })
-      })
-
-      it('spawns with group false', function () {
-        return run.start({ group: false })
-        .then(() => {
-          expect(spawn.start).to.be.calledWith(
-            ['--run-project', process.cwd(), '--group', false]
-          )
-        })
-      })
-
-      it('spawns with group and group-id', function () {
-        return run.start({ group: false, groupId: 'foo' })
-        .then(() => {
-          expect(spawn.start).to.be.calledWith(
-            ['--run-project', process.cwd(), '--group', false, '--group-id', 'foo']
-          )
-        })
-      })
+      sinon.stub(spawn, 'start').resolves()
+      sinon.stub(verify, 'start').resolves()
     })
 
     it('verifies cypress', function () {

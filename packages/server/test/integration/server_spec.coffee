@@ -16,6 +16,8 @@ describe "Server", ->
 
   context "resolving url", ->
     beforeEach ->
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
       nock.enableNetConnect()
 
       @automationRequest = sinon.stub()

@@ -175,6 +175,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/api/screenshot-api
+     */
+    Screenshot: {
+      defaults(options: Partial<ScreenshotDefaultsOptions>): void
+    }
+
+    /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -751,7 +758,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      */
     screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
-    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
 
     /**
      * Scroll an element into view.
@@ -836,6 +843,13 @@ declare namespace Cypress {
 
     spread<S extends object | any[] | string | number | boolean>(fn: (...args: any[]) => S): Chainable<S>
     spread(fn: (...args: any[]) => void): Chainable<Subject>
+
+    /**
+     * Run a task in Node via the plugins file.
+     *
+     * @see https://on.cypress.io/task
+     */
+    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -1094,11 +1108,6 @@ declare namespace Cypress {
      * Whether to take a screenshot on test failure when running headlessly or in CI
      * @default true
      */
-    screenshotOnHeadlessFailure: boolean
-    /**
-     * Whether Cypress will watch and restart tests on test file changes
-     * @default true
-     */
     watchForFileChanges: boolean
     /**
      * Time, in milliseconds, to wait until most DOM based commands are considered timed out
@@ -1164,7 +1173,7 @@ declare namespace Cypress {
      * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
      * @default true
      */
-    trashAssetsBeforeHeadlessRuns: boolean
+    trashAssetsBeforeRuns: boolean
     /**
      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * @default 32
@@ -1174,7 +1183,7 @@ declare namespace Cypress {
      * Whether Cypress will record a video of the test run when running headlessly.
      * @default true
      */
-    videoRecording: boolean
+    video: boolean
     /**
      * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
      * @default true
@@ -1255,6 +1264,27 @@ declare namespace Cypress {
     onRequest(...args: any[]): void
     onResponse(...args: any[]): void
     onAbort(...args: any[]): void
+  }
+
+  interface Dimensions {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+
+  interface ScreenshotOptions {
+    blackout: string[]
+    capture: 'runner' | 'viewport' | 'fullPage'
+    clip: Dimensions
+    disableTimersAndAnimations: boolean
+    scale: boolean
+    beforeScreenshot(doc: Document): void
+    afterScreenshot(doc: Document): void
+  }
+
+  interface ScreenshotDefaultsOptions extends ScreenshotOptions {
+    screenshotOnRunFailure: boolean
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {

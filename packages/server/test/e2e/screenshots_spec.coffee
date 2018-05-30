@@ -11,20 +11,42 @@ sizeOf  = Promise.promisify(sizeOf)
 e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
-  getHtml = (color) ->
-    """
-    <!DOCTYPE html>
-    <html lang="en">
-    <body>
-      <div style="height: 2000px; width: 2000px; background-color: #{color};"></div>
-    </body>
-    </html>
-    """
-
   app.get "/color/:color", (req, res) ->
-    res.set('Content-Type', 'text/html');
+    e2e.sendHtml("""
+      <style>body { margin: 0; }</style>
+      <div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>"""
+    )(req, res)
 
-    res.send(getHtml(req.params.color))
+  app.get "/fullPage", e2e.sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div style="background: white; height: 200px;"></div>
+    <div style="background: black; height: 200px;"></div>
+    <div style="background: white; height: 100px;"></div>
+  """)
+
+  app.get "/fullPage-same", e2e.sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div style="height: 500px;"></div>
+  """)
+
+  app.get "/element", e2e.sendHtml("""
+    <div class="element" style="background: red; width: 400px; height: 300px; margin: 20px;"></div>
+  """)
+
+  app.get "/pathological", e2e.sendHtml("""
+    <style>div { width: 1px; height: 1px; position: fixed; }</style>
+    <div style="left: 0; top: 0; background-color: grey;"></div>
+    <div style="left: 1px; top: 0; background-color: white;"></div>
+    <div style="left: 0; top: 1px; background-color: white;"></div>
+    <div style="right: 0; top: 0; background-color: white;"></div>
+    <div style="left: 0; bottom: 0; background-color: white;"></div>
+    <div style="right: 0; bottom: 0; background-color: black;"></div>
+  """)
+
+  app.get "/identical", e2e.sendHtml("""
+    <style>div { height: 1300px; width: 200px; background-color: #ddd; }</style>
+    <div></div>
+  """)
 
 describe "e2e screenshots", ->
   e2e.setup({

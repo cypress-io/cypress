@@ -21,7 +21,7 @@ channel.on('connect', () => {
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha'.split(' ')
-const driverTestEvents = 'test:before:run:async test:after:run test:set:state'.split(' ')
+const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
@@ -234,6 +234,23 @@ const eventManager = {
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:state:changed', displayProps)
+    })
+
+    Cypress.on('before:screenshot', (config, cb) => {
+      const beforeThenCb = () => {
+        localBus.emit('before:screenshot', config)
+        cb()
+      }
+
+      const wait = !config.appOnly && config.waitForCommandSynchronization
+      if (!config.appOnly) {
+        reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? beforeThenCb : undefined)
+      }
+      if (!wait) beforeThenCb()
+    })
+
+    Cypress.on('after:screenshot', (config) => {
+      localBus.emit('after:screenshot', config)
     })
 
     _.each(driverToReporterEvents, (event) => {

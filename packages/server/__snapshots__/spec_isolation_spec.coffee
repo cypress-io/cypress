@@ -4,8 +4,8 @@ exports['e2e spec_isolation failing 1'] = {
   "totalDuration": 5555,
   "totalSuites": 8,
   "totalTests": 12,
-  "totalFailures": 5,
-  "totalPasses": 5,
+  "totalFailed": 5,
+  "totalPassed": 5,
   "totalPending": 1,
   "totalSkipped": 1,
   "runs": [
@@ -234,7 +234,11 @@ exports['e2e spec_isolation failing 1'] = {
           "width": 1280
         }
       ],
-      "spec": "cypress/integration/simple_failing_hook_spec.coffee",
+      "spec": {
+        "name": "simple_failing_hook_spec.coffee",
+        "path": "cypress/integration/simple_failing_hook_spec.coffee",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee"
+      },
       "shouldUploadVideo": true
     },
     {
@@ -329,7 +333,11 @@ exports['e2e spec_isolation failing 1'] = {
           "width": 1280
         }
       ],
-      "spec": "cypress/integration/simple_failing_spec.coffee",
+      "spec": {
+        "name": "simple_failing_spec.coffee",
+        "path": "cypress/integration/simple_failing_spec.coffee",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee"
+      },
       "shouldUploadVideo": true
     },
     {
@@ -516,7 +524,11 @@ exports['e2e spec_isolation failing 1'] = {
       "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
       "screenshots": [],
-      "spec": "cypress/integration/simple_hooks_spec.coffee",
+      "spec": {
+        "name": "simple_hooks_spec.coffee",
+        "path": "cypress/integration/simple_hooks_spec.coffee",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee"
+      },
       "shouldUploadVideo": true
     },
     {
@@ -586,14 +598,20 @@ exports['e2e spec_isolation failing 1'] = {
       "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
       "screenshots": [],
-      "spec": "cypress/integration/simple_passing_spec.coffee",
+      "spec": {
+        "name": "simple_passing_spec.coffee",
+        "path": "cypress/integration/simple_passing_spec.coffee",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee"
+      },
       "shouldUploadVideo": true
     }
   ],
-  "browserName": "chrome",
-  "browserVersion": "41.2.3.4",
-  "osName": "darwin",
-  "osVersion": "1.2.3.4",
-  "cypressVersion": "2.0.0",
+  "browserPath": "path/to/browser",
+  "browserName": "FooBrowser",
+  "browserVersion": "88",
+  "osName": "FooOS",
+  "osVersion": "1234",
+  "cypressVersion": "9.9.9",
   "config": {}
 }
+

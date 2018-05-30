@@ -1,7 +1,18 @@
 exports['e2e uncaught support file errors failing 1'] = `
-Started video recording: /foo/bar/.projects/uncaught-support-file/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (spec.coffee)                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: spec.coffee...                                                                  (1 of 1) 
 
 
   1) An uncaught error was detected outside of a test
@@ -27,17 +38,19 @@ We dynamically generated a new test to display this failure.
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────┐
+  │ Tests:        1           │
+  │ Passing:      0           │
+  │ Failing:      1           │
+  │ Pending:      0           │
+  │ Skipped:      0           │
+  │ Screenshots:  1           │
+  │ Video:        true        │
+  │ Duration:     X seconds   │
+  │ Spec Ran:     spec.coffee │
+  └───────────────────────────┘
 
 
   (Screenshots)
@@ -48,10 +61,19 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/uncaught-support-file/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/uncaught-support-file/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ spec.coffee                               XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 

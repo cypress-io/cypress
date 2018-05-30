@@ -159,6 +159,15 @@ describe "lib/config", ->
           @setup({execTimeout: "foo"})
           @expectValidationFails("be a number")
 
+      context "taskTimeout", ->
+        it "passes if a number", ->
+          @setup({taskTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({taskTimeout: "foo"})
+          @expectValidationFails("be a number")
+
       context "fileServerFolder", ->
         it "passes if a string", ->
           @setup({fileServerFolder: "_files"})
@@ -285,15 +294,6 @@ describe "lib/config", ->
           @setup({responseTimeout: "foo"})
           @expectValidationFails("be a number")
 
-      context "screenshotOnHeadlessFailure", ->
-        it "passes if a boolean", ->
-          @setup({screenshotOnHeadlessFailure: false})
-          @expectValidationPasses()
-
-        it "fails if not a boolean", ->
-          @setup({screenshotOnHeadlessFailure: 42})
-          @expectValidationFails("be a boolean")
-
       context "testFiles", ->
         it "passes if a string", ->
           @setup({testFiles: "**/*.coffee"})
@@ -316,13 +316,13 @@ describe "lib/config", ->
           @setup({supportFile: true})
           @expectValidationFails("be a string or false")
 
-      context "trashAssetsBeforeHeadlessRuns", ->
+      context "trashAssetsBeforeRuns", ->
         it "passes if a boolean", ->
-          @setup({trashAssetsBeforeHeadlessRuns: false})
+          @setup({trashAssetsBeforeRuns: false})
           @expectValidationPasses()
 
         it "fails if not a boolean", ->
-          @setup({trashAssetsBeforeHeadlessRuns: 42})
+          @setup({trashAssetsBeforeRuns: 42})
           @expectValidationFails("be a boolean")
 
       context "videoCompression", ->
@@ -338,13 +338,13 @@ describe "lib/config", ->
           @setup({videoCompression: "foo"})
           @expectValidationFails("be a number or false")
 
-      context "videoRecording", ->
+      context "video", ->
         it "passes if a boolean", ->
-          @setup({videoRecording: false})
+          @setup({video: false})
           @expectValidationPasses()
 
         it "fails if not a boolean", ->
-          @setup({videoRecording: 42})
+          @setup({video: 42})
           @expectValidationFails("be a boolean")
 
       context "videoUploadOnPasses", ->
@@ -550,8 +550,8 @@ describe "lib/config", ->
     it "animationDistanceThreshold=5", ->
       @defaults "animationDistanceThreshold", 5
 
-    it "videoRecording=true", ->
-      @defaults "videoRecording", true
+    it "video=true", ->
+      @defaults "video", true
 
     it "videoCompression=32", ->
       @defaults "videoCompression", 32
@@ -559,8 +559,8 @@ describe "lib/config", ->
     it "videoUploadOnPasses=true", ->
       @defaults "videoUploadOnPasses", true
 
-    it "trashAssetsBeforeHeadlessRuns=32", ->
-      @defaults "trashAssetsBeforeHeadlessRuns", true
+    it "trashAssetsBeforeRuns=32", ->
+      @defaults "trashAssetsBeforeRuns", true
 
     it "morgan=true", ->
       @defaults "morgan", true
@@ -579,9 +579,6 @@ describe "lib/config", ->
 
     it "numTestsKeptInMemory=50", ->
       @defaults "numTestsKeptInMemory", 50
-
-    it "screenshotOnHeadlessFailure=true", ->
-      @defaults "screenshotOnHeadlessFailure", true
 
     it "modifyObstructiveCode=true", ->
       @defaults "modifyObstructiveCode", true
@@ -725,18 +722,18 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            trashAssetsBeforeRuns:      { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
             fileServerFolder:           { value: "", from: "default" },
-            videoRecording:             { value: true, from: "default" }
+            video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
             videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
@@ -784,20 +781,20 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
-            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            trashAssetsBeforeRuns:      { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
             fileServerFolder:           { value: "", from: "default" },
-            videoRecording:             { value: true, from: "default" }
+            video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
-            videoUploadOnPasses:       { value: true, from: "default" }
+            videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
@@ -974,14 +971,15 @@ describe "lib/config", ->
       obj = {
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
-      sinon.stub(scaffold, "fileTree").returns([])
+      sinon.stub(scaffold, "fileTree").resolves([])
 
-      expect(config.setScaffoldPaths(obj)).to.deep.eq({
-        integrationFolder: "/_test-output/path/to/project/cypress/integration"
-        integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
-        integrationExampleName: "examples"
-        scaffoldedFiles: []
-      })
+      config.setScaffoldPaths(obj).then (result) ->
+        expect(result).to.deep.eq({
+          integrationFolder: "/_test-output/path/to/project/cypress/integration"
+          integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
+          integrationExampleName: "examples"
+          scaffoldedFiles: []
+        })
 
   context ".setSupportFileAndFolder", ->
     it "does nothing if supportFile is falsey", ->

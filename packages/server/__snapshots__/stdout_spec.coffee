@@ -1,7 +1,19 @@
 exports['e2e stdout displays errors from failures 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_failing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/stdout_failing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: stdout_failing_spec.coffee...                                                   (1 of 1) 
 
 
   stdout_failing_spec
@@ -82,17 +94,19 @@ The internal Cypress web server responded with:
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           5
-  - Passes:          2
-  - Failures:        3
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     3
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────┐
+  │ Tests:        5                          │
+  │ Passing:      2                          │
+  │ Failing:      3                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  3                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     stdout_failing_spec.coffee │
+  └──────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -105,17 +119,39 @@ The internal Cypress web server responded with:
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ stdout_failing_spec.coffee                XX:XX        5        2        3        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        5        2        3        -        -  
 
 `
 
 exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_exit_early_failing_spec.coffee)                                    │
+  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.coffee                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: stdout_exit_early_failing_spec.coffee...                                        (1 of 1) 
+
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee
@@ -134,33 +170,56 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 
 Fix the error in your code and re-run your tests.
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           0
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌─────────────────────────────────────────────────────┐
+  │ Tests:        0                                     │
+  │ Passing:      0                                     │
+  │ Failing:      1                                     │
+  │ Pending:      0                                     │
+  │ Skipped:      0                                     │
+  │ Screenshots:  0                                     │
+  │ Video:        true                                  │
+  │ Duration:     X seconds                             │
+  │ Spec Ran:     stdout_exit_early_failing_spec.coffee │
+  └─────────────────────────────────────────────────────┘
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ stdout_exit_early_failing_spec.coffee     XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
 
 exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_passing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/stdout_passing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: stdout_passing_spec.coffee...                                                   (1 of 1) 
 
 
   stdout_passing_spec
@@ -181,26 +240,151 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   8 passing
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           8
-  - Passes:          8
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────┐
+  │ Tests:        8                          │
+  │ Passing:      8                          │
+  │ Failing:      0                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  0                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     stdout_passing_spec.coffee │
+  └──────────────────────────────────────────┘
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ stdout_passing_spec.coffee                XX:XX        8        8        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        8        8        -        -        -  
+
+`
+
+exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                        │
+  │ Specs:      1 found (simple_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_spec.coffee...                                                           (1 of 1) 
+
+Warning: Cypress can only record videos when running headlessly.
+
+You have set the 'electron' browser to run headed.
+
+A video will not be recorded when using this mode.
+
+
+  ✓ is true
+
+  1 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────┐
+  │ Tests:        1                  │
+  │ Passing:      1                  │
+  │ Failing:      0                  │
+  │ Pending:      0                  │
+  │ Skipped:      0                  │
+  │ Screenshots:  0                  │
+  │ Video:        false              │
+  │ Duration:     X seconds          │
+  │ Spec Ran:     simple_spec.coffee │
+  └──────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        1        1        -        -        -  
+
+`
+
+exports['e2e stdout logs that chrome cannot be recorded 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                          │
+  │ Specs:      1 found (simple_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_spec.coffee...                                                           (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
+
+
+  ✓ is true
+
+  1 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────┐
+  │ Tests:        1                  │
+  │ Passing:      1                  │
+  │ Failing:      0                  │
+  │ Pending:      0                  │
+  │ Skipped:      0                  │
+  │ Screenshots:  0                  │
+  │ Video:        false              │
+  │ Duration:     X seconds          │
+  │ Spec Ran:     simple_spec.coffee │
+  └──────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 
