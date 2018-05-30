@@ -7,13 +7,14 @@
 // TypeScript Version: 2.5
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="blob-util" />
-/// <reference types="bluebird" />
+/// <reference path="./blob-util.d.ts" />
+/// <reference path="./bluebird.d.ts" />
+/// <reference path="./minimatch.d.ts" />
+
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
 /// <reference types="lodash" />
-/// <reference types="minimatch" />
 /// <reference types="mocha" />
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
@@ -138,7 +139,7 @@ declare namespace Cypress {
     env(key: string, value: any): void
     env(object: ObjectLike): void
 
-    log(options: Partial<Log>): void
+    log(options: Partial<LogConfig>): Log
 
     /**
      * @see https://on.cypress.io/api/commands
@@ -173,7 +174,24 @@ declare namespace Cypress {
       defaults(options: Partial<ServerOptions>): void
     }
 
+    /**
+     * @see https://on.cypress.io/api/screenshot-api
+     */
+    Screenshot: {
+      defaults(options: Partial<ScreenshotDefaultsOptions>): void
+    }
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
     on: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    off: Actions
   }
 
   /**
@@ -421,6 +439,7 @@ declare namespace Cypress {
      */
     filter<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>> // automatically returns the correct HTMLElement type
     filter<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    filter<E extends Node = HTMLElement>(fn: (index: number, element: E) => boolean, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Get the descendent DOM elements of a specific selector.
@@ -609,6 +628,12 @@ declare namespace Cypress {
     on: Actions
 
     /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    off: Actions
+
+    /**
      * Get the parent DOM element of a set of DOM elements.
      *
      * @see https://on.cypress.io/parent
@@ -733,7 +758,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      */
     screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
-    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
 
     /**
      * Scroll an element into view.
@@ -818,6 +843,13 @@ declare namespace Cypress {
 
     spread<S extends object | any[] | string | number | boolean>(fn: (...args: any[]) => S): Chainable<S>
     spread(fn: (...args: any[]) => void): Chainable<Subject>
+
+    /**
+     * Run a task in Node via the plugins file.
+     *
+     * @see https://on.cypress.io/task
+     */
+    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -1076,11 +1108,6 @@ declare namespace Cypress {
      * Whether to take a screenshot on test failure when running headlessly or in CI
      * @default true
      */
-    screenshotOnHeadlessFailure: boolean
-    /**
-     * Whether Cypress will watch and restart tests on test file changes
-     * @default true
-     */
     watchForFileChanges: boolean
     /**
      * Time, in milliseconds, to wait until most DOM based commands are considered timed out
@@ -1146,7 +1173,7 @@ declare namespace Cypress {
      * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
      * @default true
      */
-    trashAssetsBeforeHeadlessRuns: boolean
+    trashAssetsBeforeRuns: boolean
     /**
      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * @default 32
@@ -1156,7 +1183,7 @@ declare namespace Cypress {
      * Whether Cypress will record a video of the test run when running headlessly.
      * @default true
      */
-    videoRecording: boolean
+    video: boolean
     /**
      * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
      * @default true
@@ -1239,6 +1266,27 @@ declare namespace Cypress {
     onAbort(...args: any[]): void
   }
 
+  interface Dimensions {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+
+  interface ScreenshotOptions {
+    blackout: string[]
+    capture: 'runner' | 'viewport' | 'fullPage'
+    clip: Dimensions
+    disableTimersAndAnimations: boolean
+    scale: boolean
+    beforeScreenshot(doc: Document): void
+    afterScreenshot(doc: Document): void
+  }
+
+  interface ScreenshotDefaultsOptions extends ScreenshotOptions {
+    screenshotOnRunFailure: boolean
+  }
+
   interface ScrollToOptions extends Loggable, Timeoutable {
     /**
      * Scrolls over the duration (in ms)
@@ -1251,7 +1299,16 @@ declare namespace Cypress {
      *
      * @default 'swing'
      */
-    easing: 'swing' | 'linear'
+    easing: 'swing' | 'linear',
+  }
+
+  interface ScrollIntoViewOptions extends ScrollToOptions {
+    /**
+     * Amount to scroll after the element has been scrolled into view
+     *
+     * @default {top: 0, left: 0}
+     */
+    offset: Offset
   }
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
@@ -3106,15 +3163,31 @@ declare namespace Cypress {
     stderr: string
   }
 
+  interface LogAttrs {
+    url: string
+    consoleProps: ObjectLike
+  }
+
   interface Log {
-    $el: any
+    end(): Log
+    finish(): void
+    get<K extends keyof LogConfig>(attr: K): LogConfig[K]
+    get(): LogConfig
+    set<K extends keyof LogConfig>(key: K, value: LogConfig[K]): Log
+    set(options: Partial<LogConfig>): Log
+    snapshot(name?: string, options?: { at?: number, next: string }): Log
+  }
+
+  interface LogConfig {
+    /** The JQuery element for the command. This will highlight the command in the main window when debugging */
+    $el: JQuery
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any
+    message: any[]
     /** Return an object that will be printed in the dev tools console */
-    consoleProps(): any
+    consoleProps(): ObjectLike
   }
 
   interface Response {
@@ -3164,6 +3237,10 @@ declare namespace Cypress {
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  interface Offset {
+    top: number,
+    left: number
+  }
 
   // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]

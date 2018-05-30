@@ -54,7 +54,7 @@ class PermissionMessage extends Component {
       >
         <span>
           <i className='fa fa-paper-plane'></i>{' '}
-          Request Access
+          Request access
         </span>
         <i className='fa fa-spinner fa-spin'></i>
       </button>
@@ -66,7 +66,7 @@ class PermissionMessage extends Component {
       <div className='empty'>
         <h4>
           <i className='fa fa-check passed'></i>{' '}
-          Request Sent
+          Request sent
         </h4>
         <p>
           The project owner will be notified with your request.

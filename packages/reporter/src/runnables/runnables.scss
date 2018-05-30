@@ -15,7 +15,6 @@
 
   .runnables {
     padding-left: 0;
-    user-select: none;
   }
 
   .runnable {
@@ -72,6 +71,7 @@
       line-height: 18px;
       margin-right: 5px;
       width: 12px;
+      text-align: center;
     }
 
     &.suite .collapsible-indicator  {
@@ -95,20 +95,30 @@
       }
     }
 
-    &.suite.runnable-pending > div > .runnable-wrapper {
-      border-left: 10px solid lighten($pending, 25%);
-    }
-
+    &.suite.runnable-pending > div > .runnable-wrapper,
     &.test.runnable-pending > .runnable-wrapper {
       border-left: 10px solid lighten($pending, 25%);
     }
 
+    &.suite.runnable-passed > div > .runnable-wrapper,
     &.test.runnable-passed > .runnable-wrapper {
       border-left: 10px solid $pass;
     }
 
-    &.suite.runnable-passed > div > .runnable-wrapper {
-      border-left: 10px solid $pass;
+    &.runnable-skipped > .runnable-wrapper {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-ban;
+        color: #888;
+      }
+
+      .runnable-title {
+        color: #aaa;
+      }
+    }
+
+    &.suite.runnable-skipped > div > .runnable-wrapper,
+    &.test.runnable-skipped > .runnable-wrapper {
+      border-left: 10px solid #9a9aaa;
     }
 
     &.suite.runnable-failed > div > .runnable-wrapper {

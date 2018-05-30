@@ -11,7 +11,7 @@ listPaths = (paths) ->
 API = {
   # forms well-formatted user-friendly error for most common
   # errors Cypress can encounter
-  getMsgByType: (type, arg1, arg2) ->
+  getMsgByType: (type, arg1 = {}, arg2) ->
     switch type
       when "CANNOT_TRASH_ASSETS"
         """
@@ -39,6 +39,8 @@ API = {
         """
       when "BROWSER_NOT_FOUND"
         """
+        Can't run because you've entered an invalid browser.
+
         Browser: '#{arg1}' was not found on your system.
 
         Available browsers found are: #{arg2}
@@ -135,13 +137,37 @@ API = {
 
         https://on.cypress.io/cypress-ci-deprecated
         """
+      when "DASHBOARD_INVALID_RUN_REQUEST"
+        """
+        Recording this run failed because the request was invalid.
+
+        #{arg1.message}
+
+        Errors:
+
+        #{JSON.stringify(arg1.errors, null, 2)}
+
+        Request Sent:
+
+        #{JSON.stringify(arg1.object, null, 2)}
+        """
+      when "RECORDING_FROM_FORK_PR"
+        """
+        Warning: It looks like you are trying to record this run from a forked PR.
+
+        The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+
+        These results will not be recorded.
+
+        This error will not alter the exit code.
+        """
       when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
         """
         Warning: We encountered an error while uploading results from your run.
 
         These results will not be recorded.
 
-        This error will not alter or the exit code.
+        This error will not alter the exit code.
 
         #{arg1}
         """
@@ -157,7 +183,7 @@ API = {
         """
       when "RECORD_KEY_NOT_VALID"
         """
-        We failed trying to authenticate this project.
+        We failed trying to authenticate this project: #{chalk.blue(arg2)}
 
         Your Record Key is invalid: #{chalk.yellow(arg1)}
 
@@ -209,8 +235,25 @@ API = {
 
         #{chalk.yellow(arg2)}
         """
-      when "SPEC_FILE_NOT_FOUND"
-        "Can't find test spec: " + chalk.blue(arg1)
+      when "NO_SPECS_FOUND"
+        ## no glob provided, searched all specs
+        if not arg2
+          """
+          Can't run because no spec files were found.
+
+          We searched for any files inside of this folder:
+
+          #{chalk.blue(arg1)}
+          """
+        else
+          """
+          Can't run because no spec files were found.
+
+          We searched for any files matching this glob pattern:
+
+          #{chalk.blue(arg2)}
+          """
+
       when "RENDERER_CRASHED"
         """
         We detected that the Chromium Renderer process just crashed.
@@ -302,11 +345,38 @@ API = {
 
         Fix the error in your code and re-run your tests.
         """
-      when "CONFIG_VALIDATION_ERROR"
+      when "SETTINGS_VALIDATION_ERROR"
         """
         We found an invalid value in the file: '#{chalk.blue(arg1)}'
 
         #{chalk.yellow(arg2)}
+        """
+      when "CONFIG_VALIDATION_ERROR"
+        """
+        We found an invalid configuration value:
+
+        #{chalk.yellow(arg1)}
+        """
+      when "SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED"
+        """
+        In Cypress v3.0.0 we removed the configuration option: #{chalk.yellow('screenshotOnHeadlessFailure')}
+
+        You now configure this behavior in your test code.
+
+        Example:
+
+          // cypress/support/index.js
+          Cypress.Screenshot.defaults({
+            screenshotOnRunFailure: false
+          })
+
+        https://on.cypress.io/screenshot-api
+        """
+      when "RENAMED_CONFIG_OPTION"
+        """
+        A configuration option you have supplied has been renamed.
+
+        Please rename #{chalk.yellow(arg1)} to #{chalk.blue(arg2)}
         """
       when "CANNOT_CONNECT_BASE_URL"
         """
@@ -326,11 +396,15 @@ API = {
         """
       when "INVALID_REPORTER_NAME"
         """
-        Could not load reporter by name: #{chalk.yellow(arg1)}
+        Could not load reporter by name: #{chalk.yellow(arg1.name)}
 
         We searched for the reporter in these paths:
 
-        #{listPaths(arg2).join("\n")}
+        #{listPaths(arg1.paths).join("\n")}
+
+        The error we received was:
+
+        #{chalk.yellow(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters
         """

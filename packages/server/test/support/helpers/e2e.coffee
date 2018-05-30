@@ -1,7 +1,6 @@
 require("../../spec_helper")
 
 _            = require("lodash")
-fs           = require("fs-extra")
 cp           = require("child_process")
 niv          = require("npm-install-version")
 path         = require("path")
@@ -13,30 +12,50 @@ Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
 debug        = require("debug")("cypress:support:e2e")
 Fixtures     = require("./fixtures")
+fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
-stdout       = require("#{root}../lib/stdout")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
+screenshots  = require("#{root}../lib/screenshots")
+videoCapture = require("#{root}../lib/video_capture")
 settings     = require("#{root}../lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
-fs = Promise.promisifyAll(fs)
+
+env = _.clone(process.env)
 
 Promise.config({
   longStackTraces: true
 })
 
-env = process.env
-env.COPY_CIRCLE_ARTIFACTS = "true"
-
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
+browserNameVersionRe = /(Browser\:\s+)(Electron|Chrome|Canary|Chromium)(\s\d+)(\s\(\w+\))?/
+availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
+
+replaceBrowserName = (str, p1, p2, p3, p4) ->
+  ## get the padding for the existing browser string
+  lengthOfExistingBrowserString = _.sum([p2.length, p3.length, _.get(p4, "length", 0)])
+
+  ## this ensures we add whitespace so the border is not shifted
+  p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
+
+replaceDurationSeconds = (str, p1, p2, p3, p4) ->
+  ## get the padding for the existing duration
+  lengthOfExistingDuration = _.sum([p2.length, p3.length, p4.length])
+
+  p1 + _.padEnd("X seconds", lengthOfExistingDuration)
+
+replaceDurationInTables = (str, p1, p2) ->
+  ## when swapping out the duration, ensure we pad the
+  ## full length of the duration so it doesn't shift content
+  _.padStart("XX:XX", p1.length + p2.length)
 
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
@@ -44,19 +63,20 @@ normalizeStdout = (str) ->
   str
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
-  .replace(/\(\d{1,2}s\)/g, "(10s)")
-  .replace(/\s\(\d+m?s\)/g, "")
-  .replace(/coffee-\d{3}/g, "coffee-456")
+  .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+  .replace(browserNameVersionRe, replaceBrowserName)
+  .replace(/\s\(\d+m?s\)/g, "") ## numbers in parenths
+  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
+  .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
-  .replace(/Duration\: (.+)/, "Duration:        10 seconds")
-  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
+  .replace(/(Duration\:\s+)(\d+)(\sseconds?)(\s+)/g, replaceDurationSeconds)
+  .replace(/\(\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
+  .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
   .split("\n")
     .map(replaceStackTraceLines)
     .join("\n")
-  .split("2560x1440") ## normalize resolutions
-    .join("1280x720")
 
 startServer = (obj) ->
   {onServer, port} = obj
@@ -76,14 +96,51 @@ startServer = (obj) ->
   new Promise (resolve) ->
     srv.listen port, =>
       console.log "listening on port: #{port}"
-      onServer?(app)
+      onServer?(app, srv)
 
       resolve(srv)
 
 stopServer = (srv) ->
   srv.destroyAsync()
 
+copy = ->
+  ca = process.env.CIRCLE_ARTIFACTS
+
+  debug("Should copy Circle Artifacts?", Boolean(ca))
+
+  if ca
+    videosFolder = path.join(e2ePath, "cypress/videos")
+    screenshotsFolder = path.join(e2ePath, "cypress/screenshots")
+
+    debug("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder)
+
+    ## copy each of the screenshots and videos
+    ## to artifacts using each basename of the folders
+    Promise.join(
+      screenshots.copy(
+        screenshotsFolder,
+        path.join(ca, path.basename(screenshotsFolder))
+      ),
+      videoCapture.copy(
+        videosFolder,
+        path.join(ca, path.basename(videosFolder))
+      )
+    )
+
 module.exports = {
+  normalizeStdout
+
+  snapshot: (args...) ->
+    args = _.compact(args)
+
+    ## grab the last element in index
+    index = args.length - 1
+
+    ## normalize the stdout of it
+    args[index] = normalizeStdout(args[index])
+
+    snapshot.apply(null, args)
+
   setup: (options = {}) ->
     if npmI = options.npmInstall
       before ->
@@ -124,7 +181,7 @@ module.exports = {
 
       Fixtures.scaffold()
 
-      @sandbox.stub(process, "exit")
+      sinon.stub(process, "exit")
 
       Promise.try =>
         if servers = options.servers
@@ -136,12 +193,12 @@ module.exports = {
         else
           @servers = null
       .then =>
-
         if s = options.settings
           settings.write(e2ePath, s)
-      .then =>
 
     afterEach ->
+      process.env = _.clone(env)
+
       @timeout(human("2 minutes"))
 
       Fixtures.remove()
@@ -151,6 +208,7 @@ module.exports = {
 
   options: (ctx, options = {}) ->
     _.defaults(options, {
+      browser: process.env.BROWSER
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
     })
@@ -179,14 +237,19 @@ module.exports = {
     if options.headed
       args.push("--headed")
 
+    if options.record
+      args.push("--record")
+
+    if options.key
+      args.push("--key=#{options.key}")
+
     if options.reporter
       args.push("--reporter=#{options.reporter}")
 
     if options.reporterOptions
       args.push("--reporter-options=#{options.reporterOptions}")
 
-    ## prefer options if set, else use env
-    if browser = (options.browser or env.BROWSER)
+    if browser = (options.browser)
       args.push("--browser=#{browser}")
 
     if options.config
@@ -194,6 +257,9 @@ module.exports = {
 
     if options.env
       args.push("--env", options.env)
+
+    if options.outputPath
+      args.push("--output-path", options.outputPath)
 
     if options.exit?
       args.push("--exit", options.exit)
@@ -218,8 +284,64 @@ module.exports = {
     stdout = ""
     stderr = ""
 
+    exit = (code) ->
+      if (expected = options.expectedExitCode)?
+        expect(expected).to.eq(code, "expected exit code")
+
+      ## snapshot the stdout!
+      if options.snapshot
+        ## enable callback to modify stdout
+        if ostd = options.onStdout
+          stdout = ostd(stdout)
+
+        ## if we have browser in the stdout make
+        ## sure its legit
+        if matches = browserNameVersionRe.exec(stdout)
+          [str, key, browserName, version, headless] = matches
+
+          if b = options.browser
+            expect(_.capitalize(b)).to.eq(browserName)
+
+          expect(parseFloat(version)).to.be.a.number
+
+          ## if we are in headed mode or in a browser other
+          ## than electron
+          if options.headed or (b and b isnt "electron")
+            expect(headless).not.to.exist
+          else
+            expect(headless).to.include("(headless)")
+
+        str = normalizeStdout(stdout)
+        snapshot(str)
+
+      return {
+        code:   code
+        stdout: stdout
+        stderr: stderr
+      }
+
     new Promise (resolve, reject) ->
-      sp = cp.spawn "node", args, {env: _.omit(env, "CYPRESS_DEBUG")}
+      sp = cp.spawn "node", args, {
+        env: _.chain(process.env)
+        .omit("CYPRESS_DEBUG")
+        .extend({
+          DEBUG_COLORS: "1"
+
+          ## FYI: color will already be disabled
+          ## because we are piping the child process
+          COLUMNS: 100
+          LINES: 24
+        })
+        .defaults({
+          ## prevent any Compression progress
+          ## messages from showing up
+          VIDEO_COMPRESSION_THROTTLE: 20000
+
+          ## don't fail our own tests running from forked PR's
+          CYPRESS_INTERNAL_E2E_TESTS: "1"
+        })
+        .value()
+      }
 
       ## pipe these to our current process
       ## so we can see them in the terminal
@@ -230,29 +352,19 @@ module.exports = {
         stdout += buf.toString()
       sp.stderr.on "data", (buf) ->
         stderr += buf.toString()
-      sp.on "error", reject
-      sp.on "exit", (code) ->
-        if (expected = options.expectedExitCode)?
-          try
-            expect(expected).to.eq(code)
-          catch err
-            return reject(err)
+      sp.on("error", reject)
+      sp.on("exit", resolve)
+    .tap(copy)
+    .then(exit)
 
-        ## snapshot the stdout!
-        if options.snapshot
-          try
-            ## enable callback to modify stdout
-            if ostd = options.onStdout
-              stdout = ostd(stdout)
-
-            str = normalizeStdout(stdout)
-            snapshot(str)
-          catch err
-            reject(err)
-
-        resolve({
-          code:   code
-          stdout: stdout
-          stderr: stderr
-        })
+  sendHtml: (contents) -> (req, res) ->
+    res.set('Content-Type', 'text/html')
+    res.send("""
+      <!DOCTYPE html>
+      <html lang="en">
+      <body>
+        #{contents}
+      </body>
+      </html>
+    """)
 }

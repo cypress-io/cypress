@@ -11,7 +11,7 @@ Promise  = require("bluebird")
 
 describe "lib/api", ->
   beforeEach ->
-    @sandbox.stub(os, "platform").returns("linux")
+    sinon.stub(os, "platform").returns("linux")
 
   context ".getOrgs", ->
     it "GET /orgs + returns orgs", ->
@@ -19,16 +19,18 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/organizations")
       .reply(200, orgs)
 
       api.getOrgs("auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(orgs)
+        expect(ret).to.deep.eq(orgs)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/organizations")
       .reply(500, {})
 
@@ -44,16 +46,18 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects")
       .reply(200, projects)
 
       api.getProjects("auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(projects)
+        expect(ret).to.deep.eq(projects)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects")
       .reply(500, {})
 
@@ -69,17 +73,19 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .matchHeader("x-route-version", "2")
       .get("/projects/id-123")
       .reply(200, project)
 
       api.getProject("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(project)
+        expect(ret).to.deep.eq(project)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123")
       .reply(500, {})
 
@@ -90,22 +96,25 @@ describe "lib/api", ->
         expect(err.isApiError).to.be.true
 
   context ".getProjectRuns", ->
-    it "GET /projects/:id/builds + returns builds", ->
-      builds = []
+    it "GET /projects/:id/runs + returns runs", ->
+      runs = []
 
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
-      .reply(200, builds)
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
+      .reply(200, runs)
 
       api.getProjectRuns("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(builds)
+        expect(ret).to.deep.eq(runs)
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
       .socketDelay(5000)
       .reply(200, [])
 
@@ -116,7 +125,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "get").returns({
+      sinon.stub(rp, "get").returns({
         catch: -> {
           catch: -> {
             then: (fn) -> fn()
@@ -130,10 +139,11 @@ describe "lib/api", ->
       .then (ret) ->
         expect(rp.get).to.be.calledWithMatch({timeout: 10000})
 
-    it "GET /projects/:id/builds failure formatting", ->
+    it "GET /projects/:id/runs failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
       .reply(401, {
         errors: {
           permission: ["denied"]
@@ -159,7 +169,8 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/id-123/builds")
+      .matchHeader("accept-encoding", /gzip/)
+      .get("/projects/id-123/runs")
       .reply(500, {})
 
       api.getProjectRuns("id-123", "auth-token-123")
@@ -171,7 +182,7 @@ describe "lib/api", ->
   context ".ping", ->
     it "GET /ping", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .get("/ping")
       .reply(200, "OK")
@@ -183,6 +194,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/ping")
       .reply(500, {})
 
@@ -197,69 +209,50 @@ describe "lib/api", ->
       @buildProps = {
         projectId:         "id-123"
         recordKey:         "token-123"
-        commitSha:         "sha"
-        commitBranch:      "master"
-        commitAuthorName:  "brian"
-        commitAuthorEmail: "brian@cypress.io"
-        commitMessage:     "such hax"
-        remoteOrigin:      "https://github.com/foo/bar.git"
-        ciProvider:        "circle"
-        ciBuildNumber:     "987"
-        ciParams:          { foo: "bar" }
+        ci: {
+          provider:        "circle"
+          buildNumber:     "987"
+          params:          { foo: "bar" }
+        }
+        platform: {}
+        commit: {
+          sha:         "sha"
+          branch:      "master"
+          authorName:  "brian"
+          authorEmail: "brian@cypress.io"
+          message:     "such hax"
+          remoteOrigin: "https://github.com/foo/bar.git"
+        }
         specs:             ["foo.js", "bar.js"]
       }
 
-    it "POST /builds + returns buildId", ->
+    it "POST /runs + returns runId", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds", @buildProps)
+      .post("/runs", @buildProps)
       .reply(200, {
-        buildId: "new-build-id-123"
+        runId: "new-run-id-123"
       })
 
       api.createRun(@buildProps)
       .then (ret) ->
-        expect(ret).to.eq("new-build-id-123")
+        expect(ret).to.deep.eq({ runId: "new-run-id-123" })
 
-    it "POST /builds failure formatting", ->
+    it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds", {
-        projectId:         null
-        recordKey:         "token-123"
-        commitSha:         "sha"
-        commitBranch:      "master"
-        commitAuthorName:  "brian"
-        commitAuthorEmail: "brian@cypress.io"
-        commitMessage:     "such hax"
-        remoteOrigin:      "https://github.com/foo/bar.git"
-        ciProvider:        "circle"
-        ciBuildNumber:     "987"
-        ciParams:          { foo: "bar" }
-      })
+      .post("/runs", @buildProps)
       .reply(422, {
         errors: {
-          buildId: ["is required"]
+          runId: ["is required"]
         }
       })
 
-      api.createRun({
-        projectId:         null
-        recordKey:         "token-123"
-        commitSha:         "sha"
-        commitBranch:      "master"
-        commitAuthorName:  "brian"
-        commitAuthorEmail: "brian@cypress.io"
-        commitMessage:     "such hax"
-        remoteOrigin:      "https://github.com/foo/bar.git"
-        ciProvider:        "circle"
-        ciBuildNumber:     "987"
-        ciParams:          { foo: "bar" }
-      })
+      api.createRun(@buildProps)
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -268,7 +261,7 @@ describe "lib/api", ->
 
           {
             "errors": {
-              "buildId": [
+              "runId": [
                 "is required"
               ]
             }
@@ -277,10 +270,10 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds")
+      .post("/runs")
       .socketDelay(5000)
       .reply(200, {})
 
@@ -293,9 +286,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "post").returns({
-        promise: () -> Promise.resolve({buildId: 'foo'})
-      })
+      sinon.stub(rp, "post").resolves({runId: 'foo'})
 
       api.createRun({})
       .then ->
@@ -303,8 +294,10 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "3")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/builds", @buildProps)
+      .matchHeader("accept-encoding", /gzip/)
+      .post("/runs", @buildProps)
       .reply(500, {})
 
       api.createRun(@buildProps)
@@ -319,64 +312,45 @@ describe "lib/api", ->
         value: "53"
       })
 
-      @postProps = {
-        spec: "cypress/integration/app_spec.js"
-        browserName: "Foo"
-        browserVersion: "1.2.3"
-        osName: "darwin"
-        osVersion: "10.10.10"
-        osCpus: [{model: "foo"}]
-        osMemory: {
-          free:  1000
-          total: 2000
-        }
-      }
-
       @createProps = {
-        buildId: "build-id-123"
-        browser: "foo"
+        runId: "run-id-123"
         spec: "cypress/integration/app_spec.js"
+        groupId: "groupId123"
+        machineId: "machineId123"
+        platform: {}
       }
 
-    it "POSTs /builds/:id/instances", ->
-      @sandbox.stub(os, "release").returns("10.10.10")
-      @sandbox.stub(os, "cpus").returns([{model: "foo"}])
-      @sandbox.stub(os, "freemem").returns(1000)
-      @sandbox.stub(os, "totalmem").returns(2000)
-      @sandbox.stub(browsers, "getByName").resolves({
-        displayName: "Foo"
-        version: "1.2.3"
-      })
+      @postProps = _.omit(@createProps, "runId")
 
+    it "POSTs /runs/:id/instances", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "darwin")
+      .matchHeader("x-route-version", "4")
+      .matchHeader("x-os-name", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances", @postProps)
+      .post("/runs/run-id-123/instances", @postProps)
       .reply(200, {
         instanceId: "instance-id-123"
       })
 
       api.createInstance(@createProps)
       .then (instanceId) ->
-        expect(browsers.getByName).to.be.calledWith("foo")
         expect(instanceId).to.eq("instance-id-123")
 
-    it "POST /builds/:id/instances failure formatting", ->
+    it "POST /runs/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "4")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances")
+      .post("/runs/run-id-123/instances")
       .reply(422, {
         errors: {
           tests: ["is required"]
         }
       })
 
-      api.createInstance({buildId: "build-id-123"})
+      api.createInstance({runId: "run-id-123"})
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -394,15 +368,15 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "4")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/builds/build-id-123/instances")
+      .post("/runs/run-id-123/instances")
       .socketDelay(5000)
       .reply(200, {})
 
       api.createInstance({
-        buildId: "build-id-123"
+        runId: "run-id-123"
         timeout: 100
       })
       .then ->
@@ -411,17 +385,8 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "post").returns({
-        promise: -> {
-          get: -> {
-            catch: -> {
-              catch: -> {
-                then: (fn) -> fn()
-              }
-              then: (fn) -> fn()
-            }
-          }
-        }
+      sinon.stub(rp, "post").returns({
+        promise: -> Promise.resolve({ instanceId: "instanceId123" })
       })
 
       api.createInstance({})
@@ -431,7 +396,8 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/builds/build-id-123/instances", @postProps)
+      .matchHeader("accept-encoding", /gzip/)
+      .post("/runs/run-id-123/instances", @postProps)
       .reply(500, {})
 
       api.createInstance(@createProps)
@@ -442,44 +408,23 @@ describe "lib/api", ->
 
   context ".updateInstance", ->
     beforeEach ->
-      Object.defineProperty(process.versions, "chrome", {
-        value: "53"
-      })
-
-      @putProps = {
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        error: "err msg"
-        video: true
-        screenshots: []
-        failingTests: []
-        cypressConfig: {}
-        ciProvider: "circle"
-        stdout: "foo\nbar\nbaz"
-      }
-
       @updateProps = {
         instanceId: "instance-id-123"
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
+        stats: {}
         error: "err msg"
         video: true
         screenshots: []
-        failingTests: []
         cypressConfig: {}
-        ciProvider: "circle"
+        reporterStats: {}
         stdout: "foo\nbar\nbaz"
       }
+
+      @putProps = _.omit(@updateProps, "instanceId")
 
     it "PUTs /instances/:id", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "2")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123", @putProps)
       .reply(200)
@@ -488,7 +433,8 @@ describe "lib/api", ->
 
     it "PUT /instances/:id failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "2")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
       .reply(422, {
@@ -515,7 +461,8 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-route-version", "2")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123")
       .socketDelay(5000)
@@ -531,7 +478,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "put").resolves()
+      sinon.stub(rp, "put").resolves()
 
       api.updateInstance({})
       .then ->
@@ -539,7 +486,9 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/instances/instance-id-123", @putProps)
       .reply(500, {})
 
@@ -552,7 +501,7 @@ describe "lib/api", ->
   context ".updateInstanceStdout", ->
     it "PUTs /instances/:id/stdout", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123/stdout", {
         stdout: "foobarbaz\n"
@@ -566,7 +515,7 @@ describe "lib/api", ->
 
     it "PUT /instances/:id/stdout failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123/stdout")
       .reply(422, {
@@ -593,7 +542,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .put("/instances/instance-id-123/stdout")
       .socketDelay(5000)
@@ -609,7 +558,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "put").resolves()
+      sinon.stub(rp, "put").resolves()
 
       api.updateInstanceStdout({})
       .then ->
@@ -618,6 +567,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/instances/instance-id-123/stdout", {
         stdout: "foobarbaz\n"
       })
@@ -635,7 +585,7 @@ describe "lib/api", ->
   context ".getLoginUrl", ->
     it "GET /auth + returns the url", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .get("/auth")
       .reply(200, {
@@ -648,6 +598,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/auth")
       .reply(500, {})
 
@@ -659,10 +610,10 @@ describe "lib/api", ->
 
   context ".createSignin", ->
     it "POSTs /signin + returns user object", ->
-      @sandbox.stub(nmi, "machineId").resolves("12345")
+      sinon.stub(nmi, "machineId").resolves("12345")
 
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
       .matchHeader("x-machine-id", "12345")
@@ -678,12 +629,12 @@ describe "lib/api", ->
         })
 
     it "handles nmi errors", ->
-      @sandbox.stub(nmi, "machineId").rejects(new Error("foo"))
+      sinon.stub(nmi, "machineId").rejects(new Error("foo"))
 
       nock("http://localhost:1234", {
         "badheaders": ["x-machine-id"]
       })
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
       .matchHeader("x-accept-terms", "true")
@@ -700,7 +651,7 @@ describe "lib/api", ->
 
     it "handles 401 exceptions", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "3")
       .post("/signin")
@@ -716,6 +667,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signin")
       .reply(500, {})
 
@@ -728,9 +680,10 @@ describe "lib/api", ->
   context ".createSignout", ->
     it "POSTs /signout", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signout")
       .reply(200)
 
@@ -739,6 +692,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/signout")
       .reply(500, {})
 
@@ -765,10 +719,11 @@ describe "lib/api", ->
 
     it "POST /projects", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", @postProps)
       .reply(200, {
         id: "id-123"
@@ -779,7 +734,7 @@ describe "lib/api", ->
 
       api.createProject(@createProps, "remoteOrigin", "auth-token-123")
       .then (projectDetails) ->
-        expect(projectDetails).to.eql({
+        expect(projectDetails).to.deep.eq({
           id: "id-123"
           name: "foobar"
           orgId: "org-id-123"
@@ -788,10 +743,11 @@ describe "lib/api", ->
 
     it "POST /projects failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", {
         name: "foobar"
         orgId: "org-id-123"
@@ -829,6 +785,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects", @postProps)
       .reply(500, {})
 
@@ -844,16 +801,18 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/keys")
       .reply(200, recordKeys)
 
       api.getProjectRecordKeys("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(recordKeys)
+        expect(ret).to.deep.eq(recordKeys)
 
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/keys")
       .reply(500, {})
 
@@ -867,6 +826,7 @@ describe "lib/api", ->
     it "POST /projects/:id/membership_requests + returns response", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(200)
 
@@ -877,6 +837,7 @@ describe "lib/api", ->
     it "POST /projects/:id/membership_requests failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(422, {
         errors: {
@@ -903,6 +864,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/projects/project-id-123/membership_requests")
       .reply(500, {})
 
@@ -915,9 +877,10 @@ describe "lib/api", ->
   context ".getProjectToken", ->
     it "GETs /projects/:id/token", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
@@ -930,6 +893,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .get("/projects/project-123/token")
       .reply(500, {})
 
@@ -942,9 +906,10 @@ describe "lib/api", ->
   context ".updateProjectToken", ->
     it "PUTs /projects/:id/token", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
@@ -957,6 +922,7 @@ describe "lib/api", ->
     it "tags errors", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .put("/projects/project-id-123/token")
       .reply(500, {})
 
@@ -970,7 +936,7 @@ describe "lib/api", ->
     beforeEach ->
       @setup = (body, authToken, delay = 0) ->
         nock("http://localhost:1234")
-        .matchHeader("x-platform", "linux")
+        .matchHeader("x-os-name", "linux")
         .matchHeader("x-cypress-version", pkg.version)
         .matchHeader("authorization", "Bearer #{authToken}")
         .post("/exceptions", body)
@@ -985,8 +951,8 @@ describe "lib/api", ->
       ## return our own specific promise
       ## so we can spy on the timeout function
       p = Promise.resolve()
-      @sandbox.spy(p, "timeout")
-      @sandbox.stub(rp.Request.prototype, "promise").returns(p)
+      sinon.spy(p, "timeout")
+      sinon.stub(rp.Request.prototype, "promise").returns(p)
 
       @setup({foo: "bar"}, "auth-token-123")
       api.createRaygunException({foo: "bar"}, "auth-token-123").then ->
@@ -1004,9 +970,10 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
+      .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("accept-encoding", /gzip/)
       .post("/exceptions", {foo: "bar"})
       .reply(500, {})
 

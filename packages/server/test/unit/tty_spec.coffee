@@ -3,46 +3,57 @@ require("../spec_helper")
 tty = require("tty")
 ttyUtil = require("#{root}lib/util/tty")
 
-isTTY = process.stderr.isTTY
+ttys = [process.stdin.isTTY, process.stdout.isTTY, process.stderr.isTTY]
 
 describe "lib/util/tty", ->
   context ".override", ->
     beforeEach ->
+      process.env.FORCE_STDIN_TTY = '1'
+      process.env.FORCE_STDOUT_TTY = '1'
       process.env.FORCE_STDERR_TTY = '1'
 
       ## do this so can we see when its modified
-      process.stderr.isTTY = undefined
+      process.stdin.isTTY = 'foo'
+      process.stdout.isTTY = 'foo'
+      process.stderr.isTTY = 'foo'
 
     afterEach ->
       ## restore sanity
+      process.stdin.isTTY = ttys[0]
+      process.stdout.isTTY = ttys[1]
+      process.stderr.isTTY = ttys[2]
+
+    it "is noop when not forcing in env", ->
+      delete process.env.FORCE_STDIN_TTY
+      delete process.env.FORCE_STDOUT_TTY
       delete process.env.FORCE_STDERR_TTY
-      process.stderr.isTTY = isTTY
 
-    it "is noop when not process.env.FORCE_STDERR_TTY", ->
-      delete process.env.FORCE_STDERR_TTY
+      ttyUtil.override()
 
-      expect(ttyUtil.override()).to.be.undefined
-
-      expect(process.stderr.isTTY).to.be.undefined
+      expect(process.stdin.isTTY).to.eq('foo')
+      expect(process.stdout.isTTY).to.eq('foo')
+      expect(process.stderr.isTTY).to.eq('foo')
 
     it "forces process.stderr.isTTY to be true", ->
       ttyUtil.override()
 
+      expect(process.stdin.isTTY).to.be.true
+      expect(process.stdout.isTTY).to.be.true
       expect(process.stderr.isTTY).to.be.true
 
-    it "modies isatty calls for stderr", ->
-      fd0 = tty.isatty(0)
-      fd1 = tty.isatty(1)
+    it "modifies isatty calls", ->
+      delete process.env.FORCE_STDERR_TTY
 
-      isatty = @sandbox.spy(tty, 'isatty')
+      isatty = sinon.spy(tty, 'isatty')
 
       ttyUtil.override()
 
-      expect(tty.isatty(0)).to.eq(fd0)
-      expect(isatty.firstCall).to.be.calledWith(0)
+      ## should slurp up the first two calls
+      ## and only proxy through the 3rd call
+      ## for stderr
+      tty.isatty(0)
+      tty.isatty(1)
+      tty.isatty(2)
 
-      expect(tty.isatty(1)).to.eq(fd1)
-      expect(isatty.secondCall).to.be.calledWith(1)
-
-      expect(tty.isatty(2)).to.be.true
-      expect(isatty).not.to.be.calledThrice
+      expect(isatty.callCount).to.eq(1)
+      expect(isatty.firstCall).to.be.calledWith(2)

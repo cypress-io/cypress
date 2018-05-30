@@ -7,7 +7,15 @@ defaults: &defaults
     # the Docker image with Cypress dependencies and Chrome browser
     - image: cypress/browsers:chrome64
       environment:
-        CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
+        ## set specific timezone
+        TZ: "/usr/share/zoneinfo/America/New_York"
+
+        ## store artifacts here
+        CIRCLE_ARTIFACTS: /tmp/artifacts
+
+        ## set so that e2e tests are consistent
+        COLUMNS: 100
+        LINES: 24
 
 jobs:
   ## code checkout and NPM installs
@@ -22,6 +30,12 @@ jobs:
       - run:
           name: print global NPM cache path
           command: echo $(npm -g bin)
+      - run:
+          name: print Node version
+          command: node -v
+      - run:
+          name: print NPM version
+          command: npm -v
       - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node
@@ -30,11 +44,12 @@ jobs:
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run:
-          name: Checking TERM is set
+          name: Checking TERM and COLUMNS are set
           command: |
-            echo 'term env var is:' $TERM
-            node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
-            node -e 'console.log("TERM %s stdout.isTTY?", process.env.TERM, process.stdout.isTTY)'
+            node -e 'assert.ok(process.env.TERM === "xterm", `process.env.TERM=${process.env.TERM} and must be set to "xterm" for Docker to work`)'
+            node -e 'assert.ok(process.env.COLUMNS === "100", `process.env.COLUMNS=${process.env.COLUMNS} must be set to 100 for snapshots to pass`)'
+            node -e 'console.log("stdout.isTTY?", process.stdout.isTTY)'
+            node -e 'console.log("stderr.isTTY?", process.stderr.isTTY)'
 
       # need to restore a separate cache for each package.json
       - restore_cache:
@@ -481,7 +496,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
-            CYPRESS_videoRecording=false \
+            CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
 
   "test-against-staging":
@@ -599,7 +614,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i ../cli/build
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i ../cli/build
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -624,7 +639,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -712,7 +727,6 @@ workflows:
             branches:
               only:
                 - develop
-                - fix-engines-1373
           requires:
             - build
       - build-binary:
@@ -720,7 +734,6 @@ workflows:
             branches:
               only:
                 - develop
-                - fix-engines-1373
           requires:
             - build
       - test-next-version:
@@ -728,7 +741,6 @@ workflows:
             branches:
               only:
                 - develop
-                - fix-engines-1373
           requires:
             - build-npm-package
             - build-binary
@@ -745,7 +757,6 @@ workflows:
             branches:
               only:
                 - develop
-                - issue-895
           requires:
             - build-npm-package
             - build-binary

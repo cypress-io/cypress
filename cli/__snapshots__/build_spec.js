@@ -13,6 +13,21 @@ exports['package.json build outputs expected properties 1'] = {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
+  "keywords": [
+    "browser",
+    "cypress",
+    "cypress.io",
+    "automation",
+    "end-to-end",
+    "e2e",
+    "integration",
+    "mocks",
+    "test",
+    "testing",
+    "runner",
+    "spies",
+    "stubs"
+  ],
   "types": "types",
   "scripts": {
     "postinstall": "node index.js --exec install",

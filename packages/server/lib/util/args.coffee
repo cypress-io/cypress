@@ -9,7 +9,7 @@ nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 everythingAfterFirstEqualRe = /=(.+)/
 
-whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode removeIds headed config exit exitWithCode browser headless outputPath group groupId parallel parallelId".split(" ")
+whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel parallelId".split(" ")
 
 # returns true if the given string has double quote character "
 # only at the last position.
@@ -81,17 +81,15 @@ module.exports = {
         "exec-path":   "execPath"
         "api-key":     "apiKey"
         "smoke-test":  "smokeTest"
-        "remove-ids":  "removeIds"
         "get-key":     "getKey"
         "new-key":     "generateKey"
         "clear-logs":  "clearLogs"
         "run-project": "runProject"
         "return-pkg":  "returnPkg"
-        "headless":    "isTextTerminal"
+        "runMode":    "isTextTerminal"
         "exit-with-code":   "exitWithCode"
         "reporter-options": "reporterOptions"
         "output-path":      "outputPath"
-        "group-id":         "groupId"
       }
     })
 
@@ -157,9 +155,9 @@ module.exports = {
 
     options = normalizeBackslashes(options)
 
-    ## normalize project to projectPath
+    ## normalize project to projectRoot
     if p = options.project or options.runProject
-      options.projectPath = path.resolve(options.cwd, p)
+      options.projectRoot = path.resolve(options.cwd, p)
 
     ## normalize output path from previous current working directory
     if op = options.outputPath

@@ -1,13 +1,11 @@
 require("../spec_helper")
 
-fs        = require("fs-extra")
 path      = require("path")
 Promise   = require("bluebird")
 cwd       = require("#{root}lib/cwd")
 cache     = require("#{root}lib/cache")
+fs        = require("#{root}lib/util/fs")
 Fixtures  = require("../support/helpers/fixtures")
-
-fs = Promise.promisifyAll(fs)
 
 describe "lib/cache", ->
   beforeEach ->
@@ -104,9 +102,9 @@ describe "lib/cache", ->
           cache.__get("PROJECTS").then (projects) ->
             expect(projects).to.deep.eq []
 
-    describe "#getProjectPaths", ->
+    describe "#getProjectRoots", ->
       beforeEach ->
-        @statAsync = @sandbox.stub(fs, "statAsync")
+        @statAsync = sinon.stub(fs, "statAsync")
 
       it "returns an array of paths", ->
         @statAsync.withArgs("/Users/brian/app").resolves()
@@ -116,7 +114,7 @@ describe "lib/cache", ->
         .then =>
           cache.insertProject("/Users/sam/app2")
         .then =>
-          cache.getProjectPaths().then (paths) ->
+          cache.getProjectRoots().then (paths) ->
             expect(paths).to.deep.eq ["/Users/sam/app2", "/Users/brian/app"]
 
       it "removes any paths which no longer exist on the filesystem", ->
@@ -127,7 +125,7 @@ describe "lib/cache", ->
         .then =>
           cache.insertProject("/Users/sam/app2")
         .then =>
-          cache.getProjectPaths().then (paths) =>
+          cache.getProjectRoots().then (paths) =>
             expect(paths).to.deep.eq ["/Users/brian/app"]
         .then =>
           ## we have to wait on the write event because

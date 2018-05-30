@@ -111,7 +111,7 @@ describe "lib/exec", ->
         .catch (err) ->
           expect(err.message).to.include "Process timed out"
           expect(err.message).to.include "command: pause"
-          expect(err.timedout).to.be.true
+          expect(err.timedOut).to.be.true
 
   context "#linux / mac", ->
     return if isWindows()
@@ -181,4 +181,4 @@ describe "lib/exec", ->
         .catch (err) ->
           expect(err.message).to.include "Process timed out"
           expect(err.message).to.include "command: sleep 2"
-          expect(err.timedout).to.be.true
+          expect(err.timedOut).to.be.true

@@ -17,7 +17,7 @@ describe "lib/util/ci_provider", ->
     ## restore the env
     process.env = JSON.parse(@env)
 
-  context "grou-id", ->
+  context "group-id", ->
     describe "circle", ->
       beforeEach ->
         process.env.CIRCLECI = true
@@ -105,11 +105,15 @@ describe "lib/util/ci_provider", ->
 
   it "drone", ->
     process.env.DRONE = true
+    process.env.DRONE_BUILD_NUMBER = "1234"
+    process.env.DRONE_BUILD_LINK = "some url"
 
     @expects({
       name: "drone",
-      buildNum: null
-      params: null
+      buildNum: "1234"
+      params: {
+        buildUrl: "some url"
+      }
     })
 
   it "gitlab via GITLAB_CI", ->
@@ -164,11 +168,15 @@ describe "lib/util/ci_provider", ->
 
   it "semaphore", ->
     process.env.SEMAPHORE = true
+    process.env.SEMAPHORE_BUILD_NUMBER = "46"
+    process.env.SEMAPHORE_REPO_SLUG = "rails/rails"
 
     @expects({
       name: "semaphore"
-      buildNum: null
-      params: null
+      buildNum: "46"
+      params: {
+        repoSlug: "rails/rails"
+      }
     })
 
   it "shippable", ->

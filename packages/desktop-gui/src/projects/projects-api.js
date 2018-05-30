@@ -169,6 +169,7 @@ const openProject = (project) => {
   return ipc.openProject(project.path)
   .then((config = {}) => {
     updateConfig(config)
+    specsStore.setFilter(config.projectId, localData.get(`specsFilter-${config.projectId}`))
     project.setLoading(false)
     getSpecs(setProjectError)
 

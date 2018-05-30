@@ -5,6 +5,18 @@ const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
 
+// patch "commander" method called when a user passed an unknown option
+// we want to print help for the current command and exit with an error
+commander.Command.prototype.unknownOption = function (flag) {
+  if (this._allowUnknownOption) return
+  logger.error()
+  logger.error('  error: unknown option:', flag)
+  logger.error()
+  this.outputHelp()
+  logger.error()
+  process.exit(1)
+}
+
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
@@ -13,8 +25,7 @@ const parseOpts = (opts) => {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
-    'browser', 'detached', 'headed',
-    'group', 'groupId', 'global', 'dev')
+    'browser', 'detached', 'headed', 'global', 'dev', 'force')
 
   debug('parsed cli options', opts)
 
@@ -39,9 +50,8 @@ const descriptions = {
   global: 'force Cypress into global mode as if its globally installed',
   version: 'Prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
-  group: 'flag to group individual runs by using common --group-id',
-  groupId: 'optional common id to group runs by, extracted from CI environment variables by default',
   dev: 'runs cypress in development and bypasses binary check',
+  forceInstall: 'force install the Cypress binary',
 }
 
 const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
@@ -69,6 +79,7 @@ function showVersions () {
     logger.log('Cypress binary version:', versions.binary)
     process.exit(0)
   })
+  .catch(util.logErrorExit1)
 }
 
 module.exports = {
@@ -111,8 +122,6 @@ module.exports = {
     .option('-c, --config <config>', text('config'))
     .option('-b, --browser <browser-name>', text('browser'))
     .option('-P, --project <project-path>', text('project'))
-    .option('--group', text('group'), coerceFalse)
-    .option('--group-id <group-id>', text('groupId'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress')
@@ -142,23 +151,32 @@ module.exports = {
 
     program
     .command('install')
+    .usage('[options]')
     .description('Installs the Cypress executable matching this package\'s version')
-    .action(() => {
+    .option('-f, --force', text('forceInstall'))
+    .action((opts) => {
       require('./tasks/install')
-      .start({ force: true })
+      .start(parseOpts(opts))
       .catch(util.logErrorExit1)
     })
 
     program
     .command('verify')
+    .usage('[options]')
     .description('Verifies that Cypress is installed correctly and executable')
-    .action(() => {
+    .action((opts) => {
+      const defaultOpts = { force: true, welcomeMessage: false }
+      const parsedOpts = parseOpts(opts)
+      const options = _.extend(parsedOpts, defaultOpts)
       require('./tasks/verify')
-      .start({ force: true, welcomeMessage: false })
+      .start(options)
       .catch(util.logErrorExit1)
     })
 
+    logger.log()
+
     debug('cli starts with arguments %j', args)
+    util.printNodeOptions()
 
     // if there are no arguments
     if (args.length <= 2) {
@@ -166,6 +184,8 @@ module.exports = {
       program.help()
       // exits
     }
+
+    // Deprecated Catches
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {

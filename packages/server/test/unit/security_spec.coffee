@@ -3,6 +3,7 @@ require("../spec_helper")
 _ = require("lodash")
 rp = require("request-promise")
 concat = require("concat-stream")
+fs = require("#{root}lib/util/fs")
 security = require("#{root}lib/util/security")
 Fixtures = require("#{root}test/support/helpers/fixtures")
 
@@ -118,6 +119,27 @@ describe "lib/util/security", ->
   context ".strip", ->
     it "replaces obstructive code", ->
       expect(security.strip(original)).to.eq(expected)
+
+    it "replaces jira window getter", ->
+      jira = """
+        for (; !function (n) {
+          return n === n.parent
+        }(n)
+      """
+
+      jira2 = """
+        function(n){for(;!function(l){return l===l.parent}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}
+      """
+
+      expect(security.strip(jira)).to.eq("""
+        for (; !function (n) {
+          return n === n.parent || n.parent.__Cypress__
+        }(n)
+      """)
+
+      expect(security.strip(jira2)).to.eq("""
+        function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}
+      """)
 
     describe "libs", ->
       ## go out and download all of these libs and ensure

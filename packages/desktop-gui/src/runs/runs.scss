@@ -102,6 +102,7 @@
     font-size: 0.8em;
     justify-content: space-between;
     padding-left: 0.8em;
+    line-height: 40px;
 
     h5 {
       float: left;
@@ -110,9 +111,10 @@
     }
 
     .last-updated {
-      color: #a3a3a3;
+      color: #8897a3;
+      font-size: 12px;
       margin-left: 1em;
-      line-height: 39px;
+      font-weight: normal;
     }
 
     .see-all-runs:active {
@@ -148,7 +150,20 @@
 
 .runs-container {
   margin-bottom: 0;
-  @include list-columns(0%, 10%, 25%, 14%, 10%, 12%, 7%, 7%, 8%, 7%);
+  @include list-columns(0%, 10%, 37%, 15%, 10%, 14%, 7%, 7%);
+
+  .status-data {
+    width: 10%;
+
+    padding-right: 0;
+    padding-left: 14px;
+    font-weight: 500;
+    color: #666;
+
+    &>i {
+      min-width: 12px;
+    }
+  }
 
   .user-avatar {
     position: relative;
@@ -165,19 +180,28 @@
     display: inline-block;
     width: 100%;
     font-size: 12.5px;
-    color: #898A8B;
+    color: #738493;
+    min-height: 1px;
 
     &:hover {
-      background-color: #f8f8f8;
+      background-color: #f5f8fc;
       cursor: pointer;
+      color: #45515b;
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,.06);
     }
 
     &>.row-column-wrapper>div {
-      padding: 25px 7px;
+      padding: 35px 10px;
+      min-height: 1px;
 
       &.td-top-padding {
-        padding-top: 15px;
-        padding-bottom: 15px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+
+      &.td-env-padding {
+        padding-top: 30px;
+        padding-bottom: 20px;
       }
     }
     .os-block {
@@ -186,6 +210,14 @@
 
     .result {
       font-weight: 500;
+    }
+
+    .passing-data {
+      color: #1CB77E;
+    }
+
+    .failure-data {
+      color: #ec6573;
     }
 
     &>.row-column-wrapper:first-child {
@@ -248,11 +280,16 @@
 
   .msg {
     font-weight: 300;
-    margin-top: 3px;
+    margin-top: 7px;
 
     + img {
       float: left;
       padding-left: 3px;
+    }
+
+    &.italic {
+      color: #bbbfc1;
+      margin-top: 15px;
     }
 
     .commit-msg {
@@ -266,7 +303,7 @@
   }
 
   .user-avatar {
-    margin-right: 0;
+    margin-right: 5px;
     position: relative;
     top: 0;
     left: 1px;
