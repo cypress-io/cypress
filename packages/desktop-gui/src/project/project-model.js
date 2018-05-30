@@ -72,8 +72,11 @@ export default class Project {
   @computed get displayName () {
     if (this.name) return this.name
 
-    let splitName = _.last(this.path.split('/'))
-    return _.truncate(splitName, { length: 60 })
+    // need normalize windows paths with \ before split
+    let normalizedPath = this.path.replace(/\\/g, '/')
+    let lastDir = _.last(normalizedPath.split('/'))
+
+    return _.truncate(lastDir, { length: 60 })
   }
 
   @computed get displayPath () {
