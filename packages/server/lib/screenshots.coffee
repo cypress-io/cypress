@@ -12,7 +12,8 @@ fs              = require("./util/fs")
 glob            = require("./util/glob")
 
 RUNNABLE_SEPARATOR = " -- "
-invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
+pathSeparatorRe = /[\\\/]/g
+invalidCharsRe = /[^0-9a-zA-Z-_\s]/g
 
 ## internal id incrementor
 __ID__ = null
@@ -308,8 +309,8 @@ module.exports = {
     type = getType(details)
 
     name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
-    name = name.replace(invalidCharsRe, "")
-    name = [name, mime.extension(type)].join(".")
+    parts = name.split(pathSeparatorRe).map (part) -> part.replace(invalidCharsRe, "")
+    name = "#{path.join(parts...)}.#{mime.extension(type)}"
 
     pathToScreenshot = path.join(screenshotsFolder, name)
 

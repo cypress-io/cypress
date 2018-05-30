@@ -295,9 +295,9 @@ describe "lib/screenshots", ->
         takenAt: "taken:at:date"
       }
 
-      screenshots.save({name: "foo/tweet"}, details, @config.screenshotsFolder)
+      screenshots.save({name: "foo bar\\baz%/my-$screenshot"}, details, @config.screenshotsFolder)
       .then (result) =>
-        expectedPath = path.normalize(@config.screenshotsFolder + "/footweet.png")
+        expectedPath = path.join(@config.screenshotsFolder, "foo bar", "baz", "my-screenshot.png")
         actualPath = path.normalize(result.path)
 
         expect(actualPath).to.eq(expectedPath)
@@ -316,9 +316,9 @@ describe "lib/screenshots", ->
         buffer: dataUriToBuffer(image)
       }
       dimensions = sizeOf(details.buffer)
-      screenshots.save({name: "bar/tweet"}, details, @config.screenshotsFolder)
+      screenshots.save({ name: "with-buffer" }, details, @config.screenshotsFolder)
       .then (result) =>
-        expectedPath = path.normalize(@config.screenshotsFolder + "/bartweet.png")
+        expectedPath = path.join(@config.screenshotsFolder, "with-buffer.png")
         actualPath = path.normalize(result.path)
 
         expect(result.multipart).to.be.false
