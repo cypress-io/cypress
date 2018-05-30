@@ -49,9 +49,10 @@ describe('/lib/tasks/install', function () {
       sinon.stub(unzip, 'start').resolves()
       sinon.stub(Promise, 'delay').resolves()
       sinon.stub(fs, 'removeAsync').resolves()
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
+      sinon.stub(state, 'getCacheDir').returns('/cache/Cypress')
       sinon.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
       sinon.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves()
       sinon.stub(fs, 'ensureDirAsync').resolves(undefined)
       os.platform.returns('darwin')
     })
@@ -113,18 +114,20 @@ describe('/lib/tasks/install', function () {
 
       describe('when version is already installed', function () {
         beforeEach(function () {
-          state.getBinaryPkgVersionAsync.resolves(packageVersion)
-
-          return install.start()
+          state.getBinaryPkgVersionAsync.restore()
+          sinon.stub(state, 'getBinaryPkgVersionAsync')
         })
 
         it('logs noop message', function () {
-          expect(download.start).not.to.be.called
-
-          snapshot(
-            'version already installed',
-            normalize(this.stdout.toString())
-          )
+          state.getBinaryPkgVersionAsync.withArgs('/cache/Cypress/1.2.3/Cypress.app').resolves(packageVersion)
+          return install.start()
+          .then(() => {
+            expect(download.start).not.to.be.called
+            snapshot(
+              'version already installed',
+              normalize(this.stdout.toString())
+            )
+          })
         })
       })
 
@@ -272,7 +275,7 @@ describe('/lib/tasks/install', function () {
       describe('failed write access to cache directory', function () {
         it('logs error on failure', function () {
           os.platform.returns('darwin')
-          sinon.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
+          state.getCacheDir.returns('/invalid/cache/dir')
 
           const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
           err.code = 'EACCES'
