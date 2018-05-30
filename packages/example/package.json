@@ -29,7 +29,7 @@
     "cypress-example-kitchensink": "1.0.1",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.1",
-    "gulp-gh-pages": "^0.5.4",
+    "gulp-gh-pages-will": "0.5.5",
     "gulp-rev-all": "^0.8.22",
     "mocha": "^2.4.5",
     "run-sequence": "^1.1.5",
