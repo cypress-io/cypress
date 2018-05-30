@@ -17,6 +17,16 @@ const override = () => {
     2: false,
   }
 
+  if (!tty.getWindowSize) {
+    // this is really old method, long removed from Node, but Mocha
+    // reporters fall back on it if they cannot use `process.stdout.getWindowSize`
+    // we need to polyfill it as long as we use Mocha@2 in packages/server
+    tty.getWindowSize = function () {
+      // returns [height, width]
+      return [40, 80]
+    }
+  }
+
   tty.isatty = function (fd) {
     if (patched[fd]) {
       // force stderr to return true

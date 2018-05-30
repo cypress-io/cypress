@@ -6,6 +6,26 @@ ttyUtil = require("#{root}lib/util/tty")
 ttys = [process.stdin.isTTY, process.stdout.isTTY, process.stderr.isTTY]
 
 describe "lib/util/tty", ->
+  context "base.js tty.getWindowSize", ->
+    beforeEach ->
+      # need to delete both the initial module and the
+      # "base.js" module with problematic tty.getWindowSize call
+      delete require.cache[require.resolve("mocha/lib/reporters/base")]
+      delete require.cache[require.resolve("mocha/lib/reporters")]
+
+    it "can use process.stdout.getWindowSize", ->
+      expect(process.stdout.getWindowSize).to.be.a("function")
+
+    it "polyfills tty.getWindowSize", ->
+      sinon.stub(tty, "isatty").returns(true)
+      sinon.stub(process.stdout, "getWindowSize").value(undefined)
+      ttyUtil.override()
+      # forces mocha reporters base to use tty.getWindowSize()
+      require("mocha/lib/reporters")
+      # check the terminal width - should be the ttyUtil hardcoded
+      base = require("mocha/lib/reporters/base")
+      expect(base.window.width).to.equal(80)
+
   context ".override", ->
     beforeEach ->
       process.env.FORCE_STDIN_TTY = '1'
