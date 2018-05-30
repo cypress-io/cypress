@@ -69,7 +69,7 @@ describe "e2e screenshots", ->
     .then ->
       screenshot1 = path.join(e2ePath, "cypress", "screenshots", "black.png")
       screenshot2 = path.join(e2ePath, "cypress", "screenshots", "red.png")
-      screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foobarbaz.png")
+      screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foo", "bar", "baz.png")
       screenshot4 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- generates pngs on failure.png")
       screenshot5 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- before hooks -- empty test 1 -- before all hook.png")
       screenshot6 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- before each hook.png")

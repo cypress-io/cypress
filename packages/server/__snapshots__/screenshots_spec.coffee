@@ -12,8 +12,8 @@ exports['e2e screenshots passes 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: screenshots_spec.coffee...                                                      (1 of 1) 
+
+  Running: screenshots_spec.coffee...                                                      (1 of 1)
 
 
   taking screenshots
@@ -86,7 +86,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   - /foo/bar/.projects/e2e/cypress/screenshots/black.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/red.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foobarbaz.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo/bar/baz.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/color-check.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/crop-check.png (600x400)
@@ -115,11 +115,11 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ screenshots_spec.coffee                   XX:XX       16       13        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       16       13        3        -        -  
+    1 of 1 failed (100%)                        XX:XX       16       13        3        -        -
 
 `
 
