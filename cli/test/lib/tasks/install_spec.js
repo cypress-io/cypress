@@ -119,6 +119,8 @@ describe('/lib/tasks/install', function () {
         })
 
         it('logs noop message', function () {
+          expect(state.getBinaryPkgVersionAsync).to.be.calledWith('/cache/Cypress/1.2.3/Cypress.app')
+
           expect(download.start).not.to.be.called
 
           snapshot(

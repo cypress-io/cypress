@@ -28,7 +28,6 @@ cwd        = require("#{root}lib/cwd")
 user       = require("#{root}lib/user")
 config     = require("#{root}lib/config")
 cache      = require("#{root}lib/cache")
-video      = require("#{root}lib/video")
 errors     = require("#{root}lib/errors")
 plugins    = require("#{root}lib/plugins")
 cypress    = require("#{root}lib/cypress")
@@ -37,6 +36,7 @@ Server     = require("#{root}lib/server")
 Reporter   = require("#{root}lib/reporter")
 Watchers   = require("#{root}lib/watchers")
 browsers   = require("#{root}lib/browsers")
+videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
@@ -90,7 +90,7 @@ describe "lib/cypress", ->
 
     ## force cypress to call directly into main without
     ## spawning a separate process
-    sinon.stub(video, "start").resolves({})
+    sinon.stub(videoCapture, "start").resolves({})
     sinon.stub(plugins, "init").resolves(undefined)
     sinon.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     sinon.stub(extension, "setHostAndPath").resolves()
@@ -566,7 +566,7 @@ describe "lib/cypress", ->
         @expectExitWithErr("CONFIG_VALIDATION_ERROR", "localhost:9999")
         @expectExitWithErr("CONFIG_VALIDATION_ERROR", "We found an invalid configuration value")
 
-    it "logs error and exits when using an old configuration option that has been renamed", ->
+    it "logs error and exits when using an old configuration option: trashAssetsBeforeHeadlessRuns", ->
       cypress.start([
         "--run-project=#{@todosPath}"
         "--config=trashAssetsBeforeHeadlessRuns=false"
@@ -574,6 +574,15 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("RENAMED_CONFIG_OPTION", "trashAssetsBeforeHeadlessRuns")
         @expectExitWithErr("RENAMED_CONFIG_OPTION", "trashAssetsBeforeRuns")
+
+    it "logs error and exits when using an old configuration option: videoRecording", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=videoRecording=false"
+      ])
+      .then =>
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "videoRecording")
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "video")
 
     it "logs error and exits when using screenshotOnHeadlessFailure", ->
       cypress.start([
@@ -802,7 +811,7 @@ describe "lib/cypress", ->
       it "can set specific environment variables", ->
         cypress.start([
           "--run-project=#{@todosPath}",
-          "--videoRecording=false"
+          "--video=false"
           "--env",
           "version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor"
         ])

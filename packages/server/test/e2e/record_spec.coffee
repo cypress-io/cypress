@@ -368,7 +368,7 @@ describe "e2e record", ->
 
   context "video recording", ->
     setup(defaultRoutes, {
-      videoRecording: false
+      video: false
     })
 
     it "does not upload when not enabled", ->

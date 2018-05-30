@@ -11,37 +11,42 @@ debug     = require("debug")("cypress:server:scaffold")
 { isDefault } = require("./util/config")
 
 exampleFolderName = cypressEx.getFolderName()
-exampleSpecsFullPaths = cypressEx.getPathToExamples()
+getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 
 getPathFromIntegrationFolder = (file) ->
   file.substring(file.indexOf("integration/") + "integration/".length)
 
-## short paths relative to integration folder (i.e. examples/actions.spec.js)
-exampleSpecs = _.map exampleSpecsFullPaths, (file) ->
-  getPathFromIntegrationFolder(file)
-
-isDifferentNumberOfFiles = (files) ->
+isDifferentNumberOfFiles = (files, exampleSpecs) ->
   files.length isnt exampleSpecs.length
 
-## index for quick lookup and for getting full path from short path
-exampleSpecsIndex = _.transform(exampleSpecs, (memo, spec, i) ->
-  memo[spec] = exampleSpecsFullPaths[i]
-, {})
+getExampleSpecs = ->
+  getExampleSpecsFullPaths
+  .then (fullPaths) ->
+    ## short paths relative to integration folder (i.e. examples/actions.spec.js)
+    shortPaths = _.map fullPaths, (file) ->
+      getPathFromIntegrationFolder(file)
 
-getIndexedExample = (file) ->
-  exampleSpecsIndex[getPathFromIntegrationFolder(file)]
+    ## index for quick lookup and for getting full path from short path
+    index = _.transform(shortPaths, (memo, spec, i) ->
+      memo[spec] = fullPaths[i]
+    , {})
 
-filesNamesAreDifferent = (files) ->
+    { fullPaths, shortPaths, index }
+
+getIndexedExample = (file, index) ->
+  index[getPathFromIntegrationFolder(file)]
+
+filesNamesAreDifferent = (files, index) ->
   _.some files, (file) ->
-    not getIndexedExample(file)
+    not getIndexedExample(file, index)
 
 getFileSize = (file) ->
   fs.statAsync(file).get("size")
 
-filesSizesAreSame = (files) ->
+filesSizesAreSame = (files, index) ->
   Promise.join(
     Promise.all(_.map(files, getFileSize)),
-    Promise.all(_.map(files, (file) -> getFileSize(getIndexedExample(file))))
+    Promise.all(_.map(files, (file) -> getFileSize(getIndexedExample(file, index))))
   )
   .spread (fileSizes, originalFileSizes) ->
     _.every fileSizes, (size, i) ->
@@ -63,16 +68,20 @@ isNewProject = (integrationFolder) ->
     debug("- empty?", isEmpty(files))
     return true if isEmpty(files) # 1
 
-    debug("- different number of files?", isDifferentNumberOfFiles(files))
-    return false if isDifferentNumberOfFiles(files) # 2
+    getExampleSpecs()
+    .then (exampleSpecs) ->
+      numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
+      debug("- different number of files?", numFilesDifferent)
+      return false if numFilesDifferent # 2
 
-    filesNamesDifferent = filesNamesAreDifferent(files)
-    debug("- different file names?", filesNamesDifferent)
-    return false if filesNamesDifferent # 3
+      filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
+      debug("- different file names?", filesNamesDifferent)
+      return false if filesNamesDifferent # 3
 
-    filesSizesAreSame(files).then (sameSizes) ->
-      debug("- same sizes?", sameSizes)
-      sameSizes
+      filesSizesAreSame(files, exampleSpecs.index)
+  .then (sameSizes) ->
+    debug("- same sizes?", sameSizes)
+    sameSizes
 
 module.exports = {
   isNewProject
@@ -87,8 +96,10 @@ module.exports = {
 
     @verifyScaffolding folder, =>
       debug("copying examples into #{folder}")
-      Promise.all _.map exampleSpecsFullPaths, (file) =>
-        @_copy(file, path.join(folder, exampleFolderName), config)
+      getExampleSpecs()
+      .then ({ fullPaths }) =>
+        Promise.all _.map fullPaths, (file) =>
+          @_copy(file, path.join(folder, exampleFolderName), config)
 
   fixture: (folder, config) ->
     debug("fixture folder #{folder}")
@@ -131,8 +142,8 @@ module.exports = {
     dest = path.join(folder, path.basename(file))
 
     @_assertInFileTree(dest, config)
-
-    fs.copyAsync(src, dest)
+    .then ->
+      fs.copyAsync(src, dest)
 
   verifyScaffolding: (folder, fn) ->
     ## we want to build out the folder + and example files
@@ -163,28 +174,30 @@ module.exports = {
     getFilePath = (dir, name) ->
       path.relative(config.projectRoot, path.join(dir, name))
 
-    files = _.map exampleSpecs, (file) ->
-      getFilePath(config.integrationFolder, file)
+    getExampleSpecs()
+    .then (specs) =>
+      files = _.map specs.shortPaths, (file) ->
+        getFilePath(config.integrationFolder, file)
 
-    if config.fixturesFolder
-      files = files.concat([
-        getFilePath(config.fixturesFolder, "example.json")
-      ])
+      if config.fixturesFolder
+        files = files.concat([
+          getFilePath(config.fixturesFolder, "example.json")
+        ])
 
-    if config.supportFolder and config.supportFile isnt false
-      files = files.concat([
-        getFilePath(config.supportFolder, "commands.js")
-        getFilePath(config.supportFolder, "index.js")
-      ])
+      if config.supportFolder and config.supportFile isnt false
+        files = files.concat([
+          getFilePath(config.supportFolder, "commands.js")
+          getFilePath(config.supportFolder, "index.js")
+        ])
 
-    if config.pluginsFile
-      files = files.concat([
-        getFilePath(path.dirname(config.pluginsFile), "index.js")
-      ])
+      if config.pluginsFile
+        files = files.concat([
+          getFilePath(path.dirname(config.pluginsFile), "index.js")
+        ])
 
-    debug("scaffolded files %j", files)
+      debug("scaffolded files %j", files)
 
-    return @_fileListToTree(files)
+      return @_fileListToTree(files)
 
   _fileListToTree: (files) ->
     ## turns a list of file paths into a tree-like structure where
@@ -210,8 +223,10 @@ module.exports = {
   _assertInFileTree: (filePath, config) ->
     relativeFilePath = path.relative(config.projectRoot, filePath)
 
-    if not @_inFileTree(@fileTree(config), relativeFilePath)
-      throw new Error("You attempted to scaffold a file, '#{relativeFilePath}', that's not in the scaffolded file tree. This is because you added, removed, or changed a scaffolded file. Make sure to update scaffold#fileTree to match your changes.")
+    @fileTree(config)
+    .then (fileTree) =>
+      if not @_inFileTree(fileTree, relativeFilePath)
+        throw new Error("You attempted to scaffold a file, '#{relativeFilePath}', that's not in the scaffolded file tree. This is because you added, removed, or changed a scaffolded file. Make sure to update scaffold#fileTree to match your changes.")
 
   _inFileTree: (fileTree, filePath) ->
     branch = fileTree

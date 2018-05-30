@@ -8,12 +8,12 @@ debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
 recordMode = require("./record")
-video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
 browsers   = require("../browsers")
 openProject = require("../open_project")
+videoCapture = require("../video_capture")
 Windows    = require("../gui/windows")
 fs         = require("../util/fs")
 env        = require("../util/env")
@@ -345,7 +345,7 @@ module.exports = {
     fs
     .ensureDirAsync(outputDir)
     .then ->
-      video.start(name, {
+      videoCapture.start(name, {
         onError: (err) ->
           ## catch video recording failures and log them out
           ## but don't let this affect the run at all
@@ -480,7 +480,7 @@ module.exports = {
 
         # bar.tickTotal(float)
 
-      video.process(name, cname, videoCompression, onProgress)
+      videoCapture.process(name, cname, videoCompression, onProgress)
     .catch {recordingVideoFailed: true}, (err) ->
       ## dont do anything if this error occured because
       ## recording the video had already failed
@@ -739,7 +739,7 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}) ->
-    { project, headed, browser, videoRecording, videosFolder } = options
+    { project, headed, browser, video, videosFolder } = options
 
     browserName = browser.name
 
@@ -761,7 +761,7 @@ module.exports = {
     browserCanBeRecorded = (name) ->
       name is "electron" and not options.headed
 
-    if videoRecording
+    if video
       if browserCanBeRecorded(browserName)
         if not videosFolder
           throw new Error("Missing videoFolder for recording")
@@ -884,7 +884,7 @@ module.exports = {
             specs
             sys
             videosFolder:         config.videosFolder
-            videoRecording:       config.videoRecording
+            video:                config.video
             videoCompression:     config.videoCompression
             videoUploadOnPasses:  config.videoUploadOnPasses
             exit:                 options.exit
