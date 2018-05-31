@@ -64,7 +64,7 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  - /foo/bar/.projects/task-not-registered/cypress/screenshots/fails because the task event is not registered in plugins file.png (1280x720)
+  - /foo/bar/.projects/task-not-registered/cypress/screenshots/fails because the task event is not registered in plugins file -- failure.png (1280x720)
 
 
   (Video)

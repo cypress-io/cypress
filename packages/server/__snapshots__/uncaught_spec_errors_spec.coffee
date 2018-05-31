@@ -56,7 +56,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test -- failure.png (1280x720)
 
 
   (Video)
@@ -137,7 +137,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test -- failure.png (1280x720)
 
 
   (Video)
@@ -292,7 +292,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- does not run -- before all hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- does not run -- before all hook -- failure.png (1280x720)
 
 
   (Video)
@@ -382,10 +382,10 @@ exports['e2e uncaught errors failing5 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- baz fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux fails.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux2 fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- baz fails -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar fails -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux fails -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- quux2 fails -- failure.png (1280x720)
 
 
   (Video)

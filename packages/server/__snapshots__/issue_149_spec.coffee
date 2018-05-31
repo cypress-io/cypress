@@ -46,7 +46,7 @@ exports['e2e issue 149 failing 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fails -- failure.png (1280x720)
 
 
   (Video)

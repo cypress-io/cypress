@@ -95,7 +95,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record fails -- fails 1 -- before each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record fails -- fails 1 -- before each hook -- failure.png (1280x720)
 
 
   (Video)
@@ -106,7 +106,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record fails -- fails 1 -- before each hook.png
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record fails -- fails 1 -- before each hook -- failure.png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -192,7 +192,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test -- failure.png (1280x720)
 
 
   (Video)
@@ -203,7 +203,7 @@ We dynamically generated a new test to display this failure.
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test -- failure.png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================

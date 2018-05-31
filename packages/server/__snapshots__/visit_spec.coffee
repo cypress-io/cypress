@@ -159,7 +159,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when network connection cannot be established -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when network connection cannot be established -- fails -- failure.png (1280x720)
 
 
   (Video)
@@ -254,7 +254,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when server response is 500 -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when server response is 500 -- fails -- failure.png (1280x720)
 
 
   (Video)
@@ -349,7 +349,7 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when file server response is 404 -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when file server response is 404 -- fails -- failure.png (1280x720)
 
 
   (Video)
@@ -446,7 +446,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when content type is plain/text -- fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when content type is plain/text -- fails -- failure.png (1280x720)
 
 
   (Video)
