@@ -65,17 +65,18 @@ describe "e2e screenshots", ->
       spec: "screenshots_spec.coffee"
       expectedExitCode: 4
       snapshot: true
+      timeout: 180000
     })
     .then ->
       screenshot1 = path.join(e2ePath, "cypress", "screenshots", "black.png")
       screenshot2 = path.join(e2ePath, "cypress", "screenshots", "red.png")
       screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foo", "bar", "baz.png")
-      screenshot4 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- generates pngs on failure.png")
-      screenshot5 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- before hooks -- empty test 1 -- before all hook.png")
-      screenshot6 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- before each hook.png")
-      screenshot7 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- after each hook.png")
+      screenshot4 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- generates pngs on failure -- failure.png")
+      screenshot5 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- before hooks -- empty test 1 -- before all hook -- failure.png")
+      screenshot6 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- before each hook -- failure.png")
+      screenshot7 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- after each hook -- failure.png")
       screenshot8 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure.png")
-      screenshot9 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure (1).png")
+      screenshot9 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure -- failure.png")
 
       Promise.all([
         fs.statAsync(screenshot1).get("size")
