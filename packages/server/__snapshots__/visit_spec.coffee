@@ -88,8 +88,8 @@ exports['e2e visit low response timeout fails when network connection immediatel
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: visit_http_network_error_failing_spec.coffee...                                 (1 of 1)
+                                                                                                    
+  Running: visit_http_network_error_failing_spec.coffee...                                 (1 of 1) 
 
 
   when network connection cannot be established
@@ -173,11 +173,11 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_http_network_error_failing_spe…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -195,8 +195,8 @@ exports['e2e visit low response timeout fails when server responds with 500 1'] 
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: visit_http_500_response_failing_spec.coffee...                                  (1 of 1)
+                                                                                                    
+  Running: visit_http_500_response_failing_spec.coffee...                                  (1 of 1) 
 
 
   when server response is 500
@@ -268,11 +268,11 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_http_500_response_failing_spec…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -290,8 +290,8 @@ exports['e2e visit low response timeout fails when file server responds with 404
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1)
+                                                                                                    
+  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1) 
 
 
   when file server response is 404
@@ -363,11 +363,11 @@ The internal Cypress web server responded with:
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_file_404_response_failing_spec…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -385,8 +385,8 @@ exports['e2e visit low response timeout fails when content type isnt html 1'] = 
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1)
+                                                                                                    
+  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1) 
 
 
   when content type is plain/text
@@ -460,11 +460,11 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_non_html_content_type_failing_…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -482,8 +482,8 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1)
+                                                                                                    
+  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1) 
 
 
   when visit times out
@@ -568,8 +568,8 @@ When this 'load' event occurs, Cypress will continue running commands.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds pageLoadTimeout.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds timeout option.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds pageLoadTimeout -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/when visit times out -- fails timeout exceeds timeout option -- failure.png (1280x720)
 
 
   (Video)
@@ -583,11 +583,11 @@ When this 'load' event occurs, Cypress will continue running commands.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_http_timeout_failing_spec.coff…     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -
+    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 
 `
 

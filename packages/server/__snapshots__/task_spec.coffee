@@ -105,8 +105,8 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/throws when task returns undefined.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/includes stack trace in error.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/throws when task returns undefined -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/includes stack trace in error -- failure.png (1280x720)
 
 
   (Video)

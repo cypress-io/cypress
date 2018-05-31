@@ -51,8 +51,8 @@ exports['e2e promises failing1 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/catches regular promise errors.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/catches promise errors and calls done with err even when async.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/catches regular promise errors -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/catches promise errors and calls done with err even when async -- failure.png (1280x720)
 
 
   (Video)

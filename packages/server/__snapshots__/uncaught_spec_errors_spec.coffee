@@ -212,7 +212,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/foo -- bar -- failure.png (1280x720)
 
 
   (Video)
