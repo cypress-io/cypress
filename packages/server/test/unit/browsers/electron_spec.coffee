@@ -19,9 +19,7 @@ describe "lib/browsers/electron", ->
       some: "var"
       projectRoot: "/foo/"
     }
-    @automation = {
-      use: sinon.spy()
-    }
+    @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
       close: sinon.stub()
       loadURL: sinon.stub()
@@ -68,16 +66,12 @@ describe "lib/browsers/electron", ->
         expect(obj.removeAllListeners).to.be.a("function")
 
     it "registers onRequest automation middleware", ->
+      sinon.spy(@automation, "use")
+
       electron.open("electron", @url, @options, @automation)
       .then =>
         expect(@automation.use).to.be.called
         expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
-
-    it "unregisters onRequest automation middleware on close", ->
-      electron.open("electron", @url, @options, @automation)
-      .then =>
-        @win.emit("closed")
-        expect(@automation.use).to.be.calledWith({ onRequest: null })
 
   context "._launch", ->
     beforeEach ->

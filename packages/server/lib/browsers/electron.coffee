@@ -166,10 +166,6 @@ module.exports = {
         win.once "closed", ->
           debug("closed event fired")
 
-          automation.use({
-            onRequest: null
-          })
-
           call("removeAllListeners")
           events.emit("exit")
 

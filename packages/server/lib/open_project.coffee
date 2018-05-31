@@ -71,6 +71,7 @@ create = ->
           options.onBrowserClose = ->
             if spec
               preprocessor.removeFile(spec, cfg)
+
             if onBrowserClose
               onBrowserClose()
 
