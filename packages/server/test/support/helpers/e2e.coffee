@@ -46,9 +46,9 @@ replaceBrowserName = (str, p1, p2, p3, p4) ->
   ## this ensures we add whitespace so the border is not shifted
   p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
-replaceDurationSeconds = (str, p1, p2, p3, p4) ->
+replaceDurationSeconds = (str, p1, p2, p3, p4, p5) ->
   ## get the padding for the existing duration
-  lengthOfExistingDuration = _.sum([p2.length, p3.length, p4.length])
+  lengthOfExistingDuration = _.sum([p2.length, p3?.length or 0, p4.length, p5.length])
 
   p1 + _.padEnd("X seconds", lengthOfExistingDuration)
 
@@ -65,13 +65,13 @@ normalizeStdout = (str) ->
     .join("/foo/bar/.projects")
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
   .replace(browserNameVersionRe, replaceBrowserName)
-  .replace(/\s\(\d+m?s\)/g, "") ## numbers in parenths
+  .replace(/\s\(\d+([ms]|ms)\)/g, "") ## numbers in parenths
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
-  .replace(/(Duration\:\s+)(\d+)(\sseconds?)(\s+)/g, replaceDurationSeconds)
-  .replace(/\(\d+ seconds?\)/g, "(X seconds)")
+  .replace(/(Duration\:\s+)(\d+)(\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
+  .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
   .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
   .split("\n")
@@ -335,7 +335,7 @@ module.exports = {
         .defaults({
           ## prevent any Compression progress
           ## messages from showing up
-          VIDEO_COMPRESSION_THROTTLE: 20000
+          VIDEO_COMPRESSION_THROTTLE: 120000
 
           ## don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: "1"

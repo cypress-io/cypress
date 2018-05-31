@@ -41,7 +41,7 @@ exports['e2e screenshots passes 1'] = `
       5) "after each" hook for "empty test 2"
 
 
-  14 passing (2m)
+  14 passing
   5 failing
 
   1) taking screenshots generates pngs on failure:
