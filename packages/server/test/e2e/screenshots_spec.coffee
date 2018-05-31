@@ -63,7 +63,7 @@ describe "e2e screenshots", ->
 
     e2e.exec(@, {
       spec: "screenshots_spec.coffee"
-      expectedExitCode: 3
+      expectedExitCode: 4
       snapshot: true
     })
     .then ->
@@ -74,6 +74,8 @@ describe "e2e screenshots", ->
       screenshot5 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- before hooks -- empty test 1 -- before all hook.png")
       screenshot6 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- before each hook.png")
       screenshot7 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- after each hook.png")
+      screenshot8 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure.png")
+      screenshot9 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure (1).png")
 
       Promise.all([
         fs.statAsync(screenshot1).get("size")
@@ -83,6 +85,8 @@ describe "e2e screenshots", ->
         fs.statAsync(screenshot5).get("size")
         fs.statAsync(screenshot6).get("size")
         fs.statAsync(screenshot7).get("size")
+        fs.statAsync(screenshot8).get("size")
+        fs.statAsync(screenshot9).get("size")
       ])
       .then (sizes) ->
         ## make sure all of the values are unique

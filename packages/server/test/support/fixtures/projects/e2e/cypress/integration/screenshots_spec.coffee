@@ -97,6 +97,18 @@ describe "taking screenshots", ->
           expect(duration).to.be.within(total, total + padding)
       })
 
+  it "ensures unique paths for non-named screenshots", ->
+    cy.screenshot({ capture: "runner" })
+    cy.screenshot({ capture: "runner" })
+    cy.screenshot({ capture: "runner" })
+    cy.readFile("cypress/screenshots/taking screenshots -- ensures unique paths for non-named screenshots.png", 'base64')
+    cy.readFile("cypress/screenshots/taking screenshots -- ensures unique paths for non-named screenshots (1).png", 'base64')
+    cy.readFile("cypress/screenshots/taking screenshots -- ensures unique paths for non-named screenshots (2).png", 'base64')
+
+  it "ensures unique paths when there's a non-named screenshot and a failure", ->
+    cy.screenshot({ capture: "viewport" }).then ->
+      throw new Error("failing on purpose")
+
   describe "clipping", ->
     it "can clip app screenshots", ->
       cy

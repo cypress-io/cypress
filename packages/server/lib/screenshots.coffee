@@ -229,6 +229,27 @@ getDimensions = (details) ->
   else
     _.pick(details.image.bitmap, "width", "height")
 
+ensureUniquePath = (takenPaths, withoutExt, extension, fullPath) ->
+  num = 0
+  while _.includes(takenPaths, fullPath)
+    fullPath = "#{withoutExt} (#{++num}).#{extension}"
+  return fullPath
+
+getPathToScreenshot = (data, details, screenshotsFolder) ->
+  type = getType(details)
+
+  name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
+  parts = name.split(pathSeparatorRe).map (part) -> part.replace(invalidCharsRe, "")
+  partialPath = path.join(parts...)
+  withoutExt = path.join(screenshotsFolder, partialPath)
+  extension = mime.extension(type)
+  fullPath = path.join(screenshotsFolder, "#{partialPath}.#{extension}")
+
+  if not data.name?
+    fullPath = ensureUniquePath(data.takenPaths, withoutExt, extension, fullPath)
+
+  return fullPath
+
 module.exports = {
   crop
 
@@ -306,13 +327,7 @@ module.exports = {
       return { image, pixelRatio, multipart, takenAt }
 
   save: (data, details, screenshotsFolder) ->
-    type = getType(details)
-
-    name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
-    parts = name.split(pathSeparatorRe).map (part) -> part.replace(invalidCharsRe, "")
-    name = "#{path.join(parts...)}.#{mime.extension(type)}"
-
-    pathToScreenshot = path.join(screenshotsFolder, name)
+    pathToScreenshot = getPathToScreenshot(data, details, screenshotsFolder)
 
     debug("save", pathToScreenshot)
 
