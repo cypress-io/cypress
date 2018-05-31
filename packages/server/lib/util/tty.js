@@ -1,4 +1,13 @@
 const tty = require('tty')
+const terminalSize = require('./terminal-size')
+
+// polyfills node's getWindowSize
+// by returning an array of columns/rows
+function getWindowSize () {
+  const { columns, rows } = terminalSize.get()
+
+  return [columns, rows]
+}
 
 function patchStream (patched, name) {
   const stream = process[name]
@@ -16,6 +25,16 @@ const override = () => {
     1: false,
     2: false,
   }
+
+  // polyfill in node's getWindowSize
+  // if it doesn't exist on stdout and stdin
+  // (if we are a piped process) or we are
+  // in windows on electron
+  ;['stdout', 'stderr'].forEach((fn) => {
+    if (!process[fn].getWindowSize) {
+      process[fn].getWindowSize = getWindowSize
+    }
+  })
 
   tty.isatty = function (fd) {
     if (patched[fd]) {
@@ -36,4 +55,6 @@ const override = () => {
 
 module.exports = {
   override,
+
+  getWindowSize,
 }
