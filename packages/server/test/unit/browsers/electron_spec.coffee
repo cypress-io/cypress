@@ -65,6 +65,14 @@ describe "lib/browsers/electron", ->
         expect(obj.kill).to.be.a("function")
         expect(obj.removeAllListeners).to.be.a("function")
 
+    it "registers onRequest automation middleware", ->
+      sinon.spy(@automation, "use")
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        expect(@automation.use).to.be.called
+        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
+
   context "._launch", ->
     beforeEach ->
       sinon.stub(menu, "set")
