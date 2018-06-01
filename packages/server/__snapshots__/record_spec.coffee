@@ -1,7 +1,21 @@
 exports['e2e record passing passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
+  │ Searched:   cypress/integration/record*                                                        │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_error_spec.coffee...                                                     (1 of 4) 
+
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/record_error_spec.coffee
@@ -18,32 +32,34 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 
 Fix the error in your code and re-run your tests.
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           0
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────────┐
+  │ Tests:        0                        │
+  │ Passing:      0                        │
+  │ Failing:      1                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  0                        │
+  │ Video:        true                     │
+  │ Duration:     X seconds                │
+  │ Spec Ran:     record_error_spec.coffee │
+  └────────────────────────────────────────┘
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
   (Uploading Results)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_fail_spec.coffee...                                                      (2 of 4) 
 
 
   record fails
@@ -62,17 +78,19 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         1
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      0                       │
+  │ Failing:      1                       │
+  │ Pending:      0                       │
+  │ Skipped:      1                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_fail_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
@@ -83,7 +101,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
   (Uploading Results)
@@ -91,9 +109,9 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record fails -- fails 1 -- before each hook.png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (3 of 4) 
 
 
   record pass
@@ -105,31 +123,33 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_uncaught_spec.coffee...                                                  (4 of 4) 
 
 
   1) An uncaught error was detected outside of a test
@@ -155,17 +175,19 @@ We dynamically generated a new test to display this failure.
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────┐
+  │ Tests:        1                           │
+  │ Passing:      0                           │
+  │ Failing:      1                           │
+  │ Pending:      0                           │
+  │ Skipped:      0                           │
+  │ Screenshots:  1                           │
+  │ Video:        true                        │
+  │ Duration:     X seconds                   │
+  │ Spec Ran:     record_uncaught_spec.coffee │
+  └───────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -176,7 +198,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
   (Uploading Results)
@@ -184,8 +206,27 @@ We dynamically generated a new test to display this failure.
   - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test.png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
+====================================================================================================
 
-  (All Done)
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖ record_fail_spec.coffee                   XX:XX        2        -        1        -        1 │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    3 of 4 failed (75%)                         XX:XX        5        1        3        1        1  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
@@ -221,9 +262,21 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -235,29 +288,53 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 `
 
-exports['e2e record api interaction errors create instance does not update instance 1'] = `Warning: We encountered an error talking to our servers.
+exports['e2e record api interaction errors create instance does not update instance 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Warning: We encountered an error talking to our servers.
 
 This run will not be recorded.
 
@@ -265,9 +342,9 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
-
-  (Tests Starting)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -279,32 +356,61 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
 exports['e2e record api interaction errors update instance does not update instance stdout 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -316,22 +422,24 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
@@ -344,15 +452,41 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
+====================================================================================================
 
-  (All Done)
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
 exports['e2e record api interaction errors update instance stdout warns but proceeds 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -364,22 +498,24 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
@@ -393,8 +529,21 @@ This error will not alter the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
+====================================================================================================
 
-  (All Done)
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
@@ -446,7 +595,23 @@ Please log into the Dashboard to see the updated token.
 https://on.cypress.io/dashboard/projects/pid123
 `
 
-exports['e2e record video recording does not upload when not enabled 1'] = `  (Tests Starting)
+exports['e2e record video recording does not upload when not enabled 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -458,37 +623,65 @@ exports['e2e record video recording does not upload when not enabled 1'] = `  (T
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  false
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        false                   │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Uploading Results)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
 
+====================================================================================================
 
-  (All Done)
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 `
 
 exports['e2e record api interaction errors uploading assets warns but proceeds 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -500,28 +693,30 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
   (Uploading Results)
@@ -529,9 +724,36 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   - Failed Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
   - Failed Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
+====================================================================================================
 
-  (All Done)
+  (Run Finished)
 
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+`
+
+exports['e2e record misconfiguration errors and exits when no browser found 1'] = `Can't run because you've entered an invalid browser.
+
+Browser: 'browserDoesNotExist' was not found on your system.
+
+Available browsers found are: browser1, browser2, browser3
+`
+
+exports['e2e record misconfiguration errors and exits when no specs found 1'] = `Can't run because no spec files were found.
+
+We searched for any files matching this glob pattern:
+
+cypress/integration/notfound/**
 `
 
 exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `Warning: It looks like you are trying to record this run from a forked PR.
@@ -542,9 +764,21 @@ These results will not be recorded.
 
 This error will not alter the exit code.
 
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
 
 
   record pass
@@ -556,25 +790,36 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 pending
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          1
-  - Failures:        0
-  - Pending:         1
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 `
 

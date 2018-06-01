@@ -1,5 +1,7 @@
+{ devicePixelRatio } = window
+
 it "takes consistent app captures", ->
-  options = { capture: "app", blackout: [".black-me-out"] }
+  options = { capture: "viewport", blackout: [".black-me-out"] }
 
   cy
     .visit('http://localhost:3322/app')
@@ -9,6 +11,8 @@ it "takes consistent app captures", ->
       ## to ensure the Cypress UI is consistently hidden
       fn = ->
         cy.screenshot("app-compare", options)
-        cy.task("compare:screenshots", { a: 'app-original', b: 'app-compare', blackout: true })
+        cy.task("compare:screenshots", { a: 'app-original', b: 'app-compare', blackout: true, devicePixelRatio })
 
-      Cypress.Promise.map(Cypress._.times(50), fn, { concurrency: 1 })
+      Cypress._.times(50, fn)
+
+      return

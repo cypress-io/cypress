@@ -12,16 +12,19 @@ e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
   app.get "/color/:color", (req, res) ->
-    e2e.sendHtml("""<div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>""")(req, res)
+    e2e.sendHtml("""
+      <style>body { margin: 0; }</style>
+      <div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>"""
+    )(req, res)
 
-  app.get "/fullpage", e2e.sendHtml("""
+  app.get "/fullPage", e2e.sendHtml("""
     <style>body { margin: 0; }</style>
     <div style="background: white; height: 200px;"></div>
     <div style="background: black; height: 200px;"></div>
     <div style="background: white; height: 100px;"></div>
   """)
 
-  app.get "/fullpage-same", e2e.sendHtml("""
+  app.get "/fullPage-same", e2e.sendHtml("""
     <style>body { margin: 0; }</style>
     <div style="height: 500px;"></div>
   """)
@@ -38,6 +41,11 @@ onServer = (app) ->
     <div style="right: 0; top: 0; background-color: white;"></div>
     <div style="left: 0; bottom: 0; background-color: white;"></div>
     <div style="right: 0; bottom: 0; background-color: black;"></div>
+  """)
+
+  app.get "/identical", e2e.sendHtml("""
+    <style>div { height: 1300px; width: 200px; background-color: #ddd; }</style>
+    <div></div>
   """)
 
 describe "e2e screenshots", ->

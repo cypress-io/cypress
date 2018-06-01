@@ -1,7 +1,5 @@
-import _ from 'lodash'
-import moment from 'moment'
 import gravatar from 'gravatar'
-import padStart from 'string.prototype.padstart'
+import duration from '../../../server/lib/util/duration'
 
 const cyDirRegex = /^cypress\/integration\//g
 
@@ -19,6 +17,8 @@ const browserIconLookup = {
 }
 
 module.exports = {
+  durationFormatted: duration.format,
+
   osIcon: (osName) => {
     if (!osName) return ''
 
@@ -66,28 +66,6 @@ module.exports = {
         return 'terminal'
       default:
         return ''
-    }
-  },
-
-  durationFormatted: (durationInMs, padMinutes = true) => {
-    const duration = moment.duration(durationInMs)
-
-    const durationSecs = duration.seconds() ? `${duration.seconds()}` : ''
-    const durationMins = duration.minutes() ? `${duration.minutes()}` : ''
-    const durationHrs = duration.hours() ? `${duration.hours()}` : ''
-
-    const total = _.compact([
-      durationHrs,
-      !!durationHrs || padMinutes ? padStart(durationMins, 2, '0') : durationMins,
-      padStart(durationSecs, 2, '0'),
-    ])
-
-    const totalMinSec = total.join(':')
-
-    if (totalMinSec === '00:00') {
-      return `${duration.milliseconds()}ms`
-    } else {
-      return totalMinSec
     }
   },
 

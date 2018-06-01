@@ -34,6 +34,7 @@ module.exports = {
 
         err = errors.get("BUNDLE_ERROR", filePath, preprocessor.errorMessage(err))
 
+        console.log("")
         errors.log(err)
 
         project.emit("exitEarlyWithErr", err.message)

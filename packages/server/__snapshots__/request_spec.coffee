@@ -1,7 +1,19 @@
 exports['e2e requests passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_spec.coffee)                                                      │
+  │ Searched:   cypress/integration/request_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: request_spec.coffee...                                                          (1 of 1) 
 
 
   redirects + requests
@@ -22,33 +34,56 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   12 passing
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           12
-  - Passes:          12
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     0
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────┐
+  │ Tests:        12                  │
+  │ Passing:      12                  │
+  │ Failing:      0                   │
+  │ Pending:      0                   │
+  │ Skipped:      0                   │
+  │ Screenshots:  0                   │
+  │ Video:        true                │
+  │ Duration:     X seconds           │
+  │ Spec Ran:     request_spec.coffee │
+  └───────────────────────────────────┘
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX       12       12        -        -        -  
 
 `
 
 exports['e2e requests fails when network immediately fails 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_http_network_error_failing_spec.coffee)                           │
+  │ Searched:   cypress/integration/request_http_network_error_failing_spec.coffee                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: request_http_network_error_failing_spec.coffee...                               (1 of 1) 
 
 
   when network connection cannot be established
@@ -122,17 +157,19 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                              │
+  │ Passing:      0                                              │
+  │ Failing:      1                                              │
+  │ Pending:      0                                              │
+  │ Skipped:      0                                              │
+  │ Screenshots:  1                                              │
+  │ Video:        true                                           │
+  │ Duration:     X seconds                                      │
+  │ Spec Ran:     request_http_network_error_failing_spec.coffee │
+  └──────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -143,17 +180,38 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ request_http_network_error_failing_s…     XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
 exports['e2e requests fails on status code 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_status_code_failing_spec.coffee)                                  │
+  │ Searched:   cypress/integration/request_status_code_failing_spec.coffee                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: request_status_code_failing_spec.coffee...                                      (1 of 1) 
 
 
   when status code isnt 2xx or 3xx
@@ -198,7 +256,7 @@ Headers: {
   "content-type": "text/plain; charset=utf-8",
   "content-length": "19",
   "etag": "W/13-52060a5f",
-  "date": "Fri, 18 Aug 2017 15:01:13 GMT",
+  "date": "Fri, 18 Aug 2017    XX:XX GMT",
   "connection": "close"
 }
 Body: Service Unavailable
@@ -220,17 +278,19 @@ Body: Service Unavailable
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────┐
+  │ Tests:        1                                       │
+  │ Passing:      0                                       │
+  │ Failing:      1                                       │
+  │ Pending:      0                                       │
+  │ Skipped:      0                                       │
+  │ Screenshots:  1                                       │
+  │ Video:        true                                    │
+  │ Duration:     X seconds                               │
+  │ Spec Ran:     request_status_code_failing_spec.coffee │
+  └───────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -241,10 +301,19 @@ Body: Service Unavailable
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ request_status_code_failing_spec.cof…     XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 

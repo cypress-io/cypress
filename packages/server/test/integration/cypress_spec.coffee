@@ -28,7 +28,6 @@ cwd        = require("#{root}lib/cwd")
 user       = require("#{root}lib/user")
 config     = require("#{root}lib/config")
 cache      = require("#{root}lib/cache")
-video      = require("#{root}lib/video")
 errors     = require("#{root}lib/errors")
 plugins    = require("#{root}lib/plugins")
 cypress    = require("#{root}lib/cypress")
@@ -37,6 +36,7 @@ Server     = require("#{root}lib/server")
 Reporter   = require("#{root}lib/reporter")
 Watchers   = require("#{root}lib/watchers")
 browsers   = require("#{root}lib/browsers")
+videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
@@ -90,7 +90,7 @@ describe "lib/cypress", ->
 
     ## force cypress to call directly into main without
     ## spawning a separate process
-    sinon.stub(video, "start").resolves({})
+    sinon.stub(videoCapture, "start").resolves({})
     sinon.stub(plugins, "init").resolves(undefined)
     sinon.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     sinon.stub(extension, "setHostAndPath").resolves()
@@ -247,7 +247,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
-      sinon.stub(runMode, "runSpecs").resolves({ totalFailures: 10 })
+      sinon.stub(runMode, "runSpecs").resolves({ totalFailed: 10 })
 
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
@@ -547,7 +547,51 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "cypress.json")
+        @expectExitWithErr("SETTINGS_VALIDATION_ERROR", "cypress.json")
+
+    it "logs error and exits when project has invalid config values from the CLI", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=baseUrl=localhost:9999"
+      ])
+      .then =>
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "localhost:9999")
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "We found an invalid configuration value")
+
+    it "logs error and exits when project has invalid config values from env vars", ->
+      process.env.CYPRESS_BASE_URL = "localhost:9999"
+
+      cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "localhost:9999")
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "We found an invalid configuration value")
+
+    it "logs error and exits when using an old configuration option: trashAssetsBeforeHeadlessRuns", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=trashAssetsBeforeHeadlessRuns=false"
+      ])
+      .then =>
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "trashAssetsBeforeHeadlessRuns")
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "trashAssetsBeforeRuns")
+
+    it "logs error and exits when using an old configuration option: videoRecording", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=videoRecording=false"
+      ])
+      .then =>
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "videoRecording")
+        @expectExitWithErr("RENAMED_CONFIG_OPTION", "video")
+
+    it "logs error and exits when using screenshotOnHeadlessFailure", ->
+      cypress.start([
+        "--run-project=#{@todosPath}"
+        "--config=screenshotOnHeadlessFailure=false"
+      ])
+      .then =>
+        @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "screenshotOnHeadlessFailure")
+        @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "You now configure this behavior in your test code")
 
     it "logs error and exits when baseUrl cannot be verified", ->
       settings.write(@todosPath, {baseUrl: "http://localhost:90874"})
@@ -760,19 +804,14 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
-        @env = process.env
-
         process.env = _.omit(process.env, "CYPRESS_DEBUG")
 
         runMode.listenForProjectEnd.resolves({stats: {failures: 0} })
 
-      afterEach ->
-        process.env = @env
-
       it "can set specific environment variables", ->
         cypress.start([
           "--run-project=#{@todosPath}",
-          "--videoRecording=false"
+          "--video=false"
           "--env",
           "version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor"
         ])
@@ -800,7 +839,8 @@ describe "lib/cypress", ->
           passes: 2
           failures: 3
           pending: 4
-          wallClockDuration: 5
+          skipped: 5
+          wallClockDuration: 6
         }
         tests: []
         hooks: []
@@ -808,6 +848,7 @@ describe "lib/cypress", ->
         shouldUploadVideo: true
         screenshots: []
         config: {}
+        spec: {}
       })
 
       Promise.all([
@@ -927,13 +968,6 @@ describe "lib/cypress", ->
       sinon.spy(Events, "start")
       sinon.stub(electron.ipcMain, "on")
 
-    afterEach ->
-      delete process.env.CYPRESS_FILE_SERVER_FOLDER
-      delete process.env.CYPRESS_BASE_URL
-      delete process.env.CYPRESS_port
-      delete process.env.CYPRESS_responseTimeout
-      delete process.env.CYPRESS_watch_for_file_changes
-
     it "passes options to interactiveMode.ready", ->
       sinon.stub(interactiveMode, "ready")
 
@@ -963,7 +997,7 @@ describe "lib/cypress", ->
       open      = sinon.stub(Server.prototype, "open").resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = "foo"
-      process.env.CYPRESS_BASE_URL = "localhost"
+      process.env.CYPRESS_BASE_URL = "http://localhost"
       process.env.CYPRESS_port = "2222"
       process.env.CYPRESS_responseTimeout = "5555"
       process.env.CYPRESS_watch_for_file_changes = "false"
@@ -976,7 +1010,13 @@ describe "lib/cypress", ->
         json.baseUrl = "http://localhost:8080"
         settings.write(@todosPath, json)
       .then =>
-        cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
+        cypress.start([
+          "--port=2121",
+          "--config",
+          "pageLoadTimeout=1000",
+          "--foo=bar",
+          "--env=baz=baz"
+        ])
       .then =>
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
@@ -988,12 +1028,14 @@ describe "lib/cypress", ->
           env: { baz: "baz" }
         })
 
+        expect(open).to.be.called
+
         cfg = open.getCall(0).args[0]
 
         expect(cfg.fileServerFolder).to.eq(path.join(@todosPath, "foo"))
         expect(cfg.pageLoadTimeout).to.eq(1000)
         expect(cfg.port).to.eq(2121)
-        expect(cfg.baseUrl).to.eq("localhost")
+        expect(cfg.baseUrl).to.eq("http://localhost")
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
         expect(cfg.env.baz).to.eq("baz")
@@ -1016,7 +1058,7 @@ describe "lib/cypress", ->
           from: "cli"
         })
         expect(cfg.resolved.baseUrl).to.deep.eq({
-          value: "localhost"
+          value: "http://localhost"
           from: "env"
         })
         expect(cfg.resolved.watchForFileChanges).to.deep.eq({

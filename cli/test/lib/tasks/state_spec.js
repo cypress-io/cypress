@@ -3,7 +3,7 @@ require('../../spec_helper')
 const os = require('os')
 const path = require('path')
 const proxyquire = require('proxyquire')
-// const Promise = require('bluebird')
+const Promise = require('bluebird')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -22,33 +22,33 @@ describe('lib/tasks/state', function () {
   beforeEach(function () {
     state = proxyquire(`${lib}/tasks/state`, { cachedir: fakeCachedir })
     logger.reset()
-    this.sandbox.stub(process, 'exit')
-    this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-    this.sandbox.stub(os, 'platform').returns('darwin')
+    sinon.stub(process, 'exit')
+    sinon.stub(util, 'pkgVersion').returns('1.2.3')
+    os.platform.returns('darwin')
   })
 
   context('.getBinaryPkgVersionAsync', function () {
 
     it('resolves version from version file when it exists', function () {
-      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(binaryPkgPath).resolves(true)
-      this.sandbox.stub(fs, 'readJsonAsync').withArgs(binaryPkgPath).resolves({ version: '2.0.48' })
-      return state.getBinaryPkgVersionAsync()
+      sinon.stub(fs, 'pathExistsAsync').withArgs(binaryPkgPath).resolves(true)
+      sinon.stub(fs, 'readJsonAsync').withArgs(binaryPkgPath).resolves({ version: '2.0.48' })
+      return state.getBinaryPkgVersionAsync(binaryDir)
       .then((binaryVersion) => {
         expect(binaryVersion).to.equal('2.0.48')
       })
     })
 
     it('returns null if no version found', function () {
-      this.sandbox.stub(fs, 'pathExistsAsync').resolves(false)
-      return state.getBinaryPkgVersionAsync()
+      sinon.stub(fs, 'pathExistsAsync').resolves(false)
+      return state.getBinaryPkgVersionAsync(binaryDir)
       .then((binaryVersion) => expect(binaryVersion).to.equal(null))
     })
 
     it('returns correct version if passed binaryDir', function () {
       const customBinaryDir = '/custom/binary/dir'
       const customBinaryPackageDir = '/custom/binary/dir/Contents/Resources/app/package.json'
-      this.sandbox.stub(fs, 'pathExistsAsync').withArgs(customBinaryPackageDir).resolves(true)
-      this.sandbox.stub(fs, 'readJsonAsync').withArgs(customBinaryPackageDir).resolves({ version: '3.4.5' })
+      sinon.stub(fs, 'pathExistsAsync').withArgs(customBinaryPackageDir).resolves(true)
+      sinon.stub(fs, 'readJsonAsync').withArgs(customBinaryPackageDir).resolves({ version: '3.4.5' })
 
       return state.getBinaryPkgVersionAsync(customBinaryDir)
       .then((binaryVersion) => expect(binaryVersion).to.equal('3.4.5'))
@@ -59,16 +59,16 @@ describe('lib/tasks/state', function () {
   context('.getPathToExecutable', function () {
     it('resolves path on macOS', function () {
       const macExecutable = '.cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
-      expect(state.getPathToExecutable()).to.equal(macExecutable)
+      expect(state.getPathToExecutable(state.getBinaryDir())).to.equal(macExecutable)
     })
     it('resolves path on linux', function () {
       os.platform.returns('linux')
-      const macExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
-      expect(state.getPathToExecutable()).to.equal(macExecutable)
+      const linuxExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
+      expect(state.getPathToExecutable(state.getBinaryDir())).to.equal(linuxExecutable)
     })
     it('resolves path on windows', function () {
       os.platform.returns('win32')
-      expect(state.getPathToExecutable()).to.endWith('.exe')
+      expect(state.getPathToExecutable(state.getBinaryDir())).to.endWith('.exe')
     })
     it('resolves from custom binaryDir', function () {
       const customBinaryDir = 'home/downloads/cypress.app'
@@ -110,53 +110,81 @@ describe('lib/tasks/state', function () {
 
   context('.getBinaryVerifiedAsync', function () {
     it('resolves true if verified', function () {
-      this.sandbox.stub(fs, 'readJsonAsync').resolves({ verified: true })
-      return state.getBinaryVerifiedAsync()
+      sinon.stub(fs, 'readJsonAsync').resolves({ verified: true })
+      return state.getBinaryVerifiedAsync('/asdf')
       .then((isVerified) => expect(isVerified).to.be.equal(true))
     })
     it('resolves undefined if not verified', function () {
-      this.sandbox.stub(fs, 'readJsonAsync').rejects({ code: 'ENOENT' })
-      return state.getBinaryVerifiedAsync()
+      sinon.stub(fs, 'readJsonAsync').rejects({ code: 'ENOENT' })
+      return state.getBinaryVerifiedAsync('/asdf')
       .then((isVerified) => expect(isVerified).to.be.equal(undefined))
     })
     it('can accept custom binaryDir', function () {
       const customBinaryDir = '/custom/binary/dir'
-      this.sandbox.stub(fs, 'pathExistsAsync').withArgs('/custom/binary/dir/binary_state.json').resolves({ verified: true })
-      this.sandbox.stub(fs, 'readJsonAsync').withArgs('/custom/binary/dir/binary_state.json').resolves({ verified: true })
+      sinon.stub(fs, 'pathExistsAsync').withArgs('/custom/binary/dir/binary_state.json').resolves({ verified: true })
+      sinon.stub(fs, 'readJsonAsync').withArgs('/custom/binary/dir/binary_state.json').resolves({ verified: true })
       return state.getBinaryVerifiedAsync(customBinaryDir)
       .then((isVerified) => expect(isVerified).to.be.equal(true))
     })
   })
   context('.writeBinaryVerified', function () {
     it('writes to binary state verified:true', function () {
-      this.sandbox.stub(fs, 'outputJsonAsync').resolves()
-      return state.writeBinaryVerifiedAsync(true)
+      sinon.stub(fs, 'outputJsonAsync').resolves()
+      return state.writeBinaryVerifiedAsync(true, binaryDir)
       .then(() => expect(fs.outputJsonAsync).to.be.calledWith(
         path.join(binaryDir, 'binary_state.json'), { verified: true }), { spaces: 2 }
       )
     })
 
     it('write to binary state verified:false', function () {
-      this.sandbox.stub(fs, 'outputJsonAsync').resolves()
-      return state.writeBinaryVerifiedAsync(false)
+      sinon.stub(fs, 'outputJsonAsync').resolves()
+      return state.writeBinaryVerifiedAsync(false, binaryDir)
       .then(() => expect(fs.outputJsonAsync).to.be.calledWith(
         path.join(binaryDir, 'binary_state.json'), { verified: false }, { spaces: 2 })
       )
     })
   })
   context('.getCacheDir', function () {
-    afterEach(() => {
-      delete process.env.CYPRESS_CACHE_DIRECTORY
-    })
+
     it('uses cachedir()', function () {
       const ret = state.getCacheDir()
       expect(ret).to.equal(cacheDir)
     })
 
-    it('uses env variable CYPRESS_CACHE_DIRECTORY', function () {
-      process.env.CYPRESS_CACHE_DIRECTORY = '/path/to/dir'
+    it('uses env variable CYPRESS_CACHE_FOLDER', function () {
+      process.env.CYPRESS_CACHE_FOLDER = '/path/to/dir'
       const ret = state.getCacheDir()
       expect(ret).to.equal('/path/to/dir')
+    })
+  })
+  context('.parseRealPlatformBinaryFolderAsync', function () {
+    beforeEach(function () {
+      sinon.stub(fs, 'realpathAsync').callsFake((path) => Promise.resolve(path))
+    })
+
+    it('can parse on darwin', function () {
+      os.platform.returns('darwin')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress.app/Contents/MacOS/Cypress').then((path) => expect(path).to.eql('/Documents/Cypress.app'))
+    })
+    it('can parse on linux', function () {
+      os.platform.returns('linux')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress').then((path) => expect(path).to.eql('/Documents/Cypress'))
+    })
+    it('can parse on darwin', function () {
+      os.platform.returns('win32')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe').then((path) => expect(path).to.eql('/Documents/Cypress'))
+    })
+    it('throws when invalid on darwin', function () {
+      os.platform.returns('darwin')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe').then((path) => expect(path).to.eql(false))
+    })
+    it('throws when invalid on linux', function () {
+      os.platform.returns('linux')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe').then((path) => expect(path).to.eql(false))
+    })
+    it('throws when invalid on windows', function () {
+      os.platform.returns('win32')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress').then((path) => expect(path).to.eql(false))
     })
   })
 })

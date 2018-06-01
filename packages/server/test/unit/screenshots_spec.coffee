@@ -14,14 +14,19 @@ settings    = require("#{root}lib/util/settings")
 screenshotAutomation = require("#{root}lib/automation/screenshot")
 
 image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC"
+iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 
 describe "lib/screenshots", ->
   beforeEach ->
+    ## make each test timeout after only 1 sec
+    ## so that durations are handled correctly
+    @currentTest.timeout(1000)
+
     Fixtures.scaffold()
     @todosPath = Fixtures.projectPath("todos")
 
     @appData = {
-      capture: "app"
+      capture: "viewport"
       clip: { x: 0, y: 0, width: 10, height: 10 }
       viewport: { width: 40, height: 40 }
     }
@@ -29,6 +34,7 @@ describe "lib/screenshots", ->
     @buffer = {}
 
     @jimpImage = {
+      id: 1
       bitmap: {
         width: 40
         height: 40
@@ -71,12 +77,12 @@ describe "lib/screenshots", ->
         @getPixelColor.withArgs(0, 0).returns("white")
 
     it "captures screenshot with automation", ->
-      data = { viewport: {} }
+      data = { viewport: @jimpImage.bitmap }
       screenshots.capture(data, @automate).then =>
         expect(@automate).to.be.calledOnce
         expect(@automate).to.be.calledWith(data)
 
-    it "retries until helper pixels are no longer present for app capture", ->
+    it "retries until helper pixels are no longer present for viewport capture", ->
       @getPixelColor.withArgs(0, 0).onCall(1).returns("white")
       screenshots.capture(@appData, @automate).then =>
         expect(@automate).to.be.calledTwice
@@ -84,24 +90,28 @@ describe "lib/screenshots", ->
     it "retries until helper pixels are present for runner capture", ->
       @passPixelTest()
       @getPixelColor.withArgs(0, 0).onCall(1).returns("black")
-      screenshots.capture({ viewport: {} }, @automate).then =>
+      screenshots.capture({ viewport: @jimpImage.bitmap }, @automate)
+      .then =>
         expect(@automate).to.be.calledTwice
-
-    it "gives up after 10 tries", ->
-      screenshots.capture(@appData, @automate).then =>
-        expect(@automate.callCount).to.equal(10)
 
     it "adjusts cropping based on pixel ratio", ->
       @appData.viewport = { width: 20, height: 20 }
       @appData.clip = { x: 5, y: 5, width: 10, height: 10 }
       @passPixelTest()
-      screenshots.capture(@appData, @automate).then =>
+      @getPixelColor.withArgs(2, 0).returns("white")
+      @getPixelColor.withArgs(0, 2).returns("white")
+      screenshots.capture(@appData, @automate)
+      .then =>
         expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
-    it "resolves image", ->
+    it "resolves details w/ image", ->
       @passPixelTest()
-      screenshots.capture(@appData, @automate).then (image) =>
-        expect(image).to.equal(@jimpImage)
+
+      screenshots.capture(@appData, @automate).then (details) =>
+        expect(details.image).to.equal(@jimpImage)
+        expect(details.multipart).to.be.false
+        expect(details.pixelRatio).to.equal(1)
+        expect(details.takenAt).to.match(iso8601Regex)
 
     describe "simple capture", ->
       beforeEach ->
@@ -111,9 +121,11 @@ describe "lib/screenshots", ->
         screenshots.capture(@appData, @automate).then ->
           expect(Jimp.read).not.to.be.called
 
-      it "resolves the buffer", ->
-        screenshots.capture(@appData, @automate).then (buffer) ->
-          expect(buffer).to.be.instanceOf(Buffer)
+      it "resolves details w/ buffer", ->
+        screenshots.capture(@appData, @automate).then (details) ->
+          expect(details.takenAt).to.match(iso8601Regex)
+          expect(details.multipart).to.be.false
+          expect(details.buffer).to.be.instanceOf(Buffer)
 
     describe "userClip", ->
       it "crops final image if userClip specified", ->
@@ -134,49 +146,72 @@ describe "lib/screenshots", ->
         @appData.viewport = { width: 20, height: 20 }
         @appData.userClip = { x: 5, y: 5, width: 10, height: 10 }
         @passPixelTest()
+        @getPixelColor.withArgs(2, 0).returns("white")
+        @getPixelColor.withArgs(0, 2).returns("white")
         screenshots.capture(@appData, @automate).then =>
           expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
-    describe "multi-part capture (fullpage or element)", ->
+    describe "multi-part capture (fullPage or element)", ->
       beforeEach ->
         screenshots.clearMultipartState()
 
         @appData.current = 1
         @appData.total = 3
 
-        @getPixelColor.withArgs(0, 0).onCall(1).returns("white")
+        @getPixelColor.withArgs(0, 0).onSecondCall().returns("white")
+
+        @jimpImage2 = _.extend({}, @jimpImage, {
+          id: 2
+          hash: sinon.stub().returns("image 2 hash")
+        })
+
+        @jimpImage3 = _.extend({}, @jimpImage, {
+          id: 3
+          hash: sinon.stub().returns("image 3 hash")
+        })
+
+        @jimpImage4 = _.extend({}, @jimpImage, {
+          id: 4
+          hash: sinon.stub().returns("image 4 hash")
+        })
 
       it "retries until helper pixels are no longer present on first capture", ->
-        screenshots.capture(@appData, @automate).then =>
+        screenshots.capture(@appData, @automate)
+        .then =>
           expect(@automate).to.be.calledTwice
 
       it "retries until images aren't the same on subsequent captures", ->
-        @jimpImage2 = _.extend({}, @jimpImage, {
-          foo: true
-          hash: -> "image 2 hash"
-        })
-        Jimp.read.onCall(3).resolves(@jimpImage2)
-
         screenshots.capture(@appData, @automate)
         .then =>
+          Jimp.read.onCall(3).resolves(@jimpImage2)
+
           @appData.current = 2
           screenshots.capture(@appData, @automate)
         .then =>
           expect(@automate.callCount).to.equal(4)
 
+          ## image.hash() is very expensive and we want to make sure its only called
+          ## once for each image
+          expect(@jimpImage2.hash).to.be.calledOnce
+
       it "resolves no image on non-last captures", ->
         screenshots.capture(@appData, @automate).then (image) ->
-          expect(image).to.be.undefined
+          expect(image).to.be.null
 
-      it "resolves image on last capture", ->
+      it "resolves details w/ image on last capture", ->
         screenshots.capture(@appData, @automate)
         .then =>
+          Jimp.read.onCall(3).resolves(@jimpImage2)
+
           @appData.current = 3
           screenshots.capture(@appData, @automate)
-        .then (image) =>
+        .then ({ image }) =>
           expect(image).to.be.an.instanceOf(Jimp)
 
       it "composites images into one image", ->
+        Jimp.read.onThirdCall().resolves(@jimpImage2)
+        Jimp.read.onCall(3).resolves(@jimpImage3)
+
         screenshots.capture(@appData, @automate)
         .then =>
           @appData.current = 2
@@ -196,6 +231,12 @@ describe "lib/screenshots", ->
           expect(composite.getCall(2).args[2]).to.equal(80)
 
       it "clears previous full page state once complete", ->
+        @getPixelColor.withArgs(0, 0).returns("white")
+
+        Jimp.read.onSecondCall().resolves(@jimpImage2)
+        Jimp.read.onThirdCall().resolves(@jimpImage3)
+        Jimp.read.onCall(3).resolves(@jimpImage4)
+
         @appData.total = 2
         screenshots.capture(@appData, @automate)
         .then =>
@@ -246,31 +287,44 @@ describe "lib/screenshots", ->
       expect(@jimpImage.crop).to.be.calledWith(0, 0, 40, 10)
 
   context ".save", ->
-    it "outputs file and returns size and path", ->
-      screenshots.save({name: "foo/tweet"}, @jimpImage, @config.screenshotsFolder)
-      .then (obj) =>
-        expectedPath = path.normalize(@config.screenshotsFolder + "/footweet.png")
-        actualPath = path.normalize(obj.path)
+    it "outputs file and returns details", ->
+      details = {
+        image: @jimpImage
+        multipart: false
+        pixelRatio: 2
+        takenAt: "taken:at:date"
+      }
 
-        expect(obj.size).to.eq("15 B")
+      screenshots.save({name: "foo/tweet"}, details, @config.screenshotsFolder)
+      .then (result) =>
+        expectedPath = path.normalize(@config.screenshotsFolder + "/footweet.png")
+        actualPath = path.normalize(result.path)
+
         expect(actualPath).to.eq(expectedPath)
-        expect(obj.width).to.eq(40)
-        expect(obj.height).to.eq(40)
+        expect(result.size).to.eq("15 B")
+        expect(result.dimensions).to.eql({ width: 40, height: 40 })
+        expect(result.multipart).to.be.false
+        expect(result.pixelRatio).to.be.eq(2)
+        expect(result.takenAt).to.eq("taken:at:date")
 
         fs.statAsync(expectedPath)
 
     it "can handle saving buffer", ->
-      buffer = dataUriToBuffer(image)
-      dimensions = sizeOf(buffer)
-      screenshots.save({name: "bar/tweet"}, buffer, @config.screenshotsFolder)
-      .then (obj) =>
+      details = {
+        multipart: false
+        pixelRatio: 1
+        buffer: dataUriToBuffer(image)
+      }
+      dimensions = sizeOf(details.buffer)
+      screenshots.save({name: "bar/tweet"}, details, @config.screenshotsFolder)
+      .then (result) =>
         expectedPath = path.normalize(@config.screenshotsFolder + "/bartweet.png")
-        actualPath = path.normalize(obj.path)
+        actualPath = path.normalize(result.path)
 
-        expect(obj.size).to.eq("279 B")
+        expect(result.multipart).to.be.false
+        expect(result.pixelRatio).to.equal(1)
         expect(actualPath).to.eq(expectedPath)
-        expect(obj.width).to.eq(dimensions.width)
-        expect(obj.height).to.eq(dimensions.height)
+        expect(result.dimensions).to.eql(dimensions)
 
         fs.statAsync(expectedPath)
 

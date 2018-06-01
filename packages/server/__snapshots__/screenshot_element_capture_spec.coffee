@@ -1,7 +1,19 @@
 exports['e2e screenshot element capture passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (screenshot_element_capture_spec.coffee)                                   │
+  │ Searched:   cypress/integration/screenshot_element_capture_spec.coffee                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: screenshot_element_capture_spec.coffee...                                       (1 of 1) 
 
 
   ✓ takes consistent element captures
@@ -9,17 +21,19 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   1 passing
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          1
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     11
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────────────────┐
+  │ Tests:        1                                      │
+  │ Passing:      1                                      │
+  │ Failing:      0                                      │
+  │ Pending:      0                                      │
+  │ Skipped:      0                                      │
+  │ Screenshots:  11                                     │
+  │ Video:        true                                   │
+  │ Duration:     X seconds                              │
+  │ Spec Ran:     screenshot_element_capture_spec.coffee │
+  └──────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -40,10 +54,19 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ screenshot_element_capture_spec.coff…     XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

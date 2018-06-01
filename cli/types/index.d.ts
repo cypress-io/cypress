@@ -178,7 +178,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/screenshot-api
      */
     Screenshot: {
-      defaults(options: Partial<ScreenshotOptions & ScreenshotDefaultsOptions>): void
+      defaults(options: Partial<ScreenshotDefaultsOptions>): void
     }
 
     /**
@@ -1108,11 +1108,6 @@ declare namespace Cypress {
      * Whether to take a screenshot on test failure when running headlessly or in CI
      * @default true
      */
-    screenshotOnHeadlessFailure: boolean
-    /**
-     * Whether Cypress will watch and restart tests on test file changes
-     * @default true
-     */
     watchForFileChanges: boolean
     /**
      * Time, in milliseconds, to wait until most DOM based commands are considered timed out
@@ -1178,7 +1173,7 @@ declare namespace Cypress {
      * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
      * @default true
      */
-    trashAssetsBeforeHeadlessRuns: boolean
+    trashAssetsBeforeRuns: boolean
     /**
      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * @default 32
@@ -1188,7 +1183,7 @@ declare namespace Cypress {
      * Whether Cypress will record a video of the test run when running headlessly.
      * @default true
      */
-    videoRecording: boolean
+    video: boolean
     /**
      * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
      * @default true
@@ -1280,16 +1275,15 @@ declare namespace Cypress {
 
   interface ScreenshotOptions {
     blackout: string[]
-    capture: 'runner' | 'app' | 'fullpage'
+    capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
-    waitForCommandSynchronization: boolean
+    scale: boolean
     beforeScreenshot(doc: Document): void
     afterScreenshot(doc: Document): void
   }
 
-  interface ScreenshotDefaultsOptions {
-    scaleAppCaptures: boolean
+  interface ScreenshotDefaultsOptions extends ScreenshotOptions {
     screenshotOnRunFailure: boolean
   }
 

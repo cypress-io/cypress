@@ -1,9 +1,20 @@
-const glob = require('glob')
 const path = require('path')
+const Promise = require('bluebird')
+const glob = Promise.promisify(require('glob'))
 
 module.exports = {
   getPathToExamples () {
-    return glob.sync(path.join(__dirname, '..', 'cypress', 'integration', 'examples', '**', '*'))
+    return glob(
+      path.join(
+        __dirname,
+        '..',
+        'cypress',
+        'integration',
+        'examples',
+        '**',
+        '*'
+      )
+    )
   },
 
   getFolderName () {

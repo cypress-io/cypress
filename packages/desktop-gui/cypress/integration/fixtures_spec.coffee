@@ -1,6 +1,6 @@
-publicJson = require("@cypress/json-schemas")
+jsonSchemas = require("@cypress/json-schemas")
 
-{ assertSchema } = publicJson.tools.bind(publicJson)
+{ assertSchema } = jsonSchemas
 
 describe "api object schemas matches fixture: ", ->
   it "runs", ->

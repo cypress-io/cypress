@@ -249,9 +249,8 @@ const eventManager = {
       if (!wait) beforeThenCb()
     })
 
-    Cypress.on('after:screenshot', (config, cb) => {
+    Cypress.on('after:screenshot', (config) => {
       localBus.emit('after:screenshot', config)
-      cb()
     })
 
     _.each(driverToReporterEvents, (event) => {

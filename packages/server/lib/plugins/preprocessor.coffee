@@ -21,7 +21,7 @@ errorMessage = (err = {}) ->
   .replace(/From previous event:\n?/g, "")
 
 clientSideError = (err) ->
-  console.error(pe.render(err))
+  console.log(pe.render(err))
   err = errorMessage(err)
   ## \n doesn't come through properly so preserve it so the
   ## runner can do the right thing
@@ -62,9 +62,9 @@ plugins.registerHandler (ipc) ->
     ipc.send("preprocessor:close", filePath)
 
 module.exports = {
+  errorMessage
+  clientSideError
   emitter: baseEmitter
-  errorMessage: errorMessage
-  clientSideError: clientSideError
 
   getFile: (filePath, config, options = {}) ->
     filePath = path.join(config.projectRoot, filePath)

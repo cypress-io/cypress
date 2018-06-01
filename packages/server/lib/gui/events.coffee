@@ -21,11 +21,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
   sendResponse = (data = {}) ->
     try
-      debug("sending ipc data", {type: type, data: data})
+      debug("sending ipc data %o", {type: type, data: data})
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    debug("send error:", err)
+    debug("send error: %o", err)
     sendResponse({id: id, __error: errors.clone(err, {html: true})})
 
   send = (data) ->

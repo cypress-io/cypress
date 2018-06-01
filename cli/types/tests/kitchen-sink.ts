@@ -785,10 +785,10 @@ describe('Kitchen Sink', function() {
       // https://on.cypress.io/screenshot
       cy.screenshot('my-image', {
         blackout: ['.foo'],
-        capture: 'app',
+        capture: 'viewport',
         clip: { x: 0, y: 0, width: 200, height: 200 },
         disableTimersAndAnimations: true,
-        waitForCommandSynchronization: true,
+        scale: true,
         beforeScreenshot() {},
         afterScreenshot() {},
       })
@@ -1493,12 +1493,11 @@ describe('Kitchen Sink', function() {
     it('Cypress.Screenshot.defaults() - change default config of screenshots', function() {
       Cypress.Screenshot.defaults({
         blackout: ['.foo'],
-        capture: 'app',
+        capture: 'viewport',
         clip: { x: 0, y: 0, width: 200, height: 200 },
-        scaleAppCaptures: false,
+        scale: false,
         disableTimersAndAnimations: true,
         screenshotOnRunFailure: true,
-        waitForCommandSynchronization: true,
         beforeScreenshot() { },
         afterScreenshot() { },
       })

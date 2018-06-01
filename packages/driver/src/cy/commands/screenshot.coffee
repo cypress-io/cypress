@@ -2,11 +2,12 @@ _ = require("lodash")
 Promise = require("bluebird")
 $ = require("jquery")
 
-Screenshot = require("../../cypress/screenshot")
+$Screenshot = require("../../cypress/screenshot")
 $dom = require("../../dom")
 $utils = require("../../cypress/utils")
 
 getViewportHeight = (state) ->
+  ## TODO this doesn't seem correct
   Math.min(state("viewportHeight"), $(window).height())
 
 getViewportWidth = (state) ->
@@ -72,7 +73,7 @@ scrollOverrides = (win, doc) ->
   ## hide scrollbars
   doc.documentElement.style.overflow = "hidden"
 
-  ->
+  return ->
     doc.documentElement.style.overflow = originalOverflow
     if doc.body
       doc.body.style.overflowY = originalBodyOverflowY
@@ -172,53 +173,61 @@ takeElementScreenshot = ($el, state, automationOptions) ->
   takeScrollingScreenshots(scrolls, win, automationOptions)
   .finally(resetScrollOverrides)
 
+## "app only" means we're hiding the runner UI
+isAppOnly = ({ capture }) ->
+  capture is "viewport" or capture is "fullPage"
+
+getShouldScale = ({ capture, scale }) ->
+  if isAppOnly({ capture }) then scale else true
+
+getBlackout = ({ capture, blackout }) ->
+  if isAppOnly({ capture }) then blackout else []
+
 takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
-    blackout
     capture
     clip
     disableTimersAndAnimations
-    scaleAppCaptures
-    waitForCommandSynchronization
+    onBeforeScreenshot
+    onAfterScreenshot
   } = screenshotConfig
 
-  { subject, runnable } = options
+  { subject, runnable, name } = options
 
-  appOnly = capture is "app" or capture is "fullpage"
+  startTime = new Date()
 
-  send = (event, props) ->
+  send = (event, props, resolve) ->
+    Cypress.action("cy:#{event}", props, resolve)
+
+  sendAsync = (event, props) ->
     new Promise (resolve) ->
-      Cypress.action("cy:#{event}", props, resolve)
+      send(event, props, resolve)
 
   getOptions = (isOpen) ->
     {
       id: runnable.id
       isOpen: isOpen
-      appOnly: appOnly
-      scale: if appOnly then scaleAppCaptures else true
-      waitForCommandSynchronization: if appOnly then false else waitForCommandSynchronization
+      appOnly: isAppOnly(screenshotConfig)
+      scale: getShouldScale(screenshotConfig)
+      waitForCommandSynchronization: not isAppOnly(screenshotConfig)
       disableTimersAndAnimations: disableTimersAndAnimations
-      blackout: if appOnly then blackout else []
+      blackout: getBlackout(screenshotConfig)
     }
 
   before = ->
     if disableTimersAndAnimations
       cy.pauseTimers(true)
 
-    Screenshot.callBeforeScreenshot(state("document"))
-
-    send("before:screenshot", getOptions(true))
+    sendAsync("before:screenshot", getOptions(true))
 
   after = ->
     send("after:screenshot", getOptions(false))
-
-    Screenshot.callAfterScreenshot(state("document"))
 
     if disableTimersAndAnimations
       cy.pauseTimers(false)
 
   automationOptions = _.extend({}, options, {
-    capture: capture
+    capture
     clip: {
       x: 0
       y: 0
@@ -232,37 +241,72 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     }
   })
 
+  ## use the subject as $el or yield the wrapped documentElement
+  $el = if $dom.isElement(subject)
+    subject
+  else
+    $dom.wrap(state("document").documentElement)
+
   before()
   .then ->
-    if subject
-      takeElementScreenshot(subject, state, automationOptions)
-    else if capture is "fullpage"
-      takeFullPageScreenshot(state, automationOptions)
-    else
-      automateScreenshot(automationOptions)
+    onBeforeScreenshot and onBeforeScreenshot.call(state("ctx"), $el)
+
+    $Screenshot.onBeforeScreenshot($el)
+
+    switch
+      when $dom.isElement(subject)
+        takeElementScreenshot($el, state, automationOptions)
+      when capture is "fullPage"
+        takeFullPageScreenshot(state, automationOptions)
+      else
+        automateScreenshot(automationOptions)
+  .then (props) ->
+    if name
+      props.name = name
+
+    _.extend(props, {
+      scaled: getShouldScale(screenshotConfig)
+      blackout: getBlackout(screenshotConfig)
+      duration: new Date() - startTime
+    })
+
+    onAfterScreenshot and onAfterScreenshot.call(state("ctx"), $el, props)
+
+    $Screenshot.onAfterScreenshot($el, props)
+
+    return props
   .finally(after)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
 
   ## failure screenshot when not interactive
   Cypress.on "runnable:after:run:async", (test, runnable) ->
-    screenshotConfig = Screenshot.getConfig()
-    if test.err and screenshotConfig.screenshotOnRunFailure and not config("isInteractive")
-      automateScreenshot({
+    screenshotConfig = $Screenshot.getConfig()
+    return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
+
+    if not state("screenshotTaken")
+      ## if a screenshot has not been taken (by cy.screenshot()) in the
+      ## test that failed, we can bypass UI-changing and pixel-checking
+      return automateScreenshot({
         capture: "runner"
         runnable
         simple: true
         timeout: config("responseTimeout")
       })
 
-  Commands.addAll({ prevSubject: "optional" }, {
+    ## if a screenshot has been taken, we need to do all the standard checks
+    ## to make sure the UI is in the right place
+    screenshotConfig.capture = "runner"
+    takeScreenshot(Cypress, state, screenshotConfig, {
+      runnable
+      timeout: config("responseTimeout")
+    })
+
+  Commands.addAll({ prevSubject: ["optional", "element", "window", "document"] }, {
     screenshot: (subject, name, userOptions = {}) ->
       if _.isObject(name)
         userOptions = name
         name = null
-
-      if not $dom.isElement(subject)
-        subject = null
 
       withinSubject = state("withinSubject")
       if withinSubject and $dom.isElement(withinSubject)
@@ -276,16 +320,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: config("responseTimeout")
       }
 
-      screenshotConfig = _.pick(options, "capture", "scaleAppCaptures", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip")
-      screenshotConfig = Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
-      screenshotConfig = _.extend(Screenshot.getConfig(), screenshotConfig)
+      screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip", "onBeforeScreenshot", "onAfterScreenshot")
+      screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
+      screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
+
+      ## set this regardless of options.log b/c its used by the
+      ## yielded value below
+      consoleProps = _.omit(screenshotConfig, "scale", "screenshotOnRunFailure")
+      consoleProps = _.extend(consoleProps, {
+        scaled: getShouldScale(screenshotConfig)
+        blackout: getBlackout(screenshotConfig)
+      })
+
+      if name
+        consoleProps.name = name
 
       if options.log
-        consoleProps = {
-          options: userOptions
-          config: screenshotConfig
-        }
-
         options._log = Cypress.log({
           message: name
           consoleProps: ->
@@ -298,20 +348,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { numElements: subject.length }
         })
 
-      if subject
-        screenshotConfig.capture = "app"
+      if $dom.isElement(subject)
+        screenshotConfig.capture = "viewport"
+
+      state("screenshotTaken", true)
 
       takeScreenshot(Cypress, state, screenshotConfig, {
-        subject: subject
-        runnable: runnable
-        name: name
+        name
+        subject
+        runnable
         log: options._log
         timeout: options.timeout
       })
-      .then ({ path, size }) ->
-        _.extend(consoleProps, {
-          "Saved": path
-          "Size": size
+      .then (props) ->
+        { duration } = props
+        { width, height } = props.dimensions
+
+        _.extend(consoleProps, props, {
+          duration: "#{duration}ms"
+          dimensions: "#{width}px x #{height}px"
         })
-      .return(null)
+
+        if subject
+          consoleProps.subject = subject
+
+        return subject
   })

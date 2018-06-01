@@ -1,7 +1,19 @@
 exports['e2e task fails 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (task_spec.coffee)                                                         │
+  │ Searched:   cypress/integration/task_spec.coffee                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: task_spec.coffee...                                                             (1 of 1) 
 
 
   1) throws when task returns undefined
@@ -76,17 +88,19 @@ https://on.cypress.io/api/task
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           2
-  - Passes:          0
-  - Failures:        2
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     2
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────┐
+  │ Tests:        2                │
+  │ Passing:      0                │
+  │ Failing:      2                │
+  │ Pending:      0                │
+  │ Skipped:      0                │
+  │ Screenshots:  2                │
+  │ Video:        true             │
+  │ Duration:     X seconds        │
+  │ Spec Ran:     task_spec.coffee │
+  └────────────────────────────────┘
 
 
   (Screenshots)
@@ -98,10 +112,19 @@ https://on.cypress.io/api/task
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ task_spec.coffee                          XX:XX        2        -        2        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 
 `
 

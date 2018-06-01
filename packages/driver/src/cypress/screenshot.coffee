@@ -3,19 +3,18 @@ _ = require("lodash")
 $utils = require("./utils")
 
 reset = -> {
-  capture: "fullpage"
-  waitForCommandSynchronization: true
-  scaleAppCaptures: false
+  capture: "fullPage"
+  scale: false
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
-  beforeScreenshot: ->
-  afterScreenshot: ->
+  onBeforeScreenshot: ->
+  onAfterScreenshot: ->
 }
 
 defaults = reset()
 
-validCaptures = ["app", "runner", "fullpage"]
+validCaptures = ["fullPage", "viewport", "runner"]
 
 validateAndSetBoolean = (props, values, cmd, log, option) ->
   value = props[option]
@@ -69,8 +68,7 @@ validate = (props, cmd, log) ->
 
     values.capture = capture
 
-  validateAndSetBoolean(props, values, cmd, log, "waitForCommandSynchronization")
-  validateAndSetBoolean(props, values, cmd, log, "scaleAppCaptures")
+  validateAndSetBoolean(props, values, cmd, log, "scale")
   validateAndSetBoolean(props, values, cmd, log, "disableTimersAndAnimations")
   validateAndSetBoolean(props, values, cmd, log, "screenshotOnRunFailure")
 
@@ -96,8 +94,8 @@ validate = (props, cmd, log) ->
 
     values.clip = clip
 
-  validateAndSetCallback(props, values, cmd, log, "beforeScreenshot")
-  validateAndSetCallback(props, values, cmd, log, "afterScreenshot")
+  validateAndSetCallback(props, values, cmd, log, "onBeforeScreenshot")
+  validateAndSetCallback(props, values, cmd, log, "onAfterScreenshot")
 
   return values
 
@@ -107,13 +105,13 @@ module.exports = {
     defaults = reset()
 
   getConfig: ->
-    _.cloneDeep(_.omit(defaults, "beforeScreenshot", "afterScreenshot"))
+    _.cloneDeep(_.omit(defaults, "onBeforeScreenshot", "onAfterScreenshot"))
 
-  callBeforeScreenshot: (doc) ->
-    defaults.beforeScreenshot(doc)
+  onBeforeScreenshot: ($el) ->
+    defaults.onBeforeScreenshot($el)
 
-  callAfterScreenshot: (doc) ->
-    defaults.afterScreenshot(doc)
+  onAfterScreenshot: ($el, results) ->
+    defaults.onAfterScreenshot($el, results)
 
   defaults: (props) ->
     values = validate(props, "Cypress.Screenshot.defaults")
@@ -121,4 +119,3 @@ module.exports = {
 
   validate: validate
  }
-

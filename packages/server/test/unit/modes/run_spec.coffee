@@ -3,15 +3,17 @@ require("../../spec_helper")
 Promise  = require("bluebird")
 electron = require("electron")
 user     = require("#{root}../lib/user")
-video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
 config   = require("#{root}../lib/config")
 Project  = require("#{root}../lib/project")
+browsers   = require("#{root}../lib/browsers")
 Reporter = require("#{root}../lib/reporter")
 runMode = require("#{root}../lib/modes/run")
 openProject = require("#{root}../lib/open_project")
+videoCapture = require("#{root}../lib/video_capture")
 env = require("#{root}../lib/util/env")
 random = require("#{root}../lib/util/random")
+system = require("#{root}../lib/util/system")
 specsUtil = require("#{root}../lib/util/specs")
 
 describe "lib/modes/run", ->
@@ -137,7 +139,7 @@ describe "lib/modes/run", ->
       screenshots = []
 
       runMode.launchBrowser({
-        browser: "electron"
+        browserName: "electron"
         project: @projectInstance
         write: "write"
         gui: null
@@ -164,7 +166,7 @@ describe "lib/modes/run", ->
 
     it "can launch chrome", ->
       runMode.launchBrowser({
-        browser: "chrome"
+        browserName: "chrome"
         spec: {
           absolute: "/path/to/spec"
         }
@@ -176,35 +178,35 @@ describe "lib/modes/run", ->
 
   context ".postProcessRecording", ->
     beforeEach ->
-      sinon.stub(video, "process").resolves()
+      sinon.stub(videoCapture, "process").resolves()
 
     it "calls video process with name, cname and videoCompression", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", 32, true)
       .then ->
-        expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
+        expect(videoCapture.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process when videoCompression is false", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", false, true)
       .then ->
-        expect(video.process).not.to.be.called
+        expect(videoCapture.process).not.to.be.called
 
     it "calls video process if we have been told to upload videos", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", 32, true)
       .then ->
-        expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
+        expect(videoCapture.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process if there are no failing tests and we have set not to upload video on passing", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", 32, false)
       .then ->
-        expect(video.process).not.to.be.called
+        expect(videoCapture.process).not.to.be.called
 
   context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
@@ -300,7 +302,7 @@ describe "lib/modes/run", ->
       .returns([1,2,3])
 
       sinon.stub(runMode, "postProcessRecording").resolves()
-      sinon.spy(runMode,  "displayStats")
+      sinon.spy(runMode,  "displayResults")
       sinon.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
@@ -323,20 +325,20 @@ describe "lib/modes/run", ->
       .then (obj) ->
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
-        results = runMode.collectTestResults(obj)
-
-        expect(runMode.displayStats).to.be.calledWith(results)
+        expect(runMode.displayResults).to.be.calledWith(results)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
           screenshots
-          spec: "cypress/integration/spec.js"
-          video:        "foo.mp4"
+          video: "foo.mp4"
           error: null
           hooks: null
           reporterStats: null
           shouldUploadVideo: true
           tests: [1,2,3]
+          spec: {
+            path: "cypress/integration/spec.js"
+          }
           stats: {
             tests:        1
             passes:       2
@@ -356,7 +358,7 @@ describe "lib/modes/run", ->
       end = ->
 
       sinon.stub(runMode, "postProcessRecording").resolves()
-      sinon.spy(runMode,  "displayStats")
+      sinon.spy(runMode,  "displayResults")
       sinon.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
@@ -381,19 +383,20 @@ describe "lib/modes/run", ->
       .then (obj) ->
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
-        results = runMode.collectTestResults(obj)
-        expect(runMode.displayStats).to.be.calledWith(results)
+        expect(runMode.displayResults).to.be.calledWith(obj)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
           screenshots
           error: err.message
-          spec: "cypress/integration/spec.js"
           video: "foo.mp4"
           hooks: null
           tests: null
           reporterStats: null
           shouldUploadVideo: true
+          spec: {
+            path: "cypress/integration/spec.js"
+          }
           stats: {
             failures: 1
             tests: 0
@@ -416,7 +419,7 @@ describe "lib/modes/run", ->
         })
 
       sinon.spy(runMode, "postProcessRecording")
-      sinon.spy(video, "process")
+      sinon.spy(videoCapture, "process")
       end = sinon.stub().resolves()
 
       runMode.waitForTestsToFinishRunning({
@@ -431,7 +434,7 @@ describe "lib/modes/run", ->
       .then (obj) ->
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false)
 
-        expect(video.process).not.to.be.called
+        expect(videoCapture.process).not.to.be.called
 
   context ".listenForProjectEnd", ->
     it "resolves with end event + argument", ->
@@ -460,15 +463,18 @@ describe "lib/modes/run", ->
       sinon.stub(random, "id").returns(1234)
       sinon.stub(openProject, "create").resolves(openProject)
       sinon.stub(runMode, "waitForSocketConnection").resolves()
-      sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
+      sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({
+        stats: { failures: 10 }
+        spec: {}
+      })
       sinon.spy(runMode,  "waitForBrowserToConnect")
-      sinon.stub(video, "start").resolves()
+      sinon.stub(videoCapture, "start").resolves()
       sinon.stub(openProject, "launch").resolves()
       sinon.stub(openProject, "getProject").resolves(@projectInstance)
       sinon.spy(errors, "warning")
       sinon.stub(config, "get").resolves({
         proxyUrl: "http://localhost:12345",
-        videoRecording: true,
+        video: true,
         videosFolder: "videos",
         integrationFolder: "/path/to/integrationFolder"
       })
@@ -503,22 +509,34 @@ describe "lib/modes/run", ->
     it "names video file with spec name", ->
       runMode.run()
       .then =>
-        expect(video.start).to.be.calledWith("videos/foo_spec.js.mp4")
+        expect(videoCapture.start).to.be.calledWith("videos/foo_spec.js.mp4")
         expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
           cname: "videos/foo_spec.js-compressed.mp4"
         })
 
   context ".run", ->
     beforeEach ->
-      sinon.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
+      sinon.stub(@projectInstance, "getConfig").resolves({
+        proxyUrl: "http://localhost:12345"
+      })
       sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       sinon.stub(user, "ensureAuthToken")
       sinon.stub(Project, "ensureExists").resolves()
       sinon.stub(random, "id").returns(1234)
       sinon.stub(openProject, "create").resolves(openProject)
+      sinon.stub(system, "info").resolves({ osName: "osFoo", osVersion: "fooVersion" })
+      sinon.stub(browsers, "ensureAndGetByName").resolves({
+        name: "fooBrowser",
+        path: "path/to/browser"
+        version: "777"
+      })
       sinon.stub(runMode, "waitForSocketConnection").resolves()
-      sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({ stats: { failures: 10 } })
+      sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({
+        stats: { failures: 10 }
+        spec: {}
+      })
       sinon.spy(runMode,  "waitForBrowserToConnect")
+      sinon.spy(runMode,  "runSpecs")
       sinon.stub(openProject, "launch").resolves()
       sinon.stub(openProject, "getProject").resolves(@projectInstance)
       sinon.stub(specsUtil, "find").resolves([
@@ -534,10 +552,10 @@ describe "lib/modes/run", ->
       .then ->
         expect(user.ensureAuthToken).not.to.be.called
 
-    it "resolves with object and totalFailures", ->
+    it "resolves with object and totalFailed", ->
       runMode.run()
       .then (results) ->
-        expect(results).to.have.property("totalFailures", 10)
+        expect(results).to.have.property("totalFailed", 10)
 
     it "passes projectRoot + options to openProject", ->
       opts = { projectRoot: "/path/to/project", foo: "bar" }
@@ -562,6 +580,8 @@ describe "lib/modes/run", ->
         })
 
     it "passes headed to openProject.launch", ->
+      browsers.ensureAndGetByName.resolves({ name: "electron" })
+
       runMode.run({headed: true})
       .then ->
         expect(openProject.launch).to.be.calledWithMatch(
@@ -571,3 +591,24 @@ describe "lib/modes/run", ->
             show: true
           }
         )
+
+    it "passes sys to runSpecs", ->
+      runMode.run()
+      .then ->
+        expect(runMode.runSpecs).to.be.calledWithMatch({
+          sys: {
+            osName: "osFoo"
+            osVersion: "fooVersion"
+          }
+        })
+
+    it "passes browser to runSpecs", ->
+      runMode.run()
+      .then ->
+        expect(runMode.runSpecs).to.be.calledWithMatch({
+          browser: {
+            name: "fooBrowser",
+            path: "path/to/browser"
+            version: "777"
+          }
+        })

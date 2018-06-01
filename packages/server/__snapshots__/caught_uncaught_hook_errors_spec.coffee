@@ -1,7 +1,19 @@
 exports['e2e caught and uncaught hooks errors failing1 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (hook_caught_error_failing_spec.coffee)                                    │
+  │ Searched:   cypress/integration/hook_caught_error_failing_spec.coffee                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: hook_caught_error_failing_spec.coffee...                                        (1 of 1) 
 
 
   ✓ t1a
@@ -60,17 +72,19 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           11
-  - Passes:          5
-  - Failures:        3
-  - Pending:         0
-  - Skipped:         3
-  - Duration:        10 seconds
-  - Screenshots:     3
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌─────────────────────────────────────────────────────┐
+  │ Tests:        11                                    │
+  │ Passing:      5                                     │
+  │ Failing:      3                                     │
+  │ Pending:      0                                     │
+  │ Skipped:      3                                     │
+  │ Screenshots:  3                                     │
+  │ Video:        true                                  │
+  │ Duration:     X seconds                             │
+  │ Spec Ran:     hook_caught_error_failing_spec.coffee │
+  └─────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -83,17 +97,38 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ hook_caught_error_failing_spec.coffee     XX:XX       11        5        3        -        3 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX       11        5        3        -        3  
 
 `
 
 exports['e2e caught and uncaught hooks errors failing2 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (hook_uncaught_error_failing_spec.coffee)                                  │
+  │ Searched:   cypress/integration/hook_uncaught_error_failing_spec.coffee                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: hook_uncaught_error_failing_spec.coffee...                                      (1 of 1) 
 
 
   ✓ t1b
@@ -126,17 +161,19 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           7
-  - Passes:          4
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         2
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────┐
+  │ Tests:        7                                       │
+  │ Passing:      4                                       │
+  │ Failing:      1                                       │
+  │ Pending:      0                                       │
+  │ Skipped:      2                                       │
+  │ Screenshots:  1                                       │
+  │ Video:        true                                    │
+  │ Duration:     X seconds                               │
+  │ Spec Ran:     hook_uncaught_error_failing_spec.coffee │
+  └───────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -147,17 +184,38 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ hook_uncaught_error_failing_spec.cof…     XX:XX        7        4        1        -        2 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        7        4        1        -        2  
 
 `
 
 exports['e2e caught and uncaught hooks errors failing3 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (hook_uncaught_root_error_failing_spec.coffee)                             │
+  │ Searched:   cypress/integration/hook_uncaught_root_error_failing_spec.coffee                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: hook_uncaught_root_error_failing_spec.coffee...                                 (1 of 1) 
 
 
   1) "before each" hook for "t1c"
@@ -182,17 +240,19 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           4
-  - Passes:          0
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         3
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                            │
+  │ Passing:      0                                            │
+  │ Failing:      1                                            │
+  │ Pending:      0                                            │
+  │ Skipped:      3                                            │
+  │ Screenshots:  1                                            │
+  │ Video:        true                                         │
+  │ Duration:     X seconds                                    │
+  │ Spec Ran:     hook_uncaught_root_error_failing_spec.coffee │
+  └────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -203,17 +263,38 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ hook_uncaught_root_error_failing_spe…     XX:XX        4        -        1        -        3 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        4        -        1        -        3  
 
 `
 
 exports['e2e caught and uncaught hooks errors failing4 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (hook_uncaught_error_events_failing_spec.coffee)                           │
+  │ Searched:   cypress/integration/hook_uncaught_error_events_failing_spec.coffee                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: hook_uncaught_error_events_failing_spec.coffee...                               (1 of 1) 
 
 
   uncaught hook error should continue to fire all mocha events
@@ -244,17 +325,19 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           3
-  - Passes:          2
-  - Failures:        1
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     1
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                              │
+  │ Passing:      2                                              │
+  │ Failing:      1                                              │
+  │ Pending:      0                                              │
+  │ Skipped:      0                                              │
+  │ Screenshots:  1                                              │
+  │ Video:        true                                           │
+  │ Duration:     X seconds                                      │
+  │ Spec Ran:     hook_uncaught_error_events_failing_spec.coffee │
+  └──────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
@@ -265,10 +348,19 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ hook_uncaught_error_events_failing_s…     XX:XX        3        2        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        3        2        1        -        -  
 
 `
 

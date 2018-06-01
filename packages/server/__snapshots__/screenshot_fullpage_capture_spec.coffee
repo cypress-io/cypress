@@ -1,49 +1,72 @@
-exports['e2e screenshot fullpage capture passes 1'] = `
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+exports['e2e screenshot fullPage capture passes 1'] = `
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (screenshot_fullpage_capture_spec.coffee)                                  │
+  │ Searched:   cypress/integration/screenshot_fullpage_capture_spec.coffee                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  ✓ takes consistent fullpage captures
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: screenshot_fullpage_capture_spec.coffee...                                      (1 of 1) 
+
+
+  ✓ takes consistent fullPage captures
 
   1 passing
 
 
-  (Tests Finished)
+  (Results)
 
-  - Tests:           1
-  - Passes:          1
-  - Failures:        0
-  - Pending:         0
-  - Skipped:         0
-  - Duration:        10 seconds
-  - Screenshots:     11
-  - Video Recorded:  true
-  - Cypress Version: 1.2.3
+  ┌───────────────────────────────────────────────────────┐
+  │ Tests:        1                                       │
+  │ Passing:      1                                       │
+  │ Failing:      0                                       │
+  │ Pending:      0                                       │
+  │ Skipped:      0                                       │
+  │ Screenshots:  11                                      │
+  │ Video:        true                                    │
+  │ Duration:     X seconds                               │
+  │ Spec Ran:     screenshot_fullpage_capture_spec.coffee │
+  └───────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-original.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullpage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-original.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-compare.png (600x500)
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ screenshot_fullpage_capture_spec.cof…     XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

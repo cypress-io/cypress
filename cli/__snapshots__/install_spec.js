@@ -9,7 +9,8 @@ Skipping installation:
 `
 
 exports['skip installation 1'] = `
-Skipping binary installation. Env var 'CYPRESS_SKIP_BINARY_INSTALL' was found.
+Note: Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.
+
 
 `
 
@@ -20,7 +21,7 @@ exports['specify version in env vars 1'] = `
 
   Instead we will install version: 0.12.1
 
-  Note: These versions may not work properly together.
+  These versions may not work properly together.
 
 Installing Cypress (version: 0.12.1)
 
@@ -145,7 +146,18 @@ Failed to access /invalid/cache/dir:
 EACCES: permission denied, mkdir '/invalid'
 ----------
 
-Platform: darwin (1.1.1-generic)
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['error for removed CYPRESS_BINARY_VERSION 1'] = `
+Error: The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version 3.0.0
+
+You should setCYPRESS_INSTALL_BINARY instead.
+----------
+
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
