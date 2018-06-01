@@ -120,8 +120,11 @@ function testBinary (version, binaryDir) {
   // if we are running in CI then use
   // the verbose renderer else use
   // the default
+  let renderer = util.isCi() ? verbose : 'default'
+  if (logger.logLevel() === 'silent') renderer = 'silent'
+
   const rendererOptions = {
-    renderer: util.isCi() ? verbose : 'default',
+    renderer,
   }
 
 
@@ -198,8 +201,8 @@ const start = (options = {}) => {
 
   const checkEnvVar = () => {
     debug('checking environment variables')
-    if (process.env.CYPRESS_RUN_BINARY) {
-      const envBinaryPath = process.env.CYPRESS_RUN_BINARY
+    if (util.getEnv('CYPRESS_RUN_BINARY')) {
+      const envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')
       debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
       logger.log(stripIndent`
         ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:

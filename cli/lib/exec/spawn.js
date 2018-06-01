@@ -48,8 +48,8 @@ module.exports = {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
 
-    if (process.env.CYPRESS_RUN_BINARY) {
-      executable = process.env.CYPRESS_RUN_BINARY
+    if (util.getEnv('CYPRESS_RUN_BINARY')) {
+      executable = util.getEnv('CYPRESS_RUN_BINARY')
     }
 
     debug('needs XVFB?', needsXvfb)
