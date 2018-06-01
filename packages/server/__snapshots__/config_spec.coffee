@@ -121,7 +121,7 @@ exports['e2e config fails 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/config -- times out looking for a missing element -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/config_failing_spec-coffee -- config -- times out looking for a missing element -- failure.png (1280x720)
 
 
   (Video)

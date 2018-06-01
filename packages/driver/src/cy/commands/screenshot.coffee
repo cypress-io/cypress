@@ -42,6 +42,7 @@ automateScreenshot = (state, options = {}) ->
     titles: titles
     testId: runnable.id
     takenPaths: state("screenshotPaths")
+    specPath: state("specPath")
   }, _.omit(options, "runnable", "timeout", "log", "subject"))
 
   automate = ->

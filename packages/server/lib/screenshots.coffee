@@ -10,6 +10,7 @@ colorString     = require("color-string")
 debug           = require("debug")("cypress:server:screenshot")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
+pathHelpers     = require("./util/path_helpers")
 
 RUNNABLE_SEPARATOR = " -- "
 pathSeparatorRe = /[\\\/]/g
@@ -229,26 +230,36 @@ getDimensions = (details) ->
   else
     _.pick(details.image.bitmap, "width", "height")
 
-ensureUniquePath = (takenPaths, withoutExt, extension, fullPath) ->
+ensureUniquePath = (takenPaths, withoutExt, extension) ->
+  fullPath = "#{withoutExt}.#{extension}"
   num = 0
   while _.includes(takenPaths, fullPath)
     fullPath = "#{withoutExt} (#{++num}).#{extension}"
   return fullPath
 
+getNamedPath = (data, type, screenshotsFolder) ->
+  parts = data.name.split(pathSeparatorRe).map (part) -> part.replace(invalidCharsRe, "")
+
+  "#{path.join(screenshotsFolder, parts...)}.#{mime.extension(type)}"
+
+getDefaultPath = (data, type, screenshotsFolder) ->
+  specPath = path.dirname(pathHelpers.getRelativePathToSpec(data.specPath))
+  specName = path.basename(data.specPath).replace(".", "-")
+  name = [specName].concat(data.titles).join(RUNNABLE_SEPARATOR)
+  parts = specPath.split(pathSeparatorRe).concat(name)
+  parts = _.map parts, (part) -> part.replace(invalidCharsRe, "")
+  withoutExt = path.join(screenshotsFolder, parts...)
+  extension = mime.extension(type)
+
+  ensureUniquePath(data.takenPaths, withoutExt, extension)
+
 getPathToScreenshot = (data, details, screenshotsFolder) ->
   type = getType(details)
 
-  name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
-  parts = name.split(pathSeparatorRe).map (part) -> part.replace(invalidCharsRe, "")
-  partialPath = path.join(parts...)
-  withoutExt = path.join(screenshotsFolder, partialPath)
-  extension = mime.extension(type)
-  fullPath = path.join(screenshotsFolder, "#{partialPath}.#{extension}")
-
-  if not data.name?
-    fullPath = ensureUniquePath(data.takenPaths, withoutExt, extension, fullPath)
-
-  return fullPath
+  if data.name?
+    getNamedPath(data, type, screenshotsFolder)
+  else
+    getDefaultPath(data, type, screenshotsFolder)
 
 module.exports = {
   crop

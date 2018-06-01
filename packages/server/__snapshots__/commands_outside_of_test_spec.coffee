@@ -67,7 +67,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/An uncaught error was detected outside of a test -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/commands_outside_of_test_spec-coffee -- An uncaught error was detected outside of a test -- failure.png (1280x720)
 
 
   (Video)

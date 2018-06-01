@@ -109,7 +109,7 @@ export default class Iframes extends Component {
 
     this._loadIframes(specPath)
     .then(($autIframe) => {
-      this.props.eventManager.initialize($autIframe, config)
+      this.props.eventManager.initialize($autIframe, specPath, config)
     })
   }
 
