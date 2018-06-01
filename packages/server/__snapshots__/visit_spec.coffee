@@ -13,7 +13,7 @@ exports['e2e visit low response timeout passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
-  Running: visit_spec.coffee...                                                            (1 of 1)
+  Running: visit_spec.coffee...                                                            (1 of 1) 
 
 
   visits
@@ -66,11 +66,11 @@ exports['e2e visit low response timeout passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ visit_spec.coffee                         XX:XX       13       13        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       13       13        -        -        -
+    All specs passed!                           XX:XX       13       13        -        -        -   
 
 `
 
