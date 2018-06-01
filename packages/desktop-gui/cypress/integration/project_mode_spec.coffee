@@ -9,6 +9,8 @@ describe "Project Mode", ->
       cy.visitIndex().then (win) =>
         { start, @ipc } = win.App
 
+        @config.projectName = "my-kitchen-sink"
+
         cy.stub(@ipc, "onMenuClicked")
         cy.stub(@ipc, "onFocusTests")
         cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
@@ -27,7 +29,7 @@ describe "Project Mode", ->
       cy.title().should("eq", "/foo/bar")
 
     it "shows project name in nav", ->
-      cy.get('.left-nav').should("contain", "bar")
+      cy.get('.left-nav').should("contain", @config.projectName)
         .and("not.contain", "foo")
 
   context "Windows", ->
@@ -53,5 +55,5 @@ describe "Project Mode", ->
       cy.title().should("eq", "C:\\foo\\bar")
 
     it "shows project name in nav", ->
-      cy.get('.left-nav').should("contain", "bar")
+      cy.get('.left-nav').should("contain", @config.projectName)
         .and("not.contain", "foo")
