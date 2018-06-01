@@ -46,7 +46,7 @@ configKeys = toWords """
   userAgent                       requestTimeout
   viewportWidth                   responseTimeout
   viewportHeight                  taskTimeout
-  videoRecording
+  video
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
@@ -54,6 +54,7 @@ configKeys = toWords """
 """
 
 breakingConfigKeys = toWords """
+  videoRecording
   screenshotOnHeadlessFailure
   trashAssetsBeforeHeadlessRuns
 """
@@ -82,7 +83,7 @@ defaults = {
   pageLoadTimeout:               60000
   execTimeout:                   60000
   taskTimeout:                   60000
-  videoRecording:                true
+  video:                         true
   videoCompression:              32
   videoUploadOnPasses:           true
   modifyObstructiveCode:         true
@@ -134,7 +135,7 @@ validationRules = {
   trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse
-  videoRecording: v.isBoolean
+  video: v.isBoolean
   videoUploadOnPasses: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber
@@ -180,6 +181,8 @@ validateNoBreakingConfig = (cfg) ->
           errors.throw("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED")
         when "trashAssetsBeforeHeadlessRuns"
           errors.throw("RENAMED_CONFIG_OPTION", key, "trashAssetsBeforeRuns")
+        when "videoRecording"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "video")
 
 validate = (cfg, onErr) ->
   _.each cfg, (value, key) ->
@@ -356,9 +359,12 @@ module.exports = {
 
     obj.integrationExampleName = scaffold.integrationExampleName()
     obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
-    obj.scaffoldedFiles = scaffold.fileTree(obj)
 
-    return obj
+    scaffold.fileTree(obj)
+    .then (fileTree) ->
+      obj.scaffoldedFiles = fileTree
+
+      return obj
 
   # async function
   setSupportFileAndFolder: (obj) ->

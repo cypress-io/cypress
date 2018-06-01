@@ -61,14 +61,18 @@ const getCacheDir = () => {
   return cache_directory
 }
 
-const parsePlatformBinaryFolder = (executable) => {
-  if (!executable.toString().endsWith(getPlatformExecutable())) {
-    return false
-  }
-  if (os.platform() === 'darwin') {
-    return path.resolve(executable, '..', '..', '..')
-  }
-  return path.resolve(executable, '..')
+const parseRealPlatformBinaryFolderAsync = (binaryPath) => {
+  return fs.realpathAsync(binaryPath)
+  .then((realPath) => {
+    debug('CYPRESS_RUN_BINARY has realpath:', realPath)
+    if (!realPath.toString().endsWith(getPlatformExecutable())) {
+      return false
+    }
+    if (os.platform() === 'darwin') {
+      return path.resolve(realPath, '..', '..', '..')
+    }
+    return path.resolve(realPath, '..')
+  })
 }
 
 const getDistDir = () => {
@@ -137,7 +141,7 @@ module.exports = {
   getCacheDir,
   clearBinaryStateAsync,
   writeBinaryVerifiedAsync,
-  parsePlatformBinaryFolder,
+  parseRealPlatformBinaryFolderAsync,
   getDistDir,
   getVersionDir,
 }

@@ -3,7 +3,6 @@ require("../../spec_helper")
 Promise  = require("bluebird")
 electron = require("electron")
 user     = require("#{root}../lib/user")
-video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
 config   = require("#{root}../lib/config")
 Project  = require("#{root}../lib/project")
@@ -11,6 +10,7 @@ browsers   = require("#{root}../lib/browsers")
 Reporter = require("#{root}../lib/reporter")
 runMode = require("#{root}../lib/modes/run")
 openProject = require("#{root}../lib/open_project")
+videoCapture = require("#{root}../lib/video_capture")
 env = require("#{root}../lib/util/env")
 random = require("#{root}../lib/util/random")
 system = require("#{root}../lib/util/system")
@@ -178,35 +178,35 @@ describe "lib/modes/run", ->
 
   context ".postProcessRecording", ->
     beforeEach ->
-      sinon.stub(video, "process").resolves()
+      sinon.stub(videoCapture, "process").resolves()
 
     it "calls video process with name, cname and videoCompression", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", 32, true)
       .then ->
-        expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
+        expect(videoCapture.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process when videoCompression is false", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", false, true)
       .then ->
-        expect(video.process).not.to.be.called
+        expect(videoCapture.process).not.to.be.called
 
     it "calls video process if we have been told to upload videos", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", 32, true)
       .then ->
-        expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
+        expect(videoCapture.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process if there are no failing tests and we have set not to upload video on passing", ->
       end = -> Promise.resolve()
 
       runMode.postProcessRecording(end, "foo", "foo-compress", 32, false)
       .then ->
-        expect(video.process).not.to.be.called
+        expect(videoCapture.process).not.to.be.called
 
   context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
@@ -419,7 +419,7 @@ describe "lib/modes/run", ->
         })
 
       sinon.spy(runMode, "postProcessRecording")
-      sinon.spy(video, "process")
+      sinon.spy(videoCapture, "process")
       end = sinon.stub().resolves()
 
       runMode.waitForTestsToFinishRunning({
@@ -434,7 +434,7 @@ describe "lib/modes/run", ->
       .then (obj) ->
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false)
 
-        expect(video.process).not.to.be.called
+        expect(videoCapture.process).not.to.be.called
 
   context ".listenForProjectEnd", ->
     it "resolves with end event + argument", ->
@@ -468,13 +468,13 @@ describe "lib/modes/run", ->
         spec: {}
       })
       sinon.spy(runMode,  "waitForBrowserToConnect")
-      sinon.stub(video, "start").resolves()
+      sinon.stub(videoCapture, "start").resolves()
       sinon.stub(openProject, "launch").resolves()
       sinon.stub(openProject, "getProject").resolves(@projectInstance)
       sinon.spy(errors, "warning")
       sinon.stub(config, "get").resolves({
         proxyUrl: "http://localhost:12345",
-        videoRecording: true,
+        video: true,
         videosFolder: "videos",
         integrationFolder: "/path/to/integrationFolder"
       })
@@ -509,7 +509,7 @@ describe "lib/modes/run", ->
     it "names video file with spec name", ->
       runMode.run()
       .then =>
-        expect(video.start).to.be.calledWith("videos/foo_spec.js.mp4")
+        expect(videoCapture.start).to.be.calledWith("videos/foo_spec.js.mp4")
         expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
           cname: "videos/foo_spec.js-compressed.mp4"
         })

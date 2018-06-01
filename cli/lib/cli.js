@@ -79,6 +79,7 @@ function showVersions () {
     logger.log('Cypress binary version:', versions.binary)
     process.exit(0)
   })
+  .catch(util.logErrorExit1)
 }
 
 module.exports = {

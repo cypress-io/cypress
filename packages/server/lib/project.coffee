@@ -147,6 +147,7 @@ class Project extends EE
     debug("resetting project instance %s", @projectRoot)
 
     Promise.try =>
+      @automation?.reset()
       @server?.reset()
 
   close: ->
