@@ -48,7 +48,7 @@ getStylesFor = (doc, $$, stylesheets, location) ->
     else
       ## otherwise, it's a style tag, and we can just grab its content
       styleRules = if stylesheet.sheet
-      then Array.prototype.slice.call(stylesheet.sheet.rules).map((rule) -> rule.cssText).join("")
+      then Array.prototype.slice.call(stylesheet.sheet.cssRules).map((rule) -> rule.cssText).join("")
       else $$(stylesheet).text()
 
       makePathsAbsoluteToDoc(doc, styleRules)
