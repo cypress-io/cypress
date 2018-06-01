@@ -73,6 +73,14 @@ describe "src/cy/snapshot", ->
       { headStyles } = cy.createSnapshot(@$el)
       expect(headStyles[0]).to.include(".foo { color: red }")
 
+    it "provides contents of style tags in head for injected rules", ->
+      styleEl = document.createElement("style");
+      $(styleEl).appendTo(cy.$$("head"))
+      styleEl.sheet.insertRule(".foo { color: red; }", 0)
+
+      { headStyles } = cy.createSnapshot(@$el)
+      expect(headStyles[0]).to.include(".foo { color: red; }")
+
     it "provides contents of local stylesheet links in head", (done) ->
       onLoad = ->
         ## need to for appended stylesheet to load
