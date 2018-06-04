@@ -33,13 +33,13 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request) ->
+  handle: (req, res, config, getRemoteState, request, nodeProxy) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
       url: req.url
       proxiedUrl: req.proxiedUrl
-      cookies: req.cookies
+      headers: req.headers
       remoteState
     })
 
@@ -74,6 +74,15 @@ module.exports = {
         })
 
         return res.status(503).end()
+
+    # if req.headers.accept is "text/event-stream"
+    #   return nodeProxy.web(req, res, {
+    #     secure: false
+    #     ignorePath: true
+    #     target: req.proxiedUrl
+    #     timeout: 0
+    #     proxyTimeout: 0
+    #   })
 
     thr = through (d) -> @queue(d)
 

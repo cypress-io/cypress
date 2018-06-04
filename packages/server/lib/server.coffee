@@ -11,6 +11,7 @@ httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
+compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
 origin       = require("./util/origin")
@@ -43,6 +44,9 @@ setProxiedUrl = (req) ->
   req.proxiedUrl = req.url
 
   req.url = url.parse(req.url).path
+
+notSSE = (req, res) ->
+  req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -82,7 +86,7 @@ class Server
       next()
 
     app.use require("cookie-parser")()
-    app.use require("compression")()
+    app.use compression({filter: notSSE})
     app.use require("morgan")("dev") if morgan
 
     ## errorhandler
@@ -119,12 +123,13 @@ class Server
       ## generate our request instance
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
+      @_wsProxy = httpProxy.createProxyServer()
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_wsProxy)
 
       @createServer(app, config, @_request)
 
@@ -137,7 +142,6 @@ class Server
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
       @_server  = http.createServer(app)
-      @_wsProxy = httpProxy.createProxyServer()
 
       allowDestroy(@_server)
 
