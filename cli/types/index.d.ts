@@ -746,6 +746,9 @@ declare namespace Cypress {
      * Use `cy.route()` to manage the behavior of network requests.
      *
      * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
      */
     route(url: string | RegExp, response?: string | object): Chainable<null>
     route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
