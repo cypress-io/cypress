@@ -151,7 +151,7 @@ describe "lib/screenshots", ->
         screenshots.capture(@appData, @automate).then =>
           expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
-    describe "multi-part capture (fullPage or element)", ->
+    describe.skip "multi-part capture (fullPage or element)", ->
       beforeEach ->
         screenshots.clearMultipartState()
 
@@ -190,8 +190,6 @@ describe "lib/screenshots", ->
         .then =>
           expect(@automate.callCount).to.equal(4)
 
-          ## image.hash() is very expensive and we want to make sure its only called
-          ## once for each image
           expect(@jimpImage2.hash).to.be.calledOnce
 
       it "resolves no image on non-last captures", ->
@@ -257,6 +255,89 @@ describe "lib/screenshots", ->
         .then ->
           expect(Jimp.prototype.composite).not.to.be.called
 
+    describe "integration", ->
+      beforeEach ->
+        screenshots.clearMultipartState()
+
+        @currentTest.timeout(10000)
+
+        sinon.restore()
+
+        @data1 = {
+          titles: [ 'cy.screenshot() - take a screenshot' ],
+          testId: 'r2',
+          name: 'app-screenshot',
+          capture: 'fullPage',
+          clip: { x: 0, y: 0, width: 1000, height: 646 },
+          viewport: { width: 1280, height: 646 },
+          current: 1,
+          total: 3
+        }
+
+        @data2 = {
+          titles: [ 'cy.screenshot() - take a screenshot' ],
+          testId: 'r2',
+          name: 'app-screenshot',
+          capture: 'fullPage',
+          clip: { x: 0, y: 0, width: 1000, height: 646 },
+          viewport: { width: 1280, height: 646 },
+          current: 2,
+          total: 3
+        }
+
+        @data3 = {
+          titles: [ 'cy.screenshot() - take a screenshot' ],
+          testId: 'r2',
+          name: 'app-screenshot',
+          capture: 'fullPage',
+          clip: { x: 0, y: 138, width: 1000, height: 508 },
+          viewport: { width: 1280, height: 646 },
+          current: 3,
+          total: 3
+        }
+
+        @dataUri = (img) ->
+          return ->
+            fs.readFileAsync(Fixtures.path("img/#{img}"))
+            .then (buf) ->
+              "data:image/png;base64," + buf.toString("base64")
+
+      it "stiches together 1x DPI images", ->
+        screenshots
+        .capture(@data1, @dataUri("DPI-1x/1.png"))
+        .then (img1) =>
+          expect(img1).to.be.null
+
+          screenshots
+          .capture(@data2, @dataUri("DPI-1x/2.png"))
+        .then (img2) =>
+          expect(img2).to.be.null
+
+          screenshots
+          .capture(@data3, @dataUri("DPI-1x/3.png"))
+        .then (img3) =>
+          Jimp.read(Fixtures.path("img/DPI-1x/stitched.png"))
+          .then (img) =>
+            expect(screenshots.imagesMatch(img, img3.image))
+
+      it "stiches together 2x DPI images", ->
+        screenshots
+        .capture(@data1, @dataUri("DPI-2x/1.png"))
+        .then (img1) =>
+          expect(img1).to.be.null
+
+          screenshots
+          .capture(@data2, @dataUri("DPI-2x/2.png"))
+        .then (img2) =>
+          expect(img2).to.be.null
+
+          screenshots
+          .capture(@data3, @dataUri("DPI-2x/3.png"))
+        .then (img3) =>
+          Jimp.read(Fixtures.path("img/DPI-2x/stitched.png"))
+          .then (img) =>
+            expect(screenshots.imagesMatch(img, img3.image))
+
   context ".crop", ->
     beforeEach ->
       @dimensions = (overrides) ->
@@ -286,7 +367,7 @@ describe "lib/screenshots", ->
       screenshots.crop(@jimpImage, @dimensions({ width: 50 }))
       expect(@jimpImage.crop).to.be.calledWith(0, 0, 40, 10)
 
-  context ".save", ->
+  context.skip ".save", ->
     it "outputs file and returns details", ->
       details = {
         image: @jimpImage
