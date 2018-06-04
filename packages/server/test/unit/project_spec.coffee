@@ -234,6 +234,18 @@ describe "lib/project", ->
     it "can close when server + watchers arent open", ->
       @project.close()
 
+  context "#reset", ->
+    beforeEach ->
+      @project = Project(@pristinePath)
+      @project.automation = { reset: sinon.stub() }
+      @project.server = { reset: sinon.stub() }
+
+    it "resets server + automation", ->
+      @project.reset()
+      .then =>
+        expect(@project.automation.reset).to.be.calledOnce
+        expect(@project.server.reset).to.be.calledOnce
+
   context "#getRuns", ->
     beforeEach ->
       @project = Project(@todosPath)
