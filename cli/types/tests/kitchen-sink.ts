@@ -943,6 +943,10 @@ describe('Kitchen Sink', function() {
           expect(response).to.have.property('headers')
           expect(response).to.have.property('duration')
         })
+
+      // accepts method, including "PATCH"
+      cy.request('POST', 'http://somewhere.com', {foo: 'bar'})
+      cy.request('PATCH', 'http://somewhere.com', {foo: 'bar'})
     })
 
     it('cy.route() - route responses to matching requests', function() {
