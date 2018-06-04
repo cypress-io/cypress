@@ -4,18 +4,20 @@ const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
+const cache = require('./tasks/cache')
 
 // patch "commander" method called when a user passed an unknown option
 // we want to print help for the current command and exit with an error
-commander.Command.prototype.unknownOption = function (flag) {
+function unknownOption (flag, type = 'option') {
   if (this._allowUnknownOption) return
   logger.error()
-  logger.error('  error: unknown option:', flag)
+  logger.error(`  error: unknown ${type}:`, flag)
   logger.error()
   this.outputHelp()
   logger.error()
   process.exit(1)
 }
+commander.Command.prototype.unknownOption = unknownOption
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
@@ -25,7 +27,13 @@ const parseOpts = (opts) => {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
-    'browser', 'detached', 'headed', 'global', 'dev', 'force')
+    'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
+    'cachePath', 'cacheList', 'cacheClear'
+  )
+
+  if (opts.exit) {
+    opts = _.omit(opts, 'exit')
+  }
 
   debug('parsed cli options', opts)
 
@@ -52,9 +60,13 @@ const descriptions = {
   headed: 'displays the Electron browser instead of running headlessly',
   dev: 'runs cypress in development and bypasses binary check',
   forceInstall: 'force install the Cypress binary',
+  exit: 'keep the browser open after tests finish',
+  cachePath: 'print the cypress binary cache path',
+  cacheList: 'list the currently cached versions',
+  cacheClear: 'delete the Cypress binary cache',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
+const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help', 'cache']
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -122,8 +134,10 @@ module.exports = {
     .option('-c, --config <config>', text('config'))
     .option('-b, --browser <browser-name>', text('browser'))
     .option('-P, --project <project-path>', text('project'))
+    .option('--no-exit', text('exit'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
+      // console.log(opts)
       debug('running Cypress')
       require('./exec/run')
       .start(parseOpts(opts))
@@ -173,7 +187,20 @@ module.exports = {
       .catch(util.logErrorExit1)
     })
 
-    logger.log()
+    program
+    .command('cache')
+    .usage('[command]')
+    .description('Manage the Cypress binary cache')
+    .option('list', text('cacheList'))
+    .option('path', text('cachePath'))
+    .option('clear', text('cacheClear'))
+    .action(function (opts) {
+      if (opts.command || !_.includes(['list', 'path', 'clear'], opts)) {
+        unknownOption.call(this, `cache ${opts}`, 'sub-command')
+      }
+      cache[opts]()
+      // this.outputHelp()
+    })
 
     debug('cli starts with arguments %j', args)
     util.printNodeOptions()
@@ -189,7 +216,7 @@ module.exports = {
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
-      debug('unknwon command %s', firstCommand)
+      debug('unknown command %s', firstCommand)
       logger.error('Unknown command', `"${firstCommand}"`)
       program.outputHelp()
       return util.exit(1)
