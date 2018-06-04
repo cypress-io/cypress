@@ -747,8 +747,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/route
      */
-    route(url: string | RegExp, response?: string | Response): Chainable<null>
-    route(method: string, url: string | RegExp, response?: string | Response): Chainable<null>
+    route(url: string | RegExp, response?: string | Response | object): Chainable<null>
+    route(method: string, url: string | RegExp, response?: string | Response | object): Chainable<null>
     route(fn: () => RouteOptions): Chainable<null>
     route(options: Partial<RouteOptions>): Chainable<null>
 

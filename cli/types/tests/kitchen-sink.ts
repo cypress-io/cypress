@@ -986,7 +986,7 @@ describe('Kitchen Sink', function() {
         url: /comments\/\d+/,
         status: 404,
         response: { error: message },
-        delay: 500,
+        delay: 500
       }).as('putComment')
 
       // we have code that puts a comment when
@@ -997,6 +997,16 @@ describe('Kitchen Sink', function() {
 
       // our 404 statusCode logic in scripts.js executed
       cy.get('.network-put-comment').should('contain', message)
+    })
+
+    it('has type for arbitrary response object', () => {
+      // https://github.com/cypress-io/cypress/issues/1831
+      const response = [{
+        id: 1,
+        name: 'Pat'
+      }]
+      cy.route('https://localhost:7777/users', response)
+      cy.route('GET', 'https://localhost:7777/more-users', response)
     })
   })
 
