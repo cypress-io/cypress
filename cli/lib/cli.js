@@ -137,7 +137,6 @@ module.exports = {
     .option('--no-exit', text('exit'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
-      // console.log(opts)
       debug('running Cypress')
       require('./exec/run')
       .start(parseOpts(opts))
@@ -199,7 +198,6 @@ module.exports = {
         unknownOption.call(this, `cache ${opts}`, 'sub-command')
       }
       cache[opts]()
-      // this.outputHelp()
     })
 
     debug('cli starts with arguments %j', args)
