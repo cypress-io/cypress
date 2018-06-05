@@ -1,6 +1,4 @@
-# cypress-react-unit-test [![Build Status](https://travis-ci.org/bahmutov/cypress-react-unit-test.svg?branch=master)](https://travis-ci.org/bahmutov/cypress-react-unit-test) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah)
-
-[![Greenkeeper badge](https://badges.greenkeeper.io/bahmutov/cypress-react-unit-test.svg)](https://greenkeeper.io/)
+# cypress-react-unit-test [![Build Status](https://travis-ci.org/bahmutov/cypress-react-unit-test.svg?branch=master)](https://travis-ci.org/bahmutov/cypress-react-unit-test) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah) [![renovate-app badge][renovate-badge]][renovate-app]
 
 > A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **ALPHA**
 
@@ -135,3 +133,6 @@ Same feature for unit testing components from other framesworks using Cypress
 * [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
 * [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 * [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
+
+[renovate-badge]: https://img.shields.io/badge/renovate-app-blue.svg
+[renovate-app]: https://renovateapp.com/
