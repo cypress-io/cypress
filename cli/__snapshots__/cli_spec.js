@@ -106,7 +106,7 @@ exports['cli help command shows help 1'] = `
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
     verify              Verifies that Cypress is installed correctly and executable
-    cache [options]     Manage the Cypress binary cache
+    cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -143,7 +143,7 @@ exports['cli help command shows help for -h 1'] = `
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
     verify              Verifies that Cypress is installed correctly and executable
-    cache [options]     Manage the Cypress binary cache
+    cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -180,7 +180,7 @@ exports['cli help command shows help for --help 1'] = `
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
     verify              Verifies that Cypress is installed correctly and executable
-    cache [options]     Manage the Cypress binary cache
+    cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -219,7 +219,7 @@ exports['cli unknown command shows usage and exits 1'] = `
       open [options]      Opens Cypress in the interactive GUI.
       install [options]   Installs the Cypress executable matching this package's version
       verify              Verifies that Cypress is installed correctly and executable
-      cache [options]     Manage the Cypress binary cache
+      cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------

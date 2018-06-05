@@ -190,7 +190,7 @@ module.exports = {
     program
     .command('cache')
     .usage('[command]')
-    .description('Manage the Cypress binary cache')
+    .description('Manages the Cypress binary cache')
     .option('list', text('cacheList'))
     .option('path', text('cachePath'))
     .option('clear', text('cacheClear'))
