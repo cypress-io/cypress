@@ -358,5 +358,17 @@ describe('/lib/tasks/install', function () {
         })
       })
     })
+
+    it('is silent when log level is silent', function () {
+      process.env.npm_config_loglevel = 'silent'
+      return install.start()
+      .then(() => {
+        return snapshot(
+          'silent install',
+          normalize(`[no output]${this.stdout.toString()}`)
+        )
+      })
+    })
   })
+
 })

@@ -22,6 +22,9 @@ delete process.env.CYPRESS_BINARY_VERSION
 delete process.env.CYPRESS_SKIP_BINARY_INSTALL
 delete process.env.DISPLAY
 
+// enable running specs with --silent w/out affecting logging in tests
+process.env.npm_config_loglevel = 'notice'
+
 const env = _.clone(process.env)
 
 function throwIfFnNotStubbed (stub, method) {
