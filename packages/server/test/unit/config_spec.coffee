@@ -1058,27 +1058,12 @@ describe "lib/config", ->
       .then (result) ->
         expect(result).to.eql(obj)
 
-    it "sets the full path to the pluginsFile if it exists", ->
-      projectRoot = process.cwd()
-
-      obj = {
-        projectRoot: projectRoot
-        pluginsFile: "test/unit/config_spec.coffee"
-      }
-
-      config.setPluginsFile(obj)
-      .then (result) ->
-        expect(result).to.eql({
-          projectRoot: projectRoot
-          pluginsFile: "#{projectRoot}/test/unit/config_spec.coffee"
-        })
-
     it "sets the pluginsFile to default index.js if does not exist", ->
       projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/no-scaffolding")
 
       obj = {
         projectRoot: projectRoot
-        pluginsFile: "cypress/plugins"
+        pluginsFile: "#{projectRoot}/cypress/plugins"
       }
 
       config.setPluginsFile(obj)
@@ -1093,7 +1078,7 @@ describe "lib/config", ->
 
       obj = config.setAbsolutePaths({
         projectRoot: projectRoot
-        pluginsFile: "cypress/plugins"
+        pluginsFile: "#{projectRoot}/cypress/plugins"
       })
 
       config.setPluginsFile(obj)
@@ -1171,7 +1156,7 @@ describe "lib/config", ->
 
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
 
-    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile"].forEach (folder) ->
+    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile", "pluginsFile"].forEach (folder) ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {
