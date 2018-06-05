@@ -92,6 +92,11 @@ describe "Runs List", ->
           cy.get("@runRow").contains(@runs[1].commit.branch)
           cy.get("@runRow").contains(@runs[1].commit.message)
 
+        it "display no info msg & doesn't display avatar", ->
+          cy.get(".runs-container li").eq(2).within ->
+            cy.get("img").should("not.exist")
+            cy.contains("No commit info found")
+
         it "displays platform info", ->
           cy.get("@runRow").within ->
             cy.contains(@runs[1].instances[0].platform.osVersionFormatted)
@@ -100,8 +105,8 @@ describe "Runs List", ->
             cy.get(".fa-chrome")
 
         it "displays totals", ->
-          cy.get("@runRow").contains(@runs[1].failed)
-          cy.get("@runRow").contains(@runs[1].passed)
+          cy.get("@runRow").contains(@runs[1].totalFailed)
+          cy.get("@runRow").contains(@runs[1].totalPassed)
 
         it "displays times", ->
           cy.get("@runRow").contains("a few secs ago")

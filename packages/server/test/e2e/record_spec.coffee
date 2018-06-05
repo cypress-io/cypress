@@ -7,7 +7,7 @@ e2e = require("../support/helpers/e2e")
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.0.0")
 
-{ runId, planId, machineId, runUrl } = postRunResponse
+{ runId, groupId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
 
 requests = null
@@ -140,11 +140,7 @@ defaultRoutes = [
 ]
 
 describe "e2e record", ->
-  env = _.clone(process.env)
-
   beforeEach ->
-    process.env = env
-
     requests = []
 
   context "passing", ->
@@ -225,7 +221,7 @@ describe "e2e record", ->
         expect(postRun.body.specPattern).to.eq("cypress/integration/record*")
 
         firstInstance = requests[1]
-        expect(firstInstance.body.planId).to.eq(planId)
+        expect(firstInstance.body.groupId).to.eq(groupId)
         expect(firstInstance.body.machineId).to.eq(machineId)
         expect(firstInstance.body.spec).to.eq(
           "cypress/integration/record_error_spec.coffee"
@@ -244,7 +240,7 @@ describe "e2e record", ->
         expect(firstInstanceStdout.body.stdout).to.include("record_error_spec.coffee")
 
         secondInstance = requests[5]
-        expect(secondInstance.body.planId).to.eq(planId)
+        expect(secondInstance.body.groupId).to.eq(groupId)
         expect(secondInstance.body.machineId).to.eq(machineId)
         expect(secondInstance.body.spec).to.eq(
           "cypress/integration/record_fail_spec.coffee"
@@ -265,7 +261,7 @@ describe "e2e record", ->
         expect(secondInstanceStdout.body.stdout).not.to.include("record_error_spec.coffee")
 
         thirdInstance = requests[10]
-        expect(thirdInstance.body.planId).to.eq(planId)
+        expect(thirdInstance.body.groupId).to.eq(groupId)
         expect(thirdInstance.body.machineId).to.eq(machineId)
         expect(thirdInstance.body.spec).to.eq(
           "cypress/integration/record_pass_spec.coffee"
@@ -287,7 +283,7 @@ describe "e2e record", ->
         expect(thirdInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
 
         fourthInstance = requests[14]
-        expect(fourthInstance.body.planId).to.eq(planId)
+        expect(fourthInstance.body.groupId).to.eq(groupId)
         expect(fourthInstance.body.machineId).to.eq(machineId)
         expect(fourthInstance.body.spec).to.eq(
           "cypress/integration/record_uncaught_spec.coffee"
@@ -359,6 +355,7 @@ describe "e2e record", ->
       process.env.CIRCLE_PR_NUMBER = "123"
       process.env.CIRCLE_PR_USERNAME = "brian-mann"
       process.env.CIRCLE_PR_REPONAME = "cypress"
+      process.env.CYPRESS_INTERNAL_E2E_TESTS = "0"
 
       e2e.exec(@, {
         spec: "record_pass*"
@@ -371,7 +368,7 @@ describe "e2e record", ->
 
   context "video recording", ->
     setup(defaultRoutes, {
-      videoRecording: false
+      video: false
     })
 
     it "does not upload when not enabled", ->

@@ -58,9 +58,9 @@ exports['e2e iframes passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ iframe_spec.coffee                           Xs        8        8        -        -        - │
+  │ ✔ iframe_spec.coffee                        XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        8        8        -        -        -  
+    All specs passed!                           XX:XX        8        8        -        -        -  
 
 `
 

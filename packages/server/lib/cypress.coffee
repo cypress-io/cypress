@@ -55,10 +55,10 @@ module.exports = {
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
           fn = (code) ->
-            ## juggle up the totalFailures since our outer
+            ## juggle up the totalFailed since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
-            resolve({totalFailures: code})
+            resolve({totalFailed: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
   openProject: (options) ->
@@ -110,11 +110,18 @@ module.exports = {
   start: (argv = []) ->
     debug("starting cypress with argv %o", argv)
 
+    options = require("./util/args").toObject(argv)
+
+    if options.runProject and not options.headed
+      # scale the electron browser window
+      # to force retina screens to not
+      # upsample their images when offscreen
+      # rendering
+      require("./util/electron_app").scale()
+
     ## make sure we have the appData folder
     require("./util/app_data").ensure()
     .then =>
-      options = require("./util/args").toObject(argv)
-
       ## else determine the mode by
       ## the passed in arguments / options
       ## and normalize this mode
@@ -219,9 +226,9 @@ module.exports = {
 
       when "run"
         ## run headlessly and exit
-        ## with num of totalFailures
+        ## with num of totalFailed
         @runElectron(mode, options)
-        .get("totalFailures")
+        .get("totalFailed")
         .then(exit)
         .catch(exitErr)
 

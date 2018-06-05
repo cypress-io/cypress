@@ -15,10 +15,10 @@ Fixtures     = require("./fixtures")
 fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
-video        = require("#{root}../lib/video")
 cypress      = require("#{root}../lib/cypress")
 Project      = require("#{root}../lib/project")
 screenshots  = require("#{root}../lib/screenshots")
+videoCapture = require("#{root}../lib/video_capture")
 settings     = require("#{root}../lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
@@ -55,7 +55,7 @@ replaceDurationSeconds = (str, p1, p2, p3, p4) ->
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
-  p1 + _.padStart("Xs", p2.length)
+  _.padStart("XX:XX", p1.length + p2.length)
 
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
@@ -66,7 +66,7 @@ normalizeStdout = (str) ->
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
   .replace(browserNameVersionRe, replaceBrowserName)
   .replace(/\s\(\d+m?s\)/g, "") ## numbers in parenths
-  .replace(/(\s+?)(\d+m?s)/g, replaceDurationInTables) ## durations in tables
+  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
@@ -121,7 +121,7 @@ copy = ->
         screenshotsFolder,
         path.join(ca, path.basename(screenshotsFolder))
       ),
-      video.copy(
+      videoCapture.copy(
         videosFolder,
         path.join(ca, path.basename(videosFolder))
       )
@@ -325,10 +325,20 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
+          DEBUG_COLORS: "1"
+
           ## FYI: color will already be disabled
           ## because we are piping the child process
           COLUMNS: 100
           LINES: 24
+        })
+        .defaults({
+          ## prevent any Compression progress
+          ## messages from showing up
+          VIDEO_COMPRESSION_THROTTLE: 20000
+
+          ## don't fail our own tests running from forked PR's
+          CYPRESS_INTERNAL_E2E_TESTS: "1"
         })
         .value()
       }

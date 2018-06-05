@@ -8,8 +8,8 @@ reset = -> {
   disableTimersAndAnimations: true
   screenshotOnRunFailure: true
   blackout: []
-  beforeScreenshot: ->
-  afterScreenshot: ->
+  onBeforeScreenshot: ->
+  onAfterScreenshot: ->
 }
 
 defaults = reset()
@@ -94,8 +94,8 @@ validate = (props, cmd, log) ->
 
     values.clip = clip
 
-  validateAndSetCallback(props, values, cmd, log, "beforeScreenshot")
-  validateAndSetCallback(props, values, cmd, log, "afterScreenshot")
+  validateAndSetCallback(props, values, cmd, log, "onBeforeScreenshot")
+  validateAndSetCallback(props, values, cmd, log, "onAfterScreenshot")
 
   return values
 
@@ -105,13 +105,13 @@ module.exports = {
     defaults = reset()
 
   getConfig: ->
-    _.cloneDeep(_.omit(defaults, "beforeScreenshot", "afterScreenshot"))
+    _.cloneDeep(_.omit(defaults, "onBeforeScreenshot", "onAfterScreenshot"))
 
-  callBeforeScreenshot: (doc) ->
-    defaults.beforeScreenshot(doc)
+  onBeforeScreenshot: ($el) ->
+    defaults.onBeforeScreenshot($el)
 
-  callAfterScreenshot: (doc) ->
-    defaults.afterScreenshot(doc)
+  onAfterScreenshot: ($el, results) ->
+    defaults.onAfterScreenshot($el, results)
 
   defaults: (props) ->
     values = validate(props, "Cypress.Screenshot.defaults")
@@ -119,4 +119,3 @@ module.exports = {
 
   validate: validate
  }
-

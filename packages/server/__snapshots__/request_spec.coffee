@@ -62,9 +62,9 @@ exports['e2e requests passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ request_spec.coffee                          Xs       12       12        -        -        - │
+  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs       12       12        -        -        -  
+    All specs passed!                           XX:XX       12       12        -        -        -  
 
 `
 
@@ -190,9 +190,9 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ request_http_network_error_failing_sp…       Xs        1        -        1        -        - │
+  │ ✖ request_http_network_error_failing_s…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 
@@ -256,7 +256,7 @@ Headers: {
   "content-type": "text/plain; charset=utf-8",
   "content-length": "19",
   "etag": "W/13-52060a5f",
-  "date": "Fri, 18 Aug 2017 15:01:13 GMT",
+  "date": "Fri, 18 Aug 2017    XX:XX GMT",
   "connection": "close"
 }
 Body: Service Unavailable
@@ -311,9 +311,9 @@ Body: Service Unavailable
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ request_status_code_failing_spec.coff…       Xs        1        -        1        -        - │
+  │ ✖ request_status_code_failing_spec.cof…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 

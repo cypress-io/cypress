@@ -54,9 +54,9 @@ exports['e2e cache passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cache_spec.coffee                            Xs        4        4        -        -        - │
+  │ ✔ cache_spec.coffee                         XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        4        4        -        -        -  
+    All specs passed!                           XX:XX        4        4        -        -        -  
 
 `
 

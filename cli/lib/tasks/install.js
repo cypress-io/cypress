@@ -181,8 +181,9 @@ const start = (options = {}) => {
     logger.log()
   }
 
-  const installDir = state.getVersionDir(util.pkgVersion())
+  const installDir = state.getVersionDir(pkgVersion)
   const cacheDir = state.getCacheDir()
+  const binaryDir = state.getBinaryDir(pkgVersion)
 
   return fs.ensureDirAsync(cacheDir)
   .catch({ code: 'EACCES' }, (err) => {
@@ -192,7 +193,7 @@ const start = (options = {}) => {
     ${err.message}
     `)
   })
-  .then(() => state.getBinaryPkgVersionAsync(installDir))
+  .then(() => state.getBinaryPkgVersionAsync(binaryDir))
   .then((binaryVersion) => {
 
     if (!binaryVersion) {

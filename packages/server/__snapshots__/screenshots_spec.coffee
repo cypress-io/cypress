@@ -20,11 +20,13 @@ exports['e2e screenshots passes 1'] = `
     ✓ manually generates pngs
     ✓ can nest screenshots in folders
     1) generates pngs on failure
+    ✓ handles devicePixelRatio correctly on headless electron
     ✓ crops app captures to just app size
     ✓ can capture fullPage screenshots
     ✓ accepts subsequent same captures after multiple tries
     ✓ accepts screenshot after multiple tries if somehow app has pixels that match helper pixels
     ✓ can capture element screenshots
+    ✓ retries each screenshot for up to  XX:XX
     clipping
       ✓ can clip app screenshots
       ✓ can clip runner screenshots
@@ -37,7 +39,7 @@ exports['e2e screenshots passes 1'] = `
       4) "after each" hook for "empty test 2"
 
 
-  11 passing
+  13 passing
   4 failing
 
   1) taking screenshots generates pngs on failure:
@@ -68,12 +70,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        14                      │
-  │ Passing:      11                      │
+  │ Tests:        16                      │
+  │ Passing:      13                      │
   │ Failing:      3                       │
   │ Pending:      0                       │
   │ Skipped:      0                       │
-  │ Screenshots:  16                      │
+  │ Screenshots:  18                      │
   │ Video:        true                    │
   │ Duration:     X seconds               │
   │ Spec Ran:     screenshots_spec.coffee │
@@ -86,11 +88,13 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/red.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/foobarbaz.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/color-check.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/crop-check.png (600x400)
   - /foo/bar/.projects/e2e/cypress/screenshots/fullPage.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-same.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/pathological.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/element.png (400x300)
+  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- retries each screenshot for up to  XX:XX.png (400x1316)
   - /foo/bar/.projects/e2e/cypress/screenshots/app-clip.png (100x50)
   - /foo/bar/.projects/e2e/cypress/screenshots/runner-clip.png (120x60)
   - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-clip.png (140x70)
@@ -113,9 +117,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                      Xs       14       11        3        -        - │
+  │ ✖ screenshots_spec.coffee                   XX:XX       16       13        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs       14       11        3        -        -  
+    1 of 1 failed (100%)                        XX:XX       16       13        3        -        -  
 
 `
 

@@ -52,9 +52,9 @@ exports['e2e form submissions passing 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_passing_spec.coffee          Xs        2        2        -        -        - │
+  │ ✔ form_submission_passing_spec.coffee       XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 `
 
@@ -137,9 +137,9 @@ exports['e2e form submissions failing 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ form_submission_failing_spec.coffee          Xs        1        -        1        -        - │
+  │ ✖ form_submission_failing_spec.coffee       XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 

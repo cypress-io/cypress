@@ -57,9 +57,9 @@ exports['e2e domain passing 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ domain_spec.coffee                           Xs        3        3        -        -        - │
+  │ ✔ domain_spec.coffee                        XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        3        3        -        -        -  
+    All specs passed!                           XX:XX        3        3        -        -        -  
 
 `
 

@@ -51,9 +51,9 @@ exports['e2e only spec failing 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ only_spec.coffee                             Xs        1        1        -        -        - │
+  │ ✔ only_spec.coffee                          XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

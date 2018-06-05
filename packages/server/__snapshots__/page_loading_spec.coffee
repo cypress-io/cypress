@@ -53,9 +53,9 @@ exports['e2e page_loading passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ page_loading_spec.coffee                     Xs        2        2        -        -        - │
+  │ ✔ page_loading_spec.coffee                  XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                              Xs        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 `
 

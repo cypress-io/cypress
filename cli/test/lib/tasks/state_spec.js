@@ -3,7 +3,7 @@ require('../../spec_helper')
 const os = require('os')
 const path = require('path')
 const proxyquire = require('proxyquire')
-// const Promise = require('bluebird')
+const Promise = require('bluebird')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -157,31 +157,34 @@ describe('lib/tasks/state', function () {
       expect(ret).to.equal('/path/to/dir')
     })
   })
-  context('.parsePlatformBinaryFolder', function () {
+  context('.parseRealPlatformBinaryFolderAsync', function () {
+    beforeEach(function () {
+      sinon.stub(fs, 'realpathAsync').callsFake((path) => Promise.resolve(path))
+    })
 
     it('can parse on darwin', function () {
       os.platform.returns('darwin')
-      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app/Contents/MacOS/Cypress')).to.equal('/Documents/Cypress.app')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress.app/Contents/MacOS/Cypress').then((path) => expect(path).to.eql('/Documents/Cypress.app'))
     })
     it('can parse on linux', function () {
       os.platform.returns('linux')
-      expect(state.parsePlatformBinaryFolder('/Documents/Cypress/Cypress')).to.equal('/Documents/Cypress')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress').then((path) => expect(path).to.eql('/Documents/Cypress'))
     })
     it('can parse on darwin', function () {
       os.platform.returns('win32')
-      expect(state.parsePlatformBinaryFolder('/Documents/Cypress/Cypress.exe')).to.equal('/Documents/Cypress')
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe').then((path) => expect(path).to.eql('/Documents/Cypress'))
     })
     it('throws when invalid on darwin', function () {
       os.platform.returns('darwin')
-      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app')).to.equal(false)
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe').then((path) => expect(path).to.eql(false))
     })
     it('throws when invalid on linux', function () {
       os.platform.returns('linux')
-      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app')).to.equal(false)
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe').then((path) => expect(path).to.eql(false))
     })
     it('throws when invalid on windows', function () {
       os.platform.returns('win32')
-      expect(state.parsePlatformBinaryFolder('/Documents/Cypress.app')).to.equal(false)
+      return state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress').then((path) => expect(path).to.eql(false))
     })
   })
 })

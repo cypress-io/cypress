@@ -58,9 +58,9 @@ Fix the error in your code and re-run your tests.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                              Xs        -        -        1        -        - │
+  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        -        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
 

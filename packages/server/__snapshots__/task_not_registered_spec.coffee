@@ -80,9 +80,9 @@ https://on.cypress.io/api/task
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ task_not_registered_spec.coffee              Xs        1        -        1        -        - │
+  │ ✖ task_not_registered_spec.coffee           XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                           Xs        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 `
 

@@ -2,10 +2,40 @@ require("../spec_helper")
 
 tty = require("tty")
 ttyUtil = require("#{root}lib/util/tty")
+terminalSize = require("#{root}lib/util/terminal-size")
 
 ttys = [process.stdin.isTTY, process.stdout.isTTY, process.stderr.isTTY]
 
 describe "lib/util/tty", ->
+  context "getWindowSize", ->
+    ## https://github.com/cypress-io/cypress/issues/1815
+    ## windows has undefined process.stdout.getWindowSize
+    ## when running in electron, even when stdio inherited
+    beforeEach ->
+      ## need to delete both the initial module and the
+      ## "base.js" module with problematic tty.getWindowSize call
+      delete require.cache[require.resolve("mocha/lib/reporters/base")]
+      delete require.cache[require.resolve("mocha/lib/reporters")]
+
+    it "polyfills stdout and stderr getWindowSize", ->
+      sinon.stub(tty, "isatty").returns(true)
+      sinon.stub(terminalSize, "get").returns({ columns: 10, rows: 20 })
+
+      sinon.stub(process.stdout, "getWindowSize").value(undefined)
+      sinon.stub(process.stderr, "getWindowSize").value(undefined)
+
+      ttyUtil.override()
+
+      ## forces mocha reporters base to use tty.getWindowSize()
+      ## check the terminal width - should be the ttyUtil hardcoded
+      require("mocha/lib/reporters")
+      base = require("mocha/lib/reporters/base")
+
+      expect(process.stdout.getWindowSize()).to.deep.eq([10, 20])
+      expect(process.stderr.getWindowSize()).to.deep.eq([10, 20])
+
+      expect(base.window.width).to.equal(10)
+
   context ".override", ->
     beforeEach ->
       process.env.FORCE_STDIN_TTY = '1'

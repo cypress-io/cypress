@@ -345,11 +345,38 @@ API = {
 
         Fix the error in your code and re-run your tests.
         """
-      when "CONFIG_VALIDATION_ERROR"
+      when "SETTINGS_VALIDATION_ERROR"
         """
         We found an invalid value in the file: '#{chalk.blue(arg1)}'
 
         #{chalk.yellow(arg2)}
+        """
+      when "CONFIG_VALIDATION_ERROR"
+        """
+        We found an invalid configuration value:
+
+        #{chalk.yellow(arg1)}
+        """
+      when "SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED"
+        """
+        In Cypress v3.0.0 we removed the configuration option: #{chalk.yellow('screenshotOnHeadlessFailure')}
+
+        You now configure this behavior in your test code.
+
+        Example:
+
+          // cypress/support/index.js
+          Cypress.Screenshot.defaults({
+            screenshotOnRunFailure: false
+          })
+
+        https://on.cypress.io/screenshot-api
+        """
+      when "RENAMED_CONFIG_OPTION"
+        """
+        A configuration option you have supplied has been renamed.
+
+        Please rename #{chalk.yellow(arg1)} to #{chalk.blue(arg2)}
         """
       when "CANNOT_CONNECT_BASE_URL"
         """

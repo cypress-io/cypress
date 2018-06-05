@@ -18,6 +18,10 @@ iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 
 describe "lib/screenshots", ->
   beforeEach ->
+    ## make each test timeout after only 1 sec
+    ## so that durations are handled correctly
+    @currentTest.timeout(1000)
+
     Fixtures.scaffold()
     @todosPath = Fixtures.projectPath("todos")
 
@@ -30,6 +34,7 @@ describe "lib/screenshots", ->
     @buffer = {}
 
     @jimpImage = {
+      id: 1
       bitmap: {
         width: 40
         height: 40
@@ -72,7 +77,7 @@ describe "lib/screenshots", ->
         @getPixelColor.withArgs(0, 0).returns("white")
 
     it "captures screenshot with automation", ->
-      data = { viewport: {} }
+      data = { viewport: @jimpImage.bitmap }
       screenshots.capture(data, @automate).then =>
         expect(@automate).to.be.calledOnce
         expect(@automate).to.be.calledWith(data)
@@ -85,18 +90,18 @@ describe "lib/screenshots", ->
     it "retries until helper pixels are present for runner capture", ->
       @passPixelTest()
       @getPixelColor.withArgs(0, 0).onCall(1).returns("black")
-      screenshots.capture({ viewport: {} }, @automate).then =>
+      screenshots.capture({ viewport: @jimpImage.bitmap }, @automate)
+      .then =>
         expect(@automate).to.be.calledTwice
-
-    it "gives up after 10 tries", ->
-      screenshots.capture(@appData, @automate).then =>
-        expect(@automate.callCount).to.equal(10)
 
     it "adjusts cropping based on pixel ratio", ->
       @appData.viewport = { width: 20, height: 20 }
       @appData.clip = { x: 5, y: 5, width: 10, height: 10 }
       @passPixelTest()
-      screenshots.capture(@appData, @automate).then =>
+      @getPixelColor.withArgs(2, 0).returns("white")
+      @getPixelColor.withArgs(0, 2).returns("white")
+      screenshots.capture(@appData, @automate)
+      .then =>
         expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
     it "resolves details w/ image", ->
@@ -141,6 +146,8 @@ describe "lib/screenshots", ->
         @appData.viewport = { width: 20, height: 20 }
         @appData.userClip = { x: 5, y: 5, width: 10, height: 10 }
         @passPixelTest()
+        @getPixelColor.withArgs(2, 0).returns("white")
+        @getPixelColor.withArgs(0, 2).returns("white")
         screenshots.capture(@appData, @automate).then =>
           expect(@jimpImage.crop).to.be.calledWith(10, 10, 20, 20)
 
@@ -151,25 +158,41 @@ describe "lib/screenshots", ->
         @appData.current = 1
         @appData.total = 3
 
-        @getPixelColor.withArgs(0, 0).onCall(1).returns("white")
+        @getPixelColor.withArgs(0, 0).onSecondCall().returns("white")
+
+        @jimpImage2 = _.extend({}, @jimpImage, {
+          id: 2
+          hash: sinon.stub().returns("image 2 hash")
+        })
+
+        @jimpImage3 = _.extend({}, @jimpImage, {
+          id: 3
+          hash: sinon.stub().returns("image 3 hash")
+        })
+
+        @jimpImage4 = _.extend({}, @jimpImage, {
+          id: 4
+          hash: sinon.stub().returns("image 4 hash")
+        })
 
       it "retries until helper pixels are no longer present on first capture", ->
-        screenshots.capture(@appData, @automate).then =>
+        screenshots.capture(@appData, @automate)
+        .then =>
           expect(@automate).to.be.calledTwice
 
       it "retries until images aren't the same on subsequent captures", ->
-        @jimpImage2 = _.extend({}, @jimpImage, {
-          foo: true
-          hash: -> "image 2 hash"
-        })
-        Jimp.read.onCall(3).resolves(@jimpImage2)
-
         screenshots.capture(@appData, @automate)
         .then =>
+          Jimp.read.onCall(3).resolves(@jimpImage2)
+
           @appData.current = 2
           screenshots.capture(@appData, @automate)
         .then =>
           expect(@automate.callCount).to.equal(4)
+
+          ## image.hash() is very expensive and we want to make sure its only called
+          ## once for each image
+          expect(@jimpImage2.hash).to.be.calledOnce
 
       it "resolves no image on non-last captures", ->
         screenshots.capture(@appData, @automate).then (image) ->
@@ -178,12 +201,17 @@ describe "lib/screenshots", ->
       it "resolves details w/ image on last capture", ->
         screenshots.capture(@appData, @automate)
         .then =>
+          Jimp.read.onCall(3).resolves(@jimpImage2)
+
           @appData.current = 3
           screenshots.capture(@appData, @automate)
         .then ({ image }) =>
           expect(image).to.be.an.instanceOf(Jimp)
 
       it "composites images into one image", ->
+        Jimp.read.onThirdCall().resolves(@jimpImage2)
+        Jimp.read.onCall(3).resolves(@jimpImage3)
+
         screenshots.capture(@appData, @automate)
         .then =>
           @appData.current = 2
@@ -203,6 +231,12 @@ describe "lib/screenshots", ->
           expect(composite.getCall(2).args[2]).to.equal(80)
 
       it "clears previous full page state once complete", ->
+        @getPixelColor.withArgs(0, 0).returns("white")
+
+        Jimp.read.onSecondCall().resolves(@jimpImage2)
+        Jimp.read.onThirdCall().resolves(@jimpImage3)
+        Jimp.read.onCall(3).resolves(@jimpImage4)
+
         @appData.total = 2
         screenshots.capture(@appData, @automate)
         .then =>

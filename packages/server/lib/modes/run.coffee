@@ -8,18 +8,19 @@ debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
 recordMode = require("./record")
-video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
 browsers   = require("../browsers")
 openProject = require("../open_project")
+videoCapture = require("../video_capture")
 Windows    = require("../gui/windows")
 fs         = require("../util/fs")
 env        = require("../util/env")
 trash      = require("../util/trash")
 random     = require("../util/random")
 system     = require("../util/system")
+duration   = require("../util/duration")
 progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
@@ -53,14 +54,14 @@ formatBrowser = (browser, headed) ->
   ]).join(" ")
 
 formatFooterSummary = (results) ->
-  { totalFailures, runs } = results
+  { totalFailed, runs } = results
 
   ## pass or fail color
-  c = if totalFailures then "red" else "green"
+  c = if totalFailed then "red" else "green"
 
   phrase = do ->
     ## if we have any specs failing...
-    if not totalFailures
+    if not totalFailed
       return "All specs passed!"
 
     ## number of specs
@@ -72,10 +73,10 @@ formatFooterSummary = (results) ->
 
   return [
     color(phrase, c),
-    gray(humanTime.short(results.totalDuration)),
+    gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, "reset"),
-    colorIf(results.totalPasses, "green"),
-    colorIf(totalFailures, "red"),
+    colorIf(results.totalPassed, "green"),
+    colorIf(totalFailed, "red"),
     colorIf(results.totalPending, "cyan"),
     colorIf(results.totalSkipped, "blue"),
   ]
@@ -189,7 +190,7 @@ renderSummaryTable = (runUrl, results) ->
   if runs and runs.length
     head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
     colAligns = ["left", "right", "right", "right", "right", "right", "right"]
-    colWidths = [40, 10, 10, 10, 10, 10, 10]
+    colWidths = [39, 11, 10, 10, 10, 10, 10]
 
     table1 = terminal.table({
       colAligns
@@ -217,7 +218,7 @@ renderSummaryTable = (runUrl, results) ->
     _.each runs, (run) ->
       { spec, stats } = run
 
-      ms = humanTime.short(stats.wallClockDuration)
+      ms = duration.format(stats.wallClockDuration)
 
       table2.push([
         formatSpecSummary(spec.name, stats.failures)
@@ -318,7 +319,7 @@ createAndOpenProject = (socketId, options) ->
     })
 
 trashAssets = (config = {}) ->
-  if config.trashAssetsBeforeHeadlessRuns isnt true
+  if config.trashAssetsBeforeRuns isnt true
     return Promise.resolve()
 
   Promise.join(
@@ -344,7 +345,7 @@ module.exports = {
     fs
     .ensureDirAsync(outputDir)
     .then ->
-      video.start(name, {
+      videoCapture.start(name, {
         onError: (err) ->
           ## catch video recording failures and log them out
           ## but don't let this affect the run at all
@@ -456,30 +457,30 @@ module.exports = {
 
       started  = new Date
       progress = Date.now()
-      tenSecs = human("10 seconds")
+      throttle = env.get("VIDEO_COMPRESSION_THROTTLE") or human("10 seconds")
 
       onProgress = (float) ->
         switch
           when float is 1
             finished = new Date - started
-            duration = "(#{humanTime.long(finished)})"
+            dur = "(#{humanTime.long(finished)})"
             console.log(
               gray("  - Finished processing: "),
               chalk.cyan(name),
-              gray(duration)
+              gray(dur)
             )
             console.log("")
 
-          when (new Date - progress) > tenSecs
+          when (new Date - progress) > throttle
             ## bump up the progress so we dont
             ## continuously get notifications
-            progress += tenSecs
+            progress += throttle
             percentage = Math.ceil(float * 100) + "%"
             console.log("  - Compression progress: ", chalk.cyan(percentage))
 
         # bar.tickTotal(float)
 
-      video.process(name, cname, videoCompression, onProgress)
+      videoCapture.process(name, cname, videoCompression, onProgress)
     .catch {recordingVideoFailed: true}, (err) ->
       ## dont do anything if this error occured because
       ## recording the video had already failed
@@ -676,8 +677,8 @@ module.exports = {
       totalDuration: null
       totalSuites: null,
       totalTests: null,
-      totalFailures: null,
-      totalPasses: null,
+      totalFailed: null,
+      totalPassed: null,
       totalPending: null,
       totalSkipped: null,
       runs: null,
@@ -726,9 +727,9 @@ module.exports = {
       results.totalDuration = reduceRuns(runs, "stats.wallClockDuration")
       results.totalSuites = reduceRuns(runs, "stats.suites")
       results.totalTests = reduceRuns(runs, "stats.tests")
-      results.totalPasses = reduceRuns(runs, "stats.passes")
+      results.totalPassed = reduceRuns(runs, "stats.passes")
       results.totalPending = reduceRuns(runs, "stats.pending")
-      results.totalFailures = reduceRuns(runs, "stats.failures")
+      results.totalFailed = reduceRuns(runs, "stats.failures")
       results.totalSkipped = reduceRuns(runs, "stats.skipped")
       results.runs = runs
 
@@ -738,7 +739,7 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}) ->
-    { project, headed, browser, videoRecording, videosFolder } = options
+    { project, headed, browser, video, videosFolder } = options
 
     browserName = browser.name
 
@@ -760,7 +761,7 @@ module.exports = {
     browserCanBeRecorded = (name) ->
       name is "electron" and not options.headed
 
-    if videoRecording
+    if video
       if browserCanBeRecorded(browserName)
         if not videosFolder
           throw new Error("Missing videoFolder for recording")
@@ -883,7 +884,7 @@ module.exports = {
             specs
             sys
             videosFolder:         config.videosFolder
-            videoRecording:       config.videoRecording
+            video:                config.video
             videoCompression:     config.videoCompression
             videoUploadOnPasses:  config.videoUploadOnPasses
             exit:                 options.exit
