@@ -128,11 +128,11 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 const start = (options = {}) => {
 
   // handle deprecated / removed
-  if (process.env.CYPRESS_BINARY_VERSION) {
+  if (util.getEnv('CYPRESS_BINARY_VERSION')) {
     return throwFormErrorText(errors.removed.CYPRESS_BINARY_VERSION)()
   }
 
-  if (process.env.CYPRESS_SKIP_BINARY_INSTALL) {
+  if (util.getEnv('CYPRESS_SKIP_BINARY_INSTALL')) {
     return throwFormErrorText(errors.removed.CYPRESS_SKIP_BINARY_INSTALL)()
   }
 
@@ -147,9 +147,9 @@ const start = (options = {}) => {
   debug('version in package.json is', needVersion)
 
   // let this environment variable reset the binary version we need
-  if (process.env.CYPRESS_INSTALL_BINARY) {
+  if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
 
-    const envVarVersion = process.env.CYPRESS_INSTALL_BINARY
+    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY')
     debug('using environment variable CYPRESS_INSTALL_BINARY %s', envVarVersion)
 
     if (envVarVersion === '0') {
@@ -170,8 +170,8 @@ const start = (options = {}) => {
     }
   }
 
-  if (process.env.CYPRESS_CACHE_FOLDER) {
-    const envCache = process.env.CYPRESS_CACHE_FOLDER
+  if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
+    const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')
     logger.log(
       stripIndent`
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
@@ -336,6 +336,12 @@ const progessify = (task, title) => {
 // if we are running in CI then use
 // the verbose renderer else use
 // the default
-const getRendererOptions = () => ({
-  renderer: util.isCi() ? verbose : 'default',
-})
+const getRendererOptions = () => {
+  let renderer = util.isCi() ? verbose : 'default'
+  if (logger.logLevel() === 'silent') {
+    renderer = 'silent'
+  }
+  return {
+    renderer,
+  }
+}

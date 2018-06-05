@@ -26,7 +26,7 @@ declare const assert: Chai.AssertStatic
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
-  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT"
+  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "PATCH"
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
@@ -746,9 +746,12 @@ declare namespace Cypress {
      * Use `cy.route()` to manage the behavior of network requests.
      *
      * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
      */
-    route(url: string | RegExp, response?: string | Response): Chainable<null>
-    route(method: string, url: string | RegExp, response?: string | Response): Chainable<null>
+    route(url: string | RegExp, response?: string | object): Chainable<null>
+    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     route(fn: () => RouteOptions): Chainable<null>
     route(options: Partial<RouteOptions>): Chainable<null>
 

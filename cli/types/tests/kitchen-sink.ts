@@ -269,7 +269,7 @@ describe('Kitchen Sink', function() {
       // https://on.cypress.io/click
       cy.get('.action-btn').click()
 
-      // You can clock on 9 specific positions of an element:
+      // You can click on 9 specific positions of an element:
       //  -----------------------------------
       // | topLeft        top       topRight |
       // |                                   |
@@ -943,6 +943,10 @@ describe('Kitchen Sink', function() {
           expect(response).to.have.property('headers')
           expect(response).to.have.property('duration')
         })
+
+      // accepts method, including "PATCH"
+      cy.request('POST', 'http://somewhere.com', {foo: 'bar'})
+      cy.request('PATCH', 'http://somewhere.com', {foo: 'bar'})
     })
 
     it('cy.route() - route responses to matching requests', function() {
@@ -986,7 +990,7 @@ describe('Kitchen Sink', function() {
         url: /comments\/\d+/,
         status: 404,
         response: { error: message },
-        delay: 500,
+        delay: 500
       }).as('putComment')
 
       // we have code that puts a comment when
@@ -997,6 +1001,16 @@ describe('Kitchen Sink', function() {
 
       // our 404 statusCode logic in scripts.js executed
       cy.get('.network-put-comment').should('contain', message)
+    })
+
+    it('has type for arbitrary response object', () => {
+      // https://github.com/cypress-io/cypress/issues/1831
+      const response = [{
+        id: 1,
+        name: 'Pat'
+      }]
+      cy.route('https://localhost:7777/users', response)
+      cy.route('GET', 'https://localhost:7777/more-users', response)
     })
   })
 
