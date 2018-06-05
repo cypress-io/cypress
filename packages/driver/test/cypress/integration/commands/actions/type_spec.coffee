@@ -2600,7 +2600,9 @@ describe "src/cy/commands/actions/type", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
-          expect(err.message).to.include "<input type=\"radio\" name=\"gender\" value=\"male\">"
+          expect(err.message).to.match /<input(.*)type="radio"(.*)>/
+          expect(err.message).to.match /<input(.*)name="gender"(.*)>/
+          expect(err.message).to.match /<input(.*)value="male"(.*)>/
           expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
@@ -2610,7 +2612,9 @@ describe "src/cy/commands/actions/type", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
-          expect(err.message).to.include "<input type=\"checkbox\" name=\"colors\" value=\"blue\">"
+          expect(err.message).to.match /<input(.*)type="checkbox"(.*)>/
+          expect(err.message).to.match /<input(.*)name="colors"(.*)>/
+          expect(err.message).to.match /<input(.*)value="blue"(.*)>/
           expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
