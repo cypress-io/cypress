@@ -72,9 +72,12 @@ module.exports = {
     log("getFile #{filePath}")
 
     if not fileObject = fileObjects[filePath]
+      baseFilePath = filePath
+        .replace(config.projectRoot, "")
+        .replace(config.integrationFolder, "")
       fileObject = fileObjects[filePath] = _.extend(new EE(), {
         filePath: filePath
-        outputPath: getOutputPath(config, filePath.replace(config.projectRoot, ""))
+        outputPath: getOutputPath(config, baseFilePath)
         shouldWatch: not config.isTextTerminal
       })
       fileObject.on "rerun", ->
