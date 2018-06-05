@@ -74,7 +74,7 @@ const processRunOptions = (options = {}) => {
     args.push('--headed', options.headed)
   }
 
-  if (options.noExit) {
+  if (options.exit === false) {
     args.push('--no-exit')
   }
 
