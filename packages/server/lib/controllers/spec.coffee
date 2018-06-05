@@ -1,4 +1,5 @@
-log = require('debug')('cypress:server:controllers:spec')
+log = require("debug")("cypress:server:controllers:spec")
+Promise = require("bluebird")
 errors = require("../errors")
 preprocessor = require("../plugins/preprocessor")
 
@@ -18,7 +19,8 @@ module.exports = {
     .getFile(spec, config)
     .then (filePath) ->
       log("send #{filePath}")
-      res.sendFile(filePath)
+      sendFile = Promise.promisify(res.sendFile.bind(res))
+      sendFile(filePath)
     .catch (err) ->
       if config.isTextTerminal
         ## bluebird made a change in 3.4.7 where they handle
