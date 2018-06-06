@@ -15,7 +15,6 @@ describe "e2e stdout", ->
   it "displays errors from exiting early due to bundle errors", ->
     e2e.exec(@, {
       spec: "stdout_exit_early_failing_spec.coffee"
-      config: "supportFile=false"
       snapshot: true
       expectedExitCode: 1
     })

@@ -16,7 +16,6 @@ describe "e2e browserify, babel, es2015", ->
   it "fails", ->
     e2e.exec(@, {
       spec: "browserify_babel_es2015_failing_spec.js"
-      config: "supportFile=false"
       snapshot: true
       expectedExitCode: 1
     })
