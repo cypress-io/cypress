@@ -87,6 +87,15 @@ describe('exec run', function () {
       })
     })
 
+    it('spawns with --no-exit', function () {
+      return run.start({ exit: false })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--no-exit',
+        ])
+      })
+    })
+
     it('spawns with --output-path', function () {
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {

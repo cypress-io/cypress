@@ -2,6 +2,7 @@ const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const sinon = require('sinon')
+const mockfs = require('mock-fs')
 const Promise = require('bluebird')
 const util = require('../lib/util')
 
@@ -86,4 +87,5 @@ beforeEach(function () {
 afterEach(function () {
   process.env = _.clone(env)
   sinon.restore()
+  mockfs.restore()
 })
