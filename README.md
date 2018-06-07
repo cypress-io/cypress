@@ -6,7 +6,7 @@ Apply [`semantic-release`'s](https://github.com/semantic-release/semantic-releas
 
 ## Why
 
-The default configuration of `semantic-release` assumes a one-to-one relationship between a Github repository and an `npm` package.
+The default configuration of `semantic-release` assumes a one-to-one relationship between a GitHub repository and an `npm` package.
 
 This set of plugins allows using `semantic-release` with a single Github repository containing many `npm` packages.
 
