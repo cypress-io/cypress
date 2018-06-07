@@ -1,7 +1,7 @@
 require("../../support/unit_spec_helper")
 
 chai = require("chai")
-$Chai = require("#{src}/cypress/chai")
+$Chai = require("#{src}/cy/chai")
 
 describe "src/cypress/chai", ->
   assert = chai.Assertion.prototype.assert
