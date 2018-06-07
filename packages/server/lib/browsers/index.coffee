@@ -119,7 +119,7 @@ module.exports = {
 
           return instance
     .catch (err) ->
-      log("Error launching #{name}:", err)
+      debug("Error launching #{name}:", err)
       throw err
 
 }
