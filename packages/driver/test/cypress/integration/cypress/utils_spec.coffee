@@ -4,7 +4,7 @@ Promise = Cypress.Promise
 
 describe "driver/src/cypress/utils", ->
   context ".cloneErr", ->
-    it "copies properies, message, stack", ->
+    it "copies properties, message, stack", ->
       obj = {
         stack: "stack"
         message: "message"

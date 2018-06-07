@@ -711,7 +711,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#number-with-value").type("{leftarrow}{leftarrow}{rightarrow}9").then ($input) ->
             expect($input).to.have.value("192")
 
-        it "inserts text after existing text ", ->
+        it "inserts text after existing text", ->
           cy.get("#number-with-value").type("34").then ($text) ->
             expect($text).to.have.value("1234")
 
