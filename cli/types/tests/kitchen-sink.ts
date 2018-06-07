@@ -1116,6 +1116,14 @@ describe('Kitchen Sink', function() {
       })
 
       // clearLocalStorage() yields the localStorage object
+      cy.clearLocalStorage().should((ls) => {
+        expect(ls.getItem('prop1')).to.be.null
+        expect(ls.getItem('prop2')).to.be.null
+        expect(ls.getItem('prop3')).to.be.null
+        ls.setItem('prop1', 'foo')
+      })
+
+      // clearLocalStorage() yields the localStorage object
       cy.clearLocalStorage()
       cy.window().its('localStorage').should(function(ls) {
         expect(ls.getItem('prop1')).to.be.null

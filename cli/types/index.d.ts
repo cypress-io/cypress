@@ -289,12 +289,18 @@ declare namespace Cypress {
 
     /**
      * Clear data in local storage.
-     * Cypress automatically runs this command before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear localStorage inside a single test.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
      *
      * @see https://on.cypress.io/clearlocalstorage
+     * @example
+     *    cy.clearLocalStorage().should(ls => {
+     *      expect(ls.getItem('prop1')).to.be.null
+     *    })
      */
-    clearLocalStorage(key?: string): Chainable<null>
-    clearLocalStorage(re: RegExp): Chainable<null>
+    clearLocalStorage(key?: string): Chainable<Storage>
+    clearLocalStorage(re: RegExp): Chainable<Storage>
 
     /**
      * Click a DOM element.
