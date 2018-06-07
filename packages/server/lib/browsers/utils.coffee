@@ -12,6 +12,9 @@ extensionDest = appData.path("web-extension")
 extensionBg = appData.path("web-extension", "background.js")
 
 module.exports = {
+  ensureProfileDir: (name) ->
+    fs.ensureDirAsync(path.join(profiles, name))
+
   getProfileDir: (name) ->
     path.join(profiles, name)
 

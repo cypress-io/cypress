@@ -134,13 +134,14 @@ module.exports = {
     .then ->
       Promise.all([
         utils.writeExtension(options.proxyUrl, options.socketIoRoute)
+        utils.ensureProfileDir(browserName)
         firefoxUtil.findRemotePort()
       ])
-    .spread (extensionDest, firefoxPort) ->
+    .spread (extensionDest, profileDir, firefoxPort) ->
       debug("firefox port:", firefoxPort)
 
       profile = new FirefoxProfile({
-        destinationDirectory: utils.getProfileDir(browserName)
+        destinationDirectory: profileDir
       })
       debug("firefox profile dir:", profile.path())
 
