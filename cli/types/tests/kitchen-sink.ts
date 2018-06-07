@@ -1533,3 +1533,7 @@ cy.wrap('foo').then(subject => {
 }).then(subject => {
   subject // $ExpectType string
 })
+
+Cypress.minimatch('/users/1/comments', '/users/*/comments', {
+  matchBase: true,
+})
