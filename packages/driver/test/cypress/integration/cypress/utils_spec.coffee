@@ -20,6 +20,7 @@ describe "driver/src/cypress/utils", ->
         expect(err[key], "key: #{key}").to.eq(obj[key])
 
   context ".appendErrMsg", ->
+    ## FIREFOX FIXME
     it "appends error message", ->
       err = new Error("foo")
 

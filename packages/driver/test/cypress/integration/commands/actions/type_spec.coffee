@@ -719,6 +719,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#number-without-value").invoke("val", "12").type("34").then ($text) ->
             expect($text).to.have.value("1234")
 
+        ## FIREFOX FIXME: ends up 050
         it "overwrites text on input[type=number] when input has existing text selected", ->
           cy.$$("#number-without-value").val("0").click ->
             $(@).select()

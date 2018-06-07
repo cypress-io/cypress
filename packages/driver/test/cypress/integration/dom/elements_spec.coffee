@@ -18,6 +18,7 @@ describe "src/dom/elements", ->
 
         expect(Cypress.dom.isAttached($span)).to.be.false
 
+    ## FIREFOX FIXME: cross-origin
     it "stale element", (done) ->
       cy.get("span").then ($span) ->
         expect(Cypress.dom.isAttached($span)).to.be.true
@@ -36,6 +37,7 @@ describe "src/dom/elements", ->
         ## new windows
         expect(Cypress.dom.isAttached(win)).to.be.true
 
+    ## FIREFOX FIXME: cross-origin
     it "document", (done) ->
       cy.document().then (doc) ->
         ## documents are considered attached only if
@@ -50,6 +52,7 @@ describe "src/dom/elements", ->
         cy.window().then (win) ->
           win.location.reload()
 
+    ## FIREFOX FIXME
     it "element in iframe", (done) ->
       cy.get("iframe").then ($iframe) ->
         $doc = $iframe.contents()

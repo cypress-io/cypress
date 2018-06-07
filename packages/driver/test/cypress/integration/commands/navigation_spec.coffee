@@ -1344,6 +1344,7 @@ describe "src/cy/commands/navigation", ->
 
           expect(Cookie.get("__cypress.initial")).to.be.undefined
 
+    ## FIREFOX FIXME: hangs
     it "does not reset the timeout", (done) ->
       cy.timeout(1000)
 
@@ -1361,6 +1362,7 @@ describe "src/cy/commands/navigation", ->
 
         win.location.href = "about:blank"
 
+    ## FIREFOX FIXME: can't find element
     it "does not time out current commands until stability is reached", ->
       ## on the first retry cause a page load event synchronously
       cy.on "command:retry", (options) ->
@@ -1406,6 +1408,7 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
+      ## FIREFOX FIXME: hangs
       it "can time out", (done) ->
         thenCalled = false
 
@@ -1443,6 +1446,7 @@ describe "src/cy/commands/navigation", ->
           .wrap(null).then ->
             thenCalled = true
 
+      ## FIREFOX FIXME: logByName doesn't find log
       it "does time out once stability is reached", (done) ->
         logByName = (name) =>
           _.find @logs, (log) ->
@@ -1502,6 +1506,7 @@ describe "src/cy/commands/navigation", ->
           ## make get timeout after only 200ms
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
+      ## FIREFOX FIXME: hangs
       it "captures cross origin failures", (done) ->
         cy.once "fail", (err) =>
           lastLog = @lastLog
