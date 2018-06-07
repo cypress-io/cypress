@@ -526,6 +526,7 @@ InputRange.prototype._nativeSelection = function(){
   if (shouldChangeType) {
     this._el.type = originalType
     this._el.focus()
+    this._el.focus()
   }
 
   return selection
