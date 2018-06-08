@@ -1539,6 +1539,14 @@ Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
 })
 
+// check if cy.server() yields default server options
+cy.server().should((server) => {
+  server // $ExpectType ServerOptions
+  expect(server.delay).to.eq(0)
+  expect(server.method).to.eq('GET')
+  expect(server.status).to.eq(200)
+})
+
 cy.visit('https://www.acme.com/', {
   auth: {
     username: 'wile',

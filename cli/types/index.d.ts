@@ -798,9 +798,20 @@ declare namespace Cypress {
     /**
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
+     * @example
+     *    // start server
+     *    cy.server()
+     *    // get default server options
+     *    cy.server().should((server) => {
+     *      expect(server.delay).to.eq(0)
+     *      expect(server.method).to.eq('GET')
+     *      expect(server.status).to.eq(200)
+     *      // and many others options
+     *    })
+     *
      * @see https://on.cypress.io/server
      */
-    server(options?: Partial<ServerOptions>): Chainable<null>
+    server(options?: Partial<ServerOptions>): Chainable<ServerOptions>
 
     /**
      * Set a browser cookie.
@@ -924,6 +935,15 @@ declare namespace Cypress {
      * Uncheck checkbox(es).
      *
      * @see https://on.cypress.io/uncheck
+     * @example
+     *    // Unchecks checkbox element
+     *    cy.get('[type="checkbox"]').uncheck()
+     *    // Uncheck element with the id ‘saveUserName’
+     *    cy.get('#saveUserName').uncheck()
+     *    // Uncheck all checkboxes
+     *    cy.get(':checkbox').uncheck()
+     *    // Uncheck the checkbox with the value of ‘ga’
+     *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
     uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
     uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
@@ -941,6 +961,11 @@ declare namespace Cypress {
      * Control the size and orientation of the screen for your application.
      *
      * @see https://on.cypress.io/viewport
+     * @example
+     *    // Set viewport to 550px x 750px
+     *    cy.viewport(550, 750)
+     *    // Set viewport to 357px x 667px
+     *    cy.viewport('iphone-6')
      */
     viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Partial<Loggable>): Chainable<null>
     viewport(width: number, height: number, options?: Partial<Loggable>): Chainable<null>
@@ -1000,6 +1025,11 @@ declare namespace Cypress {
      * Yield the object passed into `.wrap()`.
      *
      * @see https://on.cypress.io/wrap
+     * @example
+     *    // Make assertions about object
+     *    cy.wrap({ amount: 10 })
+     *      .should('have.property', 'amount')
+     *      .and('eq', 10)
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
@@ -2994,6 +3024,7 @@ declare namespace Cypress {
      */
     (chainers: string, value?: any): Chainable<Subject>
     (chainers: string, value: any, match: any): Chainable<Subject>
+
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
