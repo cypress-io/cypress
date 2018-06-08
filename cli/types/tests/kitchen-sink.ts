@@ -1527,6 +1527,7 @@ describe('Kitchen Sink', function() {
   })
 })
 
+// extra code that is not in the kitchensink that type checks edge cases
 cy.wrap('foo').then(subject => {
   subject // $ExpectType string
   return cy.wrap(subject)
@@ -1536,4 +1537,11 @@ cy.wrap('foo').then(subject => {
 
 Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
+})
+
+cy.visit('https://www.acme.com/', {
+  auth: {
+    username: 'wile',
+    password: 'coyote'
+  }
 })
