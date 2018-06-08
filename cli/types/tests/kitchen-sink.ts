@@ -1527,6 +1527,7 @@ describe('Kitchen Sink', function() {
   })
 })
 
+// extra code that is not in the kitchensink that type checks edge cases
 cy.wrap('foo').then(subject => {
   subject // $ExpectType string
   return cy.wrap(subject)
@@ -1544,4 +1545,11 @@ cy.server().should((server) => {
   expect(server.delay).to.eq(0)
   expect(server.method).to.eq('GET')
   expect(server.status).to.eq(200)
+})
+
+cy.visit('https://www.acme.com/', {
+  auth: {
+    username: 'wile',
+    password: 'coyote'
+  }
 })
