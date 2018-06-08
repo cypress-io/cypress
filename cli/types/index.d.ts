@@ -932,6 +932,15 @@ declare namespace Cypress {
      * Uncheck checkbox(es).
      *
      * @see https://on.cypress.io/uncheck
+     * @example
+     *    // Unchecks checkbox element
+     *    cy.get('[type="checkbox"]').uncheck()
+     *    // Uncheck element with the id ‘saveUserName’
+     *    cy.get('#saveUserName').uncheck()
+     *    // Uncheck all checkboxes
+     *    cy.get(':checkbox').uncheck()
+     *    // Uncheck the checkbox with the value of ‘ga’
+     *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
     uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
     uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
@@ -949,6 +958,11 @@ declare namespace Cypress {
      * Control the size and orientation of the screen for your application.
      *
      * @see https://on.cypress.io/viewport
+     * @example
+     *    // Set viewport to 550px x 750px
+     *    cy.viewport(550, 750)
+     *    // Set viewport to 357px x 667px
+     *    cy.viewport('iphone-6')
      */
     viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Partial<Loggable>): Chainable<null>
     viewport(width: number, height: number, options?: Partial<Loggable>): Chainable<null>
@@ -1008,6 +1022,11 @@ declare namespace Cypress {
      * Yield the object passed into `.wrap()`.
      *
      * @see https://on.cypress.io/wrap
+     * @example
+     *    // Make assertions about object
+     *    cy.wrap({ amount: 10 })
+     *      .should('have.property', 'amount')
+     *      .and('eq', 10)
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
