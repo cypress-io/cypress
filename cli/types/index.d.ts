@@ -795,9 +795,20 @@ declare namespace Cypress {
     /**
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
+     * @example
+     *    // start server
+     *    cy.server()
+     *    // get default server options
+     *    cy.server().should((server) => {
+     *      expect(server.delay).to.eq(0)
+     *      expect(server.method).to.eq('GET')
+     *      expect(server.status).to.eq(200)
+     *      // and many others options
+     *    })
+     *
      * @see https://on.cypress.io/server
      */
-    server(options?: Partial<ServerOptions>): Chainable<null>
+    server(options?: Partial<ServerOptions>): Chainable<ServerOptions>
 
     /**
      * Set a browser cookie.
@@ -2976,6 +2987,7 @@ declare namespace Cypress {
      */
     (chainers: string, value?: any): Chainable<Subject>
     (chainers: string, value: any, match: any): Chainable<Subject>
+
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
