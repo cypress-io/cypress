@@ -1,11 +1,11 @@
 _         = require("lodash")
+debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
 files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
-specsUtil = require('./util/specs')
-log       = require('debug')("cypress:server:project")
+specsUtil = require("./util/specs")
 preprocessor = require("./plugins/preprocessor")
 
 create = ->
@@ -42,12 +42,13 @@ create = ->
     getProject: -> openProject
 
     launch: (browserName, spec, options = {}) ->
-      log("launching browser %s spec %s", browserName, spec)
+      debug("launching browser %s spec %s", browserName, spec.relative)
+
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
       @reset()
       .then ->
-        openProject.getSpecUrl(spec)
+        openProject.getSpecUrl(spec.absolute)
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
@@ -60,6 +61,12 @@ create = ->
 
           options.url = url
 
+          ## set the current browser object on options
+          ## so we can pass it down
+          options.browser = browsers.find(browserName, options.browsers)
+
+          openProject.setCurrentSpecAndBrowser(spec, options.browser)
+
           automation = openProject.getAutomation()
 
           ## use automation middleware if its
@@ -69,14 +76,15 @@ create = ->
 
           onBrowserClose = options.onBrowserClose
           options.onBrowserClose = ->
-            if spec
-              preprocessor.removeFile(spec, cfg)
+            if spec and spec.absolute
+              preprocessor.removeFile(spec.absolute, cfg)
 
             if onBrowserClose
               onBrowserClose()
 
           do relaunchBrowser = ->
-            log "launching project in browser #{browserName}"
+            debug("launching project in browser #{browserName}")
+
             browsers.open(browserName, options, automation)
 
     getSpecChanges: (options = {}) ->
@@ -137,7 +145,8 @@ create = ->
         return null
 
     close:  ->
-      log "closing opened project"
+      debug("closing opened project")
+
       @clearSpecInterval()
       @closeOpenProjectAndBrowsers()
 
@@ -159,7 +168,8 @@ create = ->
 
         ## open the project and return
         ## the config for the project instance
-        log("opening project %s", path)
+        debug("opening project %s", path)
+
         openProject.open(options)
       .return(@)
   }
