@@ -8,10 +8,6 @@ cwd = require("../cwd")
 plugins = require("../plugins")
 savedState = require("../util/saved_state")
 
-PrettyError = require("pretty-error")
-pe = new PrettyError()
-pe.skipNodeFiles()
-
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())
   ## strip out stack noise from parser like
@@ -20,7 +16,8 @@ errorMessage = (err = {}) ->
   .replace(/From previous event:\n?/g, "")
 
 clientSideError = (err) ->
-  console.log(pe.render(err))
+  console.log(err.stack)
+
   err = errorMessage(err)
   ## \n doesn't come through properly so preserve it so the
   ## runner can do the right thing
