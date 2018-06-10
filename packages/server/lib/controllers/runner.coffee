@@ -9,11 +9,15 @@ module.exports = {
   serve: (req, res, options = {}) ->
     { config, getRemoteState, project } = options
 
+    { spec, browser } = project.getCurrentSpecAndBrowser()
+
     config = _.clone(config)
     config.remote = getRemoteState()
     config.version = pkg.version
     config.platform = os.platform()
     config.arch = os.arch()
+    config.spec = spec
+    config.browser = browser
 
     debug("serving runner index.html with config %o",
       _.pick(config, "version", "platform", "arch", "projectName")

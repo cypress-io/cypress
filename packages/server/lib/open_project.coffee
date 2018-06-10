@@ -42,8 +42,8 @@ create = ->
     getProject: -> openProject
 
     launch: (browserName, spec, options = {}) ->
-      debug("launching browser %s spec %s", browserName, spec.relative)
-
+      debug("resetting project state, preparing to launch browser")
+      
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
       @reset()
@@ -83,7 +83,11 @@ create = ->
               onBrowserClose()
 
           do relaunchBrowser = ->
-            debug("launching project in browser #{browserName}")
+            debug(
+              "launching browser: %s, spec: %s",
+              browserName,
+              spec.relative
+            )
 
             browsers.open(browserName, options, automation)
 

@@ -16,20 +16,22 @@ exports['e2e config passes 1'] = `
   Running: config_passing_spec.coffee...                                                   (1 of 1) 
 
 
-  Cypress.config()
-    ✓ has Cypress.version set to a string
-    ✓ has os platform
-    ✓ has os architecture
+  Cypress static methods + props
+    ✓ .version
+    ✓ .platform
+    ✓ .arch
+    ✓ .browser
+    ✓ .spec
 
 
-  3 passing
+  5 passing
 
 
   (Results)
 
   ┌──────────────────────────────────────────┐
-  │ Tests:        3                          │
-  │ Passing:      3                          │
+  │ Tests:        5                          │
+  │ Passing:      5                          │
   │ Failing:      0                          │
   │ Pending:      0                          │
   │ Skipped:      0                          │
@@ -53,9 +55,9 @@ exports['e2e config passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                XX:XX        3        3        -        -        - │
+  │ ✔ config_passing_spec.coffee                XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
+    All specs passed!                           XX:XX        5        5        -        -        -  
 
 `
 
