@@ -75,14 +75,15 @@ module.exports = {
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
       shouldWatch = not config.isTextTerminal
+      
+      baseFilePath = filePath
+      .replace(config.projectRoot, "")
+      .replace(config.integrationFolder, "")
 
       fileObject = fileObjects[filePath] = _.extend(new EE(), {
         filePath,
         shouldWatch,
-        outputPath: getOutputPath(
-          config,
-          filePath.replace(config.projectRoot, "")
-        )
+        outputPath: getOutputPath(config, baseFilePath)
       })
 
       fileObject.on "rerun", ->

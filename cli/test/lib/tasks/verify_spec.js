@@ -284,6 +284,22 @@ context('lib/tasks/verify', function () {
       })
     })
 
+    it('is silent when logLevel is silent', function () {
+      const ctx = this
+      sinon.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('9.8.7')
+      sinon.stub(state, 'getBinaryVerifiedAsync').resolves(false)
+      process.env.npm_config_loglevel = 'silent'
+
+      return verify.start()
+      .then(() => {
+        snapshot(
+          'silent verify',
+          normalize(`[no output]${ctx.stdout.toString()}`)
+        )
+      })
+    })
+
     it('turns off Opening Cypress...', function () {
       const ctx = this
       sinon.stub(fs, 'pathExistsAsync').withArgs(executablePath).resolves(true)
@@ -412,8 +428,6 @@ context('lib/tasks/verify', function () {
             normalize(this.stdout.toString())
           )
         })
-
-
       }))
     })
   })

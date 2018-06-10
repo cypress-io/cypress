@@ -269,7 +269,7 @@ describe('Kitchen Sink', function() {
       // https://on.cypress.io/click
       cy.get('.action-btn').click()
 
-      // You can clock on 9 specific positions of an element:
+      // You can click on 9 specific positions of an element:
       //  -----------------------------------
       // | topLeft        top       topRight |
       // |                                   |
@@ -943,6 +943,10 @@ describe('Kitchen Sink', function() {
           expect(response).to.have.property('headers')
           expect(response).to.have.property('duration')
         })
+
+      // accepts method, including "PATCH"
+      cy.request('POST', 'http://somewhere.com', {foo: 'bar'})
+      cy.request('PATCH', 'http://somewhere.com', {foo: 'bar'})
     })
 
     it('cy.route() - route responses to matching requests', function() {
@@ -986,7 +990,7 @@ describe('Kitchen Sink', function() {
         url: /comments\/\d+/,
         status: 404,
         response: { error: message },
-        delay: 500,
+        delay: 500
       }).as('putComment')
 
       // we have code that puts a comment when
@@ -997,6 +1001,16 @@ describe('Kitchen Sink', function() {
 
       // our 404 statusCode logic in scripts.js executed
       cy.get('.network-put-comment').should('contain', message)
+    })
+
+    it('has type for arbitrary response object', () => {
+      // https://github.com/cypress-io/cypress/issues/1831
+      const response = [{
+        id: 1,
+        name: 'Pat'
+      }]
+      cy.route('https://localhost:7777/users', response)
+      cy.route('GET', 'https://localhost:7777/more-users', response)
     })
   })
 
@@ -1099,6 +1113,14 @@ describe('Kitchen Sink', function() {
         expect(localStorage.getItem('prop1')).to.eq('red')
         expect(localStorage.getItem('prop2')).to.eq('blue')
         expect(localStorage.getItem('prop3')).to.eq('magenta')
+      })
+
+      // clearLocalStorage() yields the localStorage object
+      cy.clearLocalStorage().should((ls) => {
+        expect(ls.getItem('prop1')).to.be.null
+        expect(ls.getItem('prop2')).to.be.null
+        expect(ls.getItem('prop3')).to.be.null
+        ls.setItem('prop1', 'foo')
       })
 
       // clearLocalStorage() yields the localStorage object
@@ -1505,9 +1527,29 @@ describe('Kitchen Sink', function() {
   })
 })
 
+// extra code that is not in the kitchensink that type checks edge cases
 cy.wrap('foo').then(subject => {
   subject // $ExpectType string
   return cy.wrap(subject)
 }).then(subject => {
   subject // $ExpectType string
+})
+
+Cypress.minimatch('/users/1/comments', '/users/*/comments', {
+  matchBase: true,
+})
+
+// check if cy.server() yields default server options
+cy.server().should((server) => {
+  server // $ExpectType ServerOptions
+  expect(server.delay).to.eq(0)
+  expect(server.method).to.eq('GET')
+  expect(server.status).to.eq(200)
+})
+
+cy.visit('https://www.acme.com/', {
+  auth: {
+    username: 'wile',
+    password: 'coyote'
+  }
 })

@@ -17,6 +17,7 @@ describe "lib/plugins/preprocessor", ->
 
     @filePath = "/path/to/test.coffee"
     @fullFilePath = path.join(@todosPath, @filePath)
+    @integrationFolder = '/integration-path/'
 
     @testPath = path.join(@todosPath, "test.coffee")
     @localPreprocessorPath = path.join(@todosPath, "prep.coffee")
@@ -39,6 +40,11 @@ describe "lib/plugins/preprocessor", ->
 
     it "executes the plugin with output path", ->
       preprocessor.getFile(@filePath, @config)
+      expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", @filePath)
+      expect(@plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
+
+    it "executes the plugin with output path when integrationFolder was defined", ->
+      preprocessor.getFile(@integrationFolder + @filePath, Object.assign({integrationFolder: @integrationFolder}, @config))
       expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", @filePath)
       expect(@plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
 

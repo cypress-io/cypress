@@ -161,3 +161,7 @@ Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
+
+exports['silent install 1'] = `
+[no output]
+`
