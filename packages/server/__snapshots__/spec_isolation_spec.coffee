@@ -236,7 +236,7 @@ exports['e2e spec_isolation failing 1'] = {
       ],
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
-        "path": "cypress/integration/simple_failing_hook_spec.coffee",
+        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee"
       },
       "shouldUploadVideo": true
@@ -335,7 +335,7 @@ exports['e2e spec_isolation failing 1'] = {
       ],
       "spec": {
         "name": "simple_failing_spec.coffee",
-        "path": "cypress/integration/simple_failing_spec.coffee",
+        "relative": "cypress/integration/simple_failing_spec.coffee",
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee"
       },
       "shouldUploadVideo": true
@@ -526,7 +526,7 @@ exports['e2e spec_isolation failing 1'] = {
       "screenshots": [],
       "spec": {
         "name": "simple_hooks_spec.coffee",
-        "path": "cypress/integration/simple_hooks_spec.coffee",
+        "relative": "cypress/integration/simple_hooks_spec.coffee",
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee"
       },
       "shouldUploadVideo": true
@@ -600,7 +600,7 @@ exports['e2e spec_isolation failing 1'] = {
       "screenshots": [],
       "spec": {
         "name": "simple_passing_spec.coffee",
-        "path": "cypress/integration/simple_passing_spec.coffee",
+        "relative": "cypress/integration/simple_passing_spec.coffee",
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee"
       },
       "shouldUploadVideo": true
@@ -614,4 +614,3 @@ exports['e2e spec_isolation failing 1'] = {
   "cypressVersion": "9.9.9",
   "config": {}
 }
-

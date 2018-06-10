@@ -54,8 +54,6 @@ exports['e2e domain passing 1'] = `
                                                                                                     
   Running: domain_spec.coffee...                                                           (2 of 2) 
 
-Timed out waiting for the browser to connect. Retrying...
-
 
   localhost
     ✓ can visit
