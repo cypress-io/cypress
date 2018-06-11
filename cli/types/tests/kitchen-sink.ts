@@ -31,7 +31,7 @@ cy.visit('https://www.acme.com/', {
 })
 
 Cypress.spec.name // $ExpectType string
-Cypress.spec.relative // $ExpectType string
-Cypress.spec.absolute // $ExpectType string
+Cypress.spec.relative // $ExpectType string | null
+Cypress.spec.absolute // $ExpectType string | null
 
 Cypress.browser // $ExpectType Browser
