@@ -14,7 +14,7 @@ pathHelpers     = require("./util/path_helpers")
 
 RUNNABLE_SEPARATOR = " -- "
 pathSeparatorRe = /[\\\/]/g
-invalidCharsRe = /[^0-9a-zA-Z\(\)-_\s]/g
+invalidCharsRe = /[^0-9a-zA-Z-_\s\(\)]/g
 
 ## internal id incrementor
 __ID__ = null
@@ -241,7 +241,7 @@ ensureUniquePath = (takenPaths, withoutExt, extension) ->
   return fullPath
 
 getPath = (data, ext, screenshotsFolder) ->
-  specNames = data.specName
+  specNames = (data.specName or "")
   .split(pathSeparatorRe)
   
   if data.name
