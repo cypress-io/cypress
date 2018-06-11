@@ -41,6 +41,18 @@ declare namespace Cypress {
     username: string
     password: string
   }
+
+  /**
+   * Describes a browser Cypress can control
+   */
+  interface Browser {
+    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
+    displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
+    version: string
+    majorVersion: string
+    path: string
+  }
+
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -124,6 +136,20 @@ declare namespace Cypress {
      *    Cypress.arch // "x64"
      */
     arch: string
+
+    /**
+     * Currently executing spec file.
+     */
+    spec: {
+      name: string // "config_passing_spec.coffee"
+      relative: string // "cypress/integration/config_passing_spec.coffee"
+      absolute: string
+    }
+
+    /**
+     * Information about the browser currently running the tests
+     */
+    browser: Browser
 
     /**
      * @see https://on.cypress.io/config
