@@ -374,7 +374,6 @@ describe "lib/screenshots", ->
       p2 = screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz^"]
-        takenPaths: ["a"]
         takenPaths: ["path/to/screenshots/examples$/user/list.js/bar -- baz.png"]
       }, "png", "path/to/screenshots")
       
