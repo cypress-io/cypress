@@ -15,7 +15,7 @@ describe "lib/plugins/preprocessor", ->
     Fixtures.scaffold()
     @todosPath = Fixtures.projectPath("todos")
 
-    @filePath = "/path/to/test.coffee"
+    @filePath = "path/to/test.coffee"
     @fullFilePath = path.join(@todosPath, @filePath)
     @integrationFolder = '/integration-path/'
 
