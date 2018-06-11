@@ -120,7 +120,7 @@ describe "src/cy/commands/screenshot", ->
             "src/cy/commands/screenshot",
             "runnable:after:run:async",
             runnable.title
-            "failed"
+            "(failed)"
           ]
           capture: "runner"
           simple: true
@@ -190,7 +190,7 @@ describe "src/cy/commands/screenshot", ->
               "runnable:after:run:async",
               "if screenshot has been taken in test"
               runnable.title
-              "failed"
+              "(failed)"
             ]
             capture: "runner"
             failed: true
@@ -213,7 +213,6 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        debugger
         expect(_.omit(args, "clip", "userClip", "viewport", "takenPaths")).to.eql({
           testId: runnable.id
           titles: [
@@ -221,7 +220,7 @@ describe "src/cy/commands/screenshot", ->
             "runnable:after:run:async hooks",
             "takes screenshot of hook title with test",
             '"before each" hook'
-            "failed"
+            "(failed)"
           ]
           capture: "runner"
           simple: true
