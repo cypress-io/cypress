@@ -71,12 +71,12 @@ describe "e2e screenshots", ->
       screenshot1 = path.join(e2ePath, "cypress", "screenshots", "black.png")
       screenshot2 = path.join(e2ePath, "cypress", "screenshots", "red.png")
       screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foo", "bar", "baz.png")
-      screenshot4 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- generates pngs on failure -- failed.png")
-      screenshot5 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- before hooks -- empty test 1 -- before all hook -- failed.png")
-      screenshot6 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- before each hook -- failed.png")
-      screenshot7 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- after each hook -- failed.png")
+      screenshot4 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- generates pngs on failure (failed).png")
+      screenshot5 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png")
+      screenshot6 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png")
+      screenshot7 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png")
       screenshot8 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure.png")
-      screenshot9 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure -- failed.png")
+      screenshot9 = path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee/taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure (failed).png")
 
       Promise.all([
         fs.statAsync(screenshot1).get("size")

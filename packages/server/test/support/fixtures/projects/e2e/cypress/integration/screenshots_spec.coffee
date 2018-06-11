@@ -3,20 +3,20 @@
 describe "taking screenshots", ->
   it "manually generates pngs", ->
     cy
-      .visit('http://localhost:3322/color/black')
+      .visit("http://localhost:3322/color/black")
       .screenshot("black", { capture: "runner" })
       .wait(1500)
-      .visit('http://localhost:3322/color/red')
+      .visit("http://localhost:3322/color/red")
       .screenshot("red", { capture: "runner" })
 
   it "can nest screenshots in folders", ->
     cy
-      .visit('http://localhost:3322/color/white')
+      .visit("http://localhost:3322/color/white")
       .screenshot("foo/bar/baz", { capture: "runner" })
 
   it "generates pngs on failure", ->
     cy
-      .visit('http://localhost:3322/color/yellow')
+      .visit("http://localhost:3322/color/yellow")
       .wait(1500)
       .then ->
         ## failure 1
@@ -33,54 +33,74 @@ describe "taking screenshots", ->
         devicePixelRatio
         coords: [1, 0]
         color: [255, 255, 255] ## white
-        name: "color-check"
+        name: "screenshots_spec.coffee/color-check"
       })
       .task("ensure:pixel:color", {
         devicePixelRatio
         coords: [0, 1]
         color: [255, 255, 255] ## white
-        name: "color-check"
+        name: "screenshots_spec.coffee/color-check"
       })
 
   it "crops app captures to just app size", ->
     cy
       .viewport(600, 400)
-      .visit('http://localhost:3322/color/yellow')
+      .visit("http://localhost:3322/color/yellow")
       .screenshot("crop-check", { capture: "viewport" })
-      .task("check:screenshot:size", { name: 'crop-check.png', width: 600, height: 400, devicePixelRatio })
+      .task("check:screenshot:size", { 
+        name: "screenshots_spec.coffee/crop-check.png", 
+        width: 600, 
+        height: 400, 
+        devicePixelRatio 
+      })
 
   it "can capture fullPage screenshots", ->
     cy
       .viewport(600, 200)
-      .visit('http://localhost:3322/fullPage')
+      .visit("http://localhost:3322/fullPage")
       .screenshot("fullPage", { capture: "fullPage" })
-      .task("check:screenshot:size", { name: 'fullPage.png', width: 600, height: 500, devicePixelRatio })
+      .task("check:screenshot:size", { 
+        name: "screenshots_spec.coffee/fullPage.png", 
+        width: 600, 
+        height: 500, 
+        devicePixelRatio 
+      })
 
   it "accepts subsequent same captures after multiple tries", ->
     cy
       .viewport(600, 200)
-      .visit('http://localhost:3322/fullPage-same')
+      .visit("http://localhost:3322/fullPage-same")
       .screenshot("fullPage-same", { capture: "fullPage" })
-      .task("check:screenshot:size", { name: 'fullPage-same.png', width: 600, height: 500, devicePixelRatio })
+      .task("check:screenshot:size", { 
+        name: "screenshots_spec.coffee/fullPage-same.png", 
+        width: 600, 
+        height: 500, 
+        devicePixelRatio 
+      })
 
   it "accepts screenshot after multiple tries if somehow app has pixels that match helper pixels", ->
     cy
       .viewport(1280, 720)
-      .visit('http://localhost:3322/pathological')
+      .visit("http://localhost:3322/pathological")
       .screenshot("pathological", { capture: "viewport" })
 
   it "can capture element screenshots", ->
     cy
       .viewport(600, 200)
-      .visit('http://localhost:3322/element')
+      .visit("http://localhost:3322/element")
       .get(".element")
       .screenshot("element")
-      .task("check:screenshot:size", { name: 'element.png', width: 400, height: 300, devicePixelRatio })
+      .task("check:screenshot:size", { 
+        name: "screenshots_spec.coffee/element.png", 
+        width: 400, 
+        height: 300, 
+        devicePixelRatio 
+      })
 
   it "retries each screenshot for up to 1500ms", ->
     cy
       .viewport(400, 400)
-      .visit('http://localhost:3322/identical')
+      .visit("http://localhost:3322/identical")
       .screenshot({
         onAfterScreenshot: ($el, results) ->
           { duration } = results
@@ -101,9 +121,9 @@ describe "taking screenshots", ->
     cy.screenshot({ capture: "runner" })
     cy.screenshot({ capture: "runner" })
     cy.screenshot({ capture: "runner" })
-    cy.readFile("cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots.png", 'base64')
-    cy.readFile("cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (1).png", 'base64')
-    cy.readFile("cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (2).png", 'base64')
+    cy.readFile("cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots.png", "base64")
+    cy.readFile("cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (1).png", "base64")
+    cy.readFile("cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (2).png", "base64")
 
   it "ensures unique paths when there's a non-named screenshot and a failure", ->
     cy.screenshot({ capture: "viewport" }).then ->
@@ -113,31 +133,51 @@ describe "taking screenshots", ->
     it "can clip app screenshots", ->
       cy
         .viewport(600, 200)
-        .visit('http://localhost:3322/color/yellow')
+        .visit("http://localhost:3322/color/yellow")
         .screenshot("app-clip", { capture: "viewport", clip: { x: 10, y: 10, width: 100, height: 50 }})
-        .task("check:screenshot:size", { name: 'app-clip.png', width: 100, height: 50, devicePixelRatio })
+        .task("check:screenshot:size", {
+          name: "screenshots_spec.coffee/app-clip.png",
+          width: 100, 
+          height: 50,
+          devicePixelRatio 
+        })
 
     it "can clip runner screenshots", ->
       cy
         .viewport(600, 200)
-        .visit('http://localhost:3322/color/yellow')
+        .visit("http://localhost:3322/color/yellow")
         .screenshot("runner-clip", { capture: "runner", clip: { x: 15, y: 15, width: 120, height: 60 }})
-        .task("check:screenshot:size", { name: 'runner-clip.png', width: 120, height: 60, devicePixelRatio })
+        .task("check:screenshot:size", {
+          name: "screenshots_spec.coffee/runner-clip.png",
+          width: 120, 
+          height: 60,
+          devicePixelRatio 
+        })
 
     it "can clip fullPage screenshots", ->
       cy
         .viewport(600, 200)
-        .visit('http://localhost:3322/fullPage')
+        .visit("http://localhost:3322/fullPage")
         .screenshot("fullPage-clip", { capture: "fullPage", clip: { x: 20, y: 20, width: 140, height: 70 }})
-        .task("check:screenshot:size", { name: 'fullPage-clip.png', width: 140, height: 70, devicePixelRatio })
+        .task("check:screenshot:size", {
+          name: "screenshots_spec.coffee/fullPage-clip.png",
+          width: 140, 
+          height: 70,
+          devicePixelRatio 
+        })
 
     it "can clip element screenshots", ->
       cy
         .viewport(600, 200)
-        .visit('http://localhost:3322/element')
+        .visit("http://localhost:3322/element")
         .get(".element")
         .screenshot("element-clip", { clip: { x: 25, y: 25, width: 160, height: 80 }})
-        .task("check:screenshot:size", { name: 'element-clip.png', width: 160, height: 80, devicePixelRatio })
+        .task("check:screenshot:size", {
+          name: "screenshots_spec.coffee/element-clip.png", 
+          width: 160, 
+          height: 80, 
+          devicePixelRatio 
+        })
 
   context "before hooks", ->
     before ->

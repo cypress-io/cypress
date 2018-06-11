@@ -342,11 +342,11 @@ describe "lib/screenshots", ->
       p = screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz"]
-        name: "quux*"
+        name: "quux/lorem*"
       }, "png", "path/to/screenshots")
 
       expect(p).to.eq(
-        "path/to/screenshots/examples$/user/list.js/quux.png"
+        "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
       )
       
       p2 = screenshots.getPath({

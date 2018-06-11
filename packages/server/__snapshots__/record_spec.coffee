@@ -95,7 +95,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook -- failed.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png (1280x720)
 
 
   (Video)
@@ -106,7 +106,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook -- failed.png
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -140,12 +140,12 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -192,7 +192,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test -- failed.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
 
 
   (Video)
@@ -203,7 +203,7 @@ We dynamically generated a new test to display this failure.
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test -- failed.png
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
@@ -305,7 +305,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
 ====================================================================================================
@@ -373,7 +373,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
 ====================================================================================================
@@ -439,7 +439,7 @@ exports['e2e record api interaction errors update instance does not update insta
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
   (Uploading Results)
@@ -515,12 +515,12 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
 Warning: We encountered an error talking to our servers.
 
 This run will not be recorded.
@@ -640,12 +640,12 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
 
 ====================================================================================================
 
@@ -710,7 +710,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
   (Video)
@@ -721,7 +721,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Uploading Results)
 
-  - Failed Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png
+  - Failed Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
   - Failed Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
@@ -807,7 +807,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/yay it passes.png (202x1002)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
 ====================================================================================================

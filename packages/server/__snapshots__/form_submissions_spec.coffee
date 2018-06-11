@@ -121,7 +121,7 @@ exports['e2e form submissions failing 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/form_submission_failing_spec.coffee/form submission fails -- fails without an explicit wait when an element is immediately found -- failed.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/form_submission_failing_spec.coffee/form submission fails -- fails without an explicit wait when an element is immediately found (failed).png (1280x720)
 
 
   (Video)

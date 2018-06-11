@@ -27,7 +27,7 @@ automateScreenshot = (state, options = {}) ->
     titles.push(runnable.title)
 
   if failed
-    titles.push("failed")
+    titles.push("(failed)")
 
   getParentTitle = (runnable) ->
     if p = runnable.parent
