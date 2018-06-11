@@ -14,7 +14,7 @@ getViewportWidth = (state) ->
   Math.min(state("viewportWidth"), $(window).width())
 
 automateScreenshot = (state, options = {}) ->
-  { failure, runnable, timeout } = options
+  { failed, runnable, timeout } = options
 
   titles = []
 
@@ -26,8 +26,8 @@ automateScreenshot = (state, options = {}) ->
   else
     titles.push(runnable.title)
 
-  if failure
-    titles.push("failure")
+  if failed
+    titles.push("failed")
 
   getParentTitle = (runnable) ->
     if p = runnable.parent
@@ -42,7 +42,6 @@ automateScreenshot = (state, options = {}) ->
     titles: titles
     testId: runnable.id
     takenPaths: state("screenshotPaths")
-    specPath: state("specPath")
   }, _.omit(options, "runnable", "timeout", "log", "subject"))
 
   automate = ->
@@ -296,7 +295,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         capture: "runner"
         runnable
         simple: true
-        failure: true
+        failed: true
         timeout: config("responseTimeout")
       })
 
@@ -305,7 +304,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     screenshotConfig.capture = "runner"
     takeScreenshot(Cypress, state, screenshotConfig, {
       runnable
-      failure: true
+      failed: true
       timeout: config("responseTimeout")
     })
 

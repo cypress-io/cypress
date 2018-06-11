@@ -651,8 +651,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureScrollability: ensures.ensureScrollability
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating
 
-    initialize: ($autIframe, specPath) ->
-      state("specPath", specPath)
+    initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
 
       ## dont need to worry about a try/catch here
@@ -722,7 +721,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         window: s.window
         document: s.document
         $autIframe: s.$autIframe
-        specPath: s.specPath
       }
 
       ## reset state back to empty object
@@ -907,6 +905,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     pauseTimers: (pause) ->
       timersPaused = pause
+
       if not pause
         runTimerQueue("setTimeout")
         runTimerQueue("setInterval")

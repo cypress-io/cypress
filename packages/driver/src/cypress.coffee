@@ -135,12 +135,12 @@ class $Cypress
 
     @action("cypress:config", config)
 
-  initialize: ($autIframe, specPath) ->
+  initialize: ($autIframe) ->
     ## push down the options
     ## to the runner
     @mocha.options(@runner)
 
-    @cy.initialize($autIframe, specPath)
+    @cy.initialize($autIframe)
 
   run: (fn) ->
     $utils.throwErrByPath("miscellaneous.no_runner") if not @runner

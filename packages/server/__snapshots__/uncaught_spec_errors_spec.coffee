@@ -56,7 +56,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed-coffee -- An uncaught error was detected outside of a test -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed-coffee -- An uncaught error was detected outside of a test -- failed.png (1280x720)
 
 
   (Video)
@@ -137,7 +137,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec-coffee -- An uncaught error was detected outside of a test -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An uncaught error was detected outside of a test -- failed.png (1280x720)
 
 
   (Video)
@@ -212,7 +212,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec-coffee -- foo -- bar -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar -- failed.png (1280x720)
 
 
   (Video)
@@ -292,7 +292,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec-coffee -- foo -- does not run -- before all hook -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does not run -- before all hook -- failed.png (1280x720)
 
 
   (Video)
@@ -382,10 +382,10 @@ exports['e2e uncaught errors failing5 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec-coffee -- foo -- baz fails -- failure.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec-coffee -- foo -- bar fails -- failure.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec-coffee -- foo -- quux fails -- failure.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec-coffee -- foo -- quux2 fails -- failure.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz fails -- failed.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar fails -- failed.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux fails -- failed.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2 fails -- failed.png (1280x720)
 
 
   (Video)

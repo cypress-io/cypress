@@ -177,8 +177,8 @@ const eventManager = {
     channel.emit('watch:test:file', specPath)
   },
 
-  initialize ($autIframe, specPath, config) {
-    Cypress.initialize($autIframe, specPath)
+  initialize ($autIframe, config) {
+    Cypress.initialize($autIframe)
 
     // get the current runnable in case we reran mid-test due to a visit
     // to a new domain

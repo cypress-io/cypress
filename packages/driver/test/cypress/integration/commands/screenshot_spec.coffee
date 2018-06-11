@@ -114,7 +114,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "takenPaths", "specPath")).to.eql({
+        expect(_.omit(args, "takenPaths")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -182,7 +182,7 @@ describe "src/cy/commands/screenshot", ->
         Cypress.action("runner:runnable:after:run:async", test, runnable)
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledOnce
-          args = _.omit(Cypress.automation.withArgs("take:screenshot").args[0][1], "clip", "viewport", "userClip", "takenPaths", "specPath")
+          args = _.omit(Cypress.automation.withArgs("take:screenshot").args[0][1], "clip", "viewport", "userClip", "takenPaths")
           expect(args).to.eql({
             testId: runnable.id
             titles: [
@@ -213,7 +213,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip", "userClip", "viewport", "takenPaths", "specPath")).to.eql({
+        expect(_.omit(args, "clip", "userClip", "viewport", "takenPaths")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",

@@ -55,7 +55,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/uncaught-support-file/cypress/screenshots/spec-coffee -- An uncaught error was detected outside of a test -- failure.png (1280x720)
+  - /foo/bar/.projects/uncaught-support-file/cypress/screenshots/spec-coffee -- An uncaught error was detected outside of a test -- failed.png (1280x720)
 
 
   (Video)

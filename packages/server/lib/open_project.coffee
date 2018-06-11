@@ -43,7 +43,7 @@ create = ->
 
     launch: (browserName, spec, options = {}) ->
       debug("resetting project state, preparing to launch browser")
-      
+
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
       @reset()
@@ -73,6 +73,13 @@ create = ->
           ## been defined here
           if am = options.automationMiddleware
             automation.use(am)
+
+          automation.use({
+            onBeforeRequest: (message, data) ->
+              if message is "take:screenshot"
+                data.specName = spec.name
+                data
+          })
 
           onBrowserClose = options.onBrowserClose
           options.onBrowserClose = ->

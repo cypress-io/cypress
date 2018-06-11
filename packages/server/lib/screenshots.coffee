@@ -26,6 +26,9 @@ __ID__ = null
 
 Jimp.prototype.getBuffer = Promise.promisify(Jimp.prototype.getBuffer)
 
+replaceInvalidChars = (str) ->
+  str.replace(invalidCharsRe, "")
+
 ## when debugging logs automatically prefix the
 ## screenshot id to the debug logs for easier association
 debug = _.wrap debug, (fn, str, args...) ->
@@ -237,32 +240,29 @@ ensureUniquePath = (takenPaths, withoutExt, extension) ->
     fullPath = "#{withoutExt} (#{++num}).#{extension}"
   return fullPath
 
-getNamedPath = (data, type, screenshotsFolder) ->
-  parts = data.name.split(pathSeparatorRe).map (part) -> part.replace(invalidCharsRe, "")
+getPath = (data, ext, screenshotsFolder) ->
+  specNames = data.specName
+  .split(pathSeparatorRe)
+  
+  name = if data.name then data.name.split(pathSeparatorRe) else data.titles
+  
+  name = name
+  .map(replaceInvalidChars)
+  .join(RUNNABLE_SEPARATOR)
 
-  "#{path.join(screenshotsFolder, parts...)}.#{mime.extension(type)}"
+  withoutExt = path.join(screenshotsFolder, specNames..., name)
 
-getDefaultPath = (data, type, screenshotsFolder) ->
-  specPath = path.dirname(pathHelpers.getRelativePathToSpec(data.specPath))
-  specName = path.basename(data.specPath).replace(".", "-")
-  name = [specName].concat(data.titles).join(RUNNABLE_SEPARATOR)
-  parts = specPath.split(pathSeparatorRe).concat(name)
-  parts = _.map parts, (part) -> part.replace(invalidCharsRe, "")
-  withoutExt = path.join(screenshotsFolder, parts...)
-  extension = mime.extension(type)
-
-  ensureUniquePath(data.takenPaths, withoutExt, extension)
+  ensureUniquePath(data.takenPaths, withoutExt, ext)
 
 getPathToScreenshot = (data, details, screenshotsFolder) ->
-  type = getType(details)
+  ext = mime.extension(getType(details))
 
-  if data.name?
-    getNamedPath(data, type, screenshotsFolder)
-  else
-    getDefaultPath(data, type, screenshotsFolder)
+  getPath(data, ext, screenshotsFolder)
 
 module.exports = {
   crop
+
+  getPath
 
   clearMultipartState
 
