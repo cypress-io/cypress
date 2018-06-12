@@ -13,17 +13,17 @@ describe "lib/controllers/spec", ->
 
   beforeEach ->
     @project = {
-      emit: @sandbox.spy()
+      emit: sinon.spy()
     }
 
     @res = {
-      set: @sandbox.spy()
-      type: @sandbox.spy()
-      send: @sandbox.spy()
-      sendFile: @sandbox.spy()
+      set: sinon.spy()
+      type: sinon.spy()
+      send: sinon.spy()
+      sendFile: sinon.stub()
     }
 
-    @sandbox.stub(preprocessor, "getFile").resolves(outputFilePath)
+    sinon.stub(preprocessor, "getFile").resolves(outputFilePath)
 
     @handle = (filePath, config = {}) =>
       spec.handle(filePath, {}, @res, config, (->), @project)
@@ -36,10 +36,11 @@ describe "lib/controllers/spec", ->
       .and.to.be.calledWith("js")
 
   it "sends the file resolved from the preprocessor", ->
+    @res.sendFile.yields()
     @handle(specName).then =>
       expect(@res.sendFile).to.be.calledWith(outputFilePath)
 
-  it "sends a client-side error in headed mode", ->
+  it "sends a client-side error in interactive mode", ->
     preprocessor.getFile.rejects(new Error("Reason request failed"))
 
     @handle(specName).then =>
@@ -47,8 +48,8 @@ describe "lib/controllers/spec", ->
       expect(@res.send.firstCall.args[0]).to.include("(function")
       expect(@res.send.firstCall.args[0]).to.include("Reason request failed")
 
-  it "logs the error and exits in headless mode", ->
-    @sandbox.stub(errors, "log")
+  it "logs the error and exits in run mode", ->
+    sinon.stub(errors, "log")
     preprocessor.getFile.rejects(new Error("Reason request failed"))
 
     @handle(specName, {isTextTerminal: true}).then =>
@@ -56,3 +57,10 @@ describe "lib/controllers/spec", ->
       expect(errors.log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
       expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")
       expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Reason request failed")
+
+  it "errors when sending file errors", ->
+    sendFileErr = new Error("ENOENT")
+    @res.sendFile.yields(sendFileErr)
+    @handle(specName).then =>
+      expect(@res.send.firstCall.args[0]).to.include("(function")
+      expect(@res.send.firstCall.args[0]).to.include("ENOENT")

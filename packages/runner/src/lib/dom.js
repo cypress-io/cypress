@@ -4,10 +4,14 @@ import Promise from 'bluebird'
 
 import selectorPlaygroundHighlight from '../selector-playground/highlight'
 
+const styles = (styleString) => {
+  return styleString.replace(/\s*\n\s*/g, '')
+}
+
 const resetStyles = `
-  border: none !important
-  margin: 0 !important
-  padding: 0 !important
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 `
 
 function addHitBoxLayer (coords, body) {
@@ -27,34 +31,32 @@ function addHitBoxLayer (coords, body) {
   const dotTop = height / 2 - dotHeight / 2
   const dotLeft = width / 2 - dotWidth / 2
 
-  const box = $('<div class="__cypress-highlight">', {
-    style: `
-      ${resetStyles}
-      position: absolute
-      top: ${top}px
-      left: ${left}px
-      width: ${width}px
-      height: ${height}px
-      background-color: red
-      border-radius: 5px
-      box-shadow: 0 0 5px #333
-      z-index: 2147483647
-    `,
-  })
-  const wrapper = $('<div>', { style: `${resetStyles} position: relative` }).appendTo(box)
-  $('<div>', {
-    style: `
-      ${resetStyles}
-      position: absolute
-      top: ${dotTop}px
-      left: ${dotLeft}px
-      height: ${dotHeight}px
-      width: ${dotWidth}px
-      height: ${dotHeight}px
-      background-color: pink
-      border-radius: 5px
-  `,
-  }).appendTo(wrapper)
+  const boxStyles = styles(`
+    ${resetStyles}
+    position: absolute;
+    top: ${top}px;
+    left: ${left}px;
+    width: ${width}px;
+    height: ${height}px;
+    background-color: red;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #333;
+    z-index: 2147483647;
+  `)
+  const box = $(`<div class="__cypress-highlight" style="${boxStyles}" />`)
+  const wrapper = $(`<div style="${styles(resetStyles)} position: relative" />`).appendTo(box)
+  const dotStyles = styles(`
+    ${resetStyles}
+    position: absolute;
+    top: ${dotTop}px;
+    left: ${dotLeft}px;
+    height: ${dotHeight}px;
+    width: ${dotWidth}px;
+    height: ${dotHeight}px;
+    background-color: pink;
+    border-radius: 5px;
+  `)
+  $(`<div style="${dotStyles}">`).appendTo(wrapper)
 
   return box.appendTo(body)
 }
@@ -106,7 +108,7 @@ function addElementBoxModelLayers ($el, body) {
       obj.left -= dimensions.marginLeft
     }
 
-    // bail if the dimesions of this layer match the previous one
+    // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
     if (dimensionsMatchPreviousLayer(obj, container)) return
 
@@ -378,10 +380,63 @@ function getElementsForSelector ({ root, selector, method, cypressDom }) {
   return $el
 }
 
+function addCssAnimationDisabler ($body) {
+  $(`
+    <style id="__cypress-animation-disabler">
+      *, *:before, *:after {
+        transition-property: none !important;
+        animation: none !important;
+      }
+    </style>
+  `).appendTo($body)
+}
+
+function removeCssAnimationDisabler ($body) {
+  $body.find('#__cypress-animation-disabler').remove()
+}
+
+function addBlackout ($body, selector) {
+  let $el
+  try {
+    $el = $body.find(selector)
+    if (!$el.length) return
+  } catch (err) {
+    // if it's an invalid selector, just ignore it
+    return
+  }
+
+  const dimensions = getElementDimensions($el)
+  const width = dimensions.widthWithBorder
+  const height = dimensions.heightWithBorder
+  const top = dimensions.offset.top
+  const left = dimensions.offset.left
+
+  const style = styles(`
+    ${resetStyles}
+    position: absolute;
+    top: ${top}px;
+    left: ${left}px;
+    width: ${width}px;
+    height: ${height}px;
+    background-color: black;
+    z-index: 2147483647;
+  `)
+
+  $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
+}
+
+function removeBlackouts ($body) {
+  $body.find('.__cypress-blackout').remove()
+}
+
 export default {
+  addBlackout,
+  removeBlackouts,
   addElementBoxModelLayers,
   addHitBoxLayer,
   addOrUpdateSelectorPlaygroundHighlight,
+  addCssAnimationDisabler,
+  removeCssAnimationDisabler,
   getElementsForSelector,
   getOuterSize,
   scrollIntoView,

@@ -1,7 +1,6 @@
 _        = require("lodash")
 Promise  = require("bluebird")
 winston  = require("winston")
-fs       = require("fs-extra")
 pkg      = require("@packages/root")
 
 api      = require("./api")

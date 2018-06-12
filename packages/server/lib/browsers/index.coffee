@@ -1,13 +1,12 @@
 _             = require("lodash")
-fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
+fs            = require("../util/fs")
 
-fs              = Promise.promisifyAll(fs)
-instance        = null
+instance = null
 
 kill = (unbind) ->
   ## cleanup our running browser
@@ -42,23 +41,29 @@ getBrowser = (name) ->
 find = (browser, browsers = []) ->
   _.find(browsers, { name: browser })
 
-getByName = (browser) ->
+ensureAndGetByName = (name) ->
   utils.getBrowsers()
   .then (browsers = []) ->
-    find(browser, browsers)
+    find(name, browsers) or throwBrowserNotFound(name, browsers)
+
+throwBrowserNotFound = (browser, browsers = []) ->
+  names = _.map(browsers, "name").join(", ")
+  errors.throw("BROWSER_NOT_FOUND", browser, names)
 
 process.once "exit", kill
 
 module.exports = {
+  find
+
+  ensureAndGetByName
+
+  throwBrowserNotFound
+
   get: utils.getBrowsers
 
   launch: utils.launch
 
   close: kill
-
-  find
-
-  getByName
 
   open: (name, options = {}, automation) ->
     kill(true)
@@ -69,8 +74,7 @@ module.exports = {
       })
 
       if not browser = getBrowser(name)
-        names = _.map(options.browsers, "name").join(", ")
-        return errors.throw("BROWSER_NOT_FOUND", name, names)
+        return throwBrowserNotFound(name, options.browsers)
 
       ## set the current browser object on options
       ## so we can pass it down
@@ -80,6 +84,7 @@ module.exports = {
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
       debug("opening browser %s", name)
+
       browser.open(name, url, options, automation)
       .then (i) ->
         debug("browser opened")

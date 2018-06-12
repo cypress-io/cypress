@@ -1,11 +1,10 @@
 _        = require("lodash")
 path     = require("path")
 Promise  = require("bluebird")
-fs       = require("fs-extra")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
-errors   = require("./errors")
+fs       = require("./util/fs")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
@@ -26,8 +25,9 @@ isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 folders = toWords """
-  fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
-  supportFile        supportFolder    unitFolder          videosFolder
+  fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
+  screenshotsFolder  supportFile      supportFolder       unitFolder
+  videosFolder
 """
 
 configKeys = toWords """
@@ -41,40 +41,24 @@ configKeys = toWords """
   port                            supportFolder
   reporter                        videosFolder
   reporterOptions
-  screenshotOnHeadlessFailure     defaultCommandTimeout
-  testFiles                       execTimeout
-  trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  blacklistHosts                  requestTimeout
-  userAgent                       responseTimeout
-  viewportWidth
-  viewportHeight
-  videoRecording
+  testFiles                       defaultCommandTimeout
+  trashAssetsBeforeRuns           execTimeout
+  blacklistHosts                  pageLoadTimeout
+  userAgent                       requestTimeout
+  viewportWidth                   responseTimeout
+  viewportHeight                  taskTimeout
+  video
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
   waitForAnimations
 """
 
-toArrayFromPipes = (str) ->
-  if _.isArray(str)
-    return str
-
-  [].concat(str.split('|'))
-
-toObjectFromPipes = (str) ->
-  if _.isObject(str)
-    return str
-
-  ## convert foo=bar|version=1.2.3 to
-  ## {foo: 'bar', version: '1.2.3'}
-  _
-  .chain(str)
-  .split("|")
-  .map (pair) ->
-    pair.split("=")
-  .fromPairs()
-  .mapValues(coerce)
-  .value()
+breakingConfigKeys = toWords """
+  videoRecording
+  screenshotOnHeadlessFailure
+  trashAssetsBeforeHeadlessRuns
+"""
 
 defaults = {
   port:                          null
@@ -99,7 +83,8 @@ defaults = {
   responseTimeout:               30000
   pageLoadTimeout:               60000
   execTimeout:                   60000
-  videoRecording:                true
+  taskTimeout:                   60000
+  video:                         true
   videoCompression:              32
   videoUploadOnPasses:           true
   modifyObstructiveCode:         true
@@ -108,8 +93,7 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  screenshotOnHeadlessFailure:   true
-  trashAssetsBeforeHeadlessRuns: true
+  trashAssetsBeforeRuns: true
   autoOpen:                      false
   viewportWidth:                 1000
   viewportHeight:                660
@@ -147,12 +131,12 @@ validationRules = {
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
   testFiles: v.isString
-  screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
-  trashAssetsBeforeHeadlessRuns: v.isBoolean
+  taskTimeout: v.isNumber
+  trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse
-  videoRecording: v.isBoolean
+  video: v.isBoolean
   videoUploadOnPasses: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber
@@ -160,6 +144,27 @@ validationRules = {
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
 }
+
+toArrayFromPipes = (str) ->
+  if _.isArray(str)
+    return str
+
+  [].concat(str.split('|'))
+
+toObjectFromPipes = (str) ->
+  if _.isObject(str)
+    return str
+
+  ## convert foo=bar|version=1.2.3 to
+  ## {foo: 'bar', version: '1.2.3'}
+  _
+  .chain(str)
+  .split("|")
+  .map (pair) ->
+    pair.split("=")
+  .fromPairs()
+  .mapValues(coerce)
+  .value()
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
@@ -169,24 +174,42 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
     return memo
   , {}
 
-validate = (file) ->
-  return (settings) ->
-    _.each settings, (value, key) ->
-      if validationFn = validationRules[key]
+validateNoBreakingConfig = (cfg) ->
+  _.each breakingConfigKeys, (key) ->
+    if _.has(cfg, key)
+      switch key
+        when "screenshotOnHeadlessFailure"
+          errors.throw("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED")
+        when "trashAssetsBeforeHeadlessRuns"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "trashAssetsBeforeRuns")
+        when "videoRecording"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "video")
+
+validate = (cfg, onErr) ->
+  _.each cfg, (value, key) ->
+    ## does this key have a validation rule?
+    if validationFn = validationRules[key]
+      ## and is the value different from the default?
+      if value isnt defaults[key]
         result = validationFn(key, value)
         if result isnt true
-          errors.throw("CONFIG_VALIDATION_ERROR", file, result)
+          onErr(result)
+
+validateFile = (file) ->
+  return (settings) ->
+    validate settings, (errMsg) ->
+      errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
 module.exports = {
   getConfigKeys: -> configKeys
 
   whitelist: (obj = {}) ->
-    _.pick(obj, configKeys)
+    _.pick(obj, configKeys.concat(breakingConfigKeys))
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validate("cypress.json"))
-      settings.readEnv(projectRoot).then(validate("cypress.env.json"))
+      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
       @set({
@@ -263,6 +286,14 @@ module.exports = {
 
     config = @setParentTestsPaths(config)
 
+    ## validate config again here so that we catch
+    ## configuration errors coming from the CLI overrides
+    ## or env var overrides
+    validate config, (errMsg) ->
+      errors.throw("CONFIG_VALIDATION_ERROR", errMsg)
+
+    validateNoBreakingConfig(config)
+
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
     .then(@setScaffoldPaths)
@@ -327,13 +358,14 @@ module.exports = {
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
 
-    fileName = scaffold.integrationExampleName()
+    obj.integrationExampleName = scaffold.integrationExampleName()
+    obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
 
-    obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
-    obj.integrationExampleName = fileName
-    obj.scaffoldedFiles = scaffold.fileTree(obj)
+    scaffold.fileTree(obj)
+    .then (fileTree) ->
+      obj.scaffoldedFiles = fileTree
 
-    return obj
+      return obj
 
   # async function
   setSupportFileAndFolder: (obj) ->
@@ -411,7 +443,8 @@ module.exports = {
 
     obj = _.clone(obj)
 
-    pluginsFile = path.join(obj.projectRoot, obj.pluginsFile)
+    pluginsFile = obj.pluginsFile
+
     log("setting plugins file #{pluginsFile}")
     log("for project root #{obj.projectRoot}")
 

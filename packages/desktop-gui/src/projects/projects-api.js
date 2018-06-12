@@ -141,6 +141,7 @@ const openProject = (project) => {
 
   const updateConfig = (config) => {
     project.update({ id: config.projectId })
+    project.update({ name: config.projectName })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
@@ -169,6 +170,7 @@ const openProject = (project) => {
   return ipc.openProject(project.path)
   .then((config = {}) => {
     updateConfig(config)
+    specsStore.setFilter(config.projectId, localData.get(`specsFilter-${config.projectId}`))
     project.setLoading(false)
     getSpecs(setProjectError)
 

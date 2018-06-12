@@ -1,13 +1,14 @@
 _             = require("lodash")
-fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
+fs            = require("./util/fs")
 open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
+task          = require("./task")
 files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
@@ -343,6 +344,8 @@ class Socket
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "exec"
               exec.run(config.projectRoot, args[0])
+            when "task"
+              task.run(config.pluginsFile, args[0])
             # network stubbing / route traffic rules
             when "set:traffic:routing:add:rule"
               options.onTrafficRoutingAddRule(args[0], @toRunnerThen.bind(@))

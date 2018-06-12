@@ -29,12 +29,14 @@ providers = {
 }
 
 buildNums = (provider) -> {
-  appveyor: process.env.APPVEYOR_BUILD_NUMBER
-  circle:   process.env.CIRCLE_BUILD_NUM
-  codeship: process.env.CI_BUILD_NUMBER
-  gitlab:   process.env.CI_BUILD_ID
-  jenkins:  process.env.BUILD_NUMBER
-  travis:   process.env.TRAVIS_BUILD_NUMBER
+  appveyor:  process.env.APPVEYOR_BUILD_NUMBER
+  circle:    process.env.CIRCLE_BUILD_NUM
+  codeship:  process.env.CI_BUILD_NUMBER
+  gitlab:    process.env.CI_BUILD_ID
+  jenkins:   process.env.BUILD_NUMBER
+  travis:    process.env.TRAVIS_BUILD_NUMBER
+  semaphore: process.env.SEMAPHORE_BUILD_NUMBER
+  drone:     process.env.DRONE_BUILD_NUMBER
 }[provider]
 
 groupIds = (provider) -> {
@@ -65,6 +67,12 @@ params = (provider) -> {
     buildId:  process.env.TRAVIS_BUILD_ID
     repoSlug: process.env.TRAVIS_REPO_SLUG
   }
+  semaphore: {
+    repoSlug: process.env.SEMAPHORE_REPO_SLUG
+  }
+  drone: {
+    buildUrl:  process.env.DRONE_BUILD_LINK
+  }
 }[provider]
 
 # details = {
@@ -82,7 +90,6 @@ params = (provider) -> {
 #     ciUrl: process.env.CI_BUILD_URL
 #     buildNum: process.env.CI_BUILD_NUMBER
 #   }
-#   "drone": nullDetails
 #   "gitlab": -> {
 #     ciUrl: "#{process.env.CI_PROJECT_URL}/builds/#{process.env.CI_BUILD_ID}"
 #     buildNum: process.env.CI_BUILD_ID
@@ -92,7 +99,6 @@ params = (provider) -> {
 #     ciUrl: process.env.BUILD_URL
 #     buildNum: process.env.BUILD_NUMBER
 #   }
-#   "semaphore": nullDetails
 #   "shippable": nullDetails
 #   "snap": nullDetails
 #   "teamcity": nullDetails

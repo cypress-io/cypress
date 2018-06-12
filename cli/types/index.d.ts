@@ -7,13 +7,14 @@
 // TypeScript Version: 2.5
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="blob-util" />
-/// <reference types="bluebird" />
+/// <reference path="./blob-util.d.ts" />
+/// <reference path="./bluebird.d.ts" />
+/// <reference path="./minimatch.d.ts" />
+
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
 /// <reference types="lodash" />
-/// <reference types="minimatch" />
 /// <reference types="mocha" />
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
@@ -25,7 +26,7 @@ declare const assert: Chai.AssertStatic
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
-  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT"
+  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "PATCH"
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
@@ -36,7 +37,10 @@ declare namespace Cypress {
   interface ObjectLike {
     [key: string]: any
   }
-
+  interface Auth {
+    username: string
+    password: string
+  }
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -138,7 +142,7 @@ declare namespace Cypress {
     env(key: string, value: any): void
     env(object: ObjectLike): void
 
-    log(options: Partial<Log>): void
+    log(options: Partial<LogConfig>): Log
 
     /**
      * @see https://on.cypress.io/api/commands
@@ -173,7 +177,24 @@ declare namespace Cypress {
       defaults(options: Partial<ServerOptions>): void
     }
 
+    /**
+     * @see https://on.cypress.io/api/screenshot-api
+     */
+    Screenshot: {
+      defaults(options: Partial<ScreenshotDefaultsOptions>): void
+    }
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
     on: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    off: Actions
   }
 
   /**
@@ -271,12 +292,18 @@ declare namespace Cypress {
 
     /**
      * Clear data in local storage.
-     * Cypress automatically runs this command before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear localStorage inside a single test.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
      *
      * @see https://on.cypress.io/clearlocalstorage
+     * @example
+     *    cy.clearLocalStorage().should(ls => {
+     *      expect(ls.getItem('prop1')).to.be.null
+     *    })
      */
-    clearLocalStorage(key?: string): Chainable<null>
-    clearLocalStorage(re: RegExp): Chainable<null>
+    clearLocalStorage(key?: string): Chainable<Storage>
+    clearLocalStorage(re: RegExp): Chainable<Storage>
 
     /**
      * Click a DOM element.
@@ -421,6 +448,7 @@ declare namespace Cypress {
      */
     filter<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>> // automatically returns the correct HTMLElement type
     filter<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    filter<E extends Node = HTMLElement>(fn: (index: number, element: E) => boolean, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Get the descendent DOM elements of a specific selector.
@@ -609,6 +637,12 @@ declare namespace Cypress {
     on: Actions
 
     /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    off: Actions
+
+    /**
      * Get the parent DOM element of a set of DOM elements.
      *
      * @see https://on.cypress.io/parent
@@ -721,9 +755,12 @@ declare namespace Cypress {
      * Use `cy.route()` to manage the behavior of network requests.
      *
      * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
      */
-    route(url: string | RegExp, response?: string | Response): Chainable<null>
-    route(method: string, url: string | RegExp, response?: string | Response): Chainable<null>
+    route(url: string | RegExp, response?: string | object): Chainable<null>
+    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     route(fn: () => RouteOptions): Chainable<null>
     route(options: Partial<RouteOptions>): Chainable<null>
 
@@ -733,7 +770,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      */
     screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
-    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
 
     /**
      * Scroll an element into view.
@@ -761,9 +798,20 @@ declare namespace Cypress {
     /**
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
+     * @example
+     *    // start server
+     *    cy.server()
+     *    // get default server options
+     *    cy.server().should((server) => {
+     *      expect(server.delay).to.eq(0)
+     *      expect(server.method).to.eq('GET')
+     *      expect(server.status).to.eq(200)
+     *      // and many others options
+     *    })
+     *
      * @see https://on.cypress.io/server
      */
-    server(options?: Partial<ServerOptions>): Chainable<null>
+    server(options?: Partial<ServerOptions>): Chainable<ServerOptions>
 
     /**
      * Set a browser cookie.
@@ -818,6 +866,13 @@ declare namespace Cypress {
 
     spread<S extends object | any[] | string | number | boolean>(fn: (...args: any[]) => S): Chainable<S>
     spread(fn: (...args: any[]) => void): Chainable<Subject>
+
+    /**
+     * Run a task in Node via the plugins file.
+     *
+     * @see https://on.cypress.io/task
+     */
+    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -880,6 +935,15 @@ declare namespace Cypress {
      * Uncheck checkbox(es).
      *
      * @see https://on.cypress.io/uncheck
+     * @example
+     *    // Unchecks checkbox element
+     *    cy.get('[type="checkbox"]').uncheck()
+     *    // Uncheck element with the id ‘saveUserName’
+     *    cy.get('#saveUserName').uncheck()
+     *    // Uncheck all checkboxes
+     *    cy.get(':checkbox').uncheck()
+     *    // Uncheck the checkbox with the value of ‘ga’
+     *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
     uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
     uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
@@ -897,6 +961,11 @@ declare namespace Cypress {
      * Control the size and orientation of the screen for your application.
      *
      * @see https://on.cypress.io/viewport
+     * @example
+     *    // Set viewport to 550px x 750px
+     *    cy.viewport(550, 750)
+     *    // Set viewport to 357px x 667px
+     *    cy.viewport('iphone-6')
      */
     viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Partial<Loggable>): Chainable<null>
     viewport(width: number, height: number, options?: Partial<Loggable>): Chainable<null>
@@ -956,6 +1025,11 @@ declare namespace Cypress {
      * Yield the object passed into `.wrap()`.
      *
      * @see https://on.cypress.io/wrap
+     * @example
+     *    // Make assertions about object
+     *    cy.wrap({ amount: 10 })
+     *      .should('have.property', 'amount')
+     *      .and('eq', 10)
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
@@ -1076,11 +1150,6 @@ declare namespace Cypress {
      * Whether to take a screenshot on test failure when running headlessly or in CI
      * @default true
      */
-    screenshotOnHeadlessFailure: boolean
-    /**
-     * Whether Cypress will watch and restart tests on test file changes
-     * @default true
-     */
     watchForFileChanges: boolean
     /**
      * Time, in milliseconds, to wait until most DOM based commands are considered timed out
@@ -1146,7 +1215,7 @@ declare namespace Cypress {
      * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
      * @default true
      */
-    trashAssetsBeforeHeadlessRuns: boolean
+    trashAssetsBeforeRuns: boolean
     /**
      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * @default 32
@@ -1156,7 +1225,7 @@ declare namespace Cypress {
      * Whether Cypress will record a video of the test run when running headlessly.
      * @default true
      */
-    videoRecording: boolean
+    video: boolean
     /**
      * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
      * @default true
@@ -1239,6 +1308,27 @@ declare namespace Cypress {
     onAbort(...args: any[]): void
   }
 
+  interface Dimensions {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+
+  interface ScreenshotOptions {
+    blackout: string[]
+    capture: 'runner' | 'viewport' | 'fullPage'
+    clip: Dimensions
+    disableTimersAndAnimations: boolean
+    scale: boolean
+    beforeScreenshot(doc: Document): void
+    afterScreenshot(doc: Document): void
+  }
+
+  interface ScreenshotDefaultsOptions extends ScreenshotOptions {
+    screenshotOnRunFailure: boolean
+  }
+
   interface ScrollToOptions extends Loggable, Timeoutable {
     /**
      * Scrolls over the duration (in ms)
@@ -1251,7 +1341,16 @@ declare namespace Cypress {
      *
      * @default 'swing'
      */
-    easing: 'swing' | 'linear'
+    easing: 'swing' | 'linear',
+  }
+
+  interface ScrollIntoViewOptions extends ScrollToOptions {
+    /**
+     * Amount to scroll after the element has been scrolled into view
+     *
+     * @default {top: 0, left: 0}
+     */
+    offset: Offset
   }
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
@@ -1333,6 +1432,21 @@ declare namespace Cypress {
      * @default {true}
      */
     failOnStatusCode: boolean
+
+    /**
+     * Cypress will automatically apply the right authorization headers
+     * if you’re attempting to visit an application that requires
+     * Basic Authentication.
+     *
+     * @example
+     *    cy.visit('https://www.acme.com/', {
+     *      auth: {
+     *        username: 'wile',
+     *        password: 'coyote'
+     *      }
+     *    })
+     */
+    auth: Auth
   }
 
   /**
@@ -2910,6 +3024,7 @@ declare namespace Cypress {
      */
     (chainers: string, value?: any): Chainable<Subject>
     (chainers: string, value: any, match: any): Chainable<Subject>
+
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
@@ -3106,15 +3221,31 @@ declare namespace Cypress {
     stderr: string
   }
 
+  interface LogAttrs {
+    url: string
+    consoleProps: ObjectLike
+  }
+
   interface Log {
-    $el: any
+    end(): Log
+    finish(): void
+    get<K extends keyof LogConfig>(attr: K): LogConfig[K]
+    get(): LogConfig
+    set<K extends keyof LogConfig>(key: K, value: LogConfig[K]): Log
+    set(options: Partial<LogConfig>): Log
+    snapshot(name?: string, options?: { at?: number, next: string }): Log
+  }
+
+  interface LogConfig {
+    /** The JQuery element for the command. This will highlight the command in the main window when debugging */
+    $el: JQuery
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any
+    message: any[]
     /** Return an object that will be printed in the dev tools console */
-    consoleProps(): any
+    consoleProps(): ObjectLike
   }
 
   interface Response {
@@ -3164,6 +3295,10 @@ declare namespace Cypress {
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  interface Offset {
+    top: number,
+    left: number
+  }
 
   // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]

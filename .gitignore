@@ -7,11 +7,13 @@ node_modules
 dist
 dist-*
 build
+.history
 .vscode
 .publish
 _test-output
 cypress.zip
 tmp/
+.nyc_output
 
 # from extension
 Cached Theme.pak
@@ -19,6 +21,9 @@ Cached Theme Material Design.pak
 
 # from https-proxy project
 packages/https-proxy/ca/
+
+# from desktop-gui
+packages/desktop-gui/src/jsconfig.json
 
 # from example
 packages/example/app

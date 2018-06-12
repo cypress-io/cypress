@@ -4,7 +4,9 @@ files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
-log       = require('./log')
+specsUtil = require('./util/specs')
+log       = require('debug')("cypress:server:project")
+preprocessor = require("./plugins/preprocessor")
 
 create = ->
   openProject     = null
@@ -45,7 +47,7 @@ create = ->
       ## of potential domain changes, request buffers, etc
       @reset()
       .then ->
-        openProject.ensureSpecUrl(spec)
+        openProject.getSpecUrl(spec)
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
@@ -64,6 +66,14 @@ create = ->
           ## been defined here
           if am = options.automationMiddleware
             automation.use(am)
+
+          onBrowserClose = options.onBrowserClose
+          options.onBrowserClose = ->
+            if spec
+              preprocessor.removeFile(spec, cfg)
+
+            if onBrowserClose
+              onBrowserClose()
 
           do relaunchBrowser = ->
             log "launching project in browser #{browserName}"
@@ -95,7 +105,13 @@ create = ->
       get = ->
         openProject.getConfig()
         .then (cfg) ->
-          files.getTestFiles(cfg)
+          specsUtil.find(cfg)
+        .then (specs = []) ->
+          ## TODO: put back 'integration' property
+          ## on the specs
+          return {
+            integration: specs
+          }
 
       specIntervalId = setInterval(checkForSpecUpdates, 2500)
 

@@ -30,6 +30,7 @@ exitErr = (err) ->
   ## and potentially raygun
   ## and exit with 1
   debug('exiting with err', err)
+
   require("./errors").log(err)
   .then -> exit(1)
 
@@ -54,10 +55,10 @@ module.exports = {
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
           fn = (code) ->
-            ## juggle up the failures since our outer
+            ## juggle up the totalFailed since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
-            resolve({stats: { failures: code } })
+            resolve({totalFailed: code})
           cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
   openProject: (options) ->
@@ -107,20 +108,24 @@ module.exports = {
     #   require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
-    require("./logger").info("starting desktop app", args: argv)
+    debug("starting cypress with argv %o", argv)
+
+    options = require("./util/args").toObject(argv)
+
+    if options.runProject and not options.headed
+      # scale the electron browser window
+      # to force retina screens to not
+      # upsample their images when offscreen
+      # rendering
+      require("./util/electron_app").scale()
 
     ## make sure we have the appData folder
     require("./util/app_data").ensure()
     .then =>
-      options = require("./util/args").toObject(argv)
-
       ## else determine the mode by
       ## the passed in arguments / options
       ## and normalize this mode
       switch
-        when options.removeIds
-          options.mode = "removeIds"
-
         when options.version
           options.mode = "version"
 
@@ -145,26 +150,18 @@ module.exports = {
         when options.exitWithCode?
           options.mode = "exitWithCode"
 
-        ## enable old CLI tools to record
-        when options.record or options.ci
-          options.mode = "record"
-
         when options.runProject
-          ## go into headless mode when told to run
-          options.mode = "headless"
+          ## go into headless mode when running
+          ## until completion + exit
+          options.mode = "run"
 
         else
-          ## set the default mode as headed
-          options.mode ?= "headed"
+          ## set the default mode as interactive
+          options.mode ?= "interactive"
 
       ## remove mode from options
       mode    = options.mode
       options = _.omit(options, "mode")
-
-      ## TODO: temporary hack to get this commit in
-      ## before spec parallelization lands
-      if _.isArray(options.spec)
-        options.spec = options.spec[0]
 
       @startInMode(mode, options)
 
@@ -172,13 +169,6 @@ module.exports = {
     debug("start in mode %s with options %j", mode, options)
 
     switch mode
-      when "removeIds"
-        require("./project").removeIds(options.projectPath)
-        .then (stats = {}) ->
-          console.log("Removed '#{stats.ids}' ids from '#{stats.files}' files.")
-        .then(exit0)
-        .catch(exitErr)
-
       when "version"
         require("./modes/pkg")(options)
         .get("version")
@@ -215,7 +205,7 @@ module.exports = {
 
       when "getKey"
         ## print the key + exit
-        require("./project").getSecretKeyByPath(options.projectPath)
+        require("./project").getSecretKeyByPath(options.projectRoot)
         .then (key) ->
           console.log(key)
         .then(exit0)
@@ -223,7 +213,7 @@ module.exports = {
 
       when "generateKey"
         ## generate + print the key + exit
-        require("./project").generateSecretKeyByPath(options.projectPath)
+        require("./project").generateSecretKeyByPath(options.projectRoot)
         .then (key) ->
           console.log(key)
         .then(exit0)
@@ -234,24 +224,16 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      when "headless"
+      when "run"
         ## run headlessly and exit
+        ## with num of totalFailed
         @runElectron(mode, options)
-        .get("stats")
-        .get("failures")
+        .get("totalFailed")
         .then(exit)
         .catch(exitErr)
 
-      when "headed"
+      when "interactive"
         @runElectron(mode, options)
-
-      when "record"
-        ## run headlessly, record, and exit
-        @runElectron(mode, options)
-        .get("stats")
-        .get("failures")
-        .then(exit)
-        .catch(exitErr)
 
       when "server"
         @runServer(options)

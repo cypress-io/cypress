@@ -1,5 +1,4 @@
 _              = require("lodash")
-fs             = require("fs-extra")
 nmi            = require("node-machine-id")
 debug          = require("debug")("cypress:server:updater")
 semver         = require("semver")

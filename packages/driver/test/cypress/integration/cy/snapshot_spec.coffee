@@ -71,7 +71,15 @@ describe "src/cy/snapshot", ->
       $("<style>.foo { color: red }</style>").appendTo(cy.$$("head"))
 
       { headStyles } = cy.createSnapshot(@$el)
-      expect(headStyles[0]).to.include(".foo { color: red }")
+      expect(headStyles[0]).to.include(".foo { color: red; }")
+
+    it "provides contents of style tags in head for injected rules", ->
+      styleEl = document.createElement("style");
+      $(styleEl).appendTo(cy.$$("head"))
+      styleEl.sheet.insertRule(".foo { color: red; }", 0)
+
+      { headStyles } = cy.createSnapshot(@$el)
+      expect(headStyles[0]).to.include(".foo { color: red; }")
 
     it "provides contents of local stylesheet links in head", (done) ->
       onLoad = ->
@@ -82,6 +90,54 @@ describe "src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='generic_styles.css' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
+    it "provides media-less stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles[0]).to.include(".foo { color: green; }")
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
+    it "provides media=screen stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles[0]).to.include(".foo { color: green; }")
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' media='screen' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
+    it "provides media=all stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles[0]).to.include(".foo { color: green; }")
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' media='all' />")
+      .load(onLoad)
+      .appendTo(cy.$$("head"))
+
+    it "does not provide non-screen stylesheets", (done) ->
+      onLoad = ->
+        ## need to for appended stylesheet to load
+        { headStyles } = cy.createSnapshot(@$el)
+
+        expect(headStyles).to.have.length(0)
+        done()
+
+      $("<link rel='stylesheet' href='generic_styles.css' media='print' />")
       .load(onLoad)
       .appendTo(cy.$$("head"))
 
@@ -101,7 +157,7 @@ describe "src/cy/snapshot", ->
       $("<style>.foo { color: red }</style>").appendTo(cy.$$("body"))
 
       {bodyStyles} = cy.createSnapshot(@$el)
-      expect(bodyStyles[bodyStyles.length - 1]).to.include(".foo { color: red }")
+      expect(bodyStyles[bodyStyles.length - 1]).to.include(".foo { color: red; }")
 
     it "provides contents of local stylesheet links in body", (done) ->
       onLoad = ->
@@ -150,9 +206,8 @@ describe "src/cy/snapshot", ->
       { headStyles } = cy.createSnapshot(@$el)
       expect(headStyles[0].replace(/\s+/gm, "")).to.include """
         @font-face {
-          font-family: 'Some Font';
-          src: url('http://localhost:3500/fonts/some-font.eot');
-          src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format('embedded-opentype'), url('http://localhost:3500/fonts/some-font.woff2') format('woff2'), url('http://localhost:3500/fonts/some-font.woff') format('woff'), url('http://localhost:3500/fonts/some-font.ttf') format('truetype'), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
+          font-family: "Some Font";
+          src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format("embedded-opentype"), url('http://localhost:3500/fonts/some-font.woff2') format("woff2"), url('http://localhost:3500/fonts/some-font.woff') format("woff"), url('http://localhost:3500/fonts/some-font.ttf') format("truetype"), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format("svg");
         }
       """.replace(/\s+/gm, "")
 
