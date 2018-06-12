@@ -10,6 +10,8 @@ evilDns      = require("evil-dns")
 httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
+pluralize    = require("pluralize")
+
 httpsProxy   = require("@packages/https-proxy")
 debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
@@ -27,6 +29,7 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+TrafficRules = require("./util/traffic_rules")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -59,6 +62,7 @@ class Server
     @_wsProxy    = null
     @_fileServer = null
     @_httpsProxy = null
+    @_trafficRules = null
 
   createExpressApp: (morgan) ->
     app = express()
@@ -120,11 +124,15 @@ class Server
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
 
+      debug("creating new traffic rules")
+      @_trafficRules = TrafficRules.create()
+      debug("traffic rules API", _.functions(@_trafficRules))
+
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_trafficRules)
 
       @createServer(app, config, @_request)
 
@@ -314,6 +322,7 @@ class Server
     urlStr = urlStr.format()
 
     originalUrl = urlStr
+    debug("original url %s", originalUrl)
 
     ## if we have a buffer for this url
     ## then just respond with its details
@@ -321,15 +330,19 @@ class Server
     ## another request
     if obj = buffers.getByOriginalUrl(urlStr)
       ## reset the cookies from the existing stream's jar
+      debug("setting cookie jar for %s", urlStr)
       request.setJarCookies(obj.jar, automationRequest)
       .then (c) ->
         return obj.details
     else
       p = new Promise (resolve, reject) =>
+        debug("checking if fully qualified url %s", urlStr)
+
         redirects = []
         newUrl = null
 
         if not fullyQualifiedRe.test(urlStr)
+          debug("not fully qualified url %s", urlStr)
           handlingLocalFile = true
 
           @_remoteVisitingUrl = true
@@ -341,8 +354,10 @@ class Server
           ## and bypass all the remoteState.visiting shit
           urlFile = url.resolve(@_remoteFileServer, urlStr)
           urlStr  = url.resolve(@_remoteOrigin, urlStr)
+          debug("full url %s", urlStr)
 
         error = (err) ->
+          debug("resolve error", err.message)
           ## only restore the previous state
           ## if our promise is still pending
           if p.isPending()
@@ -430,6 +445,7 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
+        debug("sending stream to %s", urlStr)
         request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
@@ -442,6 +458,7 @@ class Server
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
+            debug("following redirect to %s", next)
 
             curr = newUrl ? urlStr
 
@@ -488,7 +505,9 @@ class Server
 
       ## set an object with port, tld, and domain properties
       ## as the remoteHostAndPort
+      debug("parsing %s", @_remoteOrigin)
       @_remoteProps = cors.parseUrlIntoDomainTldPort(@_remoteOrigin)
+      debug("top level domain %s", @_remoteProps.tld)
 
       @_remoteDomainName = _.compact([@_remoteProps.domain, @_remoteProps.tld]).join(".")
 
@@ -618,9 +637,25 @@ class Server
 
       @_middleware = null
 
+  _onTrafficRoutingAddRule: (rule, toRunner) ->
+    rule.toRunner = toRunner
+    debug("_onTrafficRoutingAddRule %j", rule)
+    console.log(@_trafficRules)
+    @_trafficRules.add(rule)
+    debug('got %s', pluralize('rule', @_trafficRules.length(), true))
+    debug(@_trafficRules.toJSON())
+
+  _onTrafficReset: ->
+    debug("_onTrafficReset")
+    @_trafficRules.reset()
+    # TODO abort all unfinished requests
+    # TODO clear all existing traffic rules
+
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onTrafficRoutingAddRule = @_onTrafficRoutingAddRule.bind(@)
+    options.onTrafficReset = @_onTrafficReset.bind(@)
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)

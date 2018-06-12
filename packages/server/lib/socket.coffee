@@ -46,6 +46,8 @@ retry = (fn) ->
 isSpecialSpec = (name) ->
   name.endsWith("__all")
 
+oneTimeMessages = {}
+
 class Socket
   constructor: (config) ->
     if not (@ instanceof Socket)
@@ -101,6 +103,39 @@ class Socket
   toRunner: (event, data) ->
     @io and @io.to("runner").emit(event, data)
 
+  # TODO remove. does not work, the error comes from socket.io library
+  # Callbacks are not supported when broadcasting
+  # toRunnerThen: (event, data) ->
+  #   @io and @io.to("runner").emit(event, data, (response) ->
+  #     console.log('got response from runner for event', event)
+  #     console.log('response', response)
+  #   )
+  toRunnerThen: (event, msg, functionId, data = {}) ->
+    console.log('toRunnerThen')
+    console.log('event', event)
+    console.log('msg', msg)
+    console.log('functionId', functionId)
+
+    responseId = '__respond:' + _.random(1e+6)
+    data.functionId = functionId
+    data.responseId = responseId
+
+    console.log('data', data)
+
+    if not @io
+      throw new Error("missing @io")
+
+    # TODO add timeout
+    new Promise (resolve, reject) =>
+      console.log('waiting for response', event, msg)
+      oneTimeMessages[responseId] = (arg) ->
+        console.log('got message back for one time message', responseId)
+        console.log('arg', arg)
+        delete oneTimeMessages[responseId]
+        resolve(arg)
+
+      @io.to("runner").emit(event, msg, data)
+
   isSocketConnected: (socket) ->
     socket and socket.connected
 
@@ -129,7 +164,7 @@ class Socket
   startListening: (server, automation, config, options) ->
     existingState = null
 
-    _.defaults options,
+    _.defaults options, {
       socketId: null
       onSetRunnables: ->
       onMocha: ->
@@ -143,6 +178,9 @@ class Socket
       checkForAppErrors: ->
       onSavedStateChanged: ->
       onTestFileChange: ->
+      onTrafficReset: ->
+      onTrafficRoutingAddRule: ->
+    }
 
     automationClient = null
 
@@ -281,13 +319,14 @@ class Socket
         .catch Promise.TimeoutError, (err) ->
           cb(false)
 
+      # requests from the runner in the browser
       socket.on "backend:request", (eventName, args...) =>
         ## cb is always the last argument
         cb = args.pop()
 
         log("backend:request", { eventName, args })
 
-        backendRequest = ->
+        backendRequest = =>
           switch eventName
             when "preserve:run:state"
               existingState = args[0]
@@ -307,10 +346,20 @@ class Socket
               exec.run(config.projectRoot, args[0])
             when "task"
               task.run(config.pluginsFile, args[0])
+            # network stubbing / route traffic rules
+            when "set:traffic:routing:add:rule"
+              options.onTrafficRoutingAddRule(args[0], @toRunnerThen.bind(@))
+            when "set:traffic:routing:reset"
+              oneTimeMessages = {}
+              options.onTrafficReset()
             else
-              throw new Error(
-                "You requested a backend event we cannot handle: #{eventName}"
-              )
+              if eventName.startsWith("__respond")
+                fn = oneTimeMessages[eventName]
+                fn.apply(null, args)
+              else
+                throw new Error(
+                  "You requested a backend event we cannot handle: #{eventName}"
+                )
 
         Promise.try(backendRequest)
         .then (resp) ->
@@ -338,6 +387,9 @@ class Socket
       runnerEvents.forEach (event) =>
         socket.on event, (data) =>
           @toReporter(event, data)
+
+      socket.on "test:before:run:async", ->
+        options.onTrafficReset()
 
   end: ->
     @ended = true
