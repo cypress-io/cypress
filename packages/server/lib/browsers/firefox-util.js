@@ -91,6 +91,39 @@ class RemoteFirefox {
       })
     })
   }
+
+  acceptInsecureCerts () {
+    return new Promise((resolve, reject) => {
+      //// this is supposed to return info about the protocol
+      // debug('make protocolDescription request')
+      // this.client.client.makeRequest({
+      //   to: 'root',
+      //   type: 'protocolDescription',
+      // }, (response) => {
+      //   debug('receive response', response)
+      //   debug('methods:', response.types.addons.methods)
+      //   if (response.error) {
+      //     reject(new Error(`${response.error}: ${response.message}`))
+      //   } else {
+      //     resolve()
+      //   }
+      // })
+      //// need to figure out the right type and format for the capability
+      debug('make acceptInsecureCerts request')
+      this.client.client.makeRequest({
+        to: 'root',
+        type: '???',
+        capabilities: { alwaysMatch: { acceptInsecureCerts: true } },
+      }, (response) => {
+        debug('receive response', response)
+        if (response.error) {
+          reject(new Error(`${response.error}: ${response.message}`))
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
 }
 
 

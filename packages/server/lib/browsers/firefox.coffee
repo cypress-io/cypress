@@ -168,7 +168,12 @@ module.exports = {
           Promise.all(_.map(extensions, (extension) ->
             client.installTemporaryAddon(extension)
           ))
+          .then ->
+            client.acceptInsecureCerts()
         .then ->
           return browserInstance
+        .catch (err) ->
+          debug("launch error:", err.stack)
+          throw err
 
 }
