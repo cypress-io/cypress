@@ -5,6 +5,7 @@ onServer = (app) ->
     res.send("<html>Herman Melville</html>")
 
 describe "e2e baseUrl", ->
+  ## FIREFOX FIXME: need https proxy support
   context "https", ->
     e2e.setup({
       settings: {

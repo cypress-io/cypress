@@ -13,6 +13,7 @@ describe "e2e domain", ->
     }
   })
 
+  ## FIREFOX FIXME: need https proxy support
   it "passing", ->
     e2e.exec(@, {
       spec: "domain_spec.coffee"
