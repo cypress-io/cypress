@@ -109,9 +109,9 @@ module.exports = {
 
       _.extend(preferences, {
         "network.proxy.http": hostname
-        "network.proxy.https": hostname
+        "network.proxy.ssl": hostname
         "network.proxy.http_port": port
-        "network.proxy.https_port": port
+        "network.proxy.ssl_port": port
         "network.proxy.no_proxies_on": ""
       })
 
