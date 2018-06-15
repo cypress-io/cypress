@@ -131,10 +131,11 @@ module.exports = {
           extensions = result.extensions
     .then ->
       Promise.all([
+        utils.ensureCleanCache(browserName)
         utils.writeExtension(options.proxyUrl, options.socketIoRoute)
         utils.ensureProfileDir(browserName)
       ])
-    .spread (extensionDest, profileDir) ->
+    .spread (cacheDir, extensionDest, profileDir) ->
       extensions.push(extensionDest)
 
       profile = new FirefoxProfile({
@@ -142,6 +143,7 @@ module.exports = {
       })
       debug("firefox profile dir:", profile.path())
 
+      preferences["browser.cache.disk.parent_directory"] = cacheDir
       for pref, value of preferences
         profile.setPreference(pref, value)
       profile.updatePreferences()
