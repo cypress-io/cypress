@@ -8,14 +8,12 @@ FirefoxProfile = require("firefox-profile")
 webExt = require("web-ext").default
 firefoxUtil = require("./firefox-util")
 
-plugins   = require("../plugins")
+plugins = require("../plugins")
 utils = require("./utils")
 
 defaultPreferences = {
   "network.proxy.type": 1
 
-  ## port used to add extensions via debugger protocol
-  "devtools.debugger.remote-port": firefoxUtil.REMOTE_PORT
   ## necessary for adding extensions
   "devtools.debugger.remote-enabled": true
   "devtools.debugger.prompt-connection": false
@@ -135,10 +133,9 @@ module.exports = {
       Promise.all([
         utils.writeExtension(options.proxyUrl, options.socketIoRoute)
         utils.ensureProfileDir(browserName)
-        firefoxUtil.findRemotePort()
       ])
-    .spread (extensionDest, profileDir, firefoxPort) ->
-      debug("firefox port:", firefoxPort)
+    .spread (extensionDest, profileDir) ->
+      extensions.push(extensionDest)
 
       profile = new FirefoxProfile({
         destinationDirectory: profileDir
@@ -152,28 +149,20 @@ module.exports = {
       args = [
         "-profile"
         profile.path()
-        "-start-debugger-server"
-        "#{firefoxPort}"
+        "-marionette"
         "-new-instance"
         "-foreground"
       ]
 
       debug("launch in firefox: %s, %s", url, args)
 
-      utils.launch(browserName, url, args)
-      .then (browserInstance) ->
-        firefoxUtil.connect(firefoxPort)
-        .then (client) ->
-          extensions.push(extensionDest)
-          Promise.all(_.map(extensions, (extension) ->
-            client.installTemporaryAddon(extension)
-          ))
-          .then ->
-            client.acceptInsecureCerts()
-        .then ->
-          return browserInstance
-        .catch (err) ->
-          debug("launch error:", err.stack)
-          throw err
+      utils.launch(browserName, null, args)
+    .then (browserInstance) ->
+      firefoxUtil.setup(extensions, url)
+      .then ->
+        return browserInstance
+    .catch (err) ->
+      debug("launch error:", err.stack)
+      throw err
 
 }
