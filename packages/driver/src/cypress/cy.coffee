@@ -148,6 +148,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     requestAnimationFrame: []
   }
 
+  wrapNativeMethods = (contentWindow) ->
+    try
+      contentWindow.document.hasFocus = ->
+        top.document.hasFocus()
+        
   runTimerQueue = (queue) ->
     _.each timerQueues[queue], ([fn, args, context]) ->
       fn.apply(context, args)
@@ -901,6 +906,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindowListeners(contentWindow)
 
+      wrapNativeMethods(contentWindow)
+      
       wrapTimers(contentWindow)
 
     pauseTimers: (pause) ->
