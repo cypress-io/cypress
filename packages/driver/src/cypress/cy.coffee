@@ -11,6 +11,7 @@ $Aliases = require("../cy/aliases")
 $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
+$Focused = require("../cy/focused")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -82,6 +83,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   jquery = $jQuery.create(state)
   location = $Location.create(state)
+  focused = $Focused.create(state)
 
   { expect } = $Chai.create(specWindow, assertions.assert)
 
@@ -631,6 +633,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## jquery sync methods
     getRemotejQueryInstance: jquery.getRemotejQueryInstance
+    
+    ## focused sync methods
+    getFocused: focused.getFocused
 
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
