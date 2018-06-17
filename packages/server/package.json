@@ -74,7 +74,7 @@
     "@cypress/commit-info": "^1.2.2",
     "@cypress/icons": "0.5.4",
     "@cypress/mocha-teamcity-reporter": "^1.0.0",
-    "@ffmpeg-installer/ffmpeg": "1.0.3",
+    "@ffmpeg-installer/ffmpeg": "1.0.15",
     "ansi_up": "^1.3.0",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-latest": "^6.16.0",
