@@ -356,6 +356,9 @@ module.exports = {
         dimensions
         multipart
         pixelRatio
+        name: data.name
+        specName: data.specName
+        testFailure: data.testFailure
         size: bytes(size, {unitSeparator: " "})
         path: pathToScreenshot
       }

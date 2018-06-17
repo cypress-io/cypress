@@ -314,17 +314,35 @@ describe "lib/screenshots", ->
         multipart: false
         pixelRatio: 1
         buffer: dataUriToBuffer(image)
+        takenAt: "1234-date"
       }
+      
       dimensions = sizeOf(details.buffer)
-      screenshots.save({ name: "with-buffer" }, details, @config.screenshotsFolder)
+      screenshots.save(
+        { name: "with-buffer", specName: "foo.spec.js", testFailure: false },
+        details,
+        @config.screenshotsFolder
+      )
       .then (result) =>
-        expectedPath = path.join(@config.screenshotsFolder, "with-buffer.png")
+        expectedPath = path.join(
+          @config.screenshotsFolder, "foo.spec.js", "with-buffer.png"
+        )
+        
         actualPath = path.normalize(result.path)
-
-        expect(result.multipart).to.be.false
-        expect(result.pixelRatio).to.equal(1)
-        expect(actualPath).to.eq(expectedPath)
-        expect(result.dimensions).to.eql(dimensions)
+        
+        expect(result).to.deep.eq({
+          dimensions
+          name: "with-buffer"
+          multipart: false
+          pixelRatio: 1
+          path: path.normalize(result.path)
+          size: "279 B"
+          specName: "foo.spec.js"
+          testFailure: false
+          takenAt: "1234-date"
+        })
+        
+        expect(expectedPath).to.eq(actualPath)
 
         fs.statAsync(expectedPath)
 
