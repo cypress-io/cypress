@@ -249,6 +249,11 @@ getPath = (data, ext, screenshotsFolder) ->
   else
     names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
   
+  ## append (failed) to the last name
+  if data.testFailure
+    index = names.length - 1
+    names[index] = names[index] + " (failed)"
+  
   withoutExt = path.join(screenshotsFolder, specNames..., names...)
 
   ensureUniquePath(data.takenPaths, withoutExt, ext)

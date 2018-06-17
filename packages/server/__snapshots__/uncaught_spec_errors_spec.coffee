@@ -56,7 +56,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed-coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
 
 
   (Video)

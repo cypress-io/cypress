@@ -120,11 +120,10 @@ describe "src/cy/commands/screenshot", ->
             "src/cy/commands/screenshot",
             "runnable:after:run:async",
             runnable.title
-            "(failed)"
           ]
           capture: "runner"
           simple: true
-          failed: true
+          testFailure: true
         })
 
     describe "if screenshot has been taken in test", ->
@@ -190,10 +189,9 @@ describe "src/cy/commands/screenshot", ->
               "runnable:after:run:async",
               "if screenshot has been taken in test"
               runnable.title
-              "(failed)"
             ]
             capture: "runner"
-            failed: true
+            testFailure: true
           })
 
   context "runnable:after:run:async hooks", ->
@@ -220,11 +218,10 @@ describe "src/cy/commands/screenshot", ->
             "runnable:after:run:async hooks",
             "takes screenshot of hook title with test",
             '"before each" hook'
-            "(failed)"
           ]
           capture: "runner"
           simple: true
-          failed: true
+          testFailure: true
         })
 
     it "takes screenshot of hook title with test", ->
