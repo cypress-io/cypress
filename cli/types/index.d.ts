@@ -51,6 +51,8 @@ declare namespace Cypress {
     version: string
     majorVersion: string
     path: string
+    isHeaded: boolean
+    isHeadless: boolean
   }
 
   /**
