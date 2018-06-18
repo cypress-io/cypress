@@ -732,6 +732,7 @@ describe "lib/cypress", ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
+        ee.focusOnWebView = ->
         ee.webContents = {
           session: {
             clearCache: sinon.stub().yieldsAsync()

@@ -209,6 +209,26 @@ const util = {
     return path.join(process.cwd(), '..', '..', filename)
   },
 
+  getEnv (varName) {
+    const envVar = process.env[varName]
+    const configVar = process.env[`npm_config_${varName}`]
+    const packageConfigVar = process.env[`npm_package_config_${varName}`]
+    if (envVar) {
+      debug(`Using ${varName} from environment variable`)
+      return envVar
+    }
+    if (configVar) {
+      debug(`Using ${varName} from npm config`)
+      return configVar
+    }
+    if (packageConfigVar) {
+      debug(`Using ${varName} from package.json config`)
+      return packageConfigVar
+    }
+    return undefined
+
+  },
+
   stdoutLineMatches,
 }
 

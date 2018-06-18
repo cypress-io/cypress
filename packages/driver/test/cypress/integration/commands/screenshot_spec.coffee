@@ -10,7 +10,7 @@ describe "src/cy/commands/screenshot", ->
 
     @serverResult = {
       path: "/path/to/screenshot"
-      size: "12 B"
+      size: 12
       dimensions: { width: 20, height: 20 }
       multipart: false
       pixelRatio: 1
@@ -114,7 +114,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(args).to.eql({
+        expect(_.omit(args, "takenPaths")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -123,6 +123,7 @@ describe "src/cy/commands/screenshot", ->
           ]
           capture: "runner"
           simple: true
+          testFailure: true
         })
 
     describe "if screenshot has been taken in test", ->
@@ -180,7 +181,7 @@ describe "src/cy/commands/screenshot", ->
         Cypress.action("runner:runnable:after:run:async", test, runnable)
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledOnce
-          args = _.omit(Cypress.automation.withArgs("take:screenshot").args[0][1], "clip", "viewport", "userClip")
+          args = _.omit(Cypress.automation.withArgs("take:screenshot").args[0][1], "clip", "viewport", "userClip", "takenPaths")
           expect(args).to.eql({
             testId: runnable.id
             titles: [
@@ -190,6 +191,7 @@ describe "src/cy/commands/screenshot", ->
               runnable.title
             ]
             capture: "runner"
+            testFailure: true
           })
 
   context "runnable:after:run:async hooks", ->
@@ -209,7 +211,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip", "userClip", "viewport")).to.eql({
+        expect(_.omit(args, "clip", "userClip", "viewport", "takenPaths")).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -219,6 +221,7 @@ describe "src/cy/commands/screenshot", ->
           ]
           capture: "runner"
           simple: true
+          testFailure: true
         })
 
     it "takes screenshot of hook title with test", ->
@@ -738,13 +741,14 @@ describe "src/cy/commands/screenshot", ->
           scaled: true
         })
 
-        expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scale")
+        expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scale", "size")
 
         cy.screenshot().then =>
           consoleProps = @lastLog.invoke("consoleProps")
-          actual = _.omit(consoleProps, "blackout", "dimensions", "duration")
+          actual = _.omit(consoleProps, "blackout", "dimensions", "duration", "size")
           { width, height } = @serverResult.dimensions
           expect(actual).to.eql(expected)
+          expect(consoleProps.size).to.eq("12 B")
           expect(consoleProps.blackout).to.eql(@screenshotConfig.blackout)
           expect(consoleProps.dimensions).to.eql("#{width}px x #{height}px")
           expect(consoleProps.duration).to.match(/^\d+ms$/)

@@ -130,6 +130,11 @@ module.exports = {
     .then (options) =>
       @_render(url, projectRoot, options)
       .then (win) =>
+        ## cause the webview to receive focus so that
+        ## native browser focus + blur events fire correctly
+        ## https://github.com/cypress-io/cypress/issues/1939
+        win.focusOnWebView()
+
         a = Windows.automation(win)
 
         invoke = (method, data) =>

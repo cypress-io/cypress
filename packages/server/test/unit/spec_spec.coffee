@@ -20,7 +20,7 @@ describe "lib/controllers/spec", ->
       set: sinon.spy()
       type: sinon.spy()
       send: sinon.spy()
-      sendFile: sinon.spy()
+      sendFile: sinon.stub()
     }
 
     sinon.stub(preprocessor, "getFile").resolves(outputFilePath)
@@ -36,6 +36,7 @@ describe "lib/controllers/spec", ->
       .and.to.be.calledWith("js")
 
   it "sends the file resolved from the preprocessor", ->
+    @res.sendFile.yields()
     @handle(specName).then =>
       expect(@res.sendFile).to.be.calledWith(outputFilePath)
 
@@ -56,3 +57,10 @@ describe "lib/controllers/spec", ->
       expect(errors.log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
       expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")
       expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Reason request failed")
+
+  it "errors when sending file errors", ->
+    sendFileErr = new Error("ENOENT")
+    @res.sendFile.yields(sendFileErr)
+    @handle(specName).then =>
+      expect(@res.send.firstCall.args[0]).to.include("(function")
+      expect(@res.send.firstCall.args[0]).to.include("ENOENT")
