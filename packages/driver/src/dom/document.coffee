@@ -6,7 +6,7 @@ isDocument = (obj) ->
 
 hasActiveWindow = (doc) ->
   ## does this document have a currently active window (defaultView)
-  return !!doc.defaultView
+  return !!doc.defaultView and doc.defaultView.document is doc
 
 getDocumentFromElement = (el) ->
   el.ownerDocument
