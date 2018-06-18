@@ -432,25 +432,25 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
 
-    "driver-integration-tests-7":
-      <<: *defaults
-      steps:
-        - restore_cache:
-            key: cypress-{{ .Branch }}-{{ .Revision }}
-        - run:
-            command: npm start
-            working_directory: packages/driver
-            background: true
-        - run:
-            command: $(npm bin)/wait-on http://localhost:3500
-            working_directory: packages/driver
-        - run:
-            command: npm run cypress:run -- --parallel 7 --index 6
-            working_directory: packages/driver
-        - store_test_results:
-            path: /tmp/cypress
-        - store_artifacts:
-            path: /tmp/artifacts
+  "driver-integration-tests-7":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm start
+          working_directory: packages/driver
+          background: true
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run cypress:run -- --parallel 7 --index 6
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "desktop-gui-integration-tests-1":
     <<: *defaults
