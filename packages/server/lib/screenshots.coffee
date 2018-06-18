@@ -397,14 +397,14 @@ module.exports = {
           return {}
 
       if isAppOnly(data) or isMultipart(data)
-        crop(image, data.clip, pixelRatio)
+        image = crop(image, data.clip, pixelRatio)
 
       return { image, pixelRatio, multipart, takenAt }
     .then ({ image, pixelRatio, multipart, takenAt }) ->
       return null if not image
 
       if image and data.userClip
-        crop(image, data.userClip, pixelRatio)
+        image = crop(image, data.userClip, pixelRatio)
 
       return { image, pixelRatio, multipart, takenAt }
 
