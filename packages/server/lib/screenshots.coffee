@@ -274,27 +274,28 @@ stitchScreenshots = (pixelRatio) ->
 
   return { image: fullImage, takenAt: takenAts }
 
-isBuffer = (details) ->
-  !!details.buffer
-
 getType = (details) ->
-  if isBuffer(details)
+  if details.buffer
     details.buffer.type
   else
     details.image.getMIME()
 
 getBuffer = (details) ->
-  if isBuffer(details)
+  if details.buffer
     Promise.resolve(details.buffer)
   else
-    Promise.promisify(details.image.getBuffer)
+    Promise
+    .promisify(details.image.getBuffer)
     .call(details.image, Jimp.AUTO)
 
 getDimensions = (details) ->
-  if isBuffer(details)
-    sizeOf(details.buffer)
+  pick = (obj) ->
+    _.pick(obj, "width", "height")
+  
+  if details.buffer
+    pick(sizeOf(details.buffer))
   else
-    _.pick(details.image.bitmap, "width", "height")
+    pick(details.image.bitmap)
 
 ensureUniquePath = (takenPaths, withoutExt, extension) ->
   fullPath = "#{withoutExt}.#{extension}"
