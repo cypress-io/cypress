@@ -60,8 +60,8 @@ throwIfNoProjectId = (projectId) ->
   if not projectId
     errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
 
-getSpecPath = (spec) ->
-  _.get(spec, "path")
+getSpecRelativePath = (spec) ->
+  _.get(spec, "relative")
 
 uploadArtifacts = (options = {}) ->
   { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
@@ -189,7 +189,7 @@ createRun = (options = {}) ->
   if specPattern
     specPattern = specPattern.join(",")
 
-  specs = _.map(specs, getSpecPath)
+  specs = _.map(specs, getSpecRelativePath)
 
   api.createRun({
     specPattern
@@ -236,7 +236,7 @@ createRun = (options = {}) ->
 createInstance = (options = {}) ->
   { runId, groupId, machineId, platform, spec } = options
 
-  spec = getSpecPath(spec)
+  spec = getSpecRelativePath(spec)
 
   api.createInstance({
     spec

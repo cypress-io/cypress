@@ -9,6 +9,7 @@ describe "lib/open_project", ->
   beforeEach ->
     @automation = {
       reset: sinon.stub()
+      use: sinon.stub()
     }
 
     sinon.stub(browsers, "get").resolves()
@@ -23,14 +24,19 @@ describe "lib/open_project", ->
     openProject.create("/project/root")
 
   context "#launch", ->
+    beforeEach ->
+      @spec = {
+        absolute: "path/to/spec"
+      }
+
     it "tells preprocessor to remove file on browser close", ->
-      openProject.launch("chrome", "path/to/spec")
+      openProject.launch("chrome", @spec)
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(preprocessor.removeFile).to.be.calledWith("path/to/spec")
 
     it "does not tell preprocessor to remove file if no spec", ->
-      openProject.launch("chrome")
+      openProject.launch("chrome", {})
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(preprocessor.removeFile).not.to.be.called
@@ -38,12 +44,12 @@ describe "lib/open_project", ->
     it "runs original onBrowserClose callback on browser close", ->
       onBrowserClose = sinon.stub()
       options = { onBrowserClose }
-      openProject.launch("chrome", "path/to/spec", options)
+      openProject.launch("chrome", @spec, options)
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(onBrowserClose).to.be.called
 
     it "calls project.reset on launch", ->
-      openProject.launch("chrome")
+      openProject.launch("chrome", @spec)
       .then ->
         expect(Project.prototype.reset).to.be.called

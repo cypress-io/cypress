@@ -27,38 +27,44 @@ exports['e2e screenshots passes 1'] = `
     ✓ accepts screenshot after multiple tries if somehow app has pixels that match helper pixels
     ✓ can capture element screenshots
     ✓ retries each screenshot for up to  XX:XX
+    ✓ ensures unique paths for non-named screenshots
+    2) ensures unique paths when there's a non-named screenshot and a failure
     clipping
       ✓ can clip app screenshots
       ✓ can clip runner screenshots
       ✓ can clip fullPage screenshots
       ✓ can clip element screenshots
     before hooks
-      2) "before all" hook for "empty test 1"
+      3) "before all" hook for "empty test 1"
     each hooks
-      3) "before each" hook for "empty test 2"
-      4) "after each" hook for "empty test 2"
+      4) "before each" hook for "empty test 2"
+      5) "after each" hook for "empty test 2"
 
 
-  13 passing
-  4 failing
+  14 passing
+  5 failing
 
   1) taking screenshots generates pngs on failure:
      Error: fail whale
       at stack trace line
 
-  2) taking screenshots before hooks "before all" hook for "empty test 1":
+  2) taking screenshots ensures unique paths when there's a non-named screenshot and a failure:
+     Error: failing on purpose
+      at stack trace line
+
+  3) taking screenshots before hooks "before all" hook for "empty test 1":
      Error: before hook failing
 
 Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'before hooks'
       at stack trace line
 
-  3) taking screenshots each hooks "before each" hook for "empty test 2":
+  4) taking screenshots each hooks "before each" hook for "empty test 2":
      Error: before each hook failed
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'each hooks'
       at stack trace line
 
-  4) taking screenshots each hooks "after each" hook for "empty test 2":
+  5) taking screenshots each hooks "after each" hook for "empty test 2":
      Error: after each hook failed
 
 Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'each hooks'
@@ -70,12 +76,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        16                      │
-  │ Passing:      13                      │
-  │ Failing:      3                       │
+  │ Tests:        18                      │
+  │ Passing:      14                      │
+  │ Failing:      4                       │
   │ Pending:      0                       │
   │ Skipped:      0                       │
-  │ Screenshots:  18                      │
+  │ Screenshots:  23                      │
   │ Video:        true                    │
   │ Duration:     X seconds               │
   │ Spec Ran:     screenshots_spec.coffee │
@@ -84,24 +90,29 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/black.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/red.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/foobarbaz.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- generates pngs on failure.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/color-check.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/crop-check.png (600x400)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-same.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/pathological.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element.png (400x300)
-  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- retries each screenshot for up to  XX:XX.png (400x1316)
-  - /foo/bar/.projects/e2e/cypress/screenshots/app-clip.png (100x50)
-  - /foo/bar/.projects/e2e/cypress/screenshots/runner-clip.png (120x60)
-  - /foo/bar/.projects/e2e/cypress/screenshots/fullPage-clip.png (140x70)
-  - /foo/bar/.projects/e2e/cypress/screenshots/element-clip.png (160x80)
-  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- before hooks -- empty test 1 -- before all hook.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- before each hook.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/taking screenshots -- each hooks -- empty test 2 -- after each hook.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/black.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/red.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/foo/bar/baz.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- generates pngs on failure (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/color-check.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/crop-check.png (600x400)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage-same.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/pathological.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/element.png (400x300)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- retries each screenshot for up to  XX:XX.png (400x1316)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (1).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (2).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/app-clip.png (100x50)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/runner-clip.png (120x60)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage-clip.png (140x70)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/element-clip.png (160x80)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png (1280x720)
 
 
   (Video)
@@ -117,9 +128,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       16       13        3        -        - │
+  │ ✖ screenshots_spec.coffee                   XX:XX       18       14        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       16       13        3        -        -  
+    1 of 1 failed (100%)                        XX:XX       18       14        4        -        -  
 
 `
 

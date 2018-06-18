@@ -1,4 +1,4 @@
-exports['e2e async timeouts failing1 1'] = `
+exports['e2e screenshot in nested spec passes 1'] = `
 ====================================================================================================
 
   (Run Starting)
@@ -6,54 +6,45 @@ exports['e2e async timeouts failing1 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (async_timeouts_spec.coffee)                                               │
-  │ Searched:   cypress/integration/async_timeouts_spec.coffee                                     │
+  │ Specs:      1 found (nested-1/nested-2/screenshot_nested_file_spec.coffee)                     │
+  │ Searched:   cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.coffee           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: async_timeouts_spec.coffee...                                                   (1 of 1) 
+  Running: nested-1/nested-2/screenshot_nested_file_spec.coffee...                         (1 of 1) 
 
 
-  async
-    1) bar fails
+  ✓ nests the file based on spec path
 
-
-  0 passing
-  1 failing
-
-  1) async bar fails:
-     Error: Timed out after '100ms'. The done() callback was never invoked!
-      at stack trace line
-
-
+  1 passing
 
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        1                          │
-  │ Passing:      0                          │
-  │ Failing:      1                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  1                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     async_timeouts_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                    │
+  │ Passing:      1                                                    │
+  │ Failing:      0                                                    │
+  │ Pending:      0                                                    │
+  │ Skipped:      0                                                    │
+  │ Screenshots:  1                                                    │
+  │ Video:        true                                                 │
+  │ Duration:     X seconds                                            │
+  │ Spec Ran:     nested-1/nested-2/screenshot_nested_file_spec.coffee │
+  └────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/async_timeouts_spec.coffee/async -- bar fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.coffee/nests the file based on spec path.png (1280x720)
 
 
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/nested-1/nested-2/abc123.mp4 (X seconds)
 
 
 ====================================================================================================
@@ -63,9 +54,9 @@ exports['e2e async timeouts failing1 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ async_timeouts_spec.coffee                XX:XX        1        -        1        -        - │
+  │ ✔ nested-1/nested-2/screenshot_nested_…     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -  
 
 `
 

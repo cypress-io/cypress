@@ -16,13 +16,14 @@ httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
 pkg           = require("@packages/root")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
+Project       = require("#{root}lib/project")
 Watchers      = require("#{root}lib/watchers")
 errors        = require("#{root}lib/errors")
 files         = require("#{root}lib/controllers/files")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
-CacheBuster   = require("#{root}lib/util/cache_buster")
 fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
+CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 ## force supertest-session to use supertest-as-promised, hah
@@ -89,6 +90,8 @@ describe "Routes", ->
           rp(options)
 
         open = =>
+          project = Project("/path/to/project")
+
           Promise.all([
             ## open our https server
             httpsServer.start(8443),
@@ -96,7 +99,7 @@ describe "Routes", ->
             ## and open our cypress server
             @server = Server(Watchers())
 
-            @server.open(cfg)
+            @server.open(cfg, project)
             .spread (port) =>
               if initialUrl
                 @server._onDomainSet(initialUrl)
@@ -286,7 +289,6 @@ describe "Routes", ->
 
       it "returns base json file path objects of only tests", ->
         ## this should omit any _fixture files, _support files and javascripts
-
         glob(path.join(Fixtures.projectPath("todos"), "tests", "_fixtures", "**", "*"))
         .then (files) =>
           ## make sure there are fixtures in here!
@@ -310,21 +312,21 @@ describe "Routes", ->
 
               ## remove the absolute path key
               body.integration = _.map body.integration, (obj) ->
-                _.pick(obj, "name", "path")
+                _.pick(obj, "name", "relative")
 
               expect(res.body).to.deep.eq({
                 integration: [
                   {
                     name: "sub/sub_test.coffee"
-                    path: "tests/sub/sub_test.coffee"
+                    relative: "tests/sub/sub_test.coffee"
                   }
                   {
                     name: "test1.js"
-                    path: "tests/test1.js"
+                    relative: "tests/test1.js"
                   }
                   {
                     name: "test2.coffee"
-                    path: "tests/test2.coffee"
+                    relative: "tests/test2.coffee"
                   }
                 ]
               })
@@ -348,33 +350,33 @@ describe "Routes", ->
 
             ## remove the absolute path key
             body.integration = _.map body.integration, (obj) ->
-              _.pick(obj, "name", "path")
+              _.pick(obj, "name", "relative")
 
             expect(body).to.deep.eq({
               integration: [
                 {
                   name: "bar.js"
-                  path: "cypress/integration/bar.js"
+                  relative: "cypress/integration/bar.js"
                 }
                 {
                   name: "baz.js"
-                  path: "cypress/integration/baz.js"
+                  relative: "cypress/integration/baz.js"
                 }
                 {
                   name: "dom.jsx"
-                  path: "cypress/integration/dom.jsx"
+                  relative: "cypress/integration/dom.jsx"
                 }
                 {
                   name: "foo.coffee"
-                  path: "cypress/integration/foo.coffee"
+                  relative: "cypress/integration/foo.coffee"
                 }
                 {
                   name: "nested/tmp.js"
-                  path: "cypress/integration/nested/tmp.js"
+                  relative: "cypress/integration/nested/tmp.js"
                 }
                 {
                   name: "noop.coffee"
-                  path: "cypress/integration/noop.coffee"
+                  relative: "cypress/integration/noop.coffee"
                 }
               ]
             })
@@ -400,21 +402,21 @@ describe "Routes", ->
 
             ## remove the absolute path key
             body.integration = _.map body.integration, (obj) ->
-              _.pick(obj, "name", "path")
+              _.pick(obj, "name", "relative")
 
             expect(body).to.deep.eq({
               integration: [
                 {
                   name: "baz.js"
-                  path: "cypress/integration/baz.js"
+                  relative: "cypress/integration/baz.js"
                 }
                 {
                   name: "dom.jsx"
-                  path: "cypress/integration/dom.jsx"
+                  relative: "cypress/integration/dom.jsx"
                 }
                 {
                   name: "noop.coffee"
-                  path: "cypress/integration/noop.coffee"
+                  relative: "cypress/integration/noop.coffee"
                 }
               ]
             })
