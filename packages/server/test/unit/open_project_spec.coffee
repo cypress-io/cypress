@@ -55,3 +55,12 @@ describe "lib/open_project", ->
       openProject.launch(@browser, @spec)
       .then ->
         expect(Project.prototype.reset).to.be.called
+
+    it "sets isHeaded + isHeadless if not already defined", ->
+      expect(@browser.isHeaded).to.be.undefined
+      expect(@browser.isHeadless).to.be.undefined
+
+      openProject.launch(@browser, @spec)
+      .then =>
+        expect(@browser.isHeaded).to.be.true
+        expect(@browser.isHeadless).to.be.false
