@@ -62,8 +62,8 @@ describe "lib/modes/record", ->
 
   context ".createRunAndRecordSpecs", ->
     specs = [
-      { path: "path/to/spec/a" },
-      { path: "path/to/spec/b" }
+      { relative: "path/to/spec/a" },
+      { relative: "path/to/spec/b" }
     ]
 
     beforeEach ->
@@ -187,7 +187,7 @@ describe "lib/modes/record", ->
         groupId: "group-123"
         machineId: "machine-123"
         platform: {}
-        spec: { path: "cypress/integration/app_spec.coffee" }
+        spec: { relative: "cypress/integration/app_spec.coffee" }
       })
       .then ->
         expect(api.createInstance).to.be.calledWith({
@@ -211,7 +211,7 @@ describe "lib/modes/record", ->
         groupId: "group-123"
         machineId: "machine-123"
         platform: {}
-        spec: { path: "cypress/integration/app_spec.coffee" }
+        spec: { relative: "cypress/integration/app_spec.coffee" }
       })
       .then (ret) ->
         expect(ret).to.be.null

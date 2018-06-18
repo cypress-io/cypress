@@ -917,6 +917,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     pauseTimers: (pause) ->
       timersPaused = pause
+
       if not pause
         runTimerQueue("setTimeout")
         runTimerQueue("setInterval")
