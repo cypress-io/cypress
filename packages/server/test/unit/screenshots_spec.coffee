@@ -160,7 +160,7 @@ describe "lib/screenshots", ->
         @appData.total = 3
 
         @getPixelColor.withArgs(0, 0).onSecondCall().returns("white")
-        
+
         clone = (img, props) ->
           _.defaultsDeep(props, img)
 
@@ -170,7 +170,7 @@ describe "lib/screenshots", ->
             data: new Buffer("image 2 data buffer")
           }
         })
-        
+
         @jimpImage3 = clone(@jimpImage, {
           id: 3
           bitmap: {
@@ -194,7 +194,7 @@ describe "lib/screenshots", ->
         screenshots.capture(@appData, @automate)
         .then =>
           Jimp.read.onCall(3).resolves(@jimpImage2)
-        
+
           @appData.current = 2
           screenshots.capture(@appData, @automate)
         .then =>
@@ -379,7 +379,7 @@ describe "lib/screenshots", ->
   context ".save", ->
     it "outputs file and returns details", ->
       buf = dataUriToBuffer(image)
-      
+
       Jimp.read(buf)
       .then (i) =>
         details = {
@@ -388,11 +388,11 @@ describe "lib/screenshots", ->
           pixelRatio: 2
           takenAt: "1234-date"
         }
-        
+
         dimensions = sizeOf(buf)
 
         screenshots.save(
-          { name: "foo bar\\baz%/my-$screenshot", specName: "foo.spec.js", testFailure: false }, 
+          { name: "foo bar\\baz%/my-$screenshot", specName: "foo.spec.js", testFailure: false },
           details,
           @config.screenshotsFolder
         )
@@ -400,9 +400,9 @@ describe "lib/screenshots", ->
           expectedPath = path.join(
             @config.screenshotsFolder, "foo.spec.js", "foo bar", "baz", "my-screenshot.png"
           )
-          
+
           actualPath = path.normalize(result.path)
-          
+
           expect(result).to.deep.eq({
             multipart: false
             pixelRatio: 2
@@ -414,7 +414,7 @@ describe "lib/screenshots", ->
             takenAt: "1234-date"
             dimensions: _.pick(dimensions, "width", "height")
           })
-          
+
           expect(expectedPath).to.eq(actualPath)
 
           fs.statAsync(expectedPath)
@@ -426,9 +426,9 @@ describe "lib/screenshots", ->
         buffer: dataUriToBuffer(image)
         takenAt: "1234-date"
       }
-      
+
       dimensions = sizeOf(details.buffer)
-      
+
       screenshots.save(
         { name: "with-buffer", specName: "foo.spec.js", testFailure: false },
         details,
@@ -438,9 +438,9 @@ describe "lib/screenshots", ->
         expectedPath = path.join(
           @config.screenshotsFolder, "foo.spec.js", "with-buffer.png"
         )
-        
+
         actualPath = path.normalize(result.path)
-        
+
         expect(result).to.deep.eq({
           name: "with-buffer"
           multipart: false
@@ -452,7 +452,7 @@ describe "lib/screenshots", ->
           takenAt: "1234-date"
           dimensions: _.pick(dimensions, "width", "height")
         })
-        
+
         expect(expectedPath).to.eq(actualPath)
 
         fs.statAsync(expectedPath)
@@ -477,14 +477,14 @@ describe "lib/screenshots", ->
       expect(p).to.eq(
         "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
       )
-      
+
       p2 = screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz"]
         name: "quux*"
         takenPaths: ["path/to/screenshots/examples$/user/list.js/quux.png"]
       }, "png", "path/to/screenshots")
-      
+
       expect(p2).to.eq(
         "path/to/screenshots/examples$/user/list.js/quux (1).png"
       )
@@ -500,13 +500,13 @@ describe "lib/screenshots", ->
       expect(p).to.eq(
         "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
       )
-      
+
       p2 = screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz^"]
         takenPaths: ["path/to/screenshots/examples$/user/list.js/bar -- baz.png"]
       }, "png", "path/to/screenshots")
-      
+
       expect(p2).to.eq(
         "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
       )
