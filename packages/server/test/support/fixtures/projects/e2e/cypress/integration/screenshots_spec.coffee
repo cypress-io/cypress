@@ -1,6 +1,15 @@
 { devicePixelRatio } = window
 
 describe "taking screenshots", ->
+  onAfterScreenshotResults = []
+  
+  Cypress.Screenshot.defaults({
+    onAfterScreenshot: ($el, results) ->
+      onAfterScreenshotResults.push(results)
+  })
+  
+  failureTestRan = false
+  
   it "manually generates pngs", ->
     cy
       .visit("http://localhost:3322/color/black")
@@ -15,12 +24,27 @@ describe "taking screenshots", ->
       .screenshot("foo/bar/baz", { capture: "runner" })
 
   it "generates pngs on failure", ->
+    failureTestRan = true
+    
     cy
       .visit("http://localhost:3322/color/yellow")
       .wait(1500)
       .then ->
         ## failure 1
         throw new Error("fail whale")
+  
+  it "does not call onAfterScreenshot with results of failed tests", ->
+    ## this test will only pass if the previous test ran
+    if not failureTestRan
+      throw new Error("this test can only pass if the previous test ran")
+    
+    testFailure = Cypress._.find(onAfterScreenshotResults, { testFailure: true })
+      
+    expect(testFailure).not.to.exist
+    
+    expect(Cypress._.map(onAfterScreenshotResults, "name")).to.deep.eq([
+      "black", "red", "foo/bar/baz"
+    ])
 
   it "handles devicePixelRatio correctly on headless electron", ->
     ## this checks to see if the topLeftRight pixel (1, 0) is
@@ -101,18 +125,25 @@ describe "taking screenshots", ->
     cy
       .viewport(400, 400)
       .visit("http://localhost:3322/identical")
+      .get("div:first").should("have.css", "height", "1300px")
       .screenshot({
         onAfterScreenshot: ($el, results) ->
+          expect($el).to.match("div")
+          
           { duration } = results
 
           ## there should be 4 screenshots taken
-          ## because the height is 1300px.
-          ## the first will resolve super fast
-          ## but the other 3 will take at least 1500ms
-          ## but not much more!
-          first = 500
-          total = first + (1500 * 3)
-          padding = 1000 * 3 ## account for exceeding 1500
+          ## because the height is 1700px.
+          ## the 1st will resolve super fast since it
+          ## won't match any other screenshots.
+          ## the 2th/3rd will take up to their 1500ms 
+          ## because they will be identical to the first.
+          ## the 4th will also go quickly because it will not
+          ## match the 3rd
+          first = fourth = 250
+          second = third = 1500
+          total = first + second + third + fourth
+          padding = 2000 ## account for slower machines
 
           expect(duration).to.be.within(total, total + padding)
       })
@@ -134,7 +165,9 @@ describe "taking screenshots", ->
       cy
         .viewport(600, 200)
         .visit("http://localhost:3322/color/yellow")
-        .screenshot("app-clip", { capture: "viewport", clip: { x: 10, y: 10, width: 100, height: 50 }})
+        .screenshot("app-clip", { 
+          capture: "viewport", clip: { x: 10, y: 10, width: 100, height: 50 }
+        })
         .task("check:screenshot:size", {
           name: "screenshots_spec.coffee/app-clip.png",
           width: 100, 
@@ -146,7 +179,9 @@ describe "taking screenshots", ->
       cy
         .viewport(600, 200)
         .visit("http://localhost:3322/color/yellow")
-        .screenshot("runner-clip", { capture: "runner", clip: { x: 15, y: 15, width: 120, height: 60 }})
+        .screenshot("runner-clip", { 
+          capture: "runner", clip: { x: 15, y: 15, width: 120, height: 60 }
+        })
         .task("check:screenshot:size", {
           name: "screenshots_spec.coffee/runner-clip.png",
           width: 120, 
@@ -158,7 +193,9 @@ describe "taking screenshots", ->
       cy
         .viewport(600, 200)
         .visit("http://localhost:3322/fullPage")
-        .screenshot("fullPage-clip", { capture: "fullPage", clip: { x: 20, y: 20, width: 140, height: 70 }})
+        .screenshot("fullPage-clip", { 
+          capture: "fullPage", clip: { x: 20, y: 20, width: 140, height: 70 }
+        })
         .task("check:screenshot:size", {
           name: "screenshots_spec.coffee/fullPage-clip.png",
           width: 140, 
@@ -171,7 +208,9 @@ describe "taking screenshots", ->
         .viewport(600, 200)
         .visit("http://localhost:3322/element")
         .get(".element")
-        .screenshot("element-clip", { clip: { x: 25, y: 25, width: 160, height: 80 }})
+        .screenshot("element-clip", { 
+          clip: { x: 25, y: 25, width: 160, height: 80 }
+        })
         .task("check:screenshot:size", {
           name: "screenshots_spec.coffee/element-clip.png", 
           width: 160, 

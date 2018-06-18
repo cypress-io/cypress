@@ -43,14 +43,12 @@ colorIf = (val, c) ->
 getSymbol = (num) ->
   if num then logSymbols.error else logSymbols.success
 
-formatBrowser = (browser, headed) ->
-  isHeadless = browser.name is "electron" and not headed
-
+formatBrowser = (browser) ->
   ## todo finish browser
   _.compact([
     browser.displayName,
     browser.majorVersion,
-    isHeadless and gray("(headless)")
+    browser.isHeadless and gray("(headless)")
   ]).join(" ")
 
 formatFooterSummary = (results) ->
@@ -105,7 +103,7 @@ formatSpecs = (specs) ->
   .join("")
 
 displayRunStarting = (options = {}) ->
-  { specs, specPattern, browser, headed, runUrl } = options
+  { specs, specPattern, browser, runUrl } = options
 
   console.log("")
 
@@ -127,7 +125,7 @@ displayRunStarting = (options = {}) ->
   data = _
   .chain([
     [gray("Cypress:"), pkg.version]
-    [gray("Browser:"), formatBrowser(browser, headed)]
+    [gray("Browser:"), formatBrowser(browser)]
     [gray("Specs:"), formatSpecs(specs)]
     [gray("Searched:"), formatSpecPattern(specPattern)]
     [gray("Run URL:"), runUrl]
@@ -352,11 +350,11 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  getElectronProps: (showGui, project, write) ->
+  getElectronProps: (isHeaded, project, write) ->
     obj = {
       width:  1280
       height: 720
-      show:   showGui
+      show:   isHeaded
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
@@ -491,13 +489,11 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   launchBrowser: (options = {}) ->
-    { browserName, spec, write, headed, project, screenshots } = options
+    { browser, spec, write, project, screenshots, projectRoot } = options
 
-    headed = !!headed
-
-    browserOpts = switch browserName
+    browserOpts = switch browser.name
       when "electron"
-        @getElectronProps(headed, project, write)
+        @getElectronProps(browser.isHeaded, project, write)
       else
         {}
 
@@ -509,11 +505,11 @@ module.exports = {
         resp
     }
 
-    browserOpts.projectRoot = options.projectRoot
+    browserOpts.projectRoot = projectRoot
 
-    openProject.launch(browserName, spec, browserOpts)
+    openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project, headed, exit) ->
+  listenForProjectEnd: (project, exit) ->
     new Promise (resolve) ->
       if exit is false
         resolve = (arg) ->
@@ -597,9 +593,9 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
 
-    @listenForProjectEnd(project, headed, exit)
+    @listenForProjectEnd(project, exit)
     .then (obj) =>
       _.defaults(obj, {
         error: null
@@ -671,6 +667,11 @@ module.exports = {
   runSpecs: (options = {}) ->
     { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl } = options
 
+    isHeadless = browser.name is "electron" and not headed
+
+    browser.isHeadless = isHeadless
+    browser.isHeaded = not isHeadless
+
     results = {
       startedTestsAt: null
       endedTestsAt: null
@@ -694,7 +695,6 @@ module.exports = {
     displayRunStarting({
       specs
       runUrl
-      headed
       browser
       specPattern
     })
@@ -739,13 +739,15 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}) ->
-    { project, headed, browser, video, videosFolder } = options
+    { project, browser, video, videosFolder } = options
+
+    { isHeadless, isHeaded } = browser
 
     browserName = browser.name
 
     debug("about to run spec %o", {
       spec
-      headed
+      isHeadless
       browserName
     })
 
@@ -759,7 +761,7 @@ module.exports = {
 
     ## if we've been told to record and we're not spawning a headed browser
     browserCanBeRecorded = (name) ->
-      name is "electron" and not options.headed
+      name is "electron" and isHeadless
 
     if video
       if browserCanBeRecorded(browserName)
@@ -773,7 +775,7 @@ module.exports = {
       else
         console.log("")
 
-        if browserName is "electron" and options.headed
+        if browserName is "electron" and isHeaded
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else
           errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
@@ -793,7 +795,6 @@ module.exports = {
             name
             spec
             cname
-            headed
             started
             project
             screenshots
@@ -805,10 +806,9 @@ module.exports = {
           connection: @waitForBrowserToConnect({
             spec
             write
-            headed
             project
+            browser
             screenshots
-            browserName
             socketId:    options.socketId
             webSecurity: options.webSecurity
             projectRoot: options.projectRoot

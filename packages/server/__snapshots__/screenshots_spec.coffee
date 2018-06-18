@@ -20,6 +20,7 @@ exports['e2e screenshots passes 1'] = `
     ✓ manually generates pngs
     ✓ can nest screenshots in folders
     1) generates pngs on failure
+    ✓ does not call onAfterScreenshot with results of failed tests
     ✓ handles devicePixelRatio correctly on headless electron
     ✓ crops app captures to just app size
     ✓ can capture fullPage screenshots
@@ -41,7 +42,7 @@ exports['e2e screenshots passes 1'] = `
       5) "after each" hook for "empty test 2"
 
 
-  14 passing
+  15 passing
   5 failing
 
   1) taking screenshots generates pngs on failure:
@@ -76,8 +77,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        18                      │
-  │ Passing:      14                      │
+  │ Tests:        19                      │
+  │ Passing:      15                      │
   │ Failing:      4                       │
   │ Pending:      0                       │
   │ Skipped:      0                       │
@@ -100,7 +101,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage-same.png (600x500)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/pathological.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/element.png (400x300)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- retries each screenshot for up to  XX:XX.png (400x1316)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- retries each screenshot for up to  XX:XX.png (200x1300)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots.png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (1).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (2).png (1280x720)
@@ -128,9 +129,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       18       14        4        -        - │
+  │ ✖ screenshots_spec.coffee                   XX:XX       19       15        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       18       14        4        -        -  
+    1 of 1 failed (100%)                        XX:XX       19       15        4        -        -  
 
 `
 

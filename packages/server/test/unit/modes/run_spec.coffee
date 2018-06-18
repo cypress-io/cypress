@@ -142,18 +142,19 @@ describe "lib/modes/run", ->
         absolute: "/path/to/spec"
       }
 
+      browser = { name: "electron", isHeaded: false }
+
       runMode.launchBrowser({
         spec
-        browserName: "electron"
+        browser
         project: @projectInstance
         write: "write"
-        gui: null
         screenshots: screenshots
       })
 
       expect(runMode.getElectronProps).to.be.calledWith(false, @projectInstance, "write")
 
-      expect(@launch).to.be.calledWithMatch("electron", spec, {foo: "bar"})
+      expect(@launch).to.be.calledWithMatch(browser, spec, { foo: "bar" })
 
       browserOpts = @launch.firstCall.args[2]
 
@@ -171,14 +172,16 @@ describe "lib/modes/run", ->
         absolute: "/path/to/spec"
       }
 
+      browser = { name: "chrome", isHeaded: true }
+
       runMode.launchBrowser({
         spec
-        browserName: "chrome"
+        browser
       })
 
       expect(runMode.getElectronProps).not.to.be.called
 
-      expect(@launch).to.be.calledWithMatch("chrome", spec, {})
+      expect(@launch).to.be.calledWithMatch(browser, spec, {})
 
   context ".postProcessRecording", ->
     beforeEach ->
@@ -584,12 +587,14 @@ describe "lib/modes/run", ->
         })
 
     it "passes headed to openProject.launch", ->
-      browsers.ensureAndGetByName.resolves({ name: "electron" })
+      browser = { name: "electron" }
 
-      runMode.run({headed: true})
+      browsers.ensureAndGetByName.resolves(browser)
+
+      runMode.run({ headed: true })
       .then ->
         expect(openProject.launch).to.be.calledWithMatch(
-          "electron",
+          browser,
           {
             name: "foo_spec.js"
             path: "cypress/integration/foo_spec.js"

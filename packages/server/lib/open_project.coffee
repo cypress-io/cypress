@@ -1,4 +1,5 @@
 _         = require("lodash")
+la        = require("lazy-ass")
 debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
 files     = require("./controllers/files")
@@ -41,8 +42,12 @@ create = ->
 
     getProject: -> openProject
 
-    launch: (browserName, spec, options = {}) ->
+    launch: (browser, spec, options = {}) ->
       debug("resetting project state, preparing to launch browser")
+
+      la(_.isPlainObject(browser), "expected browser object:", browser)
+
+      browserName = browser.name
 
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
@@ -63,9 +68,9 @@ create = ->
 
           ## set the current browser object on options
           ## so we can pass it down
-          options.browser = browsers.find(browserName, options.browsers)
+          options.browser = browser
 
-          openProject.setCurrentSpecAndBrowser(spec, options.browser)
+          openProject.setCurrentSpecAndBrowser(spec, browser)
 
           automation = openProject.getAutomation()
 
