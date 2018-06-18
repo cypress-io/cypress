@@ -63,7 +63,7 @@ const addProject = (path) => {
 
 const runSpec = (project, spec, browser) => {
   specsStore.setChosenSpec(spec)
-  project.setChosenBrowserByName(browser)
+  project.setChosenBrowser(browser)
 
   const launchBrowser = () => {
     project.browserOpening()

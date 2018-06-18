@@ -125,7 +125,7 @@ describe "Specs List", ->
             .then ->
               launchArgs = @ipc.launchBrowser.lastCall.args
 
-              expect(launchArgs[0].browser).to.eq "chrome"
+              expect(launchArgs[0].browser.name).to.eq "chrome"
               expect(launchArgs[0].spec.name).to.eq "All Specs"
 
         describe "all specs running in browser", ->
@@ -270,7 +270,8 @@ describe "Specs List", ->
             expect(@ipc.closeBrowser).to.be.called
 
             launchArgs = @ipc.launchBrowser.lastCall.args
-            expect(launchArgs[0].browser).to.equal("chrome")
+
+            expect(launchArgs[0].browser.name).to.equal("chrome")
             expect(launchArgs[0].spec.relative).to.equal("cypress/integration/app_spec.coffee")
 
       it "adds 'active' class on click", ->

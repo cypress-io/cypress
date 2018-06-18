@@ -18,6 +18,14 @@ describe "Cypress static methods + props", ->
     expect(browser.version).to.be.a("string")
     expect(browser.majorVersion).to.be.a("string")
     expect(browser.path).to.be.a("string")
+    
+    switch browser.isHeadless
+      when true
+        expect(browser.isHeaded).to.be.false
+      when false
+        expect(browser.isHeaded).to.be.true
+      else
+        expect(browser.isHeadless, "browser.isHeadless").not.to.be.undefined
 
   it ".spec", ->
     { spec } = Cypress
