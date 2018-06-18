@@ -67,6 +67,8 @@ class Socket
     .catch ->
       log("could not find test file that changed: #{filePath}")
 
+  ## TODO: clean this up by sending the spec object instead of
+  ## the url path
   watchTestFileByPath: (config, originalFilePath, options) ->
     ## files are always sent as integration/foo_spec.js
     ## need to take into account integrationFolder may be different so
@@ -90,7 +92,7 @@ class Socket
     @testFilePath = filePath
     log("will watch test file path #{filePath}")
 
-    preprocessor.getFile(filePath, config, options)
+    preprocessor.getFile(filePath, config)
     ## ignore errors b/c we're just setting up the watching. errors
     ## are handled by the spec controller
     .catch ->

@@ -10,9 +10,11 @@ colorString     = require("color-string")
 debug           = require("debug")("cypress:server:screenshot")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
+pathHelpers     = require("./util/path_helpers")
 
 RUNNABLE_SEPARATOR = " -- "
-invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
+pathSeparatorRe = /[\\\/]/g
+invalidCharsRe = /[^0-9a-zA-Z-_\s\(\)]/g
 
 ## internal id incrementor
 __ID__ = null
@@ -21,6 +23,9 @@ __ID__ = null
 ## a semaphore to access the file system when we write
 ## screenshots since its possible two screenshots with
 ## the same name will be written to the file system
+
+replaceInvalidChars = (str) ->
+  str.replace(invalidCharsRe, "")
 
 ## when debugging logs automatically prefix the
 ## screenshot id to the debug logs for easier association
@@ -291,8 +296,40 @@ getDimensions = (details) ->
   else
     _.pick(details.image.bitmap, "width", "height")
 
+ensureUniquePath = (takenPaths, withoutExt, extension) ->
+  fullPath = "#{withoutExt}.#{extension}"
+  num = 0
+  while _.includes(takenPaths, fullPath)
+    fullPath = "#{withoutExt} (#{++num}).#{extension}"
+  return fullPath
+
+getPath = (data, ext, screenshotsFolder) ->
+  specNames = (data.specName or "")
+  .split(pathSeparatorRe)
+  
+  if data.name
+    names = data.name.split(pathSeparatorRe).map(replaceInvalidChars)
+  else
+    names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
+  
+  ## append (failed) to the last name
+  if data.testFailure
+    index = names.length - 1
+    names[index] = names[index] + " (failed)"
+  
+  withoutExt = path.join(screenshotsFolder, specNames..., names...)
+
+  ensureUniquePath(data.takenPaths, withoutExt, ext)
+
+getPathToScreenshot = (data, details, screenshotsFolder) ->
+  ext = mime.extension(getType(details))
+
+  getPath(data, ext, screenshotsFolder)
+
 module.exports = {
   crop
+
+  getPath
 
   clearMultipartState
 
@@ -372,13 +409,7 @@ module.exports = {
       return { image, pixelRatio, multipart, takenAt }
 
   save: (data, details, screenshotsFolder) ->
-    type = getType(details)
-
-    name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
-    name = name.replace(invalidCharsRe, "")
-    name = [name, mime.extension(type)].join(".")
-
-    pathToScreenshot = path.join(screenshotsFolder, name)
+    pathToScreenshot = getPathToScreenshot(data, details, screenshotsFolder)
 
     debug("save", pathToScreenshot)
 
@@ -397,6 +428,9 @@ module.exports = {
         dimensions
         multipart
         pixelRatio
+        name: data.name
+        specName: data.specName
+        testFailure: data.testFailure
         size: bytes(size, { unitSeparator: " " })
         path: pathToScreenshot
       }

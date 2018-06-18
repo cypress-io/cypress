@@ -376,9 +376,9 @@ describe "lib/screenshots", ->
         takenAt: "taken:at:date"
       }
 
-      screenshots.save({name: "foo/tweet"}, details, @config.screenshotsFolder)
+      screenshots.save({name: "foo bar\\baz%/my-$screenshot"}, details, @config.screenshotsFolder)
       .then (result) =>
-        expectedPath = path.normalize(@config.screenshotsFolder + "/footweet.png")
+        expectedPath = path.join(@config.screenshotsFolder, "foo bar", "baz", "my-screenshot.png")
         actualPath = path.normalize(result.path)
 
         expect(actualPath).to.eq(expectedPath)
@@ -395,17 +395,35 @@ describe "lib/screenshots", ->
         multipart: false
         pixelRatio: 1
         buffer: dataUriToBuffer(image)
+        takenAt: "1234-date"
       }
+      
       dimensions = sizeOf(details.buffer)
-      screenshots.save({name: "bar/tweet"}, details, @config.screenshotsFolder)
+      screenshots.save(
+        { name: "with-buffer", specName: "foo.spec.js", testFailure: false },
+        details,
+        @config.screenshotsFolder
+      )
       .then (result) =>
-        expectedPath = path.normalize(@config.screenshotsFolder + "/bartweet.png")
+        expectedPath = path.join(
+          @config.screenshotsFolder, "foo.spec.js", "with-buffer.png"
+        )
+        
         actualPath = path.normalize(result.path)
-
-        expect(result.multipart).to.be.false
-        expect(result.pixelRatio).to.equal(1)
-        expect(actualPath).to.eq(expectedPath)
-        expect(result.dimensions).to.eql(dimensions)
+        
+        expect(result).to.deep.eq({
+          dimensions
+          name: "with-buffer"
+          multipart: false
+          pixelRatio: 1
+          path: path.normalize(result.path)
+          size: "279 B"
+          specName: "foo.spec.js"
+          testFailure: false
+          takenAt: "1234-date"
+        })
+        
+        expect(expectedPath).to.eq(actualPath)
 
         fs.statAsync(expectedPath)
 
@@ -417,6 +435,51 @@ describe "lib/screenshots", ->
       sinon.stub(fs, "copyAsync").withArgs("foo", "bar", {overwrite: true}).resolves()
 
       screenshots.copy("foo", "bar")
+
+  context ".getPath", ->
+    it "concats spec name, screenshotsFolder, and name", ->
+      p = screenshots.getPath({
+        specName: "examples$/user/list.js"
+        titles: ["bar", "baz"]
+        name: "quux/lorem*"
+      }, "png", "path/to/screenshots")
+
+      expect(p).to.eq(
+        "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
+      )
+      
+      p2 = screenshots.getPath({
+        specName: "examples$/user/list.js"
+        titles: ["bar", "baz"]
+        name: "quux*"
+        takenPaths: ["path/to/screenshots/examples$/user/list.js/quux.png"]
+      }, "png", "path/to/screenshots")
+      
+      expect(p2).to.eq(
+        "path/to/screenshots/examples$/user/list.js/quux (1).png"
+      )
+
+    it "concats spec name, screenshotsFolder, and titles", ->
+      p = screenshots.getPath({
+        specName: "examples$/user/list.js"
+        titles: ["bar", "baz^"]
+        takenPaths: ["a"]
+        testFailure: true
+      }, "png", "path/to/screenshots")
+
+      expect(p).to.eq(
+        "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
+      )
+      
+      p2 = screenshots.getPath({
+        specName: "examples$/user/list.js"
+        titles: ["bar", "baz^"]
+        takenPaths: ["path/to/screenshots/examples$/user/list.js/bar -- baz.png"]
+      }, "png", "path/to/screenshots")
+      
+      expect(p2).to.eq(
+        "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
+      )
 
 describe "lib/automation/screenshot", ->
   beforeEach ->

@@ -25,8 +25,9 @@ isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 folders = toWords """
-  fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
-  supportFile        supportFolder    unitFolder          videosFolder
+  fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
+  screenshotsFolder  supportFile      supportFolder       unitFolder
+  videosFolder
 """
 
 configKeys = toWords """
@@ -442,7 +443,8 @@ module.exports = {
 
     obj = _.clone(obj)
 
-    pluginsFile = path.join(obj.projectRoot, obj.pluginsFile)
+    pluginsFile = obj.pluginsFile
+
     log("setting plugins file #{pluginsFile}")
     log("for project root #{obj.projectRoot}")
 

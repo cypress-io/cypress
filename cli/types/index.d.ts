@@ -26,7 +26,7 @@ declare const assert: Chai.AssertStatic
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
-  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT"
+  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "PATCH"
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
@@ -36,6 +36,21 @@ declare namespace Cypress {
   }
   interface ObjectLike {
     [key: string]: any
+  }
+  interface Auth {
+    username: string
+    password: string
+  }
+
+  /**
+   * Describes a browser Cypress can control
+   */
+  interface Browser {
+    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
+    displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
+    version: string
+    majorVersion: string
+    path: string
   }
 
   /**
@@ -121,6 +136,20 @@ declare namespace Cypress {
      *    Cypress.arch // "x64"
      */
     arch: string
+
+    /**
+     * Currently executing spec file.
+     */
+    spec: {
+      name: string // "config_passing_spec.coffee"
+      relative: string | null // "cypress/integration/config_passing_spec.coffee"
+      absolute: string | null
+    }
+
+    /**
+     * Information about the browser currently running the tests
+     */
+    browser: Browser
 
     /**
      * @see https://on.cypress.io/config
@@ -289,12 +318,18 @@ declare namespace Cypress {
 
     /**
      * Clear data in local storage.
-     * Cypress automatically runs this command before each test to prevent state from being shared across tests. You shouldn’t need to use this command unless you’re using it to clear localStorage inside a single test.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
      *
      * @see https://on.cypress.io/clearlocalstorage
+     * @example
+     *    cy.clearLocalStorage().should(ls => {
+     *      expect(ls.getItem('prop1')).to.be.null
+     *    })
      */
-    clearLocalStorage(key?: string): Chainable<null>
-    clearLocalStorage(re: RegExp): Chainable<null>
+    clearLocalStorage(key?: string): Chainable<Storage>
+    clearLocalStorage(re: RegExp): Chainable<Storage>
 
     /**
      * Click a DOM element.
@@ -746,9 +781,12 @@ declare namespace Cypress {
      * Use `cy.route()` to manage the behavior of network requests.
      *
      * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
      */
-    route(url: string | RegExp, response?: string | Response): Chainable<null>
-    route(method: string, url: string | RegExp, response?: string | Response): Chainable<null>
+    route(url: string | RegExp, response?: string | object): Chainable<null>
+    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     route(fn: () => RouteOptions): Chainable<null>
     route(options: Partial<RouteOptions>): Chainable<null>
 
@@ -786,9 +824,20 @@ declare namespace Cypress {
     /**
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
+     * @example
+     *    // start server
+     *    cy.server()
+     *    // get default server options
+     *    cy.server().should((server) => {
+     *      expect(server.delay).to.eq(0)
+     *      expect(server.method).to.eq('GET')
+     *      expect(server.status).to.eq(200)
+     *      // and many others options
+     *    })
+     *
      * @see https://on.cypress.io/server
      */
-    server(options?: Partial<ServerOptions>): Chainable<null>
+    server(options?: Partial<ServerOptions>): Chainable<ServerOptions>
 
     /**
      * Set a browser cookie.
@@ -912,6 +961,15 @@ declare namespace Cypress {
      * Uncheck checkbox(es).
      *
      * @see https://on.cypress.io/uncheck
+     * @example
+     *    // Unchecks checkbox element
+     *    cy.get('[type="checkbox"]').uncheck()
+     *    // Uncheck element with the id ‘saveUserName’
+     *    cy.get('#saveUserName').uncheck()
+     *    // Uncheck all checkboxes
+     *    cy.get(':checkbox').uncheck()
+     *    // Uncheck the checkbox with the value of ‘ga’
+     *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
     uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
     uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
@@ -929,6 +987,11 @@ declare namespace Cypress {
      * Control the size and orientation of the screen for your application.
      *
      * @see https://on.cypress.io/viewport
+     * @example
+     *    // Set viewport to 550px x 750px
+     *    cy.viewport(550, 750)
+     *    // Set viewport to 357px x 667px
+     *    cy.viewport('iphone-6')
      */
     viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Partial<Loggable>): Chainable<null>
     viewport(width: number, height: number, options?: Partial<Loggable>): Chainable<null>
@@ -988,6 +1051,11 @@ declare namespace Cypress {
      * Yield the object passed into `.wrap()`.
      *
      * @see https://on.cypress.io/wrap
+     * @example
+     *    // Make assertions about object
+     *    cy.wrap({ amount: 10 })
+     *      .should('have.property', 'amount')
+     *      .and('eq', 10)
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
@@ -1390,6 +1458,21 @@ declare namespace Cypress {
      * @default {true}
      */
     failOnStatusCode: boolean
+
+    /**
+     * Cypress will automatically apply the right authorization headers
+     * if you’re attempting to visit an application that requires
+     * Basic Authentication.
+     *
+     * @example
+     *    cy.visit('https://www.acme.com/', {
+     *      auth: {
+     *        username: 'wile',
+     *        password: 'coyote'
+     *      }
+     *    })
+     */
+    auth: Auth
   }
 
   /**
@@ -2967,6 +3050,7 @@ declare namespace Cypress {
      */
     (chainers: string, value?: any): Chainable<Subject>
     (chainers: string, value: any, match: any): Chainable<Subject>
+
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
