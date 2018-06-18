@@ -1,6 +1,7 @@
 _ = require("lodash")
-Promise = require("bluebird")
 $ = require("jquery")
+bytes = require("bytes")
+Promise = require("bluebird")
 
 $Screenshot = require("../../cypress/screenshot")
 $dom = require("../../dom")
@@ -283,8 +284,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## failure screenshot when not interactive
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = $Screenshot.getConfig()
+    
     return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
-
+    
     if not state("screenshotTaken")
       ## if a screenshot has not been taken (by cy.screenshot()) in the
       ## test that failed, we can bypass UI-changing and pixel-checking
@@ -364,13 +366,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: options.timeout
       })
       .then (props) ->
-        { duration, path } = props
+        { duration, path, size } = props
         { width, height } = props.dimensions
 
         takenPaths = state("screenshotPaths") or []
         state("screenshotPaths", takenPaths.concat([path]))
 
         _.extend(consoleProps, props, {
+          size: bytes(size, { unitSeparator: " " })
           duration: "#{duration}ms"
           dimensions: "#{width}px x #{height}px"
         })

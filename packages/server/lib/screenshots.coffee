@@ -1,7 +1,6 @@
 _               = require("lodash")
 mime            = require("mime")
 path            = require("path")
-bytes           = require("bytes")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
 Jimp            = require("jimp")
@@ -425,6 +424,7 @@ module.exports = {
       { multipart, pixelRatio, takenAt } = details
 
       {
+        size 
         takenAt
         dimensions
         multipart
@@ -432,7 +432,6 @@ module.exports = {
         name: data.name
         specName: data.specName
         testFailure: data.testFailure
-        size: bytes(size, { unitSeparator: " " })
         path: pathToScreenshot
       }
 
