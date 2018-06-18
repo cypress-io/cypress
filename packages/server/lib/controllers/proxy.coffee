@@ -143,37 +143,29 @@ module.exports = {
       ## turn off __cypress.initial by setting false here
       setCookies(false, wantsInjection)
 
-      debug("received response for %o", {
-        url: remoteUrl
-        headers,
-        statusCode
-      })
-
       encoding = headers["content-encoding"]
 
       isGzipped = encoding and encoding.includes("gzip")
 
+      debug("received response for %o", {
+        url: remoteUrl
+        headers,
+        statusCode,
+        isGzipped
+        wantsInjection,
+        wantsSecurityRemoved,
+      })
+
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
-      if not wantsInjection
-        ## only rewrite if we should
-        if config.modifyObstructiveCode and wantsSecurityRemoved
-          str
-          ## only unzip when it is already gzipped
-          .pipe(conditional(isGzipped, zlib.createGunzip()))
-          .pipe(rewriter.security())
-          .pipe(conditional(isGzipped, zlib.createGzip()))
-          .pipe(thr)
-        else
-          str.pipe(thr)
-      else
-        rewrite = (body) =>
-          rewriter.html(body.toString(), remoteState.domainName, wantsInjection, config.modifyObstructiveCode)
+      if wantsInjection
+        rewrite = (body) ->
+          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, config.modifyObstructiveCode)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
         ## a buffer
-        injection = concat (body) =>
+        injection = concat (body) ->
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
           if isGzipped
@@ -186,6 +178,21 @@ module.exports = {
             thr.end rewrite(body)
 
         str.pipe(injection)
+      else
+        ## only rewrite if we should
+        if config.modifyObstructiveCode and wantsSecurityRemoved
+          gunzip = zlib.createGunzip()
+          gunzip.setEncoding("utf8")
+
+          str
+          ## only unzip when it is already gzipped
+          .pipe(conditional(isGzipped, gunzip))
+          .pipe(rewriter.security())
+          .pipe(conditional(isGzipped, zlib.createGzip()))
+          .pipe(thr)
+        else
+          str.pipe(thr)
+
 
     endWithResponseErr = (err) ->
       ## use res.statusCode if we have one

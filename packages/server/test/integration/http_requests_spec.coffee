@@ -5,6 +5,7 @@ rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
 path          = require("path")
+zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
@@ -25,6 +26,8 @@ fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
+
+zlib = Promise.promisifyAll(zlib)
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
@@ -2374,6 +2377,54 @@ describe "Routes", ->
             expect(res.body).to.eq(
               "if (self !== self) { }"
             )
+
+        it "handles multi-byte characters correctly when injecting", ->
+          bytes = "0" + Array(16 * 1024 * 10).fill("λφ").join("")
+
+          response = "<html>#{bytes}</html>"
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.html")
+            .reply 200, resp, {
+              "Content-Type": "text/html"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.html"
+              gzip: true
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.include(bytes + "</html>")
+
+        ## https://github.com/cypress-io/cypress/issues/1396
+        it "handles multi-byte characters correctly on JS files", ->
+          response = "0" + Array(16 * 1024 * 2).fill("λφ").join("")
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.html")
+            .reply 200, resp, {
+              "Content-Type": "application/javascript"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.html"
+              gzip: true
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.eq(response)
 
         it "does not die rewriting a huge JS file", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
