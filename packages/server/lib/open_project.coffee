@@ -66,6 +66,14 @@ create = ->
 
           options.url = url
 
+          ## if we don't have the isHeaded property
+          ## then we're in interactive mode and we
+          ## can assume its a headed browser
+          ## TODO: we should clean this up
+          if not _.has(browser, "isHeaded")
+            browser.isHeaded = true
+            browser.isHeadless = false
+
           ## set the current browser object on options
           ## so we can pass it down
           options.browser = browser

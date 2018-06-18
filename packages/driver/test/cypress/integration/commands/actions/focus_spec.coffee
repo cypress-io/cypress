@@ -1,6 +1,9 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
+getActiveElement = ->
+  cy.state("document").activeElement
+
 describe "src/cy/commands/actions/focus", ->
   before ->
     cy
@@ -20,8 +23,9 @@ describe "src/cy/commands/actions/focus", ->
       cy.$$("#focus input").focus ->
         focus = true
 
-      cy.get("#focus input").focus().then ->
+      cy.get("#focus input").focus().then ($input) ->
         expect(focus).to.be.true
+        expect(getActiveElement()).to.eq($input.get(0))
 
     it "bubbles focusin event",  ->
       focusin = false
@@ -44,25 +48,12 @@ describe "src/cy/commands/actions/focus", ->
         .then ->
            expect(blurred).to.be.true
 
-    it "sets forceFocusedEl", ->
-      input = cy.$$("#focus input")
-
-      cy
-        .get("#focus input").focus()
-        .focused().then ($focused) ->
-          expect($focused.get(0)).to.eq(input.get(0))
-
-          ## make sure we have either set the property
-          ## or havent
-          if cy.state("document").hasFocus()
-            expect(cy.state("forceFocusedEl")).not.to.be.ok
-          else
-            expect(cy.state("forceFocusedEl")).to.eq(input.get(0))
-
     it "matches cy.focused()", ->
       button = cy.$$("#button")
 
-      cy.get("#button").focus().focused().then ($focused) ->
+      cy
+      .get("#button").focus().focused()
+      .then ($focused) ->
         expect($focused.get(0)).to.eq button.get(0)
 
     it "returns the original subject", ->
@@ -320,25 +311,14 @@ describe "src/cy/commands/actions/focus", ->
 
       cy.get("#focus").within ->
         cy
-          .get("input").focus()
-          .get("button").focus()
-          .then ->
-            expect(blurred).to.be.true
-
-    it "black lists the focused element", ->
-      input = cy.$$("#focus input")
-
-      cy
-        .get("#focus input").focus().blur()
-        .focused().should("not.exist").then ($focused) ->
-          expect($focused).to.be.null
-
-          ## make sure we have either set the property
-          ## or havent
-          if cy.state("document").hasFocus()
-            expect(cy.state("blacklistFocusedEl")).not.to.be.ok
-          else
-            expect(cy.state("blacklistFocusedEl")).to.eq(input.get(0))
+        .get("input").focus()
+        .then ($input) ->
+          expect(getActiveElement()).to.eq($input.get(0))
+        
+        .get("button").focus()
+        .then ($btn) ->
+          expect(blurred).to.be.true
+          expect(getActiveElement()).to.eq($btn.get(0))
 
     it "sends a focusout event", ->
       focusout = false
@@ -398,6 +378,17 @@ describe "src/cy/commands/actions/focus", ->
 
       cy.get("input:first").focus().blur().then ->
         expect(cy.timeout).to.be.calledWith(50, true)
+
+    it "can blur tabindex", ->
+      blurred = false
+
+      cy
+      .$$("#comments").blur ->
+        blurred = true
+      .get(0).focus()
+
+      cy.get("#comments").blur().then ->
+        expect(blurred).to.be.true
 
     it "can force blurring on a non-focused element", ->
       blurred = false
