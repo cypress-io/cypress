@@ -82,7 +82,6 @@
     "babelify": "^7.3.0",
     "bluebird": "3.4.7",
     "browserify": "^13.1.1",
-    "bytes": "^2.4.0",
     "chai": "^1.9.2",
     "chalk": "^2.4.1",
     "check-more-types": "^2.24.0",

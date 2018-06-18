@@ -31,15 +31,16 @@ describe "lib/screenshots", ->
       viewport: { width: 40, height: 40 }
     }
 
-    @buffer = {}
+    @buffer = new Buffer("image 1 data buffer")
 
     @jimpImage = {
       id: 1
       bitmap: {
         width: 40
         height: 40
+        data: @buffer
       }
-      crop: sinon.stub()
+      crop: sinon.stub().callsFake => @jimpImage
       getBuffer: sinon.stub().resolves(@buffer)
       getMIME: -> "image/png"
       hash: sinon.stub().returns("image hash")
@@ -47,7 +48,7 @@ describe "lib/screenshots", ->
     }
 
     Jimp.prototype.composite = sinon.stub()
-    Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
+    # Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
 
     config.get(@todosPath).then (@config) =>
 
@@ -160,19 +161,28 @@ describe "lib/screenshots", ->
 
         @getPixelColor.withArgs(0, 0).onSecondCall().returns("white")
 
-        @jimpImage2 = _.extend({}, @jimpImage, {
+        clone = (img, props) ->
+          _.defaultsDeep(props, img)
+
+        @jimpImage2 = clone(@jimpImage, {
           id: 2
-          hash: sinon.stub().returns("image 2 hash")
+          bitmap: {
+            data: new Buffer("image 2 data buffer")
+          }
         })
 
-        @jimpImage3 = _.extend({}, @jimpImage, {
+        @jimpImage3 = clone(@jimpImage, {
           id: 3
-          hash: sinon.stub().returns("image 3 hash")
+          bitmap: {
+            data: new Buffer("image 3 data buffer")
+          }
         })
 
-        @jimpImage4 = _.extend({}, @jimpImage, {
+        @jimpImage4 = clone(@jimpImage, {
           id: 4
-          hash: sinon.stub().returns("image 4 hash")
+          bitmap: {
+            data: new Buffer("image 4 data buffer")
+          }
         })
 
       it "retries until helper pixels are no longer present on first capture", ->
@@ -190,12 +200,9 @@ describe "lib/screenshots", ->
         .then =>
           expect(@automate.callCount).to.equal(4)
 
-          ## image.hash() is very expensive and we want to make sure its only called
-          ## once for each image
-          expect(@jimpImage2.hash).to.be.calledOnce
-
       it "resolves no image on non-last captures", ->
-        screenshots.capture(@appData, @automate).then (image) ->
+        screenshots.capture(@appData, @automate)
+        .then (image) ->
           expect(image).to.be.null
 
       it "resolves details w/ image on last capture", ->
@@ -257,6 +264,89 @@ describe "lib/screenshots", ->
         .then ->
           expect(Jimp.prototype.composite).not.to.be.called
 
+    describe "integration", ->
+      beforeEach ->
+        screenshots.clearMultipartState()
+
+        @currentTest.timeout(10000)
+
+        sinon.restore()
+
+        @data1 = {
+          titles: [ 'cy.screenshot() - take a screenshot' ],
+          testId: 'r2',
+          name: 'app-screenshot',
+          capture: 'fullPage',
+          clip: { x: 0, y: 0, width: 1000, height: 646 },
+          viewport: { width: 1280, height: 646 },
+          current: 1,
+          total: 3
+        }
+
+        @data2 = {
+          titles: [ 'cy.screenshot() - take a screenshot' ],
+          testId: 'r2',
+          name: 'app-screenshot',
+          capture: 'fullPage',
+          clip: { x: 0, y: 0, width: 1000, height: 646 },
+          viewport: { width: 1280, height: 646 },
+          current: 2,
+          total: 3
+        }
+
+        @data3 = {
+          titles: [ 'cy.screenshot() - take a screenshot' ],
+          testId: 'r2',
+          name: 'app-screenshot',
+          capture: 'fullPage',
+          clip: { x: 0, y: 138, width: 1000, height: 508 },
+          viewport: { width: 1280, height: 646 },
+          current: 3,
+          total: 3
+        }
+
+        @dataUri = (img) ->
+          return ->
+            fs.readFileAsync(Fixtures.path("img/#{img}"))
+            .then (buf) ->
+              "data:image/png;base64," + buf.toString("base64")
+
+      it "stiches together 1x DPI images", ->
+        screenshots
+        .capture(@data1, @dataUri("DPI-1x/1.png"))
+        .then (img1) =>
+          expect(img1).to.be.null
+
+          screenshots
+          .capture(@data2, @dataUri("DPI-1x/2.png"))
+        .then (img2) =>
+          expect(img2).to.be.null
+
+          screenshots
+          .capture(@data3, @dataUri("DPI-1x/3.png"))
+        .then (img3) =>
+          Jimp.read(Fixtures.path("img/DPI-1x/stitched.png"))
+          .then (img) =>
+            expect(screenshots.imagesMatch(img, img3.image))
+
+      it "stiches together 2x DPI images", ->
+        screenshots
+        .capture(@data1, @dataUri("DPI-2x/1.png"))
+        .then (img1) =>
+          expect(img1).to.be.null
+
+          screenshots
+          .capture(@data2, @dataUri("DPI-2x/2.png"))
+        .then (img2) =>
+          expect(img2).to.be.null
+
+          screenshots
+          .capture(@data3, @dataUri("DPI-2x/3.png"))
+        .then (img3) =>
+          Jimp.read(Fixtures.path("img/DPI-2x/stitched.png"))
+          .then (img) =>
+            expect(screenshots.imagesMatch(img, img3.image))
+
   context ".crop", ->
     beforeEach ->
       @dimensions = (overrides) ->
@@ -288,26 +378,46 @@ describe "lib/screenshots", ->
 
   context ".save", ->
     it "outputs file and returns details", ->
-      details = {
-        image: @jimpImage
-        multipart: false
-        pixelRatio: 2
-        takenAt: "taken:at:date"
-      }
+      buf = dataUriToBuffer(image)
 
-      screenshots.save({name: "foo bar\\baz%/my-$screenshot"}, details, @config.screenshotsFolder)
-      .then (result) =>
-        expectedPath = path.join(@config.screenshotsFolder, "foo bar", "baz", "my-screenshot.png")
-        actualPath = path.normalize(result.path)
+      Jimp.read(buf)
+      .then (i) =>
+        details = {
+          image: i
+          multipart: false
+          pixelRatio: 2
+          takenAt: "1234-date"
+        }
 
-        expect(actualPath).to.eq(expectedPath)
-        expect(result.size).to.eq("15 B")
-        expect(result.dimensions).to.eql({ width: 40, height: 40 })
-        expect(result.multipart).to.be.false
-        expect(result.pixelRatio).to.be.eq(2)
-        expect(result.takenAt).to.eq("taken:at:date")
+        dimensions = sizeOf(buf)
 
-        fs.statAsync(expectedPath)
+        screenshots.save(
+          { name: "foo bar\\baz%/my-$screenshot", specName: "foo.spec.js", testFailure: false },
+          details,
+          @config.screenshotsFolder
+        )
+        .then (result) =>
+          expectedPath = path.join(
+            @config.screenshotsFolder, "foo.spec.js", "foo bar", "baz", "my-screenshot.png"
+          )
+
+          actualPath = path.normalize(result.path)
+
+          expect(result).to.deep.eq({
+            multipart: false
+            pixelRatio: 2
+            path: path.normalize(result.path)
+            size: 284
+            name: "foo bar\\baz%/my-$screenshot"
+            specName: "foo.spec.js"
+            testFailure: false
+            takenAt: "1234-date"
+            dimensions: _.pick(dimensions, "width", "height")
+          })
+
+          expect(expectedPath).to.eq(actualPath)
+
+          fs.statAsync(expectedPath)
 
     it "can handle saving buffer", ->
       details = {
@@ -316,8 +426,9 @@ describe "lib/screenshots", ->
         buffer: dataUriToBuffer(image)
         takenAt: "1234-date"
       }
-      
+
       dimensions = sizeOf(details.buffer)
+
       screenshots.save(
         { name: "with-buffer", specName: "foo.spec.js", testFailure: false },
         details,
@@ -327,21 +438,21 @@ describe "lib/screenshots", ->
         expectedPath = path.join(
           @config.screenshotsFolder, "foo.spec.js", "with-buffer.png"
         )
-        
+
         actualPath = path.normalize(result.path)
-        
+
         expect(result).to.deep.eq({
-          dimensions
           name: "with-buffer"
           multipart: false
           pixelRatio: 1
           path: path.normalize(result.path)
-          size: "279 B"
+          size: 279
           specName: "foo.spec.js"
           testFailure: false
           takenAt: "1234-date"
+          dimensions: _.pick(dimensions, "width", "height")
         })
-        
+
         expect(expectedPath).to.eq(actualPath)
 
         fs.statAsync(expectedPath)
@@ -366,14 +477,14 @@ describe "lib/screenshots", ->
       expect(p).to.eq(
         "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
       )
-      
+
       p2 = screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz"]
         name: "quux*"
         takenPaths: ["path/to/screenshots/examples$/user/list.js/quux.png"]
       }, "png", "path/to/screenshots")
-      
+
       expect(p2).to.eq(
         "path/to/screenshots/examples$/user/list.js/quux (1).png"
       )
@@ -389,13 +500,13 @@ describe "lib/screenshots", ->
       expect(p).to.eq(
         "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
       )
-      
+
       p2 = screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz^"]
         takenPaths: ["path/to/screenshots/examples$/user/list.js/bar -- baz.png"]
       }, "png", "path/to/screenshots")
-      
+
       expect(p2).to.eq(
         "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
       )
