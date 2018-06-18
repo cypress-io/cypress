@@ -125,18 +125,25 @@ describe "taking screenshots", ->
     cy
       .viewport(400, 400)
       .visit("http://localhost:3322/identical")
+      .get("div:first").should("have.css", "height", "1300px")
       .screenshot({
         onAfterScreenshot: ($el, results) ->
+          expect($el).to.match("div")
+          
           { duration } = results
 
           ## there should be 4 screenshots taken
-          ## because the height is 1300px.
-          ## the first will resolve super fast
-          ## but the other 3 will take at least 1500ms
-          ## but not much more!
-          first = 500
-          total = first + (1500 * 3)
-          padding = 1000 * 3 ## account for exceeding 1500
+          ## because the height is 1700px.
+          ## the 1st will resolve super fast since it
+          ## won't match any other screenshots.
+          ## the 2th/3rd will take up to their 1500ms 
+          ## because they will be identical to the first.
+          ## the 4th will also go quickly because it will not
+          ## match the 3rd
+          first = fourth = 250
+          second = third = 1500
+          total = first + second + third + fourth
+          padding = 2000 ## account for slower machines
 
           expect(duration).to.be.within(total, total + padding)
       })
