@@ -1,10 +1,12 @@
 require("../spec_helper")
 
 _             = require("lodash")
+r             = require("request")
 rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
 path          = require("path")
+zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
@@ -25,6 +27,8 @@ fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
+
+zlib = Promise.promisifyAll(zlib)
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
@@ -70,6 +74,17 @@ describe "Routes", ->
         ## but reset it automatically
         ## between test
         jar = rp.jar()
+
+        @r = (options = {}, cb) ->
+          _.defaults options, {
+            proxy: @proxy,
+            jar,
+            simple: false,
+            followRedirect: false,
+            resolveWithFullResponse: true
+          }
+
+          r(options, cb)
 
         ## use a custom request promise
         ## to automatically backfill these
@@ -2374,6 +2389,152 @@ describe "Routes", ->
             expect(res.body).to.eq(
               "if (self !== self) { }"
             )
+
+        it "handles multi-byte characters correctly when injecting", ->
+          bytes = "0" + Array(16 * 1024 * 10).fill("λφ").join("")
+
+          response = "<html>#{bytes}</html>"
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.html")
+            .reply 200, resp, {
+              "Content-Type": "text/html"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.html"
+              gzip: true
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.include(bytes + "</html>")
+
+        ## https://github.com/cypress-io/cypress/issues/1396
+        it "handles multi-byte characters correctly on JS files", ->
+          response = "0" + Array(16 * 1024 * 2).fill("λφ").join("")
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.js")
+            .reply 200, resp, {
+              "Content-Type": "application/javascript"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.js"
+              gzip: true
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.eq(response)
+
+        ## https://github.com/cypress-io/cypress/issues/1756
+        ## https://github.com/nodejs/node/issues/5761
+        it "handles gzip responses that are slightly truncated", ->
+          response = "I am a gzipped response"
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/app.js")
+            ## remove the last 8 characters which
+            ## truncates the CRC checksum and size check
+            ## at the end of the stream
+            .reply 200, resp.slice(0, -8), {
+              "Content-Type": "application/javascript"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/app.js"
+              gzip: true
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.eq(response)
+
+        it "handles gzip responses that are slightly truncated when injecting", ->
+          response = "<html>I am a gzipped response</html>"
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.html")
+            ## remove the last 8 characters which
+            ## truncates the CRC checksum and size check
+            ## at the end of the stream
+            .reply 200, resp.slice(0, -8), {
+              "Content-Type": "text/html"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.html"
+              gzip: true
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.include("I am a gzipped response</html>")
+
+        it "handles bad gzip responses", (done) ->
+          nock(@server._remoteOrigin)
+          .get("/app.js")
+          .delayBody(100)
+          .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
+            "Content-Type": "application/javascript"
+            "Content-Encoding": "gzip"
+          })
+
+          gotResponse = false
+
+          @r({
+            url: "http://www.google.com/app.js"
+            gzip: true
+          })
+          .on "error", (err) ->
+            expect(err.code).to.eq("Z_BUF_ERROR")
+
+            done()
+          .on "response", (res) ->
+            gotResponse = true
+
+            expect(res.statusCode).to.eq(502)
+            expect(res.headers["x-cypress-proxy-error-message"]).to.eq("incorrect header check")
+
+        it "handles bad gzip responses when injecting", ->
+          nock(@server._remoteOrigin)
+          .get("/index.html")
+          .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
+            "Content-Type": "text/html"
+            "Content-Encoding": "gzip"
+          })
+
+          @rp({
+            url: "http://www.google.com/index.html"
+            gzip: true
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(500)
+
+            expect(res.body).to.include("<html>")
 
         it "does not die rewriting a huge JS file", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
