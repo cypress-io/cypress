@@ -29,8 +29,8 @@ const createProps = () => ({
     },
   },
   state: new State(),
-  windowUtil: {
-    specFile: sinon.stub().returns('some-spec.js'),
+  util: {
+    absoluteSpecPath: sinon.stub().returns('/path/to/int/some-spec.js'),
   },
 })
 
@@ -52,7 +52,7 @@ describe('<App />', () => {
     const props = createProps()
     props.config.integrationFolder = 'path/to/int'
     const component = shallow(<App {...props} />)
-    expect(component.find(Reporter)).to.have.prop('specPath', 'path/to/int/some-spec.js')
+    expect(component.find(Reporter)).to.have.prop('specPath', '/path/to/int/some-spec.js')
   })
 
   it('renders the <Reporter /> with the autoScrollingEnabled flag', () => {

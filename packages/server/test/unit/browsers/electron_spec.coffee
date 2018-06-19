@@ -23,6 +23,7 @@ describe "lib/browsers/electron", ->
     @win = _.extend(new EE(), {
       close: sinon.stub()
       loadURL: sinon.stub()
+      focusOnWebView: sinon.stub()
       webContents: {
         session: {
           cookies: {

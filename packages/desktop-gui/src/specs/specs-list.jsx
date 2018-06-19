@@ -15,6 +15,8 @@ class Specs extends Component {
 
     if (!specsStore.filter && !specsStore.specs.length) return this._empty()
 
+    const allSpecsSpec = specsStore.getAllSpecsSpec()
+
     return (
       <div id='tests-list-page'>
         <header>
@@ -34,9 +36,9 @@ class Specs extends Component {
             />
             <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
           </div>
-          <a onClick={this._selectSpec.bind(this, '__all')} className={cs('all-tests btn btn-default', { active: specsStore.allSpecsChosen })}>
-            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
-            Run all tests
+          <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: allSpecsSpec.isChosen })}>
+            <i className={`fa fa-fw ${this._allSpecsIcon(allSpecsSpec.isChosen)}`}></i>{' '}
+            {allSpecsSpec.displayName}
           </a>
         </header>
         {this._specsList()}
@@ -98,14 +100,12 @@ class Specs extends Component {
     }
   }
 
-  _selectSpec (specPath, e) {
+  _selectSpec (spec, e) {
     e.preventDefault()
 
-    specsStore.setChosenSpec(specPath)
+    const { project } = this.props
 
-    let project = this.props.project
-
-    projectsApi.runSpec(project, specPath, project.chosenBrowser.name)
+    return projectsApi.runSpec(project, spec, project.chosenBrowser)
   }
 
   _selectSpecFolder (specFolderPath, e) {
@@ -140,14 +140,12 @@ class Specs extends Component {
   }
 
   _specContent (spec) {
-    const isChosen = specsStore.isChosenSpec(spec)
-
     return (
       <li key={spec.path} className='file'>
-        <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
+        <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: spec.isChosen })}>
           <div>
             <div>
-              <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
+              <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
               {spec.displayName}
             </div>
           </div>

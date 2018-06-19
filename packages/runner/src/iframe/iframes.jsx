@@ -13,7 +13,7 @@ import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import windowUtil from '../lib/window-util'
+import util from '../lib/util'
 
 @observer
 export default class Iframes extends Component {
@@ -44,8 +44,6 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    const specPath = windowUtil.specPath()
-
     this.autIframe = new AutIframe(this.props.config)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
@@ -56,7 +54,7 @@ export default class Iframes extends Component {
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
     this.props.eventManager.on('restart', () => {
-      this._run(this.props.config, specPath)
+      this._run(this.props.config)
     })
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
@@ -69,7 +67,7 @@ export default class Iframes extends Component {
       this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
     }))
 
-    this.props.eventManager.start(this.props.config, specPath)
+    this.props.eventManager.start(this.props.config)
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
@@ -93,14 +91,16 @@ export default class Iframes extends Component {
       ),
     })
     this.iframeModel.listen()
-    this._run(this.props.config, specPath)
+    this._run(this.props.config)
   }
 
   @action _setScriptError = (err) => {
     this.props.state.scriptError = err
   }
 
-  _run = (config, specPath) => {
+  _run = (config) => {
+    const specPath = util.specPath()
+
     this.props.eventManager.notifyRunningSpec(specPath)
     logger.clearLog()
     this._setScriptError(null)

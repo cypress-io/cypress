@@ -74,7 +74,7 @@ find = (config, specPattern) ->
 
     {
       name: relativePathFromIntegrationFolder(file)
-      path: relativePathFromProjectRoot(file)
+      relative: relativePathFromProjectRoot(file)
       absolute: file
     }
 

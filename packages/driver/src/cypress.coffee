@@ -97,11 +97,13 @@ class $Cypress
     if d = config.remote?.domainName
       document.domain = d
 
-    ## Cypress package version
-    @version = config.version
-    ## a few constants describing server environment
-    @platform = config.platform
+    ## a few static props for the host OS, browser
+    ## and the current version of Cypress
     @arch = config.arch
+    @spec = config.spec
+    @version = config.version
+    @browser = config.browser
+    @platform = config.platform
 
     ## normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal

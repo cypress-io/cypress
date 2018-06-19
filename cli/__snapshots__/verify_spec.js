@@ -218,3 +218,7 @@ Platform: win32 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
+
+exports['silent verify 1'] = `
+[no output]
+`

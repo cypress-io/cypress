@@ -75,7 +75,7 @@ export default class Project {
     // need normalize windows paths with \ before split
     const normalizedPath = this.path.replace(/\\/g, '/')
     const lastDir = _.last(normalizedPath.split('/'))
-    
+
     return _.truncate(lastDir, { length: 60 })
   }
 

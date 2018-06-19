@@ -37,7 +37,7 @@ module.exports = {
       if not written
         ## when no data has been written this will
         ## result in an 'pipe:0: End of file' error
-        ## for ffmpeg so we need to account for that
+        ## for so we need to account for that
         ## and not log errors to the console
         logErrors = false
 
@@ -73,15 +73,19 @@ module.exports = {
     .inputOptions("-use_wallclock_as_timestamps 1")
     .videoCodec("libx264")
     .outputOptions("-preset ultrafast")
-    .on "start", (line) ->
-      debug("ffmpeg started")
+    .on "start", (command) ->
+      debug("capture started %o", { command })
 
       started.resolve(new Date)
-      # .on "codecData", (data) ->
-      # console.log "codec data", data
-      # .on("error", options.onError)
+    
+    .on "codecData", (data) ->
+      debug("capture codec data: %o", data)
+    
+    .on "stderr", (stderr) ->
+      debug("capture stderr log %o", { message: stderr })
+      
     .on "error", (err, stdout, stderr) ->
-      debug("ffmpeg errored:", err.message)
+      debug("capture errored: %o", { error: err.message, stdout, stderr })
 
       ## if we're supposed log errors then
       ## bubble them up
@@ -94,7 +98,7 @@ module.exports = {
       ended.reject(err)
 
     .on "end", ->
-      debug("ffmpeg ended")
+      debug("capture ended")
 
       ended.resolve()
     .save(name)
@@ -117,18 +121,35 @@ module.exports = {
         "-preset fast"
         "-crf #{videoCompression}"
       ])
+      .on "start", (command) ->
+        debug("compression started %o", { command })
+        
       .on "codecData", (data) ->
+        debug("compression codec data: %o", data)
+        
         total = utils.timemarkToSeconds(data.duration)
+      
+      .on "stderr", (stderr) ->
+        debug("compression stderr log %o", { message: stderr })
+      
       .on "progress", (progress) ->
         ## bail if we dont have total yet
         return if not total
+        
+        debug("compression progress: %o", progress)
 
         progressed = utils.timemarkToSeconds(progress.timemark)
 
         onProgress(progressed / total)
+      
       .on "error", (err, stdout, stderr) ->
+        debug("compression errored: %o", { error: err.message, stdout, stderr })
+        
         reject(err)
+      
       .on "end", ->
+        debug("compression ended")
+        
         ## we are done progressing
         onProgress(1)
 
@@ -140,7 +161,4 @@ module.exports = {
           resolve()
       .save(cname)
 
-      # setTimeout ->
-      #   cmd.kill()
-      # , 100
 }

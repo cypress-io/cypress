@@ -78,10 +78,6 @@ module.exports = {
       if not browser = getBrowser(name)
         return throwBrowserNotFound(name, options.browsers)
 
-      ## set the current browser object on options
-      ## so we can pass it down
-      options.browser = find(name, options.browsers)
-
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 

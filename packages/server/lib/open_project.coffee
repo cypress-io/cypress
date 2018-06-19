@@ -1,11 +1,12 @@
 _         = require("lodash")
+la        = require("lazy-ass")
+debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
 files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
-specsUtil = require('./util/specs')
-log       = require('debug')("cypress:server:project")
+specsUtil = require("./util/specs")
 preprocessor = require("./plugins/preprocessor")
 
 create = ->
@@ -42,14 +43,18 @@ create = ->
 
     getProject: -> openProject
 
-    launch: (browserName, spec, options = {}) ->
-      log("launching browser %s spec %s", browserName, spec)
-      currentBrowser = browserName
+    launch: (browser, spec, options = {}) ->
+      debug("resetting project state, preparing to launch browser")
+
+      la(_.isPlainObject(browser), "expected browser object:", browser)
+
+      browserName = browser.name
+
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
       @reset()
       .then ->
-        openProject.getSpecUrl(spec)
+        openProject.getSpecUrl(spec.absolute)
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
@@ -62,6 +67,20 @@ create = ->
 
           options.url = url
 
+          ## if we don't have the isHeaded property
+          ## then we're in interactive mode and we
+          ## can assume its a headed browser
+          ## TODO: we should clean this up
+          if not _.has(browser, "isHeaded")
+            browser.isHeaded = true
+            browser.isHeadless = false
+
+          ## set the current browser object on options
+          ## so we can pass it down
+          options.browser = browser
+
+          openProject.setCurrentSpecAndBrowser(spec, browser)
+
           automation = openProject.getAutomation()
 
           ## use automation middleware if its
@@ -69,20 +88,29 @@ create = ->
           if am = options.automationMiddleware
             automation.use(am)
 
+          automation.use({
+            onBeforeRequest: (message, data) ->
+              if message is "take:screenshot"
+                data.specName = spec.name
+                data
+          })
+
           onBrowserClose = options.onBrowserClose
           options.onBrowserClose = ->
-            if spec
-              preprocessor.removeFile(spec, cfg)
+            if spec and spec.absolute
+              preprocessor.removeFile(spec.absolute, cfg)
 
             if onBrowserClose
               onBrowserClose()
 
           do relaunchBrowser = ->
-            log "launching project in browser #{browserName}"
-            browsers.open(browserName, options, automation)
+            debug(
+              "launching browser: %s, spec: %s",
+              browserName,
+              spec.relative
+            )
 
-    getCurrentBrowser: (config) ->
-      _.find(config.browsers, { name: currentBrowser })
+            browsers.open(browserName, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -143,7 +171,8 @@ create = ->
         return null
 
     close:  ->
-      log "closing opened project"
+      debug("closing opened project")
+
       @clearSpecInterval()
       @closeOpenProjectAndBrowsers()
 
@@ -165,7 +194,8 @@ create = ->
 
         ## open the project and return
         ## the config for the project instance
-        log("opening project %s", path)
+        debug("opening project %s", path)
+
         openProject.open(options)
       .return(@)
   }
