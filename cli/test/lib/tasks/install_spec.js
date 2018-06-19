@@ -3,6 +3,7 @@ const os = require('os')
 const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
+const mockfs = require('mock-fs')
 const snapshot = require('snap-shot-it')
 
 const stdout = require('../../support/stdout')
@@ -106,6 +107,24 @@ describe('/lib/tasks/install', function () {
         .then(() => {
           expect(unzip.start).to.be.calledWithMatch({
             zipFilePath: version,
+            installDir,
+          })
+        })
+      })
+
+      it('can install local binary zip file from relative path', function () {
+        const version = './cypress-resources/file.zip'
+        mockfs({
+          [version]: 'asdf',
+        })
+        process.env.CYPRESS_INSTALL_BINARY = version
+
+        const installDir = state.getVersionDir()
+        return install.start()
+        .then(() => {
+          expect(download.start).not.to.be.called
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: path.resolve(version),
             installDir,
           })
         })

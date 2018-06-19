@@ -1,5 +1,6 @@
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
+const path = require('path')
 
 const util = require('../util')
 const state = require('../tasks/state')
@@ -9,7 +10,7 @@ const getVersions = () => {
   return Promise.try(() => {
 
     if (util.getEnv('CYPRESS_RUN_BINARY')) {
-      let envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')
+      let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
       return state.parseRealPlatformBinaryFolderAsync(envBinaryPath)
       .then((envBinaryDir) => {
         if (!envBinaryDir) {

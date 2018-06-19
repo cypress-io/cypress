@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const cp = require('child_process')
 const chalk = require('chalk')
+const path = require('path')
 const Listr = require('listr')
 const debug = require('debug')('cypress:cli')
 const verbose = require('@cypress/listr-verbose-renderer')
@@ -202,7 +203,7 @@ const start = (options = {}) => {
   const checkEnvVar = () => {
     debug('checking environment variables')
     if (util.getEnv('CYPRESS_RUN_BINARY')) {
-      const envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')
+      const envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
       debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
       logger.log(stripIndent`
         ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:
