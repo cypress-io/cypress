@@ -2,6 +2,9 @@ _ = Cypress._
 $utils = Cypress.utils
 Promise = Cypress.Promise
 
+stackWithoutMessage = (err) ->
+  err.stack.replace("#{err.toString()}\n", "")
+
 describe "driver/src/cypress/utils", ->
   context ".cloneErr", ->
     it "copies properties, message, stack", ->
@@ -20,14 +23,13 @@ describe "driver/src/cypress/utils", ->
         expect(err[key], "key: #{key}").to.eq(obj[key])
 
   context ".appendErrMsg", ->
-    ## FIREFOX FIXME
     it "appends error message", ->
       err = new Error("foo")
 
       expect(err.message).to.eq("foo")
       expect(err.name).to.eq("Error")
 
-      stack = err.stack.split("\n").slice(1).join("\n")
+      stack = stackWithoutMessage(err)
 
       err2 = $utils.appendErrMsg(err, "bar")
       expect(err2.message).to.eq("foo\n\nbar")
@@ -40,7 +42,7 @@ describe "driver/src/cypress/utils", ->
       expect(err.message).to.eq("r")
       expect(err.name).to.eq("Error")
 
-      stack = err.stack.split("\n").slice(1).join("\n")
+      stack = stackWithoutMessage(err)
 
       err2 = $utils.appendErrMsg(err, "bar")
       expect(err2.message).to.eq("r\n\nbar")
@@ -53,7 +55,7 @@ describe "driver/src/cypress/utils", ->
       expect(err.message).to.eq("")
       expect(err.name).to.eq("Error")
 
-      stack = err.stack.split("\n").slice(1).join("\n")
+      stack = stackWithoutMessage(err)
 
       err2 = $utils.appendErrMsg(err, "bar")
       expect(err2.message).to.eq("\n\nbar")

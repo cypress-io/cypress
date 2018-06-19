@@ -44,6 +44,11 @@ module.exports = {
     msg = err.message
     str = err.toString()
 
+    ## Firefox stack does not include toString'd error, so normalize
+    ## things by prepending it
+    if stack.indexOf(str) is -1
+      stack = "#{str}\n#{stack}"
+
     ## append message
     msg += "\n\n" + message
 
