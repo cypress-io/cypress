@@ -17,6 +17,11 @@ redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
 
+zlibOptions = {
+  flush: zlib.Z_SYNC_FLUSH
+  finishFlush: zlib.Z_SYNC_FLUSH
+}
+
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
   ## is not sent correctly
@@ -130,7 +135,7 @@ module.exports = {
     getErrorHtml = (err, filePath) =>
       status = err.status ? 500
 
-      debug("request failed %o", { url: remoteUrl, status: status, err: err.message })
+      debug("request failed %o", { url: remoteUrl, status: status, error: err.stack })
 
       urlStr = filePath ? remoteUrl
 
@@ -169,7 +174,7 @@ module.exports = {
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
           if isGzipped
-            zlib.gunzipAsync(body)
+            zlib.gunzipAsync(body, zlibOptions)
             .then(rewrite)
             .then(zlib.gzipAsync)
             .then(thr.end)
@@ -181,18 +186,42 @@ module.exports = {
       else
         ## only rewrite if we should
         if config.modifyObstructiveCode and wantsSecurityRemoved
-          gunzip = zlib.createGunzip()
+          gunzip = zlib.createGunzip(zlibOptions)
           gunzip.setEncoding("utf8")
 
-          str
-          ## only unzip when it is already gzipped
-          .pipe(conditional(isGzipped, gunzip))
-          .pipe(rewriter.security())
-          .pipe(conditional(isGzipped, zlib.createGzip()))
-          .pipe(thr)
-        else
-          str.pipe(thr)
+          onError = (err) ->
+            debug("failed to proxy response %o", {
+              url: remoteUrl
+              headers
+              statusCode
+              isGzipped
+              wantsInjection
+              wantsSecurityRemoved
+              err
+            })
 
+            if not res.headersSent
+              res
+              .set({
+                "X-Cypress-Proxy-Error-Message": err.message
+                "X-Cypress-Proxy-Error-Stack": JSON.stringify(err.stack)
+              })
+              .status(502)
+
+            return thr.end()
+
+          ## only unzip when it is already gzipped
+          return str
+          .pipe(conditional(isGzipped, gunzip))
+          .on("error", onError)
+          .pipe(rewriter.security())
+          .on("error", onError)
+          .pipe(conditional(isGzipped, zlib.createGzip()))
+          .on("error", onError)
+          .pipe(thr)
+          .on("error", onError)
+
+        return str.pipe(thr)
 
     endWithResponseErr = (err) ->
       ## use res.statusCode if we have one

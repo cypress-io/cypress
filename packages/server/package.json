@@ -143,7 +143,7 @@
     "parse-domain": "2.0.0",
     "pluralize": "^3.0.0",
     "progress": "^1.1.8",
-    "pumpify": "^1.4.0",
+    "pumpify": "1.5.1",
     "ramda": "^0.24.0",
     "randomstring": "^1.1.5",
     "replacestream": "^4.0.3",
