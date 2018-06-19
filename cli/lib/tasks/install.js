@@ -265,7 +265,8 @@ const start = (options = {}) => {
     })
     .then((pathToLocalFile) => {
       if (pathToLocalFile) {
-        debug('found local file at', needVersion)
+        const absolutePath = path.resolve(needVersion)
+        debug('found local file at', absolutePath)
         debug('skipping download')
 
         const rendererOptions = getRendererOptions()
@@ -274,7 +275,7 @@ const start = (options = {}) => {
             throttle: 100,
             onProgress: null,
           },
-          zipFilePath: needVersion,
+          zipFilePath: absolutePath,
           installDir,
           rendererOptions,
         })], rendererOptions).run()

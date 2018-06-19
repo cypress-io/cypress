@@ -49,7 +49,7 @@ module.exports = {
     let executable = state.getPathToExecutable(state.getBinaryDir())
 
     if (util.getEnv('CYPRESS_RUN_BINARY')) {
-      executable = util.getEnv('CYPRESS_RUN_BINARY')
+      executable = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
     }
 
     debug('needs XVFB?', needsXvfb)

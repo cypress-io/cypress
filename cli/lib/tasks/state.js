@@ -56,7 +56,7 @@ const getCacheDir = () => {
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envVarCacheDir = util.getEnv('CYPRESS_CACHE_FOLDER')
     debug('using environment variable CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
-    cache_directory = envVarCacheDir
+    cache_directory = path.resolve(envVarCacheDir)
   }
   return cache_directory
 }

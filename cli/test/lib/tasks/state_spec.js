@@ -156,6 +156,12 @@ describe('lib/tasks/state', function () {
       const ret = state.getCacheDir()
       expect(ret).to.equal('/path/to/dir')
     })
+
+    it('CYPRESS_CACHE_FOLDER resolves from relative path', () => {
+      process.env.CYPRESS_CACHE_FOLDER = './local-cache/folder'
+      const ret = state.getCacheDir()
+      expect(ret).to.eql(path.resolve('local-cache/folder'))
+    })
   })
   context('.parseRealPlatformBinaryFolderAsync', function () {
     beforeEach(function () {
