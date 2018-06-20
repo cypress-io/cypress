@@ -2,7 +2,6 @@ const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
-const cachedir = require('cachedir')
 
 const fs = require('../fs')
 const util = require('../util')
@@ -52,7 +51,7 @@ const getVersionDir = (version = util.pkgVersion()) => {
 }
 
 const getCacheDir = () => {
-  let cache_directory = cachedir('Cypress')
+  let cache_directory = util.getCacheDir()
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envVarCacheDir = util.getEnv('CYPRESS_CACHE_FOLDER')
     debug('using environment variable CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
@@ -120,6 +119,7 @@ const getPathToExecutable = (binaryDir) => {
 
 const getBinaryPkgVersionAsync = (binaryDir) => {
   const pathToPackageJson = getBinaryPkgPath(binaryDir)
+  debug('Reading binary package.json from:', pathToPackageJson)
   return fs.pathExistsAsync(pathToPackageJson)
   .then((exists) => {
     if (!exists) {
