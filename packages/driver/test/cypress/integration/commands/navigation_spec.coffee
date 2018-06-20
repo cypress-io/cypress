@@ -322,6 +322,7 @@ describe "src/cy/commands/navigation", ->
 
         cy.go(0)
 
+      ## FIREFOX FIXME: hangs
       it "throws when go times out", (done) ->
         cy
           .visit("/timeout?ms=100")
