@@ -17,12 +17,13 @@ const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 
 const alreadyInstalledMsg = () => {
-  logger.log(stripIndent`    
-    Skipping installation:
-
-      Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
-  `)
-  logger.log()
+  if (!util.isPostInstall()) {
+    logger.log(stripIndent`    
+      Skipping installation:
+  
+        Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
+    `)
+  }
 }
 
 const displayCompletionMsg = () => {
@@ -201,10 +202,12 @@ const start = (options = {}) => {
       return true
     }
 
-    // debug('installed version is', binaryVersion, 'version needed is', needVersion)
+    debug('installed version is', binaryVersion, 'version needed is', needVersion)
+
+    logger.log()
     logger.log(stripIndent`
-    Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
-    `)
+      Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
+      `)
     logger.log()
 
     if (options.force) {

@@ -4,6 +4,7 @@ exports['errors individual has the following errors 1'] = [
   "missingApp",
   "missingDependency",
   "versionMismatch",
+  "binaryNotExecutable",
   "unexpected",
   "failedDownload",
   "failedUnzip",

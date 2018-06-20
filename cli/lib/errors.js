@@ -32,6 +32,19 @@ const missingApp = (binaryDir) => ({
   `,
 })
 
+const binaryNotExecutable = (executable) => ({
+  description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
+  solution: stripIndent`\n
+    Reasons this may happen:
+      
+    - node was installed as 'root' or with 'sudo'
+    - the cypress npm package as 'root' or with 'sudo'
+    
+    Please check that you have the appropriate user permissions.
+  `,
+})
+
+
 const nonZeroExitCodeXvfb = {
   description: 'XVFB exited with a non zero exit code.',
   solution: stripIndent`
@@ -205,6 +218,7 @@ module.exports = {
     missingApp,
     missingDependency,
     versionMismatch,
+    binaryNotExecutable,
     unexpected,
     failedDownload,
     failedUnzip,
