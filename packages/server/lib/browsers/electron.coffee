@@ -126,7 +126,10 @@ module.exports = {
 
         plugins.execute("before:browser:launch", options.browser, options)
         .then (newOptions) ->
-          return newOptions ? options
+          if newOptions
+            _.extend(options, newOptions)
+
+          return options
     .then (options) =>
       @_render(url, projectRoot, options)
       .then (win) =>
