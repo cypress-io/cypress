@@ -33,15 +33,15 @@ e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
 stackTraceLinesRe = /(\s+)at\s(.+)/g
-browserNameVersionRe = /(Browser\:\s+)(Electron|Chrome|Canary|Chromium)(\s\d+)(\s\(\w+\))?/
+browserNameVersionRe = /(Browser\:\s+)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
 
-replaceBrowserName = (str, p1, p2, p3, p4) ->
+replaceBrowserName = (str, p1, p2, p3, p4, p5) ->
   ## get the padding for the existing browser string
-  lengthOfExistingBrowserString = _.sum([p2.length, p3.length, _.get(p4, "length", 0)])
+  lengthOfExistingBrowserString = _.sum([p2.length, p3.length, _.get(p4, "length", 0), p5.length])
 
   ## this ensures we add whitespace so the border is not shifted
   p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
