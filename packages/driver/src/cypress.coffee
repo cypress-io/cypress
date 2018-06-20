@@ -102,7 +102,6 @@ class $Cypress
     @arch = config.arch
     @spec = config.spec
     @version = config.version
-    @browser = config.browser
     @platform = config.platform
 
     ## normalize this into boolean
