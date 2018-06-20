@@ -394,15 +394,29 @@ context('lib/tasks/verify', () => {
         packageVersion,
       })
       util.isCi.returns(true)
-
-      return verify.start({ force: true })
     })
 
     it('uses verbose renderer', () => {
-      snapshot(
-        'verifying in ci',
-        normalize(stdout.toString())
-      )
+      return verify.start()
+      .then(() => {
+        snapshot(
+          'verifying in ci',
+          normalize(stdout.toString())
+        )
+      })
+    })
+
+    it('logs error when binary not found', () => {
+      mockfs({})
+      return verify.start()
+      .then(() => { throw new Error('Should have thrown') })
+      .catch((err) => {
+        logger.error(err)
+        snapshot(
+          'error binary not found in ci',
+          normalize(stdout.toString())
+        )
+      })
     })
   })
 
