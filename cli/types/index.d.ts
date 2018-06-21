@@ -1019,6 +1019,14 @@ declare namespace Cypress {
      *    cy.viewport('iphone-6')
      */
     viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Partial<Loggable>): Chainable<null>
+    /**
+     * Set viewport to the given resolution.
+     *
+     * @see https://on.cypress.io/viewport
+     * @example
+     *    // Set viewport to 550px x 750px
+     *    cy.viewport(550, 750)
+     */
     viewport(width: number, height: number, options?: Partial<Loggable>): Chainable<null>
 
     /**
