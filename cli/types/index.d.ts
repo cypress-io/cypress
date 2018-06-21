@@ -393,7 +393,9 @@ declare namespace Cypress {
     closest<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Get the DOM element containing the text. DOM elements can contain more than the desired text and still match. Additionally, Cypress prefers some DOM elements over the deepest element found.
+     * Get the DOM element containing the text.
+     * DOM elements can contain more than the desired text and still match.
+     * Additionally, Cypress prefers some DOM elements over the deepest element found.
      *
      * @see https://on.cypress.io/contains
      * @example
@@ -408,7 +410,23 @@ declare namespace Cypress {
      */
     contains(content: string | number | RegExp): Chainable<Subject>
     contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
+    /**
+     * Get the DOM element with name "selector" containing the text or regular expression.
+     *
+     * @see https://on.cypress.io/contains
+     * @example
+     *    // yields <ul>...</ul>
+     *    cy.contains('ul', 'apples')
+     */
     contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get the DOM element using CSS "selector" containing the text or regular expression.
+     *
+     * @see https://on.cypress.io/contains
+     * @example
+     *    // yields <... class="foo">... apples ...</...>
+     *    cy.contains('.foo', 'apples')
+     */
     contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
