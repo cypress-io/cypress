@@ -1131,7 +1131,18 @@ declare namespace Cypress {
     within(options: Partial<Loggable>, fn: (currentSubject: Subject) => void): Chainable<Subject> // inconsistent argument order
 
     /**
-     * Yield the object passed into `.wrap()`.
+     * Yield the element passed into `.wrap()`.
+     *
+     * @see https://on.cypress.io/wrap
+     * @example
+     *    cy.get('form').within(($form) => {
+     *       // more commands
+     *       cy.wrap($form).should('have.class', 'form-container')
+     *    })
+     */
+    wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Yields whatever is passed into `.wrap()` to the next command in the Cypress chain.
      *
      * @see https://on.cypress.io/wrap
      * @example
@@ -1140,7 +1151,6 @@ declare namespace Cypress {
      *      .should('have.property', 'amount')
      *      .and('eq', 10)
      */
-    wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
