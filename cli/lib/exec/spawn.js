@@ -108,6 +108,20 @@ module.exports = {
           process.stderr.write(data)
         })
 
+        // https://github.com/cypress-io/cypress/issues/1841
+        // In some versions of node, it will throw on windows
+        // when you close the parent process after piping
+        // into the child process. unpiping does not seem
+        // to have any effect. so we're just catching the
+        // error here and not doing anything.
+        process.stdin.on('error', (err) => {
+          if (err.code === 'EPIPE') {
+            return
+          }
+
+          throw err
+        })
+
         if (options.detached) {
           child.unref()
         }
