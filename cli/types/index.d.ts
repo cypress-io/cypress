@@ -648,7 +648,21 @@ declare namespace Cypress {
      * @see https://on.cypress.io/next
      */
     next<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get the immediately following sibling of each DOM element within a set of DOM elements.
+     *
+     * @see https://on.cypress.io/next
+     * @example
+     *    cy.get('nav a:first').next()
+     */
     next<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get the immediately following sibling of each DOM element within a set of DOM elements that match selector
+     *
+     * @see https://on.cypress.io/next
+     * @example
+     *    cy.get('nav a:first').next('.menu-item)
+     */
     next<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -1062,9 +1076,21 @@ declare namespace Cypress {
      * Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
      *
      * @see https://on.cypress.io/wait
+     * @example
+     *    cy.wait(1000) // wait for 1 second
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
+    /**
+     * Wait for a specific XHR to respond.
+     *
+     * @see https://on.cypress.io/wait
+     */
     wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
+    /**
+     * Wait for list of XHR requests to complete.
+     *
+     * @see https://on.cypress.io/wait
+     */
     wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
 
     /**
