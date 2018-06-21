@@ -962,9 +962,26 @@ declare namespace Cypress {
      * Get sibling DOM elements.
      *
      * @see https://on.cypress.io/siblings
+     * @example
+     *    cy.get('td').siblings('a') // Yield all link siblings of "td"
      */
     siblings<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all sibling DOM elements.
+     *
+     * @see https://on.cypress.io/siblings
+     * @example
+     *    cy.get('td').siblings() // Yield all siblings of "td"
+     */
     siblings<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all sibling DOM elements that match given selector.
+     *
+     * @see https://on.cypress.io/siblings
+     * @example
+     *    // Yield all elements with class "foo" that are siblings of "td"
+     *    cy.get('td').siblings('.foo')
+     */
     siblings<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
