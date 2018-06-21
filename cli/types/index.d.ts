@@ -331,6 +331,14 @@ declare namespace Cypress {
      *    })
      */
     clearLocalStorage(key?: string): Chainable<Storage>
+    /**
+     * Clear keys in local storage that match given regular expression.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @example
+     *    // Clear all local storage matching /app-/
+     *    cy.clearLocalStorage(/app-/)
+     */
     clearLocalStorage(re: RegExp): Chainable<Storage>
 
     /**

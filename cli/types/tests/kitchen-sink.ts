@@ -47,5 +47,3 @@ cy.on('window:alert', cy.stub())
 // window:confirm stubbing
 cy.on('window:confirm', () => {})
 cy.on('window:confirm', cy.stub())
-
-cy.prev('.foo')
