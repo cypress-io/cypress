@@ -4,6 +4,7 @@ const cp = require('child_process')
 const os = require('os')
 const tty = require('tty')
 const path = require('path')
+const EE = require('events')
 
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -35,6 +36,7 @@ describe('lib/exec/spawn', function () {
         on: sinon.stub().returns(undefined),
       },
     }
+    sinon.stub(process, 'stdin').value(new EE)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()
     sinon.stub(xvfb, 'stop').resolves()
@@ -319,13 +321,17 @@ describe('lib/exec/spawn', function () {
 
       return spawn.start()
       .then(() => {
+        let called = false
+
         const fn = () => {
+          called = true
           const err = new Error()
           err.code = 'EPIPE'
           return process.stdin.emit('error', err)
         }
 
-        expect(fn).not.to.throw
+        expect(fn).not.to.throw()
+        expect(called).to.be.true
       })
     })
 
