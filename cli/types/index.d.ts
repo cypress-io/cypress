@@ -726,10 +726,26 @@ declare namespace Cypress {
     /**
      * Get the immediately preceding sibling of each element in a set of the elements.
      *
+     * @example
+     *    cy.get('nav').prev('a') // Yield previous 'a'
      * @see https://on.cypress.io/prev
      */
     prev<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get the immediately preceding sibling of each element in a set of the elements.
+     *
+     * @example
+     *    cy.get('li').prev() // Yield previous 'li'
+     * @see https://on.cypress.io/prev
+     */
     prev<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get the immediately preceding sibling of each element in a set of the elements that match selector.
+     *
+     * @example
+     *    cy.get('nav').prev('.menu-item') // Yield previous '.menu-item'
+     * @see https://on.cypress.io/prev
+     */
     prev<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
