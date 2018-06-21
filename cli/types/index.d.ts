@@ -383,13 +383,45 @@ declare namespace Cypress {
      * * `clearInterval`
      * * `Date` Objects
      *
-     * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
+     * The clock starts at the unix epoch (timestamp of 0).
+     * This means that when you instantiate new Date in your application,
+     * it will have a time of January 1st, 1970.
      *
      * @see https://on.cypress.io/clock
      */
     clock(): Chainable<Clock>
+    /**
+     * Mocks global clock and sets current timestamp to the given value.
+     * Overrides all functions that deal with time.
+     *
+     * @see https://on.cypress.io/clock
+     * @example
+     *    // your app code
+     *    $('#date').text(new Date().toJSON())
+     *    // from spec file
+     *    const now = new Date(2017, 3, 14).getTime() // March 14, 2017 timestamp
+     *    cy.clock(now)
+     *    cy.visit('/index.html')
+     *    cy.get('#date').contains('2017-03-14')
+     */
     clock(now: number, options?: Loggable): Chainable<Clock>
+    /**
+     * Mocks global clock but only overrides specific functions.
+     *
+     * @see https://on.cypress.io/clock
+     * @example
+     *    // keep current date but override "setTimeout" and "clearTimeout"
+     *    cy.clock(null, ['setTimeout', 'clearTimeout'])
+     */
     clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    /**
+     * Mocks global clock and all functions.
+     *
+     * @see https://on.cypress.io/clock
+     * @example
+     *    // mock clock but do not log this command
+     *    cy.clock({ log: false })
+     */
     clock(options: Loggable): Chainable<Clock>
 
     /**
