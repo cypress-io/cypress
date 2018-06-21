@@ -313,5 +313,35 @@ describe('lib/exec/spawn', function () {
         expect(process.stderr.write).not.to.be.calledWith(buf1)
       })
     })
+
+    it('catches process.stdin errors and returns when code=EPIPE', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start()
+      .then(() => {
+        const fn = () => {
+          const err = new Error()
+          err.code = 'EPIPE'
+          return process.stdin.emit('error', err)
+        }
+
+        expect(fn).not.to.throw
+      })
+    })
+
+    it('throws process.stdin errors code!=EPIPE', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start()
+      .then(() => {
+        const fn = () => {
+          const err = new Error('wattttt')
+          err.code = 'FAILWHALE'
+          return process.stdin.emit('error', err)
+        }
+
+        expect(fn).to.throw(/wattttt/)
+      })
+    })
   })
 })
