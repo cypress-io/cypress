@@ -868,6 +868,11 @@ declare namespace Cypress {
      * Wrap a method in a spy in order to record calls to and arguments of the function.
      * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
      *
+     * @example
+     *    // assume App.start calls util.addListeners
+     *    cy.spy(util, 'addListeners')
+     *    App.start()
+     *    expect(util.addListeners).to.be.called
      * @see https://on.cypress.io/spy
      */
     spy(): Agent<sinon.SinonSpy>
@@ -3085,8 +3090,12 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
+  // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
+  // a user callback function. Others probably only need a callback function.
+
   /**
-   * These events come from the application currently under test (your application). These are the most useful events for you to listen to.
+   * These events come from the application currently under test (your application).
+   * These are the most useful events for you to listen to.
    * @see https://on.cypress.io/catalog-of-events#App-Events
    */
   interface Actions {
@@ -3104,6 +3113,15 @@ declare namespace Cypress {
      *   // failing the test
      *   return false
      * })
+     * // stub "window.alert" in a single test
+     * it('shows alert', () => {
+     *    const stub = cy.stub()
+     *    cy.on('window:alert', stub)
+     *    // trigger application code that calls alert(...)
+     *    .then(() => {
+     *      expect(stub).to.have.been.calledOnce
+     *    })
+     * })
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
@@ -3111,13 +3129,27 @@ declare namespace Cypress {
      * Fires when your app calls the global `window.confirm()` method.
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
+     * @example
+     *    cy.on('window:confirm', (str) => {
+     *      console.log(str)
+     *      return false // simulate "Cancel"
+     *    })
      */
-    (action: 'window:confirm', fn: (text: string) => false | void): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
     /**
-     * Fires when your app calls the global `window.alert()` method. Cypress will auto accept alerts. You cannot change this behavior.
+     * Fires when your app calls the global `window.alert()` method.
+     * Cypress will auto accept alerts. You cannot change this behavior.
+     * @example
+     *    const stub = cy.stub()
+     *    cy.on('window:alert', stub)
+     *    // assume the button calls window.alert()
+     *    cy.get('.my-button').click()
+     *    .then(() => {
+     *      expect(stub).to.have.been.calledOnce
+     *    })
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: (text: string) => void): void
+    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
