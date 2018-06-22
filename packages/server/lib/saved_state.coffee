@@ -1,24 +1,42 @@
+_ = require("lodash")
 debug = require("debug")("cypress:server:saved_state")
 FileUtil = require("./util/file")
 appData = require("./util/app_data")
 savedStateUtil = require("./util/saved_state")
 
-# store file utils by the project path
-# to prevent race conditions and for simple testing
 stateFiles = {}
 
-# TESTING
+whitelist = """
+  appWidth
+  appHeight
+  appX
+  appY
+  isAppDevToolsOpen
+  browserWidth
+  browserHeight
+  browserX
+  browserY
+  isBrowserDevToolsOpen
+  reporterWidth
+  showedOnBoardingModal
+""".trim().split(/\s+/)
 
-# In order to stub state access, create a state object *first* using project's
-# path, then make the project instance. Control the stabbed instance in the test
-#
-# example
-#   savedState = require('./saved_state')
-#   state = savedState 'foo/bar'
-#   project = Project 'foo/bar'
-#   stub(state, 'get').returns(Promise.resolve({width: 200}))
-#   project.open().then(project.state).then(state)
-#   state should have width = 200
+normalizeAndWhitelistSet = (set, key, value) ->
+  valueObject = if _.isString(key)
+    tmp = {}
+    tmp[key] = value
+    tmp
+  else
+    key
+
+  invalidKeys = _.filter _.keys(valueObject), (key) ->
+    not _.includes(whitelist, key)
+
+  if invalidKeys.length
+    console.error("WARNING: attempted to save state for non-whitelisted key(s): #{invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.coffee")
+
+  set(_.pick(valueObject, whitelist))
+
 findSavedSate = (projectRoot, isTextTerminal) ->
   if isTextTerminal
     debug("noop saved state")
@@ -34,6 +52,9 @@ findSavedSate = (projectRoot, isTextTerminal) ->
     stateFile = new FileUtil({
       path: fullStatePath
     })
+
+    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndWhitelistSet)
+
     stateFiles[fullStatePath] = stateFile
     stateFile
 
