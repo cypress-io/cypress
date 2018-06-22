@@ -38,6 +38,11 @@ describe "lib/saved_state", ->
     .then (state) ->
       expect(state).to.be.instanceof(FileUtil)
 
+  it "resolves with a noop instance if isTextTerminal", ->
+    savedState("/foo/bar", true)
+    .then (state) ->
+      expect(state).to.equal(FileUtil.noopFile)
+
   it "caches state file instance per path", ->
     Promise.all([
       savedState("/foo/bar"),

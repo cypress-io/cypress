@@ -107,9 +107,9 @@ module.exports = {
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
-    { projectRoot } = options
+    { projectRoot, isTextTerminal } = options
 
-    savedState(projectRoot)
+    savedState(projectRoot, isTextTerminal)
     .then (state) ->
       state.get()
     .then (state) =>

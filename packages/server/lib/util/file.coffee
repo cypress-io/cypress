@@ -13,6 +13,13 @@ DEBOUNCE_LIMIT = 1000
 LOCK_TIMEOUT = 2000
 
 module.exports = class Conf
+  @noopFile: {
+    get: -> Promise.resolve({})
+    set: -> Promise.resolve()
+    transaction: ->
+    remove: -> Promise.resolve()
+  }
+
   constructor: (options = {}) ->
     if not options.path
       throw new Error("Must specify path to file when creating new FileUtil()")

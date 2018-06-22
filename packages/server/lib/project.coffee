@@ -336,7 +336,7 @@ class Project extends EE
     throw new Error("Missing project config") if not @cfg
     throw new Error("Missing project root") if not @projectRoot
     newState = _.merge({}, @cfg.state, stateChanges)
-    savedState(@projectRoot)
+    savedState(@projectRoot, @cfg.isTextTerminal)
     .then (state) ->
       state.set(newState)
     .then =>
@@ -344,7 +344,7 @@ class Project extends EE
       newState
 
   _setSavedState: (cfg) ->
-    savedState(@projectRoot)
+    savedState(@projectRoot, cfg.isTextTerminal)
     .then (state) -> state.get()
     .then (state) ->
       cfg.state = state
