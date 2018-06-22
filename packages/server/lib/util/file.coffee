@@ -29,6 +29,7 @@ module.exports = class Conf
     exit.ensure => lockFile.unlockSync(@_lockFilePath)
 
   transaction: (fn) ->
+    debug("transaction for %s", @path)
     @_addToQueue =>
       fn({
         get: @_get.bind(@, true)
@@ -36,17 +37,21 @@ module.exports = class Conf
       })
 
   get: (args...) ->
+    debug("get values from %s", @path)
     @_get(false, args...)
 
   set: (args...) ->
+    debug("set values in %s", @path)
     @_set(false, args...)
 
   remove: ->
+    debug("remove %s", @path)
     @_cache = {}
     @_lock()
     .then =>
       fs.removeAsync(@path)
     .finally =>
+      debug("remove succeeded or failed for %s", @path)
       @_unlock()
 
   _get: (inTransaction, key, defaultValue) ->
@@ -80,7 +85,7 @@ module.exports = class Conf
   _read: ->
     @_lock()
     .then =>
-      debug('reading JSON file %s', @path)
+      debug('read %s', @path)
       fs.readJsonAsync(@path, "utf8")
     .catch (err) =>
       ## default to {} in certain cases, otherwise bubble up error
@@ -93,6 +98,7 @@ module.exports = class Conf
       else
         throw err
     .finally =>
+      debug("read succeeded or failed for %s", @path)
       @_unlock()
 
   _set: (inTransaction, key, value) ->
@@ -128,15 +134,22 @@ module.exports = class Conf
   _write: ->
     @_lock()
     .then =>
-      debug('writing JSON file %s', @path)
+      debug('write %s', @path)
       fs.outputJsonAsync(@path, @_cache, {spaces: 2})
     .finally =>
+      debug("write succeeded or failed for %s", @path)
       @_unlock()
 
   _lock: ->
+    debug("attempt to get lock on %s", @path)
     fs.ensureDirAsync(@_lockFileDir).then =>
       ## polls every 100ms up to 2000ms to obtain lock, otherwise rejects
       lockFile.lockAsync(@_lockFilePath, {wait: 2000})
+    .finally =>
+      debug("gettin lock succeeded or failed for %s", @path)
 
   _unlock: ->
+    debug("attempt to unlock %s", @path)
     lockFile.unlockAsync(@_lockFilePath)
+    .finally =>
+      debug("unlock succeeded or failed for %s", @path)
