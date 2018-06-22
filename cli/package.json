@@ -10,7 +10,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "check-dependencies": "dependency-check . --no-dev"
+    "check-dependencies": "dependency-check . --no-dev",
     "test": "npm run test-unit",
     "test-unit": "npm run dtslint && npm run unit",
     "test-watch": "npm run unit -- --watch",
