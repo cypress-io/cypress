@@ -10,10 +10,11 @@
     "node": ">=4.0.0"
   },
   "scripts": {
+    "check-dependencies": "dependency-check . --no-dev"
     "test": "npm run test-unit",
     "test-unit": "npm run dtslint && npm run unit",
     "test-watch": "npm run unit -- --watch",
-    "test-dependencies": "bin-up deps-ok && dependency-check . --no-dev",
+    "test-dependencies": "bin-up deps-ok",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
     "test-cov": "nyc npm run unit",
     "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
@@ -22,7 +23,7 @@
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
     "prerelease": "npm run build",
-    "release": "cd build && releaser --no-node --no-changelog",
+    "release": "npm run check-dependencies && cd build && releaser --no-node --no-changelog",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
   "nyc": {
