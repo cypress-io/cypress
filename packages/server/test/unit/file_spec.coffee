@@ -155,6 +155,12 @@ describe "lib/util/file", ->
       @fileUtil.get().catch ->
         expect(lockFile.unlockAsync).to.be.called
 
+    it "times out and carries on if unlocking times out", ->
+      sinon.stub(lockFile, "lockAsync").resolves()
+      sinon.stub(lockFile, "unlockAsync").resolves(new Promise(->))
+      sinon.stub(fs, "readJsonAsync").resolves({})
+      @fileUtil.get()
+
   context "#set", ->
     beforeEach ->
       @fileUtil = new FileUtil({path: @path})

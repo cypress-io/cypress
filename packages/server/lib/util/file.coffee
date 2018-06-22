@@ -10,6 +10,7 @@ fs = require("./fs")
 exit = require("./exit")
 
 DEBOUNCE_LIMIT = 1000
+LOCK_TIMEOUT = 2000
 
 module.exports = class Conf
   constructor: (options = {}) ->
@@ -144,12 +145,14 @@ module.exports = class Conf
     debug("attempt to get lock on %s", @path)
     fs.ensureDirAsync(@_lockFileDir).then =>
       ## polls every 100ms up to 2000ms to obtain lock, otherwise rejects
-      lockFile.lockAsync(@_lockFilePath, {wait: 2000})
+      lockFile.lockAsync(@_lockFilePath, {wait: LOCK_TIMEOUT})
     .finally =>
       debug("gettin lock succeeded or failed for %s", @path)
 
   _unlock: ->
     debug("attempt to unlock %s", @path)
     lockFile.unlockAsync(@_lockFilePath)
+    .timeout(LOCK_TIMEOUT)
+    .catch(Promise.TimeoutError, ->) ## ignore timeouts
     .finally =>
       debug("unlock succeeded or failed for %s", @path)
