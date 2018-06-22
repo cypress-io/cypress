@@ -632,31 +632,6 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("INVALID_REPORTER_NAME", "foobarbaz")
 
-    describe "state", ->
-      statePath = null
-      beforeEach ->
-        formStatePath(@todosPath)
-        .then (statePathStart) ->
-          statePath = appData.projectsPath(statePathStart)
-          fs.pathExists(statePath)
-          .then (found) ->
-            if found
-              fs.unlink(statePath)
-
-      afterEach ->
-        fs.unlink(statePath)
-
-      it "saves project state", ->
-        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
-        .then =>
-          @expectExitWith(0)
-        .then ->
-          openProject.getProject().saveState()
-        .then () ->
-          fs.pathExists(statePath)
-        .then (found) ->
-          expect(found, "Finds saved stage file #{statePath}").to.be.true
-
     describe "morgan", ->
       it "sets morgan to false", ->
         cypress.start(["--run-project=#{@todosPath}"])
