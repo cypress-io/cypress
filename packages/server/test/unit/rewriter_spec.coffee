@@ -24,7 +24,6 @@ describe "src/server/lib/rewriter", ->
           <body></body>
         </html>
       '
-
       result = rewriter.html(htmlWithHead, "mydomain.com", "partial", false)
       expectInjectedContent result
       expect(result).to.include('<meta src="test"/>')
