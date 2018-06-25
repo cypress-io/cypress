@@ -8,6 +8,7 @@ $utils = require("../cypress/utils")
 delay = 50
 
 getFixedOrStickyEl = $dom.getFirstFixedOrStickyPositionParent
+getStickyEl = $dom.getFirstStickyPositionParent
 
 dispatchPrimedChangeEvents = (state) ->
   ## if we have a changeEvent, dispatch it
@@ -248,7 +249,7 @@ verify = (cy, $el, options, callbacks) ->
         ## store the coords that were absolute
         ## from the window or from the viewport for sticky/fixed elements
 
-        sticky = !!getFixedOrStickyEl($el)
+        sticky = !!getStickyEl($el)
         coordsHistory.push(if sticky then coords.fromViewport else coords.fromWindow)
 
         ## then we ensure the element isnt animating
