@@ -1,7 +1,7 @@
 inject = require("./inject")
 security = require("./security")
 
-headRe      = /(<head.*?>)/i
+headRe      = /(<head(?!er).*?>)/i
 bodyRe      = /(<body.*?>)/i
 htmlRe      = /(<html.*?>)/i
 
