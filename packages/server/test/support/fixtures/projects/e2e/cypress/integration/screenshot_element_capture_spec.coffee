@@ -3,7 +3,7 @@
 it "takes consistent element captures", ->
   cy
     .viewport(600, 200)
-    .visit('http://localhost:3322/element')
+    .visit("http://localhost:3322/element")
     .get(".capture-me")
     .screenshot("element-original")
     .then ->
@@ -11,7 +11,10 @@ it "takes consistent element captures", ->
       ## to ensure element screenshots are consistent
       fn = (index) ->
         cy.get(".capture-me").screenshot("element-compare")
-        cy.task("compare:screenshots", { a: 'element-original', b: 'element-compare', devicePixelRatio })
+        cy.task("compare:screenshots", { 
+          a: "screenshot_element_capture_spec.coffee/element-original",
+          b: "screenshot_element_capture_spec.coffee/element-compare", devicePixelRatio 
+        })
 
       Cypress._.times(10, fn)
 

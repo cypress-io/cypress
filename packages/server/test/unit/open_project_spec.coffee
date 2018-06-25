@@ -9,6 +9,7 @@ describe "lib/open_project", ->
   beforeEach ->
     @automation = {
       reset: sinon.stub()
+      use: sinon.stub()
     }
 
     sinon.stub(browsers, "get").resolves()
@@ -23,14 +24,21 @@ describe "lib/open_project", ->
     openProject.create("/project/root")
 
   context "#launch", ->
+    beforeEach ->
+      @spec = {
+        absolute: "path/to/spec"
+      }
+
+      @browser = { name: "chrome" }
+
     it "tells preprocessor to remove file on browser close", ->
-      openProject.launch("chrome", "path/to/spec")
+      openProject.launch(@browser, @spec)
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(preprocessor.removeFile).to.be.calledWith("path/to/spec")
 
     it "does not tell preprocessor to remove file if no spec", ->
-      openProject.launch("chrome")
+      openProject.launch(@browser, {})
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(preprocessor.removeFile).not.to.be.called
@@ -38,12 +46,21 @@ describe "lib/open_project", ->
     it "runs original onBrowserClose callback on browser close", ->
       onBrowserClose = sinon.stub()
       options = { onBrowserClose }
-      openProject.launch("chrome", "path/to/spec", options)
+      openProject.launch(@browser, @spec, options)
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(onBrowserClose).to.be.called
 
     it "calls project.reset on launch", ->
-      openProject.launch("chrome")
+      openProject.launch(@browser, @spec)
       .then ->
         expect(Project.prototype.reset).to.be.called
+
+    it "sets isHeaded + isHeadless if not already defined", ->
+      expect(@browser.isHeaded).to.be.undefined
+      expect(@browser.isHeadless).to.be.undefined
+
+      openProject.launch(@browser, @spec)
+      .then =>
+        expect(@browser.isHeaded).to.be.true
+        expect(@browser.isHeadless).to.be.false

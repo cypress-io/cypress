@@ -1,6 +1,7 @@
 _ = require("lodash")
-Promise = require("bluebird")
 $ = require("jquery")
+bytes = require("bytes")
+Promise = require("bluebird")
 
 $Screenshot = require("../../cypress/screenshot")
 $dom = require("../../dom")
@@ -13,7 +14,7 @@ getViewportHeight = (state) ->
 getViewportWidth = (state) ->
   Math.min(state("viewportWidth"), $(window).width())
 
-automateScreenshot = (options = {}) ->
+automateScreenshot = (state, options = {}) ->
   { runnable, timeout } = options
 
   titles = []
@@ -36,8 +37,9 @@ automateScreenshot = (options = {}) ->
   getParentTitle(runnable)
 
   props = _.extend({
-    titles: titles
+    titles
     testId: runnable.id
+    takenPaths: state("screenshotPaths")
   }, _.omit(options, "runnable", "timeout", "log", "subject"))
 
   automate = ->
@@ -79,7 +81,7 @@ scrollOverrides = (win, doc) ->
       doc.body.style.overflowY = originalBodyOverflowY
     win.scrollTo(originalX, originalY)
 
-takeScrollingScreenshots = (scrolls, win, automationOptions) ->
+takeScrollingScreenshots = (scrolls, win, state, automationOptions) ->
   scrollAndTake = ({ y, clip, afterScroll }, index) ->
     win.scrollTo(0, y)
     if afterScroll
@@ -89,7 +91,7 @@ takeScrollingScreenshots = (scrolls, win, automationOptions) ->
       total: scrolls.length
       clip: clip
     })
-    automateScreenshot(options)
+    automateScreenshot(state, options)
 
   Promise
   .mapSeries(scrolls, scrollAndTake)
@@ -121,7 +123,7 @@ takeFullPageScreenshot = (state, automationOptions) ->
 
     { y, clip }
 
-  takeScrollingScreenshots(scrolls, win, automationOptions)
+  takeScrollingScreenshots(scrolls, win, state, automationOptions)
   .finally(resetScrollOverrides)
 
 takeElementScreenshot = ($el, state, automationOptions) ->
@@ -170,7 +172,7 @@ takeElementScreenshot = ($el, state, automationOptions) ->
 
     { y, afterScroll }
 
-  takeScrollingScreenshots(scrolls, win, automationOptions)
+  takeScrollingScreenshots(scrolls, win, state, automationOptions)
   .finally(resetScrollOverrides)
 
 ## "app only" means we're hiding the runner UI
@@ -259,7 +261,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       when capture is "fullPage"
         takeFullPageScreenshot(state, automationOptions)
       else
-        automateScreenshot(automationOptions)
+        automateScreenshot(state, automationOptions)
   .then (props) ->
     if name
       props.name = name
@@ -282,15 +284,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## failure screenshot when not interactive
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = $Screenshot.getConfig()
+    
     return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
-
+    
     if not state("screenshotTaken")
       ## if a screenshot has not been taken (by cy.screenshot()) in the
       ## test that failed, we can bypass UI-changing and pixel-checking
-      return automateScreenshot({
+      return automateScreenshot(state, {
         capture: "runner"
         runnable
         simple: true
+        testFailure: true
         timeout: config("responseTimeout")
       })
 
@@ -299,6 +303,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     screenshotConfig.capture = "runner"
     takeScreenshot(Cypress, state, screenshotConfig, {
       runnable
+      testFailure: true
       timeout: config("responseTimeout")
     })
 
@@ -361,10 +366,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: options.timeout
       })
       .then (props) ->
-        { duration } = props
+        { duration, path, size } = props
         { width, height } = props.dimensions
 
+        takenPaths = state("screenshotPaths") or []
+        state("screenshotPaths", takenPaths.concat([path]))
+
         _.extend(consoleProps, props, {
+          size: bytes(size, { unitSeparator: " " })
           duration: "#{duration}ms"
           dimensions: "#{width}px x #{height}px"
         })

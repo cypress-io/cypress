@@ -732,9 +732,13 @@ describe "lib/cypress", ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
+        ee.focusOnWebView = ->
         ee.webContents = {
+          setUserAgent: sinon.stub()
           session: {
             clearCache: sinon.stub().yieldsAsync()
+            setProxy: sinon.stub().yieldsAsync()
+            setUserAgent: sinon.stub()
           }
         }
 
@@ -764,14 +768,19 @@ describe "lib/cypress", ->
             @expectExitWith(0)
 
         it "electron", ->
+          write = sinon.stub()
+          videoCapture.start.returns({ write })
+
           cypress.start([
             "--run-project=#{@pluginBrowser}"
             "--browser=electron"
           ])
           .then =>
-            expect(Windows.create).to.be.calledWith(@pluginBrowser, {
+            expect(Windows.create).to.be.calledWithMatch(@pluginBrowser, {
               browser: "electron"
               foo: "bar"
+              onNewWindow: sinon.match.func
+              onPaint: sinon.match.func
             })
 
             @expectExitWith(0)

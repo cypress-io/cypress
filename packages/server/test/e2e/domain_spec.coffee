@@ -14,8 +14,11 @@ describe "e2e domain", ->
   })
 
   it "passing", ->
+    ## run both domain specs back to back to ensure
+    ## that the internal server + project state is
+    ## reset each time we spawn the browser
     e2e.exec(@, {
-      spec: "domain_spec.coffee"
+      spec: "domain*"
       config: "hosts={#{HOSTS}}"
       snapshot: true
       expectedExitCode: 0

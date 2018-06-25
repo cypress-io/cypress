@@ -158,6 +158,10 @@
     border-left: 2px solid $pending;
     background-color: lighten($pending, 40%);
 
+    .command-number {
+      width: 20px;
+    }
+
     .command-number,
     .command-method,
     .command-message {

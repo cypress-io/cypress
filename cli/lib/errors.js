@@ -32,6 +32,37 @@ const missingApp = (binaryDir) => ({
   `,
 })
 
+const binaryNotExecutable = (executable) => ({
+  description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
+  solution: stripIndent`\n
+    Reasons this may happen:
+      
+    - node was installed as 'root' or with 'sudo'
+    - the cypress npm package as 'root' or with 'sudo'
+    
+    Please check that you have the appropriate user permissions.
+  `,
+})
+
+
+const notInstalledCI = (executable) => ({
+  description: 'The cypress npm package is installed, but the Cypress binary is missing.',
+  solution: stripIndent`\n
+    We expected the binary to be installed here: ${chalk.cyan(executable)}
+ 
+    Reasons it may be missing:
+
+    - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
+    - You ran 'npm install' at an earlier build step but did not persist: ${util.getCacheDir()}
+
+    Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
+
+    Alternatively, you can run 'cypress install' to download the binary again.
+
+    https://on.cypress.io/not-installed-ci-error
+  `,
+})
+
 const nonZeroExitCodeXvfb = {
   description: 'XVFB exited with a non zero exit code.',
   solution: stripIndent`
@@ -203,8 +234,10 @@ module.exports = {
     nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
+    notInstalledCI,
     missingDependency,
     versionMismatch,
+    binaryNotExecutable,
     unexpected,
     failedDownload,
     failedUnzip,

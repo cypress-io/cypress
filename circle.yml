@@ -241,7 +241,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 0
+          command: npm run test-e2e -- --parallel 7 --index 0
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -252,7 +252,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 1
+          command: npm run test-e2e -- --parallel 7 --index 1
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -263,7 +263,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 2
+          command: npm run test-e2e -- --parallel 7 --index 2
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -274,7 +274,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 3
+          command: npm run test-e2e -- --parallel 7 --index 3
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -285,7 +285,29 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 4
+          command: npm run test-e2e -- --parallel 7 --index 4
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-6":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm run test-e2e -- --parallel 7 --index 5
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-7":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm run test-e2e -- --parallel 7 --index 6
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -303,7 +325,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 0
+          command: npm run cypress:run -- --parallel 7 --index 0
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -323,7 +345,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 1
+          command: npm run cypress:run -- --parallel 7 --index 1
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -343,7 +365,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 2
+          command: npm run cypress:run -- --parallel 7 --index 2
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -363,7 +385,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 3
+          command: npm run cypress:run -- --parallel 7 --index 3
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -383,7 +405,47 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 4
+          command: npm run cypress:run -- --parallel 7 --index 4
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-6":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm start
+          working_directory: packages/driver
+          background: true
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run cypress:run -- --parallel 7 --index 5
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-7":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm start
+          working_directory: packages/driver
+          background: true
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run cypress:run -- --parallel 7 --index 6
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -681,6 +743,12 @@ workflows:
       - server-e2e-tests-5:
           requires:
             - build
+      - server-e2e-tests-6:
+          requires:
+            - build
+      - server-e2e-tests-7:
+          requires:
+            - build
       - driver-integration-tests-1:
           requires:
             - build
@@ -694,6 +762,12 @@ workflows:
           requires:
             - build
       - driver-integration-tests-5:
+          requires:
+            - build
+      - driver-integration-tests-6:
+          requires:
+            - build
+      - driver-integration-tests-7:
           requires:
             - build
       - desktop-gui-integration-tests-1:

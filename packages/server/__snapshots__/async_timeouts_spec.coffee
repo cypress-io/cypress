@@ -47,7 +47,7 @@ exports['e2e async timeouts failing1 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/async -- bar fails.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/async_timeouts_spec.coffee/async -- bar fails (failed).png (1280x720)
 
 
   (Video)

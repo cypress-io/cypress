@@ -4,9 +4,11 @@ const os = require('os')
 const tty = require('tty')
 const path = require('path')
 const isCi = require('is-ci')
+const execa = require('execa')
 const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
+const cachedir = require('cachedir')
 const executable = require('executable')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
@@ -228,6 +230,16 @@ const util = {
     return undefined
 
   },
+
+  getCacheDir () {
+    return cachedir('Cypress')
+  },
+
+  isPostInstall () {
+    return process.env.npm_lifecycle_event === 'postinstall'
+  },
+
+  exec: execa,
 
   stdoutLineMatches,
 }
