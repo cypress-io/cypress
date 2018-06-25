@@ -57,6 +57,18 @@ setRemoteIframeProps = ($autIframe, state) ->
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
+  timersPaused = false
+
+  ## TODO: move this to its own module
+  timerQueues = {}
+  timerQueues.reset = ->
+    _.extend(timerQueues, {
+      setTimeout: []
+      setInterval: []
+      requestAnimationFrame: []
+    })
+
+  timerQueues.reset()
 
   isStopped = -> stopped
 
@@ -143,42 +155,34 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return ret
     })
 
-  timersPaused = false
-  timerQueues = {
-    setTimeout: []
-    setInterval: []
-    requestAnimationFrame: []
-  }
-
   wrapNativeMethods = (contentWindow) ->
     try
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
-        
+
   runTimerQueue = (queue) ->
-    _.each timerQueues[queue], ([fn, args, context]) ->
-      fn.apply(context, args)
+    _.each timerQueues[queue], ([contentWindow, args]) ->
+      contentWindow[queue].apply(contentWindow, args)
+
     timerQueues[queue] = []
 
   wrapTimers = (contentWindow) ->
-    originalSetTimeout = contentWindow.setTimeout
-    originalSetInterval = contentWindow.setInterval
-    originalRequestAnimationFrame = contentWindow.requestAnimationFrame
+    originals = {
+      setTimeout: contentWindow.setTimeout
+      setInterval: contentWindow.setInterval
+      requestAnimationFrame: contentWindow.requestAnimationFrame
+    }
 
-    wrap = (fn, queue) -> (args...) ->
-      if timersPaused
-        timerQueues[queue].push([fn, args, this])
-      else
-        fn.apply(this, args)
+    wrapFn = (fnName) ->
+      return (args...) ->
+        if timersPaused
+          timerQueues[fnName].push([contentWindow, args])
+        else
+          originals[fnName].apply(contentWindow, args)
 
-    contentWindow.setTimeout = (fn, args...) ->
-      originalSetTimeout(wrap(fn, "setTimeout"), args...)
-
-    contentWindow.setInterval = (fn, args...) ->
-      originalSetInterval(wrap(fn, "setInterval"), args...)
-
-    contentWindow.requestAnimationFrame = (fn, args...) ->
-      originalRequestAnimationFrame(wrap(fn, "requestAnimationFrame"), args...)
+    contentWindow.setTimeout = wrapFn("setTimeout")
+    contentWindow.setInterval = wrapFn("setInterval")
+    contentWindow.requestAnimationFrame = wrapFn("requestAnimationFrame")
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -633,7 +637,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## jquery sync methods
     getRemotejQueryInstance: jquery.getRemotejQueryInstance
-    
+
     ## focused sync methods
     getFocused: focused.getFocused
 
@@ -740,6 +744,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state(backup)
 
       queue.reset()
+      timerQueues.reset()
 
       cy.removeAllListeners()
 
@@ -912,7 +917,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindowListeners(contentWindow)
 
       wrapNativeMethods(contentWindow)
-      
+
       wrapTimers(contentWindow)
 
     pauseTimers: (pause) ->

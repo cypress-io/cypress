@@ -148,6 +148,18 @@ getFirstFixedOrStickyPositionParent = ($el) ->
   ## else recursively continue to walk up the parent node chain
   getFirstFixedOrStickyPositionParent($el.parent())
 
+getFirstStickyPositionParent = ($el) ->
+  ## return null if we're at body/html
+  ## cuz that means nothing has sticky position
+  return null if not $el or $el.is("body,html")
+
+  ## if we have sticky position return ourselves
+  if $el.css("position") == "sticky"
+    return $el
+
+  ## else recursively continue to walk up the parent node chain
+  getFirstStickyPositionParent($el.parent())
+
 getFirstScrollableParent = ($el) ->
   # doc = $el.prop("ownerDocument")
 
@@ -297,6 +309,8 @@ module.exports = {
   getFirstDeepestElement
 
   getFirstFixedOrStickyPositionParent
+
+  getFirstStickyPositionParent
 
   getFirstScrollableParent
 }
