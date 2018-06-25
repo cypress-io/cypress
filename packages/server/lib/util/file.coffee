@@ -7,19 +7,13 @@ Queue = require("p-queue")
 Promise = require("bluebird")
 lockFile = Promise.promisifyAll(require("lockfile"))
 fs = require("./fs")
+env = require("./env")
 exit = require("./exit")
 
 DEBOUNCE_LIMIT = 1000
 LOCK_TIMEOUT = 2000
 
-module.exports = class Conf
-  @noopFile: {
-    get: -> Promise.resolve({})
-    set: -> Promise.resolve()
-    transaction: ->
-    remove: -> Promise.resolve()
-  }
-
+class File
   constructor: (options = {}) ->
     if not options.path
       throw new Error("Must specify path to file when creating new FileUtil()")
@@ -159,7 +153,16 @@ module.exports = class Conf
   _unlock: ->
     debug("attempt to unlock %s", @path)
     lockFile.unlockAsync(@_lockFilePath)
-    .timeout(LOCK_TIMEOUT)
+    .timeout(env.get("FILE_UNLOCK_TIMEOUT") or LOCK_TIMEOUT)
     .catch(Promise.TimeoutError, ->) ## ignore timeouts
     .finally =>
       debug("unlock succeeded or failed for %s", @path)
+
+File.noopFile = {
+  get: -> Promise.resolve({})
+  set: -> Promise.resolve()
+  transaction: ->
+  remove: -> Promise.resolve()
+}
+
+module.exports = File

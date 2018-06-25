@@ -632,6 +632,26 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("INVALID_REPORTER_NAME", "foobarbaz")
 
+    describe "state", ->
+      beforeEach ->
+        formStatePath(@todosPath)
+        .then (statePathStart) =>
+          @statePath = appData.projectsPath(statePathStart)
+
+      it "does not save project state", ->
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
+        .then =>
+          @expectExitWith(0)
+
+          ## this should not save the project's state
+          ## because its a noop in 'cypress run' mode
+          openProject.getProject().saveState()
+        .then =>
+          fs.statAsync(@statePath)
+          .then =>
+            throw new Error("saved state should not exist but it did here: #{@statePath}")
+          .catch {code: "ENOENT"}, ->
+
     describe "morgan", ->
       it "sets morgan to false", ->
         cypress.start(["--run-project=#{@todosPath}"])
