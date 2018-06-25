@@ -165,7 +165,7 @@ module.exports = {
       ## bypass the stream buffer and pipe this back
       if wantsInjection
         rewrite = (body) ->
-          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, config.modifyObstructiveCode)
+          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
@@ -185,7 +185,7 @@ module.exports = {
         str.pipe(injection)
       else
         ## only rewrite if we should
-        if config.modifyObstructiveCode and wantsSecurityRemoved
+        if wantsSecurityRemoved
           gunzip = zlib.createGunzip(zlibOptions)
           gunzip.setEncoding("utf8")
 
@@ -261,8 +261,13 @@ module.exports = {
 
         return "partial"
 
-      wantsSecurityRemoved ?= do ->
-        resContentTypeIs(headers, "application/javascript")
+      wantsSecurityRemoved = do ->
+        ## we want to remove security IF we're doing a full injection
+        ## on the response or its a request for any javascript script tag
+        config.modifyObstructiveCode and (
+          (wantsInjection is "full") or
+            resContentTypeIs(headers, "application/javascript")
+        )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
 
