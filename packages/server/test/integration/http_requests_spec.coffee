@@ -1921,6 +1921,26 @@ describe "Routes", ->
 
           expect(res.body).to.include "<HTML> <HEAD> <script type='text/javascript'> document.domain = 'google.com';"
 
+      it "injects when head missing but has <header>", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html> <body><nav>some nav</nav><header>header</header></body> </html>", {
+          "Content-Type": "text/html"
+        }
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<html> <head> <script type='text/javascript'> document.domain = 'google.com';"
+
+          expect(res.body).to.include "</head> <body><nav>some nav</nav><header>header</header></body> </html>"
+
       it "injects when body is capitalized", ->
         nock(@server._remoteOrigin)
         .get("/bar")
