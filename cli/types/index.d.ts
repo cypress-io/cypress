@@ -331,6 +331,14 @@ declare namespace Cypress {
      *    })
      */
     clearLocalStorage(key?: string): Chainable<Storage>
+    /**
+     * Clear keys in local storage that match given regular expression.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @example
+     *    // Clear all local storage matching /app-/
+     *    cy.clearLocalStorage(/app-/)
+     */
     clearLocalStorage(re: RegExp): Chainable<Storage>
 
     /**
@@ -375,13 +383,45 @@ declare namespace Cypress {
      * * `clearInterval`
      * * `Date` Objects
      *
-     * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
+     * The clock starts at the unix epoch (timestamp of 0).
+     * This means that when you instantiate new Date in your application,
+     * it will have a time of January 1st, 1970.
      *
      * @see https://on.cypress.io/clock
      */
     clock(): Chainable<Clock>
+    /**
+     * Mocks global clock and sets current timestamp to the given value.
+     * Overrides all functions that deal with time.
+     *
+     * @see https://on.cypress.io/clock
+     * @example
+     *    // your app code
+     *    $('#date').text(new Date().toJSON())
+     *    // from spec file
+     *    const now = new Date(2017, 3, 14).getTime() // March 14, 2017 timestamp
+     *    cy.clock(now)
+     *    cy.visit('/index.html')
+     *    cy.get('#date').contains('2017-03-14')
+     */
     clock(now: number, options?: Loggable): Chainable<Clock>
+    /**
+     * Mocks global clock but only overrides specific functions.
+     *
+     * @see https://on.cypress.io/clock
+     * @example
+     *    // keep current date but override "setTimeout" and "clearTimeout"
+     *    cy.clock(null, ['setTimeout', 'clearTimeout'])
+     */
     clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    /**
+     * Mocks global clock and all functions.
+     *
+     * @see https://on.cypress.io/clock
+     * @example
+     *    // mock clock but do not log this command
+     *    cy.clock({ log: false })
+     */
     clock(options: Loggable): Chainable<Clock>
 
     /**
@@ -393,7 +433,9 @@ declare namespace Cypress {
     closest<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Get the DOM element containing the text. DOM elements can contain more than the desired text and still match. Additionally, Cypress prefers some DOM elements over the deepest element found.
+     * Get the DOM element containing the text.
+     * DOM elements can contain more than the desired text and still match.
+     * Additionally, Cypress prefers some DOM elements over the deepest element found.
      *
      * @see https://on.cypress.io/contains
      * @example
@@ -408,7 +450,23 @@ declare namespace Cypress {
      */
     contains(content: string | number | RegExp): Chainable<Subject>
     contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
+    /**
+     * Get the DOM element with name "selector" containing the text or regular expression.
+     *
+     * @see https://on.cypress.io/contains
+     * @example
+     *    // yields <ul>...</ul>
+     *    cy.contains('ul', 'apples')
+     */
     contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get the DOM element using CSS "selector" containing the text or regular expression.
+     *
+     * @see https://on.cypress.io/contains
+     * @example
+     *    // yields <... class="foo">... apples ...</...>
+     *    cy.contains('.foo', 'apples')
+     */
     contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -599,6 +657,11 @@ declare namespace Cypress {
      * Get a property’s value on the previously yielded subject.
      *
      * @see https://on.cypress.io/its
+     * @example
+     *    // Get the 'width' property
+     *    cy.wrap({width: '50'}).its('width')
+     *    // Drill into nested properties by using dot notation
+     *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
     its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
 
@@ -630,7 +693,21 @@ declare namespace Cypress {
      * @see https://on.cypress.io/next
      */
     next<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get the immediately following sibling of each DOM element within a set of DOM elements.
+     *
+     * @see https://on.cypress.io/next
+     * @example
+     *    cy.get('nav a:first').next()
+     */
     next<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get the immediately following sibling of each DOM element within a set of DOM elements that match selector
+     *
+     * @see https://on.cypress.io/next
+     * @example
+     *    cy.get('nav a:first').next('.menu-item)
+     */
     next<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -708,10 +785,26 @@ declare namespace Cypress {
     /**
      * Get the immediately preceding sibling of each element in a set of the elements.
      *
+     * @example
+     *    cy.get('nav').prev('a') // Yield previous 'a'
      * @see https://on.cypress.io/prev
      */
     prev<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get the immediately preceding sibling of each element in a set of the elements.
+     *
+     * @example
+     *    cy.get('li').prev() // Yield previous 'li'
+     * @see https://on.cypress.io/prev
+     */
     prev<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get the immediately preceding sibling of each element in a set of the elements that match selector.
+     *
+     * @example
+     *    cy.get('nav').prev('.menu-item') // Yield previous '.menu-item'
+     * @see https://on.cypress.io/prev
+     */
     prev<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -773,7 +866,9 @@ declare namespace Cypress {
 
     /**
      * Get the root DOM element.
-     * The root element yielded is `<html>` by default. However, when calling `.root()` from a `.within()` command, the root element will point to the element you are “within”.
+     * The root element yielded is `<html>` by default.
+     * However, when calling `.root()` from a `.within()` command,
+     * the root element will point to the element you are “within”.
      *
      * @see https://on.cypress.io/root
      */
@@ -788,16 +883,66 @@ declare namespace Cypress {
      *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
      */
     route(url: string | RegExp, response?: string | object): Chainable<null>
+    /**
+     * Spy or stub request with specific method and url.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    // spy on POST /todos requests
+     *    cy.route('POST', '/todos').as('add-todo')
+     */
     route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
+    /**
+     * Set a route by returning an object literal from a callback function.
+     * Functions that return a Promise will automatically be awaited.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route(() => {
+     *      // your logic here
+     *      // return an appropriate routing object here
+     *      return {
+     *        method: 'POST',
+     *        url: '/comments',
+     *        response: this.commentsFixture
+     *      }
+     *    })
+     */
     route(fn: () => RouteOptions): Chainable<null>
+    /**
+     * Spy or stub a given route.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route({
+     *      method: 'DELETE',
+     *      url: '/users',
+     *      status: 412,
+     *      delay: 1000
+     *      // and other options, see documentation
+     *    })
+     */
     route(options: Partial<RouteOptions>): Chainable<null>
 
     /**
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
      * @see https://on.cypress.io/screenshot
+     * @example
+     *    cy.screenshot()
+     *    cy.get(".post").screenshot()
      */
     screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    /**
+     * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
+     *
+     * @see https://on.cypress.io/screenshot
+     * @example
+     *    cy.get(".post").screenshot("post-element")
+     */
     screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
 
     /**
@@ -859,15 +1004,37 @@ declare namespace Cypress {
      * Get sibling DOM elements.
      *
      * @see https://on.cypress.io/siblings
+     * @example
+     *    cy.get('td').siblings('a') // Yield all link siblings of "td"
      */
     siblings<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all sibling DOM elements.
+     *
+     * @see https://on.cypress.io/siblings
+     * @example
+     *    cy.get('td').siblings() // Yield all siblings of "td"
+     */
     siblings<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all sibling DOM elements that match given selector.
+     *
+     * @see https://on.cypress.io/siblings
+     * @example
+     *    // Yield all elements with class "foo" that are siblings of "td"
+     *    cy.get('td').siblings('.foo')
+     */
     siblings<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Wrap a method in a spy in order to record calls to and arguments of the function.
      * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
      *
+     * @example
+     *    // assume App.start calls util.addListeners
+     *    cy.spy(util, 'addListeners')
+     *    App.start()
+     *    expect(util.addListeners).to.be.called
      * @see https://on.cypress.io/spy
      */
     spy(): Agent<sinon.SinonSpy>
@@ -996,6 +1163,14 @@ declare namespace Cypress {
      *    cy.viewport('iphone-6')
      */
     viewport(preset: ViewportPreset, orientation?: ViewportOrientation, options?: Partial<Loggable>): Chainable<null>
+    /**
+     * Set viewport to the given resolution.
+     *
+     * @see https://on.cypress.io/viewport
+     * @example
+     *    // Set viewport to 550px x 750px
+     *    cy.viewport(550, 750)
+     */
     viewport(width: number, height: number, options?: Partial<Loggable>): Chainable<null>
 
     /**
@@ -1015,9 +1190,21 @@ declare namespace Cypress {
      * Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
      *
      * @see https://on.cypress.io/wait
+     * @example
+     *    cy.wait(1000) // wait for 1 second
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
+    /**
+     * Wait for a specific XHR to respond.
+     *
+     * @see https://on.cypress.io/wait
+     */
     wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
+    /**
+     * Wait for list of XHR requests to complete.
+     *
+     * @see https://on.cypress.io/wait
+     */
     wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
 
     /**
@@ -1050,7 +1237,18 @@ declare namespace Cypress {
     within(options: Partial<Loggable>, fn: (currentSubject: Subject) => void): Chainable<Subject> // inconsistent argument order
 
     /**
-     * Yield the object passed into `.wrap()`.
+     * Yield the element passed into `.wrap()`.
+     *
+     * @see https://on.cypress.io/wrap
+     * @example
+     *    cy.get('form').within(($form) => {
+     *       // more commands
+     *       cy.wrap($form).should('have.class', 'form-container')
+     *    })
+     */
+    wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Yields whatever is passed into `.wrap()` to the next command in the Cypress chain.
      *
      * @see https://on.cypress.io/wrap
      * @example
@@ -1059,7 +1257,6 @@ declare namespace Cypress {
      *      .should('have.property', 'amount')
      *      .and('eq', 10)
      */
-    wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
@@ -3085,8 +3282,12 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
+  // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
+  // a user callback function. Others probably only need a callback function.
+
   /**
-   * These events come from the application currently under test (your application). These are the most useful events for you to listen to.
+   * These events come from the application currently under test (your application).
+   * These are the most useful events for you to listen to.
    * @see https://on.cypress.io/catalog-of-events#App-Events
    */
   interface Actions {
@@ -3104,6 +3305,15 @@ declare namespace Cypress {
      *   // failing the test
      *   return false
      * })
+     * // stub "window.alert" in a single test
+     * it('shows alert', () => {
+     *    const stub = cy.stub()
+     *    cy.on('window:alert', stub)
+     *    // trigger application code that calls alert(...)
+     *    .then(() => {
+     *      expect(stub).to.have.been.calledOnce
+     *    })
+     * })
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
@@ -3111,13 +3321,27 @@ declare namespace Cypress {
      * Fires when your app calls the global `window.confirm()` method.
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
+     * @example
+     *    cy.on('window:confirm', (str) => {
+     *      console.log(str)
+     *      return false // simulate "Cancel"
+     *    })
      */
-    (action: 'window:confirm', fn: (text: string) => false | void): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
     /**
-     * Fires when your app calls the global `window.alert()` method. Cypress will auto accept alerts. You cannot change this behavior.
+     * Fires when your app calls the global `window.alert()` method.
+     * Cypress will auto accept alerts. You cannot change this behavior.
+     * @example
+     *    const stub = cy.stub()
+     *    cy.on('window:alert', stub)
+     *    // assume the button calls window.alert()
+     *    cy.get('.my-button').click()
+     *    .then(() => {
+     *      expect(stub).to.have.been.calledOnce
+     *    })
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: (text: string) => void): void
+    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events

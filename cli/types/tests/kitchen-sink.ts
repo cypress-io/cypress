@@ -35,3 +35,15 @@ Cypress.spec.relative // $ExpectType string | null
 Cypress.spec.absolute // $ExpectType string | null
 
 Cypress.browser // $ExpectType Browser
+
+// stubbing window.alert type on "Cypress" should
+// work with plain function or with a Sinon stub
+Cypress.on('window:alert', () => {})
+Cypress.on('window:alert', cy.stub())
+// same for a single test
+cy.on('window:alert', () => {})
+cy.on('window:alert', cy.stub())
+
+// window:confirm stubbing
+cy.on('window:confirm', () => {})
+cy.on('window:confirm', cy.stub())
