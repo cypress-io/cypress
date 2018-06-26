@@ -148,7 +148,7 @@ Cypress Version: 1.2.3
 exports['error for removed CYPRESS_BINARY_VERSION 1'] = `
 Error: The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version 3.0.0
 
-You should setCYPRESS_INSTALL_BINARY instead.
+You should set CYPRESS_INSTALL_BINARY instead.
 ----------
 
 Platform: darwin (Foo-OsVersion)
