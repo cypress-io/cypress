@@ -290,7 +290,7 @@ getBuffer = (details) ->
 getDimensions = (details) ->
   pick = (obj) ->
     _.pick(obj, "width", "height")
-  
+
   if details.buffer
     pick(sizeOf(details.buffer))
   else
@@ -306,17 +306,17 @@ ensureUniquePath = (takenPaths, withoutExt, extension) ->
 getPath = (data, ext, screenshotsFolder) ->
   specNames = (data.specName or "")
   .split(pathSeparatorRe)
-  
+
   if data.name
     names = data.name.split(pathSeparatorRe).map(replaceInvalidChars)
   else
     names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
-  
+
   ## append (failed) to the last name
   if data.testFailure
     index = names.length - 1
     names[index] = names[index] + " (failed)"
-  
+
   withoutExt = path.join(screenshotsFolder, specNames..., names...)
 
   ensureUniquePath(data.takenPaths, withoutExt, ext)
@@ -424,7 +424,7 @@ module.exports = {
       { multipart, pixelRatio, takenAt } = details
 
       {
-        size 
+        size
         takenAt
         dimensions
         multipart
