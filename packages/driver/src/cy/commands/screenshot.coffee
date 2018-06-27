@@ -284,25 +284,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## failure screenshot when not interactive
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = $Screenshot.getConfig()
-    
-    return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
-    
-    if not state("screenshotTaken")
-      ## if a screenshot has not been taken (by cy.screenshot()) in the
-      ## test that failed, we can bypass UI-changing and pixel-checking
-      return automateScreenshot(state, {
-        capture: "runner"
-        runnable
-        simple: true
-        testFailure: true
-        timeout: config("responseTimeout")
-      })
 
-    ## if a screenshot has been taken, we need to do all the standard checks
-    ## to make sure the UI is in the right place
+    return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
+
+    ## if a screenshot has not been taken (by cy.screenshot()) in the test
+    ## that failed, we can bypass UI-changing and pixel-checking (simple: true)
+    ## otheriwse, we need to do all the standard checks
+    ## to make sure the UI is in the right place (simple: false)
     screenshotConfig.capture = "runner"
     takeScreenshot(Cypress, state, screenshotConfig, {
       runnable
+      simple: !state("screenshotTaken")
       testFailure: true
       timeout: config("responseTimeout")
     })
