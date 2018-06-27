@@ -72,7 +72,6 @@ export default class Nav extends Component {
     return (
       <div className='logo'>
         <img src='img/cypress-inverse.png' />
-        <span>Beta</span>
       </div>
     )
   }
