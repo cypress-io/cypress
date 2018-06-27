@@ -7,6 +7,7 @@ Jimp            = require("jimp")
 sizeOf          = require("image-size")
 colorString     = require("color-string")
 debug           = require("debug")("cypress:server:screenshot")
+plugins         = require("./plugins")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
 pathHelpers     = require("./util/path_helpers")
@@ -434,5 +435,21 @@ module.exports = {
         testFailure: data.testFailure
         path: pathToScreenshot
       }
+
+  afterScreenshot: (data, details) ->
+    duration = new Date() - new Date(data.startTime)
+
+    details = _.extend({}, data, details, { duration })
+    details = _.pick(details, "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
+
+    if not plugins.has("after:screenshot")
+      return Promise.resolve(details)
+
+    plugins.execute("after:screenshot", details)
+    .then (updates) =>
+      if not _.isPlainObject(updates)
+        return details
+
+      _.extend(details, _.pick(updates, "size", "dimensions", "path"))
 
 }

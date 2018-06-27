@@ -15,6 +15,9 @@ describe "src/cy/commands/screenshot", ->
       multipart: false
       pixelRatio: 1
       takenAt: new Date().toISOString()
+      name: "name"
+      blackout: [".foo"]
+      duration: 100
     }
 
     @screenshotConfig = {
@@ -727,16 +730,16 @@ describe "src/cy/commands/screenshot", ->
         expected = _.extend({}, @serverResult, @screenshotConfig, {
           Command: "screenshot"
           scaled: true
+          duration: "100ms"
         })
 
         expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scale", "size")
 
         cy.screenshot().then =>
           consoleProps = @lastLog.invoke("consoleProps")
-          actual = _.omit(consoleProps, "blackout", "dimensions", "duration", "size")
+          actual = _.omit(consoleProps, "blackout", "dimensions", "size")
           { width, height } = @serverResult.dimensions
           expect(actual).to.eql(expected)
           expect(consoleProps.size).to.eq("12 B")
           expect(consoleProps.blackout).to.eql(@screenshotConfig.blackout)
-          expect(consoleProps.dimensions).to.eql("#{width}px x #{height}px")
-          expect(consoleProps.duration).to.match(/^\d+ms$/)
+          expect(consoleProps.dimensions).to.equal("#{width}px x #{height}px")

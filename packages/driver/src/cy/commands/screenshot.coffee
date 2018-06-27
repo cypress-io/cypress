@@ -241,6 +241,9 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       width: $(window).width()
       height: $(window).height()
     }
+    scaled: getShouldScale(screenshotConfig)
+    blackout: getBlackout(screenshotConfig)
+    startTime: startTime.toISOString()
   })
 
   ## use the subject as $el or yield the wrapped documentElement
@@ -263,15 +266,6 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       else
         automateScreenshot(state, automationOptions)
   .then (props) ->
-    if name
-      props.name = name
-
-    _.extend(props, {
-      scaled: getShouldScale(screenshotConfig)
-      blackout: getBlackout(screenshotConfig)
-      duration: new Date() - startTime
-    })
-
     onAfterScreenshot and onAfterScreenshot.call(state("ctx"), $el, props)
 
     $Screenshot.onAfterScreenshot($el, props)
