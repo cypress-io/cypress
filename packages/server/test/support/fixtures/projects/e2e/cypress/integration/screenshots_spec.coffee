@@ -1,13 +1,6 @@
 { devicePixelRatio } = window
 
 describe "taking screenshots", ->
-  onAfterScreenshotResults = []
-
-  Cypress.Screenshot.defaults({
-    onAfterScreenshot: ($el, results) ->
-      onAfterScreenshotResults.push(results)
-  })
-
   failureTestRan = false
 
   it "manually generates pngs", ->
@@ -32,19 +25,6 @@ describe "taking screenshots", ->
       .then ->
         ## failure 1
         throw new Error("fail whale")
-  
-  it "does not call onAfterScreenshot with results of failed tests", ->
-    ## this test will only pass if the previous test ran
-    if not failureTestRan
-      throw new Error("this test can only pass if the previous test ran")
-    
-    testFailure = Cypress._.find(onAfterScreenshotResults, { testFailure: true })
-      
-    expect(testFailure).not.to.exist
-    
-    expect(Cypress._.map(onAfterScreenshotResults, "name")).to.deep.eq([
-      "black", "red", "foo/bar/baz"
-    ])
 
   it "handles devicePixelRatio correctly on headless electron", ->
     ## this checks to see if the topLeftRight pixel (1, 0) is
