@@ -310,8 +310,6 @@ class Socket
               exec.run(config.projectRoot, args[0])
             when "task"
               task.run(config.pluginsFile, args[0])
-            when "after:screenshot"
-              screenshots.afterScreenshot(args[0])
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"
