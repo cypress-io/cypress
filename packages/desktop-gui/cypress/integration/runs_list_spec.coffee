@@ -92,7 +92,7 @@ describe "Runs List", ->
           cy.get("@runRow").contains(@runs[1].commit.branch)
           cy.get("@runRow").contains(@runs[1].commit.message)
 
-        it.only "display no info msg & doesn't display avatar", ->
+        it "display no info msg & doesn't display avatar", ->
           cy.get(".runs-container li").eq(2).within ->
             cy.get("img").should("not.exist")
             cy.contains("No commit info found")
