@@ -1,26 +1,12 @@
 _ = require("lodash")
-url = require("url")
 minimatch = require("minimatch")
-
-DEFAULT_PORTS = ["443", "80"]
-
-stripProtocolAndDefaultPorts = (urlToCheck) ->
-  ## grab host which is 'hostname:port' only
-  { host, hostname, port } = url.parse(urlToCheck)
-
-  ## if we have a default port for 80 or 443
-  ## then just return the hostname
-  if port in DEFAULT_PORTS
-    return hostname
-
-  ## else return the host
-  return host
+uri = require("./uri")
 
 matches = (urlToCheck, blacklistHosts) ->
   ## normalize into flat array
   blacklistHosts = [].concat(blacklistHosts)
 
-  urlToCheck = stripProtocolAndDefaultPorts(urlToCheck)
+  urlToCheck = uri.stripProtocolAndDefaultPorts(urlToCheck)
 
   matchUrl = (hostMatcher) ->
     ## use minimatch against the url
@@ -32,6 +18,4 @@ matches = (urlToCheck, blacklistHosts) ->
 
 module.exports = {
   matches
-
-  stripProtocolAndDefaultPorts
 }

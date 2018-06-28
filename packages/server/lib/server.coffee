@@ -14,6 +14,7 @@ httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
+uri          = require("./util/uri")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
 appData      = require("./util/app_data")
@@ -41,9 +42,9 @@ setProxiedUrl = (req) ->
   ## and only leave the path which is
   ## how browsers would normally send
   ## use their url
-  req.proxiedUrl = req.url
+  req.proxiedUrl = uri.removeDefaultPort(req.url)
 
-  req.url = url.parse(req.url).path
+  req.url = uri.getPath(req.url)
 
 notSSE = (req, res) ->
   req.headers.accept isnt "text/event-stream" and compression.filter(req, res)

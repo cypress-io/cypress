@@ -1669,20 +1669,34 @@ describe "Routes", ->
           .reply(200, "{}", {
             "Content-Type": "text/css"
           })
-
         .then ->
-          matches "http://127.0.0.1:80/app.css", ->
-            nock("http://127.0.0.1:80")
+          matches "http://127.0.0.1/app.css", ->
+            nock("http://127.0.0.1")
             .matchHeader("host", "127.0.0.1")
             .get("/app.css")
             .reply(200, "{}", {
               "Content-Type": "text/css"
             })
-
+        .then ->
+          matches "http://127.0.0.1:80/app2.css", ->
+            nock("http://127.0.0.1:80")
+            .matchHeader("host", "127.0.0.1")
+            .get("/app2.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
         .then ->
           matches "https://www.google.com:443/app.css", ->
             nock("https://www.google.com")
             .matchHeader("host", "www.google.com")
+            .get("/app.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
+        .then ->
+          matches "https://www.apple.com/app.css", ->
+            nock("https://www.apple.com")
+            .matchHeader("host", "www.apple.com")
             .get("/app.css")
             .reply(200, "{}", {
               "Content-Type": "text/css"
@@ -2513,7 +2527,25 @@ describe "Routes", ->
 
               expect(res.body).to.include("I am a gzipped response</html>")
 
-        it.only "handles bad gzip responses", (done) ->
+        it "handles bad gzip responses", (done) ->
+          ## honestly this is just a quick hack to make request
+          ## be forcibly less leniant about gzip errors, but
+          ## we should just switch to something like http.request()
+          ## which is built in
+          # flush <integer> Default: zlib.constants.Z_NO_FLUSH
+          # finishFlush <integer> Default: zlib.constants.Z_FINISH
+          createGunzip = zlib.createGunzip
+
+          sinon.stub(zlib, "createGunzip")
+          .callThrough()
+          .onSecondCall().callsFake ->
+            zlib.createGunzip.restore()
+
+            createGunzip.call(zlib, {
+              flush: zlib.Z_NO_FLUSH
+              finishFlush: zlib.Z_FINISH
+            })
+
           nock(@server._remoteOrigin)
           .get("/app.js")
           .delayBody(100)
@@ -2529,7 +2561,6 @@ describe "Routes", ->
             gzip: true
           })
           .on "error", (err) ->
-            console.log "Asdfasdfasdfas"
             expect(err.code).to.eq("Z_BUF_ERROR")
 
             done()
