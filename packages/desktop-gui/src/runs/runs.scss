@@ -200,8 +200,11 @@
       }
 
       &.td-env-padding {
-        padding-top: 30px;
-        padding-bottom: 20px;
+        padding: 25px 7px 20px;
+
+        .env-msg {
+          margin-top: 5px;
+        }
       }
     }
     .os-block {

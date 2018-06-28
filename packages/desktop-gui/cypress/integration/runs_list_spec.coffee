@@ -92,7 +92,7 @@ describe "Runs List", ->
           cy.get("@runRow").contains(@runs[1].commit.branch)
           cy.get("@runRow").contains(@runs[1].commit.message)
 
-        it "display no info msg & doesn't display avatar", ->
+        it.only "display no info msg & doesn't display avatar", ->
           cy.get(".runs-container li").eq(2).within ->
             cy.get("img").should("not.exist")
             cy.contains("No commit info found")
@@ -101,6 +101,7 @@ describe "Runs List", ->
           cy.get("@runRow").within ->
             cy.contains(@runs[1].instances[0].platform.osVersionFormatted)
             cy.contains(@runs[1].instances[0].platform.browserVersion)
+            cy.contains("Chrome")
             cy.get(".fa-windows")
             cy.get(".fa-chrome")
 
