@@ -130,7 +130,7 @@ const removed = {
     The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green('3.0.0')}
     `,
     solution: stripIndent`
-    You should setCYPRESS_INSTALL_BINARY instead.
+    You should set CYPRESS_INSTALL_BINARY instead.
     `,
   },
   CYPRESS_SKIP_BINARY_INSTALL: {
