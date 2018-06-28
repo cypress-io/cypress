@@ -49,8 +49,6 @@ describe "e2e server sent events", ->
   it "passes", ->
     e2e.exec(@, {
       spec: "server_sent_events_spec.coffee"
-      exit: false
-      headed: true
       snapshot: true
       expectedExitCode: 0
     })
