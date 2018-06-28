@@ -16,6 +16,8 @@ evilDns       = require("evil-dns")
 Promise       = require("bluebird")
 httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
 pkg           = require("@packages/root")
+SseStream     = require('ssestream')
+EventSource   = require("eventsource")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Project       = require("#{root}lib/project")
@@ -69,7 +71,7 @@ describe "Routes", ->
       ## and allow us to override them
       ## for each test
       config.set(obj)
-      .then  (cfg) =>
+      .then (cfg) =>
         ## use a jar for each test
         ## but reset it automatically
         ## between test
@@ -2511,7 +2513,7 @@ describe "Routes", ->
 
               expect(res.body).to.include("I am a gzipped response</html>")
 
-        it "handles bad gzip responses", (done) ->
+        it.only "handles bad gzip responses", (done) ->
           nock(@server._remoteOrigin)
           .get("/app.js")
           .delayBody(100)
@@ -2527,6 +2529,7 @@ describe "Routes", ->
             gzip: true
           })
           .on "error", (err) ->
+            console.log "Asdfasdfasdfas"
             expect(err.code).to.eq("Z_BUF_ERROR")
 
             done()
@@ -3008,6 +3011,65 @@ describe "Routes", ->
           expectedHeader(responses[2], "cypress.io")
           expectedHeader(responses[3], "localhost:6666")
           expectedHeader(responses[4], "*adwords.com")
+
+    # context "event source / server sent events / SSE", ->
+    #   beforeEach ->
+    #     @setup("http://localhost:5959", {
+    #       config: {
+    #         responseTimeout: 50
+    #       }
+    #     })
+    #     .then =>
+    #       @srv = http.createServer (req, res) =>
+    #         @sseStream = new SseStream(req)
+    #         @sseStream.pipe(res)
+    #
+    #         @sseStream.close = =>
+    #           @sseStream.end()
+    #           req.socket.destroy()
+    #
+    #       Promise.promisifyAll(@srv)
+    #
+    #       @srv.listenAsync()
+    #       .then =>
+    #         @port = @srv.address().port
+    #
+    #   afterEach ->
+    #     @srv.closeAsync()
+    #
+    #   it "receives event source messages through the proxy", (done) ->
+    #     es = new EventSource("http://localhost:#{@port}/sse", {
+    #       proxy: @proxy
+    #     })
+    #
+    #     es.onopen = =>
+    #       Promise
+    #       .delay(100)
+    #       .then =>
+    #         @sseStream.write({
+    #           data: "hey"
+    #         })
+    #
+    #     es.onmessage = (m) =>
+    #       expect(m.data).to.eq("hey")
+    #       es.close()
+    #       @sseStream.close()
+    #       done()
+    #
+    #   it "handles errors when the event source connection cannot be made", (done) ->
+    #     ## it should call req.socket.destroy() when receiving error
+    #     @server.onRequest (req, res) =>
+    #       sinon.spy(@server._request, "create")
+    #       sinon.spy(req.socket, "destroy")
+    #
+    #       es.onerror = (e) =>
+    #         expect(@server._request.create).to.be.calledWithMatch({timeout: null})
+    #         expect(req.socket.destroy).to.be.calledOnce
+    #         done()
+    #
+    #     es = new EventSource("http://localhost:7777/sse", {
+    #       proxy: @proxy
+    #     })
 
   context "POST *", ->
     beforeEach ->

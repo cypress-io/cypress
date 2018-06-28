@@ -60,7 +60,7 @@ class Server
     @_server     = null
     @_socket     = null
     @_baseUrl    = null
-    @_wsProxy    = null
+    @_nodeProxy  = null
     @_fileServer = null
     @_httpsProxy = null
 
@@ -124,13 +124,13 @@ class Server
       ## generate our request instance
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
-      @_wsProxy = httpProxy.createProxyServer()
+      @_nodeProxy = httpProxy.createProxyServer()
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_wsProxy)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
       @createServer(app, config, @_request)
 
@@ -156,7 +156,7 @@ class Server
       onUpgrade = (req, socket, head) =>
         debug("Got UPGRADE request from %s", req.url)
 
-        @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
+        @proxyWebsockets(@_nodeProxy, socketIoRoute, req, socket, head)
 
       callListeners = (req, res) =>
         listeners = @_server.listeners("request").slice(0)
@@ -300,7 +300,7 @@ class Server
     @_request.send(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
-    debug("resolving visit", {
+    debug("resolving visit %o", {
       url: urlStr
       headers
       options
