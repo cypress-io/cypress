@@ -10,7 +10,7 @@ import viewStore from '../lib/view-store'
 import Settings from '../settings/settings'
 import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
-import Runs from '../runs/runs-list'
+import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
 
 @observer
@@ -51,7 +51,7 @@ class Project extends Component {
   _currentView () {
     switch (viewStore.currentView.name) {
       case C.PROJECT_RUNS:
-        return <Runs project={this.props.project} />
+        return <RunsList project={this.props.project} />
       case C.PROJECT_SETTINGS:
         return <Settings project={this.props.project} />
       default:

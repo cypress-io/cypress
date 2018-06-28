@@ -121,6 +121,7 @@ describe('cli', function () {
   context('cypress run', function () {
     beforeEach(function () {
       sinon.stub(run, 'start').resolves(0)
+      util.exit.withArgs(0)
     })
 
     it('calls run.start with options + exits with code', function (done) {
@@ -197,6 +198,11 @@ describe('cli', function () {
     it('calls run with headed', function () {
       this.exec('run --headed')
       expect(run.start).to.be.calledWith({ headed: true })
+    })
+
+    it('calls run with --no-exit', function () {
+      this.exec('run --no-exit')
+      expect(run.start).to.be.calledWith({ exit: false })
     })
 
   })

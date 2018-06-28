@@ -25,6 +25,7 @@
     "bluebird": "3.5.0",
     "body-parser": "^1.12.4",
     "bootstrap": "^3.3.5",
+    "bytes": "^3.0.0",
     "card": "^1.0.2",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",

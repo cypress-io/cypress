@@ -39,15 +39,19 @@ class Project extends EE
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
+
     if not check.unemptyString(projectRoot)
       throw new Error("Expected project root path, not #{projectRoot}")
 
     @projectRoot = path.resolve(projectRoot)
     @watchers    = Watchers()
-    @server      = null
     @cfg         = null
+    @spec        = null
+    @browser     = null
+    @server      = null
     @memoryCheck = null
     @automation  = null
+
     debug("Project created %s", @projectRoot)
 
   open: (options = {}) ->
@@ -146,6 +150,8 @@ class Project extends EE
   reset: ->
     debug("resetting project instance %s", @projectRoot)
 
+    @spec = @browser = null
+
     Promise.try =>
       @automation?.reset()
       @server?.reset()
@@ -156,7 +162,7 @@ class Project extends EE
     if @memoryCheck
       clearInterval(@memoryCheck)
 
-    @cfg = null
+    @cfg = @spec = @browser = null
 
     Promise.join(
       @server?.close(),
@@ -281,6 +287,13 @@ class Project extends EE
   changeToUrl: (url) ->
     @server.changeToUrl(url)
 
+  setCurrentSpecAndBrowser: (spec, browser) ->
+    @spec = spec
+    @browser = browser
+
+  getCurrentSpecAndBrowser: ->
+    _.pick(@, "spec", "browser")
+
   setBrowsers: (browsers = []) ->
     @getConfig()
     .then (cfg) ->
@@ -323,7 +336,7 @@ class Project extends EE
     throw new Error("Missing project config") if not @cfg
     throw new Error("Missing project root") if not @projectRoot
     newState = _.merge({}, @cfg.state, stateChanges)
-    savedState(@projectRoot)
+    savedState(@projectRoot, @cfg.isTextTerminal)
     .then (state) ->
       state.set(newState)
     .then =>
@@ -331,27 +344,27 @@ class Project extends EE
       newState
 
   _setSavedState: (cfg) ->
-    savedState(@projectRoot)
+    savedState(@projectRoot, cfg.isTextTerminal)
     .then (state) -> state.get()
     .then (state) ->
       cfg.state = state
       cfg
 
-  getSpecUrl: (spec) ->
+  getSpecUrl: (absoluteSpecPath) ->
     @getConfig()
     .then (cfg) =>
-      ## if we dont have a spec or its __all
-      if not spec or (spec is "__all")
+      ## if we dont have a absoluteSpecPath or its __all
+      if not absoluteSpecPath or (absoluteSpecPath is "__all")
         @normalizeSpecUrl(cfg.browserUrl, "/__all")
       else
         ## TODO:
         ## to handle both unit + integration tests we need
-        ## to figure out (based on the config) where this spec
+        ## to figure out (based on the config) where this absoluteSpecPath
         ## lives. does it live in the integrationFolder or
         ## the unit folder?
         ## once we determine that we can then prefix it correctly
         ## with either integration or unit
-        prefixedPath = @getPrefixedPathToSpec(cfg, spec)
+        prefixedPath = @getPrefixedPathToSpec(cfg, absoluteSpecPath)
         @normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
   getPrefixedPathToSpec: (cfg, pathToSpec, type = "integration") ->

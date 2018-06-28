@@ -45,38 +45,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       getFocused = ->
-        try
-          forceFocusedEl = cy.state("forceFocusedEl")
-          if forceFocusedEl
-            if $dom.isAttached(forceFocusedEl)
-              el = forceFocusedEl
-            else
-              cy.state("forceFocusedEl", null)
-          else
-            el = cy.state("document").activeElement
-
-          ## return null if we have an el but
-          ## the el is body or the el is currently the
-          ## blacklist focused el
-          if el and el isnt cy.state("blacklistFocusedEl")
-            el = $dom.wrap(el)
-
-            if el.is("body")
-              log(null)
-              return null
-
-            log(el)
-            return el
-          else
-            log(null)
-            return null
-
-        catch
-          log(null)
-          return null
+        focused = cy.getFocused()
+        log(focused)
+        
+        return focused
 
       do resolveFocused = (failedByNonAssertion = false) ->
-        Promise.try(getFocused)
+        Promise
+        .try(getFocused)
         .then ($el) ->
           if options.verify is false
             return $el

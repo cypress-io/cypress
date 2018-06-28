@@ -138,20 +138,23 @@ describe "lib/modes/run", ->
     it "can launch electron", ->
       screenshots = []
 
+      spec = {
+        absolute: "/path/to/spec"
+      }
+
+      browser = { name: "electron", isHeaded: false }
+
       runMode.launchBrowser({
-        browserName: "electron"
+        spec
+        browser
         project: @projectInstance
         write: "write"
-        gui: null
         screenshots: screenshots
-        spec: {
-          absolute: "/path/to/spec"
-        }
       })
 
       expect(runMode.getElectronProps).to.be.calledWith(false, @projectInstance, "write")
 
-      expect(@launch).to.be.calledWithMatch("electron", "/path/to/spec", {foo: "bar"})
+      expect(@launch).to.be.calledWithMatch(browser, spec, { foo: "bar" })
 
       browserOpts = @launch.firstCall.args[2]
 
@@ -165,16 +168,20 @@ describe "lib/modes/run", ->
       expect(screenshots).to.deep.eq([{a: "a"}])
 
     it "can launch chrome", ->
+      spec = {
+        absolute: "/path/to/spec"
+      }
+
+      browser = { name: "chrome", isHeaded: true }
+
       runMode.launchBrowser({
-        browserName: "chrome"
-        spec: {
-          absolute: "/path/to/spec"
-        }
+        spec
+        browser
       })
 
       expect(runMode.getElectronProps).not.to.be.called
 
-      expect(@launch).to.be.calledWithMatch("chrome", "/path/to/spec", {})
+      expect(@launch).to.be.calledWithMatch(browser, spec, {})
 
   context ".postProcessRecording", ->
     beforeEach ->
@@ -580,13 +587,19 @@ describe "lib/modes/run", ->
         })
 
     it "passes headed to openProject.launch", ->
-      browsers.ensureAndGetByName.resolves({ name: "electron" })
+      browser = { name: "electron" }
 
-      runMode.run({headed: true})
+      browsers.ensureAndGetByName.resolves(browser)
+
+      runMode.run({ headed: true })
       .then ->
         expect(openProject.launch).to.be.calledWithMatch(
-          "electron",
-          "path/to/spec.js",
+          browser,
+          {
+            name: "foo_spec.js"
+            path: "cypress/integration/foo_spec.js"
+            absolute: "/path/to/spec.js"
+          },
           {
             show: true
           }

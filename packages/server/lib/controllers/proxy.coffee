@@ -17,6 +17,11 @@ redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
 
+zlibOptions = {
+  flush: zlib.Z_SYNC_FLUSH
+  finishFlush: zlib.Z_SYNC_FLUSH
+}
+
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
   ## is not sent correctly
@@ -139,7 +144,7 @@ module.exports = {
     getErrorHtml = (err, filePath) =>
       status = err.status ? 500
 
-      debug("request failed %o", { url: remoteUrl, status: status, err: err.message })
+      debug("request failed %o", { url: remoteUrl, status: status, error: err.stack })
 
       urlStr = filePath ? remoteUrl
 
@@ -152,41 +157,33 @@ module.exports = {
       ## turn off __cypress.initial by setting false here
       setCookies(false, wantsInjection)
 
-      debug("received response for %o", {
-        url: remoteUrl
-        headers,
-        statusCode
-      })
-
       encoding = headers["content-encoding"]
 
       isGzipped = encoding and encoding.includes("gzip")
 
+      debug("received response for %o", {
+        url: remoteUrl
+        headers,
+        statusCode,
+        isGzipped
+        wantsInjection,
+        wantsSecurityRemoved,
+      })
+
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
-      if not wantsInjection
-        ## only rewrite if we should
-        if config.modifyObstructiveCode and wantsSecurityRemoved
-          str
-          ## only unzip when it is already gzipped
-          .pipe(conditional(isGzipped, zlib.createGunzip()))
-          .pipe(rewriter.security())
-          .pipe(conditional(isGzipped, zlib.createGzip()))
-          .pipe(thr)
-        else
-          str.pipe(thr)
-      else
-        rewrite = (body) =>
-          rewriter.html(body.toString(), remoteState.domainName, wantsInjection, config.modifyObstructiveCode)
+      if wantsInjection
+        rewrite = (body) ->
+          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
         ## a buffer
-        injection = concat (body) =>
+        injection = concat (body) ->
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
           if isGzipped
-            zlib.gunzipAsync(body)
+            zlib.gunzipAsync(body, zlibOptions)
             .then(rewrite)
             .then(zlib.gzipAsync)
             .then(thr.end)
@@ -195,6 +192,45 @@ module.exports = {
             thr.end rewrite(body)
 
         str.pipe(injection)
+      else
+        ## only rewrite if we should
+        if wantsSecurityRemoved
+          gunzip = zlib.createGunzip(zlibOptions)
+          gunzip.setEncoding("utf8")
+
+          onError = (err) ->
+            debug("failed to proxy response %o", {
+              url: remoteUrl
+              headers
+              statusCode
+              isGzipped
+              wantsInjection
+              wantsSecurityRemoved
+              err
+            })
+
+            if not res.headersSent
+              res
+              .set({
+                "X-Cypress-Proxy-Error-Message": err.message
+                "X-Cypress-Proxy-Error-Stack": JSON.stringify(err.stack)
+              })
+              .status(502)
+
+            return thr.end()
+
+          ## only unzip when it is already gzipped
+          return str
+          .pipe(conditional(isGzipped, gunzip))
+          .on("error", onError)
+          .pipe(rewriter.security())
+          .on("error", onError)
+          .pipe(conditional(isGzipped, zlib.createGzip()))
+          .on("error", onError)
+          .pipe(thr)
+          .on("error", onError)
+
+        return str.pipe(thr)
 
     endWithResponseErr = (err) ->
       ## use res.statusCode if we have one
@@ -234,8 +270,13 @@ module.exports = {
 
         return "partial"
 
-      wantsSecurityRemoved ?= do ->
-        resContentTypeIs(headers, "application/javascript")
+      wantsSecurityRemoved = do ->
+        ## we want to remove security IF we're doing a full injection
+        ## on the response or its a request for any javascript script tag
+        config.modifyObstructiveCode and (
+          (wantsInjection is "full") or
+            resContentTypeIs(headers, "application/javascript")
+        )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
 

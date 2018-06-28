@@ -110,6 +110,7 @@ class Server
 
   open: (config = {}, project) ->
     la(_.isPlainObject(config), "expected plain config object", config)
+
     Promise.try =>
       ## always reset any buffers
       ## TODO: change buffers to be an instance

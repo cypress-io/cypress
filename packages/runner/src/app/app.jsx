@@ -8,7 +8,7 @@ import { Reporter } from '@packages/reporter'
 import { $ } from '@packages/driver'
 
 import errorMessages from '../errors/error-messages'
-import windowUtil from '../lib/window-util'
+import util from '../lib/util'
 import State from '../lib/state'
 
 import Header from '../header/header'
@@ -21,7 +21,7 @@ class App extends Component {
   @observable isReporterResizing = false
 
   render () {
-    const specPath = this._specPath()
+    const specPath = this.props.util.absoluteSpecPath(this.props.config)
 
     return (
       <div className={cs({
@@ -68,10 +68,6 @@ class App extends Component {
   componentDidMount () {
     this._monitorWindowResize()
     this._handleScreenshots()
-  }
-
-  _specPath () {
-    return `${this.props.config.integrationFolder}/${this.props.windowUtil.specFile()}`
   }
 
   _monitorWindowResize () {
@@ -210,7 +206,7 @@ class App extends Component {
 
 App.defaultProps = {
   window,
-  windowUtil,
+  util,
 }
 
 App.propTypes = {

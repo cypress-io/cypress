@@ -27,9 +27,11 @@ exports['e2e js error handling fails 1'] = `
       ✓ t6
     cross origin script errors
       5) explains where script errored
+    bad gzipped js
+      ✓ it does not crash
 
 
-  2 passing
+  3 passing
   5 failing
 
   1) s1 without an afterEach hook t1:
@@ -103,8 +105,8 @@ https://on.cypress.io/uncaught-exception-from-application
   (Results)
 
   ┌─────────────────────────────────────────────────────┐
-  │ Tests:        7                                     │
-  │ Passing:      2                                     │
+  │ Tests:        8                                     │
+  │ Passing:      3                                     │
   │ Failing:      5                                     │
   │ Pending:      0                                     │
   │ Skipped:      0                                     │
@@ -117,11 +119,11 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- without an afterEach hook -- t1.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- without an afterEach hook -- t2.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- with an afterEach hook -- t4.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- with an afterEach hook -- t5.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/s1 -- cross origin script errors -- explains where script errored.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t1 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t2 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t4 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t5 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cross origin script errors -- explains where script errored (failed).png (1280x720)
 
 
   (Video)
@@ -137,9 +139,9 @@ https://on.cypress.io/uncaught-exception-from-application
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ js_error_handling_failing_spec.coffee     XX:XX        7        2        5        -        - │
+  │ ✖ js_error_handling_failing_spec.coffee     XX:XX        8        3        5        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        7        2        5        -        -  
+    1 of 1 failed (100%)                        XX:XX        8        3        5        -        -  
 
 `
 

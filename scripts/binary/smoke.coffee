@@ -77,8 +77,8 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
   console.log("running failing project test")
 
   verifyScreenshots = ->
-    screenshot1 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails1.png")
-    screenshot2 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails2.png")
+    screenshot1 = path.join(e2e, "cypress", "screenshots", "simple_failing_spec.coffee", "simple failing spec -- fails1 (failed).png")
+    screenshot2 = path.join(e2e, "cypress", "screenshots", "simple_failing_spec.coffee", "simple failing spec -- fails2 (failed).png")
 
     Promise.all([
       fs.statAsync(screenshot1)
