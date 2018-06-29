@@ -62,6 +62,9 @@ const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
+    case 'after:screenshot':
+      util.wrapChildPromise(ipc, invoke, ids, args)
+      return
     case 'file:preprocessor':
       preprocessor.wrap(ipc, invoke, ids, args)
       return

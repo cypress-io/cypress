@@ -62,12 +62,13 @@ const addProject = (path) => {
 }
 
 const runSpec = (project, spec, browser) => {
-  project.setChosenBrowserByName(browser)
+  specsStore.setChosenSpec(spec)
+  project.setChosenBrowser(browser)
 
   const launchBrowser = () => {
     project.browserOpening()
 
-    ipc.launchBrowser({ browser, spec }, (err, data = {}) => {
+    ipc.launchBrowser({ browser, spec: spec.obj }, (err, data = {}) => {
       if (data.browserOpened) {
         project.browserOpened()
       }
@@ -82,17 +83,14 @@ const runSpec = (project, spec, browser) => {
     })
   }
 
-  const changeChosenSpec = () => {
-    specsStore.setChosenSpec(spec)
-  }
-
-  return closeBrowser()
-  .then(changeChosenSpec)
+  return closeBrowser(null, spec)
   .then(launchBrowser)
 }
 
-const closeBrowser = (project) => {
-  specsStore.setChosenSpec('')
+const closeBrowser = (project, spec) => {
+  if (!spec) {
+    specsStore.setChosenSpec(null)
+  }
 
   if (project) {
     project.browserClosed()
@@ -141,6 +139,7 @@ const openProject = (project) => {
 
   const updateConfig = (config) => {
     project.update({ id: config.projectId })
+    project.update({ name: config.projectName })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
@@ -151,7 +150,7 @@ const openProject = (project) => {
   })
 
   ipc.onSpecChanged((__, spec) => {
-    specsStore.setChosenSpec(spec)
+    specsStore.setChosenSpecByRelativePath(spec)
   })
 
   ipc.onConfigChanged(() => {
@@ -182,6 +181,7 @@ const openProject = (project) => {
 const reopenProject = (project) => {
   project.clearError()
   project.clearWarning()
+
   return closeProject(project)
   .then(() => openProject(project))
 }

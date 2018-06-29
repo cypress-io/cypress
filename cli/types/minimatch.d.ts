@@ -3,10 +3,9 @@
 // so that Cypress can get and use the Blob type
 // tslint:disable-next-line:no-implicit-dependencies
 import * as mimimatch from 'minimatch'
-
 export = Mimimatch
 export as namespace Mimimatch
 
 declare namespace Mimimatch {
-  type MimimatchStatic = mimimatch.IMinimatchStatic
+  type MimimatchStatic = mimimatch.IMinimatchStatic & typeof mimimatch
 }

@@ -349,6 +349,100 @@ describe "src/cy/commands/actions/click", ->
           .then ->
             expect(scrolled).to.be.empty
 
+      it "does not scroll when position sticky and display flex", ->
+        scrolled = []
+
+        cy.on "scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.viewport(1000, 660)
+
+        $body = cy.$$("body")
+        $body.css({
+          padding: 0
+          margin: 0
+        }).children().remove()
+
+        $wrap = $("<div></div>")
+          .attr("id", "flex-wrap")
+          .css({
+            display: "flex"
+          })
+          .prependTo($body)
+
+        $nav = $("""
+        <div><input type="text" data-cy="input" />
+        <br><br>
+        <a href="#" data-cy="button"> Button </a></div>
+        """)
+          .attr("id", "nav")
+          .css({
+            position: "sticky"
+            top: 0
+            height: "100vh"
+            width: "200px"
+            background: "#f0f0f0"
+            borderRight: "1px solid silver"
+            padding: "20px"
+          })
+          .appendTo($wrap)
+
+        $content = $("<div><h1>Hello</h1></div>")
+          .attr("id", "content")
+          .css({
+            padding: "20px"
+            flex: 1
+          })
+          .appendTo($wrap)
+
+        $longBlock1 = $("<div>Long block 1</div>")
+          .attr("id", "long-block-1")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock2 = $("<div>Long block 2</div>")
+          .attr("id", "long-block-2")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock3 = $("<div>Long block 3</div>")
+          .attr("id", "long-block-3")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock4 = $("<div>Long block 4</div>")
+          .attr("id", "long-block-4")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock5 = $("<div>Long block 5</div>")
+          .attr("id", "long-block-5")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        cy.get('[data-cy=button]').click().then =>
+          expect(scrolled).to.deep.eq(["element", "element"])
+
       it "can force click on hidden elements", ->
         cy.get("button:first").invoke("hide").click({ force: true })
 

@@ -71,7 +71,15 @@ describe "src/cy/snapshot", ->
       $("<style>.foo { color: red }</style>").appendTo(cy.$$("head"))
 
       { headStyles } = cy.createSnapshot(@$el)
-      expect(headStyles[0]).to.include(".foo { color: red }")
+      expect(headStyles[0]).to.include(".foo { color: red; }")
+
+    it "provides contents of style tags in head for injected rules", ->
+      styleEl = document.createElement("style");
+      $(styleEl).appendTo(cy.$$("head"))
+      styleEl.sheet.insertRule(".foo { color: red; }", 0)
+
+      { headStyles } = cy.createSnapshot(@$el)
+      expect(headStyles[0]).to.include(".foo { color: red; }")
 
     it "provides contents of local stylesheet links in head", (done) ->
       onLoad = ->
@@ -149,7 +157,7 @@ describe "src/cy/snapshot", ->
       $("<style>.foo { color: red }</style>").appendTo(cy.$$("body"))
 
       {bodyStyles} = cy.createSnapshot(@$el)
-      expect(bodyStyles[bodyStyles.length - 1]).to.include(".foo { color: red }")
+      expect(bodyStyles[bodyStyles.length - 1]).to.include(".foo { color: red; }")
 
     it "provides contents of local stylesheet links in body", (done) ->
       onLoad = ->
@@ -198,9 +206,8 @@ describe "src/cy/snapshot", ->
       { headStyles } = cy.createSnapshot(@$el)
       expect(headStyles[0].replace(/\s+/gm, "")).to.include """
         @font-face {
-          font-family: 'Some Font';
-          src: url('http://localhost:3500/fonts/some-font.eot');
-          src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format('embedded-opentype'), url('http://localhost:3500/fonts/some-font.woff2') format('woff2'), url('http://localhost:3500/fonts/some-font.woff') format('woff'), url('http://localhost:3500/fonts/some-font.ttf') format('truetype'), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
+          font-family: "Some Font";
+          src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format("embedded-opentype"), url('http://localhost:3500/fonts/some-font.woff2') format("woff2"), url('http://localhost:3500/fonts/some-font.woff') format("woff"), url('http://localhost:3500/fonts/some-font.ttf') format("truetype"), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format("svg");
         }
       """.replace(/\s+/gm, "")
 

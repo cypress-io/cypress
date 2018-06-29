@@ -27,7 +27,9 @@ describe "lib/util/saved_state", ->
 
 describe "lib/saved_state", ->
   beforeEach ->
-    fs.unlinkAsync(savedState.path).catch ->
+    savedState().then (state) ->
+      fs.unlinkAsync(state.path)
+    .catch ->
       ## ignore error if file didn't exist in the first place
 
   it "is a function", ->
@@ -37,6 +39,11 @@ describe "lib/saved_state", ->
     savedState()
     .then (state) ->
       expect(state).to.be.instanceof(FileUtil)
+
+  it "resolves with a noop instance if isTextTerminal", ->
+    savedState("/foo/bar", true)
+    .then (state) ->
+      expect(state).to.equal(FileUtil.noopFile)
 
   it "caches state file instance per path", ->
     Promise.all([
@@ -60,3 +67,20 @@ describe "lib/saved_state", ->
     .then (state) ->
       expected = path.join(appData.path(), "projects", "__global__", "state.json")
       expect(state.path).to.equal(expected)
+
+  it "only saves whitelisted keys", ->
+    savedState()
+    .then (state) ->
+      state.set({ foo: "bar", appWidth: 20 })
+      .then ->
+        state.get()
+    .then (stateObject) ->
+      expect(stateObject).to.eql({ appWidth: 20 })
+
+  it "logs error when attempting to set invalid key(s)", ->
+    sinon.spy(console, "error")
+    savedState()
+    .then (state) ->
+      state.set({ foo: "bar", baz: "qux" })
+    .then ->
+      expect(console.error).to.be.calledWith("WARNING: attempted to save state for non-whitelisted key(s): foo, baz. All keys must be whitelisted in server/lib/saved_state.coffee")

@@ -4,15 +4,27 @@ import { action, computed, observable } from 'mobx'
 import localData from '../lib/local-data'
 import Spec from './spec-model'
 
+const ALL_SPECS = '__all'
+
 export class SpecsStore {
   @observable _specs = []
   @observable error = null
   @observable isLoading = false
-  @observable chosenSpecPath
   @observable filter = null
 
-  @computed get allSpecsChosen () {
-    return this.chosenSpecPath === '__all'
+  constructor () {
+    this.models = []
+
+    this.allSpecsSpec = new Spec({
+      name: null,
+      path: ALL_SPECS,
+      displayName: 'Run all specs',
+      obj: {
+        name: 'All Specs',
+        relative: null,
+        absolute: null,
+      },
+    })
   }
 
   @computed get specs () {
@@ -29,8 +41,17 @@ export class SpecsStore {
     this.isLoading = false
   }
 
-  @action setChosenSpec (specPath) {
-    this.chosenSpecPath = specPath
+  @action setChosenSpec (spec) {
+    // set all the models to false
+    _
+    .chain(this.models)
+    .concat(this.allSpecsSpec)
+    .invokeMap('setChosen', false)
+    .value()
+
+    if (spec) {
+      spec.setChosen(true)
+    }
   }
 
   @action setExpandSpecFolder (spec) {
@@ -49,8 +70,42 @@ export class SpecsStore {
     this.filter = null
   }
 
-  isChosenSpec (spec) {
-    return spec.name === this.chosenSpecPath || spec.path === this.chosenSpecPath
+  setChosenSpecByRelativePath (relativePath) {
+    // TODO: currently this will always find nothing
+    // because this data is sent from the driver when
+    // a spec first opens. it passes the normalized url
+    // which will no longer match any spec. we need to
+    // change the logic to do this. it's barely worth it though.
+    const found = this.findSpecModelByPath(relativePath)
+
+    if (found) {
+      this.setChosenSpec(found)
+    }
+  }
+
+  findOrCreateSpec (file, segment) {
+    const spec = new Spec({
+      obj: file, // store the original obj
+      name: file.name,
+      path: file.relative,
+      displayName: segment,
+    })
+
+    const found = this.findSpecModelByPath(file.relative)
+
+    if (found) {
+      spec.merge(found)
+    }
+
+    return spec
+  }
+
+  findSpecModelByPath (path) {
+    return _.find(this.models, { path })
+  }
+
+  getAllSpecsSpec () {
+    return this.allSpecsSpec
   }
 
   _tree (specsByType) {
@@ -70,23 +125,31 @@ export class SpecsStore {
       })
     }
 
-    return _.reduce(specs, (root, file) => {
+    const specModels = []
+
+    const tree = _.reduce(specs, (root, file) => {
       let placeholder = root
+
       const segments = file.name.split('/')
+
       _.each(segments, (segment) => {
         let spec = _.find(placeholder, { displayName: segment })
         if (!spec) {
-          spec = new Spec({
-            name: file.name,
-            displayName: segment,
-            path: file.path,
-          })
+          spec = this.findOrCreateSpec(file, segment)
+
+          specModels.push(spec)
           placeholder.push(spec)
         }
+
         placeholder = spec.children
       })
+
       return root
     }, [])
+
+    this.models = specModels
+
+    return tree
   }
 }
 

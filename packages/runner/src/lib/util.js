@@ -1,3 +1,5 @@
+import path from 'path'
+
 export default {
   hasSpecFile () {
     return !!location.hash
@@ -14,5 +16,10 @@ export default {
     } else {
       return ''
     }
+  },
+
+  absoluteSpecPath (config) {
+    const relativeSpecPath = path.relative('integration', this.specPath())
+    return path.join(config.integrationFolder, relativeSpecPath)
   },
 }

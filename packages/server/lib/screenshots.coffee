@@ -1,18 +1,20 @@
 _               = require("lodash")
 mime            = require("mime")
 path            = require("path")
-bytes           = require("bytes")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
 Jimp            = require("jimp")
 sizeOf          = require("image-size")
 colorString     = require("color-string")
 debug           = require("debug")("cypress:server:screenshot")
+plugins         = require("./plugins")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
+pathHelpers     = require("./util/path_helpers")
 
 RUNNABLE_SEPARATOR = " -- "
-invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
+pathSeparatorRe = /[\\\/]/g
+invalidCharsRe = /[^0-9a-zA-Z-_\s\(\)]/g
 
 ## internal id incrementor
 __ID__ = null
@@ -22,7 +24,8 @@ __ID__ = null
 ## screenshots since its possible two screenshots with
 ## the same name will be written to the file system
 
-Jimp.prototype.getBuffer = Promise.promisify(Jimp.prototype.getBuffer)
+replaceInvalidChars = (str) ->
+  str.replace(invalidCharsRe, "")
 
 ## when debugging logs automatically prefix the
 ## screenshot id to the debug logs for easier association
@@ -78,7 +81,7 @@ hasHelperPixels = (image, pixelRatio) ->
   topRight.isWhite = isWhite(topRight)
   bottomRight.isBlack = isBlack(bottomRight)
 
-  debug("helper pixels %O", {
+  debug("helper pixels \n %O", {
     topLeft
     topLeftRight
     topLeftDown
@@ -108,7 +111,7 @@ captureAndCheck = (data, automate, conditionFn) ->
 
     automate(data)
     .then (dataUrl) ->
-      debug("received screenshot data from automation layer")
+      debug("received screenshot data from automation layer", dataUrl.slice(0, 100))
 
       Jimp.read(dataUriToBuffer(dataUrl))
     .then (image) ->
@@ -128,18 +131,21 @@ isMultipart = (data) ->
 
 crop = (image, dimensions, pixelRatio = 1) ->
   debug("dimensions before are %o", dimensions)
+
   dimensions = _.transform dimensions, (result, value, dimension) ->
     result[dimension] = value * pixelRatio
 
   debug("dimensions for cropping are %o", dimensions)
+
   x = Math.min(dimensions.x, image.bitmap.width - 1)
   y = Math.min(dimensions.y, image.bitmap.height - 1)
   width = Math.min(dimensions.width, image.bitmap.width - x)
   height = Math.min(dimensions.height, image.bitmap.height - y)
-  debug("crop: from #{image.bitmap.width} x #{image.bitmap.height}")
-  debug("        to #{width} x #{height} at (#{x}, #{y})")
 
-  image.crop(x, y, width, height)
+  debug("crop: from #{x}, #{y}")
+  debug("        to #{width} x #{height}")
+
+  image.clone().crop(x, y, width, height)
 
 pixelConditionFn = (data, image) ->
   pixelRatio = image.bitmap.width / data.viewport.width
@@ -147,57 +153,118 @@ pixelConditionFn = (data, image) ->
   hasPixels = hasHelperPixels(image, pixelRatio)
   app = isAppOnly(data)
 
+  subject = if app then "app" else "runner"
+
   ## if we are app, we dont need helper pixels else we do!
   passes = if app then not hasPixels else hasPixels
 
-  debug("pixelConditionFn", { pixelRatio, hasPixels, app, passes })
+  debug("pixelConditionFn %o", {
+    pixelRatio,
+    subject,
+    hasPixels,
+    expectedPixels: !app
+  })
 
   return passes
 
 multipartImages = []
 
+# compareUntilPixelsDiffer = (img1, img2) ->
+  ## NOTE: this is for comparing pixel by pixel which is useful
+  ## if you're trying to dig into the specific pixel differences
+  ##
+  ## we're making this as efficient as possible because
+  ## there are significant performance problems
+  ## getting a hash or buffer of all the image data.
+  ##
+  ## instead we will walk through two images comparing
+  ## them pixel by pixel until they don't match.
+  #
+  # iterations = 0
+  #
+  # { width, height } = img2.bitmap
+  #
+  # data1 = img1.bitmap.data
+  # data2 = img2.bitmap.data
+  #
+  # ret = (differences) ->
+  #   return {
+  #     iterations
+  #     differences
+  #   }
+  #
+  # for y in [0...height]
+  #   for x in [0...width]
+  #     iterations += 1
+  #
+  #     idx = (width * y + x) << 2
+  #
+  #     pix1 = data1.readUInt32BE(idx)
+  #     pix2 = data2.readUInt32BE(idx)
+  #
+  #     if pix1 isnt pix2
+  #       return ret([
+  #         intToRGBA(pix1),
+  #         intToRGBA(pix2)
+  #       ])
+  #
+  # return ret(null)
+
 clearMultipartState = ->
+  debug("clearing %d cached multipart images", multipartImages.length)
   multipartImages = []
 
-compareLast = (data, image) ->
-  ## ensure the previous image isn't the same, which might indicate the
-  ## page has not scrolled yet
+imagesMatch = (img1, img2) ->
+  ## using Buffer::equals here
+  img1.bitmap.data.equals(img2.bitmap.data)
+
+lastImagesAreDifferent = (data, image) ->
+  ## ensure the previous image isn't the same,
+  ## which might indicate the page has not scrolled yet
   previous = _.last(multipartImages)
   if not previous
     debug("no previous image to compare")
     return true
 
-  prevHash = previous.image.hash()
-  currHash = image.hash()
-  matches = prevHash is currHash
+  matches = imagesMatch(previous.image, image)
 
-  debug("comparing previous and current image hashes %o", {
-    prevHash
-    currHash
+  debug("comparing previous and current image pixels %o", {
+    previous: previous.__ID__
     matches
   })
 
-  return prevHash isnt currHash
+  ## return whether or not the two images match
+  ## should be true if they don't, false if they do
+  return not matches
 
 multipartConditionFn = (data, image) ->
   if data.current is 1
-    pixelConditionFn(data, image) and compareLast(data, image)
+    pixelConditionFn(data, image) and lastImagesAreDifferent(data, image)
   else
-    compareLast(data, image)
+    lastImagesAreDifferent(data, image)
 
 stitchScreenshots = (pixelRatio) ->
-  width = Math.min(_.map(multipartImages, "data.clip.width")...)
-  height = _.sumBy(multipartImages, "data.clip.height")
+  fullWidth = _
+  .chain(multipartImages)
+  .map("data.clip.width")
+  .min()
+  .multiply(pixelRatio)
+  .value()
+
+  fullHeight = _
+  .chain(multipartImages)
+  .sumBy("data.clip.height")
+  .multiply(pixelRatio)
+  .value()
 
   debug("stitch #{multipartImages.length} images together")
 
   takenAts = []
-
-  fullImage = new Jimp(width, height)
   heightMarker = 0
+  fullImage = new Jimp(fullWidth, fullHeight)
+
   _.each multipartImages, ({ data, image, takenAt }) ->
-    croppedImage = image.clone()
-    crop(croppedImage, data.clip, pixelRatio)
+    croppedImage = crop(image, data.clip, pixelRatio)
 
     debug("stitch: add image at (0, #{heightMarker})")
 
@@ -207,31 +274,67 @@ stitchScreenshots = (pixelRatio) ->
 
   return { image: fullImage, takenAt: takenAts }
 
-isBuffer = (details) ->
-  !!details.buffer
-
 getType = (details) ->
-  if isBuffer(details)
+  if details.buffer
     details.buffer.type
   else
     details.image.getMIME()
 
 getBuffer = (details) ->
-  if isBuffer(details)
+  if details.buffer
     Promise.resolve(details.buffer)
   else
-    details.image.getBuffer(Jimp.AUTO)
+    Promise
+    .promisify(details.image.getBuffer)
+    .call(details.image, Jimp.AUTO)
 
 getDimensions = (details) ->
-  if isBuffer(details)
-    sizeOf(details.buffer)
+  pick = (obj) ->
+    _.pick(obj, "width", "height")
+
+  if details.buffer
+    pick(sizeOf(details.buffer))
   else
-    _.pick(details.image.bitmap, "width", "height")
+    pick(details.image.bitmap)
+
+ensureUniquePath = (takenPaths, withoutExt, extension) ->
+  fullPath = "#{withoutExt}.#{extension}"
+  num = 0
+  while _.includes(takenPaths, fullPath)
+    fullPath = "#{withoutExt} (#{++num}).#{extension}"
+  return fullPath
+
+getPath = (data, ext, screenshotsFolder) ->
+  specNames = (data.specName or "")
+  .split(pathSeparatorRe)
+
+  if data.name
+    names = data.name.split(pathSeparatorRe).map(replaceInvalidChars)
+  else
+    names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
+
+  ## append (failed) to the last name
+  if data.testFailure
+    index = names.length - 1
+    names[index] = names[index] + " (failed)"
+
+  withoutExt = path.join(screenshotsFolder, specNames..., names...)
+
+  ensureUniquePath(data.takenPaths, withoutExt, ext)
+
+getPathToScreenshot = (data, details, screenshotsFolder) ->
+  ext = mime.extension(getType(details))
+
+  getPath(data, ext, screenshotsFolder)
 
 module.exports = {
   crop
 
+  getPath
+
   clearMultipartState
+
+  imagesMatch
 
   copy: (src, dest) ->
     fs
@@ -283,7 +386,9 @@ module.exports = {
         if data.current is 1
           clearMultipartState()
 
-        multipartImages.push({ data, image, takenAt })
+        debug("storing image for future comparison", __ID__)
+
+        multipartImages.push({ data, image, takenAt, __ID__ })
 
         if data.current is data.total
           { image } = stitchScreenshots(pixelRatio)
@@ -293,25 +398,19 @@ module.exports = {
           return {}
 
       if isAppOnly(data) or isMultipart(data)
-        crop(image, data.clip, pixelRatio)
+        image = crop(image, data.clip, pixelRatio)
 
       return { image, pixelRatio, multipart, takenAt }
     .then ({ image, pixelRatio, multipart, takenAt }) ->
       return null if not image
 
       if image and data.userClip
-        crop(image, data.userClip, pixelRatio)
+        image = crop(image, data.userClip, pixelRatio)
 
       return { image, pixelRatio, multipart, takenAt }
 
   save: (data, details, screenshotsFolder) ->
-    type = getType(details)
-
-    name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
-    name = name.replace(invalidCharsRe, "")
-    name = [name, mime.extension(type)].join(".")
-
-    pathToScreenshot = path.join(screenshotsFolder, name)
+    pathToScreenshot = getPathToScreenshot(data, details, screenshotsFolder)
 
     debug("save", pathToScreenshot)
 
@@ -326,12 +425,31 @@ module.exports = {
       { multipart, pixelRatio, takenAt } = details
 
       {
+        size
         takenAt
         dimensions
         multipart
         pixelRatio
-        size: bytes(size, {unitSeparator: " "})
+        name: data.name
+        specName: data.specName
+        testFailure: data.testFailure
         path: pathToScreenshot
       }
+
+  afterScreenshot: (data, details) ->
+    duration = new Date() - new Date(data.startTime)
+
+    details = _.extend({}, data, details, { duration })
+    details = _.pick(details, "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
+
+    if not plugins.has("after:screenshot")
+      return Promise.resolve(details)
+
+    plugins.execute("after:screenshot", details)
+    .then (updates) =>
+      if not _.isPlainObject(updates)
+        return details
+
+      _.extend(details, _.pick(updates, "size", "dimensions", "path"))
 
 }

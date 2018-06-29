@@ -17,12 +17,13 @@ const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 
 const alreadyInstalledMsg = () => {
-  logger.log(stripIndent`    
-    Skipping installation:
-
-      Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
-  `)
-  logger.log()
+  if (!util.isPostInstall()) {
+    logger.log(stripIndent`    
+      Skipping installation:
+  
+        Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
+    `)
+  }
 }
 
 const displayCompletionMsg = () => {
@@ -128,11 +129,11 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 const start = (options = {}) => {
 
   // handle deprecated / removed
-  if (process.env.CYPRESS_BINARY_VERSION) {
+  if (util.getEnv('CYPRESS_BINARY_VERSION')) {
     return throwFormErrorText(errors.removed.CYPRESS_BINARY_VERSION)()
   }
 
-  if (process.env.CYPRESS_SKIP_BINARY_INSTALL) {
+  if (util.getEnv('CYPRESS_SKIP_BINARY_INSTALL')) {
     return throwFormErrorText(errors.removed.CYPRESS_SKIP_BINARY_INSTALL)()
   }
 
@@ -147,9 +148,9 @@ const start = (options = {}) => {
   debug('version in package.json is', needVersion)
 
   // let this environment variable reset the binary version we need
-  if (process.env.CYPRESS_INSTALL_BINARY) {
+  if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
 
-    const envVarVersion = process.env.CYPRESS_INSTALL_BINARY
+    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY')
     debug('using environment variable CYPRESS_INSTALL_BINARY %s', envVarVersion)
 
     if (envVarVersion === '0') {
@@ -170,8 +171,8 @@ const start = (options = {}) => {
     }
   }
 
-  if (process.env.CYPRESS_CACHE_FOLDER) {
-    const envCache = process.env.CYPRESS_CACHE_FOLDER
+  if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
+    const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')
     logger.log(
       stripIndent`
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
@@ -201,10 +202,12 @@ const start = (options = {}) => {
       return true
     }
 
-    // debug('installed version is', binaryVersion, 'version needed is', needVersion)
+    debug('installed version is', binaryVersion, 'version needed is', needVersion)
+
+    logger.log()
     logger.log(stripIndent`
-    Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
-    `)
+      Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
+      `)
     logger.log()
 
     if (options.force) {
@@ -265,7 +268,8 @@ const start = (options = {}) => {
     })
     .then((pathToLocalFile) => {
       if (pathToLocalFile) {
-        debug('found local file at', needVersion)
+        const absolutePath = path.resolve(needVersion)
+        debug('found local file at', absolutePath)
         debug('skipping download')
 
         const rendererOptions = getRendererOptions()
@@ -274,7 +278,7 @@ const start = (options = {}) => {
             throttle: 100,
             onProgress: null,
           },
-          zipFilePath: needVersion,
+          zipFilePath: absolutePath,
           installDir,
           rendererOptions,
         })], rendererOptions).run()
@@ -336,6 +340,12 @@ const progessify = (task, title) => {
 // if we are running in CI then use
 // the verbose renderer else use
 // the default
-const getRendererOptions = () => ({
-  renderer: util.isCi() ? verbose : 'default',
-})
+const getRendererOptions = () => {
+  let renderer = util.isCi() ? verbose : 'default'
+  if (logger.logLevel() === 'silent') {
+    renderer = 'silent'
+  }
+  return {
+    renderer,
+  }
+}

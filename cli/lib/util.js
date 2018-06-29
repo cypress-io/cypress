@@ -4,9 +4,11 @@ const os = require('os')
 const tty = require('tty')
 const path = require('path')
 const isCi = require('is-ci')
+const execa = require('execa')
 const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
+const cachedir = require('cachedir')
 const executable = require('executable')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
@@ -208,6 +210,36 @@ const util = {
     }
     return path.join(process.cwd(), '..', '..', filename)
   },
+
+  getEnv (varName) {
+    const envVar = process.env[varName]
+    const configVar = process.env[`npm_config_${varName}`]
+    const packageConfigVar = process.env[`npm_package_config_${varName}`]
+    if (envVar) {
+      debug(`Using ${varName} from environment variable`)
+      return envVar
+    }
+    if (configVar) {
+      debug(`Using ${varName} from npm config`)
+      return configVar
+    }
+    if (packageConfigVar) {
+      debug(`Using ${varName} from package.json config`)
+      return packageConfigVar
+    }
+    return undefined
+
+  },
+
+  getCacheDir () {
+    return cachedir('Cypress')
+  },
+
+  isPostInstall () {
+    return process.env.npm_lifecycle_event === 'postinstall'
+  },
+
+  exec: execa,
 
   stdoutLineMatches,
 }

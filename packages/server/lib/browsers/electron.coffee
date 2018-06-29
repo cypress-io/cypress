@@ -107,9 +107,9 @@ module.exports = {
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
-    { projectRoot } = options
+    { projectRoot, isTextTerminal } = options
 
-    savedState(projectRoot)
+    savedState(projectRoot, isTextTerminal)
     .then (state) ->
       state.get()
     .then (state) =>
@@ -126,10 +126,18 @@ module.exports = {
 
         plugins.execute("before:browser:launch", options.browser, options)
         .then (newOptions) ->
-          return newOptions ? options
+          if newOptions
+            _.extend(options, newOptions)
+
+          return options
     .then (options) =>
       @_render(url, projectRoot, options)
       .then (win) =>
+        ## cause the webview to receive focus so that
+        ## native browser focus + blur events fire correctly
+        ## https://github.com/cypress-io/cypress/issues/1939
+        win.focusOnWebView()
+
         a = Windows.automation(win)
 
         invoke = (method, data) =>

@@ -3,6 +3,7 @@ const os = require('os')
 const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
+const mockfs = require('mock-fs')
 const snapshot = require('snap-shot-it')
 
 const stdout = require('../../support/stdout')
@@ -44,6 +45,7 @@ describe('/lib/tasks/install', function () {
 
       // sinon.stub(os, 'tmpdir').returns('/tmp')
       sinon.stub(util, 'isCi').returns(false)
+      sinon.stub(util, 'isPostInstall').returns(false)
       sinon.stub(util, 'pkgVersion').returns(packageVersion)
       sinon.stub(download, 'start').resolves(packageVersion)
       sinon.stub(unzip, 'start').resolves()
@@ -111,22 +113,59 @@ describe('/lib/tasks/install', function () {
         })
       })
 
+      it('can install local binary zip file from relative path', function () {
+        const version = './cypress-resources/file.zip'
+        mockfs({
+          [version]: 'asdf',
+        })
+        process.env.CYPRESS_INSTALL_BINARY = version
+
+        const installDir = state.getVersionDir()
+        return install.start()
+        .then(() => {
+          expect(download.start).not.to.be.called
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: path.resolve(version),
+            installDir,
+          })
+        })
+      })
+
       describe('when version is already installed', function () {
         beforeEach(function () {
           state.getBinaryPkgVersionAsync.resolves(packageVersion)
 
-          return install.start()
         })
 
-        it('logs noop message', function () {
-          expect(state.getBinaryPkgVersionAsync).to.be.calledWith('/cache/Cypress/1.2.3/Cypress.app')
+        it('doesn\'t attempt to download', function () {
+          return install.start()
+          .then(() => {
+            expect(download.start).not.to.be.called
+            expect(state.getBinaryPkgVersionAsync).to.be.calledWith('/cache/Cypress/1.2.3/Cypress.app')
+          })
 
-          expect(download.start).not.to.be.called
+        })
 
-          snapshot(
-            'version already installed',
-            normalize(this.stdout.toString())
-          )
+        it('logs \'skipping install\' when explicit cypress install', function () {
+          return install.start()
+          .then(() => {
+            return snapshot(
+              'version already installed - cypress install',
+              normalize(this.stdout.toString())
+            )
+          })
+
+        })
+
+        it('logs when already installed when run from postInstall', function () {
+          util.isPostInstall.returns(true)
+          return install.start()
+          .then(() => {
+            snapshot(
+              'version already installed - postInstall',
+              normalize(this.stdout.toString())
+            )
+          })
         })
       })
 
@@ -358,5 +397,17 @@ describe('/lib/tasks/install', function () {
         })
       })
     })
+
+    it('is silent when log level is silent', function () {
+      process.env.npm_config_loglevel = 'silent'
+      return install.start()
+      .then(() => {
+        return snapshot(
+          'silent install',
+          normalize(`[no output]${this.stdout.toString()}`)
+        )
+      })
+    })
   })
+
 })

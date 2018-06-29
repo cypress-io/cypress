@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 import automation from '../lib/automation'
 import eventManager from '../lib/event-manager'
 import State from '../lib/state'
-import windowUtil from '../lib/window-util'
+import util from '../lib/util'
 
 import App from './app'
 import AutomationDisconnected from '../errors/automation-disconnected'
@@ -35,7 +35,7 @@ class Container extends Component {
         return this._automationDisconnected()
       case automation.CONNECTED:
       default:
-        return this.props.windowUtil.hasSpecFile() ? this._app() : this._noSpec()
+        return this.props.util.hasSpecFile() ? this._app() : this._noSpec()
     }
   }
 
@@ -64,7 +64,7 @@ class Container extends Component {
   }
 
   _checkSpecFile = () => {
-    if (this.props.windowUtil.hasSpecFile()) {
+    if (this.props.util.hasSpecFile()) {
       this.forceUpdate()
     }
   }
@@ -85,7 +85,7 @@ class Container extends Component {
 
 Container.defaultProps = {
   eventManager,
-  windowUtil,
+  util,
 }
 
 Container.propTypes = {

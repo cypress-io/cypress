@@ -30,7 +30,7 @@ const createProps = () => ({
     },
   },
   state: new State(),
-  windowUtil: {
+  util: {
     hasSpecFile: sinon.stub(),
   },
 })
@@ -115,7 +115,7 @@ describe('<Container />', () => {
     beforeEach(() => {
       props = createProps()
       props.state.automation = automation.CONNECTED
-      props.windowUtil.hasSpecFile.returns(false)
+      props.util.hasSpecFile.returns(false)
       component = shallow(<Container {...props} />)
     })
 
@@ -128,7 +128,7 @@ describe('<Container />', () => {
     })
 
     it('renders the app when hash changes with and has a spec file', () => {
-      props.windowUtil.hasSpecFile.returns(true)
+      props.util.hasSpecFile.returns(true)
       component.find(NoSpec).prop('onHashChange')()
       component.update()
       expect(component.find(App)).to.exist
@@ -142,7 +142,7 @@ describe('<Container />', () => {
     beforeEach(() => {
       props = createProps()
       props.state.automation = automation.CONNECTED
-      props.windowUtil.hasSpecFile.returns(true)
+      props.util.hasSpecFile.returns(true)
       component = shallow(<Container {...props} />)
     })
 

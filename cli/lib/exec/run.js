@@ -1,5 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:cli')
+
+const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 
@@ -13,7 +15,7 @@ const processRunOptions = (options = {}) => {
   //// if key is set use that - else attempt to find it by environment variable
   if (options.key == null) {
     debug('--key is not set, looking up environment variable CYPRESS_RECORD_KEY')
-    options.key = process.env.CYPRESS_RECORD_KEY || process.env.CYPRESS_CI_KEY
+    options.key = util.getEnv('CYPRESS_RECORD_KEY') || util.getEnv('CYPRESS_CI_KEY')
   }
 
   if (options.env) {
@@ -72,6 +74,10 @@ const processRunOptions = (options = {}) => {
 
   if (options.headed) {
     args.push('--headed', options.headed)
+  }
+
+  if (options.exit === false) {
+    args.push('--no-exit')
   }
 
   return args

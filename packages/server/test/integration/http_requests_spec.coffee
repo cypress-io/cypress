@@ -1,10 +1,12 @@
 require("../spec_helper")
 
 _             = require("lodash")
+r             = require("request")
 rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
 path          = require("path")
+zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
@@ -14,16 +16,21 @@ evilDns       = require("evil-dns")
 Promise       = require("bluebird")
 httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
 pkg           = require("@packages/root")
+SseStream     = require('ssestream')
+EventSource   = require("eventsource")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
+Project       = require("#{root}lib/project")
 Watchers      = require("#{root}lib/watchers")
 errors        = require("#{root}lib/errors")
 files         = require("#{root}lib/controllers/files")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
-CacheBuster   = require("#{root}lib/util/cache_buster")
 fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
+CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
+
+zlib = Promise.promisifyAll(zlib)
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
@@ -64,11 +71,22 @@ describe "Routes", ->
       ## and allow us to override them
       ## for each test
       config.set(obj)
-      .then  (cfg) =>
+      .then (cfg) =>
         ## use a jar for each test
         ## but reset it automatically
         ## between test
         jar = rp.jar()
+
+        @r = (options = {}, cb) ->
+          _.defaults options, {
+            proxy: @proxy,
+            jar,
+            simple: false,
+            followRedirect: false,
+            resolveWithFullResponse: true
+          }
+
+          r(options, cb)
 
         ## use a custom request promise
         ## to automatically backfill these
@@ -89,6 +107,8 @@ describe "Routes", ->
           rp(options)
 
         open = =>
+          project = Project("/path/to/project")
+
           Promise.all([
             ## open our https server
             httpsServer.start(8443),
@@ -96,7 +116,7 @@ describe "Routes", ->
             ## and open our cypress server
             @server = Server(Watchers())
 
-            @server.open(cfg)
+            @server.open(cfg, project)
             .spread (port) =>
               if initialUrl
                 @server._onDomainSet(initialUrl)
@@ -286,7 +306,6 @@ describe "Routes", ->
 
       it "returns base json file path objects of only tests", ->
         ## this should omit any _fixture files, _support files and javascripts
-
         glob(path.join(Fixtures.projectPath("todos"), "tests", "_fixtures", "**", "*"))
         .then (files) =>
           ## make sure there are fixtures in here!
@@ -310,21 +329,21 @@ describe "Routes", ->
 
               ## remove the absolute path key
               body.integration = _.map body.integration, (obj) ->
-                _.pick(obj, "name", "path")
+                _.pick(obj, "name", "relative")
 
               expect(res.body).to.deep.eq({
                 integration: [
                   {
                     name: "sub/sub_test.coffee"
-                    path: "tests/sub/sub_test.coffee"
+                    relative: "tests/sub/sub_test.coffee"
                   }
                   {
                     name: "test1.js"
-                    path: "tests/test1.js"
+                    relative: "tests/test1.js"
                   }
                   {
                     name: "test2.coffee"
-                    path: "tests/test2.coffee"
+                    relative: "tests/test2.coffee"
                   }
                 ]
               })
@@ -348,33 +367,33 @@ describe "Routes", ->
 
             ## remove the absolute path key
             body.integration = _.map body.integration, (obj) ->
-              _.pick(obj, "name", "path")
+              _.pick(obj, "name", "relative")
 
             expect(body).to.deep.eq({
               integration: [
                 {
                   name: "bar.js"
-                  path: "cypress/integration/bar.js"
+                  relative: "cypress/integration/bar.js"
                 }
                 {
                   name: "baz.js"
-                  path: "cypress/integration/baz.js"
+                  relative: "cypress/integration/baz.js"
                 }
                 {
                   name: "dom.jsx"
-                  path: "cypress/integration/dom.jsx"
+                  relative: "cypress/integration/dom.jsx"
                 }
                 {
                   name: "foo.coffee"
-                  path: "cypress/integration/foo.coffee"
+                  relative: "cypress/integration/foo.coffee"
                 }
                 {
                   name: "nested/tmp.js"
-                  path: "cypress/integration/nested/tmp.js"
+                  relative: "cypress/integration/nested/tmp.js"
                 }
                 {
                   name: "noop.coffee"
-                  path: "cypress/integration/noop.coffee"
+                  relative: "cypress/integration/noop.coffee"
                 }
               ]
             })
@@ -400,21 +419,21 @@ describe "Routes", ->
 
             ## remove the absolute path key
             body.integration = _.map body.integration, (obj) ->
-              _.pick(obj, "name", "path")
+              _.pick(obj, "name", "relative")
 
             expect(body).to.deep.eq({
               integration: [
                 {
                   name: "baz.js"
-                  path: "cypress/integration/baz.js"
+                  relative: "cypress/integration/baz.js"
                 }
                 {
                   name: "dom.jsx"
-                  path: "cypress/integration/dom.jsx"
+                  relative: "cypress/integration/dom.jsx"
                 }
                 {
                   name: "noop.coffee"
-                  path: "cypress/integration/noop.coffee"
+                  relative: "cypress/integration/noop.coffee"
                 }
               ]
             })
@@ -1650,20 +1669,34 @@ describe "Routes", ->
           .reply(200, "{}", {
             "Content-Type": "text/css"
           })
-
         .then ->
-          matches "http://127.0.0.1:80/app.css", ->
-            nock("http://127.0.0.1:80")
+          matches "http://127.0.0.1/app.css", ->
+            nock("http://127.0.0.1")
             .matchHeader("host", "127.0.0.1")
             .get("/app.css")
             .reply(200, "{}", {
               "Content-Type": "text/css"
             })
-
+        .then ->
+          matches "http://127.0.0.1:80/app2.css", ->
+            nock("http://127.0.0.1:80")
+            .matchHeader("host", "127.0.0.1")
+            .get("/app2.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
         .then ->
           matches "https://www.google.com:443/app.css", ->
             nock("https://www.google.com")
             .matchHeader("host", "www.google.com")
+            .get("/app.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
+        .then ->
+          matches "https://www.apple.com/app.css", ->
+            nock("https://www.apple.com")
+            .matchHeader("host", "www.apple.com")
             .get("/app.css")
             .reply(200, "{}", {
               "Content-Type": "text/css"
@@ -1903,6 +1936,26 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
 
           expect(res.body).to.include "<HTML> <HEAD> <script type='text/javascript'> document.domain = 'google.com';"
+
+      it "injects when head missing but has <header>", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html> <body><nav>some nav</nav><header>header</header></body> </html>", {
+          "Content-Type": "text/html"
+        }
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<html> <head> <script type='text/javascript'> document.domain = 'google.com';"
+
+          expect(res.body).to.include "</head> <body><nav>some nav</nav><header>header</header></body> </html>"
 
       it "injects when body is capitalized", ->
         nock(@server._remoteOrigin)
@@ -2373,6 +2426,170 @@ describe "Routes", ->
               "if (self !== self) { }"
             )
 
+        it "handles multi-byte characters correctly when injecting", ->
+          bytes = "0" + Array(16 * 1024 * 10).fill("λφ").join("")
+
+          response = "<html>#{bytes}</html>"
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.html")
+            .reply 200, resp, {
+              "Content-Type": "text/html"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.html"
+              gzip: true
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.include(bytes + "</html>")
+
+        ## https://github.com/cypress-io/cypress/issues/1396
+        it "handles multi-byte characters correctly on JS files", ->
+          response = "0" + Array(16 * 1024 * 2).fill("λφ").join("")
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.js")
+            .reply 200, resp, {
+              "Content-Type": "application/javascript"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.js"
+              gzip: true
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.eq(response)
+
+        ## https://github.com/cypress-io/cypress/issues/1756
+        ## https://github.com/nodejs/node/issues/5761
+        it "handles gzip responses that are slightly truncated", ->
+          response = "I am a gzipped response"
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/app.js")
+            ## remove the last 8 characters which
+            ## truncates the CRC checksum and size check
+            ## at the end of the stream
+            .reply 200, resp.slice(0, -8), {
+              "Content-Type": "application/javascript"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/app.js"
+              gzip: true
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.eq(response)
+
+        it "handles gzip responses that are slightly truncated when injecting", ->
+          response = "<html>I am a gzipped response</html>"
+
+          zlib.gzipAsync(response)
+          .then (resp) =>
+            nock(@server._remoteOrigin)
+            .get("/index.html")
+            ## remove the last 8 characters which
+            ## truncates the CRC checksum and size check
+            ## at the end of the stream
+            .reply 200, resp.slice(0, -8), {
+              "Content-Type": "text/html"
+              "Content-Encoding": "gzip"
+            }
+
+            @rp({
+              url: "http://www.google.com/index.html"
+              gzip: true
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.include("I am a gzipped response</html>")
+
+        it "handles bad gzip responses", (done) ->
+          ## honestly this is just a quick hack to make request
+          ## be forcibly less leniant about gzip errors, but
+          ## we should just switch to something like http.request()
+          ## which is built in
+          # flush <integer> Default: zlib.constants.Z_NO_FLUSH
+          # finishFlush <integer> Default: zlib.constants.Z_FINISH
+          createGunzip = zlib.createGunzip
+
+          sinon.stub(zlib, "createGunzip")
+          .callThrough()
+          .onSecondCall().callsFake ->
+            zlib.createGunzip.restore()
+
+            createGunzip.call(zlib, {
+              flush: zlib.Z_NO_FLUSH
+              finishFlush: zlib.Z_FINISH
+            })
+
+          nock(@server._remoteOrigin)
+          .get("/app.js")
+          .delayBody(100)
+          .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
+            "Content-Type": "application/javascript"
+            "Content-Encoding": "gzip"
+          })
+
+          gotResponse = false
+
+          @r({
+            url: "http://www.google.com/app.js"
+            gzip: true
+          })
+          .on "error", (err) ->
+            expect(err.code).to.eq("Z_BUF_ERROR")
+
+            done()
+          .on "response", (res) ->
+            gotResponse = true
+
+            expect(res.statusCode).to.eq(502)
+            expect(res.headers["x-cypress-proxy-error-message"]).to.eq("incorrect header check")
+
+        it "handles bad gzip responses when injecting", ->
+          nock(@server._remoteOrigin)
+          .get("/index.html")
+          .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
+            "Content-Type": "text/html"
+            "Content-Encoding": "gzip"
+          })
+
+          @rp({
+            url: "http://www.google.com/index.html"
+            gzip: true
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(500)
+
+            expect(res.body).to.include("<html>")
+
         it "does not die rewriting a huge JS file", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
 
@@ -2825,6 +3042,65 @@ describe "Routes", ->
           expectedHeader(responses[2], "cypress.io")
           expectedHeader(responses[3], "localhost:6666")
           expectedHeader(responses[4], "*adwords.com")
+
+    # context "event source / server sent events / SSE", ->
+    #   beforeEach ->
+    #     @setup("http://localhost:5959", {
+    #       config: {
+    #         responseTimeout: 50
+    #       }
+    #     })
+    #     .then =>
+    #       @srv = http.createServer (req, res) =>
+    #         @sseStream = new SseStream(req)
+    #         @sseStream.pipe(res)
+    #
+    #         @sseStream.close = =>
+    #           @sseStream.end()
+    #           req.socket.destroy()
+    #
+    #       Promise.promisifyAll(@srv)
+    #
+    #       @srv.listenAsync()
+    #       .then =>
+    #         @port = @srv.address().port
+    #
+    #   afterEach ->
+    #     @srv.closeAsync()
+    #
+    #   it "receives event source messages through the proxy", (done) ->
+    #     es = new EventSource("http://localhost:#{@port}/sse", {
+    #       proxy: @proxy
+    #     })
+    #
+    #     es.onopen = =>
+    #       Promise
+    #       .delay(100)
+    #       .then =>
+    #         @sseStream.write({
+    #           data: "hey"
+    #         })
+    #
+    #     es.onmessage = (m) =>
+    #       expect(m.data).to.eq("hey")
+    #       es.close()
+    #       @sseStream.close()
+    #       done()
+    #
+    #   it "handles errors when the event source connection cannot be made", (done) ->
+    #     ## it should call req.socket.destroy() when receiving error
+    #     @server.onRequest (req, res) =>
+    #       sinon.spy(@server._request, "create")
+    #       sinon.spy(req.socket, "destroy")
+    #
+    #       es.onerror = (e) =>
+    #         expect(@server._request.create).to.be.calledWithMatch({timeout: null})
+    #         expect(req.socket.destroy).to.be.calledOnce
+    #         done()
+    #
+    #     es = new EventSource("http://localhost:7777/sse", {
+    #       proxy: @proxy
+    #     })
 
   context "POST *", ->
     beforeEach ->
