@@ -8,6 +8,7 @@ pluginConfig = Fixtures.projectPath("plugin-config")
 workingPreprocessor = Fixtures.projectPath("working-preprocessor")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
 pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
+pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
 
 describe "e2e plugins", ->
   e2e.setup()
@@ -54,4 +55,12 @@ describe "e2e plugins", ->
       project: pluginsAbsolutePath
       snapshot: true
       expectedExitCode: 0
+    })
+
+  it "calls after:screenshot for cy.screenshot() and failure screenshots", ->
+    e2e.exec(@, {
+      spec: "after_screenshot_spec.coffee"
+      project: pluginAfterScreenshot
+      snapshot: true
+      expectedExitCode: 1
     })

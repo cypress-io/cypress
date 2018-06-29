@@ -15,6 +15,9 @@ describe "src/cy/commands/screenshot", ->
       multipart: false
       pixelRatio: 1
       takenAt: new Date().toISOString()
+      name: "name"
+      blackout: [".foo"]
+      duration: 100
     }
 
     @screenshotConfig = {
@@ -75,18 +78,15 @@ describe "src/cy/commands/screenshot", ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
 
-    it "does not send before/after events", ->
+    it "sends before/after events", ->
       Cypress.config("isInteractive", false)
       @screenshotConfig.scale = false
       cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
-
       Cypress.automation.withArgs("take:screenshot").resolves(@serverResult)
 
       cy.stub(Cypress, "action").log(false)
       .callThrough()
       .withArgs("cy:before:screenshot")
-      .yieldsAsync()
-      .withArgs("cy:after:screenshot")
       .yieldsAsync()
 
       test = { id: "123", err: new Error() }
@@ -94,8 +94,24 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        expect(Cypress.action).not.to.be.calledWith("cy:before:screenshot")
-        expect(Cypress.action).not.to.be.calledWith("cy:after:screenshot")
+        expect(Cypress.action).to.be.calledWith("cy:before:screenshot", {
+          id: runnable.id
+          isOpen: true
+          appOnly: false
+          scale: true
+          waitForCommandSynchronization: true
+          disableTimersAndAnimations: true
+          blackout: []
+        })
+        expect(Cypress.action).to.be.calledWith("cy:after:screenshot", {
+          id: runnable.id
+          isOpen: false
+          appOnly: false
+          scale: true
+          waitForCommandSynchronization: true
+          disableTimersAndAnimations: true
+          blackout: []
+        })
 
     it "takes screenshot when not isInteractive", ->
       Cypress.config("isInteractive", false)
@@ -114,7 +130,8 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "takenPaths")).to.eql({
+        args = _.omit(args, "clip", "userClip", "viewport", "takenPaths", "startTime")
+        expect(args).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -124,48 +141,15 @@ describe "src/cy/commands/screenshot", ->
           capture: "runner"
           simple: true
           testFailure: true
+          blackout: []
+          scaled: true
         })
 
     describe "if screenshot has been taken in test", ->
       beforeEach ->
         cy.state("screenshotTaken", true)
 
-      it "sends before/after events if screenshot has been taken in test", ->
-        Cypress.config("isInteractive", false)
-        @screenshotConfig.scale = false
-        cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
-        Cypress.automation.withArgs("take:screenshot").resolves(@serverResult)
-
-        cy.stub(Cypress, "action").log(false)
-        .callThrough()
-        .withArgs("cy:before:screenshot")
-        .yieldsAsync()
-
-        test = { id: "123", err: new Error() }
-        runnable = cy.state("runnable")
-
-        Cypress.action("runner:runnable:after:run:async", test, runnable)
-        .then ->
-          expect(Cypress.action).to.be.calledWith("cy:before:screenshot", {
-            id: runnable.id
-            isOpen: true
-            appOnly: false
-            scale: true
-            waitForCommandSynchronization: true
-            disableTimersAndAnimations: true
-            blackout: []
-          })
-          expect(Cypress.action).to.be.calledWith("cy:after:screenshot", {
-            id: runnable.id
-            isOpen: false
-            appOnly: false
-            scale: true
-            waitForCommandSynchronization: true
-            disableTimersAndAnimations: true
-            blackout: []
-          })
-
-      it "does not send simple: true", ->
+      it "sends simple: false", ->
         Cypress.config("isInteractive", false)
         cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
 
@@ -181,7 +165,8 @@ describe "src/cy/commands/screenshot", ->
         Cypress.action("runner:runnable:after:run:async", test, runnable)
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledOnce
-          args = _.omit(Cypress.automation.withArgs("take:screenshot").args[0][1], "clip", "viewport", "userClip", "takenPaths")
+          args = Cypress.automation.withArgs("take:screenshot").args[0][1]
+          args = _.omit(args, "clip", "userClip", "viewport", "takenPaths", "startTime")
           expect(args).to.eql({
             testId: runnable.id
             titles: [
@@ -192,6 +177,9 @@ describe "src/cy/commands/screenshot", ->
             ]
             capture: "runner"
             testFailure: true
+            simple: false
+            scaled: true
+            blackout: []
           })
 
   context "runnable:after:run:async hooks", ->
@@ -211,7 +199,8 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        expect(_.omit(args, "clip", "userClip", "viewport", "takenPaths")).to.eql({
+        args = _.omit(args, "clip", "userClip", "viewport", "takenPaths", "startTime")
+        expect(args).to.eql({
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
@@ -222,6 +211,8 @@ describe "src/cy/commands/screenshot", ->
           capture: "runner"
           simple: true
           testFailure: true
+          scaled: true
+          blackout: []
         })
 
     it "takes screenshot of hook title with test", ->
@@ -739,16 +730,16 @@ describe "src/cy/commands/screenshot", ->
         expected = _.extend({}, @serverResult, @screenshotConfig, {
           Command: "screenshot"
           scaled: true
+          duration: "100ms"
         })
 
         expected = _.omit(expected, "blackout", "dimensions", "screenshotOnRunFailure", "scale", "size")
 
         cy.screenshot().then =>
           consoleProps = @lastLog.invoke("consoleProps")
-          actual = _.omit(consoleProps, "blackout", "dimensions", "duration", "size")
+          actual = _.omit(consoleProps, "blackout", "dimensions", "size")
           { width, height } = @serverResult.dimensions
           expect(actual).to.eql(expected)
           expect(consoleProps.size).to.eq("12 B")
           expect(consoleProps.blackout).to.eql(@screenshotConfig.blackout)
-          expect(consoleProps.dimensions).to.eql("#{width}px x #{height}px")
-          expect(consoleProps.duration).to.match(/^\d+ms$/)
+          expect(consoleProps.dimensions).to.equal("#{width}px x #{height}px")
