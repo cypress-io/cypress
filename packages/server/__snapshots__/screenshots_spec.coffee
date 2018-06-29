@@ -20,6 +20,7 @@ exports['e2e screenshots passes 1'] = `
     ✓ manually generates pngs
     ✓ can nest screenshots in folders
     1) generates pngs on failure
+    ✓ calls onAfterScreenshot with results of failed tests
     ✓ handles devicePixelRatio correctly on headless electron
     ✓ crops app captures to just app size
     ✓ can capture fullPage screenshots
@@ -41,7 +42,7 @@ exports['e2e screenshots passes 1'] = `
       5) "after each" hook for "empty test 2"
 
 
-  14 passing
+  15 passing
   5 failing
 
   1) taking screenshots generates pngs on failure:
@@ -76,8 +77,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        18                      │
-  │ Passing:      14                      │
+  │ Tests:        19                      │
+  │ Passing:      15                      │
   │ Failing:      4                       │
   │ Pending:      0                       │
   │ Skipped:      0                       │
@@ -128,9 +129,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       18       14        4        -        - │
+  │ ✖ screenshots_spec.coffee                   XX:XX       19       15        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       18       14        4        -        -  
+    1 of 1 failed (100%)                        XX:XX       19       15        4        -        -  
 
 `
 

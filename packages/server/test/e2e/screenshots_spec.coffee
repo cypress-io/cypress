@@ -70,7 +70,7 @@ describe "e2e screenshots", ->
     .then ->
       screenshot = (paths...) ->
         path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee", paths...)
-      
+
       screenshot1 = screenshot("black.png")
       screenshot2 = screenshot("red.png")
       screenshot3 = screenshot("foo", "bar", "baz.png")
