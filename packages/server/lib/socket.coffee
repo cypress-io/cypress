@@ -15,7 +15,6 @@ errors        = require("./errors")
 logger        = require("./logger")
 automation    = require("./automation")
 preprocessor  = require("./plugins/preprocessor")
-screenshots   = require("./screenshots.coffee")
 log           = require('debug')('cypress:server:socket')
 
 runnerEvents = [
