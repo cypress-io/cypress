@@ -27,22 +27,22 @@
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "@cypress/webpack-preprocessor": "^1.1.2",
-    "@types/node": "^9.4.6",
-    "axios": "^0.18.0",
+    "@cypress/webpack-preprocessor": "1.1.3",
+    "@types/node": "9.6.22",
+    "axios": "0.18.0",
     "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-loader": "7.1.4",
+    "babel-plugin-transform-class-properties": "6.24.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
-    "cypress": "^3.0.1",
-    "github-post-release": "^1.13.1",
+    "cypress": "3.0.2",
+    "github-post-release": "1.13.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "semantic-action": "^1.1.0",
-    "standard": "^11.0.0",
-    "typescript": "^2.6.2",
-    "webpack": "^4.0.0"
+    "semantic-action": "1.1.6",
+    "standard": "11.0.1",
+    "typescript": "2.9.2",
+    "webpack": "4.13.0"
   },
   "standard": {
     "globals": [
