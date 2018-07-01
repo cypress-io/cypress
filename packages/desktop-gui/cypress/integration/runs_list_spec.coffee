@@ -101,6 +101,7 @@ describe "Runs List", ->
           cy.get("@runRow").within ->
             cy.contains(@runs[1].instances[0].platform.osVersionFormatted)
             cy.contains(@runs[1].instances[0].platform.browserVersion)
+            cy.contains("Chrome")
             cy.get(".fa-windows")
             cy.get(".fa-chrome")
 
