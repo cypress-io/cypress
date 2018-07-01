@@ -165,7 +165,7 @@ https://on.cypress.io/cross-origin-violation
 
 `
 
-exports['e2e web security when disabled fails 1'] = `
+exports['e2e web security when disabled passes 1'] = `
 ====================================================================================================
 
   (Run Starting)

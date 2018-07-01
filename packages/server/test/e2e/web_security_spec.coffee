@@ -70,7 +70,7 @@ describe "e2e web security", ->
       }
     })
 
-    it "fails", ->
+    it "passes", ->
       e2e.exec(@, {
         spec: "web_security_spec.coffee"
         snapshot: true
