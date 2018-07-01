@@ -2,8 +2,5 @@
   "globals": {
     "lib": true,
     "sinon": true
-  },
-  "extends": [
-    "plugin:cypress-dev/tests"
-  ]
+  }
 }

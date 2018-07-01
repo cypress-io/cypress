@@ -1,6 +1,7 @@
 {
   "extends": [
-    "plugin:cypress-dev/general"
+    "plugin:cypress-dev/general",
+    "plugin:cypress-dev/tests",
   ],
   "env": {
     "es6": true,
