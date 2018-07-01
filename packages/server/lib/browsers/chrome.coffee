@@ -41,6 +41,10 @@ defaultArgs = [
   "--disable-device-discovery-notifications"
   "--disable-blink-features=RootLayerScrolling"
 
+  ## http://www.chromium.org/Home/chromium-security/site-isolation
+  ## https://github.com/cypress-io/cypress/issues/1951
+  "--disable-site-isolation-trials"
+
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
   "--metrics-recording-only"

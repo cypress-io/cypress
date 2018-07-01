@@ -5,7 +5,7 @@ exports['e2e user agent passes on chrome 1'] = `
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                          │
+  │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (user_agent_spec.coffee)                                                   │
   │ Searched:   cypress/integration/user_agent_spec.coffee                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

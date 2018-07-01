@@ -4,7 +4,7 @@ describe "web security", ->
     cy
       .visit("http://localhost:5566/link")
       .get("a").click()
-      .url().should("eq", "http://localhost:55665/cross_origin")
+      .url().should("eq", "https://www.foo.com:55665/cross_origin")
 
     cy.contains("h1", "cross origin")
 
@@ -12,7 +12,7 @@ describe "web security", ->
     cy
       .visit("http://localhost:5566/form")
       .get("input").click()
-      .url().should("eq", "http://localhost:55665/cross_origin")
+      .url().should("eq", "https://www.foo.com:55665/cross_origin")
 
     cy.contains("h1", "cross origin")
 
@@ -20,6 +20,6 @@ describe "web security", ->
     cy
       .visit("http://localhost:5566/javascript")
       .get("button").click()
-      .url().should("eq", "http://localhost:55665/cross_origin")
+      .url().should("eq", "https://www.foo.com:55665/cross_origin")
 
     cy.contains("h1", "cross origin")

@@ -1,20 +1,9 @@
-fs           = require("fs")
-path         = require("path")
-https        = require("https")
-Promise      = require("bluebird")
-sslRootCas   = require('ssl-root-cas')
+https = require("https")
+Promise = require("bluebird")
 allowDestroy = require("server-destroy-vvo")
+certs = require("./certs")
 
-sslRootCas
-.inject()
-.addFile(path.join(__dirname, "certs", "server", "my-root-ca.crt.pem"))
-
-options = {
-  key: fs.readFileSync(path.join(__dirname, "certs", "server", "my-server.key.pem"))
-  cert: fs.readFileSync(path.join(__dirname, "certs", "server", "my-server.crt.pem"))
-}
-
-onRequest = (req, res) ->
+defaultOnRequest = (req, res) ->
   console.log "HTTPS SERVER REQUEST URL:", req.url
   console.log "HTTPS SERVER REQUEST HEADERS:", req.headers
 
@@ -24,10 +13,15 @@ onRequest = (req, res) ->
 
 servers = []
 
+create = (onRequest) ->
+  https.createServer(certs, onRequest ? defaultOnRequest)
+
 module.exports = {
-  start: (port) ->
+  create
+
+  start: (port, onRequest) ->
     new Promise (resolve) ->
-      srv = https.createServer(options, onRequest)
+      srv = create(onRequest)
 
       allowDestroy(srv)
 

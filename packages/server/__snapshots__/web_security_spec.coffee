@@ -165,7 +165,7 @@ https://on.cypress.io/cross-origin-violation
 
 `
 
-exports['e2e web security when disabled fails 1'] = `
+exports['e2e web security when disabled passes 1'] = `
 ====================================================================================================
 
   (Run Starting)
@@ -181,6 +181,12 @@ exports['e2e web security when disabled fails 1'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: web_security_spec.coffee...                                                     (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
 
 
   web security
@@ -201,16 +207,10 @@ exports['e2e web security when disabled fails 1'] = `
   │ Pending:      0                        │
   │ Skipped:      0                        │
   │ Screenshots:  0                        │
-  │ Video:        true                     │
+  │ Video:        false                    │
   │ Duration:     X seconds                │
   │ Spec Ran:     web_security_spec.coffee │
   └────────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
 ====================================================================================================
