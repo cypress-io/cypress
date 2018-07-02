@@ -1,12 +1,10 @@
-/* global describe, it, context */
-
-const fs     = require('fs')
-const path   = require('path')
+const fs = require('fs')
+const path = require('path')
 const server = require('socket.io')
 const client = require('socket.io-client')
 const expect = require('chai').expect
-const pkg    = require('../package.json')
-const lib    = require('../index')
+const pkg = require('../package.json')
+const lib = require('../index')
 
 describe('Socket', function () {
   it('exports server', function () {
