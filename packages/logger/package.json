@@ -5,17 +5,24 @@
   "private": true,
   "scripts": {
     "test": "mocha",
-    "test-watch": "mocha --watch"
+    "test-watch": "mocha --watch",
+    "test-debug": "node --inspect --inspect-brk node_modules/.bin/_mocha"
   },
   "files": [
     "lib"
   ],
   "dependencies": {
     "debug": "3.1.0",
+    "end-of-stream": "^1.4.1",
+    "lodash.isempty": "^4.4.0",
+    "lodash.omit": "^4.5.0",
     "winston": "3.0.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
-    "mocha": "^5.2.0"
+    "chai-date-string": "^0.1.0",
+    "mocha": "^5.2.0",
+    "sinon": "^6.0.1",
+    "sinon-chai": "^3.2.0"
   }
 }
