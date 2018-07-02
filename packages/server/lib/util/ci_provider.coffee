@@ -32,11 +32,11 @@ buildNums = (provider) -> {
   appveyor:  process.env.APPVEYOR_BUILD_NUMBER
   circle:    process.env.CIRCLE_BUILD_NUM
   codeship:  process.env.CI_BUILD_NUMBER
+  drone:     process.env.DRONE_BUILD_NUMBER
   gitlab:    process.env.CI_BUILD_ID
   jenkins:   process.env.BUILD_NUMBER
-  travis:    process.env.TRAVIS_BUILD_NUMBER
   semaphore: process.env.SEMAPHORE_BUILD_NUMBER
-  drone:     process.env.DRONE_BUILD_NUMBER
+  travis:    process.env.TRAVIS_BUILD_NUMBER
 }[provider]
 
 groupIds = (provider) -> {
@@ -56,6 +56,9 @@ params = (provider) -> {
   codeship: {
     buildUrl: process.env.CI_BUILD_URL
   }
+  drone: {
+    buildUrl:  process.env.DRONE_BUILD_LINK
+  }
   gitlab: {
     buildId:    process.env.CI_BUILD_ID
     projectUrl: process.env.CI_PROJECT_URL
@@ -63,15 +66,12 @@ params = (provider) -> {
   jenkins: {
     buildUrl: process.env.BUILD_URL
   }
-  travis: {
-    buildId:  process.env.TRAVIS_BUILD_ID
-    repoSlug: process.env.TRAVIS_REPO_SLUG
-  }
   semaphore: {
     repoSlug: process.env.SEMAPHORE_REPO_SLUG
   }
-  drone: {
-    buildUrl:  process.env.DRONE_BUILD_LINK
+  travis: {
+    buildId:  process.env.TRAVIS_BUILD_ID
+    repoSlug: process.env.TRAVIS_REPO_SLUG
   }
 }[provider]
 
