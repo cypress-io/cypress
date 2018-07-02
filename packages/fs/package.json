@@ -1,0 +1,10 @@
+{
+  "name": "@packages/fs",
+  "version": "0.0.0",
+  "main": "index.js",
+  "private": true,
+  "dependencies": {
+    "bluebird": "3.5.1",
+    "fs-extra": "6.0.1"
+  }
+}
