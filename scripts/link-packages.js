@@ -60,7 +60,7 @@ function makeProxies () {
   )
   .map(({ filename, json }) => {
     if (!json.main) {
-      throw new Error(`Package ${json.name} is missing main`)
+      throw new Error(`Package ${json.name || filename} is missing main`)
     }
     const dirname = path.dirname(filename)
     const bareName = json.name.split('/')[1]
