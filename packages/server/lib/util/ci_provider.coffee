@@ -124,6 +124,130 @@ getProviderName = ->
 
   name or "unknown"
 
+getGitInfo = (provider, key) -> {
+  appveyor: {
+    sha: process.env.APPVEYOR_REPO_COMMIT
+    ## for PRs, APPVEYOR_REPO_BRANCH is the base branch being merged into
+    branch: process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH or process.env.APPVEYOR_REPO_BRANCH
+    authorName: process.env.APPVEYOR_REPO_COMMIT_AUTHOR
+    authorEmail: process.env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL
+    message: process.env.APPVEYOR_REPO_COMMIT_MESSAGE + (process.env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED ? "")
+    # remoteOrigin:
+    pullRequestId: process.env.APPVEYOR_PULL_REQUEST_NUMBER
+    # defaultBranch:
+  }
+  bamboo: {
+    ## ???
+  }
+  buildkite: {
+    sha: process.env.BUILDKITE_COMMIT
+    branch: process.env.BUILDKITE_BRANCH
+    authorName: process.env.BUILDKITE_BUILD_CREATOR
+    authorEmail: process.env.BUILDKITE_BUILD_CREATOR_EMAIL
+    message: process.env.BUILDKITE_MESSAGE
+    # remoteOrigin:
+    pullRequestId: process.env.BUILDKITE_PULL_REQUEST
+    defaultBranch: process.env.BUILDKITE_PIPELINE_DEFAULT_BRANCH
+  }
+  circle: {
+    sha: process.env.CIRCLE_SHA1
+    branch: process.env.CIRCLE_BRANCH
+    authorName: process.env.CIRCLE_USERNAME
+    # authorEmail:
+    # message:
+    # remoteOrigin:
+    pullRequestId: process.env.CIRCLE_PR_NUMBER
+    # defaultBranch:
+  }
+  codeship: {
+    sha: process.env.CI_COMMIT_ID
+    branch: process.env.CI_BRANCH
+    authorName: process.env.CI_COMMITTER_NAME
+    authorEmail: process.env.CI_COMMITTER_EMAIL
+    message: process.env.CI_COMMIT_MESSAGE
+    # remoteOrigin:
+    # pullRequestId: ## https://community.codeship.com/t/populate-ci-pull-request/1053
+    # defaultBranch:
+  }
+  drone: {
+    sha: process.env.DRONE_COMMIT_SHA
+    branch: process.env.DRONE_COMMIT_BRANCH
+    authorName: process.env.DRONE_COMMIT_AUTHOR
+    authorEmail: process.env.DRONE_COMMIT_AUTHOR_EMAIL
+    message: process.env.DRONE_COMMIT_MESSAGE
+    # remoteOrigin:
+    pullRequestId: process.env.DRONE_PULL_REQUEST
+    defaultBranch: process.env.DRONE_REPO_BRANCH
+  }
+  gitlab: {
+    sha: process.env.CI_COMMIT_SHA
+    branch: process.env.CI_COMMIT_REF_NAME
+    authorName: process.env.GITLAB_USER_NAME
+    authorEmail: process.env.GITLAB_USER_EMAIL
+    message: process.env.CI_COMMIT_MESSAGE
+    # remoteOrigin:
+    # pullRequestId: ## https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+    # defaultBranch:
+  }
+  hudson: {
+    ## same as jenkins?
+  }
+  jenkins: {
+    sha: process.env.GIT_COMMIT
+    branch: process.env.GIT_BRANCH
+    # authorName:
+    # authorEmail:
+    # message:
+    # remoteOrigin:
+    pullRequestId: process.env.ghprbPullId
+    # defaultBranch:
+  }
+  semaphore: {
+    # sha:
+    # branch:
+    # authorName:
+    # authorEmail:
+    # message:
+    # remoteOrigin:
+    ## Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
+    pullRequestId: process.env.PULL_REQUEST_NUMBER
+    # defaultBranch
+  }
+  shippable: {
+    sha: process.env.COMMIT
+    branch: process.env.BRANCH
+    authorName: process.env.COMMITTER
+    # authorEmail:
+    message: process.env.COMMIT_MESSAGE
+    # remoteOrigin:
+    pullRequestId: process.env.PULL_REQUEST
+    # defaultBranch:
+  }
+  snap: {
+    ## ???
+  }
+  teamcity: {
+    ## ???
+  }
+  teamfoundation: {
+    ## ???
+  }
+  travis: {
+    sha: process.env.TRAVIS_COMMIT
+    ## for PRs, TRAVIS_BRANCH is the base branch being merged into
+    branch: process.env.TRAVIS_PULL_REQUEST_BRANCH or process.env.TRAVIS_BRANCH
+    # authorName:
+    # authorEmail:
+    message: process.env.TRAVIS_COMMIT_MESSAGE
+    # remoteOrigin:
+    pullRequestId: process.env.TRAVIS_PULL_REQUEST
+    # defaultBranch:
+  }
+  wercker: {
+    # ???
+  }
+}[provider][key]
+
 module.exports = {
   name: ->
     getProviderName()
@@ -136,4 +260,9 @@ module.exports = {
 
   groupId: ->
     groupIds(getProviderName()) ? null
+
+  gitInfo: (existingInfo) ->
+    _.transform existingInfo, (info, key, existingValue) ->
+      info[key] = existingValue ? (getGitInfo(getProviderName(), key) ? null)
+    , {}
 }
