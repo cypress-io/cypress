@@ -124,7 +124,7 @@ getProviderName = ->
 
   name or "unknown"
 
-getGitInfo = (provider, key) -> {
+getGitInfo = (provider, key) -> ({
   appveyor: {
     sha: process.env.APPVEYOR_REPO_COMMIT
     ## for PRs, APPVEYOR_REPO_BRANCH is the base branch being merged into
@@ -246,7 +246,7 @@ getGitInfo = (provider, key) -> {
   wercker: {
     # ???
   }
-}[provider][key]
+}[provider] or {})[key]
 
 module.exports = {
   name: ->
@@ -262,7 +262,7 @@ module.exports = {
     groupIds(getProviderName()) ? null
 
   gitInfo: (existingInfo) ->
-    _.transform existingInfo, (info, key, existingValue) ->
+    _.transform existingInfo, (info, existingValue, key) ->
       info[key] = existingValue ? (getGitInfo(getProviderName(), key) ? null)
     , {}
 }
