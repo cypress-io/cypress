@@ -92,11 +92,6 @@ class Socket
     @testFilePath = filePath
     log("will watch test file path #{filePath}")
 
-    preprocessor.getFile(filePath, config)
-    ## ignore errors b/c we're just setting up the watching. errors
-    ## are handled by the spec controller
-    .catch ->
-
   toReporter: (event, data) ->
     @io and @io.to("reporter").emit(event, data)
 

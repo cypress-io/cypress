@@ -19,6 +19,7 @@ describe "lib/open_project", ->
     sinon.stub(Project.prototype, "getSpecUrl").resolves()
     sinon.stub(Project.prototype, "getConfig").resolves({})
     sinon.stub(Project.prototype, "getAutomation").returns(@automation)
+    sinon.stub(preprocessor, "getFile").resolves()
     sinon.stub(preprocessor, "removeFile")
 
     openProject.create("/project/root")
@@ -64,3 +65,12 @@ describe "lib/open_project", ->
       .then =>
         expect(@browser.isHeaded).to.be.true
         expect(@browser.isHeadless).to.be.false
+
+    it "kicks off spec preprocessing", ->
+      openProject.launch(@browser, @spec).then =>
+        expect(preprocessor.getFile).to.be.calledWith(@spec.relative)
+
+    it "ignores spec preprocessing errors", ->
+      preprocessor.getFile.rejects(new Error("syntax error"))
+
+      openProject.launch(@browser, @spec) ## should not reject

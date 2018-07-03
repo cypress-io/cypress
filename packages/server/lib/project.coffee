@@ -88,6 +88,13 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
+      if cfg.supportFile
+        # start compiling/watching support file as project opens
+        preprocessor.getFile(cfg.supportFile, cfg)
+        # ignore errors b/c we're just setting up the watching
+        # they're handled by the spec controller
+        .catch ->
+
       @server.open(cfg, @)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port

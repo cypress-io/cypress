@@ -146,6 +146,7 @@ describe "lib/project", ->
       sinon.stub(config, "updateWithPluginValues").returns(@config)
       sinon.stub(scaffold, "plugins").resolves()
       sinon.stub(plugins, "init").resolves()
+      sinon.stub(preprocessor, "getFile").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -173,6 +174,20 @@ describe "lib/project", ->
     it "calls support.plugins with pluginsFile directory", ->
       @project.open({}).then =>
         expect(scaffold.plugins).to.be.calledWith(path.dirname(@config.pluginsFile))
+
+    it "kicks off supportFile preprocessing if set", ->
+      @project.open({}).then =>
+        expect(preprocessor.getFile).to.be.calledWith(@config.supportFile)
+
+    it "ignores supportFile preprocessing errors", ->
+      preprocessor.getFile.rejects(new Error("syntax error"))
+
+      @project.open({}) ## should not reject
+
+    it "does not kick off supportFile preprocessing if not set", ->
+      @config.supportFile = false
+      @project.open({}).then =>
+        expect(preprocessor.getFile).not.to.be.called
 
     it "calls options.onError with plugins error when there is a plugins error", ->
       onError = sinon.spy()

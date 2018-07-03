@@ -432,8 +432,6 @@ describe "lib/socket", ->
         @socket.testsDir = Fixtures.project "todos/tests"
         @filePath        = @socket.testsDir + "/test1.js"
 
-        sinon.stub(preprocessor, "getFile").resolves()
-
       it "returns undefined if trying to watch special path __all", ->
         result = @socket.watchTestFileByPath(@cfg, "integration/__all")
         expect(result).to.be.undefined
@@ -446,20 +444,16 @@ describe "lib/socket", ->
       it "closes existing watched test file", ->
         sinon.stub(preprocessor, "removeFile")
         @socket.testFilePath = "tests/test1.js"
-        @socket.watchTestFileByPath(@cfg, "test2.js").then =>
-          expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
+        @socket.watchTestFileByPath(@cfg, "test2.js")
+        expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
 
       it "sets #testFilePath", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "integration/test1.js")
+        expect(@socket.testFilePath).to.eq "tests/test1.js"
 
       it "can normalizes leading slash", ->
-        @socket.watchTestFileByPath(@cfg, "/integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
-
-      it "watches file by path", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.getFile).to.be.calledWith("tests/test2.coffee", @cfg)
+        @socket.watchTestFileByPath(@cfg, "/integration/test1.js")
+        expect(@socket.testFilePath).to.eq "tests/test1.js"
 
       it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
         sinon.stub(fs, "statAsync").resolves()

@@ -104,6 +104,12 @@ create = ->
             if onBrowserClose
               onBrowserClose()
 
+          ## start compiling/watching spec file as browser opens
+          preprocessor.getFile(spec.relative, cfg)
+          ## ignore errors b/c we're just setting up the watching
+          ## they're handled by the spec controller
+          .catch ->
+
           do relaunchBrowser = ->
             debug(
               "launching browser: %s, spec: %s",
