@@ -1,7 +1,8 @@
 _ = require("lodash")
 Promise = require("bluebird")
 bililiteRange = require("../../vendor/bililiteRange")
-
+$elements = require("../dom/elements")
+$selection = require("../dom/selection")
 $Cypress = require("../cypress")
 
 charsBetweenCurlyBraces = /({.+?})/
@@ -70,55 +71,77 @@ $Keyboard = {
     shift: 16
   }
 
+  ## #region [2]
   specialChars: {
-    "{selectall}": (el, options) ->
-      options.rng.bounds('all').select()
+    "{selectall}": (el) ->
+      $selection.selectAll(el)
 
     ## charCode = 46
     ## no keyPress
     ## no textInput
     ## yes input (if value is actually changed)
     "{del}": (el, options) ->
-      {rng} = options
-      bounds = rng.bounds()
-      if @boundsAreEqual(bounds)
-        rng.bounds([bounds[0], bounds[0] + 1])
+      bounds = $selection.getSelectionBounds(el)
+      # if @boundsAreEqual(bounds)
+      #   rng.bounds([bounds[0], bounds[0] + 1])
       options.charCode  = 46
       options.keypress  = false
       options.textInput = false
       options.setKey    = "{del}"
       @ensureKey el, null, options, ->
-        prev = rng.all()
-        rng.text("", "end")
+        ## there is a text selection
+        if bounds.start isnt bounds.end
+          return $selection.clearSelection(el)
 
-        ## after applying the {del}
-        ## if our text didnt change
-        ## dont send the input event
-        if prev is rng.all()
+        ## nothing to delete!
+        else if bounds.end is $selection.getElementTextLength(el)
           options.input = false
+        
+        else $selection.deleteRightOfSelection(el)
+
+
+        console.log('delete')
+        # prev = rng.all()
+        # rng.text("", "end")
+
+
+        # ## after applying the {del}
+        # ## if our text didnt change
+        # ## dont send the input event
+        # if prev is rng.all()
+        #   options.input = false
+      
+
+      
+
+
 
     ## charCode = 8
     ## no keyPress
     ## no textInput
     ## yes input (if value is actually changed)
     "{backspace}": (el, options) ->
-      {rng} = options
-      bounds = rng.bounds()
-      if @boundsAreEqual(bounds)
-        rng.bounds([bounds[0] - 1, bounds[0]])
+      # bounds = rng.bounds()
+      # if @boundsAreEqual(bounds)
+      #   rng.bounds([bounds[0] - 1, bounds[0]])
+      bounds = $selection.getSelectionBounds(el)
       options.charCode  = 8
       options.keypress  = false
       options.textInput = false
       options.setKey    = "{backspace}"
       @ensureKey el, null, options, ->
-        prev = rng.all()
-        rng.text("", "end")
+        if bounds.start isnt bounds.end
+          $selection.clearSelection(el)
+
+        ## nothing to delete!
+        else if bounds.start is 0
+          options.input = false
+        
+        else $selection.deleteLeftOfSelection(el)
 
         ## after applying the {backspace}
         ## if our text didnt change
         ## dont send the input event
-        if prev is rng.all()
-          options.input = false
 
     ## charCode = 27
     ## no keyPress
@@ -144,14 +167,13 @@ $Keyboard = {
     ## no input
     ## yes change (if input is different from last change event)
     "{enter}": (el, options) ->
-      {rng} = options
       options.charCode  = 13
       options.textInput = false
       options.input     = false
       options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
-        rng.insertEOL()
-        changed = options.prev isnt rng.all()
+        $selection.updateValue(el, "\n")
+        changed = true #options.prev isnt $selection.getElementText()
         options.onEnterPressed(changed, options.id)
 
     ## charCode = 37
@@ -159,30 +181,37 @@ $Keyboard = {
     ## no textInput
     ## no input
     "{leftarrow}": (el, options) ->
-      {rng} = options
-      bounds = rng.bounds()
+      # {rng} = options
+      # bounds = rng.bounds()
+      # range = $selection.
+      # bounds = [range.startOffset, range.endOffset]
       options.charCode  = 37
       options.keypress  = false
       options.textInput = false
       options.input     = false
       options.setKey    = "{leftarrow}"
       @ensureKey el, null, options, ->
-        switch
-          when @boundsAreEqual(bounds)
-            ## if bounds are equal move the caret
+        $selection.moveCursorLeft(el)
+        # switch
+        #   when bounds[0] is bounds[1]
+          ## equal move the caret
             ## 1 to the left
-            left  = bounds[0] - 1
-            right = left
-          when bounds[0] > 0
-            ## just set the cursor back to the left
-            ## position
-            left = bounds[0]
-            right = left
-          else
-            left = 0
-            right = 0
 
-        rng.bounds([left, right])
+        # when @boundsAreEqual(bounds)
+        #   ## if bounds are equal move the caret
+        #   ## 1 to the left
+        #   left  = bounds[0] - 1
+        #   right = left
+        # when bounds[0] > 0
+        #   ## just set the cursor back to the left
+        #   ## position
+        #   left = bounds[0]
+        #   right = left
+        # else
+        #   left = 0
+        #   right = 0
+
+        # rng.bounds([left, right])
 
     ## charCode = 38
     ## no keyPress
@@ -201,27 +230,13 @@ $Keyboard = {
     ## no textInput
     ## no input
     "{rightarrow}": (el, options) ->
-      {rng} = options
-      bounds = rng.bounds()
       options.charCode  = 39
       options.keypress  = false
       options.textInput = false
       options.input     = false
       options.setKey    = "{rightarrow}"
       @ensureKey el, null, options, ->
-        switch
-          when @boundsAreEqual(bounds)
-            ## if bounds are equal move the caret
-            ## 1 to the right
-            left  = bounds[0] + 1
-            right = left
-          else
-            ## just set the cursor back to the left
-            ## position
-            right = bounds[1]
-            left = right
-
-        rng.bounds([left, right])
+        $selection.moveCursorRight(el)
 
     ## charCode = 40
     ## no keyPress
@@ -235,6 +250,7 @@ $Keyboard = {
       options.setKey    = "{downarrow}"
       @ensureKey(el, null, options)
   }
+  ## #endregion
 
   modifierChars: {
     "{alt}": "alt"
@@ -253,6 +269,7 @@ $Keyboard = {
   boundsAreEqual: (bounds) ->
     bounds[0] is bounds[1]
 
+  ## #region [ 1 ]
   type: (options = {}) ->
     _.defaults(options, {
       delay: 10
@@ -267,76 +284,89 @@ $Keyboard = {
 
     el = options.$el.get(0)
 
-    bililiteRangeSelection = el.bililiteRangeSelection
-    rng = bililiteRange(el).bounds("selection")
+    isContentEditable = $elements.isContentEditable(el)
 
+    ## if there's no selection on the current element, select the end
+    # if not $selection.getSelectionBounds(el).start?
+    if isContentEditable
+      $selection.moveSelectionToEnd(el)
+
+    
+
+    # bililiteRangeSelection = el.bililiteRangeSelection
+    # rng = bililiteRange(el).bounds("selection")
+
+    
     ## if the value has changed since previously typing, we need to
-    ## update the caret position if the value has changed
-    if el.prevValue and @expectedValueDoesNotMatchCurrentValue(el.prevValue, rng)
-      @moveCaretToEnd(rng)
-      el.prevValue = rng.all()
-      bililiteRangeSelection = el.bililiteRangeSelection = rng.bounds()
+    # ## update the caret position if the value has changed
+    # if el.prevValue and @expectedValueDoesNotMatchCurrentValue(el.prevValue, rng)
+    #   @moveCaretToEnd(rng)
+    #   el.prevValue = rng.all()
+    #   bililiteRangeSelection = el.bililiteRangeSelection = rng.bounds()
+    #   # @updateSelection(el, options)
+
 
     ## store the previous text value
     ## so we know to fire change events
     ## and change callbacks
-    options.prev = rng.all()
 
-    resetBounds = (start, end) ->
-      if start? and end?
-        bounds = [start, end]
-      else
-        len = rng.length()
-        bounds = [len, len]
+    # options.prev = rng.all()
 
-      ## resets the bounds to the
-      ## end of the element's text
-      if not _.isEqual(rng._bounds, bounds)
-        el.bililiteRangeSelection = bounds
-        rng.bounds(bounds)
+    # resetBounds = (start, end) ->
+    #   if start? and end?
+    #     bounds = [start, end]
+    #   else
+    #     len = rng.length()
+    #     bounds = [len, len]
+
+    #   ## resets the bounds to the
+    #   ## end of the element's text
+    #   if not _.isEqual(rng._bounds, bounds)
+    #     el.bililiteRangeSelection = bounds
+    #     rng.bounds(bounds)
 
     ## restore the bounds if our el already has this
-    if bililiteRangeSelection
-      rng.bounds(bililiteRangeSelection)
-    else
-      ## native date/moth/datetime/time input types
-      ## do not have selectionStart so we have to
-      ## manually fix the range on those elements.
-      ## we know we need to do that when
-      ## el.selectionStart throws or if the element
-      ## does not have a selectionStart property
-      try
-        if "selectionStart" of el
-          el.selectionStart
-        else
-          resetBounds()
-      catch
-        ## currently if this throws we're likely on
-        ## a native input type (number, etc)
-        ## and we're just going to take a shortcut here
-        ## by figuring out if there is currently a
-        ## selection range of the window. whatever that
-        ## value is we need to set the range of the el.
-        ## now this will fail if there is a PARTIAL range
-        ## for instance if our element has value of: 121234
-        ## and the selection range is '12' we cannot know
-        ## if it is the [0,1] index or the [2,3] index. to
-        ## fix this we need to walk forward and backward by
-        ## s.modify('extend', 'backward', 'character') until
-        ## we can definitely figure out where the selection is
-        ## check if this fires selectionchange events. if it does
-        ## we may need an option that enables to use to simply
-        ## silence these events, or perhaps just TELL US where
-        ## to type via the index.
-        try
-          selection = el.ownerDocument.getSelection().toString()
-          index = options.$el.val().indexOf(selection)
-          if selection.length and index > -1
-            resetBounds(index, selection.length)
-          else
-            resetBounds()
-        catch
-          resetBounds()
+    # if bililiteRangeSelection
+    #   rng.bounds(bililiteRangeSelection)
+    # else
+    #   ## native date/moth/datetime/time input types
+    #   ## do not have selectionStart so we have to
+    #   ## manually fix the range on those elements.
+    #   ## we know we need to do that when
+    #   ## el.selectionStart throws or if the element
+    #   ## does not have a selectionStart property
+    #   try
+    #     if "selectionStart" of el
+    #       el.selectionStart
+    #     else
+    #       resetBounds()
+    #   catch
+    #     ## currently if this throws we're likely on
+    #     ## a native input type (number, etc)
+    #     ## and we're just going to take a shortcut here
+    #     ## by figuring out if there is currently a
+    #     ## selection range of the window. whatever that
+    #     ## value is we need to set the range of the el.
+    #     ## now this will fail if there is a PARTIAL range
+    #     ## for instance if our element has value of: 121234
+    #     ## and the selection range is '12' we cannot know
+    #     ## if it is the [0,1] index or the [2,3] index. to
+    #     ## fix this we need to walk forward and backward by
+    #     ## s.modify('extend', 'backward', 'character') until
+    #     ## we can definitely figure out where the selection is
+    #     ## check if this fires selectionchange events. if it does
+    #     ## we may need an option that enables to use to simply
+    #     ## silence these events, or perhaps just TELL US where
+    #     ## to type via the index.
+    #     try
+    #       selection = el.ownerDocument.getSelection().toString()
+    #       index = options.$el.val().indexOf(selection)
+    #       if selection.length and index > -1
+    #         resetBounds(index, selection.length)
+    #       else
+    #         resetBounds()
+    #     catch
+    #       resetBounds()
 
     keys = options.chars.split(charsBetweenCurlyBraces).map (chars) ->
       if charsBetweenCurlyBraces.test(chars)
@@ -351,19 +381,17 @@ $Keyboard = {
     ## how keystrokes come into javascript naturally
     Promise
     .each keys, (key) =>
-      @typeChars(el, rng, key, options)
+      @typeChars(el, key, options)
     .then =>
       ## if after typing we ended up changing
       ## our value then fire the onTypeChange callback
-      if @expectedValueDoesNotMatchCurrentValue(options.prev, rng)
-        options.onTypeChange()
-
-      ## after typing be sure to clear all ranges
-      if sel = options.window.getSelection()
-        sel.removeAllRanges()
+      # if @expectedValueDoesNotMatchCurrentValue(options.prev, )
+      #   options.onTypeChange()
 
       unless options.release is false
         @resetModifiers(el, options.window)
+
+  ## #endregion
 
   countNumIndividualKeyStrokes: (keys) ->
     _.reduce keys, (memo, chars) =>
@@ -377,9 +405,9 @@ $Keyboard = {
         memo + chars.length
     , 0
 
-  typeChars: (el, rng, chars, options) ->
+  typeChars: (el, chars, options) ->
     options = _.clone(options)
-    options.rng = rng
+    # options.rng = rng
 
     switch
       when @isSpecialChar(chars)
@@ -414,6 +442,16 @@ $Keyboard = {
 
   expectedValueDoesNotMatchCurrentValue: (expected, rng) ->
     expected isnt rng.all()
+
+  updateSelection: (el, options) ->
+    # doc = options.window.document
+    # newRange = doc.createRange()
+    # newRange.setStart(el, el.length)
+    # newRange.setEnd(el, el.length)
+    # sel = doc.getSelection()
+    # sel.removeAllRanges()
+    # sel.addRange(newRange)
+    console.log('newRange')
 
   moveCaretToEnd: (rng) ->
     len = rng.length()
@@ -511,17 +549,23 @@ $Keyboard = {
       ## automatically shift the caret to the end like a real browser
       if @expectedValueDoesNotMatchCurrentValue(after, options.rng)
         @moveCaretToEnd(options.rng)
+        @updateSelection(el, options)
 
     @ensureKey el, key, options, ->
-      options.updateValue(options.rng, key)
+      options.updateValue(el, key)
       ## update the selection that's cached on the element
       ## and store the value for comparison in any future typing
-      el.bililiteRangeSelection = options.rng.bounds()
-      el.prevValue = el.value
+      # el.bililiteRangeSelection = options.rng.bounds()
+      # el.prevValue = el.value
+
+      ## For contenteditables, need to manually update the global selection
+      # if (Cypress.dom.isContentEditable(el))
+      #   Cypress.dom.moveSelectionToEnd(el)
+      
 
   ensureKey: (el, key, options, fn) ->
     options.id        = _.uniqueId("char")
-    options.beforeKey = options.rng.all()
+    options.beforeKey = el.value
 
     maybeUpdateValueAndFireInput = =>
       ## only call this function if we haven't been told not to
@@ -549,7 +593,7 @@ $Keyboard = {
 
           ## store the afterKey value so we know
           ## if something mutates the value between typing keys
-          options.afterKey = options.rng.all()
+          options.afterKey = options.value
 
     @simulateKey(el, "keyup", key, options)
 
@@ -610,6 +654,8 @@ $Keyboard = {
           onEvent: ->
         })
 }
+
+
 
 $Cypress.Keyboard = $Keyboard
 

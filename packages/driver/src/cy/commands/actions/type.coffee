@@ -4,6 +4,8 @@ Promise = require("bluebird")
 moment = require("moment")
 
 $dom = require("../../../dom")
+$elements = require("../../../dom/elements")
+$selection = require("../../../dom/selection")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 $actionability = require("../../actionability")
@@ -231,6 +233,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## see comment in updateValue below
         typed = ""
 
+        isContentEditable = $elements.isContentEditable(options.$el.get(0))
+        isTextarea = $elements.isTextarea(options.$el.get(0))
+
         $Keyboard.type({
           $el:     options.$el
           chars:   options.chars
@@ -238,17 +243,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           release: options.release
           window:  win
 
-          updateValue: (rng, key) ->
-            if needSingleValueChange()
-              ## in these cases, the value must only be set after all
-              ## the characters are input because attemping to set
-              ## a partial/invalid value results in the value being
-              ## set to an empty string
-              typed += key
-              if typed is options.chars
-                options.$el.val(options.chars)
-            else
-              rng.text(key, "end")
+          updateValue: (el, key) ->
+            
+            # if needSingleValueChange()
+            #   ## in these cases, the value must only be set after all
+            #   ## the characters are input because attemping to set
+            #   ## a partial/invalid value results in the value being
+            #   ## set to an empty string
+            #   typed += key
+            #   if typed is options.chars
+            #     options.$el.val(options.chars)
+            # else
+            # val = this._el.value
+            # rng.text(key, "end")
+            $selection.updateValue(el, key)
+
 
           onBeforeType: (totalKeys) ->
             ## for the total number of keys we're about to
@@ -279,7 +288,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## changes
           onTypeChange: ->
             ## never fire any change events for contenteditable
-            return if options.$el.is("[contenteditable]")
+            return if isContentEditable
 
             state "changeEvent", ->
               dispatchChangeEvent()
@@ -289,7 +298,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## dont dispatch change events or handle
             ## submit event if we've pressed enter into
             ## a textarea or contenteditable
-            return if options.$el.is("textarea,[contenteditable]")
+            return if isTextarea || isContentEditable
 
             ## if our value has changed since our
             ## element was activated we need to

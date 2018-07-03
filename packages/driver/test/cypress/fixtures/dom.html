@@ -44,6 +44,11 @@
             margin-left: 0%;
           }
         }
+        
+        #ce-prefilled p {
+          display: inline
+        }
+
       </style>
 
       DOM Fixture
@@ -281,6 +286,10 @@
         <input id="time-without-value" type="time" />
 
         <div contenteditable="true"></div>
+        <br/>
+        <div contenteditable="true" id="ce-prefilled">
+          <p><p>jjjj</p></p>
+        </div>
         <textarea></textarea>
       </div>
 

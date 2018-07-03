@@ -239,22 +239,29 @@ describe "src/cy/commands/actions/type", ->
           expect(args[2]).to.eq(animationDistanceThreshold)
 
     describe "input types where no extra formatting required", ->
-      _.each ["password", "email", "number", "search", "url", "tel"], (type) ->
-        it "accepts input [type=#{type}]", ->
-          input = cy.$$("<input type='#{type}' id='input-type-#{type}' />")
+      _.each [
+        "password"
+        "email"
+        "number"
+        "search"
+        "url"
+        "tel"
+        ], (type) ->
+          it "accepts input [type=#{type}]", ->
+            input = cy.$$("<input type='#{type}' id='input-type-#{type}' />")
 
-          cy.$$("body").append(input)
+            cy.$$("body").append(input)
 
-          cy.get("#input-type-#{type}").type("1234").then ($input) ->
-            expect($input).to.have.value "1234"
-            expect($input.get(0)).to.eq $input.get(0)
+            cy.get("#input-type-#{type}").type("1234").then ($input) ->
+              expect($input).to.have.value "1234"
+              expect($input.get(0)).to.eq $input.get(0)
 
-        it "accepts type [type=#{type}], regardless of capitalization", ->
-          input = cy.$$("<input type='#{type.toUpperCase()}' id='input-type-#{type}' />")
+          it "accepts type [type=#{type}], regardless of capitalization", ->
+            input = cy.$$("<input type='#{type.toUpperCase()}' id='input-type-#{type}' />")
 
-          cy.$$("body").append(input)
+            cy.$$("body").append(input)
 
-          cy.get("#input-type-#{type}").type("1234")
+            cy.get("#input-type-#{type}").type("1234")
 
     describe "tabindex", ->
       beforeEach ->
@@ -938,8 +945,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'ar' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 3]).select()
+              $input.get(0).setSelectionRange(1,3)
             .get(":text:first").type("{backspace}").then ($input) ->
               expect($input).to.have.value("b")
 
@@ -968,8 +974,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
+              $input.get(0).setSelectionRange(0,1)
             .get(":text:first").type("{backspace}")
 
         it "does not fire input event when value does not change", (done) ->
@@ -979,8 +984,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## set the range at the beggining
-              b = bililiteRange($input.get(0))
-              b.bounds([0, 0]).select()
+              $input.get(0).setSelectionRange(0, 0)
             .get(":text:first").type("{backspace}").then -> done()
 
         it "can prevent default backspace movement", (done) ->
@@ -1001,8 +1005,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'ar' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 3]).select()
+              $input.get(0).setSelectionRange(2,3)
             .get(":text:first").type("{del}").then ($input) ->
               expect($input).to.have.value("b")
 
@@ -1031,8 +1034,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
+              $input.get(0).setSelectionRange(0,1)
             .get(":text:first").type("{del}")
 
         it "does not fire input event when value does not change", (done) ->
@@ -1063,8 +1065,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' character
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
+              $input.get(0).setSelectionRange(0,1)
             .get(":text:first").type("{leftarrow}n").then ($input) ->
               expect($input).to.have.value("bnar")
 
@@ -1128,8 +1129,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' character
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
+              $input.get(0).setSelectionRange(0,1)
             .get(":text:first").type("{rightarrow}n").then ($input) ->
               expect($input).to.have.value("banr")
 
@@ -1292,8 +1292,10 @@ describe "src/cy/commands/actions/type", ->
             expect($textarea).to.have.value("foobar\nbaz\nquux")
 
         it "inserts new line into [contenteditable]", ->
-          cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
-            expect($div).to.have.text("foobar\nbaz\nquux")
+          cy.get("#input-types [contenteditable]:first").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
+            expect($div.get(0).innerText).to.eql("foobar\nbaz\nquux\n")
+            expect($div.get(0).textContent).to.eql("foobarbazquux")
+            expect($div.get(0).innerHTML).to.eql("foobar<div>baz</div><div>quux</div>")
 
     describe "modifiers", ->
 
@@ -1744,7 +1746,38 @@ describe "src/cy/commands/actions/type", ->
             expect(changed).to.eq 0
 
     describe "caret position", ->
-      it "leaves caret at the end of the input"
+
+      it "leaves caret at the end of contenteditable", ->
+        cy.get('[contenteditable]:first').type('foobar')
+        cy.window().then (win) ->
+          expect(Cypress.dom.getCaretPosition(Cypress.$('[contenteditable]'))).to.eq(6)
+        
+      it "leaves caret at the end of contenteditable when prefilled", ->
+        cy.get('#ce-prefilled').type('foobar')
+        cy.window().then (win) ->
+          expect(Cypress.dom.getCaretPosition(Cypress.$('[contenteditable]'))).to.eq(6)
+
+      it "can move the caret left on contenteditable", ->
+        cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
+        cy.window().then (win) ->
+          expect(Cypress.dom.getCaretPosition(Cypress.$('[contenteditable]'))).to.eq(1)
+      
+        ##make sure caret is correct
+        ## type left left
+        ## make sure caret correct
+        ## text is fboo
+        ## fix input-mask issue
+
+      it "leaves caret at the end of input", ->
+        cy.get(':text:first').type('foobar')
+        cy.window().then (win) ->
+          expect(Cypress.dom.getCaretPosition(Cypress.$(':text:first'))).to.eq(6)
+
+      it "leaves caret at the end of textarea", ->
+        cy.get('#comments').type('foobar')
+        cy.window().then (win) ->
+          expect(Cypress.dom.getCaretPosition(Cypress.$('#comments'))).to.eq(6)
+            
 
       it "always types at the end of the input"
 

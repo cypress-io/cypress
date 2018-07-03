@@ -7,7 +7,57 @@ $utils = require("../cypress/utils")
 
 fixedOrStickyRe = /(fixed|sticky)/
 
-focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
+contentEditable = '[contenteditable]'
+focusable = "a[href],link[href],button,select,[tabindex],input,textarea,#{contentEditable}"
+
+
+nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set
+
+nativeTextareaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set
+
+nativeInputValueGetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").get
+
+nativeTextareaValueGetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").get
+
+nativeIsContentEditable = Object.getOwnPropertyDescriptor(window.HTMLElement.prototype, "isContentEditable").get
+
+
+setValue = (el, val) ->
+  ## sets value for <input> or <textarea>
+  if isInput(el)
+    return nativeInputValueSetter.call(el, val)
+  if isTextarea(el)
+    return nativeTextareaValueSetter.call(el, val)
+
+substituteText = (text, newText, [start, end]) ->
+  curText.substring(0, start) + newText + curText.substring(bounds[1])
+
+
+  # if isInput(el)
+  #   curText = nativeInputValueGetter.call(el)
+  # if isTextarea(el)
+  #   curText = nativeTextareaValueGetter.call(el)
+
+    
+getValue = (el) ->
+  if isInput(el)
+    return nativeInputValueGetter.call(el)
+  if isTextarea(el)
+    return nativeTextareaValueGetter.call(el)
+
+isContentEditable = (el) ->
+  ## this property is the tell-all for contenteditable
+  ## should be true for elements:
+  ##   - with [contenteditable]
+  ##   - with document.designMode = 'on'
+  nativeIsContentEditable.call(el)
+
+isTextarea = (el) ->
+  (el.tagName or "").toLowerCase() is 'textarea'
+
+isInput = (el) ->
+  (el.tagName or "").toLowerCase() is 'input'
+
 
 isElement = (obj) ->
   try
@@ -19,7 +69,9 @@ isFocusable = ($el) ->
   $el.is(focusable)
 
 isType = ($el, type) ->
-  ($el.attr("type") or "").toLowerCase() is type
+  ## NOTE: use DOMElement.type instead of getAttribute('type') since
+  ##       <input type="asdf"> will have type="text", and behaves like text type
+  ($el.get(0).type or "").toLowerCase() is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
@@ -300,7 +352,17 @@ module.exports = {
 
   isDescendent
 
+  isContentEditable
+
+  isTextarea
+
+  isInput
+
   stringify
+
+  getValue
+
+  setValue
 
   getElements
 
