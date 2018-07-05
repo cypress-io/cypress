@@ -15,7 +15,7 @@ describe "e2e plugins", ->
 
   it "passes", ->
     e2e.exec(@, {
-      spec: "app_spec.coffee"
+      spec: "working_preprocessor_spec.coffee"
       project: workingPreprocessor
       snapshot: true
       expectedExitCode: 0
@@ -23,7 +23,7 @@ describe "e2e plugins", ->
 
   it "fails", ->
     e2e.exec(@, {
-      spec: "app_spec.coffee"
+      spec: "plugins_async_error_spec.coffee"
       project: pluginsAsyncError
       snapshot: true
       expectedExitCode: 1
@@ -31,7 +31,7 @@ describe "e2e plugins", ->
 
   it "can modify config from plugins", ->
     e2e.exec(@, {
-      spec: "app_spec.coffee"
+      spec: "plugin_config_spec.coffee"
       env: "foo=foo,bar=bar"
       config: "pageLoadTimeout=10000"
       project: pluginConfig
@@ -42,7 +42,7 @@ describe "e2e plugins", ->
   it "works with user extensions", ->
     e2e.exec(@, {
       browser: "chrome"
-      spec: "app_spec.coffee"
+      spec: "plugin_extension_spec.coffee"
       project: pluginExtension
       snapshot: true
       expectedExitCode: 0

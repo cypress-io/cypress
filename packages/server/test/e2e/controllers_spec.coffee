@@ -3,7 +3,7 @@ Fixtures = require("../support/helpers/fixtures")
 
 nonExistentSpec = Fixtures.projectPath("non-existent-spec")
 
-describe "e2e plugins", ->
+describe "e2e controllers", ->
   e2e.setup()
 
   it "fails when spec does not exist", ->
