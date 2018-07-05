@@ -7,6 +7,7 @@ minimatch = require("minimatch")
 glob = require("./glob")
 
 MINIMATCH_OPTIONS = { dot: true, matchBase: true }
+backslashRe = /\\/g
 
 getPatternRelativeToProjectRoot = (specPattern, projectRoot) ->
   _.map specPattern, (p) ->
@@ -60,6 +61,10 @@ find = (config, specPattern) ->
   ## relativePathFromIntegrationFolder = foo.coffee
   ## relativePathFromProjectRoot       = cypress/integration/foo.coffee
 
+  ## normalize windows \ into /
+  normalizePath = (file) ->
+    file.replace(backslashRe, '/')
+
   relativePathFromIntegrationFolder = (file) ->
     path.relative(integrationFolderPath, file)
 
@@ -71,6 +76,8 @@ find = (config, specPattern) ->
 
     if not path.isAbsolute(file)
       throw new Error("Cannot set parts of file from non-absolute path #{file}")
+
+    file = normalizePath(file)
 
     {
       name: relativePathFromIntegrationFolder(file)
