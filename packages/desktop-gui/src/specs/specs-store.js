@@ -1,10 +1,12 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
+import path from 'path'
 
 import localData from '../lib/local-data'
 import Spec from './spec-model'
 import Folder from './folder-model'
 
+const pathSeparatorRe = /[\\\/]/g
 const extRegex = /.*\.\w+$/
 const isFile = (maybeFile) => extRegex.test(maybeFile)
 
@@ -16,7 +18,13 @@ export const allSpecsSpec = new Spec({
 })
 
 const formRelativePath = (spec) => {
-  return spec === allSpecsSpec ? spec.relative : `${spec.type}/${spec.name}`
+  return spec === allSpecsSpec ? spec.relative : path.join(spec.type, spec.name)
+}
+
+const pathsEqual = (path1, path2) => {
+  if (!path1 || !path2) return false
+
+  return path1.replace(pathSeparatorRe, '') === path2.replace(pathSeparatorRe, '')
 }
 
 export class SpecsStore {
@@ -69,7 +77,7 @@ export class SpecsStore {
   }
 
   isChosen (spec) {
-    return this.chosenSpecPath === formRelativePath(spec)
+    return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
   }
 
   _tree (files) {
@@ -80,18 +88,18 @@ export class SpecsStore {
     }
 
     const tree = _.reduce(files, (root, file) => {
-      const segments = [file.type].concat(file.name.split('/'))
+      const segments = [file.type].concat(file.name.split(pathSeparatorRe))
       const segmentsPassed = []
 
       let placeholder = root
 
       _.each(segments, (segment) => {
         segmentsPassed.push(segment)
-        const path = segmentsPassed.join('/')
-        const isCurrentAFile = isFile(path)
-        const props = { path, displayName: segment }
+        const currentPath = path.join(...segmentsPassed)
+        const isCurrentAFile = isFile(currentPath)
+        const props = { path: currentPath, displayName: segment }
 
-        let existing = _.find(placeholder, { path })
+        let existing = _.find(placeholder, (file) => pathsEqual(file.path, currentPath))
 
         if (!existing) {
           existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)
