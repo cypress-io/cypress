@@ -27,6 +27,18 @@ specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
 
+## TODO:
+## - refactor exitEarlyWithErr events
+## NOTES:
+## - we try to preemptively preprocess support file and spec file as
+##     early as possible.
+##   - for support file, this is on project open (project#open)
+##   - for spec file, this is on browser launch (open_project#launch)
+## - errors can occur asynchronously in pluginsFile and crash process
+##   - in run mode, need to fail gracefully and exit
+##   - in interactive mode, need to close browser and display error
+##       in desktop-gui
+
 color = (val, c) ->
   chalk[c](val)
 
@@ -279,27 +291,29 @@ writeOutput = (outputPath, results) ->
 
     fs.outputJsonAsync(outputPath, results)
 
-openProjectCreate = (projectRoot, socketId, options) ->
+openProjectCreate = (projectRoot, socketId, runState, options) ->
   ## now open the project to boot the server
   ## putting our web client app in headless mode
   ## - NO  display server logs (via morgan)
   ## - YES display reporter results (via mocha reporter)
   openProject.create(projectRoot, options, {
+    runState
     socketId
-    morgan:       false
-    report:       true
-    isTextTerminal:   options.isTextTerminal ? true
+    morgan: false
+    report: true
+    isTextTerminal: options.isTextTerminal ? true
+    onDone: runState.resolve.bind(runState)
     onError: (err) ->
       console.log("")
       console.log(err.stack)
-      openProject.emit("exitEarlyWithErr", err.message)
+      runState.reject(err)
   })
   .catch {portInUse: true}, (err) ->
     ## TODO: this needs to move to emit exitEarly
     ## so we record the failure in CI
     errors.throw("PORT_IN_USE_LONG", err.port)
 
-createAndOpenProject = (socketId, options) ->
+createAndOpenProject = (socketId, runState, options) ->
   { projectRoot, projectId } = options
 
   Project
@@ -307,7 +321,7 @@ createAndOpenProject = (socketId, options) ->
   .then ->
     ## open this project without
     ## adding it to the global cache
-    openProjectCreate(projectRoot, socketId, options)
+    openProjectCreate(projectRoot, socketId, runState, options)
     .call("getProject")
   .then (project) ->
     Promise.props({
@@ -359,7 +373,8 @@ module.exports = {
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
 
-        project.emit("exitEarlyWithErr", err.message)
+        ## TODO: refactor this to not use exitEarlyWithErr event?
+        project.emit("exitEarlyWithErr", err)
       onNewWindow: (e, url, frameName, disposition, options) ->
         ## force new windows to automatically open with show: false
         ## this prevents window.open inside of javascript client code
@@ -509,40 +524,34 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project, exit) ->
-    new Promise (resolve) ->
-      if exit is false
-        resolve = (arg) ->
-          console.log("not exiting due to options.exit being false")
+  waitForProjectEnd: (runState, exit) ->
+    Promise
+    .resolve(runState.promise)
 
-      onEarlyExit = (errMsg) ->
-        ## probably should say we ended
-        ## early too: (Ended Early: true)
-        ## in the stats
-        obj = {
-          error: errors.stripAnsi(errMsg)
-          stats: {
-            failures: 1
-            tests: 0
-            passes: 0
-            pending: 0
-            suites: 0
-            skipped: 0
-            wallClockDuration: 0
-            wallClockStartedAt: (new Date()).toJSON()
-            wallClockEndedAt: (new Date()).toJSON()
-          }
+    ## FIXME: handle exit being false
+    # .then ->
+    #   if exit is false
+    #     resolve = (arg) ->
+    #       console.log("not exiting due to options.exit being false")
+
+    .catch (err) ->
+      ## probably should say we ended
+      ## early too: (Ended Early: true)
+      ## in the stats
+      obj = {
+        error: errors.stripAnsi(err.message)
+        stats: {
+          failures: 1
+          tests: 0
+          passes: 0
+          pending: 0
+          suites: 0
+          skipped: 0
+          wallClockDuration: 0
+          wallClockStartedAt: (new Date()).toJSON()
+          wallClockEndedAt: (new Date()).toJSON()
         }
-
-        resolve(obj)
-
-      onEnd = (obj) ->
-        resolve(obj)
-
-      ## when our project fires its end event
-      ## resolve the promise
-      project.once("end", onEnd)
-      project.once("exitEarlyWithErr", onEarlyExit)
+      }
 
   waitForBrowserToConnect: (options = {}) ->
     { project, socketId, timeout } = options
@@ -576,7 +585,8 @@ module.exports = {
               err = errors.get("TESTS_DID_NOT_START_FAILED")
               errors.log(err)
 
-              project.emit("exitEarlyWithErr", err.message)
+              ## TODO: refactor this to not use exitEarlyWithErr event?
+              project.emit("exitEarlyWithErr", err)
 
   waitForSocketConnection: (project, id) ->
     new Promise (resolve, reject) ->
@@ -593,9 +603,9 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { runState, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
 
-    @listenForProjectEnd(project, exit)
+    @waitForProjectEnd(runState, exit)
     .then (obj) =>
       _.defaults(obj, {
         error: null
@@ -665,7 +675,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, runState } = options
 
     isHeadless = browser.name is "electron" and not headed
 
@@ -739,7 +749,7 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}) ->
-    { project, browser, video, videosFolder } = options
+    { project, browser, video, videosFolder, runState } = options
 
     { isHeadless, isHeaded } = browser
 
@@ -796,7 +806,7 @@ module.exports = {
             spec
             cname
             started
-            project
+            runState
             screenshots
             exit:                 options.exit
             videoCompression:     options.videoCompression
@@ -834,8 +844,6 @@ module.exports = {
       browser: "electron"
     })
 
-    socketId = random.id()
-
     { projectRoot, record, key } = options
 
     browserName = options.browser
@@ -846,9 +854,12 @@ module.exports = {
     ## warn if we're using deprecated --ci flag
     recordMode.warnIfCiFlag(options.ci)
 
+    runState = Promise.pending()
+    socketId = random.id()
+
     ## ensure the project exists
     ## and open up the project
-    createAndOpenProject(socketId, options)
+    createAndOpenProject(socketId, runState, options)
     .then ({ project, projectId, config }) =>
       ## if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
@@ -876,6 +887,7 @@ module.exports = {
             afterSpecRun
             projectRoot
             specPattern
+            runState
             socketId
             browser
             project

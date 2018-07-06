@@ -109,6 +109,7 @@ create = ->
           ## ignore errors b/c we're just setting up the watching
           ## they're handled by the spec controller
           .catch ->
+            ## TODO: need to bubble this up in run mode and not swallow this
 
           do relaunchBrowser = ->
             debug(

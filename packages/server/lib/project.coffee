@@ -71,6 +71,8 @@ class Project extends EE
 
       @memoryCheck = setInterval(logMemory, 1000)
 
+    @on("exitEarlyWithErr", options.onError)
+
     @getConfig(options)
     .tap (cfg) =>
       process.chdir(@projectRoot)
@@ -94,6 +96,7 @@ class Project extends EE
         # ignore errors b/c we're just setting up the watching
         # they're handled by the spec controller
         .catch ->
+          ## TODO: need to bubble this up in run mode and not swallow this
 
       @server.open(cfg, @)
       .spread (port, warning) =>
@@ -205,7 +208,7 @@ class Project extends EE
           ## re-init plugins after a change
           @_initPlugins(cfg, options)
           .catch (err) ->
-            options.onError(err)
+            options.runState.reject(err)
       })
 
   watchSettings: (onSettingsChanged) ->
@@ -287,7 +290,7 @@ class Project extends EE
             @server.end()
           ])
           .spread (stats = {}) =>
-            @emit("end", stats)
+            options.onDone(stats)
     })
 
   changeToUrl: (url) ->
