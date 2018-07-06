@@ -6,7 +6,7 @@ Fixtures = require("../support/helpers/fixtures")
 pluginExtension = Fixtures.projectPath("plugin-extension")
 pluginConfig = Fixtures.projectPath("plugin-config")
 workingPreprocessor = Fixtures.projectPath("working-preprocessor")
-pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
+preprocessorAsyncError = Fixtures.projectPath("preprocessor-async-error")
 pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
 pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
 
@@ -21,10 +21,10 @@ describe "e2e plugins", ->
       expectedExitCode: 0
     })
 
-  it "fails", ->
+  it "fails on async preprocessor error with support file", ->
     e2e.exec(@, {
-      spec: "plugins_async_error_spec.coffee"
-      project: pluginsAsyncError
+      spec: "preprocessor_async_error_spec.coffee"
+      project: preprocessorAsyncError
       snapshot: true
       expectedExitCode: 1
     })
