@@ -1406,8 +1406,24 @@ declare namespace Cypress {
   interface Agent<A extends sinon.SinonSpy> {
     log(shouldOutput?: boolean): Omit<A, 'withArgs'> & Agent<A>
 
+    /**
+     * Saves current spy / stub under an alias.
+     * @see https://on.cypress.io/stubs-spies-and-clocks
+     * @see https://on.cypress.io/as
+     * @example
+     *    cy.spy(win, 'fetch').as('winFetch') // Alias 'window.fetch' spy as "winFetch"
+     */
     as(alias: string): Omit<A, 'withArgs'> & Agent<A>
 
+    /**
+     * Creates a spy / stub but only for calls with given arguments.
+     * @see https://on.cypress.io/stubs-spies-and-clocks
+     * @see https://on.cypress.io/as
+     * @example
+     *    const s = cy.stub(JSON, 'parse').withArgs('invalid').returns(42)
+     *    expect(JSON.parse('invalid')).to.equal(42)
+     *    expect(s).to.have.been.calledOnce
+     */
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
   }
 
