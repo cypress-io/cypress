@@ -159,6 +159,7 @@ class Server
       @_onError = options.onError
 
       @_sniServer = https.createServer({})
+      @_sniServer.setTimeout(0)
 
       allowDestroy(@_sniServer)
 

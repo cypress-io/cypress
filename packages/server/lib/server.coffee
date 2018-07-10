@@ -144,6 +144,7 @@ class Server
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
       @_server  = http.createServer(app)
+      @_server.setTimeout(0)
 
       allowDestroy(@_server)
 
