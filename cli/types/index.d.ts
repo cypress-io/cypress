@@ -1344,11 +1344,47 @@ declare namespace Cypress {
      * @see https://on.cypress.io/trigger
      */
     trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    /**
+     * Trigger an event on a DOM element.
+     *
+     * @see https://on.cypress.io/trigger
+     */
     trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    /**
+     * Trigger an event on a DOM element.
+     *
+     * @see https://on.cypress.io/trigger
+     */
     trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
-    // custom events... If the following were `.triggerCustom`, `.trigger` strongly typed with event data
+    /**
+     * Trigger an event on a DOM element.
+     * Custom events... If the following were `.triggerCustom`,
+     * `.trigger` strongly typed with event data
+     *
+     * @see https://on.cypress.io/trigger
+     * @example
+     *    cy.get('a').trigger('mousedown')
+     */
     trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions>): Chainable<Subject>
+    /**
+     * Trigger an event on a DOM element.
+     * Custom events... If the following were `.triggerCustom`,
+     * `.trigger` strongly typed with event data
+     *
+     * @see https://on.cypress.io/trigger
+     * @example
+     *    cy.get('a').trigger('mousedown')
+     */
     trigger(eventName: string, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
+    /**
+     * Trigger an event on a DOM element.
+     * Custom events... If the following were `.triggerCustom`,
+     * `.trigger` strongly typed with event data
+     *
+     * @see https://on.cypress.io/trigger
+     * @example
+     *    cy.get('a').trigger('mousedown')
+     */
     trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions>): Chainable<Subject>
 
     /**
