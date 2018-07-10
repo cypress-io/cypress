@@ -1124,13 +1124,51 @@ declare namespace Cypress {
 
     /**
      * Replace a function, record its usage and control its behavior.
-     * > Note: `.stub()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://on.cypress.io/stubs-spies-and-clocks)
+     * > Note: `.stub()` assumes you are already familiar with our guide:
+     * [Stubs, Spies, and Clocks](https://on.cypress.io/stubs-spies-and-clocks)
      *
      * @see https://on.cypress.io/stub
+     * @example
+     *    const fn = cy.stub() // stub without any arguments acts like a spy
+     *    fn(42)
+     *    expect(fn).to.have.been.calledOnce
+     *    expect(fn).to.have.always.been.calledWithExactly(42)
      */
     stub(): Agent<sinon.SinonStub>
+    /**
+     * Stubs all the object’s methods.
+     *
+     * @see https://on.cypress.io/stub
+     * @example
+     * const o = {
+     *  toString () {
+     *    return 'foo'
+     *  }
+     * }
+     * expect(o.toString()).to.equal('foo')
+     * cy.stub(o)
+     * // because stub does not call original function
+     * expect(o.toString()).to.equal(undefined)
+     * expect(o.toString).to.have.been.calledOnce
+     */
     stub(obj: any): Agent<sinon.SinonStub>
+    /**
+     * Stubs single method of an object.
+     *
+     * @see https://on.cypress.io/stub
+     * @example
+     *    const o = {}
+     *    expect(o.toString()).to.equal('[object Object]')
+     *    cy.stub(o, 'toString').callsFake(() => 'foo')
+     *    expect(o.toString()).to.equal('foo')
+     *    expect(o.toString).to.have.been.calledOnce
+     */
     stub<T>(obj: T, method: keyof T): Agent<sinon.SinonStub>
+    /**
+     * Stubs a method on an object
+     *
+     * @deprecated Use `cy.stub(object, name).callsFake(fn)` instead
+    */
     stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): Agent<sinon.SinonStub>
 
     /**
