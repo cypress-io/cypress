@@ -477,6 +477,14 @@ declare namespace Cypress {
      *    cy.contains('ul', 'apples')
      */
     contains(content: string | number | RegExp): Chainable<Subject>
+    /**
+     * Get the child DOM element that contains given text.
+     *
+     * @see https://on.cypress.io/contains
+     * @example
+     *    // Yield el in .nav containing 'About'
+     *    cy.get('.nav').contains('About')
+     */
     contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
     /**
      * Get the DOM element with name "selector" containing the text or regular expression.
@@ -1196,7 +1204,23 @@ declare namespace Cypress {
      *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
     uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
+    /**
+     * Uncheck specific checkbox.
+     *
+     * @see https://on.cypress.io/uncheck
+     * @example
+     *    // Uncheck the checkbox with the value of ‘ga’
+     *    cy.get('input[type="checkbox"]').uncheck('ga')
+     */
     uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
+    /**
+     * Uncheck specific checkboxes.
+     *
+     * @see https://on.cypress.io/uncheck
+     * @example
+     *    // Uncheck the checkbox with the value of ‘ga’, 'ma'
+     *    cy.get('input[type="checkbox"]').uncheck(['ga', 'ma'])
+     */
     uncheck(values: string[], options?: Partial<CheckOptions>): Chainable<Subject>
 
     /**
