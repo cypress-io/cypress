@@ -193,6 +193,11 @@ declare namespace Cypress {
      */
     env(object: ObjectLike): void
 
+    /**
+     * Internal options for "cy.log" used in custom commands.
+     *
+     * @see https://on.cypress.io/cypress-log
+     */
     log(options: Partial<LogConfig>): Log
 
     /**
