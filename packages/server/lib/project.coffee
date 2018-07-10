@@ -88,17 +88,6 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
-      if cfg.supportFile
-        debug("kicking off support file preprocessing")
-        # start compiling/watching support file as project opens
-        preprocessor.getFile(cfg.supportFile, cfg)
-        # ignore errors b/c we're just setting up the watching
-        # they're handled by the spec controller
-        .catch (err) ->
-          debug("caught support file preprocessing error: %s", err.message)
-          if cfg.isTextTerminal
-            options.onError(err)
-
       @server.open(cfg, @)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
@@ -131,6 +120,17 @@ class Project extends EE
             @checkSupportFile(cfg)
             @watchPluginsFile(cfg, options)
           )
+        .then ->
+          if cfg.supportFile
+            debug("kicking off support file preprocessing")
+            # start compiling/watching support file as project opens
+            preprocessor.getFile(cfg.supportFile, cfg)
+            # ignore errors b/c we're just setting up the watching
+            # they're handled by the spec controller
+            .catch (err) ->
+              debug("caught support file preprocessing error: %s", err.message)
+              if cfg.isTextTerminal
+                options.onError(err)
 
     # return our project instance
     .return(@)
