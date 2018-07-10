@@ -519,7 +519,7 @@ module.exports = {
     Promise
     .resolve(runState.promise)
     .then (result) ->
-      return result if exit
+      return result if exit isnt false
 
       console.log("not exiting due to options.exit being false")
       return Promise.pending().promise
