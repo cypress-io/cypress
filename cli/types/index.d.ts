@@ -1168,7 +1168,7 @@ declare namespace Cypress {
      * Stubs a method on an object
      *
      * @deprecated Use `cy.stub(object, name).callsFake(fn)` instead
-    */
+     */
     stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): Agent<sinon.SinonStub>
 
     /**
