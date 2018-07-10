@@ -1102,14 +1102,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/scrollto
      */
     scrollTo(position: PositionType, options?: Partial<ScrollToOptions>): Chainable<Subject>
+    /**
+     * Scroll to a specific X,Y position.
+     *
+     * @see https://on.cypress.io/scrollto
+     */
     scrollTo(x: number | string, y: number | string, options?: Partial<ScrollToOptions>): Chainable<Subject>
 
     /**
-     * Select an `<option>` within a `<select>`.
+     * Select an `<option>` with specific text within a `<select>`.
      *
      * @see https://on.cypress.io/select
      */
     select(text: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
+    /**
+     * Select an `<option>` with specific value(s) within a `<select>`.
+     *
+     * @see https://on.cypress.io/select
+     */
     select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
@@ -1259,7 +1269,23 @@ declare namespace Cypress {
      */
     submit(options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
+    /**
+     * Expand an array into multiple arguments.
+     * @see https://on.cypress.io/spread
+     * @example
+     *    cy.getCookies().spread((cookie1, cookie2, cookie3) => {
+     *      // each cookie is now an individual argument
+     *    })
+     */
     spread<S extends object | any[] | string | number | boolean>(fn: (...args: any[]) => S): Chainable<S>
+    /**
+     * Expand an array into multiple arguments.
+     * @see https://on.cypress.io/spread
+     * @example
+     *    cy.getCookies().spread((cookie1, cookie2, cookie3) => {
+     *      // each cookie is now an individual argument
+     *    })
+     */
     spread(fn: (...args: any[]) => void): Chainable<Subject>
 
     /**
