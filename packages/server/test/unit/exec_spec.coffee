@@ -1,9 +1,10 @@
 require("../spec_helper")
 
 _ = require("lodash")
-cp = require("#{root}lib/util/child_process")
 os = require("os")
 exec = require("#{root}lib/exec")
+# actual command execution is done via "execa" NPM module
+execa = require("execa")
 
 isWindows = () ->
   os.platform() is "win32"
@@ -163,6 +164,22 @@ describe "lib/exec", ->
         expect(result.code).to.eq 0
         expect(result.stderr).to.equal "some error"
 
+    it "runs child process with detached flag", ->
+      sinon.spy(execa, "shell")
+      cmd = "echo 'all good 101'"
+      runCommand(cmd)
+      .then ->
+        # there might be other calls to execa.shell
+        # for example to figure out which "bash" we have
+        expect(execa.shell).to.have.been.called
+        # make sure this is our command (with some additional wrapping)
+        expect(execa.shell.lastCall.args[0]).to.include(cmd)
+        options = execa.shell.lastCall.args[1]
+        expect(options).to.be.an('object')
+        expect(options).to.include({
+          detached: true
+        })
+
     describe "when exit code is non-zero", ->
       it "reports the stdout, stderr, and code", ->
         runCommand("cat nooope")
@@ -179,6 +196,6 @@ describe "lib/exec", ->
         .then ->
           fail("should not resolve")
         .catch (err) ->
-          expect(err.message).to.include "Process timed out"
-          expect(err.message).to.include "command: sleep 2"
+          expect(err.message, err.message).to.include "Process timed out"
+          expect(err.message, err.message).to.include "command: sleep 2"
           expect(err.timedOut).to.be.true

@@ -23,7 +23,8 @@ module.exports = {
       log("and is running command:", options.cmd)
       log("in folder:", projectRoot)
 
-      execa.shell(cmd, {cwd, env, shell})
+      execaOptions = {cwd, env, shell, detached: true}
+      execa.shell(cmd, execaOptions)
         # do we want to return all fields returned by execa?
         .then (result) ->
           result.shell = shell
