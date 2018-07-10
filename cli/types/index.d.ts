@@ -544,6 +544,14 @@ declare namespace Cypress {
      *    cy.get('.article').find('footer') // Yield 'footer' within '.article'
      */
     find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Finds the descendent DOM elements with the given selector.
+     *
+     * @see https://on.cypress.io/find
+     * @example
+     *    // Find the li’s within the nav
+     *    cy.get('.left-nav>.nav').find('>li')
+     */
     find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
