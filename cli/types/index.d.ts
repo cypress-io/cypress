@@ -163,11 +163,34 @@ declare namespace Cypress {
 
     // no real way to type without generics
     /**
+     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.json"
+     *
      * @see https://on.cypress.io/env
      */
     env(): ObjectLike
+    /**
+     * Returns specific environment variable or undefined
+     * @see https://on.cypress.io/env
+     * @example
+     *    // cypress.json
+     *    { "env": { "foo": "bar" } }
+     *    Cypress.env("foo") // => bar
+     */
     env(key: string): any
+    /**
+     * Set value for a variable.
+     * Any value you change will be permanently changed for the remainder of your tests.
+     * @see https://on.cypress.io/env
+     * @example
+     *    Cypress.env("host", "http://server.dev.local")
+     */
     env(key: string, value: any): void
+    /**
+     * Set values for multiple variables at once. Values are merged with existing values.
+     * @see https://on.cypress.io/env
+     * @example
+     *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
+     */
     env(object: ObjectLike): void
 
     log(options: Partial<LogConfig>): Log
