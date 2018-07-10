@@ -72,3 +72,8 @@ const opts2 = {
   body: {}
 }
 cy.request(opts2)
+
+const obj = {
+  foo: () => {}
+}
+cy.spy(obj, 'foo').as('my-spy')
