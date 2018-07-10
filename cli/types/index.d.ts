@@ -1090,23 +1090,41 @@ declare namespace Cypress {
     siblings<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Wrap a method in a spy in order to record calls to and arguments of the function.
-     * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
+     * Returns a new spy function.
+     * > Note: `.spy()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://on.cypress.io/stubs-spies-and-clocks)
      *
+     * @see https://on.cypress.io/spy
+     * @example
+     *    const fn = cy.spy() // returns "dumb" spy function
+     *    fn(42)
+     *    expect(fn).to.have.been.calledOnce
+     *    expect(fn).to.have.always.been.calledWithExactly(42)
+     */
+    spy(): Agent<sinon.SinonSpy>
+    /**
+     * Wraps existing function and spies on it, while passing arguments and results.
+     * @see https://on.cypress.io/spy
+     * @example
+     *    const add = (a, b) => a + b
+     *    const spy = cy.spy(add)
+     *    expect(spy(2, 3)).to.equal(5)
+     *    expect(spy).to.have.been.calledWithExactly(2, 3)
+     */
+    spy(func: (...args: any[]) => any): Agent<sinon.SinonSpy>
+    /**
+     * Spy on a method.
+     * @see https://on.cypress.io/spy
      * @example
      *    // assume App.start calls util.addListeners
      *    cy.spy(util, 'addListeners')
      *    App.start()
      *    expect(util.addListeners).to.be.called
-     * @see https://on.cypress.io/spy
      */
-    spy(): Agent<sinon.SinonSpy>
-    spy(func: (...args: any[]) => any): Agent<sinon.SinonSpy>
     spy<T>(obj: T, method: keyof T): Agent<sinon.SinonSpy>
 
     /**
      * Replace a function, record its usage and control its behavior.
-     * > Note: `.stub()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://docs.cypress.io/guides/guides/stubs-spies-and-clocks.html)
+     * > Note: `.stub()` assumes you are already familiar with our guide: [Stubs, Spies, and Clocks](https://on.cypress.io/stubs-spies-and-clocks)
      *
      * @see https://on.cypress.io/stub
      */
