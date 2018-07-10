@@ -64,3 +64,11 @@ const opts: Partial<Cypress.RequestOptions> = {
   body: {}
 }
 cy.request(opts)
+
+// you can cast just the "method" property
+const opts2 = {
+  url: "http://localhost:3000/myressource",
+  method: "POST" as Cypress.HttpMethod,
+  body: {}
+}
+cy.request(opts2)
