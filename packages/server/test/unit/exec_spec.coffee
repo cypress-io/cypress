@@ -164,28 +164,21 @@ describe "lib/exec", ->
         expect(result.code).to.eq 0
         expect(result.stderr).to.equal "some error"
 
-    describe "detached flag", ->
-      beforeEach ->
+    it "runs child process with detached flag", ->
+      sinon.spy(execa, "shell")
+      cmd = "echo 'all good 101'"
+      runCommand(cmd)
+      .then ->
         # there might be other calls to execa.shell
         # for example to figure out which "bash" we have
-        # by running a "dummy" command we prepare the code
-        runCommand("echo 'prepare for the test'")
-
-      it "runs child process with detached flag", ->
-        sinon.spy(execa, "shell")
-        cmd = "echo 'all good 101'"
-        runCommand(cmd)
-        .then ->
-          expect(execa.shell).to.have.been.calledOnce
-          # make sure this is our command
-          # (with possible some additional command wrapping
-          # like "source ...; command")
-          expect(execa.shell.firstCall.args[0]).to.include(cmd)
-          options = execa.shell.firstCall.args[1]
-          expect(options).to.be.an('object')
-          expect(options).to.include({
-            detached: true
-          })
+        expect(execa.shell).to.have.been.called
+        # make sure this is our command (with some additional wrapping)
+        expect(execa.shell.lastCall.args[0]).to.include(cmd)
+        options = execa.shell.lastCall.args[1]
+        expect(options).to.be.an('object')
+        expect(options).to.include({
+          detached: true
+        })
 
     describe "when exit code is non-zero", ->
       it "reports the stdout, stderr, and code", ->
