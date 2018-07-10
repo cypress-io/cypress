@@ -864,12 +864,31 @@ declare namespace Cypress {
     reload(forceReload: boolean): Chainable<Window>
 
     /**
-     * Make an HTTP request.
+     * Make an HTTP GET request.
      *
      * @see https://on.cypress.io/request
+     * @example
+     *    cy.request('http://dev.local/seed')
      */
     request(url: string, body?: RequestBody): Chainable<Response>
+    /**
+     * Make an HTTP request with specific method.
+     *
+     * @see https://on.cypress.io/request
+     * @example
+     *    cy.request('POST', 'http://localhost:8888/users', {name: 'Jane'})
+     */
     request(method: HttpMethod, url: string, body?: RequestBody): Chainable<Response>
+    /**
+     * Make an HTTP request with specific behavior.
+     *
+     * @see https://on.cypress.io/request
+     * @example
+     *    cy.request({
+     *      url: '/dashboard',
+     *      followRedirect: false // turn off following redirects
+     *    })
+     */
     request(options: Partial<RequestOptions>): Chainable<Response>
 
     /**
