@@ -27,18 +27,6 @@ specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
 
-## TODO:
-## - refactor exitEarlyWithErr events
-## NOTES:
-## - we try to preemptively preprocess support file and spec file as
-##     early as possible.
-##   - for support file, this is on project open (project#open)
-##   - for spec file, this is on browser launch (open_project#launch)
-## - errors can occur asynchronously in pluginsFile and crash process
-##   - in run mode, need to fail gracefully and exit
-##   - in interactive mode, need to close browser and display error
-##       in desktop-gui
-
 color = (val, c) ->
   chalk[c](val)
 
@@ -302,8 +290,11 @@ openProjectCreate = (projectRoot, socketId, runState, options) ->
     morgan: false
     report: true
     isTextTerminal: options.isTextTerminal ? true
-    onDone: runState.resolve.bind(runState)
+    onDone: (result) ->
+      debug("run finished: %o", result)
+      runState.resolve(result)
     onError: (err) ->
+      debug("run errored: %s", err.message)
       console.log("")
       console.log(err.stack)
       runState.reject(err)
@@ -364,7 +355,7 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  getElectronProps: (isHeaded, project, write) ->
+  getElectronProps: (isHeaded, project, write, onError) ->
     obj = {
       width:  1280
       height: 720
@@ -372,9 +363,7 @@ module.exports = {
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
-
-        ## TODO: refactor this to not use exitEarlyWithErr event?
-        project.emit("exitEarlyWithErr", err)
+        onError(err)
       onNewWindow: (e, url, frameName, disposition, options) ->
         ## force new windows to automatically open with show: false
         ## this prevents window.open inside of javascript client code
@@ -508,7 +497,7 @@ module.exports = {
 
     browserOpts = switch browser.name
       when "electron"
-        @getElectronProps(browser.isHeaded, project, write)
+        @getElectronProps(browser.isHeaded, project, write, options.onError)
       else
         {}
 
@@ -522,23 +511,26 @@ module.exports = {
 
     browserOpts.projectRoot = projectRoot
 
+    browserOpts.onError = options.onError
+
     openProject.launch(browser, spec, browserOpts)
 
   waitForProjectEnd: (runState, exit) ->
     Promise
     .resolve(runState.promise)
+    .then (result) ->
+      return result if exit
 
-    ## FIXME: handle exit being false
-    # .then ->
-    #   if exit is false
-    #     resolve = (arg) ->
-    #       console.log("not exiting due to options.exit being false")
+      console.log("not exiting due to options.exit being false")
+      return Promise.pending().promise
 
     .catch (err) ->
+      debug("failed early:", err.message)
+
       ## probably should say we ended
       ## early too: (Ended Early: true)
       ## in the stats
-      obj = {
+      {
         error: errors.stripAnsi(err.message)
         stats: {
           failures: 1
@@ -584,9 +576,7 @@ module.exports = {
             else
               err = errors.get("TESTS_DID_NOT_START_FAILED")
               errors.log(err)
-
-              ## TODO: refactor this to not use exitEarlyWithErr event?
-              project.emit("exitEarlyWithErr", err)
+              options.onError(err)
 
   waitForSocketConnection: (project, id) ->
     new Promise (resolve, reject) ->
@@ -819,6 +809,7 @@ module.exports = {
             project
             browser
             screenshots
+            onError: (err) -> runState.reject(err)
             socketId:    options.socketId
             webSecurity: options.webSecurity
             projectRoot: options.projectRoot

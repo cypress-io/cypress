@@ -33,25 +33,5 @@ module.exports = {
       ## and display two different errors.
       return
     .catch (err) ->
-      if config.isTextTerminal
-        ## bluebird made a change in 3.4.7 where they handle
-        ## SyntaxErrors differently here
-        ## https://github.com/petkaantonov/bluebird/pull/1295
-        ##
-        ## their new behavior messes up how we show these errors
-        ## so we must backup the original stack and replace it here
-        if os = err.originalStack
-          err.stack = os
-
-        filePath = err.filePath ? spec
-
-        err = errors.get("BUNDLE_ERROR", filePath, preprocessor.errorMessage(err))
-
-        console.log("")
-        errors.log(err)
-
-        ## TODO: refactor this to not use exitEarlyWithErr event?
-        project.emit("exitEarlyWithErr", err)
-      else
-        res.send(preprocessor.clientSideError(err))
+      res.send(preprocessor.clientSideError(err))
 }

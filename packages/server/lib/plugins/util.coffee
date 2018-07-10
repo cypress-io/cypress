@@ -58,7 +58,7 @@ module.exports = {
           value = undefined
 
         debug("promise resolved for id '#{invocationId}' with value", value)
-        
+
         resolve(value)
 
       ipc.on("promise:fulfilled:#{invocationId}", handler)

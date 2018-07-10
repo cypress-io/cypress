@@ -71,8 +71,6 @@ class Project extends EE
 
       @memoryCheck = setInterval(logMemory, 1000)
 
-    @on("exitEarlyWithErr", options.onError)
-
     @getConfig(options)
     .tap (cfg) =>
       process.chdir(@projectRoot)
@@ -91,12 +89,15 @@ class Project extends EE
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
       if cfg.supportFile
+        debug("kicking off support file preprocessing")
         # start compiling/watching support file as project opens
         preprocessor.getFile(cfg.supportFile, cfg)
         # ignore errors b/c we're just setting up the watching
         # they're handled by the spec controller
-        .catch ->
-          ## TODO: need to bubble this up in run mode and not swallow this
+        .catch (err) ->
+          debug("caught support file preprocessing error: %s", err.message)
+          if cfg.isTextTerminal
+            options.onError(err)
 
       @server.open(cfg, @)
       .spread (port, warning) =>
@@ -208,7 +209,7 @@ class Project extends EE
           ## re-init plugins after a change
           @_initPlugins(cfg, options)
           .catch (err) ->
-            options.runState.reject(err)
+            options.onError(err)
       })
 
   watchSettings: (onSettingsChanged) ->
@@ -273,7 +274,7 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        debug("recevied runnables %o", runnables)
+        debug("received runnables %o", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>

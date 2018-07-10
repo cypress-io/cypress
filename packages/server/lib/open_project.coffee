@@ -104,12 +104,15 @@ create = ->
             if onBrowserClose
               onBrowserClose()
 
+          debug("kicking off spec file preprocessing: %s", spec.relative)
           ## start compiling/watching spec file as browser opens
           preprocessor.getFile(spec.relative, cfg)
           ## ignore errors b/c we're just setting up the watching
           ## they're handled by the spec controller
-          .catch ->
-            ## TODO: need to bubble this up in run mode and not swallow this
+          .catch (err) ->
+            debug("caught spec file preprocessing error: %s", err.message)
+            if cfg.isTextTerminal
+              options.onError(err)
 
           do relaunchBrowser = ->
             debug(

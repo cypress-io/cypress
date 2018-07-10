@@ -1,5 +1,6 @@
 require("../../spec_helper")
 
+_ = require("lodash")
 Promise  = require("bluebird")
 electron = require("electron")
 user     = require("#{root}../lib/user")
@@ -46,13 +47,18 @@ describe "lib/modes/run", ->
     beforeEach ->
       sinon.stub(openProject, "create").resolves()
 
+      @runState = {
+        resolve: sinon.spy()
+        reject: sinon.spy()
+      }
+
       options = {
         port: 8080
         env: {foo: "bar"}
         projectRoot: "/_test-output/path/to/project/foo"
       }
 
-      runMode.openProjectCreate(options.projectRoot, 1234, options)
+      runMode.openProjectCreate(options.projectRoot, 1234, @runState, options)
 
     it "calls openProject.create with projectRoot + options", ->
       expect(openProject.create).to.be.calledWithMatch("/_test-output/path/to/project/foo", {
@@ -66,11 +72,19 @@ describe "lib/modes/run", ->
         isTextTerminal: true
       })
 
-    it "emits 'exitEarlyWithErr' with error message onError", ->
-      sinon.stub(openProject, "emit")
+    it "resolves runState onDone", ->
+      result = {}
+
+      expect(openProject.create.lastCall.args[2].onDone).to.be.a("function")
+      openProject.create.lastCall.args[2].onDone(result)
+      expect(@runState.resolve).to.be.calledWith(result)
+
+    it "rejects runState onError", ->
+      err = { message: "the message" }
+
       expect(openProject.create.lastCall.args[2].onError).to.be.a("function")
-      openProject.create.lastCall.args[2].onError({ message: "the message" })
-      expect(openProject.emit).to.be.calledWith("exitEarlyWithErr", "the message")
+      openProject.create.lastCall.args[2].onError(err)
+      expect(@runState.reject).to.be.calledWith(err)
 
   context ".getElectronProps", ->
     it "sets width and height", ->
@@ -115,19 +129,20 @@ describe "lib/modes/run", ->
 
       expect(options.show).to.eq(false)
 
-    it "emits exitEarlyWithErr when webContents crashed", ->
-      sinon.spy(errors, "get")
+    it "calls onError when webContents crash", ->
+      err = {}
+      sinon.stub(errors, "get").returns(err)
       sinon.spy(errors, "log")
 
-      emit = sinon.stub(@projectInstance, "emit")
+      onError = sinon.spy()
 
-      props = runMode.getElectronProps(true, @projectInstance)
+      props = runMode.getElectronProps(true, @projectInstance, false, onError)
 
       props.onCrashed()
 
       expect(errors.get).to.be.calledWith("RENDERER_CRASHED")
       expect(errors.log).to.be.calledOnce
-      expect(emit).to.be.calledWithMatch("exitEarlyWithErr", "We detected that the Chromium Renderer process just crashed.")
+      expect(onError).to.be.calledWithMatch(err)
 
   context ".launchBrowser", ->
     beforeEach ->
@@ -217,23 +232,25 @@ describe "lib/modes/run", ->
 
   context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
+      err = {}
+
       sinon.spy(errors, "warning")
-      sinon.spy(errors, "get")
+      sinon.stub(errors, "get").returns(err)
       sinon.spy(openProject, "closeBrowser")
       sinon.stub(runMode, "launchBrowser").resolves()
       sinon.stub(runMode, "waitForSocketConnection").callsFake ->
         Promise.delay(1000)
 
-      emit = sinon.stub(@projectInstance, "emit")
+      onError = sinon.spy()
 
-      runMode.waitForBrowserToConnect({project: @projectInstance, timeout: 10})
+      runMode.waitForBrowserToConnect({project: @projectInstance, timeout: 10, onError})
       .then ->
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
         expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying...")
         expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying again...")
         expect(errors.get).to.be.calledWith("TESTS_DID_NOT_START_FAILED")
-        expect(emit).to.be.calledWith("exitEarlyWithErr", "The browser never connected. Something is wrong. The tests cannot run. Aborting...")
+        expect(onError).to.be.calledWith(err)
 
   context ".waitForSocketConnection", ->
     beforeEach ->
@@ -288,7 +305,9 @@ describe "lib/modes/run", ->
     beforeEach ->
       sinon.stub(@projectInstance, "getConfig").resolves({})
 
-    it "end event resolves with obj, displays stats, displays screenshots, sets video timestamps", ->
+      @runState = Promise.pending()
+
+    it "resolves with obj, displays stats, displays screenshots, sets video timestamps", ->
       started = new Date
       screenshots = [{}, {}, {}]
       cfg = {}
@@ -313,7 +332,7 @@ describe "lib/modes/run", ->
       sinon.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
-        @projectInstance.emit("end", results)
+        @runState.resolve(results)
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
@@ -325,6 +344,8 @@ describe "lib/modes/run", ->
         screenshots
         started
         end
+        exit: true
+        runState: @runState
         spec: {
           path: "cypress/integration/spec.js"
         }
@@ -355,7 +376,7 @@ describe "lib/modes/run", ->
           }
         })
 
-    it "exitEarlyWithErr event resolves with no tests, and error", ->
+    it "error resolves with no tests, and error", ->
       clock = sinon.useFakeTimers()
 
       err = new Error("foo")
@@ -369,9 +390,7 @@ describe "lib/modes/run", ->
       sinon.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
-        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
-        @projectInstance.emit("exitEarlyWithErr", err.message)
-        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
+        @runState.reject(err)
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
@@ -383,6 +402,8 @@ describe "lib/modes/run", ->
         screenshots
         started
         end
+        exit: true
+        runState: @runState
         spec: {
           path: "cypress/integration/spec.js"
         }
@@ -419,7 +440,7 @@ describe "lib/modes/run", ->
 
     it "should not upload video when videoUploadOnPasses is false and no failures", ->
       process.nextTick =>
-        @projectInstance.emit("end", {
+        @runState.resolve({
           stats: {
             failures: 0
           }
@@ -436,31 +457,60 @@ describe "lib/modes/run", ->
         videoCompression: 32
         videoUploadOnPasses: false
         gui: false
+        runState: @runState
         end
+        exit: true
       })
       .then (obj) ->
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false)
 
         expect(videoCapture.process).not.to.be.called
 
-  context ".listenForProjectEnd", ->
-    it "resolves with end event + argument", ->
-      process.nextTick =>
-        @projectInstance.emit("end", {foo: "bar"})
+  context ".waitForProjectEnd", ->
+    beforeEach ->
+      @runState = Promise.pending()
 
-      runMode.listenForProjectEnd(@projectInstance)
-      .then (obj) ->
-        expect(obj).to.deep.eq({
-          foo: "bar"
+    it "resolves with runState value", ->
+      process.nextTick =>
+        @runState.resolve({ foo: "bar" })
+
+      runMode.waitForProjectEnd(@runState, true)
+      .then (result) ->
+        expect(result).to.eql({ foo: "bar" })
+
+    it "returns pending promise if exit is false", ->
+      process.nextTick =>
+        @runState.resolve({ foo: "bar" })
+
+      pendingPromise = {}
+      sinon.stub(Promise, "pending").returns({ promise: pendingPromise })
+
+      runMode.waitForProjectEnd(@runState, false)
+      .then (result) ->
+        expect(result).to.equal(pendingPromise)
+
+    it "resolves with error details on early exit", ->
+      process.nextTick =>
+        @runState.reject({ message: "unexpected error" })
+
+      runMode.waitForProjectEnd(@runState, true)
+      .then (result) ->
+        dates = _.pick(result.stats, "wallClockStartedAt", "wallClockEndedAt")
+        result.stats = _.omit(result.stats, "wallClockStartedAt", "wallClockEndedAt")
+        expect(result).to.eql({
+          error: "unexpected error"
+          stats: {
+            failures: 1
+            tests: 0
+            passes: 0
+            pending: 0
+            suites: 0
+            skipped: 0
+            wallClockDuration: 0
+          }
         })
-
-    it "stops listening to end event", ->
-      process.nextTick =>
-        expect(@projectInstance.listeners("end")).to.have.length(1)
-        @projectInstance.emit("end", {foo: "bar"})
-        expect(@projectInstance.listeners("end")).to.have.length(0)
-
-      runMode.listenForProjectEnd(@projectInstance)
+        expect(dates.wallClockStartedAt).to.be.a("string")
+        expect(dates.wallClockEndedAt).to.be.a("string")
 
   context ".run browser vs video recording", ->
     beforeEach ->
@@ -577,13 +627,6 @@ describe "lib/modes/run", ->
         expect(runMode.waitForBrowserToConnect).to.be.calledWithMatch({
           project: @projectInstance
           socketId: 1234
-        })
-
-    it "passes project to waitForTestsToFinishRunning", ->
-      runMode.run()
-      .then =>
-        expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
-          project: @projectInstance
         })
 
     it "passes headed to openProject.launch", ->

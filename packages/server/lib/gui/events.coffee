@@ -107,6 +107,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
           send({browserOpened: true})
         onBrowserClose: ->
           send({browserClosed: true})
+        onError: (err) ->
+          bus.emit("project:error", errors.clone(err, {html: true}))
       })
       .catch(sendErr)
 
