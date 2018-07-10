@@ -166,10 +166,15 @@ describe "lib/exec", ->
 
     it "runs child process with detached flag", ->
       sinon.spy(execa, "shell")
-      runCommand("echo 'all good'")
+      cmd = "echo 'all good 101'"
+      runCommand(cmd)
       .then ->
-        expect(execa.shell).to.have.been.calledOnce
-        options = execa.shell.firstCall.args[1]
+        # there might be other calls to execa.shell
+        # for example to figure out which "bash" we have
+        expect(execa.shell).to.have.been.called
+        # make sure this is our command (with some additional wrapping)
+        expect(execa.shell.lastCall.args[0]).to.include(cmd)
+        options = execa.shell.lastCall.args[1]
         expect(options).to.be.an('object')
         expect(options).to.include({
           detached: true
