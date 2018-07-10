@@ -569,7 +569,17 @@ declare namespace Cypress {
      * @see https://on.cypress.io/filter
      */
     filter<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>> // automatically returns the correct HTMLElement type
+    /**
+     * Get the DOM elements that match a specific selector. Opposite of `.not()`
+     *
+     * @see https://on.cypress.io/filter
+     */
     filter<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get the DOM elements that match a specific selector. Opposite of `.not()`
+     *
+     * @see https://on.cypress.io/filter
+     */
     filter<E extends Node = HTMLElement>(fn: (index: number, element: E) => boolean, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
@@ -603,6 +613,11 @@ declare namespace Cypress {
      * @see https://on.cypress.io/fixture
      */
     fixture<Contents = any>(path: string, options?: Partial<Timeoutable>): Chainable<Contents> // no log?
+    /**
+     * Load a fixed set of data located in a file with given encoding.
+     *
+     * @see https://on.cypress.io/fixture
+     */
     fixture<Contents = any>(path: string, encoding: Encodings, options?: Partial<Timeoutable>): Chainable<Contents> // no log?
 
     /**
@@ -720,8 +735,18 @@ declare namespace Cypress {
      * Get the global `window.location` object of the page that is currently active.
      *
      * @see https://on.cypress.io/location
+     * @example
+     *    cy.location() // Get location object
      */
     location(options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    /**
+     * Get a part of the global `window.location` object of the page that is currently active.
+     *
+     * @see https://on.cypress.io/location
+     * @example
+     *    cy.location('host') // Get the host of the location object
+     *    cy.location('port') // Get the port of the location object
+     */
     location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable<Location>
 
     /**
@@ -1509,7 +1534,8 @@ declare namespace Cypress {
     window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
 
     /**
-     * Scopes all subsequent cy commands to within this element. Useful when working within a particular group of elements such as a `<form>`.
+     * Scopes all subsequent cy commands to within this element.
+     * Useful when working within a particular group of elements such as a `<form>`.
      * @see https://on.cypress.io/within
      * @example
      *    cy.get('form').within(($form) => {
@@ -1522,6 +1548,11 @@ declare namespace Cypress {
      *
      */
     within(fn: (currentSubject: Subject) => void): Chainable<Subject>
+    /**
+     * Scopes all subsequent cy commands to within this element.
+     * Useful when working within a particular group of elements such as a `<form>`.
+     * @see https://on.cypress.io/within
+     */
     within(options: Partial<Loggable>, fn: (currentSubject: Subject) => void): Chainable<Subject> // inconsistent argument order
 
     /**
@@ -1553,6 +1584,11 @@ declare namespace Cypress {
      * @see https://on.cypress.io/writefile
      */
     writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
+    /**
+     * Write to a file with the specified encoding and contents.
+     *
+     * @see https://on.cypress.io/writefile
+     */
     writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
   }
 
