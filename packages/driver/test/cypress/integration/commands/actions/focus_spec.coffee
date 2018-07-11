@@ -1,9 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
-getActiveElement = ->
-  cy.state("document").activeElement
-
 describe "src/cy/commands/actions/focus", ->
   before ->
     cy
@@ -13,7 +10,6 @@ describe "src/cy/commands/actions/focus", ->
 
   beforeEach ->
     doc = cy.state("document")
-
     $(doc.body).empty().html(@body)
 
   context "#focus", ->
@@ -25,7 +21,7 @@ describe "src/cy/commands/actions/focus", ->
 
       cy.get("#focus input").focus().then ($input) ->
         expect(focus).to.be.true
-        expect(getActiveElement()).to.eq($input.get(0))
+        expect(cy.getFocused().get(0)).to.eq($input.get(0))
 
     it "bubbles focusin event",  ->
       focusin = false
@@ -313,12 +309,12 @@ describe "src/cy/commands/actions/focus", ->
         cy
         .get("input").focus()
         .then ($input) ->
-          expect(getActiveElement()).to.eq($input.get(0))
+          expect(cy.getFocused().get(0)).to.eq($input.get(0))
         
         .get("button").focus()
         .then ($btn) ->
           expect(blurred).to.be.true
-          expect(getActiveElement()).to.eq($btn.get(0))
+          expect(cy.getFocused().get(0)).to.eq($btn.get(0))
 
     it "sends a focusout event", ->
       focusout = false
@@ -413,6 +409,18 @@ describe "src/cy/commands/actions/focus", ->
         .get("input:first").blur({force: true})
         .then ->
           expect(blurred).to.be.true
+    
+    it "can blur element inside iframe", ->
+      cy.visit("/fixtures/iframe-outer.html")
+
+      getInIframe = (selector) ->
+        return cy.get('iframe').then ($iframe) ->
+          doc = $iframe.contents()
+          return cy.wrap(doc.find(selector))
+  
+      getInIframe('button')
+        .focus()
+        .blur()
 
     describe "assertion verification", ->
       beforeEach ->

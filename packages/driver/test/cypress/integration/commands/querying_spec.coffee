@@ -19,7 +19,7 @@ describe "src/cy/commands/querying", ->
       $button = cy.$$("#button")
       $button.get(0).focus()
       
-      expect(cy.state("document").activeElement).to.eq($button.get(0))
+      expect(cy.getFocused().get(0)).to.eq($button.get(0))
 
       cy.focused().then ($focused) ->
         expect($focused.get(0)).to.eq($button.get(0))

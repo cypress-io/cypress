@@ -5,6 +5,15 @@ create = (state) ->
     getFocused: ->
       try
         { activeElement, body } = state("document")
+
+        if activeElement isnt body || activeElement.tagName is 'IFRAME'
+          iframes = body.getElementsByTagName('iframe')
+
+          for iframe in iframes
+            doc = iframe.contentWindow.document
+            if doc.activeElement isnt doc.body
+              activeElement = doc.activeElement
+              break;
         
         ## active element is the default if its null
         ## or its equal to document.body
