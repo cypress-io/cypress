@@ -21,6 +21,14 @@ nativeTextareaValueGetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaE
 
 nativeIsContentEditable = Object.getOwnPropertyDescriptor(window.HTMLElement.prototype, "isContentEditable").get
 
+InputTypeNeedSingleValueChange_RE = /^(date|time|month|week)$/
+
+
+isNeedSingleValueChangeInputElement = (el) ->
+  if !isInput(el)
+    return false
+  typeName = el.type
+  return InputTypeNeedSingleValueChange_RE.test(typeName)
 
 setValue = (el, val) ->
   ## sets value for <input> or <textarea>
@@ -72,6 +80,9 @@ isType = ($el, type) ->
   ## NOTE: use DOMElement.type instead of getAttribute('type') since
   ##       <input type="asdf"> will have type="text", and behaves like text type
   ($el.get(0).type or "").toLowerCase() is type
+
+isInputType = (el, type) ->
+  el.type.toLowerCase() is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
@@ -356,7 +367,11 @@ module.exports = {
 
   isTextarea
 
+  isInputType
+
   isInput
+
+  isNeedSingleValueChangeInputElement
 
   stringify
 

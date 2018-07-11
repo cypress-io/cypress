@@ -1,6 +1,5 @@
 _ = require("lodash")
 Promise = require("bluebird")
-bililiteRange = require("../../vendor/bililiteRange")
 $elements = require("../dom/elements")
 $selection = require("../dom/selection")
 $Cypress = require("../cypress")
@@ -90,11 +89,11 @@ $Keyboard = {
       options.setKey    = "{del}"
       @ensureKey el, null, options, ->
         ## there is a text selection
-        if bounds.start isnt bounds.end
+        if bounds.start? and (bounds.start isnt bounds.end)
           return $selection.clearSelection(el)
 
         ## nothing to delete!
-        else if bounds.end is $selection.getElementTextLength(el)
+        else if bounds.end is $selection.getElementText(el).length
           options.input = false
         
         else $selection.deleteRightOfSelection(el)
@@ -133,7 +132,7 @@ $Keyboard = {
         if bounds.start isnt bounds.end
           $selection.clearSelection(el)
 
-        ## nothing to delete!
+        ## nothing to backspace!
         else if bounds.start is 0
           options.input = false
         
@@ -173,7 +172,8 @@ $Keyboard = {
       options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
         $selection.updateValue(el, "\n")
-        changed = true #options.prev isnt $selection.getElementText()
+        # debugger
+        changed = options.prevText isnt $selection.getElementText(el)
         options.onEnterPressed(changed, options.id)
 
     ## charCode = 37
@@ -181,10 +181,6 @@ $Keyboard = {
     ## no textInput
     ## no input
     "{leftarrow}": (el, options) ->
-      # {rng} = options
-      # bounds = rng.bounds()
-      # range = $selection.
-      # bounds = [range.startOffset, range.endOffset]
       options.charCode  = 37
       options.keypress  = false
       options.textInput = false
@@ -192,6 +188,7 @@ $Keyboard = {
       options.setKey    = "{leftarrow}"
       @ensureKey el, null, options, ->
         $selection.moveCursorLeft(el)
+
         # switch
         #   when bounds[0] is bounds[1]
           ## equal move the caret
@@ -213,18 +210,6 @@ $Keyboard = {
 
         # rng.bounds([left, right])
 
-    ## charCode = 38
-    ## no keyPress
-    ## no textInput
-    ## no input
-    "{uparrow}": (el, options) ->
-      options.charCode  = 38
-      options.keypress  = false
-      options.textInput = false
-      options.input     = false
-      options.setKey    = "{uparrow}"
-      @ensureKey(el, null, options)
-
     ## charCode = 39
     ## no keyPress
     ## no textInput
@@ -238,6 +223,20 @@ $Keyboard = {
       @ensureKey el, null, options, ->
         $selection.moveCursorRight(el)
 
+    ## charCode = 38
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{uparrow}": (el, options) ->
+      options.charCode  = 38
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{uparrow}"
+      @ensureKey el, null, options, ->
+        $selection.moveCursorUp(el)
+
+
     ## charCode = 40
     ## no keyPress
     ## no textInput
@@ -248,7 +247,8 @@ $Keyboard = {
       options.textInput = false
       options.input     = false
       options.setKey    = "{downarrow}"
-      @ensureKey(el, null, options)
+      @ensureKey el, null, options, ->
+        $selection.moveCursorDown(el)
   }
   ## #endregion
 
@@ -285,10 +285,12 @@ $Keyboard = {
     el = options.$el.get(0)
 
     isContentEditable = $elements.isContentEditable(el)
-
+    cannotSelectElement = $elements.isNeedSingleValueChangeInputElement(el)
     ## if there's no selection on the current element, select the end
-    # if not $selection.getSelectionBounds(el).start?
-    if isContentEditable
+    # debugger
+    # if isContentEditable
+    if !cannotSelectElement and not $selection.getSelectionBounds(el).start?
+      # debugger
       $selection.moveSelectionToEnd(el)
 
     
@@ -310,7 +312,6 @@ $Keyboard = {
     ## so we know to fire change events
     ## and change callbacks
 
-    # options.prev = rng.all()
 
     # resetBounds = (start, end) ->
     #   if start? and end?
@@ -541,36 +542,71 @@ $Keyboard = {
     return dispatched
 
   typeKey: (el, key, options) ->
+
+    # debugger
+
     ## if we have an afterKey value it means
     ## we've typed in prior to this
-    if after = options.afterKey
+    # if after = options.afterKey
       ## if this afterKey value is no longer the current value
       ## then something has altered the value and we need to
       ## automatically shift the caret to the end like a real browser
-      if @expectedValueDoesNotMatchCurrentValue(after, options.rng)
-        @moveCaretToEnd(options.rng)
-        @updateSelection(el, options)
+      # if @expectedValueDoesNotMatchCurrentValue(after, options.rng)
+      #   @moveCaretToEnd(options.rng)
+      #   @updateSelection(el, options)
 
     @ensureKey el, key, options, ->
-      options.updateValue(el, key)
-      ## update the selection that's cached on the element
-      ## and store the value for comparison in any future typing
-      # el.bililiteRangeSelection = options.rng.bounds()
-      # el.prevValue = el.value
 
-      ## For contenteditables, need to manually update the global selection
-      # if (Cypress.dom.isContentEditable(el))
-      #   Cypress.dom.moveSelectionToEnd(el)
+      isNumberInputType = $elements.isInput(el) and $elements.isInputType(el, 'number')
+      isDigit = /^\d$/.test(key)
+
+      if isNumberInputType
+        selectionStart = el.selectionStart
+        valueLength = $elements.getValue(el).length
+        isDigitsInText = /^\d/.test(options.chars)
+        isValidCharacter = key is '.' or (key is '-' and valueLength)
+        prevChar = options.prevChar
+
+        if !isDigit and (isDigitsInText or !isValidCharacter or selectionStart isnt 0)
+          options.prevChar = key
+          return
+
+        ## only type '.' and '-' if it is the first symbol and there already is a value, or if
+        ## '.' or '-' are appended to a digit. If not, value cannot be set.
+        if isDigit and (prevChar is '.' or (prevChar is '-' and !valueLength))
+          options.prevChar = key
+          key = prevChar + key
+
+
+      
+      options.updateValue(el, key)
+        ## update the selection that's cached on the element
+        ## and store the value for comparison in any future typing
+        # el.bililiteRangeSelection = options.rng.bounds()
+        # el.prevValue = el.value
+
+        ## For contenteditables, need to manually update the global selection
+        # if (Cypress.dom.isContentEditable(el))
+        #   Cypress.dom.moveSelectionToEnd(el)
       
 
   ensureKey: (el, key, options, fn) ->
+    _.defaults(options, {
+      prevText: null
+    })
+
     options.id        = _.uniqueId("char")
-    options.beforeKey = el.value
+    # options.beforeKey = el.value
 
     maybeUpdateValueAndFireInput = =>
+      isContentEditable = $elements.isContentEditable(el)
       ## only call this function if we haven't been told not to
       if fn and options.onBeforeSpecialCharAction(options.id, options.key) isnt false
+        prevText = $selection.getElementText(el)
         fn.call(@)
+        if not options.prevText? and not isContentEditable
+          options.prevText = prevText
+          options.onTypeChange(options.prevText)
 
       @simulateKey(el, "input", key, options)
 
@@ -578,11 +614,13 @@ $Keyboard = {
       if @simulateKey(el, "keypress", key, options)
         if @simulateKey(el, "textInput", key, options)
 
+          # debugger
           ml = el.maxLength
 
           ## maxlength is -1 by default when omitted
           ## but could also be null or undefined :-/
-          if ml is 0 or ml > 0
+          ## only cafe if we are trying to type a key
+          if (ml is 0 or ml > 0 ) and key
             ## check if we should update the value
             ## and fire the input event
             ## as long as we're under maxlength
@@ -593,7 +631,7 @@ $Keyboard = {
 
           ## store the afterKey value so we know
           ## if something mutates the value between typing keys
-          options.afterKey = options.value
+          # options.afterKey = $selection.getElementText(el)
 
     @simulateKey(el, "keyup", key, options)
 

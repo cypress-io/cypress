@@ -63,10 +63,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             memo
           , {}
 
-        options._log = Cypress.log
+        options._log = Cypress.log {
           message: [chars, deltaOptions]
           $el: options.$el
-          consoleProps: ->
+          consoleProps: -> {
             "Typed":      chars
             "Applied To": $dom.getElements(options.$el)
             "Options":    deltaOptions
@@ -76,6 +76,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 data: getTableData()
                 columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
               }
+            }
+          }
 
         options._log.snapshot("before", {next: "after"})
 
@@ -224,11 +226,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           return dispatched
 
         needSingleValueChange = ->
-          isDate or
-          isMonth or
-          isWeek or
-          isTime or
-          ($dom.isType(options.$el, "number") and _.includes(options.chars, "."))
+          return $elements.isNeedSingleValueChangeInputElement(options.$el.get(0))
 
         ## see comment in updateValue below
         typed = ""
@@ -245,18 +243,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           updateValue: (el, key) ->
             
-            # if needSingleValueChange()
             #   ## in these cases, the value must only be set after all
             #   ## the characters are input because attemping to set
             #   ## a partial/invalid value results in the value being
             #   ## set to an empty string
-            #   typed += key
-            #   if typed is options.chars
-            #     options.$el.val(options.chars)
-            # else
-            # val = this._el.value
-            # rng.text(key, "end")
-            $selection.updateValue(el, key)
+            if needSingleValueChange()
+              typed += key
+              if typed is options.chars
+                $elements.setValue(el, options.chars)
+
+            else $selection.updateValue(el, key)
 
 
           onBeforeType: (totalKeys) ->
@@ -286,12 +282,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## fires only when the 'value'
           ## of input/text/contenteditable
           ## changes
-          onTypeChange: ->
+          onTypeChange: (originalText) ->
             ## never fire any change events for contenteditable
-            return if isContentEditable
-
+            ## should never happen b/c should not be called for contenteditable
+            if isContentEditable
+              return
+            
+            ## change event already registered
+            console.log(state('changeEvent'))
+            if state "changeEvent"
+              return
+            # debugger
             state "changeEvent", ->
-              dispatchChangeEvent()
+              # debugger
+              if $selection.getElementText(options.$el.get(0)) isnt originalText
+                dispatchChangeEvent()
               state "changeEvent", null
 
           onEnterPressed: (changed, id) ->
@@ -303,8 +308,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## if our value has changed since our
             ## element was activated we need to
             ## fire a change event immediately
-            if changed
-              dispatchChangeEvent(id)
+            if changeEvent = state("changeEvent")
+              changeEvent()
 
             ## handle submit event handler here
             simulateSubmitHandler()
@@ -324,32 +329,34 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
-        cy.now("focused", {log: false, verify: false})
-        .then ($focused) ->
-          $actionability.verify(cy, options.$el, options, {
-            onScroll: ($el, type) ->
-              Cypress.action("cy:scrolled", $el, type)
+        $actionability.verify(cy, options.$el, options, {
+          onScroll: ($el, type) ->
+            Cypress.action("cy:scrolled", $el, type)
 
-            onReady: ($elToClick) ->
-              ## if we dont have a focused element
-              ## or if we do and its not ourselves
-              ## then issue the click
-              if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
-                ## click the element first to simulate focus
-                ## and typical user behavior in case the window
-                ## is out of focus
-                cy.now("click", $elToClick, {
-                  $el: $elToClick
-                  log: false
-                  verify: false
-                  _log: options._log
-                  force: true ## force the click, avoid waiting
-                  timeout: options.timeout
-                  interval: options.interval
-                }).then(type)
-              else
-                ## don't click, just type
+          onReady: ($elToClick) ->
+            $focused = cy.getFocused()
+
+            ## if we dont have a focused element
+            ## or if we do and its not ourselves
+            ## then issue the click
+            if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+              ## click the element first to simulate focus
+              ## and typical user behavior in case the window
+              ## is out of focus
+              cy.now("click", $elToClick, {
+                $el: $elToClick
+                log: false
+                verify: false
+                _log: options._log
+                force: true ## force the click, avoid waiting
+                timeout: options.timeout
+                interval: options.interval
+              })
+              .then ->
                 type()
+            else
+              ## don't click, just type
+              type()
           })
 
       handleFocused()
@@ -386,13 +393,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = $utils.filterOutOptions(options)
 
-          options._log = Cypress.log
+          options._log = Cypress.log {
             message: deltaOptions
             $el: $el
-            consoleProps: ->
+            consoleProps: () -> {
               "Applied To": $dom.getElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
+              }
+          }
 
         node = $dom.stringify($el)
 
