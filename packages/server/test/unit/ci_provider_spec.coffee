@@ -3,7 +3,7 @@ require("../spec_helper")
 
 ciProvider = require("#{root}lib/util/ci_provider")
 
-describe "lib/util/ci_provider", ->
+describe.only "lib/util/ci_provider", ->
   beforeEach ->
     @env = JSON.stringify(process.env)
 
@@ -24,6 +24,14 @@ describe "lib/util/ci_provider", ->
   afterEach ->
     ## restore the env
     process.env = JSON.parse(@env)
+
+  context "getCirclePrNumber", ->
+    it "uses PR number or parses PR url", ->
+      # different cases: no information, PR number, PR url
+      expect(ciProvider.getCirclePrNumber()).to.equal(undefined)
+      expect(ciProvider.getCirclePrNumber('100')).to.equal('100')
+      expect(ciProvider.getCirclePrNumber('100', 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('100')
+      expect(ciProvider.getCirclePrNumber(undefined, 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('2114')
 
   context "group-id", ->
     describe "circle", ->
