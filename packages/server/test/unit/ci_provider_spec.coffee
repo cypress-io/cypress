@@ -1,3 +1,4 @@
+R = require("ramda")
 require("../spec_helper")
 
 ciProvider = require("#{root}lib/util/ci_provider")
@@ -13,9 +14,24 @@ describe "lib/util/ci_provider", ->
       expect(ciProvider.buildNum()).to.eq(obj.buildNum)
       expect(ciProvider.params()).to.deep.eq(obj.params)
 
+      # collect Git commit information if needed
+      if obj.gitInfo
+        # create an object with just keys and empty values
+        # to force code to collect the values
+        existingGitInfo = R.mapObjIndexed(R.always(null))(obj.gitInfo)
+        expect(ciProvider.gitInfo(existingGitInfo)).to.deep.eq(obj.gitInfo)
+
   afterEach ->
     ## restore the env
     process.env = JSON.parse(@env)
+
+  context "getCirclePrNumber", ->
+    it "uses PR number or parses PR url", ->
+      # different cases: no information, PR number, PR url
+      expect(ciProvider.getCirclePrNumber()).to.equal(undefined)
+      expect(ciProvider.getCirclePrNumber('100')).to.equal('100')
+      expect(ciProvider.getCirclePrNumber('100', 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('100')
+      expect(ciProvider.getCirclePrNumber(undefined, 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('2114')
 
   context "group-id", ->
     describe "circle", ->
@@ -31,7 +47,6 @@ describe "lib/util/ci_provider", ->
 
       it "no group id without workflow id", ->
         expect(ciProvider.groupId()).to.be.null
-
 
   it "returns 'unknown' when not found", ->
     process.env = {}
@@ -77,18 +92,61 @@ describe "lib/util/ci_provider", ->
       params: null
     })
 
-  it "circle", ->
-    process.env.CIRCLECI = true
-    process.env.CIRCLE_BUILD_URL = "circle build url"
-    process.env.CIRCLE_BUILD_NUM = "4"
+  context "circle", ->
+    it "has build number", ->
+      process.env.CIRCLECI = true
+      process.env.CIRCLE_BUILD_URL = "circle build url"
+      process.env.CIRCLE_BUILD_NUM = "4"
 
-    @expects({
-      name: "circle",
-      buildNum: "4"
-      params: {
-        buildUrl: "circle build url"
-      }
-    })
+      @expects({
+        name: "circle",
+        buildNum: "4"
+        params: {
+          buildUrl: "circle build url"
+        },
+        # does not have PR number or default branch
+        gitInfo: {
+          pullRequestId: null,
+          defaultBranch: null
+        }
+      })
+
+    it "has forked PR number", ->
+      process.env.CIRCLECI = true
+      process.env.CIRCLE_BUILD_URL = "circle build url"
+      process.env.CIRCLE_BUILD_NUM = "4"
+      process.env.CIRCLE_PR_NUMBER = "100"
+
+      @expects({
+        name: "circle",
+        buildNum: "4",
+        params: {
+          buildUrl: "circle build url"
+        },
+        gitInfo: {
+          pullRequestId: '100',
+          defaultBranch: null
+        }
+      })
+
+    it "has non-forked PR number", ->
+      process.env.CIRCLECI = true
+      process.env.CIRCLE_BUILD_URL = "circle build url"
+      process.env.CIRCLE_BUILD_NUM = "4"
+      # non-forked PR has number in the URL
+      process.env.CIRCLE_PULL_REQUEST = "https://github.com/cypress-io/cypress/pull/100"
+
+      @expects({
+        name: "circle",
+        buildNum: "4",
+        params: {
+          buildUrl: "circle build url"
+        },
+        gitInfo: {
+          pullRequestId: '100',
+          defaultBranch: null
+        }
+      })
 
   it "codeship", ->
     process.env.CI_NAME = "codeship"
