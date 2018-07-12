@@ -1,4 +1,6 @@
 _ = require("lodash")
+la = require("lazy-ass")
+check = require("check-more-types")
 
 isCodeship = ->
   process.env.CI_NAME and process.env.CI_NAME is "codeship"
@@ -124,6 +126,27 @@ getProviderName = ->
 
   name or "unknown"
 
+# splits a string like "https://github.com/cypress-io/cypress/pull/2114"
+# and returns last part (the PR number, but as a string)
+pullRequestUrlToString = (url) ->
+  la(check.url(url), "expected pull request url", url)
+  _.last(url.split("/"))
+
+# if pull request is from a forked repo, there is a number
+# otherwise there is an url that we can get the last part from
+# example
+#   non-forked PR:
+#     CIRCLE_PULL_REQUEST=https://github.com/cypress-io/cypress/pull/2114
+#   forked PR:
+#     CIRCLE_PR_NUMBER=2012
+#     CIRCLE_PULL_REQUEST=https://github.com/cypress-io/cypress/pull/2012
+getCirclePrNumber = (envPrNumber, envPrUrl) ->
+  if envPrNumber
+    return envPrNumber
+
+  if envPrUrl
+    return pullRequestUrlToString(envPrUrl)
+
 getGitInfo = (provider, key) -> ({
   appveyor: {
     sha: process.env.APPVEYOR_REPO_COMMIT
@@ -156,7 +179,7 @@ getGitInfo = (provider, key) -> ({
     # authorEmail:
     # message:
     # remoteOrigin:
-    pullRequestId: process.env.CIRCLE_PR_NUMBER
+    pullRequestId: getCirclePrNumber(process.env.CIRCLE_PR_NUMBER, process.env.CIRCLE_PULL_REQUEST)
     # defaultBranch:
   }
   codeship: {
@@ -249,6 +272,8 @@ getGitInfo = (provider, key) -> ({
 }[provider] or {})[key]
 
 module.exports = {
+  getCirclePrNumber
+
   name: ->
     getProviderName()
 
@@ -262,7 +287,8 @@ module.exports = {
     groupIds(getProviderName()) ? null
 
   gitInfo: (existingInfo) ->
+    providerName = getProviderName()
     _.transform existingInfo, (info, existingValue, key) ->
-      info[key] = existingValue ? (getGitInfo(getProviderName(), key) ? null)
+      info[key] = existingValue ? (getGitInfo(providerName, key) ? null)
     , {}
 }
