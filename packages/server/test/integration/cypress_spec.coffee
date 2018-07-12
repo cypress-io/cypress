@@ -42,6 +42,7 @@ openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
 appData       = require("#{root}lib/util/app_data")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
+preprocessor = require("#{root}lib/plugins/preprocessor")
 
 TYPICAL_BROWSERS = [
   {
@@ -97,6 +98,7 @@ describe "lib/cypress", ->
     sinon.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     sinon.stub(process, "exit")
     sinon.stub(Server.prototype, "reset")
+    sinon.stub(preprocessor, "getFile").resolves("/path/to/spec.js")
     sinon.spy(errors, "log")
     sinon.spy(errors, "warning")
     sinon.spy(console, "log")
@@ -236,7 +238,7 @@ describe "lib/cypress", ->
     beforeEach ->
       sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       sinon.stub(runMode, "waitForSocketConnection")
-      sinon.stub(runMode, "listenForProjectEnd").resolves({stats: {failures: 0} })
+      sinon.stub(runMode, "waitForProjectEnd").resolves({stats: {failures: 0} })
       sinon.stub(browsers, "open")
       sinon.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
 
@@ -782,7 +784,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        runMode.listenForProjectEnd.resolves({stats: {failures: 0} })
+        runMode.waitForProjectEnd.resolves({stats: {failures: 0} })
 
       it "can change the default port to 5555", ->
         listen = sinon.spy(http.Server.prototype, "listen")
@@ -810,7 +812,7 @@ describe "lib/cypress", ->
       beforeEach ->
         process.env = _.omit(process.env, "CYPRESS_DEBUG")
 
-        runMode.listenForProjectEnd.resolves({stats: {failures: 0} })
+        runMode.waitForProjectEnd.resolves({stats: {failures: 0} })
 
       it "can set specific environment variables", ->
         cypress.start([

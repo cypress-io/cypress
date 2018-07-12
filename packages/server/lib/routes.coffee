@@ -82,7 +82,8 @@ module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
   ## the console and send 500 status
   ## and report to raygun (in production)
   app.use (err, req, res, next) ->
-    console.log err.stack
+    debug("uncaught error in route:", err.stack)
+    console.log(err.stack)
 
     res.set("x-cypress-error", err.message)
     res.set("x-cypress-stack", JSON.stringify(err.stack))

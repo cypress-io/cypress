@@ -399,7 +399,7 @@ describe "lib/project", ->
         expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
     it "calls plugins.init when file changes", ->
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
         @project.watchers.watchTree.firstCall.args[1].onChange()
         expect(plugins.init).to.be.calledWith(@config)
 

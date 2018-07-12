@@ -279,32 +279,38 @@ writeOutput = (outputPath, results) ->
 
     fs.outputJsonAsync(outputPath, results)
 
-openProjectCreate = (projectRoot, socketId, runState, options) ->
+## QUESTION: attach the error to the project itself instead?
+projectError = null
+
+resetProjectError = ->
+  projectError = null
+
+openProjectCreate = (projectRoot, socketId, options) ->
+  resetProjectError()
+
   ## now open the project to boot the server
   ## putting our web client app in headless mode
   ## - NO  display server logs (via morgan)
   ## - YES display reporter results (via mocha reporter)
   openProject.create(projectRoot, options, {
-    runState
     socketId
     morgan: false
     report: true
     isTextTerminal: options.isTextTerminal ? true
-    onDone: (result) ->
-      debug("run finished: %o", result)
-      runState.resolve(result)
     onError: (err) ->
       debug("run errored: %s", err.message)
       console.log("")
       console.log(err.stack)
-      runState.reject(err)
+
+      projectError = err
+      openProject.emit("exitEarlyWithErr", err)
   })
   .catch {portInUse: true}, (err) ->
     ## TODO: this needs to move to emit exitEarly
     ## so we record the failure in CI
     errors.throw("PORT_IN_USE_LONG", err.port)
 
-createAndOpenProject = (socketId, runState, options) ->
+createAndOpenProject = (socketId, options) ->
   { projectRoot, projectId } = options
 
   Project
@@ -312,7 +318,7 @@ createAndOpenProject = (socketId, runState, options) ->
   .then ->
     ## open this project without
     ## adding it to the global cache
-    openProjectCreate(projectRoot, socketId, runState, options)
+    openProjectCreate(projectRoot, socketId, options)
     .call("getProject")
   .then (project) ->
     Promise.props({
@@ -342,6 +348,8 @@ module.exports = {
 
   openProjectCreate
 
+  resetProjectError
+
   createRecording: (name) ->
     outputDir = path.dirname(name)
 
@@ -355,7 +363,7 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  getElectronProps: (isHeaded, project, write, onError) ->
+  getElectronProps: (isHeaded, project, write) ->
     obj = {
       width:  1280
       height: 720
@@ -363,7 +371,7 @@ module.exports = {
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
-        onError(err)
+        project.emit("exitEarlyWithErr", err)
       onNewWindow: (e, url, frameName, disposition, options) ->
         ## force new windows to automatically open with show: false
         ## this prevents window.open inside of javascript client code
@@ -497,7 +505,7 @@ module.exports = {
 
     browserOpts = switch browser.name
       when "electron"
-        @getElectronProps(browser.isHeaded, project, write, options.onError)
+        @getElectronProps(browser.isHeaded, project, write)
       else
         {}
 
@@ -515,35 +523,43 @@ module.exports = {
 
     openProject.launch(browser, spec, browserOpts)
 
-  waitForProjectEnd: (runState, exit) ->
-    Promise
-    .resolve(runState.promise)
-    .then (result) ->
-      return result if exit isnt false
+  waitForProjectEnd: (project, exit) ->
+    new Promise (resolve) ->
+      if exit is false
+        resolve = (arg) ->
+          console.log("not exiting due to options.exit being false")
 
-      console.log("not exiting due to options.exit being false")
-      return Promise.pending().promise
-
-    .catch (err) ->
-      debug("failed early:", err.message)
-
-      ## probably should say we ended
-      ## early too: (Ended Early: true)
-      ## in the stats
-      {
-        error: errors.stripAnsi(err.message)
-        stats: {
-          failures: 1
-          tests: 0
-          passes: 0
-          pending: 0
-          suites: 0
-          skipped: 0
-          wallClockDuration: 0
-          wallClockStartedAt: (new Date()).toJSON()
-          wallClockEndedAt: (new Date()).toJSON()
+      onEarlyExit = (err) ->
+        ## probably should say we ended
+        ## early too: (Ended Early: true)
+        ## in the stats
+        obj = {
+          error: errors.stripAnsi(err.message)
+          stats: {
+            failures: 1
+            tests: 0
+            passes: 0
+            pending: 0
+            suites: 0
+            skipped: 0
+            wallClockDuration: 0
+            wallClockStartedAt: (new Date()).toJSON()
+            wallClockEndedAt: (new Date()).toJSON()
+          }
         }
-      }
+
+        resolve(obj)
+
+      onEnd = (obj) ->
+        resolve(obj)
+
+      if projectError
+        return onEarlyExit(projectError)
+
+      ## when our project fires its end event
+      ## resolve the promise
+      project.once("end", onEnd)
+      project.once("exitEarlyWithErr", onEarlyExit)
 
   waitForBrowserToConnect: (options = {}) ->
     { project, socketId, timeout } = options
@@ -576,7 +592,8 @@ module.exports = {
             else
               err = errors.get("TESTS_DID_NOT_START_FAILED")
               errors.log(err)
-              options.onError(err)
+
+              project.emit("exitEarlyWithErr", err)
 
   waitForSocketConnection: (project, id) ->
     new Promise (resolve, reject) ->
@@ -593,9 +610,9 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { runState, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, project } = options
 
-    @waitForProjectEnd(runState, exit)
+    @waitForProjectEnd(project, exit)
     .then (obj) =>
       _.defaults(obj, {
         error: null
@@ -665,7 +682,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, runState } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl } = options
 
     isHeadless = browser.name is "electron" and not headed
 
@@ -739,7 +756,7 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}) ->
-    { project, browser, video, videosFolder, runState } = options
+    { project, browser, video, videosFolder } = options
 
     { isHeadless, isHeaded } = browser
 
@@ -796,7 +813,7 @@ module.exports = {
             spec
             cname
             started
-            runState
+            project
             screenshots
             exit:                 options.exit
             videoCompression:     options.videoCompression
@@ -809,7 +826,6 @@ module.exports = {
             project
             browser
             screenshots
-            onError: (err) -> runState.reject(err)
             socketId:    options.socketId
             webSecurity: options.webSecurity
             projectRoot: options.projectRoot
@@ -845,12 +861,11 @@ module.exports = {
     ## warn if we're using deprecated --ci flag
     recordMode.warnIfCiFlag(options.ci)
 
-    runState = Promise.pending()
     socketId = random.id()
 
     ## ensure the project exists
     ## and open up the project
-    createAndOpenProject(socketId, runState, options)
+    createAndOpenProject(socketId, options)
     .then ({ project, projectId, config }) =>
       ## if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
@@ -878,7 +893,6 @@ module.exports = {
             afterSpecRun
             projectRoot
             specPattern
-            runState
             socketId
             browser
             project

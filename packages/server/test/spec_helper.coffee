@@ -13,6 +13,7 @@ path             = require("path")
 cache            = require("../lib/cache")
 appData          = require("../lib/util/app_data")
 agent            = require("superagent")
+savedState       = require("../lib/saved_state")
 
 require("chai")
 .use(require("@cypress/sinon-chai"))
@@ -58,9 +59,12 @@ beforeEach ->
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 
-  ## always clean up the cache
+  ## always clean up the cache and state.json files
   ## before each test
-  cache.remove()
+  Promise.join(
+    cache.remove(),
+    savedState.removeAll()
+  )
 
 afterEach ->
   sinon.restore()

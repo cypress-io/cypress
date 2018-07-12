@@ -1,4 +1,5 @@
 _ = require("lodash")
+Promise = require("bluebird")
 debug = require("debug")("cypress:server:saved_state")
 FileUtil = require("./util/file")
 appData = require("./util/app_data")
@@ -57,5 +58,9 @@ findSavedSate = (projectRoot, isTextTerminal) ->
 
     stateFiles[fullStatePath] = stateFile
     stateFile
+
+findSavedSate.removeAll = ->
+  Promise.map _.values(stateFiles), (stateFile) ->
+    stateFile.remove()
 
 module.exports = findSavedSate

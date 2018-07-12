@@ -32,6 +32,13 @@ localCwd = cwd()
 
 multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
+onPluginsError = (onError) ->
+  (err) ->
+    debug('got plugins error', err.stack)
+
+    browsers.close()
+    onError(err)
+
 class Project extends EE
   constructor: (projectRoot) ->
     if not (@ instanceof Project)
@@ -127,10 +134,12 @@ class Project extends EE
             preprocessor.getFile(cfg.supportFile, cfg)
             # ignore errors b/c we're just setting up the watching
             # they're handled by the spec controller
-            .catch (err) ->
-              debug("caught support file preprocessing error: %s", err.message)
-              if cfg.isTextTerminal
-                options.onError(err)
+            .catch ->
+              ## ignore and handle when we kick off spec file
+
+            ## we don't want to block on this, because we're just kicking
+            ## it off to speed things up
+            return null
 
     # return our project instance
     .return(@)
@@ -143,11 +152,7 @@ class Project extends EE
     cfg = config.whitelist(cfg)
 
     plugins.init(cfg, {
-      onError: (err) ->
-        debug('got plugins error', err.stack)
-
-        browsers.close()
-        options.onError(err)
+      onError: onPluginsError(options.onError)
     })
 
   getRuns: ->
@@ -208,8 +213,7 @@ class Project extends EE
           debug("plugins file changed")
           ## re-init plugins after a change
           @_initPlugins(cfg, options)
-          .catch (err) ->
-            options.onError(err)
+          .catch(onPluginsError(options.onError))
       })
 
   watchSettings: (onSettingsChanged) ->
@@ -291,7 +295,7 @@ class Project extends EE
             @server.end()
           ])
           .spread (stats = {}) =>
-            options.onDone(stats)
+            @emit("end", stats)
     })
 
   changeToUrl: (url) ->

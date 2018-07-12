@@ -49,6 +49,10 @@ if (isWindows()) {
     '--xvfb-run-args ' +
     '"-as \\"-screen 0 1280x1024x8\\""',
     'mocha',
+    //// Swap the above 3 lines for these to debug with Chrome
+    // 'node',
+    // '--inspect-brk',
+    // 'node_modules/.bin/_mocha',
     run,
   ]
 }

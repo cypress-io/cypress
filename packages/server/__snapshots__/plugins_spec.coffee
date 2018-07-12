@@ -1,74 +1,3 @@
-exports['e2e plugins fails 1'] = `
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: app_spec.coffee...                                                              (1 of 1) 
-
-Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
-
-Error: Async error from plugins file
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-
-
-  (Results)
-
-  ┌───────────────────────────────┐
-  │ Tests:        0               │
-  │ Passing:      0               │
-  │ Failing:      1               │
-  │ Pending:      0               │
-  │ Skipped:      0               │
-  │ Screenshots:  0               │
-  │ Video:        true            │
-  │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
-  └───────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/plugins-async-error/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
-
-`
-
 exports['e2e plugins passes 1'] = `
 ====================================================================================================
 
@@ -124,6 +53,71 @@ exports['e2e plugins passes 1'] = `
   │ ✔ working_preprocessor_spec.coffee          XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
+
+`
+
+exports['e2e plugins fails on async preprocessor error with spec file 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (preprocessor_async_error_spec.coffee)                                     │
+  │ Searched:   cypress/integration/preprocessor_async_error_spec.coffee                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: preprocessor_async_error_spec.coffee...                                         (1 of 1) 
+
+Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+
+Error: Async error from plugins file
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────┐
+  │ Tests:        0                                    │
+  │ Passing:      0                                    │
+  │ Failing:      1                                    │
+  │ Pending:      0                                    │
+  │ Skipped:      0                                    │
+  │ Screenshots:  0                                    │
+  │ Video:        true                                 │
+  │ Duration:     X seconds                            │
+  │ Spec Ran:     preprocessor_async_error_spec.coffee │
+  └────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ preprocessor_async_error_spec.coffee      XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
 
@@ -374,23 +368,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
 `
 
-exports['e2e plugins fails on async preprocessor error with spec file 1'] = `
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (preprocessor_async_error_spec.coffee)                                     │
-  │ Searched:   cypress/integration/preprocessor_async_error_spec.coffee                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: preprocessor_async_error_spec.coffee...                                         (1 of 1) 
-
+exports['e2e plugins fails on async preprocessor error with support file 1'] = `
 Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
 Error: Async error from plugins file
@@ -410,6 +388,22 @@ Error: Async error from plugins file
     at stack trace line
     at stack trace line
 
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (preprocessor_async_error_spec.coffee)                                     │
+  │ Searched:   cypress/integration/preprocessor_async_error_spec.coffee                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: preprocessor_async_error_spec.coffee...                                         (1 of 1) 
 
   (Results)
 
@@ -438,3 +432,4 @@ Error: Async error from plugins file
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
+
