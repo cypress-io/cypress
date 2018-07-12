@@ -30,7 +30,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/json-schemas": "5.0.2",
+    "@cypress/json-schemas": "5.9.0",
     "@cypress/sinon-chai": "^1.0.0",
     "bin-up": "^1.1.0",
     "body-parser": "1.12.4",
