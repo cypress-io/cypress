@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import TimerDisplay from '../duration-timer/TimerDisplay'
 
-import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserVersionFormatted, stripLeadingCyDirs } from '../lib/utils'
+import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs } from '../lib/utils'
 
 export default class RunsListItem extends Component {
   render () {
@@ -106,12 +106,12 @@ export default class RunsListItem extends Component {
             {
               this._instancesExist() ?
                 this._moreThanOneInstance() && this._browsersLength() > 1 ?
-                  <div className='msg'>
+                  <div className='env-msg'>
                     <i className='fa fa-fw fa-globe'></i>{' '}
                     {this._browsersLength()} browsers
                   </div> :
                   // or did we only actual run it on one browser
-                  <div className='msg'>
+                  <div className='env-msg'>
                     <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
                     {this._browserDisplay()}
                   </div> :
@@ -228,6 +228,7 @@ export default class RunsListItem extends Component {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
         <span>
+          {browserNameFormatted(_.get(this.props.run, 'instances[0].platform.browserName', ''))}{' '}
           {browserVersionFormatted(this.props.run.instances[0].platform.browserVersion)}
         </span>
       )
