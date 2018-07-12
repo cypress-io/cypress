@@ -3,7 +3,7 @@ require("../spec_helper")
 
 ciProvider = require("#{root}lib/util/ci_provider")
 
-describe.only "lib/util/ci_provider", ->
+describe "lib/util/ci_provider", ->
   beforeEach ->
     @env = JSON.stringify(process.env)
 
