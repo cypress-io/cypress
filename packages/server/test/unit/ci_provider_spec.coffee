@@ -47,14 +47,16 @@ describe "lib/util/ci_provider", ->
     process.env.APPVEYOR_PROJECT_SLUG = "project"
     process.env.APPVEYOR_BUILD_VERSION = "1.0.1"
     process.env.APPVEYOR_BUILD_NUMBER = "1"
+    process.env.APPVEYOR_JOB_ID = "2"
 
     @expects({
       name: "appveyor"
-      buildNum: "1"
       params: {
         accountName: "account"
-        projectSlug: "project"
+        buildNumber: "1"
         buildVersion: "1.0.1"
+        jobId: "2"
+        projectSlug: "project"
       }
     })
 
@@ -81,12 +83,15 @@ describe "lib/util/ci_provider", ->
       process.env.CIRCLECI = true
       process.env.CIRCLE_BUILD_URL = "circle build url"
       process.env.CIRCLE_BUILD_NUM = "4"
+      process.env.CIRCLE_WORKFLOW_ID = "5"
 
       @expects({
         name: "circle",
-        buildNum: "4"
+        buildNum: null
         params: {
           buildUrl: "circle build url"
+          buildNumber: "4"
+          workflowId: "5"
         },
         # does not have PR number or default branch
         gitInfo: {
@@ -100,12 +105,15 @@ describe "lib/util/ci_provider", ->
       process.env.CIRCLE_BUILD_URL = "circle build url"
       process.env.CIRCLE_BUILD_NUM = "4"
       process.env.CIRCLE_PR_NUMBER = "100"
+      process.env.CIRCLE_WORKFLOW_ID = "5"
 
       @expects({
         name: "circle",
-        buildNum: "4",
+        buildNum: null,
         params: {
           buildUrl: "circle build url"
+          buildNumber: "4"
+          workflowId: "5"
         },
         gitInfo: {
           pullRequestId: '100',
@@ -119,12 +127,15 @@ describe "lib/util/ci_provider", ->
       process.env.CIRCLE_BUILD_NUM = "4"
       # non-forked PR has number in the URL
       process.env.CIRCLE_PULL_REQUEST = "https://github.com/cypress-io/cypress/pull/100"
+      process.env.CIRCLE_WORKFLOW_ID = "5"
 
       @expects({
         name: "circle",
-        buildNum: "4",
+        buildNum: null,
         params: {
           buildUrl: "circle build url"
+          buildNumber: "4"
+          workflowId: "5"
         },
         gitInfo: {
           pullRequestId: '100',
@@ -136,11 +147,14 @@ describe "lib/util/ci_provider", ->
     process.env.CI_NAME = "codeship"
     process.env.CI_BUILD_URL = "codeship build url"
     process.env.CI_BUILD_NUMBER = "5"
+    process.env.CI_BUILD_ID = "6"
 
     @expects({
       name: "codeship",
-      buildNum: "5"
+      buildNum: null
       params: {
+        buildId: "6"
+        buildNumber: "5"
         buildUrl: "codeship build url"
       }
     })
@@ -149,11 +163,14 @@ describe "lib/util/ci_provider", ->
     process.env.DRONE = true
     process.env.DRONE_BUILD_NUMBER = "1234"
     process.env.DRONE_BUILD_LINK = "some url"
+    process.env.DRONE_JOB_NUMBER = "5678"
 
     @expects({
       name: "drone",
-      buildNum: "1234"
+      buildNum: null
       params: {
+        buildNumber: "1234"
+        jobNumber: "5678"
         buildUrl: "some url"
       }
     })
@@ -162,12 +179,14 @@ describe "lib/util/ci_provider", ->
     process.env.GITLAB_CI = true
     process.env.CI_BUILD_ID = "7"
     process.env.CI_PROJECT_URL = "http://gitlab.com/foo/bar"
+    process.env.CI_JOB_ID = "8"
 
     @expects({
       name: "gitlab",
-      buildNum: "7"
+      buildNum: null
       params: {
         buildId: "7"
+        jobId: "8"
         projectUrl: "http://gitlab.com/foo/bar"
       }
     })
@@ -176,12 +195,14 @@ describe "lib/util/ci_provider", ->
     process.env.CI_SERVER_NAME = "GitLab CI"
     process.env.CI_BUILD_ID = "7"
     process.env.CI_PROJECT_URL = "http://gitlab.com/foo/bar"
+    process.env.CI_JOB_ID = "8"
 
     @expects({
       name: "gitlab"
-      buildNum: "7"
+      buildNum: null
       params: {
         buildId: "7"
+        jobId: "8"
         projectUrl: "http://gitlab.com/foo/bar"
       }
     })
@@ -199,11 +220,14 @@ describe "lib/util/ci_provider", ->
     process.env.JENKINS_URL = true
     process.env.BUILD_URL = "jenkins build url"
     process.env.BUILD_NUMBER = "9"
+    process.env.BUILD_ID = "10"
 
     @expects({
       name: "jenkins",
-      buildNum: "9"
+      buildNum: null
       params: {
+        buildId: "10"
+        buildNumber: "9"
         buildUrl: "jenkins build url"
       }
     })
@@ -215,19 +239,27 @@ describe "lib/util/ci_provider", ->
 
     @expects({
       name: "semaphore"
-      buildNum: "46"
+      buildNum: null
       params: {
+        buildNumber: "46"
         repoSlug: "rails/rails"
       }
     })
 
   it "shippable", ->
     process.env.SHIPPABLE = true
+    process.env.BUILD_NUMBER = "11"
+    process.env.JOB_ID = "12"
+    process.env.JOB_NUMBER = "13"
 
     @expects({
       name: "shippable"
       buildNum: null
-      params: null
+      params: {
+        buildNumber: "11"
+        jobId: "12"
+        jobNumber: "13"
+      }
     })
 
   it "snap", ->
@@ -262,12 +294,17 @@ describe "lib/util/ci_provider", ->
     process.env.TRAVIS_BUILD_ID = "id-123"
     process.env.TRAVIS_BUILD_NUMBER = "15"
     process.env.TRAVIS_REPO_SLUG = "travis-repo-slug"
+    process.env.TRAVIS_JOB_ID = "16"
+    process.env.TRAVIS_JOB_NUMBER = "17"
 
     @expects({
       name: "travis",
-      buildNum: "15"
+      buildNum: null
       params: {
         buildId: "id-123"
+        buildNumber: "15"
+        jobId: "16"
+        jobNumber: "17"
         repoSlug: "travis-repo-slug"
       }
     })
