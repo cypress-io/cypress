@@ -174,9 +174,9 @@ getGitInfo = (provider, key) -> ({
     authorName: process.env.APPVEYOR_REPO_COMMIT_AUTHOR
     authorEmail: process.env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL
     message: process.env.APPVEYOR_REPO_COMMIT_MESSAGE + (process.env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED ? "")
-    # remoteOrigin:
+    # remoteOrigin: ???
     pullRequestId: process.env.APPVEYOR_PULL_REQUEST_NUMBER
-    # defaultBranch:
+    # defaultBranch: ???
   }
   bamboo: {
     ## ???
@@ -187,7 +187,7 @@ getGitInfo = (provider, key) -> ({
     authorName: process.env.BUILDKITE_BUILD_CREATOR
     authorEmail: process.env.BUILDKITE_BUILD_CREATOR_EMAIL
     message: process.env.BUILDKITE_MESSAGE
-    # remoteOrigin:
+    # remoteOrigin: ???
     pullRequestId: process.env.BUILDKITE_PULL_REQUEST
     defaultBranch: process.env.BUILDKITE_PIPELINE_DEFAULT_BRANCH
   }
@@ -195,11 +195,11 @@ getGitInfo = (provider, key) -> ({
     sha: process.env.CIRCLE_SHA1
     branch: process.env.CIRCLE_BRANCH
     authorName: process.env.CIRCLE_USERNAME
-    # authorEmail:
-    # message:
-    # remoteOrigin:
+    # authorEmail: ???
+    # message: ???
+    # remoteOrigin: ???
     pullRequestId: getCirclePrNumber(process.env.CIRCLE_PR_NUMBER, process.env.CIRCLE_PULL_REQUEST)
-    # defaultBranch:
+    # defaultBranch: ???
   }
   codeship: {
     sha: process.env.CI_COMMIT_ID
@@ -207,9 +207,9 @@ getGitInfo = (provider, key) -> ({
     authorName: process.env.CI_COMMITTER_NAME
     authorEmail: process.env.CI_COMMITTER_EMAIL
     message: process.env.CI_COMMIT_MESSAGE
-    # remoteOrigin:
+    # remoteOrigin: ???
     # pullRequestId: ## https://community.codeship.com/t/populate-ci-pull-request/1053
-    # defaultBranch:
+    # defaultBranch: ???
   }
   drone: {
     sha: process.env.DRONE_COMMIT_SHA
@@ -217,7 +217,7 @@ getGitInfo = (provider, key) -> ({
     authorName: process.env.DRONE_COMMIT_AUTHOR
     authorEmail: process.env.DRONE_COMMIT_AUTHOR_EMAIL
     message: process.env.DRONE_COMMIT_MESSAGE
-    # remoteOrigin:
+    # remoteOrigin: ???
     pullRequestId: process.env.DRONE_PULL_REQUEST
     defaultBranch: process.env.DRONE_REPO_BRANCH
   }
@@ -227,9 +227,9 @@ getGitInfo = (provider, key) -> ({
     authorName: process.env.GITLAB_USER_NAME
     authorEmail: process.env.GITLAB_USER_EMAIL
     message: process.env.CI_COMMIT_MESSAGE
-    # remoteOrigin:
+    # remoteOrigin: ???
     # pullRequestId: ## https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
-    # defaultBranch:
+    # defaultBranch: ???
   }
   hudson: {
     ## same as jenkins?
@@ -237,33 +237,33 @@ getGitInfo = (provider, key) -> ({
   jenkins: {
     sha: process.env.GIT_COMMIT
     branch: process.env.GIT_BRANCH
-    # authorName:
-    # authorEmail:
-    # message:
-    # remoteOrigin:
+    # authorName: ???
+    # authorEmail: ???
+    # message: ???
+    # remoteOrigin: ???
     pullRequestId: process.env.ghprbPullId
-    # defaultBranch:
+    # defaultBranch: ???
   }
   semaphore: {
-    # sha:
-    # branch:
-    # authorName:
-    # authorEmail:
-    # message:
-    # remoteOrigin:
+    # sha: ???
+    # branch: ???
+    # authorName: ???
+    # authorEmail: ???
+    # message: ???
+    # remoteOrigin: ???
     ## Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
     pullRequestId: process.env.PULL_REQUEST_NUMBER
-    # defaultBranch
+    # defaultBranch: ???
   }
   shippable: {
     sha: process.env.COMMIT
     branch: process.env.BRANCH
     authorName: process.env.COMMITTER
-    # authorEmail:
+    # authorEmail: ???
     message: process.env.COMMIT_MESSAGE
-    # remoteOrigin:
+    # remoteOrigin: ???
     pullRequestId: process.env.PULL_REQUEST
-    # defaultBranch:
+    # defaultBranch: ???
   }
   snap: {
     ## ???
@@ -278,12 +278,12 @@ getGitInfo = (provider, key) -> ({
     sha: process.env.TRAVIS_COMMIT
     ## for PRs, TRAVIS_BRANCH is the base branch being merged into
     branch: process.env.TRAVIS_PULL_REQUEST_BRANCH or process.env.TRAVIS_BRANCH
-    # authorName:
-    # authorEmail:
+    # authorName: ???
+    # authorEmail: ???
     message: process.env.TRAVIS_COMMIT_MESSAGE
-    # remoteOrigin:
+    # remoteOrigin: ???
     pullRequestId: process.env.TRAVIS_PULL_REQUEST
-    # defaultBranch:
+    # defaultBranch: ???
   }
   wercker: {
     # ???
