@@ -49,30 +49,49 @@ groupIds = (provider) -> {
 params = (provider) -> {
   appveyor: {
     accountName:  process.env.APPVEYOR_ACCOUNT_NAME
-    projectSlug:  process.env.APPVEYOR_PROJECT_SLUG
+    buildNumber: process.env.APPVEYOR_BUILD_NUMBER
+    jobId: process.env.APPVEYOR_JOB_ID
     buildVersion: process.env.APPVEYOR_BUILD_VERSION
+    projectSlug:  process.env.APPVEYOR_PROJECT_SLUG
   }
   circle: {
+    buildNumber: process.env.CIRCLE_BUILD_NUM
+    workflowId: process.env.CIRCLE_WORKFLOW_ID
     buildUrl: process.env.CIRCLE_BUILD_URL
   }
   codeship: {
+    buildId: process.env.CI_BUILD_ID
     buildUrl: process.env.CI_BUILD_URL
   }
   drone: {
-    buildUrl:  process.env.DRONE_BUILD_LINK
+    buildNumber: process.env.DRONE_BUILD_NUMBER
+    jobNumber: process.env.DRONE_JOB_NUMBER
+    buildUrl: process.env.DRONE_BUILD_LINK
   }
   gitlab: {
-    buildId:    process.env.CI_BUILD_ID
+    buildId: process.env.CI_BUILD_ID
+    jobId: process.env.CI_JOB_ID
     projectUrl: process.env.CI_PROJECT_URL
   }
   jenkins: {
+    buildId: process.env.BUILD_ID
+    buildNumber: process.env.BUILD_NUMBER
     buildUrl: process.env.BUILD_URL
   }
   semaphore: {
+    buildNumber: process.env.SEMAPHORE_BUILD_NUMBER
     repoSlug: process.env.SEMAPHORE_REPO_SLUG
   }
+  shippable: {
+    buildNumber: process.env.BUILD_NUMBER
+    jobId: process.env.JOB_ID
+    jobNumber: process.env.JOB_NUMBER
+  }
   travis: {
-    buildId:  process.env.TRAVIS_BUILD_ID
+    buildId: process.env.TRAVIS_BUILD_ID
+    buildNumber: process.env.TRAVIS_BUILD_NUMBER
+    jobId: process.env.TRAVIS_JOB_ID
+    jobNumber: process.env.TRAVIS_JOB_NUMBER
     repoSlug: process.env.TRAVIS_REPO_SLUG
   }
 }[provider]
