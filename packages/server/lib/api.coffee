@@ -52,6 +52,10 @@ machineId = ->
   .catch ->
     return null
 
+## retry on timeouts or 5xx errors
+isRetriableError = (err) ->
+  (err instanceof Promise.TimeoutError) or (500 <= err.statusCode < 600)
+
 module.exports = {
   ping: ->
     rp.get(routes.ping())
@@ -309,5 +313,38 @@ module.exports = {
 
   updateProjectToken: (projectId, authToken) ->
     @_projectToken("put", projectId, authToken)
+
+  retryWithBackoff: (fn, options = {}) ->
+    maxRetries = 3
+    retryIndex = 0
+
+    delays = [
+      30 * 1000     ## 30 seconds
+      2 * 60 * 1000 ##  2 minutes
+      5 * 60 * 1000 ##  5 minutes
+    ]
+
+    do attempt = ->
+      Promise
+      .try(fn)
+      .catch isRetriableError, (err) ->
+        if retryIndex > maxRetries
+          throw err
+
+        delay = delays[retryIndex]
+
+        if options.onBeforeRetry
+          options.onBeforeRetry({
+            retryIndex
+            delay
+            err
+          })
+
+        retryIndex++
+
+        Promise
+        .delay(delay)
+        .then ->
+          attempt()
 
 }
