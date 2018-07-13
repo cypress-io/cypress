@@ -72,8 +72,6 @@ module.exports = {
   _launch: (win, url, options) ->
     menu.set({withDevTools: true})
 
-    debug("launching browser window to url %s with options %o", url, options)
-
     Promise
     .try =>
       if ua = options.userAgent
@@ -113,11 +111,15 @@ module.exports = {
     .then (state) ->
       state.get()
     .then (state) =>
+      debug("received saved state %o", state)
+
       ## get our electron default options
       options = @_defaultOptions(projectRoot, state, options)
 
       ## get the GUI window defaults now
       options = Windows.defaults(options)
+
+      debug("browser window options %o", _.omitBy(options, _.isFunction))
 
       Promise
       .try =>
@@ -127,10 +129,13 @@ module.exports = {
         plugins.execute("before:browser:launch", options.browser, options)
         .then (newOptions) ->
           if newOptions
+            debug("received new options from plugin event %o", newOptions)
             _.extend(options, newOptions)
 
           return options
     .then (options) =>
+      debug("launching browser window to url: %s", url)
+
       @_render(url, projectRoot, options)
       .then (win) =>
         ## cause the webview to receive focus so that

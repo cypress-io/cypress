@@ -202,14 +202,16 @@ createRun = (options = {}) ->
       provider: ciProvider.name()
       buildNumber: ciProvider.buildNum()
     }
-    commit: {
+    commit: ciProvider.gitInfo({
       sha: git.sha
       branch: git.branch
       authorName: git.author
       authorEmail: git.email
       message: git.message
       remoteOrigin: git.remote
-    }
+      pullRequestId: null
+      defaultBranch: null
+    })
   })
   .catch (err) ->
     debug("failed creating run %o", {
