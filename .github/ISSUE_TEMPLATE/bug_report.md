@@ -17,6 +17,8 @@ Want something newly documented? Please open an issue in the respective repo:
 
 ### Desired behavior:
 
+<!-- A clear and concise description of what you want to happen -->
+
 ### Steps to reproduce:
 
 <!-- Issues without reproducible steps might get closed. *Tip* You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then tell us the repo/branch to try. -->
