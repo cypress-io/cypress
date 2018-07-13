@@ -15,6 +15,8 @@ debug      = require("debug")("cypress:server:api")
 # if debug.enabled
 #   request.debug = true
 
+MUTATING_TIMEOUT = 60000
+
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
     gzip: true
@@ -120,7 +122,7 @@ module.exports = {
       body
       url: routes.runs()
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? MUTATING_TIMEOUT
       headers: {
         "x-route-version": "3"
       }
@@ -142,7 +144,7 @@ module.exports = {
       body
       url: routes.instances(runId)
       json: true
-      timeout: timeout ? 10000
+      timeout: timeout ? MUTATING_TIMEOUT
       headers: {
         "x-route-version": "4"
       }
@@ -156,7 +158,7 @@ module.exports = {
     rp.put({
       url: routes.instanceStdout(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? MUTATING_TIMEOUT
       body: {
         stdout: options.stdout
       }
@@ -168,7 +170,7 @@ module.exports = {
     rp.put({
       url: routes.instance(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? MUTATING_TIMEOUT
       headers: {
         "x-route-version": "2"
       }
