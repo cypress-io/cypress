@@ -116,6 +116,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
+
       if isDate and (
         not _.isString(chars) or
         not dateRegex.test(chars) or
@@ -214,16 +215,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## consider changing type to a Promise and juggle logging
             cy.now("submit", form, {log: false, $el: form})
 
-        dispatchChangeEvent = (id) ->
+        dispatchChangeEvent = (el, id) ->
           change = document.createEvent("HTMLEvents")
           change.initEvent("change", true, false)
 
-          dispatched = options.$el.get(0).dispatchEvent(change)
+          dispatched = el.dispatchEvent(change)
 
           if id and updateTable
             updateTable(id, null, "change", null, dispatched)
-
-          return dispatched
 
         needSingleValueChange = ->
           return $elements.isNeedSingleValueChangeInputElement(options.$el.get(0))
@@ -282,24 +281,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## fires only when the 'value'
           ## of input/text/contenteditable
           ## changes
-          onTypeChange: (originalText) ->
+          onValueChange: (originalText, el) ->
             ## never fire any change events for contenteditable
             ## should never happen b/c should not be called for contenteditable
             if isContentEditable
               return
             
             ## change event already registered
-            console.log(state('changeEvent'))
             if state "changeEvent"
               return
-            # debugger
-            state "changeEvent", ->
-              # debugger
-              if $selection.getElementText(options.$el.get(0)) isnt originalText
-                dispatchChangeEvent()
+            
+            state "changeEvent", (id) ->
+              if changed = $selection.getElementText(el) isnt originalText
+                dispatchChangeEvent(el, id)
               state "changeEvent", null
+              return changed
 
-          onEnterPressed: (changed, id) ->
+          onEnterPressed: (id) ->
             ## dont dispatch change events or handle
             ## submit event if we've pressed enter into
             ## a textarea or contenteditable
@@ -309,7 +307,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## element was activated we need to
             ## fire a change event immediately
             if changeEvent = state("changeEvent")
-              changeEvent()
+              changeEvent(id)
 
             ## handle submit event handler here
             simulateSubmitHandler()
@@ -355,7 +353,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               .then ->
                 type()
             else
-              ## don't click, just type
               type()
           })
 

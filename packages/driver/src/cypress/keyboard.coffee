@@ -70,7 +70,6 @@ $Keyboard = {
     shift: 16
   }
 
-  ## #region [2]
   specialChars: {
     "{selectall}": (el) ->
       $selection.selectAll(el)
@@ -99,7 +98,6 @@ $Keyboard = {
         else $selection.deleteRightOfSelection(el)
 
 
-        console.log('delete')
         # prev = rng.all()
         # rng.text("", "end")
 
@@ -109,11 +107,6 @@ $Keyboard = {
         # ## dont send the input event
         # if prev is rng.all()
         #   options.input = false
-      
-
-      
-
-
 
     ## charCode = 8
     ## no keyPress
@@ -172,9 +165,7 @@ $Keyboard = {
       options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
         $selection.updateValue(el, "\n")
-        # debugger
-        changed = options.prevText isnt $selection.getElementText(el)
-        options.onEnterPressed(changed, options.id)
+        options.onEnterPressed(options.id)
 
     ## charCode = 37
     ## no keyPress
@@ -188,27 +179,6 @@ $Keyboard = {
       options.setKey    = "{leftarrow}"
       @ensureKey el, null, options, ->
         $selection.moveCursorLeft(el)
-
-        # switch
-        #   when bounds[0] is bounds[1]
-          ## equal move the caret
-            ## 1 to the left
-
-        # when @boundsAreEqual(bounds)
-        #   ## if bounds are equal move the caret
-        #   ## 1 to the left
-        #   left  = bounds[0] - 1
-        #   right = left
-        # when bounds[0] > 0
-        #   ## just set the cursor back to the left
-        #   ## position
-        #   left = bounds[0]
-        #   right = left
-        # else
-        #   left = 0
-        #   right = 0
-
-        # rng.bounds([left, right])
 
     ## charCode = 39
     ## no keyPress
@@ -250,7 +220,6 @@ $Keyboard = {
       @ensureKey el, null, options, ->
         $selection.moveCursorDown(el)
   }
-  ## #endregion
 
   modifierChars: {
     "{alt}": "alt"
@@ -269,14 +238,13 @@ $Keyboard = {
   boundsAreEqual: (bounds) ->
     bounds[0] is bounds[1]
 
-  ## #region [ 1 ]
   type: (options = {}) ->
     _.defaults(options, {
       delay: 10
       onEvent: ->
       onBeforeEvent: ->
       onBeforeType: ->
-      onTypeChange: ->
+      onValueChange: ->
       onEnterPressed: ->
       onNoMatchingSpecialChars: ->
       onBeforeSpecialCharAction: ->
@@ -287,10 +255,8 @@ $Keyboard = {
     isContentEditable = $elements.isContentEditable(el)
     cannotSelectElement = $elements.isNeedSingleValueChangeInputElement(el)
     ## if there's no selection on the current element, select the end
-    # debugger
     # if isContentEditable
     if !cannotSelectElement and not $selection.getSelectionBounds(el).start?
-      # debugger
       $selection.moveSelectionToEnd(el)
 
     
@@ -385,14 +351,12 @@ $Keyboard = {
       @typeChars(el, key, options)
     .then =>
       ## if after typing we ended up changing
-      ## our value then fire the onTypeChange callback
+      ## our value then fire the onValueChange callback
       # if @expectedValueDoesNotMatchCurrentValue(options.prev, )
-      #   options.onTypeChange()
+      #   options.onValueChange()
 
       unless options.release is false
         @resetModifiers(el, options.window)
-
-  ## #endregion
 
   countNumIndividualKeyStrokes: (keys) ->
     _.reduce keys, (memo, chars) =>
@@ -444,15 +408,14 @@ $Keyboard = {
   expectedValueDoesNotMatchCurrentValue: (expected, rng) ->
     expected isnt rng.all()
 
-  updateSelection: (el, options) ->
-    # doc = options.window.document
-    # newRange = doc.createRange()
-    # newRange.setStart(el, el.length)
-    # newRange.setEnd(el, el.length)
-    # sel = doc.getSelection()
-    # sel.removeAllRanges()
-    # sel.addRange(newRange)
-    console.log('newRange')
+  # updateSelection: (el, options) ->
+  #   # doc = options.window.document
+  #   # newRange = doc.createRange()
+  #   # newRange.setStart(el, el.length)
+  #   # newRange.setEnd(el, el.length)
+  #   # sel = doc.getSelection()
+  #   # sel.removeAllRanges()
+  #   # sel.addRange(newRange)
 
   moveCaretToEnd: (rng) ->
     len = rng.length()
@@ -461,6 +424,7 @@ $Keyboard = {
   simulateKey: (el, eventType, key, options) ->
     ## bail if we've said not to fire this specific event
     ## in our options
+
     return true if options[eventType] is false
 
     key = options.key ? key
@@ -542,9 +506,7 @@ $Keyboard = {
     return dispatched
 
   typeKey: (el, key, options) ->
-
-    # debugger
-
+    
     ## if we have an afterKey value it means
     ## we've typed in prior to this
     # if after = options.afterKey
@@ -606,7 +568,7 @@ $Keyboard = {
         fn.call(@)
         if not options.prevText? and not isContentEditable
           options.prevText = prevText
-          options.onTypeChange(options.prevText)
+          options.onValueChange(options.prevText, el)
 
       @simulateKey(el, "input", key, options)
 
@@ -614,9 +576,7 @@ $Keyboard = {
       if @simulateKey(el, "keypress", key, options)
         if @simulateKey(el, "textInput", key, options)
 
-          # debugger
           ml = el.maxLength
-
           ## maxlength is -1 by default when omitted
           ## but could also be null or undefined :-/
           ## only cafe if we are trying to type a key
@@ -692,8 +652,6 @@ $Keyboard = {
           onEvent: ->
         })
 }
-
-
 
 $Cypress.Keyboard = $Keyboard
 

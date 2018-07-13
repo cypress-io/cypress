@@ -204,15 +204,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               afterMouseDown($elToClick, coords)
             else
               if $elements.isInput(el) or $elements.isTextarea(el) or $elements.isContentEditable(el)
-                if $elements.isNeedSingleValueChangeInputElement(el)
-                  return
-                $selection.moveSelectionToEnd(el)
+                if !$elements.isNeedSingleValueChangeInputElement(el)
+                  $selection.moveSelectionToEnd(el)
 
               ## retrieve the first focusable $el in our parent chain
               $elToFocus = getFirstFocusableEl($elToClick)
 
               $focused = cy.getFocused()
-              
               if shouldFireFocusEvent($focused, $elToFocus)
                 ## if our mousedown went through and
                 ## we are focusing a different element

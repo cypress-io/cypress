@@ -23,12 +23,20 @@ nativeIsContentEditable = Object.getOwnPropertyDescriptor(window.HTMLElement.pro
 
 InputTypeNeedSingleValueChange_RE = /^(date|time|month|week)$/
 
+canSetSelectionRangeElement_RE = /^(text|search|URL|tel|password)$/
+
 
 isNeedSingleValueChangeInputElement = (el) ->
   if !isInput(el)
     return false
   typeName = el.type
   return InputTypeNeedSingleValueChange_RE.test(typeName)
+
+getValue = (el) ->
+  if isInput(el)
+    return nativeInputValueGetter.call(el)
+  if isTextarea(el)
+    return nativeTextareaValueGetter.call(el)
 
 setValue = (el, val) ->
   ## sets value for <input> or <textarea>
@@ -40,18 +48,8 @@ setValue = (el, val) ->
 substituteText = (text, newText, [start, end]) ->
   curText.substring(0, start) + newText + curText.substring(bounds[1])
 
-
-  # if isInput(el)
-  #   curText = nativeInputValueGetter.call(el)
-  # if isTextarea(el)
-  #   curText = nativeTextareaValueGetter.call(el)
-
-    
-getValue = (el) ->
-  if isInput(el)
-    return nativeInputValueGetter.call(el)
-  if isTextarea(el)
-    return nativeTextareaValueGetter.call(el)
+canSetSelectionRangeElement = (el) ->
+  canSetSelectionRangeElement_RE.test(el.type)
 
 isContentEditable = (el) ->
   ## this property is the tell-all for contenteditable
@@ -372,6 +370,8 @@ module.exports = {
   isInput
 
   isNeedSingleValueChangeInputElement
+
+  canSetSelectionRangeElement
 
   stringify
 

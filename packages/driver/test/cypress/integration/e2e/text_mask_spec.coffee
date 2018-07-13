@@ -32,7 +32,7 @@ describe "src/cy/commands/actions/type", ->
         .type('50000')
         .should('have.value', "50,000 $")
 
-    it.only "can type decimal into dollar", ->
+    it "can type decimal into dollar", ->
       cy.get('#dollar')
         .type('50.1234')
         .should('have.value', "50.12 $")
