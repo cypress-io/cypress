@@ -11,7 +11,6 @@ describe "lib/util/ci_provider", ->
 
     @expects = (obj) ->
       expect(ciProvider.name()).to.eq(obj.name)
-      expect(ciProvider.buildNum()).to.eq(obj.buildNum)
       expect(ciProvider.params()).to.deep.eq(obj.params)
 
       # collect Git commit information if needed
@@ -32,21 +31,6 @@ describe "lib/util/ci_provider", ->
       expect(ciProvider.getCirclePrNumber('100')).to.equal('100')
       expect(ciProvider.getCirclePrNumber('100', 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('100')
       expect(ciProvider.getCirclePrNumber(undefined, 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('2114')
-
-  context "group-id", ->
-    describe "circle", ->
-      beforeEach ->
-        process.env.CIRCLECI = true
-        process.env.CIRCLE_BUILD_URL = "circle build url"
-        process.env.CIRCLE_BUILD_NUM = "4"
-
-      it "grabs workflow id as group id", ->
-        id = "1234-group-id"
-        process.env.CIRCLE_WORKFLOW_ID = id
-        expect(ciProvider.groupId()).to.equal(id)
-
-      it "no group id without workflow id", ->
-        expect(ciProvider.groupId()).to.be.null
 
   it "returns 'unknown' when not found", ->
     process.env = {}

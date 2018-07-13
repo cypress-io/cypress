@@ -30,22 +30,6 @@ providers = {
   "wercker":         isWercker
 }
 
-buildNums = (provider) -> {
-  appveyor:  process.env.APPVEYOR_BUILD_NUMBER
-  circle:    process.env.CIRCLE_BUILD_NUM
-  codeship:  process.env.CI_BUILD_NUMBER
-  drone:     process.env.DRONE_BUILD_NUMBER
-  gitlab:    process.env.CI_BUILD_ID
-  jenkins:   process.env.BUILD_NUMBER
-  semaphore: process.env.SEMAPHORE_BUILD_NUMBER
-  travis:    process.env.TRAVIS_BUILD_NUMBER
-}[provider]
-
-groupIds = (provider) -> {
-  # for CircleCI v2 use workflow id to group builds
-  circle:   process.env.CIRCLE_WORKFLOW_ID
-}[provider]
-
 params = (provider) -> {
   appveyor: {
     accountName:  process.env.APPVEYOR_ACCOUNT_NAME
@@ -61,6 +45,7 @@ params = (provider) -> {
   }
   codeship: {
     buildId: process.env.CI_BUILD_ID
+    buildNumber:  process.env.CI_BUILD_NUMBER
     buildUrl: process.env.CI_BUILD_URL
   }
   drone: {
@@ -298,12 +283,6 @@ module.exports = {
 
   params: ->
     params(getProviderName()) ? null
-
-  buildNum: ->
-    buildNums(getProviderName()) ? null
-
-  groupId: ->
-    groupIds(getProviderName()) ? null
 
   gitInfo: (existingInfo) ->
     providerName = getProviderName()
