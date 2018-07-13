@@ -69,7 +69,6 @@ describe "lib/modes/record", ->
     beforeEach ->
       sinon.stub(ciProvider, "name").returns("circle")
       sinon.stub(ciProvider, "params").returns({foo: "bar"})
-      sinon.stub(ciProvider, "buildNum").returns("build-123")
 
       @gitInfo = {
         branch: "master",
@@ -138,7 +137,7 @@ describe "lib/modes/record", ->
           ci: {
             params: {foo: "bar"}
             provider: "circle"
-            buildNumber: "build-123"
+            buildNumber: null
           }
           commit: {
             sha: "sha-123"
