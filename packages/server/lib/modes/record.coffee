@@ -200,7 +200,7 @@ createRun = (options = {}) ->
     ci: {
       params: ciProvider.params()
       provider: ciProvider.name()
-      buildNumber: ciProvider.buildNum()
+      buildNumber: null ## TODO: update json-schemas
     }
     commit: ciProvider.gitInfo({
       sha: git.sha
