@@ -23,6 +23,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: "element" }, {
     type: (subject, chars, options = {}) ->
+      options = _.clone(options)
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults(options, {
