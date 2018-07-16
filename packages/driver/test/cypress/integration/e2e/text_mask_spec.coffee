@@ -1,6 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 
-describe "src/cy/commands/actions/type", ->
+describe "src/cy/commands/actions/type text_mask_spec", ->
   before ->
     cy.visit("/fixtures/text-mask.html")
 
@@ -34,6 +34,7 @@ describe "src/cy/commands/actions/type", ->
 
     it "can type decimal into dollar", ->
       cy.get('#dollar')
+        .clear()
         .type('50.1234')
         .should('have.value', "50.12 $")
 
