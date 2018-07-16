@@ -8,6 +8,9 @@ isCodeship = ->
 isGitlab = ->
   process.env.GITLAB_CI or process.env.CI_SERVER_NAME and process.env.CI_SERVER_NAME is "GitLab CI"
 
+isJenkins = ->
+  process.env.JENKINS_URL or process.env.JENKINS_HOME or process.env.JENKINS_VERSION
+
 isWercker = ->
   process.env.WERCKER or process.env.WERCKER_MAIN_PIPELINE_STARTED
 
@@ -20,7 +23,7 @@ providers = {
   "drone":          "DRONE"
   "gitlab":         isGitlab
   "hudson":         "HUDSON_URL"
-  "jenkins":        "JENKINS_URL"
+  "jenkins":        isJenkins
   "semaphore":      "SEMAPHORE"
   "shippable":      "SHIPPABLE"
   "snap":           "SNAP_CI"

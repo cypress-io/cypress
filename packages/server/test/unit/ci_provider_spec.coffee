@@ -211,7 +211,7 @@ describe "lib/util/ci_provider", ->
       params: null
     })
 
-  it "jenkins", ->
+  it "jenkins via JENKINS_URL", ->
     process.env.JENKINS_URL = true
     process.env.BUILD_URL = "jenkins build url"
     process.env.BUILD_NUMBER = "9"
@@ -219,6 +219,32 @@ describe "lib/util/ci_provider", ->
     @expects({
       name: "jenkins",
       buildNum: "9"
+      params: {
+        buildUrl: "jenkins build url"
+      }
+    })
+
+  it "jenkins via JENKINS_HOME", ->
+    process.env.JENKINS_HOME = "/path/to/jenkins"
+    process.env.BUILD_URL = "jenkins build url"
+    process.env.BUILD_NUMBER = "9.1"
+
+    @expects({
+      name: "jenkins",
+      buildNum: "9.1"
+      params: {
+        buildUrl: "jenkins build url"
+      }
+    })
+
+  it "jenkins via JENKINS_VERSION", ->
+    process.env.JENKINS_VERSION = "1.2.3"
+    process.env.BUILD_URL = "jenkins build url"
+    process.env.BUILD_NUMBER = "9.2"
+
+    @expects({
+      name: "jenkins",
+      buildNum: "9.2"
       params: {
         buildUrl: "jenkins build url"
       }
