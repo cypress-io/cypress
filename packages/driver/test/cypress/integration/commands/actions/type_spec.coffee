@@ -1975,6 +1975,20 @@ describe "src/cy/commands/actions/type", ->
           .blur()
           .then ->
             expect(changed).to.eql(0)
+      
+      it "does not fire change for type'd change that restores value", ->
+        changed = 0
+        cy.$$('input:first').change ->
+          changed++
+        cy.get('input:first')
+        .invoke('val', 'foo')
+        .type('{backspace}o')
+        .invoke('val', 'bar')
+        .type('{backspace}r')
+        .blur()
+        .then ->
+          expect(changed).to.eql 0
+
 
     describe "caret position", ->
 

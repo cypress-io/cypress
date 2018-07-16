@@ -116,7 +116,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
-
       if isDate and (
         not _.isString(chars) or
         not dateRegex.test(chars) or
@@ -284,17 +283,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onValueChange: (originalText, el) ->
             ## never fire any change events for contenteditable
             ## should never happen b/c should not be called for contenteditable
+
             if isContentEditable
               return
-            
+
             ## change event already registered
-            if state "changeEvent"
+            if changeEvent = state("changeEvent")
+              if !changeEvent(null, true)
+                state("changeEvent", null)
               return
             
-            state "changeEvent", (id) ->
-              if changed = $selection.getElementText(el) isnt originalText
-                dispatchChangeEvent(el, id)
-              state "changeEvent", null
+            state "changeEvent", (id, readOnly) ->
+              changed = $selection.getElementText(el) isnt originalText
+              
+              if !readOnly
+                if changed
+                  dispatchChangeEvent(el, id)
+                state "changeEvent", null
+              
               return changed
 
           onEnterPressed: (id) ->
