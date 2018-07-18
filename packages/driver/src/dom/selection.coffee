@@ -9,19 +9,18 @@ _getSelectionBoundsFromTextarea = (el) ->
   }
 
 _getSelectionBoundsFromInput = (el) ->
-  elType = el.type
-  originalType = elType
+  { type } = el
 
   ## HACK:
   ## newer versions of Chrome incorrectly report the selection
   ## for number and email types, so we change it to type=text
   ## and blur it (then set it back and focus it further down
   ## after the selection algorithm has taken place)
-  shouldChangeType = originalType is 'email' || originalType is 'number'
-  if (shouldChangeType)
+  shouldChangeType = type is 'email' || type is 'number'
+
+  if shouldChangeType
     el.blur()
     el.type = 'text'
-  
 
   bounds = {
     start: el.selectionStart
@@ -32,11 +31,9 @@ _getSelectionBoundsFromInput = (el) ->
   ## selection start and end don't report correctly when input
   ## already has a value set, so if there's a value and there is no
   ## native selection, force it to be at the end of the text
-  # if el.value && !caretPos
-  #   caretPos = el.value.length
 
   if shouldChangeType
-    el.type = originalType
+    el.type = type
     el.focus()
 
   return bounds
@@ -51,7 +48,7 @@ _getSelectionBoundsFromContentEditable = (el) ->
     if sel.rangeCount
       ## get the first (usually only) range obj
       range = sel.getRangeAt(0)
-    
+
       ## if div[contenteditable] > text
       hostContenteditable = _getHostContenteditable(range.commonAncestorContainer)
       if hostContenteditable is el
@@ -64,61 +61,41 @@ _getSelectionBoundsFromContentEditable = (el) ->
     start: null
     end: null
   }
-  
+
   ## TODO get ACTUAL caret position in contenteditable, not line
-
-
-  ##  legacy APIs below, not needed
-
-    # when doc.selection && doc.selection.createRange
-    #   range = doc.selection.createRange()
-    #   if range.parentElement() is el
-    #     tempEl = doc.createElement("span")
-    #     el.insertBefore(tempEl, el.firstChild)
-    #     tempRange = range.duplicate()
-    #     tempRange.moveToElementText(tempEl)
-    #     tempRange.setEndPoint("EndToEnd", range)
-        
-    #     return tempRange.text.length
 
 _insertTextIntoContentEditable = (el, text) ->
   doc = $document.getDocumentFromElement(el)
   ## NOTE: insertText will also handle '\n', and render newlines
   doc.execCommand('insertText', true, text)
   return
-  
-  ## equivalent logic is below, using Selection API.
 
+  ## Keeping around native implementation
+  ## for same reasons as listed below
+  ##
   # if text is "\n"
   #   return _insertNewlineIntoContentEditable(el)
-
   # doc = $document.getDocumentFromElement(el)
   # range = _getSelectionRangeByEl(el)
   # ## delete anything in the selection
   # startNode = range.startContainer
   # range.deleteContents()
-  
   # newTextNode
-
   # if text is ' '
   #   newTextNode = doc.createElement('p')
   # else
   #   newTextNode = doc.createTextNode(text)
-
   # if $elements.isElement(startNode)
-
   #   if startNode.firstChild?.tagName is 'BR'
   #     range.selectNode(startNode.firstChild)
   #     range.deleteContents()
   #   ## else startNode is el, so just insert the node
-
   #   startNode.appendChild(newTextNode)
   #   if text is ' '
   #     newTextNode.outerHTML = '&nbsp;'
   #   range.selectNodeContents(startNode.lastChild)
   #   range.collapse()
   #   return
-
   # else
   #   # nodeOffset = range.startOffset
   #   # oldValue = startNode.nodeValue || ''
@@ -130,17 +107,15 @@ _insertTextIntoContentEditable = (el, text) ->
   #   # updatedValue = _insertSubstring(oldValue, text, [nodeOffset, nodeOffset])
   #   # newNodeOffset = nodeOffset + text.length
   #   # startNode.nodeValue = updatedValue
-
   #   el.normalize()
 
 _insertSubstring = (curText, newText, [start, end]) ->
   curText.substring(0, start) + newText + curText.substring(end)
 
 _getHostContenteditable = (el) ->
-  while (el.parentElement && !el.getAttribute?('contenteditable')? )
+  while el.parentElement && !$elements.tryCallNativeMethod(el, "getAttribute", "contenteditable")
     el = el.parentElement
-  if !el.getAttribute?('contenteditable')?
-    throw new Error('Failed to get host contenteditable element in selection')
+
   return el
 
 _getInnerLastChild = (el) ->
@@ -158,65 +133,62 @@ _getSelectionRangeByEl = (el) ->
     sel.getRangeAt(0)
   else throw new Error('No selection in document')
 
-getElementText = (el) ->
-  if $elements.isInput(el) or $elements.isTextarea(el)
-    return $elements.getValue(el)
-  if $elements.isContentEditable(el)
-    return el.innerText
-  throw new Error('Cannot get element text')
+# getElementText = (el) ->
+  # if $elements.isInput(el) or $elements.isTextarea(el)
+    # return $elements.getValue(el)
+
+  # if $elements.isContentEditable(el)
+    # return el.innerText
 
 clearSelection = (el) ->
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
     return doc.execCommand('delete', true, null)
+
   updateValue(el, "")
 
 setInputSelectionRange = (el, start, end) ->
-  if !($elements.isInput(el) or $elements.isTextarea(el))
-    throw new Error('isnt input or textarea')
-
   if $elements.canSetSelectionRangeElement(el)
     return el.setSelectionRange(start, end)
-  
-  else
-    ## NOTE: Some input elements have mobile implementations
-    ##       and thus may not always have a cursor, so calling setSelectionRange will throw.
-    ##       we are assuming desktop here, so we cast to type='text', and get the cursor from there.
-    elType = el.type
-    originalType = elType
-    # el.blur()
-    el.type = 'text'
-    el.setSelectionRange(start, end)
-    el.type = originalType
-    ## changing the type will lose focus, so focus again
-    el.focus()
+
+  ## NOTE: Some input elements have mobile implementations
+  ## and thus may not always have a cursor, so calling setSelectionRange will throw.
+  ## we are assuming desktop here, so we cast to type='text', and get the cursor from there.
+  { type } = el
+  originalType = elType
+  el.blur()
+  el.type = 'text'
+  el.setSelectionRange(start, end)
+  el.type = type
+  ## changing the type will lose focus, so focus again
+  el.focus()
 
 deleteRightOfSelection = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
     {start, end} = getSelectionBounds(el)
     setInputSelectionRange(el, start, end + 1)
     return clearSelection(el)
+
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
     ## same as pressing the Delete key
     doc.execCommand('forwardDelete', true, null)
-    return
-  return new Error('failed to deleteRight')
 
 deleteLeftOfSelection = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
     {start, end} = getSelectionBounds(el)
     setInputSelectionRange(el, start - 1, end)
     return clearSelection(el)
+
   if $elements.isContentEditable(el)
     ## there is no 'backwardDelete' command for execCommand, so we use the Selection API
     doc = $document.getDocumentFromElement(el)
     selection = _getSelectionByEl(el)
+
     if selection.isCollapsed
       selection.modify('extend', 'backward', 'character')
-    return clearSelection(el)
 
-  return new Error('failed to deleteLeft')
+    return clearSelection(el)
 
 collapseInputOrTextArea = (el, toIndex) ->
   setInputSelectionRange(el, toIndex, toIndex)
@@ -224,15 +196,22 @@ collapseInputOrTextArea = (el, toIndex) ->
 moveCursorLeft = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
     {start, end} = getSelectionBounds(el)
-    return collapseInputOrTextArea(el, start) if start isnt end
-    return if start is 0
+
+    if start isnt end
+      return collapseInputOrTextArea(el, start)
+
+    if start is 0
+      return
+
     return setInputSelectionRange(el, start - 1, start - 1)
+
   if $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
-    # if !selection.isCollapsed
-    #   selection.collapseToStart()
     selection.modify("move", "backward", "character")
 
+    ## Keeping around native implementation
+    ## for same reasons as listed below
+    ##
     # range = _getSelectionRangeByEl(el)
     # if !range.collapsed
     #   return range.collapse(true)
@@ -246,32 +225,29 @@ moveCursorLeft = (el) ->
 moveCursorRight = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
     {start, end} = getSelectionBounds(el)
-    return collapseInputOrTextArea(el, end) if start isnt end
-    ## Don't worry about moving past the end of the string: nothing will happen and there is no error.
+    if start isnt end
+      return collapseInputOrTextArea(el, end)
+
+    ## Don't worry about moving past the end of the string
+    ## nothing will happen and there is no error.
     return setInputSelectionRange(el, start + 1, end + 1)
-  else if $elements.isContentEditable(el)
+
+  if $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
-    # if !selection.isCollapsed
-    #   return selection.collapseToEnd()
     selection.modify("move", "forward", "character")
-    # if range.startOffset >= (range.startContainer.length or 0)
-    #   return _contenteditableMoveToStartOfNextLine(el)
-    # newOffset = range.startOffset + 1
-    # range.setStart(range.startContainer, newOffset)
-    # range.setEnd(range.startContainer, newOffset)
-  else throw new Error('not valid')
 
 moveCursorUp = (el) ->
   if $elements.isInput(el)
-    ## we can't move up/down in an Input
+    ## on an input, instead of moving the cursor
+    ## we want to perform the native browser action
+    ## which is to increment the step/interval
     el.stepUp?()
     return
+
   if $elements.isTextarea(el) || $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
     ## No need to collapse selection, modify will do that for us
     selection.modify("move", "backward", "line")
-
-  # else throw new Error('not valid')
 
 moveCursorDown = (el) ->
   if $elements.isInput(el)
@@ -280,18 +256,18 @@ moveCursorDown = (el) ->
     return
   if $elements.isTextarea(el) || $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
-    # if !selection.isCollapsed
-    #   return selection.collapseToStart()
     selection.modify("move", "forward", "line")
 
-  # else throw new Error('not valid')
-  
 selectAll = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
     return el.select()
+
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
     doc.execCommand('selectAll', true, null)
+    ## Keeping around native implementation
+    ## for same reasons as listed below
+    ##
     # range = _getSelectionRangeByEl(el)
     # range.selectNodeContents(el)
     # range.deleteContents()
@@ -318,29 +294,36 @@ getSelectionBounds = (el) ->
 
 moveSelectionToEnd = (el) ->
   if $elements.isInput(el) || $elements.isTextarea(el)
-    setInputSelectionRange(el, el.value.length, el.value.length)
+    length = $elements.getNativeProp(el, "value").length
+    setInputSelectionRange(el, length, length)
 
   else if $elements.isContentEditable(el)
-    ## NOTE: can't use execCommand API here because we would have to selectAll and then collapse
-    ##       so we use the Selection API
+    ## NOTE: can't use execCommand API here because we would have
+    ## to selectAll and then collapse so we use the Selection API
     doc = $document.getDocumentFromElement(el)
-    range = doc.createRange()
+    range = $elements.callNativeMethod(doc, "createRange")
     hostContenteditable = _getHostContenteditable(el)
     lastTextNode = _getInnerLastChild(hostContenteditable)
+
     if lastTextNode.tagName is 'BR'
       lastTextNode = lastTextNode.parentNode
+
     range.setStart(lastTextNode, lastTextNode.length)
     range.setEnd(lastTextNode, lastTextNode.length)
+
     sel = doc.getSelection()
     sel.removeAllRanges()
     sel.addRange(range)
 
+## TODO: think about renaming this
 updateValue = (el, key) ->
   if $elements.isContentEditable(el)
     return _insertTextIntoContentEditable(el, key)
+
   if $elements.isInput(el) or $elements.isTextarea(el)
     {start, end} = getSelectionBounds(el)
-    updatedValue = _insertSubstring(el.value, key, [start, end])
+    value = $elements.getNativeProp(el, "value")
+    updatedValue = _insertSubstring(value, key, [start, end])
     $elements.setValue(el, updatedValue)
     setInputSelectionRange(el, start + key.length, start + key.length)
 
@@ -354,7 +337,10 @@ getCaretPosition = (el) ->
   return null
 
 ## Selection API implementation of insert newline.
-
+## Worth keeping around if we ever have to insert native
+## newlines if we are trying to support a browser or
+## environment without the document.execCommand('insertText', etc...)
+##
 # _insertNewlineIntoContentEditable = (el) ->
 #   selection = _getSelectionByEl(el)
 #   selection.deleteFromDocument()

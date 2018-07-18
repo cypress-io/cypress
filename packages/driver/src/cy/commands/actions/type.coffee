@@ -241,18 +241,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           window:  win
 
           updateValue: (el, key) ->
-            
-            #   ## in these cases, the value must only be set after all
-            #   ## the characters are input because attemping to set
-            #   ## a partial/invalid value results in the value being
-            #   ## set to an empty string
+            ## in these cases, the value must only be set after all
+            ## the characters are input because attemping to set
+            ## a partial/invalid value results in the value being
+            ## set to an empty string
             if needSingleValueChange()
               typed += key
               if typed is options.chars
                 $elements.setValue(el, options.chars)
-
-            else $selection.updateValue(el, key)
-
+            else
+              $selection.updateValue(el, key)
 
           onBeforeType: (totalKeys) ->
             ## for the total number of keys we're about to
@@ -282,26 +280,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## of input/text/contenteditable
           ## changes
           onValueChange: (originalText, el) ->
-            ## never fire any change events for contenteditable
-            ## should never happen b/c should not be called for contenteditable
-
-            if isContentEditable
-              return
-
-            ## change event already registered
+            ## contenteditable should never be called here.
+            ## only input's and textareas can have change events
             if changeEvent = state("changeEvent")
               if !changeEvent(null, true)
                 state("changeEvent", null)
               return
-            
+
             state "changeEvent", (id, readOnly) ->
               changed = $selection.getElementText(el) isnt originalText
-              
+
               if !readOnly
                 if changed
                   dispatchChangeEvent(el, id)
                 state "changeEvent", null
-              
+
               return changed
 
           onEnterPressed: (id) ->

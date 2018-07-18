@@ -10,60 +10,129 @@ fixedOrStickyRe = /(fixed|sticky)/
 contentEditable = '[contenteditable]'
 focusable = "a[href],link[href],button,select,[tabindex],input,textarea,#{contentEditable}"
 
+inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
+canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
-nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set
+descriptor = (klass, prop) ->
+  Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
-nativeTextareaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set
+nativeInputValueGetter = descriptor("HTMLInputElement", "value").get
+nativeInputValueSetter = descriptor("HTMLInputElement", "value").set
 
-nativeInputValueGetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").get
+nativeTextareaValueSetter = descriptor("HTMLTextAreaElement", "value").set
+nativeTextareaValueGetter = descriptor("HTMLTextAreaElement", "value").get
 
-nativeTextareaValueGetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").get
+nativeInputMaxLengthGetter = descriptor("HTMLInputElement", "maxLength").get
+nativeTextareaMaxLengthGetter = descriptor("HTMLTextAreaElement", "maxLength").get
 
-nativeIsContentEditable = Object.getOwnPropertyDescriptor(window.HTMLElement.prototype, "isContentEditable").get
+getValue = (el) ->
+  if isInput(el)
+    nativeInputValueGetter
+  else
+    nativeTextareaValueGetter
 
-InputTypeNeedSingleValueChange_RE = /^(date|time|month|week)$/
+setValue = (el, val) ->
+  if isInput(el)
+    nativeInputValueSetter
+  else
+    nativeTextareaValueSetter
 
-canSetSelectionRangeElement_RE = /^(text|search|URL|tel|password)$/
+getMaxLength = (el) ->
+  if isInput(el)
+    nativeInputMaxLengthGetter
+  else
+    nativeTextareaMaxLengthGetter
 
+nativeGetters = {
+  type: descriptor("HTMLInputElement", "value").get
+  value: getValue
+  tagName: descriptor("Element", "tagName").get
+  maxLength: getMaxLength
+  parentNode: descriptor("Element", "parentNode").get
+  selectionStart: descriptor("HTMLInputElement", "selectionStart").get
+  isContentEditable: descriptor("HTMLElement", "isContentEditable").get
+}
+
+nativeSetters = {
+  value: setValue
+}
+
+nativeMethods = {
+  createRange: window.document.createRange
+  execCommand: window.document.execCommand
+  getAttribute: window.Element.prototype.getAttribute
+}
+
+tryCallNativeMethod = ->
+  try
+    callNativeMethod.apply(null, arguments)
+  catch
+    null
+
+callNativeMethod = (obj, fn, args...) ->
+  if not nativeFn = nativeMethods[fn]
+    fns = _.keys(nativeMethods).join(", ")
+    throw new Error("attempted to use a native fn called: #{fn}. Available fns are: #{fns}")
+
+  nativeFn.apply(obj, args)
+
+getNativeProp = (obj, prop) ->
+  if not nativeProp = nativeGetters[prop]
+    fns = _.keys(nativeGetters).join(", ")
+    throw new Error("attempted to use a native getter prop called: #{fn}. Available props are: #{fns}")
+
+  nativeProp.call(obj, prop)
+
+setNativeProp = (obj, prop, val) ->
+  if not nativeProp = nativeSetters[prop]
+    fns = _.keys(nativeSetters).join(", ")
+    throw new Error("attempted to use a native setter prop called: #{fn}. Available props are: #{fns}")
+
+  nativeProp.call(obj, prop, val)
 
 isNeedSingleValueChangeInputElement = (el) ->
   if !isInput(el)
     return false
-  typeName = el.type
-  return InputTypeNeedSingleValueChange_RE.test(typeName)
 
+  return inputTypeNeedSingleValueChangeRe.test(el.type)
+
+## TODO: switch this to not use this
 getValue = (el) ->
   if isInput(el)
-    return nativeInputValueGetter.call(el)
+    return getNativeProp(el, "value")
+
   if isTextarea(el)
     return nativeTextareaValueGetter.call(el)
 
+## TODO: switch this to not use this
 setValue = (el, val) ->
   ## sets value for <input> or <textarea>
   if isInput(el)
-    return nativeInputValueSetter.call(el, val)
+    return setNativeProp(el, "value", val)
+
   if isTextarea(el)
-    return nativeTextareaValueSetter.call(el, val)
+    return setNativeProp.call(el, val)
 
 substituteText = (text, newText, [start, end]) ->
   curText.substring(0, start) + newText + curText.substring(bounds[1])
 
 canSetSelectionRangeElement = (el) ->
-  canSetSelectionRangeElement_RE.test(el.type)
+  canSetSelectionRangeElementRe.test(el.type)
 
 isContentEditable = (el) ->
   ## this property is the tell-all for contenteditable
   ## should be true for elements:
   ##   - with [contenteditable]
   ##   - with document.designMode = 'on'
-  nativeIsContentEditable.call(el)
+  getNativeProp(el, "isContentEditable")
 
 isTextarea = (el) ->
-  (el.tagName or "").toLowerCase() is 'textarea'
+  tagName = getNativeProp(el, "tagName") or ""
+  tagName.toLowerCase() is 'textarea'
 
 isInput = (el) ->
-  (el.tagName or "").toLowerCase() is 'input'
-
+  tagName = getNativeProp(el, "tagName") or ""
+  tagName.toLowerCase() is 'input'
 
 isElement = (obj) ->
   try
@@ -378,6 +447,14 @@ module.exports = {
   getValue
 
   setValue
+
+  getNativeProp
+
+  setNativeProp
+
+  callNativeMethod
+
+  tryCallNativeMethod
 
   getElements
 

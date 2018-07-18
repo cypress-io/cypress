@@ -6,7 +6,6 @@ moment = require("moment")
 Promise = require("bluebird")
 sinon = require("sinon")
 lolex = require("lolex")
-bililiteRange = require("../vendor/bililiteRange")
 
 $dom = require("./dom")
 $errorMessages = require("./cypress/error_messages")
