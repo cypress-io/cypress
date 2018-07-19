@@ -315,6 +315,11 @@ module.exports = {
     @_projectToken("put", projectId, authToken)
 
   retryWithBackoff: (fn, options = {}) ->
+    ## for e2e testing purposes
+    if process.env.DISABLE_API_RETRIES
+      debug("api retries disabled")
+      return Promise.try(fn)
+
     maxRetries = 3
     retryIndex = 0
 
@@ -345,6 +350,7 @@ module.exports = {
         Promise
         .delay(delay)
         .then ->
+          debug("retry ##{retryIndex} after #{delay}ms")
           attempt()
 
 }
