@@ -476,7 +476,6 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
-  bililiteRange: bililiteRange
 
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 

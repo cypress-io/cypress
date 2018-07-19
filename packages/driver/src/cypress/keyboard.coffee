@@ -94,7 +94,7 @@ $Keyboard = {
           return $selection.clearSelection(el)
 
         ## TODO: fix this for content editable
-        if bounds.end is $element.getValue(el).length
+        if bounds.end is $elements.getNativeProp(el, "value").length
           ## there's no text to delete so don't fire input event
           options.input = false
 
@@ -154,7 +154,7 @@ $Keyboard = {
       options.input     = false
       options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
-        $selection.updateValue(el, "\n")
+        $selection.updateSelectionValue(el, "\n")
         options.onEnterPressed(options.id)
 
     ## charCode = 37
@@ -405,7 +405,7 @@ $Keyboard = {
 
       if isNumberInputType
         selectionStart = el.selectionStart
-        valueLength = $elements.getValue(el).length
+        valueLength = $elements.getNativeProp(el, "value").length
         isDigitsInText = isStartingDigitRe.test(options.chars)
         isValidCharacter = key is '.' or (key is '-' and valueLength)
         prevChar = options.prevChar
@@ -433,7 +433,8 @@ $Keyboard = {
     maybeUpdateValueAndFireInput = =>
       ## only call this function if we haven't been told not to
       if fn and options.onBeforeSpecialCharAction(options.id, options.key) isnt false
-        prevText = $selection.getElementText(el)
+        if not $elements.isContentEditable(el)
+          prevText = $elements.getNativeProp(el, "value")
         fn.call(@)
 
         if options.prevText is null and not $elements.isContentEditable(el)
@@ -446,7 +447,9 @@ $Keyboard = {
       if @simulateKey(el, "keypress", key, options)
         if @simulateKey(el, "textInput", key, options)
 
-          ml = $elements.getNativeProp(el, "maxLength")
+          if $elements.isInput(el) or $elements.isTextarea(el)
+            ml = el.maxLength
+  
           ## maxlength is -1 by default when omitted
           ## but could also be null or undefined :-/
           ## only cafe if we are trying to type a key
@@ -459,10 +462,6 @@ $Keyboard = {
               maybeUpdateValueAndFireInput()
           else
             maybeUpdateValueAndFireInput()
-
-          ## store the afterKey value so we know
-          ## if something mutates the value between typing keys
-          # options.afterKey = $selection.getElementText(el)
 
     @simulateKey(el, "keyup", key, options)
 

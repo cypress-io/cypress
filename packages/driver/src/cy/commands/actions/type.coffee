@@ -248,9 +248,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if needSingleValueChange()
               typed += key
               if typed is options.chars
-                $elements.setValue(el, options.chars)
+                $elements.setNativeProp(el, "value", options.chars)
             else
-              $selection.updateValue(el, key)
+              $selection.updateSelectionValue(el, key)
 
           onBeforeType: (totalKeys) ->
             ## for the total number of keys we're about to
@@ -288,7 +288,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               return
 
             state "changeEvent", (id, readOnly) ->
-              changed = $selection.getElementText(el) isnt originalText
+              changed = $elements.getNativeProp(el, 'value') isnt originalText
 
               if !readOnly
                 if changed

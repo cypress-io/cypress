@@ -4,6 +4,8 @@ Keyboard = Cypress.Keyboard
 Promise = Cypress.Promise
 $selection = require("../../../../../src/dom/selection")
 
+Cypress.on('fail', (e)->debugger)
+
 describe "src/cy/commands/actions/type", ->
   before ->
     cy
@@ -17,11 +19,13 @@ describe "src/cy/commands/actions/type", ->
     $(doc.body).empty().html(@body)
 
   context "#type", ->
-    it "does not change the subject", ->
+    it.only "does not change the subject", ->
       input = cy.$$("input:first")
 
       cy.get("input:first").type("foo").then ($input) ->
         expect($input).to.match input
+      
+      cy.wait(5000)
 
     it "changes the value", ->
       input = cy.$$("input:text:first")

@@ -64,10 +64,10 @@ _getSelectionBoundsFromContentEditable = (el) ->
 
   ## TODO get ACTUAL caret position in contenteditable, not line
 
-_insertTextIntoContentEditable = (el, text) ->
+_updateSelectionValueContentEditable = (el, text) ->
   doc = $document.getDocumentFromElement(el)
   ## NOTE: insertText will also handle '\n', and render newlines
-  doc.execCommand('insertText', true, text)
+  $elements.callNativeMethod(doc, "execCommand", 'insertText', true, text)
   return
 
   ## Keeping around native implementation
@@ -133,19 +133,13 @@ _getSelectionRangeByEl = (el) ->
     sel.getRangeAt(0)
   else throw new Error('No selection in document')
 
-# getElementText = (el) ->
-  # if $elements.isInput(el) or $elements.isTextarea(el)
-    # return $elements.getValue(el)
-
-  # if $elements.isContentEditable(el)
-    # return el.innerText
-
 clearSelection = (el) ->
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
+    
     return doc.execCommand('delete', true, null)
 
-  updateValue(el, "")
+  updateSelectionValue(el, "")
 
 setInputSelectionRange = (el, start, end) ->
   if $elements.canSetSelectionRangeElement(el)
@@ -155,7 +149,6 @@ setInputSelectionRange = (el, start, end) ->
   ## and thus may not always have a cursor, so calling setSelectionRange will throw.
   ## we are assuming desktop here, so we cast to type='text', and get the cursor from there.
   { type } = el
-  originalType = elType
   el.blur()
   el.type = 'text'
   el.setSelectionRange(start, end)
@@ -177,8 +170,11 @@ deleteRightOfSelection = (el) ->
 deleteLeftOfSelection = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
     {start, end} = getSelectionBounds(el)
-    setInputSelectionRange(el, start - 1, end)
-    return clearSelection(el)
+    if start is end
+      setInputSelectionRange(el, start - 1, end)
+      wasCollapsed = true
+    clearSelection(el)
+    return collapsed
 
   if $elements.isContentEditable(el)
     ## there is no 'backwardDelete' command for execCommand, so we use the Selection API
@@ -316,15 +312,15 @@ moveSelectionToEnd = (el) ->
     sel.addRange(range)
 
 ## TODO: think about renaming this
-updateValue = (el, key) ->
+updateSelectionValue = (el, key) ->
   if $elements.isContentEditable(el)
-    return _insertTextIntoContentEditable(el, key)
+    return _updateSelectionValueContentEditable(el, key)
 
   if $elements.isInput(el) or $elements.isTextarea(el)
     {start, end} = getSelectionBounds(el)
-    value = $elements.getNativeProp(el, "value")
+    value = $elements.getNativeProp(el, "value") or ''
     updatedValue = _insertSubstring(value, key, [start, end])
-    $elements.setValue(el, updatedValue)
+    $elements.setNativeProp(el, 'value', updatedValue)
     setInputSelectionRange(el, start + key.length, start + key.length)
 
 getCaretPosition = (el) ->
@@ -423,14 +419,10 @@ module.exports = {
   selectAll
   clearSelection
   moveSelectionToEnd
-  # _contenteditableGetNodesAround
-  # _contenteditableMoveToEndOfPrevLine
-  # _contenteditableMoveToStartOfNextLine
-  getElementText
   getCaretPosition
   moveCursorLeft
   moveCursorRight
   moveCursorUp
   moveCursorDown
-  updateValue
+  updateSelectionValue
 }
