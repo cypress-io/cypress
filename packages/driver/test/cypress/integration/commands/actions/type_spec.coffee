@@ -76,7 +76,7 @@ describe "src/cy/commands/actions/type", ->
         .get("input:text:last").type("bar")
         .then ->
           expect(blurred).to.be.true
-
+    
     it "can type into contenteditable", ->
       oldText = cy.$$("#contenteditable").get(0).innerText
 
@@ -771,6 +771,11 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#number-without-value").type("50").then ($input) ->
             expect($input).to.have.value("50")
+
+        it "can input negative numbers", -> 
+          cy.get('#number-without-value')
+            .type('-123.12')
+            .should('have.value', '-123.12')
 
       describe "input[type=email]", ->
         it "can change values", ->
