@@ -116,10 +116,7 @@ create = ->
           )
           ## ignore errors b/c we're just setting up the watching
           ## they're handled by the spec controller
-          .catch (err) ->
-            debug("caught spec file preprocessing error: %s", err.message)
-            if cfg.isTextTerminal
-              openProject.emit("exitEarlyWithErr", err)
+          .catch ->
 
           do relaunchBrowser = ->
             debug(

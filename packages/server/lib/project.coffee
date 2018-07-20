@@ -135,7 +135,6 @@ class Project extends EE
             # ignore errors b/c we're just setting up the watching
             # they're handled by the spec controller
             .catch ->
-              ## ignore and handle when we kick off spec file
 
             ## we don't want to block on this, because we're just kicking
             ## it off to speed things up

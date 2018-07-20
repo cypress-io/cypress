@@ -75,7 +75,7 @@ module.exports = {
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
       shouldWatch = not config.isTextTerminal
-      
+
       baseFilePath = filePath
       .replace(config.projectRoot, "")
       .replace(config.integrationFolder, "")
@@ -98,7 +98,7 @@ module.exports = {
       setDefaultPreprocessor(config)
 
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
-      debug("headless and already processed")
+      debug("run mode and already processed:", filePath)
       return fileProcessor
 
     preprocessor = fileProcessors[filePath] = Promise.try ->
