@@ -50,6 +50,6 @@ module.exports = {
         console.log("")
         errors.log(err)
 
-        project.emit("exitEarlyWithErr", err.message)
+        project.emit("exitEarlyWithErr", err)
       else
         res.send(preprocessor.clientSideError(err))}
