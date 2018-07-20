@@ -4,8 +4,6 @@ Keyboard = Cypress.Keyboard
 Promise = Cypress.Promise
 $selection = require("../../../../../src/dom/selection")
 
-Cypress.on('fail', (e)->debugger)
-
 describe "src/cy/commands/actions/type", ->
   before ->
     cy
@@ -19,14 +17,12 @@ describe "src/cy/commands/actions/type", ->
     $(doc.body).empty().html(@body)
 
   context "#type", ->
-    it.only "does not change the subject", ->
+    it "does not change the subject", ->
       input = cy.$$("input:first")
 
       cy.get("input:first").type("foo").then ($input) ->
         expect($input).to.match input
       
-      cy.wait(5000)
-
     it "changes the value", ->
       input = cy.$$("input:text:first")
 
@@ -524,6 +520,95 @@ describe "src/cy/commands/actions/type", ->
 
       it "fires events for each key stroke"
 
+      it "does fire input event when value changes", ->
+        fired = false
+        cy.$$(":text:first").on "input", ->
+          fired = true
+
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type("{selectAll}{rightarrow}{backspace}")
+          .then ->
+            expect(fired).to.eq true
+        
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type("{selectAll}{leftarrow}{del}")
+          .then ->
+            expect(fired).to.eq true
+
+        cy.$$('[contenteditable]:first').on "input", () ->
+          fired = true
+        
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{rightarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq true
+        
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{leftarrow}{del}')
+          .then ->
+            expect(fired).to.eq true
+            
+      it "does not fire input event when value does not change", ->
+        fired = false
+        cy.$$(":text:first").on "input", (e) ->
+          fired = true
+
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{rightarrow}{del}')
+          .then ->
+            expect(fired).to.eq false
+        
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{leftarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq false
+
+        cy.$$("textarea:first").on "input", (e) ->
+          fired = true
+
+        fired = false
+        cy.get("textarea:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{rightarrow}{del}')
+          .then ->
+            expect(fired).to.eq false
+        
+        fired = false
+        cy.get("textarea:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{leftarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq false
+
+        cy.$$('[contenteditable]:first').on "input", () ->
+          fired = true
+
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{rightarrow}{del}')
+          .then ->
+            expect(fired).to.eq false
+        
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{leftarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq false
+
     describe "maxlength", ->
       it "limits text entered to the maxlength attribute of a text input", ->
         $input = cy.$$(":text:first")
@@ -776,7 +861,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#number-without-value").type("50").then ($input) ->
             expect($input).to.have.value("50")
 
-        it "can input negative numbers", -> 
+        it "can type negative numbers", -> 
           cy.get('#number-without-value')
             .type('-123.12')
             .should('have.value', '-123.12')
@@ -1080,26 +1165,6 @@ describe "src/cy/commands/actions/type", ->
             done("textInput should not have fired")
 
           cy.get(":text:first").invoke("val", "ab").type("{backspace}").then -> done()
-
-        it "does fire input event when value changes", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done()
-
-          cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'a' characters
-              $input.get(0).setSelectionRange(0,1)
-            .get(":text:first").type("{backspace}")
-
-        it "does not fire input event when value does not change", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("should not have fired input")
-
-          cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## set the range at the beggining
-              $input.get(0).setSelectionRange(0, 0)
-            .get(":text:first").type("{backspace}").then -> done()
 
         it "can prevent default backspace movement", (done) ->
           cy.$$(":text:first").on "keydown", (e) ->

@@ -88,18 +88,18 @@ $Keyboard = {
       @ensureKey el, null, options, ->
         bounds = $selection.getSelectionBounds(el)
 
-        ## if there is a selection range...
-        if bounds.start? and (bounds.start isnt bounds.end)
-          ## then delete the selected text
-          return $selection.clearSelection(el)
+        if $selection.isCollapsed(el)
+          ## if there's no text selected, delete the prev char
+          ## if deleted char, send the input event
+          options.input = $selection.deleteRightOfCursor(el)
+          return
 
-        ## TODO: fix this for content editable
-        if bounds.end is $elements.getNativeProp(el, "value").length
-          ## there's no text to delete so don't fire input event
-          options.input = false
+        ## text is selected, so delete the selection
+        ## contents and send the input event
+        $selection.deleteSelectionContents(el)
+        options.input = true
 
-        else
-          $selection.deleteRightOfSelection(el)
+        return
 
     ## charCode = 8
     ## no keyPress
@@ -112,19 +112,21 @@ $Keyboard = {
       options.setKey    = "{backspace}"
 
       @ensureKey el, null, options, ->
-        bounds = $selection.getSelectionBounds(el)
 
-        ## if there is a selection range...
-        if bounds.start isnt bounds.end
-          ## then delete the selected text
-          return $selection.clearSelection(el)
+        if $selection.isCollapsed(el)
+          ## if there's no text selected, delete the prev char
+          ## if deleted char, send the input event
+          options.input = $selection.deleteLeftOfCursor(el)
+          return
 
-        if bounds.start is 0
-          ## there's no text to delete so don't fire input event
-          options.input = false
-        else
-          $selection.deleteLeftOfSelection(el)
+        ## text is selected, so delete the selection
+        ## contents and send the input event
+        $selection.deleteSelectionContents(el)
+        options.input = true
 
+        return
+
+  
     ## charCode = 27
     ## no keyPress
     ## no textInput
@@ -154,7 +156,7 @@ $Keyboard = {
       options.input     = false
       options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
-        $selection.updateSelectionValue(el, "\n")
+        $selection.replaceSelectionContents(el, "\n")
         options.onEnterPressed(options.id)
 
     ## charCode = 37

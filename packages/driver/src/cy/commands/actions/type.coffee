@@ -250,7 +250,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               if typed is options.chars
                 $elements.setNativeProp(el, "value", options.chars)
             else
-              $selection.updateSelectionValue(el, key)
+              $selection.replaceSelectionContents(el, key)
 
           onBeforeType: (totalKeys) ->
             ## for the total number of keys we're about to

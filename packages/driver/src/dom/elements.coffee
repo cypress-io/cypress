@@ -20,7 +20,7 @@ canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 descriptor = (klass, prop) ->
   Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
-getValue = ->
+_getValue = ->
   switch 
     when isInput(this)
       descriptor("HTMLInputElement", "value").get
@@ -29,7 +29,7 @@ getValue = ->
     else
       descriptor("HTMLTextAreaElement", "value").get
 
-setValue = ->
+_setValue = ->
   switch
     when isInput(this) 
       descriptor("HTMLInputElement", "value").set
@@ -38,20 +38,29 @@ setValue = ->
     else
       descriptor("HTMLTextAreaElement", "value").set
 
+_setSelectionRange = () ->
+  switch
+    when isInput(this)
+      window.HTMLInputElement.prototype.setSelectionRange
+    when isTextarea(this)
+      window.HTMLTextAreaElement.prototype.setSelectionRange
+
 nativeGetters = {
-  value: getValue
+  value: _getValue
   selectionStart: descriptor("HTMLInputElement", "selectionStart").get
   isContentEditable: descriptor("HTMLElement", "isContentEditable").get
 }
 
 nativeSetters = {
-  value: setValue
+  value: _setValue
 }
 
 nativeMethods = {
   createRange: window.document.createRange
   execCommand: window.document.execCommand
   getAttribute: window.Element.prototype.getAttribute
+  setSelectionRange: _setSelectionRange
+  modify: window.Selection.prototype.modify
 }
 
 tryCallNativeMethod = ->
@@ -65,7 +74,12 @@ callNativeMethod = (obj, fn, args...) ->
     fns = _.keys(nativeMethods).join(", ")
     throw new Error("attempted to use a native fn called: #{fn}. Available fns are: #{fns}")
 
-  nativeFn.apply(obj, args)
+  retFn = nativeFn.apply(obj, args)
+
+  if _.isFunction(retFn)
+    retFn = retFn.apply(obj, args)
+  
+  return retFn
 
 getNativeProp = (obj, prop) ->
   if not nativeProp = nativeGetters[prop]
@@ -447,10 +461,6 @@ module.exports = {
   canSetSelectionRangeElement
 
   stringify
-
-  getValue
-
-  setValue
 
   getNativeProp
 

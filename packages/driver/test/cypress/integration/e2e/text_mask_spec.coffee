@@ -3,27 +3,18 @@ changed = 0
 
 describe "src/cy/commands/actions/type text_mask_spec", ->
   before ->
-    # cy.visit("/fixtures/text-mask.html")
+    cy.visit("/fixtures/text-mask.html")
 
     ## count the number of change events
-    # cy.get('input').then ($els) ->
-    #   $els.change ($el) ->
-    #     changed++
+    cy.get('input').then ($els) ->
+      $els.change ($el) ->
+        changed++
   
   beforeEach ->
 
-    # ## reset number of change events before test
-    # cy.window().then (win) ->
-    #   changed = 0
-
-  it.only 'fails on Electron 53 and Canary 61, but passes on Chrome 59', ->
-    cy
-    .visit('http://jedwatson.github.io/react-select/')
-    .get('div.Select-value:first')
-    .click()
-    .wait(1000)
-    .get('.Select-option:contains(Victoria)')
-    .click()
+    ## reset number of change events before test
+    cy.window().then (win) ->
+      changed = 0
 
   context "#type", ->
     it "can type into phone", ->
