@@ -180,8 +180,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## TODO: shouldn't we be updating the values
             ## as we click the <option> instead of
             ## all afterwards?
-            el = options.$el.get(0)
-            $elements.setNativeProp(el, "value", values)
+            options.$el.val(values)
 
             if notAllUniqueValues
               ## if all the values are the same and the user is trying to
