@@ -24,19 +24,27 @@ _getValue = ->
   switch 
     when isInput(this)
       descriptor("HTMLInputElement", "value").get
+    when isTextarea(this)
+      descriptor("HTMLTextAreaElement", "value").get
     when isSelect(this)    
       descriptor("HTMLSelectElement", "value").get
     else
-      descriptor("HTMLTextAreaElement", "value").get
+      ## is an option element
+      descriptor("HTMLOptionElement", "value").get
+
 
 _setValue = ->
   switch
     when isInput(this) 
       descriptor("HTMLInputElement", "value").set
+    when isTextarea(this)
+      descriptor("HTMLTextAreaElement", "value").set
     when isSelect(this)
       descriptor("HTMLSelectElement", "value").set
     else
-      descriptor("HTMLTextAreaElement", "value").set
+      ## is an options element
+      descriptor("HTMLOptionElement", "value").set
+      
 
 _setSelectionRange = () ->
   switch
@@ -151,6 +159,9 @@ isInput = (el) ->
 
 isSelect = (el) ->
   getTagName(el) is 'select'
+
+isOption = (el) ->
+  getTagName(el) is 'option'
 
 isElement = (obj) ->
   try

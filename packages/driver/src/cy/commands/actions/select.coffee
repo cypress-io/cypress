@@ -102,7 +102,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           _.each optionsObjects, (obj, index) ->
             if obj.text in valueOrText
               optionEls.push obj.$el
-              objValue = $elements.getNativeProp(obj, "value")
+              objValue = obj.value
               values.push(objValue)
 
         ## if we didnt set multiple to true and
