@@ -55,6 +55,15 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   checkOrUncheckEl = (el, index) =>
     $el = $(el)
 
+    if not isAcceptableElement($el)
+      node   = $dom.stringify($el)
+      word   = $utils.plural(options.$el, "contains", "is")
+      phrase = if type is "check" then " and :radio" else ""
+      $utils.throwErrByPath "check_uncheck.invalid_element", {
+        onFail: options._log
+        args: { node, word, phrase, cmd: type }
+      }
+
     isElActionable = elHasMatchingValue($el)
 
     if isElActionable
@@ -80,14 +89,6 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
 
       options._log.snapshot("before", {next: "after"})
 
-      if not isAcceptableElement($el)
-        node   = $dom.stringify($el)
-        word   = $utils.plural(options.$el, "contains", "is")
-        phrase = if type is "check" then " and :radio" else ""
-        $utils.throwErrByPath "check_uncheck.invalid_element", {
-          onFail: options._log
-          args: { node, word, phrase, cmd: type }
-        }
 
       ## if the checkbox was already checked
       ## then notify the user of this note

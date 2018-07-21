@@ -4,6 +4,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$elements = require('../../../dom/elements')
 
 newLineRe = /\n/g
 
