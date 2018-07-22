@@ -502,7 +502,9 @@ describe "src/cy/commands/actions/click", ->
           }).appendTo($content)
 
         cy.get('[data-cy=button]').click().then =>
-          expect(scrolled).to.deep.eq(["element", "element"])
+          ## expect fewer than four scrolls to be used
+          ## in the actionability check
+          expect(scrolled.length).to.be.lt 4
 
       it "can force click on hidden elements", ->
         cy.get("button:first").invoke("hide").click({ force: true })
