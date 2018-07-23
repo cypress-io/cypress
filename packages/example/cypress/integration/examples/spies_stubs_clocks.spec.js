@@ -21,7 +21,14 @@ context('Spies, Stubs, and Clock', () => {
     cy.visit('https://example.cypress.io/commands/spies-stubs-clocks')
 
     let obj = {
-      foo () {},
+      /**
+       * prints both arguments to the console
+       * @param a {string}
+       * @param b {string}
+      */
+      foo (a, b) {
+        console.log('a', a, 'b', b)
+      },
     }
 
     let stub = cy.stub(obj, 'foo').as('foo')
