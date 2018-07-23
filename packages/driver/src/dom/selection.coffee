@@ -113,10 +113,16 @@ _insertSubstring = (curText, newText, [start, end]) ->
   curText.substring(0, start) + newText + curText.substring(end)
 
 _getHostContenteditable = (el) ->
-  while el.parentElement && !$elements.tryCallNativeMethod(el, "getAttribute", "contenteditable")
-    el = el.parentElement
-
-  return el
+  curEl = el
+  while curEl.parentElement && !$elements.tryCallNativeMethod(curEl, "getAttribute", "contenteditable")
+    curEl = curEl.parentElement
+  ## if there's no host contenteditable, we must be in designmode
+  ## so act as if the original element is the host contenteditable
+  ## TODO: remove this when we no longer click before type and move 
+  ## cursor to the end
+  if !$elements.tryCallNativeMethod(curEl, "getAttribute", "contenteditable")
+    return el
+  return curEl
 
 _getInnerLastChild = (el) ->
   while (el.lastChild)

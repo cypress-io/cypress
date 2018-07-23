@@ -233,11 +233,13 @@ isAttached = ($el) ->
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
   type = (type) -> isType($el, type)
+  isContentEditableElement = isContentEditable($el.get(0))
 
   _.some([
+    isContentEditableElement
     sel("textarea")
     sel(":text")
-    sel("[contenteditable]")
+    type("text")
     type("password")
     type("email")
     type("number")
