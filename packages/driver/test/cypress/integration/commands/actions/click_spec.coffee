@@ -333,7 +333,7 @@ describe "src/cy/commands/actions/click", ->
 
     it "can click a tr", ->
       cy.get("#table tr:first").click()
-    
+
     it "places cursor at the end of input", ->
       cy.get('input:first').invoke('val', 'foobar').click().then ($el) ->
         el = $el.get(0)
@@ -343,18 +343,18 @@ describe "src/cy/commands/actions/click", ->
         el = $el.get(0)
         expect(el.selectionStart).to.eql(0)
         expect(el.selectionEnd).to.eql(0)
-    
+
     it "places cursor at the end of textarea", ->
       cy.get('textarea:first').invoke('val', 'foo\nbar\nbaz').click().then ($el) ->
         el = $el.get(0)
         expect(el.selectionStart).to.eql(11)
         expect(el.selectionEnd).to.eql(11)
-      
+
       cy.get('textarea:first').invoke('val', '').click().then ($el) ->
         el = $el.get(0)
         expect(el.selectionStart).to.eql(0)
         expect(el.selectionEnd).to.eql(0)
-    
+
     it "places cursor at the end of [contenteditable]", ->
 
       cy.get('[contenteditable]:first')
@@ -365,7 +365,7 @@ describe "src/cy/commands/actions/click", ->
         expect(range.startOffset).to.eql(0)
         expect(range.endContainer.outerHTML).to.eql('<div><br></div>')
         expect(range.endOffset).to.eql(0)
-    
+
       cy.get('[contenteditable]:first')
       .invoke('html', 'foo').click()
       .then ($el) ->
@@ -374,7 +374,7 @@ describe "src/cy/commands/actions/click", ->
         expect(range.startOffset).to.eql(3)
         expect(range.endContainer.nodeValue).to.eql('foo')
         expect(range.endOffset).to.eql(3)
-        
+
       cy.get('[contenteditable]:first')
       .invoke('html', '<div>foo</div>').click()
       .then ($el) ->
@@ -393,7 +393,7 @@ describe "src/cy/commands/actions/click", ->
         expect(range.startOffset).to.eql(0)
         expect(range.endContainer).to.eql(el)
         expect(range.endOffset).to.eql(0)
-    
+
 
     describe "actionability", ->
       it "can click elements which are hidden until scrolled within parent container", ->
@@ -501,10 +501,10 @@ describe "src/cy/commands/actions/click", ->
             width: "100%"
           }).appendTo($content)
 
-        cy.get('[data-cy=button]').click().then =>
-          ## expect fewer than four scrolls to be used
-          ## in the actionability check
-          expect(scrolled.length).to.be.lt 4
+        ## make scrolling deterministic by ensuring we don't wait for coordsHistory
+        ## to build up
+        cy.get('[data-cy=button]').click({ waitForAnimations: false }).then ->
+          expect(scrolled).to.deep.eq(["element"])
 
       it "can force click on hidden elements", ->
         cy.get("button:first").invoke("hide").click({ force: true })
