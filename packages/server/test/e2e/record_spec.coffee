@@ -5,7 +5,7 @@ jsonSchemas = require("@cypress/json-schemas").api
 e2e = require("../support/helpers/e2e")
 
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
-postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.0.0")
+postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
 
 { runId, groupId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
@@ -108,12 +108,12 @@ defaultRoutes = [
   {
     method: "post"
     url: "/runs"
-    req: "postRunRequest@2.0.0",
+    req: "postRunRequest@2.1.0",
     res: postRunResponse
   }, {
     method: "post"
     url: "/runs/:id/instances"
-    req: "postRunInstanceRequest@2.0.0",
+    req: "postRunInstanceRequest@2.1.0",
     res: postRunInstanceResponse
   }, {
     method: "put"
@@ -304,6 +304,142 @@ describe "e2e record", ->
         expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
 
+  context "parallelization", ->
+    allSpecs = [
+      "cypress/integration/record_error_spec.coffee",
+      "cypress/integration/record_fail_spec.coffee",
+      "cypress/integration/record_pass_spec.coffee",
+      "cypress/integration/record_uncaught_spec.coffee",
+    ]
+
+    postInstanceResponses = (specs) ->
+      return _
+      .chain(specs)
+      .map (spec, i) ->
+        return {
+          spec
+          instanceId
+          estimatedWallClockDuration: (i + 1) * 1000
+        }
+      .concat({
+        spec: null
+        instanceId: null,
+        estimatedWallClockDuration: null
+      })
+      .value()
+
+    ## a1 does 3 specs, b2 does 1 spec
+    a1Specs = _.without(allSpecs, "cypress/integration/record_pass_spec.coffee")
+    b2Specs = _.difference(allSpecs, a1Specs)
+
+    firstRunResponse = false
+    waitUntilSecondInstanceClaims = null
+
+    claimed = []
+
+    responses = {
+      a1: postInstanceResponses(a1Specs)
+      b2: postInstanceResponses(b2Specs)
+    }
+
+    ## replace the 1st + 2nd routes object
+    routes = defaultRoutes.slice(0)
+    routes[0] = {
+      method: "post"
+      url: "/runs"
+      req: "postRunRequest@2.1.0",
+      res: (req, res) ->
+        { group, ciBuildId } = req.body
+
+        expect(group).to.eq("prod-e2e")
+        expect(ciBuildId).to.eq("ciBuildId123")
+
+        ## if this is the first response
+        ## give machineId a1, else b2
+        if not firstRunResponse
+          firstRunResponse = true
+          machineId = "a1ad2bcf-6398-46ed-b201-2fd90b188d5f"
+        else
+          machineId = "b2bd2bcf-6398-46ed-b201-2fd90b188d5f"
+
+        res.json(
+          _.extend({}, postRunResponse, { machineId })
+        )
+
+    }
+    routes[1] = {
+      method: "post"
+      url: "/runs/:id/instances"
+      req: "postRunInstanceRequest@2.1.0",
+      res: (req, res) ->
+        { machineId, spec } = req.body
+
+        expect(spec).to.be.null
+
+        mId = machineId.slice(0, 2)
+
+        respond = ->
+          resp = responses[mId].shift()
+          claimed.push(resp)
+          resp.claimedInstances = claimed.length
+          resp.totalInstances = allSpecs.length
+
+          jsonSchemas.assertSchema("postRunInstanceResponse", "2.1.0")(resp)
+          res.json(resp)
+
+        ## when the 1st machine attempts to claim its FIRST spec, we
+        ## automatically delay it until the 2nd machine claims its FIRST
+        ## spec so that the request URL's are deterministic
+        if mId is "a1" and claimed.length is 0
+          waitUntilSecondInstanceClaims = ->
+            waitUntilSecondInstanceClaims = null
+            respond()
+        else
+          respond()
+          waitUntilSecondInstanceClaims?()
+
+    }
+
+    setup(routes)
+
+    it.only "passes in parallel with group", ->
+      Promise.all([
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record*"
+          group: "prod-e2e"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 3
+          config: {
+            trashAssetsBeforeRuns: false
+          }
+        })
+        .get("stdout"),
+
+        ## stagger the 2nd instance
+        ## starting up a bit
+        Promise
+        .delay(3000)
+        .then =>
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record*"
+            group: "prod-e2e"
+            record: true
+            parallel: true
+            snapshot: true
+            ciBuildId: "ciBuildId123"
+            expectedExitCode: 0
+            config: {
+              trashAssetsBeforeRuns: false
+            }
+          })
+          .get("stdout")
+    ])
+
   context "misconfiguration", ->
     setup([])
 
@@ -386,7 +522,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: (req, res) -> res.sendStatus(401)
         }
       ]
@@ -407,7 +543,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: (req, res) -> res.sendStatus(404)
         }
       ]
@@ -427,7 +563,7 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.0.0",
+        req: "postRunRequest@2.1.0",
         res: (req, res) -> res.sendStatus(500)
       }]
 
@@ -453,12 +589,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: (req, res) -> res.sendStatus(500)
         }
       ]
@@ -486,12 +622,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: postRunInstanceResponse
         }, {
           method: "put"
@@ -525,12 +661,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: postRunInstanceResponse
         }, {
           method: "put"
@@ -582,12 +718,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: postRunInstanceResponse
         }, {
           method: "put"

@@ -61,7 +61,7 @@ throwIfNoProjectId = (projectId) ->
     errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
 
 getSpecRelativePath = (spec) ->
-  _.get(spec, "relative")
+  _.get(spec, "relative", null)
 
 uploadArtifacts = (options = {}) ->
   { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
@@ -170,7 +170,13 @@ updateInstance = (options = {}) ->
       null
 
 createRun = (options = {}) ->
-  { projectId, recordKey, platform, git, specPattern, specs } = options
+  _.defaults(options, {
+    group: null,
+    parallel: null,
+    ciBuildId: null,
+  })
+
+  { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group } = options
 
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
@@ -189,14 +195,21 @@ createRun = (options = {}) ->
   if specPattern
     specPattern = specPattern.join(",")
 
+  if ciBuildId
+    ## stringify
+    ciBuildId = String(ciBuildId)
+
   specs = _.map(specs, getSpecRelativePath)
 
   api.createRun({
-    specPattern
     specs
+    group
+    parallel
+    platform
+    ciBuildId
     projectId
     recordKey
-    platform
+    specPattern
     ci: {
       params: ciProvider.params()
       provider: ciProvider.name()
@@ -262,7 +275,7 @@ createInstance = (options = {}) ->
       null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs } = options
+  { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group } = options
 
   recordKey = options.key
 
@@ -280,8 +293,11 @@ createRunAndRecordSpecs = (options = {}) ->
     createRun({
       git
       specs
+      group
+      parallel
       platform
       recordKey
+      ciBuildId
       projectId
       specPattern
     })
@@ -295,6 +311,8 @@ createRunAndRecordSpecs = (options = {}) ->
         instanceId = null
 
         beforeSpecRun = (spec) ->
+          debug("before spec run %o", { spec })
+
           capture.restore()
 
           captured = capture.stdout()
@@ -306,13 +324,24 @@ createRunAndRecordSpecs = (options = {}) ->
             platform
             machineId
           })
-          .then (id) ->
-            instanceId = id
+          .then (resp) ->
+            { instanceId } = resp
 
-        afterSpecRun = (results, config) ->
+            ## pull off only what we need
+            return _
+            .chain(resp)
+            .pick("spec", "claimedInstances", "totalInstances")
+            .extend({
+              eta: resp.estimatedWallClockDuration
+            })
+            .value()
+
+        afterSpecRun = (spec, results, config) ->
           ## dont do anything if we failed to
           ## create the instance
           return if not instanceId
+
+          debug("after spec run %o", { spec })
 
           console.log("")
 

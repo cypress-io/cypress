@@ -29,7 +29,16 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  debug(
+    "request to url: %s with params: %o",
+    "#{params.method} #{params.url}",
+    _.pick(params, "body", "headers")
+  )
+
   request[method](params, callback)
+  .promise()
+  .tap (resp) ->
+    debug("response %o", resp)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -107,13 +116,16 @@ module.exports = {
 
   createRun: (options = {}) ->
     body = _.pick(options, [
-      "projectId"
-      "recordKey"
       "ci"
       "specs",
       "commit"
-      "platform"
-      "specPattern"
+      "group",
+      "platform",
+      "parallel",
+      "ciBuildId",
+      "projectId",
+      "recordKey",
+      "specPattern",
     ])
 
     rp.post({
@@ -122,7 +134,7 @@ module.exports = {
       json: true
       timeout: options.timeout ? 10000
       headers: {
-        "x-route-version": "3"
+        "x-route-version": "4"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -144,11 +156,9 @@ module.exports = {
       json: true
       timeout: timeout ? 10000
       headers: {
-        "x-route-version": "4"
+        "x-route-version": "5"
       }
     })
-    .promise()
-    .get("instanceId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 

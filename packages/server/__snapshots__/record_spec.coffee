@@ -823,3 +823,265 @@ This error will not alter the exit code.
 
 `
 
+exports['e2e record parallelization passes in parallel with group 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
+  │ Searched:   cypress/integration/record*                                                        │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 4) 
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+`
+
+exports['e2e record parallelization passes in parallel with group 2'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
+  │ Searched:   cypress/integration/record*                                                        │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_error_spec.coffee...                                                     (2 of 4) 
+
+Oops...we found an error preparing this test file:
+
+  /foo/bar/.projects/e2e/cypress/integration/record_error_spec.coffee
+
+The error was:
+
+Error: Cannot find module '../it/does/not/exist' from '/foo/bar/.projects/e2e/cypress/integration'
+
+
+This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
+
+- A missing file or dependency
+- A syntax error in the file or one of its dependencies
+
+Fix the error in your code and re-run your tests.
+
+  (Results)
+
+  ┌────────────────────────────────────────┐
+  │ Tests:        0                        │
+  │ Passing:      0                        │
+  │ Failing:      1                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  0                        │
+  │ Video:        true                     │
+  │ Duration:     X seconds                │
+  │ Spec Ran:     record_error_spec.coffee │
+  └────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_fail_spec.coffee...                                                      (3 of 4) 
+
+
+  record fails
+    1) "before each" hook for "fails 1"
+
+
+  0 passing
+  1 failing
+
+  1) record fails "before each" hook for "fails 1":
+     Error: foo
+
+Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      0                       │
+  │ Failing:      1                       │
+  │ Pending:      0                       │
+  │ Skipped:      1                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Spec Ran:     record_fail_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_uncaught_spec.coffee...                                                  (5 of 4) 
+
+
+  1) An uncaught error was detected outside of a test
+
+  0 passing
+  1 failing
+
+  1)  An uncaught error was detected outside of a test:
+     Uncaught Error: instantly fails
+
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Cypress could not associate this error to any specific test.
+
+We dynamically generated a new test to display this failure.
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌───────────────────────────────────────────┐
+  │ Tests:        1                           │
+  │ Passing:      0                           │
+  │ Failing:      1                           │
+  │ Pending:      0                           │
+  │ Skipped:      0                           │
+  │ Screenshots:  1                           │
+  │ Video:        true                        │
+  │ Duration:     X seconds                   │
+  │ Spec Ran:     record_uncaught_spec.coffee │
+  └───────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖ record_fail_spec.coffee                   XX:XX        2        -        1        -        1 │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    3 of 3 failed (100%)                        XX:XX        3        -        3        -        1  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+`
+

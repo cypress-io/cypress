@@ -103,7 +103,8 @@ formatSpecs = (specs) ->
   .join("")
 
 displayRunStarting = (options = {}) ->
-  { specs, specPattern, browser, runUrl } = options
+  ## TODO: if running in parallel, state that
+  { specs, specPattern, browser, runUrl, parallel } = options
 
   console.log("")
 
@@ -249,6 +250,56 @@ renderSummaryTable = (runUrl, results) ->
 
       console.log(terminal.renderTables(table4))
       console.log("")
+
+iterateThroughSpecs = (options = {}) ->
+  { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+
+  serial = ->
+    Promise.mapSeries(specs, runEachSpec)
+
+  serialWithRecord = ->
+    Promise
+    .mapSeries specs, (spec, index, length) ->
+      beforeSpecRun(spec)
+      .then ({ eta }) ->
+        runEachSpec(spec, index, length, eta)
+      .tap (results) ->
+        afterSpecRun(spec, results, config)
+
+  parallelWithRecord = (runs) ->
+    beforeSpecRun()
+    .then ({ spec, claimedInstances, totalInstances, eta }) ->
+      ## no more specs to run?
+      if not spec
+        ## then we're done!
+        return runs
+
+      ## find the actual spec object amongst
+      ## our specs array since the API sends us
+      ## the relative name
+      spec = _.find(specs, { relative: spec })
+
+      runEachSpec(spec, claimedInstances - 1, totalInstances, eta)
+      .tap (results) ->
+        runs.push(results)
+
+        afterSpecRun(spec, results, config)
+      .then ->
+        ## recurse
+        parallelWithRecord(runs)
+
+  switch
+    when parallel
+      ## if we are running in parallel
+      ## then ask the server for the next spec
+      parallelWithRecord([])
+    when beforeSpecRun
+      ## else iterate serialially and record
+      ## the results of each spec
+      serialWithRecord()
+    else
+      ## else iterate in serial
+      serial()
 
 getProjectId = (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
@@ -665,7 +716,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel } = options
 
     isHeadless = browser.name is "electron" and not headed
 
@@ -696,31 +747,26 @@ module.exports = {
       specs
       runUrl
       browser
+      parallel
       specPattern
     })
 
     runEachSpec = (spec, index, length) =>
-      Promise
-      .try ->
-        if beforeSpecRun
-          debug("before spec run %o", spec)
+      displaySpecHeader(spec.name, index + 1, length)
 
-          beforeSpecRun(spec)
-      .then =>
-        displaySpecHeader(spec.name, index + 1, length)
-
-        @runSpec(spec, options)
+      @runSpec(spec, options)
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
 
-        if afterSpecRun
-          debug("after spec run %o", spec)
-
-          afterSpecRun(results, config)
-
-    Promise
-    .mapSeries(specs, runEachSpec)
+    iterateThroughSpecs({
+      specs
+      config
+      parallel
+      runEachSpec
+      afterSpecRun
+      beforeSpecRun
+    })
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
@@ -836,7 +882,7 @@ module.exports = {
 
     socketId = random.id()
 
-    { projectRoot, record, key } = options
+    { projectRoot, record, key, parallel, ciBuildId, group } = options
 
     browserName = options.browser
 
@@ -855,6 +901,8 @@ module.exports = {
 
       if record
         recordMode.throwIfNoProjectId(projectId)
+        ## TODO: do this
+        # recordMode.throwIfGroupAndParallelButNoCiBuildId()
 
       Promise.all([
         system.info(),
@@ -877,6 +925,7 @@ module.exports = {
             projectRoot
             specPattern
             socketId
+            parallel
             browser
             project
             runUrl
@@ -900,7 +949,10 @@ module.exports = {
             key
             sys
             specs
+            group
             browser
+            parallel
+            ciBuildId
             projectId
             projectRoot
             projectName
