@@ -402,7 +402,7 @@ describe "e2e record", ->
 
     setup(routes)
 
-    it.only "passes in parallel with group", ->
+    it "passes in parallel with group", ->
       Promise.all([
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
