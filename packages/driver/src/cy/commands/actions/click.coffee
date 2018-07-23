@@ -6,6 +6,8 @@ $Mouse = require("../../../cypress/mouse")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$elements = require("../../../dom/elements")
+$selection = require("../../../dom/selection")
 $actionability = require("../../actionability")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -183,7 +185,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onReady: ($elToClick, coords) ->
             ## TODO: get focused through a callback here
             $focused = cy.getFocused()
-            
+
+            el = $elToClick.get(0)
+
             ## record the previously focused element before
             ## issuing the mousedown because browsers may
             ## automatically shift the focus to the element
@@ -199,11 +203,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if domEvents.mouseDown.preventedDefault or not $dom.isAttached($elToClick)
               afterMouseDown($elToClick, coords)
             else
+              if $elements.isInput(el) or $elements.isTextarea(el) or $elements.isContentEditable(el)
+                if !$elements.isNeedSingleValueChangeInputElement(el)
+                  $selection.moveSelectionToEnd(el)
+
               ## retrieve the first focusable $el in our parent chain
               $elToFocus = getFirstFocusableEl($elToClick)
 
               $focused = cy.getFocused()
-              
               if shouldFireFocusEvent($focused, $elToFocus)
                 ## if our mousedown went through and
                 ## we are focusing a different element

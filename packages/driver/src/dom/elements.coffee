@@ -7,7 +7,161 @@ $utils = require("../cypress/utils")
 
 fixedOrStickyRe = /(fixed|sticky)/
 
-focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
+contentEditable = '[contenteditable]'
+focusable = "a[href],link[href],button,select,[tabindex],input,textarea,#{contentEditable}"
+
+inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
+canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
+
+## rules for native methods and props
+## if a setter or getter or function then add a native method
+## if a traversal, don't
+
+descriptor = (klass, prop) ->
+  Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
+
+_getValue = ->
+  switch 
+    when isInput(this)
+      descriptor("HTMLInputElement", "value").get
+    when isTextarea(this)
+      descriptor("HTMLTextAreaElement", "value").get
+    when isSelect(this)    
+      descriptor("HTMLSelectElement", "value").get
+    else
+      ## is an option element
+      descriptor("HTMLOptionElement", "value").get
+
+
+_setValue = ->
+  switch
+    when isInput(this) 
+      descriptor("HTMLInputElement", "value").set
+    when isTextarea(this)
+      descriptor("HTMLTextAreaElement", "value").set
+    when isSelect(this)
+      descriptor("HTMLSelectElement", "value").set
+    else
+      ## is an options element
+      descriptor("HTMLOptionElement", "value").set
+      
+
+_setSelectionRange = () ->
+  switch
+    when isInput(this)
+      window.HTMLInputElement.prototype.setSelectionRange
+    when isTextarea(this)
+      window.HTMLTextAreaElement.prototype.setSelectionRange
+
+nativeGetters = {
+  value: _getValue
+  selectionStart: descriptor("HTMLInputElement", "selectionStart").get
+  isContentEditable: descriptor("HTMLElement", "isContentEditable").get
+}
+
+nativeSetters = {
+  value: _setValue
+}
+
+nativeMethods = {
+  createRange: window.document.createRange
+  execCommand: window.document.execCommand
+  getAttribute: window.Element.prototype.getAttribute
+  setSelectionRange: _setSelectionRange
+  modify: window.Selection.prototype.modify
+}
+
+tryCallNativeMethod = ->
+  try
+    callNativeMethod.apply(null, arguments)
+  catch
+    null
+
+callNativeMethod = (obj, fn, args...) ->
+  if not nativeFn = nativeMethods[fn]
+    fns = _.keys(nativeMethods).join(", ")
+    throw new Error("attempted to use a native fn called: #{fn}. Available fns are: #{fns}")
+
+  retFn = nativeFn.apply(obj, args)
+
+  if _.isFunction(retFn)
+    retFn = retFn.apply(obj, args)
+  
+  return retFn
+
+getNativeProp = (obj, prop) ->
+  if not nativeProp = nativeGetters[prop]
+    props = _.keys(nativeGetters).join(", ")
+    throw new Error("attempted to use a native getter prop called: #{prop}. Available props are: #{props}")
+
+  retProp = nativeProp.call(obj, prop)
+
+  if _.isFunction(retProp)
+    ## if we got back another function
+    ## then invoke it again
+    retProp = retProp.call(obj, prop)
+  
+  return retProp  
+
+setNativeProp = (obj, prop, val) ->
+  if not nativeProp = nativeSetters[prop]
+    fns = _.keys(nativeSetters).join(", ")
+    throw new Error("attempted to use a native setter prop called: #{fn}. Available props are: #{fns}")
+
+  retProp = nativeProp.call(obj, val)
+
+  if _.isFunction(retProp)
+    retProp = retProp.call(obj, val)
+
+  return retProp
+
+isNeedSingleValueChangeInputElement = (el) ->
+  if !isInput(el)
+    return false
+
+  return inputTypeNeedSingleValueChangeRe.test(el.type)
+
+## TODO: switch this to not use this
+# getValue = (el) ->
+#     return getNativeProp(el, "value")
+
+#   if isTextarea(el)
+#     return nativeTextareaValueGetter.call(el)
+
+## TODO: switch this to not use this
+# _setValue = (el, val) ->
+#   ## sets value for <input> or <textarea>
+#   if isInput(el)
+#     return setNativeProp(el, "value", val)
+
+#   if isTextarea(el)
+#     return setNativeProp.call(el, val)
+
+canSetSelectionRangeElement = (el) ->
+  canSetSelectionRangeElementRe.test(el.type)
+
+getTagName = (el) ->
+  tagName = el.tagName or ""
+  tagName.toLowerCase()
+
+isContentEditable = (el) ->
+  ## this property is the tell-all for contenteditable
+  ## should be true for elements:
+  ##   - with [contenteditable]
+  ##   - with document.designMode = 'on'
+  getNativeProp(el, "isContentEditable")
+
+isTextarea = (el) ->
+  getTagName(el) is 'textarea'
+
+isInput = (el) ->
+  getTagName(el) is 'input'
+
+isSelect = (el) ->
+  getTagName(el) is 'select'
+
+isOption = (el) ->
+  getTagName(el) is 'option'
 
 isElement = (obj) ->
   try
@@ -19,7 +173,12 @@ isFocusable = ($el) ->
   $el.is(focusable)
 
 isType = ($el, type) ->
-  ($el.attr("type") or "").toLowerCase() is type
+  ## NOTE: use DOMElement.type instead of getAttribute('type') since
+  ##       <input type="asdf"> will have type="text", and behaves like text type
+  ($el.get(0).type or "").toLowerCase() is type
+
+isInputType = (el, type) ->
+  el.type.toLowerCase() is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
@@ -300,7 +459,27 @@ module.exports = {
 
   isDescendent
 
+  isContentEditable
+
+  isTextarea
+
+  isInputType
+
+  isInput
+
+  isNeedSingleValueChangeInputElement
+
+  canSetSelectionRangeElement
+
   stringify
+
+  getNativeProp
+
+  setNativeProp
+
+  callNativeMethod
+
+  tryCallNativeMethod
 
   getElements
 
