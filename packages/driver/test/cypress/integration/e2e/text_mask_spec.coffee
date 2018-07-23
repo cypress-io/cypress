@@ -9,12 +9,10 @@ describe "src/cy/commands/actions/type text_mask_spec", ->
     cy.get('input').then ($els) ->
       $els.change ($el) ->
         changed++
-  
-  beforeEach ->
 
+  beforeEach ->
     ## reset number of change events before test
-    cy.window().then (win) ->
-      changed = 0
+    changed = 0
 
   context "#type", ->
     it "can type into phone", ->
@@ -96,4 +94,4 @@ describe "src/cy/commands/actions/type text_mask_spec", ->
         .blur()
         .then ->
           expect(changed).to.eql 1
-        
+

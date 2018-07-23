@@ -22,7 +22,7 @@ describe "src/cy/commands/actions/type", ->
 
       cy.get("input:first").type("foo").then ($input) ->
         expect($input).to.match input
-      
+
     it "changes the value", ->
       input = cy.$$("input:text:first")
 
@@ -76,7 +76,7 @@ describe "src/cy/commands/actions/type", ->
         .get("input:text:last").type("bar")
         .then ->
           expect(blurred).to.be.true
-    
+
     it "can type into contenteditable", ->
       oldText = cy.$$("#contenteditable").get(0).innerText
 
@@ -531,7 +531,7 @@ describe "src/cy/commands/actions/type", ->
           .type("{selectAll}{rightarrow}{backspace}")
           .then ->
             expect(fired).to.eq true
-        
+
         fired = false
         cy.get(":text:first")
           .invoke("val", "bar")
@@ -541,21 +541,21 @@ describe "src/cy/commands/actions/type", ->
 
         cy.$$('[contenteditable]:first').on "input", () ->
           fired = true
-        
+
         fired = false
         cy.get('[contenteditable]:first')
           .invoke('html', 'foobar')
           .type('{selectAll}{rightarrow}{backspace}')
           .then ->
             expect(fired).to.eq true
-        
+
         fired = false
         cy.get('[contenteditable]:first')
           .invoke('html', 'foobar')
           .type('{selectAll}{leftarrow}{del}')
           .then ->
             expect(fired).to.eq true
-            
+
       it "does not fire input event when value does not change", ->
         fired = false
         cy.$$(":text:first").on "input", (e) ->
@@ -567,7 +567,7 @@ describe "src/cy/commands/actions/type", ->
           .type('{selectAll}{rightarrow}{del}')
           .then ->
             expect(fired).to.eq false
-        
+
         fired = false
         cy.get(":text:first")
           .invoke("val", "bar")
@@ -584,7 +584,7 @@ describe "src/cy/commands/actions/type", ->
           .type('{selectAll}{rightarrow}{del}')
           .then ->
             expect(fired).to.eq false
-        
+
         fired = false
         cy.get("textarea:first")
           .invoke("val", "bar")
@@ -601,7 +601,7 @@ describe "src/cy/commands/actions/type", ->
           .type('{selectAll}{rightarrow}{del}')
           .then ->
             expect(fired).to.eq false
-        
+
         fired = false
         cy.get('[contenteditable]:first')
           .invoke('html', 'foobar')
@@ -861,7 +861,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#number-without-value").type("50").then ($input) ->
             expect($input).to.have.value("50")
 
-        it "can type negative numbers", -> 
+        it "can type negative numbers", ->
           cy.get('#number-without-value')
             .type('-123.12')
             .should('have.value', '-123.12')
@@ -920,7 +920,7 @@ describe "src/cy/commands/actions/type", ->
 
           select = (e) ->
             e.target.select()
-          
+
           cy
           .$$("#password-without-value")
           .val("secret")
@@ -1015,7 +1015,7 @@ describe "src/cy/commands/actions/type", ->
         it "inserts text after existing text", ->
           cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
             expect($text).to.have.text("foo bar")
-        
+
         it "can type into [contenteditable] with existing <div>", ->
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>foo</div>'
           cy.get("[contenteditable]:first")
@@ -1023,7 +1023,7 @@ describe "src/cy/commands/actions/type", ->
             expect($div.get(0).innerText).to.eql("foobar\n")
             expect($div.get(0).textContent).to.eql("foobar")
             expect($div.get(0).innerHTML).to.eql("<div>foobar</div>")
-        
+
         it "can type into [contenteditable] with existing <p>", ->
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<p>foo</p>'
           cy.get("[contenteditable]:first")
@@ -1031,19 +1031,19 @@ describe "src/cy/commands/actions/type", ->
             expect($div.get(0).innerText).to.eql("foobar\n\n")
             expect($div.get(0).textContent).to.eql("foobar")
             expect($div.get(0).innerHTML).to.eql("<p>foobar</p>")
-        
+
         it "collapses selection to start on {leftarrow}", ->
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
           cy.get("[contenteditable]:first")
           .type("{selectall}{leftarrow}foo").then ($div) ->
             expect($div.get(0).innerText).to.eql("foobar\n")
-        
+
         it "collapses selection to end on {rightarrow}", ->
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
           cy.get("[contenteditable]:first")
           .type("{selectall}{leftarrow}foo{selectall}{rightarrow}baz").then ($div) ->
             expect($div.get(0).innerText).to.eql("foobarbaz\n")
-  
+
         it "can remove a placeholder <br>", ->
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<div><br></div>'
           cy.get("[contenteditable]:first")
@@ -1296,7 +1296,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get(":text:first").invoke("val", "bar").focus().then ($input) ->
             ## select the beginning
             $input.get(0).setSelectionRange(0,0)
-            
+
           .get(":text:first").type("{rightarrow}n").then ($input) ->
             expect($input).to.have.value("bnar")
 
@@ -1309,7 +1309,7 @@ describe "src/cy/commands/actions/type", ->
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' character
               $input.get(0).setSelectionRange(1,2)
-              
+
             .get(":text:first").type("{rightarrow}n").then ($input) ->
               expect($input).to.have.value("banr")
 
@@ -1383,17 +1383,17 @@ describe "src/cy/commands/actions/type", ->
             done("input should not have fired")
 
           cy.get("#comments").type("{uparrow}").then -> done()
-        
+
         it "up and down arrow on contenteditable", ->
           cy.$$('[contenteditable]:first').get(0).innerHTML =
                       '<div>foo</div>' +
                       '<div>bar</div>' +
                       '<div>baz</div>'
-                      
+
           cy.get("[contenteditable]:first")
           .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").then ($div) ->
             expect($div.get(0).innerText).to.eql("foo22\nb11ar\nbaz33\n")
-        
+
         it "uparrow ignores current selection", ->
           ce = cy.$$('[contenteditable]:first').get(0)
           ce.innerHTML =
@@ -1405,14 +1405,14 @@ describe "src/cy/commands/actions/type", ->
           cy.document().then (doc) ->
             ce.focus()
             doc.getSelection().selectAllChildren(line)
-          
+
           cy.get("[contenteditable]:first")
           .type("{uparrow}11").then ($div) ->
             expect($div.get(0).innerText).to.eql("11foo\nbar\nbaz\n")
-        
+
         it "up and down arrow on textarea", ->
           cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
-                      
+
           cy.get("textarea:first")
           .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").should('have.value', "foo22\nb11ar\nbaz33")
 
@@ -1421,7 +1421,7 @@ describe "src/cy/commands/actions/type", ->
             .invoke('val', '12.34')
             .type('{uparrow}{uparrow}')
             .should('have.value', '14')
-          
+
 
       context "{downarrow}", ->
         beforeEach ->
@@ -1454,10 +1454,10 @@ describe "src/cy/commands/actions/type", ->
 
         it "{downarrow} will move to EOL on textarea", ->
           cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
-                      
+
           cy.get("textarea:first")
           .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33{leftarrow}{downarrow}44").should('have.value', "foo22\nb11ar\nbaz3344")
-        
+
         it "decrements input[type='number']", ->
           cy.get('input[type="number"]:first')
             .invoke('val', '12.34')
@@ -1475,7 +1475,7 @@ describe "src/cy/commands/actions/type", ->
           cy.document().then (doc) ->
             ce.focus()
             doc.getSelection().selectAllChildren(line)
-          
+
           cy.get("[contenteditable]:first")
           .type("{downarrow}22").then ($div) ->
             expect($div.get(0).innerText).to.eql("foo\n22bar\nbaz\n")
@@ -1543,7 +1543,7 @@ describe "src/cy/commands/actions/type", ->
             expect($div.get(0).innerText).to.eql("foobar\nbaz\n\n\nquux\n")
             expect($div.get(0).textContent).to.eql("foobarbazquux")
             expect($div.get(0).innerHTML).to.eql("foobar<div>baz</div><div><br></div><div><br></div><div>quux</div>")
-        
+
         it "inserts new line into [contenteditable] from midline", ->
           cy.get("#input-types [contenteditable]:first").invoke("text", "foo")
           .type("bar{leftarrow}{enter}baz{leftarrow}{enter}quux").then ($div) ->
@@ -2012,7 +2012,7 @@ describe "src/cy/commands/actions/type", ->
           .get("[contenteditable]:first").type("foo")
           .get("button:first").click().then ->
             expect(changed).to.eq 0
-      
+
       it "does not fire on .clear() without blur", ->
         changed = 0
 
@@ -2028,7 +2028,7 @@ describe "src/cy/commands/actions/type", ->
         .blur()
         .then ->
           expect(changed).to.eq 0
-      
+
       it "fires change for single value change inputs", ->
         changed = 0
         cy.$$('input[type="date"]:first').change ->
@@ -2049,7 +2049,7 @@ describe "src/cy/commands/actions/type", ->
           .blur()
           .then ->
             expect(changed).to.eql(0)
-      
+
       it "does not fire change for type'd change that restores value", ->
         changed = 0
         cy.$$('input:first').change ->
@@ -2073,13 +2073,13 @@ describe "src/cy/commands/actions/type", ->
         cy.window().then (win) ->
           expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
           .to.deep.eq({start:4, end:4})
-      
+
       it "won't arrowright past length", ->
         cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
         cy.window().then (win) ->
           expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
           .to.deep.eq({start:6, end:6})
-      
+
       it "won't arrowleft before word", ->
         cy.get('input:first').type('oo' + '{leftarrow}{leftarrow}{leftarrow}' + 'f' + '{leftarrow}'.repeat(5))
         cy.window().then (win) ->
@@ -2091,7 +2091,7 @@ describe "src/cy/commands/actions/type", ->
         cy.window().then (win) ->
           expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
           .to.deep.eq({start:6, end:6})
-        
+
       it "leaves caret at the end of contenteditable when prefilled", ->
         $el = cy.$$('[contenteditable]:first')
         el = $el.get(0)
@@ -2106,7 +2106,7 @@ describe "src/cy/commands/actions/type", ->
         cy.window().then (win) ->
           expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
           .to.deep.eq({start:1, end:1})
-      
+
         ##make sure caret is correct
         ## type left left
         ## make sure caret correct
@@ -2124,7 +2124,7 @@ describe "src/cy/commands/actions/type", ->
         cy.window().then (win) ->
           expect $selection.getSelectionBounds Cypress.$('#comments').get(0)
           .to.deep.eq({start:6, end:6})
-            
+
       it "can wrap cursor to next line in [contenteditable] with {rightarrow}", ->
         $el = cy.$$('[contenteditable]:first')
         el = $el.get(0)
@@ -2145,7 +2145,7 @@ describe "src/cy/commands/actions/type", ->
         '<div>end</div>'
         cy.get('[contenteditable]:first').type('{leftarrow}'.repeat(12)+'[_I_]').then ->
           expect(cy.$$('[contenteditable]:first').get(0).innerText).to.eql('star[_I_]t\nmiddle\nend\n')
-      
+
 
       it "can wrap cursor to next line in [contenteditable] with {rightarrow} and empty lines", ->
         $el = cy.$$('[contenteditable]:first')
@@ -2175,7 +2175,7 @@ describe "src/cy/commands/actions/type", ->
 
         expectMatchInnerText = ($el , innerText) ->
           expect(cleanseText($el.get(0).innerText)).to.eql(innerText)
-        
+
         ## NOTE: this may only pass in Chrome since the whitespace may be different in other browsers
         ##  even if actual and expected appear the same.
         expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}\n"
@@ -2188,8 +2188,8 @@ describe "src/cy/commands/actions/type", ->
         .type('{{}\n  foo:   1\n  bar:   2\n  baz:   3\n}')
         .should ($el) ->
           expectMatchInnerText($el, expected)
-        
-      
+
+
       it "enter and \\n should act the same for textarea", ->
         expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}"
         cy.get('textarea:first')
@@ -2199,7 +2199,7 @@ describe "src/cy/commands/actions/type", ->
         .clear()
         .type('{{}\n  foo:   1\n  bar:   2\n  baz:   3\n}')
         .should('have.prop', 'value', expected)
-        
+
 
 
     describe "{enter}", ->
