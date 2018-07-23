@@ -4,6 +4,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$elements = require('../../../dom/elements')
 
 newLineRe = /\n/g
 
@@ -70,7 +71,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         optionsObjects = options.$el.find("option").map((index, el) ->
           ## push the value in values array if its
           ## found within the valueOrText
-          value = el.value
+          value = $elements.getNativeProp(el, "value")
           optEl = $(el)
 
           if value in valueOrText
@@ -101,7 +102,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           _.each optionsObjects, (obj, index) ->
             if obj.text in valueOrText
               optionEls.push obj.$el
-              values.push(obj.value)
+              objValue = obj.value
+              values.push(objValue)
 
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
