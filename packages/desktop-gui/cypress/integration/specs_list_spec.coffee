@@ -330,9 +330,7 @@ describe "Specs List", ->
         cy.get("@firstSpec").should("not.have.class", "active")
         cy.get("@secondSpec").should("have.class", "active")
 
-  ## We aren't properly handling this event so skipping
-  ## this test for now until its implemented
-  describe.skip "spec list updates", ->
+  describe "spec list updates", ->
     beforeEach ->
       @ipc.getSpecs.yields(null, @specs)
       @openProject.resolve(@config)

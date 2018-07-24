@@ -20,7 +20,7 @@ exports['e2e screenshots passes 1'] = `
     ✓ manually generates pngs
     ✓ can nest screenshots in folders
     1) generates pngs on failure
-    ✓ does not call onAfterScreenshot with results of failed tests
+    ✓ calls onAfterScreenshot with results of failed tests
     ✓ handles devicePixelRatio correctly on headless electron
     ✓ crops app captures to just app size
     ✓ can capture fullPage screenshots

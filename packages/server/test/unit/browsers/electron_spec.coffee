@@ -6,6 +6,7 @@ la = require("lazy-ass")
 check = require("check-more-types")
 
 menu = require("#{root}../lib/gui/menu")
+plugins = require("#{root}../lib/plugins")
 Windows = require("#{root}../lib/gui/windows")
 electron = require("#{root}../lib/browsers/electron")
 savedState = require("#{root}../lib/saved_state")
@@ -38,6 +39,9 @@ describe "lib/browsers/electron", ->
   context ".open", ->
     beforeEach ->
       sinon.stub(electron, "_render").resolves(@win)
+      sinon.stub(plugins, "has")
+      sinon.stub(plugins, "execute")
+
       savedState()
       .then (state) =>
         la(check.fn(state.get), "state is missing .get to stub", state)
@@ -73,6 +77,27 @@ describe "lib/browsers/electron", ->
       .then =>
         expect(@automation.use).to.be.called
         expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
+
+    it "is noop when before:browser:launch yields null", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves(null)
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
+
+    ## https://github.com/cypress-io/cypress/issues/1992
+    it "it merges in options without removing essential options", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({foo: "bar"})
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
 
   context "._launch", ->
     beforeEach ->

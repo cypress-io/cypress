@@ -2,25 +2,22 @@ require('../../spec_helper')
 
 const os = require('os')
 const path = require('path')
-const proxyquire = require('proxyquire')
 const Promise = require('bluebird')
+const proxyquire = require('proxyquire')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
 const util = require(`${lib}/util`)
+const state = require(`${lib}/tasks/state`)
 
-const fakeCachedir = (cacheName) => path.join('.cache', cacheName)
-
-const cacheDir = path.join(fakeCachedir('Cypress'))
+const cacheDir = path.join('.cache/Cypress')
 const versionDir = path.join(cacheDir, '1.2.3')
 const binaryDir = path.join(versionDir, 'Cypress.app')
 const binaryPkgPath = path.join(binaryDir, 'Contents', 'Resources', 'app', 'package.json')
 
-let state
-
 describe('lib/tasks/state', function () {
   beforeEach(function () {
-    state = proxyquire(`${lib}/tasks/state`, { cachedir: fakeCachedir })
+    sinon.stub(util, 'getCacheDir').returns(cacheDir)
     logger.reset()
     sinon.stub(process, 'exit')
     sinon.stub(util, 'pkgVersion').returns('1.2.3')
@@ -87,7 +84,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('resolves path on windows', function () {
-      const state = proxyquire(`${lib}/tasks/state`, { path: path.win32, cachedir: fakeCachedir })
+      const state = proxyquire(`${lib}/tasks/state`, { path: path.win32 })
       os.platform.returns('win32')
       const pathToExec = state.getBinaryDir()
       expect(pathToExec).to.be.equal(path.win32.join(versionDir, 'Cypress'))
@@ -155,6 +152,12 @@ describe('lib/tasks/state', function () {
       process.env.CYPRESS_CACHE_FOLDER = '/path/to/dir'
       const ret = state.getCacheDir()
       expect(ret).to.equal('/path/to/dir')
+    })
+
+    it('CYPRESS_CACHE_FOLDER resolves from relative path', () => {
+      process.env.CYPRESS_CACHE_FOLDER = './local-cache/folder'
+      const ret = state.getCacheDir()
+      expect(ret).to.eql(path.resolve('local-cache/folder'))
     })
   })
   context('.parseRealPlatformBinaryFolderAsync', function () {

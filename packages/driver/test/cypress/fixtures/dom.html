@@ -51,6 +51,11 @@
             margin-left: 0%;
           }
         }
+        
+        [contenteditable] p {
+          display: block
+        }
+
       </style>
 
       DOM Fixture
@@ -150,6 +155,7 @@
         <input type="checkbox" name="colors" value="blue" />
         <input type="checkbox" name="colors" value="green" />
         <input type="checkbox" name="colors" value="red" />
+        <input type="tel">
       </form>
 
       <form>
@@ -289,6 +295,7 @@
 
         <div contenteditable="true" style="padding: 5px;"></div>
         <textarea></textarea>
+        <input id="bad-type" type="asdf" />
       </div>
 
       <table id="table">

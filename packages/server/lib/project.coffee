@@ -6,7 +6,7 @@ Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
 check       = require("check-more-types")
-scaffoldLog = require("debug")("cypress:server:scaffold")
+scaffoldDebug = require("debug")("cypress:server:scaffold")
 debug       = require("debug")("cypress:server:project")
 cwd         = require("./cwd")
 api         = require("./api")
@@ -263,8 +263,7 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        debug("onSetRunnables")
-        debug("runnables", runnables)
+        debug("received runnables %o", runnables)
         reporterInstance?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
@@ -311,7 +310,12 @@ class Project extends EE
   ## with additional object "state" which are transient things like
   ## window width and height, DevTools open or not, etc.
   getConfig: (options = {}) =>
+    if @cfg
+      return Promise.resolve(@cfg)
+
     setNewProject = (cfg) =>
+      return if cfg.isTextTerminal
+
       ## decide if new project by asking scaffold
       ## and looking at previously saved user state
       if not cfg.integrationFolder
@@ -320,23 +324,19 @@ class Project extends EE
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
-        scaffoldLog("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
+        scaffoldDebug("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
-      .return(cfg)
-
-    if c = @cfg
-      return Promise.resolve(c)
 
     config.get(@projectRoot, options)
     .then (cfg) => @_setSavedState(cfg)
-    .then(setNewProject)
+    .tap(setNewProject)
 
   # forces saving of project's state by first merging with argument
   saveState: (stateChanges = {}) ->
     throw new Error("Missing project config") if not @cfg
     throw new Error("Missing project root") if not @projectRoot
     newState = _.merge({}, @cfg.state, stateChanges)
-    savedState(@projectRoot)
+    savedState(@projectRoot, @cfg.isTextTerminal)
     .then (state) ->
       state.set(newState)
     .then =>
@@ -344,7 +344,8 @@ class Project extends EE
       newState
 
   _setSavedState: (cfg) ->
-    savedState(@projectRoot)
+    debug("get saved state")
+    savedState(@projectRoot, cfg.isTextTerminal)
     .then (state) -> state.get()
     .then (state) ->
       cfg.state = state

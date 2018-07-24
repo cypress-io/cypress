@@ -6,7 +6,6 @@ moment = require("moment")
 Promise = require("bluebird")
 sinon = require("sinon")
 lolex = require("lolex")
-bililiteRange = require("../vendor/bililiteRange")
 
 $dom = require("./dom")
 $errorMessages = require("./cypress/error_messages")
@@ -479,7 +478,6 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
-  bililiteRange: bililiteRange
 
   _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 

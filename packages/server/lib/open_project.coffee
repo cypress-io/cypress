@@ -67,6 +67,8 @@ create = ->
 
           options.url = url
 
+          options.isTextTerminal = cfg.isTextTerminal
+
           ## if we don't have the isHeaded property
           ## then we're in interactive mode and we
           ## can assume its a headed browser

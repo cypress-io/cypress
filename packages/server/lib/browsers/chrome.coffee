@@ -41,7 +41,11 @@ defaultArgs = [
   "--disable-blink-features=RootLayerScrolling"
 
   ## the following come from chromedriver
-  ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
+  ## http://www.chromium.org/Home/chromium-security/site-isolation
+  ## https://github.com/cypress-io/cypress/issues/1951
+  "--disable-site-isolation-trials"
+
+  ## the following come frome chromedriver
   "--metrics-recording-only" ## Enables the recording of metrics reports but disables reporting
   "--disable-prompt-on-repost" ## Disables prompt when user re-submits POST form
   "--disable-hang-monitor" ## Suppresses hang monitor dialogs in renderer processes

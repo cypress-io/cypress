@@ -192,7 +192,7 @@ exports['e2e plugins works with user extensions 1'] = `
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                          │
+  │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.coffee)                                                          │
   │ Searched:   cypress/integration/app_spec.coffee                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -296,6 +296,81 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   │ ✔ absolute_spec.coffee                      XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
+
+`
+
+exports['e2e plugins calls after:screenshot for cy.screenshot() and failure screenshots 1'] = `
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (after_screenshot_spec.coffee)                                             │
+  │ Searched:   cypress/integration/after_screenshot_spec.coffee                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: after_screenshot_spec.coffee...                                                 (1 of 1) 
+
+
+  ✓ cy.screenshot() - replacement
+  ✓ cy.screenshot() - ignored values
+  ✓ cy.screenshot() - invalid return
+  1) failure screenshot - rename
+
+  3 passing
+  1 failing
+
+  1)  failure screenshot - rename:
+     Error: test error
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────┐
+  │ Tests:        4                            │
+  │ Passing:      3                            │
+  │ Failing:      1                            │
+  │ Pending:      0                            │
+  │ Skipped:      0                            │
+  │ Screenshots:  4                            │
+  │ Video:        true                         │
+  │ Duration:     X seconds                    │
+  │ Spec Ran:     after_screenshot_spec.coffee │
+  └────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (2x2)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (1280x720)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (1280x720)
+  - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (1x1)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/plugin-after-screenshot/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ after_screenshot_spec.coffee              XX:XX        4        3        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        4        3        1        -        -  
 
 `
 

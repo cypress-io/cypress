@@ -170,6 +170,13 @@ module.exports = {
       win.removeAllListeners()
       options.onClose.apply(win, arguments)
 
+    ## the webview loses focus on navigation, so we
+    ## have to refocus it everytime top navigates in headless mode
+    ## https://github.com/cypress-io/cypress/issues/2190
+    if options.show is false
+      win.webContents.on "did-start-loading", ->
+        win.focusOnWebView()
+
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)
 
@@ -177,7 +184,7 @@ module.exports = {
       options.onNewWindow.apply(win, arguments)
 
     if ts = options.trackState
-      @trackState(projectRoot, win, ts)
+      @trackState(projectRoot, options.isTextTerminal, win, ts)
 
     ## open dev tools if they're true
     if options.devTools
@@ -299,7 +306,7 @@ module.exports = {
       else
         return win
 
-  trackState: (projectRoot, win, keys) ->
+  trackState: (projectRoot, isTextTerminal, win, keys) ->
     isDestroyed = ->
       win.isDestroyed()
 
@@ -313,7 +320,7 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -325,7 +332,7 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -333,14 +340,14 @@ module.exports = {
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 

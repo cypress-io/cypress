@@ -11,6 +11,7 @@ express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
 debug        = require("debug")("cypress:support:e2e")
+httpsProxy   = require("@packages/https-proxy")
 Fixtures     = require("./fixtures")
 fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
@@ -79,11 +80,14 @@ normalizeStdout = (str) ->
     .join("\n")
 
 startServer = (obj) ->
-  {onServer, port} = obj
+  { onServer, port, https } = obj
 
   app = express()
 
-  srv = http.Server(app)
+  if https
+    srv = httpsProxy.httpsServer(app)
+  else
+    srv = http.Server(app)
 
   allowDestroy(srv)
 
@@ -218,6 +222,8 @@ module.exports = {
     if spec = options.spec
       ## normalize into array and then prefix
       specs = spec.split(',').map (spec) ->
+        return spec if path.isAbsolute(spec)
+
         path.join(options.project, "cypress", "integration", spec)
 
       ## normalize the path to the spec
