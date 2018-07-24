@@ -4,27 +4,31 @@ $ = require('jquery')
 
 _getSelectionBoundsFromTextarea = (el) ->
   {
-    start: el.selectionStart
-    end: el.selectionEnd
+    start: $elements.getNativeProp(el, 'selectionStart')
+    end: $elements.getNativeProp(el, 'selectionEnd')
   }
 
 _getSelectionBoundsFromInput = (el) ->
-  { type } = el
-
+  if $elements.canSetSelectionRangeElement(el)
+    return {
+      start: $elements.getNativeProp(el, 'selectionStart')
+      end: $elements.getNativeProp(el, 'selectionEnd')
+    }
   ## HACK:
   ## newer versions of Chrome incorrectly report the selection
   ## for number and email types, so we change it to type=text
   ## and blur it (then set it back and focus it further down
   ## after the selection algorithm has taken place)
-  shouldChangeType = type is 'email' || type is 'number'
 
-  if shouldChangeType
-    el.blur()
-    el.type = 'text'
+  type = $elements.getNativeProp(el, 'type')
+
+  $elements.tryCallNativeMethod(el, 'blur')
+  
+  $elements.setNativeProp(el, 'type', 'text')
 
   bounds = {
-    start: el.selectionStart
-    end: el.selectionEnd
+    start: $elements.getNativeProp(el, 'selectionStart')
+    end: $elements.getNativeProp(el, 'selectionEnd')
   }
 
   ## HACK:
@@ -32,9 +36,8 @@ _getSelectionBoundsFromInput = (el) ->
   ## already has a value set, so if there's a value and there is no
   ## native selection, force it to be at the end of the text
 
-  if shouldChangeType
-    el.type = type
-    el.focus()
+  $elements.setNativeProp(el, 'type', type)
+  $elements.callNativeMethod(el, 'focus')
 
   return bounds
 
@@ -113,10 +116,16 @@ _insertSubstring = (curText, newText, [start, end]) ->
   curText.substring(0, start) + newText + curText.substring(end)
 
 _getHostContenteditable = (el) ->
-  while el.parentElement && !$elements.tryCallNativeMethod(el, "getAttribute", "contenteditable")
-    el = el.parentElement
-
-  return el
+  curEl = el
+  while curEl.parentElement && !$elements.tryCallNativeMethod(curEl, "getAttribute", "contenteditable")
+    curEl = curEl.parentElement
+  ## if there's no host contenteditable, we must be in designmode
+  ## so act as if the original element is the host contenteditable
+  ## TODO: remove this when we no longer click before type and move 
+  ## cursor to the end
+  if !$elements.callNativeMethod(curEl, "getAttribute", "contenteditable")
+    return el
+  return curEl
 
 _getInnerLastChild = (el) ->
   while (el.lastChild)
@@ -144,23 +153,21 @@ deleteSelectionContents = (el) ->
   ## for input and textarea, update selected text with empty string
   replaceSelectionContents(el, "")
 
-setInputSelectionRange = (el, start, end) ->
-  if $elements.canSetSelectionRangeElement(el)
-    ## el.setSelectionRange(start, end)
+setSelectionRange = (el, start, end) ->
+  if $elements.isTextarea(el) || $elements.canSetSelectionRangeElement(el)
     $elements.callNativeMethod(el, "setSelectionRange", start, end)
     return
-
   ## NOTE: Some input elements have mobile implementations
   ## and thus may not always have a cursor, so calling setSelectionRange will throw.
   ## we are assuming desktop here, so we cast to type='text', and get the cursor from there.
-  { type } = el
-  el.blur()
-  el.type = 'text'
+  type = $elements.getNativeProp(el, 'type')
+  $elements.callNativeMethod(el, 'blur')
+  $elements.setNativeProp(el, 'type', 'text')
   $elements.callNativeMethod(el, "setSelectionRange", start, end)
-
-  el.type = type
+  $elements.setNativeProp(el, 'type', type)
   ## changing the type will lose focus, so focus again
-  el.focus()
+  $elements.callNativeMethod(el, "focus")
+
 
 deleteRightOfCursor = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
@@ -170,7 +177,7 @@ deleteRightOfCursor = (el) ->
       ## nothing to delete, nothing to right of selection
       return false
 
-    setInputSelectionRange(el, start, end + 1)
+    setSelectionRange(el, start, end + 1)
     deleteSelectionContents(el)
     ## successful delete
     return true
@@ -179,7 +186,7 @@ deleteRightOfCursor = (el) ->
     selection = _getSelectionByEl(el)
     $elements.callNativeMethod(selection, "modify", 'extend', 'forward', 'character')
 
-    if selection.isCollapsed
+    if $elements.getNativeProp(selection, 'isCollapsed')
       ## there's nothing to delete
       return false
 
@@ -195,7 +202,7 @@ deleteLeftOfCursor = (el) ->
       ## there's nothing to delete, nothing before cursor
       return false
 
-    setInputSelectionRange(el, start - 1, end)
+    setSelectionRange(el, start - 1, end)
     deleteSelectionContents(el)
     ## successful delete
     return true
@@ -215,7 +222,7 @@ deleteLeftOfCursor = (el) ->
     return true
 
 _collapseInputOrTextArea = (el, toIndex) ->
-  setInputSelectionRange(el, toIndex, toIndex)
+  setSelectionRange(el, toIndex, toIndex)
 
 moveCursorLeft = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
@@ -227,7 +234,7 @@ moveCursorLeft = (el) ->
     if start is 0
       return
 
-    return setInputSelectionRange(el, start - 1, start - 1)
+    return setSelectionRange(el, start - 1, start - 1)
 
   if $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
@@ -253,7 +260,7 @@ moveCursorRight = (el) ->
 
     ## Don't worry about moving past the end of the string
     ## nothing will happen and there is no error.
-    return setInputSelectionRange(el, start + 1, end + 1)
+    return setSelectionRange(el, start + 1, end + 1)
 
   if $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
@@ -293,7 +300,7 @@ isCollapsed = (el) ->
 
 selectAll = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
-    return el.select()
+    return $elements.callNativeMethod(el, 'select')
 
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
@@ -329,7 +336,7 @@ getSelectionBounds = (el) ->
 moveSelectionToEnd = (el) ->
   if $elements.isInput(el) || $elements.isTextarea(el)
     length = $elements.getNativeProp(el, "value").length
-    setInputSelectionRange(el, length, length)
+    setSelectionRange(el, length, length)
 
   else if $elements.isContentEditable(el)
     ## NOTE: can't use execCommand API here because we would have
@@ -345,9 +352,9 @@ moveSelectionToEnd = (el) ->
     range.setStart(lastTextNode, lastTextNode.length)
     range.setEnd(lastTextNode, lastTextNode.length)
 
-    sel = doc.getSelection()
-    sel.removeAllRanges()
-    sel.addRange(range)
+    sel = $elements.callNativeMethod(doc, 'getSelection')
+    $elements.callNativeMethod(sel, 'removeAllRanges')
+    $elements.callNativeMethod(sel, 'addRange', range)
 
 ## TODO: think about renaming this
 replaceSelectionContents = (el, key) ->
@@ -359,7 +366,7 @@ replaceSelectionContents = (el, key) ->
     value = $elements.getNativeProp(el, "value") or ''
     updatedValue = _insertSubstring(value, key, [start, end])
     $elements.setNativeProp(el, 'value', updatedValue)
-    setInputSelectionRange(el, start + key.length, start + key.length)
+    setSelectionRange(el, start + key.length, start + key.length)
 
 getCaretPosition = (el) ->
   bounds = getSelectionBounds(el)
