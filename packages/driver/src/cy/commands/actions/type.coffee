@@ -81,7 +81,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           }
 
         options._log.snapshot("before", {next: "after"})
-  
+
       isBody      = options.$el.is("body")
       isTextLike  = $dom.isTextLike(options.$el)
       isDate      = $dom.isInputType(options.$el, "date")
@@ -333,6 +333,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           onReady: ($elToClick) ->
             $focused = cy.getFocused()
+
+            ## retrieve the first focusable $el in our parent chain
+            $elToFocus = getFirstFocusableEl($elToClick)
+
+            if el = cy.needsForceFocus()
+              cy.fireFocus(el)
 
             ## if we dont have a focused element
             ## or if we do and its not ourselves

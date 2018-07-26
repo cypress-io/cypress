@@ -21,21 +21,20 @@ descriptor = (klass, prop) ->
   Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
 _getValue = ->
-  switch 
+  switch
     when isInput(this)
       descriptor("HTMLInputElement", "value").get
     when isTextarea(this)
       descriptor("HTMLTextAreaElement", "value").get
-    when isSelect(this)    
+    when isSelect(this)
       descriptor("HTMLSelectElement", "value").get
     else
       ## is an option element
       descriptor("HTMLOptionElement", "value").get
 
-
 _setValue = ->
   switch
-    when isInput(this) 
+    when isInput(this)
       descriptor("HTMLInputElement", "value").set
     when isTextarea(this)
       descriptor("HTMLTextAreaElement", "value").set
@@ -44,23 +43,22 @@ _setValue = ->
     else
       ## is an options element
       descriptor("HTMLOptionElement", "value").set
-      
 
-_getSelectionStart = () ->
+_getSelectionStart = ->
   switch
     when isInput(this)
       descriptor('HTMLInputElement', 'selectionStart').get
     when isTextarea(this)
       descriptor('HTMLTextAreaElement', 'selectionStart').get
 
-_getSelectionEnd = () ->
+_getSelectionEnd = ->
   switch
     when isInput(this)
       descriptor('HTMLInputElement', 'selectionEnd').get
     when isTextarea(this)
       descriptor('HTMLTextAreaElement', 'selectionEnd').get
 
-_nativeSetSelectionRange = () ->
+_nativeSetSelectionRange = ->
   switch
     when isInput(this)
       window.HTMLInputElement.prototype.setSelectionRange
@@ -68,11 +66,11 @@ _nativeSetSelectionRange = () ->
       ## is textarea
       window.HTMLTextAreaElement.prototype.setSelectionRange
 
-_nativeSelect = () ->
+_nativeSelect = ->
   switch
     when isInput(this)
       window.HTMLInputElement.prototype.select
-    else 
+    else
       ## is textarea
       window.HTMLTextAreaElement.prototype.select
 
@@ -92,6 +90,8 @@ nativeSetters = {
 }
 
 nativeMethods = {
+  addEventListener: window.EventTarget.prototype.addEventListener
+  removeEventListener: window.EventTarget.prototype.removeEventListener
   createRange: window.document.createRange
   getSelection: window.document.getSelection
   removeAllRanges: window.Selection.prototype.removeAllRanges
@@ -120,7 +120,7 @@ callNativeMethod = (obj, fn, args...) ->
 
   if _.isFunction(retFn)
     retFn = retFn.apply(obj, args)
-  
+
   return retFn
 
 getNativeProp = (obj, prop) ->
@@ -134,8 +134,8 @@ getNativeProp = (obj, prop) ->
     ## if we got back another function
     ## then invoke it again
     retProp = retProp.call(obj, prop)
-    
-  return retProp  
+
+  return retProp
 
 setNativeProp = (obj, prop, val) ->
   if not nativeProp = nativeSetters[prop]
@@ -154,22 +154,6 @@ isNeedSingleValueChangeInputElement = (el) ->
     return false
 
   return inputTypeNeedSingleValueChangeRe.test(el.type)
-
-## TODO: switch this to not use this
-# getValue = (el) ->
-#     return getNativeProp(el, "value")
-
-#   if isTextarea(el)
-#     return nativeTextareaValueGetter.call(el)
-
-## TODO: switch this to not use this
-# _setValue = (el, val) ->
-#   ## sets value for <input> or <textarea>
-#   if isInput(el)
-#     return setNativeProp(el, "value", val)
-
-#   if isTextarea(el)
-#     return setNativeProp.call(el, val)
 
 canSetSelectionRangeElement = (el) ->
   canSetSelectionRangeElementRe.test(el.type)
@@ -265,6 +249,7 @@ isAttached = ($el) ->
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
   type = (type) -> isInputType($el, type)
+
   isContentEditableElement = isContentEditable($el.get(0))
 
   _.some([
