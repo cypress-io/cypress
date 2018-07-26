@@ -320,13 +320,16 @@ isDescendent = ($el1, $el2) ->
 ## 3. if this element is ourself or our descendants, click whatever was returned
 ## 4. else throw an error because something is covering us up
 getFirstFocusableEl = ($el) ->
-  return $el if $dom.isFocusable($el)
+  return $el if isFocusable($el)
 
   parent = $el.parent()
 
   ## if we have no parent then just return
   ## the window since that can receive focus
-  return $(win) if not parent.length
+  if not parent.length
+    win = $window.getWindowByElement($el.get(0))
+
+    return $(win)
 
   getFirstFocusableEl($el.parent())
 
