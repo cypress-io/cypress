@@ -35,7 +35,7 @@
 ##  - no focus events are queued when programmatically calling element.focus() AND the window is out of focus. the events evaporate into the ether.
 ##  - however, if calling window.focus() programmatically prior to programmatic element.focus() calls will fire all events as if the window is natively in focus
 
-it.only "sends delayed focus when programmatically invoked during action commands", ->
+it "sends delayed focus when programmatically invoked during action commands", ->
   cy
   .visit("http://localhost:3500/fixtures/form.html")
   .debug()
