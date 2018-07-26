@@ -61,22 +61,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if options.errorOnSelect and $el.is("select")
           $utils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
-        ## in order to simulate actual user behavior we need to do the following:
-        ## 1. take our element and figure out its center coordinate
-        ## 2. check to figure out the element listed at those coordinates
-        ## 3. if this element is ourself or our descendants, click whatever was returned
-        ## 4. else throw an error because something is covering us up
-        getFirstFocusableEl = ($el) ->
-          return $el if $dom.isFocusable($el)
-
-          parent = $el.parent()
-
-          ## if we have no parent then just return
-          ## the window since that can receive focus
-          return $(win) if not parent.length
-
-          getFirstFocusableEl($el.parent())
-
         afterMouseDown = ($elToClick, coords) ->
           ## we need to use both of these
           { fromWindow, fromViewport } = coords
@@ -171,7 +155,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             $previouslyFocusedEl = $focused
 
             ## retrieve the first focusable $el in our parent chain
-            $elToFocus = getFirstFocusableEl($elToClick)
+            $elToFocus = $elements.getFirstFocusableEl($elToClick)
 
             if el = cy.needsForceFocus()
               cy.fireFocus(el)
@@ -190,7 +174,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   $selection.moveSelectionToEnd(el)
 
               ## retrieve the first focusable $el in our parent chain
-              $elToFocus = getFirstFocusableEl($elToClick)
+              $elToFocus = $elements.getFirstFocusableEl($elToClick)
 
               if cy.needsFocus($elToFocus, $previouslyFocusedEl)
                 cy.fireFocus($elToFocus.get(0))
