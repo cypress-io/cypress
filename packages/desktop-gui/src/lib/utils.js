@@ -1,21 +1,14 @@
-import _ from 'lodash'
-import moment from 'moment'
+import { capitalize } from 'lodash'
 import gravatar from 'gravatar'
-import padStart from 'string.prototype.padstart'
+import duration from '../../../server/lib/util/duration'
 
 const cyDirRegex = /^cypress\/integration\//g
 
-const osNameLookup = {
-  darwin: 'apple',
-}
-
 const osIconLookup = {
-  windows: 'windows',
+  win32: 'windows',
   darwin: 'apple',
   linux: 'linux',
 }
-
-const browserNameLookup = {}
 
 const browserIconLookup = {
   chrome: 'chrome',
@@ -25,16 +18,12 @@ const browserIconLookup = {
 }
 
 module.exports = {
+  durationFormatted: duration.format,
+
   osIcon: (osName) => {
     if (!osName) return ''
 
     return osIconLookup[osName] || 'desktop'
-  },
-
-  osNameFormatted: (osName) => {
-    if (!osName) return ''
-
-    return _.capitalize(osNameLookup[osName] || osName)
   },
 
   browserIcon: (browserName) => {
@@ -46,9 +35,8 @@ module.exports = {
   browserNameFormatted: (browserName) => {
     if (!browserName) return ''
 
-    return _.capitalize(browserNameLookup[browserName] || browserName)
+    return capitalize(browserName)
   },
-
 
   browserVersionFormatted: (browserVersion) => {
     if (!browserVersion) return ''
@@ -85,28 +73,6 @@ module.exports = {
         return 'terminal'
       default:
         return ''
-    }
-  },
-
-  durationFormatted: (durationInMs, padMinutes = true) => {
-    const duration = moment.duration(durationInMs)
-
-    const durationSecs = duration.seconds() ? `${duration.seconds()}` : ''
-    const durationMins = duration.minutes() ? `${duration.minutes()}` : ''
-    const durationHrs = duration.hours() ? `${duration.hours()}` : ''
-
-    const total = _.compact([
-      durationHrs,
-      !!durationHrs || padMinutes ? padStart(durationMins, 2, '0') : durationMins,
-      padStart(durationSecs, 2, '0'),
-    ])
-
-    const totalMinSec = total.join(':')
-
-    if (totalMinSec === '00:00') {
-      return `${duration.milliseconds()}ms`
-    } else {
-      return totalMinSec
     }
   },
 

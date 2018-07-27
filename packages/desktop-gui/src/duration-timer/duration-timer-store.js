@@ -5,15 +5,16 @@ import Timer from './duration-timer-model'
 
 class DurationTimer {
   @observable isRunning = false
-  @observable timer = new Timer()
+  @observable timer
   @observable startTime
+
+  constructor (startTime) {
+    this.timer = new Timer()
+    this.startTime = moment(startTime)
+  }
 
   @computed get mainDisplay () {
     return this.timer.display
-  }
-
-  @computed get hasStarted () {
-    return this.timer.totalMilliSeconds !== 0
   }
 
   @action measure () {
@@ -21,20 +22,20 @@ class DurationTimer {
 
     this.timer.milliseconds = moment().diff(this.startTime)
 
-    setTimeout(() => this.measure(), 10)
+    this.timerId = setTimeout(() => this.measure(), 10)
   }
 
-  @action startTimer (startTime) {
+  @action startTimer () {
     if (this.isRunning) return
     this.isRunning = true
-    this.startTime = moment(startTime)
     this.measure()
   }
 
   @action resetTimer () {
     this.timer.reset()
     this.isRunning = false
+    clearTimeout(this.timerId)
   }
 }
 
-export default new DurationTimer()
+export default DurationTimer

@@ -59,7 +59,7 @@ module.exports = {
 
     tx.set({PROJECTS: projects})
 
-  getProjectPaths: ->
+  getProjectRoots: ->
     fileUtil.transaction (tx) =>
       @_getProjects(tx).then (projects) =>
         pathsToRemove = Promise.reduce projects, (memo, path) ->

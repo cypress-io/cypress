@@ -26,3 +26,19 @@ describe "e2e stdout", ->
       snapshot: true
       expectedExitCode: 0
     })
+
+  it "logs that electron cannot be recorded in headed mode", ->
+    e2e.exec(@, {
+      spec: "simple_spec.coffee"
+      headed: true
+      snapshot: true
+      expectedExitCode: 0
+    })
+
+  it "logs that chrome cannot be recorded", ->
+    e2e.exec(@, {
+      spec: "simple_spec.coffee"
+      browser: "chrome"
+      snapshot: true
+      expectedExitCode: 0
+    })

@@ -1,5 +1,6 @@
 _ = Cypress._
 $utils = Cypress.utils
+Promise = Cypress.Promise
 
 describe "driver/src/cypress/utils", ->
   context ".cloneErr", ->

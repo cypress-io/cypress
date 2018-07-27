@@ -15,18 +15,18 @@ interactiveMode = require("#{root}../lib/modes/interactive")
 describe "gui/interactive", ->
   context ".isMac", ->
     it "returns true if os.platform is darwin", ->
-      @sandbox.stub(os, "platform").returns("darwin")
+      sinon.stub(os, "platform").returns("darwin")
 
       expect(interactiveMode.isMac()).to.be.true
 
     it "returns false if os.platform isnt darwin", ->
-      @sandbox.stub(os, "platform").returns("linux64")
+      sinon.stub(os, "platform").returns("linux64")
 
       expect(interactiveMode.isMac()).to.be.false
 
   context ".getWindowArgs", ->
     it "exits process when onClose is called", ->
-      @sandbox.stub(process, "exit")
+      sinon.stub(process, "exit")
       interactiveMode.getWindowArgs({}).onClose()
       expect(process.exit).to.be.called
 
@@ -69,7 +69,7 @@ describe "gui/interactive", ->
 
     describe "on window focus", ->
       beforeEach ->
-        @sandbox.stub(menu, "set")
+        sinon.stub(menu, "set")
 
       it "calls menu.set withDevTools: true when in dev env", ->
         env = process.env["CYPRESS_ENV"]
@@ -90,16 +90,16 @@ describe "gui/interactive", ->
       @win = {}
       @state = {}
 
-      @sandbox.stub(menu, "set")
-      @sandbox.stub(Events, "start")
-      @sandbox.stub(Windows, "open").resolves(@win)
-      @sandbox.stub(Windows, "trackState")
+      sinon.stub(menu, "set")
+      sinon.stub(Events, "start")
+      sinon.stub(Windows, "open").resolves(@win)
+      sinon.stub(Windows, "trackState")
 
       state = savedState()
-      @sandbox.stub(state, "get").resolves(@state)
+      sinon.stub(state, "get").resolves(@state)
 
     it "calls Events.start with options, adding env, onFocusTests, and os", ->
-      @sandbox.stub(os, "platform").returns("someOs")
+      sinon.stub(os, "platform").returns("someOs")
       opts = {}
 
       interactiveMode.ready(opts).then ->
@@ -131,10 +131,10 @@ describe "gui/interactive", ->
 
   context ".run", ->
     beforeEach ->
-      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
 
     it "calls ready with options", ->
-      @sandbox.stub(interactiveMode, "ready")
+      sinon.stub(interactiveMode, "ready")
 
       opts = {}
       interactiveMode.run(opts).then ->

@@ -11,6 +11,7 @@ $Aliases = require("../cy/aliases")
 $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
+$Focused = require("../cy/focused")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -56,6 +57,18 @@ setRemoteIframeProps = ($autIframe, state) ->
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
+  timersPaused = false
+
+  ## TODO: move this to its own module
+  timerQueues = {}
+  timerQueues.reset = ->
+    _.extend(timerQueues, {
+      setTimeout: []
+      setInterval: []
+      requestAnimationFrame: []
+    })
+
+  timerQueues.reset()
 
   isStopped = -> stopped
 
@@ -82,6 +95,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   jquery = $jQuery.create(state)
   location = $Location.create(state)
+  focused = $Focused.create(state)
 
   { expect } = $Chai.create(specWindow, assertions.assert)
 
@@ -140,6 +154,35 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         return ret
     })
+
+  wrapNativeMethods = (contentWindow) ->
+    try
+      contentWindow.document.hasFocus = ->
+        top.document.hasFocus()
+
+  runTimerQueue = (queue) ->
+    _.each timerQueues[queue], ([contentWindow, args]) ->
+      contentWindow[queue].apply(contentWindow, args)
+
+    timerQueues[queue] = []
+
+  wrapTimers = (contentWindow) ->
+    originals = {
+      setTimeout: contentWindow.setTimeout
+      setInterval: contentWindow.setInterval
+      requestAnimationFrame: contentWindow.requestAnimationFrame
+    }
+
+    wrapFn = (fnName) ->
+      return (args...) ->
+        if timersPaused
+          timerQueues[fnName].push([contentWindow, args])
+        else
+          originals[fnName].apply(contentWindow, args)
+
+    contentWindow.setTimeout = wrapFn("setTimeout")
+    contentWindow.setInterval = wrapFn("setInterval")
+    contentWindow.requestAnimationFrame = wrapFn("requestAnimationFrame")
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -595,6 +638,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## jquery sync methods
     getRemotejQueryInstance: jquery.getRemotejQueryInstance
 
+    ## focused sync methods
+    getFocused: focused.getFocused
+
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
 
@@ -698,6 +744,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state(backup)
 
       queue.reset()
+      timerQueues.reset()
 
       cy.removeAllListeners()
 
@@ -869,6 +916,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindowListeners(contentWindow)
 
+      wrapNativeMethods(contentWindow)
+
+      wrapTimers(contentWindow)
+
+    pauseTimers: (pause) ->
+      timersPaused = pause
+
+      if not pause
+        runTimerQueue("setTimeout")
+        runTimerQueue("setInterval")
+        runTimerQueue("requestAnimationFrame")
+
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
       err = errors.createUncaughtException("spec", arguments)
@@ -1030,7 +1089,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## but we should still teardown and handle
           ## the error
           fail(err, runnable)
-
   }
 
   _.each privateProps, (obj, key) =>

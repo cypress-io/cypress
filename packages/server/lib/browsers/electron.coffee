@@ -8,7 +8,7 @@ Windows       = require("../gui/windows")
 savedState    = require("../saved_state")
 
 module.exports = {
-  _defaultOptions: (projectPath, state, options) ->
+  _defaultOptions: (projectRoot, state, options) ->
     _this = @
 
     defaults = {
@@ -32,7 +32,7 @@ module.exports = {
       onNewWindow: (e, url) ->
         _win = @
 
-        _this._launchChild(e, url, _win, projectPath, state, options)
+        _this._launchChild(e, url, _win, projectRoot, state, options)
         .then (child) ->
           ## close child on parent close
           _win.on "close", ->
@@ -42,17 +42,17 @@ module.exports = {
 
     _.defaultsDeep({}, options, defaults)
 
-  _render: (url, projectPath, options = {}) ->
-    win = Windows.create(projectPath, options)
+  _render: (url, projectRoot, options = {}) ->
+    win = Windows.create(projectRoot, options)
 
     @_launch(win, url, options)
 
-  _launchChild: (e, url, parent, projectPath, state, options) ->
+  _launchChild: (e, url, parent, projectRoot, state, options) ->
     e.preventDefault()
 
     [parentX, parentY] = parent.getPosition()
 
-    options = @_defaultOptions(projectPath, state, options)
+    options = @_defaultOptions(projectRoot, state, options)
 
     _.extend(options, {
       x: parentX + 100
@@ -61,7 +61,7 @@ module.exports = {
       onPaint: null ## dont capture paint events
     })
 
-    win = Windows.create(projectPath, options)
+    win = Windows.create(projectRoot, options)
 
     ## needed by electron since we prevented default and are creating
     ## our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
@@ -71,8 +71,6 @@ module.exports = {
 
   _launch: (win, url, options) ->
     menu.set({withDevTools: true})
-
-    debug("launching browser window to url %s with options %o", url, options)
 
     Promise
     .try =>
@@ -107,17 +105,23 @@ module.exports = {
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
-    { projectPath } = options
+    { projectRoot, isTextTerminal } = options
 
-    savedState(projectPath)
+    debug("open %o", { browserName, url })
+    savedState(projectRoot, isTextTerminal)
     .then (state) ->
+      debug("got saved state")
       state.get()
     .then (state) =>
+      debug("received saved state %o", state)
+
       ## get our electron default options
-      options = @_defaultOptions(projectPath, state, options)
+      options = @_defaultOptions(projectRoot, state, options)
 
       ## get the GUI window defaults now
       options = Windows.defaults(options)
+
+      debug("browser window options %o", _.omitBy(options, _.isFunction))
 
       Promise
       .try =>
@@ -126,10 +130,21 @@ module.exports = {
 
         plugins.execute("before:browser:launch", options.browser, options)
         .then (newOptions) ->
-          return newOptions ? options
+          if newOptions
+            debug("received new options from plugin event %o", newOptions)
+            _.extend(options, newOptions)
+
+          return options
     .then (options) =>
-      @_render(url, projectPath, options)
+      debug("launching browser window to url: %s", url)
+
+      @_render(url, projectRoot, options)
       .then (win) =>
+        ## cause the webview to receive focus so that
+        ## native browser focus + blur events fire correctly
+        ## https://github.com/cypress-io/cypress/issues/1939
+        win.focusOnWebView()
+
         a = Windows.automation(win)
 
         invoke = (method, data) =>

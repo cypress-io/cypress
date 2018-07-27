@@ -1,5 +1,7 @@
 { durationFormatted, stripLeadingCyDirs } = require("../../src/lib/utils")
 
+## TODO: remove these once we move durationFormatted
+## to a shared @cypress module
 describe "durationFormatted", ->
   it "formats ms", ->
     expect(durationFormatted(496)).to.eq('496ms')

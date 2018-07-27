@@ -22,7 +22,7 @@ describe "Runs List", ->
     cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "closeBrowser").resolves(null)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
@@ -82,23 +82,44 @@ describe "Runs List", ->
 
       context "displays each run's data", ->
         beforeEach ->
+          cy.get(".runs-container li").first().as("firstRunRow")
           cy.get(".runs-container li").eq(1).as("runRow")
 
         it "displays build num", ->
           cy.get("@runRow").contains("#" + @runs[1].buildNumber)
 
         it "displays commit info", ->
-          cy.get("@runRow").contains(@runs[1].commitBranch)
-          cy.get("@runRow").contains(@runs[1].commitMessage)
+          cy.get("@runRow").contains(@runs[1].commit.branch)
+          cy.get("@runRow").contains(@runs[1].commit.message)
+
+        it "display no info msg & doesn't display avatar", ->
+          cy.get(".runs-container li").eq(2).within ->
+            cy.get("img").should("not.exist")
+            cy.contains("No commit info found")
+
+        it "displays platform info", ->
+          cy.get("@runRow").within ->
+            cy.contains(@runs[1].instances[0].platform.osVersionFormatted)
+            cy.contains(@runs[1].instances[0].platform.browserVersion)
+            cy.contains("Chrome")
+            cy.get(".fa-windows")
+            cy.get(".fa-chrome")
 
         it "displays totals", ->
-          cy.get("@runRow").contains(@runs[1].failed)
-          cy.get("@runRow").contains(@runs[1].passed)
+          cy.get("@runRow").contains(@runs[1].totalFailed)
+          cy.get("@runRow").contains(@runs[1].totalPassed)
 
         it "displays times", ->
           cy.get("@runRow").contains("a few secs ago")
-          cy.get("@runRow").contains("00:16")
-        
+          cy.get("@runRow").contains("00:12")
+
+        it "displays seperate timers for incomplete runs", ->
+          cy.get("@firstRunRow").contains("47:02")
+          cy.get(".runs-container li").last().contains("57:02")
+            .then -> cy.tick(1000)
+          cy.get("@firstRunRow").contains("47:03")
+          cy.get(".runs-container li").last().contains("57:03")
+
         context "spec display", ->
           it "displays spec if defined when 1 instance", ->
             cy.get(".runs-container li").eq(1).contains(@runs[1].instances[0].spec)
@@ -160,8 +181,7 @@ describe "Runs List", ->
 
       timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
-      cy
-        .clock(timestamp)
+      cy.clock(timestamp)
         .then =>
           @goToRuns()
         .then =>
@@ -171,30 +191,26 @@ describe "Runs List", ->
       expect(@ipc.getRuns).to.be.called
 
     it "lists runs", ->
-      cy
-        .get(".runs-container li")
+      cy.get(".runs-container li")
         .should("have.length", @runs.length)
 
     it "displays link to dashboard that goes to admin project runs", ->
-      cy
-        .contains("See all").click()
+      cy.contains("See all").click()
         .then ->
           expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
 
     it "displays run status icon", ->
-      cy
-        .get(".runs-container li").first().find("> div")
+      cy.get(".runs-container li").first().find("> div")
         .should("have.class", "running")
 
     it "displays last updated", ->
       cy.contains("Last updated: 10:00:00am")
 
     it "clicking run opens admin", ->
-      cy
-        .get(".runs-container li").first()
+      cy.get(".runs-container li").first()
         .click()
         .then =>
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].buildNumber}")
 
   context "without a current user", ->
     beforeEach ->
@@ -249,17 +265,16 @@ describe "Runs List", ->
       @getRunsAgain = @util.deferred()
       @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
 
-      cy
-        .clock()
+      cy.clock()
         .then =>
           @goToRuns()
         .then =>
           @getRuns.resolve(@runs)
-        .get(".runs-container") ## wait for original runs to show
-        .clock().then (clock) =>
+      cy.get(".runs-container") ## wait for original runs to show
+      cy.clock().then (clock) =>
           @getRunsAgain = @util.deferred()
           @ipc.getRuns.onCall(1).returns(@getRunsAgain.promise)
-        .tick(10000)
+      cy.tick(10000)
 
     it "has original state of runs", ->
       cy.get(".runs-container li").first().find("> div")
@@ -305,7 +320,7 @@ describe "Runs List", ->
 
       it "displays old runs if another error", ->
         @ipcError({type: "TIMED_OUT"})
-        cy.get(".runs-container li").should("have.length", 4)
+        cy.get(".runs-container li").should("have.length", @runs.length)
 
   describe "manually refreshing runs", ->
     beforeEach ->
@@ -323,7 +338,7 @@ describe "Runs List", ->
       expect(@ipc.getRuns).to.be.calledTwice
 
     it "still shows list of runs", ->
-      cy.get(".runs-container li").should("have.length", 4)
+      cy.get(".runs-container li").should("have.length", @runs.length)
 
     it "disables refresh button", ->
       cy.get(".runs header button").should("be.disabled")

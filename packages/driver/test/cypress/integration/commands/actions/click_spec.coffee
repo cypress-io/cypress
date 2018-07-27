@@ -334,6 +334,67 @@ describe "src/cy/commands/actions/click", ->
     it "can click a tr", ->
       cy.get("#table tr:first").click()
 
+    it "places cursor at the end of input", ->
+      cy.get('input:first').invoke('val', 'foobar').click().then ($el) ->
+        el = $el.get(0)
+        expect(el.selectionStart).to.eql(6)
+        expect(el.selectionEnd).to.eql(6)
+      cy.get('input:first').invoke('val', '').click().then ($el) ->
+        el = $el.get(0)
+        expect(el.selectionStart).to.eql(0)
+        expect(el.selectionEnd).to.eql(0)
+
+    it "places cursor at the end of textarea", ->
+      cy.get('textarea:first').invoke('val', 'foo\nbar\nbaz').click().then ($el) ->
+        el = $el.get(0)
+        expect(el.selectionStart).to.eql(11)
+        expect(el.selectionEnd).to.eql(11)
+
+      cy.get('textarea:first').invoke('val', '').click().then ($el) ->
+        el = $el.get(0)
+        expect(el.selectionStart).to.eql(0)
+        expect(el.selectionEnd).to.eql(0)
+
+    it "places cursor at the end of [contenteditable]", ->
+
+      cy.get('[contenteditable]:first')
+      .invoke('html', '<div><br></div>').click()
+      .then ($el) ->
+        range = $el.get(0).ownerDocument.getSelection().getRangeAt(0)
+        expect(range.startContainer.outerHTML).to.eql('<div><br></div>')
+        expect(range.startOffset).to.eql(0)
+        expect(range.endContainer.outerHTML).to.eql('<div><br></div>')
+        expect(range.endOffset).to.eql(0)
+
+      cy.get('[contenteditable]:first')
+      .invoke('html', 'foo').click()
+      .then ($el) ->
+        range = $el.get(0).ownerDocument.getSelection().getRangeAt(0)
+        expect(range.startContainer.nodeValue).to.eql('foo')
+        expect(range.startOffset).to.eql(3)
+        expect(range.endContainer.nodeValue).to.eql('foo')
+        expect(range.endOffset).to.eql(3)
+
+      cy.get('[contenteditable]:first')
+      .invoke('html', '<div>foo</div>').click()
+      .then ($el) ->
+        range = $el.get(0).ownerDocument.getSelection().getRangeAt(0)
+        expect(range.startContainer.nodeValue).to.eql('foo')
+        expect(range.startOffset).to.eql(3)
+        expect(range.endContainer.nodeValue).to.eql('foo')
+        expect(range.endOffset).to.eql(3)
+
+      cy.get('[contenteditable]:first')
+      .invoke('html', '').click()
+      .then ($el) ->
+        el = $el.get(0)
+        range = el.ownerDocument.getSelection().getRangeAt(0)
+        expect(range.startContainer).to.eql(el)
+        expect(range.startOffset).to.eql(0)
+        expect(range.endContainer).to.eql(el)
+        expect(range.endOffset).to.eql(0)
+
+
     describe "actionability", ->
       it "can click elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").click()
@@ -348,6 +409,102 @@ describe "src/cy/commands/actions/click", ->
           .get("button:last").click({ force: true })
           .then ->
             expect(scrolled).to.be.empty
+
+      it "does not scroll when position sticky and display flex", ->
+        scrolled = []
+
+        cy.on "scrolled", ($el, type) ->
+          scrolled.push(type)
+
+        cy.viewport(1000, 660)
+
+        $body = cy.$$("body")
+        $body.css({
+          padding: 0
+          margin: 0
+        }).children().remove()
+
+        $wrap = $("<div></div>")
+          .attr("id", "flex-wrap")
+          .css({
+            display: "flex"
+          })
+          .prependTo($body)
+
+        $nav = $("""
+        <div><input type="text" data-cy="input" />
+        <br><br>
+        <a href="#" data-cy="button"> Button </a></div>
+        """)
+          .attr("id", "nav")
+          .css({
+            position: "sticky"
+            top: 0
+            height: "100vh"
+            width: "200px"
+            background: "#f0f0f0"
+            borderRight: "1px solid silver"
+            padding: "20px"
+          })
+          .appendTo($wrap)
+
+        $content = $("<div><h1>Hello</h1></div>")
+          .attr("id", "content")
+          .css({
+            padding: "20px"
+            flex: 1
+          })
+          .appendTo($wrap)
+
+        $longBlock1 = $("<div>Long block 1</div>")
+          .attr("id", "long-block-1")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock2 = $("<div>Long block 2</div>")
+          .attr("id", "long-block-2")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock3 = $("<div>Long block 3</div>")
+          .attr("id", "long-block-3")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock4 = $("<div>Long block 4</div>")
+          .attr("id", "long-block-4")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        $longBlock5 = $("<div>Long block 5</div>")
+          .attr("id", "long-block-5")
+          .css({
+            height: "500px"
+            border: "1px solid red"
+            marginTop: "10px"
+            width: "100%"
+          }).appendTo($content)
+
+        ## make scrolling deterministic by ensuring we don't wait for coordsHistory
+        ## to build up
+        cy.get('[data-cy=button]').click({ waitForAnimations: false }).then ->
+          expect(scrolled).to.deep.eq(["element"])
 
       it "can force click on hidden elements", ->
         cy.get("button:first").invoke("hide").click({ force: true })

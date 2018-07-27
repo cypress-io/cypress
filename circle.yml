@@ -7,9 +7,15 @@ defaults: &defaults
     # the Docker image with Cypress dependencies and Chrome browser
     - image: cypress/browsers:chrome64
       environment:
-        # set specific timezone
+        ## set specific timezone
         TZ: "/usr/share/zoneinfo/America/New_York"
-        CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
+
+        ## store artifacts here
+        CIRCLE_ARTIFACTS: /tmp/artifacts
+
+        ## set so that e2e tests are consistent
+        COLUMNS: 100
+        LINES: 24
 
 jobs:
   ## code checkout and NPM installs
@@ -38,11 +44,12 @@ jobs:
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run:
-          name: Checking TERM is set
+          name: Checking TERM and COLUMNS are set
           command: |
-            echo 'term env var is:' $TERM
-            node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
-            node -e 'console.log("TERM %s stdout.isTTY?", process.env.TERM, process.stdout.isTTY)'
+            node -e 'assert.ok(process.env.TERM === "xterm", `process.env.TERM=${process.env.TERM} and must be set to "xterm" for Docker to work`)'
+            node -e 'assert.ok(process.env.COLUMNS === "100", `process.env.COLUMNS=${process.env.COLUMNS} must be set to 100 for snapshots to pass`)'
+            node -e 'console.log("stdout.isTTY?", process.stdout.isTTY)'
+            node -e 'console.log("stderr.isTTY?", process.stderr.isTTY)'
 
       # need to restore a separate cache for each package.json
       - restore_cache:
@@ -234,7 +241,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 0
+          command: npm run test-e2e -- --parallel 7 --index 0
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -245,7 +252,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 1
+          command: npm run test-e2e -- --parallel 7 --index 1
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -256,7 +263,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 2
+          command: npm run test-e2e -- --parallel 7 --index 2
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -267,7 +274,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 3
+          command: npm run test-e2e -- --parallel 7 --index 3
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -278,7 +285,29 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 4
+          command: npm run test-e2e -- --parallel 7 --index 4
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-6":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm run test-e2e -- --parallel 7 --index 5
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-7":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm run test-e2e -- --parallel 7 --index 6
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -296,7 +325,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 0
+          command: npm run cypress:run -- --parallel 7 --index 0 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -316,7 +345,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 1
+          command: npm run cypress:run -- --parallel 7 --index 1 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -336,7 +365,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 2
+          command: npm run cypress:run -- --parallel 7 --index 2 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -356,7 +385,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 3
+          command: npm run cypress:run -- --parallel 7 --index 3 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -376,7 +405,47 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 4
+          command: npm run cypress:run -- --parallel 7 --index 4 --browser chrome
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-6":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm start
+          working_directory: packages/driver
+          background: true
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run cypress:run -- --parallel 7 --index 5 --browser chrome
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-7":
+    <<: *defaults
+    steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm start
+          working_directory: packages/driver
+          background: true
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: npm run cypress:run -- --parallel 7 --index 6 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -489,7 +558,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
-            CYPRESS_videoRecording=false \
+            CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
 
   "test-against-staging":
@@ -607,7 +676,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i ../cli/build
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i ../cli/build
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -632,7 +701,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -674,6 +743,12 @@ workflows:
       - server-e2e-tests-5:
           requires:
             - build
+      - server-e2e-tests-6:
+          requires:
+            - build
+      - server-e2e-tests-7:
+          requires:
+            - build
       - driver-integration-tests-1:
           requires:
             - build
@@ -687,6 +762,12 @@ workflows:
           requires:
             - build
       - driver-integration-tests-5:
+          requires:
+            - build
+      - driver-integration-tests-6:
+          requires:
+            - build
+      - driver-integration-tests-7:
           requires:
             - build
       - desktop-gui-integration-tests-1:

@@ -139,14 +139,6 @@ module.exports = (options = {}) ->
         else
           opts = strOrOpts
 
-      opts.url = url.parse(opts.url)
-
-      ## parse port into a legit number
-      ## to fix issue with request
-      ## https://github.com/cypress-io/cypress/issues/222
-      if p = opts.url.port
-        opts.url.port = _.toNumber(p)
-
       if promise
         rp(opts)
       else

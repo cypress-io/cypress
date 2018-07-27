@@ -76,7 +76,7 @@ normalizeTestTimings = (obj, timings) ->
 
 expectRunsToHaveCorrectStats = (runs = []) ->
   runs.forEach (run) ->
-    expectStartToBeBeforeEnd(run, "stats.start", "stats.end")
+    expectStartToBeBeforeEnd(run, "stats.wallClockStartedAt", "stats.wallClockEndedAt")
     expectStartToBeBeforeEnd(run, "reporterStats.start", "reporterStats.end")
 
     ## grab all the wallclock durations for all tests
@@ -87,7 +87,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
     ## of all tests wallclock duration
     expectDurationWithin(
       run,
-      "stats.duration",
+      "stats.wallClockDuration",
       wallClocks,
       wallClocks + 150, ## add 150ms to account for padding
       1234
@@ -105,16 +105,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       ## add these two together
       obj.fnDuration + obj.afterFnDuration
 
-    ## make sure we've added failingTests
-    failingTests = _.filter(run.tests, { state: "failed" })
-
-    if failingTests.length
-      expect(run.failingTests).to.deep.eq(failingTests)
-
-      ## now reset it
-      run.failingTests = []
-    else
-      expect(run.failingTests).to.be.undefined
+    run.spec.absolute = e2e.normalizeStdout(run.spec.absolute)
 
     ## now make sure that each tests wallclock duration
     ## is around the sum of all of its timings
@@ -146,10 +137,10 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       if test.stack
         test.stack = e2e.normalizeStdout(test.stack)
 
-      if test.wallClockStart
-        d = new Date(test.wallClockStart)
-        expect(d.toJSON()).to.eq(test.wallClockStart)
-        test.wallClockStart = STATIC_DATE
+      if test.wallClockStartedAt
+        d = new Date(test.wallClockStartedAt)
+        expect(d.toJSON()).to.eq(test.wallClockStartedAt)
+        test.wallClockStartedAt = STATIC_DATE
 
         expect(test.videoTimestamp).to.be.a("number")
         test.videoTimestamp = 9999
@@ -159,9 +150,13 @@ expectRunsToHaveCorrectStats = (runs = []) ->
 
     ## normalize screenshot dynamic props
     run.screenshots = _.map run.screenshots, (screenshot) ->
-      expect(screenshot.clientId).to.be.a.uuid("v4")
+      expect(screenshot.screenshotId).to.have.length("5")
 
-      screenshot.clientId = "some-random-guid-number"
+      d = new Date(screenshot.takenAt)
+      expect(d.toJSON()).to.eq(screenshot.takenAt)
+      screenshot.takenAt = STATIC_DATE
+
+      screenshot.screenshotId = "some-random-id"
       screenshot.path = e2e.normalizeStdout(screenshot.path)
       screenshot
 
@@ -188,11 +183,27 @@ describe "e2e spec_isolation", ->
         ## but zero out config because it's too volatile
         json.config = {}
 
+        expect(json.browserPath).to.be.a('string')
+        expect(json.browserName).to.be.a('string')
+        expect(json.browserVersion).to.be.a('string')
+        expect(json.osName).to.be.a('string')
+        expect(json.osVersion).to.be.a('string')
+        expect(json.cypressVersion).to.be.a('string')
+
+        _.extend(json, {
+          browserPath: 'path/to/browser'
+          browserName: 'FooBrowser'
+          browserVersion: '88'
+          osName: 'FooOS'
+          osVersion: '1234'
+          cypressVersion: '9.9.9'
+        })
+
         ## ensure the totals are accurate
         expect(json.totalTests).to.eq(
           _.sum([
-            json.totalFailures,
-            json.totalPasses,
+            json.totalFailed,
+            json.totalPassed,
             json.totalPending,
             json.totalSkipped
           ])
@@ -204,8 +215,8 @@ describe "e2e spec_isolation", ->
         expectDurationWithin(
           json,
           "totalDuration",
-          _.sumBy(json.runs, "stats.duration"),
-          _.sumBy(json.runs, "stats.duration"),
+          _.sumBy(json.runs, "stats.wallClockDuration"),
+          _.sumBy(json.runs, "stats.wallClockDuration"),
           5555
         )
 

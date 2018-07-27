@@ -1,6 +1,7 @@
 $ = require("jquery")
 _ = require("lodash")
 moment = require("moment")
+Promise = require("bluebird")
 
 $Location = require("./location")
 $errorMessages = require("./error_messages")
@@ -292,4 +293,21 @@ module.exports = {
     deltaY = point1.y - point2.y
 
     Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+  runSerially: (fns) ->
+    values = []
+
+    run = (index) ->
+      Promise
+      .try ->
+        fns[index]()
+      .then (value) ->
+        values.push(value)
+        index++
+        if fns[index]
+          run(index)
+        else
+          values
+
+    run(0)
 }
