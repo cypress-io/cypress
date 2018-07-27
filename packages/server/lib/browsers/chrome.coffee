@@ -39,7 +39,6 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
   "--disable-device-discovery-notifications"
-  "--disable-blink-features=RootLayerScrolling"
 
   ## http://www.chromium.org/Home/chromium-security/site-isolation
   ## https://github.com/cypress-io/cypress/issues/1951
@@ -113,6 +112,10 @@ module.exports = {
     if options.chromeWebSecurity is false
       args.push("--disable-web-security")
       args.push("--allow-running-insecure-content")
+
+    ## prevent AUT shaking in v66 & 67, bug flag breaks chrome in v68+
+    if options.browser.majorVersion === '66' || options.browser.majorVersion === '67'
+       args.push("--disable-blink-features=RootLayerScrolling")
 
     args
 
