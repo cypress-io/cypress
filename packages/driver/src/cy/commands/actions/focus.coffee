@@ -94,7 +94,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onFail: options._log
           args: { num }
         })
-
+      
       ## if we haven't forced the blur, and we don't currently
       ## have a focused element OR we aren't the window then error
       if (options.force isnt true) and (not $focused) and (not isWin)

@@ -146,8 +146,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onReady: ($elToClick, coords) ->
             $focused = cy.getFocused()
 
-            el = $elToClick.get(0)
-
             ## record the previously focused element before
             ## issuing the mousedown because browsers may
             ## automatically shift the focus to the element
@@ -159,6 +157,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             if el = cy.needsForceFocus()
               cy.fireFocus(el)
+            
+            el = $elToClick.get(0)
 
             domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
 

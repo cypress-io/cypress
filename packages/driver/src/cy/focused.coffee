@@ -55,8 +55,8 @@ create = (state) ->
         relatedTarget: null
       }
 
-      options.$el.get(0).dispatchEvent(blurEvt)
-      options.$el.get(0).dispatchEvent(focusoutEvt)
+      el.dispatchEvent(blurEvt)
+      el.dispatchEvent(focusoutEvt)
 
   fireFocus = (el) ->
     ## if we are focusing a different element
