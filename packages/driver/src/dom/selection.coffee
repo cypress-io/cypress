@@ -2,6 +2,8 @@ $document = require('./document')
 $elements = require('./elements')
 $ = require('jquery')
 
+INTERNAL_SELECTION = "__Cypress_selection"
+
 _getSelectionBoundsFromTextarea = (el) ->
   {
     start: $elements.getNativeProp(el, 'selectionStart')
@@ -14,32 +16,18 @@ _getSelectionBoundsFromInput = (el) ->
       start: $elements.getNativeProp(el, 'selectionStart')
       end: $elements.getNativeProp(el, 'selectionEnd')
     }
-  ## HACK:
-  ## newer versions of Chrome incorrectly report the selection
-  ## for number and email types, so we change it to type=text
-  ## and blur it (then set it back and focus it further down
-  ## after the selection algorithm has taken place)
 
-  type = $elements.getNativeProp(el, 'type')
+  if internalSelection = el[INTERNAL_SELECTION]
+    return {
+      start: internalSelection.start
+      end: internalSelection.end
+    }
 
-  $elements.tryCallNativeMethod(el, 'blur')
-  
-  $elements.setNativeProp(el, 'type', 'text')
-
-  bounds = {
-    start: $elements.getNativeProp(el, 'selectionStart')
-    end: $elements.getNativeProp(el, 'selectionEnd')
+  return {
+    start: 0
+    end: 0
   }
 
-  ## HACK:
-  ## selection start and end don't report correctly when input
-  ## already has a value set, so if there's a value and there is no
-  ## native selection, force it to be at the end of the text
-
-  $elements.setNativeProp(el, 'type', type)
-  $elements.callNativeMethod(el, 'focus')
-
-  return bounds
 
 _getSelectionBoundsFromContentEditable = (el) ->
   doc = $document.getDocumentFromElement(el)
@@ -145,28 +133,28 @@ _getSelectionRangeByEl = (el) ->
 deleteSelectionContents = (el) ->
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
-    
-    # return doc.execCommand('delete', true, null)
-    $elements.callNativeMethod(doc, "execCommand", 'delete', true, null)
+    $elements.callNativeMethod(doc, "execCommand", 'delete', false, null)
     return
 
   ## for input and textarea, update selected text with empty string
   replaceSelectionContents(el, "")
 
 setSelectionRange = (el, start, end) ->
-  if $elements.isTextarea(el) || $elements.canSetSelectionRangeElement(el)
+  
+  if $elements.canSetSelectionRangeElement(el)
     $elements.callNativeMethod(el, "setSelectionRange", start, end)
     return
+
   ## NOTE: Some input elements have mobile implementations
   ## and thus may not always have a cursor, so calling setSelectionRange will throw.
-  ## we are assuming desktop here, so we cast to type='text', and get the cursor from there.
-  type = $elements.getNativeProp(el, 'type')
-  $elements.callNativeMethod(el, 'blur')
-  $elements.setNativeProp(el, 'type', 'text')
-  $elements.callNativeMethod(el, "setSelectionRange", start, end)
-  $elements.setNativeProp(el, 'type', type)
-  ## changing the type will lose focus, so focus again
-  $elements.callNativeMethod(el, "focus")
+  ## we are assuming desktop here, so we store our own internal state.
+
+  el[INTERNAL_SELECTION] = {
+    start
+    end
+  }
+
+  return
 
 
 deleteRightOfCursor = (el) ->
@@ -300,12 +288,12 @@ isCollapsed = (el) ->
 
 selectAll = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
-    return $elements.callNativeMethod(el, 'select')
+    setSelectionRange(el, 0, $elements.getNativeProp(el, 'value').length)
+    return
 
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
-    ## doc.execCommand('selectAll', true, null)
-    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', true, null)
+    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
     ## Keeping around native implementation
     ## for same reasons as listed below
     ##
@@ -376,6 +364,12 @@ getCaretPosition = (el) ->
   if bounds.start is bounds.end
     return bounds.start
   return null
+
+interceptSelect = ->
+  if $elements.isInput(this) and !$elements.canSetSelectionRangeElement(this)
+    setSelectionRange(this, 0, $elements.getNativeProp(this, 'value').length)
+  this.select()
+
 
 ## Selection API implementation of insert newline.
 ## Worth keeping around if we ever have to insert native
@@ -471,4 +465,5 @@ module.exports = {
   moveCursorDown
   replaceSelectionContents
   isCollapsed
+  interceptSelect
 }
