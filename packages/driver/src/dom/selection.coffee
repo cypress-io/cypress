@@ -109,7 +109,7 @@ _getHostContenteditable = (el) ->
     curEl = curEl.parentElement
   ## if there's no host contenteditable, we must be in designmode
   ## so act as if the original element is the host contenteditable
-  ## TODO: remove this when we no longer click before type and move 
+  ## TODO: remove this when we no longer click before type and move
   ## cursor to the end
   if !$elements.callNativeMethod(curEl, "getAttribute", "contenteditable")
     return el
@@ -140,7 +140,7 @@ deleteSelectionContents = (el) ->
   replaceSelectionContents(el, "")
 
 setSelectionRange = (el, start, end) ->
-  
+
   if $elements.canSetSelectionRangeElement(el)
     $elements.callNativeMethod(el, "setSelectionRange", start, end)
     return
@@ -271,7 +271,7 @@ _moveCursorUpOrDown = (el, up) ->
 
   if $elements.isTextarea(el) || $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
-    $elements.callNativeMethod(selection, "modify", 
+    $elements.callNativeMethod(selection, "modify",
       "move"
       if up then "backward" else "forward"
       "line"
@@ -368,7 +368,7 @@ getCaretPosition = (el) ->
 interceptSelect = ->
   if $elements.isInput(this) and !$elements.canSetSelectionRangeElement(this)
     setSelectionRange(this, 0, $elements.getNativeProp(this, 'value').length)
-  this.select()
+  $elements.callNativeMethod(this, 'select')
 
 
 ## Selection API implementation of insert newline.
