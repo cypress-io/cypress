@@ -866,6 +866,15 @@ describe "src/cy/commands/actions/type", ->
             .type('-123.12')
             .should('have.value', '-123.12')
 
+        it "type=number blurs consistently", ->
+          blurred = 0
+          cy.$$("#number-without-value").blur ->
+            blurred++
+          cy.get("#number-without-value")
+          .type('200').blur()
+          .then ->
+            expect(blurred).to.eq 1
+
       describe "input[type=email]", ->
         it "can change values", ->
           cy.get("#email-without-value").type("brian@foo.com").then ($text) ->
@@ -892,6 +901,17 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#email-without-value").type("bar@foo.com").then ($input) ->
             expect($input).to.have.value("bar@foo.com")
+
+        it "type=email blurs consistently", ->
+          blurred = 0
+          cy.$$("#email-without-value").blur ->
+            blurred++
+          cy.get("#email-without-value")
+          .type('foo@bar.com').blur()
+          .then ->
+            expect(blurred).to.eq 1
+
+
 
       describe "input[type=password]", ->
         it "can change values", ->
@@ -1053,7 +1073,7 @@ describe "src/cy/commands/actions/type", ->
         it "can type into an iframe with designmode = 'on'", ->
           ## append a new iframe to the body
           cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html"></iframe>')
-            .appendTo cy.$$('body')           
+            .appendTo cy.$$('body')
 
           ## wait for iframe to load
           loaded = false
@@ -1078,9 +1098,9 @@ describe "src/cy/commands/actions/type", ->
             .then ($iframe) ->
               iframeText = $iframe[0].contentDocument.body.innerText
               expect(iframeText).to.include('foo bar baz\nabc')
-          
-            
-          
+
+
+
 
       describe.skip "element reference loss", ->
         it 'follows the focus of the cursor', ->
@@ -2763,7 +2783,7 @@ describe "src/cy/commands/actions/type", ->
         cy
           .get(":text:first").type(" ")
           .should("have.value", " ")
-      
+
       it "can type into input with invalid type attribute", ->
         cy.get(':text:first')
           .invoke('attr', 'type', 'asdf')
