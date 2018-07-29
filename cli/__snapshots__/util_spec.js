@@ -3,15 +3,15 @@ exports['env_as_string 1'] = {
 }
 
 exports['env_as_object 1'] = {
-  "env": "foo=bar,magicNumber=1234,host=kevin.dev.local"
+  "env": "{\"foo\":\"bar\",\"magicNumber\":1234,\"host\":\"kevin.dev.local\"}"
 }
 
 exports['config_as_object 1'] = {
-  "config": "baseUrl=http://localhost:2000,watchForFileChanges=false"
+  "config": "{\"baseUrl\":\"http://localhost:2000\",\"watchForFileChanges\":false}"
 }
 
 exports['reporter_options_as_object 1'] = {
-  "reporterOptions": "mochaFile=results/my-test-output.xml,toConsole=true"
+  "reporterOptions": "{\"mochaFile\":\"results/my-test-output.xml\",\"toConsole\":true}"
 }
 
 exports['others_unchanged 1'] = {
@@ -19,7 +19,7 @@ exports['others_unchanged 1'] = {
 }
 
 exports['spec_as_array 1'] = {
-  "spec": "a,b,c"
+  "spec": "[\"a\",\"b\",\"c\"]"
 }
 
 exports['spec_as_string 1'] = {
