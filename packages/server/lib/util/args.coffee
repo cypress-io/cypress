@@ -90,9 +90,9 @@ sanitizeAndConvertNestedArgs = (str) ->
     return parsed
 
   ## invalid JSON, so assume mixed usage
-  ## first find foo={a=b,b=c} and bar=[1,2,3]
+  ## first find foo={a:b,b:c} and bar=[1,2,3]
   ## syntax and turn those into
-  ## foo: a=b|b=c
+  ## foo: a:b|b:c
   ## bar: 1|2|3
 
   _
