@@ -55,8 +55,9 @@ describe "lib/controllers/spec", ->
     @handle(specName, {isTextTerminal: true}).then =>
       expect(errors.log).to.be.called
       expect(errors.log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
-      expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")
-      expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Reason request failed")
+      expect(@project.emit).to.be.calledWith("exitEarlyWithErr")
+      expect(@project.emit.lastCall.args[1].message).to.be.include("Oops...we found an error preparing this test file")
+      expect(@project.emit.lastCall.args[1].message).to.be.include("Reason request failed")
 
   it "errors when sending file errors", ->
     sendFileErr = new Error("ENOENT")
