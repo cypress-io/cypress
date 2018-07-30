@@ -7,8 +7,7 @@ $utils = require("../cypress/utils")
 
 fixedOrStickyRe = /(fixed|sticky)/
 
-contentEditable = '[contenteditable]'
-focusable = "a[href],link[href],button,select,[tabindex],input,textarea,#{contentEditable}"
+focusable = "body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]"
 
 inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
 canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
@@ -58,6 +57,20 @@ _getSelectionEnd = ->
     when isTextarea(this)
       descriptor('HTMLTextAreaElement', 'selectionEnd').get
 
+_nativeFocus = ->
+  switch
+    when $window.isWindow(this)
+      window.focus
+    else
+      window.HTMLElement.prototype.focus
+
+_nativeBlur = ->
+  switch
+    when $window.isWindow(this)
+      window.blur
+    else
+      window.HTMLElement.prototype.blur
+
 _nativeSetSelectionRange = ->
   switch
     when isInput(this)
@@ -100,8 +113,8 @@ nativeMethods = {
   getAttribute: window.Element.prototype.getAttribute
   setSelectionRange: _nativeSetSelectionRange
   modify: window.Selection.prototype.modify
-  focus: window.HTMLElement.prototype.focus
-  blur: window.HTMLElement.prototype.blur
+  focus: _nativeFocus
+  blur: _nativeBlur
   select: _nativeSelect
 }
 
@@ -181,6 +194,9 @@ isSelect = (el) ->
 isOption = (el) ->
   getTagName(el) is 'option'
 
+isBody = (el) ->
+  getTagName(el) is 'body'
+
 isElement = (obj) ->
   try
     !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
@@ -245,6 +261,12 @@ isAttached = ($el) ->
   ## make sure every single element
   ## is attached to this document
   return $document.hasActiveWindow(doc) and _.every(els, isIn)
+
+isSame = ($el1, $el2) ->
+  el1 = $jquery.unwrap($el1)
+  el2 = $jquery.unwrap($el2)
+
+  el1 and el2 and _.isEqual(el1, el2)
 
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
@@ -475,8 +497,6 @@ stringify = (el, form = "long") ->
 
 
 module.exports = {
-  isInputType
-
   isElement
 
   isSelector
@@ -499,11 +519,15 @@ module.exports = {
 
   isContentEditable
 
+  isSame
+
+  isBody
+
+  isInput
+
   isTextarea
 
   isInputType
-
-  isInput
 
   isNeedSingleValueChangeInputElement
 

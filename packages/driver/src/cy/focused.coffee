@@ -30,12 +30,14 @@ create = (state) ->
 
     $elements.callNativeMethod(el, "addEventListener", "blur", onBlur)
 
-    ## does this synchronously fire?
-    ## if it does we don't need this
-    ## lower promise
     $elements.callNativeMethod(el, "blur")
 
     cleanup()
+
+    ## body will never emit focus events
+    ## so we avoid simulating this
+    if $elements.isBody(el)
+      return
 
     ## fallback if our focus event never fires
     ## to simulate the focus + focusin
@@ -69,6 +71,10 @@ create = (state) ->
 
     win = $window.getWindowByElement(el)
 
+    ## store the current focused element
+    ## since when we call .focus() it will change
+    $focused = getFocused()
+
     hasFocused = false
 
     hasFocus = top.document.hasFocus()
@@ -88,12 +94,14 @@ create = (state) ->
 
     $elements.callNativeMethod(el, "addEventListener", "focus", onFocus)
 
-    ## does this synchronously fire?
-    ## if it does we don't need this
-    ## lower promise
     $elements.callNativeMethod(el, "focus")
 
     cleanup()
+
+    ## body will never emit focus events
+    ## so we avoid simulating this
+    if $elements.isBody(el)
+      return
 
     ## fallback if our focus event never fires
     ## to simulate the focus + focusin
@@ -119,12 +127,14 @@ create = (state) ->
         el.dispatchEvent(focusEvt)
         el.dispatchEvent(focusinEvt)
 
-      $focused = getFocused()
-
       ## only blur if we have a focused element AND its not
       ## currently ourselves!
       if $focused and $focused.get(0) isnt el
-        fireBlur($focused.get(0))
+        ## additionally make sure that this isnt
+        ## the window, since that does not steal focus
+        ## or actually change the activeElement
+        if not $window.isWindow(el)
+          fireBlur($focused.get(0))
 
       simulate()
 
@@ -205,11 +215,6 @@ create = (state) ->
       activeElementIsDefault = ->
         (not activeElement) or (activeElement is body)
 
-      ## if activeElement is something other than the default
-      ## we bail early and reset the force focused el.
-      ## this can happen if the AUT steals focus
-      ## programmatically by calling
-      ## HTMLElement::focus directly
       if activeElementIsDefault()
         return null
 

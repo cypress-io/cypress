@@ -144,20 +144,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick, coords) ->
-            $focused = cy.getFocused()
-
             ## record the previously focused element before
             ## issuing the mousedown because browsers may
             ## automatically shift the focus to the element
             ## without firing the focus event
-            $previouslyFocusedEl = $focused
-
-            ## retrieve the first focusable $el in our parent chain
-            $elToFocus = $elements.getFirstFocusableEl($elToClick)
+            $previouslyFocused = cy.getFocused()
 
             if el = cy.needsForceFocus()
               cy.fireFocus(el)
-            
+
             el = $elToClick.get(0)
 
             domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
@@ -176,8 +171,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## retrieve the first focusable $el in our parent chain
               $elToFocus = $elements.getFirstFocusableEl($elToClick)
 
-              if cy.needsFocus($elToFocus, $previouslyFocusedEl)
+              if cy.needsFocus($elToFocus, $previouslyFocused)
                 cy.fireFocus($elToFocus.get(0))
+
+                ## if we are currently trying to focus
+                ## the body then calling body.focus()
+                ## is a noop, and it will not blur the
+                ## current element, which is all so wrong
+                if $elToFocus.is("body")
+                  $focused = cy.getFocused()
+
+                  ## if the current focused element hasn't changed
+                  ## then blur manually
+                  if $elements.isSame($focused, $previouslyFocused)
+                    cy.fireBlur($focused.get(0))
 
               afterMouseDown($elToClick, coords)
         })

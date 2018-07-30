@@ -77,6 +77,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## get this into a jquery object
         options.$el = $dom.wrap(options.$el)
 
+      isBody = options.$el.is("body")
+
       if options.log
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = $utils.filterOutOptions(options)
@@ -94,10 +96,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onFail: options._log
           args: { num }
         })
-      
+
       ## if we haven't forced the blur, and we don't currently
-      ## have a focused element OR we aren't the window then error
-      if (options.force isnt true) and (not $focused) and (not isWin)
+      ## have a focused element OR we aren't the window or body then error
+      if (options.force isnt true) and (not $focused) and (not isWin) and (not isBody)
         return if options.error is false
 
         $utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
@@ -105,7 +107,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we're currently window dont check for the wrong
       ## focused element because window will not show up
       ## as $focused
-      if (options.force isnt true) and (not isWin) and (
+      if (options.force isnt true) and (not isWin) and (not isBody) and (
         options.$el.get(0) isnt $focused.get(0)
       )
         return if options.error is false

@@ -1024,10 +1024,21 @@ describe "src/cy/commands/actions/click", ->
           .get("#button-covered-in-span").click()
           .focused().should("have.id", "button-covered-in-span")
 
-      it "will give focus to the window if no element is focusable", (done) ->
-        $(cy.state("window")).on "focus", -> done()
+      it "will not fire focus events when nothing can receive focus", ->
+        onFocus = cy.stub()
 
-        cy.get("#nested-find").click()
+        win = cy.state("window")
+        $body = cy.$$("body")
+        $div = cy.$$("#nested-find")
+
+        $(win).on("focus", onFocus)
+        $body.on("focus", onFocus)
+        $div.on("focus", onFocus)
+
+        cy
+        .get("#nested-find").click()
+        .then ->
+          expect(onFocus).not.to.be.called
 
       # it "events", ->
       #   $btn = cy.$$("button")

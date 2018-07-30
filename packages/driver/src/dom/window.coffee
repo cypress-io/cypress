@@ -2,6 +2,9 @@ $ = require("jquery")
 $document = require("./document")
 
 getWindowByElement = (el) ->
+  if isWindow(el)
+    return el
+
   doc = $document.getDocumentFromElement(el)
   getWindowByDocument(doc)
 

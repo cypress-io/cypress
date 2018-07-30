@@ -334,9 +334,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onReady: ($elToClick) ->
             $focused = cy.getFocused()
 
-            ## retrieve the first focusable $el in our parent chain
-            $elToFocus = $elements.getFirstFocusableEl($elToClick)
-
             if el = cy.needsForceFocus()
               cy.fireFocus(el)
 

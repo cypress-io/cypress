@@ -157,8 +157,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
-      # contentWindow.EventTarget.prototype.addEventLister = ->
-
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
 
