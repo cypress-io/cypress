@@ -1070,11 +1070,7 @@ describe "src/cy/commands/actions/type", ->
 
         it "can type into an iframe with designmode = 'on'", ->
           ## append a new iframe to the body
-<<<<<<< HEAD
           cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
-=======
-          cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html"></iframe>')
->>>>>>> develop
             .appendTo cy.$$('body')
 
           ## wait for iframe to load
