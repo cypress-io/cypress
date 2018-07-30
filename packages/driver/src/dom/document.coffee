@@ -1,6 +1,8 @@
+docNode = Node.DOCUMENT_NODE
+
 isDocument = (obj) ->
   try
-    !!((obj and obj.nodeType is 9) or (obj and obj[0] and obj[0].nodeType is 9))
+    !!((obj and obj.nodeType is docNode) or (obj and obj[0] and obj[0].nodeType is docNode))
   catch
     false
 
@@ -9,6 +11,9 @@ hasActiveWindow = (doc) ->
   return !!doc.defaultView
 
 getDocumentFromElement = (el) ->
+  if isDocument(el)
+    return el
+
   el.ownerDocument
 
 module.exports = {

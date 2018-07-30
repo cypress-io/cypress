@@ -170,6 +170,13 @@ module.exports = {
       win.removeAllListeners()
       options.onClose.apply(win, arguments)
 
+    ## the webview loses focus on navigation, so we
+    ## have to refocus it everytime top navigates in headless mode
+    ## https://github.com/cypress-io/cypress/issues/2190
+    if options.show is false
+      win.webContents.on "did-start-loading", ->
+        win.focusOnWebView()
+
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)
 

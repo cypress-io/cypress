@@ -107,8 +107,10 @@ module.exports = {
   open: (browserName, url, options = {}, automation) ->
     { projectRoot, isTextTerminal } = options
 
+    debug("open %o", { browserName, url })
     savedState(projectRoot, isTextTerminal)
     .then (state) ->
+      debug("got saved state")
       state.get()
     .then (state) =>
       debug("received saved state %o", state)
