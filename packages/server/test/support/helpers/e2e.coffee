@@ -259,7 +259,7 @@ module.exports = {
       args.push("--browser=#{browser}")
 
     if options.config
-      args.push("--config", options.config)
+      args.push("--config", JSON.stringify(options.config))
 
     if options.env
       args.push("--env", options.env)
