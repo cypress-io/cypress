@@ -24,7 +24,7 @@ const installDir = '/cache/Cypress/1.2.3'
 
 const isCircle = Boolean(process.env.CIRCLECI)
 
-describe.only('/lib/tasks/install', function () {
+describe('/lib/tasks/install', function () {
   require('mocha-banner').register()
 
   before(() => {
