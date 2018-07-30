@@ -209,8 +209,6 @@ createRun = (options = {}) ->
       authorEmail: git.email
       message: git.message
       remoteOrigin: git.remote
-      pullRequestId: null
-      defaultBranch: null
     })
   })
   .catch (err) ->
