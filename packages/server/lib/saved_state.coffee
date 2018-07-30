@@ -38,8 +38,6 @@ normalizeAndWhitelistSet = (set, key, value) ->
   set(_.pick(valueObject, whitelist))
 
 module.exports = (projectRoot, isTextTerminal) ->
-  console.log(projectRoot, isTextTerminal)
-
   if isTextTerminal
     debug("noop saved state")
     return Promise.resolve(FileUtil.noopFile)
