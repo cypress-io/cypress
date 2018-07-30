@@ -56,6 +56,71 @@ exports['e2e plugins passes 1'] = `
 
 `
 
+exports['e2e plugins fails on async preprocessor error with support file 1'] = `
+Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+
+Error: Async error from plugins file
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (preprocessor_async_error_spec.coffee)                                     │
+  │ Searched:   cypress/integration/preprocessor_async_error_spec.coffee                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: preprocessor_async_error_spec.coffee...                                         (1 of 1) 
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────┐
+  │ Tests:        0                                    │
+  │ Passing:      0                                    │
+  │ Failing:      1                                    │
+  │ Pending:      0                                    │
+  │ Skipped:      0                                    │
+  │ Screenshots:  0                                    │
+  │ Video:        true                                 │
+  │ Duration:     X seconds                            │
+  │ Spec Ran:     preprocessor_async_error_spec.coffee │
+  └────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ preprocessor_async_error_spec.coffee      XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+
+`
+
 exports['e2e plugins fails on async preprocessor error with spec file 1'] = `
 ====================================================================================================
 
@@ -365,71 +430,6 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ ✖ after_screenshot_spec.coffee              XX:XX        4        3        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        4        3        1        -        -  
-
-`
-
-exports['e2e plugins fails on async preprocessor error with support file 1'] = `
-Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
-
-Error: Async error from plugins file
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (preprocessor_async_error_spec.coffee)                                     │
-  │ Searched:   cypress/integration/preprocessor_async_error_spec.coffee                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: preprocessor_async_error_spec.coffee...                                         (1 of 1) 
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────┐
-  │ Tests:        0                                    │
-  │ Passing:      0                                    │
-  │ Failing:      1                                    │
-  │ Pending:      0                                    │
-  │ Skipped:      0                                    │
-  │ Screenshots:  0                                    │
-  │ Video:        true                                 │
-  │ Duration:     X seconds                            │
-  │ Spec Ran:     preprocessor_async_error_spec.coffee │
-  └────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ preprocessor_async_error_spec.coffee      XX:XX        -        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
 `
 
