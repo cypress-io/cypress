@@ -39,7 +39,7 @@
 
 it "sends delayed focus when programmatically invoked during action commands", ->
   cy
-  .visit("http://localhost:3500/fixtures/generic.html")
+  .visit("http://localhost:3500/fixtures/active-elements.html")
   .then ->
     events = []
 
@@ -100,7 +100,7 @@ it "sends delayed focus when programmatically invoked during action commands", -
 
 it 'sends programmatic blur when delayed due to window being out of focus', ->
   cy
-  .visit("http://localhost:3500/fixtures/generic.html")
+  .visit("http://localhost:3500/fixtures/active-elements.html")
   .then ->
     events = []
 
@@ -166,7 +166,7 @@ it 'sends programmatic blur when delayed due to window being out of focus', ->
 
 it "blur the activeElement when clicking the body", ->
   cy
-  .visit("http://localhost:3500/fixtures/generic.html")
+  .visit("http://localhost:3500/fixtures/active-elements.html")
   .then ->
     events = []
 
