@@ -25,7 +25,7 @@ describe('cypress', function () {
     }
 
     it('calls open#start, passing in options', function () {
-      cypress.open({ foo: 'foo' })
+      return cypress.open({ foo: 'foo' })
       .then(getStartArgs)
       .then((args) => {
         expect(args.foo).to.equal('foo')
@@ -37,9 +37,12 @@ describe('cypress', function () {
         pageLoadTime: 10000,
         watchForFileChanges: false,
       }
-      cypress.open({ config })
+
+      return cypress.open({ config })
       .then(getStartArgs)
-      .then(snapshot)
+      .then((args) => {
+        expect(args).to.deep.eq({ config: JSON.stringify(config) })
+      })
     })
   })
 
@@ -66,35 +69,36 @@ describe('cypress', function () {
       return normalizeCallArgs(getCallArgs(run.start))
     }
 
-    it('calls run#start, passing in options', () =>
-      cypress.run({ foo: 'foo' })
+    it('calls run#start, passing in options', () => {
+      return cypress.run({ spec: 'foo' })
       .then(getStartArgs)
       .then((args) => {
-        expect(args.foo).to.equal('foo')
+        expect(args.spec).to.equal('foo')
       })
-    )
+    })
 
     it('normalizes config object', () => {
       const config = {
         pageLoadTime: 10000,
         watchForFileChanges: false,
       }
+
       return cypress.run({ config })
       .then(getStartArgs)
-      .then(snapshot)
+      .then((args) => {
+        expect(args).to.deep.eq({ config: JSON.stringify(config) })
+      })
     })
 
-    it('normalizes env option if passed an object', () =>
-      cypress.run({ env: { foo: 'bar' } })
-      .then(getStartArgs)
-      .then(snapshot)
-    )
+    it('normalizes env option if passed an object', () => {
+      const env = { foo: 'bar', another: 'one' }
 
-    it('normalizes env option if passed an object with multiple properties', () =>
-      cypress.run({ env: { foo: 'bar', another: 'one' } })
+      return cypress.run({ env })
       .then(getStartArgs)
-      .then(snapshot)
-    )
+      .then((args) => {
+        expect(args).to.deep.eq({ env: JSON.stringify(env) })
+      })
+    })
 
     it('gets random tmp file and passes it to run#start', function () {
       return cypress.run().then(() => {
@@ -102,8 +106,8 @@ describe('cypress', function () {
       })
     })
 
-    it('resolves with contents of tmp file', () =>
-      cypress.run().then(snapshot)
-    )
+    it('resolves with contents of tmp file', () => {
+      return cypress.run().then(snapshot)
+    })
   })
 })

@@ -169,7 +169,7 @@ isNeedSingleValueChangeInputElement = (el) ->
   return inputTypeNeedSingleValueChangeRe.test(el.type)
 
 canSetSelectionRangeElement = (el) ->
-  canSetSelectionRangeElementRe.test(el.type)
+  isTextarea(el) or (isInput(el) and canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
 
 getTagName = (el) ->
   tagName = el.tagName or ""

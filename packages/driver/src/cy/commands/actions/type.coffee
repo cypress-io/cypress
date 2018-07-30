@@ -293,7 +293,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               if !readOnly
                 if changed
                   dispatchChangeEvent(el, id)
-                state "changeEvent", null
+
+                state("changeEvent", null)
 
               return changed
 

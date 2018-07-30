@@ -2,6 +2,7 @@ path     = require("path")
 Promise  = require("bluebird")
 cp       = require("child_process")
 fs       = require("../../lib/util/fs")
+glob     = require("../../lib/util/glob")
 e2e      = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
@@ -41,13 +42,18 @@ describe "e2e reporters", ->
       expectedExitCode: 0
       snapshot: true
       reporter: "junit"
-      reporterOptions: "mochaFile=junit-output/result.xml"
+      reporterOptions: "mochaFile=junit-output/result.[hash].xml,testCaseSwitchClassnameAndName=true"
     })
     .then ->
-      fs.readFileAsync(path.join(e2ePath, "junit-output", "result.xml"), "utf8")
-      .then (str) ->
-        expect(str).to.include("<testsuite name=\"simple passing spec\"")
-        expect(str).to.include("<testcase name=\"simple passing spec passes\"")
+      glob(path.join(e2ePath, "junit-output", "result.*.xml"))
+      .then (paths) ->
+        expect(paths.length).to.eq(1)
+
+        fs.readFileAsync(paths[0], "utf8")
+        .then (str) ->
+          expect(str).to.include("<testsuite name=\"simple passing spec\"")
+          expect(str).to.include("<testcase name=\"passes\"")
+          expect(str).to.include("classname=\"simple passing spec passes\"")
 
   it "supports local custom reporter", ->
     e2e.exec(@, {
