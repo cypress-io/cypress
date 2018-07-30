@@ -9,6 +9,7 @@ appData   = require("../util/app_data")
 utils     = require("./utils")
 
 LOAD_EXTENSION = "--load-extension="
+CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -39,7 +40,10 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
   "--disable-device-discovery-notifications"
-  "--disable-blink-features=RootLayerScrolling"
+
+  ## http://www.chromium.org/Home/chromium-security/site-isolation
+  ## https://github.com/cypress-io/cypress/issues/1951
+  "--disable-site-isolation-trials"
 
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
@@ -94,6 +98,12 @@ module.exports = {
       .return(extensionDest)
 
   _getArgs: (options = {}) ->
+    _.defaults(options, {
+      browser: {}
+    })
+
+    { majorVersion } = options.browser
+
     args = [].concat(defaultArgs)
 
     if os.platform() is "linux"
@@ -109,6 +119,13 @@ module.exports = {
     if options.chromeWebSecurity is false
       args.push("--disable-web-security")
       args.push("--allow-running-insecure-content")
+
+    ## prevent AUT shaking in 66 & 67, but flag breaks chrome in 68+
+    ## https://github.com/cypress-io/cypress/issues/2037
+    ## https://github.com/cypress-io/cypress/issues/2215
+    ## https://github.com/cypress-io/cypress/issues/2223
+    if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
+       args.push("--disable-blink-features=RootLayerScrolling")
 
     args
 

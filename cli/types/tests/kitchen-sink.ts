@@ -47,3 +47,33 @@ cy.on('window:alert', cy.stub())
 // window:confirm stubbing
 cy.on('window:confirm', () => {})
 cy.on('window:confirm', cy.stub())
+
+// specifying HTTP method directly in the options object
+cy.request({
+  url: "http://localhost:3000/myressource",
+  method: "POST",
+  body: {}
+})
+
+// if you want a separate variable, you need specify its type
+// otherwise TSC does not cast string "POST" as HttpMethod
+// https://github.com/cypress-io/cypress/issues/2093
+const opts: Partial<Cypress.RequestOptions> = {
+  url: "http://localhost:3000/myressource",
+  method: "POST",
+  body: {}
+}
+cy.request(opts)
+
+// you can cast just the "method" property
+const opts2 = {
+  url: "http://localhost:3000/myressource",
+  method: "POST" as Cypress.HttpMethod,
+  body: {}
+}
+cy.request(opts2)
+
+const obj = {
+  foo: () => {}
+}
+cy.spy(obj, 'foo').as('my-spy')

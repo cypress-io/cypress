@@ -71,13 +71,22 @@ describe "lib/modes/record", ->
       sinon.stub(ciProvider, "params").returns({foo: "bar"})
       sinon.stub(ciProvider, "buildNum").returns("build-123")
 
-      sinon.stub(commitInfo, "commitInfo").resolves({
+      @gitInfo = {
         branch: "master",
         author: "brian",
         email: "brian@cypress.io",
         message: "such hax",
         sha: "sha-123",
         remote: "https://github.com/foo/bar.git"
+      }
+      sinon.stub(commitInfo, "commitInfo").resolves(@gitInfo)
+      sinon.stub(ciProvider, "gitInfo").returns({
+        sha: @gitInfo.sha
+        branch: @gitInfo.branch
+        authorName: @gitInfo.author
+        authorEmail: @gitInfo.email
+        message: @gitInfo.message
+        remoteOrigin: @gitInfo.remote
       })
 
       sinon.stub(api, "createRun").resolves()
@@ -130,11 +139,11 @@ describe "lib/modes/record", ->
             buildNumber: "build-123"
           }
           commit: {
-            sha: "sha-123",
-            branch: "master",
-            authorName: "brian",
-            authorEmail: "brian@cypress.io",
-            message: "such hax",
+            sha: "sha-123"
+            branch: "master"
+            authorName: "brian"
+            authorEmail: "brian@cypress.io"
+            message: "such hax"
             remoteOrigin: "https://github.com/foo/bar.git"
           }
         })

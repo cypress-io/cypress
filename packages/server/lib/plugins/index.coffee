@@ -82,7 +82,14 @@ module.exports = {
   register: register
 
   has: (event) ->
-    !!registeredEvents[event]
+    isRegistered = !!registeredEvents[event]
+
+    debug("plugin event registered? %o", {
+      event,
+      isRegistered
+    })
+
+    isRegistered
 
   execute: (event, args...) ->
     debug("execute plugin event '#{event}' with args: %o %o %o", args...)

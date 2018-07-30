@@ -1,3 +1,4 @@
+import { capitalize } from 'lodash'
 import gravatar from 'gravatar'
 import duration from '../../../server/lib/util/duration'
 
@@ -29,6 +30,12 @@ module.exports = {
     if (!browserName) return ''
 
     return browserIconLookup[browserName] || 'globe'
+  },
+
+  browserNameFormatted: (browserName) => {
+    if (!browserName) return ''
+
+    return capitalize(browserName)
   },
 
   browserVersionFormatted: (browserVersion) => {

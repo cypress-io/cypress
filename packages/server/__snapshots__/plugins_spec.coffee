@@ -192,7 +192,7 @@ exports['e2e plugins works with user extensions 1'] = `
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                          │
+  │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.coffee)                                                          │
   │ Searched:   cypress/integration/app_spec.coffee                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

@@ -315,7 +315,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("integrationFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-run-mode"])
         .then =>
           fs.statAsync(cfg.integrationFolder)
         .then =>
@@ -365,7 +365,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-run-mode"])
         .then =>
           fs.statAsync(cfg.fixturesFolder)
         .then =>
@@ -380,7 +380,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("supportFolder should not exist!")
         .catch {code: "ENOENT"}, =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-run-mode"])
         .then =>
           fs.statAsync(supportFolder)
         .then =>
@@ -989,7 +989,6 @@ describe "lib/cypress", ->
       cypress.start(["--port=2121", "--config=pageLoadTimeout=1000"])
       .then ->
         expect(Events.start).to.be.calledWithMatch({
-          port: 2121,
           config: {
             pageLoadTimeout: 1000
             port: 2121
