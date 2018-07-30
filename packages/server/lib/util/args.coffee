@@ -120,7 +120,7 @@ module.exports = {
       "clear-logs":  "clearLogs"
       "run-project": "runProject"
       "return-pkg":  "returnPkg"
-      "runMode":    "isTextTerminal"
+      "run-mode":    "isTextTerminal"
       "exit-with-code":   "exitWithCode"
       "reporter-options": "reporterOptions"
       "output-path":      "outputPath"
