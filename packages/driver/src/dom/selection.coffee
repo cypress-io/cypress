@@ -1,20 +1,20 @@
-$document = require('./document')
-$elements = require('./elements')
-$ = require('jquery')
+$document = require("./document")
+$elements = require("./elements")
+$ = require("jquery")
 
 INTERNAL_STATE = "__Cypress_state__"
 
 _getSelectionBoundsFromTextarea = (el) ->
   {
-    start: $elements.getNativeProp(el, 'selectionStart')
-    end: $elements.getNativeProp(el, 'selectionEnd')
+    start: $elements.getNativeProp(el, "selectionStart")
+    end: $elements.getNativeProp(el, "selectionEnd")
   }
 
 _getSelectionBoundsFromInput = (el) ->
   if $elements.canSetSelectionRangeElement(el)
     return {
-      start: $elements.getNativeProp(el, 'selectionStart')
-      end: $elements.getNativeProp(el, 'selectionEnd')
+      start: $elements.getNativeProp(el, "selectionStart")
+      end: $elements.getNativeProp(el, "selectionEnd")
     }
 
   if internalState = el[INTERNAL_STATE]
@@ -57,7 +57,7 @@ _getSelectionBoundsFromContentEditable = (el) ->
 _replaceSelectionContentsContentEditable = (el, text) ->
   doc = $document.getDocumentFromElement(el)
   ## NOTE: insertText will also handle '\n', and render newlines
-  $elements.callNativeMethod(doc, "execCommand", 'insertText', true, text)
+  $elements.callNativeMethod(doc, "execCommand", "insertText", true, text)
   return
 
   ## Keeping around native implementation
@@ -76,7 +76,7 @@ _replaceSelectionContentsContentEditable = (el, text) ->
   # else
   #   newTextNode = doc.createTextNode(text)
   # if $elements.isElement(startNode)
-  #   if startNode.firstChild?.tagName is 'BR'
+  #   if startNode.firstChild?.tagName is "BR"
   #     range.selectNode(startNode.firstChild)
   #     range.deleteContents()
   #   ## else startNode is el, so just insert the node
@@ -130,7 +130,7 @@ _getSelectionRangeByEl = (el) ->
   sel = _getSelectionByEl(el)
   if sel.rangeCount > 0
     sel.getRangeAt(0)
-  else throw new Error('No selection in document')
+  else throw new Error("No selection in document")
 
 deleteSelectionContents = (el) ->
   if $elements.isContentEditable(el)
@@ -173,9 +173,9 @@ deleteRightOfCursor = (el) ->
 
   if $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
-    $elements.callNativeMethod(selection, "modify", 'extend', 'forward', 'character')
+    $elements.callNativeMethod(selection, "modify", "extend", "forward", "character")
 
-    if $elements.getNativeProp(selection, 'isCollapsed')
+    if $elements.getNativeProp(selection, "isCollapsed")
       ## there's nothing to delete
       return false
 
@@ -199,7 +199,7 @@ deleteLeftOfCursor = (el) ->
   if $elements.isContentEditable(el)
     ## there is no 'backwardDelete' command for execCommand, so use the Selection API
     selection = _getSelectionByEl(el)
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'backward', 'character')
+    $elements.callNativeMethod(selection, "modify", "extend", "backward", "character")
 
     if selection.isCollapsed
       ## there's nothing to delete
@@ -266,7 +266,7 @@ _moveCursorUpOrDown = (el, up) ->
   ## on an input, instead of moving the cursor
   ## we want to perform the native browser action
   ## which is to increment the step/interval
-    if $elements.isInputType(el, 'number')
+    if $elements.isInputType(el, "number")
       if up then el.stepUp?() else el.stepDown?()
     return
 
@@ -335,15 +335,15 @@ moveSelectionToEnd = (el) ->
     hostContenteditable = _getHostContenteditable(el)
     lastTextNode = _getInnerLastChild(hostContenteditable)
 
-    if lastTextNode.tagName is 'BR'
+    if lastTextNode.tagName is "BR"
       lastTextNode = lastTextNode.parentNode
 
     range.setStart(lastTextNode, lastTextNode.length)
     range.setEnd(lastTextNode, lastTextNode.length)
 
-    sel = $elements.callNativeMethod(doc, 'getSelection')
-    $elements.callNativeMethod(sel, 'removeAllRanges')
-    $elements.callNativeMethod(sel, 'addRange', range)
+    sel = $elements.callNativeMethod(doc, "getSelection")
+    $elements.callNativeMethod(sel, "removeAllRanges")
+    $elements.callNativeMethod(sel, "addRange", range)
 
 ## TODO: think about renaming this
 replaceSelectionContents = (el, key) ->
@@ -386,7 +386,7 @@ interceptSelect = ->
 # _insertNewlineIntoContentEditable = (el) ->
 #   selection = _getSelectionByEl(el)
 #   selection.deleteFromDocument()
-#   $elements.callNativeMethod(selection, "modify", 'extend', 'forward', 'lineboundary')
+#   $elements.callNativeMethod(selection, "modify", "extend", "forward", "lineboundary")
 #   range = selection.getRangeAt(0)
 #   clonedElements = range.cloneContents()
 #   selection.deleteFromDocument()

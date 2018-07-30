@@ -335,6 +335,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onReady: ($elToClick) ->
             $focused = cy.getFocused()
 
+            if el = cy.needsForceFocus()
+              cy.fireFocus(el)
+
             ## if we dont have a focused element
             ## or if we do and its not ourselves
             ## then issue the click

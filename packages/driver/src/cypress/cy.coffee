@@ -158,9 +158,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
+      contentWindow.HTMLElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
+
       contentWindow.HTMLInputElement.prototype.select = ->
         $selection.interceptSelect.call(this)
-  
+
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
 
@@ -644,6 +647,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## focused sync methods
     getFocused: focused.getFocused
+    needsForceFocus: focused.needsForceFocus
+    needsFocus: focused.needsFocus
+    fireFocus: focused.fireFocus
+    fireBlur: focused.fireBlur
 
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
