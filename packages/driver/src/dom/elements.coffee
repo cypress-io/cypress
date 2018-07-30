@@ -21,12 +21,12 @@ descriptor = (klass, prop) ->
   Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
 _getValue = ->
-  switch 
+  switch
     when isInput(this)
       descriptor("HTMLInputElement", "value").get
     when isTextarea(this)
       descriptor("HTMLTextAreaElement", "value").get
-    when isSelect(this)    
+    when isSelect(this)
       descriptor("HTMLSelectElement", "value").get
     else
       ## is an option element
@@ -35,7 +35,7 @@ _getValue = ->
 
 _setValue = ->
   switch
-    when isInput(this) 
+    when isInput(this)
       descriptor("HTMLInputElement", "value").set
     when isTextarea(this)
       descriptor("HTMLTextAreaElement", "value").set
@@ -44,31 +44,65 @@ _setValue = ->
     else
       ## is an options element
       descriptor("HTMLOptionElement", "value").set
-      
 
-_setSelectionRange = () ->
+
+_getSelectionStart = () ->
+  switch
+    when isInput(this)
+      descriptor('HTMLInputElement', 'selectionStart').get
+    when isTextarea(this)
+      descriptor('HTMLTextAreaElement', 'selectionStart').get
+
+_getSelectionEnd = () ->
+  switch
+    when isInput(this)
+      descriptor('HTMLInputElement', 'selectionEnd').get
+    when isTextarea(this)
+      descriptor('HTMLTextAreaElement', 'selectionEnd').get
+
+_nativeSetSelectionRange = () ->
   switch
     when isInput(this)
       window.HTMLInputElement.prototype.setSelectionRange
-    when isTextarea(this)
+    else
+      ## is textarea
       window.HTMLTextAreaElement.prototype.setSelectionRange
+
+_nativeSelect = () ->
+  switch
+    when isInput(this)
+      window.HTMLInputElement.prototype.select
+    else
+      ## is textarea
+      window.HTMLTextAreaElement.prototype.select
 
 nativeGetters = {
   value: _getValue
   selectionStart: descriptor("HTMLInputElement", "selectionStart").get
   isContentEditable: descriptor("HTMLElement", "isContentEditable").get
+  isCollapsed: descriptor("Selection", 'isCollapsed').get
+  selectionStart: _getSelectionStart
+  selectionEnd: _getSelectionEnd
+  type: descriptor("HTMLInputElement", "type").get
 }
 
 nativeSetters = {
   value: _setValue
+  type: descriptor("HTMLInputElement", "type").set
 }
 
 nativeMethods = {
   createRange: window.document.createRange
+  getSelection: window.document.getSelection
+  removeAllRanges: window.Selection.prototype.removeAllRanges
+  addRange: window.Selection.prototype.addRange
   execCommand: window.document.execCommand
   getAttribute: window.Element.prototype.getAttribute
-  setSelectionRange: _setSelectionRange
+  setSelectionRange: _nativeSetSelectionRange
   modify: window.Selection.prototype.modify
+  focus: window.HTMLElement.prototype.focus
+  blur: window.HTMLElement.prototype.blur
+  select: _nativeSelect
 }
 
 tryCallNativeMethod = ->
@@ -86,7 +120,7 @@ callNativeMethod = (obj, fn, args...) ->
 
   if _.isFunction(retFn)
     retFn = retFn.apply(obj, args)
-  
+
   return retFn
 
 getNativeProp = (obj, prop) ->
@@ -100,8 +134,8 @@ getNativeProp = (obj, prop) ->
     ## if we got back another function
     ## then invoke it again
     retProp = retProp.call(obj, prop)
-  
-  return retProp  
+
+  return retProp
 
 setNativeProp = (obj, prop, val) ->
   if not nativeProp = nativeSetters[prop]
@@ -138,7 +172,7 @@ isNeedSingleValueChangeInputElement = (el) ->
 #     return setNativeProp.call(el, val)
 
 canSetSelectionRangeElement = (el) ->
-  canSetSelectionRangeElementRe.test(el.type)
+  isTextarea(el) or (isInput(el) and canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
 
 getTagName = (el) ->
   tagName = el.tagName or ""
@@ -172,13 +206,11 @@ isElement = (obj) ->
 isFocusable = ($el) ->
   $el.is(focusable)
 
-isType = ($el, type) ->
+isInputType = ($el, type) ->
+  el = [].concat($jquery.unwrap($el))[0]
   ## NOTE: use DOMElement.type instead of getAttribute('type') since
   ##       <input type="asdf"> will have type="text", and behaves like text type
-  ($el.get(0).type or "").toLowerCase() is type
-
-isInputType = (el, type) ->
-  el.type.toLowerCase() is type
+  isInput(el) && (getNativeProp(el, 'type') or "").toLowerCase() is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
@@ -232,12 +264,14 @@ isAttached = ($el) ->
 
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
-  type = (type) -> isType($el, type)
+  type = (type) -> isInputType($el, type)
+  isContentEditableElement = isContentEditable($el.get(0))
 
   _.some([
+    isContentEditableElement
     sel("textarea")
     sel(":text")
-    sel("[contenteditable]")
+    type("text")
     type("password")
     type("email")
     type("number")
@@ -437,7 +471,7 @@ stringify = (el, form = "long") ->
 
 
 module.exports = {
-  isType
+  isInputType
 
   isElement
 

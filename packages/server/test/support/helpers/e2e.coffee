@@ -222,6 +222,8 @@ module.exports = {
     if spec = options.spec
       ## normalize into array and then prefix
       specs = spec.split(',').map (spec) ->
+        return spec if path.isAbsolute(spec)
+
         path.join(options.project, "cypress", "integration", spec)
 
       ## normalize the path to the spec

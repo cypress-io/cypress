@@ -866,6 +866,15 @@ describe "src/cy/commands/actions/type", ->
             .type('-123.12')
             .should('have.value', '-123.12')
 
+        it "type=number blurs consistently", ->
+          blurred = 0
+          cy.$$("#number-without-value").blur ->
+            blurred++
+          cy.get("#number-without-value")
+          .type('200').blur()
+          .then ->
+            expect(blurred).to.eq 1
+
       describe "input[type=email]", ->
         it "can change values", ->
           cy.get("#email-without-value").type("brian@foo.com").then ($text) ->
@@ -892,6 +901,15 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#email-without-value").type("bar@foo.com").then ($input) ->
             expect($input).to.have.value("bar@foo.com")
+
+        it "type=email blurs consistently", ->
+          blurred = 0
+          cy.$$("#email-without-value").blur ->
+            blurred++
+          cy.get("#email-without-value")
+          .type('foo@bar.com').blur()
+          .then ->
+            expect(blurred).to.eq 1
 
       describe "input[type=password]", ->
         it "can change values", ->
@@ -1050,6 +1068,36 @@ describe "src/cy/commands/actions/type", ->
           .type("foobar").then ($div) ->
             expect($div.get(0).innerHTML).to.eql("<div>foobar</div>")
 
+        it "can type into an iframe with designmode = 'on'", ->
+          ## append a new iframe to the body
+          cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html"></iframe>')
+            .appendTo cy.$$('body')
+
+          ## wait for iframe to load
+          loaded = false
+          cy.get('#generic-iframe')
+            .then ($iframe) ->
+              $iframe.load ->
+                loaded = true
+            .scrollIntoView()
+            .should ->
+              expect(loaded).to.eq true
+
+          ## type text into iframe
+          cy.get('#generic-iframe')
+            .then ($iframe) ->
+              $iframe[0].contentDocument.designMode = 'on'
+              iframe = $iframe.contents()
+              cy.wrap(iframe.find('html')).first()
+                .type('{selectall}{del} foo bar baz{enter}ac{leftarrow}b')
+
+          # assert that text was typed
+          cy.get('#generic-iframe')
+            .then ($iframe) ->
+              iframeText = $iframe[0].contentDocument.body.innerText
+              expect(iframeText).to.include('foo bar baz\nabc')
+
+      ## TODO: fix this with 4.0 updates
       describe.skip "element reference loss", ->
         it 'follows the focus of the cursor', ->
           charCount = 0
@@ -2731,6 +2779,12 @@ describe "src/cy/commands/actions/type", ->
         cy
           .get(":text:first").type(" ")
           .should("have.value", " ")
+
+      it "can type into input with invalid type attribute", ->
+        cy.get(':text:first')
+          .invoke('attr', 'type', 'asdf')
+          .type('foobar')
+          .should('have.value', 'foobar')
 
       _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
         it "throws when trying to type: #{val}", (done) ->

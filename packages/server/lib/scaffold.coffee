@@ -59,7 +59,9 @@ isNewProject = (integrationFolder) ->
   ## 3. the files are named the same as the example files
   ## 4. the bytes of the files match the example files
 
-  glob("**/*", { cwd: integrationFolder, realpath: true, nodir: true })
+  debug("determine if new project by globbing files in %o", { integrationFolder })
+  ## checks for file up to 3 levels deep
+  glob("{*,*/*,*/*/*}", { cwd: integrationFolder, realpath: true, nodir: true })
   .then (files) ->
     debug("found #{files.length} files in folder #{integrationFolder}")
     debug("determine if we should scaffold:")

@@ -84,10 +84,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       isBody      = options.$el.is("body")
       isTextLike  = $dom.isTextLike(options.$el)
-      isDate      = $dom.isType(options.$el, "date")
-      isTime      = $dom.isType(options.$el, "time")
-      isMonth     = $dom.isType(options.$el, "month")
-      isWeek      = $dom.isType(options.$el, "week")
+      isDate      = $dom.isInputType(options.$el, "date")
+      isTime      = $dom.isInputType(options.$el, "time")
+      isMonth     = $dom.isInputType(options.$el, "month")
+      isWeek      = $dom.isInputType(options.$el, "week")
       hasTabIndex = $dom.isSelector(options.$el, "[tabindex]")
 
       ## TODO: tabindex can't be -1
@@ -161,8 +161,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getDefaultButtons = (form) ->
         form.find("input, button").filter (__, el) ->
           $el = $(el)
-          ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
-          ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
+          ($dom.isSelector($el, "input") and $dom.isInputType($el, "submit")) or
+          ($dom.isSelector($el, "button") and not $dom.isInputType($el, "button"))
 
       type = ->
         simulateSubmitHandler = ->
@@ -293,7 +293,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               if !readOnly
                 if changed
                   dispatchChangeEvent(el, id)
-                state "changeEvent", null
+
+                state("changeEvent", null)
 
               return changed
 

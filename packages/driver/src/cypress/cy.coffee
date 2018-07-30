@@ -3,6 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../dom")
+$selection = require("../dom/selection")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
@@ -157,6 +158,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(this)
+  
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
 
