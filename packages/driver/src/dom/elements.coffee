@@ -21,12 +21,12 @@ descriptor = (klass, prop) ->
   Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
 _getValue = ->
-  switch 
+  switch
     when isInput(this)
       descriptor("HTMLInputElement", "value").get
     when isTextarea(this)
       descriptor("HTMLTextAreaElement", "value").get
-    when isSelect(this)    
+    when isSelect(this)
       descriptor("HTMLSelectElement", "value").get
     else
       ## is an option element
@@ -35,7 +35,7 @@ _getValue = ->
 
 _setValue = ->
   switch
-    when isInput(this) 
+    when isInput(this)
       descriptor("HTMLInputElement", "value").set
     when isTextarea(this)
       descriptor("HTMLTextAreaElement", "value").set
@@ -44,7 +44,7 @@ _setValue = ->
     else
       ## is an options element
       descriptor("HTMLOptionElement", "value").set
-      
+
 
 _getSelectionStart = () ->
   switch
@@ -72,7 +72,7 @@ _nativeSelect = () ->
   switch
     when isInput(this)
       window.HTMLInputElement.prototype.select
-    else 
+    else
       ## is textarea
       window.HTMLTextAreaElement.prototype.select
 
@@ -120,7 +120,7 @@ callNativeMethod = (obj, fn, args...) ->
 
   if _.isFunction(retFn)
     retFn = retFn.apply(obj, args)
-  
+
   return retFn
 
 getNativeProp = (obj, prop) ->
@@ -134,8 +134,8 @@ getNativeProp = (obj, prop) ->
     ## if we got back another function
     ## then invoke it again
     retProp = retProp.call(obj, prop)
-    
-  return retProp  
+
+  return retProp
 
 setNativeProp = (obj, prop, val) ->
   if not nativeProp = nativeSetters[prop]
@@ -172,7 +172,7 @@ isNeedSingleValueChangeInputElement = (el) ->
 #     return setNativeProp.call(el, val)
 
 canSetSelectionRangeElement = (el) ->
-  canSetSelectionRangeElementRe.test(el.type)
+  isTextarea(el) or (isInput(el) and canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
 
 getTagName = (el) ->
   tagName = el.tagName or ""

@@ -81,7 +81,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           }
 
         options._log.snapshot("before", {next: "after"})
-  
+
       isBody      = options.$el.is("body")
       isTextLike  = $dom.isTextLike(options.$el)
       isDate      = $dom.isInputType(options.$el, "date")
@@ -293,7 +293,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               if !readOnly
                 if changed
                   dispatchChangeEvent(el, id)
-                state "changeEvent", null
+
+                state("changeEvent", null)
 
               return changed
 
