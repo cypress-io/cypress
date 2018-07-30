@@ -1052,8 +1052,8 @@ describe "src/cy/commands/actions/type", ->
 
         it "can type into an iframe with designmode = 'on'", ->
           ## append a new iframe to the body
-          cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html"></iframe>')
-            .appendTo cy.$$('body')           
+          cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
+            .appendTo cy.$$('body')
 
           ## wait for iframe to load
           loaded = false
@@ -1078,9 +1078,6 @@ describe "src/cy/commands/actions/type", ->
             .then ($iframe) ->
               iframeText = $iframe[0].contentDocument.body.innerText
               expect(iframeText).to.include('foo bar baz\nabc')
-          
-            
-          
 
       describe.skip "element reference loss", ->
         it 'follows the focus of the cursor', ->
@@ -2763,7 +2760,7 @@ describe "src/cy/commands/actions/type", ->
         cy
           .get(":text:first").type(" ")
           .should("have.value", " ")
-      
+
       it "can type into input with invalid type attribute", ->
         cy.get(':text:first')
           .invoke('attr', 'type', 'asdf')
