@@ -7,7 +7,7 @@
   "scripts": {
     "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee",
     "cypress:open": "node ../../cli/bin/cypress open --dev --project ./test",
-    "cypress:run": "node ../../scripts/run-cypress-tests.js --browser chrome --dir test",
+    "cypress:run": "node ../../scripts/run-cypress-tests.js --dir test",
     "clean-deps": "rm -rf node_modules"
   },
   "files": [
@@ -53,9 +53,11 @@
     "parse-domain": "2.0.0",
     "setimmediate": "^1.0.2",
     "sinon": "3.2.0",
+    "text-mask-addons": "^3.7.2",
     "underscore": "^1.8.3",
     "underscore.string": "3.3.4",
     "url-parse": "^1.1.7",
+    "vanilla-text-mask": "^5.1.1",
     "wait-on": "^2.0.2",
     "zone.js": "^0.8.18"
   }

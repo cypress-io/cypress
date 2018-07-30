@@ -7,7 +7,195 @@ $utils = require("../cypress/utils")
 
 fixedOrStickyRe = /(fixed|sticky)/
 
-focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
+focusable = "body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]"
+
+inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
+canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
+
+## rules for native methods and props
+## if a setter or getter or function then add a native method
+## if a traversal, don't
+
+descriptor = (klass, prop) ->
+  Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
+
+_getValue = ->
+  switch
+    when isInput(this)
+      descriptor("HTMLInputElement", "value").get
+    when isTextarea(this)
+      descriptor("HTMLTextAreaElement", "value").get
+    when isSelect(this)
+      descriptor("HTMLSelectElement", "value").get
+    else
+      ## is an option element
+      descriptor("HTMLOptionElement", "value").get
+
+_setValue = ->
+  switch
+    when isInput(this)
+      descriptor("HTMLInputElement", "value").set
+    when isTextarea(this)
+      descriptor("HTMLTextAreaElement", "value").set
+    when isSelect(this)
+      descriptor("HTMLSelectElement", "value").set
+    else
+      ## is an options element
+      descriptor("HTMLOptionElement", "value").set
+
+_getSelectionStart = ->
+  switch
+    when isInput(this)
+      descriptor('HTMLInputElement', 'selectionStart').get
+    when isTextarea(this)
+      descriptor('HTMLTextAreaElement', 'selectionStart').get
+
+_getSelectionEnd = ->
+  switch
+    when isInput(this)
+      descriptor('HTMLInputElement', 'selectionEnd').get
+    when isTextarea(this)
+      descriptor('HTMLTextAreaElement', 'selectionEnd').get
+
+_nativeFocus = ->
+  switch
+    when $window.isWindow(this)
+      window.focus
+    else
+      window.HTMLElement.prototype.focus
+
+_nativeBlur = ->
+  switch
+    when $window.isWindow(this)
+      window.blur
+    else
+      window.HTMLElement.prototype.blur
+
+_nativeSetSelectionRange = ->
+  switch
+    when isInput(this)
+      window.HTMLInputElement.prototype.setSelectionRange
+    else
+      ## is textarea
+      window.HTMLTextAreaElement.prototype.setSelectionRange
+
+_nativeSelect = ->
+  switch
+    when isInput(this)
+      window.HTMLInputElement.prototype.select
+    else
+      ## is textarea
+      window.HTMLTextAreaElement.prototype.select
+
+nativeGetters = {
+  value: _getValue
+  selectionStart: descriptor("HTMLInputElement", "selectionStart").get
+  isContentEditable: descriptor("HTMLElement", "isContentEditable").get
+  isCollapsed: descriptor("Selection", 'isCollapsed').get
+  selectionStart: _getSelectionStart
+  selectionEnd: _getSelectionEnd
+  type: descriptor("HTMLInputElement", "type").get
+}
+
+nativeSetters = {
+  value: _setValue
+  type: descriptor("HTMLInputElement", "type").set
+}
+
+nativeMethods = {
+  addEventListener: window.EventTarget.prototype.addEventListener
+  removeEventListener: window.EventTarget.prototype.removeEventListener
+  createRange: window.document.createRange
+  getSelection: window.document.getSelection
+  removeAllRanges: window.Selection.prototype.removeAllRanges
+  addRange: window.Selection.prototype.addRange
+  execCommand: window.document.execCommand
+  getAttribute: window.Element.prototype.getAttribute
+  setSelectionRange: _nativeSetSelectionRange
+  modify: window.Selection.prototype.modify
+  focus: _nativeFocus
+  blur: _nativeBlur
+  select: _nativeSelect
+}
+
+tryCallNativeMethod = ->
+  try
+    callNativeMethod.apply(null, arguments)
+  catch
+    null
+
+callNativeMethod = (obj, fn, args...) ->
+  if not nativeFn = nativeMethods[fn]
+    fns = _.keys(nativeMethods).join(", ")
+    throw new Error("attempted to use a native fn called: #{fn}. Available fns are: #{fns}")
+
+  retFn = nativeFn.apply(obj, args)
+
+  if _.isFunction(retFn)
+    retFn = retFn.apply(obj, args)
+
+  return retFn
+
+getNativeProp = (obj, prop) ->
+  if not nativeProp = nativeGetters[prop]
+    props = _.keys(nativeGetters).join(", ")
+    throw new Error("attempted to use a native getter prop called: #{prop}. Available props are: #{props}")
+
+  retProp = nativeProp.call(obj, prop)
+
+  if _.isFunction(retProp)
+    ## if we got back another function
+    ## then invoke it again
+    retProp = retProp.call(obj, prop)
+
+  return retProp
+
+setNativeProp = (obj, prop, val) ->
+  if not nativeProp = nativeSetters[prop]
+    fns = _.keys(nativeSetters).join(", ")
+    throw new Error("attempted to use a native setter prop called: #{fn}. Available props are: #{fns}")
+
+  retProp = nativeProp.call(obj, val)
+
+  if _.isFunction(retProp)
+    retProp = retProp.call(obj, val)
+
+  return retProp
+
+isNeedSingleValueChangeInputElement = (el) ->
+  if !isInput(el)
+    return false
+
+  return inputTypeNeedSingleValueChangeRe.test(el.type)
+
+canSetSelectionRangeElement = (el) ->
+  isTextarea(el) or (isInput(el) and canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
+
+getTagName = (el) ->
+  tagName = el.tagName or ""
+  tagName.toLowerCase()
+
+isContentEditable = (el) ->
+  ## this property is the tell-all for contenteditable
+  ## should be true for elements:
+  ##   - with [contenteditable]
+  ##   - with document.designMode = 'on'
+  getNativeProp(el, "isContentEditable")
+
+isTextarea = (el) ->
+  getTagName(el) is 'textarea'
+
+isInput = (el) ->
+  getTagName(el) is 'input'
+
+isSelect = (el) ->
+  getTagName(el) is 'select'
+
+isOption = (el) ->
+  getTagName(el) is 'option'
+
+isBody = (el) ->
+  getTagName(el) is 'body'
 
 isElement = (obj) ->
   try
@@ -18,8 +206,11 @@ isElement = (obj) ->
 isFocusable = ($el) ->
   $el.is(focusable)
 
-isType = ($el, type) ->
-  ($el.attr("type") or "").toLowerCase() is type
+isInputType = ($el, type) ->
+  el = [].concat($jquery.unwrap($el))[0]
+  ## NOTE: use DOMElement.type instead of getAttribute('type') since
+  ##       <input type="asdf"> will have type="text", and behaves like text type
+  isInput(el) && (getNativeProp(el, 'type') or "").toLowerCase() is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
@@ -71,14 +262,23 @@ isAttached = ($el) ->
   ## is attached to this document
   return $document.hasActiveWindow(doc) and _.every(els, isIn)
 
+isSame = ($el1, $el2) ->
+  el1 = $jquery.unwrap($el1)
+  el2 = $jquery.unwrap($el2)
+
+  el1 and el2 and _.isEqual(el1, el2)
+
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
-  type = (type) -> isType($el, type)
+  type = (type) -> isInputType($el, type)
+
+  isContentEditableElement = isContentEditable($el.get(0))
 
   _.some([
+    isContentEditableElement
     sel("textarea")
     sel(":text")
-    sel("[contenteditable]")
+    type("text")
     type("password")
     type("email")
     type("number")
@@ -135,6 +335,25 @@ isDescendent = ($el1, $el2) ->
   return false if not $el2
 
   !!(($el1.get(0) is $el2.get(0)) or $el1.has($el2).length)
+
+## in order to simulate actual user behavior we need to do the following:
+## 1. take our element and figure out its center coordinate
+## 2. check to figure out the element listed at those coordinates
+## 3. if this element is ourself or our descendants, click whatever was returned
+## 4. else throw an error because something is covering us up
+getFirstFocusableEl = ($el) ->
+  return $el if isFocusable($el)
+
+  parent = $el.parent()
+
+  ## if we have no parent then just return
+  ## the window since that can receive focus
+  if not parent.length
+    win = $window.getWindowByElement($el.get(0))
+
+    return $(win)
+
+  getFirstFocusableEl($el.parent())
 
 getFirstFixedOrStickyPositionParent = ($el) ->
   ## return null if we're at body/html
@@ -278,8 +497,6 @@ stringify = (el, form = "long") ->
 
 
 module.exports = {
-  isType
-
   isElement
 
   isSelector
@@ -300,9 +517,35 @@ module.exports = {
 
   isDescendent
 
+  isContentEditable
+
+  isSame
+
+  isBody
+
+  isInput
+
+  isTextarea
+
+  isInputType
+
+  isNeedSingleValueChangeInputElement
+
+  canSetSelectionRangeElement
+
   stringify
 
+  getNativeProp
+
+  setNativeProp
+
+  callNativeMethod
+
+  tryCallNativeMethod
+
   getElements
+
+  getFirstFocusableEl
 
   getContainsSelector
 
