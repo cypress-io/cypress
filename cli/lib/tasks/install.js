@@ -14,8 +14,6 @@ const util = require('../util')
 const state = require('./state')
 const unzip = require('./unzip')
 const logger = require('../logger')
-const la = require('lazy-ass')
-const is = require('check-more-types')
 const { throwFormErrorText, errors } = require('../errors')
 
 debug('write stream isTTY', process.stdout.isTTY)
@@ -23,9 +21,9 @@ debug('write stream columns', process.stdout.columns)
 
 const alreadyInstalledMsg = () => {
   if (!util.isPostInstall()) {
-    logger.log(stripIndent`    
+    logger.log(stripIndent`
       Skipping installation:
-  
+
         Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
     `)
   }
@@ -90,16 +88,6 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
         rendererOptions.renderer
       )
     }
-  }
-
-  // if we are running in CI or do not have a terminal then use
-  // the verbose (simple) renderer else use the default (with progress bars)
-  const rendererOptions = {
-    renderer: util.isCi()
-      ? verbose
-      : util.isTerminal()
-        ? 'default'
-        : verbose,
   }
 
   const tasks = new Listr([
@@ -368,14 +356,27 @@ const progessify = (task, title) => {
   }
 }
 
-// if we are running in CI then use
-// the verbose renderer else use
-// the default
+// if we are running in CI or do not have a terminal then use
+// the verbose (simple) renderer else use the default (with progress bars)
 const getRendererOptions = () => {
-  let renderer = util.isCi() ? verbose : 'default'
+  let renderer = 'default'
+
+  // maybe for some reason we cannot use default renderer
+  // for example on CI it makes no sense to show progress bars
+  if (util.isCi()) {
+    renderer = verbose
+  }
+  // or the terminal does not have dimensions, so progress
+  // messages will output 1000k lines
+  if (!util.hasTerminalDimensions()) {
+    renderer = verbose
+  }
+
+  // respect NPM log option "silent"
   if (logger.logLevel() === 'silent') {
     renderer = 'silent'
   }
+
   return {
     renderer,
   }

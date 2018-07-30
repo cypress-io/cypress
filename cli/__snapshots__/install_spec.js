@@ -178,9 +178,7 @@ Cypress 1.2.3 is already installed in /cache/Cypress/1.2.3
 `
 
 exports['installing without a terminal 1'] = `
-Installed version (x.x.x) does not match needed version (1.2.3).
-
-Installing Cypress (version: 1.2.3)
+Installing Cypress (version: x.x.x)
 
 [xx:xx:xx]  Downloading Cypress     [started]
 [xx:xx:xx]  Downloading Cypress     [completed]
@@ -192,5 +190,6 @@ Installing Cypress (version: 1.2.3)
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
+
 
 `

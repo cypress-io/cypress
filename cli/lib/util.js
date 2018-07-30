@@ -70,7 +70,12 @@ const util = {
     return isCi
   },
 
-  isTerminal () {
+  /**
+   * Checks if the terminal has known columns and rows dimensions.
+   *
+   * @returns {boolean} True if the terminal knows its width and height (columns and rows)
+   */
+  hasTerminalDimensions () {
     // in redirected streams we should not show progress bars
     return process.stdout.columns > 0
   },

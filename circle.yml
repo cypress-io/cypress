@@ -801,6 +801,7 @@ workflows:
             branches:
               only:
                 - develop
+                - render-without-terminal-in-cli-1243
           requires:
             - build
       - build-binary:
@@ -808,6 +809,7 @@ workflows:
             branches:
               only:
                 - develop
+                - render-without-terminal-in-cli-1243
           requires:
             - build
       - test-next-version:

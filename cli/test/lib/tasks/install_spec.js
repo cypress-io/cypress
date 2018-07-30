@@ -24,14 +24,14 @@ const installDir = '/cache/Cypress/1.2.3'
 
 const isCircle = Boolean(process.env.CIRCLECI)
 
-describe('/lib/tasks/install', function () {
+describe.only('/lib/tasks/install', function () {
   require('mocha-banner').register()
 
   before(() => {
     /* eslint-disable no-console */
     console.log('isCircle', isCircle)
     console.log('util.isCi', util.isCi())
-    console.log('util.isTerminal', util.isTerminal())
+    console.log('util.hasTerminalDimensions', util.hasTerminalDimensions())
   })
 
   beforeEach(function () {
@@ -54,12 +54,12 @@ describe('/lib/tasks/install', function () {
 
       // sinon.stub(os, 'tmpdir').returns('/tmp')
       sinon.stub(util, 'isCi').returns(false)
-      
+
       // on CircleCI we have "normal" terminal, but without stdout.columns
       // so work around it and let it use progress bar
-      const isTerm = util.isTerminal()
-      sinon.stub(util, 'isTerminal').returns(isTerm || isCircle)
-      
+      const isTerm = util.hasTerminalDimensions()
+      sinon.stub(util, 'hasTerminalDimensions').returns(isTerm || isCircle)
+
       sinon.stub(util, 'isPostInstall').returns(false)
       sinon.stub(util, 'pkgVersion').returns(packageVersion)
       sinon.stub(download, 'start').resolves(packageVersion)
@@ -427,9 +427,8 @@ describe('/lib/tasks/install', function () {
     describe('when running without a terminal', function () {
       beforeEach(function () {
         util.isCi.returns(false)
-        util.isTerminal.returns(false)
-
-        info.getInstalledVersion.resolves('x.x.x')
+        util.hasTerminalDimensions.returns(false)
+        util.pkgVersion.returns('x.x.x')
 
         return install.start()
       })
