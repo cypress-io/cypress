@@ -394,6 +394,30 @@ describe "src/cy/commands/actions/click", ->
         expect(range.endContainer).to.eql(el)
         expect(range.endOffset).to.eql(0)
 
+    it "can click SVG elements", ->
+      onClick = cy.stub()
+
+      $svgs = cy.$$("#svgs")
+      $svgs.click(onClick)
+
+      cy.get("[data-cy=line]").click().first().click()
+      cy.get("[data-cy=rect]").click().first().click()
+      cy.get("[data-cy=circle]").click().first().click()
+      .then ->
+        expect(onClick.callCount).to.eq(6)
+
+    it "can click a canvas", ->
+      onClick = cy.stub()
+
+      $canvas = cy.$$("#canvas")
+      $canvas.click(onClick)
+
+      ctx = $canvas.get(0).getContext("2d")
+      ctx.fillStyle = "green"
+      ctx.fillRect(10, 10, 100, 100)
+
+      cy.get("#canvas").click().then ->
+        expect(onClick).to.be.calledOnce
 
     describe "actionability", ->
       it "can click elements which are hidden until scrolled within parent container", ->
