@@ -104,6 +104,11 @@ describe "Runs List", ->
             cy.get(".fa-apple")
             cy.get(".fa-chrome")
 
+        it "does not display browser when null", ->
+          cy.get("@firstRunRow").within ->
+            cy.contains(@runs[0].instances[0].platform.osVersionFormatted)
+            cy.get(".fa-chrome").should('not.exist')
+
         it "displays totals", ->
           cy.get("@runRow").contains(@runs[1].totalFailed)
           cy.get("@runRow").contains(@runs[1].totalPassed)

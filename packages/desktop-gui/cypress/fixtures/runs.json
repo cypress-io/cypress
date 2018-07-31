@@ -96,8 +96,8 @@
         "passed": 0,
         "pending": 0,
         "platform": {
-          "browserName": "Electron",
-          "browserVersion": "53.0.2785.143",
+          "browserName": null,
+          "browserVersion": null,
           "osCpus": [],
           "osMemory": {
             "free": 985665536,
