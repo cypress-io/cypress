@@ -4,6 +4,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$elements = require("../../../dom/elements")
 
 checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## we're not handling conversion of values to strings
@@ -46,12 +47,22 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## in the values array?
   ## or values array is empty
   elHasMatchingValue = ($el) ->
-    values.length is 0 or $el.val() in values
+    value = $elements.getNativeProp($el.get(0), "value")
+    values.length is 0 or value in values
 
   ## blow up if any member of the subject
   ## isnt a checkbox or radio
   checkOrUncheckEl = (el, index) =>
     $el = $(el)
+
+    if not isAcceptableElement($el)
+      node   = $dom.stringify($el)
+      word   = $utils.plural(options.$el, "contains", "is")
+      phrase = if type is "check" then " and :radio" else ""
+      $utils.throwErrByPath "check_uncheck.invalid_element", {
+        onFail: options._log
+        args: { node, word, phrase, cmd: type }
+      }
 
     isElActionable = elHasMatchingValue($el)
 
@@ -78,14 +89,6 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
 
       options._log.snapshot("before", {next: "after"})
 
-      if not isAcceptableElement($el)
-        node   = $dom.stringify($el)
-        word   = $utils.plural(options.$el, "contains", "is")
-        phrase = if type is "check" then " and :radio" else ""
-        $utils.throwErrByPath "check_uncheck.invalid_element", {
-          onFail: options._log
-          args: { node, word, phrase, cmd: type }
-        }
 
       ## if the checkbox was already checked
       ## then notify the user of this note

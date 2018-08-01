@@ -13,7 +13,7 @@ _       = require("lodash")
 cp      = require("child_process")
 path    = require("path")
 Promise = require("bluebird")
-debug   = require('debug')('cypress:server:cypress')
+debug   = require("debug")("cypress:server:cypress")
 
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
@@ -125,48 +125,44 @@ module.exports = {
       ## else determine the mode by
       ## the passed in arguments / options
       ## and normalize this mode
-      switch
+      mode = switch
         when options.version
-          options.mode = "version"
+          "version"
 
         when options.smokeTest
-          options.mode = "smokeTest"
+          "smokeTest"
 
         when options.returnPkg
-          options.mode = "returnPkg"
+          "returnPkg"
 
         when options.logs
-          options.mode = "logs"
+          "logs"
 
         when options.clearLogs
-          options.mode = "clearLogs"
+          "clearLogs"
 
         when options.getKey
-          options.mode = "getKey"
+          "getKey"
 
         when options.generateKey
-          options.mode = "generateKey"
+          "generateKey"
 
         when options.exitWithCode?
-          options.mode = "exitWithCode"
+          "exitWithCode"
 
         when options.runProject
           ## go into headless mode when running
           ## until completion + exit
-          options.mode = "run"
+          "run"
 
         else
           ## set the default mode as interactive
-          options.mode ?= "interactive"
-
-      ## remove mode from options
-      mode    = options.mode
-      options = _.omit(options, "mode")
+          options.mode or "interactive"
 
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->
-    debug("start in mode %s with options %j", mode, options)
+    debug("starting in mode %s", mode)
 
     switch mode
       when "version"

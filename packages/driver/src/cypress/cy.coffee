@@ -3,6 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../dom")
+$selection = require("../dom/selection")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
@@ -157,6 +158,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
+      contentWindow.HTMLElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(this)
+
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
 
@@ -640,6 +647,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## focused sync methods
     getFocused: focused.getFocused
+    needsForceFocus: focused.needsForceFocus
+    needsFocus: focused.needsFocus
+    fireFocus: focused.fireFocus
+    fireBlur: focused.fireBlur
 
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
