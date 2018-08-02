@@ -65,7 +65,7 @@ const descriptions = {
   cacheList: 'list the currently cached versions',
   cacheClear: 'delete the Cypress binary cache',
   group: 'a named group for recorded runs in the Cypress dashboard',
-  parallel: 'automatically runs specs across multiple machines in parallel',
+  parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
 }
 
