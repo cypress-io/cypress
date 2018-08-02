@@ -596,7 +596,7 @@ describe "lib/config", ->
 
     it "blacklistHosts=a|b", ->
       @defaults("blacklistHosts", ["a", "b"], {
-        blacklistHosts: "a|b"
+        blacklistHosts: ["a", "b"]
       })
 
     it "hosts=null", ->
@@ -611,14 +611,6 @@ describe "lib/config", ->
           foo: "bar",
           baz: "quux"
         }
-      })
-
-    it "hosts=foo=bar,baz=quux", ->
-      @defaults("hosts", {
-        foo: "bar"
-        baz: "quux"
-      }, {
-        hosts: "foo=bar|baz=quux"
       })
 
     it "resets numTestsKeptInMemory to 0 when runMode", ->

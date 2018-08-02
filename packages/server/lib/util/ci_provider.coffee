@@ -8,6 +8,13 @@ isCodeship = ->
 isGitlab = ->
   process.env.GITLAB_CI or process.env.CI_SERVER_NAME and process.env.CI_SERVER_NAME is "GitLab CI"
 
+isJenkins = ->
+  process.env.JENKINS_URL or
+    process.env.JENKINS_HOME or
+    process.env.JENKINS_VERSION or
+    process.env.HUDSON_URL or
+    process.env.HUDSON_HOME
+
 isWercker = ->
   process.env.WERCKER or process.env.WERCKER_MAIN_PIPELINE_STARTED
 
@@ -19,8 +26,7 @@ providers = {
   "codeship":       isCodeship
   "drone":          "DRONE"
   "gitlab":         isGitlab
-  "hudson":         "HUDSON_URL"
-  "jenkins":        "JENKINS_URL"
+  "jenkins":        isJenkins
   "semaphore":      "SEMAPHORE"
   "shippable":      "SHIPPABLE"
   "snap":           "SNAP_CI"
@@ -96,7 +102,6 @@ params = (provider) -> {
 #     ciUrl: "#{process.env.CI_PROJECT_URL}/builds/#{process.env.CI_BUILD_ID}"
 #     buildNum: process.env.CI_BUILD_ID
 #   }
-#   "hudson": nullDetails
 #   "jenkins": -> {
 #     ciUrl: process.env.BUILD_URL
 #     buildNum: process.env.BUILD_NUMBER
@@ -211,9 +216,6 @@ getGitInfo = (provider, key) -> ({
     # remoteOrigin:
     # pullRequestId: ## https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     # defaultBranch:
-  }
-  hudson: {
-    ## same as jenkins?
   }
   jenkins: {
     sha: process.env.GIT_COMMIT

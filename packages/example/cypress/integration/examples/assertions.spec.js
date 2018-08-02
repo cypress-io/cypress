@@ -33,18 +33,19 @@ context('Assertions', () => {
       cy.get('.assertions-p').find('p')
       .should(($p) => {
         // return an array of texts from all of the p's
-        let texts = $p.map((i, el) => // https://on.cypress.io/$
+        // @ts-ignore TS6133 unused variable
+        const texts = $p.map((i, el) => // https://on.cypress.io/$
           Cypress.$(el).text())
 
         // jquery map returns jquery object
         // and .get() convert this to simple array
-        texts = texts.get()
+        const paragraphs = texts.get()
 
         // array should have length of 3
-        expect(texts).to.have.length(3)
+        expect(paragraphs).to.have.length(3)
 
         // set this specific subject
-        expect(texts).to.deep.eq([
+        expect(paragraphs).to.deep.eq([
           'Some text from first p',
           'More text from second p',
           'And even more text from third p',

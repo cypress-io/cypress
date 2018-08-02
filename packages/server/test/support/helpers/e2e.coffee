@@ -222,6 +222,8 @@ module.exports = {
     if spec = options.spec
       ## normalize into array and then prefix
       specs = spec.split(',').map (spec) ->
+        return spec if path.isAbsolute(spec)
+
         path.join(options.project, "cypress", "integration", spec)
 
       ## normalize the path to the spec
@@ -257,7 +259,7 @@ module.exports = {
       args.push("--browser=#{browser}")
 
     if options.config
-      args.push("--config", options.config)
+      args.push("--config", JSON.stringify(options.config))
 
     if options.env
       args.push("--env", options.env)

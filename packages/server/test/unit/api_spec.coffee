@@ -103,7 +103,7 @@ describe "lib/api", ->
       runs = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
       .get("/projects/id-123/runs")
