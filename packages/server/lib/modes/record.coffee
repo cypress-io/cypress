@@ -324,7 +324,7 @@ createRunAndRecordSpecs = (options = {}) ->
             platform
             machineId
           })
-          .then (resp) ->
+          .then (resp = {}) ->
             { instanceId } = resp
 
             ## pull off only what we need
