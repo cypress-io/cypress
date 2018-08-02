@@ -49,6 +49,7 @@ describe "lib/modes/run", ->
       options = {
         port: 8080
         env: {foo: "bar"}
+        isTextTerminal: true
         projectRoot: "/_test-output/path/to/project/foo"
       }
 

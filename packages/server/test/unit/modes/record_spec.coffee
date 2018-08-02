@@ -96,6 +96,9 @@ describe "lib/modes/record", ->
       projectId = "pId123"
       specPattern = ["spec/pattern1", "spec/pattern2"]
       projectRoot = "project/root"
+      ciBuildId = "ciId123"
+      parallel = null
+      group = null
       runAllSpecs = sinon.stub()
       sys = {
         osCpus: 1
@@ -112,7 +115,10 @@ describe "lib/modes/record", ->
         key
         sys
         specs
+        group
         browser
+        parallel
+        ciBuildId
         projectId
         projectRoot
         specPattern
@@ -121,7 +127,10 @@ describe "lib/modes/record", ->
       .then ->
         expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
         expect(api.createRun).to.be.calledWith({
+          group
+          parallel
           projectId
+          ciBuildId
           recordKey: key
           specPattern: "spec/pattern1,spec/pattern2"
           specs: ["path/to/spec/a", "path/to/spec/b"]

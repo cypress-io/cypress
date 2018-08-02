@@ -339,7 +339,7 @@ openProjectCreate = (projectRoot, socketId, options) ->
     socketId
     morgan:       false
     report:       true
-    isTextTerminal:   options.isTextTerminal ? true
+    isTextTerminal: options.isTextTerminal
     onError: (err) ->
       console.log("")
       console.log(err.stack)
@@ -883,6 +883,7 @@ module.exports = {
     debug("run mode ready with options %o", options)
 
     _.defaults(options, {
+      isTextTerminal: true
       browser: "electron"
     })
 
