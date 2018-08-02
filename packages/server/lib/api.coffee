@@ -60,6 +60,8 @@ machineId = ->
     return null
 
 module.exports = {
+  rp
+
   ping: ->
     rp.get(routes.ping())
     .catch(tagError)
@@ -206,7 +208,6 @@ module.exports = {
         bearer: authToken
       }
     })
-    .promise()
     .timeout(timeout)
     .catch(tagError)
 
@@ -292,7 +293,6 @@ module.exports = {
       url: routes.auth(),
       json: true
     })
-    .promise()
     .get("url")
     .catch(tagError)
 
@@ -308,7 +308,6 @@ module.exports = {
         "x-route-version": "2"
       }
     })
-    .promise()
     .get("apiToken")
     .catch(tagError)
 
