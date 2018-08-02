@@ -1,11 +1,10 @@
 const os = require('os')
 const chalk = require('chalk')
-const Promise = require('bluebird')
-const getos = Promise.promisify(require('getos'))
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
 
 const util = require('./util')
+const state = require('./tasks/state')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
@@ -26,12 +25,43 @@ const failedUnzip = {
   `,
 }
 
-const missingApp = {
-  description: 'No version of Cypress is installed.',
+const missingApp = (binaryDir) => ({
+  description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
   solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
-}
+})
+
+const binaryNotExecutable = (executable) => ({
+  description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
+  solution: stripIndent`\n
+    Reasons this may happen:
+      
+    - node was installed as 'root' or with 'sudo'
+    - the cypress npm package as 'root' or with 'sudo'
+    
+    Please check that you have the appropriate user permissions.
+  `,
+})
+
+
+const notInstalledCI = (executable) => ({
+  description: 'The cypress npm package is installed, but the Cypress binary is missing.',
+  solution: stripIndent`\n
+    We expected the binary to be installed here: ${chalk.cyan(executable)}
+ 
+    Reasons it may be missing:
+
+    - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
+    - You ran 'npm install' at an earlier build step but did not persist: ${util.getCacheDir()}
+
+    Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
+
+    Alternatively, you can run 'cypress install' to download the binary again.
+
+    https://on.cypress.io/not-installed-ci-error
+  `,
+})
 
 const nonZeroExitCodeXvfb = {
   description: 'XVFB exited with a non zero exit code.',
@@ -69,6 +99,11 @@ const missingDependency = {
   `,
 }
 
+const invalidCacheDirectory = {
+  description: 'Cypress cannot write to the cache directory due to file permissions',
+  solution: '',
+}
+
 const versionMismatch = {
   description: 'Installed version does not match package version.',
   solution: 'Install Cypress and verify app again',
@@ -89,18 +124,37 @@ const unexpected = {
   `,
 }
 
-const getOsVersion = () => {
-  if (os.platform() === 'linux') {
-    return getos()
-    .then((osInfo) => [osInfo.dist, osInfo.release].join(' - '))
-    .catch(() => os.release())
-  } else {
-    return Promise.resolve(os.release())
-  }
+const removed = {
+  CYPRESS_BINARY_VERSION: {
+    description: stripIndent`
+    The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green('3.0.0')}
+    `,
+    solution: stripIndent`
+    You should set CYPRESS_INSTALL_BINARY instead.
+    `,
+  },
+  CYPRESS_SKIP_BINARY_INSTALL: {
+    description: stripIndent`
+    The environment variable CYPRESS_SKIP_BINARY_INSTALL has been removed as of version ${chalk.green('3.0.0')}
+    `,
+    solution: stripIndent`
+      To skip the binary install, set CYPRESS_INSTALL_BINARY=0
+    `,
+  },
+}
+
+const CYPRESS_RUN_BINARY = {
+  notValid: (value) => {
+    const properFormat = `**/${state.getPlatformExecutable()}`
+    return {
+      description: `Could not run binary set by environment variable CYPRESS_RUN_BINARY=${value}`,
+      solution: `Ensure the environment variable is a path to the Cypress binary, matching ${properFormat}`,
+    }
+  },
 }
 
 function getPlatformInfo () {
-  return getOsVersion()
+  return util.getOsVersionAsync()
   .then((version) => stripIndent`
     Platform: ${os.platform()} (${version})
     Cypress Version: ${util.pkgVersion()}
@@ -180,10 +234,15 @@ module.exports = {
     nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
+    notInstalledCI,
     missingDependency,
     versionMismatch,
+    binaryNotExecutable,
     unexpected,
     failedDownload,
     failedUnzip,
+    invalidCacheDirectory,
+    removed,
+    CYPRESS_RUN_BINARY,
   },
 }

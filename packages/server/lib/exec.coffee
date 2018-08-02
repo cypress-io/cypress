@@ -48,6 +48,6 @@ module.exports = {
     .catch Promise.TimeoutError, ->
       msg = "Process timed out\ncommand: #{options.cmd}"
       err = new Error(msg)
-      err.timedout = true
+      err.timedOut = true
       throw err
 }

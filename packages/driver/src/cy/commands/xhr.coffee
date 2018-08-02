@@ -141,7 +141,7 @@ startXhrServer = (cy, state, config) ->
           indicator ?= if /^2/.test(status) then "successful" else "bad"
 
           {
-            message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), { length: 20 })}"
+            message: "#{xhr.method} #{status} #{stripOrigin(xhr.url)}"
             indicator: indicator
           }
       })

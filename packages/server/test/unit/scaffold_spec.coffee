@@ -1,16 +1,15 @@
 require("../spec_helper")
 
 path       = require("path")
-glob       = require("glob")
 Promise    = require("bluebird")
 cypressEx  = require("@packages/example")
 snapshot   = require("snap-shot-it")
 config     = require("#{root}lib/config")
 Project    = require("#{root}lib/project")
 scaffold   = require("#{root}lib/scaffold")
+fs         = require("#{root}lib/util/fs")
+glob       = require("#{root}lib/util/glob")
 Fixtures   = require("#{root}/test/support/helpers/fixtures")
-
-glob = Promise.promisify(glob)
 
 describe "lib/scaffold", ->
   beforeEach ->
@@ -20,8 +19,8 @@ describe "lib/scaffold", ->
     Fixtures.remove()
 
   context ".integrationExampleName", ->
-    it "returns example_spec.js", ->
-      expect(scaffold.integrationExampleName()).to.eq("example_spec.js")
+    it "returns examples", ->
+      expect(scaffold.integrationExampleName()).to.eq("examples")
 
   context.skip ".isNewProject", ->
     beforeEach ->
@@ -93,14 +92,20 @@ describe "lib/scaffold", ->
       config.get(pristinePath).then (@cfg) =>
         {@integrationFolder} = @cfg
 
-    it "creates both integrationFolder and example_spec.js when integrationFolder does not exist", ->
-      scaffold.integration(@integrationFolder, @cfg)
-      .then =>
-        Promise.all([
-          fs.statAsync(@integrationFolder + "/example_spec.js").get("size")
-          fs.statAsync(cypressEx.getPathToExample()).get("size")
-        ]).spread (size1, size2) ->
+    it "creates both integrationFolder and example specs when integrationFolder does not exist", ->
+      Promise.join(
+        cypressEx.getPathToExamples(),
+        scaffold.integration(@integrationFolder, @cfg)
+      )
+      .spread (exampleSpecs) =>
+        Promise.join(
+          fs.statAsync(@integrationFolder + "/examples/actions.spec.js").get("size"),
+          fs.statAsync(exampleSpecs[0]).get("size"),
+          fs.statAsync(@integrationFolder + "/examples/location.spec.js").get("size"),
+          fs.statAsync(exampleSpecs[8]).get("size")
+        ).spread (size1, size2, size3, size4) ->
           expect(size1).to.eq(size2)
+          expect(size3).to.eq(size4)
 
     it "does not create any files if integrationFolder is not default", ->
       @cfg.resolved.integrationFolder.from = "config"
@@ -111,7 +116,7 @@ describe "lib/scaffold", ->
       .then (files) ->
         expect(files.length).to.eq(0)
 
-    it "does not create example_spec.js if integrationFolder already exists", ->
+    it "does not create example specs if integrationFolder already exists", ->
       ## create the integrationFolder ourselves manually
       fs.ensureDirAsync(@integrationFolder)
       .then =>

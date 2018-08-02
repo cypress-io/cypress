@@ -1,49 +1,53 @@
-log       = require('../log')
-cwd       = require('../cwd')
-fs        = require('fs-extra')
-md5       = require('md5')
-sanitize  = require("sanitize-filename")
+md5       = require("md5")
+path      = require("path")
+debug     = require("debug")("cypress:server:saved_state")
 Promise   = require("bluebird")
-{ basename, join, isAbsolute } = require('path')
+sanitize  = require("sanitize-filename")
+cwd       = require("../cwd")
+fs        = require("../util/fs")
 
-toHashName = (projectPath) ->
-  throw new Error("Missing project path") unless projectPath
-  throw new Error("Expected project absolute path, not just a name #{projectPath}") unless isAbsolute(projectPath)
-  name = sanitize(basename(projectPath))
-  hash = md5(projectPath)
+toHashName = (projectRoot) ->
+  if not projectRoot
+    throw new Error("Missing project path")
+
+  if not path.isAbsolute(projectRoot)
+    throw new Error("Expected project absolute path, not just a name #{projectRoot}")
+
+  name = sanitize(path.basename(projectRoot))
+  hash = md5(projectRoot)
   "#{name}-#{hash}"
 
 # async promise-returning method
-formStatePath = (projectPath) ->
-  Promise.resolve()
-  .then ->
-    log('making saved state from %s', cwd())
-    if projectPath
-      log('for project path %s', projectPath)
-      return projectPath
-    else
-      log('missing project path, looking for project here')
+formStatePath = (projectRoot) ->
+  Promise.try ->
+    debug("making saved state from %s", cwd())
 
-      cypressJsonPath = cwd('cypress.json')
-      fs.pathExists(cypressJsonPath)
-      .then (found) ->
-        if found
-          log('found cypress file %s', cypressJsonPath)
-          projectPath = cwd()
-        return projectPath
+    if projectRoot
+      debug("for project path %s", projectRoot)
+      return projectRoot
 
-  .then (projectPath) ->
+    debug("missing project path, looking for project here")
+
+    cypressJsonPath = cwd("cypress.json")
+    fs.pathExistsAsync(cypressJsonPath)
+    .then (found) ->
+      if found
+        debug("found cypress file %s", cypressJsonPath)
+        projectRoot = cwd()
+
+      return projectRoot
+
+  .then (projectRoot) ->
     fileName = "state.json"
-    if projectPath
-      log("state path for project #{projectPath}")
-      statePath = join(toHashName(projectPath), fileName)
-    else
-      log("state path for global mode")
-      statePath = join("__global__", fileName)
 
-    return statePath
+    if projectRoot
+      debug("state path for project #{projectRoot}")
+      return path.join(toHashName(projectRoot), fileName)
+
+    debug("state path for global mode")
+    return path.join("__global__", fileName)
 
 module.exports = {
-  toHashName: toHashName,
-  formStatePath: formStatePath
+  toHashName
+  formStatePath
 }

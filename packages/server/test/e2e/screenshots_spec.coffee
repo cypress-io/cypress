@@ -1,8 +1,8 @@
 _        = require("lodash")
-fs       = require("fs-extra")
 path     = require("path")
 Promise  = require("bluebird")
 sizeOf   = require("image-size")
+fs       = require("../../lib/util/fs")
 Fixtures = require("../support/helpers/fixtures")
 e2e      = require("../support/helpers/e2e")
 
@@ -11,20 +11,42 @@ sizeOf  = Promise.promisify(sizeOf)
 e2ePath = Fixtures.projectPath("e2e")
 
 onServer = (app) ->
-  getHtml = (color) ->
-    """
-    <!DOCTYPE html>
-    <html lang="en">
-    <body>
-      <div style="height: 2000px; width: 2000px; background-color: #{color};"></div>
-    </body>
-    </html>
-    """
-
   app.get "/color/:color", (req, res) ->
-    res.set('Content-Type', 'text/html');
+    e2e.sendHtml("""
+      <style>body { margin: 0; }</style>
+      <div style="height: 2000px; width: 2000px; background-color: #{req.params.color};"></div>"""
+    )(req, res)
 
-    res.send(getHtml(req.params.color))
+  app.get "/fullPage", e2e.sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div style="background: white; height: 200px;"></div>
+    <div style="background: black; height: 200px;"></div>
+    <div style="background: white; height: 100px;"></div>
+  """)
+
+  app.get "/fullPage-same", e2e.sendHtml("""
+    <style>body { margin: 0; }</style>
+    <div style="height: 500px;"></div>
+  """)
+
+  app.get "/element", e2e.sendHtml("""
+    <div class="element" style="background: red; width: 400px; height: 300px; margin: 20px;"></div>
+  """)
+
+  app.get "/pathological", e2e.sendHtml("""
+    <style>div { width: 1px; height: 1px; position: fixed; }</style>
+    <div style="left: 0; top: 0; background-color: grey;"></div>
+    <div style="left: 1px; top: 0; background-color: white;"></div>
+    <div style="left: 0; top: 1px; background-color: white;"></div>
+    <div style="right: 0; top: 0; background-color: white;"></div>
+    <div style="left: 0; bottom: 0; background-color: white;"></div>
+    <div style="right: 0; bottom: 0; background-color: black;"></div>
+  """)
+
+  app.get "/identical", e2e.sendHtml("""
+    <style>div { height: 1300px; width: 200px; background-color: #ddd; }</style>
+    <div></div>
+  """)
 
 describe "e2e screenshots", ->
   e2e.setup({
@@ -41,17 +63,23 @@ describe "e2e screenshots", ->
 
     e2e.exec(@, {
       spec: "screenshots_spec.coffee"
-      expectedExitCode: 3
+      expectedExitCode: 4
       snapshot: true
+      timeout: 180000
     })
     .then ->
-      screenshot1 = path.join(e2ePath, "cypress", "screenshots", "black.png")
-      screenshot2 = path.join(e2ePath, "cypress", "screenshots", "red.png")
-      screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foobarbaz.png")
-      screenshot4 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- generates pngs on failure.png")
-      screenshot5 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- before hooks -- empty test 1 -- before all hook.png")
-      screenshot6 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- before each hook.png")
-      screenshot7 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- each hooks -- empty test 2 -- after each hook.png")
+      screenshot = (paths...) ->
+        path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee", paths...)
+
+      screenshot1 = screenshot("black.png")
+      screenshot2 = screenshot("red.png")
+      screenshot3 = screenshot("foo", "bar", "baz.png")
+      screenshot4 = screenshot("taking screenshots -- generates pngs on failure (failed).png")
+      screenshot5 = screenshot("taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png")
+      screenshot6 = screenshot("taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png")
+      screenshot7 = screenshot("taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png")
+      screenshot8 = screenshot("taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure.png")
+      screenshot9 = screenshot("taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure (failed).png")
 
       Promise.all([
         fs.statAsync(screenshot1).get("size")
@@ -61,6 +89,8 @@ describe "e2e screenshots", ->
         fs.statAsync(screenshot5).get("size")
         fs.statAsync(screenshot6).get("size")
         fs.statAsync(screenshot7).get("size")
+        fs.statAsync(screenshot8).get("size")
+        fs.statAsync(screenshot9).get("size")
       ])
       .then (sizes) ->
         ## make sure all of the values are unique

@@ -72,8 +72,11 @@ export default class Project {
   @computed get displayName () {
     if (this.name) return this.name
 
-    let splitName = _.last(this.path.split('/'))
-    return _.truncate(splitName, { length: 60 })
+    // need normalize windows paths with \ before split
+    const normalizedPath = this.path.replace(/\\/g, '/')
+    const lastDir = _.last(normalizedPath.split('/'))
+
+    return _.truncate(lastDir, { length: 60 })
   }
 
   @computed get displayPath () {
@@ -174,11 +177,11 @@ export default class Project {
 
   @action setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
-    this.integrationExampleFile = config.integrationExampleFile
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
     this.integrationExampleName = config.integrationExampleName
+    this.integrationExamplePath = config.integrationExamplePath
     this.scaffoldedFiles = config.scaffoldedFiles
   }
 

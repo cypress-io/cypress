@@ -1,3 +1,4 @@
+R = require("ramda")
 require("../spec_helper")
 
 ciProvider = require("#{root}lib/util/ci_provider")
@@ -13,11 +14,26 @@ describe "lib/util/ci_provider", ->
       expect(ciProvider.buildNum()).to.eq(obj.buildNum)
       expect(ciProvider.params()).to.deep.eq(obj.params)
 
+      # collect Git commit information if needed
+      if obj.gitInfo
+        # create an object with just keys and empty values
+        # to force code to collect the values
+        existingGitInfo = R.mapObjIndexed(R.always(null))(obj.gitInfo)
+        expect(ciProvider.gitInfo(existingGitInfo)).to.deep.eq(obj.gitInfo)
+
   afterEach ->
     ## restore the env
     process.env = JSON.parse(@env)
 
-  context "grou-id", ->
+  context "getCirclePrNumber", ->
+    it "uses PR number or parses PR url", ->
+      # different cases: no information, PR number, PR url
+      expect(ciProvider.getCirclePrNumber()).to.equal(undefined)
+      expect(ciProvider.getCirclePrNumber('100')).to.equal('100')
+      expect(ciProvider.getCirclePrNumber('100', 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('100')
+      expect(ciProvider.getCirclePrNumber(undefined, 'https://github.com/cypress-io/cypress/pull/2114')).to.equal('2114')
+
+  context "group-id", ->
     describe "circle", ->
       beforeEach ->
         process.env.CIRCLECI = true
@@ -31,7 +47,6 @@ describe "lib/util/ci_provider", ->
 
       it "no group id without workflow id", ->
         expect(ciProvider.groupId()).to.be.null
-
 
   it "returns 'unknown' when not found", ->
     process.env = {}
@@ -77,18 +92,61 @@ describe "lib/util/ci_provider", ->
       params: null
     })
 
-  it "circle", ->
-    process.env.CIRCLECI = true
-    process.env.CIRCLE_BUILD_URL = "circle build url"
-    process.env.CIRCLE_BUILD_NUM = "4"
+  context "circle", ->
+    it "has build number", ->
+      process.env.CIRCLECI = true
+      process.env.CIRCLE_BUILD_URL = "circle build url"
+      process.env.CIRCLE_BUILD_NUM = "4"
 
-    @expects({
-      name: "circle",
-      buildNum: "4"
-      params: {
-        buildUrl: "circle build url"
-      }
-    })
+      @expects({
+        name: "circle",
+        buildNum: "4"
+        params: {
+          buildUrl: "circle build url"
+        },
+        # does not have PR number or default branch
+        gitInfo: {
+          pullRequestId: null,
+          defaultBranch: null
+        }
+      })
+
+    it "has forked PR number", ->
+      process.env.CIRCLECI = true
+      process.env.CIRCLE_BUILD_URL = "circle build url"
+      process.env.CIRCLE_BUILD_NUM = "4"
+      process.env.CIRCLE_PR_NUMBER = "100"
+
+      @expects({
+        name: "circle",
+        buildNum: "4",
+        params: {
+          buildUrl: "circle build url"
+        },
+        gitInfo: {
+          pullRequestId: '100',
+          defaultBranch: null
+        }
+      })
+
+    it "has non-forked PR number", ->
+      process.env.CIRCLECI = true
+      process.env.CIRCLE_BUILD_URL = "circle build url"
+      process.env.CIRCLE_BUILD_NUM = "4"
+      # non-forked PR has number in the URL
+      process.env.CIRCLE_PULL_REQUEST = "https://github.com/cypress-io/cypress/pull/100"
+
+      @expects({
+        name: "circle",
+        buildNum: "4",
+        params: {
+          buildUrl: "circle build url"
+        },
+        gitInfo: {
+          pullRequestId: '100',
+          defaultBranch: null
+        }
+      })
 
   it "codeship", ->
     process.env.CI_NAME = "codeship"
@@ -105,11 +163,15 @@ describe "lib/util/ci_provider", ->
 
   it "drone", ->
     process.env.DRONE = true
+    process.env.DRONE_BUILD_NUMBER = "1234"
+    process.env.DRONE_BUILD_LINK = "some url"
 
     @expects({
       name: "drone",
-      buildNum: null
-      params: null
+      buildNum: "1234"
+      params: {
+        buildUrl: "some url"
+      }
     })
 
   it "gitlab via GITLAB_CI", ->
@@ -140,16 +202,7 @@ describe "lib/util/ci_provider", ->
       }
     })
 
-  it "hudson", ->
-    process.env.HUDSON_URL = true
-
-    @expects({
-      name: "hudson",
-      buildNum: null
-      params: null
-    })
-
-  it "jenkins", ->
+  it "jenkins via JENKINS_URL", ->
     process.env.JENKINS_URL = true
     process.env.BUILD_URL = "jenkins build url"
     process.env.BUILD_NUMBER = "9"
@@ -162,13 +215,69 @@ describe "lib/util/ci_provider", ->
       }
     })
 
+  it "jenkins via JENKINS_HOME", ->
+    process.env.JENKINS_HOME = "/path/to/jenkins"
+    process.env.BUILD_URL = "jenkins build url"
+    process.env.BUILD_NUMBER = "9.1"
+
+    @expects({
+      name: "jenkins",
+      buildNum: "9.1"
+      params: {
+        buildUrl: "jenkins build url"
+      }
+    })
+
+  it "jenkins via JENKINS_VERSION", ->
+    process.env.JENKINS_VERSION = "1.2.3"
+    process.env.BUILD_URL = "jenkins build url"
+    process.env.BUILD_NUMBER = "9.2"
+
+    @expects({
+      name: "jenkins",
+      buildNum: "9.2"
+      params: {
+        buildUrl: "jenkins build url"
+      }
+    })
+
+  it "jenkins via HUDSON_URL", ->
+    process.env.HUDSON_URL = true
+    process.env.BUILD_URL = "jenkins build url"
+    process.env.BUILD_NUMBER = "9.3"
+
+    @expects({
+      name: "jenkins",
+      buildNum: "9.3"
+      params: {
+        buildUrl: "jenkins build url"
+      }
+    })
+
+  it "jenkins via HUDSON_HOME", ->
+    process.env.HUDSON_HOME = "/path/to/jenkins"
+    process.env.BUILD_URL = "jenkins build url"
+    process.env.BUILD_NUMBER = "9.4"
+
+    @expects({
+      name: "jenkins",
+      buildNum: "9.4"
+      params: {
+        buildUrl: "jenkins build url"
+      }
+    })
+
   it "semaphore", ->
     process.env.SEMAPHORE = true
+    process.env.SEMAPHORE_BUILD_NUMBER = "46"
+    process.env.SEMAPHORE_REPO_SLUG = "rails/rails"
 
     @expects({
       name: "semaphore"
-      buildNum: null
-      params: null
+      buildNum: "46"
+      params: {
+        repoSlug: "rails/rails"
+      }
     })
 
   it "shippable", ->

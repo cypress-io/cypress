@@ -1,18 +1,14 @@
-import _ from 'lodash'
-import moment from 'moment'
+import { capitalize } from 'lodash'
 import gravatar from 'gravatar'
+import duration from '../../../server/lib/util/duration'
 
-const osNameLookup = {
-  darwin: 'apple',
-}
+const cyDirRegex = /^cypress\/integration\//g
 
 const osIconLookup = {
-  windows: 'windows',
+  win32: 'windows',
   darwin: 'apple',
   linux: 'linux',
 }
-
-const browserNameLookup = {}
 
 const browserIconLookup = {
   chrome: 'chrome',
@@ -22,16 +18,12 @@ const browserIconLookup = {
 }
 
 module.exports = {
+  durationFormatted: duration.format,
+
   osIcon: (osName) => {
     if (!osName) return ''
 
     return osIconLookup[osName] || 'desktop'
-  },
-
-  osNameFormatted: (osName) => {
-    if (!osName) return ''
-
-    return _.capitalize(osNameLookup[osName] || osName)
   },
 
   browserIcon: (browserName) => {
@@ -43,9 +35,8 @@ module.exports = {
   browserNameFormatted: (browserName) => {
     if (!browserName) return ''
 
-    return _.capitalize(browserNameLookup[browserName] || browserName)
+    return capitalize(browserName)
   },
-
 
   browserVersionFormatted: (browserVersion) => {
     if (!browserVersion) return ''
@@ -85,13 +76,9 @@ module.exports = {
     }
   },
 
-  durationFormatted: (durationInMs) => {
-    const duration = moment.duration(durationInMs)
-
-    let durationHours = duration.hours() ? `${duration.hours()}h ` : ''
-    let durationMinutes = duration.minutes() ? `${duration.minutes()}m ` : ''
-    let durationSeconds = duration.seconds() ? `${duration.seconds()}s ` : ''
-
-    return durationHours + durationMinutes + durationSeconds
+  stripLeadingCyDirs (spec) {
+    if (!spec) return null
+    // remove leading 'cypress/integration' from spec
+    return spec.replace(cyDirRegex, '')
   },
 }

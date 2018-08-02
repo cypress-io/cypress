@@ -1,8 +1,8 @@
 path     = require("path")
 _        = require("lodash")
-fs       = require("fs-extra")
 Promise  = require("bluebird")
 winston  = require("winston")
+fs       = require("./util/fs")
 appData  = require("./util/app_data")
 
 folder = appData.path()

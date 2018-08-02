@@ -1,18 +1,17 @@
-const _ = require('lodash')
-const os = require('os')
-const path = require('path')
-const progress = require('request-progress')
-const Promise = require('bluebird')
-const request = require('request')
-const url = require('url')
-const debug = require('debug')('cypress:cli')
-const { stripIndent } = require('common-tags')
+const la = require('lazy-ass')
 const is = require('check-more-types')
+const os = require('os')
+const url = require('url')
+const path = require('path')
+const debug = require('debug')('cypress:cli')
+const request = require('request')
+const Promise = require('bluebird')
+const requestProgress = require('request-progress')
+const { stripIndent } = require('common-tags')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
-const info = require('./info')
 
 const baseUrl = 'https://download.cypress.io/'
 
@@ -46,36 +45,26 @@ const prettyDownloadErr = (err, version) => {
   return throwFormErrorText(errors.failedDownload)(msg)
 }
 
-// attention:
-// when passing relative path to NPM post install hook, the current working
-// directory is set to the `node_modules/cypress` folder
-// the user is probably passing relative path with respect to root package folder
-function formAbsolutePath (filename) {
-  if (path.isAbsolute(filename)) {
-    return filename
-  }
-  return path.join(process.cwd(), '..', '..', filename)
-}
-
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = (options) => {
+const downloadFromUrl = ({ url, downloadDestination, progress }) => {
   return new Promise((resolve, reject) => {
-    const url = getUrl(options.version)
-
     debug('Downloading from', url)
-    debug('Saving file to', options.downloadDestination)
+    debug('Saving file to', downloadDestination)
+
+    let redirectVersion
 
     const req = request({
       url,
       followRedirect (response) {
         const version = response.headers['x-version']
+        debug('redirect version:', version)
         if (version) {
           // set the version in options if we have one.
           // this insulates us from potential redirect
           // problems where version would be set to undefined.
-          options.version = version
+          redirectVersion = version
         }
 
         // yes redirect
@@ -86,8 +75,8 @@ const downloadFromUrl = (options) => {
     // closure
     let started = null
 
-    progress(req, {
-      throttle: options.throttle,
+    requestProgress(req, {
+      throttle: progress.throttle,
     })
     .on('response', (response) => {
       // start counting now once we've gotten
@@ -118,75 +107,39 @@ const downloadFromUrl = (options) => {
       const eta = util.calculateEta(state.percent, elapsed)
 
       // send up our percent and seconds remaining
-      options.onProgress(state.percent, util.secsRemaining(eta))
+      progress.onProgress(state.percent, util.secsRemaining(eta))
     })
     // save this download here
-    .pipe(fs.createWriteStream(options.downloadDestination))
+    .pipe(fs.createWriteStream(downloadDestination))
     .on('finish', () => {
       debug('downloading finished')
 
-      resolve({
-        filename: options.downloadDestination,
-        downloaded: true,
-      })
+      resolve(redirectVersion)
     })
   })
 }
 
-// returns an object with zip filename
-// and a flag if the file was really downloaded
-// or not. Maybe it was already there!
-// {filename: ..., downloaded: true|false}
-const download = (options = {}) => {
-  if (!options.version) {
-    debug('empty Cypress version to download, will try latest')
-    return downloadFromUrl(options)
+const start = ({ version, downloadDestination, progress }) => {
+  if (!downloadDestination) {
+    la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
+  }
+  if (!progress) {
+    progress = { onProgress: () => ({}) }
   }
 
-  debug('need to download Cypress version %s', options.version)
-  // first check the original filename
-  return fs.pathExists(options.version).then((exists) => {
-    if (exists) {
-      debug('found file right away', options.version)
-      return {
-        filename: options.version,
-        downloaded: false,
-      }
-    }
+  const url = getUrl(version)
+  progress.throttle = 100
 
-    const possibleFile = formAbsolutePath(options.version)
-    debug('checking local file', possibleFile, 'cwd', process.cwd())
-    return fs.pathExists(possibleFile).then((exists) => {
-      if (exists) {
-        debug('found local file', possibleFile)
-        debug('skipping download')
-        return {
-          filename: possibleFile,
-          downloaded: false,
-        }
-      } else {
-        return downloadFromUrl(options)
-      }
-    })
-  })
-}
+  debug('needed Cypress version: %s', version)
+  debug(`downloading cypress.zip to "${downloadDestination}"`)
 
-const start = (options) => {
-  _.defaults(options, {
-    version: null,
-    throttle: 100,
-    onProgress: () => {},
-    downloadDestination: path.join(info.getInstallationDir(), 'cypress.zip'),
-  })
-
-  // make sure our 'dist' installation dir exists
-  return info
-  .ensureInstallationDir()
+  // ensure download dir exists
+  return fs.ensureDirAsync(path.dirname(downloadDestination))
   .then(() => {
-    return download(options)
+    return downloadFromUrl({ url, downloadDestination, progress })
   })
   .catch((err) => {
-    return prettyDownloadErr(err, options.version)
+    return prettyDownloadErr(err, version)
   })
 }
 

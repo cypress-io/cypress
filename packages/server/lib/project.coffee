@@ -1,15 +1,14 @@
 _           = require("lodash")
 R           = require("ramda")
-fs          = require("fs-extra")
 EE          = require("events")
 path        = require("path")
-glob        = require("glob")
 Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
 check       = require("check-more-types")
+scaffoldDebug = require("debug")("cypress:server:scaffold")
+debug       = require("debug")("cypress:server:project")
 cwd         = require("./cwd")
-ids         = require("./ids")
 api         = require("./api")
 user        = require("./user")
 cache       = require("./cache")
@@ -17,21 +16,17 @@ config      = require("./config")
 logger      = require("./logger")
 errors      = require("./errors")
 Server      = require("./server")
+plugins     = require("./plugins")
 scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
+browsers    = require("./browsers")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
-files       = require("./controllers/files")
-plugins     = require("./plugins")
 preprocessor = require("./plugins/preprocessor")
+fs          = require("./util/fs")
 settings    = require("./util/settings")
-browsers    = require("./browsers")
-scaffoldLog = require("debug")("cypress:server:scaffold")
-debug       = require("debug")("cypress:server:project")
-
-fs   = Promise.promisifyAll(fs)
-glob = Promise.promisify(glob)
+specsUtil   = require("./util/specs")
 
 localCwd = cwd()
 
@@ -44,15 +39,19 @@ class Project extends EE
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
+
     if not check.unemptyString(projectRoot)
       throw new Error("Expected project root path, not #{projectRoot}")
 
     @projectRoot = path.resolve(projectRoot)
     @watchers    = Watchers()
-    @server      = null
     @cfg         = null
+    @spec        = null
+    @browser     = null
+    @server      = null
     @memoryCheck = null
     @automation  = null
+
     debug("Project created %s", @projectRoot)
 
   open: (options = {}) ->
@@ -151,7 +150,10 @@ class Project extends EE
   reset: ->
     debug("resetting project instance %s", @projectRoot)
 
+    @spec = @browser = null
+
     Promise.try =>
+      @automation?.reset()
       @server?.reset()
 
   close: ->
@@ -160,7 +162,7 @@ class Project extends EE
     if @memoryCheck
       clearInterval(@memoryCheck)
 
-    @cfg = null
+    @cfg = @spec = @browser = null
 
     Promise.join(
       @server?.close(),
@@ -189,7 +191,7 @@ class Project extends EE
       return if not found
 
       debug("watch plugins file")
-      @watchers.watch(cfg.pluginsFile, {
+      @watchers.watchTree(cfg.pluginsFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
@@ -204,6 +206,8 @@ class Project extends EE
     ## watch anything
     return if not onSettingsChanged
 
+    debug("watch settings files")
+
     obj = {
       onChange: (filePath, stats) =>
         ## dont fire change events if we generated
@@ -217,6 +221,7 @@ class Project extends EE
     }
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
+    @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
     @watchSettings(options.onSettingsChanged)
@@ -258,8 +263,7 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        debug("onSetRunnables")
-        debug("runnables", runnables)
+        debug("recevied runnables %o", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
@@ -282,6 +286,13 @@ class Project extends EE
   changeToUrl: (url) ->
     @server.changeToUrl(url)
 
+  setCurrentSpecAndBrowser: (spec, browser) ->
+    @spec = spec
+    @browser = browser
+
+  getCurrentSpecAndBrowser: ->
+    _.pick(@, "spec", "browser")
+
   setBrowsers: (browsers = []) ->
     @getConfig()
     .then (cfg) ->
@@ -299,30 +310,33 @@ class Project extends EE
   ## with additional object "state" which are transient things like
   ## window width and height, DevTools open or not, etc.
   getConfig: (options = {}) =>
+    if @cfg
+      return Promise.resolve(@cfg)
+
     setNewProject = (cfg) =>
+      return if cfg.isTextTerminal
+
       ## decide if new project by asking scaffold
       ## and looking at previously saved user state
-      throw new Error("Missing integration folder") if not cfg.integrationFolder
+      if not cfg.integrationFolder
+        throw new Error("Missing integration folder")
+
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
-        scaffoldLog("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
+        scaffoldDebug("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
-      .return(cfg)
 
-    if c = @cfg
-      Promise.resolve(c)
-    else
-      config.get(@projectRoot, options)
-      .then (cfg) => @_setSavedState(cfg)
-      .then(setNewProject)
+    config.get(@projectRoot, options)
+    .then (cfg) => @_setSavedState(cfg)
+    .tap(setNewProject)
 
   # forces saving of project's state by first merging with argument
   saveState: (stateChanges = {}) ->
     throw new Error("Missing project config") if not @cfg
     throw new Error("Missing project root") if not @projectRoot
     newState = _.merge({}, @cfg.state, stateChanges)
-    savedState(@projectRoot)
+    savedState(@projectRoot, @cfg.isTextTerminal)
     .then (state) ->
       state.set(newState)
     .then =>
@@ -330,43 +344,33 @@ class Project extends EE
       newState
 
   _setSavedState: (cfg) ->
-    savedState(@projectRoot)
+    debug("get saved state")
+    savedState(@projectRoot, cfg.isTextTerminal)
     .then (state) -> state.get()
     .then (state) ->
       cfg.state = state
       cfg
 
-  ensureSpecUrl: (spec) ->
+  getSpecUrl: (absoluteSpecPath) ->
     @getConfig()
     .then (cfg) =>
-      ## if we dont have a spec or its __all
-      if not spec or (spec is "__all")
-        @getUrlBySpec(cfg.browserUrl, "/__all")
+      ## if we dont have a absoluteSpecPath or its __all
+      if not absoluteSpecPath or (absoluteSpecPath is "__all")
+        @normalizeSpecUrl(cfg.browserUrl, "/__all")
       else
-        @ensureSpecExists(spec)
-        .then (pathToSpec) =>
-          ## TODO:
-          ## to handle both unit + integration tests we need
-          ## to figure out (based on the config) where this spec
-          ## lives. does it live in the integrationFolder or
-          ## the unit folder?
-          ## once we determine that we can then prefix it correctly
-          ## with either integration or unit
-          prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.browserUrl, prefixedPath)
+        ## TODO:
+        ## to handle both unit + integration tests we need
+        ## to figure out (based on the config) where this absoluteSpecPath
+        ## lives. does it live in the integrationFolder or
+        ## the unit folder?
+        ## once we determine that we can then prefix it correctly
+        ## with either integration or unit
+        prefixedPath = @getPrefixedPathToSpec(cfg, absoluteSpecPath)
+        @normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
-  ensureSpecExists: (spec) ->
-    specFile = path.resolve(@projectRoot, spec)
+  getPrefixedPathToSpec: (cfg, pathToSpec, type = "integration") ->
+    { integrationFolder, projectRoot } = cfg
 
-    ## we want to make it easy on the user by allowing them to pass both
-    ## an absolute path to the spec, or a relative path from their test folder
-    fs
-    .statAsync(specFile)
-    .return(specFile)
-    .catch ->
-      errors.throw("SPEC_FILE_NOT_FOUND", specFile)
-
-  getPrefixedPathToSpec: (integrationFolder, pathToSpec, type = "integration") ->
     ## for now hard code the 'type' as integration
     ## but in the future accept something different here
 
@@ -377,13 +381,20 @@ class Project extends EE
     ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     ##
     ## becomes /integration/foo.coffee
-    "/" + path.join(type, path.relative(integrationFolder, pathToSpec))
+    "/" + path.join(type, path.relative(
+      integrationFolder,
+      path.resolve(projectRoot, pathToSpec)
+    ))
 
-  getUrlBySpec: (browserUrl, specUrl) ->
+  normalizeSpecUrl: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [
+      browserUrl,
+      "#/tests",
+      specUrl
+    ].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (cfg) ->
     debug("scaffolding project %s", @projectRoot)
@@ -411,7 +422,7 @@ class Project extends EE
     Promise.all(scaffolds)
 
   writeProjectId: (id) ->
-    attrs = {projectId: id}
+    attrs = { projectId: id }
     logger.info "Writing Project ID", _.clone(attrs)
 
     @generatedProjectIdTimestamp = new Date
@@ -423,10 +434,7 @@ class Project extends EE
   getProjectId: ->
     @verifyExistence()
     .then =>
-      if id = process.env.CYPRESS_PROJECT_ID
-        {projectId: id}
-      else
-        settings.read(@projectRoot)
+      settings.read(@projectRoot)
     .then (settings) =>
       if settings and id = settings.projectId
         return id
@@ -469,14 +477,14 @@ class Project extends EE
       api.getOrgs(authToken)
 
   @paths = ->
-    cache.getProjectPaths()
+    cache.getProjectRoots()
 
   @getPathsAndIds = ->
-    cache.getProjectPaths()
-    .map (projectPath) ->
+    cache.getProjectRoots()
+    .map (projectRoot) ->
       Promise.props({
-        path: projectPath
-        id: settings.id(projectPath)
+        path: projectRoot
+        id: settings.id(projectRoot)
       })
 
   @_mergeDetails = (clientProject, project) ->
@@ -552,14 +560,6 @@ class Project extends EE
     .catch ->
       {path}
 
-  @removeIds = (p) ->
-    Project(p)
-    .verifyExistence()
-    .call("getConfig")
-    .then (cfg) ->
-      ## remove all of the ids for the test files found in the integrationFolder
-      ids.remove(cfg.integrationFolder)
-
   @id = (path) ->
     Project(path).getProjectId()
 
@@ -592,9 +592,9 @@ class Project extends EE
 
   # Given a path to the project, finds all specs
   # returns list of specs with respect to the project root
-  @findSpecs = (projectPath, specPattern) ->
-    debug("finding specs for project %s", projectPath)
-    la(check.unemptyString(projectPath), "missing project path", projectPath)
+  @findSpecs = (projectRoot, specPattern) ->
+    debug("finding specs for project %s", projectRoot)
+    la(check.unemptyString(projectRoot), "missing project path", projectRoot)
     la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
 
     ## if we have a spec pattern
@@ -602,13 +602,13 @@ class Project extends EE
       ## then normalize to create an absolute
       ## file path from projectRoot
       ## ie: **/* turns into /Users/bmann/dev/project/**/*
-      specPattern = path.resolve(projectPath, specPattern)
+      specPattern = path.resolve(projectRoot, specPattern)
 
-    Project(projectPath)
+    Project(projectRoot)
     .getConfig()
     # TODO: handle wild card pattern or spec filename
     .then (cfg) ->
-      files.getTestFiles(cfg, specPattern)
+      specsUtil.find(cfg, specPattern)
     .then R.prop("integration")
     .then R.map(R.prop("name"))
 

@@ -5,9 +5,9 @@
   "main": "index.js",
   "browser": "src/main",
   "scripts": {
-    "start": "coffee test/support/server.coffee",
-    "cypress:open": "node ../../scripts/start.js --project ./test",
-    "cypress:run": "node ../../scripts/run-cypress-tests.js --browser chrome --dir test",
+    "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee",
+    "cypress:open": "node ../../cli/bin/cypress open --dev --project ./test",
+    "cypress:run": "node ../../scripts/run-cypress-tests.js --dir test",
     "clean-deps": "rm -rf node_modules"
   },
   "files": [
@@ -25,6 +25,7 @@
     "bluebird": "3.5.0",
     "body-parser": "^1.12.4",
     "bootstrap": "^3.3.5",
+    "bytes": "^3.0.0",
     "card": "^1.0.2",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
@@ -40,7 +41,7 @@
     "jquery.scrollto": "^2.1.2",
     "js-cookie": "2.1.1",
     "jsdom": "^11.0.0",
-    "lodash": "4.17.4",
+    "lodash": "4.17.10",
     "lolex": "^1.5.2",
     "method-override": "^2.3.1",
     "minimatch": "^3.0.0",
@@ -52,9 +53,11 @@
     "parse-domain": "2.0.0",
     "setimmediate": "^1.0.2",
     "sinon": "3.2.0",
+    "text-mask-addons": "^3.7.2",
     "underscore": "^1.8.3",
     "underscore.string": "3.3.4",
     "url-parse": "^1.1.7",
+    "vanilla-text-mask": "^5.1.1",
     "wait-on": "^2.0.2",
     "zone.js": "^0.8.18"
   }

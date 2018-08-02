@@ -1,17 +1,12 @@
 _ = require("lodash")
 EE = require("events")
 path = require("path")
-log = require("debug")("cypress:server:preprocessor")
+debug = require("debug")("cypress:server:preprocessor")
 Promise = require("bluebird")
-
 appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
 savedState = require("../util/saved_state")
-
-PrettyError = require("pretty-error")
-pe = new PrettyError()
-pe.skipNodeFiles()
 
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())
@@ -21,7 +16,8 @@ errorMessage = (err = {}) ->
   .replace(/From previous event:\n?/g, "")
 
 clientSideError = (err) ->
-  console.error(pe.render(err))
+  console.log(err.stack)
+
   err = errorMessage(err)
   ## \n doesn't come through properly so preserve it so the
   ## runner can do the right thing
@@ -47,48 +43,62 @@ fileObjects = {}
 fileProcessors = {}
 
 setDefaultPreprocessor = ->
-  log("set default preprocessor")
+  debug("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
   plugins.register("file:preprocessor", browserify())
 
 plugins.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
-    log("ipc preprocessor:rerun event")
+    debug("ipc preprocessor:rerun event")
     baseEmitter.emit("file:updated", filePath)
 
   baseEmitter.on "close", (filePath) ->
-    log("base emitter plugin close event")
+    debug("base emitter plugin close event")
     ipc.send("preprocessor:close", filePath)
 
 module.exports = {
+  errorMessage
+
+  clientSideError
+
   emitter: baseEmitter
-  errorMessage: errorMessage
-  clientSideError: clientSideError
 
-  getFile: (filePath, config, options = {}) ->
-    filePath = path.join(config.projectRoot, filePath)
+  getFile: (filePath, config) ->
+    filePath = path.resolve(config.projectRoot, filePath)
 
-    log("getFile #{filePath}")
+    debug("getFile #{filePath}")
 
     if not fileObject = fileObjects[filePath]
+      ## we should be watching the file if we are NOT
+      ## in a text terminal aka cypress run
+      ## TODO: rename this to config.isRunMode
+      ## vs config.isInterativeMode
+      shouldWatch = not config.isTextTerminal
+      
+      baseFilePath = filePath
+      .replace(config.projectRoot, "")
+      .replace(config.integrationFolder, "")
+
       fileObject = fileObjects[filePath] = _.extend(new EE(), {
-        filePath: filePath
-        outputPath: getOutputPath(config, filePath.replace(config.projectRoot, ""))
-        shouldWatch: not config.isTextTerminal
+        filePath,
+        shouldWatch,
+        outputPath: getOutputPath(config, baseFilePath)
       })
+
       fileObject.on "rerun", ->
-        log("file object rerun event")
+        debug("file object rerun event")
         baseEmitter.emit("file:updated", filePath)
+
       baseEmitter.once "close", ->
-        log("base emitter native close event")
+        debug("base emitter native close event")
         fileObject.emit("close")
  
     if not plugins.has("file:preprocessor")
       setDefaultPreprocessor(config)
 
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
-      log("headless and already processed")
+      debug("headless and already processed")
       return fileProcessor
 
     preprocessor = fileProcessors[filePath] = Promise.try ->
@@ -97,23 +107,25 @@ module.exports = {
     return preprocessor
 
   removeFile: (filePath, config) ->
-    filePath = path.join(config.projectRoot, filePath)
+    filePath = path.resolve(config.projectRoot, filePath)
 
     return if not fileProcessors[filePath]
 
-    log("removeFile #{filePath}")
+    debug("removeFile #{filePath}")
+
     baseEmitter.emit("close", filePath)
+
     if fileObject = fileObjects[filePath]
       fileObject.emit("close")
+
     delete fileObjects[filePath]
     delete fileProcessors[filePath]
 
   close: ->
-    log("close preprocessor")
+    debug("close preprocessor")
 
     fileObjects = {}
     fileProcessors = {}
     baseEmitter.emit("close")
     baseEmitter.removeAllListeners()
-
 }

@@ -1,8 +1,6 @@
-fs = require("fs")
 path = require("path")
 Promise = require("bluebird")
-
-fs = Promise.promisifyAll(fs)
+fs = require("./fs")
 
 isIntegrationTestRe = /^integration/
 isUnitTestRe        = /^unit/
@@ -33,10 +31,23 @@ getRealFolderPath = (folder) ->
 
   fs.realpathAsync(folder)
 
+getRelativePathToSpec = (spec) ->
+  switch
+    ## if our file is an integration test
+    ## then figure out the absolute path
+    ## to it
+    when isIntegrationTestRe.test(spec)
+      ## strip off the integration part
+      path.relative("integration", spec)
+    else
+      spec
+
 module.exports = {
   checkIfResolveChangedRootFolder
 
   getRealFolderPath
+
+  getRelativePathToSpec
 
   getAbsolutePathToSpec: (spec, config) ->
     switch
@@ -44,12 +55,11 @@ module.exports = {
       ## then figure out the absolute path
       ## to it
       when isIntegrationTestRe.test(spec)
-        ## strip off the integration part
-        spec = path.relative("integration", spec)
+        spec = getRelativePathToSpec(spec)
 
         ## now simply join this with our integrationFolder
         ## which makes it an absolute path
-        spec = path.join(config.integrationFolder, spec)
+        path.join(config.integrationFolder, spec)
 
       # ## commented out until we implement unit testing
       # when isUnitTestRe.test(spec)
@@ -59,7 +69,7 @@ module.exports = {
 
         # ## now simply resolve this with our unitFolder
         # ## which makes it an absolute path
-        # spec = path.resolve(config.unitFolder, spec)
+        # path.join(config.unitFolder, spec)
 
       else
         spec
