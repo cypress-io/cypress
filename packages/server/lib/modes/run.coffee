@@ -367,6 +367,12 @@ createAndOpenProject = (socketId, options) ->
       projectId: getProjectId(project, projectId)
     })
 
+removeOldProfiles = ->
+  browsers.removeOldProfiles()
+  .catch (err) ->
+    ## dont make removing old browsers profiles break the build
+    errors.warning("CANNOT_REMOVE_OLD_BROWSER_PROFILES", err.stack)
+
 trashAssets = (config = {}) ->
   if config.trashAssetsBeforeRuns isnt true
     return Promise.resolve()
@@ -909,6 +915,7 @@ module.exports = {
         browsers.ensureAndGetByName(browserName),
         @findSpecs(config, specPattern),
         trashAssets(config),
+        removeOldProfiles()
       ])
       .spread (sys = {}, browser = {}, specs = []) =>
         ## return only what is return to the specPattern

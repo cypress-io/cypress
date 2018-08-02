@@ -21,6 +21,14 @@ API = {
 
         #{arg1}
         """
+      when "CANNOT_REMOVE_OLD_BROWSER_PROFILES"
+        """
+        Warning: We failed to remove old browser profiles from previous runs.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
       when "VIDEO_RECORDING_FAILED"
         """
         Warning: We failed to record the video.

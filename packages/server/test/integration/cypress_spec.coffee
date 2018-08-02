@@ -460,6 +460,17 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWithMatch("cypress run --record")
         expect(console.log).to.be.calledWithMatch("https://on.cypress.io/recording-project-runs")
 
+    it "logs warning when removing old browser profiles fails", ->
+      err = new Error('foo')
+
+      sinon.stub(browsers, 'removeOldProfiles').rejects(err)
+
+      cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        expect(errors.warning).to.be.calledWith("CANNOT_REMOVE_OLD_BROWSER_PROFILES", err.stack)
+        expect(console.log).to.be.calledWithMatch("Warning: We failed to remove old browser profiles from previous runs.")
+        expect(console.log).to.be.calledWithMatch(err.message)
+
     it "does not log warning when no projectId", ->
       cypress.start(["--run-project=#{@pristinePath}", "--key=asdf"])
       .then =>
@@ -634,7 +645,9 @@ describe "lib/cypress", ->
 
     describe "state", ->
       beforeEach ->
-        formStatePath(@todosPath)
+        appData.remove()
+        .then =>
+          formStatePath(@todosPath)
         .then (statePathStart) =>
           @statePath = appData.projectsPath(statePathStart)
 
