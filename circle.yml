@@ -325,7 +325,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 0
+          command: npm run cypress:run -- --parallel 7 --index 0 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -345,7 +345,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 1
+          command: npm run cypress:run -- --parallel 7 --index 1 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -365,7 +365,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 2
+          command: npm run cypress:run -- --parallel 7 --index 2 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -385,7 +385,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 3
+          command: npm run cypress:run -- --parallel 7 --index 3 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -405,7 +405,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 4
+          command: npm run cypress:run -- --parallel 7 --index 4 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -425,7 +425,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 5
+          command: npm run cypress:run -- --parallel 7 --index 5 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -445,7 +445,7 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 6
+          command: npm run cypress:run -- --parallel 7 --index 6 --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress

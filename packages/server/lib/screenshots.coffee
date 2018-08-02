@@ -7,6 +7,7 @@ Jimp            = require("jimp")
 sizeOf          = require("image-size")
 colorString     = require("color-string")
 debug           = require("debug")("cypress:server:screenshot")
+plugins         = require("./plugins")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
 pathHelpers     = require("./util/path_helpers")
@@ -290,7 +291,7 @@ getBuffer = (details) ->
 getDimensions = (details) ->
   pick = (obj) ->
     _.pick(obj, "width", "height")
-  
+
   if details.buffer
     pick(sizeOf(details.buffer))
   else
@@ -306,17 +307,17 @@ ensureUniquePath = (takenPaths, withoutExt, extension) ->
 getPath = (data, ext, screenshotsFolder) ->
   specNames = (data.specName or "")
   .split(pathSeparatorRe)
-  
+
   if data.name
     names = data.name.split(pathSeparatorRe).map(replaceInvalidChars)
   else
     names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
-  
+
   ## append (failed) to the last name
   if data.testFailure
     index = names.length - 1
     names[index] = names[index] + " (failed)"
-  
+
   withoutExt = path.join(screenshotsFolder, specNames..., names...)
 
   ensureUniquePath(data.takenPaths, withoutExt, ext)
@@ -424,7 +425,7 @@ module.exports = {
       { multipart, pixelRatio, takenAt } = details
 
       {
-        size 
+        size
         takenAt
         dimensions
         multipart
@@ -434,5 +435,21 @@ module.exports = {
         testFailure: data.testFailure
         path: pathToScreenshot
       }
+
+  afterScreenshot: (data, details) ->
+    duration = new Date() - new Date(data.startTime)
+
+    details = _.extend({}, data, details, { duration })
+    details = _.pick(details, "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
+
+    if not plugins.has("after:screenshot")
+      return Promise.resolve(details)
+
+    plugins.execute("after:screenshot", details)
+    .then (updates) =>
+      if not _.isPlainObject(updates)
+        return details
+
+      _.extend(details, _.pick(updates, "size", "dimensions", "path"))
 
 }

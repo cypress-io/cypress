@@ -11,6 +11,7 @@ config      = require("#{root}lib/config")
 screenshots = require("#{root}lib/screenshots")
 fs          = require("#{root}lib/util/fs")
 settings    = require("#{root}lib/util/settings")
+plugins     = require("#{root}lib/plugins")
 screenshotAutomation = require("#{root}lib/automation/screenshot")
 
 image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC"
@@ -511,11 +512,108 @@ describe "lib/screenshots", ->
         "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
       )
 
+  context ".afterScreenshot", ->
+    beforeEach ->
+      @data = {
+        titles: ["the", "title"]
+        testId: "r1"
+        name: "my-screenshot"
+        capture: "runner"
+        clip: { x: 0, y: 0, width: 1000, height: 660 }
+        viewport: { width: 1400, height: 700 }
+        scaled: true
+        blackout: []
+        startTime: "2018-06-27T20:17:19.537Z"
+        specName: "integration/spec.coffee"
+      }
+
+      @details = {
+        size: 100
+        takenAt: new Date().toISOString()
+        dimensions: { width: 1000, height: 660 }
+        multipart: false
+        pixelRatio: 1
+        name: "my-screenshot"
+        specName: "integration/spec.coffee"
+        testFailure: true
+        path: "/path/to/my-screenshot.png"
+      }
+
+      sinon.stub(plugins, "has")
+      sinon.stub(plugins, "execute")
+
+    it "resolves whitelisted details if no after:screenshot plugin registered", ->
+      plugins.has.returns(false)
+
+      screenshots.afterScreenshot(@data, @details).then (result) =>
+        expect(_.omit(result, "duration")).to.eql({
+          size: 100
+          takenAt: @details.takenAt
+          dimensions: @details.dimensions
+          multipart: false
+          pixelRatio: 1
+          name: "my-screenshot"
+          specName: "integration/spec.coffee"
+          testFailure: true
+          path: "/path/to/my-screenshot.png"
+          scaled: true
+          blackout: []
+          })
+        expect(result.duration).to.be.a("number")
+
+    it "executes after:screenshot plugin and merges in size, dimensions, and/or path", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({
+        size: 200
+        dimensions: { width: 2000, height: 1320 }
+        path: "/new/path/to/screenshot.png"
+        pixelRatio: 2
+        takenAt: "1234"
+      })
+
+      screenshots.afterScreenshot(@data, @details).then (result) =>
+        expect(_.omit(result, "duration")).to.eql({
+          size: 200
+          takenAt: @details.takenAt
+          dimensions: { width: 2000, height: 1320 }
+          multipart: false
+          pixelRatio: 1
+          name: "my-screenshot"
+          specName: "integration/spec.coffee"
+          testFailure: true
+          path: "/new/path/to/screenshot.png"
+          scaled: true
+          blackout: []
+        })
+        expect(result.duration).to.be.a("number")
+
+    it "ignores updates that are not an object", ->
+      plugins.execute.resolves("foo")
+
+      screenshots.afterScreenshot(@data, @details).then (result) =>
+        expect(_.omit(result, "duration")).to.eql({
+          size: 100
+          takenAt: @details.takenAt
+          dimensions: @details.dimensions
+          multipart: false
+          pixelRatio: 1
+          name: "my-screenshot"
+          specName: "integration/spec.coffee"
+          testFailure: true
+          path: "/path/to/my-screenshot.png"
+          scaled: true
+          blackout: []
+          })
+        expect(result.duration).to.be.a("number")
+
 describe "lib/automation/screenshot", ->
   beforeEach ->
-    @image = {}
-    sinon.stub(screenshots, "capture").resolves(@image)
-    sinon.stub(screenshots, "save")
+    @details = {}
+    sinon.stub(screenshots, "capture").resolves(@details)
+    @savedDetails = {}
+    sinon.stub(screenshots, "save").resolves(@savedDetails)
+    @updatedDetails = {}
+    sinon.stub(screenshots, "afterScreenshot").resolves(@updatedDetails)
 
     @screenshot = screenshotAutomation("cypress/screenshots")
 
@@ -528,9 +626,18 @@ describe "lib/automation/screenshot", ->
   it "saves screenshot if there's a buffer", ->
     data = {}
     @screenshot.capture(data, @automate).then =>
-      expect(screenshots.save).to.be.calledWith(data, @image, "cypress/screenshots")
+      expect(screenshots.save).to.be.calledWith(data, @details, "cypress/screenshots")
 
   it "does not save screenshot if there's no buffer", ->
     screenshots.capture.resolves(null)
     @screenshot.capture({}, @automate).then =>
       expect(screenshots.save).not.to.be.called
+
+  it "calls afterScreenshot", ->
+    data = {}
+    @screenshot.capture(data, @automate).then =>
+      expect(screenshots.afterScreenshot).to.be.calledWith(data, @savedDetails)
+
+  it "resolves with updated details", ->
+    @screenshot.capture({}, @automate).then (details) =>
+      expect(details).to.equal(@updatedDetails)

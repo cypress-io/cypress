@@ -1,11 +1,11 @@
 inject = require("./inject")
 security = require("./security")
 
-headRe      = /(<head.*?>)/i
+headRe      = /(<head(?!er).*?>)/i
 bodyRe      = /(<body.*?>)/i
 htmlRe      = /(<html.*?>)/i
 
-rewriteHtml = (html, domainName, wantsInjection, modifyObstructiveCode) ->
+rewriteHtml = (html, domainName, wantsInjection, wantsSecurityRemoved) ->
   replace = (re, str) ->
     html.replace(re, str)
 
@@ -18,7 +18,7 @@ rewriteHtml = (html, domainName, wantsInjection, modifyObstructiveCode) ->
 
   ## strip clickjacking and framebusting
   ## from the HTML if we've been told to
-  if modifyObstructiveCode
+  if wantsSecurityRemoved
     html = security.strip(html)
 
   switch

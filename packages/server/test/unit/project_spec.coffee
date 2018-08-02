@@ -135,6 +135,17 @@ describe "lib/project", ->
             }
           })
 
+    it "does not set cfg.isNewProject when cfg.isTextTerminal", ->
+      cfg = { isTextTerminal: true }
+
+      config.get.resolves(cfg)
+
+      sinon.stub(@project, "_setSavedState").resolves(cfg)
+
+      @project.getConfig({foo: "bar"})
+      .then (cfg) ->
+        expect(cfg).not.to.have.property("isNewProject")
+
   context "#open", ->
     beforeEach ->
       sinon.stub(@project, "watchSettingsAndStartWebsockets").resolves()

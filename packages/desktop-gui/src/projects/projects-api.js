@@ -68,7 +68,7 @@ const runSpec = (project, spec, browser) => {
   const launchBrowser = () => {
     project.browserOpening()
 
-    ipc.launchBrowser({ browser, spec: spec.obj }, (err, data = {}) => {
+    ipc.launchBrowser({ browser, spec: spec.file }, (err, data = {}) => {
       if (data.browserOpened) {
         project.browserOpened()
       }
@@ -149,8 +149,8 @@ const openProject = (project) => {
     viewStore.showProjectSpecs(project)
   })
 
-  ipc.onSpecChanged((__, spec) => {
-    specsStore.setChosenSpecByRelativePath(spec)
+  ipc.onSpecChanged((__, relativeSpecPath) => {
+    specsStore.setChosenSpecByRelativePath(relativeSpecPath)
   })
 
   ipc.onConfigChanged(() => {

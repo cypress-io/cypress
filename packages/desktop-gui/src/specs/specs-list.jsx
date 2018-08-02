@@ -6,16 +6,14 @@ import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
-import specsStore from './specs-store'
+import specsStore, { allSpecsSpec } from './specs-store'
 
 @observer
-class Specs extends Component {
+class SpecsList extends Component {
   render () {
     if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
     if (!specsStore.filter && !specsStore.specs.length) return this._empty()
-
-    const allSpecsSpec = specsStore.getAllSpecsSpec()
 
     return (
       <div id='tests-list-page'>
@@ -36,8 +34,8 @@ class Specs extends Component {
             />
             <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
           </div>
-          <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: allSpecsSpec.isChosen })}>
-            <i className={`fa fa-fw ${this._allSpecsIcon(allSpecsSpec.isChosen)}`}></i>{' '}
+          <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: specsStore.isChosen(allSpecsSpec) })}>
+            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
             {allSpecsSpec.displayName}
           </a>
         </header>
@@ -63,27 +61,15 @@ class Specs extends Component {
   }
 
   _specItem (spec) {
-    if (spec.hasChildren()) {
-      return this._folderContent(spec)
-    } else {
-      return this._specContent(spec)
-    }
+    return spec.hasChildren ? this._folderContent(spec) : this._specContent(spec)
   }
 
   _allSpecsIcon (allSpecsChosen) {
-    if (allSpecsChosen) {
-      return 'fa-dot-circle-o green'
-    } else {
-      return 'fa-play'
-    }
+    return allSpecsChosen ? 'fa-dot-circle-o green' : 'fa-play'
   }
 
   _specIcon (isChosen) {
-    if (isChosen) {
-      return 'fa-dot-circle-o green'
-    } else {
-      return 'fa-file-code-o'
-    }
+    return isChosen ? 'fa-dot-circle-o green' : 'fa-file-code-o'
   }
 
   _clearFilter = () => {
@@ -142,10 +128,10 @@ class Specs extends Component {
   _specContent (spec) {
     return (
       <li key={spec.path} className='file'>
-        <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: spec.isChosen })}>
+        <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
           <div>
             <div>
-              <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
+              <i className={`fa fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
               {spec.displayName}
             </div>
           </div>
@@ -186,4 +172,4 @@ class Specs extends Component {
   }
 }
 
-export default Specs
+export default SpecsList

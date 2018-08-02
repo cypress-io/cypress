@@ -9,7 +9,7 @@ origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-log      = require("debug")("cypress:server:config")
+debug      = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
 ## cypress followed by _
@@ -145,27 +145,6 @@ validationRules = {
   watchForFileChanges: v.isBoolean
 }
 
-toArrayFromPipes = (str) ->
-  if _.isArray(str)
-    return str
-
-  [].concat(str.split('|'))
-
-toObjectFromPipes = (str) ->
-  if _.isObject(str)
-    return str
-
-  ## convert foo=bar|version=1.2.3 to
-  ## {foo: 'bar', version: '1.2.3'}
-  _
-  .chain(str)
-  .split("|")
-  .map (pair) ->
-    pair.split("=")
-  .fromPairs()
-  .mapValues(coerce)
-  .value()
-
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
@@ -262,12 +241,6 @@ module.exports = {
     config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
 
-    if hosts = config.hosts
-      config.hosts = toObjectFromPipes(hosts)
-
-    if blacklistHosts = config.blacklistHosts
-      config.blacklistHosts = toArrayFromPipes(blacklistHosts)
-
     ## when headless
     if config.isTextTerminal
       ## dont ever watch for file changes
@@ -361,8 +334,10 @@ module.exports = {
     obj.integrationExampleName = scaffold.integrationExampleName()
     obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
 
+    debug("set scaffold paths")
     scaffold.fileTree(obj)
     .then (fileTree) ->
+      debug("got file tree")
       obj.scaffoldedFiles = fileTree
 
       return obj
@@ -375,8 +350,8 @@ module.exports = {
 
     ## TODO move this logic to find support file into util/path_helpers
     sf = obj.supportFile
-    log "setting support file #{sf}"
-    log "for project root #{obj.projectRoot}"
+    debug("setting support file #{sf}")
+    debug("for project root #{obj.projectRoot}")
 
     Promise
     .try ->
@@ -384,8 +359,7 @@ module.exports = {
       obj.supportFile = require.resolve(sf)
     .then ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
-        log("require.resolve switched support folder from %s to %s",
-          sf, obj.supportFile)
+        debug("require.resolve switched support folder from %s to %s", sf, obj.supportFile)
         # this means the path was probably symlinked, like
         # /tmp/foo -> /private/tmp/foo
         # which can confuse the rest of the code
@@ -395,25 +369,25 @@ module.exports = {
         .then (found) ->
           if not found
             errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
-          log("switching to found file %s", obj.supportFile)
+          debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
-      log("support file %s does not exist", sf)
+      debug("support file %s does not exist", sf)
       ## supportFile doesn't exist on disk
       if sf is path.resolve(obj.projectRoot, defaults.supportFile)
-        log("support file is default, check if #{path.dirname(sf)} exists")
+        debug("support file is default, check if #{path.dirname(sf)} exists")
         return fs.pathExists(sf)
         .then (found) ->
           if found
-            log("support folder exists, set supportFile to false")
+            debug("support folder exists, set supportFile to false")
             ## if the directory exists, set it to false so it's ignored
             obj.supportFile = false
           else
-            log("support folder does not exist, set to default index.js")
+            debug("support folder does not exist, set to default index.js")
             ## otherwise, set it up to be scaffolded later
             obj.supportFile = path.join(sf, "index.js")
           return obj
       else
-        log("support file is not default")
+        debug("support file is not default")
         ## they have it explicitly set, so it should be there
         errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
     )
@@ -421,7 +395,7 @@ module.exports = {
       if obj.supportFile
         ## set config.supportFolder to its directory
         obj.supportFolder = path.dirname(obj.supportFile)
-        log "set support folder #{obj.supportFolder}"
+        debug("set support folder #{obj.supportFolder}")
       obj
 
   ## set pluginsFile to an absolute path with the following rules:
@@ -445,31 +419,31 @@ module.exports = {
 
     pluginsFile = obj.pluginsFile
 
-    log("setting plugins file #{pluginsFile}")
-    log("for project root #{obj.projectRoot}")
+    debug("setting plugins file #{pluginsFile}")
+    debug("for project root #{obj.projectRoot}")
 
     Promise
     .try ->
       ## resolve full path with extension
       obj.pluginsFile = require.resolve(pluginsFile)
-      log("set pluginsFile to #{obj.pluginsFile}")
+      debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
-      log("plugins file does not exist")
+      debug("plugins file does not exist")
       if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
-        log("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
+        debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
         fs.pathExists(pluginsFile)
         .then (found) ->
           if found
-            log("plugins folder exists, set pluginsFile to false")
+            debug("plugins folder exists, set pluginsFile to false")
             ## if the directory exists, set it to false so it's ignored
             obj.pluginsFile = false
           else
-            log("plugins folder does not exist, set to default index.js")
+            debug("plugins folder does not exist, set to default index.js")
             ## otherwise, set it up to be scaffolded later
             obj.pluginsFile = path.join(pluginsFile, "index.js")
           return obj
       else
-        log("plugins file is not default")
+        debug("plugins file is not default")
         ## they have it explicitly set, so it should be there
         errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
     .return(obj)
