@@ -303,7 +303,7 @@ commitParams = ->
   _get(_providerCommitParams)
 
 commitDefaults = (existingInfo) ->
-  commitParamsObj = commitParams()
+  commitParamsObj = commitParams() or {}
 
   ## based on the existingInfo properties
   ## merge in the commitParams if null or undefined

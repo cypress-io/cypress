@@ -67,8 +67,7 @@ describe "lib/modes/record", ->
     ]
 
     beforeEach ->
-      sinon.stub(ciProvider, "name").returns("circle")
-      sinon.stub(ciProvider, "params").returns({foo: "bar"})
+      sinon.stub(ciProvider, "ciParams").returns({foo: "bar"})
 
       @commitDefaults = {
         branch: "master",
@@ -120,31 +119,32 @@ describe "lib/modes/record", ->
       .then ->
         expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
         expect(api.createRun).to.be.calledWith({
-          projectId
-          recordKey: key
-          specPattern: "spec/pattern1,spec/pattern2"
-          specs: ["path/to/spec/a", "path/to/spec/b"]
-          platform: {
-            osCpus: 1
-            osName: 2
-            osMemory: 3
-            osVersion: 4
-            browserName: "chrome"
-            browserVersion: "59"
-          }
           ci: {
-            params: {foo: "bar"}
-            provider: "circle"
-            buildNumber: null
+            params: {
+              foo: "bar"
+            }
+            provider: null
           }
           commit: {
-            sha: "sha-123"
-            branch: "master"
-            authorName: "brian"
             authorEmail: "brian@cypress.io"
+            authorName: "brian"
+            branch: "master"
             message: "such hax"
             remoteOrigin: "https://github.com/foo/bar.git"
+            sha: "sha-123"
           }
+          platform: {
+            browserName: "chrome"
+            browserVersion: "59"
+            osCpus: 1
+            osMemory: 3
+            osName: 2
+            osVersion: 4
+          }
+          projectId: "pId123"
+          recordKey: "recordKey"
+          specPattern: "spec/pattern1,spec/pattern2"
+          specs: ["path/to/spec/a", "path/to/spec/b"]
         })
 
   context ".updateInstanceStdout", ->
