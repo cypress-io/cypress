@@ -67,6 +67,7 @@ describe "lib/modes/record", ->
     ]
 
     beforeEach ->
+      sinon.stub(ciProvider, "provider").returns("circle")
       sinon.stub(ciProvider, "ciParams").returns({foo: "bar"})
 
       @commitDefaults = {
@@ -123,7 +124,7 @@ describe "lib/modes/record", ->
             params: {
               foo: "bar"
             }
-            provider: null
+            provider: "circle"
           }
           commit: {
             authorEmail: "brian@cypress.io"
