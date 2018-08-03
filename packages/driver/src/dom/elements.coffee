@@ -61,6 +61,8 @@ _nativeFocus = ->
   switch
     when $window.isWindow(this)
       window.focus
+    when isSvg(this)
+      window.SVGElement.prototype.focus
     else
       window.HTMLElement.prototype.focus
 
@@ -68,6 +70,8 @@ _nativeBlur = ->
   switch
     when $window.isWindow(this)
       window.blur
+    when isSvg(this)
+      window.SVGElement.prototype.blur
     else
       window.HTMLElement.prototype.blur
 
@@ -87,10 +91,17 @@ _nativeSelect = ->
       ## is textarea
       window.HTMLTextAreaElement.prototype.select
 
+_isContentEditable = ->
+  switch
+    when isSvg(this)
+      false
+    else
+      descriptor("HTMLElement", "isContentEditable").get
+
 nativeGetters = {
   value: _getValue
   selectionStart: descriptor("HTMLInputElement", "selectionStart").get
-  isContentEditable: descriptor("HTMLElement", "isContentEditable").get
+  isContentEditable: _isContentEditable
   isCollapsed: descriptor("Selection", 'isCollapsed').get
   selectionStart: _getSelectionStart
   selectionEnd: _getSelectionEnd
@@ -121,8 +132,8 @@ nativeMethods = {
 tryCallNativeMethod = ->
   try
     callNativeMethod.apply(null, arguments)
-  catch
-    null
+  catch err
+    return
 
 callNativeMethod = (obj, fn, args...) ->
   if not nativeFn = nativeMethods[fn]
@@ -196,6 +207,12 @@ isOption = (el) ->
 
 isBody = (el) ->
   getTagName(el) is 'body'
+
+isSvg = (el) ->
+  try
+    "ownerSVGElement" of el
+  catch
+    false
 
 isElement = (obj) ->
   try
