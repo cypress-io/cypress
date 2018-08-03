@@ -70,7 +70,7 @@ describe "lib/modes/record", ->
       sinon.stub(ciProvider, "name").returns("circle")
       sinon.stub(ciProvider, "params").returns({foo: "bar"})
 
-      @gitInfo = {
+      @commitDefaults = {
         branch: "master",
         author: "brian",
         email: "brian@cypress.io",
@@ -78,14 +78,14 @@ describe "lib/modes/record", ->
         sha: "sha-123",
         remote: "https://github.com/foo/bar.git"
       }
-      sinon.stub(commitInfo, "commitInfo").resolves(@gitInfo)
-      sinon.stub(ciProvider, "gitInfo").returns({
-        sha: @gitInfo.sha
-        branch: @gitInfo.branch
-        authorName: @gitInfo.author
-        authorEmail: @gitInfo.email
-        message: @gitInfo.message
-        remoteOrigin: @gitInfo.remote
+      sinon.stub(commitInfo, "commitInfo").resolves(@commitDefaults)
+      sinon.stub(ciProvider, "commitDefaults").returns({
+        sha: @commitDefaults.sha
+        branch: @commitDefaults.branch
+        authorName: @commitDefaults.author
+        authorEmail: @commitDefaults.email
+        message: @commitDefaults.message
+        remoteOrigin: @commitDefaults.remote
       })
 
       sinon.stub(api, "createRun").resolves()
