@@ -188,9 +188,12 @@ describe "src/cy/commands/actions/check", ->
         $("[name=colors][value=blue]").change -> done()
         cy.get("[name=colors]").check("blue")
 
-      it "emits focus event", (done) ->
-        $("[name=colors][value=blue]").focus -> done()
-        cy.get("[name=colors]").check("blue")
+      it "emits focus event", () ->
+        focus = false
+        $("[name=colors][value=blue]").focus -> focus = true
+        cy.get("[name=colors]")
+        .check("blue")
+        .then -> expect(focus).to.eq true
 
     describe "errors", ->
       beforeEach ->

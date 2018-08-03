@@ -8,7 +8,7 @@ describe "e2e specs", ->
 
   it "failing when no specs found", ->
     e2e.exec(@, {
-      config: "integrationFolder=cypress/specs"
+      config: { integrationFolder: "cypress/specs" }
       snapshot: true
       expectedExitCode: 1
     })

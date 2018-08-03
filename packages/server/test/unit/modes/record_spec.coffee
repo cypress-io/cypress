@@ -86,8 +86,6 @@ describe "lib/modes/record", ->
         authorEmail: @gitInfo.email
         message: @gitInfo.message
         remoteOrigin: @gitInfo.remote
-        pullRequestId: "1"
-        defaultBranch: "master"
       })
 
       sinon.stub(api, "createRun").resolves()
@@ -146,8 +144,6 @@ describe "lib/modes/record", ->
             authorEmail: "brian@cypress.io"
             message: "such hax"
             remoteOrigin: "https://github.com/foo/bar.git"
-            pullRequestId: "1"
-            defaultBranch: "master"
           }
         })
 

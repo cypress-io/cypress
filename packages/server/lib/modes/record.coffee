@@ -200,7 +200,7 @@ createRun = (options = {}) ->
     ci: {
       params: ciProvider.params()
       provider: ciProvider.name()
-      buildNumber: null ## TODO: update json-schemas
+      # buildNumber: null ## TODO: update json-schemas
     }
     commit: ciProvider.gitInfo({
       sha: git.sha
@@ -209,8 +209,6 @@ createRun = (options = {}) ->
       authorEmail: git.email
       message: git.message
       remoteOrigin: git.remote
-      pullRequestId: null
-      defaultBranch: null
     })
   })
   .catch (err) ->

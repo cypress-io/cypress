@@ -33,7 +33,7 @@ describe "e2e plugins", ->
     e2e.exec(@, {
       spec: "app_spec.coffee"
       env: "foo=foo,bar=bar"
-      config: "pageLoadTimeout=10000"
+      config: { pageLoadTimeout: 10000 }
       project: pluginConfig
       snapshot: true
       expectedExitCode: 0
@@ -51,7 +51,12 @@ describe "e2e plugins", ->
   it "handles absolute path to pluginsFile", ->
     e2e.exec(@, {
       spec: "absolute_spec.coffee"
-      config: "pluginsFile=#{path.join(pluginsAbsolutePath, "cypress/plugins/index.js")}"
+      config: {
+        pluginsFile: path.join(
+          pluginsAbsolutePath,
+          "cypress/plugins/index.js"
+        )
+      }
       project: pluginsAbsolutePath
       snapshot: true
       expectedExitCode: 0
