@@ -126,7 +126,6 @@ describe "lib/modes/record", ->
       .then ->
         expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
         expect(api.createRun).to.be.calledWith({
-<<<<<<< HEAD
           group
           parallel
           projectId
@@ -142,8 +141,6 @@ describe "lib/modes/record", ->
             browserName: "chrome"
             browserVersion: "59"
           }
-=======
->>>>>>> develop
           ci: {
             params: {
               foo: "bar"
