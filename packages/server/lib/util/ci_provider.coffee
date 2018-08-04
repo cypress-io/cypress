@@ -2,25 +2,40 @@ _ = require("lodash")
 la = require("lazy-ass")
 check = require("check-more-types")
 
+join = (char, pieces...) ->
+  _.chain(pieces).compact().join(char).value()
+
+toCamelObject = (obj, key) ->
+  _.set(obj, _.camelCase(key), process.env[key])
+
+extract = (envKeys) ->
+  _.transform(envKeys, toCamelObject, {})
+
 isCodeship = ->
   process.env.CI_NAME and process.env.CI_NAME is "codeship"
 
 isGitlab = ->
-  process.env.GITLAB_CI or process.env.CI_SERVER_NAME and process.env.CI_SERVER_NAME is "GitLab CI"
+  process.env.GITLAB_CI or (process.env.CI_SERVER_NAME and process.env.CI_SERVER_NAME is "GitLab CI")
+
+isJenkins = ->
+  process.env.JENKINS_URL or
+    process.env.JENKINS_HOME or
+    process.env.JENKINS_VERSION or
+    process.env.HUDSON_URL or
+    process.env.HUDSON_HOME
 
 isWercker = ->
   process.env.WERCKER or process.env.WERCKER_MAIN_PIPELINE_STARTED
 
-providers = {
+CI_PROVIDERS = {
   "appveyor":       "APPVEYOR"
-  "bamboo":         "bamboo_planKey"
+  "bamboo":         "bamboo.buildNumber"
   "buildkite":      "BUILDKITE"
   "circle":         "CIRCLECI"
   "codeship":       isCodeship
   "drone":          "DRONE"
   "gitlab":         isGitlab
-  "hudson":         "HUDSON_URL"
-  "jenkins":        "JENKINS_URL"
+  "jenkins":        isJenkins
   "semaphore":      "SEMAPHORE"
   "shippable":      "SHIPPABLE"
   "snap":           "SNAP_CI"
@@ -30,265 +45,279 @@ providers = {
   "wercker":         isWercker
 }
 
-buildNums = (provider) -> {
-  appveyor:  process.env.APPVEYOR_BUILD_NUMBER
-  circle:    process.env.CIRCLE_BUILD_NUM
-  codeship:  process.env.CI_BUILD_NUMBER
-  drone:     process.env.DRONE_BUILD_NUMBER
-  gitlab:    process.env.CI_BUILD_ID
-  jenkins:   process.env.BUILD_NUMBER
-  semaphore: process.env.SEMAPHORE_BUILD_NUMBER
-  travis:    process.env.TRAVIS_BUILD_NUMBER
-}[provider]
+_detectProviderName = ->
+  { env } = process
 
-groupIds = (provider) -> {
-  # for CircleCI v2 use workflow id to group builds
-  circle:   process.env.CIRCLE_WORKFLOW_ID
-}[provider]
-
-params = (provider) -> {
-  appveyor: {
-    accountName:  process.env.APPVEYOR_ACCOUNT_NAME
-    projectSlug:  process.env.APPVEYOR_PROJECT_SLUG
-    buildVersion: process.env.APPVEYOR_BUILD_VERSION
-  }
-  circle: {
-    buildUrl: process.env.CIRCLE_BUILD_URL
-  }
-  codeship: {
-    buildUrl: process.env.CI_BUILD_URL
-  }
-  drone: {
-    buildUrl:  process.env.DRONE_BUILD_LINK
-  }
-  gitlab: {
-    buildId:    process.env.CI_BUILD_ID
-    projectUrl: process.env.CI_PROJECT_URL
-  }
-  jenkins: {
-    buildUrl: process.env.BUILD_URL
-  }
-  semaphore: {
-    repoSlug: process.env.SEMAPHORE_REPO_SLUG
-  }
-  travis: {
-    buildId:  process.env.TRAVIS_BUILD_ID
-    repoSlug: process.env.TRAVIS_REPO_SLUG
-  }
-}[provider]
-
-# details = {
-#   "appveyor": -> {
-#     ciUrl: "https://ci.appveyor.com/project/#{process.env.APPVEYOR_ACCOUNT_NAME}/#{process.env.APPVEYOR_PROJECT_SLUG}/build/#{process.env.APPVEYOR_BUILD_VERSION}"
-#     buildNum: process.env.APPVEYOR_BUILD_NUMBER
-#   }
-#   "bamboo": nullDetails
-#   "buildkite": nullDetails
-#   "circle": -> {
-#     ciUrl: process.env.CIRCLE_BUILD_URL
-#     buildNum: process.env.CIRCLE_BUILD_NUM
-#   }
-#   "codeship": -> {
-#     ciUrl: process.env.CI_BUILD_URL
-#     buildNum: process.env.CI_BUILD_NUMBER
-#   }
-#   "gitlab": -> {
-#     ciUrl: "#{process.env.CI_PROJECT_URL}/builds/#{process.env.CI_BUILD_ID}"
-#     buildNum: process.env.CI_BUILD_ID
-#   }
-#   "hudson": nullDetails
-#   "jenkins": -> {
-#     ciUrl: process.env.BUILD_URL
-#     buildNum: process.env.BUILD_NUMBER
-#   }
-#   "shippable": nullDetails
-#   "snap": nullDetails
-#   "teamcity": nullDetails
-#   "teamfoundation": nullDetails
-#   "travis": -> {
-#     ciUrl: "https://travis-ci.org/#{process.env.TRAVIS_REPO_SLUG}/builds/#{process.env.TRAVIS_BUILD_ID}"
-#     buildNum: process.env.TRAVIS_BUILD_NUMBER
-#   }
-#   "wercker": nullDetails
-
-#   "unknown": nullDetails
-# }
-
-getProviderName = ->
   ## return the key of the first provider
   ## which is truthy
-  name = _.findKey providers, (value, key) ->
+  _.findKey CI_PROVIDERS, (value, key) ->
     switch
       when _.isString(value)
-        process.env[value]
+        env[value]
       when _.isFunction(value)
         value()
 
-  name or "unknown"
+## TODO: dont forget about buildNumber!
+## look at the old commit that was removed to see how we did it
+_providerCiParams = ->
+  { env } = process
 
-# splits a string like "https://github.com/cypress-io/cypress/pull/2114"
-# and returns last part (the PR number, but as a string)
-pullRequestUrlToString = (url) ->
-  la(check.url(url), "expected pull request url", url)
-  _.last(url.split("/"))
+  return {
+    appveyor: extract([
+      "APPVEYOR_JOB_ID"
+      "APPVEYOR_ACCOUNT_NAME"
+      "APPVEYOR_PROJECT_SLUG"
+      "APPVEYOR_BUILD_NUMBER"
+      "APPVEYOR_BUILD_VERSION"
+      "APPVEYOR_PULL_REQUEST_NUMBER"
+      "APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH"
+    ])
+    bamboo: extract([
+      "bamboo.resultsUrl"
+      "bamboo.buildNumber"
+      "bamboo.buildResultsUrl"
+      "bamboo.planRepository.repositoryUrl"
+    ])
+    buildkite: extract([
+      "BUILDKITE_REPO"
+      "BUILDKITE_SOURCE"
+      "BUILDKITE_JOB_ID"
+      "BUILDKITE_BUILD_ID"
+      "BUILDKITE_BUILD_URL"
+      "BUILDKITE_BUILD_NUMBER"
+      "BUILDKITE_PULL_REQUEST"
+      "BUILDKITE_PULL_REQUEST_REPO"
+      "BUILDKITE_PULL_REQUEST_BASE_BRANCH"
+    ])
+    circle: extract([
+      "CIRCLE_JOB"
+      "CIRCLE_BUILD_NUM"
+      "CIRCLE_BUILD_URL"
+      "CIRCLE_PR_NUMBER"
+      "CIRCLE_PR_REPONAME"
+      "CIRCLE_PR_USERNAME"
+      "CIRCLE_COMPARE_URL"
+      "CIRCLE_WORKFLOW_ID"
+      "CIRCLE_PULL_REQUEST"
+      "CIRCLE_REPOSITORY_URL"
+      "CI_PULL_REQUEST"
+    ])
+    codeship: extract([
+      "CI_BUILD_ID"
+      "CI_REPO_NAME"
+      "CI_BUILD_URL"
+      "CI_PROJECT_ID"
+      "CI_BUILD_NUMBER"
+      "CI_PULL_REQUEST"
+    ])
+    drone: extract([
+      "DRONE_JOB_NUMBER"
+      "DRONE_BUILD_LINK"
+      "DRONE_BUILD_NUMBER"
+      "DRONE_PULL_REQUEST"
+    ])
+    gitlab: extract([
+      "CI_JOB_ID"
+      "CI_JOB_URL"
+      "CI_BUILD_ID"
+      "GITLAB_HOST"
+      "CI_PROJECT_ID"
+      "CI_PROJECT_URL"
+      "CI_REPOSITORY_URL"
+      "CI_ENVIRONMENT_URL"
+      ## for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+    ])
+    jenkins: extract([
+      "BUILD_ID"
+      "BUILD_URL"
+      "BUILD_NUMBER"
+      "ghprbPullId"
+    ])
+    semaphore: extract([
+      "SEMAPHORE_REPO_SLUG"
+      "SEMAPHORE_BUILD_NUMBER"
+      "SEMAPHORE_PROJECT_NAME"
+      "SEMAPHORE_TRIGGER_SOURCE"
+      "PULL_REQUEST_NUMBER"
+    ])
+    shippable: extract([
+      "JOB_ID"
+      "BUILD_URL"
+      "PROJECT_ID"
+      "JOB_NUMBER"
+      "COMPARE_URL"
+      "BASE_BRANCH"
+      "BUILD_NUMBER"
+      "PULL_REQUEST"
+      "REPOSITORY_URL"
+      "PULL_REQUEST_BASE_BRANCH"
+      "PULL_REQUEST_REPO_FULL_NAME"
+    ])
+    snap: null
+    teamcity: null
+    teamfoundation: null
+    travis: extract([
+      "TRAVIS_JOB_ID"
+      "TRAVIS_BUILD_ID"
+      "TRAVIS_REPO_SLUG"
+      "TRAVIS_JOB_NUMBER"
+      "TRAVIS_EVENT_TYPE"
+      "TRAVIS_COMMIT_RANGE"
+      "TRAVIS_BUILD_NUMBER"
+      "TRAVIS_PULL_REQUEST"
+      "TRAVIS_PULL_REQUEST_BRANCH"
+    ])
+    wercker: null
+  }
 
-# if pull request is from a forked repo, there is a number
-# otherwise there is an url that we can get the last part from
-# example
-#   non-forked PR:
-#     CIRCLE_PULL_REQUEST=https://github.com/cypress-io/cypress/pull/2114
-#   forked PR:
-#     CIRCLE_PR_NUMBER=2012
-#     CIRCLE_PULL_REQUEST=https://github.com/cypress-io/cypress/pull/2012
-getCirclePrNumber = (envPrNumber, envPrUrl) ->
-  if envPrNumber
-    return envPrNumber
+_providerCommitParams = ->
+  { env } = process
 
-  if envPrUrl
-    return pullRequestUrlToString(envPrUrl)
-
-getGitInfo = (provider, key) -> ({
-  appveyor: {
-    sha: process.env.APPVEYOR_REPO_COMMIT
-    ## for PRs, APPVEYOR_REPO_BRANCH is the base branch being merged into
-    branch: process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH or process.env.APPVEYOR_REPO_BRANCH
-    authorName: process.env.APPVEYOR_REPO_COMMIT_AUTHOR
-    authorEmail: process.env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL
-    message: process.env.APPVEYOR_REPO_COMMIT_MESSAGE + (process.env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED ? "")
-    # remoteOrigin:
-    pullRequestId: process.env.APPVEYOR_PULL_REQUEST_NUMBER
-    # defaultBranch:
-  }
-  bamboo: {
-    ## ???
-  }
-  buildkite: {
-    sha: process.env.BUILDKITE_COMMIT
-    branch: process.env.BUILDKITE_BRANCH
-    authorName: process.env.BUILDKITE_BUILD_CREATOR
-    authorEmail: process.env.BUILDKITE_BUILD_CREATOR_EMAIL
-    message: process.env.BUILDKITE_MESSAGE
-    # remoteOrigin:
-    pullRequestId: process.env.BUILDKITE_PULL_REQUEST
-    defaultBranch: process.env.BUILDKITE_PIPELINE_DEFAULT_BRANCH
-  }
-  circle: {
-    sha: process.env.CIRCLE_SHA1
-    branch: process.env.CIRCLE_BRANCH
-    authorName: process.env.CIRCLE_USERNAME
-    # authorEmail:
-    # message:
-    # remoteOrigin:
-    pullRequestId: getCirclePrNumber(process.env.CIRCLE_PR_NUMBER, process.env.CIRCLE_PULL_REQUEST)
-    # defaultBranch:
-  }
-  codeship: {
-    sha: process.env.CI_COMMIT_ID
-    branch: process.env.CI_BRANCH
-    authorName: process.env.CI_COMMITTER_NAME
-    authorEmail: process.env.CI_COMMITTER_EMAIL
-    message: process.env.CI_COMMIT_MESSAGE
-    # remoteOrigin:
-    # pullRequestId: ## https://community.codeship.com/t/populate-ci-pull-request/1053
-    # defaultBranch:
-  }
-  drone: {
-    sha: process.env.DRONE_COMMIT_SHA
-    branch: process.env.DRONE_COMMIT_BRANCH
-    authorName: process.env.DRONE_COMMIT_AUTHOR
-    authorEmail: process.env.DRONE_COMMIT_AUTHOR_EMAIL
-    message: process.env.DRONE_COMMIT_MESSAGE
-    # remoteOrigin:
-    pullRequestId: process.env.DRONE_PULL_REQUEST
-    defaultBranch: process.env.DRONE_REPO_BRANCH
-  }
-  gitlab: {
-    sha: process.env.CI_COMMIT_SHA
-    branch: process.env.CI_COMMIT_REF_NAME
-    authorName: process.env.GITLAB_USER_NAME
-    authorEmail: process.env.GITLAB_USER_EMAIL
-    message: process.env.CI_COMMIT_MESSAGE
-    # remoteOrigin:
-    # pullRequestId: ## https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
-    # defaultBranch:
-  }
-  hudson: {
-    ## same as jenkins?
-  }
-  jenkins: {
-    sha: process.env.GIT_COMMIT
-    branch: process.env.GIT_BRANCH
-    # authorName:
-    # authorEmail:
-    # message:
-    # remoteOrigin:
-    pullRequestId: process.env.ghprbPullId
-    # defaultBranch:
-  }
-  semaphore: {
-    # sha:
-    # branch:
-    # authorName:
-    # authorEmail:
-    # message:
-    # remoteOrigin:
+  return {
+    appveyor: {
+      sha: env.APPVEYOR_REPO_COMMIT
+      branch: env.APPVEYOR_REPO_BRANCH
+      message: join('\n', env.APPVEYOR_REPO_COMMIT_MESSAGE, env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED)
+      authorName: env.APPVEYOR_REPO_COMMIT_AUTHOR
+      authorEmail: env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    bamboo: {
+      # sha: ???
+      branch: env["bamboo.planRepository.branch"]
+      # message: ???
+      # authorName: ???
+      # authorEmail: ???
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    buildkite: {
+      sha: env.BUILDKITE_COMMIT
+      branch: env.BUILDKITE_BRANCH
+      message: env.BUILDKITE_MESSAGE
+      authorName: env.BUILDKITE_BUILD_CREATOR
+      authorEmail: env.BUILDKITE_BUILD_CREATOR_EMAIL
+      remoteOrigin: env.BUILDKITE_REPO
+      defaultBranch: env.BUILDKITE_PIPELINE_DEFAULT_BRANCH
+    }
+    circle: {
+      sha: env.CIRCLE_SHA1
+      branch: env.CIRCLE_BRANCH
+      # message: ???
+      authorName: env.CIRCLE_USERNAME
+      # authorEmail: ???
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    codeship: {
+      sha: env.CI_COMMIT_ID
+      branch: env.CI_BRANCH
+      message: env.CI_COMMIT_MESSAGE
+      authorName: env.CI_COMMITTER_NAME
+      authorEmail: env.CI_COMMITTER_EMAIL
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    drone: {
+      sha: env.DRONE_COMMIT_SHA
+      branch: env.DRONE_COMMIT_BRANCH
+      message: env.DRONE_COMMIT_MESSAGE
+      authorName: env.DRONE_COMMIT_AUTHOR
+      authorEmail: env.DRONE_COMMIT_AUTHOR_EMAIL
+      # remoteOrigin: ???
+      defaultBranch: env.DRONE_REPO_BRANCH
+    }
+    gitlab: {
+      sha: env.CI_COMMIT_SHA
+      branch: env.CI_COMMIT_REF_NAME
+      message: env.CI_COMMIT_MESSAGE
+      authorName: env.GITLAB_USER_NAME
+      authorEmail: env.GITLAB_USER_EMAIL
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    jenkins: {
+      sha: env.GIT_COMMIT
+      branch: env.GIT_BRANCH
+      # message: ???
+      # authorName: ???
+      # authorEmail: ???
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
     ## Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
-    pullRequestId: process.env.PULL_REQUEST_NUMBER
-    # defaultBranch
+    semaphore: {
+      sha: env.REVISION
+      branch: env.BRANCH_NAME
+      # message: ???
+      # authorName: ???
+      # authorEmail: ???
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    shippable: {
+      sha: env.COMMIT
+      branch: env.BRANCH
+      message: env.COMMIT_MESSAGE
+      authorName: env.COMMITTER
+      # authorEmail: ???
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    snap: null
+    teamcity: null
+    teamfoundation: null
+    travis: {
+      sha: env.TRAVIS_COMMIT
+      ## for PRs, TRAVIS_BRANCH is the base branch being merged into
+      branch: env.TRAVIS_PULL_REQUEST_BRANCH or env.TRAVIS_BRANCH
+      # authorName: ???
+      # authorEmail: ???
+      message: env.TRAVIS_COMMIT_MESSAGE
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    wercker: null
   }
-  shippable: {
-    sha: process.env.COMMIT
-    branch: process.env.BRANCH
-    authorName: process.env.COMMITTER
-    # authorEmail:
-    message: process.env.COMMIT_MESSAGE
-    # remoteOrigin:
-    pullRequestId: process.env.PULL_REQUEST
-    # defaultBranch:
-  }
-  snap: {
-    ## ???
-  }
-  teamcity: {
-    ## ???
-  }
-  teamfoundation: {
-    ## ???
-  }
-  travis: {
-    sha: process.env.TRAVIS_COMMIT
-    ## for PRs, TRAVIS_BRANCH is the base branch being merged into
-    branch: process.env.TRAVIS_PULL_REQUEST_BRANCH or process.env.TRAVIS_BRANCH
-    # authorName:
-    # authorEmail:
-    message: process.env.TRAVIS_COMMIT_MESSAGE
-    # remoteOrigin:
-    pullRequestId: process.env.TRAVIS_PULL_REQUEST
-    # defaultBranch:
-  }
-  wercker: {
-    # ???
-  }
-}[provider] or {})[key]
+
+provider = ->
+  _detectProviderName() ? null
+
+omitUndefined = (ret) ->
+  if _.isObject(ret)
+    _.omitBy(ret, _.isUndefined)
+
+_get = (fn) ->
+  _
+  .chain(fn())
+  .get(provider())
+  .thru(omitUndefined)
+  .defaultTo(null)
+  .value()
+
+ciParams = ->
+  _get(_providerCiParams)
+
+commitParams = ->
+  _get(_providerCommitParams)
+
+commitDefaults = (existingInfo) ->
+  commitParamsObj = commitParams() or {}
+
+  ## based on the existingInfo properties
+  ## merge in the commitParams if null or undefined
+  ## defaulting back to null if all fails
+  _.transform existingInfo, (memo, value, key) ->
+    memo[key] = _.defaultTo(value ? commitParamsObj[key], null)
 
 module.exports = {
-  getCirclePrNumber
+  provider
 
-  name: ->
-    getProviderName()
+  ciParams
 
-  params: ->
-    params(getProviderName()) ? null
+  commitParams
 
-  buildNum: ->
-    buildNums(getProviderName()) ? null
+  commitDefaults
 
-  groupId: ->
-    groupIds(getProviderName()) ? null
-
-  gitInfo: (existingInfo) ->
-    providerName = getProviderName()
-    _.transform existingInfo, (info, existingValue, key) ->
-      info[key] = existingValue ? (getGitInfo(providerName, key) ? null)
-    , {}
 }

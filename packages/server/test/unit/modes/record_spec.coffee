@@ -67,11 +67,10 @@ describe "lib/modes/record", ->
     ]
 
     beforeEach ->
-      sinon.stub(ciProvider, "name").returns("circle")
-      sinon.stub(ciProvider, "params").returns({foo: "bar"})
-      sinon.stub(ciProvider, "buildNum").returns("build-123")
+      sinon.stub(ciProvider, "provider").returns("circle")
+      sinon.stub(ciProvider, "ciParams").returns({foo: "bar"})
 
-      @gitInfo = {
+      @commitDefaults = {
         branch: "master",
         author: "brian",
         email: "brian@cypress.io",
@@ -79,14 +78,14 @@ describe "lib/modes/record", ->
         sha: "sha-123",
         remote: "https://github.com/foo/bar.git"
       }
-      sinon.stub(commitInfo, "commitInfo").resolves(@gitInfo)
-      sinon.stub(ciProvider, "gitInfo").returns({
-        sha: @gitInfo.sha
-        branch: @gitInfo.branch
-        authorName: @gitInfo.author
-        authorEmail: @gitInfo.email
-        message: @gitInfo.message
-        remoteOrigin: @gitInfo.remote
+      sinon.stub(commitInfo, "commitInfo").resolves(@commitDefaults)
+      sinon.stub(ciProvider, "commitDefaults").returns({
+        sha: @commitDefaults.sha
+        branch: @commitDefaults.branch
+        authorName: @commitDefaults.author
+        authorEmail: @commitDefaults.email
+        message: @commitDefaults.message
+        remoteOrigin: @commitDefaults.remote
       })
 
       sinon.stub(api, "createRun").resolves()
@@ -127,6 +126,7 @@ describe "lib/modes/record", ->
       .then ->
         expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
         expect(api.createRun).to.be.calledWith({
+<<<<<<< HEAD
           group
           parallel
           projectId
@@ -142,19 +142,34 @@ describe "lib/modes/record", ->
             browserName: "chrome"
             browserVersion: "59"
           }
+=======
+>>>>>>> develop
           ci: {
-            params: {foo: "bar"}
+            params: {
+              foo: "bar"
+            }
             provider: "circle"
-            buildNumber: "build-123"
           }
           commit: {
-            sha: "sha-123"
-            branch: "master"
-            authorName: "brian"
             authorEmail: "brian@cypress.io"
+            authorName: "brian"
+            branch: "master"
             message: "such hax"
             remoteOrigin: "https://github.com/foo/bar.git"
+            sha: "sha-123"
           }
+          platform: {
+            browserName: "chrome"
+            browserVersion: "59"
+            osCpus: 1
+            osMemory: 3
+            osName: 2
+            osVersion: 4
+          }
+          projectId: "pId123"
+          recordKey: "recordKey"
+          specPattern: "spec/pattern1,spec/pattern2"
+          specs: ["path/to/spec/a", "path/to/spec/b"]
         })
 
   context ".updateInstanceStdout", ->

@@ -110,7 +110,7 @@ module.exports = {
         bearer: authToken
       }
       headers: {
-        "x-route-version": "2"
+        "x-route-version": "3"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -129,6 +129,12 @@ module.exports = {
       "recordKey",
       "specPattern",
     ])
+
+    ## temporary hack to get around
+    ## the latest schema requirements
+    body.group = null
+    body.parallel = null
+    body.ciBuildId = null
 
     rp.post({
       body
