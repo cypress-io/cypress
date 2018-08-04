@@ -122,6 +122,12 @@ module.exports = {
       "specPattern"
     ])
 
+    ## temporary hack to get around
+    ## the latest schema requirements
+    body.group = null
+    body.parallel = null
+    body.ciBuildId = null
+
     rp.post({
       body
       url: routes.runs()

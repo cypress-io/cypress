@@ -211,21 +211,18 @@ createRun = (options = {}) ->
       recordKey
       platform
       ci: {
-        params: ciProvider.params()
-        provider: ciProvider.name()
-        buildNumber: ciProvider.buildNum()
+        params: ciProvider.ciParams()
+        provider: ciProvider.provider()
       }
-      commit: ciProvider.gitInfo({
+      commit: ciProvider.commitDefaults({
         sha: git.sha
         branch: git.branch
         authorName: git.author
         authorEmail: git.email
         message: git.message
         remoteOrigin: git.remote
-        pullRequestId: null
         defaultBranch: null
       })
-    })
 
   api.retryWithBackoff(makeRequest, {
     onBeforeRetry: (details) ->
