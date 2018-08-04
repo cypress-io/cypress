@@ -173,20 +173,35 @@ describe "lib/modes/record", ->
     beforeEach ->
       sinon.stub(api, "updateInstanceStdout")
 
-    it "calls api.updateInstanceStdout", ->
-      api.updateInstanceStdout.resolves()
-
-      options = {
+      @options = {
         instanceId: "id-123"
         captured: { toString: -> "foobarbaz\n" }
       }
 
-      recordMode.updateInstanceStdout(options)
+    it "calls api.updateInstanceStdout", ->
+      api.updateInstanceStdout.resolves()
+
+      recordMode.updateInstanceStdout(@options)
       .then ->
         expect(api.updateInstanceStdout).to.be.calledWith({
           instanceId: "id-123"
           stdout: "foobarbaz\n"
         })
+
+    it "retries with backoff strategy", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+
+      recordMode.updateInstanceStdout(@options)
+      expect(api.retryWithBackoff).to.be.called
+
+    it "logs on retry", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+      sinon.spy(console, "log")
+
+      recordMode.updateInstanceStdout(@options)
+      details = {}
+      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
+      expect(console.log).to.be.calledWith("...")
 
     it "does not createException when statusCode is 503", ->
       err = new Error("foo")
@@ -194,7 +209,7 @@ describe "lib/modes/record", ->
 
       sinon.spy(logger, "createException")
 
-      api.updateInstanceStdout.rejects(err)
+      sinon.stub(api, "retryWithBackoff").rejects(err)
 
       options = {
         instanceId: "id-123"
@@ -209,16 +224,18 @@ describe "lib/modes/record", ->
     beforeEach ->
       sinon.stub(api, "createInstance")
 
-    it "calls api.createInstance", ->
-      api.createInstance.resolves()
-
-      recordMode.createInstance({
+      @options = {
         runId: "run-123",
         groupId: "group-123"
         machineId: "machine-123"
         platform: {}
         spec: { relative: "cypress/integration/app_spec.coffee" }
-      })
+      }
+
+    it "calls api.createInstance", ->
+      api.createInstance.resolves()
+
+      recordMode.createInstance(@options)
       .then ->
         expect(api.createInstance).to.be.calledWith({
           runId: "run-123",
@@ -228,13 +245,28 @@ describe "lib/modes/record", ->
           spec: "cypress/integration/app_spec.coffee"
         })
 
+    it "retries with backoff strategy", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+
+      recordMode.createInstance(@options)
+      expect(api.retryWithBackoff).to.be.called
+
+    it "logs on retry", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+      sinon.spy(console, "log")
+
+      recordMode.createInstance(@options)
+      details = {}
+      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
+      expect(console.log).to.be.calledWith("...")
+
     it "does not createException when statusCode is 503", ->
       err = new Error("foo")
       err.statusCode = 503
 
       sinon.spy(logger, "createException")
 
-      api.createInstance.rejects(err)
+      sinon.stub(api, "retryWithBackoff").rejects(err)
 
       recordMode.createInstance({
         runId: "run-123",
@@ -246,3 +278,57 @@ describe "lib/modes/record", ->
       .then (ret) ->
         expect(ret).to.be.null
         expect(logger.createException).not.to.be.called
+
+  context ".createRun", ->
+    beforeEach ->
+      sinon.stub(api, "createRun")
+      sinon.stub(ciProvider, "ciParams").returns({})
+      sinon.stub(ciProvider, "provider").returns("")
+      sinon.stub(ciProvider, "commitDefaults").returns({})
+
+      @options = {
+        git: {}
+        recordKey: "1"
+      }
+
+    it "retries with backoff strategy", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+
+      recordMode.createRun(@options)
+      expect(api.retryWithBackoff).to.be.called
+
+    it "logs on retry", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+      sinon.spy(console, "log")
+
+      recordMode.createRun(@options)
+      details = {}
+      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
+      expect(console.log).to.be.calledWith("...")
+
+  context ".updateInstance", ->
+    beforeEach ->
+      sinon.stub(api, "updateInstance")
+      sinon.stub(ciProvider, "ciParams").returns({})
+      sinon.stub(ciProvider, "provider").returns("")
+      sinon.stub(ciProvider, "commitDefaults").returns({})
+
+      @options = {
+        results: {}
+        captured: ""
+      }
+
+    it "retries with backoff strategy", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+
+      recordMode.updateInstance(@options)
+      expect(api.retryWithBackoff).to.be.called
+
+    it "logs on retry", ->
+      sinon.stub(api, "retryWithBackoff").yields().resolves()
+      sinon.spy(console, "log")
+
+      recordMode.updateInstance(@options)
+      details = {}
+      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
+      expect(console.log).to.be.calledWith("...")
