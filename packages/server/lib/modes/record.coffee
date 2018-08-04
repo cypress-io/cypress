@@ -116,9 +116,15 @@ updateInstanceStdout = (options = {}) ->
 
   stdout = captured.toString()
 
-  api.updateInstanceStdout({
-    stdout
-    instanceId
+  makeRequest = ->
+    api.updateInstanceStdout({
+      stdout
+      instanceId
+    })
+
+  api.retryWithBackoff(makeRequest, {
+    onBeforeRetry: (details) ->
+      console.log("...") ## TODO: log the right thing
   })
   .catch (err) ->
     debug("failed updating instance stdout %o", {
@@ -143,17 +149,23 @@ updateInstance = (options = {}) ->
   screenshots = _.map screenshots, (screenshot) ->
     _.omit(screenshot, "path")
 
-  api.updateInstance({
-    stats
-    tests
-    error
-    video
-    hooks
-    stdout
-    instanceId
-    screenshots
-    reporterStats
-    cypressConfig
+  makeRequest = ->
+    api.updateInstance({
+      stats
+      tests
+      error
+      video
+      hooks
+      stdout
+      instanceId
+      screenshots
+      reporterStats
+      cypressConfig
+    })
+
+  api.retryWithBackoff(makeRequest, {
+    onBeforeRetry: (details) ->
+      console.log("...") ## TODO: log the right thing
   })
   .catch (err) ->
     debug("failed updating instance %o", {
@@ -191,25 +203,31 @@ createRun = (options = {}) ->
 
   specs = _.map(specs, getSpecRelativePath)
 
-  api.createRun({
-    specPattern
-    specs
-    projectId
-    recordKey
-    platform
-    ci: {
-      params: ciProvider.ciParams()
-      provider: ciProvider.provider()
-    }
-    commit: ciProvider.commitDefaults({
-      sha: git.sha
-      branch: git.branch
-      authorName: git.author
-      authorEmail: git.email
-      message: git.message
-      remoteOrigin: git.remote
-      defaultBranch: null
+  makeRequest = ->
+    api.createRun({
+      specPattern
+      specs
+      projectId
+      recordKey
+      platform
+      ci: {
+        params: ciProvider.ciParams()
+        provider: ciProvider.provider()
+      }
+      commit: ciProvider.commitDefaults({
+        sha: git.sha
+        branch: git.branch
+        authorName: git.author
+        authorEmail: git.email
+        message: git.message
+        remoteOrigin: git.remote
+        defaultBranch: null
+      })
     })
+
+  api.retryWithBackoff(makeRequest, {
+    onBeforeRetry: (details) ->
+      console.log("...") ## TODO: log the right thing
   })
   .catch (err) ->
     debug("failed creating run %o", {
@@ -238,12 +256,18 @@ createInstance = (options = {}) ->
 
   spec = getSpecRelativePath(spec)
 
-  api.createInstance({
-    spec
-    runId
-    groupId
-    platform
-    machineId
+  makeRequest = ->
+    api.createInstance({
+      spec
+      runId
+      groupId
+      platform
+      machineId
+    })
+
+  api.retryWithBackoff(makeRequest, {
+    onBeforeRetry: (details) ->
+      console.log("...") ## TODO: log the right thing
   })
   .catch (err) ->
     debug("failed creating instance %o", {

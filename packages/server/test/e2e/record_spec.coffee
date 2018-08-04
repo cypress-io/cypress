@@ -434,6 +434,8 @@ describe "e2e record", ->
       setup(routes)
 
       it "warns and does not create or update instances", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -466,6 +468,8 @@ describe "e2e record", ->
       setup(routes)
 
       it "does not update instance", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -504,6 +508,8 @@ describe "e2e record", ->
       setup(routes)
 
       it "does not update instance stdout", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -559,6 +565,8 @@ describe "e2e record", ->
       setup(routes)
 
       it "warns but proceeds", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
