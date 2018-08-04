@@ -261,10 +261,9 @@ describe "lib/modes/record", ->
   context ".createRun", ->
     beforeEach ->
       sinon.stub(api, "createRun")
-      sinon.stub(ciProvider, "params").returns({})
-      sinon.stub(ciProvider, "name").returns("")
-      sinon.stub(ciProvider, "buildNum").returns("")
-      sinon.stub(ciProvider, "gitInfo").returns({})
+      sinon.stub(ciProvider, "ciParams").returns({})
+      sinon.stub(ciProvider, "provider").returns("")
+      sinon.stub(ciProvider, "commitDefaults").returns({})
 
       @options = {
         git: {}
@@ -289,10 +288,9 @@ describe "lib/modes/record", ->
   context ".updateInstance", ->
     beforeEach ->
       sinon.stub(api, "updateInstance")
-      sinon.stub(ciProvider, "params").returns({})
-      sinon.stub(ciProvider, "name").returns("")
-      sinon.stub(ciProvider, "buildNum").returns("")
-      sinon.stub(ciProvider, "gitInfo").returns({})
+      sinon.stub(ciProvider, "ciParams").returns({})
+      sinon.stub(ciProvider, "provider").returns("")
+      sinon.stub(ciProvider, "commitDefaults").returns({})
 
       @options = {
         results: {}
