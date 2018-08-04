@@ -207,6 +207,9 @@ describe "lib/api", ->
   context ".createRun", ->
     beforeEach ->
       @buildProps = {
+        group: null
+        parallel: null
+        ciBuildId: null
         projectId:         "id-123"
         recordKey:         "token-123"
         ci: {
