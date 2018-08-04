@@ -223,6 +223,7 @@ createRun = (options = {}) ->
         remoteOrigin: git.remote
         defaultBranch: null
       })
+    })
 
   api.retryWithBackoff(makeRequest, {
     onBeforeRetry: (details) ->
