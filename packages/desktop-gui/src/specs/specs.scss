@@ -171,14 +171,10 @@
       }
     }
 
-    &:hover {
+    &:hover, &:focus {
       background-color: #f8f8f8;
       color: #38589c;
       cursor: pointer;
-      text-decoration: none;
-    }
-
-    &:focus {
       text-decoration: none;
     }
   }
