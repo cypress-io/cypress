@@ -965,6 +965,15 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("INCORRECT_CI_BUILD_ID_USAGE")
         snapshotConsoleLogs("INCORRECT_CI_BUILD_ID_USAGE")
+
+    it "errors and exits when using --ci-build-id without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--ci-build-id=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING")
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()

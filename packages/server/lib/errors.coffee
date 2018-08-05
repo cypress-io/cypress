@@ -8,6 +8,16 @@ listPaths = (paths) ->
   _.map paths, (p) ->
     "- " + chalk.yellow(p)
 
+displayArgs = (obj, mapper) ->
+  _
+  .chain(mapper)
+  .map (flag, key) ->
+    if v = obj[key]
+      "The #{flag} you passed was: #{chalk.blue(v)}"
+  .compact()
+  .join("\n")
+  .value()
+
 API = {
   # forms well-formatted user-friendly error for most common
   # errors Cypress can encounter
@@ -79,6 +89,20 @@ API = {
         "Timed out waiting for the browser to connect. #{arg1}"
       when "TESTS_DID_NOT_START_FAILED"
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+      when "RECORD_PARAMS_WITHOUT_RECORDING"
+        """
+        You passed either the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+
+        #{displayArgs(arg1, {
+          ciBuildId: "--ci-build-id",
+          group: "--group",
+          parallel: "--parallel"
+        })}
+
+        These flags can only be used when recording to the Cypress Dashboard service.
+
+        https://on.cypress.io/record-params-without-recording
+        """
       when "INCORRECT_CI_BUILD_ID_USAGE"
         """
         You passed the --ci-build-id flag but did not provide either --group or --parallel.

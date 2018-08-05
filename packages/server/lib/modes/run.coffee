@@ -922,6 +922,7 @@ module.exports = {
     .then ({ project, projectId, config }) =>
       ## if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
+      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
 
       if record
         recordMode.throwIfNoProjectId(projectId)
