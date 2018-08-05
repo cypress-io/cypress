@@ -13,7 +13,7 @@ displayArgs = (obj, mapper) ->
   .chain(mapper)
   .map (flag, key) ->
     if v = obj[key]
-      "The #{flag} you passed was: #{chalk.blue(v)}"
+      "The #{flag} flag you passed was: #{chalk.blue(v)}"
   .compact()
   .join("\n")
   .value()

@@ -973,7 +973,36 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId")
+
+    it "errors and exits when using --group without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--group=e2e-tests",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group")
+
+    it "errors and exits when using --parallel without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--parallel=true",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel")
+
+    it "errors and exits when using --group and --parallel without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--group=electron-smoke-tests",
+        "--parallel=true",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group-parallel")
+
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()
