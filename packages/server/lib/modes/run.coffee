@@ -86,6 +86,11 @@ formatSpecSummary = (name, failures) ->
   ]
   .join(" ")
 
+formatRecordParams = (runUrl, parallel, group) ->
+  if runUrl
+    group or= false
+    "Group: #{group}, Parallel: #{Boolean(parallel)}"
+
 formatSpecPattern = (specPattern) ->
   if specPattern
     specPattern.join(", ")
@@ -103,8 +108,7 @@ formatSpecs = (specs) ->
   .join("")
 
 displayRunStarting = (options = {}) ->
-  ## TODO: if running in parallel, state that
-  { specs, specPattern, browser, runUrl, parallel } = options
+  { specs, specPattern, browser, runUrl, group, parallel } = options
 
   console.log("")
 
@@ -129,6 +133,7 @@ displayRunStarting = (options = {}) ->
     [gray("Browser:"), formatBrowser(browser)]
     [gray("Specs:"), formatSpecs(specs)]
     [gray("Searched:"), formatSpecPattern(specPattern)]
+    [gray("Params:"), formatRecordParams(runUrl, parallel, group)]
     [gray("Run URL:"), runUrl]
   ])
   .filter(_.property(1))
@@ -140,15 +145,17 @@ displayRunStarting = (options = {}) ->
 
   console.log("")
 
-displaySpecHeader = (name, curr, total) ->
+displaySpecHeader = (name, curr, total, estimated) ->
   console.log("")
+
+  PADDING = 2
 
   table = terminal.table({
     colWidths: [80, 20]
     colAligns: ["left", "right"]
     type: "pageDivider"
     style: {
-      "padding-left": 2
+      "padding-left": PADDING
     }
   })
 
@@ -160,7 +167,11 @@ displaySpecHeader = (name, curr, total) ->
 
   console.log(table.toString())
 
-collectTestResults = (obj = {}) ->
+  if estimated
+    estimatedLabel = " ".repeat(PADDING) + "Estimated:"
+    console.log(estimatedLabel, humanTime.long(estimated))
+
+collectTestResults = (obj = {}, estimated) ->
   {
     name:        _.get(obj, 'spec.name')
     tests:       _.get(obj, 'stats.tests')
@@ -169,11 +180,12 @@ collectTestResults = (obj = {}) ->
     failures:    _.get(obj, 'stats.failures')
     skipped:     _.get(obj, 'stats.skipped' )
     duration:    humanTime.long(_.get(obj, 'stats.wallClockDuration'))
+    estimated:   estimated and humanTime.long(estimated)
     screenshots: obj.screenshots and obj.screenshots.length
     video:       Boolean(obj.video)
   }
 
-renderSummaryTable = (runUrl, results) ->
+renderSummaryTable = (runUrl) -> (results) ->
   { runs } = results
 
   console.log("")
@@ -261,14 +273,14 @@ iterateThroughSpecs = (options = {}) ->
     Promise
     .mapSeries specs, (spec, index, length) ->
       beforeSpecRun(spec)
-      .then ({ eta }) ->
-        runEachSpec(spec, index, length, eta)
+      .then ({ estimated }) ->
+        runEachSpec(spec, index, length, estimated)
       .tap (results) ->
         afterSpecRun(spec, results, config)
 
   parallelWithRecord = (runs) ->
     beforeSpecRun()
-    .then ({ spec, claimedInstances, totalInstances, eta }) ->
+    .then ({ spec, claimedInstances, totalInstances, estimated }) ->
       ## no more specs to run?
       if not spec
         ## then we're done!
@@ -279,7 +291,7 @@ iterateThroughSpecs = (options = {}) ->
       ## the relative name
       spec = _.find(specs, { relative: spec })
 
-      runEachSpec(spec, claimedInstances - 1, totalInstances, eta)
+      runEachSpec(spec, claimedInstances - 1, totalInstances, estimated)
       .tap (results) ->
         runs.push(results)
 
@@ -432,8 +444,8 @@ module.exports = {
 
     obj
 
-  displayResults: (obj = {}) ->
-    results = collectTestResults(obj)
+  displayResults: (obj = {}, estimated) ->
+    results = collectTestResults(obj, estimated)
 
     c = if results.failures then "red" else "green"
 
@@ -447,7 +459,7 @@ module.exports = {
       type: "outsideBorder"
     })
 
-    data = _.map [
+    data = _.chain([
       ["Tests:", results.tests]
       ["Passing:", results.passes]
       ["Failing:", results.failures]
@@ -456,11 +468,15 @@ module.exports = {
       ["Screenshots:", results.screenshots]
       ["Video:", results.video]
       ["Duration:", results.duration]
+      ["Estimated:", results.estimated] if estimated
       ["Spec Ran:", results.name]
-    ], (arr) ->
+    ])
+    .compact()
+    .map (arr) ->
       [key, val] = arr
 
       [color(key, "gray"), color(val, c)]
+    .value()
 
     table.push(data...)
 
@@ -650,7 +666,7 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
 
     @listenForProjectEnd(project, exit)
     .then (obj) =>
@@ -674,7 +690,7 @@ module.exports = {
       finish = ->
         return obj
 
-      @displayResults(obj)
+      @displayResults(obj, estimated)
 
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
@@ -757,10 +773,10 @@ module.exports = {
       specPattern
     })
 
-    runEachSpec = (spec, index, length) =>
-      displaySpecHeader(spec.name, index + 1, length)
+    runEachSpec = (spec, index, length, estimated) =>
+      displaySpecHeader(spec.name, index + 1, length, estimated)
 
-      @runSpec(spec, options)
+      @runSpec(spec, options, estimated)
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
@@ -790,7 +806,7 @@ module.exports = {
       writeOutput(outputPath, results)
       .return(results)
 
-  runSpec: (spec = {}, options = {}) ->
+  runSpec: (spec = {}, options = {}, estimated) ->
     { project, browser, video, videosFolder } = options
 
     { isHeadless, isHeaded } = browser
@@ -849,6 +865,7 @@ module.exports = {
             cname
             started
             project
+            estimated
             screenshots
             exit:                 options.exit
             videoCompression:     options.videoCompression
@@ -948,7 +965,7 @@ module.exports = {
             headed:               options.headed
             outputPath:           options.outputPath
           })
-          .tap(_.partial(renderSummaryTable, runUrl))
+          .tap(renderSummaryTable(runUrl))
 
         if record
           { projectName } = config

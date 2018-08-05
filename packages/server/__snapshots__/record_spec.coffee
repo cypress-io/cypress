@@ -8,6 +8,7 @@ exports['e2e record passing passes 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
+  │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -15,6 +16,7 @@ exports['e2e record passing passes 1'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_error_spec.coffee...                                                     (1 of 4) 
+  Estimated: 8 seconds
 
 Oops...we found an error preparing this test file:
 
@@ -43,6 +45,7 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                        │
   │ Video:        true                     │
   │ Duration:     X seconds                │
+  │ Estimated:    8 seconds                │
   │ Spec Ran:     record_error_spec.coffee │
   └────────────────────────────────────────┘
 
@@ -60,6 +63,7 @@ Fix the error in your code and re-run your tests.
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_fail_spec.coffee...                                                      (2 of 4) 
+  Estimated: 8 seconds
 
 
   record fails
@@ -89,6 +93,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
   │ Spec Ran:     record_fail_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -112,6 +117,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_pass_spec.coffee...                                                      (3 of 4) 
+  Estimated: 8 seconds
 
 
   record pass
@@ -134,6 +140,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
   │ Spec Ran:     record_pass_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -150,6 +157,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_uncaught_spec.coffee...                                                  (4 of 4) 
+  Estimated: 8 seconds
 
 
   1) An uncaught error was detected outside of a test
@@ -186,6 +194,7 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                           │
   │ Video:        true                        │
   │ Duration:     X seconds                   │
+  │ Estimated:    8 seconds                   │
   │ Spec Ran:     record_uncaught_spec.coffee │
   └───────────────────────────────────────────┘
 
@@ -331,6 +340,7 @@ exports['e2e record api interaction errors create instance does not update insta
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -404,6 +414,7 @@ exports['e2e record api interaction errors update instance does not update insta
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -411,6 +422,7 @@ exports['e2e record api interaction errors update instance does not update insta
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
 
 
   record pass
@@ -433,6 +445,7 @@ exports['e2e record api interaction errors update instance does not update insta
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
   │ Spec Ran:     record_pass_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -480,6 +493,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -487,6 +501,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
 
 
   record pass
@@ -509,6 +524,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
   │ Spec Ran:     record_pass_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -605,6 +621,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -612,6 +629,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
 
 
   record pass
@@ -634,6 +652,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
   │ Screenshots:  1                       │
   │ Video:        false                   │
   │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
   │ Spec Ran:     record_pass_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -675,6 +694,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -682,6 +702,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
 
 
   record pass
@@ -704,6 +725,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
   │ Spec Ran:     record_pass_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -838,8 +860,8 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: record_pass_spec.coffee...                                                      (1 of 4) 
+
+  Running: record_pass_spec.coffee...                                                      (1 of 4)
 
 
   record pass
@@ -880,16 +902,16 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    All specs passed!                           XX:XX        2        1        -        1        -
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                       
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12
 
 `
 
@@ -908,8 +930,8 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: record_error_spec.coffee...                                                     (2 of 4) 
+
+  Running: record_error_spec.coffee...                                                     (2 of 4)
 
 Oops...we found an error preparing this test file:
 
@@ -953,8 +975,8 @@ Fix the error in your code and re-run your tests.
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: record_fail_spec.coffee...                                                      (3 of 4) 
+
+  Running: record_fail_spec.coffee...                                                      (3 of 4)
 
 
   record fails
@@ -1005,8 +1027,8 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: record_uncaught_spec.coffee...                                                  (5 of 4) 
+
+  Running: record_uncaught_spec.coffee...                                                  (5 of 4)
 
 
   1) An uncaught error was detected outside of a test
@@ -1068,7 +1090,7 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -1076,12 +1098,12 @@ We dynamically generated a new test to display this failure.
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    3 of 3 failed (100%)                        XX:XX        3        -        3        -        1  
+    3 of 3 failed (100%)                        XX:XX        3        -        3        -        1
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                       
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12
 
 `
 

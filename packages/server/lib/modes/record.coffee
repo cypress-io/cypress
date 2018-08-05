@@ -354,7 +354,7 @@ createRunAndRecordSpecs = (options = {}) ->
             .chain(resp)
             .pick("spec", "claimedInstances", "totalInstances")
             .extend({
-              eta: resp.estimatedWallClockDuration
+              estimated: resp.estimatedWallClockDuration
             })
             .value()
 
