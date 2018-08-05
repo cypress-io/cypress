@@ -11,6 +11,8 @@ electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
 isForkPr   = require("is-fork-pr")
 Fixtures   = require("../support/helpers/fixtures")
+snapshot   = require("snap-shot-it")
+stripAnsi  = require("strip-ansi")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
@@ -70,6 +72,22 @@ TYPICAL_BROWSERS = [
     info: 'Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.'
   }
 ]
+
+previousCwd = process.cwd()
+
+snapshotConsoleLogs = (name) ->
+  args = _
+  .chain(console.log.args)
+  .map (innerArgs) ->
+    innerArgs.join(" ")
+  .join("\n")
+  .value()
+
+  ## our cwd() is currently the project
+  ## so must switch back to original
+  process.chdir(previousCwd)
+
+  snapshot(name, stripAnsi(args))
 
 describe "lib/cypress", ->
   require("mocha-banner").register()
