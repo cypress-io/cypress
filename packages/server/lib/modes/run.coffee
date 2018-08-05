@@ -927,8 +927,7 @@ module.exports = {
       if record
         recordMode.throwIfNoProjectId(projectId)
         recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
-        ## TODO: do this
-        # recordMode.throwIfGroupAndParallelButNoCiBuildId()
+        recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
 
       Promise.all([
         system.info(),

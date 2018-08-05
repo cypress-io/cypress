@@ -955,6 +955,46 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWithMatch("cypress run --record")
         @expectExitWith(3)
 
+    it "errors and exits when using --group but ciBuildId could not be generated", ->
+      sinon.stub(ciProvider, "provider").returns(null)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=e2e-tests",
+      ])
+      .then =>
+        @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-group")
+
+    it "errors and exits when using --parallel but ciBuildId could not be generated", ->
+      sinon.stub(ciProvider, "provider").returns(null)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel",
+      ])
+      .then =>
+        @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel")
+
+    it "errors and exits when using --parallel and --group but ciBuildId could not be generated", ->
+      sinon.stub(ciProvider, "provider").returns(null)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=e2e-tests-chrome",
+        "--parallel",
+      ])
+      .then =>
+        @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel-group")
+
     it "errors and exits when using --ci-build-id with no group or parallelization", ->
       cypress.start([
         "--run-project=#{@recordPath}",
@@ -987,7 +1027,7 @@ describe "lib/cypress", ->
     it "errors and exits when using --parallel without recording", ->
       cypress.start([
         "--run-project=#{@recordPath}",
-        "--parallel=true",
+        "--parallel",
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
@@ -997,7 +1037,7 @@ describe "lib/cypress", ->
       cypress.start([
         "--run-project=#{@recordPath}",
         "--group=electron-smoke-tests",
-        "--parallel=true",
+        "--parallel",
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
