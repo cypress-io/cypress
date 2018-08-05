@@ -955,6 +955,16 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWithMatch("cypress run --record")
         @expectExitWith(3)
 
+    it "errors and exits when using --ci-build-id with no group or parallelization", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--ci-build-id=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("INCORRECT_CI_BUILD_ID_USAGE")
+        snapshotConsoleLogs("INCORRECT_CI_BUILD_ID_USAGE")
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()
