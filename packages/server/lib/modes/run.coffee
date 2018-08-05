@@ -108,7 +108,7 @@ formatSpecs = (specs) ->
   .join("")
 
 displayRunStarting = (options = {}) ->
-  { specs, specPattern, browser, runUrl, group, parallel } = options
+  { specs, specPattern, browser, runUrl, parallel, group } = options
 
   console.log("")
 
@@ -906,7 +906,7 @@ module.exports = {
 
     socketId = random.id()
 
-    { projectRoot, record, key, parallel, ciBuildId, group } = options
+    { projectRoot, record, key, ciBuildId, parallel, group } = options
 
     browserName = options.browser
 
@@ -925,6 +925,7 @@ module.exports = {
 
       if record
         recordMode.throwIfNoProjectId(projectId)
+        recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
         ## TODO: do this
         # recordMode.throwIfGroupAndParallelButNoCiBuildId()
 

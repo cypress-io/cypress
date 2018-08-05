@@ -79,6 +79,16 @@ API = {
         "Timed out waiting for the browser to connect. #{arg1}"
       when "TESTS_DID_NOT_START_FAILED"
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+      when "INCORRECT_CI_BUILD_ID_USAGE"
+        """
+        You passed the --ci-build-id flag but did not provide either --group or --parallel.
+
+        The --ci-build-id you passed was: #{chalk.blue(arg1)}
+
+        The --ci-build-id flag is used to either group or parallelize multiple runs together.
+
+        https://on.cypress.io/incorrect-ci-build-id-usage
+        """
       when "RECORD_KEY_MISSING"
         """
         You passed the --record flag but did not provide us your Record Key.

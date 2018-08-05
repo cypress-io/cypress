@@ -56,6 +56,12 @@ warnIfProjectIdButNoRecordOption = (projectId, options) ->
     ## record mode
     errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
 
+throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) ->
+  ## we've been given an explicit ciBuildId
+  ## but no parallel or group flag
+  if ciBuildId and (not parallel and not group)
+    errors.throw("INCORRECT_CI_BUILD_ID_USAGE", ciBuildId)
+
 throwIfNoProjectId = (projectId) ->
   if not projectId
     errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
@@ -416,6 +422,8 @@ module.exports = {
   warnIfCiFlag
 
   throwIfNoProjectId
+
+  throwIfIncorrectCiBuildIdUsage
 
   warnIfProjectIdButNoRecordOption
 

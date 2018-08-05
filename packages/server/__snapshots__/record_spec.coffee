@@ -1107,3 +1107,12 @@ We dynamically generated a new test to display this failure.
 
 `
 
+exports['e2e record misconfiguration errors and exits when ciBuildId provided with no group or parallelization 1'] = `You passed the --ci-build-id flag but did not provide either --group or --parallel.
+
+The --ci-build-id you passed was: ciBuildId123
+
+The --ci-build-id flag is used to either group or parallelize multiple runs together.
+
+https://on.cypress.io/incorrect-ci-build-id-usage
+`
+

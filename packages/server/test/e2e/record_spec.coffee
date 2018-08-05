@@ -462,6 +462,19 @@ describe "e2e record", ->
       .then ->
         expect(getRequestUrls()).to.be.empty
 
+    it "errors and exits when ciBuildId provided with no group or parallelization", ->
+      e2e.exec(@, {
+        key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+        spec: "record*"
+        record: true
+        snapshot: true
+        ciBuildId: "ciBuildId123"
+        expectedExitCode: 1
+      })
+      .get("stdout")
+      .then (stdout) ->
+        expect(stdout).to.include("ciBuildId123")
+
   context "projectId", ->
     e2e.setup()
 
