@@ -263,7 +263,7 @@ Alternatively, you can create a new project using the Desktop Application.
 https://on.cypress.io/dashboard
 `
 
-exports['e2e record api interaction errors create run warns and does not create or update instances 1'] = `Warning: We encountered an error talking to our servers.
+exports['e2e record api interaction errors create run 500 warns and does not create or update instances 1'] = `Warning: We encountered an error talking to our servers.
 
 This run will not be recorded.
 

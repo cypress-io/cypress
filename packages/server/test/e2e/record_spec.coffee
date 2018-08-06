@@ -559,7 +559,7 @@ describe "e2e record", ->
           expectedExitCode: 1
         })
 
-    describe "create run", ->
+    describe "create run 500", ->
       routes = [{
         method: "post"
         url: "/runs"
