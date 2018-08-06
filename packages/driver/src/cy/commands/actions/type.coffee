@@ -173,7 +173,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           multipleInputsAndNoSubmitElements = (form) ->
             inputs  = form.find("input")
             submits = getDefaultButtons(form)
-  
+
             inputs.length > 1 and submits.length is 0
 
           ## throw an error here if there are multiple form parents
