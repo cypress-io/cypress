@@ -1,4 +1,5 @@
 exports['e2e uncaught support file errors failing 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -75,5 +76,5 @@ We dynamically generated a new test to display this failure.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
-`
 
+`

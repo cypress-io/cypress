@@ -1,4 +1,5 @@
 exports['e2e visit low response timeout passes 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -72,9 +73,11 @@ exports['e2e visit low response timeout passes 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX       13       13        -        -        -  
 
+
 `
 
 exports['e2e visit low response timeout fails when network connection immediately fails 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -179,9 +182,11 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
+
 `
 
 exports['e2e visit low response timeout fails when server responds with 500 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -274,9 +279,11 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
+
 `
 
 exports['e2e visit low response timeout fails when file server responds with 404 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -369,9 +376,11 @@ The internal Cypress web server responded with:
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
+
 `
 
 exports['e2e visit low response timeout fails when content type isnt html 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -466,9 +475,11 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
+
 `
 
 exports['e2e visit normal response timeouts fails when visit times out 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -589,5 +600,5 @@ When this 'load' event occurs, Cypress will continue running commands.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 
-`
 
+`

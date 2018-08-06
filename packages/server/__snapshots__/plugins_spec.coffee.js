@@ -1,4 +1,5 @@
 exports['e2e plugins fails 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -67,9 +68,11 @@ Error: Async error from plugins file
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
+
 `
 
 exports['e2e plugins passes 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -125,9 +128,11 @@ exports['e2e plugins passes 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 
+
 `
 
 exports['e2e plugins can modify config from plugins 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -183,9 +188,11 @@ exports['e2e plugins can modify config from plugins 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 
+
 `
 
 exports['e2e plugins works with user extensions 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -240,9 +247,11 @@ A video will not be recorded when using this browser.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
+
 `
 
 exports['e2e plugins handles absolute path to pluginsFile 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -297,9 +306,11 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
+
 `
 
 exports['e2e plugins calls after:screenshot for cy.screenshot() and failure screenshots 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -372,5 +383,5 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        4        3        1        -        -  
 
-`
 
+`

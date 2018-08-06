@@ -1,4 +1,5 @@
 exports['e2e screenshots passes 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -133,5 +134,5 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX       19       15        4        -        -  
 
-`
 
+`

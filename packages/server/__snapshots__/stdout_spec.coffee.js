@@ -1,4 +1,5 @@
 exports['e2e stdout displays errors from failures 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -133,9 +134,11 @@ The internal Cypress web server responded with:
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        5        2        3        -        -  
 
+
 `
 
 exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -202,9 +205,11 @@ Fix the error in your code and re-run your tests.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
+
 `
 
 exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -272,9 +277,11 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        8        8        -        -        -  
 
+
 `
 
 exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -329,9 +336,11 @@ A video will not be recorded when using this mode.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
+
 `
 
 exports['e2e stdout logs that chrome cannot be recorded 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -386,5 +395,5 @@ A video will not be recorded when using this browser.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
-`
 
+`

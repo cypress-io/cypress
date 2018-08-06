@@ -1,4 +1,6 @@
-exports['e2e reporters reports error if cannot load reporter 1'] = `Could not load reporter by name: module-does-not-exist
+exports['e2e reporters reports error if cannot load reporter 1'] = `
+
+Could not load reporter by name: module-does-not-exist
 
 We searched for the reporter in these paths:
 
@@ -10,9 +12,12 @@ The error we received was:
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 
 Learn more at stack trace line
+
+
 `
 
 exports['e2e reporters supports junit reporter and reporter options 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -61,9 +66,11 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
+
 `
 
 exports['e2e reporters supports local custom reporter 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -114,9 +121,11 @@ finished!
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
+
 `
 
 exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom reporter 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -178,10 +187,12 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
   │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
+
 
 `
 
 exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom reporter 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -289,9 +300,11 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
 
+
 `
 
 exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom reporter 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -351,10 +364,12 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
   │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
+
 
 `
 
 exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom reporter 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -460,9 +475,11 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
 
+
 `
 
 exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom reporter 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -523,9 +540,11 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
+
 `
 
 exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom reporter 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -631,9 +650,12 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
 
+
 `
 
-exports['e2e reporters reports error when thrown from reporter 1'] = `Could not load reporter by name: reporters/throws.js
+exports['e2e reporters reports error when thrown from reporter 1'] = `
+
+Could not load reporter by name: reporters/throws.js
 
 We searched for the reporter in these paths:
 
@@ -677,5 +699,6 @@ Error: this reporter threw an error
 
 
 Learn more at stack trace line
-`
 
+
+`

@@ -1,4 +1,5 @@
 exports['e2e caught and uncaught hooks errors failing1 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -111,9 +112,11 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX       11        5        3        -        3  
 
+
 `
 
 exports['e2e caught and uncaught hooks errors failing2 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -198,9 +201,11 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        7        4        1        -        2  
 
+
 `
 
 exports['e2e caught and uncaught hooks errors failing3 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -277,9 +282,11 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        4        -        1        -        3  
 
+
 `
 
 exports['e2e caught and uncaught hooks errors failing4 1'] = `
+
 ====================================================================================================
 
   (Run Starting)
@@ -362,5 +369,5 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        3        2        1        -        -  
 
-`
 
+`
