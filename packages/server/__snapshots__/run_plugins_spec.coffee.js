@@ -1,5 +1,4 @@
 exports['lib/plugins/child/run_plugins sends error message if pluginsFile is missing 1'] = `
-
 Error: Cannot find module '/does/not/exist.coffee'
     at Function.Module._resolveFilename <path>module.js
     at Module._load <path>module.js
@@ -25,11 +24,9 @@ Error: Cannot find module '/does/not/exist.coffee'
     at tryOnImmediate <path>timers.js
     at processImmediate [as _immediateCallback] <path>timers.js
 
-
 `
 
 exports['lib/plugins/child/run_plugins sends error message if requiring pluginsFile errors 1'] = `
-
 Error: error thrown by pluginsFile
     at Object.<anonymous> <path>throws_error.coffee
     at Object.<anonymous> <path>throws_error.coffee
@@ -60,26 +57,14 @@ Error: error thrown by pluginsFile
     at tryOnImmediate <path>timers.js
     at processImmediate [as _immediateCallback] <path>timers.js
 
-
 `
 
 exports['lib/plugins/child/run_plugins sends error message if pluginsFile has syntax error 1'] = `
-
 <path>syntax_error.coffee) error: missing }
 <color-code>{<color-code>
 <color-code>^<color-code>
-
-
 `
 
 exports['lib/plugins/child/run_plugins sends error message if pluginsFile does not export a function 1'] = `
-
 null
-
-
 `
-
-exports['lib/plugins/child/run_plugins on \'load\' message sends error if pluginsFile function throws an error 1'] = {
-  "name": "ReferenceError",
-  "message": "foo is not defined"
-}

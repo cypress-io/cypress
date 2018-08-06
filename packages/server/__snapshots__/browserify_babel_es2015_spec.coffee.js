@@ -91,7 +91,6 @@ SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
 > 2 | 
     | ^ while parsing file: /foo/bar/.projects/e2e/lib/fail.js
 
-
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
 - A missing file or dependency

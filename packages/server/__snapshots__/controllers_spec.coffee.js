@@ -24,8 +24,6 @@ The error was:
 
 Error: ENOENT: no such file or directory, stat '/does/not/exist.js'
 
-
-
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
 - A missing file or dependency

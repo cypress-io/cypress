@@ -286,7 +286,6 @@ exports['lib/scaffold .fileTree leaves out support if configured to false 1'] = 
 ]
 
 exports['lib/scaffold .support creates supportFolder and commands.js and index.js when supportFolder does not exist 1'] = `
-
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -313,11 +312,9 @@ exports['lib/scaffold .support creates supportFolder and commands.js and index.j
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-
 `
 
 exports['lib/scaffold .support creates supportFolder and commands.js and index.js when supportFolder does not exist 2'] = `
-
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -338,7 +335,6 @@ import './commands'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
-
 
 `
 
@@ -432,7 +428,6 @@ exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = 
 ]
 
 exports['lib/scaffold .plugins creates pluginsFile when pluginsFolder does not exist 1'] = `
-
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
 //
@@ -450,6 +445,5 @@ module.exports = (on, config) => {
   // <backtick>on<backtick> is used to hook into various events Cypress emits
   // <backtick>config<backtick> is the resolved Cypress config
 }
-
 
 `

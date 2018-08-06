@@ -23,7 +23,6 @@ The error was:
 
 Error: Cannot find module './does/not/exist' from '/foo/bar/.projects/busted-support-file/cypress/support'
 
-
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
 - A missing file or dependency
