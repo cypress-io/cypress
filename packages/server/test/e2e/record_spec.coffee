@@ -624,6 +624,37 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
+    describe "create run unknown 422", ->
+      routes = [{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(422).json({
+          code: "SOMETHING_UNKNOWN"
+          message: "An unknown message here from the server."
+        })
+      }]
+
+      setup(routes)
+
+      it.only "errors and exits when there is an unknown 422 response", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "e2e-tests"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
     describe "create instance", ->
       routes = [
         {

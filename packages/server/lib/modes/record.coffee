@@ -334,7 +334,15 @@ createRun = (options = {}) ->
               ciBuildId,
             })
           else
-            errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", err.error)
+            errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
+              error: err,
+              flags: {
+                runUrl,
+                group,
+                parallel,
+                ciBuildId,
+              },
+            })
       else
         ## warn the user that assets will be not recorded
         errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)

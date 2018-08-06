@@ -115,6 +115,22 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       "Timed out waiting for the browser to connect. #{arg1}"
     when "TESTS_DID_NOT_START_FAILED"
       "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+    when "DASHBOARD_UNKNOWN_INVALID_REQUEST"
+      """
+      We encountered an unexpected error talking to our servers.
+
+      There is likely something wrong with the request.
+
+      #{displayFlags(arg1.flags, {
+        group: "--group",
+        parallel: "--parallel",
+        ciBuildId: "--ciBuildId",
+      })}
+
+      The server's response was:
+
+      #{arg1.error}
+      """
     when "DASHBOARD_STALE_RUN"
       """
       You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.

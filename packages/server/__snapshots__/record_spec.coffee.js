@@ -1135,3 +1135,23 @@ If you are trying to parallelize this run, then also pass the --parallel flag, e
 https://on.cypress.io/run-group-name-not-unique
 
 `
+
+exports['e2e record api interaction errors create run unknown 422 errors and exits when there is an unknown 422 response 1'] = `
+We encountered an unexpected error talking to our servers.
+
+There is likely something wrong with the request.
+
+The --group flag you passed was: e2e-tests
+The --parallel flag you passed was: true
+The --ciBuildId flag you passed was: ciBuildId123
+
+The server's response was:
+
+StatusCodeError: 422
+
+{
+  "code": "SOMETHING_UNKNOWN",
+  "message": "An unknown message here from the server."
+}
+
+`
