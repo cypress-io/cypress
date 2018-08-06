@@ -1034,14 +1034,14 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.equal("600 error")
 
-    it "backs off with strategy: 30s, 2m, 5m", ->
+    it "backs off with strategy: 30s, 60s, 2m", ->
       fn = sinon.stub().rejects(new Promise.TimeoutError())
       fn.onCall(3).resolves()
       api.retryWithBackoff(fn).then =>
         expect(Promise.delay).to.be.calledThrice
         expect(Promise.delay.firstCall).to.be.calledWith(30 * 1000)
-        expect(Promise.delay.secondCall).to.be.calledWith(2 * 60 * 1000)
-        expect(Promise.delay.thirdCall).to.be.calledWith(5 * 60 * 1000)
+        expect(Promise.delay.secondCall).to.be.calledWith(60 * 1000)
+        expect(Promise.delay.thirdCall).to.be.calledWith(2 * 60 * 1000)
 
     it "fails after third retry fails", ->
       fn = sinon.stub().rejects(makeError({ message: "500 error", statusCode: 500 }))
@@ -1061,15 +1061,18 @@ describe "lib/api", ->
         expect(onBeforeRetry.firstCall.args[0]).to.eql({
           retryIndex: 0
           delay: 30 * 1000
+          total: 3
           err
         })
         expect(onBeforeRetry.secondCall.args[0]).to.eql({
           retryIndex: 1
-          delay: 2 * 60 * 1000
+          delay: 60 * 1000
+          total: 3
           err
         })
         expect(onBeforeRetry.thirdCall.args[0]).to.eql({
           retryIndex: 2
-          delay: 5 * 60 * 1000
+          delay: 2 * 60 * 1000
+          total: 3
           err
         })

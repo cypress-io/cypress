@@ -14,7 +14,17 @@ capture    = require("../capture")
 upload     = require("../upload")
 env        = require("../util/env")
 terminal   = require("../util/terminal")
+humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
+
+onBeforeRetry = (details) ->
+  errors.warning(
+    "DASHBOARD_API_RESPONSE_FAILED_RETRYING", {
+      delay: humanTime.long(details.delay, false)
+      tries: details.total - details.retryIndex
+      response: details.err
+    }
+  )
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -147,10 +157,7 @@ updateInstanceStdout = (options = {}) ->
       instanceId
     })
 
-  api.retryWithBackoff(makeRequest, {
-    onBeforeRetry: (details) ->
-      console.log("...") ## TODO: log the right thing
-  })
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed updating instance stdout %o", {
       stack: err.stack
@@ -188,10 +195,7 @@ updateInstance = (options = {}) ->
       cypressConfig
     })
 
-  api.retryWithBackoff(makeRequest, {
-    onBeforeRetry: (details) ->
-      console.log("...") ## TODO: log the right thing
-  })
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed updating instance %o", {
       stack: err.stack
@@ -199,7 +203,7 @@ updateInstance = (options = {}) ->
 
     if parallel
       return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
-        error: err,
+        response: err,
         flags: {
           group,
           ciBuildId,
@@ -272,10 +276,7 @@ createRun = (options = {}) ->
       })
     })
 
-  api.retryWithBackoff(makeRequest, {
-    onBeforeRetry: (details) ->
-      console.log("...") ## TODO: log the right thing
-  })
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed creating run %o", {
       stack: err.stack
@@ -344,7 +345,7 @@ createRun = (options = {}) ->
             })
           else
             errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
-              error: err,
+              response: err,
               flags: {
                 group,
                 parallel,
@@ -354,7 +355,7 @@ createRun = (options = {}) ->
       else
         if parallel
           return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
-            error: err,
+            response: err,
             flags: {
               group,
               ciBuildId,
@@ -383,10 +384,7 @@ createInstance = (options = {}) ->
       machineId
     })
 
-  api.retryWithBackoff(makeRequest, {
-    onBeforeRetry: (details) ->
-      console.log("...") ## TODO: log the right thing
-  })
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed creating instance %o", {
       stack: err.stack
@@ -394,7 +392,7 @@ createInstance = (options = {}) ->
 
     if parallel
       return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
-        error: err,
+        response: err,
         flags: {
           group,
           ciBuildId,
