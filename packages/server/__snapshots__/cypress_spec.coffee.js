@@ -74,7 +74,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - travis
 - wercker
 
-You can avoid this check in the future by passing an ID to the --ci-build-id flag manually.
+Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
 https://on.cypress.io/indeterminate-ci-build-id
 `
@@ -104,7 +104,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - travis
 - wercker
 
-You can avoid this check in the future by passing an ID to the --ci-build-id flag manually.
+Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
 https://on.cypress.io/indeterminate-ci-build-id
 `
@@ -135,7 +135,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - travis
 - wercker
 
-You can avoid this check in the future by passing an ID to the --ci-build-id flag manually.
+Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
 https://on.cypress.io/indeterminate-ci-build-id
 `
@@ -216,7 +216,7 @@ https://on.cypress.io/parallel-required
 `
 
 exports['DASHBOARD_ALREADY_COMPLETE 1'] = `
-The run you are attempting access to is already complete and will not accept new groups.
+The run you are attempting to access is already complete and will not accept new groups.
 
 The existing run is: https://dashboard.cypress.io/runs/12345
 

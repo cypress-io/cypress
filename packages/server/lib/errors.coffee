@@ -175,7 +175,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_ALREADY_COMPLETE"
       """
-      The run you are attempting access to is already complete and will not accept new groups.
+      The run you are attempting to access is already complete and will not accept new groups.
 
       The existing run is: #{arg1.runUrl}
 
@@ -224,7 +224,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH"
       """
       You passed the --parallel flag, but we do not parallelize tests across different environments.
-      
+
       This machine is sending different environment parameters than the first machine that started this parallel run.
 
       The existing run is: #{arg1.runUrl}
@@ -278,7 +278,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{listItems(arg2)}
 
-      You can avoid this check in the future by passing an ID to the --ci-build-id flag manually.
+      Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
       https://on.cypress.io/indeterminate-ci-build-id
       """
