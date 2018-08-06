@@ -68,11 +68,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - jenkins
 - semaphore
 - shippable
-- snap
-- teamcity
-- teamfoundation
 - travis
-- wercker
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -98,11 +94,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - jenkins
 - semaphore
 - shippable
-- snap
-- teamcity
-- teamfoundation
 - travis
-- wercker
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -129,11 +121,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - jenkins
 - semaphore
 - shippable
-- snap
-- teamcity
-- teamfoundation
 - travis
-- wercker
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
