@@ -1105,7 +1105,7 @@ describe "src/cy/commands/actions/click", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass { multiple: true } if you want to serially click each element."
+          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 15 elements. Pass { multiple: true } if you want to serially click each element."
           done()
 
         cy.get("button").click()
