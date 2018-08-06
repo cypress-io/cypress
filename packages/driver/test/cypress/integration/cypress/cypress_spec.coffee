@@ -1,7 +1,5 @@
 $ = Cypress.$
 Promise = Cypress.Promise
-$utils = Cypress.utils
-
 
 describe "driver/src/cypress/index", ->
   beforeEach ->
@@ -39,10 +37,3 @@ describe "driver/src/cypress/index", ->
         Cypress.Log.command({})
 
       expect(fn).to.throw(/has been renamed to Cypress.log/)
-
-  context "Deprecated", ->
-    it "warns with deprecated Cypress.dom.isType", ->
-      warnSpy = cy.spy($utils, "warning")
-      isText = Cypress.dom.isType($('<input type="asdf"/>'), 'text')
-      expect(isText).to.eq true
-      expect(warnSpy.called).to.eq true
