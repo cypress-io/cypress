@@ -275,7 +275,7 @@ createRun = (options = {}) ->
     switch err.statusCode
       when 401
         recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
-        errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
+        errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412

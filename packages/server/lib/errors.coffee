@@ -250,7 +250,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
-    when "RECORD_KEY_NOT_VALID"
+    when "DASHBOARD_RECORD_KEY_NOT_VALID"
       """
       We failed trying to authenticate this project: #{chalk.blue(arg2)}
 
