@@ -115,6 +115,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       "Timed out waiting for the browser to connect. #{arg1}"
     when "TESTS_DID_NOT_START_FAILED"
       "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+    when "DASHBOARD_PARALLEL_REQUIRED"
+      """
+      You dot not pass the --parallel flag, but this run group was originally created with the --parallel flag.
+
+      The existing run is: #{arg1.runUrl}
+
+      #{displayFlags(arg1, {
+        group: "--group",
+      })}
+
+      You must use the --parallel flag with this group.
+
+      https://on.cypress.io/parallel-required
+      """
     when "DASHBOARD_PARALLEL_DISALLOWED"
       """
       You passed the --parallel flag, but this run group was originally created without the --parallel flag.

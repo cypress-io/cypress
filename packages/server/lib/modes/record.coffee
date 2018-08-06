@@ -310,6 +310,11 @@ createRun = (options = {}) ->
               runUrl,
               group,
             })
+          when "PARALLEL_REQUIRED"
+            errors.throw("DASHBOARD_PARALLEL_REQUIRED", {
+              runUrl,
+              group,
+            })
           else
             errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", err.error)
       else

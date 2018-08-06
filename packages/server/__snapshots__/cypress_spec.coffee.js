@@ -197,3 +197,15 @@ You can not use the --parallel flag with this group.
 
 https://on.cypress.io/parallel-disallowed
 `
+
+exports['DASHBOARD_PARALLEL_REQUIRED 1'] = `
+You dot not pass the --parallel flag, but this run group was originally created with the --parallel flag.
+
+The existing run is: https://dashboard.cypress.io/runs/12345
+
+The --group flag you passed was: electron-smoke-tests
+
+You must use the --parallel flag with this group.
+
+https://on.cypress.io/parallel-required
+`

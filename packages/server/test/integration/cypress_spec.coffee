@@ -1119,6 +1119,30 @@ describe "lib/cypress", ->
         @expectExitWithErr("DASHBOARD_PARALLEL_DISALLOWED")
         snapshotConsoleLogs("DASHBOARD_PARALLEL_DISALLOWED")
 
+    it "errors and exits when parallel is required", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "PARALLEL_REQUIRED"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_PARALLEL_REQUIRED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_REQUIRED")
+
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()
