@@ -607,6 +607,27 @@ describe "e2e record", ->
           expect(urls).to.deep.eq([
             "POST /runs"
           ])
+
+      it "does not proceed and exits with error when parallelizing", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "foo"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
     describe "create run 422", ->
       routes = [{
         method: "post"

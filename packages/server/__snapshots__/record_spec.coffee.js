@@ -1224,3 +1224,17 @@ StatusCodeError: 500 - "Internal Server Error"
 
 
 `
+
+exports['e2e record api interaction errors create run 500 does not proceed and exits with error when parallelizing 1'] = `
+We encountered an unexpected error talking to our servers.
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+The server's response was:
+
+StatusCodeError: 500 - "Internal Server Error"
+
+`
