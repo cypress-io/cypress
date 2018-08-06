@@ -31,7 +31,16 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  debug(
+    "request to url: %s with params: %o",
+    "#{params.method} #{params.url}",
+    _.pick(params, "body", "headers")
+  )
+
   request[method](params, callback)
+  .promise()
+  .tap (resp) ->
+    debug("response %o", resp)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -57,6 +66,8 @@ isRetriableError = (err) ->
   (err instanceof Promise.TimeoutError) or (500 <= err.statusCode < 600)
 
 module.exports = {
+  rp
+
   ping: ->
     rp.get(routes.ping())
     .catch(tagError)
@@ -113,20 +124,17 @@ module.exports = {
 
   createRun: (options = {}) ->
     body = _.pick(options, [
-      "projectId"
-      "recordKey"
       "ci"
       "specs",
       "commit"
-      "platform"
-      "specPattern"
+      "group",
+      "platform",
+      "parallel",
+      "ciBuildId",
+      "projectId",
+      "recordKey",
+      "specPattern",
     ])
-
-    ## temporary hack to get around
-    ## the latest schema requirements
-    body.group = null
-    body.parallel = null
-    body.ciBuildId = null
 
     rp.post({
       body
@@ -134,7 +142,7 @@ module.exports = {
       json: true
       timeout: options.timeout ? MUTATING_TIMEOUT
       headers: {
-        "x-route-version": "3"
+        "x-route-version": "4"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -156,11 +164,9 @@ module.exports = {
       json: true
       timeout: timeout ? MUTATING_TIMEOUT
       headers: {
-        "x-route-version": "4"
+        "x-route-version": "5"
       }
     })
-    .promise()
-    .get("instanceId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
@@ -208,7 +214,6 @@ module.exports = {
         bearer: authToken
       }
     })
-    .promise()
     .timeout(timeout)
     .catch(tagError)
 
@@ -294,7 +299,6 @@ module.exports = {
       url: routes.auth(),
       json: true
     })
-    .promise()
     .get("url")
     .catch(tagError)
 
@@ -310,7 +314,6 @@ module.exports = {
         "x-route-version": "2"
       }
     })
-    .promise()
     .get("apiToken")
     .catch(tagError)
 

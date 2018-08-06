@@ -304,6 +304,145 @@ describe "e2e record", ->
         expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
 
+  context "parallelization", ->
+    allSpecs = [
+      "cypress/integration/record_error_spec.coffee",
+      "cypress/integration/record_fail_spec.coffee",
+      "cypress/integration/record_pass_spec.coffee",
+      "cypress/integration/record_uncaught_spec.coffee",
+    ]
+
+    postInstanceResponses = (specs) ->
+      return _
+      .chain(specs)
+      .map (spec, i) ->
+        return {
+          spec
+          instanceId
+          estimatedWallClockDuration: (i + 1) * 1000
+        }
+      .concat({
+        spec: null
+        instanceId: null,
+        estimatedWallClockDuration: null
+      })
+      .value()
+
+    ## a1 does 3 specs, b2 does 1 spec
+    a1Specs = _.without(allSpecs, "cypress/integration/record_pass_spec.coffee")
+    b2Specs = _.difference(allSpecs, a1Specs)
+
+    firstRunResponse = false
+    waitUntilSecondInstanceClaims = null
+
+    claimed = []
+
+    responses = {
+      a1: postInstanceResponses(a1Specs)
+      b2: postInstanceResponses(b2Specs)
+    }
+
+    ## replace the 1st + 2nd routes object
+    routes = defaultRoutes.slice(0)
+    routes[0] = {
+      method: "post"
+      url: "/runs"
+      req: "postRunRequest@2.1.0",
+      res: (req, res) ->
+        { group, ciBuildId } = req.body
+
+        expect(group).to.eq("prod-e2e")
+        expect(ciBuildId).to.eq("ciBuildId123")
+
+        ## if this is the first response
+        ## give machineId a1, else b2
+        if not firstRunResponse
+          firstRunResponse = true
+          machineId = "a1ad2bcf-6398-46ed-b201-2fd90b188d5f"
+        else
+          machineId = "b2bd2bcf-6398-46ed-b201-2fd90b188d5f"
+
+        res.json(
+          _.extend({}, postRunResponse, { machineId })
+        )
+
+    }
+    routes[1] = {
+      method: "post"
+      url: "/runs/:id/instances"
+      req: "postRunInstanceRequest@2.1.0",
+      res: (req, res) ->
+        { machineId, spec } = req.body
+
+        expect(spec).to.be.null
+
+        mId = machineId.slice(0, 2)
+
+        respond = ->
+          resp = responses[mId].shift()
+
+          ## if theres a spec to claim
+          if resp.spec
+            claimed.push(resp)
+
+          resp.claimedInstances = claimed.length
+          resp.totalInstances = allSpecs.length
+
+          jsonSchemas.assertSchema("postRunInstanceResponse", "2.1.0")(resp)
+          res.json(resp)
+
+        ## when the 1st machine attempts to claim its FIRST spec, we
+        ## automatically delay it until the 2nd machine claims its FIRST
+        ## spec so that the request URL's are deterministic
+        if mId is "a1" and claimed.length is 0
+          waitUntilSecondInstanceClaims = ->
+            waitUntilSecondInstanceClaims = null
+            respond()
+        else
+          respond()
+          waitUntilSecondInstanceClaims?()
+    }
+
+    setup(routes)
+
+    it "passes in parallel with group", ->
+      Promise.all([
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record*"
+          group: "prod-e2e"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 3
+          config: {
+            trashAssetsBeforeRuns: false
+          }
+        })
+        .get("stdout"),
+
+        ## stagger the 2nd instance
+        ## starting up a bit
+        Promise
+        .delay(3000)
+        .then =>
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record*"
+            group: "prod-e2e"
+            record: true
+            parallel: true
+            snapshot: true
+            ciBuildId: "ciBuildId123"
+            expectedExitCode: 0
+            config: {
+              trashAssetsBeforeRuns: false
+            }
+          })
+          .get("stdout")
+    ])
+
   context "misconfiguration", ->
     setup([])
 
@@ -423,7 +562,7 @@ describe "e2e record", ->
           expectedExitCode: 1
         })
 
-    describe "create run", ->
+    describe "create run 500", ->
       routes = [{
         method: "post"
         url: "/runs"
@@ -442,6 +581,192 @@ describe "e2e record", ->
           record: true
           snapshot: true
           expectedExitCode: 0
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
+      it "warns but proceeds when grouping without parallelization", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "foo"
+          record: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 0
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
+      it "does not proceed and exits with error when parallelizing", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "foo"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
+    describe "create instance 500", ->
+      routes = defaultRoutes.slice(0)
+
+      routes[1] = {
+        method: "post"
+        url: "/runs/:id/instances"
+        req: "postRunInstanceRequest@2.1.0",
+        res: (req, res) -> res.sendStatus(500)
+      }
+
+      setup(routes)
+
+      it "does not proceed and exits with error when parallelizing and creating instance", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "foo"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs",
+            "POST /runs/#{runId}/instances"
+          ])
+
+    describe "update instance 500", ->
+      routes = defaultRoutes.slice(0)
+
+      routes[1] = {
+        method: "post"
+        url: "/runs/:id/instances"
+        req: "postRunInstanceRequest@2.1.0",
+        res: (req, res) ->
+          res.json({
+            instanceId
+            spec: "cypress/integration/record_pass_spec.coffee"
+            estimatedWallClockDuration: 5000
+            totalInstances: 1
+            claimedInstances: 1
+          })
+      }
+
+      routes[2] = {
+        method: "put"
+        url: "/instances/:id"
+        req: "putInstanceRequest@2.0.0",
+        res: (req, res) -> res.sendStatus(500)
+      }
+
+      setup(routes)
+
+      it "does not proceed and exits with error when parallelizing and updating instance", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "foo"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs",
+            "POST /runs/#{runId}/instances"
+            "PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6"
+          ])
+
+    describe "create run 422", ->
+      routes = [{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(422).json({
+          code: "RUN_GROUP_NAME_NOT_UNIQUE"
+          message: "Run group name cannot be used again without passing the parallel flag."
+          payload: {
+            runUrl: "https://dashboard.cypress.io/runs/12345"
+          }
+        })
+      }]
+
+      setup(routes)
+
+      ## the other 422 tests for this are in integration/cypress_spec
+      it "errors and exits when group name is in use", ->
+        process.env.CIRCLECI = "1"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "e2e-tests"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
+    describe "create run unknown 422", ->
+      routes = [{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(422).json({
+          code: "SOMETHING_UNKNOWN"
+          message: "An unknown message here from the server."
+        })
+      }]
+
+      setup(routes)
+
+      it "errors and exits when there is an unknown 422 response", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "e2e-tests"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 1
         })
         .then ->
           urls = getRequestUrls()

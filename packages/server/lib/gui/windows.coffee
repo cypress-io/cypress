@@ -142,6 +142,7 @@ module.exports = {
       onCrashed: ->
       onNewWindow: ->
       webPreferences:  {
+        partition:            null
         chromeWebSecurity:    true
         nodeIntegration:      false
         backgroundThrottling: false
@@ -157,6 +158,9 @@ module.exports = {
 
     if options.chromeWebSecurity is false
       options.webPreferences.webSecurity = false
+
+    if options.partition
+      options.webPreferences.partition = options.partition
 
     win = @_newBrowserWindow(options)
 
