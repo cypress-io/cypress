@@ -24,6 +24,18 @@ displayFlags = (obj, mapper) ->
   .join("\n")
   .value()
 
+warnIfExplicitCiBuildId = (ciBuildId) ->
+  if not ciBuildId
+    return ""
+
+  """
+  It also looks like you also passed in an explicit --ci-build-id flag.
+
+  This is only necessary if you are NOT running in one of our supported CI providers.
+
+  This flag must be unique for each new run, but must also be identical for each machine you are trying to --group or run in --parallel.
+  """
+
 trimMultipleNewLines = (str) ->
   _
   .chain(str)
@@ -103,6 +115,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       "Timed out waiting for the browser to connect. #{arg1}"
     when "TESTS_DID_NOT_START_FAILED"
       "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+    when "DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE"
+      """
+      You passed the --group flag, but this group name has already been used for this run.
+
+      #{displayFlags(arg1, {
+        group: "--group",
+      })}
+
+      If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
+
+      #{warnIfExplicitCiBuildId(arg1.ciBuildId)}
+
+      https://on.cypress.io/run-group-name-not-unique
+      """
     when "INDETERMINATE_CI_BUILD_ID"
       """
       You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.

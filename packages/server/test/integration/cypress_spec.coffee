@@ -1043,6 +1043,26 @@ describe "lib/cypress", ->
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
         snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group-parallel")
 
+    it "errors and exits when group name is not unique and explicitly passed ciBuildId", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "RUN_GROUP_NAME_NOT_UNIQUE"
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
+        snapshotConsoleLogs("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
+
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()

@@ -586,6 +586,38 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
+    describe "create run 422", ->
+      routes = [{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(422).json({
+          code: "RUN_GROUP_NAME_NOT_UNIQUE"
+          message: "Run group name cannot be used again without passing the parallel flag."
+        })
+      }]
+
+      setup(routes)
+
+      ## the other 422 tests for this are in integration/cypress_spec
+      it "errors and exits when group name is in use", ->
+        process.env.CIRCLECI = "1"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "e2e-tests"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
     describe "create instance", ->
       routes = [
         {

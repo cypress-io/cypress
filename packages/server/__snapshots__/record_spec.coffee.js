@@ -1173,3 +1173,14 @@ https://on.cypress.io/incorrect-ci-build-id-usage
 
 
 `
+
+exports['e2e record api interaction errors create run 422 errors and exits when group name is in use 1'] = `
+You passed the --group flag, but this group name has already been used for this run.
+
+The --group flag you passed was: e2e-tests
+
+If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
+
+https://on.cypress.io/run-group-name-not-unique
+
+`
