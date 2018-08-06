@@ -143,6 +143,8 @@ https://on.cypress.io/indeterminate-ci-build-id
 exports['DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1'] = `
 You passed the --group flag, but this group name has already been used for this run.
 
+The existing run is: https://dashboard.cypress.io/runs/12345
+
 The --group flag you passed was: electron-smoke-tests
 
 If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
@@ -159,7 +161,7 @@ https://on.cypress.io/run-group-name-not-unique
 exports['DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1'] = `
 You passed the --parallel flag, but this machine is sending different parameters from the first machine that started this parallel run.
 
-The current run is: https://dashboard.cypress.io/runs/12345
+The existing run is: https://dashboard.cypress.io/runs/12345
 
 In order to run in parallel mode each machine must send the identical parameters such as:
 

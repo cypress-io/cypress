@@ -1043,6 +1043,9 @@ describe "lib/cypress", ->
       err.statusCode = 422
       err.error = {
         code: "RUN_GROUP_NAME_NOT_UNIQUE"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
       }
 
       api.createRun.rejects(err)

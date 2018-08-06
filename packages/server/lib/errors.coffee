@@ -119,7 +119,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       You passed the --parallel flag, but this machine is sending different parameters from the first machine that started this parallel run.
 
-      The current run is: #{arg1.runUrl}
+      The existing run is: #{arg1.runUrl}
 
       In order to run in parallel mode each machine must send the identical parameters such as:
 
@@ -140,6 +140,8 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE"
       """
       You passed the --group flag, but this group name has already been used for this run.
+
+      The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
         group: "--group",

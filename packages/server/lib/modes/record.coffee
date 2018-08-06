@@ -283,14 +283,20 @@ createRun = (options = {}) ->
       when 422
         { code, payload } = err.error
 
+        runUrl = _.get(payload, "runUrl")
+
         switch code
           when "RUN_GROUP_NAME_NOT_UNIQUE"
-            errors.throw("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE", { group, ciBuildId })
+            errors.throw("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
           when "PARALLEL_GROUP_PARAMS_MISMATCH"
             { browserName, browserVersion, osName, osVersion } = platform
 
             errors.throw("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH", {
-              runUrl: _.get(payload, "runUrl")
+              runUrl,
               parameters: {
                 osName,
                 osVersion,
