@@ -380,7 +380,11 @@ describe "e2e record", ->
 
         respond = ->
           resp = responses[mId].shift()
-          claimed.push(resp)
+
+          ## if theres a spec to claim
+          if resp.spec
+            claimed.push(resp)
+
           resp.claimedInstances = claimed.length
           resp.totalInstances = allSpecs.length
 
@@ -397,12 +401,11 @@ describe "e2e record", ->
         else
           respond()
           waitUntilSecondInstanceClaims?()
-
     }
 
     setup(routes)
 
-    it.skip "passes in parallel with group", ->
+    it "passes in parallel with group", ->
       Promise.all([
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
@@ -594,6 +597,9 @@ describe "e2e record", ->
         res: (req, res) -> res.status(422).json({
           code: "RUN_GROUP_NAME_NOT_UNIQUE"
           message: "Run group name cannot be used again without passing the parallel flag."
+          payload: {
+            runUrl: "https://dashboard.cypress.io/runs/12345"
+          }
         })
       }]
 

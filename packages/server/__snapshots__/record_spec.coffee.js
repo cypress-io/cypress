@@ -27,7 +27,6 @@ The error was:
 
 Error: Cannot find module '../it/does/not/exist' from '/foo/bar/.projects/e2e/cypress/integration'
 
-
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
 - A missing file or dependency
@@ -241,23 +240,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e record api interaction errors recordKey and projectId errors and exits 1'] = `
-
-We failed trying to authenticate this project: pid123
-
-Your Record Key is invalid: f858a...ee7e1
-
-It may have been recently revoked by you or another user.
-
-Please log into the Dashboard to see the updated token.
-
-https://on.cypress.io/dashboard/projects/pid123
-
-
-`
-
 exports['e2e record api interaction errors project 404 errors and exits 1'] = `
-
 We could not find a project with the ID: pid123
 
 This projectId came from your cypress.json file or an environment variable.
@@ -270,11 +253,9 @@ Alternatively, you can create a new project using the Desktop Application.
 
 https://on.cypress.io/dashboard
 
-
 `
 
 exports['e2e record api interaction errors create run 500 warns and does not create or update instances 1'] = `
-
 Warning: We encountered an error talking to our servers.
 
 This run will not be recorded.
@@ -582,25 +563,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 `
 
-exports['e2e record failing errors and exits without projectId 1'] = `
-
-You passed the --record flag but this project has not been setup to record.
-
-This project is missing the 'projectId' inside of 'cypress.json'.
-
-We cannot uniquely identify this project without this id.
-
-You need to setup this project to record. This will generate a unique 'projectId'.
-
-Alternatively if you omit the --record flag this project will run without recording.
-
-https://on.cypress.io/recording-project-runs
-
-
-`
-
 exports['e2e record recordKey errors and exits without recordKey 1'] = `
-
 You passed the --record flag but did not provide us your Record Key.
 
 You can pass us your Record Key like this:
@@ -611,11 +574,9 @@ You can also set the key as an environment variable with the name CYPRESS_RECORD
 
 https://on.cypress.io/how-do-i-record-runs
 
-
 `
 
 exports['e2e record projectId errors and exits without projectId 1'] = `
-
 You passed the --record flag but this project has not been setup to record.
 
 This project is missing the 'projectId' inside of 'cypress.json'.
@@ -628,11 +589,9 @@ Alternatively if you omit the --record flag this project will run without record
 
 https://on.cypress.io/recording-project-runs
 
-
 `
 
 exports['e2e record api interaction errors recordKey and projectId errors and exits on 401 1'] = `
-
 We failed trying to authenticate this project: pid123
 
 Your Record Key is invalid: f858a...ee7e1
@@ -642,7 +601,6 @@ It may have been recently revoked by you or another user.
 Please log into the Dashboard to see the updated token.
 
 https://on.cypress.io/dashboard/projects/pid123
-
 
 `
 
@@ -804,29 +762,24 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-
 Can't run because you've entered an invalid browser.
 
 Browser: 'browserDoesNotExist' was not found on your system.
 
 Available browsers found are: browser1, browser2, browser3
 
-
 `
 
 exports['e2e record misconfiguration errors and exits when no specs found 1'] = `
-
 Can't run because no spec files were found.
 
 We searched for any files matching this glob pattern:
 
 cypress/integration/notfound/**
 
-
 `
 
 exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `
-
 Warning: It looks like you are trying to record this run from a forked PR.
 
 The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
@@ -906,13 +859,15 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
+  │ Params:     Group: false, Parallel: true                                                       │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: record_pass_spec.coffee...                                                      (1 of 4)
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 4) 
+  Estimated: 1 second
 
 
   record pass
@@ -935,6 +890,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+  │ Estimated:    1 second                │
   │ Spec Ran:     record_pass_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -953,16 +909,16 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -
+    All specs passed!                           XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 
 `
@@ -978,13 +934,15 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
+  │ Params:     Group: false, Parallel: true                                                       │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: record_error_spec.coffee...                                                     (2 of 4)
+                                                                                                    
+  Running: record_error_spec.coffee...                                                     (2 of 4) 
+  Estimated: 1 second
 
 Oops...we found an error preparing this test file:
 
@@ -993,7 +951,6 @@ Oops...we found an error preparing this test file:
 The error was:
 
 Error: Cannot find module '../it/does/not/exist' from '/foo/bar/.projects/e2e/cypress/integration'
-
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -1013,6 +970,7 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                        │
   │ Video:        true                     │
   │ Duration:     X seconds                │
+  │ Estimated:    1 second                 │
   │ Spec Ran:     record_error_spec.coffee │
   └────────────────────────────────────────┘
 
@@ -1028,8 +986,9 @@ Fix the error in your code and re-run your tests.
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: record_fail_spec.coffee...                                                      (3 of 4)
+                                                                                                    
+  Running: record_fail_spec.coffee...                                                      (3 of 4) 
+  Estimated: 2 seconds
 
 
   record fails
@@ -1059,6 +1018,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+  │ Estimated:    2 seconds               │
   │ Spec Ran:     record_fail_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -1080,8 +1040,9 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Running: record_uncaught_spec.coffee...                                                  (5 of 4)
+                                                                                                    
+  Running: record_uncaught_spec.coffee...                                                  (4 of 4) 
+  Estimated: 3 seconds
 
 
   1) An uncaught error was detected outside of a test
@@ -1118,6 +1079,7 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                           │
   │ Video:        true                        │
   │ Duration:     X seconds                   │
+  │ Estimated:    3 seconds                   │
   │ Spec Ran:     record_uncaught_spec.coffee │
   └───────────────────────────────────────────┘
 
@@ -1143,7 +1105,7 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -1151,31 +1113,20 @@ We dynamically generated a new test to display this failure.
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    3 of 3 failed (100%)                        XX:XX        3        -        3        -        1
+    3 of 3 failed (100%)                        XX:XX        3        -        3        -        1  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12
-
-
-`
-
-exports['e2e record misconfiguration errors and exits when ciBuildId provided with no group or parallelization 1'] = `
-
-You passed the --ci-build-id flag but did not provide either --group or --parallel.
-
-The --ci-build-id you passed was: ciBuildId123
-
-The --ci-build-id flag is used to either group or parallelize multiple runs together.
-
-https://on.cypress.io/incorrect-ci-build-id-usage
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
 
 `
 
 exports['e2e record api interaction errors create run 422 errors and exits when group name is in use 1'] = `
 You passed the --group flag, but this group name has already been used for this run.
+
+The existing run is: https://dashboard.cypress.io/runs/12345
 
 The --group flag you passed was: e2e-tests
 
