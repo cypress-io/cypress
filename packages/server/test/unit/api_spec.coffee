@@ -9,6 +9,9 @@ api      = require("#{root}lib/api")
 browsers = require("#{root}lib/browsers")
 Promise  = require("bluebird")
 
+makeError = (details) ->
+  _.extend(new Error(details.message or "Some error"), details)
+
 describe "lib/api", ->
   beforeEach ->
     sinon.stub(os, "platform").returns("linux")
@@ -207,6 +210,9 @@ describe "lib/api", ->
   context ".createRun", ->
     beforeEach ->
       @buildProps = {
+        group: null
+        parallel: null
+        ciBuildId: null
         projectId:         "id-123"
         recordKey:         "token-123"
         ci: {
@@ -285,12 +291,12 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
-    it "sets timeout to 10 seconds", ->
+    it "sets timeout to 60 seconds", ->
       sinon.stub(rp, "post").resolves({runId: 'foo'})
 
       api.createRun({})
       .then ->
-        expect(rp.post).to.be.calledWithMatch({timeout: 10000})
+        expect(rp.post).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -384,14 +390,14 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
-    it "sets timeout to 10 seconds", ->
+    it "sets timeout to 60 seconds", ->
       sinon.stub(rp, "post").returns({
         promise: -> Promise.resolve({ instanceId: "instanceId123" })
       })
 
       api.createInstance({})
       .then ->
-        expect(rp.post).to.be.calledWithMatch({timeout: 10000})
+        expect(rp.post).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -477,12 +483,12 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
-    it "sets timeout to 10 seconds", ->
+    it "sets timeout to 60 seconds", ->
       sinon.stub(rp, "put").resolves()
 
       api.updateInstance({})
       .then ->
-        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
+        expect(rp.put).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -557,12 +563,12 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
-    it "sets timeout to 10 seconds", ->
+    it "sets timeout to 60 seconds", ->
       sinon.stub(rp, "put").resolves()
 
       api.updateInstanceStdout({})
       .then ->
-        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
+        expect(rp.put).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -982,3 +988,88 @@ describe "lib/api", ->
         throw new Error("should have thrown here")
       .catch (err) ->
         expect(err.isApiError).to.be.true
+
+  context ".retryWithBackoff", ->
+    beforeEach ->
+      sinon.stub(Promise, "delay").resolves()
+
+    it "attempts passed-in function", ->
+      fn = sinon.stub()
+      api.retryWithBackoff(fn).then =>
+        expect(fn).to.be.called
+
+    it "retries if function times out", ->
+      fn = sinon.stub().rejects(new Promise.TimeoutError())
+      fn.onCall(1).resolves()
+      api.retryWithBackoff(fn).then =>
+        expect(fn).to.be.calledTwice
+
+    it "retries on 5xx errors", ->
+      fn1 = sinon.stub().rejects(makeError({ statusCode: 500 }))
+      fn1.onCall(1).resolves()
+
+      fn2 = sinon.stub().rejects(makeError({ statusCode: 599 }))
+      fn2.onCall(1).resolves()
+
+      api.retryWithBackoff(fn1)
+      .then ->
+        expect(fn1).to.be.calledTwice
+        api.retryWithBackoff(fn2)
+      .then ->
+        expect(fn2).to.be.calledTwice
+
+    it "does not retry on non-5xx errors", ->
+      fn1 = sinon.stub().rejects(makeError({ message: "499 error", statusCode: 499 }))
+
+      fn2 = sinon.stub().rejects(makeError({ message: "600 error", statusCode: 600 }))
+
+      api.retryWithBackoff(fn1)
+      .then ->
+        throw new Error("Should not resolve 499 error")
+      .catch (err) ->
+        expect(err.message).to.equal("499 error")
+        api.retryWithBackoff(fn2)
+      .then ->
+        throw new Error("Should not resolve 600 error")
+      .catch (err) ->
+        expect(err.message).to.equal("600 error")
+
+    it "backs off with strategy: 30s, 2m, 5m", ->
+      fn = sinon.stub().rejects(new Promise.TimeoutError())
+      fn.onCall(3).resolves()
+      api.retryWithBackoff(fn).then =>
+        expect(Promise.delay).to.be.calledThrice
+        expect(Promise.delay.firstCall).to.be.calledWith(30 * 1000)
+        expect(Promise.delay.secondCall).to.be.calledWith(2 * 60 * 1000)
+        expect(Promise.delay.thirdCall).to.be.calledWith(5 * 60 * 1000)
+
+    it "fails after third retry fails", ->
+      fn = sinon.stub().rejects(makeError({ message: "500 error", statusCode: 500 }))
+      api.retryWithBackoff(fn)
+      .then ->
+        throw new Error("Should not resolve")
+      .catch (err) =>
+        expect(err.message).to.equal("500 error")
+
+    it "calls onBeforeRetry before each retry", ->
+      err = makeError({ message: "500 error", statusCode: 500 })
+      onBeforeRetry = sinon.stub()
+      fn = sinon.stub().rejects(err)
+      fn.onCall(3).resolves()
+      api.retryWithBackoff(fn, { onBeforeRetry }).then =>
+        expect(onBeforeRetry).to.be.calledThrice
+        expect(onBeforeRetry.firstCall.args[0]).to.eql({
+          retryIndex: 0
+          delay: 30 * 1000
+          err
+        })
+        expect(onBeforeRetry.secondCall.args[0]).to.eql({
+          retryIndex: 1
+          delay: 2 * 60 * 1000
+          err
+        })
+        expect(onBeforeRetry.thirdCall.args[0]).to.eql({
+          retryIndex: 2
+          delay: 5 * 60 * 1000
+          err
+        })

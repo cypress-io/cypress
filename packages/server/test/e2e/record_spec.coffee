@@ -5,7 +5,7 @@ jsonSchemas = require("@cypress/json-schemas").api
 e2e = require("../support/helpers/e2e")
 
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
-postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.0.0")
+postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
 
 { runId, groupId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
@@ -108,12 +108,12 @@ defaultRoutes = [
   {
     method: "post"
     url: "/runs"
-    req: "postRunRequest@2.0.0",
+    req: "postRunRequest@2.1.0",
     res: postRunResponse
   }, {
     method: "post"
     url: "/runs/:id/instances"
-    req: "postRunInstanceRequest@2.0.0",
+    req: "postRunInstanceRequest@2.1.0",
     res: postRunInstanceResponse
   }, {
     method: "put"
@@ -386,7 +386,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: (req, res) -> res.sendStatus(401)
         }
       ]
@@ -407,7 +407,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: (req, res) -> res.sendStatus(404)
         }
       ]
@@ -427,13 +427,15 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.0.0",
+        req: "postRunRequest@2.1.0",
         res: (req, res) -> res.sendStatus(500)
       }]
 
       setup(routes)
 
       it "warns and does not create or update instances", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -453,12 +455,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: (req, res) -> res.sendStatus(500)
         }
       ]
@@ -466,6 +468,8 @@ describe "e2e record", ->
       setup(routes)
 
       it "does not update instance", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -486,12 +490,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: postRunInstanceResponse
         }, {
           method: "put"
@@ -504,6 +508,8 @@ describe "e2e record", ->
       setup(routes)
 
       it "does not update instance stdout", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -525,12 +531,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: postRunInstanceResponse
         }, {
           method: "put"
@@ -559,6 +565,8 @@ describe "e2e record", ->
       setup(routes)
 
       it "warns but proceeds", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -582,12 +590,12 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.0.0",
+          req: "postRunRequest@2.1.0",
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
-          req: "postRunInstanceRequest@2.0.0",
+          req: "postRunInstanceRequest@2.1.0",
           res: postRunInstanceResponse
         }, {
           method: "put"
