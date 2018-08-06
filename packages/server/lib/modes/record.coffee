@@ -312,8 +312,13 @@ createRun = (options = {}) ->
             })
           when "PARALLEL_REQUIRED"
             errors.throw("DASHBOARD_PARALLEL_REQUIRED", {
+          when "ALREADY_COMPLETE"
+            errors.throw("DASHBOARD_ALREADY_COMPLETE", {
               runUrl,
               group,
+              parallel,
+              ciBuildId,
+            })
             })
           else
             errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", err.error)

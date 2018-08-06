@@ -1143,6 +1143,28 @@ describe "lib/cypress", ->
         @expectExitWithErr("DASHBOARD_PARALLEL_REQUIRED")
         snapshotConsoleLogs("DASHBOARD_PARALLEL_REQUIRED")
 
+    it "errors and exits when run is already complete", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "ALREADY_COMPLETE"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_ALREADY_COMPLETE")
+        snapshotConsoleLogs("DASHBOARD_ALREADY_COMPLETE")
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()

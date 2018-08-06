@@ -115,6 +115,22 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       "Timed out waiting for the browser to connect. #{arg1}"
     when "TESTS_DID_NOT_START_FAILED"
       "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+    when "DASHBOARD_ALREADY_COMPLETE"
+      """
+      The run you are attempting access is already complete and will not accept new groups.
+
+      The existing run is: #{arg1.runUrl}
+
+      When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
+
+      #{displayFlags(arg1, {
+        group: "--group",
+        parallel: "--parallel",
+        ciBuildId: "--ciBuildId",
+      })}
+
+      https://on.cypress.io/already-complete
+      """
     when "DASHBOARD_PARALLEL_REQUIRED"
       """
       You dot not pass the --parallel flag, but this run group was originally created with the --parallel flag.

@@ -209,3 +209,16 @@ You must use the --parallel flag with this group.
 
 https://on.cypress.io/parallel-required
 `
+
+exports['DASHBOARD_ALREADY_COMPLETE 1'] = `
+The run you are attempting access is already complete and will not accept new groups.
+
+The existing run is: https://dashboard.cypress.io/runs/12345
+
+When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
+
+The --group flag you passed was: electron-smoke-tests
+The --ciBuildId flag you passed was: ciBuildId123
+
+https://on.cypress.io/already-complete
+`
