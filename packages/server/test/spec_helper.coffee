@@ -37,7 +37,7 @@ hasOnly = false
   global[prop].only = ->
     hasOnly = true
 
-    backup.apply(this, arguments)
+    backup.apply(@, arguments)
 
 env = _.clone(process.env)
 
