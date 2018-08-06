@@ -155,6 +155,8 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{displayFlags(arg1, {
         group: "--group",
+        parallel: "--parallel",
+        ciBuildId: "--ciBuildId",
       })}
 
       You must use the --parallel flag with this group.
@@ -169,6 +171,8 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{displayFlags(arg1, {
         group: "--group",
+        parallel: "--parallel",
+        ciBuildId: "--ciBuildId",
       })}
 
       You can not use the --parallel flag with this group.
@@ -205,6 +209,8 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{displayFlags(arg1, {
         group: "--group",
+        parallel: "--parallel",
+        ciBuildId: "--ciBuildId",
       })}
 
       If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.

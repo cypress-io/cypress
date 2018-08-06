@@ -146,6 +146,7 @@ You passed the --group flag, but this group name has already been used for this 
 The existing run is: https://dashboard.cypress.io/runs/12345
 
 The --group flag you passed was: electron-smoke-tests
+The --ciBuildId flag you passed was: ciBuildId123
 
 If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
 
@@ -192,6 +193,7 @@ You passed the --parallel flag, but this run group was originally created withou
 The existing run is: https://dashboard.cypress.io/runs/12345
 
 The --group flag you passed was: electron-smoke-tests
+The --ciBuildId flag you passed was: ciBuildId123
 
 You can not use the --parallel flag with this group.
 
@@ -204,6 +206,7 @@ You dot not pass the --parallel flag, but this run group was originally created 
 The existing run is: https://dashboard.cypress.io/runs/12345
 
 The --group flag you passed was: electron-smoke-tests
+The --ciBuildId flag you passed was: ciBuildId123
 
 You must use the --parallel flag with this group.
 

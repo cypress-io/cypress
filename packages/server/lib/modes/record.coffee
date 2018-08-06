@@ -296,7 +296,9 @@ createRun = (options = {}) ->
             { browserName, browserVersion, osName, osVersion } = platform
 
             errors.throw("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH", {
+              group,
               runUrl,
+              ciBuildId,
               parameters: {
                 osName,
                 osVersion,
@@ -307,11 +309,16 @@ createRun = (options = {}) ->
             })
           when "PARALLEL_DISALLOWED"
             errors.throw("DASHBOARD_PARALLEL_DISALLOWED", {
-              runUrl,
               group,
+              runUrl,
+              ciBuildId,
             })
           when "PARALLEL_REQUIRED"
             errors.throw("DASHBOARD_PARALLEL_REQUIRED", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
           when "ALREADY_COMPLETE"
             errors.throw("DASHBOARD_ALREADY_COMPLETE", {
               runUrl,
