@@ -859,7 +859,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
-  │ Params:     Group: false, Parallel: true                                                       │
+  │ Params:     Group: prod-e2e, Parallel: true                                                    │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -934,7 +934,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
-  │ Params:     Group: false, Parallel: true                                                       │
+  │ Params:     Group: prod-e2e, Parallel: true                                                    │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 

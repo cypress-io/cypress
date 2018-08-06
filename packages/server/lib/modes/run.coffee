@@ -738,7 +738,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
 
     isHeadless = browser.name is "electron" and not headed
 
@@ -767,6 +767,7 @@ module.exports = {
 
     displayRunStarting({
       specs
+      group
       runUrl
       browser
       parallel
@@ -955,6 +956,7 @@ module.exports = {
             browser
             project
             runUrl
+            group
             config
             specs
             sys
