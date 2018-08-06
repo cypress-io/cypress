@@ -15,6 +15,8 @@ debug      = require("debug")("cypress:server:api")
 # if debug.enabled
 #   request.debug = true
 
+MUTATING_TIMEOUT = 60000
+
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
     gzip: true
@@ -49,6 +51,10 @@ machineId = ->
   nmi.machineId()
   .catch ->
     return null
+
+## retry on timeouts or 5xx errors
+isRetriableError = (err) ->
+  (err instanceof Promise.TimeoutError) or (500 <= err.statusCode < 600)
 
 module.exports = {
   ping: ->
@@ -116,11 +122,17 @@ module.exports = {
       "specPattern"
     ])
 
+    ## temporary hack to get around
+    ## the latest schema requirements
+    body.group = null
+    body.parallel = null
+    body.ciBuildId = null
+
     rp.post({
       body
       url: routes.runs()
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? MUTATING_TIMEOUT
       headers: {
         "x-route-version": "3"
       }
@@ -142,7 +154,7 @@ module.exports = {
       body
       url: routes.instances(runId)
       json: true
-      timeout: timeout ? 10000
+      timeout: timeout ? MUTATING_TIMEOUT
       headers: {
         "x-route-version": "4"
       }
@@ -156,7 +168,7 @@ module.exports = {
     rp.put({
       url: routes.instanceStdout(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? MUTATING_TIMEOUT
       body: {
         stdout: options.stdout
       }
@@ -168,7 +180,7 @@ module.exports = {
     rp.put({
       url: routes.instance(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? MUTATING_TIMEOUT
       headers: {
         "x-route-version": "2"
       }
@@ -307,5 +319,44 @@ module.exports = {
 
   updateProjectToken: (projectId, authToken) ->
     @_projectToken("put", projectId, authToken)
+
+  retryWithBackoff: (fn, options = {}) ->
+    ## for e2e testing purposes
+    if process.env.DISABLE_API_RETRIES
+      debug("api retries disabled")
+      return Promise.try(fn)
+
+    maxRetries = 3
+    retryIndex = 0
+
+    delays = [
+      30 * 1000     ## 30 seconds
+      2 * 60 * 1000 ##  2 minutes
+      5 * 60 * 1000 ##  5 minutes
+    ]
+
+    do attempt = ->
+      Promise
+      .try(fn)
+      .catch isRetriableError, (err) ->
+        if retryIndex > maxRetries
+          throw err
+
+        delay = delays[retryIndex]
+
+        if options.onBeforeRetry
+          options.onBeforeRetry({
+            retryIndex
+            delay
+            err
+          })
+
+        retryIndex++
+
+        Promise
+        .delay(delay)
+        .then ->
+          debug("retry ##{retryIndex} after #{delay}ms")
+          attempt()
 
 }
