@@ -18,6 +18,15 @@ require("chai")
 .use(require("@cypress/sinon-chai"))
 .use(require("chai-uuid"))
 
+if process.env.UPDATE
+  throw new Error("You're using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
+
+if process.env.UPDATE_SNAPSHOT
+  throw new Error("You're using UPDATE_SNAPSHOT=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
+
+if process.env.UPDATE_SNAPSHOTS
+  throw new Error("You're using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
+
 env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
