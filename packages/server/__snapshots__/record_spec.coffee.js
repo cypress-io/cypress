@@ -1238,3 +1238,31 @@ The server's response was:
 StatusCodeError: 500 - "Internal Server Error"
 
 `
+
+exports['e2e record api interaction errors create instance 500 does not proceed and exits with error when parallelizing and creating instance 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: foo, Parallel: true                                                         │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+We encountered an unexpected error talking to our servers.
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+The server's response was:
+
+StatusCodeError: 500 - "Internal Server Error"
+
+`

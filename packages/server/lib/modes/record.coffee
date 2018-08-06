@@ -361,7 +361,7 @@ createRun = (options = {}) ->
         .return(null)
 
 createInstance = (options = {}) ->
-  { runId, groupId, machineId, platform, spec } = options
+  { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options
 
   spec = getSpecRelativePath(spec)
 
@@ -382,6 +382,15 @@ createInstance = (options = {}) ->
     debug("failed creating instance %o", {
       stack: err.stack
     })
+
+    if parallel
+      return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
+        error: err,
+        flags: {
+          group,
+          ciBuildId,
+        },
+      })
 
     errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
@@ -438,8 +447,11 @@ createRunAndRecordSpecs = (options = {}) ->
           createInstance({
             spec
             runId
+            group
             groupId
             platform
+            parallel
+            ciBuildId
             machineId
           })
           .then (resp = {}) ->

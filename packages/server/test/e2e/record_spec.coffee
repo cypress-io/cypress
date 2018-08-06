@@ -628,6 +628,39 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
+    describe "create instance 500", ->
+      routes = defaultRoutes.slice(0)
+
+      routes[1] = {
+        method: "post"
+        url: "/runs/:id/instances"
+        req: "postRunInstanceRequest@2.1.0",
+        res: (req, res) -> res.sendStatus(500)
+      }
+
+      setup(routes)
+
+      it.only "does not proceed and exits with error when parallelizing and creating instance", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "foo"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 1
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs",
+            "POST /runs/#{runId}/instances"
+          ])
+
     describe "create run 422", ->
       routes = [{
         method: "post"
