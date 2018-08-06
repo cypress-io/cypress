@@ -85,9 +85,11 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token, expected { (1:7)
-> 1 | export defalt "foo"
-    |        ^
+SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
+
+  1 | export default {
+> 2 | 
+    | ^ while parsing file: /foo/bar/.projects/e2e/lib/fail.js
 
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
