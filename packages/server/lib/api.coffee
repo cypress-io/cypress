@@ -1,21 +1,37 @@
 _          = require("lodash")
 os         = require("os")
 nmi        = require("node-machine-id")
+debug      = require("debug")("cypress:server:api")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
+humanInterval = require("human-interval")
 pkg        = require("@packages/root")
-browsers   = require('./browsers')
+browsers   = require("./browsers")
 routes     = require("./util/routes")
 system     = require("./util/system")
-debug      = require("debug")("cypress:server:api")
 
 ## TODO: improve this, dont just use
 ## requests because its way too verbose
 # if debug.enabled
 #   request.debug = true
 
-MUTATING_TIMEOUT = 60000
+THIRTY_SECONDS = humanInterval("30 seconds")
+SIXTY_SECONDS = humanInterval("60 seconds")
+TWO_MINUTES = humanInterval("2 minutes")
+
+DELAYS = [
+  THIRTY_SECONDS
+  SIXTY_SECONDS
+  TWO_MINUTES
+]
+
+if intervals = process.env.API_RETRY_INTERVALS
+  DELAYS = _
+  .chain(intervals)
+  .split(",")
+  .map(_.toNumber)
+  .value()
 
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
@@ -31,7 +47,16 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  debug(
+    "request to url: %s with params: %o",
+    "#{params.method} #{params.url}",
+    _.pick(params, "body", "headers")
+  )
+
   request[method](params, callback)
+  .promise()
+  .tap (resp) ->
+    debug("response %o", resp)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -57,6 +82,8 @@ isRetriableError = (err) ->
   (err instanceof Promise.TimeoutError) or (500 <= err.statusCode < 600)
 
 module.exports = {
+  rp
+
   ping: ->
     rp.get(routes.ping())
     .catch(tagError)
@@ -113,28 +140,25 @@ module.exports = {
 
   createRun: (options = {}) ->
     body = _.pick(options, [
-      "projectId"
-      "recordKey"
       "ci"
       "specs",
       "commit"
-      "platform"
-      "specPattern"
+      "group",
+      "platform",
+      "parallel",
+      "ciBuildId",
+      "projectId",
+      "recordKey",
+      "specPattern",
     ])
-
-    ## temporary hack to get around
-    ## the latest schema requirements
-    body.group = null
-    body.parallel = null
-    body.ciBuildId = null
 
     rp.post({
       body
       url: routes.runs()
       json: true
-      timeout: options.timeout ? MUTATING_TIMEOUT
+      timeout: options.timeout ? SIXTY_SECONDS
       headers: {
-        "x-route-version": "3"
+        "x-route-version": "4"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -154,13 +178,11 @@ module.exports = {
       body
       url: routes.instances(runId)
       json: true
-      timeout: timeout ? MUTATING_TIMEOUT
+      timeout: timeout ? SIXTY_SECONDS
       headers: {
-        "x-route-version": "4"
+        "x-route-version": "5"
       }
     })
-    .promise()
-    .get("instanceId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
@@ -168,7 +190,7 @@ module.exports = {
     rp.put({
       url: routes.instanceStdout(options.instanceId)
       json: true
-      timeout: options.timeout ? MUTATING_TIMEOUT
+      timeout: options.timeout ? SIXTY_SECONDS
       body: {
         stdout: options.stdout
       }
@@ -180,7 +202,7 @@ module.exports = {
     rp.put({
       url: routes.instance(options.instanceId)
       json: true
-      timeout: options.timeout ? MUTATING_TIMEOUT
+      timeout: options.timeout ? SIXTY_SECONDS
       headers: {
         "x-route-version": "2"
       }
@@ -208,7 +230,6 @@ module.exports = {
         bearer: authToken
       }
     })
-    .promise()
     .timeout(timeout)
     .catch(tagError)
 
@@ -294,7 +315,6 @@ module.exports = {
       url: routes.auth(),
       json: true
     })
-    .promise()
     .get("url")
     .catch(tagError)
 
@@ -310,7 +330,6 @@ module.exports = {
         "x-route-version": "2"
       }
     })
-    .promise()
     .get("apiToken")
     .catch(tagError)
 
@@ -326,29 +345,21 @@ module.exports = {
       debug("api retries disabled")
       return Promise.try(fn)
 
-    maxRetries = 3
-    retryIndex = 0
-
-    delays = [
-      30 * 1000     ## 30 seconds
-      2 * 60 * 1000 ##  2 minutes
-      5 * 60 * 1000 ##  5 minutes
-    ]
-
-    do attempt = ->
+    do attempt = (retryIndex = 0) ->
       Promise
       .try(fn)
       .catch isRetriableError, (err) ->
-        if retryIndex > maxRetries
+        if retryIndex > DELAYS.length
           throw err
 
-        delay = delays[retryIndex]
+        delay = DELAYS[retryIndex]
 
         if options.onBeforeRetry
           options.onBeforeRetry({
-            retryIndex
-            delay
             err
+            delay
+            retryIndex
+            total: DELAYS.length
           })
 
         retryIndex++
@@ -357,6 +368,6 @@ module.exports = {
         .delay(delay)
         .then ->
           debug("retry ##{retryIndex} after #{delay}ms")
-          attempt()
+          attempt(retryIndex)
 
 }

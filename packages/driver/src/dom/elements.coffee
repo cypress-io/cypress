@@ -27,6 +27,8 @@ _getValue = ->
       descriptor("HTMLTextAreaElement", "value").get
     when isSelect(this)
       descriptor("HTMLSelectElement", "value").get
+    when isButton(this)
+      descriptor("HTMLButtonElement", "value").get
     else
       ## is an option element
       descriptor("HTMLOptionElement", "value").get
@@ -39,6 +41,8 @@ _setValue = ->
       descriptor("HTMLTextAreaElement", "value").set
     when isSelect(this)
       descriptor("HTMLSelectElement", "value").set
+    when isButton(this)
+      descriptor("HTMLButtonElement", "value").set
     else
       ## is an options element
       descriptor("HTMLOptionElement", "value").set
@@ -98,6 +102,21 @@ _isContentEditable = ->
     else
       descriptor("HTMLElement", "isContentEditable").get
 
+_setType = ->
+  switch
+    when isInput(this)
+      descriptor("HTMLInputElement", "type").set
+    when isButton(this)
+      descriptor("HTMLButtonElement", "type").set
+
+
+_getType = ->
+  switch
+    when isInput(this)
+      descriptor("HTMLInputElement", "type").get
+    when isButton(this)
+      descriptor("HTMLButtonElement", "type").get
+
 nativeGetters = {
   value: _getValue
   selectionStart: descriptor("HTMLInputElement", "selectionStart").get
@@ -105,12 +124,12 @@ nativeGetters = {
   isCollapsed: descriptor("Selection", 'isCollapsed').get
   selectionStart: _getSelectionStart
   selectionEnd: _getSelectionEnd
-  type: descriptor("HTMLInputElement", "type").get
+  type: _getType
 }
 
 nativeSetters = {
   value: _setValue
-  type: descriptor("HTMLInputElement", "type").set
+  type: _setType
 }
 
 nativeMethods = {
@@ -199,6 +218,9 @@ isTextarea = (el) ->
 isInput = (el) ->
   getTagName(el) is 'input'
 
+isButton = (el) ->
+  getTagName(el) is 'button'
+
 isSelect = (el) ->
   getTagName(el) is 'select'
 
@@ -223,11 +245,11 @@ isElement = (obj) ->
 isFocusable = ($el) ->
   $el.is(focusable)
 
-isInputType = ($el, type) ->
+isType = ($el, type) ->
   el = [].concat($jquery.unwrap($el))[0]
   ## NOTE: use DOMElement.type instead of getAttribute('type') since
   ##       <input type="asdf"> will have type="text", and behaves like text type
-  isInput(el) && (getNativeProp(el, 'type') or "").toLowerCase() is type
+  (getNativeProp(el, 'type') or "").toLowerCase() is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
@@ -287,7 +309,7 @@ isSame = ($el1, $el2) ->
 
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
-  type = (type) -> isInputType($el, type)
+  type = (type) -> isType($el, type)
 
   isContentEditableElement = isContentEditable($el.get(0))
 
@@ -544,7 +566,7 @@ module.exports = {
 
   isTextarea
 
-  isInputType
+  isType
 
   isNeedSingleValueChangeInputElement
 

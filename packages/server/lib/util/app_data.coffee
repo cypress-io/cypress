@@ -6,13 +6,15 @@ la      = require("lazy-ass")
 check   = require("check-more-types")
 log     = require("debug")("cypress:server:appdata")
 pkg     = require("@packages/root")
-cwd     = require("../cwd")
 fs      = require("../util/fs")
+cwd     = require("../cwd")
 
-name = pkg.productName or pkg.name
-data = ospath.data()
+PRODUCT_NAME = pkg.productName or pkg.name
+OS_DATA_PATH = ospath.data()
 
-if not name
+ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+if not PRODUCT_NAME
   throw new Error("Root package is missing name")
 
 getSymlinkType = ->
@@ -52,9 +54,13 @@ module.exports = {
   path: (paths...) ->
     la(check.unemptyString(process.env.CYPRESS_ENV),
       "expected CYPRESS_ENV, found", process.env.CYPRESS_ENV)
-    p = path.join(data, name, "cy", process.env.CYPRESS_ENV, paths...)
+
+    p = path.join(ELECTRON_APP_DATA_PATH, "cy", process.env.CYPRESS_ENV, paths...)
     log("path: %s", p)
     p
+
+  electronPartitionsPath: ->
+    path.join(ELECTRON_APP_DATA_PATH, "Partitions")
 
   projectsPath: (paths...) ->
     @path("projects", paths...)

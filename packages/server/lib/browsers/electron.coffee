@@ -2,10 +2,12 @@ _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers:electron")
-plugins       = require("../plugins")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
+appData       = require("../util/app_data")
+plugins       = require("../plugins")
 savedState    = require("../saved_state")
+profileCleaner = require("../util/profile_cleaner")
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
@@ -20,6 +22,7 @@ module.exports = {
       minWidth: 100
       minHeight: 100
       contextMenu: true
+      partition: @_getPartition(options)
       trackState: {
         width: "browserWidth"
         height: "browserHeight"
@@ -89,6 +92,16 @@ module.exports = {
       win.loadURL(url)
     .return(win)
 
+  _getPartition: (options) ->
+    if options.isTextTerminal
+      ## create dynamic persisted run
+      ## to enable parallelization
+      return "persist:run-#{process.pid}"
+
+    ## we're in interactive mode and always
+    ## use the same session
+    return "persist:interactive"
+
   _clearCache: (webContents) ->
     new Promise (resolve) ->
       webContents.session.clearCache(resolve)
@@ -108,6 +121,7 @@ module.exports = {
     { projectRoot, isTextTerminal } = options
 
     debug("open %o", { browserName, url })
+
     savedState(projectRoot, isTextTerminal)
     .then (state) ->
       debug("got saved state")

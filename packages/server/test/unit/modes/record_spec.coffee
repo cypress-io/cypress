@@ -95,6 +95,9 @@ describe "lib/modes/record", ->
       projectId = "pId123"
       specPattern = ["spec/pattern1", "spec/pattern2"]
       projectRoot = "project/root"
+      ciBuildId = "ciId123"
+      parallel = null
+      group = null
       runAllSpecs = sinon.stub()
       sys = {
         osCpus: 1
@@ -111,7 +114,10 @@ describe "lib/modes/record", ->
         key
         sys
         specs
+        group
         browser
+        parallel
+        ciBuildId
         projectId
         projectRoot
         specPattern
@@ -120,6 +126,21 @@ describe "lib/modes/record", ->
       .then ->
         expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
         expect(api.createRun).to.be.calledWith({
+          group
+          parallel
+          projectId
+          ciBuildId
+          recordKey: key
+          specPattern: "spec/pattern1,spec/pattern2"
+          specs: ["path/to/spec/a", "path/to/spec/b"]
+          platform: {
+            osCpus: 1
+            osName: 2
+            osMemory: 3
+            osVersion: 4
+            browserName: "chrome"
+            browserVersion: "59"
+          }
           ci: {
             params: {
               foo: "bar"
@@ -175,12 +196,10 @@ describe "lib/modes/record", ->
 
     it "logs on retry", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()
-      sinon.spy(console, "log")
 
       recordMode.updateInstanceStdout(@options)
-      details = {}
-      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
-      expect(console.log).to.be.calledWith("...")
+      .then ->
+        expect(api.retryWithBackoff).to.be.calledOnce
 
     it "does not createException when statusCode is 503", ->
       err = new Error("foo")
@@ -232,12 +251,10 @@ describe "lib/modes/record", ->
 
     it "logs on retry", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()
-      sinon.spy(console, "log")
 
       recordMode.createInstance(@options)
-      details = {}
-      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
-      expect(console.log).to.be.calledWith("...")
+      .then ->
+        expect(api.retryWithBackoff).to.be.calledOnce
 
     it "does not createException when statusCode is 503", ->
       err = new Error("foo")
@@ -278,12 +295,10 @@ describe "lib/modes/record", ->
 
     it "logs on retry", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()
-      sinon.spy(console, "log")
 
       recordMode.createRun(@options)
-      details = {}
-      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
-      expect(console.log).to.be.calledWith("...")
+      .then ->
+        expect(api.retryWithBackoff).to.be.calledOnce
 
   context ".updateInstance", ->
     beforeEach ->
@@ -305,9 +320,7 @@ describe "lib/modes/record", ->
 
     it "logs on retry", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()
-      sinon.spy(console, "log")
 
       recordMode.updateInstance(@options)
-      details = {}
-      api.retryWithBackoff.lastCall.args[1].onBeforeRetry({})
-      expect(console.log).to.be.calledWith("...")
+      .then ->
+        expect(api.retryWithBackoff).to.be.calledOnce

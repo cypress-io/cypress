@@ -311,7 +311,12 @@ commitDefaults = (existingInfo) ->
   _.transform existingInfo, (memo, value, key) ->
     memo[key] = _.defaultTo(value ? commitParamsObj[key], null)
 
+list = ->
+  _.keys(CI_PROVIDERS)
+
 module.exports = {
+  list
+
   provider
 
   ciParams

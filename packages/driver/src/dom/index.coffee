@@ -1,4 +1,3 @@
-$utils = require("../cypress/utils")
 $jquery = require("./jquery")
 $window = require("./window")
 $document = require("./document")
@@ -10,7 +9,7 @@ $coordinates = require("./coordinates")
 { isDocument } = $document
 { wrap, unwrap, isJquery } = $jquery
 { isVisible, isHidden, getReasonIsHidden } = $visibility
-{ isInputType, isFocusable, isElement, isScrollable, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent,  getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent,  getFirstScrollableParent } = $elements
+{ isType, isFocusable, isElement, isScrollable, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent,  getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent,  getFirstScrollableParent } = $elements
 { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
 
 isDom = (obj) ->
@@ -28,11 +27,7 @@ module.exports = {
 
   isDom
 
-  isInputType
-
-  isType: (args...) ->
-    $utils.warning('Cypress.dom.isType is deprecated. Use Cypress.dom.isInputType instead.')
-    isInputType(args...)
+  isType
 
   isVisible
 

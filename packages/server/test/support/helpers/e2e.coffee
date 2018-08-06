@@ -246,6 +246,15 @@ module.exports = {
     if options.record
       args.push("--record")
 
+    if options.parallel
+      args.push("--parallel")
+
+    if options.group
+      args.push("--group=#{options.group}")
+
+    if options.ciBuildId
+      args.push("--ci-build-id=#{options.ciBuildId}")
+
     if options.key
       args.push("--key=#{options.key}")
 

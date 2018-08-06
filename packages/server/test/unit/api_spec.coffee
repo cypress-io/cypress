@@ -1,7 +1,6 @@
 require("../spec_helper")
 
 _        = require("lodash")
-rp       = require("request-promise")
 os       = require("os")
 nmi      = require("node-machine-id")
 pkg      = require("@packages/root")
@@ -128,7 +127,7 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      sinon.stub(rp, "get").returns({
+      sinon.stub(api.rp, "get").returns({
         catch: -> {
           catch: -> {
             then: (fn) -> fn()
@@ -140,7 +139,7 @@ describe "lib/api", ->
 
       api.getProjectRuns("id-123", "auth-token-123")
       .then (ret) ->
-        expect(rp.get).to.be.calledWithMatch({timeout: 10000})
+        expect(api.rp.get).to.be.calledWithMatch({timeout: 10000})
 
     it "GET /projects/:id/runs failure formatting", ->
       nock("http://localhost:1234")
@@ -234,7 +233,7 @@ describe "lib/api", ->
 
     it "POST /runs + returns runId", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", @buildProps)
@@ -248,7 +247,7 @@ describe "lib/api", ->
 
     it "POST /runs failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs", @buildProps)
@@ -276,7 +275,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs")
@@ -291,16 +290,16 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
-    it "sets timeout to 60 seconds", ->
-      sinon.stub(rp, "post").resolves({runId: 'foo'})
+    it "sets timeout to 10 seconds", ->
+      sinon.stub(api.rp, "post").resolves({runId: 'foo'})
 
       api.createRun({})
       .then ->
-        expect(rp.post).to.be.calledWithMatch({timeout: 60000})
+        expect(api.rp.post).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "3")
+      .matchHeader("x-route-version", "4")
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
       .post("/runs", @buildProps)
@@ -332,7 +331,7 @@ describe "lib/api", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "4")
+      .matchHeader("x-route-version", "5")
       .matchHeader("x-os-name", "darwin")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances", @postProps)
@@ -341,12 +340,13 @@ describe "lib/api", ->
       })
 
       api.createInstance(@createProps)
+      .get("instanceId")
       .then (instanceId) ->
         expect(instanceId).to.eq("instance-id-123")
 
     it "POST /runs/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "4")
+      .matchHeader("x-route-version", "5")
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances")
@@ -374,7 +374,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "4")
+      .matchHeader("x-route-version", "5")
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .post("/runs/run-id-123/instances")
@@ -391,13 +391,13 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 60 seconds", ->
-      sinon.stub(rp, "post").returns({
-        promise: -> Promise.resolve({ instanceId: "instanceId123" })
+      sinon.stub(api.rp, "post").resolves({
+        instanceId: "instanceId123"
       })
 
       api.createInstance({})
       .then ->
-        expect(rp.post).to.be.calledWithMatch({timeout: 60000})
+        expect(api.rp.post).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -484,11 +484,11 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 60 seconds", ->
-      sinon.stub(rp, "put").resolves()
+      sinon.stub(api.rp, "put").resolves()
 
       api.updateInstance({})
       .then ->
-        expect(rp.put).to.be.calledWithMatch({timeout: 60000})
+        expect(api.rp.put).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -564,11 +564,11 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 60 seconds", ->
-      sinon.stub(rp, "put").resolves()
+      sinon.stub(api.rp, "put").resolves()
 
       api.updateInstanceStdout({})
       .then ->
-        expect(rp.put).to.be.calledWithMatch({timeout: 60000})
+        expect(api.rp.put).to.be.calledWithMatch({timeout: 60000})
 
     it "tags errors", ->
       nock("http://localhost:1234")
@@ -956,9 +956,9 @@ describe "lib/api", ->
     it "by default times outs after 3 seconds", ->
       ## return our own specific promise
       ## so we can spy on the timeout function
-      p = Promise.resolve()
+      p = Promise.resolve({})
       sinon.spy(p, "timeout")
-      sinon.stub(rp.Request.prototype, "promise").returns(p)
+      sinon.stub(api.rp, "post").returns(p)
 
       @setup({foo: "bar"}, "auth-token-123")
       api.createRaygunException({foo: "bar"}, "auth-token-123").then ->
@@ -1034,14 +1034,14 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.message).to.equal("600 error")
 
-    it "backs off with strategy: 30s, 2m, 5m", ->
+    it "backs off with strategy: 30s, 60s, 2m", ->
       fn = sinon.stub().rejects(new Promise.TimeoutError())
       fn.onCall(3).resolves()
       api.retryWithBackoff(fn).then =>
         expect(Promise.delay).to.be.calledThrice
         expect(Promise.delay.firstCall).to.be.calledWith(30 * 1000)
-        expect(Promise.delay.secondCall).to.be.calledWith(2 * 60 * 1000)
-        expect(Promise.delay.thirdCall).to.be.calledWith(5 * 60 * 1000)
+        expect(Promise.delay.secondCall).to.be.calledWith(60 * 1000)
+        expect(Promise.delay.thirdCall).to.be.calledWith(2 * 60 * 1000)
 
     it "fails after third retry fails", ->
       fn = sinon.stub().rejects(makeError({ message: "500 error", statusCode: 500 }))
@@ -1061,15 +1061,18 @@ describe "lib/api", ->
         expect(onBeforeRetry.firstCall.args[0]).to.eql({
           retryIndex: 0
           delay: 30 * 1000
+          total: 3
           err
         })
         expect(onBeforeRetry.secondCall.args[0]).to.eql({
           retryIndex: 1
-          delay: 2 * 60 * 1000
+          delay: 60 * 1000
+          total: 3
           err
         })
         expect(onBeforeRetry.thirdCall.args[0]).to.eql({
           retryIndex: 2
-          delay: 5 * 60 * 1000
+          delay: 2 * 60 * 1000
+          total: 3
           err
         })
