@@ -222,3 +222,17 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 https://on.cypress.io/already-complete
 `
+
+exports['DASHBOARD_STALE_RUN 1'] = `
+You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
+
+The existing run is: https://dashboard.cypress.io/runs/12345
+
+You cannot parallelize a run that has been complete for that long.
+
+The --group flag you passed was: electron-smoke-tests
+The --parallel flag you passed was: true
+The --ciBuildId flag you passed was: ciBuildId123
+
+https://on.cypress.io/stale-run
+`

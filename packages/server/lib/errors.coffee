@@ -115,6 +115,22 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       "Timed out waiting for the browser to connect. #{arg1}"
     when "TESTS_DID_NOT_START_FAILED"
       "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+    when "DASHBOARD_STALE_RUN"
+      """
+      You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
+
+      The existing run is: #{arg1.runUrl}
+
+      You cannot parallelize a run that has been complete for that long.
+
+      #{displayFlags(arg1, {
+        group: "--group",
+        parallel: "--parallel",
+        ciBuildId: "--ciBuildId",
+      })}
+
+      https://on.cypress.io/stale-run
+      """
     when "DASHBOARD_ALREADY_COMPLETE"
       """
       The run you are attempting access is already complete and will not accept new groups.

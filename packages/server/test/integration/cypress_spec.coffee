@@ -1165,6 +1165,31 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("DASHBOARD_ALREADY_COMPLETE")
         snapshotConsoleLogs("DASHBOARD_ALREADY_COMPLETE")
+
+    it "errors and exits when run is stale", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "STALE_RUN"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_STALE_RUN")
+        snapshotConsoleLogs("DASHBOARD_STALE_RUN")
+
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()

@@ -319,6 +319,12 @@ createRun = (options = {}) ->
               parallel,
               ciBuildId,
             })
+          when "STALE_RUN"
+            errors.throw("DASHBOARD_STALE_RUN", {
+              runUrl,
+              group,
+              parallel,
+              ciBuildId,
             })
           else
             errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", err.error)
