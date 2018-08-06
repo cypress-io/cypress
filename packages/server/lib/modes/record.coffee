@@ -281,11 +281,26 @@ createRun = (options = {}) ->
       when 412
         errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
       when 422
-        { code } = err.error
+        { code, payload } = err.error
 
         switch code
           when "RUN_GROUP_NAME_NOT_UNIQUE"
             errors.throw("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE", { group, ciBuildId })
+          when "PARALLEL_GROUP_PARAMS_MISMATCH"
+            { browserName, browserVersion, osName, osVersion } = platform
+
+            errors.throw("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH", {
+              runUrl: _.get(payload, "runUrl")
+              parameters: {
+                osName,
+                osVersion,
+                browserName,
+                browserVersion,
+                specs,
+              }
+            })
+          else
+            errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", err.error)
       else
         ## warn the user that assets will be not recorded
         errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)

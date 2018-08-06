@@ -115,6 +115,28 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       "Timed out waiting for the browser to connect. #{arg1}"
     when "TESTS_DID_NOT_START_FAILED"
       "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+    when "DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH"
+      """
+      You passed the --parallel flag, but this machine is sending different parameters from the first machine that started this parallel run.
+
+      The current run is: #{arg1.runUrl}
+
+      In order to run in parallel mode each machine must send the identical parameters such as:
+
+      #{listItems([
+        "specs",
+        "osName",
+        "osVersion",
+        "browserName",
+        "browserVersion (major)",
+      ])}
+
+      This machine sent the following parameters:
+
+      #{JSON.stringify(arg1.parameters, null, 2)}
+
+      https://on.cypress.io/parallel-group-params-mismatch
+      """
     when "DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE"
       """
       You passed the --group flag, but this group name has already been used for this run.

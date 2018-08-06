@@ -42,6 +42,7 @@ videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
+system        = require("#{root}lib/util/system")
 appData       = require("#{root}lib/util/app_data")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
 
@@ -64,12 +65,6 @@ TYPICAL_BROWSERS = [
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     majorVersion: '62'
-  }, {
-    name: 'electron',
-    version: '',
-    path: '',
-    majorVersion: '',
-    info: 'Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.'
   }
 ]
 
@@ -1062,6 +1057,40 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWithErr("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
         snapshotConsoleLogs("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
+
+    it "errors and exits when parallel group params are different", ->
+      sinon.stub(system, "info").returns({
+        osName: "darwin"
+        osVersion: "v1"
+      })
+
+      sinon.stub(browsers, "ensureAndGetByName").returns({
+        version: "59.1.2.3"
+        displayName: "Electron"
+      })
+
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "PARALLEL_GROUP_PARAMS_MISMATCH"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
 
   context "--return-pkg", ->
     beforeEach ->

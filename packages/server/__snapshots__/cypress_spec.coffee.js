@@ -155,3 +155,31 @@ This flag must be unique for each new run, but must also be identical for each m
 
 https://on.cypress.io/run-group-name-not-unique
 `
+
+exports['DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1'] = `
+You passed the --parallel flag, but this machine is sending different parameters from the first machine that started this parallel run.
+
+The current run is: https://dashboard.cypress.io/runs/12345
+
+In order to run in parallel mode each machine must send the identical parameters such as:
+
+- specs
+- osName
+- osVersion
+- browserName
+- browserVersion (major)
+
+This machine sent the following parameters:
+
+{
+  "osName": "darwin",
+  "osVersion": "v1",
+  "browserName": "Electron",
+  "browserVersion": "59.1.2.3",
+  "specs": [
+    "cypress/integration/app_spec.js"
+  ]
+}
+
+https://on.cypress.io/parallel-group-params-mismatch
+`
