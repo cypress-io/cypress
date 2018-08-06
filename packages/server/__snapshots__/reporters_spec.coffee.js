@@ -1,5 +1,4 @@
 exports['e2e reporters reports error if cannot load reporter 1'] = `
-
 Could not load reporter by name: module-does-not-exist
 
 We searched for the reporter in these paths:
@@ -12,7 +11,6 @@ The error we received was:
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 
 Learn more at stack trace line
-
 
 `
 
@@ -654,7 +652,6 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 `
 
 exports['e2e reporters reports error when thrown from reporter 1'] = `
-
 Could not load reporter by name: reporters/throws.js
 
 We searched for the reporter in these paths:
@@ -697,8 +694,6 @@ Error: this reporter threw an error
     at stack trace line
     at stack trace line
 
-
 Learn more at stack trace line
-
 
 `
