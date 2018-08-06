@@ -16,7 +16,7 @@ parse = (ms) ->
     duration
   }
 
-long = (ms) ->
+long = (ms, alwaysIncludeSeconds = true) ->
   msg = []
 
   { mins, duration } = parse(ms)
@@ -27,9 +27,9 @@ long = (ms) ->
 
   secs = duration.seconds()
 
-  word = pluralize("second", secs)
-
-  msg.push(secs + " " + word)
+  if alwaysIncludeSeconds or secs > 0
+    word = pluralize("second", secs)
+    msg.push(secs + " " + word)
 
   msg.join(", ")
 

@@ -3,6 +3,7 @@ strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
+pluralize = require("pluralize")
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -115,6 +116,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       "Timed out waiting for the browser to connect. #{arg1}"
     when "TESTS_DID_NOT_START_FAILED"
       "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
+    when "DASHBOARD_API_RESPONSE_FAILED_RETRYING"
+      """
+      We encountered an unexpected error talking to our servers.
+
+      We will retry #{arg1.tries} more #{pluralize('time', arg1.tries)} in #{arg1.delay}...
+
+      The server's response was:
+
+      #{arg1.response}
+      """
     when "DASHBOARD_CANNOT_PROCEED_IN_PARALLEL"
       """
       We encountered an unexpected error talking to our servers.
@@ -128,7 +139,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       The server's response was:
 
-      #{arg1.error}
+      #{arg1.response}
       """
     when "DASHBOARD_UNKNOWN_INVALID_REQUEST"
       """
@@ -144,7 +155,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       The server's response was:
 
-      #{arg1.error}
+      #{arg1.response}
       """
     when "DASHBOARD_STALE_RUN"
       """

@@ -969,3 +969,77 @@ describe "e2e record", ->
             "PUT /screenshots/1.png"
             "PUT /instances/#{instanceId}/stdout"
           ])
+
+    describe "api retries on error", ->
+      count = 0
+
+      routes = defaultRoutes.slice(0)
+
+      routes[0] = {
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) ->
+          count += 1
+
+          if count is 4
+            res.json(postRunResponse)
+          else
+            res.sendStatus(500)
+      }
+
+      routes[1] = {
+        method: "post"
+        url: "/runs/:id/instances"
+        req: "postRunInstanceRequest@2.1.0",
+        res: (req, res) ->
+          count += 1
+
+          if count is 5
+            return res.sendStatus(500)
+
+          if count is 6
+            res.json({
+              instanceId
+              spec: "cypress/integration/record_pass_spec.coffee"
+              estimatedWallClockDuration: 5000
+              totalInstances: 1
+              claimedInstances: 1
+            })
+          else
+            res.json({
+              instanceId,
+              spec: null
+            })
+      }
+
+      setup(routes)
+
+      it "warns and does not create or update instances", ->
+        process.env.API_RETRY_INTERVALS = "1000,2000,3000"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          group: "foo"
+          record: true
+          parallel: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 0
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+            "POST /runs"
+            "POST /runs"
+            "POST /runs"
+            "POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances"
+            "POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances"
+            "PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6"
+            "PUT /screenshots/1.png"
+            "PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout"
+            "POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances"
+          ])
