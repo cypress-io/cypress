@@ -27,6 +27,18 @@ if process.env.UPDATE_SNAPSHOT
 if process.env.UPDATE_SNAPSHOTS
   throw new Error("You're using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
 
+hasOnly = false
+
+## hack for older version of mocha so that
+## snap-shot-it can find suite._onlyTests
+["it", "describe", "context"].forEach (prop) ->
+  backup = global[prop].only
+
+  global[prop].only = ->
+    hasOnly = true
+
+    backup.apply(this, arguments)
+
 env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
@@ -61,6 +73,9 @@ mockery.registerSubstitute(
 mockery.registerMock("original-fs", {})
 
 before ->
+  if hasOnly
+    @test.parent._onlyTests = [true]
+
   appData.ensure()
 
 beforeEach ->
