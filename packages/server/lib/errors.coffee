@@ -4,6 +4,8 @@ chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
+twoOrMoreNewLinesRe = /\n{2,}/
+
 listItems = (paths) ->
   _
   .chain(paths)
@@ -484,6 +486,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
+  msg = trimMultipleNewLines(msg)
   err = new Error(msg)
   err.isCypressErr = true
   err.type = type
