@@ -1095,6 +1095,30 @@ describe "lib/cypress", ->
         @expectExitWithErr("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
         snapshotConsoleLogs("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
 
+    it "errors and exits when parallel is not allowed", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "PARALLEL_DISALLOWED"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_PARALLEL_DISALLOWED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_DISALLOWED")
+
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()

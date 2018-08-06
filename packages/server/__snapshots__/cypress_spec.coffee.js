@@ -185,3 +185,15 @@ This machine sent the following parameters:
 
 https://on.cypress.io/parallel-group-params-mismatch
 `
+
+exports['DASHBOARD_PARALLEL_DISALLOWED 1'] = `
+You passed the --parallel flag, but this run group was originally created without the --parallel flag.
+
+The existing run is: https://dashboard.cypress.io/runs/12345
+
+The --group flag you passed was: electron-smoke-tests
+
+You can not use the --parallel flag with this group.
+
+https://on.cypress.io/parallel-disallowed
+`
