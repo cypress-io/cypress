@@ -24,6 +24,14 @@ displayFlags = (obj, mapper) ->
   .join("\n")
   .value()
 
+trimMultipleNewLines = (str) ->
+  _
+  .chain(str)
+  .split(twoOrMoreNewLinesRe)
+  .compact()
+  .join("\n\n")
+  .value()
+
 isCypressErr = (err) ->
   Boolean(err.isCypressErr)
 
