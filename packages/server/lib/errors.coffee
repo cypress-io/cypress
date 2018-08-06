@@ -12,7 +12,7 @@ listItems = (paths) ->
   .join("\n")
   .value()
 
-displayArgs = (obj, mapper) ->
+displayFlags = (obj, mapper) ->
   _
   .chain(mapper)
   .map (flag, key) ->
@@ -97,7 +97,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
 
-      #{displayArgs(arg1, {
+      #{displayFlags(arg1, {
         group: "--group",
         parallel: "--parallel"
       })}
@@ -116,7 +116,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
 
-      #{displayArgs(arg1, {
+      #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
         group: "--group",
         parallel: "--parallel"
@@ -130,7 +130,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       You passed the --ci-build-id flag but did not provide either --group or --parallel.
 
-      The --ci-build-id you passed was: #{chalk.blue(arg1)}
+      #{displayFlags(arg1, {
+        ciBuildId: "--ci-build-id",
+      })}
 
       The --ci-build-id flag is used to either group or parallelize multiple runs together.
 

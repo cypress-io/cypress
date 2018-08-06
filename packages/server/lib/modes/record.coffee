@@ -79,7 +79,7 @@ throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) ->
   ## we've been given an explicit ciBuildId
   ## but no parallel or group flag
   if ciBuildId and (not parallel and not group)
-    errors.throw("INCORRECT_CI_BUILD_ID_USAGE", ciBuildId)
+    errors.throw("INCORRECT_CI_BUILD_ID_USAGE", { ciBuildId })
 
 throwIfNoProjectId = (projectId) ->
   if not projectId
