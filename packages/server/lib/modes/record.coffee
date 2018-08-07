@@ -74,7 +74,7 @@ throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) ->
         group,
         parallel
       },
-      ciProvider.list()
+      ciProvider.detectableCiBuildIdProviders()
     )
 
 throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group) ->

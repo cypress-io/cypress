@@ -9,7 +9,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['INCORRECT_CI_BUILD_ID_USAGE 1'] = `
-You passed the --ci-build-id flag but did not provide either --group or --parallel.
+You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
 
 The --ci-build-id flag you passed was: ciBuildId123
 
@@ -54,9 +54,9 @@ You passed the --group or --parallel flag but we could not automatically determi
 
 The --group flag you passed was: e2e-tests
 
-In order to use either of these parameters a ciBuildId must be determined.
+In order to use either of these features a ciBuildId must be determined.
 
-The ciBuildId is automatically detected if you are running Cypress in any of of the these CI providers:
+The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
 - bamboo
@@ -68,13 +68,9 @@ The ciBuildId is automatically detected if you are running Cypress in any of of 
 - jenkins
 - semaphore
 - shippable
-- snap
-- teamcity
-- teamfoundation
 - travis
-- wercker
 
-Because we could not automatically generate this ciBuildId, the  --ci-build-id flag must be passed in manually.
+Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
 https://on.cypress.io/indeterminate-ci-build-id
 `
@@ -84,9 +80,9 @@ You passed the --group or --parallel flag but we could not automatically determi
 
 The --parallel flag you passed was: true
 
-In order to use either of these parameters a ciBuildId must be determined.
+In order to use either of these features a ciBuildId must be determined.
 
-The ciBuildId is automatically detected if you are running Cypress in any of of the these CI providers:
+The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
 - bamboo
@@ -98,13 +94,9 @@ The ciBuildId is automatically detected if you are running Cypress in any of of 
 - jenkins
 - semaphore
 - shippable
-- snap
-- teamcity
-- teamfoundation
 - travis
-- wercker
 
-Because we could not automatically generate this ciBuildId, the  --ci-build-id flag must be passed in manually.
+Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
 https://on.cypress.io/indeterminate-ci-build-id
 `
@@ -115,9 +107,9 @@ You passed the --group or --parallel flag but we could not automatically determi
 The --group flag you passed was: e2e-tests-chrome
 The --parallel flag you passed was: true
 
-In order to use either of these parameters a ciBuildId must be determined.
+In order to use either of these features a ciBuildId must be determined.
 
-The ciBuildId is automatically detected if you are running Cypress in any of of the these CI providers:
+The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
 - bamboo
@@ -129,13 +121,9 @@ The ciBuildId is automatically detected if you are running Cypress in any of of 
 - jenkins
 - semaphore
 - shippable
-- snap
-- teamcity
-- teamfoundation
 - travis
-- wercker
 
-Because we could not automatically generate this ciBuildId, the  --ci-build-id flag must be passed in manually.
+Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
 https://on.cypress.io/indeterminate-ci-build-id
 `
@@ -160,11 +148,13 @@ https://on.cypress.io/run-group-name-not-unique
 `
 
 exports['DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1'] = `
-You passed the --parallel flag, but this machine is sending different parameters from the first machine that started this parallel run.
+You passed the --parallel flag, but we do not parallelize tests across different environments.
+
+This machine is sending different environment parameters than the first machine that started this parallel run.
 
 The existing run is: https://dashboard.cypress.io/runs/12345
 
-In order to run in parallel mode each machine must send the identical parameters such as:
+In order to run in parallel mode each machine must send identical environment parameters such as:
 
 - specs
 - osName
@@ -201,7 +191,7 @@ https://on.cypress.io/parallel-disallowed
 `
 
 exports['DASHBOARD_PARALLEL_REQUIRED 1'] = `
-You dot not pass the --parallel flag, but this run group was originally created with the --parallel flag.
+You did not pass the --parallel flag, but this run's group was originally created with the --parallel flag.
 
 The existing run is: https://dashboard.cypress.io/runs/12345
 
@@ -214,7 +204,7 @@ https://on.cypress.io/parallel-required
 `
 
 exports['DASHBOARD_ALREADY_COMPLETE 1'] = `
-The run you are attempting access is already complete and will not accept new groups.
+The run you are attempting to access is already complete and will not accept new groups.
 
 The existing run is: https://dashboard.cypress.io/runs/12345
 
