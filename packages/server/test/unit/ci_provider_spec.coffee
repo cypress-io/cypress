@@ -409,47 +409,83 @@ describe "lib/util/ci_provider", ->
     expectsCiParams(null)
     expectsCommitParams(null)
 
-  it "travis", ->
-    process.env.TRAVIS = true
+  context "travis", ->
+    it "without pull request", ->
+      process.env.TRAVIS = true
 
-    process.env.TRAVIS_JOB_ID = "travisJobId"
-    process.env.TRAVIS_BUILD_ID = "travisBuildId"
-    process.env.TRAVIS_REPO_SLUG = "travisRepoSlug"
-    process.env.TRAVIS_JOB_NUMBER = "travisJobNumber"
-    process.env.TRAVIS_EVENT_TYPE = "travisEventType"
-    process.env.TRAVIS_COMMIT_RANGE = "travisCommitRange"
-    process.env.TRAVIS_BUILD_NUMBER = "travisBuildNumber"
-    process.env.TRAVIS_PULL_REQUEST = "travisPullRequest"
-    process.env.TRAVIS_PULL_REQUEST_BRANCH = "travisPullRequestBranch"
+      process.env.TRAVIS_JOB_ID = "travisJobId"
+      process.env.TRAVIS_BUILD_ID = "travisBuildId"
+      process.env.TRAVIS_REPO_SLUG = "travisRepoSlug"
+      process.env.TRAVIS_JOB_NUMBER = "travisJobNumber"
+      process.env.TRAVIS_EVENT_TYPE = "travisEventType"
+      process.env.TRAVIS_COMMIT_RANGE = "travisCommitRange"
+      process.env.TRAVIS_BUILD_NUMBER = "travisBuildNumber"
+      process.env.TRAVIS_PULL_REQUEST = "false"
+      process.env.TRAVIS_PULL_REQUEST_BRANCH = null
 
-    process.env.TRAVIS_COMMIT = "travisCommit"
-    process.env.TRAVIS_BRANCH = "travisBranch"
-    process.env.TRAVIS_COMMIT_MESSAGE = "travisCommitMessage"
+      process.env.TRAVIS_COMMIT = "travisCommit"
+      process.env.TRAVIS_BRANCH = "travisBranch"
+      process.env.TRAVIS_COMMIT_MESSAGE = "travisCommitMessage"
 
-    expectsName("travis")
-    expectsCiParams({
-      travisJobId: "travisJobId"
-      travisBuildId: "travisBuildId"
-      travisRepoSlug: "travisRepoSlug"
-      travisJobNumber: "travisJobNumber"
-      travisEventType: "travisEventType"
-      travisCommitRange: "travisCommitRange"
-      travisBuildNumber: "travisBuildNumber"
-      travisPullRequest: "travisPullRequest"
-      travisPullRequestBranch: "travisPullRequestBranch"
-    })
-    expectsCommitParams({
-      sha: "travisCommit"
-      branch: "travisPullRequestBranch"
-      message: "travisCommitMessage"
-    })
+      expectsName("travis")
+      expectsCiParams({
+        travisJobId: "travisJobId"
+        travisBuildId: "travisBuildId"
+        travisRepoSlug: "travisRepoSlug"
+        travisJobNumber: "travisJobNumber"
+        travisEventType: "travisEventType"
+        travisCommitRange: "travisCommitRange"
+        travisBuildNumber: "travisBuildNumber"
+        travisPullRequest: null
+        travisPullRequestBranch: null
+      })
+      expectsCommitParams({
+        sha: "travisCommit"
+        branch: "travisBranch"
+        message: "travisCommitMessage"
+      })
 
-    resetEnv()
-    process.env.TRAVIS = true
-    process.env.TRAVIS_BRANCH = "travisBranch"
-    expectsCommitParams({
-      branch: "travisBranch"
-    })
+    it "with pull request", ->
+      process.env.TRAVIS = true
+
+      process.env.TRAVIS_JOB_ID = "travisJobId"
+      process.env.TRAVIS_BUILD_ID = "travisBuildId"
+      process.env.TRAVIS_REPO_SLUG = "travisRepoSlug"
+      process.env.TRAVIS_JOB_NUMBER = "travisJobNumber"
+      process.env.TRAVIS_EVENT_TYPE = "travisEventType"
+      process.env.TRAVIS_COMMIT_RANGE = "travisCommitRange"
+      process.env.TRAVIS_BUILD_NUMBER = "travisBuildNumber"
+      process.env.TRAVIS_PULL_REQUEST = "travisPullRequest"
+      process.env.TRAVIS_PULL_REQUEST_BRANCH = "travisPullRequestBranch"
+
+      process.env.TRAVIS_COMMIT = "travisCommit"
+      process.env.TRAVIS_BRANCH = "travisBranch"
+      process.env.TRAVIS_COMMIT_MESSAGE = "travisCommitMessage"
+
+      expectsName("travis")
+      expectsCiParams({
+        travisJobId: "travisJobId"
+        travisBuildId: "travisBuildId"
+        travisRepoSlug: "travisRepoSlug"
+        travisJobNumber: "travisJobNumber"
+        travisEventType: "travisEventType"
+        travisCommitRange: "travisCommitRange"
+        travisBuildNumber: "travisBuildNumber"
+        travisPullRequest: "travisPullRequest"
+        travisPullRequestBranch: "travisPullRequestBranch"
+      })
+      expectsCommitParams({
+        sha: "travisCommit"
+        branch: "travisPullRequestBranch"
+        message: "travisCommitMessage"
+      })
+
+      resetEnv()
+      process.env.TRAVIS = true
+      process.env.TRAVIS_BRANCH = "travisBranch"
+      expectsCommitParams({
+        branch: "travisBranch"
+      })
 
   it "wercker", ->
     process.env.WERCKER = true

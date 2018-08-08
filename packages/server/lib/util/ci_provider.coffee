@@ -11,6 +11,13 @@ toCamelObject = (obj, key) ->
 extract = (envKeys) ->
   _.transform(envKeys, toCamelObject, {})
 
+# some "special" variables are set to string, but really mean
+# to be cast to boolean / null
+castFromStrings = (obj) ->
+  if obj.travisPullRequest == "false"
+    obj.travisPullRequest = null
+  obj
+
 isCodeship = ->
   process.env.CI_NAME and process.env.CI_NAME is "codeship"
 
@@ -154,7 +161,7 @@ _providerCiParams = ->
     snap: null
     teamcity: null
     teamfoundation: null
-    travis: extract([
+    travis: castFromStrings(extract([
       "TRAVIS_JOB_ID"
       "TRAVIS_BUILD_ID"
       "TRAVIS_REPO_SLUG"
@@ -164,7 +171,7 @@ _providerCiParams = ->
       "TRAVIS_BUILD_NUMBER"
       "TRAVIS_PULL_REQUEST"
       "TRAVIS_PULL_REQUEST_BRANCH"
-    ])
+    ]))
     wercker: null
   }
 
