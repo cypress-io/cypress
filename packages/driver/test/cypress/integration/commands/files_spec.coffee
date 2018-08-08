@@ -46,7 +46,7 @@ describe "src/cy/commands/files", ->
       cy.on "command:retry", ->
         retries += 1
 
-      Cypress.backend
+      Cypress.backend.withArgs("read:file")
       .onFirstCall()
       .rejects(err)
       .onSecondCall()
@@ -61,7 +61,7 @@ describe "src/cy/commands/files", ->
       cy.on "command:retry", ->
         retries += 1
 
-      Cypress.backend
+      Cypress.backend.withArgs("read:file")
       .onFirstCall()
       .resolves({
         contents: "foobarbaz"
