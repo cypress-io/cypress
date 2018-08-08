@@ -71,7 +71,7 @@ serializeCommand = (command) ->
 
   {
     name: name
-    args: _.reject(args, _.isFunction)
+    args: _.reject args, (arg) -> _.isFunction(arg) or _.isObject(arg)
   }
 
 serializeRetry = (retry) ->
@@ -82,7 +82,7 @@ serializeRetry = (retry) ->
   }
 
 serializeTest = (test) ->
-  _.extend({}, _.pick(test, "async", "body", "file", "id", "pending", "sync", "timedOut", "title", "type", "wallClockStartedAt" ), {
+  _.extend({}, _.pick(test, "async", "body", "file", "id", "pending", "sync", "timedOut", "title", "type"), {
     parentId: test.parent.id
   })
 
