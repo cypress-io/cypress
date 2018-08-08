@@ -186,7 +186,7 @@ describe "src/cy/commands/fixtures", ->
               expect(obj).to.deep.eq {foo: "bar"}
 
         .then ->
-          expect(Cypress.backend).to.be.calledTwice
+          expect(Cypress.backend.withArgs("get:fixture")).to.be.calledTwice
 
       it "clones fixtures to prevent accidental mutation", ->
         cy.fixture("foo").then (obj) ->
@@ -200,4 +200,4 @@ describe "src/cy/commands/fixtures", ->
             cy.fixture("foo").then (obj3) ->
               expect(obj3).not.to.have.property("lorem")
           .then ->
-            expect(Cypress.backend).to.be.calledOnce
+            expect(Cypress.backend.withArgs("get:fixture")).to.be.calledOnce
