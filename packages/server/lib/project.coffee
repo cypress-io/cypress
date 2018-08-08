@@ -263,7 +263,7 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        debug("recevied runnables %o", runnables)
+        debug("received runnables %o", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>

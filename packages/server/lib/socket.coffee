@@ -1,6 +1,7 @@
 _             = require("lodash")
 path          = require("path")
 uuid          = require("node-uuid")
+debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
 fs            = require("./util/fs")
@@ -12,10 +13,8 @@ task          = require("./task")
 files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
-logger        = require("./logger")
 automation    = require("./automation")
 preprocessor  = require("./plugins/preprocessor")
-log           = require('debug')('cypress:server:socket')
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -59,13 +58,13 @@ class Socket
       preprocessor.emitter.on("file:updated", @onTestFileChange)
 
   onTestFileChange: (filePath) ->
-    log("test file changed: #{filePath}")
+    debug("test file changed %o", filePath)
 
     fs.statAsync(filePath)
     .then =>
       @io.emit("watched:file:changed")
     .catch ->
-      log("could not find test file that changed: #{filePath}")
+      debug("could not find test file that changed %o", filePath)
 
   ## TODO: clean this up by sending the spec object instead of
   ## the url path
@@ -73,7 +72,7 @@ class Socket
     ## files are always sent as integration/foo_spec.js
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
-    log("watch test file #{originalFilePath}")
+    debug("watch test file %o", originalFilePath)
     filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
     filePath = path.relative(config.projectRoot, filePath)
 
@@ -90,7 +89,7 @@ class Socket
 
     ## store this location
     @testFilePath = filePath
-    log("will watch test file path #{filePath}")
+    debug("will watch test file path %o", filePath)
 
     preprocessor.getFile(filePath, config)
     ## ignore errors b/c we're just setting up the watching. errors
@@ -166,7 +165,7 @@ class Socket
       automation.request(message, data, onAutomationClientRequestCallback)
 
     @io.on "connection", (socket) =>
-      log("socket connected")
+      debug("socket connected")
 
       ## cache the headers so we can access
       ## them at any time
@@ -177,7 +176,7 @@ class Socket
 
         automationClient = socket
 
-        log("automation:client connected")
+        debug("automation:client connected")
 
         ## if our automation disconnects then we're
         ## in trouble and should probably bomb everything
@@ -211,7 +210,7 @@ class Socket
         socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
-        log("automation:request %o", message, data)
+        debug("automation:request %o", message, data)
 
         automationRequest(message, data)
         .then (resp) ->
@@ -287,7 +286,7 @@ class Socket
         ## cb is always the last argument
         cb = args.pop()
 
-        log("backend:request %o", { eventName, args })
+        debug("backend:request %o", { eventName, args })
 
         backendRequest = ->
           switch eventName

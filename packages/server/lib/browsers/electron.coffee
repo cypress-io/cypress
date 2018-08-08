@@ -77,6 +77,9 @@ module.exports = {
 
     Promise
     .try =>
+      if options.show is false
+        @_attachDebugger(win.webContents)
+
       if ua = options.userAgent
         @_setUserAgent(win.webContents, ua)
 
@@ -91,6 +94,22 @@ module.exports = {
     .then ->
       win.loadURL(url)
     .return(win)
+
+  _attachDebugger: (webContents) ->
+    try
+      webContents.debugger.attach()
+      debug("debugger attached")
+    catch err
+      debug("debugger attached failed %o", { err })
+
+    webContents.debugger.on "detach", (event, reason) ->
+      debug("debugger detached due to %o", { reason })
+
+    webContents.debugger.on "message", (event, method, params) ->
+      if method is "Console.messageAdded"
+        debug("console message: %o", params.message)
+
+    webContents.debugger.sendCommand("Console.enable")
 
   _getPartition: (options) ->
     if options.isTextTerminal
@@ -154,6 +173,8 @@ module.exports = {
 
       @_render(url, projectRoot, options)
       .then (win) =>
+        debug("rendered electron window")
+
         ## cause the webview to receive focus so that
         ## native browser focus + blur events fire correctly
         ## https://github.com/cypress-io/cypress/issues/1939
@@ -197,6 +218,8 @@ module.exports = {
 
           call("removeAllListeners")
           events.emit("exit")
+
+        debug("electron window configuration complete")
 
         return _.extend events, {
           browserWindow:      win
