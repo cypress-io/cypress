@@ -56,7 +56,10 @@ throwPrivateCommandInterface = (method) ->
   })
 
 serializeError = (err) ->
-  _.pick(err, "name", "message", "stack", "actual", "expected", "displayMessage")
+  _.extend({}, _.pick(err, "name", "message", "stack", "displayMessage"), {
+    actual: $utils.stringify(err.actual)
+    expected: $utils.stringify(err.expected)
+  })
 
 serializeCommand = (command) ->
   if command.attributes
@@ -73,14 +76,13 @@ serializeCommand = (command) ->
 
 serializeRetry = (retry) ->
   {
-    assertions: retry.assertions
     name: retry._name
     error: serializeError(retry.error)
     runnable: serializeTest(retry._runnable)
   }
 
 serializeTest = (test) ->
-  _.extend(_.pick(test, "async", "body", "file", "id", "pending", "sync", "timedOut", "title", "type", "wallClockStartedAt" ), {
+  _.extend({}, _.pick(test, "async", "body", "file", "id", "pending", "sync", "timedOut", "title", "type", "wallClockStartedAt" ), {
     parentId: test.parent.id
   })
 
