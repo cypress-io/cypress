@@ -55,6 +55,35 @@ throwPrivateCommandInterface = (method) ->
     args: { method }
   })
 
+serializeError = (err) ->
+  _.pick(err, "name", "message", "stack", "actual", "expected", "displayMessage")
+
+serializeCommand = (command) ->
+  if command.attributes
+    name = command.get("name")
+    args = command.get("args")
+  else
+    name = command.name
+    args = command.args
+
+  {
+    name: name
+    args: _.reject(args, _.isFunction)
+  }
+
+serializeRetry = (retry) ->
+  {
+    assertions: retry.assertions
+    name: retry._name
+    error: serializeError(retry.error)
+    runnable: serializeTest(retry._runnable)
+  }
+
+serializeTest = (test) ->
+  _.extend(_.pick(test, "async", "body", "file", "id", "pending", "sync", "timedOut", "title", "type", "wallClockStartedAt" ), {
+    parentId: test.parent.id
+  })
+
 class $Cypress
   constructor: (config = {}) ->
     @cy       = null
@@ -259,6 +288,7 @@ class $Cypress
         ## get back to a clean slate
         @cy.reset()
 
+        @emitToBackend("test:before:run", serializeTest(args[1]))
         @emit("test:before:run", args...)
 
       when "runner:test:before:run:async"
@@ -273,6 +303,7 @@ class $Cypress
 
         ## this event is how the reporter knows how to display
         ## stats and runnable properties such as errors
+        @emitToBackend("test:after:run", serializeTest(args[1]))
         @emit("test:after:run", args...)
 
         if @config("isTextTerminal")
@@ -304,6 +335,7 @@ class $Cypress
 
       when "cy:fail"
         ## comes from cypress errors fail()
+        @emitToBackend("fail", serializeError(args[0]), serializeTest(args[1]))
         @emitMap("fail", args...)
 
       when "cy:stability:changed"
@@ -322,15 +354,19 @@ class $Cypress
         @emit("viewport:changed", args...)
 
       when "cy:command:start"
+        @emitToBackend("command:start", serializeCommand(args[0]))
         @emit("command:start", args...)
 
       when "cy:command:end"
+        @emitToBackend("command:end", serializeCommand(args[0]))
         @emit("command:end", args...)
 
       when "cy:command:retry"
+        @emitToBackend("command:retry", serializeRetry(args[0]))
         @emit("command:retry", args...)
 
       when "cy:command:enqueued"
+        @emitToBackend("command:enqueued", serializeCommand(args[0]))
         @emit("command:enqueued", args[0])
 
       when "cy:command:queue:before:end"

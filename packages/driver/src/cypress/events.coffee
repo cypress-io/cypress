@@ -1,12 +1,3 @@
-# _ = require("lodash")
-# Backbone = require("backbone")
-
-## adds a custom lightweight event bus
-## to the Cypress class
-
-# splice = (index) ->
-  # @_events.splice(index, 1)
-
 _ = require("lodash")
 EE = require("eventemitter2")
 log = require("debug")("cypress:driver")
@@ -107,6 +98,10 @@ module.exports = {
           log("emitted: '%s'", eventName)
 
         return ret
+
+    events.emitToBackend = (eventName, args...) ->
+      args = _.reject(args, _.isFunction)
+      Cypress.backend("driver:event", eventName, args...)
 
     _.extend(obj, events)
 
