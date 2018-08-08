@@ -55,6 +55,15 @@ cy.request({
   body: {}
 })
 
+// specify query parameters
+// https://github.com/cypress-io/cypress/issues/2305
+cy.request({
+  url: "http://localhost:3000/myressource",
+  qs: {
+    param: 'someValue'
+  }
+})
+
 // if you want a separate variable, you need specify its type
 // otherwise TSC does not cast string "POST" as HttpMethod
 // https://github.com/cypress-io/cypress/issues/2093

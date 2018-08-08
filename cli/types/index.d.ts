@@ -1847,6 +1847,9 @@ declare namespace Cypress {
     env: object
   }
 
+  /**
+   * Full set of possible options for cy.request call
+   */
   interface RequestOptions extends Loggable, Timeoutable {
     auth: object
     body: RequestBody
@@ -1856,7 +1859,7 @@ declare namespace Cypress {
     gzip: boolean
     headers: object
     method: HttpMethod
-    qs: string
+    qs: object
     url: string
   }
 
