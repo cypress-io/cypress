@@ -169,7 +169,7 @@ displaySpecHeader = (name, curr, total, estimated) ->
 
   if estimated
     estimatedLabel = " ".repeat(PADDING) + "Estimated:"
-    console.log(estimatedLabel, humanTime.long(estimated))
+    console.log(estimatedLabel, gray(humanTime.long(estimated)))
 
 collectTestResults = (obj = {}, estimated) ->
   {
@@ -652,8 +652,12 @@ module.exports = {
               project.emit("exitEarlyWithErr", err.message)
 
   waitForSocketConnection: (project, id) ->
+    debug("waiting for socket connection... %o", { id })
+
     new Promise (resolve, reject) ->
       fn = (socketId) ->
+        debug("got socket connection %o", { id: socketId })
+
         if socketId is id
           ## remove the event listener if we've connected
           project.removeListener("socket:connected", fn)
