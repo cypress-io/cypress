@@ -169,7 +169,7 @@ displaySpecHeader = (name, curr, total, estimated) ->
 
   if estimated
     estimatedLabel = " ".repeat(PADDING) + "Estimated:"
-    console.log(estimatedLabel, humanTime.long(estimated))
+    console.log(estimatedLabel, gray(humanTime.long(estimated)))
 
 collectTestResults = (obj = {}, estimated) ->
   {
