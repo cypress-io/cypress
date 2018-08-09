@@ -1925,6 +1925,10 @@ declare namespace Cypress {
     interval: number
   }
 
+  /**
+   * Setting default options for cy.server()
+   * @see https://on.cypress.io/server
+   */
   interface ServerOptions {
     delay: number
     method: HttpMethod
@@ -1937,7 +1941,7 @@ declare namespace Cypress {
     enable: boolean
     force404: boolean
     urlMatchingOptions: object
-    whitelist(...args: any[]): void
+    whitelist(xhr: Request): void
   }
 
   interface SetCookieOptions extends Loggable, Timeoutable {

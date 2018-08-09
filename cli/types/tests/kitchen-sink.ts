@@ -30,6 +30,13 @@ cy.visit('https://www.acme.com/', {
   }
 })
 
+const serverOptions: Partial<Cypress.ServerOptions> = {
+  delay: 100,
+  whitelist: () => true
+}
+
+cy.server(serverOptions)
+
 Cypress.spec.name // $ExpectType string
 Cypress.spec.relative // $ExpectType string | null
 Cypress.spec.absolute // $ExpectType string | null
