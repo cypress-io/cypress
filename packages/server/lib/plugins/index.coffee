@@ -93,7 +93,10 @@ module.exports = {
 
   execute: (event, args...) ->
     debug("execute plugin event '#{event}' with args: %o %o %o", args...)
-    registeredEvents[event](args...)
+    if pluginsProcess
+      registeredEvents[event](args...)
+    else
+      debug("plugins process killed - don't execute")
 
   ## for testing purposes
   _reset: ->
