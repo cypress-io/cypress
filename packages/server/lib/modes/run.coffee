@@ -26,7 +26,7 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
-plugins    = require("../plugins")
+serverEvents = require("../plugins/server_events")
 
 color = (val, c) ->
   chalk[c](val)
@@ -786,7 +786,7 @@ module.exports = {
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
-        plugins.execute('server:event', 'after:spec', spec, results)
+        serverEvents.execute("after:spec", spec, results)
 
     iterateThroughSpecs({
       specs
@@ -810,7 +810,8 @@ module.exports = {
 
       debug("final results of all runs: %o", results)
 
-      plugins.execute('server:event', 'after:run', results)
+      Promise.try ->
+        serverEvents.execute("after:run", results)
       .then ->
         writeOutput(outputPath, results)
       .return(results)
@@ -828,7 +829,7 @@ module.exports = {
       browserName
     })
 
-    plugins.execute('server:event', 'before:spec', spec)
+    serverEvents.execute("before:spec", spec)
 
     screenshots = []
 
