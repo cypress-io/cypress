@@ -46,7 +46,11 @@ module.exports = {
     _.defaultsDeep({}, options, defaults)
 
   _render: (url, projectRoot, options = {}) ->
+    debug("creating window instance")
+
     win = Windows.create(projectRoot, options)
+
+    debug("launching window instance")
 
     @_launch(win, url, options)
 
@@ -73,18 +77,22 @@ module.exports = {
     @_launch(win, url, options)
 
   _launch: (win, url, options) ->
+    debug("setting menu")
     menu.set({withDevTools: true})
 
     Promise
     .try =>
       if options.show is false
+        debug("attaching debugger")
         @_attachDebugger(win.webContents)
 
       if ua = options.userAgent
+        debug("setting user agent")
         @_setUserAgent(win.webContents, ua)
 
       setProxy = =>
         if ps = options.proxyServer
+          debug("setting proxy server")
           @_setProxy(win.webContents, ps)
 
       Promise.join(
@@ -92,6 +100,7 @@ module.exports = {
         @_clearCache(win.webContents)
       )
     .then ->
+      debug("loading url")
       win.loadURL(url)
     .return(win)
 
@@ -122,6 +131,7 @@ module.exports = {
     return "persist:interactive"
 
   _clearCache: (webContents) ->
+    debug("clearing cache")
     new Promise (resolve) ->
       webContents.session.clearCache(resolve)
 
