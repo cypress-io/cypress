@@ -15,9 +15,11 @@ env = require("#{root}../lib/util/env")
 random = require("#{root}../lib/util/random")
 system = require("#{root}../lib/util/system")
 specsUtil = require("#{root}../lib/util/specs")
+plugins = require("#{root}../lib/plugins")
 
 describe "lib/modes/run", ->
   beforeEach ->
+    sinon.stub(plugins, "execute").resolves()
     @projectInstance = Project("/_test-output/path/to/project")
 
   context ".getProjectId", ->

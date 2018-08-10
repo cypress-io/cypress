@@ -26,6 +26,7 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
+plugins    = require("../plugins")
 
 color = (val, c) ->
   chalk[c](val)
@@ -785,6 +786,7 @@ module.exports = {
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
+        plugins.execute('server:event', 'after:spec', spec, results)
 
     iterateThroughSpecs({
       specs
@@ -808,7 +810,9 @@ module.exports = {
 
       debug("final results of all runs: %o", results)
 
-      writeOutput(outputPath, results)
+      plugins.execute('server:event', 'after:run', results)
+      .then ->
+        writeOutput(outputPath, results)
       .return(results)
 
   runSpec: (spec = {}, options = {}, estimated) ->
@@ -823,6 +827,8 @@ module.exports = {
       isHeadless
       browserName
     })
+
+    plugins.execute('server:event', 'before:spec', spec)
 
     screenshots = []
 

@@ -1,5 +1,7 @@
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
+
+const serverEvents = require('./server_events')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
@@ -46,6 +48,8 @@ const load = (ipc, config, pluginsFile) => {
   register('_get:task:body', () => {})
   register('_get:task:keys', () => {})
 
+  register('server:event', () => {})
+
   Promise
   .try(() => {
     return plugins(register, config)
@@ -73,6 +77,9 @@ const execute = (ipc, event, ids, args = []) => {
       return
     case 'task':
       task.wrap(ipc, registeredEvents, ids, args)
+      return
+    case 'server:event':
+      serverEvents.execute(ipc, registeredEvents, ids, args)
       return
     case '_get:task:keys':
       task.getKeys(ipc, registeredEvents, ids)

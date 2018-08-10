@@ -132,7 +132,7 @@ describe "lib/plugins/child/run_plugins", ->
 
       it "invokes registered function when invoked by preprocessor handler", ->
         @ipc.on.withArgs("execute").yield("file:preprocessor", @ids, [])
-        preprocessor.wrap.lastCall.args[1](2, ["one", "two"])
+        preprocessor.wrap.lastCall.args[1](3, ["one", "two"])
         expect(@onFilePreprocessor).to.be.calledWith("one", "two")
 
     context "before:browser:launch", ->
@@ -152,7 +152,7 @@ describe "lib/plugins/child/run_plugins", ->
       it "invokes registered function when invoked by preprocessor handler", ->
         @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, [])
         args = ["one", "two"]
-        util.wrapChildPromise.lastCall.args[1](3, args)
+        util.wrapChildPromise.lastCall.args[1](4, args)
         expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")
 
     context "task", ->
