@@ -77,11 +77,16 @@ module.exports = {
     @_launch(win, url, options)
 
   _launch: (win, url, options) ->
+    console.log("setting menu")
     debug("setting menu")
     menu.set({withDevTools: true})
+    console.log("set menu")
+    debug("set menu")
 
     Promise
     .try =>
+      console.log("inside Promise.try(...)")
+      debug("inside Promise.try(...)")
       if options.show is false
         debug("attaching debugger")
         @_attachDebugger(win.webContents)
