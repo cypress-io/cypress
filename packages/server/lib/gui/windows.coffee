@@ -172,7 +172,6 @@ module.exports = {
 
     win.once "closed", ->
       win.removeAllListeners()
-      win.webContents.removeAllListeners()
       options.onClose.apply(win, arguments)
 
     ## the webview loses focus on navigation, so we
