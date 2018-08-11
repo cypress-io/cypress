@@ -22,6 +22,7 @@ describe "lib/browsers/electron", ->
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
+      isDestroyed: -> false
       close: sinon.stub()
       loadURL: sinon.stub()
       focusOnWebView: sinon.stub()

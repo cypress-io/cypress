@@ -9,6 +9,16 @@ plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
+tryToCall = (win, method) ->
+  if not win.isDestroyed()
+    try
+      if _.isString(method)
+        win[method]()
+      else
+        method()
+    catch err
+      debug("got error calling window method:", err.stack)
+
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
     _this = @
@@ -47,11 +57,7 @@ module.exports = {
     _.defaultsDeep({}, options, defaults)
 
   _render: (url, projectRoot, options = {}) ->
-    debug("creating window instance")
-
     win = Windows.create(projectRoot, options)
-
-    debug("launching window instance")
 
     @_launch(win, url, options)
 
@@ -78,29 +84,19 @@ module.exports = {
     @_launch(win, url, options)
 
   _launch: (win, url, options) ->
-    console.log("setting menu")
-    debug("setting menu")
-    menu.set({withDevTools: true})
-    console.log("set menu")
-    debug("set menu")
     if options.show
       menu.set({withDevTools: true})
 
     Promise
     .try =>
-      console.log("inside Promise.try(...)")
-      debug("inside Promise.try(...)")
       if options.show is false
-        debug("attaching debugger")
         @_attachDebugger(win.webContents)
 
       if ua = options.userAgent
-        debug("setting user agent")
         @_setUserAgent(win.webContents, ua)
 
       setProxy = =>
         if ps = options.proxyServer
-          debug("setting proxy server")
           @_setProxy(win.webContents, ps)
 
       Promise.join(
@@ -108,7 +104,6 @@ module.exports = {
         @_clearCache(win.webContents)
       )
     .then ->
-      debug("loading url")
       win.loadURL(url)
     .return(win)
 
@@ -144,6 +139,7 @@ module.exports = {
       webContents.session.clearCache(resolve)
 
   _setUserAgent: (webContents, userAgent) ->
+    debug("setting user agent to:", userAgent)
     ## set both because why not
     webContents.setUserAgent(userAgent)
     webContents.session.setUserAgent(userAgent)
@@ -161,7 +157,6 @@ module.exports = {
 
     savedState(projectRoot, isTextTerminal)
     .then (state) ->
-      debug("got saved state")
       state.get()
     .then (state) =>
       debug("received saved state %o", state)
@@ -191,17 +186,16 @@ module.exports = {
 
       @_render(url, projectRoot, options)
       .then (win) =>
-        debug("rendered electron window")
-
         ## cause the webview to receive focus so that
         ## native browser focus + blur events fire correctly
         ## https://github.com/cypress-io/cypress/issues/1939
-        win.focusOnWebView()
+        tryToCall(win, "focusOnWebView")
 
         a = Windows.automation(win)
 
         invoke = (method, data) =>
-          a[method](data)
+          tryToCall ->
+            a[method](data)
 
         automation.use({
           onRequest: (message, data) ->
@@ -224,24 +218,16 @@ module.exports = {
                 throw new Error("No automation handler registered for: '#{message}'")
         })
 
-        call = (method) ->
-          return ->
-            if not win.isDestroyed()
-              win[method]()
-
         events = new EE
 
         win.once "closed", ->
           debug("closed event fired")
 
-          call("removeAllListeners")
           events.emit("exit")
-
-        debug("electron window configuration complete")
 
         return _.extend events, {
           browserWindow:      win
-          kill:               call("close")
-          removeAllListeners: call("removeAllListeners")
+          kill:               -> tryToCall(win, "close")
+          removeAllListeners: -> tryToCall(win, "removeAllListeners")
         }
 }
