@@ -10,14 +10,14 @@ savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
 tryToCall = (win, method) ->
-  if not win.isDestroyed()
-    try
+  try
+    if not win.isDestroyed()
       if _.isString(method)
         win[method]()
       else
         method()
-    catch err
-      debug("got error calling window method:", err.stack)
+  catch err
+    debug("got error calling window method:", err.stack)
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
@@ -194,7 +194,7 @@ module.exports = {
         a = Windows.automation(win)
 
         invoke = (method, data) =>
-          tryToCall ->
+          tryToCall win, ->
             a[method](data)
 
         automation.use({
