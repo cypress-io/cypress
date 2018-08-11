@@ -22,6 +22,7 @@ describe "lib/browsers/electron", ->
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
+      isDestroyed: -> false
       close: sinon.stub()
       loadURL: sinon.stub()
       focusOnWebView: sinon.stub()
@@ -102,14 +103,21 @@ describe "lib/browsers/electron", ->
   context "._launch", ->
     beforeEach ->
       sinon.stub(menu, "set")
+      sinon.stub(electron, "_attachDebugger").resolves()
       sinon.stub(electron, "_clearCache").resolves()
       sinon.stub(electron, "_setProxy").resolves()
       sinon.stub(electron, "_setUserAgent")
 
-    it "sets dev tools in menu", ->
-      electron._launch(@win, @url, @options)
+    it "sets menu.set whether or not its in headless mode", ->
+      electron._launch(@win, @url, { show: true })
       .then ->
         expect(menu.set).to.be.calledWith({withDevTools: true})
+      .then =>
+        menu.set.reset()
+
+        electron._launch(@win, @url, { show: false })
+      .then ->
+        expect(menu.set).not.to.be.called
 
     it "sets user agent if options.userAgent", ->
       electron._launch(@win, @url, @options)
@@ -198,9 +206,15 @@ describe "lib/browsers/electron", ->
       })
 
     it ".onFocus", ->
-      opts = electron._defaultOptions("/foo", @state, @options)
+      opts = electron._defaultOptions("/foo", @state, { show: true })
       opts.onFocus()
       expect(menu.set).to.be.calledWith({withDevTools: true})
+
+      menu.set.reset()
+
+      opts = electron._defaultOptions("/foo", @state, { show: false })
+      opts.onFocus()
+      expect(menu.set).not.to.be.called
 
     describe ".onNewWindow", ->
       beforeEach ->

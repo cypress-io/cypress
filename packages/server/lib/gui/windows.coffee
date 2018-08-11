@@ -150,9 +150,7 @@ module.exports = {
     })
 
   create: (projectRoot, options = {}) ->
-    debug("windows.create")
     options = @defaults(options)
-    debug("got default window options", options)
 
     if options.show is false
       options.frame = false
@@ -166,15 +164,11 @@ module.exports = {
 
     win = @_newBrowserWindow(options)
 
-    debug("instantiated browser window")
-
     win.on "blur", ->
       options.onBlur.apply(win, arguments)
 
     win.on "focus", ->
       options.onFocus.apply(win, arguments)
-
-    debug("attaching listeners (1)")
 
     win.once "closed", ->
       win.removeAllListeners()
@@ -185,15 +179,14 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/2190
     if options.show is false
       win.webContents.on "did-start-loading", ->
-        win.focusOnWebView()
+        if not win.isDestroyed()
+          win.focusOnWebView()
 
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)
 
     win.webContents.on "new-window", ->
       options.onNewWindow.apply(win, arguments)
-
-    debug("attaching listeners (2)")
 
     if ts = options.trackState
       @trackState(projectRoot, options.isTextTerminal, win, ts)
@@ -212,8 +205,6 @@ module.exports = {
         window: win
       })
 
-    debug("attaching listeners (3)")
-
     if options.onPaint
       setFrameRate = (num) ->
         if win.webContents.getFrameRate() isnt num
@@ -229,8 +220,6 @@ module.exports = {
           options.onPaint.apply(win, arguments)
         catch err
           ## do nothing
-
-    debug("attaching listeners (4)")
 
     win
 
