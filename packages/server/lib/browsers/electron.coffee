@@ -31,7 +31,8 @@ module.exports = {
         devTools: "isBrowserDevToolsOpen"
       }
       onFocus: ->
-        menu.set({withDevTools: true})
+        if options.show
+          menu.set({withDevTools: true})
       onNewWindow: (e, url) ->
         _win = @
 
@@ -82,6 +83,8 @@ module.exports = {
     menu.set({withDevTools: true})
     console.log("set menu")
     debug("set menu")
+    if options.show
+      menu.set({withDevTools: true})
 
     Promise
     .try =>
