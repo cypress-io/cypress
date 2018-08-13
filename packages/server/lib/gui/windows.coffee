@@ -142,6 +142,7 @@ module.exports = {
       onCrashed: ->
       onNewWindow: ->
       webPreferences:  {
+        partition:            null
         chromeWebSecurity:    true
         nodeIntegration:      false
         backgroundThrottling: false
@@ -157,6 +158,9 @@ module.exports = {
 
     if options.chromeWebSecurity is false
       options.webPreferences.webSecurity = false
+
+    if options.partition
+      options.webPreferences.partition = options.partition
 
     win = @_newBrowserWindow(options)
 
@@ -175,7 +179,8 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/2190
     if options.show is false
       win.webContents.on "did-start-loading", ->
-        win.focusOnWebView()
+        if not win.isDestroyed()
+          win.focusOnWebView()
 
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)
