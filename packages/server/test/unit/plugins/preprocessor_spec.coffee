@@ -22,8 +22,8 @@ describe "lib/plugins/preprocessor", ->
     @testPath = path.join(@todosPath, "test.coffee")
     @localPreprocessorPath = path.join(@todosPath, "prep.coffee")
 
-    @plugin = sinon.stub().returns("/path/to/output.js")
-    plugins.register("file:preprocessor", @plugin)
+    sinon.stub(plugins, "execute").resolves("/path/to/output.js")
+    sinon.stub(plugins, "has").returns(true)
 
     preprocessor.close()
 
@@ -35,18 +35,18 @@ describe "lib/plugins/preprocessor", ->
   context "#getFile", ->
     it "executes the plugin with file path", ->
       preprocessor.getFile(@filePath, @config)
-      expect(@plugin).to.be.called
-      expect(@plugin.lastCall.args[0].filePath).to.equal(@fullFilePath)
+      expect(plugins.execute).to.be.calledWith("file:preprocessor")
+      expect(plugins.execute.lastCall.args[1].filePath).to.equal(@fullFilePath)
 
     it "executes the plugin with output path", ->
       preprocessor.getFile(@filePath, @config)
       expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", @filePath)
-      expect(@plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
+      expect(plugins.execute.lastCall.args[1].outputPath).to.equal(expectedPath)
 
     it "executes the plugin with output path when integrationFolder was defined", ->
       preprocessor.getFile(@integrationFolder + @filePath, Object.assign({integrationFolder: @integrationFolder}, @config))
       expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", @filePath)
-      expect(@plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
+      expect(plugins.execute.lastCall.args[1].outputPath).to.equal(expectedPath)
 
     it "returns a promise resolved with the plugin's outputPath", ->
       preprocessor.getFile(@filePath, @config).then (filePath) ->
@@ -56,24 +56,24 @@ describe "lib/plugins/preprocessor", ->
       fileUpdated = sinon.spy()
       preprocessor.emitter.on("file:updated", fileUpdated)
       preprocessor.getFile(@filePath, @config)
-      @plugin.lastCall.args[0].emit("rerun")
+      plugins.execute.lastCall.args[1].emit("rerun")
       expect(fileUpdated).to.be.calledWith(@fullFilePath)
 
-    it "invokes plugin again when isTextTerminal: false", ->
+    it "executes plugin again when isTextTerminal: false", ->
       @config.isTextTerminal = false
       preprocessor.getFile(@filePath, @config)
       preprocessor.getFile(@filePath, @config)
-      expect(@plugin).to.be.calledTwice
+      expect(plugins.execute).to.be.calledTwice
 
-    it "does not invoke plugin again when isTextTerminal: true", ->
+    it "does not execute plugin again when isTextTerminal: true", ->
       @config.isTextTerminal = true
       preprocessor.getFile(@filePath, @config)
       preprocessor.getFile(@filePath, @config)
-      expect(@plugin).to.be.calledOnce
+      expect(plugins.execute).to.be.calledOnce
 
     it "uses default preprocessor if none registered", ->
       plugins._reset()
-      sinon.stub(plugins, "execute").returns(->)
+      plugins.has.returns(false)
       browserify = sinon.stub()
       browserifyMock = sinon.stub().returns(browserify)
       mockery.registerMock("@cypress/browserify-preprocessor", browserifyMock)
@@ -88,7 +88,7 @@ describe "lib/plugins/preprocessor", ->
     it "emits 'close'", ->
       preprocessor.getFile(@filePath, @config)
       onClose = sinon.spy()
-      @plugin.lastCall.args[0].on("close", onClose)
+      plugins.execute.lastCall.args[1].on("close", onClose)
       preprocessor.removeFile(@filePath, @config)
       expect(onClose).to.be.called
 
@@ -103,7 +103,7 @@ describe "lib/plugins/preprocessor", ->
     it "emits 'close' on config emitter", ->
       preprocessor.getFile(@filePath, @config)
       onClose = sinon.spy()
-      @plugin.lastCall.args[0].on("close", onClose)
+      plugins.execute.lastCall.args[1].on("close", onClose)
       preprocessor.close()
       expect(onClose).to.be.called
 

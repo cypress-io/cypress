@@ -142,6 +142,7 @@ describe "lib/plugins/index", ->
   context "#register", ->
     it "registers callback for event", ->
       foo = sinon.spy()
+      plugins.init({ pluginsFile: "cypress-plugin" })
       plugins.register("foo", foo)
       plugins.execute("foo")
       expect(foo).to.be.called
@@ -161,8 +162,15 @@ describe "lib/plugins/index", ->
       expect(plugins.has("foo")).to.be.false
 
   context "#execute", ->
-    it "calls the callback registered for the event", ->
+    it "calls the callback registered for the event if plugins process has been initialized", ->
       foo = sinon.spy()
+      plugins.init({ pluginsFile: "cypress-plugin" })
       plugins.register("foo", foo)
       plugins.execute("foo", "arg1", "arg2")
       expect(foo).to.be.calledWith("arg1", "arg2")
+
+    it "does not call the callback if plugins process has been initialized", ->
+      foo = sinon.spy()
+      plugins.register("foo", foo)
+      plugins.execute("foo", "arg1", "arg2")
+      expect(foo).not.to.be.called

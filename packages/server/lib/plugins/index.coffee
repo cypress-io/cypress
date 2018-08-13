@@ -100,6 +100,7 @@ module.exports = {
 
   ## for testing purposes
   _reset: ->
+    pluginsProcess = null
     registeredEvents = {}
     handlers = []
 }
