@@ -22,7 +22,7 @@ const started = new Date()
 let numFailed = 0
 
 function isLoadBalanced (options) {
-  return _.isNumber(options.index)
+  return _.isNumber(options.chunk)
 }
 
 function spawn (cmd, args, opts) {
@@ -43,7 +43,7 @@ glob('test/e2e/**/*')
 
   if (isLoadBalanced(options)) {
     return _.filter(specs, (spec) => {
-      return path.basename(spec).startsWith(options.index)
+      return path.basename(spec).startsWith(options.chunk)
     })
   }
 

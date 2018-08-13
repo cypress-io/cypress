@@ -243,7 +243,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --index 0
+          command: npm run test-e2e -- --chunk 1
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -254,7 +254,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --index 1
+          command: npm run test-e2e -- --chunk 2
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -265,7 +265,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --index 2
+          command: npm run test-e2e -- --chunk 3
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -276,7 +276,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --index 3
+          command: npm run test-e2e -- --chunk 4
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -287,7 +287,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --index 4
+          command: npm run test-e2e -- --chunk 5
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -298,7 +298,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --index 5
+          command: npm run test-e2e -- --chunk 6
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -309,7 +309,7 @@ jobs:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
       - run:
-          command: npm run test-e2e -- --index 6
+          command: npm run test-e2e -- --chunk 7
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
