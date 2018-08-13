@@ -73,14 +73,16 @@ describe "lib/plugins/preprocessor", ->
 
     it "uses default preprocessor if none registered", ->
       plugins._reset()
-      sinon.stub(plugins, "register")
       sinon.stub(plugins, "execute").returns(->)
-      browserifyFn = ->
-      browserify = sinon.stub().returns(browserifyFn)
-      mockery.registerMock("@cypress/browserify-preprocessor", browserify)
+      browserify = sinon.stub()
+      browserifyMock = sinon.stub().returns(browserify)
+      mockery.registerMock("@cypress/browserify-preprocessor", browserifyMock)
       preprocessor.getFile(@filePath, @config)
-      expect(plugins.register).to.be.calledWith("file:preprocessor", browserifyFn)
+      expect(browserifyMock).to.be.called
       expect(browserify).to.be.called
+      expect(browserify.lastCall.args[0].filePath).to.include("path/to/test.coffee")
+      expect(browserify.lastCall.args[0].outputPath).to.include("bundles/path/to/test.coffee")
+      expect(plugins.execute).not.to.be.called
 
   context "#removeFile", ->
     it "emits 'close'", ->
