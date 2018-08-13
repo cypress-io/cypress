@@ -244,7 +244,6 @@ module.exports = {
     config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
 
-<<<<<<< HEAD
     if hosts = config.hosts
       config.hosts = toObjectFromPipes(hosts)
 
@@ -254,8 +253,6 @@ module.exports = {
     if whitelistHosts = config.whitelistHosts
       config.whitelistHosts = toArrayFromPipes(whitelistHosts)
 
-=======
->>>>>>> develop
     ## when headless
     if config.isTextTerminal
       ## dont ever watch for file changes
