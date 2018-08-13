@@ -314,6 +314,17 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
+  "server-e2e-tests-8":
+      <<: *defaults
+      steps:
+      - restore_cache:
+          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - run:
+          command: npm run test-e2e -- --chunk 8
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
   "3x-driver-integration-tests":
     <<: *defaults
     parallelism: 3
@@ -603,6 +614,9 @@ workflows:
           requires:
             - build
       - server-e2e-tests-7:
+          requires:
+            - build
+      - server-e2e-tests-8:
           requires:
             - build
       - 3x-driver-integration-tests:
