@@ -314,8 +314,9 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  "driver-integration-tests-1":
+  "driver-integration-tests":
     <<: *defaults
+    parallelism: 3
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
@@ -327,135 +328,16 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 7 --index 0 --browser chrome
+          command: CYPRESS_KONFIG_ENV=production npm run cypress:run -- --record --parallel --group driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
-  "driver-integration-tests-2":
+  "desktop-gui-integration-tests":
     <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 7 --index 1 --browser chrome
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-3":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 7 --index 2 --browser chrome
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-4":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 7 --index 3 --browser chrome
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-5":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 7 --index 4 --browser chrome
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-6":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 7 --index 5 --browser chrome
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-7":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 7 --index 6 --browser chrome
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "desktop-gui-integration-tests-1":
-    <<: *defaults
+    parallelism: 2
     steps:
       - restore_cache:
           key: cypress-{{ .Branch }}-{{ .Revision }}
@@ -463,39 +345,7 @@ jobs:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run cypress:run -- --parallel 3 --index 0
-          working_directory: packages/desktop-gui
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "desktop-gui-integration-tests-2":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm run build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: npm run cypress:run -- --parallel 3 --index 1
-          working_directory: packages/desktop-gui
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "desktop-gui-integration-tests-3":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm run build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: npm run cypress:run -- --parallel 3 --index 2
+          command: CYPRESS_KONFIG_ENV=production npm run cypress:run -- --record --parallel --group desktop-gui
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress

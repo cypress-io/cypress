@@ -52,10 +52,15 @@ module.exports = {
     fs.removeAsync(cwd(".cy")).catch(->)
 
   path: (paths...) ->
-    la(check.unemptyString(process.env.CYPRESS_ENV),
-      "expected CYPRESS_ENV, found", process.env.CYPRESS_ENV)
+    { env } = process
 
-    p = path.join(ELECTRON_APP_DATA_PATH, "cy", process.env.CYPRESS_ENV, paths...)
+    la(check.unemptyString(env.CYPRESS_ENV),
+      "expected CYPRESS_ENV, found", env.CYPRESS_ENV)
+
+    ## allow overriding the app_data folder
+    folder = env.CYPRESS_KONFIG_ENV or env.CYPRESS_ENV
+
+    p = path.join(ELECTRON_APP_DATA_PATH, "cy", folder, paths...)
     log("path: %s", p)
     p
 
