@@ -179,7 +179,8 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/2190
     if options.show is false
       win.webContents.on "did-start-loading", ->
-        win.focusOnWebView()
+        if not win.isDestroyed()
+          win.focusOnWebView()
 
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)
