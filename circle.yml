@@ -601,34 +601,10 @@ workflows:
       - server-e2e-tests-7:
           requires:
             - build
-      - driver-integration-tests-1:
+      - driver-integration-tests:
           requires:
             - build
-      - driver-integration-tests-2:
-          requires:
-            - build
-      - driver-integration-tests-3:
-          requires:
-            - build
-      - driver-integration-tests-4:
-          requires:
-            - build
-      - driver-integration-tests-5:
-          requires:
-            - build
-      - driver-integration-tests-6:
-          requires:
-            - build
-      - driver-integration-tests-7:
-          requires:
-            - build
-      - desktop-gui-integration-tests-1:
-          requires:
-            - build
-      - desktop-gui-integration-tests-2:
-          requires:
-            - build
-      - desktop-gui-integration-tests-3:
+      - desktop-gui-integration-tests:
           requires:
             - build
       - run-launcher:
