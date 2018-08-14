@@ -145,6 +145,14 @@ describe "src/cy/commands/actions/focus", ->
         .focused().then ($ce) ->
           expect($ce.get(0)).to.eq ce.get(0)
 
+    it "can focus svg elements", ->
+      onFocus = cy.stub()
+
+      cy.$$("[data-cy=rect]").focus(onFocus)
+
+      cy.get("[data-cy=rect]").focus().then ->
+        expect(onFocus).to.be.calledOnce
+
     describe "assertion verification", ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
@@ -487,6 +495,14 @@ describe "src/cy/commands/actions/focus", ->
         .get("input:first").blur({force: true})
         .then ->
           expect(blurred).to.be.true
+
+    it "can focus svg elements", ->
+      onBlur = cy.stub()
+
+      cy.$$("[data-cy=rect]").blur(onBlur)
+
+      cy.get("[data-cy=rect]").focus().blur().then ->
+        expect(onBlur).to.be.calledOnce
 
     describe "assertion verification", ->
       beforeEach ->

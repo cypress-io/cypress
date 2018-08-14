@@ -266,7 +266,7 @@ _moveCursorUpOrDown = (el, up) ->
   ## on an input, instead of moving the cursor
   ## we want to perform the native browser action
   ## which is to increment the step/interval
-    if $elements.isInputType(el, "number")
+    if $elements.isType(el, "number")
       if up then el.stepUp?() else el.stepDown?()
     return
 

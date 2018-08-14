@@ -27,6 +27,8 @@ _getValue = ->
       descriptor("HTMLTextAreaElement", "value").get
     when isSelect(this)
       descriptor("HTMLSelectElement", "value").get
+    when isButton(this)
+      descriptor("HTMLButtonElement", "value").get
     else
       ## is an option element
       descriptor("HTMLOptionElement", "value").get
@@ -39,6 +41,8 @@ _setValue = ->
       descriptor("HTMLTextAreaElement", "value").set
     when isSelect(this)
       descriptor("HTMLSelectElement", "value").set
+    when isButton(this)
+      descriptor("HTMLButtonElement", "value").set
     else
       ## is an options element
       descriptor("HTMLOptionElement", "value").set
@@ -61,6 +65,8 @@ _nativeFocus = ->
   switch
     when $window.isWindow(this)
       window.focus
+    when isSvg(this)
+      window.SVGElement.prototype.focus
     else
       window.HTMLElement.prototype.focus
 
@@ -68,6 +74,8 @@ _nativeBlur = ->
   switch
     when $window.isWindow(this)
       window.blur
+    when isSvg(this)
+      window.SVGElement.prototype.blur
     else
       window.HTMLElement.prototype.blur
 
@@ -87,19 +95,41 @@ _nativeSelect = ->
       ## is textarea
       window.HTMLTextAreaElement.prototype.select
 
+_isContentEditable = ->
+  switch
+    when isSvg(this)
+      false
+    else
+      descriptor("HTMLElement", "isContentEditable").get
+
+_setType = ->
+  switch
+    when isInput(this)
+      descriptor("HTMLInputElement", "type").set
+    when isButton(this)
+      descriptor("HTMLButtonElement", "type").set
+
+
+_getType = ->
+  switch
+    when isInput(this)
+      descriptor("HTMLInputElement", "type").get
+    when isButton(this)
+      descriptor("HTMLButtonElement", "type").get
+
 nativeGetters = {
   value: _getValue
   selectionStart: descriptor("HTMLInputElement", "selectionStart").get
-  isContentEditable: descriptor("HTMLElement", "isContentEditable").get
+  isContentEditable: _isContentEditable
   isCollapsed: descriptor("Selection", 'isCollapsed').get
   selectionStart: _getSelectionStart
   selectionEnd: _getSelectionEnd
-  type: descriptor("HTMLInputElement", "type").get
+  type: _getType
 }
 
 nativeSetters = {
   value: _setValue
-  type: descriptor("HTMLInputElement", "type").set
+  type: _setType
 }
 
 nativeMethods = {
@@ -121,8 +151,8 @@ nativeMethods = {
 tryCallNativeMethod = ->
   try
     callNativeMethod.apply(null, arguments)
-  catch
-    null
+  catch err
+    return
 
 callNativeMethod = (obj, fn, args...) ->
   if not nativeFn = nativeMethods[fn]
@@ -188,6 +218,9 @@ isTextarea = (el) ->
 isInput = (el) ->
   getTagName(el) is 'input'
 
+isButton = (el) ->
+  getTagName(el) is 'button'
+
 isSelect = (el) ->
   getTagName(el) is 'select'
 
@@ -196,6 +229,12 @@ isOption = (el) ->
 
 isBody = (el) ->
   getTagName(el) is 'body'
+
+isSvg = (el) ->
+  try
+    "ownerSVGElement" of el
+  catch
+    false
 
 isElement = (obj) ->
   try
@@ -206,11 +245,11 @@ isElement = (obj) ->
 isFocusable = ($el) ->
   $el.is(focusable)
 
-isInputType = ($el, type) ->
+isType = ($el, type) ->
   el = [].concat($jquery.unwrap($el))[0]
   ## NOTE: use DOMElement.type instead of getAttribute('type') since
   ##       <input type="asdf"> will have type="text", and behaves like text type
-  isInput(el) && (getNativeProp(el, 'type') or "").toLowerCase() is type
+  (getNativeProp(el, 'type') or "").toLowerCase() is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"
@@ -270,7 +309,7 @@ isSame = ($el1, $el2) ->
 
 isTextLike = ($el) ->
   sel = (selector) -> isSelector($el, selector)
-  type = (type) -> isInputType($el, type)
+  type = (type) -> isType($el, type)
 
   isContentEditableElement = isContentEditable($el.get(0))
 
@@ -527,7 +566,7 @@ module.exports = {
 
   isTextarea
 
-  isInputType
+  isType
 
   isNeedSingleValueChangeInputElement
 

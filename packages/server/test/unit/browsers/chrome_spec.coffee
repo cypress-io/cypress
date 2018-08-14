@@ -37,7 +37,9 @@ describe "lib/browsers/chrome", ->
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.has.returns(true)
-      plugins.execute.resolves(["--foo=bar", "--load-extension=/foo/bar/baz.js"])
+      plugins.execute.resolves([
+        "--foo=bar", "--load-extension=/foo/bar/baz.js"
+      ])
 
       pathToTheme = extension.getPathToTheme()
 

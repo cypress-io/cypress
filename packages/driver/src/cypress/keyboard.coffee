@@ -403,7 +403,7 @@ $Keyboard = {
     @ensureKey el, key, options, ->
 
       isDigit = isSingleDigitRe.test(key)
-      isNumberInputType = $elements.isInput(el) and $elements.isInputType(el, 'number')
+      isNumberInputType = $elements.isInput(el) and $elements.isType(el, 'number')
 
       if isNumberInputType
         selectionStart = el.selectionStart
