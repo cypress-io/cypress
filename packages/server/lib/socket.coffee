@@ -16,6 +16,7 @@ logger        = require("./logger")
 automation    = require("./automation")
 plugins       = require("./plugins")
 preprocessor  = require("./plugins/preprocessor")
+driverEvents  = require("./plugins/driver_events")
 debug         = require('debug')('cypress:server:socket')
 
 runnerEvents = [
@@ -311,7 +312,7 @@ class Socket
             when "task"
               task.run(config.pluginsFile, args[0])
             when "driver:event"
-              plugins.execute('driver:event', args...)
+              driverEvents.execute(args...)
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"

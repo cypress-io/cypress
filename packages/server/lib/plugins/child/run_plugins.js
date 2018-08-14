@@ -79,7 +79,7 @@ const execute = (ipc, event, ids, args = []) => {
       task.wrap(ipc, registeredEvents, ids, args)
       return
     case 'driver:event':
-      driverEvents.execute(registeredEvents, args)
+      driverEvents.execute(ipc, registeredEvents, ids, args)
       return
     case '_get:task:keys':
       task.getKeys(ipc, registeredEvents, ids)

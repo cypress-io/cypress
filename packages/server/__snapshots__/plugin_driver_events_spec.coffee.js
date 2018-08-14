@@ -7,14 +7,14 @@ exports['e2e plugins sends driver events 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (plugin_driver_events.coffee)                                              │
-  │ Searched:   cypress/integration/plugin_driver_events.coffee                                    │
+  │ Specs:      1 found (plugin_driver_events_spec.coffee)                                         │
+  │ Searched:   cypress/integration/plugin_driver_events_spec.coffee                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: plugin_driver_events.coffee...                                                  (1 of 1) 
+  Running: plugin_driver_events_spec.coffee...                                             (1 of 1) 
 
 
 test:before:run: fails to get
@@ -53,22 +53,22 @@ test:after:run: fails to get
 
   (Results)
 
-  ┌───────────────────────────────────────────┐
-  │ Tests:        1                           │
-  │ Passing:      0                           │
-  │ Failing:      1                           │
-  │ Pending:      0                           │
-  │ Skipped:      0                           │
-  │ Screenshots:  1                           │
-  │ Video:        true                        │
-  │ Duration:     X seconds                   │
-  │ Spec Ran:     plugin_driver_events.coffee │
-  └───────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────┐
+  │ Tests:        1                                │
+  │ Passing:      0                                │
+  │ Failing:      1                                │
+  │ Pending:      0                                │
+  │ Skipped:      0                                │
+  │ Screenshots:  1                                │
+  │ Video:        true                             │
+  │ Duration:     X seconds                        │
+  │ Spec Ran:     plugin_driver_events_spec.coffee │
+  └────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/plugin-driver-events/cypress/screenshots/plugin_driver_events.coffee/fails to get (failed).png (1280x720)
+  - /foo/bar/.projects/plugin-driver-events/cypress/screenshots/plugin_driver_events_spec.coffee/fails to get (failed).png (1280x720)
 
 
   (Video)
@@ -84,7 +84,7 @@ test:after:run: fails to get
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ plugin_driver_events.coffee               XX:XX        1        -        1        -        - │
+  │ ✖ plugin_driver_events_spec.coffee          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
