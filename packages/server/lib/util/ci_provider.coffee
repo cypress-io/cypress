@@ -124,6 +124,7 @@ _providerCiParams = ->
       "CI_JOB_ID"
       "CI_JOB_URL"
       # other information
+      "CI_COMMIT_REF_NAME" # branch name or tag name
       "GITLAB_HOST"
       "CI_PROJECT_ID"
       "CI_PROJECT_URL"
