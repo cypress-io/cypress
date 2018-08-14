@@ -15,7 +15,7 @@ isCodeship = ->
   process.env.CI_NAME and process.env.CI_NAME is "codeship"
 
 isGitlab = ->
-  process.env.GITLAB_CI or (process.env.CI_SERVER_NAME and process.env.CI_SERVER_NAME is "GitLab CI")
+  process.env.GITLAB_CI or (process.env.CI_SERVER_NAME and /^GitLab/.test(process.env.CI_SERVER_NAME))
 
 isJenkins = ->
   process.env.JENKINS_URL or

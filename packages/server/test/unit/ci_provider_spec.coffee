@@ -290,6 +290,12 @@ describe "lib/util/ci_provider", ->
 
     expectsName("gitlab")
 
+    resetEnv()
+
+    process.env.CI_SERVER_NAME = "GitLab"
+
+    expectsName("gitlab")
+
   it "jenkins", ->
     process.env.JENKINS_URL = true
 
