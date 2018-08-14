@@ -60,8 +60,6 @@ _detectProviderName = ->
 ## TODO: dont forget about buildNumber!
 ## look at the old commit that was removed to see how we did it
 _providerCiParams = ->
-  { env } = process
-
   return {
     appveyor: extract([
       "APPVEYOR_JOB_ID"
@@ -314,6 +312,15 @@ commitDefaults = (existingInfo) ->
 list = ->
   _.keys(CI_PROVIDERS)
 
+detectableCiBuildIdProviders = ->
+  ## grab all detectable providers
+  ## that we can extract ciBuildId from
+  _
+  .chain(_providerCiParams())
+  .omitBy(_.isNull)
+  .keys()
+  .value()
+
 module.exports = {
   list
 
@@ -324,5 +331,7 @@ module.exports = {
   commitParams
 
   commitDefaults
+
+  detectableCiBuildIdProviders
 
 }

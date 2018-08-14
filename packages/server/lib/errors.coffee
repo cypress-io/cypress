@@ -175,7 +175,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_ALREADY_COMPLETE"
       """
-      The run you are attempting access is already complete and will not accept new groups.
+      The run you are attempting to access is already complete and will not accept new groups.
 
       The existing run is: #{arg1.runUrl}
 
@@ -191,7 +191,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_PARALLEL_REQUIRED"
       """
-      You dot not pass the --parallel flag, but this run group was originally created with the --parallel flag.
+      You did not pass the --parallel flag, but this run's group was originally created with the --parallel flag.
 
       The existing run is: #{arg1.runUrl}
 
@@ -223,11 +223,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH"
       """
-      You passed the --parallel flag, but this machine is sending different parameters from the first machine that started this parallel run.
+      You passed the --parallel flag, but we do not parallelize tests across different environments.
+
+      This machine is sending different environment parameters than the first machine that started this parallel run.
 
       The existing run is: #{arg1.runUrl}
 
-      In order to run in parallel mode each machine must send the identical parameters such as:
+      In order to run in parallel mode each machine must send identical environment parameters such as:
 
       #{listItems([
         "specs",
@@ -270,13 +272,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
         parallel: "--parallel"
       })}
 
-      In order to use either of these parameters a ciBuildId must be determined.
+      In order to use either of these features a ciBuildId must be determined.
 
-      The ciBuildId is automatically detected if you are running Cypress in any of of the these CI providers:
+      The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
       #{listItems(arg2)}
 
-      Because we could not automatically generate this ciBuildId, the  --ci-build-id flag must be passed in manually.
+      Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
       https://on.cypress.io/indeterminate-ci-build-id
       """
@@ -296,7 +298,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "INCORRECT_CI_BUILD_ID_USAGE"
       """
-      You passed the --ci-build-id flag but did not provide either --group or --parallel.
+      You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
