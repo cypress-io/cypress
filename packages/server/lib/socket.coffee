@@ -1,6 +1,7 @@
 _             = require("lodash")
 path          = require("path")
 uuid          = require("node-uuid")
+debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
 fs            = require("./util/fs")
@@ -12,12 +13,10 @@ task          = require("./task")
 files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
-logger        = require("./logger")
 automation    = require("./automation")
 plugins       = require("./plugins")
 preprocessor  = require("./plugins/preprocessor")
 driverEvents  = require("./plugins/driver_events")
-debug         = require('debug')('cypress:server:socket')
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -61,13 +60,13 @@ class Socket
       preprocessor.emitter.on("file:updated", @onTestFileChange)
 
   onTestFileChange: (filePath) ->
-    debug("test file changed: #{filePath}")
+    debug("test file changed %o", filePath)
 
     fs.statAsync(filePath)
     .then =>
       @io.emit("watched:file:changed")
     .catch ->
-      debug("could not find test file that changed: #{filePath}")
+      debug("could not find test file that changed %o", filePath)
 
   ## TODO: clean this up by sending the spec object instead of
   ## the url path
@@ -75,7 +74,7 @@ class Socket
     ## files are always sent as integration/foo_spec.js
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
-    debug("watch test file #{originalFilePath}")
+    debug("watch test file %o", originalFilePath)
     filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
     filePath = path.relative(config.projectRoot, filePath)
 
@@ -92,7 +91,7 @@ class Socket
 
     ## store this location
     @testFilePath = filePath
-    debug("will watch test file path #{filePath}")
+    debug("will watch test file path %o", filePath)
 
     preprocessor.getFile(filePath, config)
     ## ignore errors b/c we're just setting up the watching. errors

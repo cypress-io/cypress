@@ -755,6 +755,11 @@ describe "lib/cypress", ->
         ee.loadURL = ->
         ee.focusOnWebView = ->
         ee.webContents = {
+          debugger: {
+            on: sinon.stub()
+            attach: sinon.stub()
+            sendCommand: sinon.stub()
+          }
           setUserAgent: sinon.stub()
           session: {
             clearCache: sinon.stub().yieldsAsync()
