@@ -8,7 +8,7 @@ api      = require("#{root}lib/api")
 browsers = require("#{root}lib/browsers")
 Promise  = require("bluebird")
 
-makeError = (details) ->
+makeError = (details = {}) ->
   _.extend(new Error(details.message or "Some error"), details)
 
 describe "lib/api", ->
@@ -1017,6 +1017,14 @@ describe "lib/api", ->
         api.retryWithBackoff(fn2)
       .then ->
         expect(fn2).to.be.calledTwice
+
+    it "retries on error without status code", ->
+      fn = sinon.stub().rejects(makeError())
+      fn.onCall(1).resolves()
+
+      api.retryWithBackoff(fn)
+      .then ->
+        expect(fn).to.be.calledTwice
 
     it "does not retry on non-5xx errors", ->
       fn1 = sinon.stub().rejects(makeError({ message: "499 error", statusCode: 499 }))
