@@ -114,10 +114,16 @@ _providerCiParams = ->
       "DRONE_BUILD_NUMBER"
       "DRONE_PULL_REQUEST"
     ])
+    # see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
+      # pipeline is common among all jobs
+      "CI_PIPELINE_ID",
+      "CI_PIPELINE_URL",
+      # individual jobs
+      "CI_BUILD_ID" # build id and job id are aliases
       "CI_JOB_ID"
       "CI_JOB_URL"
-      "CI_BUILD_ID"
+      # other information
       "GITLAB_HOST"
       "CI_PROJECT_ID"
       "CI_PROJECT_URL"

@@ -243,9 +243,14 @@ describe "lib/util/ci_provider", ->
   it "gitlab", ->
     process.env.GITLAB_CI = true
 
+    # Gitlab has job id and build id as synonyms
+    process.env.CI_BUILD_ID = "ciJobId"
     process.env.CI_JOB_ID = "ciJobId"
     process.env.CI_JOB_URL = "ciJobUrl"
-    process.env.CI_BUILD_ID = "ciBuildId"
+
+    process.env.CI_PIPELINE_ID = "ciPipelineId"
+    process.env.CI_PIPELINE_URL = "ciPipelineUrl"
+
     process.env.GITLAB_HOST = "gitlabHost"
     process.env.CI_PROJECT_ID = "ciProjectId"
     process.env.CI_PROJECT_URL = "ciProjectUrl"
@@ -262,7 +267,9 @@ describe "lib/util/ci_provider", ->
     expectsCiParams({
       ciJobId: "ciJobId"
       ciJobUrl: "ciJobUrl"
-      ciBuildId: "ciBuildId"
+      ciBuildId: "ciJobId"
+      ciPipelineId: "ciPipelineId"
+      ciPipelineUrl: "ciPipelineUrl"
       gitlabHost: "gitlabHost"
       ciProjectId: "ciProjectId"
       ciProjectUrl: "ciProjectUrl"
