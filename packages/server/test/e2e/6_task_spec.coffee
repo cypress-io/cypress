@@ -10,7 +10,7 @@ describe "e2e task", ->
       expectedExitCode: 2
     })
     .then ({ stdout }) ->
-      ## should include a stack trace from plugins file
+      ## should include a stack trace from background file
       match = stdout.match(/at errors(.*)\n/)
       expect(match).not.to.be.null
-      expect(match[0]).to.include("plugins/index.js")
+      expect(match[0]).to.include("background/index.js")

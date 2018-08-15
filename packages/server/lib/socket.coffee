@@ -14,7 +14,7 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
-preprocessor  = require("./plugins/preprocessor")
+preprocessor  = require("./background/preprocessor")
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -307,7 +307,7 @@ class Socket
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
-              task.run(config.pluginsFile, args[0])
+              task.run(config.backgroundFile, args[0])
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"

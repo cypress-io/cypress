@@ -525,31 +525,31 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
-    when "PLUGINS_FILE_ERROR"
+    when "BACKGROUND_FILE_ERROR"
       """
-      The plugins file is missing or invalid.
+      The background file is missing or invalid.
 
-      Your pluginsFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The pluginsFile must be a .js or .coffee file.
+      Your backgroundFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The backgroundFile must be a .js or .coffee file.
 
-      Please fix this, or set 'pluginsFile' to 'false' if a plugins file is not necessary for your project.
+      Please fix this, or set 'backgroundFile' to 'false' if a background file is not necessary for your project.
 
       #{if arg2 then "The following error was thrown:" else ""}
 
       #{if arg2 then chalk.yellow(arg2) else ""}
       """.trim()
-    when "PLUGINS_DIDNT_EXPORT_FUNCTION"
+    when "BACKGROUND_DIDNT_EXPORT_FUNCTION"
       """
-      The pluginsFile must export a function.
+      The backgroundFile must export a function.
 
-      We loaded the pluginsFile from: #{arg1}
+      We loaded the backgroundFile from: #{arg1}
 
       It exported:
 
       #{JSON.stringify(arg2)}
       """
-    when "PLUGINS_FUNCTION_ERROR"
+    when "BACKGROUND_FUNCTION_ERROR"
       """
-      The function exported by the plugins file threw an error.
+      The function exported by the background file threw an error.
 
       We invoked the function exported by '#{arg1}', but it threw an error.
 
@@ -557,9 +557,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """.trim()
-    when "PLUGINS_ERROR"
+    when "BACKGROUND_ERROR"
       """
-      The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+      The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
       #{chalk.yellow(arg1)}
       """.trim()
