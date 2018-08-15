@@ -34,6 +34,8 @@ describe "lib/modes/record", ->
       delete process.env.TRAVIS
       delete process.env.BUILDKITE
       delete process.env.CI_NAME
+      delete process.env.APPVEYOR
+      delete process.env.APPVEYOR_REPO_BRANCH
 
     afterEach ->
       process.env = initialEnv
@@ -73,6 +75,14 @@ describe "lib/modes/record", ->
       commit = recordMode.getCommitFromGitOrCi(gitCommit)
       debug(commit)
       expect(commit.branch).to.eq("bem/ci")
+
+    it "gets branch from process.env.APPVEYOR_REPO_BRANCH for AppVeyor", ->
+      process.env.APPVEYOR              = "1"
+      process.env.APPVEYOR_REPO_BRANCH  = "bem/app"
+
+      commit = recordMode.getCommitFromGitOrCi(gitCommit)
+      debug(commit)
+      expect(commit.branch).to.eq("bem/app")
 
     it "gets branch from git"
       # this is tested inside @cypress/commit-info
