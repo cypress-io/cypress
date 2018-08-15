@@ -1,6 +1,7 @@
 _ = require("lodash")
 la = require("lazy-ass")
 check = require("check-more-types")
+debug = require("debug")("cypress:server")
 
 join = (char, pieces...) ->
   _.chain(pieces).compact().join(char).value()
@@ -41,8 +42,8 @@ CI_PROVIDERS = {
   "snap":           "SNAP_CI"
   "teamcity":       "TEAMCITY_VERSION"
   "teamfoundation": "TF_BUILD"
-  "travis":          "TRAVIS"
-  "wercker":         isWercker
+  "travis":         "TRAVIS"
+  "wercker":        isWercker
 }
 
 _detectProviderName = ->
@@ -308,6 +309,8 @@ commitParams = ->
 
 commitDefaults = (existingInfo) ->
   commitParamsObj = commitParams() or {}
+  debug("commit params object")
+  debug(commitParamsObj)
 
   ## based on the existingInfo properties
   ## merge in the commitParams if null or undefined
