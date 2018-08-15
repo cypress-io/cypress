@@ -8,6 +8,9 @@ workflows:
 
 jobs:
   test:
+    docker:
+      - image: circleci/node:8
+
     steps:
       - checkout
 
