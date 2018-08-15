@@ -1,9 +1,24 @@
-machine:
-  node:
-    # need Node 8 for latest semantic release
-    version: 8
-test:
-  override:
-    - npm test
-  post:
-    - npm run semantic-release || true
+version: 2
+
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - test
+
+jobs:
+  test:
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: npm install
+
+      - run:
+          name: Lint code
+          command: npm run lint
+
+      - run:
+          name: Run tests
+          command: npm test
