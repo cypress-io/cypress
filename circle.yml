@@ -25,3 +25,7 @@ jobs:
       - run:
           name: Run tests
           command: npm test
+
+      - run:
+          name: Semantic release
+          command: npm run semantic-release || true
