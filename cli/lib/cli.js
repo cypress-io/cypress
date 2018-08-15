@@ -90,8 +90,8 @@ function showVersions () {
   return require('./exec/versions')
   .getVersions()
   .then((versions = {}) => {
-    logger.log('Cypress package version:', versions.package)
-    logger.log('Cypress binary version:', versions.binary)
+    console.log('Cypress package version:', versions.package) // eslint-disable-line no-console
+    console.log('Cypress binary version:', versions.binary) // eslint-disable-line no-console
     process.exit(0)
   })
   .catch(util.logErrorExit1)
