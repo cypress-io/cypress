@@ -3,12 +3,13 @@ cache:
   directories:
     - ~/.npm
     - ~/.cache
+  override:
+    - npm ci
+    - $(npm bin)/cypress verify
 notifications:
   email: true
 node_js:
   - '8'
-before_script:
-  - npm ci
 script:
   - npm run lint
   - npm test -- --record
