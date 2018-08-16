@@ -47,8 +47,9 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  # use %j argument to ensure deep nested properties are serialized
   debug(
-    "request to url: %s with params: %o",
+    "request to url: %s with params: %j",
     "#{params.method} #{params.url}",
     _.pick(params, "body", "headers")
   )

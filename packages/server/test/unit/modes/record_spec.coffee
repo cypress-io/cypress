@@ -2,6 +2,7 @@ require("../../spec_helper")
 
 _          = require("lodash")
 os         = require("os")
+debug      = require("debug")("test")
 commitInfo = require("@cypress/commit-info")
 api        = require("#{root}../lib/api")
 errors     = require("#{root}../lib/errors")
@@ -19,43 +20,69 @@ initialEnv = _.clone(process.env)
 describe "lib/modes/record", ->
   ## QUESTION: why are these tests here when
   ## this is a module... ?
-  context "commitInfo.getBranch", ->
+  context "getCommitFromGitOrCi", ->
+    gitCommit = {
+      branch: null
+    }
+
     beforeEach ->
       delete process.env.CIRCLE_BRANCH
       delete process.env.TRAVIS_BRANCH
       delete process.env.BUILDKITE_BRANCH
       delete process.env.CI_BRANCH
+      delete process.env.CIRCLECI
+      delete process.env.TRAVIS
+      delete process.env.BUILDKITE
+      delete process.env.CI_NAME
+      delete process.env.APPVEYOR
+      delete process.env.APPVEYOR_REPO_BRANCH
 
     afterEach ->
       process.env = initialEnv
 
     it "gets branch from process.env.CIRCLE_BRANCH", ->
+      process.env.CIRCLECI      = "1"
       process.env.CIRCLE_BRANCH = "bem/circle"
       process.env.TRAVIS_BRANCH = "bem/travis"
       process.env.CI_BRANCH     = "bem/ci"
 
-      commitInfo.getBranch().then (ret) ->
-        expect(ret).to.eq("bem/circle")
+      commit = recordMode.getCommitFromGitOrCi(gitCommit)
+      debug(commit)
+      expect(commit.branch).to.eq("bem/circle")
 
     it "gets branch from process.env.TRAVIS_BRANCH", ->
+      process.env.TRAVIS        = "1"
       process.env.TRAVIS_BRANCH = "bem/travis"
       process.env.CI_BRANCH     = "bem/ci"
 
-      commitInfo.getBranch().then (ret) ->
-        expect(ret).to.eq("bem/travis")
+      commit = recordMode.getCommitFromGitOrCi(gitCommit)
+      debug(commit)
+      expect(commit.branch).to.eq("bem/travis")
 
     it "gets branch from process.env.BUILDKITE_BRANCH", ->
-      process.env.BUILDKITE_BRANCH = "bem/buildkite"
+      process.env.BUILDKITE         = "1"
+      process.env.BUILDKITE_BRANCH  = "bem/buildkite"
+      process.env.CI_BRANCH         = "bem/ci"
+
+      commit = recordMode.getCommitFromGitOrCi(gitCommit)
+      debug(commit)
+      expect(commit.branch).to.eq("bem/buildkite")
+
+    it "gets branch from process.env.CI_BRANCH for codeship", ->
+      process.env.CI_NAME       = "codeship"
       process.env.CI_BRANCH     = "bem/ci"
 
-      commitInfo.getBranch().then (ret) ->
-        expect(ret).to.eq("bem/buildkite")
+      commit = recordMode.getCommitFromGitOrCi(gitCommit)
+      debug(commit)
+      expect(commit.branch).to.eq("bem/ci")
 
-    it "gets branch from process.env.CI_BRANCH", ->
-      process.env.CI_BRANCH     = "bem/ci"
+    it "gets branch from process.env.APPVEYOR_REPO_BRANCH for AppVeyor", ->
+      process.env.APPVEYOR              = "1"
+      process.env.APPVEYOR_REPO_BRANCH  = "bem/app"
 
-      commitInfo.getBranch().then (ret) ->
-        expect(ret).to.eq("bem/ci")
+      commit = recordMode.getCommitFromGitOrCi(gitCommit)
+      debug(commit)
+      expect(commit.branch).to.eq("bem/app")
 
     it "gets branch from git"
       # this is tested inside @cypress/commit-info
