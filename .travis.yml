@@ -9,7 +9,7 @@ cache:
 notifications:
   email: true
 node_js:
-  - '8'
+  - '10'
 script:
   - npm run lint
   - npm test -- --record
