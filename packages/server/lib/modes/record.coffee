@@ -219,6 +219,18 @@ updateInstance = (options = {}) ->
     else
       null
 
+getCommitFromGitOrCi = (git) ->
+  la(check.object(git), 'expected git information object', git)
+  ciProvider.commitDefaults({
+    sha: git.sha
+    branch: git.branch
+    authorName: git.author
+    authorEmail: git.email
+    message: git.message
+    remoteOrigin: git.remote
+    defaultBranch: null
+  })
+
 createRun = (options = {}) ->
   _.defaults(options, {
     group: null,
@@ -251,6 +263,10 @@ createRun = (options = {}) ->
 
   specs = _.map(specs, getSpecRelativePath)
 
+  commit = getCommitFromGitOrCi(git)
+  debug("commit information from Git or from environment variables")
+  debug(commit)
+
   makeRequest = ->
     api.createRun({
       specs
@@ -265,15 +281,7 @@ createRun = (options = {}) ->
         params: ciProvider.ciParams()
         provider: ciProvider.provider()
       }
-      commit: ciProvider.commitDefaults({
-        sha: git.sha
-        branch: git.branch
-        authorName: git.author
-        authorEmail: git.email
-        message: git.message
-        remoteOrigin: git.remote
-        defaultBranch: null
-      })
+      commit
     })
 
   api.retryWithBackoff(makeRequest, { onBeforeRetry })
@@ -415,6 +423,9 @@ createRunAndRecordSpecs = (options = {}) ->
 
   commitInfo.commitInfo(projectRoot)
   .then (git) ->
+    debug("found the following git information")
+    debug(git)
+
     platform = {
       osCpus: sys.osCpus
       osName: sys.osName
@@ -545,4 +556,5 @@ module.exports = {
 
   createRunAndRecordSpecs
 
+  getCommitFromGitOrCi
 }
