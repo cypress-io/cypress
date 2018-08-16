@@ -12,8 +12,11 @@ toCamelObject = (obj, key) ->
 extract = (envKeys) ->
   _.transform(envKeys, toCamelObject, {})
 
-isCodeship = ->
-  process.env.CI_NAME and process.env.CI_NAME is "codeship"
+isCodeshipBasic = ->
+  process.env.CI_NAME and process.env.CI_NAME is "codeship" and process.env.CODESHIP
+
+isCodeshipPro = ->
+  process.env.CI_NAME and process.env.CI_NAME is "codeship" and not process.env.CODESHIP
 
 isGitlab = ->
   process.env.GITLAB_CI or (process.env.CI_SERVER_NAME and /^GitLab/.test(process.env.CI_SERVER_NAME))
@@ -33,7 +36,8 @@ CI_PROVIDERS = {
   "bamboo":         "bamboo.buildNumber"
   "buildkite":      "BUILDKITE"
   "circle":         "CIRCLECI"
-  "codeship":       isCodeship
+  "codeshipBasic":  isCodeshipBasic
+  "codeshipPro":    isCodeshipPro
   "drone":          "DRONE"
   "gitlab":         isGitlab
   "jenkins":        isJenkins
@@ -101,13 +105,20 @@ _providerCiParams = ->
       "CIRCLE_REPOSITORY_URL"
       "CI_PULL_REQUEST"
     ])
-    codeship: extract([
+    codeshipBasic: extract([
       "CI_BUILD_ID"
       "CI_REPO_NAME"
       "CI_BUILD_URL"
       "CI_PROJECT_ID"
       "CI_BUILD_NUMBER"
       "CI_PULL_REQUEST"
+    ])
+    # CodeshipPro provides very few CI variables
+    # https://documentation.codeship.com/pro/builds-and-configuration/environment-variables/
+    codeshipPro: extract([
+      "CI_BUILD_ID"
+      "CI_REPO_NAME"
+      "CI_PROJECT_ID"
     ])
     drone: extract([
       "DRONE_JOB_NUMBER"
@@ -175,6 +186,8 @@ _providerCiParams = ->
     wercker: null
   }
 
+# tries to grab commit information from CI environment variables
+# very useful to fill missing information when Git cannot grab correct values
 _providerCommitParams = ->
   { env } = process
 
@@ -215,7 +228,16 @@ _providerCommitParams = ->
       # remoteOrigin: ???
       # defaultBranch: ???
     }
-    codeship: {
+    codeshipBasic: {
+      sha: env.CI_COMMIT_ID
+      branch: env.CI_BRANCH
+      message: env.CI_COMMIT_MESSAGE
+      authorName: env.CI_COMMITTER_NAME
+      authorEmail: env.CI_COMMITTER_EMAIL
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    codeshipPro: {
       sha: env.CI_COMMIT_ID
       branch: env.CI_BRANCH
       message: env.CI_COMMIT_MESSAGE

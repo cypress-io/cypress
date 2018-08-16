@@ -176,7 +176,8 @@ describe "lib/util/ci_provider", ->
       authorName: "circleUsername"
     })
 
-  it "codeship", ->
+  it "codeshipBasic", ->
+    process.env.CODESHIP = "TRUE"
     process.env.CI_NAME = "codeship"
 
     process.env.CI_BUILD_ID = "ciBuildId"
@@ -192,7 +193,7 @@ describe "lib/util/ci_provider", ->
     process.env.CI_COMMITTER_NAME = "ciCommitterName"
     process.env.CI_COMMITTER_EMAIL = "ciCommitterEmail"
 
-    expectsName("codeship")
+    expectsName("codeshipBasic")
     expectsCiParams({
       ciBuildId: "ciBuildId"
       ciRepoName: "ciRepoName"
@@ -200,6 +201,33 @@ describe "lib/util/ci_provider", ->
       ciProjectId: "ciProjectId"
       ciBuildNumber: "ciBuildNumber"
       ciPullRequest: "ciPullRequest"
+    })
+    expectsCommitParams({
+      sha: "ciCommitId"
+      branch: "ciBranch"
+      message: "ciCommitMessage"
+      authorName: "ciCommitterName"
+      authorEmail: "ciCommitterEmail"
+    })
+
+  it "codeshipPro", ->
+    process.env.CI_NAME = "codeship"
+
+    process.env.CI_BUILD_ID = "ciBuildId"
+    process.env.CI_REPO_NAME = "ciRepoName"
+    process.env.CI_PROJECT_ID = "ciProjectId"
+
+    process.env.CI_COMMIT_ID = "ciCommitId"
+    process.env.CI_BRANCH = "ciBranch"
+    process.env.CI_COMMIT_MESSAGE = "ciCommitMessage"
+    process.env.CI_COMMITTER_NAME = "ciCommitterName"
+    process.env.CI_COMMITTER_EMAIL = "ciCommitterEmail"
+
+    expectsName("codeshipPro")
+    expectsCiParams({
+      ciBuildId: "ciBuildId"
+      ciRepoName: "ciRepoName"
+      ciProjectId: "ciProjectId"
     })
     expectsCommitParams({
       sha: "ciCommitId"
