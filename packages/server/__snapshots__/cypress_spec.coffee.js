@@ -62,7 +62,8 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - bamboo
 - buildkite
 - circle
-- codeship
+- codeshipBasic
+- codeshipPro
 - drone
 - gitlab
 - jenkins
@@ -88,7 +89,8 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - bamboo
 - buildkite
 - circle
-- codeship
+- codeshipBasic
+- codeshipPro
 - drone
 - gitlab
 - jenkins
@@ -115,7 +117,8 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - bamboo
 - buildkite
 - circle
-- codeship
+- codeshipBasic
+- codeshipPro
 - drone
 - gitlab
 - jenkins
