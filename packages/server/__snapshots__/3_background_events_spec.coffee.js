@@ -384,3 +384,10 @@ exports['e2e background events calls after:screenshot for cy.screenshot() and fa
 
 
 `
+
+exports['e2e background events errors when pluginsFile is used in config 1'] = `
+A configuration option you have supplied has been renamed.
+
+Please rename pluginsFile to backgroundFile
+
+`

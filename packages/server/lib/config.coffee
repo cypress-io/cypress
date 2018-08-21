@@ -58,6 +58,7 @@ breakingConfigKeys = toWords """
   videoRecording
   screenshotOnHeadlessFailure
   trashAssetsBeforeHeadlessRuns
+  pluginsFile
 """
 
 defaults = {
@@ -163,6 +164,8 @@ validateNoBreakingConfig = (cfg) ->
           errors.throw("RENAMED_CONFIG_OPTION", key, "trashAssetsBeforeRuns")
         when "videoRecording"
           errors.throw("RENAMED_CONFIG_OPTION", key, "video")
+        when "pluginsFile"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "backgroundFile")
 
 validate = (cfg, onErr) ->
   _.each cfg, (value, key) ->
