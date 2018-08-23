@@ -1436,3 +1436,13 @@ StatusCodeError: 500 - "Internal Server Error"
 
 
 `
+
+exports['e2e record api interaction errors create run 402 errors and exits when over recorded runs limit 1'] = `
+This project is over its recorded run limit.
+
+You have recorded 600 runs. The limit is 500 runs.
+
+< instructions on how to increase limit >
+< note about not recording? >
+
+`

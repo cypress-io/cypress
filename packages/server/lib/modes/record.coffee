@@ -294,6 +294,15 @@ createRun = (options = {}) ->
       when 401
         recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
         errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
+      when 402
+        { code, payload } = err.error
+
+        numRuns = _.get(payload, "numRuns")
+        limit = _.get(payload, "limit")
+
+        switch code
+          when "RECORD_RUNS_OVER_LIMIT"
+            errors.throw("RECORD_RUNS_OVER_LIMIT", numRuns, limit)
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412

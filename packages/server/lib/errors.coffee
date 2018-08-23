@@ -651,6 +651,15 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "RECORD_RUNS_OVER_LIMIT"
+      """
+      This project is over its recorded run limit.
+      
+      You have recorded #{chalk.blue(arg1)} runs. The limit is #{chalk.blue(arg2)} runs.
+
+      < instructions on how to increase limit >
+      < note about not recording? >
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

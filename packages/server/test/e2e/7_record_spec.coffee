@@ -744,6 +744,32 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
+    describe "create run 402", ->
+      routes = [{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "RECORD_RUNS_OVER_LIMIT"
+          message: "Run group name cannot be used again without passing the parallel flag."
+          payload: {
+            numRuns: 600
+            limit: 500
+          }
+        })
+      }]
+
+      setup(routes)
+
+      it "errors and exits when over recorded runs limit", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
     describe "create run unknown 422", ->
       routes = [{
         method: "post"
