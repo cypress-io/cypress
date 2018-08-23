@@ -654,12 +654,23 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "RECORD_RUNS_OVER_LIMIT"
       """
       This project is over its recorded run limit.
-      
+
       You have recorded #{chalk.blue(arg1)} runs. The limit is #{chalk.blue(arg2)} runs.
 
       < instructions on how to increase limit >
       < note about not recording? >
       """
+    when "GRACE_PERIOD_WARNING"
+      """
+      Your project is in a grace period with #{chalk.blue(arg1)} days left.
+      """
+    when "OVER_RECORDINGS_WARNING"
+      """
+      You are over the recorded runs limit.
+
+      You have recorded #{chalk.blue(arg1)} runs. The limit is #{chalk.blue(arg2)} runs.
+      """
+
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
@@ -669,8 +680,8 @@ get = (type, arg1, arg2) ->
   err.type = type
   err
 
-warning = (type, arg) ->
-  err = get(type, arg)
+warning = (type, arg1, arg2) ->
+  err = get(type, arg1, arg2)
   log(err, "magenta")
 
 throwErr = (type, arg1, arg2) ->

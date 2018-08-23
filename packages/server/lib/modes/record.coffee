@@ -285,6 +285,16 @@ createRun = (options = {}) ->
     })
 
   api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .tap (response) ->
+    return if not response.warnings?.length
+
+    _.each response.warnings, (warning) ->
+      switch warning.code
+        when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          errors.warning("GRACE_PERIOD_WARNING", warning.daysLeft)
+        when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          errors.warning("OVER_RECORDINGS_WARNING", warning.numRuns, warning.limit)
+
   .catch (err) ->
     debug("failed creating run %o", {
       stack: err.stack
