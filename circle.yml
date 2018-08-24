@@ -177,19 +177,17 @@ jobs:
       ## now go build all of subpackages
       - run: npm run build
 
-      ## save entire folder as artifact for other jobs to continue
-      ## hmm, do not see a good way to cache it, since all code
-      ## might change
-      - save_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}-{{ checksum "circle.yml" }}
+      ## save entire folder as artifact for other jobs to run without reinstalling
+      - persist_to_workspace:
+          root: ~/
           paths:
-            - /root/cypress
+            - cypress
 
   lint:
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run lint
       - run: npm run all lint
 
@@ -197,8 +195,8 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
@@ -221,8 +219,8 @@ jobs:
     <<: *defaults
     parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -231,8 +229,8 @@ jobs:
     <<: *defaults
     parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -240,8 +238,8 @@ jobs:
   "server-e2e-tests-1":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 1
           working_directory: packages/server
@@ -251,8 +249,8 @@ jobs:
   "server-e2e-tests-2":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 2
           working_directory: packages/server
@@ -262,8 +260,8 @@ jobs:
   "server-e2e-tests-3":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 3
           working_directory: packages/server
@@ -273,8 +271,8 @@ jobs:
   "server-e2e-tests-4":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 4
           working_directory: packages/server
@@ -284,8 +282,8 @@ jobs:
   "server-e2e-tests-5":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 5
           working_directory: packages/server
@@ -295,8 +293,8 @@ jobs:
   "server-e2e-tests-6":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 6
           working_directory: packages/server
@@ -306,8 +304,8 @@ jobs:
   "server-e2e-tests-7":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 7
           working_directory: packages/server
@@ -317,8 +315,8 @@ jobs:
   "server-e2e-tests-8":
       <<: *defaults
       steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run test-e2e -- --chunk 8
           working_directory: packages/server
@@ -329,8 +327,8 @@ jobs:
     <<: *defaults
     parallelism: 3
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm start
           background: true
@@ -352,8 +350,8 @@ jobs:
     <<: *defaults
     parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
@@ -370,8 +368,8 @@ jobs:
   "run-launcher":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -379,8 +377,8 @@ jobs:
   "build-binary":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: $(npm bin)/print-arch
       - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform linux
@@ -405,8 +403,8 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
@@ -431,8 +429,8 @@ jobs:
   "test-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
@@ -447,8 +445,8 @@ jobs:
   "build-npm-package":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           name: bump NPM version
           command: npm --no-git-tag-version version $NEXT_DEV_VERSION
@@ -489,8 +487,8 @@ jobs:
   "test-next-version":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la /tmp/urls
@@ -523,8 +521,8 @@ jobs:
   "test-next-version-locally":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       # make sure we have cypress.zip received
@@ -553,8 +551,8 @@ jobs:
   "test-binary-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       # make sure we have the binary
