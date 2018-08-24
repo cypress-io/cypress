@@ -584,6 +584,7 @@ workflows:
       - lint:
           requires:
             - build
+      # unit, integration and e2e tests
       - unit-tests:
           requires:
             - build
@@ -626,11 +627,15 @@ workflows:
       - run-launcher:
           requires:
             - build
+      # various testing scenarios, like building full binary
+      # and testing it on a real project
       - test-against-staging:
           filters:
             branches:
               only:
                 - develop
+                # todo: remove before closing this issue 2398
+                - switch-to-circle-workspaces-2398
           requires:
             - build
       - test-kitchensink-against-staging:
@@ -638,6 +643,7 @@ workflows:
             branches:
               only:
                 - develop
+                - switch-to-circle-workspaces-2398
           requires:
             - build
       - build-npm-package:
@@ -645,6 +651,7 @@ workflows:
             branches:
               only:
                 - develop
+                - switch-to-circle-workspaces-2398
           requires:
             - build
       - build-binary:
@@ -652,6 +659,7 @@ workflows:
             branches:
               only:
                 - develop
+                - switch-to-circle-workspaces-2398
           requires:
             - build
       - test-next-version:
@@ -659,6 +667,7 @@ workflows:
             branches:
               only:
                 - develop
+                - switch-to-circle-workspaces-2398
           requires:
             - build-npm-package
             - build-binary
@@ -667,6 +676,7 @@ workflows:
             branches:
               only:
                 - develop
+                - switch-to-circle-workspaces-2398
           requires:
             - build-npm-package
             - build-binary
@@ -675,6 +685,7 @@ workflows:
             branches:
               only:
                 - develop
+                - switch-to-circle-workspaces-2398
           requires:
             - build-npm-package
             - build-binary
