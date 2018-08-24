@@ -653,22 +653,23 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_RUNS_OVER_LIMIT"
       """
-      This project is over its recorded run limit.
-
-      You have recorded #{chalk.blue(arg1)} runs. The limit is #{chalk.blue(arg2)} runs.
+      This project is over its monthly recorded run limit.
+      #{arg1}
 
       < instructions on how to increase limit >
       < note about not recording? >
       """
     when "GRACE_PERIOD_WARNING"
       """
-      Your project is in a grace period with #{chalk.blue(arg1)} days left.
+      Your project is in a grace period#{arg1}.
       """
     when "OVER_RECORDINGS_WARNING"
       """
-      You are over the recorded runs limit.
+      This project is over its monthly recorded run limit.
+      #{arg1}
 
-      You have recorded #{chalk.blue(arg1)} runs. The limit is #{chalk.blue(arg2)} runs.
+      < instructions on how to increase limit >
+      < note about not recording? >
       """
 
 

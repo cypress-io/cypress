@@ -231,6 +231,18 @@ getCommitFromGitOrCi = (git) ->
     defaultBranch: null
   })
 
+usedMessage = (used, limit) ->
+  if used? and limit?
+    "\nYou have recorded #{chalk.blue(used)} runs this month. The limit is #{chalk.blue(limit)} runs."
+  else
+    ""
+
+daysLeftPhrase = (daysLeft) ->
+  if daysLeft?
+    " with #{chalk.blue(daysLeft)} days left"
+  else
+    ""
+
 createRun = (options = {}) ->
   _.defaults(options, {
     group: null,
@@ -291,9 +303,9 @@ createRun = (options = {}) ->
     _.each response.warnings, (warning) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("GRACE_PERIOD_WARNING", warning.daysLeft)
+          errors.warning("GRACE_PERIOD_WARNING", daysLeftPhrase(warning.daysLeft))
         when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("OVER_RECORDINGS_WARNING", warning.numRuns, warning.limit)
+          errors.warning("OVER_RECORDINGS_WARNING", usedMessage(warning.used, warning.limit))
 
   .catch (err) ->
     debug("failed creating run %o", {
@@ -307,12 +319,12 @@ createRun = (options = {}) ->
       when 402
         { code, payload } = err.error
 
-        numRuns = _.get(payload, "numRuns")
+        used = _.get(payload, "used")
         limit = _.get(payload, "limit")
 
         switch code
           when "RECORD_RUNS_OVER_LIMIT"
-            errors.throw("RECORD_RUNS_OVER_LIMIT", numRuns, limit)
+            errors.throw("RECORD_RUNS_OVER_LIMIT", usedMessage(used, limit))
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412

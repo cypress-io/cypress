@@ -752,7 +752,7 @@ describe "e2e record", ->
         res: (req, res) -> res.status(402).json({
           code: "RECORD_RUNS_OVER_LIMIT"
           payload: {
-            numRuns: 600
+            used: 600
             limit: 500
           }
         })
@@ -1112,7 +1112,7 @@ describe "e2e record", ->
             runUrl
             warnings: [{
               code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-              numRuns: 700
+              used: 700
               limit: 500
             }]
           })
