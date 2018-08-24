@@ -286,7 +286,7 @@ createRun = (options = {}) ->
 
   api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .tap (response) ->
-    return if not response.warnings?.length
+    return if not response?.warnings?.length
 
     _.each response.warnings, (warning) ->
       switch warning.code
