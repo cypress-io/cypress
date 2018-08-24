@@ -634,8 +634,6 @@ workflows:
             branches:
               only:
                 - develop
-                # todo: remove before closing this issue 2398
-                - switch-to-circle-workspaces-2398
           requires:
             - build
       - test-kitchensink-against-staging:
@@ -643,7 +641,6 @@ workflows:
             branches:
               only:
                 - develop
-                - switch-to-circle-workspaces-2398
           requires:
             - build
       - build-npm-package:
@@ -651,7 +648,6 @@ workflows:
             branches:
               only:
                 - develop
-                - switch-to-circle-workspaces-2398
           requires:
             - build
       - build-binary:
@@ -659,7 +655,6 @@ workflows:
             branches:
               only:
                 - develop
-                - switch-to-circle-workspaces-2398
           requires:
             - build
       - test-next-version:
@@ -667,7 +662,6 @@ workflows:
             branches:
               only:
                 - develop
-                - switch-to-circle-workspaces-2398
           requires:
             - build-npm-package
             - build-binary
@@ -676,7 +670,6 @@ workflows:
             branches:
               only:
                 - develop
-                - switch-to-circle-workspaces-2398
           requires:
             - build-npm-package
             - build-binary
@@ -685,7 +678,6 @@ workflows:
             branches:
               only:
                 - develop
-                - switch-to-circle-workspaces-2398
           requires:
             - build-npm-package
             - build-binary
