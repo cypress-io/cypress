@@ -339,7 +339,8 @@ jobs:
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            npm run cypress:run -- --record --key $PACKAGES_RECORD_KEY --parallel --group 3x-driver-chrome --browser chrome
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -358,7 +359,8 @@ jobs:
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            npm run cypress:run -- --record --key $PACKAGES_RECORD_KEY --parallel --group 2x-desktop-gui
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress
@@ -420,9 +422,9 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
+            CYPRESS_ENV=staging \
             CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
 
@@ -437,9 +439,9 @@ jobs:
       - run:
           name: Run test project
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            CYPRESS_ENV=staging \
             npm run cypress:run -- --project /tmp/repo --record
 
   "build-npm-package":
@@ -571,9 +573,9 @@ jobs:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
 
 workflows:
