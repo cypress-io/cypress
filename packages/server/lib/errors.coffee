@@ -653,23 +653,23 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_RUNS_OVER_LIMIT"
       """
-      This project is over its monthly recorded run limit.
+      This project is over its monthly limit of private test recordings.
       #{arg1}
 
-      < instructions on how to increase limit >
-      < note about not recording? >
+      < TODO: instructions on how to increase limit >
+      < TODO: note about not recording? >
       """
     when "GRACE_PERIOD_WARNING"
       """
-      Your project is in a grace period#{arg1}.
+      Your project is in a grace period.
       """
     when "OVER_RECORDINGS_WARNING"
       """
-      This project is over its monthly recorded run limit.
+      This project is over its monthly limit of private test recordings.
       #{arg1}
 
-      < instructions on how to increase limit >
-      < note about not recording? >
+      < TODO: instructions on how to increase limit >
+      < TODO: note about not recording? >
       """
 
 

@@ -1438,17 +1438,17 @@ StatusCodeError: 500 - "Internal Server Error"
 `
 
 exports['e2e record api interaction errors create run 402 errors and exits when over recorded runs limit 1'] = `
-This project is over its monthly recorded run limit.
+This project is over its monthly limit of private test recordings.
 
-You have recorded 600 runs this month. The limit is 500 runs.
+You have recorded 600 private test recordings this month. The limit is 500 private test recordings.
 
-< instructions on how to increase limit >
-< note about not recording? >
+< TODO: instructions on how to increase limit >
+< TODO: note about not recording? >
 
 `
 
 exports['e2e record api interaction warnings create run warnings grace period warns when in grace period 1'] = `
-Your project is in a grace period with 15 days left.
+Your project is in a grace period.
 
 ====================================================================================================
 
@@ -1524,12 +1524,12 @@ Your project is in a grace period with 15 days left.
 `
 
 exports['e2e record api interaction warnings create run warnings over test recordings warning warns when over recordings limit 1'] = `
-This project is over its monthly recorded run limit.
+This project is over its monthly limit of private test recordings.
 
-You have recorded 700 runs this month. The limit is 500 runs.
+You have recorded 700 private test recordings this month. The limit is 500 private test recordings.
 
-< instructions on how to increase limit >
-< note about not recording? >
+< TODO: instructions on how to increase limit >
+< TODO: note about not recording? >
 
 ====================================================================================================
 

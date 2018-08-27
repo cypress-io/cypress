@@ -233,13 +233,7 @@ getCommitFromGitOrCi = (git) ->
 
 usedMessage = (used, limit) ->
   if used? and limit?
-    "\nYou have recorded #{chalk.blue(used)} runs this month. The limit is #{chalk.blue(limit)} runs."
-  else
-    ""
-
-daysLeftPhrase = (daysLeft) ->
-  if daysLeft?
-    " with #{chalk.blue(daysLeft)} days left"
+    "\nYou have recorded #{chalk.blue(used)} private test recordings this month. The limit is #{chalk.blue(limit)} private test recordings."
   else
     ""
 
@@ -303,7 +297,7 @@ createRun = (options = {}) ->
     _.each response.warnings, (warning) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("GRACE_PERIOD_WARNING", daysLeftPhrase(warning.daysLeft))
+          errors.warning("GRACE_PERIOD_WARNING")
         when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("OVER_RECORDINGS_WARNING", usedMessage(warning.used, warning.limit))
 
