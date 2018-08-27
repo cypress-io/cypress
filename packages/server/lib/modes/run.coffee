@@ -1,12 +1,15 @@
 _          = require("lodash")
+la         = require("lazy-ass")
 pkg        = require("@packages/root")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
+check      = require("check-more-types")
 human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
+
 recordMode = require("./record")
 errors     = require("../errors")
 Project    = require("../project")
@@ -265,6 +268,8 @@ renderSummaryTable = (runUrl) -> (results) ->
 
 iterateThroughSpecs = (options = {}) ->
   { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+
+  la(check.maybe.fn(beforeSpecRun), "beforeSpecRun should be a function, was", beforeSpecRun)
 
   serial = ->
     Promise.mapSeries(specs, runEachSpec)
@@ -950,6 +955,9 @@ module.exports = {
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
         runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
+          la(check.maybe.fn(beforeSpecRun),
+            "beforeSpecRun should be a function, not", beforeSpecRun)
+
           @runSpecs({
             beforeSpecRun
             afterSpecRun
