@@ -9,6 +9,7 @@ workingPreprocessor = Fixtures.projectPath("working-preprocessor")
 backgroundAsyncError = Fixtures.projectPath("background-async-error")
 backgroundAbsolutePath = Fixtures.projectPath("background-absolute-path")
 backgroundAfterScreenshot = Fixtures.projectPath("background-after-screenshot")
+backgroundPluginsFile = Fixtures.projectPath("background-plugins-file")
 
 describe "e2e background events", ->
   e2e.setup()
@@ -78,9 +79,9 @@ describe "e2e background events", ->
       expectedExitCode: 1
     })
 
-  it.only "errors when backgroundFile path is default and plugins/index.js exists", ->
+  it "errors when backgroundFile path is default and plugins/index.js exists", ->
     e2e.exec(@, {
-      # spec: "simple_spec.coffee"
+      project: backgroundPluginsFile
       snapshot: true
       expectedExitCode: 1
     })
