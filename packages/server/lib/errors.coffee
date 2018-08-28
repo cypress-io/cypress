@@ -651,6 +651,15 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "REPATHED_BACKGROUND_FILE"
+      """
+      The "plugins file" has been renamed to the "background file" and has a new default path.
+
+      Please rename
+        #{chalk.yellow(arg1)}
+      to
+        #{chalk.blue(arg2)}
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

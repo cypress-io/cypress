@@ -78,7 +78,7 @@ class Project extends EE
       ## TODO: we currently always scaffold the background file
       ## even when headlessly or else it will cause an error when
       ## we try to load it and it's not there. We must do this here
-      ## else initialing the background will instantly fail.
+      ## else initializing the background file will instantly fail.
       if cfg.backgroundFile
         scaffold.background(path.dirname(cfg.backgroundFile), cfg)
     .then (cfg) =>

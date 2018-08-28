@@ -9,8 +9,9 @@ origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-debug      = require("debug")("cypress:server:config")
+debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
+util     = require("./util/config")
 
 ## cypress followed by _
 cypressEnvRe = /^(cypress_)/i
@@ -182,6 +183,25 @@ validateFile = (file) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
+validateBackgroundFile = (config) ->
+  return if not util.isDefault(config, "backgroundFile")
+
+  ## if the backgroundFile is default and the file exists at the old
+  ## path (plugins/index.js), throw to let the user know to rename the file
+  oldPath = config.backgroundFile.replace(
+    "#{path.sep}background#{path.sep}index",
+    "#{path.sep}plugins#{path.sep}index"
+  )
+
+  shortOldPath = oldPath.replace("#{config.projectRoot}#{path.sep}", "")
+  shortNewPath = config.backgroundFile.replace("#{config.projectRoot}#{path.sep}", "")
+
+  fs.pathExists(oldPath)
+  .then ->
+    errors.throw("REPATHED_BACKGROUND_FILE", shortOldPath, shortNewPath)
+  .catch {code: "ENOENT"}, ->
+    ## file doesn't exist. they've already renamed it
+
 module.exports = {
   getConfigKeys: -> configKeys
 
@@ -273,6 +293,7 @@ module.exports = {
     @setSupportFileAndFolder(config)
     .then(@setBackgroundFile)
     .then(@setScaffoldPaths)
+    .tap(validateBackgroundFile)
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)

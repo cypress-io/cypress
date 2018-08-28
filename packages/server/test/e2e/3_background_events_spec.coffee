@@ -72,8 +72,15 @@ describe "e2e background events", ->
 
   it "errors when pluginsFile is used in config", ->
     e2e.exec(@, {
-      spec: "simple_passing_spec.coffee"
+      spec: "simple_spec.coffee"
       config: "pluginsFile=cypress/integration/background/index.js"
+      snapshot: true
+      expectedExitCode: 1
+    })
+
+  it.only "errors when backgroundFile path is default and plugins/index.js exists", ->
+    e2e.exec(@, {
+      # spec: "simple_spec.coffee"
       snapshot: true
       expectedExitCode: 1
     })

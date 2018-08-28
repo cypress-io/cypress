@@ -391,3 +391,13 @@ A configuration option you have supplied has been renamed.
 Please rename pluginsFile to backgroundFile
 
 `
+
+exports['e2e background events errors when backgroundFile path is default and plugins/index.js exists 1'] = `
+The "plugins file" has been renamed to the "background file" and has a new default path.
+
+Please rename
+  cypress/plugins/index.js
+to
+  cypress/background/index.js
+
+`
