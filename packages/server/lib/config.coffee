@@ -197,10 +197,9 @@ validateBackgroundFile = (config) ->
   shortNewPath = config.backgroundFile.replace("#{config.projectRoot}#{path.sep}", "")
 
   fs.pathExists(oldPath)
-  .then ->
-    errors.throw("REPATHED_BACKGROUND_FILE", shortOldPath, shortNewPath)
-  .catch {code: "ENOENT"}, ->
-    ## file doesn't exist. they've already renamed it
+  .then (found) ->
+    if found
+      errors.throw("REPATHED_BACKGROUND_FILE", shortOldPath, shortNewPath)
 
 module.exports = {
   getConfigKeys: -> configKeys
