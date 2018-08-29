@@ -788,14 +788,17 @@ module.exports = {
         debug("spec results %o", results)
         serverEvents.execute("after:spec", spec, results)
 
-    iterateThroughSpecs({
-      specs
-      config
-      parallel
-      runEachSpec
-      afterSpecRun
-      beforeSpecRun
-    })
+    Promise.try ->
+      serverEvents.execute("before:run")
+    .then ->
+      iterateThroughSpecs({
+        specs
+        config
+        parallel
+        runEachSpec
+        afterSpecRun
+        beforeSpecRun
+      })
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
