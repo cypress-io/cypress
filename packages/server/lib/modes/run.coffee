@@ -829,9 +829,17 @@ module.exports = {
       browserName
     })
 
-    serverEvents.execute("before:spec", spec)
-
     screenshots = []
+
+    browserCanBeRecorded = (name) ->
+      name is "electron" and isHeadless
+
+    if video and browserCanBeRecorded(browserName)
+      if not videosFolder
+        throw new Error("Missing videoFolder for recording")
+
+      name  = path.join(videosFolder, spec.name + ".mp4")
+      cname = path.join(videosFolder, spec.name + "-compressed.mp4")
 
     ## we know we're done running headlessly
     ## when the renderer has connected and
@@ -839,28 +847,20 @@ module.exports = {
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
 
-    ## if we've been told to record and we're not spawning a headed browser
-    browserCanBeRecorded = (name) ->
-      name is "electron" and isHeadless
-
-    if video
-      if browserCanBeRecorded(browserName)
-        if not videosFolder
-          throw new Error("Missing videoFolder for recording")
-
-        name  = path.join(videosFolder, spec.name + ".mp4")
-        cname = path.join(videosFolder, spec.name + "-compressed.mp4")
-
-        recording = @createRecording(name)
-      else
-        console.log("")
-
-        if browserName is "electron" and isHeaded
-          errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+    Promise.try ->
+      serverEvents.execute("before:spec", spec)
+    .then =>
+      if video
+        if browserCanBeRecorded(browserName)
+          @createRecording(name)
         else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
+          console.log("")
 
-    Promise.resolve(recording)
+          if browserName is "electron" and isHeaded
+            errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+          else
+            errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
+
     .then (props = {}) =>
       ## extract the started + ended promises from recording
       {start, end, write} = props

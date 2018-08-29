@@ -15,6 +15,7 @@ exports['e2e plugins sends server events 1'] = `
                                                                                                     
   Running: plugin_server_events_1_spec.coffee...                                           (1 of 2) 
 before:spec: cypress/integration/plugin_server_events_1_spec.coffee
+before:spec is awaited
 
 
   ✓ passes
@@ -43,11 +44,13 @@ before:spec: cypress/integration/plugin_server_events_1_spec.coffee
   - Finished processing:  /foo/bar/.projects/plugin-server-events/cypress/videos/abc123.mp4 (X seconds)
 
 after:spec: cypress/integration/plugin_server_events_1_spec.coffee { tests: 1, passes: 1, failures: 0 }
+after:spec is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: plugin_server_events_2_spec.coffee...                                           (2 of 2) 
 before:spec: cypress/integration/plugin_server_events_2_spec.coffee
+before:spec is awaited
 
 
   1) fails
@@ -109,7 +112,9 @@ before:spec: cypress/integration/plugin_server_events_2_spec.coffee
   - Finished processing:  /foo/bar/.projects/plugin-server-events/cypress/videos/abc123.mp4 (X seconds)
 
 after:spec: cypress/integration/plugin_server_events_2_spec.coffee { tests: 1, passes: 0, failures: 1 }
+after:spec is awaited
 after:run: { totalTests: 2, totalPassed: 1, totalFailed: 1 }
+after:run is awaited
 
 ====================================================================================================
 

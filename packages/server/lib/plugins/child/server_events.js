@@ -2,16 +2,16 @@ const _ = require('lodash')
 const util = require('../util')
 
 module.exports = {
-  execute (ipc, events, ids, args) {
+  wrap (ipc, events, ids, args) {
     const eventName = args[0]
     args = args.slice(1)
     const event = _.find(events, { event: eventName })
 
     const invoke = () => {
-      if (event && _.isFunction(event.handler)) {
-        event.handler(...args)
+      const handler = _.get(event, 'handler')
+      if (_.isFunction(handler)) {
+        return handler(...args)
       }
-      return null
     }
 
     util.wrapChildPromise(ipc, invoke, ids, args)
