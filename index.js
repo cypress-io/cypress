@@ -19,7 +19,7 @@ const defaultOptions = {
             {
               loader: require.resolve('babel-loader'),
               options: {
-                presets: ['babel-preset-env', 'babel-preset-react'].map(require.resolve),
+                presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve),
               },
             },
           ],
@@ -146,9 +146,7 @@ const preprocessor = (options = {}) => {
       log('watching')
     }
 
-    const bundler = file.shouldWatch
-      ? compiler.watch(watchOptions, handle)
-      : compiler.run(handle)
+    const bundler = file.shouldWatch ? compiler.watch(watchOptions, handle) : compiler.run(handle)
 
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
