@@ -82,14 +82,14 @@ describe "$Cypress.Runner API", ->
           expect(restore).to.be.called
           done()
 
-      it "calls test:after:hooks and test:after:run when uncaught err from hook", (done) ->
+      it "calls test:after:hooks and after:test:run when uncaught err from hook", (done) ->
         fn = _.after 3, -> done()
 
         @Cypress.on "test:after:hooks", (test) ->
           expect(test.title).to.eq("one")
           fn()
 
-        @Cypress.on "test:after:run", (test) ->
+        @Cypress.on "after:test:run", (test) ->
           expect(test.title).to.eq("one")
           fn()
 
@@ -305,7 +305,7 @@ describe "$Cypress.Runner API", ->
       ## we're additionally testing that Cypress
       ## fires this test:end event since thats
       ## how we actually get our test!
-      @Cypress.on "test:after:run", (@relatedTest) =>
+      @Cypress.on "after:test:run", (@relatedTest) =>
 
       @runner.run -> done()
 
@@ -367,11 +367,11 @@ describe "$Cypress.Runner API", ->
 
         @runner = $Cypress.Runner.runner(@Cypress, runner)
 
-      it "fires test:before:run:async twice", (done) ->
+      it "fires before:test:run:async twice", (done) ->
         invoke = @sandbox.spy @Cypress, "invoke"
 
         @runner.run ->
-          calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:run:async"
+          calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "before:test:run:async"
           expect(calls.length).to.eq(2)
           done()
 
@@ -422,8 +422,8 @@ describe "$Cypress.Runner API", ->
           done()
 
       describe "when grepped", ->
-        it "triggers test:before:run:async on test 'two'", (done) ->
-          @Cypress.on "test:before:run:async", (@curTest) =>
+        it "triggers before:test:run:async on test 'two'", (done) ->
+          @Cypress.on "before:test:run:async", (@curTest) =>
 
           @runner.grep /two/
           @runner.normalizeAll()
@@ -431,8 +431,8 @@ describe "$Cypress.Runner API", ->
             expect(@curTest.title).to.eq "two"
             done()
 
-        it "triggers test:before:run:async on test 'ten'", (done) ->
-          @Cypress.on "test:before:run:async", (@curTest) =>
+        it "triggers before:test:run:async on test 'ten'", (done) ->
+          @Cypress.on "before:test:run:async", (@curTest) =>
 
           @runner.grep /ten/
           @runner.normalizeAll()
@@ -451,28 +451,28 @@ describe "$Cypress.Runner API", ->
 
             @runner = $Cypress.Runner.runner(@Cypress, runner)
 
-          it "fires test:before:run:async twice", (done) ->
+          it "fires before:test:run:async twice", (done) ->
             trigger = @sandbox.spy(@Cypress, "trigger")
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:before:run:async"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "before:test:run:async"
               expect(calls.length).to.eq(2)
               done()
 
-          it "fires test:after:run twice", (done) ->
+          it "fires after:test:run twice", (done) ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:after:run"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "after:test:run"
               expect(calls.length).to.eq(2)
               done()
 
           ## only once because before(fn) code still gets executed  on pending tests
-          it "fires test:before:run:async once", (done) ->
+          it "fires before:test:run:async once", (done) ->
             invoke = @sandbox.spy(@Cypress, "invoke")
 
             @runner.run ->
-              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:run:async"
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "before:test:run:async"
               expect(calls.length).to.eq(1)
               done()
 
@@ -496,11 +496,11 @@ describe "$Cypress.Runner API", ->
 
             @runner = $Cypress.Runner.runner(@Cypress, runner)
 
-          it "fires test:before:run:async thrice", (done) ->
+          it "fires before:test:run:async thrice", (done) ->
             trigger = @sandbox.spy(@Cypress, "trigger")
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:before:run:async"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "before:test:run:async"
               expect(calls.length).to.eq(3)
               done()
 
@@ -508,16 +508,16 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:after:run"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "after:test:run"
               expect(calls.length).to.eq(3)
               done()
 
           ## only twice because pending tests in the middle are completely skipped
-          it "fires test:before:run:async twice", (done) ->
+          it "fires before:test:run:async twice", (done) ->
             invoke = @sandbox.spy(@Cypress, "invoke")
 
             @runner.run ->
-              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:run:async"
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "before:test:run:async"
               expect(calls.length).to.eq(2)
               done()
 
@@ -545,11 +545,11 @@ describe "$Cypress.Runner API", ->
 
             @runner = $Cypress.Runner.runner(@Cypress, runner)
 
-          it "fires test:before:run:async five times", (done) ->
+          it "fires before:test:run:async five times", (done) ->
             trigger = @sandbox.spy(@Cypress, "trigger")
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:before:run:async"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "before:test:run:async"
               expect(calls.length).to.eq(5)
               done()
 
@@ -557,20 +557,20 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:after:run"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "after:test:run"
               expect(calls.length).to.eq(5)
               done()
 
-          it "fires test:before:run:async four times", (done) ->
+          it "fires before:test:run:async four times", (done) ->
             invoke = @sandbox.spy(@Cypress, "invoke")
 
             @runner.run ->
-              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:run:async"
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "before:test:run:async"
               titles = _.map calls, (call) -> call.args[1].title
               expect(calls.length).to.eq(4)
 
               ## this may seem strange but it is correct. only pending tests
-              ## on the book ends will get their test:before:run:async called since
+              ## on the book ends will get their before:test:run:async called since
               ## thats the only time code can actually run on a pending test
               expect(titles).to.deep.eq(["one", "two", "three", "five"])
               done()

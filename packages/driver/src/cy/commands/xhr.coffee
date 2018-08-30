@@ -228,7 +228,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("window:unload", abort)
 
-  Cypress.on "test:before:run", ->
+  Cypress.on "before:test:run", ->
     ## reset the existing server
     reset()
 
@@ -245,7 +245,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     return null
 
-  Cypress.on "window:before:load", (contentWindow) ->
+  Cypress.on "before:window:load", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
       server.bindTo(contentWindow)

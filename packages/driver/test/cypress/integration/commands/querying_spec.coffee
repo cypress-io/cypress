@@ -18,7 +18,7 @@ describe "src/cy/commands/querying", ->
     it "returns the activeElement", ->
       $button = cy.$$("#button")
       $button.get(0).focus()
-      
+
       expect(cy.state("document").activeElement).to.eq($button.get(0))
 
       cy.focused().then ($focused) ->
@@ -261,7 +261,7 @@ describe "src/cy/commands/querying", ->
     it "clears withinSubject even if next is null", (done) ->
       span = cy.$$("#button-text button span")
 
-      cy.once "command:queue:before:end", ->
+      cy.once "before:command:queue:end", ->
         ## should be defined here because next would have been
         ## null and withinSubject would not have been cleared
         expect(cy.state("withinSubject")).not.to.be.undefined

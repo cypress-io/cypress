@@ -526,7 +526,7 @@ describe "src/cy/commands/window", ->
         { viewportHeight, viewportWidth } = Cypress.config()
 
         cy.viewport(500, 400).then ->
-          Cypress.action("runner:test:before:run:async", {})
+          Cypress.action("runner:before:test:run:async", {})
           .then ->
             expect(Cypress.config("viewportWidth")).to.eq(viewportWidth)
             expect(Cypress.config("viewportHeight")).to.eq(viewportHeight)

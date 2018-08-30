@@ -1,6 +1,6 @@
 testAfterRunEvent = false
 
-Cypress.on "test:after:run", (obj) ->
+Cypress.on "after:test:run", (obj) ->
   if obj.title is "does not run"
     testAfterRunEvent = true
 

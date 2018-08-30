@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 
 module.exports = (on) => {
-  on('test:before:run', (test) => {
-    console.log('test:before:run:', test.title)
+  on('before:test:run', (test) => {
+    console.log('before:test:run:', test.title)
   })
 
   on('command:enqueued', (command) => {
@@ -29,7 +29,7 @@ module.exports = (on) => {
     console.log('fail:', test.title, err.message)
   })
 
-  on('test:after:run', (test) => {
-    console.log('test:after:run:', test.title)
+  on('after:test:run', (test) => {
+    console.log('after:test:run:', test.title)
   })
 }

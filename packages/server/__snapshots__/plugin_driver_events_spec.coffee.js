@@ -17,7 +17,7 @@ exports['e2e plugins sends driver events 1'] = `
   Running: plugin_driver_events_spec.coffee...                                             (1 of 1) 
 
 
-test:before:run: fails to get
+before:test:run: fails to get
 command:enqueued: log you had logs?
 command:enqueued: get #non-existent
 command:start: log you had logs?
@@ -26,7 +26,7 @@ command:start: get #non-existent
 command:retry: get expected '#non-existent' to exist in the DOM
 fail: fails to get Timed out retrying: Expected to find element: '#non-existent', but never found it.
   1) fails to get
-test:after:run: fails to get
+after:test:run: fails to get
 
   0 passing
   1 failing

@@ -82,7 +82,7 @@ describe "src/cy/commands/navigation", ->
       stub3 = cy.stub()
 
       cy.on("stability:changed", stub1)
-      cy.on("window:before:unload", stub2)
+      cy.on("before:window:unload", stub2)
       cy.on("window:unload", stub3)
 
       cy.reload().then ->
@@ -201,7 +201,7 @@ describe "src/cy/commands/navigation", ->
 
         cy
           .window().then (win) ->
-            cy.on "window:before:unload", =>
+            cy.on "before:window:unload", =>
               lastLog = @lastLog
 
               beforeunload = true
@@ -246,19 +246,19 @@ describe "src/cy/commands/navigation", ->
         .visit("/fixtures/jquery.html")
         .then ->
           winLoadListeners = cy.listeners("window:load")
-          beforeWinUnloadListeners = cy.listeners("window:before:unload")
+          beforeWinUnloadListeners = cy.listeners("before:window:unload")
 
           cyOn = cy.spy(cy, "once")
 
           winLoad = cyOn.withArgs("window:load")
-          beforeWinUnload = cyOn.withArgs("window:before:unload")
+          beforeWinUnload = cyOn.withArgs("before:window:unload")
 
           cy.go("back").then ->
             expect(winLoad).to.be.calledOnce
             expect(beforeWinUnload).to.be.calledOnce
 
             expect(cy.listeners("window:load")).to.deep.eq(winLoadListeners)
-            expect(cy.listeners("window:before:unload")).to.deep.eq(beforeWinUnloadListeners)
+            expect(cy.listeners("before:window:unload")).to.deep.eq(beforeWinUnloadListeners)
 
     it "fires stability:changed and window events events", ->
       stub1= cy.stub()
@@ -269,7 +269,7 @@ describe "src/cy/commands/navigation", ->
         .visit("/fixtures/jquery.html")
         .then ->
           cy.on("stability:changed", stub1)
-          cy.on("window:before:unload", stub2)
+          cy.on("before:window:unload", stub2)
           cy.on("window:unload", stub3)
         .go("back").then ->
           expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
@@ -395,7 +395,7 @@ describe "src/cy/commands/navigation", ->
         cy
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
-            cy.on "window:before:unload", =>
+            cy.on "before:window:unload", =>
               lastLog = @lastLog
 
               beforeunload = true
@@ -569,7 +569,7 @@ describe "src/cy/commands/navigation", ->
 
     describe "when origins don't match", ->
       beforeEach ->
-        Cypress.emit("test:before:run", { id: 888 })
+        Cypress.emit("before:test:run", { id: 888 })
 
         cy.stub(Cypress, "getEmissions").returns([])
         cy.stub(Cypress, "getTestsState").returns([])
@@ -1319,7 +1319,7 @@ describe "src/cy/commands/navigation", ->
 
       expected = false
 
-      cy.on "window:before:unload", ->
+      cy.on "before:window:unload", ->
         expected = true
         expect(Cookie.get("__cypress.initial")).to.eq("true")
 
@@ -1354,7 +1354,7 @@ describe "src/cy/commands/navigation", ->
         timeout = cy.spy(cy, "timeout")
 
         ## we are unstable at this point
-        cy.on "window:before:unload", ->
+        cy.on "before:window:unload", ->
           cy.whenStable ->
             expect(timeout).not.to.be.called
             done()
@@ -1582,7 +1582,7 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/generic.html")
         .then ->
-          cy.once "window:before:unload", =>
+          cy.once "before:window:unload", =>
             expected = true
 
             expect(@lastLog).to.exist
@@ -1607,7 +1607,7 @@ describe "src/cy/commands/navigation", ->
         .then ->
           $input = cy.$$("form#click-me input[type=submit]")
 
-          cy.once "window:before:unload", =>
+          cy.once "before:window:unload", =>
             expected = true
 
             expect(@lastLog).to.exist
@@ -1642,7 +1642,7 @@ describe "src/cy/commands/navigation", ->
           cy.on "command:queue:end", ->
             done()
 
-        cy.on "command:queue:before:end", ->
+        cy.on "before:command:queue:end", ->
           ## force us to become unstable immediately
           ## else the beforeunload event fires at the end
           ## of the tick which is too late

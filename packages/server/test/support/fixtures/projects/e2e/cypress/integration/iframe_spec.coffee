@@ -2,7 +2,7 @@ count  = 0
 action = Cypress.action
 
 Cypress.action = (str) ->
-  if str is "app:window:before:load"
+  if str is "app:before:window:load"
     count += 1
 
   action.apply(@, arguments)

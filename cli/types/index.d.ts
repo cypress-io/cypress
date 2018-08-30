@@ -3686,7 +3686,7 @@ declare namespace Cypress {
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:before:load', fn: (win: Window) => void): void
+    (action: 'before:window:load', fn: (win: Window) => void): void
     /**
      * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onLoad` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -3696,7 +3696,7 @@ declare namespace Cypress {
      * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:before:unload', fn: (event: BeforeUnloadEvent) => void): void
+    (action: 'before:window:unload', fn: (event: BeforeUnloadEvent) => void): void
     /**
      * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -3756,12 +3756,12 @@ declare namespace Cypress {
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'before:test:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
     /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'after:test:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
   }
 
   // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS

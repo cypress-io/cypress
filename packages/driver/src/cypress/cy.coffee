@@ -127,7 +127,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
-        Cypress.action("app:window:before:unload", e)
+        Cypress.action("app:before:window:unload", e)
 
         ## return undefined so our beforeunload handler
         ## doesnt trigger a confirmation dialog
@@ -371,7 +371,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       if not command
 
         ## trigger queue is almost finished
-        Cypress.action("cy:command:queue:before:end")
+        Cypress.action("cy:before:command:queue:end")
 
         ## we need to wait after all commands have
         ## finished running if the application under
@@ -689,7 +689,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## by trying to talk to the contentWindow document to see if
       ## its accessible.
       ## when we find ourselves in a cross origin situation, then our
-      ## proxy has not injected Cypress.action('window:before:load')
+      ## proxy has not injected Cypress.action('before:window:load')
       ## so Cypress.onBeforeAppWindowLoad() was never called
       $autIframe.on "load", ->
         ## if setting these props failed

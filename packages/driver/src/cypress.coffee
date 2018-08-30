@@ -228,7 +228,7 @@ class $Cypress
         ## when this happens mocha aborts the entire run
         ## and does not do the usual cleanup so that means
         ## we have to fire the test:after:hooks and
-        ## test:after:run events ourselves
+        ## after:test:run events ourselves
         @emit("run:end")
 
         if @config("isTextTerminal")
@@ -286,27 +286,27 @@ class $Cypress
       when "mocha:runnable:run"
         @runner.onRunnableRun(args...)
 
-      when "runner:test:before:run"
+      when "runner:before:test:run"
         ## get back to a clean slate
         @cy.reset()
 
-        @emitToBackend("test:before:run", serializeTest(args[1]))
-        @emit("test:before:run", args...)
+        @emitToBackend("before:test:run", serializeTest(args[1]))
+        @emit("before:test:run", args...)
 
-      when "runner:test:before:run:async"
+      when "runner:before:test:run:async"
         ## TODO: handle timeouts here? or in the runner?
-        @emitThen("test:before:run:async", args...)
+        @emitThen("before:test:run:async", args...)
 
-      when "runner:runnable:after:run:async"
-        @emitThen("runnable:after:run:async", args...)
+      when "runner:after:runnable:run:async"
+        @emitThen("after:runnable:run:async", args...)
 
-      when "runner:test:after:run"
+      when "runner:after:test:run"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 
         ## this event is how the reporter knows how to display
         ## stats and runnable properties such as errors
-        @emitToBackend("test:after:run", serializeTest(args[1]))
-        @emit("test:after:run", args...)
+        @emitToBackend("after:test:run", serializeTest(args[1]))
+        @emit("after:test:run", args...)
 
         if @config("isTextTerminal")
           ## needed for calculating wallClockDuration
@@ -371,8 +371,8 @@ class $Cypress
         @emitToBackend("command:enqueued", serializeCommand(args[0]))
         @emit("command:enqueued", args[0])
 
-      when "cy:command:queue:before:end"
-        @emit("command:queue:before:end")
+      when "cy:before:command:queue:end"
+        @emit("before:command:queue:end")
 
       when "cy:command:queue:end"
         @emit("command:queue:end")
@@ -404,10 +404,10 @@ class $Cypress
       when "app:page:loading"
         @emit("page:loading", args[0])
 
-      when "app:window:before:load"
+      when "app:before:window:load"
         @cy.onBeforeAppWindowLoad(args[0])
 
-        @emit("window:before:load", args[0])
+        @emit("before:window:load", args[0])
 
       when "app:navigation:changed"
         @emit("navigation:changed", args...)
@@ -418,8 +418,8 @@ class $Cypress
       when "app:window:load"
         @emit("window:load", args[0])
 
-      when "app:window:before:unload"
-        @emit("window:before:unload", args[0])
+      when "app:before:window:unload"
+        @emit("before:window:unload", args[0])
 
       when "app:window:unload"
         @emit("window:unload", args[0])

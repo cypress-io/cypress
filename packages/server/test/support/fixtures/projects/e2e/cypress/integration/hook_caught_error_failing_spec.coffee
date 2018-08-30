@@ -1,6 +1,6 @@
 testAfterRuns = []
 
-Cypress.on "test:after:run", (test) ->
+Cypress.on "after:test:run", (test) ->
   testAfterRuns.push(test.title)
 
 ## this should run
@@ -27,7 +27,7 @@ describe "s3a", ->
       throw new Error("s3a before hook failed")
 
   after ->
-    ## it should not have fired test:after:run
+    ## it should not have fired after:test:run
     ## for t8a yet
     expect(testAfterRuns).to.deep.eq([
       "t1a"
@@ -47,7 +47,7 @@ describe "s4a", ->
   it "t10a", ->
 
 describe "s5a", ->
-  it "fires all test:after:run events", ->
+  it "fires all after:test:run events", ->
     expect(testAfterRuns).to.deep.eq([
       "t1a"
       "t2a"

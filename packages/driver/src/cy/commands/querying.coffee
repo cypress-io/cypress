@@ -17,7 +17,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   restoreContains()
 
   ## restore before each test and whenever we stop
-  Cypress.on("test:before:run", restoreContains)
+  Cypress.on("before:test:run", restoreContains)
   Cypress.on("stop", restoreContains)
 
   Commands.addAll({
@@ -47,7 +47,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getFocused = ->
         focused = cy.getFocused()
         log(focused)
-        
+
         return focused
 
       do resolveFocused = (failedByNonAssertion = false) ->
@@ -447,7 +447,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       else
         ## remove our listener if we happen to reach the end
         ## event which will finalize cleanup if there was no next obj
-        cy.once "command:queue:before:end", ->
+        cy.once "before:command:queue:end", ->
           cleanup()
 
           cy.state("withinSubject", null)

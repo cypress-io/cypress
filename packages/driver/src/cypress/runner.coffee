@@ -10,8 +10,8 @@ mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
 HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
-TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
-TEST_AFTER_RUN_EVENT = "runner:test:after:run"
+TEST_BEFORE_RUN_EVENT = "runner:before:test:run"
+TEST_AFTER_RUN_EVENT = "runner:after:test:run"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
@@ -77,8 +77,8 @@ fired = (event, runnable) ->
 
 testBeforeRunAsync = (test, Cypress) ->
   Promise.try ->
-    if not fired("runner:test:before:run:async", test)
-      fire("runner:test:before:run:async", test, Cypress)
+    if not fired("runner:before:test:run:async", test)
+      fire("runner:before:test:run:async", test, Cypress)
 
 runnableAfterRunAsync = (runnable, Cypress) ->
   Promise.try ->
@@ -266,7 +266,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
   return if not _runner.hook
 
   ## monkey patch the hook event so we can wrap
-  ## 'test:after:run' around all of
+  ## 'after:test:run' around all of
   ## the hooks surrounding a test runnable
   _runnerHook = _runner.hook
 
@@ -575,7 +575,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
     @emit("test", test)
 
     ## if this is not the last test amongst its siblings
-    ## then go ahead and fire its test:after:run event
+    ## then go ahead and fire its after:test:run event
     ## else this will not get called
     tests = getAllSiblingTests(test.parent, getTestById)
 
@@ -897,7 +897,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## whenever any runnable is about to run
       ## we figure out what test its associated to
       ## if its a hook, and then we fire the
-      ## test:before:run:async action if its not
+      ## before:test:run:async action if its not
       ## been fired before for this test
       testBeforeRunAsync(test, Cypress)
       .catch (err) ->

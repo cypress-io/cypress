@@ -236,7 +236,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
-  Cypress.on("test:before:run", reset)
+  Cypress.on("before:test:run", reset)
 
   Cypress.on "stability:changed", (bool, event) ->
     ## only send up page loading events when we're
@@ -284,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  Cypress.on "window:before:load", (contentWindow) ->
+  Cypress.on "before:window:load", (contentWindow) ->
     ## TODO: just use a closure here
     current = state("current")
 
@@ -396,12 +396,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## clear the current timeout
             cy.clearTimeout()
 
-            cy.once("window:before:unload", beforeUnload)
+            cy.once("before:window:unload", beforeUnload)
 
             didLoad = new Promise (resolve) ->
               cleanup = ->
                 cy.removeListener("window:load", resolve)
-                cy.removeListener("window:before:unload", beforeUnload)
+                cy.removeListener("before:window:unload", beforeUnload)
 
               cy.once("window:load", resolve)
 
