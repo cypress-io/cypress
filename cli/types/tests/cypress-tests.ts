@@ -6,7 +6,7 @@ namespace CypressLodashTests {
 }
 
 namespace CypressJqueryTests {
-  Cypress.$ // $ExpectType JQueryStatic<HTMLElement>
+  Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
   Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
 }
