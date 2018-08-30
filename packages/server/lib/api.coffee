@@ -47,8 +47,9 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  # use %j argument to ensure deep nested properties are serialized
   debug(
-    "request to url: %s with params: %o",
+    "request to url: %s with params: %j",
     "#{params.method} #{params.url}",
     _.pick(params, "body", "headers")
   )
@@ -77,9 +78,11 @@ machineId = ->
   .catch ->
     return null
 
-## retry on timeouts or 5xx errors
+## retry on timeouts, 5xx errors, or any error without a status code
 isRetriableError = (err) ->
-  (err instanceof Promise.TimeoutError) or (500 <= err.statusCode < 600)
+  (err instanceof Promise.TimeoutError) or 
+  (500 <= err.statusCode < 600) or
+  not err.statusCode?
 
 module.exports = {
   rp
