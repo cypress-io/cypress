@@ -1,10 +1,8 @@
 _          = require("lodash")
-la         = require("lazy-ass")
 pkg        = require("@packages/root")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
-check      = require("check-more-types")
 human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
@@ -268,8 +266,6 @@ renderSummaryTable = (runUrl) -> (results) ->
 
 iterateThroughSpecs = (options = {}) ->
   { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
-
-  la(check.maybe.fn(beforeSpecRun), "beforeSpecRun should be a function, was", beforeSpecRun)
 
   serial = ->
     Promise.mapSeries(specs, runEachSpec)
@@ -954,17 +950,14 @@ module.exports = {
         if not specs.length
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
-          la(check.maybe.fn(beforeSpecRun),
-            "beforeSpecRun should be a function, not", beforeSpecRun)
-
+        runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
           @runSpecs({
             beforeSpecRun
             afterSpecRun
             projectRoot
             specPattern
             socketId
-            parallel
+            parallel: parallelOverride
             browser
             project
             runUrl
@@ -1000,7 +993,8 @@ module.exports = {
             runAllSpecs
           })
         else
-          runAllSpecs()
+          ## not recording, can't be parallel
+          runAllSpecs({}, false)
 
   run: (options) ->
     electronApp
