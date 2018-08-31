@@ -94,6 +94,29 @@ describe "lib/util/ci_provider", ->
       branch: "bamboo.planRepository.branch"
     })
 
+  it.only "bitbucket", ->
+    process.env.CI = "1"
+
+    # build information
+    process.env.BITBUCKET_BUILD_NUMBER = "bitbucketBuildNumber"
+    process.env.BITBUCKET_REPO_OWNER = "bitbucketRepoOwner"
+    process.env.BITBUCKET_REPO_SLUG = "bitbucketRepoSlug"
+
+    # git information
+    process.env.BITBUCKET_COMMIT = "bitbucketCommit"
+    process.env.BITBUCKET_BRANCH = "bitbucketBranch"
+
+    expectsName("bitbucket")
+    expectsCiParams({
+      bitbucketBuildNumber: "bitbucketBuildNumber"
+      bitbucketRepoOwner: "bitbucketRepoOwner"
+      bitbucketRepoSlug: "bitbucketRepoSlug"
+    })
+    expectsCommitParams({
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
+
   it "buildkite", ->
     process.env.BUILDKITE = true
 

@@ -28,9 +28,12 @@ isJenkins = ->
 isWercker = ->
   process.env.WERCKER or process.env.WERCKER_MAIN_PIPELINE_STARTED
 
+# top level detection of CI providers by environment variable
+# or a predicate function
 CI_PROVIDERS = {
   "appveyor":       "APPVEYOR"
   "bamboo":         "bamboo.buildNumber"
+  "bitbucket":      "BITBUCKET_BUILD_NUMBER"
   "buildkite":      "BUILDKITE"
   "circle":         "CIRCLECI"
   "codeship":       isCodeship
@@ -76,6 +79,11 @@ _providerCiParams = ->
       "bamboo.buildNumber"
       "bamboo.buildResultsUrl"
       "bamboo.planRepository.repositoryUrl"
+    ])
+    bitbucket: extract([
+      "BITBUCKET_REPO_SLUG"
+      "BITBUCKET_REPO_OWNER"
+      "BITBUCKET_BUILD_NUMBER"
     ])
     buildkite: extract([
       "BUILDKITE_REPO"
@@ -196,6 +204,10 @@ _providerCommitParams = ->
       # authorEmail: ???
       # remoteOrigin: ???
       # defaultBranch: ???
+    }
+    bitbucket: {
+      sha: env.BITBUCKET_COMMIT
+      branch: env.BITBUCKET_BRANCH
     }
     buildkite: {
       sha: env.BUILDKITE_COMMIT
