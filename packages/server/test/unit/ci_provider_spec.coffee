@@ -94,7 +94,7 @@ describe "lib/util/ci_provider", ->
       branch: "bamboo.planRepository.branch"
     })
 
-  it.only "bitbucket", ->
+  it "bitbucket", ->
     process.env.CI = "1"
 
     # build information
@@ -115,6 +115,13 @@ describe "lib/util/ci_provider", ->
     expectsCommitParams({
       sha: "bitbucketCommit"
       branch: "bitbucketBranch"
+    })
+    expectsCommitDefaults({
+      sha: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "bitbucketCommit"
+      branch: "gitFoundBranch"
     })
 
   it "buildkite", ->

@@ -320,15 +320,23 @@ commitParams = ->
   _get(_providerCommitParams)
 
 commitDefaults = (existingInfo) ->
+  debug("git commit existing info")
+  debug(existingInfo)
+
   commitParamsObj = commitParams() or {}
-  debug("commit params object")
+  debug("commit info from provider environment variables")
   debug(commitParamsObj)
 
   ## based on the existingInfo properties
   ## merge in the commitParams if null or undefined
   ## defaulting back to null if all fails
-  _.transform existingInfo, (memo, value, key) ->
+  combined = _.transform existingInfo, (memo, value, key) ->
     memo[key] = _.defaultTo(value ? commitParamsObj[key], null)
+
+  debug("combined git and environment variables from provider")
+  debug(combined)
+
+  return combined
 
 list = ->
   _.keys(CI_PROVIDERS)
