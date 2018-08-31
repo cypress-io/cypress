@@ -28,7 +28,7 @@ describe "src/cy/commands/screenshot", ->
       blackout: [".foo"]
     }
 
-  context "runnable:after:run:async", ->
+  context "after:runnable:run:async", ->
     it "is noop when not isTextTerminal", ->
       Cypress.config("isTextTerminal", false)
 
@@ -40,7 +40,7 @@ describe "src/cy/commands/screenshot", ->
 
       runnable = cy.state("runnable")
 
-      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      Cypress.action("runner:after:runnable:run:async", test, runnable)
       .then ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
@@ -54,7 +54,7 @@ describe "src/cy/commands/screenshot", ->
 
       runnable = cy.state("runnable")
 
-      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      Cypress.action("runner:after:runnable:run:async", test, runnable)
       .then ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
@@ -73,7 +73,7 @@ describe "src/cy/commands/screenshot", ->
 
       runnable = cy.state("runnable")
 
-      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      Cypress.action("runner:after:runnable:run:async", test, runnable)
       .then ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
@@ -92,7 +92,7 @@ describe "src/cy/commands/screenshot", ->
       test = { id: "123", err: new Error() }
       runnable = cy.state("runnable")
 
-      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      Cypress.action("runner:after:runnable:run:async", test, runnable)
       .then ->
         expect(Cypress.action).to.be.calledWith("cy:before:screenshot", {
           id: runnable.id
@@ -126,7 +126,7 @@ describe "src/cy/commands/screenshot", ->
 
       runnable = cy.state("runnable")
 
-      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      Cypress.action("runner:after:runnable:run:async", test, runnable)
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
@@ -135,7 +135,7 @@ describe "src/cy/commands/screenshot", ->
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
-            "runnable:after:run:async",
+            "after:runnable:run:async",
             runnable.title
           ]
           capture: "runner"
@@ -162,7 +162,7 @@ describe "src/cy/commands/screenshot", ->
 
         runnable = cy.state("runnable")
 
-        Cypress.action("runner:runnable:after:run:async", test, runnable)
+        Cypress.action("runner:after:runnable:run:async", test, runnable)
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledOnce
           args = Cypress.automation.withArgs("take:screenshot").args[0][1]
@@ -171,7 +171,7 @@ describe "src/cy/commands/screenshot", ->
             testId: runnable.id
             titles: [
               "src/cy/commands/screenshot",
-              "runnable:after:run:async",
+              "after:runnable:run:async",
               "if screenshot has been taken in test"
               runnable.title
             ]
@@ -182,7 +182,7 @@ describe "src/cy/commands/screenshot", ->
             blackout: []
           })
 
-  context "runnable:after:run:async hooks", ->
+  context "after:runnable:run:async hooks", ->
     beforeEach ->
       Cypress.config("isInteractive", false)
       cy.stub(Screenshot, "getConfig").returns(@screenshotConfig)
@@ -195,7 +195,7 @@ describe "src/cy/commands/screenshot", ->
       }
       runnable = cy.state("runnable")
 
-      Cypress.action("runner:runnable:after:run:async", test, runnable)
+      Cypress.action("runner:after:runnable:run:async", test, runnable)
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
@@ -204,7 +204,7 @@ describe "src/cy/commands/screenshot", ->
           testId: runnable.id
           titles: [
             "src/cy/commands/screenshot",
-            "runnable:after:run:async hooks",
+            "after:runnable:run:async hooks",
             "takes screenshot of hook title with test",
             '"before each" hook'
           ]

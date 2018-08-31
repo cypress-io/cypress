@@ -26,7 +26,7 @@ runnerEvents = [
   "reporter:log:add"
   "reporter:log:state:changed"
   "paused"
-  "test:after:hooks"
+  "after:test:hooks"
   "run:end"
 ]
 

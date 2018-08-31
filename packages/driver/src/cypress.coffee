@@ -227,7 +227,7 @@ class $Cypress
         ##
         ## when this happens mocha aborts the entire run
         ## and does not do the usual cleanup so that means
-        ## we have to fire the test:after:hooks and
+        ## we have to fire the after:test:hooks and
         ## after:test:run events ourselves
         @emit("run:end")
 
@@ -311,7 +311,7 @@ class $Cypress
         if @config("isTextTerminal")
           ## needed for calculating wallClockDuration
           ## and the timings of after + afterEach hooks
-          @emit("mocha", "test:after:run", args[0])
+          @emit("mocha", "after:test:run", args[0])
 
       when "cy:before:all:screenshots"
         @emit("before:all:screenshots", args...)

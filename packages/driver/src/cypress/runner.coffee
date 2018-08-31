@@ -82,8 +82,8 @@ testBeforeRunAsync = (test, Cypress) ->
 
 runnableAfterRunAsync = (runnable, Cypress) ->
   Promise.try ->
-    if not fired("runner:runnable:after:run:async", runnable)
-      fire("runner:runnable:after:run:async", runnable, Cypress)
+    if not fired("runner:after:runnable:run:async", runnable)
+      fire("runner:after:runnable:run:async", runnable, Cypress)
 
 testAfterRun = (test, Cypress) ->
   if not fired(TEST_AFTER_RUN_EVENT, test)
@@ -786,7 +786,7 @@ create = (specWindow, mocha, Cypress, cy) ->
 
       ## closure for calculating the actual
       ## runtime of a runnables fn exection duration
-      ## and also the run of the runnable:after:run:async event
+      ## and also the run of the after:runnable:run:async event
       wallClockStartedAt = null
       wallClockEnd = null
       fnDurationStart = null

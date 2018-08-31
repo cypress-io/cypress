@@ -4,7 +4,7 @@ afterVisitCommand = false
 runnableAfterRunAsync = []
 testAfterRun = []
 
-Cypress.on "runnable:after:run:async", (obj, runnable) ->
+Cypress.on "after:runnable:run:async", (obj, runnable) ->
   if obj.err
     runnableAfterRunAsync.push(obj.title)
 
