@@ -4,7 +4,10 @@ const pluginDefinitions = require('semantic-release/lib/definitions/plugins');
 const withOnlyPackageCommits = require('./only-package-commits');
 const versionToGitTag = require('./version-to-git-tag');
 const logPluginVersion = require('./log-plugin-version');
-const { wrapPlugin } = require('semantic-release-plugin-decorators');
+const {
+  wrapPlugin,
+  wrapMultiPlugin,
+} = require('semantic-release-plugin-decorators');
 
 const {
   mapNextReleaseVersion,
@@ -20,7 +23,7 @@ const analyzeCommits = wrapPlugin(
   pluginDefinitions.analyzeCommits.default
 );
 
-const generateNotes = wrapPlugin(
+const generateNotes = wrapMultiPlugin(
   NAMESPACE,
   'generateNotes',
   compose(
