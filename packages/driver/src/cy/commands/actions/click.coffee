@@ -9,6 +9,7 @@ $utils = require("../../../cypress/utils")
 $elements = require("../../../dom/elements")
 $selection = require("../../../dom/selection")
 $actionability = require("../../actionability")
+$native = require("../../../cypress/native_events")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
@@ -155,38 +156,41 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             el = $elToClick.get(0)
 
-            domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
+            return $native.mousedown(coords.fromViewport)
+              .then(()=>$native.mouseup(coords.fromViewport))
 
-            ## if mousedown was cancelled then or caused
-            ## our element to be removed from the DOM
-            ## just resolve after mouse down and dont
-            ## send a focus event
-            if domEvents.mouseDown.preventedDefault or not $dom.isAttached($elToClick)
-              afterMouseDown($elToClick, coords)
-            else
-              if $elements.isInput(el) or $elements.isTextarea(el) or $elements.isContentEditable(el)
-                if !$elements.isNeedSingleValueChangeInputElement(el)
-                  $selection.moveSelectionToEnd(el)
+            # domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
 
-              ## retrieve the first focusable $el in our parent chain
-              $elToFocus = $elements.getFirstFocusableEl($elToClick)
+            # ## if mousedown was cancelled then or caused
+            # ## our element to be removed from the DOM
+            # ## just resolve after mouse down and dont
+            # ## send a focus event
+            # if domEvents.mouseDown.preventedDefault or not $dom.isAttached($elToClick)
+            #   afterMouseDown($elToClick, coords)
+            # else
+            #   if $elements.isInput(el) or $elements.isTextarea(el) or $elements.isContentEditable(el)
+            #     if !$elements.isNeedSingleValueChangeInputElement(el)
+            #       $selection.moveSelectionToEnd(el)
 
-              if cy.needsFocus($elToFocus, $previouslyFocused)
-                cy.fireFocus($elToFocus.get(0))
+            #   ## retrieve the first focusable $el in our parent chain
+            #   $elToFocus = $elements.getFirstFocusableEl($elToClick)
 
-                ## if we are currently trying to focus
-                ## the body then calling body.focus()
-                ## is a noop, and it will not blur the
-                ## current element, which is all so wrong
-                if $elToFocus.is("body")
-                  $focused = cy.getFocused()
+            #   if cy.needsFocus($elToFocus, $previouslyFocused)
+            #     cy.fireFocus($elToFocus.get(0))
 
-                  ## if the current focused element hasn't changed
-                  ## then blur manually
-                  if $elements.isSame($focused, $previouslyFocused)
-                    cy.fireBlur($focused.get(0))
+            #     ## if we are currently trying to focus
+            #     ## the body then calling body.focus()
+            #     ## is a noop, and it will not blur the
+            #     ## current element, which is all so wrong
+            #     if $elToFocus.is("body")
+            #       $focused = cy.getFocused()
 
-              afterMouseDown($elToClick, coords)
+            #       ## if the current focused element hasn't changed
+            #       ## then blur manually
+            #       if $elements.isSame($focused, $previouslyFocused)
+            #         cy.fireBlur($focused.get(0))
+
+              # afterMouseDown($elToClick, coords)
         })
         .catch (err) ->
           ## snapshot only on click failure

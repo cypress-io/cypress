@@ -185,8 +185,10 @@ module.exports = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
+        ## TODO: make this a dynamic port
+        args.push("--remote-debugging-port=9222")
 
         debug("launch in chrome: %s, %s", url, args)
-
+        
         utils.launch(browserName, url, args)
 }
