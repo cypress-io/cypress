@@ -168,7 +168,11 @@ _providerCiParams = ->
     ])
     snap: null
     teamcity: null
-    teamfoundation: null
+    teamfoundation: extract([
+      "BUILD_BUILDID",
+      "BUILD_BUILDNUMBER",
+      "BUILD_CONTAINERID"
+    ])
     travis: extract([
       "TRAVIS_JOB_ID"
       "TRAVIS_BUILD_ID"
@@ -284,7 +288,12 @@ _providerCommitParams = ->
     }
     snap: null
     teamcity: null
-    teamfoundation: null
+    teamfoundation: {
+      sha: env.BUILD_SOURCEVERSION
+      branch: env.BUILD_SOURCEBRANCHNAME
+      message: env.BUILD_SOURCEVERSIONMESSAGE
+      authorName: env.BUILD_SOURCEVERSIONAUTHOR
+    }
     travis: {
       sha: env.TRAVIS_COMMIT
       ## for PRs, TRAVIS_BRANCH is the base branch being merged into

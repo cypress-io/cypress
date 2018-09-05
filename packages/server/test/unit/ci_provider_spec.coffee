@@ -448,9 +448,27 @@ describe "lib/util/ci_provider", ->
   it "teamfoundation", ->
     process.env.TF_BUILD = true
 
+    process.env.BUILD_BUILDID = "buildId"
+    process.env.BUILD_BUILDNUMBER = "buildNumber"
+    process.env.BUILD_CONTAINERID = "containerId"
+
+    process.env.BUILD_SOURCEVERSION = "commit"
+    process.env.BUILD_SOURCEBRANCHNAME = "branch"
+    process.env.BUILD_SOURCEVERSIONMESSAGE = "message"
+    process.env.BUILD_SOURCEVERSIONAUTHOR = "name"
+
     expectsName("teamfoundation")
-    expectsCiParams(null)
-    expectsCommitParams(null)
+    expectsCiParams({
+      buildBuildid: "buildId"
+      buildBuildnumber: "buildNumber"
+      buildContainerid: "containerId"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      message: "message"
+      authorName: "name"
+    })
 
   it "travis", ->
     process.env.TRAVIS = true
