@@ -8,20 +8,20 @@ Apply [`semantic-release`'s](https://github.com/semantic-release/semantic-releas
 
 The default configuration of `semantic-release` assumes a one-to-one relationship between a GitHub repository and an `npm` package.
 
-This set of plugins allows using `semantic-release` with a single Github repository containing many `npm` packages.
+This set of plugins allows using `semantic-release` with a single GitHub repository containing many `npm` packages.
 
 ## How
 
 Instead of attributing all commits to a single package, commits are assigned to packages based on the files that a commit touched.
 
-If a commit touched a file in or below a package's root, it will be considered for that package's next release. A single commit can belong to multiple packages.
+If a commit touched a file in or below a package's root, it will be considered for that package's next release. A single commit can belong to multiple packages and a merge may release multiple package versions. 
 
-A push may release multiple package versions. In order to avoid version collisions, git tags are namespaced using the given package's name: `<package-name>-<version>`.
+In order to avoid version collisions, release git tags are namespaced using the given package's name: `<package-name>-<version>`.
 
 ## Install
 
 ```bash
-npm install -D semantic-release@next semantic-release-monorepo
+npm install -D semantic-release semantic-release-monorepo
 ```
 
 ## Usage
