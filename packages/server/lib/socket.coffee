@@ -73,7 +73,7 @@ class Socket
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
     debug("watch test file %o", originalFilePath)
-    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
+    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration#{path.sep}", ""))
     filePath = path.relative(config.projectRoot, filePath)
 
     ## bail if this is special path like "__all"
