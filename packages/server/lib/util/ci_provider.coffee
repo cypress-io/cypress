@@ -12,8 +12,11 @@ toCamelObject = (obj, key) ->
 extract = (envKeys) ->
   _.transform(envKeys, toCamelObject, {})
 
-isCodeship = ->
-  process.env.CI_NAME and process.env.CI_NAME is "codeship"
+isCodeshipBasic = ->
+  process.env.CI_NAME and process.env.CI_NAME is "codeship" and process.env.CODESHIP
+
+isCodeshipPro = ->
+  process.env.CI_NAME and process.env.CI_NAME is "codeship" and not process.env.CODESHIP
 
 isGitlab = ->
   process.env.GITLAB_CI or (process.env.CI_SERVER_NAME and /^GitLab/.test(process.env.CI_SERVER_NAME))
@@ -28,12 +31,16 @@ isJenkins = ->
 isWercker = ->
   process.env.WERCKER or process.env.WERCKER_MAIN_PIPELINE_STARTED
 
+# top level detection of CI providers by environment variable
+# or a predicate function
 CI_PROVIDERS = {
   "appveyor":       "APPVEYOR"
   "bamboo":         "bamboo.buildNumber"
+  "bitbucket":      "BITBUCKET_BUILD_NUMBER"
   "buildkite":      "BUILDKITE"
   "circle":         "CIRCLECI"
-  "codeship":       isCodeship
+  "codeshipBasic":  isCodeshipBasic
+  "codeshipPro":    isCodeshipPro
   "drone":          "DRONE"
   "gitlab":         isGitlab
   "jenkins":        isJenkins
@@ -77,6 +84,11 @@ _providerCiParams = ->
       "bamboo.buildResultsUrl"
       "bamboo.planRepository.repositoryUrl"
     ])
+    bitbucket: extract([
+      "BITBUCKET_REPO_SLUG"
+      "BITBUCKET_REPO_OWNER"
+      "BITBUCKET_BUILD_NUMBER"
+    ])
     buildkite: extract([
       "BUILDKITE_REPO"
       "BUILDKITE_SOURCE"
@@ -101,13 +113,20 @@ _providerCiParams = ->
       "CIRCLE_REPOSITORY_URL"
       "CI_PULL_REQUEST"
     ])
-    codeship: extract([
+    codeshipBasic: extract([
       "CI_BUILD_ID"
       "CI_REPO_NAME"
       "CI_BUILD_URL"
       "CI_PROJECT_ID"
       "CI_BUILD_NUMBER"
       "CI_PULL_REQUEST"
+    ])
+    # CodeshipPro provides very few CI variables
+    # https://documentation.codeship.com/pro/builds-and-configuration/environment-variables/
+    codeshipPro: extract([
+      "CI_BUILD_ID"
+      "CI_REPO_NAME"
+      "CI_PROJECT_ID"
     ])
     drone: extract([
       "DRONE_JOB_NUMBER"
@@ -160,7 +179,11 @@ _providerCiParams = ->
     ])
     snap: null
     teamcity: null
-    teamfoundation: null
+    teamfoundation: extract([
+      "BUILD_BUILDID",
+      "BUILD_BUILDNUMBER",
+      "BUILD_CONTAINERID"
+    ])
     travis: extract([
       "TRAVIS_JOB_ID"
       "TRAVIS_BUILD_ID"
@@ -175,6 +198,8 @@ _providerCiParams = ->
     wercker: null
   }
 
+# tries to grab commit information from CI environment variables
+# very useful to fill missing information when Git cannot grab correct values
 _providerCommitParams = ->
   { env } = process
 
@@ -197,6 +222,10 @@ _providerCommitParams = ->
       # remoteOrigin: ???
       # defaultBranch: ???
     }
+    bitbucket: {
+      sha: env.BITBUCKET_COMMIT
+      branch: env.BITBUCKET_BRANCH
+    }
     buildkite: {
       sha: env.BUILDKITE_COMMIT
       branch: env.BUILDKITE_BRANCH
@@ -215,7 +244,16 @@ _providerCommitParams = ->
       # remoteOrigin: ???
       # defaultBranch: ???
     }
-    codeship: {
+    codeshipBasic: {
+      sha: env.CI_COMMIT_ID
+      branch: env.CI_BRANCH
+      message: env.CI_COMMIT_MESSAGE
+      authorName: env.CI_COMMITTER_NAME
+      authorEmail: env.CI_COMMITTER_EMAIL
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    codeshipPro: {
       sha: env.CI_COMMIT_ID
       branch: env.CI_BRANCH
       message: env.CI_COMMIT_MESSAGE
@@ -272,7 +310,12 @@ _providerCommitParams = ->
     }
     snap: null
     teamcity: null
-    teamfoundation: null
+    teamfoundation: {
+      sha: env.BUILD_SOURCEVERSION
+      branch: env.BUILD_SOURCEBRANCHNAME
+      message: env.BUILD_SOURCEVERSIONMESSAGE
+      authorName: env.BUILD_SOURCEVERSIONAUTHOR
+    }
     travis: {
       sha: env.TRAVIS_COMMIT
       ## for PRs, TRAVIS_BRANCH is the base branch being merged into
@@ -308,15 +351,23 @@ commitParams = ->
   _get(_providerCommitParams)
 
 commitDefaults = (existingInfo) ->
+  debug("git commit existing info")
+  debug(existingInfo)
+
   commitParamsObj = commitParams() or {}
-  debug("commit params object")
+  debug("commit info from provider environment variables")
   debug(commitParamsObj)
 
   ## based on the existingInfo properties
   ## merge in the commitParams if null or undefined
   ## defaulting back to null if all fails
-  _.transform existingInfo, (memo, value, key) ->
+  combined = _.transform existingInfo, (memo, value, key) ->
     memo[key] = _.defaultTo(value ? commitParamsObj[key], null)
+
+  debug("combined git and environment variables from provider")
+  debug(combined)
+
+  return combined
 
 list = ->
   _.keys(CI_PROVIDERS)

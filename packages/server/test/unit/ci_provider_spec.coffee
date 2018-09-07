@@ -94,6 +94,36 @@ describe "lib/util/ci_provider", ->
       branch: "bamboo.planRepository.branch"
     })
 
+  it "bitbucket", ->
+    process.env.CI = "1"
+
+    # build information
+    process.env.BITBUCKET_BUILD_NUMBER = "bitbucketBuildNumber"
+    process.env.BITBUCKET_REPO_OWNER = "bitbucketRepoOwner"
+    process.env.BITBUCKET_REPO_SLUG = "bitbucketRepoSlug"
+
+    # git information
+    process.env.BITBUCKET_COMMIT = "bitbucketCommit"
+    process.env.BITBUCKET_BRANCH = "bitbucketBranch"
+
+    expectsName("bitbucket")
+    expectsCiParams({
+      bitbucketBuildNumber: "bitbucketBuildNumber"
+      bitbucketRepoOwner: "bitbucketRepoOwner"
+      bitbucketRepoSlug: "bitbucketRepoSlug"
+    })
+    expectsCommitParams({
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
+    expectsCommitDefaults({
+      sha: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "bitbucketCommit"
+      branch: "gitFoundBranch"
+    })
+
   it "buildkite", ->
     process.env.BUILDKITE = true
 
@@ -176,7 +206,8 @@ describe "lib/util/ci_provider", ->
       authorName: "circleUsername"
     })
 
-  it "codeship", ->
+  it "codeshipBasic", ->
+    process.env.CODESHIP = "TRUE"
     process.env.CI_NAME = "codeship"
 
     process.env.CI_BUILD_ID = "ciBuildId"
@@ -192,7 +223,7 @@ describe "lib/util/ci_provider", ->
     process.env.CI_COMMITTER_NAME = "ciCommitterName"
     process.env.CI_COMMITTER_EMAIL = "ciCommitterEmail"
 
-    expectsName("codeship")
+    expectsName("codeshipBasic")
     expectsCiParams({
       ciBuildId: "ciBuildId"
       ciRepoName: "ciRepoName"
@@ -200,6 +231,33 @@ describe "lib/util/ci_provider", ->
       ciProjectId: "ciProjectId"
       ciBuildNumber: "ciBuildNumber"
       ciPullRequest: "ciPullRequest"
+    })
+    expectsCommitParams({
+      sha: "ciCommitId"
+      branch: "ciBranch"
+      message: "ciCommitMessage"
+      authorName: "ciCommitterName"
+      authorEmail: "ciCommitterEmail"
+    })
+
+  it "codeshipPro", ->
+    process.env.CI_NAME = "codeship"
+
+    process.env.CI_BUILD_ID = "ciBuildId"
+    process.env.CI_REPO_NAME = "ciRepoName"
+    process.env.CI_PROJECT_ID = "ciProjectId"
+
+    process.env.CI_COMMIT_ID = "ciCommitId"
+    process.env.CI_BRANCH = "ciBranch"
+    process.env.CI_COMMIT_MESSAGE = "ciCommitMessage"
+    process.env.CI_COMMITTER_NAME = "ciCommitterName"
+    process.env.CI_COMMITTER_EMAIL = "ciCommitterEmail"
+
+    expectsName("codeshipPro")
+    expectsCiParams({
+      ciBuildId: "ciBuildId"
+      ciRepoName: "ciRepoName"
+      ciProjectId: "ciProjectId"
     })
     expectsCommitParams({
       sha: "ciCommitId"
@@ -418,9 +476,27 @@ describe "lib/util/ci_provider", ->
   it "teamfoundation", ->
     process.env.TF_BUILD = true
 
+    process.env.BUILD_BUILDID = "buildId"
+    process.env.BUILD_BUILDNUMBER = "buildNumber"
+    process.env.BUILD_CONTAINERID = "containerId"
+
+    process.env.BUILD_SOURCEVERSION = "commit"
+    process.env.BUILD_SOURCEBRANCHNAME = "branch"
+    process.env.BUILD_SOURCEVERSIONMESSAGE = "message"
+    process.env.BUILD_SOURCEVERSIONAUTHOR = "name"
+
     expectsName("teamfoundation")
-    expectsCiParams(null)
-    expectsCommitParams(null)
+    expectsCiParams({
+      buildBuildid: "buildId"
+      buildBuildnumber: "buildNumber"
+      buildContainerid: "containerId"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      message: "message"
+      authorName: "name"
+    })
 
   it "travis", ->
     process.env.TRAVIS = true
