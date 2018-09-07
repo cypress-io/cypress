@@ -3,6 +3,7 @@
 module.exports = (on) => {
   on('before:test:run', (test) => {
     console.log('before:test:run:', test.title)
+    throw new Error('Error thrown synchronously from "before:test:run". Should be ignored.')
   })
 
   on('command:enqueued', (command) => {
@@ -27,5 +28,6 @@ module.exports = (on) => {
 
   on('after:test:run', (test) => {
     console.log('after:test:run:', test.title)
+    return Promise.reject(new Error('Error thrown in promise from "test:after:run". Should be ignored.'))
   })
 }

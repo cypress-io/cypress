@@ -651,6 +651,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "DRIVER_EVENT_ERROR_CAUGHT"
+      """
+      An was thrown by the handler of the event "#{chalk.blue(arg1.event)}" in your background file.
+
+      This error is being ignored because the event cannot affect the results of the run.
+
+      The error we received was:
+
+      #{chalk.yellow(arg1.error)}
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
