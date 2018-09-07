@@ -337,7 +337,6 @@ class $Cypress
 
       when "cy:fail"
         ## comes from cypress errors fail()
-        @emitToBackend("fail", serializeError(args[0]), serializeTest(args[1]))
         @emitMap("fail", args...)
 
       when "cy:stability:changed"

@@ -25,10 +25,6 @@ module.exports = (on) => {
     console.log('command:end:', command.name, command.args.join(', '))
   })
 
-  on('fail', (err, test) => {
-    console.log('fail:', test.title, err.message)
-  })
-
   on('after:test:run', (test) => {
     console.log('after:test:run:', test.title)
   })

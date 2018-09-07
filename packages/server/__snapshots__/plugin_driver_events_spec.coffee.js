@@ -24,7 +24,6 @@ command:start: log you had logs?
 command:end: log you had logs?
 command:start: get #non-existent
 command:retry: get expected '#non-existent' to exist in the DOM
-fail: fails to get Timed out retrying: Expected to find element: '#non-existent', but never found it.
   1) fails to get
 after:test:run: fails to get
 
