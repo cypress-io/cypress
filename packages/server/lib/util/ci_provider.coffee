@@ -28,9 +28,12 @@ isJenkins = ->
 isWercker = ->
   process.env.WERCKER or process.env.WERCKER_MAIN_PIPELINE_STARTED
 
+# top level detection of CI providers by environment variable
+# or a predicate function
 CI_PROVIDERS = {
   "appveyor":       "APPVEYOR"
   "bamboo":         "bamboo.buildNumber"
+  "bitbucket":      "BITBUCKET_BUILD_NUMBER"
   "buildkite":      "BUILDKITE"
   "circle":         "CIRCLECI"
   "codeship":       isCodeship
@@ -76,6 +79,11 @@ _providerCiParams = ->
       "bamboo.buildNumber"
       "bamboo.buildResultsUrl"
       "bamboo.planRepository.repositoryUrl"
+    ])
+    bitbucket: extract([
+      "BITBUCKET_REPO_SLUG"
+      "BITBUCKET_REPO_OWNER"
+      "BITBUCKET_BUILD_NUMBER"
     ])
     buildkite: extract([
       "BUILDKITE_REPO"
@@ -160,7 +168,11 @@ _providerCiParams = ->
     ])
     snap: null
     teamcity: null
-    teamfoundation: null
+    teamfoundation: extract([
+      "BUILD_BUILDID",
+      "BUILD_BUILDNUMBER",
+      "BUILD_CONTAINERID"
+    ])
     travis: extract([
       "TRAVIS_JOB_ID"
       "TRAVIS_BUILD_ID"
@@ -196,6 +208,10 @@ _providerCommitParams = ->
       # authorEmail: ???
       # remoteOrigin: ???
       # defaultBranch: ???
+    }
+    bitbucket: {
+      sha: env.BITBUCKET_COMMIT
+      branch: env.BITBUCKET_BRANCH
     }
     buildkite: {
       sha: env.BUILDKITE_COMMIT
@@ -272,7 +288,12 @@ _providerCommitParams = ->
     }
     snap: null
     teamcity: null
-    teamfoundation: null
+    teamfoundation: {
+      sha: env.BUILD_SOURCEVERSION
+      branch: env.BUILD_SOURCEBRANCHNAME
+      message: env.BUILD_SOURCEVERSIONMESSAGE
+      authorName: env.BUILD_SOURCEVERSIONAUTHOR
+    }
     travis: {
       sha: env.TRAVIS_COMMIT
       ## for PRs, TRAVIS_BRANCH is the base branch being merged into
@@ -308,15 +329,23 @@ commitParams = ->
   _get(_providerCommitParams)
 
 commitDefaults = (existingInfo) ->
+  debug("git commit existing info")
+  debug(existingInfo)
+
   commitParamsObj = commitParams() or {}
-  debug("commit params object")
+  debug("commit info from provider environment variables")
   debug(commitParamsObj)
 
   ## based on the existingInfo properties
   ## merge in the commitParams if null or undefined
   ## defaulting back to null if all fails
-  _.transform existingInfo, (memo, value, key) ->
+  combined = _.transform existingInfo, (memo, value, key) ->
     memo[key] = _.defaultTo(value ? commitParamsObj[key], null)
+
+  debug("combined git and environment variables from provider")
+  debug(combined)
+
+  return combined
 
 list = ->
   _.keys(CI_PROVIDERS)
