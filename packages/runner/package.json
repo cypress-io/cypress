@@ -25,6 +25,7 @@
     "bluebird": "3.5.0",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.7.1",
+    "chrome-remote-interface": "^0.26.1",
     "classnames": "^2.2.5",
     "enzyme": "^2.8.2",
     "font-awesome": "^4.6.3",
