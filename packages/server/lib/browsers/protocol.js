@@ -26,7 +26,7 @@ const getWsTargetFor = () => {
     return connectAsync({ port: '9222' }).catch(retry)
   }, { retries: 10 })
   .catch((e) => {
-    console.log('asdfasfsfsdfasfasdfasdf', e)
+    console.log('err', e)
   })
   .then(() => CRI.List())
   .then((targets) => {
@@ -41,7 +41,7 @@ const getWsTargetFor = () => {
 
     console.log('target is', target)
 
-    return target
+    return target.webSocketDebuggerUrl
   })
   .catch((err) => {
     console.log(err)

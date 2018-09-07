@@ -70,7 +70,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
           # if $dom.isAttached($elToClick)
-          return $native.mouseup(coords)
+          return $native.mouseup(coords.fromViewport)
           # .then ->
           #    if options._log and options.log
           #     options._log.snapshot().end()   
@@ -163,7 +163,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             el = $elToClick.get(0)
 
-            return $native.mousedown(coords.fromViewport)
+            return $native.mousedown($elToClick, coords.fromViewport)
               .then(()=>afterMouseDown($elToClick, coords))
 
             # domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)

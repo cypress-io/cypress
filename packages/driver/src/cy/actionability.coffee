@@ -186,6 +186,7 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
   return $elAtCoords
 
 getCoordinatesForEl = (cy, $el, options) ->
+  debugger
   ## determine if this element is animating
   if options.x and options.y
     $dom.getElementCoordinatesByPositionRelativeToXY($el, options.x, options.y)
