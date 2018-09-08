@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const util = require('../util')
+const errors = require('../../errors')
 
 const getBody = (ipc, events, ids, [event]) => {
   const taskEvent = _.find(events, { event: 'task' }).handler
@@ -13,6 +14,14 @@ const getKeys = (ipc, events, ids) => {
   const invoke = () => _.keys(taskEvent)
 
   util.wrapChildPromise(ipc, invoke, ids)
+}
+
+const merge = (prevEvents, events) => {
+  const duplicates = _.intersection(_.keys(prevEvents), _.keys(events))
+  if (duplicates.length) {
+    errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
+  }
+  return _.extend(prevEvents, events)
 }
 
 const wrap = (ipc, events, ids, args) => {
@@ -34,5 +43,6 @@ const wrap = (ipc, events, ids, args) => {
 module.exports = {
   getBody,
   getKeys,
+  merge,
   wrap,
 }
