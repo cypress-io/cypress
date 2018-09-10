@@ -651,6 +651,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "PLUGIN_SERVER_EVENT_ERROR"
+      """
+      An error was thrown in your plugins file while executing the handler for the '#{chalk.blue(arg1)}' event.
+
+      The error we received was:
+
+      #{chalk.yellow(arg2)}
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

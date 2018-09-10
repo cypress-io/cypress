@@ -133,3 +133,45 @@ after:run is awaited
 
 
 `
+
+exports['e2e plugins fails run if server event handler throws 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (plugin_server_events_throw.coffee)                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: plugin_server_events_throw.coffee...                                            (1 of 1) 
+An error was thrown in your plugins file while executing the handler for the 'before:spec' event.
+
+The error we received was:
+
+Error: before:spec throws error
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+
+`
