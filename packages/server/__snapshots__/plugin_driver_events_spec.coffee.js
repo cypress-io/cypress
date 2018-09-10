@@ -18,7 +18,7 @@ exports['e2e plugins sends driver events 1'] = `
 
 
 before:test:run: fails to get
-An was thrown by the handler of the event "before:test:run" in your background file.
+An error was thrown in your background file while executing the handler for the 'before:test:run' event.
 
 This error is being ignored because the event cannot affect the results of the run.
 

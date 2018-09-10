@@ -6,7 +6,7 @@ module.exports = {
     if plugins.has("driver:event")
       plugins.execute("driver:event", eventName, args...)
       .catch (err) ->
-        errors.warning("DRIVER_EVENT_ERROR_CAUGHT", {
+        errors.warning("BACKGROUND_DRIVER_EVENT_ERROR", {
           event: eventName
           error: err?.stack or err
         })
