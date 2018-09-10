@@ -10,7 +10,7 @@ exports['e2e plugins sends server events 1'] = `
   │ Specs:      2 found (plugin_server_events_1_spec.coffee, plugin_server_events_2_spec.coffee)   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-before:run
+before:run cypress/integration/plugin_server_events_1_spec.coffee
 before:run is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

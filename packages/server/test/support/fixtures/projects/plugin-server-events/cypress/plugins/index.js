@@ -2,8 +2,8 @@
 const Promise = require('bluebird')
 
 module.exports = (on) => {
-  on('before:run', () => {
-    console.log('before:run')
+  on('before:run', (runDetails) => {
+    console.log('before:run', runDetails.specs[0].relative)
     return Promise.delay(10).then(() => console.log('before:run is awaited'))
   })
 

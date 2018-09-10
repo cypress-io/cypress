@@ -744,9 +744,11 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
+    ## TODO: add ciGroupId to these options and pass to 'before:run' event
     { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
 
     isHeadless = browser.name is "electron" and not headed
+    cypressVersion = pkg.version
 
     browser.isHeadless = isHeadless
     browser.isHeaded = not isHeadless
@@ -755,20 +757,20 @@ module.exports = {
       startedTestsAt: null
       endedTestsAt: null
       totalDuration: null
-      totalSuites: null,
-      totalTests: null,
-      totalFailed: null,
-      totalPassed: null,
-      totalPending: null,
-      totalSkipped: null,
-      runs: null,
-      browserPath: browser.path,
-      browserName: browser.name,
-      browserVersion: browser.version,
-      osName: sys.osName,
-      osVersion: sys.osVersion,
-      cypressVersion: pkg.version,
-      config,
+      totalSuites: null
+      totalTests: null
+      totalFailed: null
+      totalPassed: null
+      totalPending: null
+      totalSkipped: null
+      runs: null
+      browserPath: browser.path
+      browserName: browser.name
+      browserVersion: browser.version
+      osName: sys.osName
+      osVersion: sys.osVersion
+      cypressVersion
+      config
     }
 
     displayRunStarting({
@@ -790,7 +792,19 @@ module.exports = {
         serverEvents.execute("after:spec", spec, results)
 
     Promise.try ->
-      serverEvents.execute("before:run")
+      runDetails = {
+        config
+        browser
+        system: sys
+        cypressVersion
+        specs
+        specPattern
+        runUrl
+        parallel
+        group
+      }
+
+      serverEvents.execute("before:run", runDetails)
     .then ->
       iterateThroughSpecs({
         specs
