@@ -651,7 +651,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
-    when "RECORD_RUNS_OVER_LIMIT"
+    when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
       This project is over its monthly limit of private test recordings.
       #{arg1}
@@ -659,11 +659,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       < TODO: instructions on how to increase limit >
       < TODO: note about not recording? >
       """
-    when "GRACE_PERIOD_WARNING"
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      Your project is in a grace period.
+      < TODO: message about being over limit on grace period >
       """
-    when "OVER_RECORDINGS_WARNING"
+    when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
       This project is over its monthly limit of private test recordings.
       #{arg1}

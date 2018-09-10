@@ -297,9 +297,9 @@ createRun = (options = {}) ->
     _.each response.warnings, (warning) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("GRACE_PERIOD_WARNING")
-        when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("OVER_RECORDINGS_WARNING", usedMessage(warning.used, warning.limit))
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS")
+        when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(warning.used, warning.limit))
 
   .catch (err) ->
     debug("failed creating run %o", {
@@ -317,8 +317,8 @@ createRun = (options = {}) ->
         limit = _.get(payload, "limit")
 
         switch code
-          when "RECORD_RUNS_OVER_LIMIT"
-            errors.throw("RECORD_RUNS_OVER_LIMIT", usedMessage(used, limit))
+          when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(used, limit))
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412
