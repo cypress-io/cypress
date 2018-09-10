@@ -651,6 +651,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "DUPLICATE_TASK_KEY"
+      """
+      Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
+      """
     when "BACKGROUND_DRIVER_EVENT_ERROR"
       """
       An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1.event)}' event.
