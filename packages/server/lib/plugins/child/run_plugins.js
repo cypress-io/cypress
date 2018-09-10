@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
@@ -31,6 +32,16 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
+    if (event === 'task') {
+      const existingEventId = _.findKey(registeredEvents, { event: 'task' })
+      if (existingEventId) {
+        handler = task.merge(registeredEvents[existingEventId].handler, handler)
+        registeredEvents[existingEventId] = { event, handler }
+        debug('extend task events with id', existingEventId)
+        return
+      }
+    }
+
     const eventId = eventIdCount++
     registeredEvents[eventId] = { event, handler }
 
@@ -62,6 +73,9 @@ const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
+    case 'after:screenshot':
+      util.wrapChildPromise(ipc, invoke, ids, args)
+      return
     case 'file:preprocessor':
       preprocessor.wrap(ipc, invoke, ids, args)
       return

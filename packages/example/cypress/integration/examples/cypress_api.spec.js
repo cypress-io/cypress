@@ -18,6 +18,7 @@ context('Cypress.Commands', () => {
       method = method || 'log'
 
       // log the subject to the console
+      // @ts-ignore TS7017
       console[method]('The subject is', subject)
 
       // whatever we return becomes the new subject
@@ -26,6 +27,7 @@ context('Cypress.Commands', () => {
       return subject
     })
 
+    // @ts-ignore TS2339
     cy.get('button').console('info').then(($button) => {
       // subject is still $button
     })
@@ -84,9 +86,6 @@ context('Cypress.Server', () => {
     Cypress.Server.defaults({
       delay: 0,
       force404: false,
-      whitelist (xhr) {
-        // handle custom logic for whitelisting
-      },
     })
   })
 })

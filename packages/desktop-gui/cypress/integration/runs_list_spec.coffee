@@ -89,20 +89,25 @@ describe "Runs List", ->
           cy.get("@runRow").contains("#" + @runs[1].buildNumber)
 
         it "displays commit info", ->
-          cy.get("@runRow").contains(@runs[1].commit.branch)
-          cy.get("@runRow").contains(@runs[1].commit.message)
+          cy.get("@firstRunRow").contains(@runs[0].commit.branch)
+          cy.get("@firstRunRow").contains(@runs[0].commit.message)
 
         it "display no info msg & doesn't display avatar", ->
-          cy.get(".runs-container li").eq(2).within ->
+          cy.get("@runRow").within ->
             cy.get("img").should("not.exist")
             cy.contains("No commit info found")
 
         it "displays platform info", ->
           cy.get("@runRow").within ->
             cy.contains(@runs[1].instances[0].platform.osVersionFormatted)
-            cy.contains(@runs[1].instances[0].platform.browserVersion)
-            cy.get(".fa-windows")
+            cy.contains(@runs[1].instances[0].platform.browserName)
+            cy.get(".fa-apple")
             cy.get(".fa-chrome")
+
+        it "does not display browser when null", ->
+          cy.get("@firstRunRow").within ->
+            cy.contains(@runs[0].instances[0].platform.osVersionFormatted)
+            cy.get(".fa-chrome").should('not.exist')
 
         it "displays totals", ->
           cy.get("@runRow").contains(@runs[1].totalFailed)
@@ -110,21 +115,21 @@ describe "Runs List", ->
 
         it "displays times", ->
           cy.get("@runRow").contains("a few secs ago")
-          cy.get("@runRow").contains("00:12")
+          cy.get("@runRow").contains("00:16")
 
         it "displays seperate timers for incomplete runs", ->
-          cy.get("@firstRunRow").contains("47:02")
-          cy.get(".runs-container li").last().contains("57:02")
+          cy.get("@firstRunRow").contains("24:47")
+          cy.get(".runs-container li").eq(3).contains("45:47")
             .then -> cy.tick(1000)
-          cy.get("@firstRunRow").contains("47:03")
-          cy.get(".runs-container li").last().contains("57:03")
+          cy.get("@firstRunRow").contains("24:48")
+          cy.get(".runs-container li").eq(3).contains("45:48")
 
         context "spec display", ->
           it "displays spec if defined when 1 instance", ->
-            cy.get(".runs-container li").eq(1).contains(@runs[1].instances[0].spec)
+            cy.get("@firstRunRow").contains(@runs[1].instances[0].spec)
 
           it "does not display spec if null", ->
-            cy.get(".runs-container li").eq(3).contains("spec").should("not.exist")
+            cy.get(".runs-container li").eq(2).contains("spec").should("not.exist")
 
           it "does not display spec if multiple instances", ->
             cy.get(".runs-container li").eq(2).contains("spec").should("not.exist")

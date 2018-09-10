@@ -7,6 +7,7 @@ human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
+
 recordMode = require("./record")
 errors     = require("../errors")
 Project    = require("../project")
@@ -86,6 +87,11 @@ formatSpecSummary = (name, failures) ->
   ]
   .join(" ")
 
+formatRecordParams = (runUrl, parallel, group) ->
+  if runUrl
+    group or= false
+    "Group: #{group}, Parallel: #{Boolean(parallel)}"
+
 formatSpecPattern = (specPattern) ->
   if specPattern
     specPattern.join(", ")
@@ -103,7 +109,7 @@ formatSpecs = (specs) ->
   .join("")
 
 displayRunStarting = (options = {}) ->
-  { specs, specPattern, browser, runUrl } = options
+  { specs, specPattern, browser, runUrl, parallel, group } = options
 
   console.log("")
 
@@ -128,6 +134,7 @@ displayRunStarting = (options = {}) ->
     [gray("Browser:"), formatBrowser(browser)]
     [gray("Specs:"), formatSpecs(specs)]
     [gray("Searched:"), formatSpecPattern(specPattern)]
+    [gray("Params:"), formatRecordParams(runUrl, parallel, group)]
     [gray("Run URL:"), runUrl]
   ])
   .filter(_.property(1))
@@ -139,15 +146,17 @@ displayRunStarting = (options = {}) ->
 
   console.log("")
 
-displaySpecHeader = (name, curr, total) ->
+displaySpecHeader = (name, curr, total, estimated) ->
   console.log("")
+
+  PADDING = 2
 
   table = terminal.table({
     colWidths: [80, 20]
     colAligns: ["left", "right"]
     type: "pageDivider"
     style: {
-      "padding-left": 2
+      "padding-left": PADDING
     }
   })
 
@@ -159,7 +168,11 @@ displaySpecHeader = (name, curr, total) ->
 
   console.log(table.toString())
 
-collectTestResults = (obj = {}) ->
+  if estimated
+    estimatedLabel = " ".repeat(PADDING) + "Estimated:"
+    console.log(estimatedLabel, gray(humanTime.long(estimated)))
+
+collectTestResults = (obj = {}, estimated) ->
   {
     name:        _.get(obj, 'spec.name')
     tests:       _.get(obj, 'stats.tests')
@@ -168,11 +181,12 @@ collectTestResults = (obj = {}) ->
     failures:    _.get(obj, 'stats.failures')
     skipped:     _.get(obj, 'stats.skipped' )
     duration:    humanTime.long(_.get(obj, 'stats.wallClockDuration'))
+    estimated:   estimated and humanTime.long(estimated)
     screenshots: obj.screenshots and obj.screenshots.length
     video:       Boolean(obj.video)
   }
 
-renderSummaryTable = (runUrl, results) ->
+renderSummaryTable = (runUrl) -> (results) ->
   { runs } = results
 
   console.log("")
@@ -250,6 +264,56 @@ renderSummaryTable = (runUrl, results) ->
       console.log(terminal.renderTables(table4))
       console.log("")
 
+iterateThroughSpecs = (options = {}) ->
+  { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+
+  serial = ->
+    Promise.mapSeries(specs, runEachSpec)
+
+  serialWithRecord = ->
+    Promise
+    .mapSeries specs, (spec, index, length) ->
+      beforeSpecRun(spec)
+      .then ({ estimated }) ->
+        runEachSpec(spec, index, length, estimated)
+      .tap (results) ->
+        afterSpecRun(spec, results, config)
+
+  parallelWithRecord = (runs) ->
+    beforeSpecRun()
+    .then ({ spec, claimedInstances, totalInstances, estimated }) ->
+      ## no more specs to run?
+      if not spec
+        ## then we're done!
+        return runs
+
+      ## find the actual spec object amongst
+      ## our specs array since the API sends us
+      ## the relative name
+      spec = _.find(specs, { relative: spec })
+
+      runEachSpec(spec, claimedInstances - 1, totalInstances, estimated)
+      .tap (results) ->
+        runs.push(results)
+
+        afterSpecRun(spec, results, config)
+      .then ->
+        ## recurse
+        parallelWithRecord(runs)
+
+  switch
+    when parallel
+      ## if we are running in parallel
+      ## then ask the server for the next spec
+      parallelWithRecord([])
+    when beforeSpecRun
+      ## else iterate serialially and record
+      ## the results of each spec
+      serialWithRecord()
+    else
+      ## else iterate in serial
+      serial()
+
 getProjectId = (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
 
@@ -288,7 +352,7 @@ openProjectCreate = (projectRoot, socketId, options) ->
     socketId
     morgan:       false
     report:       true
-    isTextTerminal:   options.isTextTerminal ? true
+    isTextTerminal: options.isTextTerminal
     onError: (err) ->
       console.log("")
       console.log(err.stack)
@@ -315,6 +379,12 @@ createAndOpenProject = (socketId, options) ->
       config: project.getConfig()
       projectId: getProjectId(project, projectId)
     })
+
+removeOldProfiles = ->
+  browsers.removeOldProfiles()
+  .catch (err) ->
+    ## dont make removing old browsers profiles break the build
+    errors.warning("CANNOT_REMOVE_OLD_BROWSER_PROFILES", err.stack)
 
 trashAssets = (config = {}) ->
   if config.trashAssetsBeforeRuns isnt true
@@ -375,8 +445,8 @@ module.exports = {
 
     obj
 
-  displayResults: (obj = {}) ->
-    results = collectTestResults(obj)
+  displayResults: (obj = {}, estimated) ->
+    results = collectTestResults(obj, estimated)
 
     c = if results.failures then "red" else "green"
 
@@ -390,7 +460,7 @@ module.exports = {
       type: "outsideBorder"
     })
 
-    data = _.map [
+    data = _.chain([
       ["Tests:", results.tests]
       ["Passing:", results.passes]
       ["Failing:", results.failures]
@@ -399,11 +469,15 @@ module.exports = {
       ["Screenshots:", results.screenshots]
       ["Video:", results.video]
       ["Duration:", results.duration]
+      ["Estimated:", results.estimated] if estimated
       ["Spec Ran:", results.name]
-    ], (arr) ->
+    ])
+    .compact()
+    .map (arr) ->
       [key, val] = arr
 
       [color(key, "gray"), color(val, c)]
+    .value()
 
     table.push(data...)
 
@@ -579,8 +653,12 @@ module.exports = {
               project.emit("exitEarlyWithErr", err.message)
 
   waitForSocketConnection: (project, id) ->
+    debug("waiting for socket connection... %o", { id })
+
     new Promise (resolve, reject) ->
       fn = (socketId) ->
+        debug("got socket connection %o", { id: socketId })
+
         if socketId is id
           ## remove the event listener if we've connected
           project.removeListener("socket:connected", fn)
@@ -593,7 +671,7 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
 
     @listenForProjectEnd(project, exit)
     .then (obj) =>
@@ -617,7 +695,7 @@ module.exports = {
       finish = ->
         return obj
 
-      @displayResults(obj)
+      @displayResults(obj, estimated)
 
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
@@ -665,7 +743,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
 
     isHeadless = browser.name is "electron" and not headed
 
@@ -694,33 +772,29 @@ module.exports = {
 
     displayRunStarting({
       specs
+      group
       runUrl
       browser
+      parallel
       specPattern
     })
 
-    runEachSpec = (spec, index, length) =>
-      Promise
-      .try ->
-        if beforeSpecRun
-          debug("before spec run %o", spec)
+    runEachSpec = (spec, index, length, estimated) =>
+      displaySpecHeader(spec.name, index + 1, length, estimated)
 
-          beforeSpecRun(spec)
-      .then =>
-        displaySpecHeader(spec.name, index + 1, length)
-
-        @runSpec(spec, options)
+      @runSpec(spec, options, estimated)
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
 
-        if afterSpecRun
-          debug("after spec run %o", spec)
-
-          afterSpecRun(results, config)
-
-    Promise
-    .mapSeries(specs, runEachSpec)
+    iterateThroughSpecs({
+      specs
+      config
+      parallel
+      runEachSpec
+      afterSpecRun
+      beforeSpecRun
+    })
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
@@ -738,7 +812,7 @@ module.exports = {
       writeOutput(outputPath, results)
       .return(results)
 
-  runSpec: (spec = {}, options = {}) ->
+  runSpec: (spec = {}, options = {}, estimated) ->
     { project, browser, video, videosFolder } = options
 
     { isHeadless, isHeaded } = browser
@@ -797,6 +871,7 @@ module.exports = {
             cname
             started
             project
+            estimated
             screenshots
             exit:                 options.exit
             videoCompression:     options.videoCompression
@@ -831,12 +906,13 @@ module.exports = {
     debug("run mode ready with options %o", options)
 
     _.defaults(options, {
+      isTextTerminal: true
       browser: "electron"
     })
 
     socketId = random.id()
 
-    { projectRoot, record, key } = options
+    { projectRoot, record, key, ciBuildId, parallel, group } = options
 
     browserName = options.browser
 
@@ -852,15 +928,19 @@ module.exports = {
     .then ({ project, projectId, config }) =>
       ## if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
+      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
 
       if record
         recordMode.throwIfNoProjectId(projectId)
+        recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
+        recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
 
       Promise.all([
         system.info(),
         browsers.ensureAndGetByName(browserName),
         @findSpecs(config, specPattern),
         trashAssets(config),
+        removeOldProfiles()
       ])
       .spread (sys = {}, browser = {}, specs = []) =>
         ## return only what is return to the specPattern
@@ -870,16 +950,18 @@ module.exports = {
         if not specs.length
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
+        runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
           @runSpecs({
             beforeSpecRun
             afterSpecRun
             projectRoot
             specPattern
             socketId
+            parallel: parallelOverride
             browser
             project
             runUrl
+            group
             config
             specs
             sys
@@ -891,7 +973,7 @@ module.exports = {
             headed:               options.headed
             outputPath:           options.outputPath
           })
-          .tap(_.partial(renderSummaryTable, runUrl))
+          .tap(renderSummaryTable(runUrl))
 
         if record
           { projectName } = config
@@ -900,7 +982,10 @@ module.exports = {
             key
             sys
             specs
+            group
             browser
+            parallel
+            ciBuildId
             projectId
             projectRoot
             projectName
@@ -908,7 +993,8 @@ module.exports = {
             runAllSpecs
           })
         else
-          runAllSpecs()
+          ## not recording, can't be parallel
+          runAllSpecs({}, false)
 
   run: (options) ->
     electronApp

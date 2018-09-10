@@ -64,6 +64,18 @@ const processRunOptions = (options = {}) => {
     args.push('--record', options.record)
   }
 
+  if (options.parallel) {
+    args.push('--parallel')
+  }
+
+  if (options.group) {
+    args.push('--group', options.group)
+  }
+
+  if (options.ciBuildId) {
+    args.push('--ci-build-id', options.ciBuildId)
+  }
+
   if (options.outputPath) {
     args.push('--output-path', options.outputPath)
   }

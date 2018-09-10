@@ -142,6 +142,7 @@ module.exports = {
       onCrashed: ->
       onNewWindow: ->
       webPreferences:  {
+        partition:            null
         chromeWebSecurity:    true
         nodeIntegration:      false
         backgroundThrottling: false
@@ -158,6 +159,9 @@ module.exports = {
     if options.chromeWebSecurity is false
       options.webPreferences.webSecurity = false
 
+    if options.partition
+      options.webPreferences.partition = options.partition
+
     win = @_newBrowserWindow(options)
 
     win.on "blur", ->
@@ -169,6 +173,14 @@ module.exports = {
     win.once "closed", ->
       win.removeAllListeners()
       options.onClose.apply(win, arguments)
+
+    ## the webview loses focus on navigation, so we
+    ## have to refocus it everytime top navigates in headless mode
+    ## https://github.com/cypress-io/cypress/issues/2190
+    if options.show is false
+      win.webContents.on "did-start-loading", ->
+        if not win.isDestroyed()
+          win.focusOnWebView()
 
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)

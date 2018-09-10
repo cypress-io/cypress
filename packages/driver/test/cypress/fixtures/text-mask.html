@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+  <script
+  type="text/javascript"
+  src="/node_modules/vanilla-text-mask/dist/vanillaTextMask.js"></script>
+  <script src="/node_modules/text-mask-addons/dist/createNumberMask.js"></script>
+</head>
+<body>
+  <label>Phone:</label><input id="phone" />
+  <br>
+  <label>Date:</label><input type="text" id="date">
+  <br>
+  <label>Dollar:</label><input type="text" id="dollar">
+  <br>
+  <label>Card:</label><input type="text" id="card">
+  
+<script type="text/javascript">
+
+  // Assuming you have an input element in your HTML with the class .myInput
+  const masks = {
+    phone: {
+      inputElement: document.querySelector('#phone'),
+      mask: ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]
+    },
+    date: {
+      inputElement: document.querySelector('#date'),
+      mask: [/\d/, /\d/, '/', /\d/, /\d/, '/', /\d/, /\d/, /\d/, /\d/]
+    },
+    dollar: {
+      inputElement: document.querySelector('#dollar'),
+      mask: createNumberMask.default({
+        prefix: '',
+        suffix: ' $',
+        allowDecimal: true,
+        })
+    },
+    card: {
+      inputElement: document.querySelector('#card'),
+      mask: [/\d/, /\d/, /\d/, /\d/, ' ', /\d/, /\d/, /\d/, /\d/, ' ', /\d/, /\d/, /\d/, /\d/, ' ', /\d/, /\d/, /\d/, /\d/],
+    }
+  }
+
+  Object.keys(masks).forEach((name) => {
+    vanillaTextMask.maskInput(masks[name])
+  })
+  // Calling `vanillaTextMask.maskInput` adds event listeners to the input element. 
+  // If you need to remove those event listeners, you can call
+  // maskedInputController.destroy()
+</script>
+</body>
+
+</html>

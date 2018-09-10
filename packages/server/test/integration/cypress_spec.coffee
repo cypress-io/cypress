@@ -11,6 +11,8 @@ electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
 isForkPr   = require("is-fork-pr")
 Fixtures   = require("../support/helpers/fixtures")
+snapshot   = require("snap-shot-it")
+stripAnsi  = require("strip-ansi")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
@@ -40,6 +42,7 @@ videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
+system        = require("#{root}lib/util/system")
 appData       = require("#{root}lib/util/app_data")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
 
@@ -62,14 +65,24 @@ TYPICAL_BROWSERS = [
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     majorVersion: '62'
-  }, {
-    name: 'electron',
-    version: '',
-    path: '',
-    majorVersion: '',
-    info: 'Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.'
   }
 ]
+
+previousCwd = process.cwd()
+
+snapshotConsoleLogs = (name) ->
+  args = _
+  .chain(console.log.args)
+  .map (innerArgs) ->
+    innerArgs.join(" ")
+  .join("\n")
+  .value()
+
+  ## our cwd() is currently the project
+  ## so must switch back to original
+  process.chdir(previousCwd)
+
+  snapshot(name, stripAnsi(args))
 
 describe "lib/cypress", ->
   require("mocha-banner").register()
@@ -315,7 +328,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("integrationFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-run-mode"])
         .then =>
           fs.statAsync(cfg.integrationFolder)
         .then =>
@@ -365,7 +378,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-run-mode"])
         .then =>
           fs.statAsync(cfg.fixturesFolder)
         .then =>
@@ -380,7 +393,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("supportFolder should not exist!")
         .catch {code: "ENOENT"}, =>
-          cypress.start(["--run-project=#{@pristinePath}", "--no-runMode"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-run-mode"])
         .then =>
           fs.statAsync(supportFolder)
         .then =>
@@ -459,6 +472,17 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWithMatch("You also provided your Record Key, but you did not pass the --record flag.")
         expect(console.log).to.be.calledWithMatch("cypress run --record")
         expect(console.log).to.be.calledWithMatch("https://on.cypress.io/recording-project-runs")
+
+    it "logs warning when removing old browser profiles fails", ->
+      err = new Error('foo')
+
+      sinon.stub(browsers, 'removeOldProfiles').rejects(err)
+
+      cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        expect(errors.warning).to.be.calledWith("CANNOT_REMOVE_OLD_BROWSER_PROFILES", err.stack)
+        expect(console.log).to.be.calledWithMatch("Warning: We failed to remove old browser profiles from previous runs.")
+        expect(console.log).to.be.calledWithMatch(err.message)
 
     it "does not log warning when no projectId", ->
       cypress.start(["--run-project=#{@pristinePath}", "--key=asdf"])
@@ -634,7 +658,9 @@ describe "lib/cypress", ->
 
     describe "state", ->
       beforeEach ->
-        formStatePath(@todosPath)
+        appData.remove()
+        .then =>
+          formStatePath(@todosPath)
         .then (statePathStart) =>
           @statePath = appData.projectsPath(statePathStart)
 
@@ -729,6 +755,11 @@ describe "lib/cypress", ->
         ee.loadURL = ->
         ee.focusOnWebView = ->
         ee.webContents = {
+          debugger: {
+            on: sinon.stub()
+            attach: sinon.stub()
+            sendCommand: sinon.stub()
+          }
           setUserAgent: sinon.stub()
           session: {
             clearCache: sinon.stub().yieldsAsync()
@@ -924,6 +955,246 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWithMatch("cypress run --record")
         @expectExitWith(3)
 
+    it "errors and exits when using --group but ciBuildId could not be generated", ->
+      sinon.stub(ciProvider, "provider").returns(null)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=e2e-tests",
+      ])
+      .then =>
+        @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-group")
+
+    it "errors and exits when using --parallel but ciBuildId could not be generated", ->
+      sinon.stub(ciProvider, "provider").returns(null)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel",
+      ])
+      .then =>
+        @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel")
+
+    it "errors and exits when using --parallel and --group but ciBuildId could not be generated", ->
+      sinon.stub(ciProvider, "provider").returns(null)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=e2e-tests-chrome",
+        "--parallel",
+      ])
+      .then =>
+        @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel-group")
+
+    it "errors and exits when using --ci-build-id with no group or parallelization", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--ci-build-id=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("INCORRECT_CI_BUILD_ID_USAGE")
+        snapshotConsoleLogs("INCORRECT_CI_BUILD_ID_USAGE")
+
+    it "errors and exits when using --ci-build-id without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--ci-build-id=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId")
+
+    it "errors and exits when using --group without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--group=e2e-tests",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group")
+
+    it "errors and exits when using --parallel without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--parallel",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel")
+
+    it "errors and exits when using --group and --parallel without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--group=electron-smoke-tests",
+        "--parallel",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group-parallel")
+
+    it "errors and exits when group name is not unique and explicitly passed ciBuildId", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "RUN_GROUP_NAME_NOT_UNIQUE"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
+        snapshotConsoleLogs("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
+
+    it "errors and exits when parallel group params are different", ->
+      sinon.stub(system, "info").returns({
+        osName: "darwin"
+        osVersion: "v1"
+      })
+
+      sinon.stub(browsers, "ensureAndGetByName").returns({
+        version: "59.1.2.3"
+        displayName: "Electron"
+      })
+
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "PARALLEL_GROUP_PARAMS_MISMATCH"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
+
+    it "errors and exits when parallel is not allowed", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "PARALLEL_DISALLOWED"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_PARALLEL_DISALLOWED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_DISALLOWED")
+
+    it "errors and exits when parallel is required", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "PARALLEL_REQUIRED"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_PARALLEL_REQUIRED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_REQUIRED")
+
+    it "errors and exits when run is already complete", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "ALREADY_COMPLETE"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_ALREADY_COMPLETE")
+        snapshotConsoleLogs("DASHBOARD_ALREADY_COMPLETE")
+
+    it "errors and exits when run is stale", ->
+      err = new Error()
+      err.statusCode = 422
+      err.error = {
+        code: "STALE_RUN"
+        payload: {
+          runUrl: "https://dashboard.cypress.io/runs/12345"
+        }
+      }
+
+      api.createRun.rejects(err)
+
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--record"
+        "--key=token-123",
+        "--parallel"
+        "--group=electron-smoke-tests",
+        "--ciBuildId=ciBuildId123",
+      ])
+      .then =>
+        @expectExitWithErr("DASHBOARD_STALE_RUN")
+        snapshotConsoleLogs("DASHBOARD_STALE_RUN")
+
   context "--return-pkg", ->
     beforeEach ->
       console.log.restore()
@@ -989,7 +1260,6 @@ describe "lib/cypress", ->
       cypress.start(["--port=2121", "--config=pageLoadTimeout=1000"])
       .then ->
         expect(Events.start).to.be.calledWithMatch({
-          port: 2121,
           config: {
             pageLoadTimeout: 1000
             port: 2121

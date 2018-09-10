@@ -3,6 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../dom")
+$selection = require("../dom/selection")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
@@ -37,12 +38,6 @@ isPromiseLike = (ret) ->
 
 returnedFalse = (result) ->
   result is false
-
-silenceConsole = (contentWindow) ->
-  if c = contentWindow.console
-    c.log = ->
-    c.warn = ->
-    c.info = ->
 
 getContentWindow = ($autIframe) ->
   $autIframe.prop("contentWindow")
@@ -157,6 +152,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
+      contentWindow.HTMLElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(this)
+
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
 
@@ -640,6 +641,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## focused sync methods
     getFocused: focused.getFocused
+    needsForceFocus: focused.needsForceFocus
+    needsFocus: focused.needsFocus
+    fireFocus: focused.fireFocus
+    fireBlur: focused.fireBlur
 
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
@@ -901,12 +906,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       return null
 
     onBeforeAppWindowLoad: (contentWindow) ->
-      ## we silence the console when running headlessly
-      ## because console logs are kept around in memory for
-      ## inspection via the developer
-      if not config("isInteractive")
-        silenceConsole(contentWindow)
-
       ## we set window / document props before the window load event
       ## so that we properly handle events coming from the application
       ## from the time that happens BEFORE the load event occurs

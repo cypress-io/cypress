@@ -38,13 +38,13 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request) ->
+  handle: (req, res, config, getRemoteState, request, nodeProxy) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
       url: req.url
       proxiedUrl: req.proxiedUrl
-      cookies: req.cookies
+      headers: req.headers
       remoteState
     })
 
@@ -80,6 +80,15 @@ module.exports = {
 
         return res.status(503).end()
 
+    # if req.headers.accept is "text/event-stream"
+    #   return nodeProxy.web(req, res, {
+    #     secure: false
+    #     ignorePath: true
+    #     target: req.proxiedUrl
+    #     timeout: 0
+    #     proxyTimeout: 0
+    #   })
+
     thr = through (d) -> @queue(d)
 
     @getHttpContent(thr, req, res, remoteState, config, request)
@@ -95,6 +104,7 @@ module.exports = {
 
     wantsInjection = null
     wantsSecurityRemoved = null
+    isEventStream = req.headers.accept is "text/event-stream"
 
     resContentTypeIs = (respHeaders, str) ->
       contentType = respHeaders["content-type"]
@@ -224,6 +234,17 @@ module.exports = {
         return str.pipe(thr)
 
     endWithResponseErr = (err) ->
+      ## TODO: add debug logs here that the request
+      ## failed, including the original url, the error
+      ## and whether or not the res headers were sent
+
+      ## if this is an event stream just destroy
+      ## the socket without sending a response
+      ## which matches how it works without a proxy
+      ## in the middle
+      if isEventStream
+        return req.socket.destroy()
+
       ## use res.statusCode if we have one
       ## in the case of an ESOCKETTIMEDOUT
       ## and we have the incomingRes headers
@@ -318,6 +339,9 @@ module.exports = {
     else
       # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
       opts = {followRedirect: false, strictSSL: false}
+
+      if isEventStream
+        opts.timeout = null
 
       ## strip unsupported accept-encoding headers
       encodings = accept.parser(req.headers["accept-encoding"]) ? []

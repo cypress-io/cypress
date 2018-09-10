@@ -37,7 +37,7 @@ normalizeAndWhitelistSet = (set, key, value) ->
 
   set(_.pick(valueObject, whitelist))
 
-findSavedSate = (projectRoot, isTextTerminal) ->
+module.exports = (projectRoot, isTextTerminal) ->
   if isTextTerminal
     debug("noop saved state")
     return Promise.resolve(FileUtil.noopFile)
@@ -57,5 +57,3 @@ findSavedSate = (projectRoot, isTextTerminal) ->
 
     stateFiles[fullStatePath] = stateFile
     stateFile
-
-module.exports = findSavedSate

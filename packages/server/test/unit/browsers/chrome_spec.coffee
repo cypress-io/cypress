@@ -37,7 +37,9 @@ describe "lib/browsers/chrome", ->
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.has.returns(true)
-      plugins.execute.resolves(["--foo=bar", "--load-extension=/foo/bar/baz.js"])
+      plugins.execute.resolves([
+        "--foo=bar", "--load-extension=/foo/bar/baz.js"
+      ])
 
       pathToTheme = extension.getPathToTheme()
 
@@ -117,3 +119,23 @@ describe "lib/browsers/chrome", ->
       args = chrome._getArgs()
 
       expect(args).not.to.include("--user-agent=foo")
+
+    it "disables RootLayerScrolling in versions 66 or 67", ->
+      arg = "--disable-blink-features=RootLayerScrolling"
+
+      disabledRootLayerScrolling = (version, bool) ->
+        args = chrome._getArgs({
+          browser: {
+            majorVersion: version
+          }
+        })
+
+        if bool
+          expect(args).to.include(arg)
+        else
+          expect(args).not.to.include(arg)
+
+      disabledRootLayerScrolling("65", false)
+      disabledRootLayerScrolling("66", true)
+      disabledRootLayerScrolling("67", true)
+      disabledRootLayerScrolling("68", false)
