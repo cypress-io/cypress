@@ -1448,7 +1448,7 @@ You have recorded 600 private test recordings this month. The limit is 500 priva
 `
 
 exports['e2e record api interaction warnings create run warnings grace period warns when in grace period 1'] = `
-Your project is in a grace period.
+< TODO: message about being over limit on grace period >
 
 ====================================================================================================
 
@@ -1524,12 +1524,6 @@ Your project is in a grace period.
 `
 
 exports['e2e record api interaction warnings create run warnings over test recordings warning warns when over recordings limit 1'] = `
-This project is over its monthly limit of private test recordings.
-
-You have recorded 700 private test recordings this month. The limit is 500 private test recordings.
-
-< TODO: instructions on how to increase limit >
-< TODO: note about not recording? >
 
 ====================================================================================================
 

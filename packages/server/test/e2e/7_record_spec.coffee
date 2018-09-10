@@ -750,7 +750,7 @@ describe "e2e record", ->
         url: "/runs"
         req: "postRunRequest@2.1.0",
         res: (req, res) -> res.status(402).json({
-          code: "RECORD_RUNS_OVER_LIMIT"
+          code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           payload: {
             used: 600
             limit: 500
