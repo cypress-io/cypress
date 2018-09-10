@@ -164,18 +164,33 @@ _providerCiParams = ->
       "SEMAPHORE_TRIGGER_SOURCE"
       "PULL_REQUEST_NUMBER"
     ])
+
+    # see http://docs.shippable.com/ci/env-vars/
     shippable: extract([
-      "JOB_ID"
-      "BUILD_URL"
-      "PROJECT_ID"
-      "JOB_NUMBER"
-      "COMPARE_URL"
-      "BASE_BRANCH"
-      "BUILD_NUMBER"
-      "PULL_REQUEST"
-      "REPOSITORY_URL"
-      "PULL_REQUEST_BASE_BRANCH"
-      "PULL_REQUEST_REPO_FULL_NAME"
+      ## build variables
+      "SHIPPABLE_BUILD_ID"        # "5b93354cabfabb07007f01fd"
+      "SHIPPABLE_BUILD_NUMBER"    # "4"
+      "SHIPPABLE_COMMIT_RANGE"    # "sha1...sha2"
+      "SHIPPABLE_CONTAINER_NAME"  # "c.exec.cypress-example-kitchensink.4.1"
+      "SHIPPABLE_JOB_ID"          # "1"
+      "SHIPPABLE_JOB_NUMBER"      # "1"
+      "SHIPPABLE_REPO_SLUG"       # "<username>/<repo>"
+      ## additional information that Shippable provides
+      "IS_FORK"                   # "true"
+      "IS_GIT_TAG"                # "false"
+      "IS_PRERELEASE"             # "false"
+      "IS_RELEASE"                # "false"
+      "REPOSITORY_URL"            # "https://github.com/....git"
+      "REPO_FULL_NAME"            # "<username>/<repo>"
+      "REPO_NAME"                 # "cypress-example-kitchensink"
+      "BUILD_URL"                 # "https://app.shippable.com/github/<username>/<repo>/runs/1"
+      ## Pull request information
+      "BASE_BRANCH" # Name of the target branch into which the pull request changes will be merged.
+      "HEAD_BRANCH" # This is only set for pull requests and is the name of the branch the pull request was opened from.
+      "IS_PULL_REQUEST" # "false" or "true"
+      "PULL_REQUEST" # Pull request number if the job is a pull request. If not, this will be set to false.
+      "PULL_REQUEST_BASE_BRANCH" # Name of the branch that the pull request will be merged into. It should be the same as BASE_BRANCH.
+      "PULL_REQUEST_REPO_FULL_NAME" # Full name of the repository from where the pull request originated.
     ])
     snap: null
     teamcity: null
