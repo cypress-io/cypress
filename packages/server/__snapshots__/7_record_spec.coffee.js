@@ -1437,18 +1437,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 `
 
-exports['e2e record api interaction errors create run 402 errors and exits when over recorded runs limit 1'] = `
-This project is over its monthly limit of private test recordings.
-
-You have recorded 600 private test recordings this month. The limit is 500 private test recordings.
-
-< TODO: instructions on how to increase limit >
-< TODO: note about not recording? >
-
-`
-
-exports['e2e record api interaction warnings create run warnings grace period warns when in grace period 1'] = `
-< TODO: message about being over limit on grace period >
+exports['e2e record api interaction warnings create run warnings over test recordings warning warns when over recordings limit 1'] = `
 
 ====================================================================================================
 
@@ -1523,7 +1512,101 @@ exports['e2e record api interaction warnings create run warnings grace period wa
 
 `
 
-exports['e2e record api interaction warnings create run warnings over test recordings warning warns when over recordings limit 1'] = `
+exports['e2e record api interaction errors create run 402 errors and exits when on free plan and over recorded runs limit 1'] = `
+You've exceeded the limit of private test recordings under your free plan this month. The limit is 500 private test recordings.
+
+To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+https://on.cypress.io/set-up-billing
+
+`
+
+exports['e2e record api interaction warnings create run warnings grace period warns when over private test recordings 1'] = `
+You've exceeded the limit of private test recordings under your free plan this month. The limit is 500 private test recordings.
+
+Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+https://on.cypress.io/set-up-billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings paid plan warns when over private test recordings 1'] = `
+You've exceeded the limit of private test recordings under your current billing plan this month. The limit is 500 private test recordings.
+
+To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+https://on.cypress.io/set-up-billing
 
 ====================================================================================================
 

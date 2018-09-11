@@ -231,11 +231,14 @@ getCommitFromGitOrCi = (git) ->
     defaultBranch: null
   })
 
-usedMessage = (used, limit) ->
-  if used? and limit?
-    "\nYou have recorded #{chalk.blue(used)} private test recordings this month. The limit is #{chalk.blue(limit)} private test recordings."
+usedMessage = (limit) ->
+  if _.isFinite(limit)
+    "The limit is #{chalk.blue(limit)} private test recordings."
   else
     ""
+
+gracePeriodMessage = (gracePeriodEnds) ->
+  gracePeriodEnds or "the grace period ends"
 
 createRun = (options = {}) ->
   _.defaults(options, {
@@ -297,9 +300,9 @@ createRun = (options = {}) ->
     _.each response.warnings, (warning) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS")
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(warning.limit), gracePeriodMessage(warning.gracePeriodEnds))
         when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(warning.used, warning.limit))
+          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(warning.limit))
 
   .catch (err) ->
     debug("failed creating run %o", {
@@ -318,7 +321,7 @@ createRun = (options = {}) ->
 
         switch code
           when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(used, limit))
+            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(limit))
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412

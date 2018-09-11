@@ -653,23 +653,27 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      This project is over its monthly limit of private test recordings.
-      #{arg1}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1}
 
-      < TODO: instructions on how to increase limit >
-      < TODO: note about not recording? >
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      https://on.cypress.io/set-up-billing
       """
     when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      < TODO: message about being over limit on grace period >
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg2}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      https://on.cypress.io/set-up-billing
       """
     when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      This project is over its monthly limit of private test recordings.
-      #{arg1}
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1}
 
-      < TODO: instructions on how to increase limit >
-      < TODO: note about not recording? >
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      https://on.cypress.io/set-up-billing
       """
 
 
