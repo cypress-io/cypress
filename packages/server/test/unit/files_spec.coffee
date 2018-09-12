@@ -70,11 +70,3 @@ describe "lib/files", ->
           files.writeFile(@projectRoot, ".projects/write_file.txt", "bar", {flag: "a+"}).then =>
             files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
               expect(contents).to.equal("foobar")
-
-    xit "respects mode when specified", ->
-      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
-        files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) =>
-          expect(contents).to.equal("foo")
-          files.writeFile(@projectRoot, ".projects/write_file.txt", "bar", {flag: "a+"}).then =>
-            files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
-              expect(contents).to.equal("foobar")
