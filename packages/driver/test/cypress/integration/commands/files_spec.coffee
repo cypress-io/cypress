@@ -302,6 +302,8 @@ describe "src/cy/commands/files", ->
 
     describe ".flag", ->
       it "sends a flag if specified", ->
+        Cypress.backend.resolves(okResponse)
+
         cy.writeFile("foo.txt", "contents", { flag: "a+" }).then ->
           expect(Cypress.backend).to.be.calledWith(
             "write:file",
@@ -311,7 +313,6 @@ describe "src/cy/commands/files", ->
               encoding: "utf8",
               flag: "a+"
             })
-          .exec("rm cypress/fixtures/foo.txt")
 
       # TODO figure out why this fails
       xit "appends content to existing file if specified", ->
