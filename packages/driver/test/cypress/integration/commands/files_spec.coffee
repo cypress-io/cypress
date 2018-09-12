@@ -314,11 +314,10 @@ describe "src/cy/commands/files", ->
               flag: "a+"
             })
 
-      # TODO figure out why this fails
-      xit "appends content to existing file if specified", ->
+      it "appends content to existing file if specified", ->
         cy
           .writeFile("cypress/fixtures/foo.txt", "foo")
-          .writeFile("cypress/fixtures/foo.txt", "bar")
+          .writeFile("cypress/fixtures/foo.txt", "bar", { flag: "a+"})
           .readFile("cypress/fixtures/foo.txt").should("equal", "foobar")
           .exec("rm cypress/fixtures/foo.txt")
 

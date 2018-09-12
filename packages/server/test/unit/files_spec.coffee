@@ -15,7 +15,8 @@ describe "lib/files", ->
       @config = cfg
       {@projectRoot} = cfg
 
-  afterEach -> FixturesHelper.remove()
+  afterEach ->
+    FixturesHelper.remove()
 
   context "#readFile", ->
     it "returns contents and full file path", ->
