@@ -316,12 +316,22 @@ createRun = (options = {}) ->
       when 402
         { code, payload } = err.error
 
-        used = _.get(payload, "used")
         limit = _.get(payload, "limit")
 
         switch code
           when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
             errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(limit))
+          when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+            errors.throw("PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN")
+          else
+            errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
+              response: err,
+              flags: {
+                group,
+                parallel,
+                ciBuildId,
+              },
+            })
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412

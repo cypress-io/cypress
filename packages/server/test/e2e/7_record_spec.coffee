@@ -744,29 +744,6 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
-    describe "create run 402", ->
-      setup([{
-        method: "post"
-        url: "/runs"
-        req: "postRunRequest@2.1.0",
-        res: (req, res) -> res.status(402).json({
-          code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          payload: {
-            used: 600
-            limit: 500
-          }
-        })
-      }])
-
-      it "errors and exits when on free plan and over recorded runs limit", ->
-        e2e.exec(@, {
-          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
-          spec: "record_pass*"
-          record: true
-          snapshot: true
-          expectedExitCode: 1
-        })
-
     describe "create run unknown 422", ->
       routes = [{
         method: "post"
@@ -797,6 +774,67 @@ describe "e2e record", ->
           expect(urls).to.deep.eq([
             "POST /runs"
           ])
+
+    describe.only "create run 402 - free plan exceeds monthly private tests", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          payload: {
+            used: 600
+            limit: 500
+          }
+        })
+      }])
+
+      it "errors and exits when on free plan and over recorded runs limit", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - parallel feature not available in plan", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+        })
+      }])
+
+      it "errors and exits when attempting parallel run when not available in plan", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - unknown error", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          error: "Something went wrong"
+        })
+      }])
+
+      it "errors and exits when there's an unknown 402 error", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
 
     describe "create instance", ->
       routes = [

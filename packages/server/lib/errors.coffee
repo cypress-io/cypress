@@ -675,7 +675,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       https://on.cypress.io/set-up-billing
       """
-
+    when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+      """
+      TODO: add message for user trying to start build with `--parallel` when plan does not allow it
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

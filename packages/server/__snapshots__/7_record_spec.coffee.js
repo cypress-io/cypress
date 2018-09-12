@@ -1512,7 +1512,7 @@ exports['e2e record api interaction warnings create run warnings over test recor
 
 `
 
-exports['e2e record api interaction errors create run 402 errors and exits when on free plan and over recorded runs limit 1'] = `
+exports['e2e record api interaction errors create run 402 - free plan exceeds monthly private tests errors and exits when on free plan and over recorded runs limit 1'] = `
 You've exceeded the limit of private test recordings under your free plan this month. The limit is 500 private test recordings.
 
 To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
@@ -1678,5 +1678,20 @@ https://on.cypress.io/set-up-billing
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
 
+
+`
+
+exports['e2e record api interaction errors create run 402 - unknown error errors and exits when there\'s an unknown 402 error 1'] = `
+We encountered an unexpected error talking to our servers.
+
+There is likely something wrong with the request.
+
+The server's response was:
+
+StatusCodeError: 402
+
+{
+  "error": "Something went wrong"
+}
 
 `
