@@ -22,7 +22,11 @@ module.exports = {
 
   writeFile: (projectRoot, file, contents, options = {}) ->
     filePath = path.join(projectRoot, file)
-    fs.outputFileAsync(filePath, contents, options.encoding or "utf8")
+    writeOptions = {
+      encoding: options.encoding or "utf8"
+      flag: options.flag or "w"
+    }
+    fs.outputFile(filePath, contents, writeOptions)
     .then ->
       {
         contents: contents

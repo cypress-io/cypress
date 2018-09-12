@@ -15,8 +15,7 @@ describe "lib/files", ->
       @config = cfg
       {@projectRoot} = cfg
 
-  afterEach ->
-    FixturesHelper.remove()
+  afterEach -> FixturesHelper.remove()
 
   context "#readFile", ->
     it "returns contents and full file path", ->
@@ -56,10 +55,26 @@ describe "lib/files", ->
         files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
           expect(contents).to.equal("�")
 
-    it "overwrites existing file without issue", ->
+    it "overwrites existing file by default", ->
       files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
         files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) =>
           expect(contents).to.equal("foo")
           files.writeFile(@projectRoot, ".projects/write_file.txt", "bar").then =>
             files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
               expect(contents).to.equal("bar")
+
+    it "appends content to file when specified", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) =>
+          expect(contents).to.equal("foo")
+          files.writeFile(@projectRoot, ".projects/write_file.txt", "bar", {flag: "a+"}).then =>
+            files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
+              expect(contents).to.equal("foobar")
+
+    xit "respects mode when specified", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) =>
+          expect(contents).to.equal("foo")
+          files.writeFile(@projectRoot, ".projects/write_file.txt", "bar", {flag: "a+"}).then =>
+            files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
+              expect(contents).to.equal("foobar")

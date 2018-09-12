@@ -266,6 +266,22 @@ describe "src/cy/commands/files", ->
           { encoding: "ascii" }
         )
 
+    it "can take writeOptions as third argument", ->
+      Cypress.backend.resolves(okResponse)
+
+      writeOptions = {
+        encoding: "ascii",
+        flag: "a+"
+      }
+
+      cy.writeFile("foo.txt", "contents", {"ascii"}).then ->
+        expect(Cypress.backend).to.be.calledWith(
+          "write:file",
+          "foo.txt",
+          "contents",
+          writeOptions
+        )
+
     it "sets the contents as the subject", ->
       Cypress.backend.resolves(okResponse)
 
