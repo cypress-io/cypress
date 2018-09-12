@@ -96,6 +96,8 @@ defaultPreferences = {
 }
 
 module.exports = {
+  send: firefoxUtil.send,
+
   open: (browserName, url, options = {}) ->
     preferences = _.extend({}, defaultPreferences)
     extensions = []
@@ -159,10 +161,10 @@ module.exports = {
       debug("launch in firefox: %s, %s", url, args)
 
       utils.launch(browserName, null, args)
-    .then (browserInstance) ->
-      firefoxUtil.setup(extensions, url)
-      .then ->
-        return browserInstance
+      .then (browserInstance) ->
+        firefoxUtil.setup(extensions, url)
+        # .then ->
+        #   return browserInstance
     .catch (err) ->
       debug("launch error:", err.stack)
       throw err

@@ -1,0 +1,22 @@
+{
+  "name": "@packages/gateway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.2",
+    "debug": "^4.0.0",
+    "express": "^4.16.3",
+    "marionette-client": "^1.9.5",
+    "socket.io": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/socket.io": "^1.4.38"
+  }
+}

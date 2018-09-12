@@ -26,6 +26,8 @@ const send = (data) => {
 }
 
 module.exports = {
+  send,
+
   setup (extensions, url) {
     return connect()
     .then(() => {
@@ -49,6 +51,7 @@ module.exports = {
           parameters: { url },
         })
       })
+      .return({ sessionId })
     })
   },
 }
