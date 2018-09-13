@@ -43,7 +43,7 @@ npm run watch
 #### For development
 
 ```bash
-npm run build-dev
+npm run build
 ```
 
 #### For production

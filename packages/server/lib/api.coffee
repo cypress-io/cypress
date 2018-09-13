@@ -1,19 +1,37 @@
 _          = require("lodash")
 os         = require("os")
 nmi        = require("node-machine-id")
+debug      = require("debug")("cypress:server:api")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
+humanInterval = require("human-interval")
 pkg        = require("@packages/root")
-browsers   = require('./browsers')
+browsers   = require("./browsers")
 routes     = require("./util/routes")
 system     = require("./util/system")
-debug      = require("debug")("cypress:server:api")
 
 ## TODO: improve this, dont just use
 ## requests because its way too verbose
 # if debug.enabled
 #   request.debug = true
+
+THIRTY_SECONDS = humanInterval("30 seconds")
+SIXTY_SECONDS = humanInterval("60 seconds")
+TWO_MINUTES = humanInterval("2 minutes")
+
+DELAYS = [
+  THIRTY_SECONDS
+  SIXTY_SECONDS
+  TWO_MINUTES
+]
+
+if intervals = process.env.API_RETRY_INTERVALS
+  DELAYS = _
+  .chain(intervals)
+  .split(",")
+  .map(_.toNumber)
+  .value()
 
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
@@ -29,7 +47,17 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  # use %j argument to ensure deep nested properties are serialized
+  debug(
+    "request to url: %s with params: %j",
+    "#{params.method} #{params.url}",
+    _.pick(params, "body", "headers")
+  )
+
   request[method](params, callback)
+  .promise()
+  .tap (resp) ->
+    debug("response %o", resp)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -50,7 +78,15 @@ machineId = ->
   .catch ->
     return null
 
+## retry on timeouts, 5xx errors, or any error without a status code
+isRetriableError = (err) ->
+  (err instanceof Promise.TimeoutError) or 
+  (500 <= err.statusCode < 600) or
+  not err.statusCode?
+
 module.exports = {
+  rp
+
   ping: ->
     rp.get(routes.ping())
     .catch(tagError)
@@ -107,22 +143,25 @@ module.exports = {
 
   createRun: (options = {}) ->
     body = _.pick(options, [
-      "projectId"
-      "recordKey"
       "ci"
       "specs",
       "commit"
-      "platform"
-      "specPattern"
+      "group",
+      "platform",
+      "parallel",
+      "ciBuildId",
+      "projectId",
+      "recordKey",
+      "specPattern",
     ])
 
     rp.post({
       body
       url: routes.runs()
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? SIXTY_SECONDS
       headers: {
-        "x-route-version": "3"
+        "x-route-version": "4"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -142,13 +181,11 @@ module.exports = {
       body
       url: routes.instances(runId)
       json: true
-      timeout: timeout ? 10000
+      timeout: timeout ? SIXTY_SECONDS
       headers: {
-        "x-route-version": "4"
+        "x-route-version": "5"
       }
     })
-    .promise()
-    .get("instanceId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
@@ -156,7 +193,7 @@ module.exports = {
     rp.put({
       url: routes.instanceStdout(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? SIXTY_SECONDS
       body: {
         stdout: options.stdout
       }
@@ -168,7 +205,7 @@ module.exports = {
     rp.put({
       url: routes.instance(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? SIXTY_SECONDS
       headers: {
         "x-route-version": "2"
       }
@@ -196,7 +233,6 @@ module.exports = {
         bearer: authToken
       }
     })
-    .promise()
     .timeout(timeout)
     .catch(tagError)
 
@@ -282,7 +318,6 @@ module.exports = {
       url: routes.auth(),
       json: true
     })
-    .promise()
     .get("url")
     .catch(tagError)
 
@@ -298,7 +333,6 @@ module.exports = {
         "x-route-version": "2"
       }
     })
-    .promise()
     .get("apiToken")
     .catch(tagError)
 
@@ -307,5 +341,36 @@ module.exports = {
 
   updateProjectToken: (projectId, authToken) ->
     @_projectToken("put", projectId, authToken)
+
+  retryWithBackoff: (fn, options = {}) ->
+    ## for e2e testing purposes
+    if process.env.DISABLE_API_RETRIES
+      debug("api retries disabled")
+      return Promise.try(fn)
+
+    do attempt = (retryIndex = 0) ->
+      Promise
+      .try(fn)
+      .catch isRetriableError, (err) ->
+        if retryIndex > DELAYS.length
+          throw err
+
+        delay = DELAYS[retryIndex]
+
+        if options.onBeforeRetry
+          options.onBeforeRetry({
+            err
+            delay
+            retryIndex
+            total: DELAYS.length
+          })
+
+        retryIndex++
+
+        Promise
+        .delay(delay)
+        .then ->
+          debug("retry ##{retryIndex} after #{delay}ms")
+          attempt(retryIndex)
 
 }
