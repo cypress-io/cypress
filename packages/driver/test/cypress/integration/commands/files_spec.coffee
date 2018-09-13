@@ -272,6 +272,20 @@ describe "src/cy/commands/files", ->
           }
         )
 
+    it "can take encoding as part of options", ->
+      Cypress.backend.resolves(okResponse)
+
+      cy.writeFile("foo.txt", "contents", {encoding: "ascii"}).then ->
+        expect(Cypress.backend).to.be.calledWith(
+          "write:file",
+          "foo.txt",
+          "contents",
+          {
+            encoding: "ascii"
+            flag: "w"
+          }
+        )
+
     it "sets the contents as the subject", ->
       Cypress.backend.resolves(okResponse)
 
