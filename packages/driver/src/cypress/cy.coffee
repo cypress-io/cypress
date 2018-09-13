@@ -61,6 +61,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       setTimeout: []
       setInterval: []
       requestAnimationFrame: []
+      clearTimeout: []
+      clearInterval: []
+      cancelAnimationFrame: []
     })
 
   timerQueues.reset()
@@ -172,6 +175,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       setTimeout: contentWindow.setTimeout
       setInterval: contentWindow.setInterval
       requestAnimationFrame: contentWindow.requestAnimationFrame
+      clearTimeout: contentWindow.clearTimeout
+      clearInterval: contentWindow.clearInterval
+      cancelAnimationFrame: contentWindow.clearAnimationFrame
     }
 
     wrapFn = (fnName) ->
@@ -184,6 +190,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     contentWindow.setTimeout = wrapFn("setTimeout")
     contentWindow.setInterval = wrapFn("setInterval")
     contentWindow.requestAnimationFrame = wrapFn("requestAnimationFrame")
+    contentWindow.clearTimeout = wrapFn("clearTimeout")
+    contentWindow.clearInterval = wrapFn("clearInterval")
+    contentWindow.cancelAnimationFrame = wrapFn("cancelAnimationFrame")
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -926,6 +935,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         runTimerQueue("setTimeout")
         runTimerQueue("setInterval")
         runTimerQueue("requestAnimationFrame")
+        runTimerQueue("clearTimeout")
+        runTimerQueue("clearInterval")
+        runTimerQueue("cancelAnimationFrame")
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
