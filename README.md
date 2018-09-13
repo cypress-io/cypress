@@ -10,7 +10,10 @@ npm install --save-dev @cypress/webpack-preprocessor
 
 ## Compatibility
 
-This version is only compatible with webpack 4.x+. If you need webpack 2 or 3 support, use `@cypress/webpack-preprocessor` 1.x
+This version is only compatible with webpack 4.x+ and Babel 7.x+. 
+
+* If you need webpack 2 or 3 support, use `@cypress/webpack-preprocessor` 1.x
+* If you need Babel 6 support, use `@cypress/webpack-preprocessor` <= 2.x
 
 This plugin (and all Cypress plugins) run in Cypress's own version of Node. If you require npm packages or your own code into the pluginsFile, they needs to be compatible with [the version of Node that Cypress uses]((https://github.com/cypress-io/cypress/blob/develop/.node-version)), currently `8.2.1`.
 
