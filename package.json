@@ -55,14 +55,14 @@
     "sinon-chai": "2.13.0"
   },
   "dependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.0",
+    "@babel/core": "7.0.1",
+    "@babel/preset-env": "7.0.0",
+    "@babel/preset-react": "7.0.0",
+    "babel-loader": "8.0.2",
     "bluebird": "3.5.0",
     "debug": "3.1.0",
     "lodash.clonedeep": "4.5.0",
-    "webpack": "^4.0.0"
+    "webpack": "4.18.1"
   },
   "release": {
     "verifyConditions": "condition-circle",
