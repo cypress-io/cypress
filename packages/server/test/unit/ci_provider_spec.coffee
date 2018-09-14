@@ -396,9 +396,19 @@ describe "lib/util/ci_provider", ->
   it "semaphore", ->
     process.env.SEMAPHORE = true
 
-    process.env.SEMAPHORE_REPO_SLUG = "semaphoreRepoSlug"
+    process.env.SEMAPHORE_BRANCH_ID = "semaphoreBranchId"
     process.env.SEMAPHORE_BUILD_NUMBER = "semaphoreBuildNumber"
+    process.env.SEMAPHORE_CURRENT_JOB = "semaphoreCurrentJob"
+    process.env.SEMAPHORE_CURRENT_THREAD = "semaphoreCurrentThread"
+    process.env.SEMAPHORE_EXECUTABLE_UUID = "semaphoreExecutableUuid"
+    process.env.SEMAPHORE_JOB_COUNT = "semaphoreJobCount"
+    process.env.SEMAPHORE_JOB_UUID = "semaphoreJobUuid"
+    process.env.SEMAPHORE_PLATFORM = "semaphorePlatform"
+    process.env.SEMAPHORE_PROJECT_DIR = "semaphoreProjectDir"
+    process.env.SEMAPHORE_PROJECT_HASH_ID = "semaphoreProjectHashId"
     process.env.SEMAPHORE_PROJECT_NAME = "semaphoreProjectName"
+    process.env.SEMAPHORE_PROJECT_UUID = "semaphoreProjectUuid"
+    process.env.SEMAPHORE_REPO_SLUG = "semaphoreRepoSlug"
     process.env.SEMAPHORE_TRIGGER_SOURCE = "semaphoreTriggerSource"
     process.env.PULL_REQUEST_NUMBER = "pullRequestNumber"
 
@@ -407,11 +417,21 @@ describe "lib/util/ci_provider", ->
 
     expectsName("semaphore")
     expectsCiParams({
-      semaphoreRepoSlug: "semaphoreRepoSlug"
-      semaphoreBuildNumber: "semaphoreBuildNumber"
-      semaphoreProjectName: "semaphoreProjectName"
-      semaphoreTriggerSource: "semaphoreTriggerSource"
       pullRequestNumber: "pullRequestNumber"
+      semaphoreBranchId: "semaphoreBranchId"
+      semaphoreBuildNumber: "semaphoreBuildNumber"
+      semaphoreCurrentJob: "semaphoreCurrentJob"
+      semaphoreCurrentThread: "semaphoreCurrentThread"
+      semaphoreExecutableUuid: "semaphoreExecutableUuid"
+      semaphoreJobCount: "semaphoreJobCount"
+      semaphoreJobUuid: "semaphoreJobUuid"
+      semaphorePlatform: "semaphorePlatform"
+      semaphoreProjectDir: "semaphoreProjectDir"
+      semaphoreProjectHashId: "semaphoreProjectHashId"
+      semaphoreProjectName: "semaphoreProjectName"
+      semaphoreProjectUuid: "semaphoreProjectUuid"
+      semaphoreRepoSlug: "semaphoreRepoSlug"
+      semaphoreTriggerSource: "semaphoreTriggerSource"
     })
     expectsCommitParams({
       sha: "revision"
@@ -419,20 +439,36 @@ describe "lib/util/ci_provider", ->
     })
 
   it "shippable", ->
-    process.env.SHIPPABLE = true
+    process.env.SHIPPABLE = "true"
 
-    process.env.JOB_ID = "jobId"
-    process.env.BUILD_URL = "buildUrl"
-    process.env.PROJECT_ID = "projectId"
-    process.env.JOB_NUMBER = "jobNumber"
-    process.env.COMPARE_URL = "compareUrl"
-    process.env.BASE_BRANCH = "baseBranch"
-    process.env.BUILD_NUMBER = "buildNumber"
-    process.env.PULL_REQUEST = "pullRequest"
+    # build environment variables
+    process.env.SHIPPABLE_BUILD_ID = "buildId"
+    process.env.SHIPPABLE_BUILD_NUMBER = "buildNumber"
+    process.env.SHIPPABLE_COMMIT_RANGE = "commitRange"
+    process.env.SHIPPABLE_CONTAINER_NAME = "containerName"
+    process.env.SHIPPABLE_JOB_ID = "jobId"
+    process.env.SHIPPABLE_JOB_NUMBER = "jobNumber"
+    process.env.SHIPPABLE_REPO_SLUG = "repoSlug"
+
+    # additional information
+    process.env.IS_FORK = "isFork"
+    process.env.IS_GIT_TAG = "isGitTag"
+    process.env.IS_PRERELEASE = "isPrerelease"
+    process.env.IS_RELEASE = "isRelease"
     process.env.REPOSITORY_URL = "repositoryUrl"
+    process.env.REPO_FULL_NAME = "repoFullName"
+    process.env.REPO_NAME = "repoName"
+    process.env.BUILD_URL = "buildUrl"
+
+    # pull request variables
+    process.env.BASE_BRANCH = "baseBranch"
+    process.env.HEAD_BRANCH = "headBranch"
+    process.env.IS_PULL_REQUEST = "isPullRequest"
+    process.env.PULL_REQUEST = "pullRequest"
     process.env.PULL_REQUEST_BASE_BRANCH = "pullRequestBaseBranch"
     process.env.PULL_REQUEST_REPO_FULL_NAME = "pullRequestRepoFullName"
 
+    # git information
     process.env.COMMIT = "commit"
     process.env.BRANCH = "branch"
     process.env.COMMITTER = "committer"
@@ -440,15 +476,28 @@ describe "lib/util/ci_provider", ->
 
     expectsName("shippable")
     expectsCiParams({
-      jobId: "jobId"
-      buildUrl: "buildUrl"
-      projectId: "projectId"
-      jobNumber: "jobNumber"
-      compareUrl: "compareUrl"
-      baseBranch: "baseBranch"
-      buildNumber: "buildNumber"
-      pullRequest: "pullRequest"
+      # build information
+      shippableBuildId: "buildId"
+      shippableBuildNumber: "buildNumber"
+      shippableCommitRange: "commitRange"
+      shippableContainerName: "containerName"
+      shippableJobId: "jobId"
+      shippableJobNumber: "jobNumber"
+      shippableRepoSlug: "repoSlug"
+      # additional information
+      isFork: "isFork"
+      isGitTag: "isGitTag"
+      isPrerelease: "isPrerelease"
+      isRelease: "isRelease"
       repositoryUrl: "repositoryUrl"
+      repoFullName: "repoFullName"
+      repoName: "repoName"
+      buildUrl: "buildUrl"
+      # pull request information
+      baseBranch: "baseBranch"
+      headBranch: "headBranch"
+      isPullRequest: "isPullRequest"
+      pullRequest: "pullRequest"
       pullRequestBaseBranch: "pullRequestBaseBranch"
       pullRequestRepoFullName: "pullRequestRepoFullName"
     })
