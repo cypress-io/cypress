@@ -12,13 +12,13 @@ describe "lib/browsers/chrome", ->
     beforeEach ->
       @args = []
 
-      @sandbox.stub(chrome, "_getArgs").returns(@args)
-      @sandbox.stub(chrome, "_writeExtension").resolves("/path/to/ext")
-      @sandbox.stub(plugins, "has")
-      @sandbox.stub(plugins, "execute")
-      @sandbox.stub(utils, "launch")
-      @sandbox.stub(utils, "getProfileDir").returns("/profile/dir")
-      @sandbox.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
+      sinon.stub(chrome, "_getArgs").returns(@args)
+      sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
+      sinon.stub(plugins, "has")
+      sinon.stub(plugins, "execute")
+      sinon.stub(utils, "launch")
+      sinon.stub(utils, "getProfileDir").returns("/profile/dir")
+      sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
@@ -37,7 +37,9 @@ describe "lib/browsers/chrome", ->
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.has.returns(true)
-      plugins.execute.resolves(["--foo=bar", "--load-extension=/foo/bar/baz.js"])
+      plugins.execute.resolves([
+        "--foo=bar", "--load-extension=/foo/bar/baz.js"
+      ])
 
       pathToTheme = extension.getPathToTheme()
 
@@ -79,28 +81,28 @@ describe "lib/browsers/chrome", ->
 
   context "#_getArgs", ->
     it "disables gpu when linux", ->
-      @sandbox.stub(os, "platform").returns("linux")
+      sinon.stub(os, "platform").returns("linux")
 
       args = chrome._getArgs()
 
       expect(args).to.include("--disable-gpu")
 
     it "does not disable gpu when not linux", ->
-      @sandbox.stub(os, "platform").returns("darwin")
+      sinon.stub(os, "platform").returns("darwin")
 
       args = chrome._getArgs()
 
       expect(args).not.to.include("--disable-gpu")
 
     it "turns off sandbox when linux", ->
-      @sandbox.stub(os, "platform").returns("linux")
+      sinon.stub(os, "platform").returns("linux")
 
       args = chrome._getArgs()
 
       expect(args).to.include("--no-sandbox")
 
     it "does not turn off sandbox when not linux", ->
-      @sandbox.stub(os, "platform").returns("win32")
+      sinon.stub(os, "platform").returns("win32")
 
       args = chrome._getArgs()
 
@@ -117,3 +119,23 @@ describe "lib/browsers/chrome", ->
       args = chrome._getArgs()
 
       expect(args).not.to.include("--user-agent=foo")
+
+    it "disables RootLayerScrolling in versions 66 or 67", ->
+      arg = "--disable-blink-features=RootLayerScrolling"
+
+      disabledRootLayerScrolling = (version, bool) ->
+        args = chrome._getArgs({
+          browser: {
+            majorVersion: version
+          }
+        })
+
+        if bool
+          expect(args).to.include(arg)
+        else
+          expect(args).not.to.include(arg)
+
+      disabledRootLayerScrolling("65", false)
+      disabledRootLayerScrolling("66", true)
+      disabledRootLayerScrolling("67", true)
+      disabledRootLayerScrolling("68", false)

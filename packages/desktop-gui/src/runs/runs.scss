@@ -198,6 +198,14 @@
         padding-top: 20px;
         padding-bottom: 20px;
       }
+
+      &.td-env-padding {
+        padding: 25px 7px 20px;
+
+        .env-msg {
+          margin-top: 5px;
+        }
+      }
     }
     .os-block {
       padding-right: 0;
@@ -280,6 +288,11 @@
     + img {
       float: left;
       padding-left: 3px;
+    }
+
+    &.italic {
+      color: #bbbfc1;
+      margin-top: 15px;
     }
 
     .commit-msg {

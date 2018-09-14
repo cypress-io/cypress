@@ -20,7 +20,7 @@ execa.shell(`npm install ${npm}`, {
   cwd,
   stdio: 'inherit',
   env: {
-    CYPRESS_BINARY_VERSION: binary,
+    CYPRESS_INSTALL_BINARY: binary,
   },
 })
 .then(console.log)

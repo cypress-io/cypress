@@ -6,7 +6,7 @@ namespace CypressLodashTests {
 }
 
 namespace CypressJqueryTests {
-  Cypress.$ // $ExpectType JQueryStatic<HTMLElement>
+  Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
   Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
 }
@@ -208,4 +208,13 @@ namespace CypressOffTests {
     error // $ExpectType Error
     runnable // $ExpectType IRunnable
   })
+}
+
+namespace CypressFilterTests {
+  cy.get<HTMLDivElement>('#id')
+    .filter((index: number, element: HTMLDivElement) => {
+      index // $ExpectType number
+      element // $ExpectType HTMLDivElement
+      return true
+    })
 }

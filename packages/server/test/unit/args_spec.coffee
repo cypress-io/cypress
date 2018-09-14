@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_        = require("lodash")
 path     = require("path")
 argsUtil = require("#{root}lib/util/args")
 
@@ -16,16 +17,16 @@ describe "lib/util/args", ->
       expect(options.pong).to.eq 123
 
   context "--project", ->
-    it "sets projectPath", ->
-      projectPath = path.resolve(cwd, "./foo/bar")
+    it "sets projectRoot", ->
+      projectRoot = path.resolve(cwd, "./foo/bar")
       options = @setup("--project", "./foo/bar")
-      expect(options.projectPath).to.eq projectPath
+      expect(options.projectRoot).to.eq projectRoot
 
   context "--run-project", ->
-    it "sets projectPath", ->
-      projectPath = path.resolve(cwd, "/baz")
+    it "sets projectRoot", ->
+      projectRoot = path.resolve(cwd, "/baz")
       options = @setup("--run-project", "/baz")
-      expect(options.projectPath).to.eq projectPath
+      expect(options.projectRoot).to.eq projectRoot
 
     it "strips single double quote from the end", ->
       # https://github.com/cypress-io/cypress/issues/535
@@ -44,16 +45,54 @@ describe "lib/util/args", ->
   context "--port", ->
     it "converts to Number", ->
       options = @setup("--port", "8080")
-      expect(options.port).to.eq(8080)
+      expect(options.config.port).to.eq(8080)
 
   context "--env", ->
     it "converts to object literal", ->
       options = @setup("--env", "foo=bar,version=0.12.1,host=localhost:8888,bar=qux=")
-      expect(options.env).to.deep.eq({
+      expect(options.config.env).to.deep.eq({
         foo: "bar"
         version: "0.12.1"
         host: "localhost:8888"
         bar: "qux="
+      })
+
+  context "--reporterOptions", ->
+    it "converts to object literal", ->
+      reporterOpts = {
+        mochaFile: "path/to/results.xml",
+        testCaseSwitchClassnameAndName: true,
+        suiteTitleSeparatedBy: ".=|"
+      }
+
+      options = @setup("--reporterOptions", JSON.stringify(reporterOpts))
+
+      expect(options.config.reporterOptions).to.deep.eq(reporterOpts)
+
+    it "converts nested objects with mixed assignment usage", ->
+      reporterOpts = {
+        reporterEnabled: 'JSON, Spec',
+        jsonReporterOptions: {
+          toConsole: true
+        }
+      }
+
+      ## as a full blown object
+      options = @setup("--reporterOptions", JSON.stringify(reporterOpts))
+      expect(options.config.reporterOptions).to.deep.eq(reporterOpts)
+
+      ## as mixed usage
+      nestedJSON = JSON.stringify(reporterOpts.jsonReporterOptions)
+
+      options = @setup(
+        "--reporterOptions",
+        "reporterEnabled=JSON,jsonReporterOptions=#{nestedJSON}"
+      )
+      expect(options.config.reporterOptions).to.deep.eq({
+        reporterEnabled: 'JSON',
+        jsonReporterOptions: {
+          toConsole: true
+        }
       })
 
   context "--config", ->
@@ -62,6 +101,45 @@ describe "lib/util/args", ->
 
       expect(options.config.pageLoadTimeout).eq(10000)
       expect(options.config.waitForAnimations).eq(false)
+
+    it "converts straight JSON stringification", ->
+      config = {
+        pageLoadTimeout: 10000,
+        waitForAnimations: false
+      }
+
+      options = @setup("--config", JSON.stringify(config))
+      expect(options.config).to.deep.eq(config)
+
+    it "converts nested usage with JSON stringification", ->
+      config = {
+        pageLoadTimeout: 10000,
+        waitForAnimations: false,
+        blacklistHosts: ["one.com", "www.two.io"],
+        hosts: {
+          "foobar.com": "127.0.0.1",
+        }
+      }
+
+      ## as a full blown object
+      options = @setup("--config", JSON.stringify(config))
+      expect(options.config).to.deep.eq(config)
+
+      ## as mixed usage
+      hosts = JSON.stringify(config.hosts)
+      blacklistHosts = JSON.stringify(config.blacklistHosts)
+
+      options = @setup(
+        "--config",
+        [
+          "pageLoadTimeout=10000",
+          "waitForAnimations=false",
+          "hosts=#{hosts}",
+          "blacklistHosts=#{blacklistHosts}",
+        ].join(",")
+
+      )
+      expect(options.config).to.deep.eq(config)
 
     it "whitelists config properties", ->
       options = @setup("--config", "foo=bar,port=1111,supportFile=path/to/support_file")
@@ -79,22 +157,47 @@ describe "lib/util/args", ->
 
   context ".toArray", ->
     beforeEach ->
-      @obj = {config: {foo: "bar"}, _config: "foo=bar", project: "foo/bar"}
+      @obj = {config: {foo: "bar"}, project: "foo/bar"}
 
     it "rejects values which have an cooresponding underscore'd key", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
         "--project=foo/bar",
-        "--config=foo=bar"
+        "--config=#{JSON.stringify({foo: 'bar'})}"
       ])
 
   context ".toObject", ->
     beforeEach ->
+      @hosts = { a: "b", b: "c" }
+      @blacklistHosts = ["a.com", "b.com"]
+      @specs = [
+        path.join(cwd, "foo"),
+        path.join(cwd, "bar"),
+        path.join(cwd, "baz")
+      ]
+      @env = {
+        foo: "bar"
+        baz: "quux"
+        bar: "foo=quz"
+      }
+      @config = {
+        env: @env
+        hosts: @hosts
+        requestTimeout: 1234
+        blacklistHosts: @blacklistHosts
+        reporterOptions: {
+          foo: "bar"
+        }
+      }
+
+      s = (str) ->
+        JSON.stringify(str)
+
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup(
         "--get-key",
         "--env=foo=bar,baz=quux,bar=foo=quz",
         "--config",
-        "requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
+        "requestTimeout=1234,blacklistHosts=#{s(@blacklistHosts)},hosts=#{s(@hosts)}"
         "--reporter-options=foo=bar"
         "--spec=foo,bar,baz",
       )
@@ -108,50 +211,38 @@ describe "lib/util/args", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
-        "get-key": true
         getKey: true
-        _env: "foo=bar,baz=quux,bar=foo=quz"
-        env: {
-          foo: "bar"
-          baz: "quux"
-          bar: "foo=quz"
-        }
-        config: {
-          requestTimeout: 1234
-          blacklistHosts: "a.com|b.com"
-          hosts: "a=b|b=c"
-          reporterOptions: {
-            foo: "bar"
-          }
-          env: {
-            foo: "bar"
-            baz: "quux"
-            bar: "foo=quz"
-          }
-        }
-        _config: "requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
-        "reporter-options": "foo=bar"
-        _reporterOptions: "foo=bar"
-        reporterOptions: {
-          foo: "bar"
-        }
-        _spec: "foo,bar,baz"
-        spec: [
-          path.join(cwd, "foo"),
-          path.join(cwd, "bar"),
-          path.join(cwd, "baz")
-        ]
+        config: @config
+        spec: @specs
       })
 
     it "can transpose back to an array", ->
-      expect(argsUtil.toArray(@obj)).to.deep.eq([
+      mergedConfig = JSON.stringify({
+        requestTimeout: @config.requestTimeout
+        blacklistHosts: @blacklistHosts
+        hosts: @hosts
+        env: @env
+        reporterOptions: {
+          foo: "bar"
+        }
+      })
+
+      args = argsUtil.toArray(@obj)
+
+      expect(args).to.deep.eq([
         "--cwd=#{cwd}"
         "--getKey=true"
-        "--spec=foo,bar,baz",
-        "--reporterOptions=foo=bar"
-        "--env=foo=bar,baz=quux,bar=foo=quz"
-        "--config=requestTimeout=1234,blacklistHosts=[a.com,b.com],hosts={a=b,b=c}"
+        "--spec=#{JSON.stringify(@specs)}",
+        "--config=#{mergedConfig}"
       ])
+
+      expect(argsUtil.toObject(args)).to.deep.eq({
+        cwd
+        _: []
+        getKey: true
+        config: @config
+        spec: @specs
+      })
 
   context "--updating", ->
 
@@ -172,6 +263,7 @@ describe "lib/util/args", ->
           "/Applications/Cypress.app"
           "/Applications/Cypress.app"
         ]
+        config: {}
         appPath: "/Applications/Cypress.app"
         execPath: "/Applications/Cypress.app"
         updating: true
@@ -194,9 +286,8 @@ describe "lib/util/args", ->
           "/Applications/Cypress.app1"
           "/Applications/Cypress.app2"
         ]
+        config: {}
         appPath: "a"
         execPath: "e"
-        "app-path": "a"
-        "exec-path": "e"
         updating: true
       })

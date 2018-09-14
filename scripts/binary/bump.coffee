@@ -173,7 +173,7 @@ module.exports = {
       console.log("setting environment variables in", project)
       car.updateProjectEnv(project, provider, {
         CYPRESS_NPM_PACKAGE_NAME: nameOrUrl,
-        CYPRESS_BINARY_VERSION: binaryVersionOrUrl
+        CYPRESS_INSTALL_BINARY: binaryVersionOrUrl
       })
     awaitEachProjectAndProvider(PROJECTS, updateProject, projectFilter)
     .then R.always(result)

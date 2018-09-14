@@ -1,6 +1,10 @@
-Promise = require("bluebird")
+scale = ->
+  try
+    app = require("electron").app
+    app.commandLine.appendSwitch("force-device-scale-factor", "1")
 
 ready = ->
+  Promise = require("bluebird")
   app = require("electron").app
 
   waitForReady = ->
@@ -13,5 +17,7 @@ ready = ->
   ])
 
 module.exports = {
+  scale
+
   ready
 }

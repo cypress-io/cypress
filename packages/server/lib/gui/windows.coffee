@@ -142,13 +142,14 @@ module.exports = {
       onCrashed: ->
       onNewWindow: ->
       webPreferences:  {
+        partition:            null
         chromeWebSecurity:    true
         nodeIntegration:      false
         backgroundThrottling: false
       }
     })
 
-  create: (projectPath, options = {}) ->
+  create: (projectRoot, options = {}) ->
     options = @defaults(options)
 
     if options.show is false
@@ -157,6 +158,9 @@ module.exports = {
 
     if options.chromeWebSecurity is false
       options.webPreferences.webSecurity = false
+
+    if options.partition
+      options.webPreferences.partition = options.partition
 
     win = @_newBrowserWindow(options)
 
@@ -170,6 +174,14 @@ module.exports = {
       win.removeAllListeners()
       options.onClose.apply(win, arguments)
 
+    ## the webview loses focus on navigation, so we
+    ## have to refocus it everytime top navigates in headless mode
+    ## https://github.com/cypress-io/cypress/issues/2190
+    if options.show is false
+      win.webContents.on "did-start-loading", ->
+        if not win.isDestroyed()
+          win.focusOnWebView()
+
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)
 
@@ -177,7 +189,7 @@ module.exports = {
       options.onNewWindow.apply(win, arguments)
 
     if ts = options.trackState
-      @trackState(projectPath, win, ts)
+      @trackState(projectRoot, options.isTextTerminal, win, ts)
 
     ## open dev tools if they're true
     if options.devTools
@@ -211,7 +223,7 @@ module.exports = {
 
     win
 
-  open: (projectPath, options = {}) ->
+  open: (projectRoot, options = {}) ->
     ## if we already have a window open based
     ## on that type then just show + focus it!
     if win = getByType(options.type)
@@ -254,7 +266,7 @@ module.exports = {
     #   args.width = 0
     #   args.height = 0
 
-    win = @create(projectPath, options)
+    win = @create(projectRoot, options)
 
     debug("creating electron window with options %o", options)
 
@@ -299,7 +311,7 @@ module.exports = {
       else
         return win
 
-  trackState: (projectPath, win, keys) ->
+  trackState: (projectRoot, isTextTerminal, win, keys) ->
     isDestroyed = ->
       win.isDestroyed()
 
@@ -313,7 +325,7 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectPath)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -325,7 +337,7 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectPath)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -333,14 +345,14 @@ module.exports = {
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState(projectPath)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState(projectPath)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 

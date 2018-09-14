@@ -73,7 +73,7 @@ module.exports = {
   ready: (options = {}) ->
     bus = new EE
 
-    { projectPath } = options
+    { projectRoot } = options
 
     ## TODO: potentially just pass an event emitter
     ## instance here instead of callback functions
@@ -83,10 +83,10 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState(projectPath)
+    savedState(projectRoot, false)
     .then (state) -> state.get()
     .then (state) =>
-      Windows.open(projectPath, @getWindowArgs(state, options))
+      Windows.open(projectRoot, @getWindowArgs(state, options))
       .then (win) =>
         Events.start(_.extend({}, options, {
           onFocusTests: -> win.focus()

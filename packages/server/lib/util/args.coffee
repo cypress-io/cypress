@@ -1,5 +1,6 @@
 _        = require("lodash")
 path     = require("path")
+debug    = require("debug")("cypress:server:args")
 minimist = require("minimist")
 coerce   = require("./coerce")
 config   = require("../config")
@@ -9,7 +10,7 @@ nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 everythingAfterFirstEqualRe = /=(.+)/
 
-whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath group groupId parallel parallelId".split(" ")
+whitelist = "cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group".split(" ")
 
 # returns true if the given string has double quote character "
 # only at the last position.
@@ -40,58 +41,96 @@ normalizeBackslashes = (options) ->
 
   options
 
-backup = (key, options) ->
-  options["_#{key}"] = options[key]
+stringify = (val) ->
+  if _.isObject(val)
+    return JSON.stringify(val)
 
-anyUnderscoredValuePairs = (val, key, obj) ->
-  return v if v = obj["_#{key}"]
   return val
 
 strToArray = (str) ->
+  if parsed = tryJSONParse(str)
+    return parsed
+
   [].concat(str.split(","))
 
-commasForBars = (match, p1) ->
+commasToPipes = (match, p1, p2, p3) ->
   ## swap out comma's for bars
-  p1.split(",").join("|")
+  match.split(",").join("|")
+
+pipesToCommas = (str) ->
+  ## convert foo=bar|version=1.2.3 to
+  ## foo=bar,version=1.2.3
+  str.split("|").join(",")
+
+tryJSONParse = (str) ->
+  try
+    JSON.parse(str)
+  catch err
+    null
+
+JSONOrCoerce = (str) ->
+  ## valid JSON? horray
+  if parsed = tryJSONParse(str)
+    return parsed
+
+  ## convert bars back to commas
+  str = pipesToCommas(str)
+
+  ## try to parse again?
+  if parsed = tryJSONParse(str)
+    return parsed
+
+  ## nupe :-(
+  return coerce(str)
 
 sanitizeAndConvertNestedArgs = (str) ->
-  ## find foo={a=b,b=c} and bar=[1,2,3] syntax first
-  ## and turn those into
-  ## foo: a=b|b=c
+  ## if this is valid JSON then just
+  ## parse it and call it a day
+  if parsed = tryJSONParse(str)
+    return parsed
+
+  ## invalid JSON, so assume mixed usage
+  ## first find foo={a:b,b:c} and bar=[1,2,3]
+  ## syntax and turn those into
+  ## foo: a:b|b:c
   ## bar: 1|2|3
 
   _
   .chain(str)
-  .replace(nestedObjectsInCurlyBracesRe, commasForBars)
-  .replace(nestedArraysInSquareBracketsRe, commasForBars)
+  .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
+  .replace(nestedArraysInSquareBracketsRe, commasToPipes)
   .split(",")
   .map (pair) ->
     pair.split(everythingAfterFirstEqualRe)
   .fromPairs()
-  .mapValues(coerce)
+  .mapValues(JSONOrCoerce)
   .value()
 
 module.exports = {
   toObject: (argv) ->
+    debug("argv array: %o", argv)
+
+    alias = {
+      "app-path":    "appPath"
+      "exec-path":   "execPath"
+      "api-key":     "apiKey"
+      "smoke-test":  "smokeTest"
+      "get-key":     "getKey"
+      "new-key":     "generateKey"
+      "clear-logs":  "clearLogs"
+      "run-project": "runProject"
+      "return-pkg":  "returnPkg"
+      "run-mode":    "isTextTerminal"
+      "ci-build-id": "ciBuildId"
+      "exit-with-code":   "exitWithCode"
+      "reporter-options": "reporterOptions"
+      "output-path":      "outputPath"
+    }
+
     ## takes an array of args and converts
     ## to an object
     options = minimist(argv, {
-      alias: {
-        "app-path":    "appPath"
-        "exec-path":   "execPath"
-        "api-key":     "apiKey"
-        "smoke-test":  "smokeTest"
-        "get-key":     "getKey"
-        "new-key":     "generateKey"
-        "clear-logs":  "clearLogs"
-        "run-project": "runProject"
-        "return-pkg":  "returnPkg"
-        "runMode":    "isTextTerminal"
-        "exit-with-code":   "exitWithCode"
-        "reporter-options": "reporterOptions"
-        "output-path":      "outputPath"
-        "group-id":         "groupId"
-      }
+      alias
     })
 
     whitelisted = _.pick(argv, whitelist)
@@ -99,6 +138,7 @@ module.exports = {
     options = _
     .chain(options)
     .defaults(whitelisted)
+    .omit(_.keys(alias)) ## remove aliases
     .defaults({
       ## set in case we
       ## bypassed the cli
@@ -106,6 +146,8 @@ module.exports = {
     })
     .mapValues(coerce)
     .value()
+
+    debug("argv parsed: %o", options)
 
     ## if we are updating we may have to pluck out the
     ## appPath + execPath from the options._ because
@@ -118,24 +160,18 @@ module.exports = {
       [options.appPath, options.execPath] = options._.slice(-2)
 
     if spec = options.spec
-      backup("spec", options)
-
       resolvePath = (p) ->
         path.resolve(options.cwd, p)
 
       options.spec = strToArray(spec).map(resolvePath)
 
     if envs = options.env
-      backup("env", options)
       options.env = sanitizeAndConvertNestedArgs(envs)
 
     if ro = options.reporterOptions
-      backup("reporterOptions", options)
       options.reporterOptions = sanitizeAndConvertNestedArgs(ro)
 
     if c = options.config
-      backup("config", options)
-
       ## convert config to an object
       ## annd store the config
       options.config = sanitizeAndConvertNestedArgs(c)
@@ -150,15 +186,17 @@ module.exports = {
     ## this solves situations where we accept
     ## root level arguments which also can
     ## be set in configuration
-    _.each configValues, (val, key) ->
-      options.config ?= {}
-      options.config[key] = val
+    options.config ?= {}
+    _.extend(options.config, configValues)
+
+    ## remove them from the root options object
+    options = _.omit(options, configKeys)
 
     options = normalizeBackslashes(options)
 
-    ## normalize project to projectPath
+    ## normalize project to projectRoot
     if p = options.project or options.runProject
-      options.projectPath = path.resolve(options.cwd, p)
+      options.projectRoot = path.resolve(options.cwd, p)
 
     ## normalize output path from previous current working directory
     if op = options.outputPath
@@ -170,6 +208,8 @@ module.exports = {
     if options.smokeTest
       options.pong = options.ping
 
+    debug("argv options: %o", options)
+
     return options
 
   toArray: (obj = {}) ->
@@ -179,10 +219,9 @@ module.exports = {
     ## mapping them to include the argument
     _
     .chain(obj)
-    .mapValues(anyUnderscoredValuePairs)
     .pick(whitelist...)
     .mapValues (val, key) ->
-      "--#{key}=#{val}"
+      "--#{key}=#{stringify(val)}"
     .values()
     .value()
 }

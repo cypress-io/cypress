@@ -81,7 +81,7 @@ describe('Test model', () => {
 
     it('adds the command to an existing hook if it already exists', () => {
       const test = new Test({})
-      test.addCommand({}, 'some hook')
+      test.addCommand({ isMatchingEvent: () => false }, 'some hook')
       expect(test.hooks.length).to.equal(1)
       expect(test.hooks[0].commands.length).to.equal(1)
       test.addCommand({}, 'some hook')

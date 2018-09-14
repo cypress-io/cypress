@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import TimerDisplay from '../duration-timer/TimerDisplay'
 
-import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserVersionFormatted, stripLeadingCyDirs } from '../lib/utils'
+import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs } from '../lib/utils'
 
 export default class RunsListItem extends Component {
   render () {
@@ -28,29 +28,41 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              { run.commitBranch ? run.commitBranch : null }
-              {run.commitBranch && this._displaySpec() ? ' / ' : null}
+              { run.commit && run.commit.branch ?
+                <span>
+                  {run.commit.branch}
+                  {this._displaySpec() ? ' / ' : null}
+                </span> :
+                null
+              }
               {this._displaySpec()}
             </div>
-            <div className='msg'>
-              {
-                run.commitAuthorEmail ?
-                  <img
-                    className='user-avatar'
-                    height='13'
-                    width='13'
-                    src={`${gravatarUrl(run.commitAuthorEmail)}`}
-                  /> :
-                  null
-              }
-              {
-                run.commitMessage ?
-                  <span className='commit-msg'>
-                    {run.commitMessage.split(NEWLINE)[0]}
-                  </span> :
-                  null
-              }
-            </div>
+            {
+              run.commit ?
+                <div className='msg'>
+                  {
+                    run.commit.authorEmail ?
+                      <img
+                        className='user-avatar'
+                        height='13'
+                        width='13'
+                        src={`${gravatarUrl(run.commit.authorEmail)}`}
+                      /> :
+                      null
+                  }
+                  {
+                    run.commit.message ?
+                      <span className='commit-msg'>
+                        {run.commit.message.split(NEWLINE)[0]}
+                      </span> :
+                      null
+                  }
+                </div> :
+                <div className='msg italic'>
+                  - No commit info found -
+                </div>
+            }
+
           </div>
         </div>
         <div className='row-column-wrapper'>
@@ -62,19 +74,19 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             {
-              run.duration ?
+              run.totalDuration ?
                 <span>
                   <i className='fa fa-hourglass-end'></i>{' '}
-                  {durationFormatted(run.duration)}
+                  {durationFormatted(run.totalDuration)}
                 </span> :
-                run.startedAt ?
-                  <TimerDisplay startTime={run.startedAt} /> :
+                run.createdAt ?
+                  <TimerDisplay startTime={run.createdAt} /> :
                   null
             }
           </div>
         </div>
         <div className='row-column-wrapper env-data'>
-          <div className='td-top-padding'>
+          <div className='td-env-padding'>
             {/* // do we have multiple OS's ? */}
             {
               this._instancesExist() ?
@@ -85,7 +97,7 @@ export default class RunsListItem extends Component {
                   </div> :
                   // or did we only actual run it on one OS
                   <div>
-                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].osName)}`}></i>{' '}
+                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].platform.osName)}`}></i>{' '}
                     {this._osDisplay()}
                   </div> :
                 null
@@ -94,12 +106,12 @@ export default class RunsListItem extends Component {
             {
               this._instancesExist() ?
                 this._moreThanOneInstance() && this._browsersLength() > 1 ?
-                  <div className='msg'>
+                  <div className='env-msg'>
                     <i className='fa fa-fw fa-globe'></i>{' '}
                     {this._browsersLength()} browsers
                   </div> :
                   // or did we only actual run it on one browser
-                  <div className='msg'>
+                  <div className='env-msg'>
                     <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
                     {this._browserDisplay()}
                   </div> :
@@ -113,7 +125,7 @@ export default class RunsListItem extends Component {
               <div className='result'>
                 <i className='fa fa-check'></i>{' '}
                 <span>
-                  {run.passed ? run.passed : '0'}
+                  {run.totalPassed || '0'}
                 </span>
               </div> :
               null
@@ -125,7 +137,7 @@ export default class RunsListItem extends Component {
               <div className='result'>
                 <i className='fa fa-times'></i>{' '}
                 <span>
-                  {run.failed ? run.failed : '0'}
+                  {run.totalFailed || '0'}
                 </span>
               </div> :
               null
@@ -157,28 +169,30 @@ export default class RunsListItem extends Component {
   }
 
   _getUniqBrowsers () {
-    if (!this.props.run.instances) return 0
+    if (!this.props.run.instances) return []
 
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.browserName} + ${instance.browserVersion}`
+      return `${instance.platform.browserName} + ${instance.platform.browserVersion}`
     })
     .uniq()
     .value()
   }
 
   _browsersLength () {
-    return this._getUniqBrowsers().length
+    if (this._getUniqBrowsers()) {
+      return this._getUniqBrowsers().length
+    }
   }
 
   _browserIcon () {
-    return browserIcon(this.props.run.instances[0].browserName)
+    return browserIcon(this.props.run.instances[0].platform.browserName)
   }
 
   _osIcon () {
     if (!this._moreThanOneInstance() && this.props.run.instances.length) {
-      return (osIcon(this.props.run.instances[0].osName))
+      return (osIcon(this.props.run.instances[0].platform.osName))
     } else {
       return 'desktop'
     }
@@ -190,7 +204,7 @@ export default class RunsListItem extends Component {
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.osName} + ${instance.osVersionFormatted}`
+      return `${instance.platform.osName} + ${instance.platform.osVersionFormatted}`
     })
     .uniq()
     .value()
@@ -204,7 +218,7 @@ export default class RunsListItem extends Component {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
         <span>
-          {this.props.run.instances[0].osVersionFormatted}
+          {this.props.run.instances[0].platform.osVersionFormatted}
         </span>
       )
     }
@@ -214,13 +228,14 @@ export default class RunsListItem extends Component {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
         <span>
-          {browserVersionFormatted(this.props.run.instances[0].browserVersion)}
+          {browserNameFormatted(_.get(this.props.run, 'instances[0].platform.browserName', ''))}{' '}
+          {browserVersionFormatted(this.props.run.instances[0].platform.browserVersion)}
         </span>
       )
     }
   }
 
   _goToRun = () => {
-    this.props.goToRun(this.props.run.id)
+    this.props.goToRun(this.props.run.buildNumber)
   }
 }

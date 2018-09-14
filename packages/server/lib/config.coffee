@@ -4,13 +4,12 @@ Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
-errors   = require("./errors")
 fs       = require("./util/fs")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-log      = require("debug")("cypress:server:config")
+debug      = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
 ## cypress followed by _
@@ -26,8 +25,9 @@ isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 folders = toWords """
-  fileServerFolder   fixturesFolder   integrationFolder   screenshotsFolder
-  supportFile        supportFolder    unitFolder          videosFolder
+  fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
+  screenshotsFolder  supportFile      supportFolder       unitFolder
+  videosFolder
 """
 
 configKeys = toWords """
@@ -41,40 +41,24 @@ configKeys = toWords """
   port                            supportFolder
   reporter                        videosFolder
   reporterOptions
-  screenshotOnHeadlessFailure     defaultCommandTimeout
-  testFiles                       execTimeout
-  trashAssetsBeforeHeadlessRuns   pageLoadTimeout
-  blacklistHosts                  requestTimeout
-  userAgent                       responseTimeout
-  viewportWidth
-  viewportHeight
-  videoRecording
+  testFiles                       defaultCommandTimeout
+  trashAssetsBeforeRuns           execTimeout
+  blacklistHosts                  pageLoadTimeout
+  userAgent                       requestTimeout
+  viewportWidth                   responseTimeout
+  viewportHeight                  taskTimeout
+  video
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
   waitForAnimations
 """
 
-toArrayFromPipes = (str) ->
-  if _.isArray(str)
-    return str
-
-  [].concat(str.split('|'))
-
-toObjectFromPipes = (str) ->
-  if _.isObject(str)
-    return str
-
-  ## convert foo=bar|version=1.2.3 to
-  ## {foo: 'bar', version: '1.2.3'}
-  _
-  .chain(str)
-  .split("|")
-  .map (pair) ->
-    pair.split("=")
-  .fromPairs()
-  .mapValues(coerce)
-  .value()
+breakingConfigKeys = toWords """
+  videoRecording
+  screenshotOnHeadlessFailure
+  trashAssetsBeforeHeadlessRuns
+"""
 
 defaults = {
   port:                          null
@@ -99,7 +83,8 @@ defaults = {
   responseTimeout:               30000
   pageLoadTimeout:               60000
   execTimeout:                   60000
-  videoRecording:                true
+  taskTimeout:                   60000
+  video:                         true
   videoCompression:              32
   videoUploadOnPasses:           true
   modifyObstructiveCode:         true
@@ -108,8 +93,7 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  screenshotOnHeadlessFailure:   true
-  trashAssetsBeforeHeadlessRuns: true
+  trashAssetsBeforeRuns: true
   autoOpen:                      false
   viewportWidth:                 1000
   viewportHeight:                660
@@ -147,12 +131,12 @@ validationRules = {
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
   testFiles: v.isString
-  screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
-  trashAssetsBeforeHeadlessRuns: v.isBoolean
+  taskTimeout: v.isNumber
+  trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse
-  videoRecording: v.isBoolean
+  video: v.isBoolean
   videoUploadOnPasses: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber
@@ -169,24 +153,42 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
     return memo
   , {}
 
-validate = (file) ->
-  return (settings) ->
-    _.each settings, (value, key) ->
-      if validationFn = validationRules[key]
+validateNoBreakingConfig = (cfg) ->
+  _.each breakingConfigKeys, (key) ->
+    if _.has(cfg, key)
+      switch key
+        when "screenshotOnHeadlessFailure"
+          errors.throw("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED")
+        when "trashAssetsBeforeHeadlessRuns"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "trashAssetsBeforeRuns")
+        when "videoRecording"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "video")
+
+validate = (cfg, onErr) ->
+  _.each cfg, (value, key) ->
+    ## does this key have a validation rule?
+    if validationFn = validationRules[key]
+      ## and is the value different from the default?
+      if value isnt defaults[key]
         result = validationFn(key, value)
         if result isnt true
-          errors.throw("CONFIG_VALIDATION_ERROR", file, result)
+          onErr(result)
+
+validateFile = (file) ->
+  return (settings) ->
+    validate settings, (errMsg) ->
+      errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
 module.exports = {
   getConfigKeys: -> configKeys
 
   whitelist: (obj = {}) ->
-    _.pick(obj, configKeys)
+    _.pick(obj, configKeys.concat(breakingConfigKeys))
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validate("cypress.json"))
-      settings.readEnv(projectRoot).then(validate("cypress.env.json"))
+      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
       @set({
@@ -239,12 +241,6 @@ module.exports = {
     config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
 
-    if hosts = config.hosts
-      config.hosts = toObjectFromPipes(hosts)
-
-    if blacklistHosts = config.blacklistHosts
-      config.blacklistHosts = toArrayFromPipes(blacklistHosts)
-
     ## when headless
     if config.isTextTerminal
       ## dont ever watch for file changes
@@ -262,6 +258,14 @@ module.exports = {
     config = @setAbsolutePaths(config, defaults)
 
     config = @setParentTestsPaths(config)
+
+    ## validate config again here so that we catch
+    ## configuration errors coming from the CLI overrides
+    ## or env var overrides
+    validate config, (errMsg) ->
+      errors.throw("CONFIG_VALIDATION_ERROR", errMsg)
+
+    validateNoBreakingConfig(config)
 
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
@@ -327,13 +331,16 @@ module.exports = {
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
 
-    fileName = scaffold.integrationExampleName()
+    obj.integrationExampleName = scaffold.integrationExampleName()
+    obj.integrationExamplePath = path.join(obj.integrationFolder, obj.integrationExampleName)
 
-    obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
-    obj.integrationExampleName = fileName
-    obj.scaffoldedFiles = scaffold.fileTree(obj)
+    debug("set scaffold paths")
+    scaffold.fileTree(obj)
+    .then (fileTree) ->
+      debug("got file tree")
+      obj.scaffoldedFiles = fileTree
 
-    return obj
+      return obj
 
   # async function
   setSupportFileAndFolder: (obj) ->
@@ -343,8 +350,8 @@ module.exports = {
 
     ## TODO move this logic to find support file into util/path_helpers
     sf = obj.supportFile
-    log "setting support file #{sf}"
-    log "for project root #{obj.projectRoot}"
+    debug("setting support file #{sf}")
+    debug("for project root #{obj.projectRoot}")
 
     Promise
     .try ->
@@ -352,8 +359,7 @@ module.exports = {
       obj.supportFile = require.resolve(sf)
     .then ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
-        log("require.resolve switched support folder from %s to %s",
-          sf, obj.supportFile)
+        debug("require.resolve switched support folder from %s to %s", sf, obj.supportFile)
         # this means the path was probably symlinked, like
         # /tmp/foo -> /private/tmp/foo
         # which can confuse the rest of the code
@@ -363,25 +369,25 @@ module.exports = {
         .then (found) ->
           if not found
             errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
-          log("switching to found file %s", obj.supportFile)
+          debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
-      log("support file %s does not exist", sf)
+      debug("support file %s does not exist", sf)
       ## supportFile doesn't exist on disk
       if sf is path.resolve(obj.projectRoot, defaults.supportFile)
-        log("support file is default, check if #{path.dirname(sf)} exists")
+        debug("support file is default, check if #{path.dirname(sf)} exists")
         return fs.pathExists(sf)
         .then (found) ->
           if found
-            log("support folder exists, set supportFile to false")
+            debug("support folder exists, set supportFile to false")
             ## if the directory exists, set it to false so it's ignored
             obj.supportFile = false
           else
-            log("support folder does not exist, set to default index.js")
+            debug("support folder does not exist, set to default index.js")
             ## otherwise, set it up to be scaffolded later
             obj.supportFile = path.join(sf, "index.js")
           return obj
       else
-        log("support file is not default")
+        debug("support file is not default")
         ## they have it explicitly set, so it should be there
         errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
     )
@@ -389,7 +395,7 @@ module.exports = {
       if obj.supportFile
         ## set config.supportFolder to its directory
         obj.supportFolder = path.dirname(obj.supportFile)
-        log "set support folder #{obj.supportFolder}"
+        debug("set support folder #{obj.supportFolder}")
       obj
 
   ## set pluginsFile to an absolute path with the following rules:
@@ -411,32 +417,33 @@ module.exports = {
 
     obj = _.clone(obj)
 
-    pluginsFile = path.join(obj.projectRoot, obj.pluginsFile)
-    log("setting plugins file #{pluginsFile}")
-    log("for project root #{obj.projectRoot}")
+    pluginsFile = obj.pluginsFile
+
+    debug("setting plugins file #{pluginsFile}")
+    debug("for project root #{obj.projectRoot}")
 
     Promise
     .try ->
       ## resolve full path with extension
       obj.pluginsFile = require.resolve(pluginsFile)
-      log("set pluginsFile to #{obj.pluginsFile}")
+      debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
-      log("plugins file does not exist")
+      debug("plugins file does not exist")
       if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
-        log("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
+        debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
         fs.pathExists(pluginsFile)
         .then (found) ->
           if found
-            log("plugins folder exists, set pluginsFile to false")
+            debug("plugins folder exists, set pluginsFile to false")
             ## if the directory exists, set it to false so it's ignored
             obj.pluginsFile = false
           else
-            log("plugins folder does not exist, set to default index.js")
+            debug("plugins folder does not exist, set to default index.js")
             ## otherwise, set it up to be scaffolded later
             obj.pluginsFile = path.join(pluginsFile, "index.js")
           return obj
       else
-        log("plugins file is not default")
+        debug("plugins file is not default")
         ## they have it explicitly set, so it should be there
         errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
     .return(obj)

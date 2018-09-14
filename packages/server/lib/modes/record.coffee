@@ -1,20 +1,30 @@
 _          = require("lodash")
 os         = require("os")
+la         = require("lazy-ass")
 chalk      = require("chalk")
+check      = require("check-more-types")
+debug      = require("debug")("cypress:server:record")
 Promise    = require("bluebird")
-runMode   = require("./run")
+isForkPr   = require("is-fork-pr")
+commitInfo = require("@cypress/commit-info")
 api        = require("../api")
 logger     = require("../logger")
 errors     = require("../errors")
-stdout     = require("../stdout")
+capture    = require("../capture")
 upload     = require("../upload")
-Project    = require("../project")
+env        = require("../util/env")
 terminal   = require("../util/terminal")
+humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
-debug      = require("debug")("cypress:server")
-commitInfo = require("@cypress/commit-info")
-la         = require("lazy-ass")
-check      = require("check-more-types")
+
+onBeforeRetry = (details) ->
+  errors.warning(
+    "DASHBOARD_API_RESPONSE_FAILED_RETRYING", {
+      delay: humanTime.long(details.delay, false)
+      tries: details.total - details.retryIndex
+      response: details.err
+    }
+  )
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -24,253 +34,529 @@ logException = (err) ->
   .catch ->
     ## dont yell about any errors either
 
-module.exports = {
-  generateProjectRunId: (projectId, projectPath, projectName, recordKey, group, groupId, specPattern) ->
-    if not recordKey
-      errors.throw("RECORD_KEY_MISSING")
-    if groupId and not group
-      console.log("Warning: you passed group-id but no group flag")
+runningInternalTests = ->
+  env.get("CYPRESS_INTERNAL_E2E_TESTS") is "1"
 
-    la(check.maybe.unemptyString(specPattern), "invalid spec pattern", specPattern)
-
-    debug("generating build id for project %s at %s", projectId, projectPath)
-    Promise.all([
-      commitInfo.commitInfo(projectPath),
-      Project.findSpecs(projectPath, specPattern)
-    ])
-    .spread (git, specs) ->
-      debug("git information")
-      debug(git)
-      if specPattern
-        debug("spec pattern", specPattern)
-      debug("project specs")
-      debug(specs)
-      la(check.maybe.strings(specs), "invalid list of specs to run", specs)
-      # only send groupId if group option is true
-      if group
-        groupId ?= ciProvider.groupId()
+warnIfCiFlag = (ci) ->
+  ## if we are using the ci flag that means
+  ## we have an old version of the CLI tools installed
+  ## and that we need to warn the user what to update
+  if ci
+    type = switch
+      when env.get("CYPRESS_CI_KEY")
+        "CYPRESS_CI_DEPRECATED_ENV_VAR"
       else
-        groupId = null
-      createRunOptions = {
-        projectId:         projectId
-        recordKey:         recordKey
-        commitSha:         git.sha
-        commitBranch:      git.branch
-        commitAuthorName:  git.author
-        commitAuthorEmail: git.email
-        commitMessage:     git.message
-        remoteOrigin:      git.remote
-        ciParams:          ciProvider.params()
-        ciProvider:        ciProvider.name()
-        ciBuildNumber:     ciProvider.buildNum()
-        groupId:           groupId
-        specs:             specs
-        specPattern:       specPattern
-      }
+        "CYPRESS_CI_DEPRECATED"
 
-      api.createRun(createRunOptions)
-      .catch (err) ->
-        switch err.statusCode
-          when 401
-            recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
-            errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
-          when 404
-            errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
-          else
-            ## warn the user that assets will be not recorded
-            errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+    errors.warning(type)
 
-            ## report on this exception
-            ## and return null
-            logException(err)
-            .return(null)
+haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
+  ## if we have a project id
+  ## and we have a key
+  ## and (record or ci) hasn't been set to true or false
+  (projectId and options.key) and (
+    _.isUndefined(options.record) and _.isUndefined(options.ci)
+  )
 
-  createInstance: (runId, spec, browser) ->
-    api.createInstance({
-      runId
-      spec
-      browser
-    })
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+warnIfProjectIdButNoRecordOption = (projectId, options) ->
+  if haveProjectIdAndKeyButNoRecordOption(projectId, options)
+    ## log a warning telling the user
+    ## that they either need to provide us
+    ## with a RECORD_KEY or turn off
+    ## record mode
+    errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
 
-      ## dont log exceptions if we have a 503 status code
-      if err.statusCode isnt 503
-        logException(err)
-        .return(null)
-      else
-        null
+throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) ->
+  if (not ciBuildId and not ciProvider.provider()) and (parallel or group)
+    errors.throw(
+      "INDETERMINATE_CI_BUILD_ID",
+      {
+        group,
+        parallel
+      },
+      ciProvider.detectableCiBuildIdProviders()
+    )
 
-  upload: (options = {}) ->
-    {video, uploadVideo, screenshots, videoUrl, screenshotUrls} = options
-
-    uploads = []
-    count   = 0
-
-    nums = ->
-      count += 1
-
-      chalk.gray("(#{count}/#{uploads.length})")
-
-    send = (pathToFile, url) ->
-      success = ->
-        console.log("  - Done Uploading #{nums()}", chalk.blue(pathToFile))
-
-      fail = (err) ->
-        console.log("  - Failed Uploading #{nums()}", chalk.red(pathToFile))
-
-      uploads.push(
-        upload.send(pathToFile, url)
-        .then(success)
-        .catch(fail)
-      )
-
-    if videoUrl and uploadVideo
-      send(video, videoUrl)
-
-    if screenshotUrls
-      screenshotUrls.forEach (obj) ->
-        screenshot = _.find(screenshots, {clientId: obj.clientId})
-
-        send(screenshot.path, obj.uploadUrl)
-
-    if not uploads.length
-      console.log("  - Nothing to Upload")
-
-    Promise
-    .all(uploads)
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_UPLOAD_RESULTS", err)
-
-      logException(err)
-
-  uploadAssets: (instanceId, results, stdout) ->
-    console.log("")
-    console.log("")
-
-    terminal.header("Uploading Assets", {
-      color: ["blue"]
+throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group) ->
+  if not record and _.some([ciBuildId, parallel, group])
+    errors.throw("RECORD_PARAMS_WITHOUT_RECORDING", {
+      ciBuildId,
+      group,
+      parallel
     })
 
-    console.log("")
+throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) ->
+  ## we've been given an explicit ciBuildId
+  ## but no parallel or group flag
+  if ciBuildId and (not parallel and not group)
+    errors.throw("INCORRECT_CI_BUILD_ID_USAGE", { ciBuildId })
 
-    ## get rid of the path property
-    screenshots = _.map results.screenshots, (screenshot) ->
-      _.omit(screenshot, "path")
+throwIfNoProjectId = (projectId) ->
+  if not projectId
+    errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
 
-    api.updateInstance({
-      instanceId:   instanceId
-      tests:        _.get(results, "stats.tests")
-      passes:       _.get(results, "stats.passes")
-      failures:     _.get(results, "stats.failures")
-      pending:      _.get(results, "stats.pending")
-      duration:     _.get(results, "stats.duration")
-      error:        results.error
-      video:        !!results.video
-      screenshots:  screenshots
-      failingTests: results.failingTests
-      cypressConfig: results.config
-      ciProvider:    ciProvider.name() ## TODO: don't send this (no reason to)
-      stdout:       stdout
-    })
-    .then (resp = {}) =>
-      @upload({
-        video:          results.video
-        uploadVideo:    results.shouldUploadVideo
-        screenshots:    results.screenshots
-        videoUrl:       resp.videoUploadUrl
-        screenshotUrls: resp.screenshotUploadUrls
+getSpecRelativePath = (spec) ->
+  _.get(spec, "relative", null)
+
+uploadArtifacts = (options = {}) ->
+  { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
+
+  uploads = []
+  count   = 0
+
+  nums = ->
+    count += 1
+
+    chalk.gray("(#{count}/#{uploads.length})")
+
+  send = (pathToFile, url) ->
+    success = ->
+      console.log("  - Done Uploading #{nums()}", chalk.blue(pathToFile))
+
+    fail = (err) ->
+      debug("failed to upload artifact %o", {
+        file: pathToFile
+        stack: err.stack
       })
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
-      ## dont log exceptions if we have a 503 status code
-      if err.statusCode isnt 503
+      console.log("  - Failed Uploading #{nums()}", chalk.red(pathToFile))
+
+    uploads.push(
+      upload.send(pathToFile, url)
+      .then(success)
+      .catch(fail)
+    )
+
+  if videoUploadUrl and shouldUploadVideo
+    send(video, videoUploadUrl)
+
+  if screenshotUploadUrls
+    screenshotUploadUrls.forEach (obj) ->
+      screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
+
+      send(screenshot.path, obj.uploadUrl)
+
+  if not uploads.length
+    console.log("  - Nothing to Upload")
+
+  Promise
+  .all(uploads)
+  .catch (err) ->
+    errors.warning("DASHBOARD_CANNOT_UPLOAD_RESULTS", err)
+
+    logException(err)
+
+updateInstanceStdout = (options = {}) ->
+  { instanceId, captured } = options
+
+  stdout = captured.toString()
+
+  makeRequest = ->
+    api.updateInstanceStdout({
+      stdout
+      instanceId
+    })
+
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .catch (err) ->
+    debug("failed updating instance stdout %o", {
+      stack: err.stack
+    })
+
+    errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+    ## dont log exceptions if we have a 503 status code
+    logException(err) unless err.statusCode is 503
+  .finally(capture.restore)
+
+updateInstance = (options = {}) ->
+  { instanceId, results, captured, group, parallel, ciBuildId } = options
+  { stats, tests, hooks, video, screenshots, reporterStats, error } = results
+
+  video = Boolean(video)
+  cypressConfig = options.config
+  stdout = captured.toString()
+
+  ## get rid of the path property
+  screenshots = _.map screenshots, (screenshot) ->
+    _.omit(screenshot, "path")
+
+  makeRequest = ->
+    api.updateInstance({
+      stats
+      tests
+      error
+      video
+      hooks
+      stdout
+      instanceId
+      screenshots
+      reporterStats
+      cypressConfig
+    })
+
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .catch (err) ->
+    debug("failed updating instance %o", {
+      stack: err.stack
+    })
+
+    if parallel
+      return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
+        response: err,
+        flags: {
+          group,
+          ciBuildId,
+        },
+      })
+
+    errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+    ## dont log exceptions if we have a 503 status code
+    if err.statusCode isnt 503
+      logException(err)
+      .return(null)
+    else
+      null
+
+getCommitFromGitOrCi = (git) ->
+  la(check.object(git), 'expected git information object', git)
+  ciProvider.commitDefaults({
+    sha: git.sha
+    branch: git.branch
+    authorName: git.author
+    authorEmail: git.email
+    message: git.message
+    remoteOrigin: git.remote
+    defaultBranch: null
+  })
+
+createRun = (options = {}) ->
+  _.defaults(options, {
+    group: null,
+    parallel: null,
+    ciBuildId: null,
+  })
+
+  { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group } = options
+
+  recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
+
+  if not recordKey
+    ## are we a forked PR and are we NOT running our own internal
+    ## e2e tests? currently some e2e tests fail when a user submits
+    ## a PR because this logic triggers unintended here
+    if isForkPr.isForkPr() and not runningInternalTests()
+      ## bail with a warning
+      return errors.warning("RECORDING_FROM_FORK_PR")
+
+    ## else throw
+    errors.throw("RECORD_KEY_MISSING")
+
+  ## go back to being a string
+  if specPattern
+    specPattern = specPattern.join(",")
+
+  if ciBuildId
+    ## stringify
+    ciBuildId = String(ciBuildId)
+
+  specs = _.map(specs, getSpecRelativePath)
+
+  commit = getCommitFromGitOrCi(git)
+  debug("commit information from Git or from environment variables")
+  debug(commit)
+
+  makeRequest = ->
+    api.createRun({
+      specs
+      group
+      parallel
+      platform
+      ciBuildId
+      projectId
+      recordKey
+      specPattern
+      ci: {
+        params: ciProvider.ciParams()
+        provider: ciProvider.provider()
+      }
+      commit
+    })
+
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .catch (err) ->
+    debug("failed creating run %o", {
+      stack: err.stack
+    })
+
+    switch err.statusCode
+      when 401
+        recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+        errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
+      when 404
+        errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
+      when 412
+        errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
+      when 422
+        { code, payload } = err.error
+
+        runUrl = _.get(payload, "runUrl")
+
+        switch code
+          when "RUN_GROUP_NAME_NOT_UNIQUE"
+            errors.throw("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          when "PARALLEL_GROUP_PARAMS_MISMATCH"
+            { browserName, browserVersion, osName, osVersion } = platform
+
+            errors.throw("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH", {
+              group,
+              runUrl,
+              ciBuildId,
+              parameters: {
+                osName,
+                osVersion,
+                browserName,
+                browserVersion,
+                specs,
+              }
+            })
+          when "PARALLEL_DISALLOWED"
+            errors.throw("DASHBOARD_PARALLEL_DISALLOWED", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          when "PARALLEL_REQUIRED"
+            errors.throw("DASHBOARD_PARALLEL_REQUIRED", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          when "ALREADY_COMPLETE"
+            errors.throw("DASHBOARD_ALREADY_COMPLETE", {
+              runUrl,
+              group,
+              parallel,
+              ciBuildId,
+            })
+          when "STALE_RUN"
+            errors.throw("DASHBOARD_STALE_RUN", {
+              runUrl,
+              group,
+              parallel,
+              ciBuildId,
+            })
+          else
+            errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
+              response: err,
+              flags: {
+                group,
+                parallel,
+                ciBuildId,
+              },
+            })
+      else
+        if parallel
+          return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
+            response: err,
+            flags: {
+              group,
+              ciBuildId,
+            },
+          })
+
+        ## warn the user that assets will be not recorded
+        errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
+
+        ## report on this exception
+        ## and return null
         logException(err)
         .return(null)
-      else
-        null
 
-  uploadStdout: (instanceId, stdout) ->
-    api.updateInstanceStdout({
-      instanceId:   instanceId
-      stdout:       stdout
+createInstance = (options = {}) ->
+  { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options
+
+  spec = getSpecRelativePath(spec)
+
+  makeRequest = ->
+    api.createInstance({
+      spec
+      runId
+      groupId
+      platform
+      machineId
     })
-    .catch (err) ->
-      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
-      ## dont log exceptions if we have a 503 status code
-      logException(err) unless err.statusCode is 503
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .catch (err) ->
+    debug("failed creating instance %o", {
+      stack: err.stack
+    })
 
-  run: (options) ->
-    { projectPath, browser } = options
+    if parallel
+      return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
+        response: err,
+        flags: {
+          group,
+          ciBuildId,
+        },
+      })
 
-    ## default browser
-    browser ?= "electron"
+    errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
-    captured = stdout.capture()
+    ## dont log exceptions if we have a 503 status code
+    if err.statusCode isnt 503
+      logException(err)
+      .return(null)
+    else
+      null
 
-    ## if we are using the ci flag that means
-    ## we have an old version of the CLI tools installed
-    ## and that we need to warn the user what to update
-    if options.ci
-      type = switch
-        when process.env.CYPRESS_CI_KEY
-          "CYPRESS_CI_DEPRECATED_ENV_VAR"
-        else
-          "CYPRESS_CI_DEPRECATED"
+createRunAndRecordSpecs = (options = {}) ->
+  { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group } = options
 
-      errors.warning(type)
+  recordKey = options.key
 
-    Project.add(projectPath)
-    .then ->
-      Project.id(projectPath)
-      .catch ->
-        errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
-    .then (projectId) =>
-      ## store the projectId for later use
-      options.projectId = projectId
+  commitInfo.commitInfo(projectRoot)
+  .then (git) ->
+    debug("found the following git information")
+    debug(git)
 
-      Project.config(projectPath)
-      .then (cfg) =>
-        { projectName } = cfg
+    platform = {
+      osCpus: sys.osCpus
+      osName: sys.osName
+      osMemory: sys.osMemory
+      osVersion: sys.osVersion
+      browserName: browser.displayName
+      browserVersion: browser.version
+    }
 
-        key = options.key ? process.env.CYPRESS_RECORD_KEY or process.env.CYPRESS_CI_KEY
+    createRun({
+      git
+      specs
+      group
+      parallel
+      platform
+      recordKey
+      ciBuildId
+      projectId
+      specPattern
+    })
+    .then (resp) ->
+      if not resp
+        ## if a forked run, can't record and can't be parallel
+        ## because the necessary env variables aren't present
+        runAllSpecs({}, false)
+      else
+        { runUrl, runId, machineId, groupId } = resp
 
-        @generateProjectRunId(projectId, projectPath, projectName, key,
-          options.group, options.groupId, options.spec)
-        .then (runId) =>
-          ## bail if we dont have a runId
-          return if not runId
+        captured = null
+        instanceId = null
 
-          @createInstance(runId, options.spec, browser)
-        .then (instanceId) =>
-          ## dont check that the user is logged in
-          options.ensureAuthToken = false
+        beforeSpecRun = (spec) ->
+          debug("before spec run %o", { spec })
 
-          ## dont let headless say its all done
-          options.allDone       = false
+          capture.restore()
 
-          didUploadAssets       = false
+          captured = capture.stdout()
 
-          runMode.run(options)
-          .then (results = {}) =>
-            ## if we got a instanceId then attempt to
-            ## upload these assets
-            if instanceId
-              @uploadAssets(instanceId, results, captured.toString())
-              .then (ret) ->
-                didUploadAssets = ret isnt null
-              .return(results)
-              .finally =>
-                runMode.allDone()
+          createInstance({
+            spec
+            runId
+            group
+            groupId
+            platform
+            parallel
+            ciBuildId
+            machineId
+          })
+          .then (resp = {}) ->
+            { instanceId } = resp
 
-                if didUploadAssets
-                  stdout.restore()
-                  @uploadStdout(instanceId, captured.toString())
+            ## pull off only what we need
+            return _
+            .chain(resp)
+            .pick("spec", "claimedInstances", "totalInstances")
+            .extend({
+              estimated: resp.estimatedWallClockDuration
+            })
+            .value()
 
-            else
-              stdout.restore()
-              runMode.allDone()
-              return results
+        afterSpecRun = (spec, results, config) ->
+          ## dont do anything if we failed to
+          ## create the instance
+          return if not instanceId
+
+          debug("after spec run %o", { spec })
+
+          console.log("")
+
+          terminal.header("Uploading Results", {
+            color: ["blue"]
+          })
+
+          console.log("")
+
+          updateInstance({
+            group
+            config
+            results
+            captured
+            parallel
+            ciBuildId
+            instanceId
+          })
+          .then (resp) ->
+            return if not resp
+
+            { video, shouldUploadVideo, screenshots } = results
+            { videoUploadUrl, screenshotUploadUrls } = resp
+
+            uploadArtifacts({
+              video
+              screenshots
+              videoUploadUrl
+              shouldUploadVideo
+              screenshotUploadUrls
+            })
+            .finally ->
+              ## always attempt to upload stdout
+              ## even if uploading failed
+              updateInstanceStdout({
+                captured
+                instanceId
+              })
+
+        runAllSpecs({ beforeSpecRun, afterSpecRun, runUrl })
+
+module.exports = {
+  createRun
+
+  createInstance
+
+  updateInstance
+
+  updateInstanceStdout
+
+  uploadArtifacts
+
+  warnIfCiFlag
+
+  throwIfNoProjectId
+
+  throwIfIndeterminateCiBuildId
+
+  throwIfIncorrectCiBuildIdUsage
+
+  warnIfProjectIdButNoRecordOption
+
+  throwIfRecordParamsWithoutRecording
+
+  createRunAndRecordSpecs
+
+  getCommitFromGitOrCi
 }

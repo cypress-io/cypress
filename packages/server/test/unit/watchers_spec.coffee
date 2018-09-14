@@ -7,12 +7,12 @@ Watchers = require("#{root}lib/watchers")
 
 describe "lib/watchers", ->
   beforeEach ->
-    @standardWatcher = @sandbox.stub({
+    @standardWatcher = sinon.stub({
       on:    ->
       close: ->
     })
 
-    @sandbox.stub(chokidar, "watch").returns(@standardWatcher)
+    sinon.stub(chokidar, "watch").returns(@standardWatcher)
     @watchers = Watchers()
 
   it "returns instance of watcher class", ->
@@ -31,7 +31,7 @@ describe "lib/watchers", ->
 
   context "#watchTree", ->
     beforeEach ->
-      @sandbox.stub(dependencyTree, "toList").returns([
+      sinon.stub(dependencyTree, "toList").returns([
         "/foo/bar"
         "/dep/a"
         "/dep/b"
@@ -55,10 +55,10 @@ describe "lib/watchers", ->
 
   context "#close", ->
     it "removes each watched property", ->
-      watched1 = {close: @sandbox.spy()}
+      watched1 = {close: sinon.spy()}
       @watchers._add("/one", watched1)
 
-      watched2 = {close: @sandbox.spy()}
+      watched2 = {close: sinon.spy()}
       @watchers._add("/two", watched2)
 
       expect(_.keys(@watchers.watchers)).to.have.length(2)

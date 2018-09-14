@@ -31,6 +31,7 @@ builtInCommands = [
   require("../cy/commands/querying")
   require("../cy/commands/request")
   require("../cy/commands/screenshot")
+  require("../cy/commands/task")
   require("../cy/commands/traversals")
   require("../cy/commands/waiting")
   require("../cy/commands/window")

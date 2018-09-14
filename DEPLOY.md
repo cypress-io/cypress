@@ -25,7 +25,7 @@ The steps above:
 
 - Build the `cypress` NPM package
 - Transpiles the code into ES5 version to be compatible with the common Node versions
-- Puts the result into the `cli/build` folder. 
+- Puts the result into the `cli/build` folder.
 
 You could publish from there, but first you need to build and upload the binary with the *same version*;
 this guarantees that when users do `npm i cypress@<x.y.z>` they can download the binary
@@ -85,7 +85,7 @@ impossible. Instead we:
 A typical installation looks like this:
 
 ```
-export CYPRESS_BINARY_VERSION=https://cdn.../binary/<new version>/hash/cypress.zip
+export CYPRESS_INSTALL_BINARY=https://cdn.../binary/<new version>/hash/cypress.zip
 npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 ```
 
@@ -111,7 +111,7 @@ npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 
 ```
 $ vers cypress
-0.20.1                      16 days        
+0.20.1                      16 days
 0.20.2                      3 days             latest
 1.0.5                       a few seconds ago  dev
 ```
@@ -123,8 +123,10 @@ $ vers cypress
 
 - Update and publish the [changelog](https://github.com/cypress-io/cypress-documentation/blob/develop/source/guides/references/changelog.md)
 - Close issues (with a link to the changelog).
-- Update the NPM dist tag to `latest` using `npm dist-tag add cypress@1.0.5`.
+- Update the NPM dist tag to `latest` using `npm dist-tag add cypress@1.0.5 --otp <code>`.
 - Update the `manifest.json` for download server `npm run binary-release -- --version 1.0.5`
 - Push out the updated changes to the manifest for `on.cypress.io` if needed.
+- Push out an updated kitchen sink if needed.
+- Bump `version` in `package.json` from `develop` branch and then merge into `master`.
 
 Take a break, you deserve it! :sunglasses:

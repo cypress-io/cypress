@@ -11,7 +11,9 @@ describe "Set Up Project", ->
     cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      @config.projectName = "my-kitchen-sink"
+
+      cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "closeBrowser").resolves(null)
       @config.projectId = null
@@ -59,7 +61,7 @@ describe "Set Up Project", ->
           .should("be.disabled")
 
       it "prefills Project Name", ->
-        cy.get("#projectName").should("have.value", "bar")
+        cy.get("#projectName").should("have.value", @config.projectName)
 
       it "allows me to change Project Name value", ->
         cy.get("#projectName").clear().type("New Project Here")
@@ -247,7 +249,7 @@ describe "Set Up Project", ->
 
         it "sends data from form to ipc event", ->
           expect(@ipc.setupDashboardProject).to.be.calledWith({
-            projectName: "bar"
+            projectName: @config.projectName
             orgId: "777"
             public: true
           })
@@ -262,7 +264,7 @@ describe "Set Up Project", ->
 
         it "sends data from form to ipc event", ->
           expect(@ipc.setupDashboardProject).to.be.calledWith({
-            projectName: "bar"
+            projectName: @config.projectName
             orgId: "000"
             public: false
           })
@@ -277,7 +279,7 @@ describe "Set Up Project", ->
 
         it "sends data from form to ipc event", ->
           expect(@ipc.setupDashboardProject).to.be.calledWith({
-            projectName: "bar"
+            projectName: @config.projectName
             orgId: "000"
             public: true
           })

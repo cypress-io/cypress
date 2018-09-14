@@ -8,6 +8,10 @@ glob = require("./glob")
 
 MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
+getPatternRelativeToProjectRoot = (specPattern, projectRoot) ->
+  _.map specPattern, (p) ->
+    path.relative(projectRoot, p)
+
 find = (config, specPattern) ->
   la(check.maybe.strings(specPattern), "invalid spec pattern", specPattern)
 
@@ -70,7 +74,7 @@ find = (config, specPattern) ->
 
     {
       name: relativePathFromIntegrationFolder(file)
-      path: relativePathFromProjectRoot(file)
+      relative: relativePathFromProjectRoot(file)
       absolute: file
     }
 
@@ -114,4 +118,6 @@ find = (config, specPattern) ->
 
 module.exports = {
   find
+
+  getPatternRelativeToProjectRoot
 }

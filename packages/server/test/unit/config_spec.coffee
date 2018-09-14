@@ -19,21 +19,21 @@ describe "lib/config", ->
 
   context ".get", ->
     beforeEach ->
-      @projectPath = "/_test-output/path/to/project"
+      @projectRoot = "/_test-output/path/to/project"
       @setup = (cypressJson = {}, cypressEnvJson = {}) =>
-        @sandbox.stub(settings, "read").withArgs(@projectPath).resolves(cypressJson)
-        @sandbox.stub(settings, "readEnv").withArgs(@projectPath).resolves(cypressEnvJson)
+        sinon.stub(settings, "read").withArgs(@projectRoot).resolves(cypressJson)
+        sinon.stub(settings, "readEnv").withArgs(@projectRoot).resolves(cypressEnvJson)
 
     it "sets projectRoot", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) =>
-        expect(obj.projectRoot).to.eq(@projectPath)
+        expect(obj.projectRoot).to.eq(@projectRoot)
         expect(obj.env).to.deep.eq({foo: "bar"})
 
     it "sets projectName", ->
       @setup({}, {foo: "bar"})
-      config.get(@projectPath)
+      config.get(@projectRoot)
       .then (obj) ->
         expect(obj.projectName).to.eq("project")
 
@@ -42,27 +42,27 @@ describe "lib/config", ->
         @setup({}, {foo: "bar"})
 
       it "can override default port", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.port).to.eq(8080)
 
       it "updates browserUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.browserUrl).to.eq "http://localhost:8080/__/"
 
       it "updates proxyUrl", ->
-        config.get(@projectPath, {port: 8080})
+        config.get(@projectRoot, {port: 8080})
         .then (obj) ->
           expect(obj.proxyUrl).to.eq "http://localhost:8080"
 
     context "validation", ->
       beforeEach ->
         @expectValidationPasses = =>
-          config.get(@projectPath) ## shouldn't throw
+          config.get(@projectRoot) ## shouldn't throw
 
         @expectValidationFails = (errorMessage = "validation error") =>
-          config.get(@projectPath)
+          config.get(@projectRoot)
           .then ->
             throw new Error("should throw validation error")
           .catch (err) ->
@@ -157,6 +157,15 @@ describe "lib/config", ->
 
         it "fails if not a number", ->
           @setup({execTimeout: "foo"})
+          @expectValidationFails("be a number")
+
+      context "taskTimeout", ->
+        it "passes if a number", ->
+          @setup({taskTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({taskTimeout: "foo"})
           @expectValidationFails("be a number")
 
       context "fileServerFolder", ->
@@ -285,15 +294,6 @@ describe "lib/config", ->
           @setup({responseTimeout: "foo"})
           @expectValidationFails("be a number")
 
-      context "screenshotOnHeadlessFailure", ->
-        it "passes if a boolean", ->
-          @setup({screenshotOnHeadlessFailure: false})
-          @expectValidationPasses()
-
-        it "fails if not a boolean", ->
-          @setup({screenshotOnHeadlessFailure: 42})
-          @expectValidationFails("be a boolean")
-
       context "testFiles", ->
         it "passes if a string", ->
           @setup({testFiles: "**/*.coffee"})
@@ -316,13 +316,13 @@ describe "lib/config", ->
           @setup({supportFile: true})
           @expectValidationFails("be a string or false")
 
-      context "trashAssetsBeforeHeadlessRuns", ->
+      context "trashAssetsBeforeRuns", ->
         it "passes if a boolean", ->
-          @setup({trashAssetsBeforeHeadlessRuns: false})
+          @setup({trashAssetsBeforeRuns: false})
           @expectValidationPasses()
 
         it "fails if not a boolean", ->
-          @setup({trashAssetsBeforeHeadlessRuns: 42})
+          @setup({trashAssetsBeforeRuns: 42})
           @expectValidationFails("be a boolean")
 
       context "videoCompression", ->
@@ -338,13 +338,13 @@ describe "lib/config", ->
           @setup({videoCompression: "foo"})
           @expectValidationFails("be a number or false")
 
-      context "videoRecording", ->
+      context "video", ->
         it "passes if a boolean", ->
-          @setup({videoRecording: false})
+          @setup({video: false})
           @expectValidationPasses()
 
         it "fails if not a boolean", ->
-          @setup({videoRecording: 42})
+          @setup({video: 42})
           @expectValidationFails("be a boolean")
 
       context "videoUploadOnPasses", ->
@@ -550,8 +550,8 @@ describe "lib/config", ->
     it "animationDistanceThreshold=5", ->
       @defaults "animationDistanceThreshold", 5
 
-    it "videoRecording=true", ->
-      @defaults "videoRecording", true
+    it "video=true", ->
+      @defaults "video", true
 
     it "videoCompression=32", ->
       @defaults "videoCompression", 32
@@ -559,8 +559,8 @@ describe "lib/config", ->
     it "videoUploadOnPasses=true", ->
       @defaults "videoUploadOnPasses", true
 
-    it "trashAssetsBeforeHeadlessRuns=32", ->
-      @defaults "trashAssetsBeforeHeadlessRuns", true
+    it "trashAssetsBeforeRuns=32", ->
+      @defaults "trashAssetsBeforeRuns", true
 
     it "morgan=true", ->
       @defaults "morgan", true
@@ -580,9 +580,6 @@ describe "lib/config", ->
     it "numTestsKeptInMemory=50", ->
       @defaults "numTestsKeptInMemory", 50
 
-    it "screenshotOnHeadlessFailure=true", ->
-      @defaults "screenshotOnHeadlessFailure", true
-
     it "modifyObstructiveCode=true", ->
       @defaults "modifyObstructiveCode", true
 
@@ -599,7 +596,7 @@ describe "lib/config", ->
 
     it "blacklistHosts=a|b", ->
       @defaults("blacklistHosts", ["a", "b"], {
-        blacklistHosts: "a|b"
+        blacklistHosts: ["a", "b"]
       })
 
     it "hosts=null", ->
@@ -614,14 +611,6 @@ describe "lib/config", ->
           foo: "bar",
           baz: "quux"
         }
-      })
-
-    it "hosts=foo=bar,baz=quux", ->
-      @defaults("hosts", {
-        foo: "bar"
-        baz: "quux"
-      }, {
-        hosts: "foo=bar|baz=quux"
       })
 
     it "resets numTestsKeptInMemory to 0 when runMode", ->
@@ -725,18 +714,18 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            trashAssetsBeforeRuns:      { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
             fileServerFolder:           { value: "", from: "default" },
-            videoRecording:             { value: true, from: "default" }
+            video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
             videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
@@ -749,7 +738,7 @@ describe "lib/config", ->
           })
 
       it "sets config, envFile and env", ->
-        @sandbox.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+        sinon.stub(config, "getProcessEnvVars").returns({quux: "quux"})
 
         obj = {
           projectRoot: "/foo/bar"
@@ -784,20 +773,20 @@ describe "lib/config", ->
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
+            taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
             animationDistanceThreshold: { value: 5, from: "default" },
-            screenshotOnHeadlessFailure:{ value: true, from: "default" },
-            trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
+            trashAssetsBeforeRuns:      { value: true, from: "default" },
             watchForFileChanges:        { value: true, from: "default" },
             modifyObstructiveCode:      { value: true, from: "default" },
             chromeWebSecurity:          { value: true, from: "default" },
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
             fileServerFolder:           { value: "", from: "default" },
-            videoRecording:             { value: true, from: "default" }
+            video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
-            videoUploadOnPasses:       { value: true, from: "default" }
+            videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
@@ -882,7 +871,7 @@ describe "lib/config", ->
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
-      @sandbox.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
+      sinon.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
 
       obj = {
         env: {
@@ -970,18 +959,19 @@ describe "lib/config", ->
       expect(urls.proxyUrl).to.eq("http://localhost:65432")
 
   context ".setScaffoldPaths", ->
-    it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->
+    it "sets integrationExamplePath + integrationExampleName + scaffoldedFiles", ->
       obj = {
         integrationFolder: "/_test-output/path/to/project/cypress/integration"
       }
-      @sandbox.stub(scaffold, "fileTree").returns([])
+      sinon.stub(scaffold, "fileTree").resolves([])
 
-      expect(config.setScaffoldPaths(obj)).to.deep.eq({
-        integrationFolder: "/_test-output/path/to/project/cypress/integration"
-        integrationExampleFile: "/_test-output/path/to/project/cypress/integration/example_spec.js"
-        integrationExampleName: "example_spec.js"
-        scaffoldedFiles: []
-      })
+      config.setScaffoldPaths(obj).then (result) ->
+        expect(result).to.deep.eq({
+          integrationFolder: "/_test-output/path/to/project/cypress/integration"
+          integrationExamplePath: "/_test-output/path/to/project/cypress/integration/examples"
+          integrationExampleName: "examples"
+          scaffoldedFiles: []
+        })
 
   context ".setSupportFileAndFolder", ->
     it "does nothing if supportFile is falsey", ->
@@ -1060,27 +1050,12 @@ describe "lib/config", ->
       .then (result) ->
         expect(result).to.eql(obj)
 
-    it "sets the full path to the pluginsFile if it exists", ->
-      projectRoot = process.cwd()
-
-      obj = {
-        projectRoot: projectRoot
-        pluginsFile: "test/unit/config_spec.coffee"
-      }
-
-      config.setPluginsFile(obj)
-      .then (result) ->
-        expect(result).to.eql({
-          projectRoot: projectRoot
-          pluginsFile: "#{projectRoot}/test/unit/config_spec.coffee"
-        })
-
     it "sets the pluginsFile to default index.js if does not exist", ->
       projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/no-scaffolding")
 
       obj = {
         projectRoot: projectRoot
-        pluginsFile: "cypress/plugins"
+        pluginsFile: "#{projectRoot}/cypress/plugins"
       }
 
       config.setPluginsFile(obj)
@@ -1095,7 +1070,7 @@ describe "lib/config", ->
 
       obj = config.setAbsolutePaths({
         projectRoot: projectRoot
-        pluginsFile: "cypress/plugins"
+        pluginsFile: "#{projectRoot}/cypress/plugins"
       })
 
       config.setPluginsFile(obj)
@@ -1173,7 +1148,7 @@ describe "lib/config", ->
 
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
 
-    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile"].forEach (folder) ->
+    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile", "pluginsFile"].forEach (folder) ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {
