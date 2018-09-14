@@ -6,7 +6,7 @@
 // the background file with the 'backgroundFile' configuration option.
 //
 // You can read more here:
-// https://on.cypress.io/background-guide
+// https://on.cypress.io/background-process
 // ***********************************************************
 
 // This function is called when a project is opened or re-opened (e.g. due to
