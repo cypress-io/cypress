@@ -28,7 +28,7 @@ create = (state, config, log) ->
 
   createUncaughtException = (type, args) ->
     [msg, source, lineno, colno, err] = args
-    type = err.from or type
+    type = err?.from or type
 
     current = state("current")
 
