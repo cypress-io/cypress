@@ -8,7 +8,7 @@ trash = require("#{root}lib/util/trash")
 describe "lib/util/trash", ->
   context ".folder", ->
     it "deletes contents of directory", ->
-      basePath = path.join("foo") 
+      basePath = path.join("foo")
       fs.mkdirSync(basePath)
       fs.writeFileSync("#{basePath}/bar.txt", "")
 
