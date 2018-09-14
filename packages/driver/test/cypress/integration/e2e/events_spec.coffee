@@ -8,7 +8,7 @@ describe "events", ->
       "test:after:run": "after:test:run"
       "command:queue:before:end": "before:command:queue:end"
       "window:before:load": "before:window:load"
-      "before:window:unload": "before:window:unload"
+      "window:before:unload": "before:window:unload"
       "runnable:after:run:async": "after:runnable:run:async"
     }
     methods = "addListener on once prependListener prependOnceListener".split(" ")
