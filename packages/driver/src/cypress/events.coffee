@@ -3,6 +3,8 @@ EE = require("eventemitter2")
 log = require("debug")("cypress:driver")
 Promise = require("bluebird")
 
+$utils = require("./utils")
+
 proxyFunctions = "emit emitThen emitMap".split(" ")
 
 withoutFunctions = (arr) ->
@@ -107,4 +109,32 @@ module.exports = {
 
     ## return the events object
     return events
+
+  throwOnRenamedEvent: (eventEmitter, name) ->
+    renamedEvents = {
+      "test:before:run": "before:test:run"
+      "test:before:run:async": "before:test:run:async"
+      "test:after:run": "after:test:run"
+      "command:queue:before:end": "before:command:queue:end"
+      "window:before:load": "before:window:load"
+      "before:window:unload": "before:window:unload"
+      "runnable:after:run:async": "after:runnable:run:async"
+    }
+
+    methods = "addListener on once prependListener prependOnceListener".split(" ")
+    
+    _.each methods, (method) ->
+      eventEmitter[method] = _.wrap eventEmitter[method], (original, eventName, listener) ->
+        if renamedEvents[eventName]
+          $utils.throwErrByPath("events.renamed_event", {
+            args: {
+              oldEvent: eventName
+              newEvent: renamedEvents[eventName]
+              object: name
+              method: method
+            }
+            from: "cypress"
+          })
+        else
+          original.call(@, eventName, listener)
 }

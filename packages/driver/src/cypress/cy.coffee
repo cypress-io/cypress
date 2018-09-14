@@ -927,9 +927,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         runTimerQueue("setInterval")
         runTimerQueue("requestAnimationFrame")
 
-    onSpecWindowUncaughtException: ->
+    onSpecWindowUncaughtException: (args...) ->
       ## create the special uncaught exception err
-      err = errors.createUncaughtException("spec", arguments)
+      err = errors.createUncaughtException("spec", args)
 
       if runnable = state("runnable")
         ## we're using an explicit done callback here
@@ -1102,6 +1102,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   specWindow.cy = cy
 
   $Events.extend(cy)
+
+  $Events.throwOnRenamedEvent(cy, "cy")
 
   return cy
 

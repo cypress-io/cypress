@@ -213,6 +213,18 @@ module.exports = {
     invalid_argument: "#{cmd('each')} must be passed a callback function."
     non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: '{{subject}}'"
 
+  events:
+    renamed_event: """The '{{oldEvent}}' event has been renamed to '{{newEvent}}'. 
+    
+      Please change:
+    
+        {{object}}.{{method}}('{{oldEvent}}', <handler>)
+      
+      to:
+      
+        {{object}}.{{method}}('{{newEvent}}', <handler>)
+    """
+
   exec:
     failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
 
@@ -836,6 +848,8 @@ module.exports = {
 
       When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
     """
+
+    fromCypress: ""
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."

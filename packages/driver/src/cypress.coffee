@@ -97,6 +97,8 @@ class $Cypress
 
     @events = $Events.extend(@)
 
+    $Events.throwOnRenamedEvent(@, "Cypress")
+
     @setConfig(config)
 
   setConfig: (config = {}) ->
