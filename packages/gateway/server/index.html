@@ -12,13 +12,15 @@
 <script>
 	console.log(io)
 	
-	
+	document.addEventListener('click', function(e){
+		console.log('CLICKED', e)
+	})
 	// fetch('http://localhost:3000/config').then(console.log)
-	const socket = io(
+	var socket = io(
 		'http://localhost:3000',
 		{transports: ['websocket']}
 	)
-	socket.on('connect', ()=>console.log('connected'))
+	socket.on('connect', function(){console.log('connected')})
 </script>
 </body>
 </html>

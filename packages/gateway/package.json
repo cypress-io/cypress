@@ -13,7 +13,11 @@
     "bluebird": "^3.5.2",
     "debug": "^4.0.0",
     "express": "^4.16.3",
+    "header-case-normalizer": "^1.0.3",
+    "iedriver": "^3.9.2",
     "marionette-client": "^1.9.5",
+    "promise-retry": "^1.1.1",
+    "request-promise": "^4.2.2",
     "socket.io": "^2.1.1"
   },
   "devDependencies": {
