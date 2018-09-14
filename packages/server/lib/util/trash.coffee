@@ -4,5 +4,5 @@ Promise = require("bluebird")
 
 module.exports = {
   folder: (pathToFolder) ->
-    Promise.resolve(trash([path.join(pathToFolder, "**"),"!#{pathToFolder}"], {glob: true}))
+    Promise.resolve(trash([path.join(pathToFolder, "**"),"!#{pathToFolder}"]))
 }

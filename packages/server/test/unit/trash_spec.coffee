@@ -9,9 +9,9 @@ describe "lib/util/trash", ->
   context ".folder", ->
     it "deletes contents of directory", ->
       basePath = path.join("foo") 
-
       fs.mkdirSync(basePath)
       fs.writeFileSync("#{basePath}/bar.txt", "")
+
       expect(fs.existsSync(basePath)).to.be.true
       expect(fs.existsSync("#{basePath}/bar.txt")).to.be.true
 
