@@ -12,20 +12,18 @@
 		button:active {
 			background-color: salmon;
 		}
+		*{margin:0;padding:0}
+
 	</style>
 </head>
 <body>
-	<div>some header</div>
-	<div>some header</div>
-	<div>some header</div>
 	<button>button</button>
-	<div>some footer</div>
-	<div>some footer</div>
-	<div>some footer</div>
+
 	<script>
 		document.getElementsByTagName('button')[0]
-			.addEventListener('click', function(){
-				console.log('clicked')
+			.addEventListener('click', function(e){
+
+				console.log('clicked', e)
 				})
 	</script>
 </body>

@@ -12,13 +12,14 @@ const proxyServer = require('./proxy')
 let sessionId
 
 const send = (data) => {
-  debug('send', (data))
+  debug('send %O', (data))
   _.defaults(data, { sessionId })
   return firefox.send(data)
 }
 
 firefox.open('firefox', 'about:blank')
 .then((res) => {
+  debug(res)
   sessionId = res.sessionId
   return proxyServer.start(send)
 })
@@ -28,7 +29,6 @@ firefox.open('firefox', 'about:blank')
 .then(() => {
   return send({
     name: 'WebDriver:Navigate',
-    sessionId,
     parameters: { url: 'http://localhost:3001' },
   })
 })

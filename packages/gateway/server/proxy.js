@@ -1,6 +1,6 @@
 const express = require('express')
 const Promise = require('bluebird')
-const debug = require('debug')('gateway')
+const debug = require('debug')('gateway:proxy')
 
 const start = (send) => {
   const app = express()
@@ -8,7 +8,7 @@ const start = (send) => {
   const io = require('socket.io')(server)
   const listenAsync = Promise.promisify(server.listen, { context: server })
 
-  debug('starting server with config')
+  debug('starting proxy server')
   // @ts-ignore
   io.set('transports', ['websocket'])
 
@@ -16,7 +16,7 @@ const start = (send) => {
     debug('socket connected')
 
     socket.on('command', (payload, cb) => {
-      debug('got command', payload)
+      debug('got command, %O', payload)
       return send(payload)
       .then((resp) => cb({ response: resp }))
       .catch((err) => {
