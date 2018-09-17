@@ -128,7 +128,7 @@
     "lockfile": "^1.0.3",
     "lodash": "4.17.4",
     "log-symbols": "^2.2.0",
-    "marionette-client": "^1.9.5",
+    "marionette-client": "https://github.com/cypress-io/marionette-client",
     "md5": "^2.2.1",
     "method-override": "^2.3.1",
     "mime": "1.2.11",
