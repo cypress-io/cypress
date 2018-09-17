@@ -311,6 +311,11 @@ createRun = (options = {}) ->
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
+        when "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE", {
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
         when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
             usedMessage: usedMessage(warning.limit)

@@ -679,9 +679,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.link}
       """
+    when "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+      """
+      Parallelization is not included under your free plan.
+
+      Your plan is now in a grace period, which means your tests will still run in parallel until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests in parallel in the future.
+
+      #{arg1.link}
+      """
+
     when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
       """
-      TODO: add message for user trying to start build with `--parallel` when plan does not allow it
+      Parallelization is not included under your current billing plan.
+
+      To run your tests in parallel, please visit your billing and upgrade to another plan with parallelization.
 
       #{arg1.link}
       """
