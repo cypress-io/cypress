@@ -793,7 +793,7 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
-    describe.only "create run 402 - free plan exceeds monthly private tests", ->
+    describe "create run 402 - free plan exceeds monthly private tests", ->
       setup([{
         method: "post"
         url: "/runs"
@@ -803,6 +803,7 @@ describe "e2e record", ->
           payload: {
             used: 600
             limit: 500
+            orgId: "org-id-1234"
           }
         })
       }])
@@ -823,6 +824,9 @@ describe "e2e record", ->
         req: "postRunRequest@2.1.0",
         res: (req, res) -> res.status(402).json({
           code: "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+          payload: {
+            orgId: "org-id-1234"
+          }
         })
       }])
 
@@ -1141,6 +1145,7 @@ describe "e2e record", ->
               code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
               limit: 500
               gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
             }]
           })
         }
@@ -1171,6 +1176,7 @@ describe "e2e record", ->
               code: "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
               used: 700
               limit: 500
+              orgId: "org-id-1234"
             }]
           })
         }

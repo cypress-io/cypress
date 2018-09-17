@@ -237,6 +237,12 @@ usedMessage = (limit) ->
   else
     ""
 
+billingLink = (orgId) ->
+  if orgId
+    "https://on.cypress.io/dashboard/organizations/#{orgId}/billing"
+  else
+    "https://on.cypress.io/set-up-billing"
+
 gracePeriodMessage = (gracePeriodEnds) ->
   gracePeriodEnds or "the grace period ends"
 
@@ -300,9 +306,16 @@ createRun = (options = {}) ->
     _.each response.warnings, (warning) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(warning.limit), gracePeriodMessage(warning.gracePeriodEnds))
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
+            usedMessage: usedMessage(warning.limit)
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
         when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(warning.limit))
+          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
+            usedMessage: usedMessage(warning.limit)
+            link: billingLink(warning.orgId)
+          })
 
   .catch (err) ->
     debug("failed creating run %o", {
@@ -317,12 +330,18 @@ createRun = (options = {}) ->
         { code, payload } = err.error
 
         limit = _.get(payload, "limit")
+        orgId = _.get(payload, "orgId")
 
         switch code
           when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
-            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", usedMessage(limit))
+            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
+              usedMessage: usedMessage(limit)
+              link: billingLink(orgId)
+            })
           when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
-            errors.throw("PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN")
+            errors.throw("PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN", {
+              link: billingLink(orgId)
+            })
           else
             errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
               response: err,
