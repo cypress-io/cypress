@@ -651,6 +651,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "DUPLICATE_TASK_KEY"
+      """
+      Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
+      """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
       You've exceeded the limit of private test recordings under your free plan this month. #{arg1}

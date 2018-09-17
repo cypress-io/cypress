@@ -1437,6 +1437,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 `
 
+<<<<<<< HEAD
 exports['e2e record api interaction warnings create run warnings over test recordings warning warns when over recordings limit 1'] = `
 
 ====================================================================================================
@@ -1527,6 +1528,16 @@ You've exceeded the limit of private test recordings under your free plan this m
 Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
 https://on.cypress.io/set-up-billing
+=======
+exports['e2e record recordKey warns but does not exit when is forked pr and parallel 1'] = `
+Warning: It looks like you are trying to record this run from a forked PR.
+
+The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+
+These results will not be recorded.
+
+This error will not alter the exit code.
+>>>>>>> develop
 
 ====================================================================================================
 
@@ -1537,15 +1548,21 @@ https://on.cypress.io/set-up-billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
+<<<<<<< HEAD
   │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+=======
+>>>>>>> develop
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: record_pass_spec.coffee...                                                      (1 of 1) 
+<<<<<<< HEAD
   Estimated: 8 seconds
+=======
+>>>>>>> develop
 
 
   record pass
@@ -1568,7 +1585,10 @@ https://on.cypress.io/set-up-billing
   │ Screenshots:  1                       │
   │ Video:        true                    │
   │ Duration:     X seconds               │
+<<<<<<< HEAD
   │ Estimated:    8 seconds               │
+=======
+>>>>>>> develop
   │ Spec Ran:     record_pass_spec.coffee │
   └───────────────────────────────────────┘
 
@@ -1578,10 +1598,13 @@ https://on.cypress.io/set-up-billing
   - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
 
 
+<<<<<<< HEAD
   (Uploading Results)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
 
+=======
+>>>>>>> develop
 ====================================================================================================
 
   (Run Finished)
@@ -1594,6 +1617,7 @@ https://on.cypress.io/set-up-billing
     All specs passed!                           XX:XX        2        1        -        1        -  
 
 
+<<<<<<< HEAD
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
@@ -1694,4 +1718,6 @@ StatusCodeError: 402
   "error": "Something went wrong"
 }
 
+=======
+>>>>>>> develop
 `

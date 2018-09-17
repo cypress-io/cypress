@@ -505,6 +505,24 @@ describe "e2e record", ->
       .then ->
         expect(getRequestUrls()).to.be.empty
 
+    it "warns but does not exit when is forked pr and parallel", ->
+      process.env.CIRCLECI = "1"
+      process.env.CIRCLE_WORKFLOW_ID = "123"
+      process.env.CIRCLE_PR_NUMBER = "123"
+      process.env.CIRCLE_PR_USERNAME = "brian-mann"
+      process.env.CIRCLE_PR_REPONAME = "cypress"
+      process.env.CYPRESS_INTERNAL_E2E_TESTS = "0"
+
+      e2e.exec(@, {
+        spec: "record_pass*"
+        record: true
+        parallel: true
+        snapshot: true
+        expectedExitCode: 0
+      })
+      .then ->
+        expect(getRequestUrls()).to.be.empty
+
   context "video recording", ->
     setup(defaultRoutes, {
       video: false
