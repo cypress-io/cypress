@@ -19,7 +19,7 @@
     "chai": "^3.5.0",
     "cross-env": "^5.0.5",
     "http-mitm-proxy": "^0.5.1",
-    "request": "^2.72.0",
+    "request": "^4.0.0",
     "request-promise": "^3.0.0",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
