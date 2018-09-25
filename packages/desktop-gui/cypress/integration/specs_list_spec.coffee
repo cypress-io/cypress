@@ -238,14 +238,14 @@ describe "Specs List", ->
 
         it "saves the filter to local storage for the project", ->
           cy.window().then (win) =>
-            expect(win.localStorage["specsFilter-#{@config.projectId}"]).to.be.a("string")
-            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}"])).to.equal("new")
+            expect(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"]).to.be.a("string")
+            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"])).to.equal("new")
 
       describe "when there's a saved filter", ->
         beforeEach ->
           @ipc.getSpecs.yields(null, @specs)
           cy.window().then (win) ->
-            win.localStorage["specsFilter-#{@config.projectId}"] = JSON.stringify("app")
+            win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"] = JSON.stringify("app")
 
         it "applies it for the appropriate project", ->
           @openProject.resolve(@config)
@@ -255,7 +255,6 @@ describe "Specs List", ->
           @config.projectId = "different"
           @openProject.resolve(@config)
           cy.get(".filter").should("have.value", "")
-
 
     context "click on spec", ->
       beforeEach ->
