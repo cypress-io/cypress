@@ -82,7 +82,7 @@ describe "src/cy/commands/xhr", ->
             responseText = xhr.responseText
             if xhr.readyState == 3
               responseStatuses++
-          xhr.open("GET", "/fixtures/longtext.txt?" + (new Date).getTime())
+          xhr.open("GET", "/fixtures/longtext.txt?" + Cypress._.random(0, 1e6)
           xhr.send()
           null
         .wait("@getFoo").then (xhr) ->
