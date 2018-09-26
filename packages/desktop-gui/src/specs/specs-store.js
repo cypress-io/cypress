@@ -64,20 +64,27 @@ export class SpecsStore {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setFilter (projectId, filter = null) {
-    localData.set(`specsFilter-${projectId}`, filter)
+  @action setFilter (project, filter = null) {
+    if (!filter) return this.clearFilter(project)
+
+    localData.set(this.getSpecsFilterId(project), filter)
 
     this.filter = filter
   }
 
-  @action clearFilter (projectId) {
-    localData.remove(`specsFilter-${projectId}`)
+  @action clearFilter (project) {
+    localData.remove(this.getSpecsFilterId(project))
 
     this.filter = null
   }
 
   isChosen (spec) {
     return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
+  }
+
+  getSpecsFilterId ({ id = '<no-id>', path = '' }) {
+    const shortenedPath = path.replace(/.*cypress/, 'cypress')
+    return `specsFilter-${id}-${shortenedPath}`
   }
 
   _tree (files) {
