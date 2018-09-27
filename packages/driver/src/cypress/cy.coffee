@@ -30,6 +30,14 @@ privateProps = {
   privates: { name: "state", url: false }
 }
 
+setTimerFns = {
+  setTimeout: "clearTimeout"
+  setInterval: "clearInterval"
+  requestAnimationFrame: "cancelAnimationFrame"
+}
+
+cancelTimerFns = _.invert(setTimerFns)
+
 noArgsAreAFunction = (args) ->
   not _.some(args, _.isFunction)
 
@@ -61,9 +69,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       setTimeout: []
       setInterval: []
       requestAnimationFrame: []
-      clearTimeout: []
-      clearInterval: []
-      cancelAnimationFrame: []
     })
 
   timerQueues.reset()
@@ -165,8 +170,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         top.document.hasFocus()
 
   runTimerQueue = (queue) ->
-    _.each timerQueues[queue], ([contentWindow, args]) ->
+    _.each timerQueues[queue], (obj) ->
+      { contentWindow, args, timerId } = obj
+
       contentWindow[queue].apply(contentWindow, args)
+
+      return timerId
 
     timerQueues[queue] = []
 
@@ -177,15 +186,59 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       requestAnimationFrame: contentWindow.requestAnimationFrame
       clearTimeout: contentWindow.clearTimeout
       clearInterval: contentWindow.clearInterval
-      cancelAnimationFrame: contentWindow.clearAnimationFrame
+      cancelAnimationFrame: contentWindow.cancelAnimationFrame
     }
+
+    callThrough = (fnName, args) ->
+      originals[fnName].apply(contentWindow, args)
+
+    realTimerIdFromAut = (fnName, args, cancelFn) ->
+      ## get a real timerId from the AUT
+      timerId = callThrough(fnName, args)
+
+      timerQueues[fnName].push({
+        args,
+        timerId,
+        contentWindow,
+      })
+
+      ## we've gotten our timerId but we still need
+      ## to cancel this timer so that it doesn't
+      ## actually fire
+      callThrough(cancelFn, [timerId])
+
+      return timerId
+
+    removeTimerFromQueue = (fnName, timerId) ->
+      queueName = cancelTimerFns[fnName]
+      timerQueues[queueName] = _.reject(timerQueues[queueName], { timerId })
+
+      ## cancelling timers always returns undefined
+      return undefined
 
     wrapFn = (fnName) ->
       return (args...) ->
-        if timersPaused
-          timerQueues[fnName].push([contentWindow, args])
-        else
-          originals[fnName].apply(contentWindow, args)
+        [ timerId ] = args
+
+        ## if we're not in pause mode
+        ## then just call through, all good
+        if not timersPaused
+          return callThrough(fnName, args)
+
+        ## else our timers are paused then we want to enqueue
+        ## new timers into our own internal queue
+        ##
+        ## BUT if we're canceling, we want to slice out queued
+        ## timers that match up to ther timerId saved to the queue
+
+        ## are we are a setter or canceller?
+        if cancelFn = setTimerFns[fnName]
+          return realTimerIdFromAut(fnName, args, cancelFn)
+
+        ## else we are a canceller function and we need
+        ## to go find the queued timer by timerId and
+        ## slice it out of the queue
+        return removeTimerFromQueue(fnName, timerId)
 
     contentWindow.setTimeout = wrapFn("setTimeout")
     contentWindow.setInterval = wrapFn("setInterval")
@@ -935,9 +988,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         runTimerQueue("setTimeout")
         runTimerQueue("setInterval")
         runTimerQueue("requestAnimationFrame")
-        runTimerQueue("clearTimeout")
-        runTimerQueue("clearInterval")
-        runTimerQueue("cancelAnimationFrame")
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
