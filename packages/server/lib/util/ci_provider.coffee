@@ -157,12 +157,23 @@ _providerCiParams = ->
       "BUILD_NUMBER"
       "ghprbPullId"
     ])
+    # https://semaphoreci.com/docs/available-environment-variables.html
     semaphore: extract([
-      "SEMAPHORE_REPO_SLUG"
+      "SEMAPHORE_BRANCH_ID"
       "SEMAPHORE_BUILD_NUMBER"
+      "SEMAPHORE_CURRENT_JOB"
+      "SEMAPHORE_CURRENT_THREAD"
+      "SEMAPHORE_EXECUTABLE_UUID"
+      "SEMAPHORE_JOB_COUNT"
+      "SEMAPHORE_JOB_UUID"
+      "SEMAPHORE_PLATFORM"
+      "SEMAPHORE_PROJECT_DIR"
+      "SEMAPHORE_PROJECT_HASH_ID"
       "SEMAPHORE_PROJECT_NAME"
+      "SEMAPHORE_PROJECT_UUID"
+      "SEMAPHORE_REPO_SLUG"
       "SEMAPHORE_TRIGGER_SOURCE"
-      "PULL_REQUEST_NUMBER"
+      "PULL_REQUEST_NUMBER" # pull requests from forks ONLY
     ])
 
     # see http://docs.shippable.com/ci/env-vars/
