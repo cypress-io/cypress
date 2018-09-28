@@ -5,6 +5,7 @@ debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
 fs            = require("../util/fs")
+pac = require('../util/pac')
 
 instance = null
 
