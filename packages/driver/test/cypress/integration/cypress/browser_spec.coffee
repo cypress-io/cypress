@@ -33,6 +33,7 @@ describe "src/cypress/browser", ->
       expect(@commands({ name: "chromium" }).isBrowserType("chrome")).to.be.true
       expect(@commands({ name: "canary" }).isBrowserType("chrome")).to.be.true
       expect(@commands({ name: "firefox" }).isBrowserType("firefox")).to.be.true
+      expect(@commands({ name: "ie" }).isBrowserType("ie")).to.be.true
 
     it "returns false if it's not a match", ->
       expect(@commands().isBrowser("firefox")).to.be.false

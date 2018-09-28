@@ -1,5 +1,6 @@
 http       = require("http")
 path       = require("path")
+request    = require("request")
 httpsProxy = require("../../lib/proxy")
 
 prx = null
@@ -13,12 +14,14 @@ pipe = (req, res) ->
   .pipe(res)
 
 onConnect = (req, socket, head, proxy) ->
+  console.log("GOT ON CONNECT ", req.url)
   proxy.connect(req, socket, head, {
     onDirectConnection: (req, socket, head) ->
       req.url is "localhost:8444"
   })
 
 onRequest = (req, res) ->
+  console.log("GOT ON REQUEST ", req.url, req.headers)
   pipe(req, res)
 
 module.exports = {

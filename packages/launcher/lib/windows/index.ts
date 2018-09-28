@@ -53,6 +53,11 @@ function formFirefoxNightlyAppPath() {
   return normalize(exe)
 }
 
+function formIEAppPath() {
+  const exe = 'C:/Program Files (x86)/Internet Explorer/iexplore.exe'
+  return normalize(exe)
+}
+
 type NameToPath = (name: string) => string
 
 interface WindowsBrowserPaths {
@@ -61,6 +66,7 @@ interface WindowsBrowserPaths {
   canary: NameToPath
   chromium: NameToPath
   firefox: NameToPath
+  ie: NameToPath
 }
 
 const formPaths: WindowsBrowserPaths = {
@@ -70,6 +76,7 @@ const formPaths: WindowsBrowserPaths = {
   firefox: formFirefoxAppPath,
   firefoxDeveloperEdition: formFirefoxDeveloperEditionAppPath,
   firefoxNightly: formFirefoxNightlyAppPath,
+  ie: formIEAppPath,
 }
 
 function getWindowsBrowser(
@@ -96,8 +103,10 @@ function getWindowsBrowser(
 
   return pathExists(exePath)
     .then(exists => {
+      console.log('exe path searched: ', exePath)
       log('found %s ?', exePath, exists)
       if (!exists) {
+        console.log('path not exist:', exePath)
         throw notInstalledErr(`Browser ${name} file not found at ${exePath}`)
       }
       // on Windows using "--version" seems to always start the full
@@ -130,5 +139,9 @@ function getWindowsBrowser(
 }
 
 export function detectBrowserWindows(browser: Browser) {
+  console.log('trying to detect:',browser.name)
   return getWindowsBrowser(browser.name, browser.binary)
 }
+
+// Get version of IE:
+// $ reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Internet Explorer" //v svcVersion

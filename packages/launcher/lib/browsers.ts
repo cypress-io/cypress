@@ -59,6 +59,13 @@ export const browsers: Browser[] = [
     versionRegex: /Firefox Nightly (\S+)/,
     profile: true,
     binary: 'firefox-nightly'
+  },
+  {
+    name: 'ie',
+    displayName: "IE",
+    versionRegex: /.*/,
+    profile: false,
+    binary: 'iexplorer'
   }
 ]
 

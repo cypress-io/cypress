@@ -1,93 +1,27 @@
-require('@packages/coffee/register')
+// require('@packages/coffee/register')
 
-const debug = require('debug')('gateway')
+// const debug = require('debug')('gateway')
 
-const Promise = require('bluebird')
+// const Promise = require('bluebird')
 const request = require('request-promise')
-const { spawn } = require('child_process')
-const net = require('net')
-const promiseRetry = require('promise-retry')
-const http = require('http')
-const normalizer = require('header-case-normalizer')
 
-const iedriver = require('iedriver')
 
 const proxyServer = require('./proxy')
 
-const setHeader = http.OutgoingMessage.prototype.setHeader
-
-http.OutgoingMessage.prototype.setHeader = function (name, value) {
-  return setHeader.call(this, normalizer(name), value)
-}
-
-
-function connectAsync (opts) {
-  return new Promise(function (resolve, reject) {
-    let socket = net.connect(opts)
-    socket.once('connect', function () {
-      socket.removeListener('error', reject)
-      resolve(socket)
-    })
-    socket.once('error', function (err) {
-      socket.removeListener('connection', resolve)
-      reject(err)
-    })
-  })
-}
-
-let sessionId
-
-const send = (data) => {
-  debug('send', (data))
-  // return send(data)
-  if (!sessionId) throw new Error('sessionId is falsey')
-  return request({
-    uri: `http://localhost:5555/session/${sessionId}/actions`,
+const start = (send, sessionId) => {
+  return proxyServer.start(send)
+  .then(() => require('./static').start())
+  .then(() => request({
+    uri: `http://localhost:5555/session/${sessionId}/url`,
     method: 'POST',
-    body: data,
+    body: { url: 'http://localhost:3001' },
     json: true,
-  })
+  }))
 }
 
-const driver = spawn(iedriver.path32, ['--log-level=TRACE'], { stdio: 'pipe' })
-
-const killBrowser = () => {
-  return request({
-    uri: `http://localhost:5555/session/${sessionId}`,
-    method: 'DELETE',
-  })
+module.exports = {
+  start,
 }
-process.stdin.on('data', () => {
-  killBrowser().then(() => process.exit(0))
-})
-
-const sessionRequest = {
-  desiredCapabilities: {
-    browserName: 'internet explorer',
-  },
-}
-
-promiseRetry((retry) => connectAsync({ port: '5555' }).catch(retry))
-.then(() => {
-  return request({
-    uri: 'http://localhost:5555/session',
-    method: 'POST',
-    body: sessionRequest,
-    json: true,
-  })
-})
-.then((res) => {
-  debug('WD:RESPONSE', res)
-  sessionId = res.value.sessionId
-})
-.then(() => proxyServer.start(send))
-.then(() => require('./static').start())
-.then(() => request({
-  uri: `http://localhost:5555/session/${sessionId}/url`,
-  method: 'POST',
-  body: { url: 'http://localhost:3001' },
-  json: true,
-}))
 
 // firefox.open('firefox', 'about:blank')
 // .then(({ sessionId }) => {

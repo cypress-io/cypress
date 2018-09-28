@@ -39,6 +39,8 @@ getBrowser = (name) ->
       require("./electron")
     when "firefox", "firefoxDeveloperEdition", "firefoxNightly"
       require("./firefox")
+    when 'ie'
+      require('./ie.js')
 
 find = (browser, browsers = []) ->
   _.find(browsers, { name: browser })

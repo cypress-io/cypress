@@ -10,6 +10,8 @@ browsers = {
   firefox: "firefox"
   firefoxDeveloperEdition: "firefox"
   firefoxNightly: "firefox"
+
+  ie: 'ie'
 }
 
 isBrowser = (method, config, normalize, browserName = "") ->
