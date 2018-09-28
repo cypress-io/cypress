@@ -396,9 +396,19 @@ describe "lib/util/ci_provider", ->
   it "semaphore", ->
     process.env.SEMAPHORE = true
 
-    process.env.SEMAPHORE_REPO_SLUG = "semaphoreRepoSlug"
+    process.env.SEMAPHORE_BRANCH_ID = "semaphoreBranchId"
     process.env.SEMAPHORE_BUILD_NUMBER = "semaphoreBuildNumber"
+    process.env.SEMAPHORE_CURRENT_JOB = "semaphoreCurrentJob"
+    process.env.SEMAPHORE_CURRENT_THREAD = "semaphoreCurrentThread"
+    process.env.SEMAPHORE_EXECUTABLE_UUID = "semaphoreExecutableUuid"
+    process.env.SEMAPHORE_JOB_COUNT = "semaphoreJobCount"
+    process.env.SEMAPHORE_JOB_UUID = "semaphoreJobUuid"
+    process.env.SEMAPHORE_PLATFORM = "semaphorePlatform"
+    process.env.SEMAPHORE_PROJECT_DIR = "semaphoreProjectDir"
+    process.env.SEMAPHORE_PROJECT_HASH_ID = "semaphoreProjectHashId"
     process.env.SEMAPHORE_PROJECT_NAME = "semaphoreProjectName"
+    process.env.SEMAPHORE_PROJECT_UUID = "semaphoreProjectUuid"
+    process.env.SEMAPHORE_REPO_SLUG = "semaphoreRepoSlug"
     process.env.SEMAPHORE_TRIGGER_SOURCE = "semaphoreTriggerSource"
     process.env.PULL_REQUEST_NUMBER = "pullRequestNumber"
 
@@ -407,11 +417,21 @@ describe "lib/util/ci_provider", ->
 
     expectsName("semaphore")
     expectsCiParams({
-      semaphoreRepoSlug: "semaphoreRepoSlug"
-      semaphoreBuildNumber: "semaphoreBuildNumber"
-      semaphoreProjectName: "semaphoreProjectName"
-      semaphoreTriggerSource: "semaphoreTriggerSource"
       pullRequestNumber: "pullRequestNumber"
+      semaphoreBranchId: "semaphoreBranchId"
+      semaphoreBuildNumber: "semaphoreBuildNumber"
+      semaphoreCurrentJob: "semaphoreCurrentJob"
+      semaphoreCurrentThread: "semaphoreCurrentThread"
+      semaphoreExecutableUuid: "semaphoreExecutableUuid"
+      semaphoreJobCount: "semaphoreJobCount"
+      semaphoreJobUuid: "semaphoreJobUuid"
+      semaphorePlatform: "semaphorePlatform"
+      semaphoreProjectDir: "semaphoreProjectDir"
+      semaphoreProjectHashId: "semaphoreProjectHashId"
+      semaphoreProjectName: "semaphoreProjectName"
+      semaphoreProjectUuid: "semaphoreProjectUuid"
+      semaphoreRepoSlug: "semaphoreRepoSlug"
+      semaphoreTriggerSource: "semaphoreTriggerSource"
     })
     expectsCommitParams({
       sha: "revision"
