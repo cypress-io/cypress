@@ -7,6 +7,7 @@ human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
+
 recordMode = require("./record")
 errors     = require("../errors")
 Project    = require("../project")
@@ -169,7 +170,7 @@ displaySpecHeader = (name, curr, total, estimated) ->
 
   if estimated
     estimatedLabel = " ".repeat(PADDING) + "Estimated:"
-    console.log(estimatedLabel, humanTime.long(estimated))
+    console.log(estimatedLabel, gray(humanTime.long(estimated)))
 
 collectTestResults = (obj = {}, estimated) ->
   {
@@ -652,8 +653,12 @@ module.exports = {
               project.emit("exitEarlyWithErr", err.message)
 
   waitForSocketConnection: (project, id) ->
+    debug("waiting for socket connection... %o", { id })
+
     new Promise (resolve, reject) ->
       fn = (socketId) ->
+        debug("got socket connection %o", { id: socketId })
+
         if socketId is id
           ## remove the event listener if we've connected
           project.removeListener("socket:connected", fn)
@@ -945,14 +950,14 @@ module.exports = {
         if not specs.length
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
+        runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
           @runSpecs({
             beforeSpecRun
             afterSpecRun
             projectRoot
             specPattern
             socketId
-            parallel
+            parallel: parallelOverride
             browser
             project
             runUrl
@@ -988,7 +993,8 @@ module.exports = {
             runAllSpecs
           })
         else
-          runAllSpecs()
+          ## not recording, can't be parallel
+          runAllSpecs({}, false)
 
   run: (options) ->
     electronApp
