@@ -146,6 +146,7 @@
     "opn": "cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "^1.1.0",
     "p-queue": "^1.0.0",
+    "pac-resolver": "^3.0.0",
     "parse-domain": "2.0.0",
     "pluralize": "^3.0.0",
     "progress": "^1.1.8",
