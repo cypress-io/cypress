@@ -7,7 +7,7 @@ const generate = (proxyPort, bypassPort) => {
         return 'DIRECT';
       }
 
-      return 'PROXY http://127.0.0.1:${proxyPort}';
+      return 'PROXY 127.0.0.1:${proxyPort}';
     }
   `
 }
