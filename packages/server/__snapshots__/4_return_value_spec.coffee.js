@@ -53,12 +53,6 @@ https://on.cypress.io/returning-value-and-commands-in-test
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 
   2)  errors when invoking commands in custom command and returning differnet value:
      CypressError: Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
