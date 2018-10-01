@@ -57,9 +57,16 @@ module.exports = (on) => {
         Jimp.read(comparePath),
       ])
       .spread((originalImage, compareImage) => {
-        const coord = 11 * devicePixelRatio
+        const blackout1XCoord = 11 * devicePixelRatio
+        const blackout2XCoord = 31 * devicePixelRatio
+        const blackoutYCoord = 11 * devicePixelRatio
 
-        if (blackout && !isBlack(Jimp.intToRGBA(compareImage.getPixelColor(coord, coord)))) {
+        if (
+          blackout && (
+            !isBlack(Jimp.intToRGBA(compareImage.getPixelColor(blackout1XCoord, blackoutYCoord))) ||
+            !isBlack(Jimp.intToRGBA(compareImage.getPixelColor(blackout2XCoord, blackoutYCoord)))
+          )
+        ) {
           throw new Error('Blackout not present!')
         }
 
