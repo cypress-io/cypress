@@ -250,7 +250,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('writes everything on win32', function () {
-      const buf1 = new Buffer('asdf')
+      const buf1 = Buffer.from('asdf')
 
       this.spawnedProcess.stdin.pipe.withArgs(process.stdin)
       this.spawnedProcess.stdout.pipe.withArgs(process.stdout)
@@ -268,9 +268,9 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not write to process.stderr when from xlib or libudev', function () {
-      const buf1 = new Buffer('Xlib: something foo')
-      const buf2 = new Buffer('libudev something bar')
-      const buf3 = new Buffer('asdf')
+      const buf1 = Buffer.from('Xlib: something foo')
+      const buf2 = Buffer.from('libudev something bar')
+      const buf3 = Buffer.from('asdf')
 
       this.spawnedProcess.stderr.on
       .withArgs('data')
@@ -295,8 +295,8 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not write to process.stderr when from high sierra warnings', function () {
-      const buf1 = new Buffer('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
-      const buf2 = new Buffer('asdf')
+      const buf1 = Buffer.from('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
+      const buf2 = Buffer.from('asdf')
 
       this.spawnedProcess.stderr.on
       .withArgs('data')
