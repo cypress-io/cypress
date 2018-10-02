@@ -8,7 +8,7 @@ require("../../spec_helper")
 
 ie = require("#{root}../lib/browsers/ie")
 
-describe.only "lib/browsers/ie", ->
+describe "lib/browsers/ie", ->
   context "#open", ->
     beforeEach ->
       # @options = {
