@@ -1,9 +1,14 @@
-jsonSchemas = require("@cypress/json-schemas")
+publicJson = require("@cypress/json-schemas")
 
-{ assertSchema } = jsonSchemas
+{ assertSchema } = publicJson.bind(publicJson)
 
-describe "api object schemas matches fixture: ", ->
+omitErrObjects = {
+   object: true,
+   example: true,
+ }
+
+describe "fixtures match api object schemas: ", ->
   it "runs", ->
-    cy.fixture("runs.json").each assertSchema("getRunResponse", "2.0.0", {
-      substitutions: ["orgId"], omit: { object: true, example: true }
+    cy.fixture("runs").each assertSchema("getRunResponse", "2.1.0", {
+      substitutions: ["orgId"], omit: omitErrObjects
     })

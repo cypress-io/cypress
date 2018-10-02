@@ -77,7 +77,7 @@ describe "src/cy/commands/navigation", ->
         expect(timeout).to.be.calledWith(4567, "reload")
 
     it "fires stability:changed and window events events", ->
-      stub1= cy.stub()
+      stub1 = cy.stub()
       stub2 = cy.stub()
       stub3 = cy.stub()
 

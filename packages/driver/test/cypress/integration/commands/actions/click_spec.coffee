@@ -394,6 +394,30 @@ describe "src/cy/commands/actions/click", ->
         expect(range.endContainer).to.eql(el)
         expect(range.endOffset).to.eql(0)
 
+    it "can click SVG elements", ->
+      onClick = cy.stub()
+
+      $svgs = cy.$$("#svgs")
+      $svgs.click(onClick)
+
+      cy.get("[data-cy=line]").click().first().click()
+      cy.get("[data-cy=rect]").click().first().click()
+      cy.get("[data-cy=circle]").click().first().click()
+      .then ->
+        expect(onClick.callCount).to.eq(6)
+
+    it "can click a canvas", ->
+      onClick = cy.stub()
+
+      $canvas = cy.$$("#canvas")
+      $canvas.click(onClick)
+
+      ctx = $canvas.get(0).getContext("2d")
+      ctx.fillStyle = "green"
+      ctx.fillRect(10, 10, 100, 100)
+
+      cy.get("#canvas").click().then ->
+        expect(onClick).to.be.calledOnce
 
     describe "actionability", ->
       it "can click elements which are hidden until scrolled within parent container", ->
@@ -1024,10 +1048,21 @@ describe "src/cy/commands/actions/click", ->
           .get("#button-covered-in-span").click()
           .focused().should("have.id", "button-covered-in-span")
 
-      it "will give focus to the window if no element is focusable", (done) ->
-        $(cy.state("window")).on "focus", -> done()
+      it "will not fire focus events when nothing can receive focus", ->
+        onFocus = cy.stub()
 
-        cy.get("#nested-find").click()
+        win = cy.state("window")
+        $body = cy.$$("body")
+        $div = cy.$$("#nested-find")
+
+        $(win).on("focus", onFocus)
+        $body.on("focus", onFocus)
+        $div.on("focus", onFocus)
+
+        cy
+        .get("#nested-find").click()
+        .then ->
+          expect(onFocus).not.to.be.called
 
       # it "events", ->
       #   $btn = cy.$$("button")
@@ -1070,7 +1105,7 @@ describe "src/cy/commands/actions/click", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass { multiple: true } if you want to serially click each element."
+          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 15 elements. Pass { multiple: true } if you want to serially click each element."
           done()
 
         cy.get("button").click()

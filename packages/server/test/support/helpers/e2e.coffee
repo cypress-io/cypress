@@ -246,6 +246,15 @@ module.exports = {
     if options.record
       args.push("--record")
 
+    if options.parallel
+      args.push("--parallel")
+
+    if options.group
+      args.push("--group=#{options.group}")
+
+    if options.ciBuildId
+      args.push("--ci-build-id=#{options.ciBuildId}")
+
     if options.key
       args.push("--key=#{options.key}")
 
@@ -259,7 +268,7 @@ module.exports = {
       args.push("--browser=#{browser}")
 
     if options.config
-      args.push("--config", options.config)
+      args.push("--config", JSON.stringify(options.config))
 
     if options.env
       args.push("--env", options.env)

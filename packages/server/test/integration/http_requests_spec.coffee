@@ -45,8 +45,8 @@ browserifyFile = (filePath) ->
     browserify(filePath)
     .transform(cjsxify)
     .transform(babelify, {
-      plugins: ["add-module-exports"],
-      presets: ["latest", "react"],
+      plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
+      presets: ["@babel/preset-env", "@babel/preset-react"],
     })
     .bundle()
   )
@@ -1395,7 +1395,7 @@ describe "Routes", ->
       it "sends with Transfer-Encoding: chunked without Content-Length", ->
         nock(@server._remoteOrigin)
         .get("/login")
-        .reply 200, new Buffer("foo"), {
+        .reply 200, Buffer.from("foo"), {
           "Content-Type": "text/html"
         }
 
@@ -1706,7 +1706,7 @@ describe "Routes", ->
         username = "u"
         password = "p"
 
-        base64 = new Buffer(username + ":" + password).toString("base64")
+        base64 = Buffer.from(username + ":" + password).toString("base64")
 
         @server._remoteAuth = {
           username

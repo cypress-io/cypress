@@ -11,11 +11,12 @@ whitelist = """
   appHeight
   appX
   appY
-  isAppDevToolsOpen
+  autoScrollingEnabled
   browserWidth
   browserHeight
   browserX
   browserY
+  isAppDevToolsOpen
   isBrowserDevToolsOpen
   reporterWidth
   showedOnBoardingModal
@@ -37,7 +38,7 @@ normalizeAndWhitelistSet = (set, key, value) ->
 
   set(_.pick(valueObject, whitelist))
 
-findSavedState = (projectRoot, isTextTerminal) ->
+module.exports = (projectRoot, isTextTerminal) ->
   if isTextTerminal
     debug("noop saved state")
     return Promise.resolve(FileUtil.noopFile)
@@ -57,5 +58,3 @@ findSavedState = (projectRoot, isTextTerminal) ->
 
     stateFiles[fullStatePath] = stateFile
     stateFile
-
-module.exports = findSavedState

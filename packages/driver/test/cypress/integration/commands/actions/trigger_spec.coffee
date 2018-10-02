@@ -603,7 +603,7 @@ describe "src/cy/commands/actions/trigger", ->
 
       it "throws when eventName is not a string", ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 14 elements."
+          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 15 elements."
           done()
 
         cy.get("button:first").trigger("cy.trigger() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")

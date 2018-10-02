@@ -51,7 +51,7 @@
             margin-left: 0%;
           }
         }
-        
+
         [contenteditable] p {
           display: block
         }
@@ -251,6 +251,7 @@
         <form id="multiple-inputs-and-button-submit">
           <input name="fname" />
           <input name="lname" />
+          <button type="button">button</button>
           <button type="submit">submit me</button>
         </form>
 
@@ -388,6 +389,20 @@
       </div>
 
       <div id="invisible" style="display: none;">i am not visible</div>
+
+      <div id="svgs">
+        <svg data-cy="line" width="300" height="200">
+          <line x1="50" y1="50" x2="250" y2="150" style="stroke:red; stroke-width:20;" />
+        </svg>
+        <svg tabindex="0" data-cy="rect" width="300" height="200">
+          <rect x="50" y="50" width="200" height="100" style="fill:orange; stroke:black; stroke-width:3;" />
+        </svg>
+        <svg data-cy="circle" width="300" height="200">
+          <circle cx="150" cy="100" r="70" style="fill:lime; stroke:black; stroke-width:3;" />
+        </svg>
+      </div>
+
+      <canvas id="canvas"></canvas>
 
       <div id="contains-multiple-filter-match">
         <ul class="k-group k-treeview-lines" role="group">

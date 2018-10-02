@@ -145,27 +145,6 @@ validationRules = {
   watchForFileChanges: v.isBoolean
 }
 
-toArrayFromPipes = (str) ->
-  if _.isArray(str)
-    return str
-
-  [].concat(str.split('|'))
-
-toObjectFromPipes = (str) ->
-  if _.isObject(str)
-    return str
-
-  ## convert foo=bar|version=1.2.3 to
-  ## {foo: 'bar', version: '1.2.3'}
-  _
-  .chain(str)
-  .split("|")
-  .map (pair) ->
-    pair.split("=")
-  .fromPairs()
-  .mapValues(coerce)
-  .value()
-
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
@@ -261,12 +240,6 @@ module.exports = {
     config.env = @parseEnv(config, options.env, resolved)
     config.cypressEnv = process.env["CYPRESS_ENV"]
     delete config.envFile
-
-    if hosts = config.hosts
-      config.hosts = toObjectFromPipes(hosts)
-
-    if blacklistHosts = config.blacklistHosts
-      config.blacklistHosts = toArrayFromPipes(blacklistHosts)
 
     ## when headless
     if config.isTextTerminal

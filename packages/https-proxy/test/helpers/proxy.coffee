@@ -42,7 +42,7 @@ module.exports = {
         if req.url.includes("replace")
           write = res.write
           res.write = (chunk) ->
-            chunk = new Buffer(chunk.toString().replace("https server", "replaced content"))
+            chunk = Buffer.from(chunk.toString().replace("https server", "replaced content"))
 
             write.call(@, chunk)
 

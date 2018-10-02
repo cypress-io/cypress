@@ -63,6 +63,8 @@ module.exports = {
 
   throwBrowserNotFound
 
+  removeOldProfiles: utils.removeOldProfiles
+
   get: utils.getBrowsers
 
   launch: utils.launch
