@@ -89,7 +89,9 @@ class Project extends EE
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
       @server.open(cfg, @)
-      .spread (port, warning) =>
+      .spread (port, pacUrl, warning) =>
+        cfg.pacUrl = pacUrl
+
         ## if we didnt have a cfg.port
         ## then get the port once we
         ## open the server

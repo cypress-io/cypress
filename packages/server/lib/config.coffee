@@ -514,11 +514,12 @@ module.exports = {
     else
       proxyUrl
 
-    _.extend obj,
+    _.extend obj, {
       proxyUrl:    proxyUrl
       browserUrl:  rootUrl + obj.clientRoute
       reporterUrl: rootUrl + obj.reporterRoute
       xhrUrl:      obj.namespace + obj.xhrRoute
+    }
 
     return obj
 

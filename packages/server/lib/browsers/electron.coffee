@@ -78,8 +78,8 @@ module.exports = {
         @_setUserAgent(win.webContents, ua)
 
       setProxy = =>
-        if ps = options.proxyServer
-          @_setProxy(win.webContents, ps)
+        if pacUrl = options.pacUrl
+          @_setPacUrl(win.webContents, pacUrl)
 
       Promise.join(
         setProxy(),
@@ -98,10 +98,10 @@ module.exports = {
     webContents.setUserAgent(userAgent)
     webContents.session.setUserAgent(userAgent)
 
-  _setProxy: (webContents, proxyServer) ->
+  _setPacUrl: (webContents, pacUrl) ->
     new Promise (resolve) ->
       webContents.session.setProxy({
-        proxyRules: proxyServer
+        pacScript: pacUrl
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->

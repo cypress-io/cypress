@@ -2,11 +2,10 @@
 
 _            = require("lodash")
 url          = require("url")
-http         = require("http")
 path         = require("path")
 send         = require("send")
 errors       = require("./errors")
-allowDestroy = require("./util/server_destroy")
+baseServer   = require("./util/base_server")
 
 onRequest = (req, res, fileServerFolder) ->
   args = _.compact([
@@ -34,21 +33,6 @@ onRequest = (req, res, fileServerFolder) ->
 
 module.exports = {
   create: (fileServerFolder) ->
-    new Promise (resolve) ->
-      srv = http.createServer (req, res) ->
-        onRequest(req, res, fileServerFolder)
-
-      allowDestroy(srv)
-
-      srv.listen ->
-        resolve({
-          port: ->
-            srv.address().port
-
-          address: ->
-            "http://localhost:" + @port()
-
-          close: ->
-            srv.destroyAsync()
-      })
+    baseServer.listen (req, res) ->
+      onRequest(req, res, fileServerFolder)
 }

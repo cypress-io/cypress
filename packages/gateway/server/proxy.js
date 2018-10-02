@@ -2,7 +2,7 @@ const express = require('express')
 const Promise = require('bluebird')
 const debug = require('debug')('gateway:proxy')
 
-const start = (send) => {
+const create = (send) => {
   const app = express()
   const server = require('http').createServer(app)
   const io = require('socket.io')(server)
@@ -31,5 +31,5 @@ const start = (send) => {
 }
 
 module.exports = {
-  start,
+  create,
 }

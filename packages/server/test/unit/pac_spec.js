@@ -1,13 +1,13 @@
 require('../spec_helper')
 
 const pacResolver = require('pac-resolver')
-const pac = require('../../lib/util/pac')
+const pacServer = require('../../lib/pac_server')
 
 const proxyPort = 8080
 let bypassPort
 
 const expects = (url, result) => {
-  const jsStr = pac.generate(proxyPort, bypassPort)
+  const jsStr = pacServer.generate(proxyPort, bypassPort)
 
   const FindProxyForURL = pacResolver(jsStr)
 
@@ -17,7 +17,7 @@ const expects = (url, result) => {
   })
 }
 
-describe('lib/util/pac', () => {
+describe('lib/pac_server', () => {
   beforeEach(() => {
     bypassPort = 65656
   })

@@ -92,8 +92,8 @@ module.exports = {
     if ua = options.userAgent
       args.push("--user-agent=#{ua}")
 
-    if ps = options.proxyServer
-      args.push("--proxy-server=#{ps}")
+    if pacUrl = options.pacUrl
+      args.push("--proxy-pac-url=#{pacUrl}")
 
     if options.chromeWebSecurity is false
       args.push("--disable-web-security")
