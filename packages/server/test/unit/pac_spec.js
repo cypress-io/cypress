@@ -37,23 +37,23 @@ describe('lib/util/pac', () => {
     bypassPort = undefined
 
     return Promise.all([
-      expects('http://localhost:65656', 'PROXY http://127.0.0.1:8080'),
-      expects('https://localhost:65656', 'PROXY http://127.0.0.1:8080'),
-      expects('http://127.0.0.1:65656', 'PROXY http://127.0.0.1:8080'),
-      expects('https://127.0.0.1:65656', 'PROXY http://127.0.0.1:8080'),
-      expects('http://google.com:65656', 'PROXY http://127.0.0.1:8080'),
-      expects('https://google.com:65656', 'PROXY http://127.0.0.1:8080'),
+      expects('http://localhost:65656', 'PROXY 127.0.0.1:8080'),
+      expects('https://localhost:65656', 'PROXY 127.0.0.1:8080'),
+      expects('http://127.0.0.1:65656', 'PROXY 127.0.0.1:8080'),
+      expects('https://127.0.0.1:65656', 'PROXY 127.0.0.1:8080'),
+      expects('http://google.com:65656', 'PROXY 127.0.0.1:8080'),
+      expects('https://google.com:65656', 'PROXY 127.0.0.1:8080'),
     ])
   })
 
   it('returns PROXY when url does not match bypassPort', () => {
     return Promise.all([
-      expects('http://localhost:1234', 'PROXY http://127.0.0.1:8080'),
-      expects('https://localhost:9876', 'PROXY http://127.0.0.1:8080'),
-      expects('http://127.0.0.1:1234', 'PROXY http://127.0.0.1:8080'),
-      expects('https://127.0.0.1:9876', 'PROXY http://127.0.0.1:8080'),
-      expects('http://google.com:1234', 'PROXY http://127.0.0.1:8080'),
-      expects('https://google.com:9876', 'PROXY http://127.0.0.1:8080'),
+      expects('http://localhost:1234', 'PROXY 127.0.0.1:8080'),
+      expects('https://localhost:9876', 'PROXY 127.0.0.1:8080'),
+      expects('http://127.0.0.1:1234', 'PROXY 127.0.0.1:8080'),
+      expects('https://127.0.0.1:9876', 'PROXY 127.0.0.1:8080'),
+      expects('http://google.com:1234', 'PROXY 127.0.0.1:8080'),
+      expects('https://google.com:9876', 'PROXY 127.0.0.1:8080'),
     ])
   })
 })
