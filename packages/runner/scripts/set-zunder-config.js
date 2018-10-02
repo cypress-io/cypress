@@ -8,6 +8,17 @@ module.exports = function setZunderConfig (zunder) {
       coffeeCompiler: require('@packages/coffee'),
     },
   ])
+  browserifyOptions.transform[0][1].plugins.push(
+    [zunder.defaults.babel.pluginTransformRuntime.module, zunder.defaults.babel.pluginTransformRuntime.options]
+  )
+  browserifyOptions.transform[0][1].presets[0] = [
+    zunder.defaults.babel.presetEnv.module,
+    {
+      targets: {
+        ie: '11',
+      },
+    },
+  ]
   // ensure no duplicates of common dependencies between runner, reporter, & driver
   browserifyOptions.transform.push([
     zunder.defaults.browserify.transformAliasify.module,
