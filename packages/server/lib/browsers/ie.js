@@ -40,20 +40,17 @@ const open = (name, url, options = {}) => {
     },
   }
 
-  const ps = options.proxyServer
-  if (ps) {
-    console.log('ps equals:', ps)
-    let { hostname, port, protocol } = urlUtil.parse(ps)
-    port = port || (protocol === 'https:' ? '443' : '80')
-    const addr = `${hostname}:${port}`
+  const pacUrl = options.pacUrl
+  if (pacUrl) {
     _.extend(sessionRequest.desiredCapabilities, {
       // 'ie.usePerProcessProxy': true,
       proxy: {
-        proxyType: 'manual',
-        httpProxy: addr,
-        sslProxy: addr,
-        // Pass url of gateway server running on host machine
-        noProxy: ['localhost:8445', '<-loopback>'], //;localhost: 8445],
+        proxyType: 'pac',
+        proxyAutoconfigUrl: pacUrl,
+        // httpProxy: addr,
+        // sslProxy: addr,
+        // // Pass url of gateway server running on host machine
+        // noProxy: ['localhost:8445', '<-loopback>'], //;localhost: 8445],
       },
     })
   }
@@ -62,7 +59,7 @@ const open = (name, url, options = {}) => {
   console.log(sessionRequest.desiredCapabilities)
   const driver = spawn(exePath,
     [
-      '--log-level=TRACE',
+      // '--log-level=TRACE',
     ],
     { stdio: 'pipe' })
 
