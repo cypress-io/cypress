@@ -450,16 +450,16 @@ describe "lib/socket", ->
           expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
 
       it "sets #testFilePath", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "integration#{path.sep}test1.js").then =>
+          expect(@socket.testFilePath).to.eq "tests#{path.sep}test1.js"
 
       it "can normalizes leading slash", ->
-        @socket.watchTestFileByPath(@cfg, "/integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "#{path.sep}integration#{path.sep}test1.js").then =>
+          expect(@socket.testFilePath).to.eq "tests#{path.sep}test1.js"
 
       it "watches file by path", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.getFile).to.be.calledWith("tests/test2.coffee", @cfg)
+        @socket.watchTestFileByPath(@cfg, "integration#{path.sep}test2.coffee")
+        expect(preprocessor.getFile).to.be.calledWith("tests#{path.sep}test2.coffee", @cfg)
 
       it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
         sinon.stub(fs, "statAsync").resolves()

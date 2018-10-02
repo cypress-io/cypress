@@ -205,6 +205,20 @@ describe('cli', function () {
       expect(run.start).to.be.calledWith({ exit: false })
     })
 
+    it('calls run with --parallel', function () {
+      this.exec('run --parallel')
+      expect(run.start).to.be.calledWith({ parallel: true })
+    })
+
+    it('calls runs with --ci-build-id', function () {
+      this.exec('run --ci-build-id 123')
+      expect(run.start).to.be.calledWith({ ciBuildId: '123' })
+    })
+
+    it('calls runs with --group', function () {
+      this.exec('run --group staging')
+      expect(run.start).to.be.calledWith({ group: 'staging' })
+    })
   })
 
   context('cypress open', function () {

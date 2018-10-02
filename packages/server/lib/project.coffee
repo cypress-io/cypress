@@ -67,7 +67,7 @@ class Project extends EE
 
     if process.env.CYPRESS_MEMORY
       logMemory = ->
-        console.debug("memory info", process.memoryUsage())
+        console.log("memory info", process.memoryUsage())
 
       @memoryCheck = setInterval(logMemory, 1000)
 

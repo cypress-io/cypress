@@ -1,45 +1,32 @@
-$document = require('./document')
-$elements = require('./elements')
-$ = require('jquery')
+$document = require("./document")
+$elements = require("./elements")
+$ = require("jquery")
+
+INTERNAL_STATE = "__Cypress_state__"
 
 _getSelectionBoundsFromTextarea = (el) ->
   {
-    start: $elements.getNativeProp(el, 'selectionStart')
-    end: $elements.getNativeProp(el, 'selectionEnd')
+    start: $elements.getNativeProp(el, "selectionStart")
+    end: $elements.getNativeProp(el, "selectionEnd")
   }
 
 _getSelectionBoundsFromInput = (el) ->
   if $elements.canSetSelectionRangeElement(el)
     return {
-      start: $elements.getNativeProp(el, 'selectionStart')
-      end: $elements.getNativeProp(el, 'selectionEnd')
+      start: $elements.getNativeProp(el, "selectionStart")
+      end: $elements.getNativeProp(el, "selectionEnd")
     }
-  ## HACK:
-  ## newer versions of Chrome incorrectly report the selection
-  ## for number and email types, so we change it to type=text
-  ## and blur it (then set it back and focus it further down
-  ## after the selection algorithm has taken place)
 
-  type = $elements.getNativeProp(el, 'type')
+  if internalState = el[INTERNAL_STATE]
+    return {
+      start: internalState.start
+      end: internalState.end
+    }
 
-  $elements.tryCallNativeMethod(el, 'blur')
-  
-  $elements.setNativeProp(el, 'type', 'text')
-
-  bounds = {
-    start: $elements.getNativeProp(el, 'selectionStart')
-    end: $elements.getNativeProp(el, 'selectionEnd')
+  return {
+    start: 0
+    end: 0
   }
-
-  ## HACK:
-  ## selection start and end don't report correctly when input
-  ## already has a value set, so if there's a value and there is no
-  ## native selection, force it to be at the end of the text
-
-  $elements.setNativeProp(el, 'type', type)
-  $elements.callNativeMethod(el, 'focus')
-
-  return bounds
 
 _getSelectionBoundsFromContentEditable = (el) ->
   doc = $document.getDocumentFromElement(el)
@@ -70,7 +57,7 @@ _getSelectionBoundsFromContentEditable = (el) ->
 _replaceSelectionContentsContentEditable = (el, text) ->
   doc = $document.getDocumentFromElement(el)
   ## NOTE: insertText will also handle '\n', and render newlines
-  $elements.callNativeMethod(doc, "execCommand", 'insertText', true, text)
+  $elements.callNativeMethod(doc, "execCommand", "insertText", true, text)
   return
 
   ## Keeping around native implementation
@@ -89,7 +76,7 @@ _replaceSelectionContentsContentEditable = (el, text) ->
   # else
   #   newTextNode = doc.createTextNode(text)
   # if $elements.isElement(startNode)
-  #   if startNode.firstChild?.tagName is 'BR'
+  #   if startNode.firstChild?.tagName is "BR"
   #     range.selectNode(startNode.firstChild)
   #     range.deleteContents()
   #   ## else startNode is el, so just insert the node
@@ -101,7 +88,7 @@ _replaceSelectionContentsContentEditable = (el, text) ->
   #   return
   # else
   #   # nodeOffset = range.startOffset
-  #   # oldValue = startNode.nodeValue || ''
+  #   # oldValue = startNode.nodeValue || ""
   #   range.insertNode(newTextNode)
   #   range.selectNodeContents(newTextNode)
   #   range.collapse()
@@ -117,19 +104,22 @@ _insertSubstring = (curText, newText, [start, end]) ->
 
 _getHostContenteditable = (el) ->
   curEl = el
+
   while curEl.parentElement && !$elements.tryCallNativeMethod(curEl, "getAttribute", "contenteditable")
     curEl = curEl.parentElement
   ## if there's no host contenteditable, we must be in designmode
   ## so act as if the original element is the host contenteditable
-  ## TODO: remove this when we no longer click before type and move 
+  ## TODO: remove this when we no longer click before type and move
   ## cursor to the end
   if !$elements.callNativeMethod(curEl, "getAttribute", "contenteditable")
     return el
+
   return curEl
 
 _getInnerLastChild = (el) ->
   while (el.lastChild)
     el = el.lastChild
+
   return el
 
 _getSelectionByEl = (el) ->
@@ -140,34 +130,33 @@ _getSelectionRangeByEl = (el) ->
   sel = _getSelectionByEl(el)
   if sel.rangeCount > 0
     sel.getRangeAt(0)
-  else throw new Error('No selection in document')
+  else throw new Error("No selection in document")
 
 deleteSelectionContents = (el) ->
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
-    
-    # return doc.execCommand('delete', true, null)
-    $elements.callNativeMethod(doc, "execCommand", 'delete', true, null)
+    $elements.callNativeMethod(doc, "execCommand", 'delete', false, null)
     return
 
   ## for input and textarea, update selected text with empty string
   replaceSelectionContents(el, "")
 
 setSelectionRange = (el, start, end) ->
-  if $elements.isTextarea(el) || $elements.canSetSelectionRangeElement(el)
+
+  if $elements.canSetSelectionRangeElement(el)
     $elements.callNativeMethod(el, "setSelectionRange", start, end)
     return
+
   ## NOTE: Some input elements have mobile implementations
   ## and thus may not always have a cursor, so calling setSelectionRange will throw.
-  ## we are assuming desktop here, so we cast to type='text', and get the cursor from there.
-  type = $elements.getNativeProp(el, 'type')
-  $elements.callNativeMethod(el, 'blur')
-  $elements.setNativeProp(el, 'type', 'text')
-  $elements.callNativeMethod(el, "setSelectionRange", start, end)
-  $elements.setNativeProp(el, 'type', type)
-  ## changing the type will lose focus, so focus again
-  $elements.callNativeMethod(el, "focus")
+  ## we are assuming desktop here, so we store our own internal state.
 
+  el[INTERNAL_STATE] = {
+    start
+    end
+  }
+
+  return
 
 deleteRightOfCursor = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
@@ -184,9 +173,9 @@ deleteRightOfCursor = (el) ->
 
   if $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
-    $elements.callNativeMethod(selection, "modify", 'extend', 'forward', 'character')
+    $elements.callNativeMethod(selection, "modify", "extend", "forward", "character")
 
-    if $elements.getNativeProp(selection, 'isCollapsed')
+    if $elements.getNativeProp(selection, "isCollapsed")
       ## there's nothing to delete
       return false
 
@@ -210,7 +199,7 @@ deleteLeftOfCursor = (el) ->
   if $elements.isContentEditable(el)
     ## there is no 'backwardDelete' command for execCommand, so use the Selection API
     selection = _getSelectionByEl(el)
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'backward', 'character')
+    $elements.callNativeMethod(selection, "modify", "extend", "backward", "character")
 
     if selection.isCollapsed
       ## there's nothing to delete
@@ -277,13 +266,13 @@ _moveCursorUpOrDown = (el, up) ->
   ## on an input, instead of moving the cursor
   ## we want to perform the native browser action
   ## which is to increment the step/interval
-    if $elements.isInputType(el, 'number')
+    if $elements.isType(el, "number")
       if up then el.stepUp?() else el.stepDown?()
     return
 
   if $elements.isTextarea(el) || $elements.isContentEditable(el)
     selection = _getSelectionByEl(el)
-    $elements.callNativeMethod(selection, "modify", 
+    $elements.callNativeMethod(selection, "modify",
       "move"
       if up then "backward" else "forward"
       "line"
@@ -300,12 +289,12 @@ isCollapsed = (el) ->
 
 selectAll = (el) ->
   if $elements.isTextarea(el) || $elements.isInput(el)
-    return $elements.callNativeMethod(el, 'select')
+    setSelectionRange(el, 0, $elements.getNativeProp(el, "value").length)
+    return
 
   if $elements.isContentEditable(el)
     doc = $document.getDocumentFromElement(el)
-    ## doc.execCommand('selectAll', true, null)
-    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', true, null)
+    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
     ## Keeping around native implementation
     ## for same reasons as listed below
     ##
@@ -346,15 +335,15 @@ moveSelectionToEnd = (el) ->
     hostContenteditable = _getHostContenteditable(el)
     lastTextNode = _getInnerLastChild(hostContenteditable)
 
-    if lastTextNode.tagName is 'BR'
+    if lastTextNode.tagName is "BR"
       lastTextNode = lastTextNode.parentNode
 
     range.setStart(lastTextNode, lastTextNode.length)
     range.setEnd(lastTextNode, lastTextNode.length)
 
-    sel = $elements.callNativeMethod(doc, 'getSelection')
-    $elements.callNativeMethod(sel, 'removeAllRanges')
-    $elements.callNativeMethod(sel, 'addRange', range)
+    sel = $elements.callNativeMethod(doc, "getSelection")
+    $elements.callNativeMethod(sel, "removeAllRanges")
+    $elements.callNativeMethod(sel, "addRange", range)
 
 ## TODO: think about renaming this
 replaceSelectionContents = (el, key) ->
@@ -362,20 +351,32 @@ replaceSelectionContents = (el, key) ->
     return _replaceSelectionContentsContentEditable(el, key)
 
   if $elements.isInput(el) or $elements.isTextarea(el)
-    {start, end} = getSelectionBounds(el)
-    value = $elements.getNativeProp(el, "value") or ''
+    { start, end } = getSelectionBounds(el)
+
+    value = $elements.getNativeProp(el, "value") or ""
     updatedValue = _insertSubstring(value, key, [start, end])
-    $elements.setNativeProp(el, 'value', updatedValue)
+
+    $elements.setNativeProp(el, "value", updatedValue)
+
     setSelectionRange(el, start + key.length, start + key.length)
 
 getCaretPosition = (el) ->
   bounds = getSelectionBounds(el)
+
   if !bounds.start?
     ## no selection
     return null
+
   if bounds.start is bounds.end
     return bounds.start
+
   return null
+
+interceptSelect = ->
+  if $elements.isInput(this) and !$elements.canSetSelectionRangeElement(this)
+    setSelectionRange(this, 0, $elements.getNativeProp(this, "value").length)
+
+  $elements.callNativeMethod(this, "select")
 
 ## Selection API implementation of insert newline.
 ## Worth keeping around if we ever have to insert native
@@ -385,7 +386,7 @@ getCaretPosition = (el) ->
 # _insertNewlineIntoContentEditable = (el) ->
 #   selection = _getSelectionByEl(el)
 #   selection.deleteFromDocument()
-#   $elements.callNativeMethod(selection, "modify", 'extend', 'forward', 'lineboundary')
+#   $elements.callNativeMethod(selection, "modify", "extend", "forward", "lineboundary")
 #   range = selection.getRangeAt(0)
 #   clonedElements = range.cloneContents()
 #   selection.deleteFromDocument()
@@ -415,7 +416,6 @@ getCaretPosition = (el) ->
 #     range.selectNodeContents(newTextNode)
 #   range.collapse(true)
 
-
 # _contenteditableMoveToEndOfPrevLine = (el) ->
 #   bounds = _contenteditableGetNodesAround(el)
 #   if bounds.prev
@@ -424,7 +424,6 @@ getCaretPosition = (el) ->
 #     range.setStart(prevTextNode, prevTextNode.length)
 #     range.setEnd(prevTextNode, prevTextNode.length)
 
-
 # _contenteditableMoveToStartOfNextLine = (el) ->
 #   bounds = _contenteditableGetNodesAround(el)
 #   if bounds.next
@@ -432,7 +431,6 @@ getCaretPosition = (el) ->
 #     nextTextNode = _getFirstTextNode(bounds.next)
 #     range.setStart(nextTextNode, 1)
 #     range.setEnd(nextTextNode, 1)
-
 
 # _contenteditableGetNodesAround = (el) ->
 #   range = _getSelectionRangeByEl(el)
@@ -450,12 +448,10 @@ getCaretPosition = (el) ->
 #     next: nextTextNode
 #   }
 
-
 # _getFirstTextNode = (el) ->
 #   while (el.firstChild)
 #     el = el.firstChild
 #   return el
-
 
 module.exports = {
   getSelectionBounds
@@ -471,4 +467,5 @@ module.exports = {
   moveCursorDown
   replaceSelectionContents
   isCollapsed
+  interceptSelect
 }

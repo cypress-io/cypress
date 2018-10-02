@@ -4,8 +4,61 @@ launcher = require("@packages/launcher")
 fs       = require("../util/fs")
 extension = require("@packages/extension")
 appData  = require("../util/app_data")
+profileCleaner = require("../util/profile_cleaner")
 
-profiles = appData.path("browsers")
+PATH_TO_BROWSERS = appData.path("browsers")
+
+copyExtension = (src, dest) ->
+  fs.copyAsync(src, dest)
+
+getPartition = (isTextTerminal) ->
+  if isTextTerminal
+    return "run-#{process.pid}"
+
+  return "interactive"
+
+getProfileDir = (browserName, isTextTerminal) ->
+  path.join(
+    PATH_TO_BROWSERS,
+    browserName,
+    getPartition(isTextTerminal),
+  )
+
+getExtensionDir = (browserName, isTextTerminal) ->
+  path.join(
+    getProfileDir(browserName, isTextTerminal),
+    "CypressExtension"
+  )
+
+ensureCleanCache = (browserName, isTextTerminal) ->
+  p = path.join(
+    getProfileDir(browserName, isTextTerminal),
+    "CypressCache"
+  )
+
+  fs
+  .removeAsync(p)
+  .then ->
+    fs.ensureDirAsync(p)
+  .return(p)
+
+removeOldProfiles = ->
+  ## a profile is considered old if it was used
+  ## in a previous run for a PID that is either
+  ## no longer active, or isnt a cypress related process
+  pathToProfiles = path.join(PATH_TO_BROWSERS, "*")
+  pathToPartitions = appData.electronPartitionsPath()
+
+  Promise.all([
+    ## we now store profiles in either interactive or run-* folders
+    ## so we need to remove the old root profiles that existed before
+    profileCleaner.removeRootProfile(pathToProfiles, [
+      path.join(pathToProfiles, "run-*")
+      path.join(pathToProfiles, "interactive")
+    ])
+    profileCleaner.removeInactiveByPid(pathToProfiles, "run-"),
+    profileCleaner.removeInactiveByPid(pathToPartitions, "run-"),
+  ])
 
 pathToExtension = extension.getPathToExtension()
 extensionDest = appData.path("web-extension")
@@ -15,20 +68,15 @@ module.exports = {
   ensureProfileDir: (name) ->
     fs.ensureDirAsync(path.join(profiles, name))
 
-  getProfileDir: (name) ->
-    path.join(profiles, name)
+  copyExtension
 
-  ensureCleanCache: (name) ->
-    p = path.join(profiles, name, "CypressCache")
+  getProfileDir
 
-    fs
-    .removeAsync(p)
-    .then ->
-      fs.ensureDirAsync(p)
-    .return(p)
+  getExtensionDir
 
-  copyExtension: (src, dest) ->
-    fs.copyAsync(src, dest)
+  ensureCleanCache
+
+  removeOldProfiles
 
   writeExtension: (proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
