@@ -117,6 +117,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
+        timers.reset()
+
         Cypress.action("app:window:before:unload", e)
 
         ## return undefined so our beforeunload handler

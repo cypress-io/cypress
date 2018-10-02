@@ -1,51 +1,55 @@
 const _ = require('lodash')
 
-const setTimerFns = {
-  setTimeout: 'clearTimeout',
-  setInterval: 'clearInterval',
-  requestAnimationFrame: 'cancelAnimationFrame',
-}
-
-const cancelTimerFns = _.invert(setTimerFns)
-
 const create = () => {
-  let _isPaused = false
-
-  const _queues = {}
+  let paused
+  let flushing
+  let timerQueue
+  let cancelledTimerIds
 
   const reset = () => {
-    _.extend(_queues, {
-      setTimeout: [],
-      setInterval: [],
-      requestAnimationFrame: [],
-    })
+    paused = false
+    flushing = false
+    timerQueue = []
+    cancelledTimerIds = {}
   }
 
   const isPaused = () => {
-    return _isPaused
+    return paused
   }
 
-  const runTimerQueue = (queueName) => {
-    _.each(_queues[queueName], (obj) => {
-      const { contentWindow, args } = obj
+  const invoke = (contentWindow, fnOrCode, params = []) => {
+    if (_.isString(fnOrCode)) {
+      return contentWindow.eval(fnOrCode)
+    }
 
-      // TODO:
-      // hold the timerId for setIntervals in another queue
-      // in case clearInterval() is called on this id
-      contentWindow[queueName](...args)
+    return fnOrCode(...params)
+  }
+
+  const flushTimerQueue = () => {
+    flushing = true
+
+    _.each(timerQueue, (timer) => {
+      const { timerId, type, fnOrCode, params, contentWindow } = timer
+
+      // if we are a setInterval and we're been cancelled
+      // then just return. this can happen when a setInterval
+      // queues many callbacks, and from within that callback
+      // we would have cancelled the original setInterval
+      if (type === 'setInterval' && cancelledTimerIds[timerId]) {
+        return
+      }
+
+      invoke(contentWindow, fnOrCode, params)
     })
 
-    // reset the queue back to empty array
-    _queues[queueName] = []
+    reset()
   }
 
   const pauseTimers = (pause) => {
-    _isPaused = Boolean(pause)
+    paused = Boolean(pause)
 
-    if (!_isPaused) {
-      runTimerQueue('setTimeout')
-      runTimerQueue('setInterval')
-      runTimerQueue('requestAnimationFrame')
+    if (!paused) {
+      flushTimerQueue()
     }
   }
 
@@ -56,82 +60,58 @@ const create = () => {
       requestAnimationFrame: contentWindow.requestAnimationFrame,
       clearTimeout: contentWindow.clearTimeout,
       clearInterval: contentWindow.clearInterval,
-      cancelAnimationFrame: contentWindow.cancelAnimationFrame,
+      // cancelAnimationFrame: contentWindow.cancelAnimationFrame,
     }
 
     const callThrough = (fnName, args) => {
       return originals[fnName].apply(contentWindow, args)
     }
 
-    const realTimerIdFromAut = (fnName, args, cancelFn) => {
-      // get a real timerId from the AUT
-      const timerId = callThrough(fnName, args)
+    const wrapCancel = (fnName) => (timerId) => {
+      if (flushing) {
+        cancelledTimerIds[timerId] = true
+      }
 
-      _queues[fnName].push({
-        args,
-        timerId,
-        contentWindow,
-      })
+      return callThrough(fnName, [timerId])
+    }
 
-      // we've gotten our timerId but we still need
-      // to cancel this timer so that it doesn't
-      // actually fire
-      callThrough(cancelFn, [timerId])
+    const wrapTimer = (fnName) => (...args) => {
+      const [fnOrCode, delay, ...params] = args
+
+      let timerId
+
+      const timerOverride = () => {
+        // if we're currently paused then we need
+        // to enqueue this timer callback and invoke
+        // it immediately once we're unpaused
+        if (paused) {
+          timerQueue.push({
+            timerId,
+            fnOrCode,
+            params,
+            contentWindow,
+            type: fnName,
+          })
+
+          return
+        }
+
+        // else go ahead and invoke the real function
+        // the same way the browser otherwise would
+        return invoke(contentWindow, fnOrCode, params)
+      }
+
+      timerId = callThrough(fnName, [timerOverride, delay, ...params])
 
       return timerId
     }
 
-    const removeTimerFromQueue = (fnName, timerId) => {
-      const queueName = cancelTimerFns[fnName]
-      _queues[queueName] = _.reject(_queues[queueName], { timerId })
-
-      // cancelling timers always returns undefined
-      return undefined
-    }
-
-    // calls tasks in the order in which they were enqueued
-    // clearTimeout / clearInterval stays the same
-    // const macrotasks = [
-    //   { type: 'setTimeout', timerId: ?, args: [], contentWindow: {} }
-    // ]
-
-    const wrapFn = (fnName) => (...args) => {
-      const [timerId] = args
-
-      // if we're not in pause mode
-      // then just call through, all good
-      if (!_isPaused) {
-        // if fnName is "clearInterval"
-        // removeTimerFromIntervalQueueById(timerId)
-
-        return callThrough(fnName, args)
-      }
-
-      // else our timers are paused then we want to enqueue
-      // new timers into our own internal queue
-      //#
-      // BUT if we're canceling, we want to slice out queued
-      // timers that match up to ther timerId saved to the queue
-
-      // are we are a setter or canceller?
-      const cancelFn = setTimerFns[fnName]
-
-      if (cancelFn) {
-        return realTimerIdFromAut(fnName, args, cancelFn)
-      }
-
-      // else we are a canceller function and we need
-      // to go find the queued timer by timerId and
-      // slice it out of the queue
-      return removeTimerFromQueue(fnName, timerId)
-    }
-
-    contentWindow.setTimeout = wrapFn('setTimeout')
-    contentWindow.setInterval = wrapFn('setInterval')
-    contentWindow.requestAnimationFrame = wrapFn('requestAnimationFrame')
-    contentWindow.clearTimeout = wrapFn('clearTimeout')
-    contentWindow.clearInterval = wrapFn('clearInterval')
-    contentWindow.cancelAnimationFrame = wrapFn('cancelAnimationFrame')
+    contentWindow.setTimeout = wrapTimer('setTimeout')
+    contentWindow.setInterval = wrapTimer('setInterval')
+    contentWindow.requestAnimationFrame = wrapTimer('requestAnimationFrame')
+    contentWindow.clearTimeout = wrapCancel('clearTimeout')
+    contentWindow.clearInterval = wrapCancel('clearInterval')
+    // contentWindow.cancelAnimationFrame = wrapFn('cancelAnimationFrame')
   }
 
   // always initially reset to set the state
