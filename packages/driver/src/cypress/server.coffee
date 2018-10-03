@@ -442,6 +442,7 @@ create = (options = {}) ->
                 overrides[prop]
             set: (fn) ->
               fns[prop] = fn
+            configurable: true
           })
 
         options.onOpen(method, url, async, username, password)
