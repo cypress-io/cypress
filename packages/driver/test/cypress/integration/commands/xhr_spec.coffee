@@ -69,7 +69,7 @@ describe "src/cy/commands/xhr", ->
           expect(onreadystatechanged).to.be.true
           expect(xhr.status).to.eq(404)
 
-    it "allow multiple readystatechange calls", ->
+    it "allows multiple readystatechange calls", ->
       responseText = null
       responseStatuses = 0
 
