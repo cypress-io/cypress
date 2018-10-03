@@ -370,7 +370,7 @@ create = (options = {}) ->
             try
               return fn.apply(arguments)
             finally
-              isCalled = false;
+              isCalled = false
 
         onLoadFn = ->
           proxy._setDuration(timeStart)
