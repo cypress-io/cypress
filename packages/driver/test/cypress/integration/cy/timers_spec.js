@@ -201,8 +201,21 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
-  // TODO: lila all yours
-  it('can use string code as timer function')
+  it('can use string code as timer function', () => {
+    cy
+    .window()
+    .then((win) => {
+      win.stub = cy.stub()
+
+      win.setTimeout('this.stub()', 1)
+
+      cy
+      .wait(10)
+      .then(() => {
+        expect(win.stub).to.be.called
+      })
+    })
+  })
 
   it('can cancel setIntervals paused or unpaused', () => {
     // 1. setInterval works unpaused and can be canceled after N calls
