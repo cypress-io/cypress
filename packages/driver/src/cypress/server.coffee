@@ -359,17 +359,20 @@ create = (options = {}) ->
 
         xhr = @
         fns = {}
-        called = {}
         overrides = {}
-        readyStates = {}
+
+        bailIfRecursive = (fn) ->
+          isCalled = false
+
+          return () ->
+            return if isCalled
+            isCalled = true
+            try
+              return fn.apply(arguments)
+            finally
+              isCalled = false
 
         onLoadFn = ->
-          ## bail if we've already been called to prevent
-          ## infinite recursion
-          return if called.onload
-
-          called.onload = true
-
           proxy._setDuration(timeStart)
           proxy._setStatus()
           proxy._setResponseHeaders()
@@ -391,12 +394,6 @@ create = (options = {}) ->
             options.onAnyResponse(route, proxy)
 
         onErrorFn = ->
-          ## bail if we've already been called to prevent
-          ## infinite recursion
-          return if called.onerror
-
-          called.onerror = true
-
           ## its possible our real onerror handler
           ## throws so we need to catch those errors too
           try
@@ -407,12 +404,6 @@ create = (options = {}) ->
             options.onError(proxy, err)
 
         onReadyStateFn = ->
-          ## bail if we've already been called with this
-          ## readyState to prevent infinite recursions
-          return if readyStates[@readyState]
-
-          readyStates[@readyState] = true
-
           ## catch synchronous errors caused
           ## by the onreadystatechange function
           try
@@ -423,9 +414,11 @@ create = (options = {}) ->
             xhr.onreadystatechange = null
             options.onError(proxy, err)
 
-        overrides.onload             = onLoadFn
-        overrides.onerror            = onErrorFn
-        overrides.onreadystatechange = onReadyStateFn
+        ## bail if eventhandlers have already been called to prevent
+        ## infinite recursion
+        overrides.onload             = bailIfRecursive(onLoadFn)
+        overrides.onerror            = bailIfRecursive(onErrorFn)
+        overrides.onreadystatechange = bailIfRecursive(onReadyStateFn)
 
         props.forEach (prop) ->
           ## if we currently have one of these properties then
