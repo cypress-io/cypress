@@ -64,8 +64,8 @@ const webpackOptions = {
         test: /\.(js|jsx|mjs)$/,
         loader: 'babel-loader',
         options: {
-          presets: ['env', 'react'],
-          plugins: ['transform-class-properties'],
+          presets: ['@babel/preset-env', '@babel/preset-react'],
+          plugins: ['@babel/plugin-proposal-class-properties'],
         },
       }
     ]
@@ -88,8 +88,8 @@ Install dev dependencies
 
 ```shell
 npm i -D @cypress/webpack-preprocessor \
-  babel-loader babel-preset-es2015 babel-preset-react \
-  babel-plugin-transform-class-properties
+  babel-loader @babel/preset-env @babel/preset-react \
+  @babel/plugin-proposal-class-properties
 ```
 
 And write a component using class properties
