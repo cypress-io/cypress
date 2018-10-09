@@ -363,7 +363,7 @@ module.exports = {
       if (a = remoteState.auth) and resMatchesOriginPolicy()
         ## and no existing Authentication headers
         if not req.headers["authorization"]
-          base64 = new Buffer(a.username + ":" + a.password).toString("base64")
+          base64 = Buffer.from(a.username + ":" + a.password).toString("base64")
           req.headers["authorization"] = "Basic #{base64}"
 
       rq = request.create(opts)

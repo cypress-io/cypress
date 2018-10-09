@@ -269,23 +269,23 @@ function getZIndex (el) {
   }
 }
 
-function getElementDimensions (el) {
+function getElementDimensions ($el) {
   const dimensions = {
-    offset: el.offset(), // offset disregards margin but takes into account border + padding
-    height: el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: el.width(),
-    paddingTop: getPadding(el, 'top'),
-    paddingRight: getPadding(el, 'right'),
-    paddingBottom: getPadding(el, 'bottom'),
-    paddingLeft: getPadding(el, 'left'),
-    borderTop: getBorder(el, 'top'),
-    borderRight: getBorder(el, 'right'),
-    borderBottom: getBorder(el, 'bottom'),
-    borderLeft: getBorder(el, 'left'),
-    marginTop: getMargin(el, 'top'),
-    marginRight: getMargin(el, 'right'),
-    marginBottom: getMargin(el, 'bottom'),
-    marginLeft: getMargin(el, 'left'),
+    offset: $el.offset(), // offset disregards margin but takes into account border + padding
+    height: $el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
+    width: $el.width(),
+    paddingTop: getPadding($el, 'top'),
+    paddingRight: getPadding($el, 'right'),
+    paddingBottom: getPadding($el, 'bottom'),
+    paddingLeft: getPadding($el, 'left'),
+    borderTop: getBorder($el, 'top'),
+    borderRight: getBorder($el, 'right'),
+    borderBottom: getBorder($el, 'bottom'),
+    borderLeft: getBorder($el, 'left'),
+    marginTop: getMargin($el, 'top'),
+    marginRight: getMargin($el, 'right'),
+    marginBottom: getMargin($el, 'bottom'),
+    marginLeft: getMargin($el, 'left'),
   }
 
   // innerHeight: Get the current computed height for the first
@@ -296,13 +296,13 @@ function getElementDimensions (el) {
   // and optionally margin. Returns a number (without 'px') representation
   // of the value or null if called on an empty set of elements.
 
-  dimensions.heightWithPadding = el.innerHeight()
-  dimensions.heightWithBorder = el.innerHeight() + getTotalFor(['borderTop', 'borderBottom'], dimensions)
-  dimensions.heightWithMargin = el.outerHeight(true)
+  dimensions.heightWithPadding = $el.innerHeight()
+  dimensions.heightWithBorder = $el.innerHeight() + getTotalFor(['borderTop', 'borderBottom'], dimensions)
+  dimensions.heightWithMargin = $el.outerHeight(true)
 
-  dimensions.widthWithPadding = el.innerWidth()
-  dimensions.widthWithBorder = el.innerWidth() + getTotalFor(['borderRight', 'borderLeft'], dimensions)
-  dimensions.widthWithMargin = el.outerWidth(true)
+  dimensions.widthWithPadding = $el.innerWidth()
+  dimensions.widthWithBorder = $el.innerWidth() + getTotalFor(['borderRight', 'borderLeft'], dimensions)
+  dimensions.widthWithMargin = $el.outerWidth(true)
 
   return dimensions
 }
@@ -395,16 +395,7 @@ function removeCssAnimationDisabler ($body) {
   $body.find('#__cypress-animation-disabler').remove()
 }
 
-function addBlackout ($body, selector) {
-  let $el
-  try {
-    $el = $body.find(selector)
-    if (!$el.length) return
-  } catch (err) {
-    // if it's an invalid selector, just ignore it
-    return
-  }
-
+function addBlackoutForElement ($body, $el) {
   const dimensions = getElementDimensions($el)
   const width = dimensions.widthWithBorder
   const height = dimensions.heightWithBorder
@@ -423,6 +414,21 @@ function addBlackout ($body, selector) {
   `)
 
   $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
+}
+
+function addBlackout ($body, selector) {
+  let $el
+  try {
+    $el = $body.find(selector)
+    if (!$el.length) return
+  } catch (err) {
+    // if it's an invalid selector, just ignore it
+    return
+  }
+
+  $el.each(function () {
+    addBlackoutForElement($body, $(this))
+  })
 }
 
 function removeBlackouts ($body) {
