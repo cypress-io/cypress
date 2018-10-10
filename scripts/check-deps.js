@@ -66,7 +66,7 @@ if (!isCypressRepo()) {
 
   if (result.status) {
     logInBox(chalk.yellow, epilogue)
-  } else {
+  } else if (!args.prescript) {
     logInBox(chalk.green, 'Deps are all good!')
   }
 
