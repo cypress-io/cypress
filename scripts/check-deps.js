@@ -132,7 +132,7 @@ if (args.list) {
   process.stdout.write(getResultsList(results))
 } else {
   const allGood = results.every(({ depsWereOk }) => depsWereOk)
-  if (allGood) {
+  if (allGood && !args.prescript) {
     logInBox(chalk.green, 'Deps are all good!')
   }
 
