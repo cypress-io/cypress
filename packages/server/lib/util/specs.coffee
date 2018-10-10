@@ -47,6 +47,7 @@ find = (config, specPattern) ->
   options = {
     sort:     true
     absolute: true
+    nodir:    true
     cwd:      integrationFolderPath
     ignore:   _.compact(_.flatten([
       javascriptsPaths
