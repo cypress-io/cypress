@@ -115,8 +115,16 @@ describe "e2e screenshots", ->
           sizeOf(screenshot6)
           sizeOf(screenshot7)
         ])
-      .then (dimensions = []) ->
+          .then (dimensions = []) ->
         ## all of the images should be 1280x720
         ## since thats what we run headlessly
         _.each dimensions, (dimension) ->
           expect(dimension).to.deep.eq({width: 1280, height: 720, type: "png"})
+
+  it.only "saves screenshots in correct directory when running all specs", ->  
+    process.env.CYPRESS_RUN_ALL_SPECS = true
+    e2e.exec(@, {
+      project: Fixtures.projectPath("all-specs-screenshots")
+      spec: "take_a_screenshot.coffee"
+      snapshot: true
+    })

@@ -891,6 +891,9 @@ module.exports = {
         })
 
   findSpecs: (config, specPattern) ->
+    if env.get("CYPRESS_RUN_ALL_SPECS")
+      return Promise.resolve([{ absolute: '__all', name: 'All Specs', relative: '__all' }])
+
     specsUtil.find(config, specPattern)
     .tap (specs = []) =>
       if debug.enabled
