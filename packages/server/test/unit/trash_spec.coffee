@@ -10,12 +10,12 @@ describe "lib/util/trash", ->
     it "deletes contents of directory", ->
       basePath = path.join("foo")
       fs.mkdirSync(basePath)
-      fs.writeFileSync("#{basePath}/bar.txt", "")
+      fs.mkdirSync(path.resolve(basePath, 'bar'))
+      fs.writeFileSync("#{basePath}/baz.txt", "")
+      fs.writeFileSync("#{basePath}/bar/qux.txt", "")
 
-      expect(fs.existsSync(basePath)).to.be.true
-      expect(fs.existsSync("#{basePath}/bar.txt")).to.be.true
-
-      trash.folder("foo").then ->
+      trash.folder(basePath).then ->
         expect(fs.existsSync(basePath)).to.be.true
         expect(fs.existsSync("#{basePath}/bar.txt")).to.be.false
+        expect(fs.existsSync("#{basePath}/bar/qux.txt")).to.be.false
         fs.rmdirSync(basePath)
