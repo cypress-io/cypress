@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import events from '../lib/events'
@@ -9,15 +9,17 @@ import events from '../lib/events'
 const ifThen = (condition, component) => (
   condition ? component : null
 )
-
-const Controls = observer(({ events, appState }) => {
-  const emit = (event) => () => events.emit(event)
-  const toggleAutoScrolling = () => {
+@observer
+class Controls extends Component {
+  emit = (event) => () => events.emit(event)
+  
+  toggleAutoScrolling = () => {
     appState.toggleAutoScrolling()
     events.emit('save:state')
   }
 
-  return (
+  render() {
+    return (
     <div className='controls'>
       {ifThen(appState.isPaused, (
         <span className='paused-label'>
@@ -65,7 +67,8 @@ const Controls = observer(({ events, appState }) => {
       ))}
     </div>
   )
-})
+}
+}
 
 Controls.defaultProps = {
   events,
