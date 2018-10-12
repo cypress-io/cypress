@@ -8,6 +8,20 @@ module.exports = function setZunderConfig (zunder) {
       coffeeCompiler: require('@packages/coffee'),
     },
   ])
+  // ensure no duplicates of common dependencies between runner, reporter, & driver
+  browserifyOptions.transform.push([
+    zunder.defaults.browserify.transformAliasify.module,
+    {
+      aliases: {
+        'bluebird': require.resolve('bluebird'),
+        'lodash': require.resolve('lodash'),
+        'mobx': require.resolve('mobx'),
+        'mobx-react': require.resolve('mobx-react'),
+        'react': require.resolve('react'),
+        'react-dom': require.resolve('react-dom'),
+      },
+    },
+  ])
 
   zunder.setConfig({
     cacheBust: false,
