@@ -41,7 +41,7 @@ class Controls extends Component {
   }
 
   render () {
-    const { appState, toggleAutoScrolling } = this.props
+    const { appState, events } = this.props
     return (
       <div className='controls'>
         {ifThen(appState.isPaused, (
@@ -60,7 +60,7 @@ class Controls extends Component {
           <Tooltip placement='bottom' title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}>
             <button
               className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
-              onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
+              onClick={action('toggle:auto:scrolling', this.toggleAutoScrolling)}
             >
               <i className='fa'></i>
               <i className='fa fa-arrows-v'></i>
