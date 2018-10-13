@@ -19,15 +19,13 @@ class Controls extends Component {
   }
 
   _handleKeyDown = (e) => {
-    switch (e.key) {
+     switch (e.key) {
       case ('R'): {
-        this.emit('restart')
+        events.emit('restart')
         break
       }
       case ('S'): {
-        if (this.props.appState.isRunning) {
-          this.emit('stop')
-        }
+        events.emit('stop')
         break
       }
       default: {
@@ -37,7 +35,11 @@ class Controls extends Component {
   }
 
   componentDidMount () {
-    document.addEventListener('onkeydown', this._handleKeyDown)
+    document.addEventListener('keydown', this._handleKeyDown)
+  }
+
+  componentWillUnmount (){
+    document.removeEventListener('keydown', this._handleKeyDown)
   }
 
   render () {
