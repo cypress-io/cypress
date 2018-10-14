@@ -12,8 +12,11 @@ toCamelObject = (obj, key) ->
 extract = (envKeys) ->
   _.transform(envKeys, toCamelObject, {})
 
-isCodeship = ->
-  process.env.CI_NAME and process.env.CI_NAME is "codeship"
+isCodeshipBasic = ->
+  process.env.CI_NAME and process.env.CI_NAME is "codeship" and process.env.CODESHIP
+
+isCodeshipPro = ->
+  process.env.CI_NAME and process.env.CI_NAME is "codeship" and not process.env.CODESHIP
 
 isGitlab = ->
   process.env.GITLAB_CI or (process.env.CI_SERVER_NAME and /^GitLab/.test(process.env.CI_SERVER_NAME))
@@ -36,7 +39,8 @@ CI_PROVIDERS = {
   "bitbucket":      "BITBUCKET_BUILD_NUMBER"
   "buildkite":      "BUILDKITE"
   "circle":         "CIRCLECI"
-  "codeship":       isCodeship
+  "codeshipBasic":  isCodeshipBasic
+  "codeshipPro":    isCodeshipPro
   "drone":          "DRONE"
   "gitlab":         isGitlab
   "jenkins":        isJenkins
@@ -109,13 +113,20 @@ _providerCiParams = ->
       "CIRCLE_REPOSITORY_URL"
       "CI_PULL_REQUEST"
     ])
-    codeship: extract([
+    codeshipBasic: extract([
       "CI_BUILD_ID"
       "CI_REPO_NAME"
       "CI_BUILD_URL"
       "CI_PROJECT_ID"
       "CI_BUILD_NUMBER"
       "CI_PULL_REQUEST"
+    ])
+    # CodeshipPro provides very few CI variables
+    # https://documentation.codeship.com/pro/builds-and-configuration/environment-variables/
+    codeshipPro: extract([
+      "CI_BUILD_ID"
+      "CI_REPO_NAME"
+      "CI_PROJECT_ID"
     ])
     drone: extract([
       "DRONE_JOB_NUMBER"
@@ -146,25 +157,51 @@ _providerCiParams = ->
       "BUILD_NUMBER"
       "ghprbPullId"
     ])
+    # https://semaphoreci.com/docs/available-environment-variables.html
     semaphore: extract([
-      "SEMAPHORE_REPO_SLUG"
+      "SEMAPHORE_BRANCH_ID"
       "SEMAPHORE_BUILD_NUMBER"
+      "SEMAPHORE_CURRENT_JOB"
+      "SEMAPHORE_CURRENT_THREAD"
+      "SEMAPHORE_EXECUTABLE_UUID"
+      "SEMAPHORE_JOB_COUNT"
+      "SEMAPHORE_JOB_UUID"
+      "SEMAPHORE_PLATFORM"
+      "SEMAPHORE_PROJECT_DIR"
+      "SEMAPHORE_PROJECT_HASH_ID"
       "SEMAPHORE_PROJECT_NAME"
+      "SEMAPHORE_PROJECT_UUID"
+      "SEMAPHORE_REPO_SLUG"
       "SEMAPHORE_TRIGGER_SOURCE"
-      "PULL_REQUEST_NUMBER"
+      "PULL_REQUEST_NUMBER" # pull requests from forks ONLY
     ])
+
+    # see http://docs.shippable.com/ci/env-vars/
     shippable: extract([
-      "JOB_ID"
-      "BUILD_URL"
-      "PROJECT_ID"
-      "JOB_NUMBER"
-      "COMPARE_URL"
-      "BASE_BRANCH"
-      "BUILD_NUMBER"
-      "PULL_REQUEST"
-      "REPOSITORY_URL"
-      "PULL_REQUEST_BASE_BRANCH"
-      "PULL_REQUEST_REPO_FULL_NAME"
+      ## build variables
+      "SHIPPABLE_BUILD_ID"        # "5b93354cabfabb07007f01fd"
+      "SHIPPABLE_BUILD_NUMBER"    # "4"
+      "SHIPPABLE_COMMIT_RANGE"    # "sha1...sha2"
+      "SHIPPABLE_CONTAINER_NAME"  # "c.exec.cypress-example-kitchensink.4.1"
+      "SHIPPABLE_JOB_ID"          # "1"
+      "SHIPPABLE_JOB_NUMBER"      # "1"
+      "SHIPPABLE_REPO_SLUG"       # "<username>/<repo>"
+      ## additional information that Shippable provides
+      "IS_FORK"                   # "true"
+      "IS_GIT_TAG"                # "false"
+      "IS_PRERELEASE"             # "false"
+      "IS_RELEASE"                # "false"
+      "REPOSITORY_URL"            # "https://github.com/....git"
+      "REPO_FULL_NAME"            # "<username>/<repo>"
+      "REPO_NAME"                 # "cypress-example-kitchensink"
+      "BUILD_URL"                 # "https://app.shippable.com/github/<username>/<repo>/runs/1"
+      ## Pull request information
+      "BASE_BRANCH" # Name of the target branch into which the pull request changes will be merged.
+      "HEAD_BRANCH" # This is only set for pull requests and is the name of the branch the pull request was opened from.
+      "IS_PULL_REQUEST" # "false" or "true"
+      "PULL_REQUEST" # Pull request number if the job is a pull request. If not, this will be set to false.
+      "PULL_REQUEST_BASE_BRANCH" # Name of the branch that the pull request will be merged into. It should be the same as BASE_BRANCH.
+      "PULL_REQUEST_REPO_FULL_NAME" # Full name of the repository from where the pull request originated.
     ])
     snap: null
     teamcity: null
@@ -187,6 +224,8 @@ _providerCiParams = ->
     wercker: null
   }
 
+# tries to grab commit information from CI environment variables
+# very useful to fill missing information when Git cannot grab correct values
 _providerCommitParams = ->
   { env } = process
 
@@ -231,7 +270,16 @@ _providerCommitParams = ->
       # remoteOrigin: ???
       # defaultBranch: ???
     }
-    codeship: {
+    codeshipBasic: {
+      sha: env.CI_COMMIT_ID
+      branch: env.CI_BRANCH
+      message: env.CI_COMMIT_MESSAGE
+      authorName: env.CI_COMMITTER_NAME
+      authorEmail: env.CI_COMMITTER_EMAIL
+      # remoteOrigin: ???
+      # defaultBranch: ???
+    }
+    codeshipPro: {
       sha: env.CI_COMMIT_ID
       branch: env.CI_BRANCH
       message: env.CI_COMMIT_MESSAGE
