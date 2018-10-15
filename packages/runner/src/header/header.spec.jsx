@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import React from 'react'
-import { shallow } from 'enzyme'
+import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 import driver from '@packages/driver'
 import Tooltip from '@cypress/react-tooltip'
@@ -9,7 +9,6 @@ import selectorPlaygroundModel from '../selector-playground/selector-playground-
 
 import Header from './header'
 
-driver.$ = () => ({ outerHeight: () => 42 })
 
 const getState = (props) => _.extend({
   defaults: {},
@@ -17,6 +16,10 @@ const getState = (props) => _.extend({
 }, props)
 
 describe('<Header />', () => {
+  beforeEach(() => {
+    driver.$ = () => ({ outerHeight: () => 42 })
+  })
+
   it('has showing-selector-playground class if selector playground is open', () => {
     selectorPlaygroundModel.isOpen = true
     expect(shallow(<Header state={getState()} />)).to.have.className('showing-selector-playground')
@@ -48,9 +51,8 @@ describe('<Header />', () => {
     it('updates window dimensions after selector playground is toggled', () => {
       selectorPlaygroundModel.isOpen = false
       const state = getState()
-      const component = shallow(<Header state={state} />)
+      mount(<Header state={state} />)
       selectorPlaygroundModel.isOpen = true
-      component.update()
       expect(state.updateWindowDimensions).to.be.calledWith({ headerHeight: 42 })
     })
 
