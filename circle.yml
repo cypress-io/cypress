@@ -367,6 +367,25 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
 
+  "reporter-integration-tests":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run build-prod
+          working_directory: packages/reporter
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group reporter
+          working_directory: packages/reporter
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
   "run-launcher":
     <<: *defaults
     steps:
