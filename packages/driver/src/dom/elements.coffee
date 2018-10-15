@@ -132,9 +132,23 @@ nativeSetters = {
   type: _setType
 }
 
+callNative = (method) ->
+  return (args...) ->
+    descriptor = Object.getOwnPropertyDescriptor(@, method)
+
+    if getter = _.get(descriptor, 'get')
+      delete @[method]
+    
+    ret = @[method].apply(@, args)
+
+    if getter
+      Object.defineProperty(@, method, descriptor)
+    
+    return ret
+
 nativeMethods = {
-  addEventListener: window.EventTarget.prototype.addEventListener
-  removeEventListener: window.EventTarget.prototype.removeEventListener
+  addEventListener: callNative('addEventListener') #window.EventTarget.prototype.addEventListener
+  removeEventListener: callNative('removeEventListener') ##window.EventTarget.prototype.removeEventListener
   createRange: window.document.createRange
   getSelection: window.document.getSelection
   removeAllRanges: window.Selection.prototype.removeAllRanges

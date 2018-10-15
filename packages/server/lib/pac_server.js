@@ -1,3 +1,4 @@
+const debug = require('debug')('cypress:server:pac')
 const baseServer = require('./util/base_server')
 
 const generate = (proxyPort, bypassPort) => {
@@ -18,6 +19,13 @@ const create = (proxyPort, bypassPort) => {
   const pacString = generate(proxyPort, bypassPort)
 
   return baseServer.listen((req, res) => {
+    debug('request to pac server: %o', {
+      url: req.url,
+      proxyPort,
+      bypassPort,
+      pacString,
+    })
+
     res.statusCode = 200
     res.setHeader('Content-Type', 'application/x-ns-proxy-autoconfig')
     res.end(pacString)

@@ -37,7 +37,7 @@ module.exports = {
     ## because the browser has a cached
     ## dynamic stack getter that will
     ## not be evaluated later
-    stack = err.stack
+    stack = err.stack or ""
 
     ## preserve message
     ## and toString
@@ -46,7 +46,7 @@ module.exports = {
 
     ## Firefox stack does not include toString'd error, so normalize
     ## things by prepending it
-    if stack.indexOf(str) is -1
+    if _.includes(stack, str)
       stack = "#{str}\n#{stack}"
 
     ## append message

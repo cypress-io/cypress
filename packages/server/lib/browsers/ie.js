@@ -4,11 +4,14 @@ const net = require('net')
 const promiseRetry = require('promise-retry')
 const debug = require('debug')('cypress:launcher')
 const request = require('request-promise')
+const fs = require('fs-extra')
+const path = require('path')
 // const gateway = require('@packages/gateway')
 const http = require('http')
 const normalizer = require('header-case-normalizer')
 const urlUtil = require('url')
 const _ = require('lodash')
+const Promise = require('bluebird')
 
 const setHeader = http.OutgoingMessage.prototype.setHeader
 
@@ -33,36 +36,70 @@ function connectPromise (opts) {
 
 let sessionId
 
-const open = (name, url, options = {}) => {
+const open = (name, url, options = {}, automation) => {
+
+  const invoke = (method, data) => {
+    return Promise.resolve(null)
+  }
+
+  automation.use({
+    onRequest (message, data) {
+      switch (message) {
+        case 'get:cookies':
+          return invoke('getCookies', data)
+        case 'get:cookie':
+          return invoke('getCookie', data)
+        case 'set:cookie':
+          return invoke('setCookie', data)
+        case 'clear:cookies':
+          return invoke('clearCookies', data)
+        case 'clear:cookie':
+          return invoke('clearCookie', data)
+        case 'is:automation:client:connected':
+          return true
+          // return invoke('isAutomationConnected', data)
+        case 'take:screenshot':
+          return invoke('takeScreenshot')
+        default:
+          throw new Error(`No automation handler registered for: '${message}'`)
+      }
+    },
+  })
+
   const sessionRequest = {
     desiredCapabilities: {
       browserName: 'internet explorer',
     },
   }
 
+  console.log('proxyUrl', options.proxyUrl)
+
   const pacUrl = options.pacUrl
+  const proxyUrl = options.proxyUrl
   if (pacUrl) {
     _.extend(sessionRequest.desiredCapabilities, {
       // 'ie.usePerProcessProxy': true,
       proxy: {
-        proxyType: 'pac',
-        proxyAutoconfigUrl: pacUrl,
-        // httpProxy: addr,
-        // sslProxy: addr,
+        proxyType: 'manual', //'pac',
+        // proxyAutoconfigUrl: pacUrl,
+        httpProxy: proxyUrl,
+        sslProxy: proxyUrl,
         // // Pass url of gateway server running on host machine
-        // noProxy: ['localhost:8445', '<-loopback>'], //;localhost: 8445],
+        noProxy: ['<-loopback>'], //;localhost: 8445],
       },
     })
   }
 
 
-  console.log(sessionRequest.desiredCapabilities)
-  const driver = spawn(exePath,
+  const driver = spawn(path.resolve(__dirname, '../../IEDriverServer.exe'), //exePath,
     [
       // '--log-level=TRACE',
     ],
     { stdio: 'pipe' })
 
+  const logFile = fs.createWriteStream(path.resolve('../../../../temp.log'))
+  // driver.stdout.pipe(logFile)
+  // driver.stderr.pipe(logFile)
   driver.stdout.on('data', (data) => {
     console.log(data.toString())
   })
@@ -80,8 +117,6 @@ const open = (name, url, options = {}) => {
     })
   })
   .then((res) => {
-    console.log('WD:RESPONSE', res)
-    console.log('WD:RESPONSE', res.value.capabilities.proxy)
     sessionId = res.value.sessionId
   })
   .then(() => request({

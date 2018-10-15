@@ -254,6 +254,7 @@ class Server
           @_pacServer = pacServer
 
           pacUrl = pacServer.address()
+          # pacUrl = "http://dev.local:#{pacUrl}"
           
           ## once we open set the domain
           ## to root by default
@@ -449,6 +450,8 @@ class Server
           .pipe(stream.PassThrough())
 
         restorePreviousState = =>
+          debug('restoring previous server state, %o', previousState)
+
           @_remoteAuth         = previousState.auth
           @_remoteProps        = previousState.props
           @_remoteOrigin       = previousState.origin

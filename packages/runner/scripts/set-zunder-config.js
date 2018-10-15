@@ -42,6 +42,9 @@ module.exports = function setZunderConfig (zunder) {
     scripts: {
       'src/main.jsx': 'cypress_runner.js',
     },
+    addBrowserifyConfigTo: [
+      path.join(__dirname, '..', '..', 'driver', 'node_modules', 'parse-domain'),
+    ],
     staticGlobs: {
       'static/**': '',
       'node_modules/font-awesome/fonts/**': '/fonts',

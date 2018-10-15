@@ -103,7 +103,6 @@ function getWindowsBrowser(
 
   return pathExists(exePath)
     .then(exists => {
-      console.log('exe path searched: ', exePath)
       log('found %s ?', exePath, exists)
       if (!exists) {
         console.log('path not exist:', exePath)
@@ -139,7 +138,6 @@ function getWindowsBrowser(
 }
 
 export function detectBrowserWindows(browser: Browser) {
-  console.log('trying to detect:',browser.name)
   return getWindowsBrowser(browser.name, browser.binary)
 }
 
