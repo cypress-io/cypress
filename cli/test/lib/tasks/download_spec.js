@@ -71,6 +71,32 @@ describe('lib/tasks/download', function () {
     })
   })
 
+  context('download base url from CYPRESS_DOWNLOAD_BASE_URL env var', () => {
+    it('env var', () => {
+      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com'
+      const url = download.getUrl('0.20.2')
+      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL', normalize(url))
+    })
+
+    it('env var with trailing slash', () => {
+      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com/'
+      const url = download.getUrl('0.20.2')
+      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL with trailing slash', normalize(url))
+    })
+
+    it('env var with subdirectory', () => {
+      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com/example'
+      const url = download.getUrl('0.20.2')
+      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL with subdirectory', normalize(url))
+    })
+
+    it('env var with subdirectory and trailing slash', () => {
+      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com/example/'
+      const url = download.getUrl('0.20.2')
+      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL with subdirectory and trailing slash', normalize(url))
+    })
+  })
+
   it('saves example.zip to options.downloadDestination', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')

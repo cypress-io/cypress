@@ -20,3 +20,19 @@ https://download.cypress.io/desktop?platform=OS&arch=ARCH
 exports['specific version desktop url 1'] = `
 https://download.cypress.io/desktop/0.20.2?platform=OS&arch=ARCH
 `
+
+exports['base url from CYPRESS_DOWNLOAD_BASE_URL 1'] = `
+https://cypress.example.com/desktop/0.20.2?platform=OS&arch=ARCH
+`
+
+exports['base url from CYPRESS_DOWNLOAD_BASE_URL with trailing slash 1'] = `
+https://cypress.example.com/desktop/0.20.2?platform=OS&arch=ARCH
+`
+
+exports['base url from CYPRESS_DOWNLOAD_BASE_URL with subdirectory 1'] = `
+https://cypress.example.com/example/desktop/0.20.2?platform=OS&arch=ARCH
+`
+
+exports['base url from CYPRESS_DOWNLOAD_BASE_URL with subdirectory and trailing slash 1'] = `
+https://cypress.example.com/example/desktop/0.20.2?platform=OS&arch=ARCH
+`
