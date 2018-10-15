@@ -45,7 +45,7 @@
     "js-cookie": "2.1.1",
     "jsdom": "^11.0.0",
     "lodash": "4.17.10",
-    "lolex": "^1.5.2",
+    "lolex": "^3.0.0",
     "method-override": "^2.3.1",
     "minimatch": "^3.0.0",
     "minimist": "^1.2.0",
