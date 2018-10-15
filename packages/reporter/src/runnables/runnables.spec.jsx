@@ -73,7 +73,7 @@ describe('<Runnables />', () => {
         specPath=''
       />
     )
-    expect(scroller.setContainer).to.have.been.calledWith(component.ref('container').node)
+    expect(scroller.setContainer).to.have.been.calledWith(component.ref('container'))
   })
 
   it('disables auto-scrolling when user scrolls and app is running', () => {
