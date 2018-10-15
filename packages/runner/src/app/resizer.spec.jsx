@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'enzyme'
+import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Resizer from './resizer'
@@ -25,7 +25,7 @@ describe('<Resizer />', () => {
     beforeEach(() => {
       props = createProps()
       component = mount(<Resizer {...props} />)
-      component.ref('resizer').simulate('mousedown', mousedownEvent)
+      component.simulate('mousedown', mousedownEvent)
     })
 
     afterEach(() => {
@@ -48,7 +48,7 @@ describe('<Resizer />', () => {
     beforeEach(() => {
       props = createProps()
       component = mount(<Resizer {...props} />)
-      component.ref('resizer').simulate('mousedown', mousedownEvent)
+      component.simulate('mousedown', mousedownEvent)
     })
 
     afterEach(() => {

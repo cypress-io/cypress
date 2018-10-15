@@ -259,7 +259,7 @@ describe('<Command />', () => {
 
     describe('clicking pin button again', () => {
       beforeEach(() => {
-        events.emit.reset()
+        events.emit.resetHistory()
         component.find('FlashOnClick').simulate('click')
       })
 
