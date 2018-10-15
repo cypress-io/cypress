@@ -78,7 +78,7 @@ const open = (name, url, options = {}, automation) => {
   const proxyUrl = options.proxyUrl
   if (pacUrl) {
     _.extend(sessionRequest.desiredCapabilities, {
-      // 'ie.usePerProcessProxy': true,
+      'ie.usePerProcessProxy': true,
       proxy: {
         proxyType: 'manual', //'pac',
         // proxyAutoconfigUrl: pacUrl,

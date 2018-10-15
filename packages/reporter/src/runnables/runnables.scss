@@ -1,3 +1,5 @@
+.fa { &:not(.fa-spin) { animation: none; } }
+
 .reporter {
   min-height: 0; // needed for firefox or else scrolling gets funky
 
@@ -153,6 +155,7 @@
     &.runnable-passed > .runnable-wrapper {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
+
         color: $pass;
       }
     }

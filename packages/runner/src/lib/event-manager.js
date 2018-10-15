@@ -184,6 +184,8 @@ const eventManager = {
   },
 
   initialize ($autIframe, config) {
+    performance.mark('initialize-start')
+
     Cypress.initialize($autIframe)
 
     // get the current runnable in case we reran mid-test due to a visit
@@ -191,6 +193,8 @@ const eventManager = {
     channel.emit('get:existing:run:state', (state = {}) => {
       const runnables = Cypress.normalizeAll(state.tests)
       const run = () => {
+        performance.mark('initialize-end')
+        performance.measure('initialize', 'initialize-start', 'initialize-end')
         this._runDriver(state)
       }
 
@@ -289,7 +293,11 @@ const eventManager = {
   },
 
   _runDriver (state) {
-    Cypress.run(() => {})
+    performance.mark('run-s')
+    Cypress.run(() => {
+      performance.mark('run-e')
+      performance.measure('run', 'run-s', 'run-e')
+    })
 
     reporterBus.emit('reporter:start', {
       startTime: Cypress.getStartTime(),
