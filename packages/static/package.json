@@ -5,7 +5,11 @@
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/static needs: npm run build'",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "prebuild": "npm run check-deps-pre",
     "build": "gulp build",
+    "pretest": "npm run check-deps-pre",
     "test": "echo 'Nothing to test yet'"
   },
   "files": [

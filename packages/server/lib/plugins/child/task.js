@@ -4,7 +4,10 @@ const errors = require('../../errors')
 
 const getBody = (ipc, events, ids, [event]) => {
   const taskEvent = _.find(events, { event: 'task' }).handler
-  const invoke = () => taskEvent[event].toString()
+  const invoke = () => {
+    const fn = taskEvent[event]
+    return _.isFunction(fn) ? fn.toString() : ''
+  }
 
   util.wrapChildPromise(ipc, invoke, ids)
 }

@@ -25,7 +25,7 @@ describe('<Resizer />', () => {
     beforeEach(() => {
       props = createProps()
       component = mount(<Resizer {...props} />)
-      component.ref('resizer').simulate('mousedown', mousedownEvent)
+      component.simulate('mousedown', mousedownEvent)
     })
 
     afterEach(() => {
@@ -48,7 +48,7 @@ describe('<Resizer />', () => {
     beforeEach(() => {
       props = createProps()
       component = mount(<Resizer {...props} />)
-      component.ref('resizer').simulate('mousedown', mousedownEvent)
+      component.simulate('mousedown', mousedownEvent)
     })
 
     afterEach(() => {
