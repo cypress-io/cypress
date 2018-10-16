@@ -7,8 +7,8 @@ module.exports = {
   folder: (pathToFolder) ->
     fs.statAsync(pathToFolder)
     .then ->
-      fs.readdirAsync(pathToFolder).map (item) ->
-        trash([path.join(pathToFolder, item)])
-    .catch ->
+      Promise.map(fs.readdirAsync(pathToFolder), (item) ->
+        return trash([path.join(pathToFolder, item)]))
+    .catch {code: "ENOENT"}, ->
       return
 }
