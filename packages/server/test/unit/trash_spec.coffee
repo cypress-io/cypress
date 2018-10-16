@@ -27,3 +27,9 @@ describe "lib/util/trash", ->
         expect(fs.existsSync(path.resolve(basePath, "bar", "b.txt"))).to.be.false
         expect(fs.existsSync(path.resolve(basePath,"bar", "baz", "c.txt"))).to.be.false
         fs.rmdirSync(basePath)
+
+    it "doesn't fail if directory is non-existent", (done) ->
+      trash.folder('bar').then ->
+        done()
+      .catch ->
+        throw new Error('should not have errored')
