@@ -31,6 +31,7 @@ exports['e2e screenshots passes 1'] = `
     ✓ retries each screenshot for up to  XX:XX
     ✓ ensures unique paths for non-named screenshots
     2) ensures unique paths when there's a non-named screenshot and a failure
+    - doesn't take a screenshot for a pending test
     clipping
       ✓ can clip app screenshots
       ✓ can clip runner screenshots
@@ -44,6 +45,7 @@ exports['e2e screenshots passes 1'] = `
 
 
   15 passing
+  1 pending
   5 failing
 
   1) taking screenshots generates pngs on failure:
@@ -78,10 +80,10 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        19                      │
+  │ Tests:        20                      │
   │ Passing:      15                      │
   │ Failing:      4                       │
-  │ Pending:      0                       │
+  │ Pending:      1                       │
   │ Skipped:      0                       │
   │ Screenshots:  23                      │
   │ Video:        true                    │
@@ -130,9 +132,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       19       15        4        -        - │
+  │ ✖ screenshots_spec.coffee                   XX:XX       20       15        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       19       15        4        -        -  
+    1 of 1 failed (100%)                        XX:XX       20       15        4        1        -  
 
 
 `
