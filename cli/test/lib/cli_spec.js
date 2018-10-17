@@ -44,14 +44,21 @@ describe('cli', () => {
       snapshot('shows help for run --foo', normalize(this.stdout.toString()))
     })
 
-    it('shows help for cache --foo', () => {
+    it('shows help for cache command - unknown option --foo', () => {
       return this.exec('cache --foo')
       .then(() => {
         snapshot(normalize(this.stdout.toString()))
       })
     })
 
-    it('shows help for cache [no command]', () => {
+    it('shows help for cache command - unknown sub-command foo', () => {
+      return this.exec('cache foo')
+      .then(() => {
+        snapshot(normalize(this.stdout.toString()))
+      })
+    })
+
+    it('shows help for cache command - no sub-command', () => {
       return this.exec('cache')
       .then(() => {
         snapshot(normalize(this.stdout.toString()))

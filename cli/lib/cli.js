@@ -204,7 +204,7 @@ module.exports = {
         util.exit(1)
       }
       if (opts.command || !_.includes(['list', 'path', 'clear'], opts)) {
-        unknownOption.call(this, `cache ${opts}`, 'sub-command')
+        unknownOption.call(this, `cache ${opts}`, 'command')
       }
       cache[opts]()
     })

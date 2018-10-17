@@ -171,7 +171,7 @@ Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
 
-exports['cli unknown option shows help for cache --foo 1'] = `
+exports['cli unknown option shows help for cache command - unknown option --foo 1'] = `
 
   error: unknown option: --foo
 
@@ -190,7 +190,26 @@ exports['cli unknown option shows help for cache --foo 1'] = `
 
 `
 
-exports['cli unknown option shows help for cache [no command] 1'] = `
+exports['cli unknown option shows help for cache command - unknown sub-command foo 1'] = `
+
+  error: unknown command: cache foo
+
+
+  Usage: cache [command]
+
+  Manages the Cypress binary cache
+
+
+  Options:
+
+    list   list cached binary versions
+    path   print the path to the binary cache
+    clear  delete all cached binaries
+    -h, --help  output usage information
+
+`
+
+exports['cli unknown option shows help for cache command - no sub-command 1'] = `
 
   Usage: cache [command]
 
