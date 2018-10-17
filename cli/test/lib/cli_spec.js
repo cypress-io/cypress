@@ -10,7 +10,7 @@ const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
-const normalize = require('../support/normalize')
+const execa = require('execa-wrap')
 const stdout = require('../support/stdout')
 
 describe('cli', () => {
@@ -22,79 +22,54 @@ describe('cli', () => {
     os.platform.returns('darwin')
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
-    this.exec = (args) => new Promise((res) => {
-      process.exit.callsFake(() => {
-        res()
-        throw new Error('mocha exit')
-      })
-      cli.init(`node test ${args}`.split(' '))
-    })
+    this.exec = (args) => cli.init(`node test ${args}`.split(' '))
     this.stdout = stdout.capture()
   })
 
   context('unknown option', () => {
     // note it shows help for that specific command
-    it('shows help', () => {
-      this.exec('open --foo')
-      snapshot('shows help for open --foo', normalize(this.stdout.toString()))
-    })
-
-    it('shows help for run command', () => {
-      this.exec('run --foo')
-      snapshot('shows help for run --foo', normalize(this.stdout.toString()))
-    })
-
-    it('shows help for cache command - unknown option --foo', () => {
-      return this.exec('cache --foo')
-      .then(() => {
-        snapshot(normalize(this.stdout.toString()))
+    it('shows help', () =>
+      execa('bin/cypress', ['open', '--foo']).then((result) => {
+        snapshot('shows help for open --foo', result)
       })
-    })
+    )
 
-    it('shows help for cache command - unknown sub-command foo', () => {
-      return this.exec('cache foo')
-      .then(() => {
-        snapshot(normalize(this.stdout.toString()))
+    it('shows help for run command', () =>
+      execa('bin/cypress', ['run', '--foo']).then((result) => {
+        snapshot('shows help for run --foo', result)
       })
-    })
+    )
 
-    it('shows help for cache command - no sub-command', () => {
-      return this.exec('cache')
-      .then(() => {
-        snapshot(normalize(this.stdout.toString()))
-      })
-    })
+    it('shows help for cache command - unknown option --foo', () =>
+      execa('bin/cypress', ['cache', '--foo']).then(snapshot)
+    )
+
+    it('shows help for cache command - unknown sub-command foo', () =>
+      execa('bin/cypress', ['cache', 'foo']).then(snapshot)
+    )
+
+    it('shows help for cache command - no sub-command', () =>
+      execa('bin/cypress', ['cache']).then(snapshot)
+    )
   })
 
   context('help command', () => {
     it('shows help', () =>
-      this.exec('help')
-      .then(() => {
-        snapshot(normalize(this.stdout.toString()))
-      })
+      execa('bin/cypress', ['help']).then(snapshot)
     )
 
     it('shows help for -h', () =>
-      this.exec('-h')
-      .then(() => {
-        snapshot(normalize(this.stdout.toString()))
-      })
+      execa('bin/cypress', ['-h']).then(snapshot)
     )
 
     it('shows help for --help', () =>
-      this.exec('--help')
-      .then(() => {
-        snapshot(normalize(this.stdout.toString()))
-      })
+      execa('bin/cypress', ['--help']).then(snapshot)
     )
   })
 
   context('unknown command', () => {
     it('shows usage and exits', () =>
-      this.exec('foo')
-      .then(() => {
-        snapshot(normalize(this.stdout.toString()))
-      })
+      execa('bin/cypress', ['foo']).then(snapshot)
     )
   })
 
