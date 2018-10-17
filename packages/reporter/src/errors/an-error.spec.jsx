@@ -44,6 +44,6 @@ describe('<AnError />', () => {
 
   it('renders message with markdown', () => {
     const component = shallow(<AnError error={error} />)
-    expect(component.find('> div').prop('dangerouslySetInnerHTML').__html).to.include('<h1>Message with markdown</h1>')
+    expect(component.find('.error-message').prop('dangerouslySetInnerHTML').__html).to.include('<h1>Message with markdown</h1>')
   })
 })

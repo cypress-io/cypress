@@ -150,6 +150,10 @@ describe "Specs List", ->
         it "lists test specs", ->
           cy.get(".file a").contains("app_spec.coffee")
 
+        it "lists folder with '.'", ->
+          cy.get(".file").should("have.length", 7)
+          cy.get(".folder").should("have.length", 10)
+
       context "collapsing specs", ->
         it "sets folder collapsed when clicked", ->
           cy.get(".folder:first").should("have.class", "folder-expanded")

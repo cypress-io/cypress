@@ -7,6 +7,7 @@ setZunderConfig(z)
 u.series(
   z.applyDevEnv,
   z.cleanDev,
+  z.buildDevStaticAssets,
   z.buildDevScripts,
   z.buildDevStylesheets
 )()
