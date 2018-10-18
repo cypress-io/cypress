@@ -219,6 +219,9 @@ describe "taking screenshots", ->
           devicePixelRatio
         })
 
+  it "doesn't take a screenshot for a pending test", ->
+    @skip()
+
   context "before hooks", ->
     before ->
       ## failure 2
