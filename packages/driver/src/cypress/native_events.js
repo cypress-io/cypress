@@ -70,17 +70,11 @@ const calculateTrueCoords = (coords, $elToClick) => {
   let x = coords.x
   let y = coords.y
   let curWindow = $elToClick.ownerDocument.defaultView
-  while (curWindow.parent) {
-    const iframes = curWindow.parent.document.getElementsByTagName('IFRAME')
-    for (let i = 0; i < iframes.length; i++) {
-      if (curWindow.parent.frames[i] === curWindow) {
-        const frame = iframes[i]
-        const rect = frame.getBoundingClientRect()
-        x += rect.x
-        y += rect.y
-        break
-      }
-    }
+  while (curWindow.frameElement) {
+    const frame = curWindow.frameElement
+    const rect = frame.getBoundingClientRect()
+    x += rect.x
+    y += rect.y
     curWindow = curWindow.parent
   }
   return { x, y }

@@ -24,26 +24,29 @@
         "babelify",
         {
           "presets": [
-            "env",
-            "react",
-            "stage-1"
+            "@babel/env",
+            "@babel/react"
           ],
           "plugins": [
             "add-module-exports",
-            "transform-decorators-legacy"
+            [
+              "@babel/plugin-proposal-class-properties",
+              {
+                "loose": true
+              }
+            ]
           ]
         }
       ]
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
     "@cypress/react-tooltip": "0.3.1",
     "@cypress/releaser": "0.1.12",
     "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-1": "^6.24.1",
     "bin-up": "^1.1.0",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.8.0",
@@ -64,6 +67,6 @@
     "rebuild-node-sass": "^1.1.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "zunder": "5.8.0"
+    "zunder": "5.8.2"
   }
 }
