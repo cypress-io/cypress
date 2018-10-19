@@ -49,7 +49,7 @@ onServer = (app) ->
 
 describe "e2e visit", ->
   require("mocha-banner").register()
-  
+
   context "low response timeout", ->
     e2e.setup({
       settings: {
@@ -106,6 +106,11 @@ describe "e2e visit", ->
         spec: "visit_non_html_content_type_failing_spec.coffee"
         snapshot: true
         expectedExitCode: 1
+      })
+
+    it "calls onBeforeLoad when overwriting cy.visit", ->
+      e2e.exec(@, {
+        spec: "issue_2196_spec.coffee"
       })
 
   context "normal response timeouts", ->
