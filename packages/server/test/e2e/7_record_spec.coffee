@@ -10,6 +10,9 @@ Fixtures = require("../support/helpers/fixtures")
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
 
+e2ePath = Fixtures.projectPath("e2e")
+outputPath = path.join(e2ePath, "output.json")
+
 { runId, groupId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
 
@@ -155,6 +158,7 @@ describe "e2e record", ->
         spec: "record*"
         record: true
         snapshot: true
+        outputPath: outputPath
         expectedExitCode: 3
       })
       .get("stdout")
@@ -306,6 +310,10 @@ describe "e2e record", ->
         expect(forthInstanceStdout.body.stdout).not.to.include("record_error_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
+
+        fs.readJsonAsync(outputPath)
+        .then (results) ->
+          expect(results.runUrrunUrl).to.equal(runUrl)
 
   context "parallelization", ->
     allSpecs = [
@@ -1064,33 +1072,3 @@ describe "e2e record", ->
             "PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout"
             "POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances"
           ])
-
-  context "dashboard URL", ->
-    setup(defaultRoutes)
-
-    e2ePath = Fixtures.projectPath("e2e")
-    outputPath = path.join(e2ePath, "output.json")
-
-    it "is included in results if recording", ->
-      e2e.exec(@, {
-        key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
-        record: true
-        spec: "simple_passing_spec*"
-        outputPath: outputPath
-        snapshot: false
-      })
-      .then ->
-        fs.readJsonAsync(outputPath)
-        .then (results) ->
-          expect(results.dashboardUrl).to.equal(runUrl)
-
-    it "is not included in results if not recording", ->
-      e2e.exec(@, {
-        spec: "simple_passing_spec*"
-        outputPath: outputPath
-        snapshot: false
-      })
-      .then ->
-        fs.readJsonAsync(outputPath)
-        .then (results) ->
-          expect(results).to.not.have.key('dashboardUrl')
