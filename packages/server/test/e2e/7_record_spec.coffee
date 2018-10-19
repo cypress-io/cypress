@@ -313,7 +313,7 @@ describe "e2e record", ->
 
         fs.readJsonAsync(outputPath)
         .then (results) ->
-          expect(results.runUrrunUrl).to.equal(runUrl)
+          expect(results.runUrl).to.equal(runUrl)
 
   context "parallelization", ->
     allSpecs = [
