@@ -1,8 +1,11 @@
 _ = require("lodash")
+path = require("path")
 Promise = require("bluebird")
 bodyParser = require("body-parser")
 jsonSchemas = require("@cypress/json-schemas").api
 e2e = require("../support/helpers/e2e")
+fs = require("../../lib/util/fs")
+Fixtures = require("../support/helpers/fixtures")
 
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
@@ -1061,3 +1064,33 @@ describe "e2e record", ->
             "PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout"
             "POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances"
           ])
+
+  context "dashboard URL", ->
+    setup(defaultRoutes)
+
+    e2ePath = Fixtures.projectPath("e2e")
+    outputPath = path.join(e2ePath, "output.json")
+
+    it "is included in results if recording", ->
+      e2e.exec(@, {
+        key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+        record: true
+        spec: "simple_passing_spec*"
+        outputPath: outputPath
+        snapshot: false
+      })
+      .then ->
+        fs.readJsonAsync(outputPath)
+        .then (results) ->
+          expect(results.dashboardUrl).to.equal(runUrl)
+
+    it "is not included in results if not recording", ->
+      e2e.exec(@, {
+        spec: "simple_passing_spec*"
+        outputPath: outputPath
+        snapshot: false
+      })
+      .then ->
+        fs.readJsonAsync(outputPath)
+        .then (results) ->
+          expect(results).to.not.have.key('dashboardUrl')
