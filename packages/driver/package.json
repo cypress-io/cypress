@@ -5,9 +5,12 @@
   "main": "index.js",
   "browser": "src/main",
   "scripts": {
+    "prestart": "npm run check-deps-pre",
     "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee",
     "cypress:open": "node ../../scripts/cypress open --project ./test",
     "cypress:run": "node ../../scripts/cypress run --project ./test",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules"
   },
   "files": [
@@ -42,7 +45,7 @@
     "js-cookie": "2.1.1",
     "jsdom": "^11.0.0",
     "lodash": "4.17.10",
-    "lolex": "^1.5.2",
+    "lolex": "^3.0.0",
     "method-override": "^2.3.1",
     "minimatch": "^3.0.0",
     "minimist": "^1.2.0",

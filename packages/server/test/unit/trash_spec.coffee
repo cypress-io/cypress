@@ -10,12 +10,26 @@ describe "lib/util/trash", ->
     it "deletes contents of directory", ->
       basePath = path.join("foo")
       fs.mkdirSync(basePath)
-      fs.writeFileSync("#{basePath}/bar.txt", "")
+      fs.mkdirSync(path.resolve(basePath, "bar"))
+      fs.mkdirSync(path.resolve(basePath, "bar", "baz"))
 
-      expect(fs.existsSync(basePath)).to.be.true
-      expect(fs.existsSync("#{basePath}/bar.txt")).to.be.true
+      fs.writeFileSync(path.resolve(basePath, "a.txt"), "")
+      fs.writeFileSync(path.resolve(basePath, "bar", "b.txt"), "")
+      fs.writeFileSync(path.resolve(basePath,"bar", "baz", "c.txt"), "")
 
-      trash.folder("foo").then ->
+      expect(fs.existsSync(path.resolve(basePath, "a.txt"))).to.be.true
+      expect(fs.existsSync(path.resolve(basePath, "bar", "b.txt"))).to.be.true
+      expect(fs.existsSync(path.resolve(basePath,"bar", "baz", "c.txt"))).to.be.true
+
+      trash.folder(basePath).then ->
         expect(fs.existsSync(basePath)).to.be.true
-        expect(fs.existsSync("#{basePath}/bar.txt")).to.be.false
+        expect(fs.existsSync(path.resolve(basePath, "a.txt"))).to.be.false
+        expect(fs.existsSync(path.resolve(basePath, "bar", "b.txt"))).to.be.false
+        expect(fs.existsSync(path.resolve(basePath,"bar", "baz", "c.txt"))).to.be.false
         fs.rmdirSync(basePath)
+
+    it "doesn't fail if directory is non-existent", (done) ->
+      trash.folder('bar').then ->
+        done()
+      .catch ->
+        throw new Error('should not have errored')
