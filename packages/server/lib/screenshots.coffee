@@ -313,9 +313,19 @@ getPath = (data, ext, screenshotsFolder) ->
   else
     names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
 
+  # truncate file names to be less than 243 characters
+  # this accomodates 255 chars with message and extension
+  maxFileNameLength = 242
+  index = names.length - 1
+
+  if names[index].length > maxFileNameLength
+    names[index] = _.truncate(names[index], {
+      length: maxFileNameLength,
+      omission: ''
+    })
+
   ## append (failed) to the last name
   if data.testFailure
-    index = names.length - 1
     names[index] = names[index] + " (failed)"
 
   withoutExt = path.join(screenshotsFolder, specNames..., names...)

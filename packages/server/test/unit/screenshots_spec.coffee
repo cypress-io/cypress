@@ -512,6 +512,42 @@ describe "lib/screenshots", ->
         "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
       )
 
+    it "truncates file paths", ->
+      name = "a".repeat(260)
+      truncatedName = "a".repeat(242)
+
+      p = screenshots.getPath({
+        specName: "integration/spec.js"
+        name
+      }, "png", "path/to/screenshots")
+
+      expect(p).to.eq(
+        "path/to/screenshots/integration/spec.js/#{truncatedName}.png"
+      )
+
+      p = screenshots.getPath({
+        specName: "integration/spec.js"
+        testFailure: true
+        name
+      }, "png", "path/to/screenshots")
+
+      expect(p).to.eq(
+        "path/to/screenshots/integration/spec.js/#{truncatedName} (failed).png"
+      )
+
+      takenPaths = [1...10].map (val) -> "path/to/screenshots/integration/spec.js/#{truncatedName} (#{val}).png"
+      takenPaths.push("path/to/screenshots/integration/spec.js/#{truncatedName}.png")
+
+      p = screenshots.getPath({
+        specName: "integration/spec.js"
+        takenPaths
+        name
+      }, "png", "path/to/screenshots")
+
+      expect(p).to.eq(
+        "path/to/screenshots/integration/spec.js/#{truncatedName} (10).png"
+      )
+
   context ".afterScreenshot", ->
     beforeEach ->
       @data = {
