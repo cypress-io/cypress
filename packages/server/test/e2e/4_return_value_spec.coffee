@@ -7,5 +7,5 @@ describe "e2e return value", ->
     e2e.exec(@, {
       spec: "return_value_spec.coffee"
       snapshot: true
-      expectedExitCode: 2
+      expectedExitCode: 3
     })

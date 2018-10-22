@@ -99,6 +99,9 @@ patchRunnerFail = ->
   ## matching the current Runner.prototype.fail except
   ## changing the logic for determing whether this is a valid err
   Runner::fail = (runnable, err) ->
+    if err?.message?.indexOf("Resolution method is overspecified") > -1
+      err.message = $utils.errMessageByPath("mocha.overspecified", { error: err.stack })
+
     ## if this isnt a correct error object then just bail
     ## and call the original function
     if Object.prototype.toString.call(err) isnt "[object Error]"
