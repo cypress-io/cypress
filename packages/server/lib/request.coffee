@@ -3,6 +3,7 @@ r          = require("request")
 rp         = require("request-promise")
 url        = require("url")
 tough      = require("tough-cookie")
+debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
 statusCode = require("./util/status_code")
@@ -231,6 +232,8 @@ module.exports = (options = {}) ->
       Promise.try ->
         store = jar.toJSON()
 
+        debug("setting request jar cookies %o", store.cookies)
+
         ## this likely needs
         ## to be an 'each' not a map
         ## since we need to set cookies
@@ -285,6 +288,8 @@ module.exports = (options = {}) ->
           followRedirect.call(req, incomingRes)
 
       send = =>
+        debug("sending request as stream %o", _.omit(options, "jar"))
+
         str = @create(options)
         str.getJar = -> options.jar
         str

@@ -1,5 +1,6 @@
 _   = require("lodash")
 url = require("url")
+debug = require("debug")("cypress:server:buffers")
 
 buffers = []
 
@@ -9,6 +10,8 @@ module.exports = {
   keys: -> _.map(buffers, "url")
 
   reset: ->
+    debug("resetting buffers")
+
     buffers = []
 
   set: (obj = {}) ->
