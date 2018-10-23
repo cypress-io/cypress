@@ -102,3 +102,10 @@ context "cookies", ->
       .getCookie("shouldExpire").should("exist")
       .request("http://localhost:2121/expirationRedirect")
       .getCookie("shouldExpire").should("not.exist")
+
+  it "issue: #1321 failing to set or parse cookie", ->
+    cy
+      .visit("http://localhost:2121/setOneHourFromNow")
+      .visit("http://localhost:2121/expirationMaxAge")
+
+      ## TODO: its the lack of valu ethat MUST be the key

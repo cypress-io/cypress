@@ -1,6 +1,7 @@
 _         = require("lodash")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
+debug     = require("debug")("cypress:server:cookies")
 
 ## match the w3c webdriver spec on return cookies
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
@@ -64,20 +65,30 @@ cookies = (cyNamespace, cookieNamespace) ->
 
       delete data.includeHostOnly
 
+      debug("getting:cookies %o", data)
+
       automate(data)
       .then (cookies) ->
-        normalizeCookies(cookies, includeHostOnly)
-      .then (cookies) ->
-        _.reject(cookies, isNamespaced)
+        cookies = normalizeCookies(cookies, includeHostOnly)
+        cookies = _.reject(cookies, isNamespaced)
+
+        debug("received get:cookies %o", cookies)
+
+        return cookies
 
     getCookie: (data, automate) ->
+      debug("getting:cookie %o", data)
+
       automate(data)
       .then (cookie) ->
         if isNamespaced(cookie)
           throw new Error("Sorry, you cannot get a Cypress namespaced cookie.")
         else
-          cookie
-      .then(normalizeCookieProps)
+          cookie = normalizeCookieProps(cookie)
+
+          debug("received get:cookie %o", cookie)
+
+          return cookie
 
     setCookie: (data, automate) ->
       if isNamespaced(data)
@@ -97,21 +108,37 @@ cookies = (cyNamespace, cookieNamespace) ->
         if data.hostOnly
           cookie = _.omit(cookie, "domain")
 
+        debug("set:cookie %o", data)
+
         automate(cookie)
-        .then(normalizeCookieProps)
+        .then (cookie) ->
+          cookie = normalizeCookieProps(cookie)
+
+          debug("received set %o:cookie", cookie)
+
+          return cookie
 
     clearCookie: (data, automate) ->
       if isNamespaced(data)
         throw new Error("Sorry, you cannot clear a Cypress namespaced cookie.")
       else
+        debug("clear:cookie %o", data)
+
         automate(data)
-        .then(normalizeCookieProps)
+        .then (cookie) ->
+          cookie = normalizeCookieProps(cookie)
+
+          debug("received clear %o:cookie", cookie)
+
+          return cookie
 
     clearCookies: (data, automate) ->
       cookies = _.reject(normalizeCookies(data), isNamespaced)
 
+      debug("clear:cookies %o", data)
+
       clear = (cookie) ->
-        automate("clear:cookie", {name: cookie.name})
+        automate("clear:cookie", { name: cookie.name })
         .then(normalizeCookieProps)
 
       Promise.map(cookies, clear)
