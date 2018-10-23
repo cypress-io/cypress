@@ -129,7 +129,9 @@ const preprocessor = (options = {}) => {
     }
 
     // this event is triggered when watching and a file is saved
-    compiler.plugin('compile', () => {
+    const plugin = { name: 'CypressWebpackPreprocessor' }
+
+    const onCompile = () => {
       log('compile', filePath)
       // we overwrite the latest bundle, so that a new call to this function
       // returns a promise that resolves when the bundling is finished
@@ -140,7 +142,13 @@ const preprocessor = (options = {}) => {
         // to let Cypress know to re-run the spec
         file.emit('rerun')
       })
-    })
+    }
+
+    if (compiler.hooks) {
+      compiler.hooks.compile.tap(plugin, onCompile)
+    } else {
+      compiler.plugin('compile', onCompile)
+    }
 
     if (file.shouldWatch) {
       log('watching')
