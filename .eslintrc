@@ -2,6 +2,48 @@
   "extends": [
     "plugin:cypress-dev/general"
   ],
+  "rules": {
+    "arrow-body-style": [
+      "error",
+      "always"
+    ],
+    "padding-line-between-statements": [
+      "error",
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": "return"
+      },
+      {
+        "blankLine": "always",
+        "prev": [
+          "const",
+          "let",
+          "var",
+          "if",
+          "while",
+          "export",
+          "cjs-export",
+          "import",
+          "cjs-import"
+        ],
+        "next": "*"
+      },
+      {
+        "blankLine": "any",
+        "prev": [
+          "const",
+          "let",
+          "var"
+        ],
+        "next": [
+          "const",
+          "let",
+          "var"
+        ]
+      }
+    ]
+  },
   "env": {
     "es6": true,
     "node": true
