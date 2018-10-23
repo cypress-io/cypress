@@ -13,7 +13,7 @@ describe "driver/src/cypress/index", ->
       expect(window.top.$Cypress).to.be.undefined
 
   context "#backend", ->
-    it "sets __stackCleaned__ on errors", (done) ->
+    it "sets __stackCleaned__ on errors", ->
       cy.stub(@Cypress, "emit")
       .withArgs("backend:request")
       .yieldsAsync({
@@ -28,8 +28,6 @@ describe "driver/src/cypress/index", ->
       .catch (err) ->
         expect(err.backend).to.be.true
         expect(err.stack).not.to.include("From previous event")
-
-        done()
 
   context "Log", ->
     it "throws when using Cypress.Log.command()", ->
