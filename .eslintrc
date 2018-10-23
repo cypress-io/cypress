@@ -3,10 +3,11 @@
     "plugin:cypress-dev/general"
   ],
   "rules": {
-    "arrow-body-style": [
-      "error",
-      "always"
-    ],
+    "no-else-return": [ "error", { "allowElseIf": false } ],
+    "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
+    "no-unneeded-ternary": ["error"],
+    "array-bracket-newline": ["error", "consistent"],
+    "arrow-body-style": ["error", "always"],
     "padding-line-between-statements": [
       "error",
       {
