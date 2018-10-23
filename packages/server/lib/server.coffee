@@ -243,7 +243,7 @@ class Server
           resolve([port, warning])
 
   _port: ->
-    @_server?.address()?.port
+    _(@_server).invoke("address").get("port")
 
   _listen: (port, onError) ->
     new Promise (resolve) =>
