@@ -19,22 +19,11 @@ getElementPositioning = ($el) ->
   topCenter = center.y
   leftCenter = center.x
 
-  ## factor in elements within iframes
-  iframe = cy.state("$autIframe").get(0).getBoundingClientRect()
-
   return {
     scrollTop: el.scrollTop
     scrollLeft: el.scrollLeft
     width: rect.width
     height: rect.height
-    fromTopViewport: {
-      top: rect.top + iframe.top
-      left: rect.left + iframe.left
-      right: rect.right + iframe.right
-      bottom: rect.bottom + iframe.bottom
-      topCenter: topCenter + iframe.top
-      leftCenter: leftCenter + iframe.left
-    }
     fromViewport: {
       top: rect.top
       left: rect.left
@@ -145,7 +134,7 @@ getElementCoordinatesByPosition = ($el, position = "center") ->
   ## but also from the viewport so
   ## whoever is calling us can use it
   ## however they'd like
-  { width, height, fromViewport, fromWindow, fromTopViewport } = positionProps
+  { width, height, fromViewport, fromWindow } = positionProps
 
   ## dynamically call the function by transforming the name
   ## bottom -> getBottomCoordinates
@@ -174,10 +163,6 @@ getElementCoordinatesByPosition = ($el, position = "center") ->
     left: fromWindow.left
   })
 
-  ## HACK: fix this plz
-  fromTopViewport.x = viewportTargetCoords.x + fromTopViewport.left
-  fromTopViewport.y = viewportTargetCoords.y + fromTopViewport.top
-
   fromViewport.x = viewportTargetCoords.x
   fromViewport.y = viewportTargetCoords.y
 
@@ -190,7 +175,6 @@ getElementCoordinatesByPosition = ($el, position = "center") ->
   return {
     width
     height
-    fromTopViewport
     fromViewport
     fromWindow
   }

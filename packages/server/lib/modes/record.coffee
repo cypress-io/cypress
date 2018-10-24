@@ -448,7 +448,9 @@ createRunAndRecordSpecs = (options = {}) ->
     })
     .then (resp) ->
       if not resp
-        runAllSpecs()
+        ## if a forked run, can't record and can't be parallel
+        ## because the necessary env variables aren't present
+        runAllSpecs({}, false)
       else
         { runUrl, runId, machineId, groupId } = resp
 
@@ -529,7 +531,7 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs(beforeSpecRun, afterSpecRun, runUrl)
+        runAllSpecs({ beforeSpecRun, afterSpecRun, runUrl })
 
 module.exports = {
   createRun

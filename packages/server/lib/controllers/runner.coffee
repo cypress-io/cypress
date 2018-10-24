@@ -18,7 +18,6 @@ module.exports = {
     config.arch = os.arch()
     config.spec = spec
     config.browser = browser
-    config.wsUrl = global.wsUrl
 
     debug("serving runner index.html with config %o",
       _.pick(config, "version", "platform", "arch", "projectName")

@@ -8,7 +8,6 @@ plugins   = require("../plugins")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
-protocol = require("./protocol")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
@@ -186,17 +185,8 @@ module.exports = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
-        ## TODO: make this a dynamic port
-        args.push("--remote-debugging-port=9222")
 
         debug("launch in chrome: %s, %s", url, args)
-        
-        utils.launch(browserName, url, args)
-        .tap ->
-          ## TODO: pass in the port
-          protocol.getWsTargetFor()
-          .then (wsUrl) ->
-            console.log 'wsUrl', wsUrl
-            global.wsUrl = wsUrl
 
+        utils.launch(browserName, url, args)
 }
