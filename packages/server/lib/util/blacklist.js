@@ -8,16 +8,14 @@ const matches = function (urlToCheck, blacklistHosts) {
 
   urlToCheck = uri.stripProtocolAndDefaultPorts(urlToCheck)
 
-  //# use minimatch against the url
-  //# to see if any match
+  // use minimatch against the url
+  // to see if any match
   const matchUrl = (hostMatcher) => {
     return minimatch(urlToCheck, hostMatcher)
   }
 
-
   return _.find(blacklistHosts, matchUrl)
 }
-
 
 module.exports = {
   matches,

@@ -1,32 +1,22 @@
-/* eslint-disable
-    no-empty,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const scale = function () {
+const scale = () => {
   try {
     const { app } = require('electron')
 
     return app.commandLine.appendSwitch('force-device-scale-factor', '1')
-  } catch (error) {}
+  } catch (err) {
+    return
+  }
 }
 
-const ready = function () {
+const ready = () => {
   const Promise = require('bluebird')
   const { app } = require('electron')
 
   const waitForReady = () => {
-    return new Promise((resolve, reject) => {
-      return app.on('ready', resolve)
+    return new Promise((resolve) => {
+      app.on('ready', resolve)
     })
   }
-
 
   return Promise.any([
     waitForReady(),

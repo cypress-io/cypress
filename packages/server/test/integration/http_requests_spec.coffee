@@ -2199,7 +2199,7 @@ describe "Routes", ->
             body = removeWhitespace(res.body)
             expect(body).to.eq contents.replace("localhost", "foobar.com")
 
-      it "continues to inject on the same https superdomain but different subdomain", ->
+      it.only "continues to inject on the same https superdomain but different subdomain", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
 
         @setup("https://www.foobar.com:8443")

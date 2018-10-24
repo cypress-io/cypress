@@ -114,6 +114,7 @@
     "clear-module": "^2.1.0",
     "cli-table2": "^0.2.0",
     "color-string": "^1.5.2",
+    "common-tags": "^1.8.0",
     "compression": "1.7.2",
     "concat-stream": "^1.5.1",
     "content-type": "^1.0.2",

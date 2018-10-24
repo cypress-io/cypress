@@ -3,6 +3,7 @@
     "plugin:cypress-dev/general"
   ],
   "rules": {
+    "no-multiple-empty-lines": ["error", { "max": 1 } ],
     "no-else-return": [ "error", { "allowElseIf": false } ],
     "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
     "no-unneeded-ternary": ["error"],
