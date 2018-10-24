@@ -1,8 +1,14 @@
-stream = require("stream")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const stream = require("stream");
 
-module.exports = (condition, dest) ->
-  ## if truthy return the dest stream
-  return dest if condition
+module.exports = function(condition, dest) {
+  //# if truthy return the dest stream
+  if (condition) { return dest; }
 
-  ## else passthrough the stream
-  stream.PassThrough()
+  //# else passthrough the stream
+  return stream.PassThrough();
+};

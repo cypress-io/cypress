@@ -1,41 +1,50 @@
-inject = require("./inject")
-security = require("./security")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const inject = require("./inject");
+const security = require("./security");
 
-headRe      = /(<head(?!er).*?>)/i
-bodyRe      = /(<body.*?>)/i
-htmlRe      = /(<html.*?>)/i
+const headRe      = /(<head(?!er).*?>)/i;
+const bodyRe      = /(<body.*?>)/i;
+const htmlRe      = /(<html.*?>)/i;
 
-rewriteHtml = (html, domainName, wantsInjection, wantsSecurityRemoved) ->
-  replace = (re, str) ->
-    html.replace(re, str)
+const rewriteHtml = function(html, domainName, wantsInjection, wantsSecurityRemoved) {
+  const replace = (re, str) => html.replace(re, str);
 
-  htmlToInject = do =>
-    switch wantsInjection
-      when "full"
-        inject.full(domainName)
-      when "partial"
-        inject.partial(domainName)
+  const htmlToInject = (() => {
+    switch (wantsInjection) {
+      case "full":
+        return inject.full(domainName);
+      case "partial":
+        return inject.partial(domainName);
+    }
+  })();
 
-  ## strip clickjacking and framebusting
-  ## from the HTML if we've been told to
-  if wantsSecurityRemoved
-    html = security.strip(html)
+  //# strip clickjacking and framebusting
+  //# from the HTML if we've been told to
+  if (wantsSecurityRemoved) {
+    html = security.strip(html);
+  }
 
-  switch
-    when headRe.test(html)
-      replace(headRe, "$1 #{htmlToInject}")
+  switch (false) {
+    case !headRe.test(html):
+      return replace(headRe, `$1 ${htmlToInject}`);
 
-    when bodyRe.test(html)
-      replace(bodyRe, "<head> #{htmlToInject} </head> $1")
+    case !bodyRe.test(html):
+      return replace(bodyRe, `<head> ${htmlToInject} </head> $1`);
 
-    when htmlRe.test(html)
-      replace(htmlRe, "$1 <head> #{htmlToInject} </head>")
+    case !htmlRe.test(html):
+      return replace(htmlRe, `$1 <head> ${htmlToInject} </head>`);
 
-    else
-      "<head> #{htmlToInject} </head>" + html
+    default:
+      return `<head> ${htmlToInject} </head>` + html;
+  }
+};
 
 module.exports = {
-  html: rewriteHtml
+  html: rewriteHtml,
 
   security: security.stripStream
-}
+};

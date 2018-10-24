@@ -1,11 +1,18 @@
-## wrapper around opn due to issues with proxyquire + istanbul
-os  = require("os")
-opn = require("opn")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//# wrapper around opn due to issues with proxyquire + istanbul
+const os  = require("os");
+const opn = require("opn");
 
 module.exports = {
-  opn: (arg, opts = {}) ->
-    if os.platform() is "darwin"
-      opts.args = "-R"
+  opn(arg, opts = {}) {
+    if (os.platform() === "darwin") {
+      opts.args = "-R";
+    }
 
-    opn(arg, opts)
-}
+    return opn(arg, opts);
+  }
+};

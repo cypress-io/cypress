@@ -1,15 +1,23 @@
-statuses = require("http-status-codes")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const statuses = require("http-status-codes");
 
-isOkStatusCodeRe = /^[2|3]\d+$/
+const isOkStatusCodeRe = /^[2|3]\d+$/;
 
 module.exports = {
-  isOk: (code) ->
-    code and isOkStatusCodeRe.test(code)
+  isOk(code) {
+    return code && isOkStatusCodeRe.test(code);
+  },
 
-  ## TODO: test this method
-  getText: (code) ->
-    try
-      statuses.getStatusText(code)
-    catch e
-      "Unknown Status Code"
-}
+  //# TODO: test this method
+  getText(code) {
+    try {
+      return statuses.getStatusText(code);
+    } catch (e) {
+      return "Unknown Status Code";
+    }
+  }
+};
