@@ -25,16 +25,19 @@ const failedUnzip = {
   `,
 }
 
-const missingApp = (binaryDir) => ({
-  description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
-  solution: stripIndent`
+const missingApp = (binaryDir) => {
+  return {
+    description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
+    solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
-})
+  }
+}
 
-const binaryNotExecutable = (executable) => ({
-  description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
-  solution: stripIndent`\n
+const binaryNotExecutable = (executable) => {
+  return {
+    description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
+    solution: stripIndent`\n
     Reasons this may happen:
       
     - node was installed as 'root' or with 'sudo'
@@ -42,12 +45,13 @@ const binaryNotExecutable = (executable) => ({
     
     Please check that you have the appropriate user permissions.
   `,
-})
+  }
+}
 
-
-const notInstalledCI = (executable) => ({
-  description: 'The cypress npm package is installed, but the Cypress binary is missing.',
-  solution: stripIndent`\n
+const notInstalledCI = (executable) => {
+  return {
+    description: 'The cypress npm package is installed, but the Cypress binary is missing.',
+    solution: stripIndent`\n
     We expected the binary to be installed here: ${chalk.cyan(executable)}
  
     Reasons it may be missing:
@@ -61,7 +65,8 @@ const notInstalledCI = (executable) => ({
 
     https://on.cypress.io/not-installed-ci-error
   `,
-})
+  }
+}
 
 const nonZeroExitCodeXvfb = {
   description: 'XVFB exited with a non zero exit code.',
@@ -146,6 +151,7 @@ const removed = {
 const CYPRESS_RUN_BINARY = {
   notValid: (value) => {
     const properFormat = `**/${state.getPlatformExecutable()}`
+
     return {
       description: `Could not run binary set by environment variable CYPRESS_RUN_BINARY=${value}`,
       solution: `Ensure the environment variable is a path to the Cypress binary, matching ${properFormat}`,
@@ -155,15 +161,19 @@ const CYPRESS_RUN_BINARY = {
 
 function getPlatformInfo () {
   return util.getOsVersionAsync()
-  .then((version) => stripIndent`
+  .then((version) => {
+    return stripIndent`
     Platform: ${os.platform()} (${version})
     Cypress Version: ${util.pkgVersion()}
-  `)
+  `
+  })
 }
 
 function addPlatformInformation (info) {
   return getPlatformInfo()
-  .then((platform) => merge(info, { platform }))
+  .then((platform) => {
+    return merge(info, { platform })
+  })
 }
 
 function formErrorText (info, msg) {
@@ -216,13 +226,16 @@ function formErrorText (info, msg) {
 
 const raise = (text) => {
   const err = new Error(text)
+
   err.known = true
   throw err
 }
 
-const throwFormErrorText = (info) => (msg) => {
-  return formErrorText(info, msg)
-  .then(raise)
+const throwFormErrorText = (info) => {
+  return (msg) => {
+    return formErrorText(info, msg)
+    .then(raise)
+  }
 }
 
 module.exports = {

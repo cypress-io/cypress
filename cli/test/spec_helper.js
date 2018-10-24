@@ -42,7 +42,9 @@ function throwIfFnNotStubbed (stub, method) {
     err.stack = _
     .chain(err.stack)
     .split('\n')
-    .reject((str) => _.includes(str, 'sinon'))
+    .reject((str) => {
+      return _.includes(str, 'sinon')
+    })
     .join('\n')
     .value()
 
@@ -51,6 +53,7 @@ function throwIfFnNotStubbed (stub, method) {
 }
 
 const $stub = sinon.stub
+
 sinon.stub = function (obj, method) {
   /* eslint-disable prefer-rest-params */
   const stub = $stub.apply(this, arguments)
