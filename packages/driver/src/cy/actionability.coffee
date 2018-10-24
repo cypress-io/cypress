@@ -273,6 +273,8 @@ verify = (cy, $el, options, callbacks) ->
       try
         runAllChecks()
       catch err
+        console.log(err.stack.split('\n').slice(0,8).join('\n'))
+        # debugger
         options.error = err
         cy.retry(retryActionability, options)
 

@@ -49,6 +49,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
           finishAssertions(assertions)
 
         getErrMessage = (err) ->
+          if err.stack then console.log(err.stack.split('\n').slice(0,5).join('\n'))
           switch
             when err and err.displayMessage
               err.displayMessage
@@ -56,7 +57,6 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
               err.message
             else
               err
-
         $utils.throwErrByPath "miscellaneous.retry_timed_out", {
           onFail: (options.onFail or log)
           args: { error: getErrMessage(options.error) }

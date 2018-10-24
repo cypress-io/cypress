@@ -9,6 +9,7 @@ $utils = require("../../../cypress/utils")
 $elements = require("../../../dom/elements")
 $selection = require("../../../dom/selection")
 $actionability = require("../../actionability")
+$native = require("../../../cypress/native_events")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
@@ -68,15 +69,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## handle mouse events removing DOM elements
           ## https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
-          if $dom.isAttached($elToClick)
-            domEvents.mouseUp = $Mouse.mouseUp($elToClick, fromViewport)
-
-          if $dom.isAttached($elToClick)
-            domEvents.click   = $Mouse.click($elToClick, fromViewport)
-
-          if options._log
-            consoleObj = options._log.invoke("consoleProps")
-
           consoleProps = ->
             consoleObj = _.defaults consoleObj ? {}, {
               "Applied To":   $dom.getElements($el)
@@ -110,12 +102,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               return groups
 
             consoleObj
+        
+          return Promise.try ->
+            if options.force
+              if $dom.isAttached($elToClick)
+                domEvents.mouseUp = $Mouse.mouseUp($elToClick, fromViewport)
 
-          return Promise
+              if $dom.isAttached($elToClick)
+                domEvents.click   = $Mouse.click($elToClick, fromViewport)
+            else
+              return $native.mouseup($elToClick, coords.fromViewport)
+          .return(null)
           .delay($actionability.delay, "click")
           .then ->
+            debugger
             ## display the red dot at these coords
             if options._log
+              consoleObj = options._log.invoke("consoleProps")
               ## because we snapshot and output a command per click
               ## we need to manually snapshot + end them
               options._log.set({coords: fromWindow, consoleProps: consoleProps})
@@ -148,6 +151,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## issuing the mousedown because browsers may
             ## automatically shift the focus to the element
             ## without firing the focus event
+            if not options.force
+              return $native.mousedown($elToClick, coords.fromViewport)
+                .then(()=>afterMouseDown($elToClick, coords))
+            
             $previouslyFocused = cy.getFocused()
 
             if el = cy.needsForceFocus()
@@ -162,7 +169,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## just resolve after mouse down and dont
             ## send a focus event
             if domEvents.mouseDown.preventedDefault or not $dom.isAttached($elToClick)
-              afterMouseDown($elToClick, coords)
+              return afterMouseDown($elToClick, coords)
             else
               if $elements.isInput(el) or $elements.isTextarea(el) or $elements.isContentEditable(el)
                 if !$elements.isNeedSingleValueChangeInputElement(el)
@@ -186,7 +193,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   if $elements.isSame($focused, $previouslyFocused)
                     cy.fireBlur($focused.get(0))
 
-              afterMouseDown($elToClick, coords)
+              return afterMouseDown($elToClick, coords)
         })
         .catch (err) ->
           ## snapshot only on click failure

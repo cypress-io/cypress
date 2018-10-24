@@ -125,6 +125,7 @@ nativeGetters = {
   selectionStart: _getSelectionStart
   selectionEnd: _getSelectionEnd
   type: _getType
+  frameElement: Object.getOwnPropertyDescriptor(window, "frameElement").get
 }
 
 nativeSetters = {

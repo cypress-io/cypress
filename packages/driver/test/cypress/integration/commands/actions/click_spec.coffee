@@ -13,6 +13,11 @@ describe "src/cy/commands/actions/click", ->
         @body = win.document.body.outerHTML
 
   beforeEach ->
+    ## TODO: remove listeners
+    # window.top.addEventListener('mousedown', ()=>debugger)
+    # window.top.addEventListener('mouseup', ()=>debugger)
+    # cy.state("window").addEventListener('mousedown', ()=>debugger)
+    # cy.state("window").addEventListener('mouseup', ()=>debugger)
     doc = cy.state("document")
 
     $(doc.body).empty().html(@body)
@@ -95,7 +100,6 @@ describe "src/cy/commands/actions/click", ->
 
       $btn.get(0).addEventListener "mouseup", (e) ->
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
-
         obj = _.pick(e, "bubbles", "cancelable", "view", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
@@ -443,6 +447,7 @@ describe "src/cy/commands/actions/click", ->
         cy.viewport(1000, 660)
 
         $body = cy.$$("body")
+        oldCss = $body[0].style.cssText
         $body.css({
           padding: 0
           margin: 0
@@ -529,269 +534,271 @@ describe "src/cy/commands/actions/click", ->
         ## to build up
         cy.get('[data-cy=button]').click({ waitForAnimations: false }).then ->
           expect(scrolled).to.deep.eq(["element"])
+        
+        $body[0].style.cssText = oldCss
 
-      it "can force click on hidden elements", ->
-        cy.get("button:first").invoke("hide").click({ force: true })
+      # it "can force click on hidden elements", ->
+      #   cy.get("button:first").invoke("hide").click({ force: true })
 
       it "can force click on disabled elements", ->
         cy.get("input:first").invoke("prop", "disabled", true).click({ force: true })
 
-      it "can forcibly click even when being covered by another element", ->
-        $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
-        span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
+      # it "can forcibly click even when being covered by another element", ->
+      #   $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
+      #   span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-        scrolled = []
-        retried = false
-        clicked = false
+      #   scrolled = []
+      #   retried = false
+      #   clicked = false
 
-        cy.on "scrolled", ($el, type) ->
-          scrolled.push(type)
+      #   cy.on "scrolled", ($el, type) ->
+      #     scrolled.push(type)
 
-        cy.on "command:retry", ($el, type) ->
-          retried = true
+      #   cy.on "command:retry", ($el, type) ->
+      #     retried = true
 
-        $btn.on "click", ->
-          clicked = true
+      #   $btn.on "click", ->
+      #     clicked = true
 
-        cy.get("#button-covered-in-span").click({force: true}).then ->
-          expect(scrolled).to.be.empty
-          expect(retried).to.be.false
-          expect(clicked).to.be.true
+      #   cy.get("#button-covered-in-span").click({force: true}).then ->
+      #     expect(scrolled).to.be.empty
+      #     expect(retried).to.be.false
+      #     expect(clicked).to.be.true
 
-      it "eventually clicks when covered up", ->
-        $btn = $("<button>button covered</button>")
-        .attr("id", "button-covered-in-span")
-        .prependTo(cy.$$("body"))
+      # it "eventually clicks when covered up", ->
+      #   $btn = $("<button>button covered</button>")
+      #   .attr("id", "button-covered-in-span")
+      #   .prependTo(cy.$$("body"))
 
-        $span = $("<span>span on button</span>").css({
-          position: "absolute",
-          left: $btn.offset().left,
-          top: $btn.offset().top,
-          padding: 5,
-          display: "inline-block",
-          backgroundColor: "yellow"
-        }).prependTo(cy.$$("body"))
+      #   $span = $("<span>span on button</span>").css({
+      #     position: "absolute",
+      #     left: $btn.offset().left,
+      #     top: $btn.offset().top,
+      #     padding: 5,
+      #     display: "inline-block",
+      #     backgroundColor: "yellow"
+      #   }).prependTo(cy.$$("body"))
 
-        scrolled = []
-        retried = false
+      #   scrolled = []
+      #   retried = false
 
-        cy.on "scrolled", ($el, type) ->
-          scrolled.push(type)
+      #   cy.on "scrolled", ($el, type) ->
+      #     scrolled.push(type)
 
-        cy.on "command:retry", _.after 3, ->
-          $span.hide()
-          retried = true
+      #   cy.on "command:retry", _.after 3, ->
+      #     $span.hide()
+      #     retried = true
 
-        cy.get("#button-covered-in-span").click().then ->
-          expect(retried).to.be.true
+      #   cy.get("#button-covered-in-span").click().then ->
+      #     expect(retried).to.be.true
 
-          ## - element scrollIntoView
-          ## - element scrollIntoView (retry animation coords)
-          ## - element scrollIntoView (retry covered)
-          ## - element scrollIntoView (retry covered)
-          ## - window
-          expect(scrolled).to.deep.eq(["element", "element", "element", "element"])
+      #     ## - element scrollIntoView
+      #     ## - element scrollIntoView (retry animation coords)
+      #     ## - element scrollIntoView (retry covered)
+      #     ## - element scrollIntoView (retry covered)
+      #     ## - window
+      #     expect(scrolled).to.deep.eq(["element", "element", "element", "element"])
 
-      it "scrolls the window past a fixed position element when being covered", ->
-        $btn = $("<button>button covered</button>")
-        .attr("id", "button-covered-in-nav")
-        .appendTo(cy.$$("#fixed-nav-test"))
+      # it "scrolls the window past a fixed position element when being covered", ->
+      #   $btn = $("<button>button covered</button>")
+      #   .attr("id", "button-covered-in-nav")
+      #   .appendTo(cy.$$("#fixed-nav-test"))
 
-        $nav = $("<nav>nav on button</nav>").css({
-          position: "fixed",
-          left: 0
-          top: 0,
-          padding: 20,
-          backgroundColor: "yellow"
-          zIndex: 1
-        }).prependTo(cy.$$("body"))
+      #   $nav = $("<nav>nav on button</nav>").css({
+      #     position: "fixed",
+      #     left: 0
+      #     top: 0,
+      #     padding: 20,
+      #     backgroundColor: "yellow"
+      #     zIndex: 1
+      #   }).prependTo(cy.$$("body"))
 
-        scrolled = []
+      #   scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
-          scrolled.push(type)
+      #   cy.on "scrolled", ($el, type) ->
+      #     scrolled.push(type)
 
-        cy.get("#button-covered-in-nav").click().then ->
-          ## - element scrollIntoView
-          ## - element scrollIntoView (retry animation coords)
-          ## - window
-          expect(scrolled).to.deep.eq(["element", "element", "window"])
+      #   cy.get("#button-covered-in-nav").click().then ->
+      #     ## - element scrollIntoView
+      #     ## - element scrollIntoView (retry animation coords)
+      #     ## - window
+      #     expect(scrolled).to.deep.eq(["element", "element", "window"])
 
-      it "scrolls the window past two fixed positioned elements when being covered", ->
-        $btn = $("<button>button covered</button>")
-        .attr("id", "button-covered-in-nav")
-        .appendTo(cy.$$("#fixed-nav-test"))
+      # it "scrolls the window past two fixed positioned elements when being covered", ->
+      #   $btn = $("<button>button covered</button>")
+      #   .attr("id", "button-covered-in-nav")
+      #   .appendTo(cy.$$("#fixed-nav-test"))
 
-        $nav = $("<nav>nav on button</nav>").css({
-          position: "fixed",
-          left: 0
-          top: 0,
-          padding: 20,
-          backgroundColor: "yellow"
-          zIndex: 1
-        }).prependTo(cy.$$("body"))
+      #   $nav = $("<nav>nav on button</nav>").css({
+      #     position: "fixed",
+      #     left: 0
+      #     top: 0,
+      #     padding: 20,
+      #     backgroundColor: "yellow"
+      #     zIndex: 1
+      #   }).prependTo(cy.$$("body"))
 
-        $nav2 = $("<nav>nav2 on button</nav>").css({
-          position: "fixed",
-          left: 0
-          top: 40,
-          padding: 20,
-          backgroundColor: "red"
-          zIndex: 1
-        }).prependTo(cy.$$("body"))
+      #   $nav2 = $("<nav>nav2 on button</nav>").css({
+      #     position: "fixed",
+      #     left: 0
+      #     top: 40,
+      #     padding: 20,
+      #     backgroundColor: "red"
+      #     zIndex: 1
+      #   }).prependTo(cy.$$("body"))
 
-        scrolled = []
+      #   scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
-          scrolled.push(type)
+      #   cy.on "scrolled", ($el, type) ->
+      #     scrolled.push(type)
 
-        cy.get("#button-covered-in-nav").click().then ->
-          ## - element scrollIntoView
-          ## - element scrollIntoView (retry animation coords)
-          ## - window (nav1)
-          ## - window (nav2)
-          expect(scrolled).to.deep.eq(["element", "element", "window", "window"])
+      #   cy.get("#button-covered-in-nav").click().then ->
+      #     ## - element scrollIntoView
+      #     ## - element scrollIntoView (retry animation coords)
+      #     ## - window (nav1)
+      #     ## - window (nav2)
+      #     expect(scrolled).to.deep.eq(["element", "element", "window", "window"])
 
-      it "scrolls a container past a fixed position element when being covered", ->
-        cy.viewport(600, 450)
+      # it "scrolls a container past a fixed position element when being covered", ->
+      #   cy.viewport(600, 450)
 
-        $body = cy.$$("body")
+      #   $body = cy.$$("body")
 
-        ## we must remove all of our children to
-        ## prevent the window from scrolling
-        $body.children().remove()
+      #   ## we must remove all of our children to
+      #   ## prevent the window from scrolling
+      #   $body.children().remove()
 
-        ## this tests that our container properly scrolls!
-        $container = $("<div></div>")
-        .attr("id", "scrollable-container")
-        .css({
-          position: "relative"
-          width: 300
-          height: 200
-          marginBottom: 100
-          backgroundColor: "green"
-          overflow: "auto"
-        })
-        .prependTo($body)
+      #   ## this tests that our container properly scrolls!
+      #   $container = $("<div></div>")
+      #   .attr("id", "scrollable-container")
+      #   .css({
+      #     position: "relative"
+      #     width: 300
+      #     height: 200
+      #     marginBottom: 100
+      #     backgroundColor: "green"
+      #     overflow: "auto"
+      #   })
+      #   .prependTo($body)
 
-        $btn = $("<button>button covered</button>")
-        .attr("id", "button-covered-in-nav")
-        .css({
-          marginTop: 500
-          # marginLeft: 500
-          marginBottom: 500
-        })
-        .appendTo($container)
+      #   $btn = $("<button>button covered</button>")
+      #   .attr("id", "button-covered-in-nav")
+      #   .css({
+      #     marginTop: 500
+      #     # marginLeft: 500
+      #     marginBottom: 500
+      #   })
+      #   .appendTo($container)
 
-        $nav = $("<nav>nav on button</nav>")
-        .css({
-          position: "fixed",
-          left: 0
-          top: 0,
-          padding: 20,
-          backgroundColor: "yellow"
-          zIndex: 1
-        })
-        .prependTo($container)
+      #   $nav = $("<nav>nav on button</nav>")
+      #   .css({
+      #     position: "fixed",
+      #     left: 0
+      #     top: 0,
+      #     padding: 20,
+      #     backgroundColor: "yellow"
+      #     zIndex: 1
+      #   })
+      #   .prependTo($container)
 
-        scrolled = []
+      #   scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
-          scrolled.push(type)
+      #   cy.on "scrolled", ($el, type) ->
+      #     scrolled.push(type)
 
-        cy.get("#button-covered-in-nav").click().then ->
-          ## - element scrollIntoView
-          ## - element scrollIntoView (retry animation coords)
-          ## - window
-          ## - container
-          expect(scrolled).to.deep.eq(["element", "element", "window", "container"])
+      #   cy.get("#button-covered-in-nav").click().then ->
+      #     ## - element scrollIntoView
+      #     ## - element scrollIntoView (retry animation coords)
+      #     ## - window
+      #     ## - container
+      #     expect(scrolled).to.deep.eq(["element", "element", "window", "container"])
 
-      it "waits until element becomes visible", ->
-        $btn = cy.$$("#button").hide()
+      # it "waits until element becomes visible", ->
+      #   $btn = cy.$$("#button").hide()
 
-        retried = false
+      #   retried = false
 
-        cy.on "command:retry", _.after 3, ->
-          $btn.show()
-          retried = true
+      #   cy.on "command:retry", _.after 3, ->
+      #     $btn.show()
+      #     retried = true
 
-        cy.get("#button").click().then ->
-          expect(retried).to.be.true
+      #   cy.get("#button").click().then ->
+      #     expect(retried).to.be.true
 
-      it "waits until element is no longer disabled", ->
-        $btn = cy.$$("#button").prop("disabled", true)
+      # it "waits until element is no longer disabled", ->
+      #   $btn = cy.$$("#button").prop("disabled", true)
 
-        retried = false
-        clicks = 0
+      #   retried = false
+      #   clicks = 0
 
-        $btn.on "click", ->
-          clicks += 1
+      #   $btn.on "click", ->
+      #     clicks += 1
 
-        cy.on "command:retry", _.after 3, ->
-          $btn.prop("disabled", false)
-          retried = true
+      #   cy.on "command:retry", _.after 3, ->
+      #     $btn.prop("disabled", false)
+      #     retried = true
 
-        cy.get("#button").click().then ->
-          expect(clicks).to.eq(1)
-          expect(retried).to.be.true
+      #   cy.get("#button").click().then ->
+      #     expect(clicks).to.eq(1)
+      #     expect(retried).to.be.true
 
-      it "waits until element stops animating", ->
-        retries = 0
+      # it "waits until element stops animating", ->
+      #   retries = 0
 
-        cy.on "command:retry", (obj) ->
-          retries += 1
+      #   cy.on "command:retry", (obj) ->
+      #     retries += 1
 
-        cy.stub(cy, "ensureElementIsNotAnimating")
-        .throws(new Error("animating!"))
-        .onThirdCall().returns()
+      #   cy.stub(cy, "ensureElementIsNotAnimating")
+      #   .throws(new Error("animating!"))
+      #   .onThirdCall().returns()
 
-        cy.get("button:first").click().then ->
-          ## - retry animation coords
-          ## - retry animation
-          ## - retry animation
-          expect(retries).to.eq(3)
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+      #   cy.get("button:first").click().then ->
+      #     ## - retry animation coords
+      #     ## - retry animation
+      #     ## - retry animation
+      #     expect(retries).to.eq(3)
+      #     expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
 
-      it "does not throw when waiting for animations is disabled", ->
-        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
-        Cypress.config("waitForAnimations", false)
+      # it "does not throw when waiting for animations is disabled", ->
+      #   cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
+      #   Cypress.config("waitForAnimations", false)
 
-        cy.get("button:first").click().then ->
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      #   cy.get("button:first").click().then ->
+      #     expect(cy.ensureElementIsNotAnimating).not.to.be.called
 
-      it "does not throw when turning off waitForAnimations in options", ->
-        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
+      # it "does not throw when turning off waitForAnimations in options", ->
+      #   cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
 
-        cy.get("button:first").click({waitForAnimations: false}).then ->
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      #   cy.get("button:first").click({waitForAnimations: false}).then ->
+      #     expect(cy.ensureElementIsNotAnimating).not.to.be.called
 
-      it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
-        $btn = cy.$$("button:first")
+      # it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
+      #   $btn = cy.$$("button:first")
 
-        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+      #   { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        cy.spy(cy, "ensureElementIsNotAnimating")
+      #   cy.spy(cy, "ensureElementIsNotAnimating")
 
-        cy.get("button:first").click({animationDistanceThreshold: 1000}).then ->
-          args = cy.ensureElementIsNotAnimating.firstCall.args
+      #   cy.get("button:first").click({animationDistanceThreshold: 1000}).then ->
+      #     args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
-          expect(args[2]).to.eq(1000)
+      #     expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+      #     expect(args[2]).to.eq(1000)
 
-      it "passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
-        animationDistanceThreshold = Cypress.config("animationDistanceThreshold")
+      # it "passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
+      #   animationDistanceThreshold = Cypress.config("animationDistanceThreshold")
 
-        $btn = cy.$$("button:first")
+      #   $btn = cy.$$("button:first")
 
-        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+      #   { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        cy.spy(cy, "ensureElementIsNotAnimating")
+      #   cy.spy(cy, "ensureElementIsNotAnimating")
 
-        cy.get("button:first").click().then ->
-          args = cy.ensureElementIsNotAnimating.firstCall.args
+      #   cy.get("button:first").click().then ->
+      #     args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
-          expect(args[2]).to.eq(animationDistanceThreshold)
+      #     expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+      #     expect(args[2]).to.eq(animationDistanceThreshold)
 
     describe "assertion verification", ->
       beforeEach ->
@@ -841,6 +848,7 @@ describe "src/cy/commands/actions/click", ->
         cy.get("#button-covered-in-span").click()
 
       it "can click topLeft", (done) ->
+
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
 
         $span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)

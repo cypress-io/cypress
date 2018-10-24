@@ -24,6 +24,28 @@
   "files": [
     "dist"
   ],
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "@babel/env",
+            "@babel/react"
+          ],
+          "plugins": [
+            "add-module-exports",
+            [
+              "@babel/plugin-proposal-class-properties",
+              {
+                "loose": true
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
   "devDependencies": {
     "@cypress/react-tooltip": "0.4.0",
     "@cypress/releaser": "0.1.12",
