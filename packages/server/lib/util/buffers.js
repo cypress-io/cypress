@@ -1,46 +1,61 @@
-_   = require("lodash")
-url = require("url")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _   = require("lodash");
+const url = require("url");
+const debug = require("debug")("cypress:server:buffers");
 
-buffers = []
+let buffers = [];
 
 module.exports = {
-  all: -> buffers
+  all() { return buffers; },
 
-  keys: -> _.map(buffers, "url")
+  keys() { return _.map(buffers, "url"); },
 
-  reset: ->
-    buffers = []
+  reset() {
+    debug("resetting buffers");
 
-  set: (obj = {}) ->
-    buffers.push _.pick(obj, "url", "originalUrl", "jar", "stream", "response", "details")
+    return buffers = [];
+  },
 
-  getByOriginalUrl: (str) ->
-    _.find(buffers, {originalUrl: str})
+  set(obj = {}) {
+    return buffers.push(_.pick(obj, "url", "originalUrl", "jar", "stream", "response", "details"));
+  },
 
-  get: (str) ->
-    find = (str) ->
-      _.find(buffers, {url: str})
+  getByOriginalUrl(str) {
+    return _.find(buffers, {originalUrl: str});
+  },
 
-    b = find(str)
+  get(str) {
+    const find = str => _.find(buffers, {url: str});
 
-    return b if b
+    const b = find(str);
 
-    parsed = url.parse(str)
+    if (b) { return b; }
 
-    ## if we're on https and we have a port
-    ## then attempt to find the buffer by
-    ## slicing off the port since our buffer
-    ## was likely stored without a port
-    if parsed.protocol is "https:" and parsed.port
-      parsed.host = parsed.host.split(":")[0]
-      parsed.port = null
+    const parsed = url.parse(str);
 
-      find(parsed.format())
+    //# if we're on https and we have a port
+    //# then attempt to find the buffer by
+    //# slicing off the port since our buffer
+    //# was likely stored without a port
+    if ((parsed.protocol === "https:") && parsed.port) {
+      parsed.host = parsed.host.split(":")[0];
+      parsed.port = null;
 
-  take: (str) ->
-    if buffer = @get(str)
-      buffers = _.without(buffers, buffer)
+      return find(parsed.format());
+    }
+  },
 
-    return buffer
+  take(str) {
+    let buffer;
+    if (buffer = this.get(str)) {
+      buffers = _.without(buffers, buffer);
+    }
 
-}
+    return buffer;
+  }
+
+};

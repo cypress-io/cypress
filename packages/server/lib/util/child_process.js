@@ -1,4 +1,4 @@
-cp = require("child_process")
-Promise = require("bluebird")
+const cp = require("child_process");
+const Promise = require("bluebird");
 
-module.exports = Promise.promisifyAll(cp)
+module.exports = Promise.promisifyAll(cp);

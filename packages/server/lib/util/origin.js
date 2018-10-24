@@ -1,12 +1,18 @@
-url = require("url")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const url = require("url");
 
-module.exports = (urlStr) ->
-  parsed = url.parse(urlStr)
+module.exports = function(urlStr) {
+  const parsed = url.parse(urlStr);
 
-  parsed.hash     = null
-  parsed.search   = null
-  parsed.query    = null
-  parsed.path     = null
-  parsed.pathname = null
+  parsed.hash     = null;
+  parsed.search   = null;
+  parsed.query    = null;
+  parsed.path     = null;
+  parsed.pathname = null;
 
-  url.format(parsed)
+  return url.format(parsed);
+};

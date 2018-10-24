@@ -1,4 +1,4 @@
-glob = require("glob")
-Promise = require("bluebird")
+const glob = require("glob");
+const Promise = require("bluebird");
 
-module.exports = Promise.promisify(glob)
+module.exports = Promise.promisify(glob);

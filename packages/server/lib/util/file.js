@@ -1,168 +1,209 @@
-_ = require("lodash")
-os = require("os")
-md5 = require("md5")
-path = require("path")
-debug = require('debug')('cypress:server:file')
-Queue = require("p-queue")
-Promise = require("bluebird")
-lockFile = Promise.promisifyAll(require("lockfile"))
-fs = require("./fs")
-env = require("./env")
-exit = require("./exit")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const os = require("os");
+const md5 = require("md5");
+const path = require("path");
+const debug = require('debug')('cypress:server:file');
+const Queue = require("p-queue");
+const Promise = require("bluebird");
+const lockFile = Promise.promisifyAll(require("lockfile"));
+const fs = require("./fs");
+const env = require("./env");
+const exit = require("./exit");
 
-DEBOUNCE_LIMIT = 1000
-LOCK_TIMEOUT = 2000
+const DEBOUNCE_LIMIT = 1000;
+const LOCK_TIMEOUT = 2000;
 
-class File
-  constructor: (options = {}) ->
-    if not options.path
-      throw new Error("Must specify path to file when creating new FileUtil()")
+class File {
+  constructor(options = {}) {
+    if (!options.path) {
+      throw new Error("Must specify path to file when creating new FileUtil()");
+    }
 
-    @path = options.path
+    this.path = options.path;
 
-    @_lockFileDir = path.join(os.tmpdir(), "cypress")
-    @_lockFilePath = path.join(@_lockFileDir, "#{md5(@path)}.lock")
+    this._lockFileDir = path.join(os.tmpdir(), "cypress");
+    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`);
 
-    @_queue = new Queue({concurrency: 1})
+    this._queue = new Queue({concurrency: 1});
 
-    @_cache = {}
-    @_lastRead = 0
+    this._cache = {};
+    this._lastRead = 0;
 
-    exit.ensure => lockFile.unlockSync(@_lockFilePath)
+    exit.ensure(() => lockFile.unlockSync(this._lockFilePath));
+  }
 
-  transaction: (fn) ->
-    debug("transaction for %s", @path)
-    @_addToQueue =>
-      fn({
-        get: @_get.bind(@, true)
-        set: @_set.bind(@, true)
-      })
+  transaction(fn) {
+    debug("transaction for %s", this.path);
+    return this._addToQueue(() => {
+      return fn({
+        get: this._get.bind(this, true),
+        set: this._set.bind(this, true)
+      });
+    });
+  }
 
-  get: (args...) ->
-    debug("get values from %s", @path)
-    @_get(false, args...)
+  get(...args) {
+    debug("get values from %s", this.path);
+    return this._get(false, ...args);
+  }
 
-  set: (args...) ->
-    debug("set values in %s", @path)
-    @_set(false, args...)
+  set(...args) {
+    debug("set values in %s", this.path);
+    return this._set(false, ...args);
+  }
 
-  remove: ->
-    debug("remove %s", @path)
-    @_cache = {}
-    @_lock()
-    .then =>
-      fs.removeAsync(@path)
-    .finally =>
-      debug("remove succeeded or failed for %s", @path)
-      @_unlock()
+  remove() {
+    debug("remove %s", this.path);
+    this._cache = {};
+    return this._lock()
+    .then(() => {
+      return fs.removeAsync(this.path);
+  }).finally(() => {
+      debug("remove succeeded or failed for %s", this.path);
+      return this._unlock();
+    });
+  }
 
-  _get: (inTransaction, key, defaultValue) ->
-    get = if inTransaction
-      @_getContents()
-    else
-      @_addToQueue => @_getContents()
+  _get(inTransaction, key, defaultValue) {
+    const get = inTransaction ?
+      this._getContents()
+    :
+      this._addToQueue(() => this._getContents());
 
-    get.then (contents) ->
-      if not key?
-        return contents
+    return get.then(function(contents) {
+      if ((key == null)) {
+        return contents;
+      }
 
-      value = _.get(contents, key)
-      if value is undefined
-        defaultValue
-      else
-        value
+      const value = _.get(contents, key);
+      if (value === undefined) {
+        return defaultValue;
+      } else {
+        return value;
+      }
+    });
+  }
 
-  _getContents: (inTransaction) ->
-    ## read from disk on first call, but resolve cache for any subsequent
-    ## calls within the DEBOUNCE_LIMIT
-    ## once the DEBOUNCE_LIMIT passes, read from disk again
-    ## on the next call
-    if Date.now() - @_lastRead > DEBOUNCE_LIMIT
-      @_lastRead = Date.now()
-      @_read().then (contents) =>
-        @_cache = contents
-    else
-      Promise.resolve(@_cache)
+  _getContents(inTransaction) {
+    //# read from disk on first call, but resolve cache for any subsequent
+    //# calls within the DEBOUNCE_LIMIT
+    //# once the DEBOUNCE_LIMIT passes, read from disk again
+    //# on the next call
+    if ((Date.now() - this._lastRead) > DEBOUNCE_LIMIT) {
+      this._lastRead = Date.now();
+      return this._read().then(contents => {
+        return this._cache = contents;
+      });
+    } else {
+      return Promise.resolve(this._cache);
+    }
+  }
 
-  _read: ->
-    @_lock()
-    .then =>
-      debug('read %s', @path)
-      fs.readJsonAsync(@path, "utf8")
-    .catch (err) =>
-      ## default to {} in certain cases, otherwise bubble up error
+  _read() {
+    return this._lock()
+    .then(() => {
+      debug('read %s', this.path);
+      return fs.readJsonAsync(this.path, "utf8");
+  }).catch(err => {
+      //# default to {} in certain cases, otherwise bubble up error
       if (
-        err.code is "ENOENT" or ## file doesn't exist
-        err.code is "EEXIST" or ## file contains invalid JSON
-        err.name is "SyntaxError" ## can't get lock on file
-      )
-        return {}
-      else
-        throw err
-    .finally =>
-      debug("read succeeded or failed for %s", @path)
-      @_unlock()
+        (err.code === "ENOENT") || //# file doesn't exist
+        (err.code === "EEXIST") || //# file contains invalid JSON
+        (err.name === "SyntaxError") //# can't get lock on file
+      ) {
+        return {};
+      } else {
+        throw err;
+      }
+    }).finally(() => {
+      debug("read succeeded or failed for %s", this.path);
+      return this._unlock();
+    });
+  }
 
-  _set: (inTransaction, key, value) ->
-    if not _.isString(key) and not _.isPlainObject(key)
-      type = if _.isArray(key) then "array" else (typeof key)
-      throw new TypeError("Expected `key` to be of type `string` or `object`, got `#{type}`")
+  _set(inTransaction, key, value) {
+    if (!_.isString(key) && !_.isPlainObject(key)) {
+      const type = _.isArray(key) ? "array" : (typeof key);
+      throw new TypeError(`Expected \`key\` to be of type \`string\` or \`object\`, got \`${type}\``);
+    }
 
-    valueObject = if _.isString(key)
-      tmp = {}
-      tmp[key] = value
-      tmp
-    else
-      key
+    const valueObject = (() => {
+      if (_.isString(key)) {
+      const tmp = {};
+      tmp[key] = value;
+      return tmp;
+    } else {
+      return key;
+    }
+    })();
 
-    if inTransaction
-      @_setContents(valueObject)
-    else
-      @_addToQueue => @_setContents(valueObject)
+    if (inTransaction) {
+      return this._setContents(valueObject);
+    } else {
+      return this._addToQueue(() => this._setContents(valueObject));
+    }
+  }
 
-  _setContents: (valueObject) ->
-    @_getContents().then (contents) =>
-      _.each valueObject, (value, key) ->
-        _.set(contents, key, value)
+  _setContents(valueObject) {
+    return this._getContents().then(contents => {
+      _.each(valueObject, (value, key) => _.set(contents, key, value));
 
-      @_cache = contents
-      @_write()
+      this._cache = contents;
+      return this._write();
+    });
+  }
 
-  _addToQueue: (operation) ->
-    ## queues operations so they occur serially as invoked
-    Promise.try =>
-      @_queue.add(operation)
+  _addToQueue(operation) {
+    //# queues operations so they occur serially as invoked
+    return Promise.try(() => {
+      return this._queue.add(operation);
+    });
+  }
 
-  _write: ->
-    @_lock()
-    .then =>
-      debug('write %s', @path)
-      fs.outputJsonAsync(@path, @_cache, {spaces: 2})
-    .finally =>
-      debug("write succeeded or failed for %s", @path)
-      @_unlock()
+  _write() {
+    return this._lock()
+    .then(() => {
+      debug('write %s', this.path);
+      return fs.outputJsonAsync(this.path, this._cache, {spaces: 2});
+  }).finally(() => {
+      debug("write succeeded or failed for %s", this.path);
+      return this._unlock();
+    });
+  }
 
-  _lock: ->
-    debug("attempt to get lock on %s", @path)
-    fs.ensureDirAsync(@_lockFileDir).then =>
-      ## polls every 100ms up to 2000ms to obtain lock, otherwise rejects
-      lockFile.lockAsync(@_lockFilePath, {wait: LOCK_TIMEOUT})
-    .finally =>
-      debug("gettin lock succeeded or failed for %s", @path)
+  _lock() {
+    debug("attempt to get lock on %s", this.path);
+    return fs.ensureDirAsync(this._lockFileDir).then(() => {
+      //# polls every 100ms up to 2000ms to obtain lock, otherwise rejects
+      return lockFile.lockAsync(this._lockFilePath, {wait: LOCK_TIMEOUT});
+  }).finally(() => {
+      return debug("gettin lock succeeded or failed for %s", this.path);
+    });
+  }
 
-  _unlock: ->
-    debug("attempt to unlock %s", @path)
-    lockFile.unlockAsync(@_lockFilePath)
-    .timeout(env.get("FILE_UNLOCK_TIMEOUT") or LOCK_TIMEOUT)
-    .catch(Promise.TimeoutError, ->) ## ignore timeouts
-    .finally =>
-      debug("unlock succeeded or failed for %s", @path)
-
-File.noopFile = {
-  get: -> Promise.resolve({})
-  set: -> Promise.resolve()
-  transaction: ->
-  remove: -> Promise.resolve()
+  _unlock() {
+    debug("attempt to unlock %s", this.path);
+    return lockFile.unlockAsync(this._lockFilePath)
+    .timeout(env.get("FILE_UNLOCK_TIMEOUT") || LOCK_TIMEOUT)
+    .catch(Promise.TimeoutError, function() {}) //# ignore timeouts
+    .finally(() => {
+      return debug("unlock succeeded or failed for %s", this.path);
+    });
+  }
 }
 
-module.exports = File
+File.noopFile = {
+  get() { return Promise.resolve({}); },
+  set() { return Promise.resolve(); },
+  transaction() {},
+  remove() { return Promise.resolve(); }
+};
+
+module.exports = File;

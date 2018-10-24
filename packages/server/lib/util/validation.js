@@ -1,78 +1,98 @@
-_ = require("lodash")
-errors = require("../errors")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const errors = require("../errors");
 
-## validation functions take a key and a value and should:
-##  - return true if it passes validation
-##  - return a error message if it fails validation
+//# validation functions take a key and a value and should:
+//#  - return true if it passes validation
+//#  - return a error message if it fails validation
 
-errMsg = (key, value, type) ->
-  "Expected '#{key}' to be #{type}. Instead the value was: #{JSON.stringify(value)}"
+const errMsg = (key, value, type) => `Expected '${key}' to be ${type}. Instead the value was: ${JSON.stringify(value)}`;
 
-isFullyQualifiedUrl = (value) ->
-  isString(value) and /^https?\:\/\//.test(value)
+const isFullyQualifiedUrl = value => isString(value) && /^https?\:\/\//.test(value);
 
-isArrayOfStrings = (value) ->
-  isArray(value) and _.every(value, isString)
+const isArrayOfStrings = value => isArray(value) && _.every(value, isString);
 
-isFalse = (value) ->
-  value is false
+const isFalse = value => value === false;
 
-isArray  = _.isArray
-isNumber = _.isFinite
-isString = _.isString
+var { isArray }  = _;
+const isNumber = _.isFinite;
+var { isString } = _;
 
 module.exports = {
-  isNumber: (key, value) ->
-    if not value? or isNumber(value)
-      true
-    else
-      errMsg(key, value, "a number")
+  isNumber(key, value) {
+    if ((value == null) || isNumber(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a number");
+    }
+  },
 
-  isNumberOrFalse: (key, value) ->
-    if isNumber(value) or isFalse(value)
-      true
-    else
-      errMsg(key, value, "a number or false")
+  isNumberOrFalse(key, value) {
+    if (isNumber(value) || isFalse(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a number or false");
+    }
+  },
 
-  isFullyQualifiedUrl: (key, value) ->
-    if not value? or isFullyQualifiedUrl(value)
-      return true
-    else
-      errMsg(key, value, "a fully qualified URL (starting with http:// or https://)")
+  isFullyQualifiedUrl(key, value) {
+    if ((value == null) || isFullyQualifiedUrl(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a fully qualified URL (starting with http:// or https://)");
+    }
+  },
 
-  isBoolean: (key, value) ->
-    if not value? or _.isBoolean(value)
-      true
-    else
-      errMsg(key, value, "a boolean")
+  isBoolean(key, value) {
+    if ((value == null) || _.isBoolean(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a boolean");
+    }
+  },
 
-  isPlainObject: (key, value) ->
-    if not value? or _.isPlainObject(value)
-      true
-    else
-      errMsg(key, value, "a plain object")
+  isPlainObject(key, value) {
+    if ((value == null) || _.isPlainObject(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a plain object");
+    }
+  },
 
-  isString: (key, value) ->
-    if not value? or isString(value)
-      true
-    else
-      errMsg(key, value, "a string")
+  isString(key, value) {
+    if ((value == null) || isString(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a string");
+    }
+  },
 
-  isArray: (key, value) ->
-    if not value? or isArray(value)
-      true
-    else
-      errMsg(key, value, "an array")
+  isArray(key, value) {
+    if ((value == null) || isArray(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "an array");
+    }
+  },
 
-  isStringOrFalse: (key, value) ->
-    if isString(value) or isFalse(value)
-      true
-    else
-      errMsg(key, value, "a string or false")
+  isStringOrFalse(key, value) {
+    if (isString(value) || isFalse(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a string or false");
+    }
+  },
 
-  isStringOrArrayOfStrings: (key, value) ->
-    if isString(value) or isArrayOfStrings(value)
-      true
-    else
-      errMsg(key, value, "a string or an array of strings")
-}
+  isStringOrArrayOfStrings(key, value) {
+    if (isString(value) || isArrayOfStrings(value)) {
+      return true;
+    } else {
+      return errMsg(key, value, "a string or an array of strings");
+    }
+  }
+};

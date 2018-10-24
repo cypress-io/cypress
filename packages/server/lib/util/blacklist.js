@@ -1,21 +1,28 @@
-_ = require("lodash")
-minimatch = require("minimatch")
-uri = require("./uri")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const minimatch = require("minimatch");
+const uri = require("./uri");
 
-matches = (urlToCheck, blacklistHosts) ->
-  ## normalize into flat array
-  blacklistHosts = [].concat(blacklistHosts)
+const matches = function(urlToCheck, blacklistHosts) {
+  //# normalize into flat array
+  blacklistHosts = [].concat(blacklistHosts);
 
-  urlToCheck = uri.stripProtocolAndDefaultPorts(urlToCheck)
+  urlToCheck = uri.stripProtocolAndDefaultPorts(urlToCheck);
 
-  matchUrl = (hostMatcher) ->
-    ## use minimatch against the url
-    ## to see if any match
+  const matchUrl = hostMatcher =>
+    //# use minimatch against the url
+    //# to see if any match
     minimatch(urlToCheck, hostMatcher)
+  ;
 
-  _.find(blacklistHosts, matchUrl)
+  return _.find(blacklistHosts, matchUrl);
+};
 
 
 module.exports = {
   matches
-}
+};
