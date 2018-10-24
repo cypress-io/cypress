@@ -1,48 +1,58 @@
-convertNewLinesToBr = (text) ->
-  text.split("\n").join("<br />")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const convertNewLinesToBr = text => text.split("\n").join("<br />");
 
 module.exports = {
-  http: (err, url) ->
-    """
-    Cypress errored attempting to make an http request to this url:
+  http(err, url) {
+    return `\
+Cypress errored attempting to make an http request to this url:
 
-    #{url}
-
-
-    The error was:
-
-    #{err.message}
+${url}
 
 
-    The stack trace was:
+The error was:
 
-    #{err.stack}
-    """
+${err.message}
 
-  file: (url, status) ->
-    """
-    Cypress errored trying to serve this file from your system:
 
-    #{url}
+The stack trace was:
 
-    #{if status is 404 then "The file was not found." else ""}
-    """
+${err.stack}\
+`;
+  },
 
-  wrap: (contents) ->
-    """
-    <!DOCTYPE html>
-    <html>
-    <body>
-      #{convertNewLinesToBr(contents)}
-    </body>
-    </html>
-    """
+  file(url, status) {
+    return `\
+Cypress errored trying to serve this file from your system:
 
-  get: (err, url, status, strategy) ->
-    contents =
-      switch strategy
-        when "http" then @http(err, url)
-        when "file" then @file(url, status)
+${url}
 
-    @wrap(contents)
-}
+${status === 404 ? "The file was not found." : ""}\
+`;
+  },
+
+  wrap(contents) {
+    return `\
+<!DOCTYPE html>
+<html>
+<body>
+  ${convertNewLinesToBr(contents)}
+</body>
+</html>\
+`;
+  },
+
+  get(err, url, status, strategy) {
+    const contents =
+      (() => { switch (strategy) {
+        case "http": return this.http(err, url);
+        case "file": return this.file(url, status);
+      } })();
+
+    return this.wrap(contents);
+  }
+};

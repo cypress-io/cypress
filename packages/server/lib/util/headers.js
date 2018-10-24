@@ -1,17 +1,26 @@
-contentType  = require("content-type")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const contentType  = require("content-type");
 
 module.exports = {
-  getContentType: (res, type) ->
-    try
-      contentType.parse(res).type
-    catch err
-      null
+  getContentType(res, type) {
+    try {
+      return contentType.parse(res).type;
+    } catch (err) {
+      return null;
+    }
+  },
 
-  hasContentType: (res, type) ->
-    ## does the response object have a content-type
-    ## that matches what we expect
-    try
-      contentType.parse(res).type is type
-    catch err
-      false
-}
+  hasContentType(res, type) {
+    //# does the response object have a content-type
+    //# that matches what we expect
+    try {
+      return contentType.parse(res).type === type;
+    } catch (err) {
+      return false;
+    }
+  }
+};

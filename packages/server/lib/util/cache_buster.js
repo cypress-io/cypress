@@ -1,17 +1,27 @@
-_     = require 'lodash'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _     = require('lodash');
 
-DIGITS = 3
-SEPERATOR = "-"
+const DIGITS = 3;
+const SEPERATOR = "-";
 
-module.exports =
-  get: ->
-    SEPERATOR + Math.random().toFixed(DIGITS).slice(2, 5)
+module.exports = {
+  get() {
+    return SEPERATOR + Math.random().toFixed(DIGITS).slice(2, 5);
+  },
 
-  strip: (str) ->
-    if @_hasCacheBuster(str)
-      str.slice(0, -4)
-    else
-      str
+  strip(str) {
+    if (this._hasCacheBuster(str)) {
+      return str.slice(0, -4);
+    } else {
+      return str;
+    }
+  },
 
-  _hasCacheBuster: (str) ->
-    str.split("").slice(-4, -3).join("") is SEPERATOR
+  _hasCacheBuster(str) {
+    return str.split("").slice(-4, -3).join("") === SEPERATOR;
+  }
+};

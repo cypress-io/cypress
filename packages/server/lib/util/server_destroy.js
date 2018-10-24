@@ -1,10 +1,17 @@
-Promise      = require("bluebird")
-allowDestroy = require("server-destroy")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Promise      = require("bluebird");
+const allowDestroy = require("server-destroy");
 
-module.exports = (server) ->
-  allowDestroy(server)
+module.exports = function(server) {
+  allowDestroy(server);
 
-  server.destroyAsync = ->
+  return server.destroyAsync = () =>
     Promise.promisify(server.destroy)()
-    .catch ->
-      ## dont catch any errors
+    .catch(function() {})
+  ;
+};
+      //# dont catch any errors

@@ -1,63 +1,78 @@
-moment    = require("moment")
-pluralize = require("pluralize")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const moment    = require("moment");
+const pluralize = require("pluralize");
 
-parse = (ms) ->
-  mins = 0
+const parse = function(ms) {
+  let mins = 0;
 
-  duration = moment.duration(ms)
+  const duration = moment.duration(ms);
 
-  hours = duration.hours()
+  const hours = duration.hours();
 
-  mins = hours * 60
+  mins = hours * 60;
 
   return {
-    mins
-    hours
+    mins,
+    hours,
     duration
+  };
+};
+
+const long = function(ms, alwaysIncludeSeconds = true) {
+  let word;
+  const msg = [];
+
+  let { mins, duration } = parse(ms);
+
+  if (mins += duration.minutes()) {
+    word = pluralize("minute", mins);
+    msg.push(mins + " " + word);
   }
 
-long = (ms, alwaysIncludeSeconds = true) ->
-  msg = []
+  const secs = duration.seconds();
 
-  { mins, duration } = parse(ms)
+  if (alwaysIncludeSeconds || (secs > 0)) {
+    word = pluralize("second", secs);
+    msg.push(secs + " " + word);
+  }
 
-  if mins += duration.minutes()
-    word = pluralize("minute", mins)
-    msg.push(mins + " " + word)
+  return msg.join(", ");
+};
 
-  secs = duration.seconds()
+const short = function(ms) {
+  const msg = [];
 
-  if alwaysIncludeSeconds or secs > 0
-    word = pluralize("second", secs)
-    msg.push(secs + " " + word)
+  let { mins, duration } = parse(ms);
 
-  msg.join(", ")
+  if (mins += duration.minutes()) {
+    msg.push(mins + "m");
+  }
 
-short = (ms) ->
-  msg = []
+  const secs = duration.seconds();
 
-  { mins, duration } = parse(ms)
+  if (secs) {
+    msg.push(secs + "s");
+  } else {
+    if (!mins) {
+      const millis = duration.milliseconds();
 
-  if mins += duration.minutes()
-    msg.push(mins + "m")
+      if (millis) {
+        msg.push(millis + "ms");
+      } else {
+        msg.push(secs + "s");
+      }
+    }
+  }
 
-  secs = duration.seconds()
-
-  if secs
-    msg.push(secs + "s")
-  else
-    if not mins
-      millis = duration.milliseconds()
-
-      if millis
-        msg.push(millis + "ms")
-      else
-        msg.push(secs + "s")
-
-  msg.join(", ")
+  return msg.join(", ");
+};
 
 module.exports = {
-  long
+  long,
 
   short
-}
+};

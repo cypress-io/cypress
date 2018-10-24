@@ -1,31 +1,39 @@
-fs = require("fs-extra")
-Promise = require("bluebird")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const fs = require("fs-extra");
+const Promise = require("bluebird");
 
-## warn users if somehow synchronous file methods are invoked
-## these methods due to "too many files" errors are a huge pain
-warnOnSyncFileSystem = ->
-  console.error "WARNING: fs sync methods can fail due to EMFILE errors"
-  console.error "Cypress only works reliably when ALL fs calls are async"
-  console.error "You should modify these sync calls to be async"
+//# warn users if somehow synchronous file methods are invoked
+//# these methods due to "too many files" errors are a huge pain
+const warnOnSyncFileSystem = function() {
+  console.error("WARNING: fs sync methods can fail due to EMFILE errors");
+  console.error("Cypress only works reliably when ALL fs calls are async");
+  return console.error("You should modify these sync calls to be async");
+};
 
-topLines = (from, n, text) ->
-  text.split("\n").slice(from, n).join("\n")
+const topLines = (from, n, text) => text.split("\n").slice(from, n).join("\n");
 
-# just hide this function itself
-# stripping top few lines of the stack
-getStack = () ->
-  err = new Error()
-  topLines(3, 10, err.stack)
+// just hide this function itself
+// stripping top few lines of the stack
+const getStack = function() {
+  const err = new Error();
+  return topLines(3, 10, err.stack);
+};
 
-addSyncFileSystemWarnings = (fs) ->
-  oldExistsSync = fs.existsSync
-  fs.existsSync = (filename) ->
-    warnOnSyncFileSystem()
-    console.error(getStack())
-    oldExistsSync(filename)
+const addSyncFileSystemWarnings = function(fs) {
+  const oldExistsSync = fs.existsSync;
+  return fs.existsSync = function(filename) {
+    warnOnSyncFileSystem();
+    console.error(getStack());
+    return oldExistsSync(filename);
+  };
+};
 
-addSyncFileSystemWarnings(fs)
+addSyncFileSystemWarnings(fs);
 
-promisifiedFs = Promise.promisifyAll(fs)
+const promisifiedFs = Promise.promisifyAll(fs);
 
-module.exports = promisifiedFs
+module.exports = promisifiedFs;
