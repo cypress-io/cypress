@@ -1,18 +1,20 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 module.exports = {
-  partial(domain) {
+  partial (domain) {
     return `\
 <script type='text/javascript'> \
 document.domain = '${domain}'; \
 </script>\
-`;
+`
   },
 
-  full(domain) {
+  full (domain) {
     return `\
 <script type='text/javascript'> \
 document.domain = '${domain}'; \
@@ -25,7 +27,7 @@ throw new Error('Something went terribly wrong and we cannot proceed. We expecte
 \
 Cypress.action('app:window:before:load', window); \
 </script>\
-`;
-  }
+`
+  },
 
-};
+}

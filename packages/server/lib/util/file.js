@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -5,205 +10,241 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const os = require("os");
-const md5 = require("md5");
-const path = require("path");
-const debug = require('debug')('cypress:server:file');
-const Queue = require("p-queue");
-const Promise = require("bluebird");
-const lockFile = Promise.promisifyAll(require("lockfile"));
-const fs = require("./fs");
-const env = require("./env");
-const exit = require("./exit");
+const _ = require('lodash')
+const os = require('os')
+const md5 = require('md5')
+const path = require('path')
+const debug = require('debug')('cypress:server:file')
+const Queue = require('p-queue')
+const Promise = require('bluebird')
+const lockFile = Promise.promisifyAll(require('lockfile'))
+const fs = require('./fs')
+const env = require('./env')
+const exit = require('./exit')
 
-const DEBOUNCE_LIMIT = 1000;
-const LOCK_TIMEOUT = 2000;
+const DEBOUNCE_LIMIT = 1000
+const LOCK_TIMEOUT = 2000
 
 class File {
-  constructor(options = {}) {
+  constructor (options = {}) {
     if (!options.path) {
-      throw new Error("Must specify path to file when creating new FileUtil()");
+      throw new Error('Must specify path to file when creating new FileUtil()')
     }
 
-    this.path = options.path;
+    this.path = options.path
 
-    this._lockFileDir = path.join(os.tmpdir(), "cypress");
-    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`);
+    this._lockFileDir = path.join(os.tmpdir(), 'cypress')
+    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
 
-    this._queue = new Queue({concurrency: 1});
+    this._queue = new Queue({ concurrency: 1 })
 
-    this._cache = {};
-    this._lastRead = 0;
+    this._cache = {}
+    this._lastRead = 0
 
-    exit.ensure(() => lockFile.unlockSync(this._lockFilePath));
+    exit.ensure(() => {
+      return lockFile.unlockSync(this._lockFilePath)
+    })
   }
 
-  transaction(fn) {
-    debug("transaction for %s", this.path);
+  transaction (fn) {
+    debug('transaction for %s', this.path)
+
     return this._addToQueue(() => {
       return fn({
         get: this._get.bind(this, true),
-        set: this._set.bind(this, true)
-      });
-    });
+        set: this._set.bind(this, true),
+      })
+    })
   }
 
-  get(...args) {
-    debug("get values from %s", this.path);
-    return this._get(false, ...args);
+  get (...args) {
+    debug('get values from %s', this.path)
+
+    return this._get(false, ...args)
   }
 
-  set(...args) {
-    debug("set values in %s", this.path);
-    return this._set(false, ...args);
+  set (...args) {
+    debug('set values in %s', this.path)
+
+    return this._set(false, ...args)
   }
 
-  remove() {
-    debug("remove %s", this.path);
-    this._cache = {};
+  remove () {
+    debug('remove %s', this.path)
+    this._cache = {}
+
     return this._lock()
     .then(() => {
-      return fs.removeAsync(this.path);
-  }).finally(() => {
-      debug("remove succeeded or failed for %s", this.path);
-      return this._unlock();
-    });
+      return fs.removeAsync(this.path)
+    }).finally(() => {
+      debug('remove succeeded or failed for %s', this.path)
+
+      return this._unlock()
+    })
   }
 
-  _get(inTransaction, key, defaultValue) {
+  _get (inTransaction, key, defaultValue) {
     const get = inTransaction ?
       this._getContents()
-    :
-      this._addToQueue(() => this._getContents());
+      :
+      this._addToQueue(() => {
+        return this._getContents()
+      })
 
-    return get.then(function(contents) {
+    return get.then((contents) => {
       if ((key == null)) {
-        return contents;
+        return contents
       }
 
-      const value = _.get(contents, key);
+      const value = _.get(contents, key)
+
       if (value === undefined) {
-        return defaultValue;
-      } else {
-        return value;
+        return defaultValue
       }
-    });
+
+      return value
+
+    })
   }
 
-  _getContents(inTransaction) {
+  _getContents (inTransaction) {
     //# read from disk on first call, but resolve cache for any subsequent
     //# calls within the DEBOUNCE_LIMIT
     //# once the DEBOUNCE_LIMIT passes, read from disk again
     //# on the next call
     if ((Date.now() - this._lastRead) > DEBOUNCE_LIMIT) {
-      this._lastRead = Date.now();
-      return this._read().then(contents => {
-        return this._cache = contents;
-      });
-    } else {
-      return Promise.resolve(this._cache);
+      this._lastRead = Date.now()
+
+      return this._read().then((contents) => {
+        this._cache = contents
+      })
     }
+
+    return Promise.resolve(this._cache)
+
   }
 
-  _read() {
+  _read () {
     return this._lock()
     .then(() => {
-      debug('read %s', this.path);
-      return fs.readJsonAsync(this.path, "utf8");
-  }).catch(err => {
+      debug('read %s', this.path)
+
+      return fs.readJsonAsync(this.path, 'utf8')
+    }).catch((err) => {
       //# default to {} in certain cases, otherwise bubble up error
       if (
-        (err.code === "ENOENT") || //# file doesn't exist
-        (err.code === "EEXIST") || //# file contains invalid JSON
-        (err.name === "SyntaxError") //# can't get lock on file
+        (err.code === 'ENOENT') || //# file doesn't exist
+        (err.code === 'EEXIST') || //# file contains invalid JSON
+        (err.name === 'SyntaxError') //# can't get lock on file
       ) {
-        return {};
-      } else {
-        throw err;
+        return {}
       }
+
+      throw err
+
     }).finally(() => {
-      debug("read succeeded or failed for %s", this.path);
-      return this._unlock();
-    });
+      debug('read succeeded or failed for %s', this.path)
+
+      return this._unlock()
+    })
   }
 
-  _set(inTransaction, key, value) {
+  _set (inTransaction, key, value) {
     if (!_.isString(key) && !_.isPlainObject(key)) {
-      const type = _.isArray(key) ? "array" : (typeof key);
-      throw new TypeError(`Expected \`key\` to be of type \`string\` or \`object\`, got \`${type}\``);
+      const type = _.isArray(key) ? 'array' : (typeof key)
+
+      throw new TypeError(`Expected \`key\` to be of type \`string\` or \`object\`, got \`${type}\``)
     }
 
     const valueObject = (() => {
       if (_.isString(key)) {
-      const tmp = {};
-      tmp[key] = value;
-      return tmp;
-    } else {
-      return key;
-    }
-    })();
+        const tmp = {}
+
+        tmp[key] = value
+
+        return tmp
+      }
+
+      return key
+
+    })()
 
     if (inTransaction) {
-      return this._setContents(valueObject);
-    } else {
-      return this._addToQueue(() => this._setContents(valueObject));
+      return this._setContents(valueObject)
     }
+
+    return this._addToQueue(() => {
+      return this._setContents(valueObject)
+    })
+
   }
 
-  _setContents(valueObject) {
-    return this._getContents().then(contents => {
-      _.each(valueObject, (value, key) => _.set(contents, key, value));
+  _setContents (valueObject) {
+    return this._getContents().then((contents) => {
+      _.each(valueObject, (value, key) => {
+        return _.set(contents, key, value)
+      })
 
-      this._cache = contents;
-      return this._write();
-    });
+      this._cache = contents
+
+      return this._write()
+    })
   }
 
-  _addToQueue(operation) {
+  _addToQueue (operation) {
     //# queues operations so they occur serially as invoked
     return Promise.try(() => {
-      return this._queue.add(operation);
-    });
+      return this._queue.add(operation)
+    })
   }
 
-  _write() {
+  _write () {
     return this._lock()
     .then(() => {
-      debug('write %s', this.path);
-      return fs.outputJsonAsync(this.path, this._cache, {spaces: 2});
-  }).finally(() => {
-      debug("write succeeded or failed for %s", this.path);
-      return this._unlock();
-    });
+      debug('write %s', this.path)
+
+      return fs.outputJsonAsync(this.path, this._cache, { spaces: 2 })
+    }).finally(() => {
+      debug('write succeeded or failed for %s', this.path)
+
+      return this._unlock()
+    })
   }
 
-  _lock() {
-    debug("attempt to get lock on %s", this.path);
+  _lock () {
+    debug('attempt to get lock on %s', this.path)
+
     return fs.ensureDirAsync(this._lockFileDir).then(() => {
       //# polls every 100ms up to 2000ms to obtain lock, otherwise rejects
-      return lockFile.lockAsync(this._lockFilePath, {wait: LOCK_TIMEOUT});
-  }).finally(() => {
-      return debug("gettin lock succeeded or failed for %s", this.path);
-    });
+      return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
+    }).finally(() => {
+      return debug('gettin lock succeeded or failed for %s', this.path)
+    })
   }
 
-  _unlock() {
-    debug("attempt to unlock %s", this.path);
+  _unlock () {
+    debug('attempt to unlock %s', this.path)
+
     return lockFile.unlockAsync(this._lockFilePath)
-    .timeout(env.get("FILE_UNLOCK_TIMEOUT") || LOCK_TIMEOUT)
-    .catch(Promise.TimeoutError, function() {}) //# ignore timeouts
+    .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
+    .catch(Promise.TimeoutError, () => {}) //# ignore timeouts
     .finally(() => {
-      return debug("unlock succeeded or failed for %s", this.path);
-    });
+      return debug('unlock succeeded or failed for %s', this.path)
+    })
   }
 }
 
 File.noopFile = {
-  get() { return Promise.resolve({}); },
-  set() { return Promise.resolve(); },
-  transaction() {},
-  remove() { return Promise.resolve(); }
-};
+  get () {
+    return Promise.resolve({})
+  },
+  set () {
+    return Promise.resolve()
+  },
+  transaction () {},
+  remove () {
+    return Promise.resolve()
+  },
+}
 
-module.exports = File;
+module.exports = File
