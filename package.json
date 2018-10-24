@@ -26,7 +26,7 @@
     "link": "node ./scripts/link-packages.js",
     "install-filtered": "npm run all install -- --package $(node ./scripts/check-deps.js --list)",
     "postinstall": "echo 'root postinstall' && npm run link && npm run all install && npm run build",
-    "clean-deps": "npm run all clean-deps",
+    "clean-deps": "npm run all clean-deps && rm -rf node_modules",
     "docker": "./scripts/run-docker-local.sh",
     "lint-js": "eslint --fix scripts/*.js packages/ts/*.js cli/*.js cli/**/*.js",
     "lint-coffee": "coffeelint scripts/**/*.coffee",
