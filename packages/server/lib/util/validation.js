@@ -1,98 +1,120 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const errors = require("../errors");
+const _ = require('lodash')
+const errors = require('../errors')
 
 //# validation functions take a key and a value and should:
 //#  - return true if it passes validation
 //#  - return a error message if it fails validation
 
-const errMsg = (key, value, type) => `Expected '${key}' to be ${type}. Instead the value was: ${JSON.stringify(value)}`;
+const errMsg = (key, value, type) => {
+  return `Expected '${key}' to be ${type}. Instead the value was: ${JSON.stringify(value)}`
+}
 
-const isFullyQualifiedUrl = value => isString(value) && /^https?\:\/\//.test(value);
+const isFullyQualifiedUrl = (value) => {
+  return isString(value) && /^https?\:\/\//.test(value)
+}
 
-const isArrayOfStrings = value => isArray(value) && _.every(value, isString);
+const isArrayOfStrings = (value) => {
+  return isArray(value) && _.every(value, isString)
+}
 
-const isFalse = value => value === false;
+const isFalse = (value) => {
+  return value === false
+}
 
-var { isArray }  = _;
-const isNumber = _.isFinite;
-var { isString } = _;
+const { isArray } = _
+const isNumber = _.isFinite
+const { isString } = _
 
 module.exports = {
-  isNumber(key, value) {
+  isNumber (key, value) {
     if ((value == null) || isNumber(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a number");
+      return true
     }
+
+    return errMsg(key, value, 'a number')
+
   },
 
-  isNumberOrFalse(key, value) {
+  isNumberOrFalse (key, value) {
     if (isNumber(value) || isFalse(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a number or false");
+      return true
     }
+
+    return errMsg(key, value, 'a number or false')
+
   },
 
-  isFullyQualifiedUrl(key, value) {
+  isFullyQualifiedUrl (key, value) {
     if ((value == null) || isFullyQualifiedUrl(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a fully qualified URL (starting with http:// or https://)");
+      return true
     }
+
+    return errMsg(key, value, 'a fully qualified URL (starting with http:// or https://)')
+
   },
 
-  isBoolean(key, value) {
+  isBoolean (key, value) {
     if ((value == null) || _.isBoolean(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a boolean");
+      return true
     }
+
+    return errMsg(key, value, 'a boolean')
+
   },
 
-  isPlainObject(key, value) {
+  isPlainObject (key, value) {
     if ((value == null) || _.isPlainObject(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a plain object");
+      return true
     }
+
+    return errMsg(key, value, 'a plain object')
+
   },
 
-  isString(key, value) {
+  isString (key, value) {
     if ((value == null) || isString(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a string");
+      return true
     }
+
+    return errMsg(key, value, 'a string')
+
   },
 
-  isArray(key, value) {
+  isArray (key, value) {
     if ((value == null) || isArray(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "an array");
+      return true
     }
+
+    return errMsg(key, value, 'an array')
+
   },
 
-  isStringOrFalse(key, value) {
+  isStringOrFalse (key, value) {
     if (isString(value) || isFalse(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a string or false");
+      return true
     }
+
+    return errMsg(key, value, 'a string or false')
+
   },
 
-  isStringOrArrayOfStrings(key, value) {
+  isStringOrArrayOfStrings (key, value) {
     if (isString(value) || isArrayOfStrings(value)) {
-      return true;
-    } else {
-      return errMsg(key, value, "a string or an array of strings");
+      return true
     }
-  }
-};
+
+    return errMsg(key, value, 'a string or an array of strings')
+
+  },
+}
