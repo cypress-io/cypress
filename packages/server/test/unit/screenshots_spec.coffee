@@ -32,7 +32,7 @@ describe "lib/screenshots", ->
       viewport: { width: 40, height: 40 }
     }
 
-    @buffer = new Buffer("image 1 data buffer")
+    @buffer = Buffer.from("image 1 data buffer")
 
     @jimpImage = {
       id: 1
@@ -168,21 +168,21 @@ describe "lib/screenshots", ->
         @jimpImage2 = clone(@jimpImage, {
           id: 2
           bitmap: {
-            data: new Buffer("image 2 data buffer")
+            data: Buffer.from("image 2 data buffer")
           }
         })
 
         @jimpImage3 = clone(@jimpImage, {
           id: 3
           bitmap: {
-            data: new Buffer("image 3 data buffer")
+            data: Buffer.from("image 3 data buffer")
           }
         })
 
         @jimpImage4 = clone(@jimpImage, {
           id: 4
           bitmap: {
-            data: new Buffer("image 4 data buffer")
+            data: Buffer.from("image 4 data buffer")
           }
         })
 
