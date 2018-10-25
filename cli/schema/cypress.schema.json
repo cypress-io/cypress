@@ -119,6 +119,11 @@
       "default": true,
       "description": "Whether Cypress will record a video of the test run when running headlessly."
     },
+    "videoUpload": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will upload the video to the Dashboard. This applies only when recording your runs to the Dashboard. Turn this off if you’d like to turn off the video upload."
+    },
     "videoUploadOnPasses": {
       "type": "boolean",
       "default": true,

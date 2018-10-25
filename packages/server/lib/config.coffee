@@ -49,6 +49,7 @@ configKeys = toWords """
   viewportHeight                  taskTimeout
   video
   videoCompression
+  videoUpload
   videoUploadOnPasses
   watchForFileChanges
   waitForAnimations
@@ -86,6 +87,7 @@ defaults = {
   taskTimeout:                   60000
   video:                         true
   videoCompression:              32
+  videoUpload:                   true
   videoUploadOnPasses:           true
   modifyObstructiveCode:         true
   chromeWebSecurity:             true
@@ -137,6 +139,7 @@ validationRules = {
   userAgent: v.isString
   videoCompression: v.isNumberOrFalse
   video: v.isBoolean
+  videoUpload: v.isBoolean
   videoUploadOnPasses: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber

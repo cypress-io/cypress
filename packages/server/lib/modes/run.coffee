@@ -671,7 +671,7 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+    { project, screenshots, started, end, name, cname, videoCompression, videoUpload, videoUploadOnPasses, exit, spec, estimated } = options
 
     @listenForProjectEnd(project, exit)
     .then (obj) =>
@@ -711,11 +711,12 @@ module.exports = {
         ## always set the video timestamp on tests
         obj.tests = Reporter.setVideoTimestamp(started, tests)
 
-      ## we should upload the video if we upload on passes (by default)
-      ## or if we have any failures and have started the video
-      suv = Boolean(videoUploadOnPasses is true or (started and hasFailingTests))
+      ## we should upload the video if we upload in general and then check if 
+      ## we upload on passes (by default) or if we have any failures and have 
+      ## started the video
+      shouldUploadVideo = Boolean(videoUpload is true and videoUploadOnPasses is true or (started and hasFailingTests))
 
-      obj.shouldUploadVideo = suv
+      obj.shouldUploadVideo = shouldUploadVideo
 
       debug("attempting to close the browser")
 
@@ -725,7 +726,7 @@ module.exports = {
       openProject.closeBrowser()
       .then =>
         if end
-          @postProcessRecording(end, name, cname, videoCompression, suv)
+          @postProcessRecording(end, name, cname, videoCompression, shouldUploadVideo)
           .then(finish)
           ## TODO: add a catch here
         else
@@ -876,6 +877,7 @@ module.exports = {
             screenshots
             exit:                 options.exit
             videoCompression:     options.videoCompression
+            videoUpload:          options.videoUpload
             videoUploadOnPasses:  options.videoUploadOnPasses
           }),
 
@@ -969,6 +971,7 @@ module.exports = {
             videosFolder:         config.videosFolder
             video:                config.video
             videoCompression:     config.videoCompression
+            videoUpload:          config.videoUpload
             videoUploadOnPasses:  config.videoUploadOnPasses
             exit:                 options.exit
             headed:               options.headed

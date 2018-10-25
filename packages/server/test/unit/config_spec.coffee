@@ -347,6 +347,15 @@ describe "lib/config", ->
           @setup({video: 42})
           @expectValidationFails("be a boolean")
 
+      context "videoUpload", ->
+        it "passes if a boolean", ->
+          @setup({videoUpload: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({videoUpload: 99})
+          @expectValidationFails("be a boolean")
+
       context "videoUploadOnPasses", ->
         it "passes if a boolean", ->
           @setup({videoUploadOnPasses: false})
@@ -556,6 +565,9 @@ describe "lib/config", ->
     it "videoCompression=32", ->
       @defaults "videoCompression", 32
 
+    it "videoUpload=true", ->
+      @defaults "videoUpload", true
+
     it "videoUploadOnPasses=true", ->
       @defaults "videoUploadOnPasses", true
 
@@ -727,6 +739,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
+            videoUpload:                { value: true, from: "default" }
             videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
@@ -786,6 +799,7 @@ describe "lib/config", ->
             fileServerFolder:           { value: "", from: "default" },
             video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
+            videoUpload:                { value: true, from: "default" }
             videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },

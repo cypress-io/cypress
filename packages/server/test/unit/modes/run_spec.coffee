@@ -321,6 +321,7 @@ describe "lib/modes/run", ->
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
+        videoUpload: true
         videoUploadOnPasses: true
         gui: false
         screenshots
@@ -379,6 +380,7 @@ describe "lib/modes/run", ->
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
+        videoUpload: true
         videoUploadOnPasses: true
         gui: false
         screenshots
@@ -418,6 +420,33 @@ describe "lib/modes/run", ->
           }
         })
 
+    it "should not upload video when videoUpload is false", ->
+      process.nextTick =>
+        @projectInstance.emit("end", {
+          stats: {
+            failures: 0
+          }
+        })
+
+      sinon.spy(runMode, "postProcessRecording")
+      sinon.spy(videoCapture, "process")
+      end = sinon.stub().resolves()
+
+      runMode.waitForTestsToFinishRunning({
+        project: @projectInstance,
+        name: "foo.mp4"
+        cname: "foo-compressed.mp4"
+        videoCompression: 32
+        videoUpload: false
+        videoUploadOnPasses: true
+        gui: false
+        end
+      })
+      .then (obj) ->
+        expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false)
+
+        expect(videoCapture.process).not.to.be.called
+
     it "should not upload video when videoUploadOnPasses is false and no failures", ->
       process.nextTick =>
         @projectInstance.emit("end", {
@@ -435,6 +464,7 @@ describe "lib/modes/run", ->
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
+        videoUpload: true
         videoUploadOnPasses: false
         gui: false
         end
