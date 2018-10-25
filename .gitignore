@@ -8,7 +8,6 @@ dist
 dist-*
 build
 .history
-.vscode
 .publish
 _test-output
 cypress.zip

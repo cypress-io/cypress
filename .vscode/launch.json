@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test: active",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "test-debug-package",
+      ],
+      "args": [
+        "${file}"
+      ],
+      "port": 5566,
+      "showAsyncStacks": true,
+      "autoAttachChildProcesses": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test: prompt",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "test-debug-package",
+      ],
+      "args": [
+        "${command:prompt-debug.resolve}"
+      ],
+      "port": 5566,
+      "showAsyncStacks": true,
+      "autoAttachChildProcesses": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "debug process",
+      "port": 5566,
+      "showAsyncStacks": true,
+    },
+  ]
+}

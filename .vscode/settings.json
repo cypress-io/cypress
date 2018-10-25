@@ -1,0 +1,5 @@
+{
+  "javascript.implicitProjectConfig.checkJs": false,
+  "files.trimTrailingWhitespace": true,
+  "eslint.enable": true,
+}
