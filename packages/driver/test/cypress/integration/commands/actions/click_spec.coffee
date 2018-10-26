@@ -14,19 +14,19 @@ describe "src/cy/commands/actions/click", ->
 
   beforeEach ->
     ## TODO: remove listeners
-    # window.top.addEventListener('mousedown', ()=>debugger)
-    # window.top.addEventListener('mouseup', ()=>debugger)
-    # cy.state("window").addEventListener('mousedown', ()=>debugger)
-    # cy.state("window").addEventListener('mouseup', ()=>debugger)
+    window.top.addEventListener('mousedown', ()=>debugger)
+    window.top.addEventListener('mouseup', ()=>debugger)
+    cy.state("window").addEventListener('mousedown', ()=>debugger)
+    cy.state("window").addEventListener('mouseup', ()=>debugger)
     doc = cy.state("document")
 
     $(doc.body).empty().html(@body)
 
   context "#click", ->
-    it "receives native click event", (done) ->
+    it "receives native click event", ->
       $btn = cy.$$("#button")
 
-      $btn.on "click", (e) =>
+      click = cy.spy((e) =>
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         obj = _.pick(e.originalEvent, "bubbles", "cancelable", "view", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -48,25 +48,29 @@ describe "src/cy/commands/actions/click", ->
 
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
-        done()
+        ).as 'click'
+
+      $btn.on "click", click
 
       cy.get("#button").click()
+      .then -> expect(click).to.be.calledOnce
 
-    it "bubbles up native click event", (done) ->
-      click = (e) =>
+    it "bubbles up native click event", ->
+      click = cy.spy (e) =>
         cy.state("window").removeEventListener "click", click
-        done()
+      .as 'click'
 
       cy.state("window").addEventListener "click", click
 
       cy.get("#button").click()
+      .then -> expect(click).to.be.calledOnce
 
-    it "sends native mousedown event", (done) ->
+    it "sends native mousedown event", ->
       $btn = cy.$$("#button")
 
       win = cy.state("window")
 
-      $btn.get(0).addEventListener "mousedown", (e) ->
+      onMousedown = (e) ->
         ## calculate after scrolling
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
@@ -89,16 +93,20 @@ describe "src/cy/commands/actions/click", ->
 
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
-        done()
 
-      cy.get("#button").click()
+      stub = cy.spy(onMousedown).as('mousedown')
 
-    it "sends native mouseup event", (done) ->
+      $btn.get(0).addEventListener("mousedown", stub)
+
+      cy.get("#button").click().then ->
+        expect(stub).to.be.calledOnce
+
+    it "sends native mouseup event", ->
       $btn = cy.$$("#button")
 
       win = cy.state("window")
 
-      $btn.get(0).addEventListener "mouseup", (e) ->
+      mouseup = cy.spy (e) ->
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
         obj = _.pick(e, "bubbles", "cancelable", "view", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
@@ -116,12 +124,14 @@ describe "src/cy/commands/actions/click", ->
           detail: 1
           type: "mouseup"
         }
-
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
-        done()
+      .as('mouseup')
 
-      cy.get("#button").click()
+      
+      $btn.get(0).addEventListener "mouseup", mouseup
+      cy.get("#button").click().then ->
+        expect(mouseup).to.be.calledOnce
 
     it "sends mousedown, mouseup, click events in order", ->
       events = []
@@ -135,33 +145,41 @@ describe "src/cy/commands/actions/click", ->
       cy.get("#button").click().then ->
         expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
 
-    it "records correct clientX when el scrolled", (done) ->
+    it "records correct clientX when el scrolled", ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
       win = cy.state("window")
 
-      $btn.get(0).addEventListener "click", (e) =>
+      click = cy.spy (e) =>
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         expect(win.pageXOffset).to.be.gt(0)
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
-        done()
 
-      cy.get("#scrolledBtn").click()
+      .as 'click'
 
-    it "records correct clientY when el scrolled", (done) ->
+      $btn.get(0).addEventListener "click", click
+
+      cy.get("#scrolledBtn").click().then ->
+        expect(click).to.be.calledOnce
+
+
+    it "records correct clientY when el scrolled", ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
 
       win = cy.state("window")
 
-      $btn.get(0).addEventListener "click", (e) =>
+      click = cy.spy (e) =>
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         expect(win.pageYOffset).to.be.gt(0)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
-        done()
+      .as 'click'
 
-      cy.get("#scrolledBtn").click()
+      $btn.get(0).addEventListener "click", click
+
+      cy.get("#scrolledBtn").click().then ->
+        expect(click).to.be.calledOnce
 
     it "will send all events even mousedown is defaultPrevented", ->
       events = []
@@ -179,10 +197,15 @@ describe "src/cy/commands/actions/click", ->
       cy.get("#button").click().then ->
         expect(events).to.deep.eq ["mouseup", "click"]
 
-    it "sends a click event", (done) ->
-      cy.$$("#button").click -> done()
+    it "sends a click event", ->
+
+      click = cy.spy(->)
+      .as 'click'
+
+      cy.$$("#button").click click
 
       cy.get("#button").click()
+      .then -> expect(click).to.be.calledOnce
 
     it "returns the original subject", ->
       button = cy.$$("#button")
@@ -190,12 +213,14 @@ describe "src/cy/commands/actions/click", ->
       cy.get("#button").click().then ($button) ->
         expect($button).to.match button
 
-    it "causes focusable elements to receive focus", (done) ->
+    it "causes focusable elements to receive focus", ->
       $text = cy.$$(":text:first")
 
-      $text.focus -> done()
+      focus = cy.spy(->).as('focus')
+      $text.focus focus
 
       cy.get(":text:first").click()
+      .then -> expect(focus).to.be.calledOnce
 
     it "does not fire a focus, mouseup, or click event when element has been removed on mousedown", ->
       $btn = cy.$$("button:first")
@@ -266,7 +291,7 @@ describe "src/cy/commands/actions/click", ->
       cy.get("button").invoke("slice", 0, 3).click({ multiple: true}).then ($buttons) ->
         expect($buttons.length).to.eq clicks
 
-    it "can cancel multiple clicks", (done) ->
+    it.skip "can cancel multiple clicks", ->
       cy.stub(Cypress.runner, "stop")
 
       ## abort after the 3rd click
@@ -283,7 +308,8 @@ describe "src/cy/commands/actions/click", ->
       ## make sure we have at least 5 anchor links
       expect($anchors.length).to.be.gte 5
 
-      cy.on "stop", =>
+
+      cyStop = cy.spy =>
         ## timeout will get called synchronously
         ## again during a click if the click function
         ## is called
@@ -295,10 +321,13 @@ describe "src/cy/commands/actions/click", ->
 
           expect(timeout.callCount).to.eq 0
 
-          done()
         , 100
+      .as 'cyStop'
+
+      cy.on "stop", cyStop
 
       cy.get("#sequential-clicks a").click({ multiple: true })
+      .then -> expect(cyStop).to.be.calledOnce
 
     it "serially clicks a collection", ->
       clicks = 0
@@ -545,7 +574,7 @@ describe "src/cy/commands/actions/click", ->
 
       # it "can forcibly click even when being covered by another element", ->
       #   $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
-      #   span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
+    #   span = $("<span>span on button</span>").css({position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow"}).prependTo(cy.$$("body"))
 
       #   scrolled = []
       #   retried = false
@@ -836,128 +865,144 @@ describe "src/cy/commands/actions/click", ->
           .should("have.class", "clicked")
 
     describe "position argument", ->
-      it "can click center by default", (done) ->
+      it "can click center by default", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
-        span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        span = $("<span>span</span>").css({position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow"}).appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click()
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click topLeft", (done) ->
+
+      it "can click topLeft", ->
 
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
 
-        $span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        $span = $("<span>span</span>").css({position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow"}).appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        $span.on "click", clicked
-        $btn.on "click", clicked
+        $span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("topLeft")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click top", (done) ->
+
+      it "can click top", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
-        span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        span = $("<span>span</span>").css({position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow"}).appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("top")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click topRight", (done) ->
+      it "can click topRight", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
-        span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        span = $("<span>span</span>").css({position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow"}).appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("topRight")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click left", (done) ->
+      it "can click left", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
-        span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        span = $("<span>span</span>").css({position: "absolute", left: $btn.offset().left, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow"}).appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("left")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click center", (done) ->
+      it "can click center", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
-        span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
+        span = $("<span>span</span>").css({position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow"}).appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("center")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click right", (done) ->
+      it "can click right", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("right")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click bottomLeft", (done) ->
+      it "can click bottomLeft", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("bottomLeft")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click bottom", (done) ->
+      it "can click bottom", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 30, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("bottom")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can click bottomRight", (done) ->
+      it "can click bottomRight", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        span.on "click", clicked
-        $btn.on "click", clicked
+        span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("bottomRight")
+        .then -> expect(click).to.be.calledTwice
 
-      it "can pass options along with position", (done) ->
+      it "can pass options along with position", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(cy.$$("body"))
 
-        $btn.on "click", -> done()
+        click = cy.spy(->).as 'click'
+
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click("bottomRight", {force: true})
+        .then -> expect(click).to.be.calledOnce
+
 
     describe "relative coordinate arguments", ->
-      it "can specify x and y", (done) ->
+      it "can specify x and y", ->
         $btn = $("<button>button covered</button>")
         .attr("id", "button-covered-in-span")
         .css({height: 100, width: 100})
@@ -967,26 +1012,31 @@ describe "src/cy/commands/actions/click", ->
         .css({position: "absolute", left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow"})
         .appendTo($btn)
 
-        clicked = _.after 2, -> done()
+        click = cy.spy(->).as 'click'
 
-        $span.on "click", clicked
-        $btn.on "click", clicked
+        $span.on "click", click
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click(75, 78)
+        .then -> expect(click).to.be.calledTwice
 
-      it "can pass options along with x, y", (done) ->
+
+      it "can pass options along with x, y", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(cy.$$("body"))
 
-        $btn.on "click", -> done()
+        click = cy.spy(->).as 'click'
+
+        $btn.on "click", click
 
         cy.get("#button-covered-in-span").click(75, 78, {force: true})
+        .then -> expect(click).to.be.calledOnce
 
     describe "mousedown", ->
-      it "gives focus after mousedown", (done) ->
+      it "gives focus after mousedown", ->
         input = cy.$$("input:first")
 
-        input.get(0).addEventListener "focus", (e) =>
+        focus = cy.spy (e) =>
           obj = _.pick(e, "bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: false
@@ -1000,14 +1050,17 @@ describe "src/cy/commands/actions/click", ->
             detail: 0
             type: "focus"
           }
-          done()
+        .as 'focus'
+          
+        input.get(0).addEventListener "focus", focus
 
         cy.get("input:first").click()
+        .then -> expect(focus).to.be.calledOnce
 
-      it "gives focusin after mousedown", (done) ->
+      it "gives focusin after mousedown", ->
         input = cy.$$("input:first")
 
-        input.get(0).addEventListener "focusin", (e) =>
+        focusin = cy.spy (e) =>
           obj = _.pick(e, "bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: true
@@ -1020,9 +1073,12 @@ describe "src/cy/commands/actions/click", ->
             detail: 0
             type: "focusin"
           }
-          done()
+        .as 'focusin'
+
+        input.get(0).addEventListener "focusin", focusin
 
         cy.get("input:first").click()
+        .then -> expect(focusin).to.be.calledOnce
 
       it "gives all events in order", ->
         events = []
@@ -1171,7 +1227,7 @@ describe "src/cy/commands/actions/click", ->
 
       it "throws when a non-descendent element is covering subject", (done) ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
-        span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
+        span = $("<span>span on button</span>").css({position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow"}).prependTo(cy.$$("body"))
 
         cy.on "fail", (err) =>
           lastLog = @lastLog

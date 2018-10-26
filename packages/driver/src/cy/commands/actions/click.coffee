@@ -111,8 +111,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               if $dom.isAttached($elToClick)
                 domEvents.click   = $Mouse.click($elToClick, fromViewport)
             else
-              return $native.mouseup($elToClick, coords.fromViewport)
-          .return(null)
+              return Promise.resolve(null) #$native.mouseup($elToClick, coords.fromViewport)
           .delay($actionability.delay, "click")
           .then ->
             debugger
@@ -152,7 +151,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## automatically shift the focus to the element
             ## without firing the focus event
             if not options.force
-              return $native.mousedown($elToClick, coords.fromViewport)
+              return $native.click($elToClick, coords.fromViewport)
                 .then(()=>afterMouseDown($elToClick, coords))
             
             $previouslyFocused = cy.getFocused()
