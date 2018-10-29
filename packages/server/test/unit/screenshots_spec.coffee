@@ -469,84 +469,27 @@ describe "lib/screenshots", ->
 
   context ".getPath", ->
     it "concats spec name, screenshotsFolder, and name", ->
-      p = screenshots.getPath({
+      screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz"]
         name: "quux/lorem*"
       }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
-      )
-
-      p2 = screenshots.getPath({
-        specName: "examples$/user/list.js"
-        titles: ["bar", "baz"]
-        name: "quux*"
-        takenPaths: ["path/to/screenshots/examples$/user/list.js/quux.png"]
-      }, "png", "path/to/screenshots")
-
-      expect(p2).to.eq(
-        "path/to/screenshots/examples$/user/list.js/quux (1).png"
-      )
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
+        )
 
     it "concats spec name, screenshotsFolder, and titles", ->
-      p = screenshots.getPath({
+      screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz^"]
         takenPaths: ["a"]
         testFailure: true
       }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
-      )
-
-      p2 = screenshots.getPath({
-        specName: "examples$/user/list.js"
-        titles: ["bar", "baz^"]
-        takenPaths: ["path/to/screenshots/examples$/user/list.js/bar -- baz.png"]
-      }, "png", "path/to/screenshots")
-
-      expect(p2).to.eq(
-        "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
-      )
-
-    it "truncates file paths", ->
-      name = "a".repeat(260)
-      truncatedName = "a".repeat(242)
-
-      p = screenshots.getPath({
-        specName: "integration/spec.js"
-        name
-      }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/integration/spec.js/#{truncatedName}.png"
-      )
-
-      p = screenshots.getPath({
-        specName: "integration/spec.js"
-        testFailure: true
-        name
-      }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/integration/spec.js/#{truncatedName} (failed).png"
-      )
-
-      takenPaths = [1...10].map (val) -> "path/to/screenshots/integration/spec.js/#{truncatedName} (#{val}).png"
-      takenPaths.push("path/to/screenshots/integration/spec.js/#{truncatedName}.png")
-
-      p = screenshots.getPath({
-        specName: "integration/spec.js"
-        takenPaths
-        name
-      }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/integration/spec.js/#{truncatedName} (10).png"
-      )
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
+        )
 
   context ".afterScreenshot", ->
     beforeEach ->
