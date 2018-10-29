@@ -314,9 +314,9 @@ getPath = (data, ext, screenshotsFolder) ->
   else
     names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
 
-  # truncate file names to be less than 243 characters
+  # truncate file names to be less than 238 characters
   # this accomodates 255 chars with message and extension
-  maxFileNameLength = 242
+  maxFileNameLength = 238
   index = names.length - 1
 
   if names[index].length > maxFileNameLength
