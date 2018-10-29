@@ -297,12 +297,13 @@ getDimensions = (details) ->
   else
     pick(details.image.bitmap)
 
-ensureUniquePath = (takenPaths, withoutExt, extension) ->
-  fullPath = "#{withoutExt}.#{extension}"
-  num = 0
-  while _.includes(takenPaths, fullPath)
-    fullPath = "#{withoutExt} (#{++num}).#{extension}"
-  return fullPath
+ensureUniquePath = (withoutExt, extension, num = 0) ->
+  fullPath = if num then "#{withoutExt} (#{num}).#{extension}" else "#{withoutExt}.#{extension}"
+  fs.pathExists(fullPath)
+  .then (found) ->
+    if found
+      return ensureUniquePath(withoutExt, extension, num += 1)
+    return fullPath
 
 getPath = (data, ext, screenshotsFolder) ->
   specNames = (data.specName or "")
@@ -330,7 +331,7 @@ getPath = (data, ext, screenshotsFolder) ->
 
   withoutExt = path.join(screenshotsFolder, specNames..., names...)
 
-  ensureUniquePath(data.takenPaths, withoutExt, ext)
+  ensureUniquePath(withoutExt, ext)
 
 getPathToScreenshot = (data, details, screenshotsFolder) ->
   ext = mime.extension(getType(details))
@@ -420,31 +421,31 @@ module.exports = {
       return { image, pixelRatio, multipart, takenAt }
 
   save: (data, details, screenshotsFolder) ->
-    pathToScreenshot = getPathToScreenshot(data, details, screenshotsFolder)
+    getPathToScreenshot(data, details, screenshotsFolder)
+    .then (pathToScreenshot) ->
+      debug("save", pathToScreenshot)
 
-    debug("save", pathToScreenshot)
+      getBuffer(details)
+      .then (buffer) ->
+        fs.outputFileAsync(pathToScreenshot, buffer)
+      .then ->
+        fs.statAsync(pathToScreenshot).get("size")
+      .then (size) ->
+        dimensions = getDimensions(details)
 
-    getBuffer(details)
-    .then (buffer) ->
-      fs.outputFileAsync(pathToScreenshot, buffer)
-    .then ->
-      fs.statAsync(pathToScreenshot).get("size")
-    .then (size) ->
-      dimensions = getDimensions(details)
+        { multipart, pixelRatio, takenAt } = details
 
-      { multipart, pixelRatio, takenAt } = details
-
-      {
-        size
-        takenAt
-        dimensions
-        multipart
-        pixelRatio
-        name: data.name
-        specName: data.specName
-        testFailure: data.testFailure
-        path: pathToScreenshot
-      }
+        {
+          size
+          takenAt
+          dimensions
+          multipart
+          pixelRatio
+          name: data.name
+          specName: data.specName
+          testFailure: data.testFailure
+          path: pathToScreenshot
+        }
 
   afterScreenshot: (data, details) ->
     duration = new Date() - new Date(data.startTime)
