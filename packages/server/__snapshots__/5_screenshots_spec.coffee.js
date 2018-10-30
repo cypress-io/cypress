@@ -120,8 +120,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png (1000x660)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png (1000x660)
 
 
   (Video)
