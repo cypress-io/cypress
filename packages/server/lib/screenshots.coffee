@@ -316,7 +316,7 @@ getPath = (data, ext, screenshotsFolder) ->
 
   # truncate file names to be less than 238 characters
   # this accomodates 255 chars with message and extension
-  maxFileNameLength = 238
+  maxFileNameLength = 220
   index = names.length - 1
 
   if names[index].length > maxFileNameLength
