@@ -6,8 +6,8 @@ import State from './lib/state'
 import Container from './app/container'
 
 configure({
-    enforceActions: 'observed'
-});
+  enforceActions: 'observed',
+})
 
 window.Runner = {
   start (el, config) {

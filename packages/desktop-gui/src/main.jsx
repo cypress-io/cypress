@@ -7,11 +7,10 @@ import handleGlobalErrors from './lib/handle-global-errors'
 import momentOverrides from './lib/configure-moment'
 
 import App from './app/app'
-import {  } from 'mobx';
 
 configure({
-    enforceActions: 'observed'
-});
+  enforceActions: 'observed',
+})
 
 handleGlobalErrors()
 momentOverrides()

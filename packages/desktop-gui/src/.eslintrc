@@ -1,4 +1,9 @@
 {
+  "parserOptions": {
+    "ecmaFeatures": {
+      "legacyDecorators": true
+    }
+  },
   "extends": [
     "plugin:cypress-dev/react",
     "plugin:cypress-dev/tests"
