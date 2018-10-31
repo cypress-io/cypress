@@ -18,13 +18,15 @@ exports['e2e cookies passes 1'] = `
 
 
   cookies
-    ✓ can get all cookies
-    ✓ resets cookies between tests correctly
-    ✓ should be only two left now
-    ✓ sends cookies to localhost:2121
-    ✓ handles expired cookies secure
-    ✓ issue: #224 sets expired cookies between redirects
-    ✓ issue: #1321 failing to set or parse cookie
+    with whitelist
+      ✓ can get all cookies
+      ✓ resets cookies between tests correctly
+      ✓ should be only two left now
+    without whitelist
+      ✓ sends cookies to localhost:2121
+      ✓ handles expired cookies secure
+      ✓ issue: #224 sets expired cookies between redirects
+      ✓ issue: #1321 failing to set or parse cookie
 
 
   7 passing
