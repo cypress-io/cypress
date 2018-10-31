@@ -381,7 +381,7 @@ class Project extends EE
     ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     ##
     ## becomes /integration/foo.coffee
-    "/" + path.join(type, path.relative(
+    path.sep + path.join(type, path.relative(
       integrationFolder,
       path.resolve(projectRoot, pathToSpec)
     ))
