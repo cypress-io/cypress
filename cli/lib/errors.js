@@ -21,7 +21,7 @@ const failedUnzip = {
   solution: stripIndent`
     Search for an existing issue or open a GitHub issue at
 
-      ${issuesUrl}
+      ${chalk.blue(issuesUrl)}
   `,
 }
 
@@ -29,6 +29,37 @@ const missingApp = (binaryDir) => ({
   description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
   solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
+  `,
+})
+
+const binaryNotExecutable = (executable) => ({
+  description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
+  solution: stripIndent`\n
+    Reasons this may happen:
+      
+    - node was installed as 'root' or with 'sudo'
+    - the cypress npm package as 'root' or with 'sudo'
+    
+    Please check that you have the appropriate user permissions.
+  `,
+})
+
+
+const notInstalledCI = (executable) => ({
+  description: 'The cypress npm package is installed, but the Cypress binary is missing.',
+  solution: stripIndent`\n
+    We expected the binary to be installed here: ${chalk.cyan(executable)}
+ 
+    Reasons it may be missing:
+
+    - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
+    - You ran 'npm install' at an earlier build step but did not persist: ${util.getCacheDir()}
+
+    Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
+
+    Alternatively, you can run 'cypress install' to download the binary again.
+
+    ${chalk.blue('https://on.cypress.io/not-installed-ci-error')}
   `,
 })
 
@@ -48,7 +79,7 @@ const missingXvfb = {
 
     Read our documentation on dependencies for more information:
 
-      ${requiredDependenciesUrl}
+      ${chalk.blue(requiredDependenciesUrl)}
 
     If you are using Docker, we provide containers with all required dependencies installed.
     `,
@@ -62,7 +93,7 @@ const missingDependency = {
 
     The error below should indicate which dependency is missing.
 
-      ${requiredDependenciesUrl}
+      ${chalk.blue(requiredDependenciesUrl)}
 
     If you are using Docker, we provide containers with all required dependencies installed.
   `,
@@ -83,11 +114,11 @@ const unexpected = {
   solution: stripIndent`
     Please search Cypress documentation for possible solutions:
 
-      ${docsUrl}
+      ${chalk.blue(docsUrl)}
 
     Check if there is a GitHub issue describing this crash:
 
-      ${issuesUrl}
+      ${chalk.blue(issuesUrl)}
 
     Consider opening a new issue.
   `,
@@ -99,7 +130,7 @@ const removed = {
     The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green('3.0.0')}
     `,
     solution: stripIndent`
-    You should setCYPRESS_INSTALL_BINARY instead.
+    You should set CYPRESS_INSTALL_BINARY instead.
     `,
   },
   CYPRESS_SKIP_BINARY_INSTALL: {
@@ -203,8 +234,10 @@ module.exports = {
     nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
+    notInstalledCI,
     missingDependency,
     versionMismatch,
+    binaryNotExecutable,
     unexpected,
     failedDownload,
     failedUnzip,

@@ -596,7 +596,7 @@ describe "lib/config", ->
 
     it "blacklistHosts=a|b", ->
       @defaults("blacklistHosts", ["a", "b"], {
-        blacklistHosts: "a|b"
+        blacklistHosts: ["a", "b"]
       })
 
     it "hosts=null", ->
@@ -611,14 +611,6 @@ describe "lib/config", ->
           foo: "bar",
           baz: "quux"
         }
-      })
-
-    it "hosts=foo=bar,baz=quux", ->
-      @defaults("hosts", {
-        foo: "bar"
-        baz: "quux"
-      }, {
-        hosts: "foo=bar|baz=quux"
       })
 
     it "resets numTestsKeptInMemory to 0 when runMode", ->
@@ -1058,27 +1050,12 @@ describe "lib/config", ->
       .then (result) ->
         expect(result).to.eql(obj)
 
-    it "sets the full path to the pluginsFile if it exists", ->
-      projectRoot = process.cwd()
-
-      obj = {
-        projectRoot: projectRoot
-        pluginsFile: "test/unit/config_spec.coffee"
-      }
-
-      config.setPluginsFile(obj)
-      .then (result) ->
-        expect(result).to.eql({
-          projectRoot: projectRoot
-          pluginsFile: "#{projectRoot}/test/unit/config_spec.coffee"
-        })
-
     it "sets the pluginsFile to default index.js if does not exist", ->
       projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/no-scaffolding")
 
       obj = {
         projectRoot: projectRoot
-        pluginsFile: "cypress/plugins"
+        pluginsFile: "#{projectRoot}/cypress/plugins"
       }
 
       config.setPluginsFile(obj)
@@ -1093,7 +1070,7 @@ describe "lib/config", ->
 
       obj = config.setAbsolutePaths({
         projectRoot: projectRoot
-        pluginsFile: "cypress/plugins"
+        pluginsFile: "#{projectRoot}/cypress/plugins"
       })
 
       config.setPluginsFile(obj)
@@ -1171,7 +1148,7 @@ describe "lib/config", ->
 
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
 
-    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile"].forEach (folder) ->
+    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile", "pluginsFile"].forEach (folder) ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {

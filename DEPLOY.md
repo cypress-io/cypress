@@ -106,15 +106,14 @@ npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 
         $ npm publish https://cdn.../npm/1.0.5/<long sha>/cypress.tgz --tag dev
         + cypress@1.0.5
+
 - Check that the new version has the right tag using
     [available-versions](https://github.com/bahmutov/available-versions)
 
-```
-$ vers cypress
-0.20.1                      16 days        
-0.20.2                      3 days             latest
-1.0.5                       a few seconds ago  dev
-```
+        $ vers cypress
+        0.20.1                      16 days
+        0.20.2                      3 days             latest
+        1.0.5                       a few seconds ago  dev
 
 - Test `cypress@1.0.5` again to make sure everything is working. You can trigger test projects
     from command line (if you have the appropriate permissions)
@@ -123,7 +122,7 @@ $ vers cypress
 
 - Update and publish the [changelog](https://github.com/cypress-io/cypress-documentation/blob/develop/source/guides/references/changelog.md)
 - Close issues (with a link to the changelog).
-- Update the NPM dist tag to `latest` using `npm dist-tag add cypress@1.0.5`.
+- Update the NPM dist tag to `latest` using `npm dist-tag add cypress@1.0.5 --otp <code>`.
 - Update the `manifest.json` for download server `npm run binary-release -- --version 1.0.5`
 - Push out the updated changes to the manifest for `on.cypress.io` if needed.
 - Push out an updated kitchen sink if needed.

@@ -4,18 +4,20 @@ const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
+const cache = require('./tasks/cache')
 
 // patch "commander" method called when a user passed an unknown option
 // we want to print help for the current command and exit with an error
-commander.Command.prototype.unknownOption = function (flag) {
+function unknownOption (flag, type = 'option') {
   if (this._allowUnknownOption) return
   logger.error()
-  logger.error('  error: unknown option:', flag)
+  logger.error(`  error: unknown ${type}:`, flag)
   logger.error()
   this.outputHelp()
   logger.error()
   process.exit(1)
 }
+commander.Command.prototype.unknownOption = unknownOption
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
@@ -25,7 +27,13 @@ const parseOpts = (opts) => {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
-    'browser', 'detached', 'headed', 'global', 'dev', 'force')
+    'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
+    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId'
+  )
+
+  if (opts.exit) {
+    opts = _.omit(opts, 'exit')
+  }
 
   debug('parsed cli options', opts)
 
@@ -48,13 +56,20 @@ const descriptions = {
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
   global: 'force Cypress into global mode as if its globally installed',
-  version: 'Prints Cypress version',
+  version: 'prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
   dev: 'runs cypress in development and bypasses binary check',
   forceInstall: 'force install the Cypress binary',
+  exit: 'keep the browser open after tests finish',
+  cachePath: 'print the cypress binary cache path',
+  cacheList: 'list the currently cached versions',
+  cacheClear: 'delete the Cypress binary cache',
+  group: 'a named group for recorded runs in the Cypress dashboard',
+  parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
+  ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help']
+const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help', 'cache']
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -122,6 +137,10 @@ module.exports = {
     .option('-c, --config <config>', text('config'))
     .option('-b, --browser <browser-name>', text('browser'))
     .option('-P, --project <project-path>', text('project'))
+    .option('--parallel', text('parallel'))
+    .option('--group <name>', text('group'))
+    .option('--ci-build-id <id>', text('ciBuildId'))
+    .option('--no-exit', text('exit'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress')
@@ -173,7 +192,19 @@ module.exports = {
       .catch(util.logErrorExit1)
     })
 
-    logger.log()
+    program
+    .command('cache')
+    .usage('[command]')
+    .description('Manages the Cypress binary cache')
+    .option('list', text('cacheList'))
+    .option('path', text('cachePath'))
+    .option('clear', text('cacheClear'))
+    .action(function (opts) {
+      if (opts.command || !_.includes(['list', 'path', 'clear'], opts)) {
+        unknownOption.call(this, `cache ${opts}`, 'sub-command')
+      }
+      cache[opts]()
+    })
 
     debug('cli starts with arguments %j', args)
     util.printNodeOptions()
@@ -189,7 +220,7 @@ module.exports = {
 
     const firstCommand = args[2]
     if (!_.includes(knownCommands, firstCommand)) {
-      debug('unknwon command %s', firstCommand)
+      debug('unknown command %s', firstCommand)
       logger.error('Unknown command', `"${firstCommand}"`)
       program.outputHelp()
       return util.exit(1)

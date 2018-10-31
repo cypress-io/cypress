@@ -1,38 +1,60 @@
+_ = require("lodash")
+debug = require("debug")("cypress:server:saved_state")
 FileUtil = require("./util/file")
 appData = require("./util/app_data")
-log = require('./log')
 savedStateUtil = require("./util/saved_state")
 
-# store file utils by the project path
-# to prevent race conditions and for simple testing
 stateFiles = {}
 
-# TESTING
+whitelist = """
+  appWidth
+  appHeight
+  appX
+  appY
+  autoScrollingEnabled
+  browserWidth
+  browserHeight
+  browserX
+  browserY
+  isAppDevToolsOpen
+  isBrowserDevToolsOpen
+  reporterWidth
+  showedOnBoardingModal
+""".trim().split(/\s+/)
 
-# In order to stub state access, create a state object *first* using project's
-# path, then make the project instance. Control the stabbed instance in the test
-#
-# example
-#   savedState = require('./saved_state')
-#   state = savedState 'foo/bar'
-#   project = Project 'foo/bar'
-#   stub(state, 'get').returns(Promise.resolve({width: 200}))
-#   project.open().then(project.state).then(state)
-#   state should have width = 200
+normalizeAndWhitelistSet = (set, key, value) ->
+  valueObject = if _.isString(key)
+    tmp = {}
+    tmp[key] = value
+    tmp
+  else
+    key
 
-# async promise-returning function
-findSavedSate = (projectRoot) ->
+  invalidKeys = _.filter _.keys(valueObject), (key) ->
+    not _.includes(whitelist, key)
+
+  if invalidKeys.length
+    console.error("WARNING: attempted to save state for non-whitelisted key(s): #{invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.coffee")
+
+  set(_.pick(valueObject, whitelist))
+
+module.exports = (projectRoot, isTextTerminal) ->
+  if isTextTerminal
+    debug("noop saved state")
+    return Promise.resolve(FileUtil.noopFile)
+
   savedStateUtil.formStatePath(projectRoot)
   .then (statePath) ->
     fullStatePath = appData.projectsPath(statePath)
-    log('full state path %s', fullStatePath)
+    debug('full state path %s', fullStatePath)
     return stateFiles[fullStatePath] if stateFiles[fullStatePath]
 
-    log('making new state file around %s', fullStatePath)
+    debug('making new state file around %s', fullStatePath)
     stateFile = new FileUtil({
       path: fullStatePath
     })
+
+    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndWhitelistSet)
+
     stateFiles[fullStatePath] = stateFile
     stateFile
-
-module.exports = findSavedSate

@@ -171,23 +171,23 @@ jobs:
           paths:
             - packages/ts/node_modules
 
-      - run: npm run stop-only
+        ## TODO: this needs to be reenabled when
+        ## we update stop-only
+    #   - run: npm run stop-only
       ## now go build all of subpackages
       - run: npm run build
 
-      ## save entire folder as artifact for other jobs to continue
-      ## hmm, do not see a good way to cache it, since all code
-      ## might change
-      - save_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}-{{ checksum "circle.yml" }}
+      ## save entire folder as artifact for other jobs to run without reinstalling
+      - persist_to_workspace:
+          root: ~/
           paths:
-            - /root/cypress
+            - cypress
 
   lint:
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run lint
       - run: npm run all lint
 
@@ -195,8 +195,8 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
@@ -219,8 +219,8 @@ jobs:
     <<: *defaults
     parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -229,8 +229,8 @@ jobs:
     <<: *defaults
     parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -238,10 +238,10 @@ jobs:
   "server-e2e-tests-1":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 0
+          command: npm run test-e2e -- --chunk 1
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -249,10 +249,10 @@ jobs:
   "server-e2e-tests-2":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 1
+          command: npm run test-e2e -- --chunk 2
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -260,10 +260,10 @@ jobs:
   "server-e2e-tests-3":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 2
+          command: npm run test-e2e -- --chunk 3
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -271,10 +271,10 @@ jobs:
   "server-e2e-tests-4":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 3
+          command: npm run test-e2e -- --chunk 4
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
@@ -282,19 +282,53 @@ jobs:
   "server-e2e-tests-5":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 4
+          command: npm run test-e2e -- --chunk 5
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
 
-  "driver-integration-tests-1":
+  "server-e2e-tests-6":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk 6
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-7":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk 7
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-8":
+      <<: *defaults
+      steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk 8
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "3x-driver-integration-tests":
+    <<: *defaults
+    parallelism: 3
+    steps:
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm start
           background: true
@@ -303,136 +337,50 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 0
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
-  "driver-integration-tests-2":
+  "2x-desktop-gui-integration-tests":
     <<: *defaults
+    parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 1
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-3":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 2
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-4":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 3
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-5":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 4
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "desktop-gui-integration-tests-1":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run cypress:run -- --parallel 3 --index 0
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
-  "desktop-gui-integration-tests-2":
+  "reporter-integration-tests":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run build-prod
-          working_directory: packages/desktop-gui
+          working_directory: packages/reporter
       - run:
-          command: npm run cypress:run -- --parallel 3 --index 1
-          working_directory: packages/desktop-gui
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "desktop-gui-integration-tests-3":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm run build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: npm run cypress:run -- --parallel 3 --index 2
-          working_directory: packages/desktop-gui
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group reporter
+          working_directory: packages/reporter
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -441,8 +389,8 @@ jobs:
   "run-launcher":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -450,8 +398,8 @@ jobs:
   "build-binary":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: $(npm bin)/print-arch
       - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform linux
@@ -476,8 +424,8 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
@@ -493,33 +441,33 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
+            CYPRESS_ENV=staging \
             CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
 
   "test-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
       - run:
           name: Run test project
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            CYPRESS_ENV=staging \
             npm run cypress:run -- --project /tmp/repo --record
 
   "build-npm-package":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           name: bump NPM version
           command: npm --no-git-tag-version version $NEXT_DEV_VERSION
@@ -560,8 +508,8 @@ jobs:
   "test-next-version":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la /tmp/urls
@@ -594,8 +542,8 @@ jobs:
   "test-next-version-locally":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       # make sure we have cypress.zip received
@@ -624,8 +572,8 @@ jobs:
   "test-binary-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       # make sure we have the binary
@@ -644,9 +592,9 @@ jobs:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
 
 workflows:
@@ -657,6 +605,7 @@ workflows:
       - lint:
           requires:
             - build
+      # unit, integration and e2e tests
       - unit-tests:
           requires:
             - build
@@ -681,33 +630,26 @@ workflows:
       - server-e2e-tests-5:
           requires:
             - build
-      - driver-integration-tests-1:
+      - server-e2e-tests-6:
           requires:
             - build
-      - driver-integration-tests-2:
+      - server-e2e-tests-7:
           requires:
             - build
-      - driver-integration-tests-3:
+      - server-e2e-tests-8:
           requires:
             - build
-      - driver-integration-tests-4:
+      - 3x-driver-integration-tests:
           requires:
             - build
-      - driver-integration-tests-5:
-          requires:
-            - build
-      - desktop-gui-integration-tests-1:
-          requires:
-            - build
-      - desktop-gui-integration-tests-2:
-          requires:
-            - build
-      - desktop-gui-integration-tests-3:
+      - 2x-desktop-gui-integration-tests:
           requires:
             - build
       - run-launcher:
           requires:
             - build
+      # various testing scenarios, like building full binary
+      # and testing it on a real project
       - test-against-staging:
           filters:
             branches:

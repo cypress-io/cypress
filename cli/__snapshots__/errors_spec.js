@@ -2,8 +2,10 @@ exports['errors individual has the following errors 1'] = [
   "nonZeroExitCodeXvfb",
   "missingXvfb",
   "missingApp",
+  "notInstalledCI",
   "missingDependency",
   "versionMismatch",
+  "binaryNotExecutable",
   "unexpected",
   "failedDownload",
   "failedUnzip",
@@ -19,7 +21,7 @@ Install XVFB and run Cypress again.
 
 Read our documentation on dependencies for more information:
 
-https://on.cypress.io/required-dependencies
+[34mhttps://on.cypress.io/required-dependencies[39m
 
 If you are using Docker, we provide containers with all required dependencies installed.
 ----------

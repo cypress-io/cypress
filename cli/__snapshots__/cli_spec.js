@@ -67,6 +67,10 @@ exports['shows help for run --foo 1'] = `
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
     -b, --browser <browser-name>               runs Cypress in the browser with the given name. note: using an external browser will not record a video.
     -P, --project <project-path>               path to the project
+    --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
+    --group <name>                             a named group for recorded runs in the Cypress dashboard
+    --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
+    --no-exit                                  keep the browser open after tests finish
     --dev                                      runs cypress in development and bypasses binary check
     -h, --help                                 output usage information
   -------
@@ -93,18 +97,19 @@ exports['cli help command shows help 1'] = `
 
   Options:
 
-    -v, --version  Prints Cypress version
+    -v, --version  prints Cypress version
     -h, --help     output usage information
 
 
   Commands:
 
     help                Shows CLI help and exits
-    version             Prints Cypress version
+    version             prints Cypress version
     run [options]       Runs Cypress tests from the CLI without the GUI
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
     verify              Verifies that Cypress is installed correctly and executable
+    cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -129,18 +134,19 @@ exports['cli help command shows help for -h 1'] = `
 
   Options:
 
-    -v, --version  Prints Cypress version
+    -v, --version  prints Cypress version
     -h, --help     output usage information
 
 
   Commands:
 
     help                Shows CLI help and exits
-    version             Prints Cypress version
+    version             prints Cypress version
     run [options]       Runs Cypress tests from the CLI without the GUI
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
     verify              Verifies that Cypress is installed correctly and executable
+    cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -165,18 +171,19 @@ exports['cli help command shows help for --help 1'] = `
 
   Options:
 
-    -v, --version  Prints Cypress version
+    -v, --version  prints Cypress version
     -h, --help     output usage information
 
 
   Commands:
 
     help                Shows CLI help and exits
-    version             Prints Cypress version
+    version             prints Cypress version
     run [options]       Runs Cypress tests from the CLI without the GUI
     open [options]      Opens Cypress in the interactive GUI.
     install [options]   Installs the Cypress executable matching this package's version
     verify              Verifies that Cypress is installed correctly and executable
+    cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -203,18 +210,19 @@ exports['cli unknown command shows usage and exits 1'] = `
 
     Options:
 
-      -v, --version  Prints Cypress version
+      -v, --version  prints Cypress version
       -h, --help     output usage information
 
 
     Commands:
 
       help                Shows CLI help and exits
-      version             Prints Cypress version
+      version             prints Cypress version
       run [options]       Runs Cypress tests from the CLI without the GUI
       open [options]      Opens Cypress in the interactive GUI.
       install [options]   Installs the Cypress executable matching this package's version
       verify              Verifies that Cypress is installed correctly and executable
+      cache [options]     Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -224,31 +232,26 @@ exports['cli unknown command shows usage and exits 1'] = `
 `
 
 exports['cli version and binary version 1'] = `
-
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
 `
 
 exports['cli version and binary version 2'] = `
-
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
 `
 
 exports['cli version no binary version 1'] = `
-
 Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
 
 exports['cli --version no binary version 1'] = `
-
 Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
 
 exports['cli -v no binary version 1'] = `
-
 Cypress package version: 1.2.3
 Cypress binary version: not installed
 `

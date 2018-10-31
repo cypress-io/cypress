@@ -14,7 +14,17 @@ capture    = require("../capture")
 upload     = require("../upload")
 env        = require("../util/env")
 terminal   = require("../util/terminal")
+humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
+
+onBeforeRetry = (details) ->
+  errors.warning(
+    "DASHBOARD_API_RESPONSE_FAILED_RETRYING", {
+      delay: humanTime.long(details.delay, false)
+      tries: details.total - details.retryIndex
+      response: details.err
+    }
+  )
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -56,12 +66,37 @@ warnIfProjectIdButNoRecordOption = (projectId, options) ->
     ## record mode
     errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
 
+throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) ->
+  if (not ciBuildId and not ciProvider.provider()) and (parallel or group)
+    errors.throw(
+      "INDETERMINATE_CI_BUILD_ID",
+      {
+        group,
+        parallel
+      },
+      ciProvider.detectableCiBuildIdProviders()
+    )
+
+throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group) ->
+  if not record and _.some([ciBuildId, parallel, group])
+    errors.throw("RECORD_PARAMS_WITHOUT_RECORDING", {
+      ciBuildId,
+      group,
+      parallel
+    })
+
+throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) ->
+  ## we've been given an explicit ciBuildId
+  ## but no parallel or group flag
+  if ciBuildId and (not parallel and not group)
+    errors.throw("INCORRECT_CI_BUILD_ID_USAGE", { ciBuildId })
+
 throwIfNoProjectId = (projectId) ->
   if not projectId
     errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
 
-getSpecPath = (spec) ->
-  _.get(spec, "path")
+getSpecRelativePath = (spec) ->
+  _.get(spec, "relative", null)
 
 uploadArtifacts = (options = {}) ->
   { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
@@ -116,10 +151,13 @@ updateInstanceStdout = (options = {}) ->
 
   stdout = captured.toString()
 
-  api.updateInstanceStdout({
-    stdout
-    instanceId
-  })
+  makeRequest = ->
+    api.updateInstanceStdout({
+      stdout
+      instanceId
+    })
+
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed updating instance stdout %o", {
       stack: err.stack
@@ -132,7 +170,7 @@ updateInstanceStdout = (options = {}) ->
   .finally(capture.restore)
 
 updateInstance = (options = {}) ->
-  { instanceId, results, captured } = options
+  { instanceId, results, captured, group, parallel, ciBuildId } = options
   { stats, tests, hooks, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -143,22 +181,34 @@ updateInstance = (options = {}) ->
   screenshots = _.map screenshots, (screenshot) ->
     _.omit(screenshot, "path")
 
-  api.updateInstance({
-    stats
-    tests
-    error
-    video
-    hooks
-    stdout
-    instanceId
-    screenshots
-    reporterStats
-    cypressConfig
-  })
+  makeRequest = ->
+    api.updateInstance({
+      stats
+      tests
+      error
+      video
+      hooks
+      stdout
+      instanceId
+      screenshots
+      reporterStats
+      cypressConfig
+    })
+
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed updating instance %o", {
       stack: err.stack
     })
+
+    if parallel
+      return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
+        response: err,
+        flags: {
+          group,
+          ciBuildId,
+        },
+      })
 
     errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
@@ -169,8 +219,26 @@ updateInstance = (options = {}) ->
     else
       null
 
+getCommitFromGitOrCi = (git) ->
+  la(check.object(git), 'expected git information object', git)
+  ciProvider.commitDefaults({
+    sha: git.sha
+    branch: git.branch
+    authorName: git.author
+    authorEmail: git.email
+    message: git.message
+    remoteOrigin: git.remote
+    defaultBranch: null
+  })
+
 createRun = (options = {}) ->
-  { projectId, recordKey, platform, git, specPattern, specs } = options
+  _.defaults(options, {
+    group: null,
+    parallel: null,
+    ciBuildId: null,
+  })
+
+  { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group } = options
 
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
@@ -189,28 +257,34 @@ createRun = (options = {}) ->
   if specPattern
     specPattern = specPattern.join(",")
 
-  specs = _.map(specs, getSpecPath)
+  if ciBuildId
+    ## stringify
+    ciBuildId = String(ciBuildId)
 
-  api.createRun({
-    specPattern
-    specs
-    projectId
-    recordKey
-    platform
-    ci: {
-      params: ciProvider.params()
-      provider: ciProvider.name()
-      buildNumber: ciProvider.buildNum()
-    }
-    commit: {
-      sha: git.sha
-      branch: git.branch
-      authorName: git.author
-      authorEmail: git.email
-      message: git.message
-      remoteOrigin: git.remote
-    }
-  })
+  specs = _.map(specs, getSpecRelativePath)
+
+  commit = getCommitFromGitOrCi(git)
+  debug("commit information from Git or from environment variables")
+  debug(commit)
+
+  makeRequest = ->
+    api.createRun({
+      specs
+      group
+      parallel
+      platform
+      ciBuildId
+      projectId
+      recordKey
+      specPattern
+      ci: {
+        params: ciProvider.ciParams()
+        provider: ciProvider.provider()
+      }
+      commit
+    })
+
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed creating run %o", {
       stack: err.stack
@@ -219,12 +293,83 @@ createRun = (options = {}) ->
     switch err.statusCode
       when 401
         recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
-        errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
+        errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412
         errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
+      when 422
+        { code, payload } = err.error
+
+        runUrl = _.get(payload, "runUrl")
+
+        switch code
+          when "RUN_GROUP_NAME_NOT_UNIQUE"
+            errors.throw("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          when "PARALLEL_GROUP_PARAMS_MISMATCH"
+            { browserName, browserVersion, osName, osVersion } = platform
+
+            errors.throw("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH", {
+              group,
+              runUrl,
+              ciBuildId,
+              parameters: {
+                osName,
+                osVersion,
+                browserName,
+                browserVersion,
+                specs,
+              }
+            })
+          when "PARALLEL_DISALLOWED"
+            errors.throw("DASHBOARD_PARALLEL_DISALLOWED", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          when "PARALLEL_REQUIRED"
+            errors.throw("DASHBOARD_PARALLEL_REQUIRED", {
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          when "ALREADY_COMPLETE"
+            errors.throw("DASHBOARD_ALREADY_COMPLETE", {
+              runUrl,
+              group,
+              parallel,
+              ciBuildId,
+            })
+          when "STALE_RUN"
+            errors.throw("DASHBOARD_STALE_RUN", {
+              runUrl,
+              group,
+              parallel,
+              ciBuildId,
+            })
+          else
+            errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
+              response: err,
+              flags: {
+                group,
+                parallel,
+                ciBuildId,
+              },
+            })
       else
+        if parallel
+          return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
+            response: err,
+            flags: {
+              group,
+              ciBuildId,
+            },
+          })
+
         ## warn the user that assets will be not recorded
         errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
@@ -234,21 +379,33 @@ createRun = (options = {}) ->
         .return(null)
 
 createInstance = (options = {}) ->
-  { runId, groupId, machineId, platform, spec } = options
+  { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options
 
-  spec = getSpecPath(spec)
+  spec = getSpecRelativePath(spec)
 
-  api.createInstance({
-    spec
-    runId
-    groupId
-    platform
-    machineId
-  })
+  makeRequest = ->
+    api.createInstance({
+      spec
+      runId
+      groupId
+      platform
+      machineId
+    })
+
+  api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch (err) ->
     debug("failed creating instance %o", {
       stack: err.stack
     })
+
+    if parallel
+      return errors.throw("DASHBOARD_CANNOT_PROCEED_IN_PARALLEL", {
+        response: err,
+        flags: {
+          group,
+          ciBuildId,
+        },
+      })
 
     errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
@@ -260,12 +417,15 @@ createInstance = (options = {}) ->
       null
 
 createRunAndRecordSpecs = (options = {}) ->
-  { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs } = options
+  { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group } = options
 
   recordKey = options.key
 
   commitInfo.commitInfo(projectRoot)
   .then (git) ->
+    debug("found the following git information")
+    debug(git)
+
     platform = {
       osCpus: sys.osCpus
       osName: sys.osName
@@ -278,14 +438,19 @@ createRunAndRecordSpecs = (options = {}) ->
     createRun({
       git
       specs
+      group
+      parallel
       platform
       recordKey
+      ciBuildId
       projectId
       specPattern
     })
     .then (resp) ->
       if not resp
-        runAllSpecs()
+        ## if a forked run, can't record and can't be parallel
+        ## because the necessary env variables aren't present
+        runAllSpecs({}, false)
       else
         { runUrl, runId, machineId, groupId } = resp
 
@@ -293,6 +458,8 @@ createRunAndRecordSpecs = (options = {}) ->
         instanceId = null
 
         beforeSpecRun = (spec) ->
+          debug("before spec run %o", { spec })
+
           capture.restore()
 
           captured = capture.stdout()
@@ -300,17 +467,31 @@ createRunAndRecordSpecs = (options = {}) ->
           createInstance({
             spec
             runId
+            group
             groupId
             platform
+            parallel
+            ciBuildId
             machineId
           })
-          .then (id) ->
-            instanceId = id
+          .then (resp = {}) ->
+            { instanceId } = resp
 
-        afterSpecRun = (results, config) ->
+            ## pull off only what we need
+            return _
+            .chain(resp)
+            .pick("spec", "claimedInstances", "totalInstances")
+            .extend({
+              estimated: resp.estimatedWallClockDuration
+            })
+            .value()
+
+        afterSpecRun = (spec, results, config) ->
           ## dont do anything if we failed to
           ## create the instance
           return if not instanceId
+
+          debug("after spec run %o", { spec })
 
           console.log("")
 
@@ -321,9 +502,12 @@ createRunAndRecordSpecs = (options = {}) ->
           console.log("")
 
           updateInstance({
+            group
             config
             results
             captured
+            parallel
+            ciBuildId
             instanceId
           })
           .then (resp) ->
@@ -347,7 +531,7 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs(beforeSpecRun, afterSpecRun, runUrl)
+        runAllSpecs({ beforeSpecRun, afterSpecRun, runUrl })
 
 module.exports = {
   createRun
@@ -364,8 +548,15 @@ module.exports = {
 
   throwIfNoProjectId
 
+  throwIfIndeterminateCiBuildId
+
+  throwIfIncorrectCiBuildIdUsage
+
   warnIfProjectIdButNoRecordOption
+
+  throwIfRecordParamsWithoutRecording
 
   createRunAndRecordSpecs
 
+  getCommitFromGitOrCi
 }

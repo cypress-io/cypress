@@ -3,6 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../dom")
+$selection = require("../dom/selection")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
@@ -11,10 +12,12 @@ $Aliases = require("../cy/aliases")
 $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
+$Focused = require("../cy/focused")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
+$Timers = require("../cy/timers")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
@@ -36,12 +39,6 @@ isPromiseLike = (ret) ->
 
 returnedFalse = (result) ->
   result is false
-
-silenceConsole = (contentWindow) ->
-  if c = contentWindow.console
-    c.log = ->
-    c.warn = ->
-    c.info = ->
 
 getContentWindow = ($autIframe) ->
   $autIframe.prop("contentWindow")
@@ -82,6 +79,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   jquery = $jQuery.create(state)
   location = $Location.create(state)
+  focused = $Focused.create(state)
+  timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
 
@@ -118,6 +117,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
+        timers.reset()
+
         Cypress.action("app:window:before:unload", e)
 
         ## return undefined so our beforeunload handler
@@ -141,37 +142,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return ret
     })
 
-  timersPaused = false
-  timerQueues = {
-    setTimeout: []
-    setInterval: []
-    requestAnimationFrame: []
-  }
+  wrapNativeMethods = (contentWindow) ->
+    try
+      contentWindow.HTMLElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
 
-  runTimerQueue = (queue) ->
-    _.each timerQueues[queue], ([fn, args, context]) ->
-      fn.apply(context, args)
-    timerQueues[queue] = []
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(this)
 
-  wrapTimers = (contentWindow) ->
-    originalSetTimeout = contentWindow.setTimeout
-    originalSetInterval = contentWindow.setInterval
-    originalRequestAnimationFrame = contentWindow.requestAnimationFrame
-
-    wrap = (fn, queue) -> (args...) ->
-      if timersPaused
-        timerQueues[queue].push([fn, args, this])
-      else
-        fn.apply(this, args)
-
-    contentWindow.setTimeout = (fn, args...) ->
-      originalSetTimeout(wrap(fn, "setTimeout"), args...)
-
-    contentWindow.setInterval = (fn, args...) ->
-      originalSetInterval(wrap(fn, "setInterval"), args...)
-
-    contentWindow.requestAnimationFrame = (fn, args...) ->
-      originalRequestAnimationFrame(wrap(fn, "requestAnimationFrame"), args...)
+      contentWindow.document.hasFocus = ->
+        top.document.hasFocus()
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -627,6 +607,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## jquery sync methods
     getRemotejQueryInstance: jquery.getRemotejQueryInstance
 
+    ## focused sync methods
+    getFocused: focused.getFocused
+    needsForceFocus: focused.needsForceFocus
+    needsFocus: focused.needsFocus
+    fireFocus: focused.fireFocus
+    fireBlur: focused.fireBlur
+
+    ## timer sync methods
+    pauseTimers: timers.pauseTimers
+
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
 
@@ -730,6 +720,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state(backup)
 
       queue.reset()
+      timers.reset()
 
       cy.removeAllListeners()
 
@@ -886,12 +877,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       return null
 
     onBeforeAppWindowLoad: (contentWindow) ->
-      ## we silence the console when running headlessly
-      ## because console logs are kept around in memory for
-      ## inspection via the developer
-      if not config("isInteractive")
-        silenceConsole(contentWindow)
-
       ## we set window / document props before the window load event
       ## so that we properly handle events coming from the application
       ## from the time that happens BEFORE the load event occurs
@@ -901,14 +886,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindowListeners(contentWindow)
 
-      wrapTimers(contentWindow)
+      wrapNativeMethods(contentWindow)
 
-    pauseTimers: (pause) ->
-      timersPaused = pause
-      if not pause
-        runTimerQueue("setTimeout")
-        runTimerQueue("setInterval")
-        runTimerQueue("requestAnimationFrame")
+      timers.wrap(contentWindow)
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err

@@ -121,6 +121,7 @@ describe('cli', function () {
   context('cypress run', function () {
     beforeEach(function () {
       sinon.stub(run, 'start').resolves(0)
+      util.exit.withArgs(0)
     })
 
     it('calls run.start with options + exits with code', function (done) {
@@ -199,6 +200,25 @@ describe('cli', function () {
       expect(run.start).to.be.calledWith({ headed: true })
     })
 
+    it('calls run with --no-exit', function () {
+      this.exec('run --no-exit')
+      expect(run.start).to.be.calledWith({ exit: false })
+    })
+
+    it('calls run with --parallel', function () {
+      this.exec('run --parallel')
+      expect(run.start).to.be.calledWith({ parallel: true })
+    })
+
+    it('calls runs with --ci-build-id', function () {
+      this.exec('run --ci-build-id 123')
+      expect(run.start).to.be.calledWith({ ciBuildId: '123' })
+    })
+
+    it('calls runs with --group', function () {
+      this.exec('run --group staging')
+      expect(run.start).to.be.calledWith({ group: 'staging' })
+    })
   })
 
   context('cypress open', function () {

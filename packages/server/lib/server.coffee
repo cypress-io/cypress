@@ -11,8 +11,10 @@ httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
+compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
+uri          = require("./util/uri")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
 appData      = require("./util/app_data")
@@ -40,9 +42,12 @@ setProxiedUrl = (req) ->
   ## and only leave the path which is
   ## how browsers would normally send
   ## use their url
-  req.proxiedUrl = req.url
+  req.proxiedUrl = uri.removeDefaultPort(req.url)
 
-  req.url = url.parse(req.url).path
+  req.url = uri.getPath(req.url)
+
+notSSE = (req, res) ->
+  req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -56,7 +61,7 @@ class Server
     @_server     = null
     @_socket     = null
     @_baseUrl    = null
-    @_wsProxy    = null
+    @_nodeProxy  = null
     @_fileServer = null
     @_httpsProxy = null
 
@@ -82,7 +87,7 @@ class Server
       next()
 
     app.use require("cookie-parser")()
-    app.use require("compression")()
+    app.use compression({filter: notSSE})
     app.use require("morgan")("dev") if morgan
 
     ## errorhandler
@@ -106,6 +111,7 @@ class Server
 
   open: (config = {}, project) ->
     la(_.isPlainObject(config), "expected plain config object", config)
+
     Promise.try =>
       ## always reset any buffers
       ## TODO: change buffers to be an instance
@@ -119,12 +125,13 @@ class Server
       ## generate our request instance
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
+      @_nodeProxy = httpProxy.createProxyServer()
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
       @createServer(app, config, @_request)
 
@@ -137,7 +144,6 @@ class Server
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
       @_server  = http.createServer(app)
-      @_wsProxy = httpProxy.createProxyServer()
 
       allowDestroy(@_server)
 
@@ -151,7 +157,7 @@ class Server
       onUpgrade = (req, socket, head) =>
         debug("Got UPGRADE request from %s", req.url)
 
-        @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
+        @proxyWebsockets(@_nodeProxy, socketIoRoute, req, socket, head)
 
       callListeners = (req, res) =>
         listeners = @_server.listeners("request").slice(0)
@@ -295,7 +301,7 @@ class Server
     @_request.send(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
-    debug("resolving visit", {
+    debug("resolving visit %o", {
       url: urlStr
       headers
       options

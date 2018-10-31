@@ -282,30 +282,55 @@ describe('util', () => {
         expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
       })
     })
+  })
 
-    describe('.getOsVersionAsync', () => {
-      let util
-      let getos = sinon.stub().resolves(['distro-release'])
-      beforeEach(() => {
-        util = proxyquire(`${lib}/util`, { getos })
+  describe('.getOsVersionAsync', () => {
+    let util
+    let getos = sinon.stub().resolves(['distro-release'])
+    beforeEach(() => {
+      util = proxyquire(`${lib}/util`, { getos })
+    })
+    it('calls os.release on non-linux', () => {
+      os.platform.returns('darwin')
+      os.release.returns('some-release')
+      util.getOsVersionAsync()
+      .then(() => {
+        expect(os.release).to.be.called
+        expect(getos).to.not.be.called
       })
-      it('calls os.release on non-linux', () => {
-        os.platform.returns('darwin')
-        os.release.returns('some-release')
-        util.getOsVersionAsync()
-        .then(() => {
-          expect(os.release).to.be.called
-          expect(getos).to.not.be.called
-        })
+    })
+    it('NOT calls os.release on linux', () => {
+      os.platform.returns('linux')
+      util.getOsVersionAsync()
+      .then(() => {
+        expect(os.release).to.not.be.called
+        expect(getos).to.be.called
       })
-      it('NOT calls os.release on linux', () => {
-        os.platform.returns('linux')
-        util.getOsVersionAsync()
-        .then(() => {
-          expect(os.release).to.not.be.called
-          expect(getos).to.be.called
-        })
-      })
+    })
+  })
+
+  describe('.getEnv', () => {
+    it('reads from package.json config', () => {
+      process.env.npm_package_config_CYPRESS_FOO = 'bar'
+      expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
+    })
+    it('reads from .npmrc config', () => {
+      process.env.npm_config_CYPRESS_FOO = 'bar'
+      expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
+    })
+    it('reads from env var', () => {
+      process.env.CYPRESS_FOO = 'bar'
+      expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
+    })
+    it('prefers env var over .npmrc config', () => {
+      process.env.CYPRESS_FOO = 'bar'
+      process.env.npm_config_CYPRESS_FOO = 'baz'
+      expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
+    })
+    it('prefers .npmrc config over package config', () => {
+      process.env.npm_package_config_CYPRESS_FOO = 'baz'
+      process.env.npm_config_CYPRESS_FOO = 'bloop'
+      expect(util.getEnv('CYPRESS_FOO')).to.eql('bloop')
     })
   })
 })

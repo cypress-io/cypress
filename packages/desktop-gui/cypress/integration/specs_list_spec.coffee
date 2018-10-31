@@ -112,25 +112,25 @@ describe "Specs List", ->
 
       context "run all specs", ->
         it "displays run all specs button", ->
-          cy.contains(".btn", "Run all tests")
+          cy.contains(".btn", "Run all specs")
 
         it "has play icon", ->
           cy
-            .contains(".btn", "Run all tests")
+            .contains(".btn", "Run all specs")
             .find("i").should("have.class", "fa-play")
 
         it "triggers browser launch on click of button", ->
           cy
-            .contains(".btn", "Run all tests").click()
+            .contains(".btn", "Run all specs").click()
             .then ->
               launchArgs = @ipc.launchBrowser.lastCall.args
 
-              expect(launchArgs[0].browser).to.eq "chrome"
-              expect(launchArgs[0].spec).to.eq "__all"
+              expect(launchArgs[0].browser.name).to.eq "chrome"
+              expect(launchArgs[0].spec.name).to.eq "All Specs"
 
         describe "all specs running in browser", ->
           beforeEach ->
-            cy.contains(".btn", "Run all tests").as("allSpecs").click()
+            cy.contains(".btn", "Run all specs").as("allSpecs").click()
 
           it "updates spec icon", ->
             cy.get("@allSpecs").find("i").should("have.class", "fa-dot-circle-o")
@@ -149,6 +149,10 @@ describe "Specs List", ->
 
         it "lists test specs", ->
           cy.get(".file a").contains("app_spec.coffee")
+
+        it "lists folder with '.'", ->
+          cy.get(".file").should("have.length", 7)
+          cy.get(".folder").should("have.length", 10)
 
       context "collapsing specs", ->
         it "sets folder collapsed when clicked", ->
@@ -238,14 +242,14 @@ describe "Specs List", ->
 
         it "saves the filter to local storage for the project", ->
           cy.window().then (win) =>
-            expect(win.localStorage["specsFilter-#{@config.projectId}"]).to.be.a("string")
-            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}"])).to.equal("new")
+            expect(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"]).to.be.a("string")
+            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"])).to.equal("new")
 
       describe "when there's a saved filter", ->
         beforeEach ->
           @ipc.getSpecs.yields(null, @specs)
           cy.window().then (win) ->
-            win.localStorage["specsFilter-#{@config.projectId}"] = JSON.stringify("app")
+            win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"] = JSON.stringify("app")
 
         it "applies it for the appropriate project", ->
           @openProject.resolve(@config)
@@ -255,7 +259,6 @@ describe "Specs List", ->
           @config.projectId = "different"
           @openProject.resolve(@config)
           cy.get(".filter").should("have.value", "")
-
 
     context "click on spec", ->
       beforeEach ->
@@ -270,8 +273,9 @@ describe "Specs List", ->
             expect(@ipc.closeBrowser).to.be.called
 
             launchArgs = @ipc.launchBrowser.lastCall.args
-            expect(launchArgs[0].browser).to.equal("chrome")
-            expect(launchArgs[0].spec).to.equal("cypress/integration/app_spec.coffee")
+
+            expect(launchArgs[0].browser.name).to.equal("chrome")
+            expect(launchArgs[0].spec.relative).to.equal("cypress/integration/app_spec.coffee")
 
       it "adds 'active' class on click", ->
         cy.get("@firstSpec")

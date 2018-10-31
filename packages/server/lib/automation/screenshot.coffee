@@ -6,8 +6,13 @@ module.exports = (screenshotsFolder) ->
     capture: (data, automate) ->
       screenshots.capture(data, automate)
       .then (details) ->
-        if details
-          screenshots.save(data, details, screenshotsFolder)
+        ## if there are no details, this is part of a multipart screenshot
+        ## and should not be saved
+        return if not details
+
+        screenshots.save(data, details, screenshotsFolder)
+        .then (savedDetails) ->
+          screenshots.afterScreenshot(data, savedDetails)
       .catch (err) ->
         screenshots.clearMultipartState()
         throw err

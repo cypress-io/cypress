@@ -6,7 +6,7 @@ namespace CypressLodashTests {
 }
 
 namespace CypressJqueryTests {
-  Cypress.$ // $ExpectType JQueryStatic<HTMLElement>
+  Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
   Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
 }
@@ -218,3 +218,15 @@ namespace CypressFilterTests {
       return true
     })
 }
+
+cy.screenshot('example-name')
+cy.screenshot('example', {log: false})
+cy.screenshot({log: false})
+cy.screenshot({
+  log: true,
+  blackout: []
+})
+cy.screenshot('example', {
+  log: true,
+  blackout: []
+})

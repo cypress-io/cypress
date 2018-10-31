@@ -1,3 +1,4 @@
+$ = Cypress.$
 Promise = Cypress.Promise
 
 describe "driver/src/cypress/index", ->

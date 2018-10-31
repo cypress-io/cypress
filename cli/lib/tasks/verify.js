@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const cp = require('child_process')
 const chalk = require('chalk')
 const Listr = require('listr')
 const debug = require('debug')('cypress:cli')
@@ -10,89 +9,73 @@ const logSymbols = require('log-symbols')
 
 
 const { throwFormErrorText, errors } = require('../errors')
-const fs = require('../fs')
 const util = require('../util')
 const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const state = require('./state')
 
-const verificationError = (message) => {
-  return _.extend(new Error(''), { name: '', message, isVerificationError: true })
-}
-
-const xvfbError = (message) => {
-  return _.extend(new Error(''), { name: '', message, isXvfbError: true })
-}
-
-const isMissingExecutable = (binaryDir) => {
+const checkExecutable = (binaryDir) => {
   const executable = state.getPathToExecutable(binaryDir)
   debug('checking if executable exists', executable)
-  return fs.pathExistsAsync(executable)
-  .then((exists) => {
-    if (!exists) {
-      return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
+  return util.isExecutableAsync(executable)
+  .then((isExecutable) => {
+    debug('Binary is executable? :', isExecutable)
+    if (!isExecutable) {
+      return throwFormErrorText(errors.binaryNotExecutable(executable))()
+    }
+  })
+  .catch({ code: 'ENOENT' }, () => {
+    if (util.isCi()) {
+      return throwFormErrorText(errors.notInstalledCI(executable))()
+    }
+    return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
       Cypress executable not found at: ${chalk.cyan(executable)}
     `)
-    }
   })
 }
 
 const runSmokeTest = (binaryDir) => {
   debug('running smoke test')
-  let stderr = ''
-  let stdout = ''
   const cypressExecPath = state.getPathToExecutable(binaryDir)
   debug('using Cypress executable %s', cypressExecPath)
 
-  // TODO switch to execa for this?
-  const spawn = () => {
-    return new Promise((resolve, reject) => {
-      const random = _.random(0, 1000)
-      const args = ['--smoke-test', `--ping=${random}`]
-      const smokeTestCommand = `${cypressExecPath} ${args.join(' ')}`
-      debug('smoke test command:', smokeTestCommand)
-      const child = cp.spawn(cypressExecPath, args)
-
-      child.stderr.on('data', (data) => {
-        stderr += data.toString()
-      })
-
-      child.stdout.on('data', (data) => {
-        stdout += data.toString()
-      })
-
-      child.on('error', reject)
-
-      child.on('close', (code) => {
-        if (code === 0) {
-          const smokeTestReturned = stdout.trim()
-          debug('smoke test output "%s"', smokeTestReturned)
-
-          if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
-            return reject(new Error(stripIndent`
-              Smoke test returned wrong code.
-
-              Command was: ${smokeTestCommand}
-
-              Returned: ${smokeTestReturned}
-            `))
-          }
-
-          return resolve()
-        }
-
-        reject(verificationError(stderr))
-      })
-    })
-  }
-
   const onXvfbError = (err) => {
     debug('caught xvfb error %s', err.message)
-    throw xvfbError(`Caught error trying to run XVFB: "${err.message}"`)
+    return throwFormErrorText(errors.missingXvfb)(`Caught error trying to run XVFB: "${err.message}"`)
+  }
+
+  const onSmokeTestError = (err) => {
+    debug('Smoke test failed:', err)
+    return throwFormErrorText(errors.missingDependency)(err.stderr || err.message)
   }
 
   const needsXvfb = xvfb.isNeeded()
   debug('needs XVFB?', needsXvfb)
+
+  const spawn = () => {
+    const random = _.random(0, 1000)
+    const args = ['--smoke-test', `--ping=${random}`]
+    const smokeTestCommand = `${cypressExecPath} ${args.join(' ')}`
+    debug('smoke test command:', smokeTestCommand)
+
+    return Promise.resolve(util.exec(cypressExecPath, args))
+    .catch(onSmokeTestError)
+    .then((result) => {
+      const smokeTestReturned = result.stdout
+      debug('smoke test stdout "%s"', smokeTestReturned)
+
+      if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
+        debug('Smoke test failed:', result)
+        throw new Error(stripIndent`
+          Smoke failed.
+
+          Command was: ${smokeTestCommand}
+
+          Returned: ${smokeTestReturned}
+        `)
+      }
+    })
+  }
 
   if (needsXvfb) {
     return xvfb.start()
@@ -120,8 +103,11 @@ function testBinary (version, binaryDir) {
   // if we are running in CI then use
   // the verbose renderer else use
   // the default
+  let renderer = util.isCi() ? verbose : 'default'
+  if (logger.logLevel() === 'silent') renderer = 'silent'
+
   const rendererOptions = {
-    renderer: util.isCi() ? verbose : 'default',
+    renderer,
   }
 
 
@@ -151,8 +137,6 @@ function testBinary (version, binaryDir) {
             rendererOptions.renderer
           )
         })
-        .catch({ isXvfbError: true }, throwFormErrorText(errors.missingXvfb))
-        .catch({ isVerificationError: true }, throwFormErrorText(errors.missingDependency))
       },
     },
   ], rendererOptions)
@@ -196,46 +180,47 @@ const start = (options = {}) => {
     welcomeMessage: true,
   })
 
-  const checkEnvVar = () => {
-    debug('checking environment variables')
-    if (process.env.CYPRESS_RUN_BINARY) {
-      const envBinaryPath = process.env.CYPRESS_RUN_BINARY
-      debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
-      logger.log(stripIndent`
+  const parseBinaryEnvVar = () => {
+    const envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')
+    debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
+    logger.log(stripIndent`
         ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:
         
               This overrides the default Cypress binary path used.
         `)
-      logger.log()
+    logger.log()
 
-      return util.isExecutableAsync(envBinaryPath)
-      .then((isExecutable) => {
-        debug('CYPRESS_RUN_BINARY is executable? :', isExecutable)
-        if (!isExecutable) {
-          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(stripIndent`
+    return util.isExecutableAsync(envBinaryPath)
+    .then((isExecutable) => {
+      debug('CYPRESS_RUN_BINARY is executable? :', isExecutable)
+      if (!isExecutable) {
+        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(stripIndent`
           The supplied binary path is not executable
           `)
-        }
-      })
-      .then(() => state.parseRealPlatformBinaryFolderAsync(envBinaryPath))
-      .then((envBinaryDir) => {
-        if (!envBinaryDir) {
-          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
-        }
-        debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
+      }
+    })
+    .then(() => state.parseRealPlatformBinaryFolderAsync(envBinaryPath))
+    .then((envBinaryDir) => {
+      if (!envBinaryDir) {
+        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
+      }
+      debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
 
-        binaryDir = envBinaryDir
-      })
-      .catch({ code: 'ENOENT' }, (err) => {
-        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(err.message)
-      })
-    }
-    return Promise.resolve()
+      binaryDir = envBinaryDir
+    })
+    .catch({ code: 'ENOENT' }, (err) => {
+      return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(err.message)
+    })
   }
 
 
-  return checkEnvVar()
-  .then(() => isMissingExecutable(binaryDir))
+  return Promise.try(() => {
+    debug('checking environment variables')
+    if (util.getEnv('CYPRESS_RUN_BINARY')) {
+      return parseBinaryEnvVar()
+    }
+  })
+  .then(() => checkExecutable(binaryDir))
   .tap(() => debug('binaryDir is ', binaryDir))
   .then(() => state.getBinaryPkgVersionAsync(binaryDir))
   .then((binaryVersion) => {

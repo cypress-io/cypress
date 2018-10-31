@@ -5,6 +5,7 @@ path = require("path")
 Promise = require("bluebird")
 lockFile = Promise.promisifyAll(require("lockfile"))
 fs = require("#{root}lib/util/fs")
+env = require("#{root}lib/util/env")
 exit = require("#{root}lib/util/exit")
 FileUtil = require("#{root}lib/util/file")
 
@@ -154,6 +155,14 @@ describe "lib/util/file", ->
       sinon.stub(fs, "readJsonAsync").rejects(new Error("fail!"))
       @fileUtil.get().catch ->
         expect(lockFile.unlockAsync).to.be.called
+
+    it "times out and carries on if unlocking times out", ->
+      sinon.stub(lockFile, "lockAsync").resolves()
+      sinon.stub(lockFile, "unlockAsync").callsFake -> Promise.delay(1e9)
+      sinon.stub(fs, "readJsonAsync").resolves({})
+      sinon.stub(env, "get").withArgs("FILE_UNLOCK_TIMEOUT").returns(100)
+
+      @fileUtil.get()
 
   context "#set", ->
     beforeEach ->

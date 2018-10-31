@@ -16,53 +16,21 @@ describe "src/cy/commands/querying", ->
 
   context "#focused", ->
     it "returns the activeElement", ->
-      button = cy.$$("#button")
-      button.get(0).focus()
+      $button = cy.$$("#button")
+      $button.get(0).focus()
+      
+      expect(cy.state("document").activeElement).to.eq($button.get(0))
 
       cy.focused().then ($focused) ->
-        expect($focused.get(0)).to.eq(button.get(0))
+        expect($focused.get(0)).to.eq($button.get(0))
 
     it "returns null if no activeElement", ->
-      button = cy.$$("#button")
-      button.get(0).focus()
-      button.get(0).blur()
+      $button = cy.$$("#button")
+      $button.get(0).focus()
+      $button.get(0).blur()
 
       cy.focused().should('not.exist').then ($focused) ->
         expect($focused).to.be.null
-
-    it "uses forceFocusedEl if set", ->
-      input = cy.$$("input:first")
-      cy.state("forceFocusedEl", input.get(0))
-
-      cy.focused().then ($focused) ->
-        expect($focused.get(0)).to.eq input.get(0)
-
-    it "does not use forceFocusedEl if that el is not in the document", ->
-      input = cy.$$("input:first")
-
-      cy
-        .get("input:first").focus().focused().then ->
-          input.remove()
-        .focused().should("not.exist").then ($el) ->
-          expect($el).to.be.null
-
-    it "nulls forceFocusedEl if that el is not in the document", ->
-      input = cy.$$("input:first")
-
-      cy
-        .get("input:first").focus().focused().then ->
-          input.remove()
-        .focused().should("not.exist").then ($el) ->
-          expect(cy.state("forceFocusedEl")).to.be.null
-
-    it "refuses to use blacklistFocusedEl", ->
-      input = cy.$$("input:first")
-      cy.state("blacklistFocusedEl", input.get(0))
-
-      cy
-        .get("input:first").focus()
-        .focused().should("not.exist").then ($focused) ->
-          expect($focused).to.be.null
 
     describe "assertion verification", ->
       beforeEach ->
@@ -88,9 +56,8 @@ describe "src/cy/commands/querying", ->
         $input = cy.$$("input:first")
 
         cy.on "command:retry", _.after 2, ->
-          cy.state("forceFocusedEl", $input.get(0))
-
           $input.val("1234")
+          $input.get(0).focus()
 
         cy.focused().should("have.value", "1234").then ->
           lastLog = @lastLog
@@ -183,8 +150,7 @@ describe "src/cy/commands/querying", ->
         cy.focused()
 
       it "fails waiting for the focused element not to exist", (done) ->
-        input = cy.$$("input:first")
-        cy.state("forceFocusedEl", input.get(0))
+        cy.$$("input:first").focus()
 
         cy.on "fail", (err) =>
           expect(err.message).to.include "Expected <input#input> not to exist in the DOM, but it was continuously found."
@@ -193,8 +159,7 @@ describe "src/cy/commands/querying", ->
         cy.focused().should("not.exist")
 
       it "eventually fails the assertion", (done) ->
-        input = cy.$$("input:first")
-        cy.state("forceFocusedEl", input.get(0))
+        cy.$$("input:first").focus()
 
         cy.on "fail", (err) =>
           lastLog = @lastLog

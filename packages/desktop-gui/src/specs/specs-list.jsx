@@ -6,10 +6,10 @@ import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
-import specsStore from './specs-store'
+import specsStore, { allSpecsSpec } from './specs-store'
 
 @observer
-class Specs extends Component {
+class SpecsList extends Component {
   render () {
     if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
@@ -34,9 +34,9 @@ class Specs extends Component {
             />
             <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
           </div>
-          <a onClick={this._selectSpec.bind(this, '__all')} className={cs('all-tests btn btn-default', { active: specsStore.allSpecsChosen })}>
-            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
-            Run all tests
+          <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: specsStore.isChosen(allSpecsSpec) })}>
+            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
+            {allSpecsSpec.displayName}
           </a>
         </header>
         {this._specsList()}
@@ -61,35 +61,25 @@ class Specs extends Component {
   }
 
   _specItem (spec) {
-    if (spec.hasChildren()) {
-      return this._folderContent(spec)
-    } else {
-      return this._specContent(spec)
-    }
+    return spec.hasChildren ? this._folderContent(spec) : this._specContent(spec)
   }
 
   _allSpecsIcon (allSpecsChosen) {
-    if (allSpecsChosen) {
-      return 'fa-dot-circle-o green'
-    } else {
-      return 'fa-play'
-    }
+    return allSpecsChosen ? 'fa-dot-circle-o green' : 'fa-play'
   }
 
   _specIcon (isChosen) {
-    if (isChosen) {
-      return 'fa-dot-circle-o green'
-    } else {
-      return 'fa-file-code-o'
-    }
+    return isChosen ? 'fa-dot-circle-o green' : 'fa-file-code-o'
   }
 
   _clearFilter = () => {
-    specsStore.clearFilter(this.props.project.id)
+    const { id, path } = this.props.project
+    specsStore.clearFilter({ id, path })
   }
 
   _updateFilter = (e) => {
-    specsStore.setFilter(this.props.project.id, e.target.value)
+    const { id, path } = this.props.project
+    specsStore.setFilter({ id, path }, e.target.value)
   }
 
   _executeFilterAction = (e) => {
@@ -98,14 +88,12 @@ class Specs extends Component {
     }
   }
 
-  _selectSpec (specPath, e) {
+  _selectSpec (spec, e) {
     e.preventDefault()
 
-    specsStore.setChosenSpec(specPath)
+    const { project } = this.props
 
-    let project = this.props.project
-
-    projectsApi.runSpec(project, specPath, project.chosenBrowser.name)
+    return projectsApi.runSpec(project, spec, project.chosenBrowser)
   }
 
   _selectSpecFolder (specFolderPath, e) {
@@ -140,14 +128,12 @@ class Specs extends Component {
   }
 
   _specContent (spec) {
-    const isChosen = specsStore.isChosenSpec(spec)
-
     return (
       <li key={spec.path} className='file'>
-        <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
+        <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
           <div>
             <div>
-              <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
+              <i className={`fa fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
               {spec.displayName}
             </div>
           </div>
@@ -188,4 +174,4 @@ class Specs extends Component {
   }
 }
 
-export default Specs
+export default SpecsList

@@ -153,10 +153,20 @@
     color: #565554;
   }
 
-  .command-state-pending {
+  .command-state-pending > span > .command-wrapper {
     padding-left: 3px;
     border-left: 2px solid $pending;
     background-color: lighten($pending, 40%);
+    cursor: default;
+
+    &:hover {
+      box-shadow: none;
+    }
+
+    .command-number {
+      margin-left: 5px;
+      width: 20px;
+    }
 
     .command-number,
     .command-method,
@@ -165,10 +175,14 @@
     }
   }
 
-  .command-state-failed {
+  .command-state-failed > span > .command-wrapper {
     padding-left: 3px;
     border-left: 2px solid $fail;
     background-color: lighten($fail, 30%);
+
+    &:hover {
+      background: lighten($fail, 26%);
+    }
 
     .command-number,
     .command-method,
@@ -279,7 +293,6 @@
         span {
           background-color: $fail;
           color: white;
-
         }
       }
       .command-message {
@@ -453,6 +466,16 @@
 
     .command-pin {
       display: block;
+    }
+  }
+
+  .command-state-pending > span .command-wrapper:hover {
+    .command-number {
+      display: block;
+    }
+
+    .command-pin {
+      display: none;
     }
   }
 
