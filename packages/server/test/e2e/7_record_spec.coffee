@@ -1,11 +1,17 @@
 _ = require("lodash")
+path = require("path")
 Promise = require("bluebird")
 bodyParser = require("body-parser")
 jsonSchemas = require("@cypress/json-schemas").api
 e2e = require("../support/helpers/e2e")
+fs = require("../../lib/util/fs")
+Fixtures = require("../support/helpers/fixtures")
 
 postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
+
+e2ePath = Fixtures.projectPath("e2e")
+outputPath = path.join(e2ePath, "output.json")
 
 { runId, groupId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
@@ -152,6 +158,7 @@ describe "e2e record", ->
         spec: "record*"
         record: true
         snapshot: true
+        outputPath: outputPath
         expectedExitCode: 3
       })
       .get("stdout")
@@ -303,6 +310,10 @@ describe "e2e record", ->
         expect(forthInstanceStdout.body.stdout).not.to.include("record_error_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
+
+        fs.readJsonAsync(outputPath)
+        .then (results) ->
+          expect(results.runUrl).to.equal(runUrl)
 
   context "parallelization", ->
     allSpecs = [

@@ -4,9 +4,14 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "prestart": "npm run check-deps-pre",
     "start": "node index.js",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
+    "pretest": "npm run check-deps-pre",
     "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "pretest-watch": "npm run check-deps-pre",
     "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch",
     "https": "node https.js"
   },
