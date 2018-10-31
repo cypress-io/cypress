@@ -48,6 +48,14 @@ function printNodeOptions (log = debug) {
   }
 }
 
+function getNode11WindowsFix(){
+  if (process.version>'v11' && process.platform==='win32') {
+    return {
+      windowsHide: false
+    }
+  }
+}
+
 const util = {
   normalizeModuleOptions,
 
@@ -62,6 +70,7 @@ const util = {
     .chain({})
     .extend(util.getEnvColors())
     .extend(util.getForceTty())
+    .extend(util.getNode11WindowsFix())
     .omitBy(_.isUndefined) // remove undefined values
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
