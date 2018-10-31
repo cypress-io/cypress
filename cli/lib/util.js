@@ -48,14 +48,6 @@ function printNodeOptions (log = debug) {
   }
 }
 
-function getNode11WindowsFix(){
-  if (process.version>'v11' && process.platform==='win32') {
-    return {
-      windowsHide: false
-    }
-  }
-}
-
 const util = {
   normalizeModuleOptions,
 
@@ -83,6 +75,14 @@ const util = {
       FORCE_STDIN_TTY: util.isTty(process.stdin.fd),
       FORCE_STDOUT_TTY: util.isTty(process.stdout.fd),
       FORCE_STDERR_TTY: util.isTty(process.stderr.fd),
+    }
+  },
+
+  getNode11WindowsFix () {
+    if (process.version>'v11' && process.platform==='win32') {
+      return {
+        windowsHide: false
+      }
     }
   },
 
