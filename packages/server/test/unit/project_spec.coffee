@@ -519,6 +519,19 @@ describe "lib/project", ->
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
+  context "#getPrefixedPathToSpec", ->
+    it "prefixed path to spec", ->
+      expect(@project.getPrefixedPathToSpec({
+        integrationFolder: "/Users/bmann/Dev/cypress-app/.projects/cypress/integration",
+        projectRoot: "/Users/bmann/Dev/cypress-app"
+      }, "/Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee")).to.eq("/integration/foo.coffee")
+  
+    it "prefixed path to spec for Windows path", ->
+      expect(@project.getPrefixedPathToSpec({
+        integrationFolder: "\\Users\\bmann\\Dev\\cypress-app\\.projects\\cypress\\integration",
+        projectRoot: "\\Users\\bmann\\Dev\\cypress-app"
+      }, "\\Users\\bmann\\Dev\\cypress-app\\.projects\\cypress\\integration\\foo.coffee")).to.eq("\\integration\\foo.coffee")
+
   context ".add", ->
     beforeEach ->
       @pristinePath = Fixtures.projectPath("pristine")
