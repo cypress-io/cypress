@@ -5,15 +5,14 @@ let RevAll = require('gulp-rev-all')
 let runSequence = require('run-sequence')
 
 gulp.task('assets', function () {
-  let revAll = new RevAll({
+
+  return gulp.src('./app/**/*')
+  .pipe(RevAll.revision({
     dontGlobal: ['.ico', 'fira.css', 'javascript-logo.png'],
     dontRenameFile: ['.ico', '.html', /fonts/],
     dontSearchFile: ['.js'],
     debug: false,
-  })
-
-  return gulp.src('./app/**/*')
-  .pipe(revAll.revision())
+  }))
   .pipe(gulp.dest('build'))
 })
 
