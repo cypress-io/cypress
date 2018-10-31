@@ -807,7 +807,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       test.wallClockStartedAt ?= wallClockStartedAt
 
       ## if this isnt a hook, then the name is 'test'
-      hookName = getHookName(runnable) or "test"
+      hookName = if runnable.type is "hook" then getHookName(runnable) else "test"
 
       ## if we haven't yet fired this event for this test
       ## that means that we need to reset the previous state
