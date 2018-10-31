@@ -767,6 +767,7 @@ module.exports = {
       osName: sys.osName,
       osVersion: sys.osVersion,
       cypressVersion: pkg.version,
+      runUrl: runUrl,
       config,
     }
 

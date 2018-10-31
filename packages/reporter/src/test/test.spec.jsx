@@ -138,7 +138,7 @@ describe('<Test />', () => {
             scroller={scroller}
           />
         )
-        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node)
+        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container'))
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {
@@ -203,7 +203,7 @@ describe('<Test />', () => {
         testModel.isActive = true
         testModel.shouldRender = true
         component.instance().componentDidUpdate()
-        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node)
+        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container'))
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {

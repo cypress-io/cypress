@@ -21,7 +21,7 @@ const failedUnzip = {
   solution: stripIndent`
     Search for an existing issue or open a GitHub issue at
 
-      ${issuesUrl}
+      ${chalk.blue(issuesUrl)}
   `,
 }
 
@@ -59,7 +59,7 @@ const notInstalledCI = (executable) => ({
 
     Alternatively, you can run 'cypress install' to download the binary again.
 
-    https://on.cypress.io/not-installed-ci-error
+    ${chalk.blue('https://on.cypress.io/not-installed-ci-error')}
   `,
 })
 
@@ -79,7 +79,7 @@ const missingXvfb = {
 
     Read our documentation on dependencies for more information:
 
-      ${requiredDependenciesUrl}
+      ${chalk.blue(requiredDependenciesUrl)}
 
     If you are using Docker, we provide containers with all required dependencies installed.
     `,
@@ -93,7 +93,7 @@ const missingDependency = {
 
     The error below should indicate which dependency is missing.
 
-      ${requiredDependenciesUrl}
+      ${chalk.blue(requiredDependenciesUrl)}
 
     If you are using Docker, we provide containers with all required dependencies installed.
   `,
@@ -114,11 +114,11 @@ const unexpected = {
   solution: stripIndent`
     Please search Cypress documentation for possible solutions:
 
-      ${docsUrl}
+      ${chalk.blue(docsUrl)}
 
     Check if there is a GitHub issue describing this crash:
 
-      ${issuesUrl}
+      ${chalk.blue(issuesUrl)}
 
     Consider opening a new issue.
   `,
