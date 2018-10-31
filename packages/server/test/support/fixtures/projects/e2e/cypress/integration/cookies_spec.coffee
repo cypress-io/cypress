@@ -79,7 +79,7 @@ context "cookies", ->
       .request("http://localhost:2121/foo")
         .its("body").should("deep.eq", {foo1: "1", asdf: "jkl"})
 
-  it "handles expired cookies", ->
+  it "handles expired cookies secure", ->
     cy
       .visit("http://localhost:2121/set")
       .getCookie("shouldExpire").should("exist")
@@ -104,8 +104,9 @@ context "cookies", ->
       .getCookie("shouldExpire").should("not.exist")
 
   it "issue: #1321 failing to set or parse cookie", ->
+    ## this is happening because the original cookie was set
+    ## with a secure flag, and then expired without the secure
+    ## flag.
     cy
-      .visit("http://localhost:2121/setOneHourFromNow")
-      .visit("http://localhost:2121/expirationMaxAge")
-
-      ## TODO: its the lack of valu ethat MUST be the key
+      .visit("https://localhost:2323/setOneHourFromNowAndSecure")
+      .visit("https://localhost:2323/expirationMaxAge")

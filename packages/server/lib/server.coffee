@@ -362,6 +362,11 @@ class Server
           pt = str
           .on("error", error)
           .on "response", (incomingRes) =>
+            debug(
+              "got resolve:url response %o",
+              _.pick(incomingRes, "headers", "statusCode")
+            )
+
             str.removeListener("error", error)
             str.on "error", (err) ->
               ## if we have listeners on our

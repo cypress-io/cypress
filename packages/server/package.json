@@ -187,7 +187,7 @@
     "tar-fs": "^1.11.1",
     "term-size": "^1.2.0",
     "through": "2.3.6",
-    "tough-cookie": "2.3.0",
+    "tough-cookie": "2.4.3",
     "trash": "4.0.0",
     "underscore": "^1.8.3",
     "underscore.string": "3.3.4",

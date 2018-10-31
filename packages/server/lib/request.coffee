@@ -12,6 +12,9 @@ Cookies    = require("./automation/cookies")
 Cookie    = tough.Cookie
 CookieJar = tough.CookieJar
 
+## shallow clone the original
+serializableProperties = Cookie.serializableProperties.slice(0)
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 getOriginalHeaders = (req = {}) ->
@@ -53,10 +56,19 @@ newCookieJar = ->
     _jar: j
 
     toJSON: ->
-      j.toJSON()
+      ## temporarily include the URL property
+      ## and restore afterwards. this is used to fix
+      ## https://github.com/cypress-io/cypress/issues/1321
+      Cookie.serializableProperties = serializableProperties.concat("url")
+      cookies = j.toJSON()
+      Cookie.serializableProperties = serializableProperties
+      return cookies
 
     setCookie: (cookieOrStr, uri, options) ->
-      j.setCookieSync(cookieOrStr, uri, options)
+      ## store the original URL this cookie was set on
+      cookie = j.setCookieSync(cookieOrStr, uri, options)
+      cookie.url = uri
+      return cookie
 
     getCookieString: (uri) ->
       j.getCookieStringSync(uri, {expire: false})

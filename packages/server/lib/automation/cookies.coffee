@@ -97,7 +97,8 @@ cookies = (cyNamespace, cookieNamespace) ->
         cookie = normalizeCookieProps(data)
 
         ## lets construct the url ourselves right now
-        cookie.url = extension.getCookieUrl(data)
+        ## unless we already have a URL
+        cookie.url = data.url ? extension.getCookieUrl(data)
 
         ## https://github.com/SalesforceEng/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie
         ## a host only cookie is when domain was not explictly
@@ -105,16 +106,21 @@ cookies = (cyNamespace, cookieNamespace) ->
         ## when this is the case we need to remove the domain
         ## property else our cookie will incorrectly be set
         ## as a domain cookie
+        ##
+        ## hostOnly=true means no domain= property was set, so
+        ##   this cookie is specific to being bound to the exact domain
+        ## hostOnly=false means that a domain= property was set, so
+        ##   this cookie has been relaxed to apply to multiple subdomains
         if data.hostOnly
           cookie = _.omit(cookie, "domain")
 
-        debug("set:cookie %o", data)
+        debug("set:cookie %o", cookie)
 
         automate(cookie)
         .then (cookie) ->
           cookie = normalizeCookieProps(cookie)
 
-          debug("received set %o:cookie", cookie)
+          debug("received set:cookie %o", cookie)
 
           return cookie
 
@@ -128,7 +134,7 @@ cookies = (cyNamespace, cookieNamespace) ->
         .then (cookie) ->
           cookie = normalizeCookieProps(cookie)
 
-          debug("received clear %o:cookie", cookie)
+          debug("received clear:cookie %o", cookie)
 
           return cookie
 
