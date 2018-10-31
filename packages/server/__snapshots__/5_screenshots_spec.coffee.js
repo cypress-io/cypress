@@ -42,9 +42,12 @@ exports['e2e screenshots passes 1'] = `
     each hooks
       4) "before each" hook for "empty test 2"
       5) "after each" hook for "empty test 2"
+    really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      ✓ takes a screenshot
+      ✓ takes another screenshot
 
 
-  15 passing
+  17 passing
   1 pending
   5 failing
 
@@ -80,12 +83,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        20                      │
-  │ Passing:      15                      │
+  │ Tests:        22                      │
+  │ Passing:      17                      │
   │ Failing:      4                       │
   │ Pending:      1                       │
   │ Skipped:      0                       │
-  │ Screenshots:  23                      │
+  │ Screenshots:  25                      │
   │ Video:        true                    │
   │ Duration:     X seconds               │
   │ Spec Ran:     screenshots_spec.coffee │
@@ -117,6 +120,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png (1000x660)
 
 
   (Video)
@@ -132,9 +137,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       20       15        4        1        - │
+  │ ✖ screenshots_spec.coffee                   XX:XX       22       17        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       20       15        4        1        -  
+    1 of 1 failed (100%)                        XX:XX       22       17        4        1        -  
 
 
 `
