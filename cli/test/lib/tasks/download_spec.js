@@ -71,29 +71,29 @@ describe('lib/tasks/download', function () {
     })
   })
 
-  context('download base url from CYPRESS_DOWNLOAD_BASE_URL env var', () => {
+  context('download base url from CYPRESS_DOWNLOAD_MIRROR env var', () => {
     it('env var', () => {
-      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com'
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com'
       const url = download.getUrl('0.20.2')
-      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR', normalize(url))
     })
 
     it('env var with trailing slash', () => {
-      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com/'
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/'
       const url = download.getUrl('0.20.2')
-      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL with trailing slash', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with trailing slash', normalize(url))
     })
 
     it('env var with subdirectory', () => {
-      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com/example'
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/example'
       const url = download.getUrl('0.20.2')
-      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL with subdirectory', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory', normalize(url))
     })
 
     it('env var with subdirectory and trailing slash', () => {
-      process.env.CYPRESS_DOWNLOAD_BASE_URL = 'https://cypress.example.com/example/'
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/example/'
       const url = download.getUrl('0.20.2')
-      snapshot('base url from CYPRESS_DOWNLOAD_BASE_URL with subdirectory and trailing slash', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory and trailing slash', normalize(url))
     })
   })
 

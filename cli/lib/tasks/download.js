@@ -16,8 +16,8 @@ const util = require('../util')
 const defaultBaseUrl = 'https://download.cypress.io/'
 
 const getBaseUrl = () => {
-  if (util.getEnv('CYPRESS_DOWNLOAD_BASE_URL')) {
-    let baseUrl = util.getEnv('CYPRESS_DOWNLOAD_BASE_URL')
+  if (util.getEnv('CYPRESS_DOWNLOAD_MIRROR')) {
+    let baseUrl = util.getEnv('CYPRESS_DOWNLOAD_MIRROR')
     if (!baseUrl.endsWith('/')) {
       baseUrl += '/'
     }
