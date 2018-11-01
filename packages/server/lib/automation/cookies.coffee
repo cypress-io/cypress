@@ -42,7 +42,7 @@ normalizeCookieProps = (props, includeHostOnly) ->
 
 cookies = (cyNamespace, cookieNamespace) ->
   isNamespaced = (cookie) ->
-    return cookie if not name = cookie?.name
+    return undefined if not name = cookie?.name
 
     name.startsWith(cyNamespace) or name is cookieNamespace
 
