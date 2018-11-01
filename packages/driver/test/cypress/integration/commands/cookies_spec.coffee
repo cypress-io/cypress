@@ -379,6 +379,15 @@ describe "src/cy/commands/cookies", ->
           { domain: "brian.dev.local", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987 }
         )
 
+    it "can set multiple cookies with the same options", ->
+      Cypress.utils.addTwentyYears.restore()
+      options = {}
+
+      cy.setCookie("foo", "bar", options)
+      cy.setCookie("bing", "bong", options)
+
+      cy.getCookie("bing").its("value").should("equal", "bong")
+
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
         Cypress.config("responseTimeout", 2500)
