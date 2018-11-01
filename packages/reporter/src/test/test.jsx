@@ -42,6 +42,7 @@ class Test extends Component {
     this._scrollIntoView()
 
     const cb = this.props.model.callbackAfterUpdate
+
     if (cb) {
       cb()
     }
@@ -97,7 +98,9 @@ class Test extends Component {
     return (
       <div
         className='runnable-instruments collapsible-content'
-        onClick={(e) => { e.stopPropagation() }}
+        onClick={(e) => {
+          e.stopPropagation()
+        }}
       >
         <Agents model={model} />
         <Routes model={model} />
@@ -135,4 +138,5 @@ class Test extends Component {
 }
 
 export { NoCommands }
+
 export default Test

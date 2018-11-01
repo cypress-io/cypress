@@ -82,6 +82,7 @@ export class SpecsStore {
 
   getSpecsFilterId ({ id = '<no-id>', path = '' }) {
     const shortenedPath = path.replace(/.*cypress/, 'cypress')
+
     return `specsFilter-${id}-${shortenedPath}`
   }
 
@@ -104,7 +105,9 @@ export class SpecsStore {
         const isCurrentAFile = i === segments.length - 1
         const props = { path: currentPath, displayName: segment }
 
-        let existing = _.find(placeholder, (file) => pathsEqual(file.path, currentPath))
+        let existing = _.find(placeholder, (file) => {
+          return pathsEqual(file.path, currentPath)
+        })
 
         if (!existing) {
           existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)
