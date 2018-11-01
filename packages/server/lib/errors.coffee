@@ -707,7 +707,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Grouping is not included under your current billing plan.
 
-      To run your tests with groups, please visit your billing and upgrade to another plan with parallelization.
+      To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
 
       #{arg1.link}
       """
