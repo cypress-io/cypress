@@ -86,8 +86,10 @@ class OnBoarding extends Component {
     files = _.sortBy(files, 'name')
 
     const notFolders = _.every(files, (file) => !file.children)
+
     if (notFolders && files.length > 3) {
       const numHidden = files.length - 2
+
       files = files.slice(0, 2).concat({ name: `... ${numHidden} more files ...`, more: true })
     }
 
@@ -104,16 +106,17 @@ class OnBoarding extends Component {
             </ul>
           </li>
         )
-      } else {
-        return (
-          <li className={cs(className, 'new-item', { 'is-more': file.more })} key={file.name}>
-            <span>
-              <i className='fa fa-file-code-o'></i>{' '}
-              {file.name}
-            </span>
-          </li>
-        )
       }
+
+      return (
+        <li className={cs(className, 'new-item', { 'is-more': file.more })} key={file.name}>
+          <span>
+            <i className='fa fa-file-code-o'></i>{' '}
+            {file.name}
+          </span>
+        </li>
+      )
+
     })
   }
 

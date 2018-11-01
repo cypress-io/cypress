@@ -74,11 +74,13 @@ class SpecsList extends Component {
 
   _clearFilter = () => {
     const { id, path } = this.props.project
+
     specsStore.clearFilter({ id, path })
   }
 
   _updateFilter = (e) => {
     const { id, path } = this.props.project
+
     specsStore.setFilter({ id, path }, e.target.value)
   }
 

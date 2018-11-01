@@ -92,11 +92,13 @@ class Default extends Component {
 
   _dragover = () => {
     this._setDragging(true)
+
     return false
   }
 
   _dragleave = () => {
     this._setDragging(false)
+
     return false
   }
 
@@ -105,6 +107,7 @@ class Default extends Component {
     this._setDragging(false)
 
     const file = _.get(e, 'dataTransfer.files[0]')
+
     if (!file) return false
 
     this._addProject(file.path)
@@ -118,6 +121,7 @@ class Default extends Component {
 
   _nope (e) {
     e.preventDefault()
+
     return false
   }
 
