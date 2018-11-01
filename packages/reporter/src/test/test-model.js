@@ -28,15 +28,21 @@ export default class Test extends Runnable {
       // if at any point, a command goes long running, set isLongRunning
       // to true until the test becomes inactive
       if (!this.isActive) {
-        action('became:inactive', () => this.isLongRunning = false)()
+        action('became:inactive', () => {
+          return this.isLongRunning = false
+        })()
       } else if (this._hasLongRunningCommand) {
-        action('became:long:running', () => this.isLongRunning = true)()
+        action('became:long:running', () => {
+          return this.isLongRunning = true
+        })()
       }
     })
   }
 
   @computed get _hasLongRunningCommand () {
-    return _.some(this.commands, (command) => command.isLongRunning)
+    return _.some(this.commands, (command) => {
+      return command.isLongRunning
+    })
   }
 
   @computed get state () {
@@ -53,6 +59,7 @@ export default class Test extends Runnable {
 
   addCommand (command, hookName) {
     const hook = this._findOrCreateHook(hookName)
+
     this.commands.push(command)
     hook.addCommand(command)
   }
@@ -88,6 +95,7 @@ export default class Test extends Runnable {
 
     if (hookName) {
       const hook = _.find(this.hooks, { name: hookName })
+
       if (hook) {
         hook.failed = true
       }
@@ -115,17 +123,22 @@ export default class Test extends Runnable {
 
   commandMatchingErr () {
     return _(this.hooks)
-    .map((hook) => hook.commandMatchingErr(this.err))
+    .map((hook) => {
+      return hook.commandMatchingErr(this.err)
+    })
     .compact()
     .last()
   }
 
   _findOrCreateHook (name) {
     const hook = _.find(this.hooks, { name })
+
     if (hook) return hook
 
     const newHook = new Hook({ name })
+
     this.hooks.push(newHook)
+
     return newHook
   }
 }
