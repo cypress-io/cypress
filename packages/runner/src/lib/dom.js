@@ -56,6 +56,7 @@ function addHitBoxLayer (coords, body) {
     background-color: pink;
     border-radius: 5px;
   `)
+
   $(`<div style="${dotStyles}">`).appendTo(wrapper)
 
   return box.appendTo(body)
@@ -80,6 +81,7 @@ function addElementBoxModelLayers ($el, body) {
   // create the margin / bottom / padding layers
   _.each(layers, (color, attr) => {
     let obj
+
     switch (attr) {
       case 'Content':
         // rearrange the contents offset so
@@ -124,7 +126,9 @@ function addElementBoxModelLayers ($el, body) {
 
     // dont ask... for some reason we
     // have to run offset twice!
-    _.times(2, () => $el.offset({ top, left }))
+    _.times(2, () => {
+      return $el.offset({ top, left })
+    })
   })
 
   return container
@@ -164,16 +168,20 @@ function getOrCreateSelectorHelperDom ($body) {
   .addClass('__cypress-selector-playground-cover')
   .appendTo($container)
 
-  return Promise.try(() => fetch('/__cypress/runner/cypress_selector_playground.css'))
+  return Promise.try(() => {
+    return fetch('/__cypress/runner/cypress_selector_playground.css')
+  })
   .then((result) => {
     return result.text()
   })
   .then((content) => {
     $('<style />', { html: content }).prependTo(shadowRoot)
+
     return { $container, shadowRoot, $reactContainer, $cover }
   })
   .catch((error) => {
     console.error('Selector playground failed to load styles:', error) // eslint-disable-line no-console
+
     return { $container, shadowRoot, $reactContainer, $cover }
   })
 }
@@ -185,6 +193,7 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
       selectorPlaygroundHighlight.unmount($reactContainer[0])
       $cover.off('click')
       $container.remove()
+
       return
     }
 
@@ -251,7 +260,9 @@ function dimensionsMatchPreviousLayer (obj, container) {
   const previousLayer = container.children().first()
 
   // bail if there is no previous layer
-  if (!previousLayer.length) { return }
+  if (!previousLayer.length) {
+    return
+  }
 
   return obj.width === previousLayer.width() &&
   obj.height === previousLayer.height()
@@ -264,9 +275,10 @@ function getDimensionsFor (dimensions, attr, dimension) {
 function getZIndex (el) {
   if (/^(auto|0)$/.test(el.css('zIndex'))) {
     return 2147483647
-  } else {
-    return _.toNumber(el.css('zIndex'))
   }
+
+  return _.toNumber(el.css('zIndex'))
+
 }
 
 function getElementDimensions ($el) {
@@ -331,7 +343,9 @@ function getMargin (el, dir) {
 }
 
 function getTotalFor (directions, dimensions) {
-  return _.reduce(directions, (memo, direction) => memo + dimensions[direction], 0)
+  return _.reduce(directions, (memo, direction) => {
+    return memo + dimensions[direction]
+  }, 0)
 }
 
 function getOuterSize (el) {
@@ -418,6 +432,7 @@ function addBlackoutForElement ($body, $el) {
 
 function addBlackout ($body, selector) {
   let $el
+
   try {
     $el = $body.find(selector)
     if (!$el.length) return

@@ -14,15 +14,18 @@ shell.set('-e') // any error is fatal
 
 // https://www.appveyor.com/docs/environment-variables/
 
-const isRightBranch = () =>
-  process.env.APPVEYOR_REPO_BRANCH === 'develop' ||
+const isRightBranch = () => {
+  return process.env.APPVEYOR_REPO_BRANCH === 'develop' ||
   process.env.APPVEYOR_REPO_BRANCH === 'win-build-shell'
+}
 
-const isPullRequest = () =>
-  Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
+const isPullRequest = () => {
+  return Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
+}
 
-const shouldBuildBinary = () =>
-  isRightBranch() && !isPullRequest()
+const shouldBuildBinary = () => {
+  return isRightBranch() && !isPullRequest()
+}
 
 if (!shouldBuildBinary()) {
   console.log('should not build binary')
@@ -33,6 +36,7 @@ console.log('building Windows binary')
 
 const filename = `cypress-${process.env.NEXT_DEV_VERSION}.tgz`
 const version = process.env.NEXT_DEV_VERSION
+
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
 
 console.log('building version', version)

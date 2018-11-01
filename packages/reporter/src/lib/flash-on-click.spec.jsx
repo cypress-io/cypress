@@ -15,11 +15,13 @@ const renderComponent = ({ onClick = (() => {}) }) => {
 describe('<FlashOnClick />', () => {
   it('renders a tooltip with the specified message', () => {
     const component = renderComponent({})
+
     expect(component.find('Tooltip')).to.have.prop('title', 'Some message')
   })
 
   it('renders a tooltip around the content', () => {
     const component = renderComponent({})
+
     expect(component.find('Tooltip').find('.content')).to.exist
   })
 

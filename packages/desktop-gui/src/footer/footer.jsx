@@ -19,6 +19,7 @@ export default class Footer extends Component {
 
   _openChangelog (e) {
     e.preventDefault()
+
     return ipc.externalOpen('https://on.cypress.io/changelog')
   }
 }
