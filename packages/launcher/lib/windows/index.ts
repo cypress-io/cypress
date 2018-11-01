@@ -1,6 +1,6 @@
 import { log } from '../log'
 import { FoundBrowser, Browser, NotInstalledError } from '../types'
-import * as execa from 'execa'
+import execa from 'execa'
 import { normalize, join } from 'path'
 import { trim, tap } from 'ramda'
 import { pathExists } from 'fs-extra'
