@@ -79,7 +79,7 @@ function detectBrowsers(): Bluebird<Browser[]> {
   const removeDuplicates = uniqBy(prop('version'))
   return Bluebird.mapSeries(browsers, checkOneBrowser)
     .then(_.compact)
-    .then(removeDuplicates)
+    .then(removeDuplicates) as Bluebird<Browser[]>
 }
 
 export default detectBrowsers
