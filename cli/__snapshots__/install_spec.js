@@ -157,7 +157,14 @@ Cypress Version: 1.2.3
 `
 
 exports['silent install 1'] = `
-[no output]
+Installing Cypress (version: 1.2.3)
+[xx:xx:xx]  Downloading Cypress     [started]
+[xx:xx:xx]  Downloading Cypress     [completed]
+[xx:xx:xx]  Unzipping Cypress       [started]
+[xx:xx:xx]  Unzipping Cypress       [completed]
+[xx:xx:xx]  Finishing Installation  [started]
+[xx:xx:xx]  Finishing Installation  [completed]
+
 `
 
 exports['version already installed - cypress install 1'] = `

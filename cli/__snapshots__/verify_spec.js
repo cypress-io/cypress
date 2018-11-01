@@ -199,7 +199,11 @@ Cypress Version: 1.2.3
 `
 
 exports['silent verify 1'] = `
-[no output]
+[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [started]
+[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [completed]
+
+Opening Cypress...
+
 `
 
 exports['no Cypress executable 1'] = `

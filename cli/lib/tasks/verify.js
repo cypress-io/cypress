@@ -102,18 +102,20 @@ const runSmokeTest = (binaryDir) => {
 function testBinary (version, binaryDir) {
   debug('running binary verification check', version)
 
-  logger.log(stripIndent`
+  logger.info(stripIndent`
   It looks like this is your first time using Cypress: ${chalk.cyan(version)}
   `)
 
-  logger.log()
+  logger.info()
 
   // if we are running in CI then use
   // the verbose renderer else use
   // the default
-  let renderer = util.isCi() ? verbose : 'default'
+  let renderer = 'default'
 
-  if (logger.logLevel() === 'silent') renderer = 'silent'
+  if (util.isCi() || logger.logLevel() === 'silent') {
+    renderer = verbose
+  }
 
   const rendererOptions = {
     renderer,
@@ -195,12 +197,12 @@ const start = (options = {}) => {
     const envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')
 
     debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
-    logger.log(stripIndent`
+    logger.info(stripIndent`
         ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:
         
               This overrides the default Cypress binary path used.
         `)
-    logger.log()
+    logger.info()
 
     return util.isExecutableAsync(envBinaryPath)
     .then((isExecutable) => {
@@ -258,8 +260,8 @@ const start = (options = {}) => {
     if (binaryVersion !== packageVersion) {
       // warn if we installed with CYPRESS_INSTALL_BINARY or changed version
       // in the package.json
-      logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
-      logger.log()
+      logger.info(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
+      logger.info()
       logger.warn(stripIndent`
       
       
@@ -268,7 +270,7 @@ const start = (options = {}) => {
         These versions may not work properly together.
       `)
 
-      logger.log()
+      logger.warn()
     }
 
     return maybeVerify(binaryVersion, binaryDir, options)

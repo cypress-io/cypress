@@ -295,7 +295,7 @@ context('lib/tasks/verify', () => {
     .then(() => {
       return snapshot(
         'silent verify',
-        normalize(`[no output]${stdout.toString()}`)
+        normalize(stdout.toString() || '[no output]')
       )
     })
   })

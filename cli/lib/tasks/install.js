@@ -18,7 +18,7 @@ const { throwFormErrorText, errors } = require('../errors')
 
 const alreadyInstalledMsg = () => {
   if (!util.isPostInstall()) {
-    logger.log(stripIndent`    
+    logger.info(stripIndent`    
       Skipping installation:
   
         Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
@@ -31,7 +31,7 @@ const displayCompletionMsg = () => {
   // check here to see if we are globally installed
   if (util.isInstalledGlobally()) {
     // if we are display a warning
-    logger.log()
+    logger.warn()
     logger.warn(stripIndent`
       ${logSymbols.warning} Warning: It looks like you\'ve installed Cypress globally.
 
@@ -48,15 +48,15 @@ const displayCompletionMsg = () => {
     return
   }
 
-  logger.log()
-  logger.log(
+  logger.info()
+  logger.info(
     'You can now open Cypress by running:',
     chalk.cyan(path.join('node_modules', '.bin', 'cypress'), 'open')
   )
 
-  logger.log()
-  logger.log(chalk.grey('https://on.cypress.io/installing-cypress'))
-  logger.log()
+  logger.info()
+  logger.info(chalk.grey('https://on.cypress.io/installing-cypress'))
+  logger.info()
 }
 
 const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
@@ -69,7 +69,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 
   // let the user know what version of cypress we're downloading!
   logger.log(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
-  logger.log()
+  logger.info()
 
   const tasks = new Listr([
     {
@@ -159,10 +159,10 @@ const start = (options = {}) => {
 
     if (envVarVersion === '0') {
       debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
-      logger.log(
+      logger.info(
         stripIndent`
         ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`)
-      logger.log()
+      logger.info()
 
       return Promise.resolve()
     }
@@ -179,13 +179,13 @@ const start = (options = {}) => {
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')
 
-    logger.log(
+    logger.info(
       stripIndent`
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
 
               Previous installs of Cypress may not be found.
       `)
-    logger.log()
+    logger.info()
   }
 
   const installDir = state.getVersionDir(pkgVersion)
@@ -213,11 +213,11 @@ const start = (options = {}) => {
 
     debug('installed version is', binaryVersion, 'version needed is', needVersion)
 
-    logger.log()
-    logger.log(stripIndent`
+    logger.info()
+    logger.info(stripIndent`
       Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
       `)
-    logger.log()
+    logger.info()
 
     if (options.force) {
       debug('performing force install over existing binary')
@@ -243,7 +243,7 @@ const start = (options = {}) => {
     }
 
     if (needVersion !== pkgVersion) {
-      logger.log(
+      logger.warn(
         chalk.yellow(stripIndent`
           ${logSymbols.warning} Warning: Forcing a binary version different than the default.
 
@@ -254,7 +254,7 @@ const start = (options = {}) => {
             These versions may not work properly together.
         `)
       )
-      logger.log()
+      logger.warn()
     }
 
     // see if version supplied is a path to a binary
@@ -361,10 +361,10 @@ const progessify = (task, title) => {
 // the verbose renderer else use
 // the default
 const getRendererOptions = () => {
-  let renderer = util.isCi() ? verbose : 'default'
+  let renderer = 'default'
 
-  if (logger.logLevel() === 'silent') {
-    renderer = 'silent'
+  if (util.isCi() || logger.logLevel() === 'silent') {
+    renderer = verbose
   }
 
   return {
