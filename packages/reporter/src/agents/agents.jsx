@@ -52,4 +52,5 @@ const Agents = observer(({ model }) => (
 ))
 
 export { Agent, AgentsList }
+
 export default Agents

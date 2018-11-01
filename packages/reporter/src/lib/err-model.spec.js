@@ -4,11 +4,13 @@ describe('Err model', () => {
   context('.displayMessage', () => {
     it('returns combo of name and message', () => {
       const err = new Err({ name: 'BadError', message: 'Something went wrong' })
+
       expect(err.displayMessage).to.equal('BadError: Something went wrong')
     })
 
     it('returns empty string if no name or message', () => {
       const err = new Err()
+
       expect(err.displayMessage).to.equal('')
     })
   })
@@ -16,22 +18,26 @@ describe('Err model', () => {
   context('.isCommandErr', () => {
     it('returns true if an AssertionError', () => {
       const err = new Err({ name: 'AssertionError', message: 'Something went wrong' })
+
       expect(err.isCommandErr).to.be.true
     })
 
     it('returns true if an CypressError', () => {
       const err = new Err({ name: 'CypressError', message: 'Something went wrong' })
+
       expect(err.isCommandErr).to.be.true
     })
 
     it('returns false otherwise', () => {
       const err = new Err({ name: 'BadError', message: 'Something went wrong' })
+
       expect(err.isCommandErr).to.be.false
     })
   })
 
   context('#update', () => {
     let err
+
     beforeEach(() => {
       err = new Err({ name: 'BadError', message: 'Something went wrong' })
     })

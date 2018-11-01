@@ -11,6 +11,7 @@ const display = (obj) => {
 
   return _.map(obj, (value, key) => {
     const hasComma = lastKey !== key
+
     if (value.from == null) {
       return displayNestedObj(key, value, hasComma)
     }
