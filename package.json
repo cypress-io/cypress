@@ -66,7 +66,7 @@
     "@cypress/questions-remain": "^1.0.1",
     "ansi-styles": "^3.1.0",
     "ascii-table": "0.0.9",
-    "babel-eslint": "^7.2.3",
+    "babel-eslint": "^10.0.1",
     "bluebird": "^3.4.5",
     "bluebird-retry": "^0.11.0",
     "bulk-decaffeinate": "^3.3.1",

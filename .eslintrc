@@ -36,12 +36,16 @@
         "prev": [
           "const",
           "let",
-          "var"
+          "var",
+          "import",
+          "cjs-import"
         ],
         "next": [
           "const",
           "let",
-          "var"
+          "var",
+          "import",
+          "cjs-import"
         ]
       }
     ]
@@ -49,5 +53,16 @@
   "env": {
     "es6": true,
     "node": true
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "legacyDecorators": true
+    }
+  },
+  "overrides": {
+    "files": ["**/*.jsx"],
+    "rules": {
+      "arrow-body-style": "off",
+    }
   }
 }
