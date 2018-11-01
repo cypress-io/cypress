@@ -33,6 +33,7 @@
     "bin-up": "^1.1.0",
     "browserify": "^16.2.3",
     "chai": "^4.2.0",
+    "coffeescript": "^2.3.2",
     "coffeeify": "^3.0.1",
     "cross-env": "^5.2.0",
     "eol": "^0.9.1",
@@ -47,7 +48,6 @@
   },
   "dependencies": {
     "bluebird": "^3.5.2",
-    "coffeescript": "^2.3.2",
     "lodash": "^4.17.11"
   }
 }
