@@ -1782,7 +1782,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 exports['e2e record api interaction errors create run 402 - grouping feature not available in plan errors and exits when attempting parallel run when not available in plan 1'] = `
 Grouping is not included under your current billing plan.
 
-To run your tests with groups, please visit your billing and upgrade to another plan with parallelization.
+To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
