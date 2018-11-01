@@ -13,10 +13,23 @@ const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
 
-const baseUrl = 'https://download.cypress.io/'
+const defaultBaseUrl = 'https://download.cypress.io/'
+
+const getBaseUrl = () => {
+  if (util.getEnv('CYPRESS_DOWNLOAD_MIRROR')) {
+    let baseUrl = util.getEnv('CYPRESS_DOWNLOAD_MIRROR')
+    if (!baseUrl.endsWith('/')) {
+      baseUrl += '/'
+    }
+
+    return baseUrl
+  }
+
+  return defaultBaseUrl
+}
 
 const prepend = (urlPath) => {
-  const endpoint = url.resolve(baseUrl, urlPath)
+  const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
   const arch = os.arch()
   return `${endpoint}?platform=${platform}&arch=${arch}`
