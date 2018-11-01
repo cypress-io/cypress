@@ -291,6 +291,9 @@ describe "driver/src/cypress/cy", ->
         ## yield the context
         return fn(@)
 
+      Cypress.Commands.overwrite "submit", (orig, subject) ->
+        return orig(subject, { foo: "foo" })
+
     it "can modify parent commands", ->
       cy.wrap("bar").then (str) ->
         expect(str).to.eq("foobar")
@@ -316,3 +319,7 @@ describe "driver/src/cypress/cy", ->
         Cypress.Commands.overwrite "foo", ->
 
       expect(fn).to.throw("Cannot overwite command for: 'foo'. An existing command does not exist by that name.")
+
+    it "updates state('current') with modified args", ->
+      cy.get("form").eq(0).submit().then =>
+        expect(cy.state("current").get("prev").get("args")[0].foo).to.equal("foo")

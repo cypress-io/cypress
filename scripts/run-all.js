@@ -143,6 +143,8 @@ module.exports = (cmd, options) => {
   const packagesFilter = options.package || options.packages
   const packagesReject = options['skip-package'] || options['skip-packages']
 
+  if (packagesFilter === 'none') return
+
   return getDirs()
   .then(keepDirsWithPackageJson)
   .then((dirs) => filterDirsByPackage(dirs, packagesFilter))

@@ -8,6 +8,7 @@
   "files": [
     "register.js"
   ],
-  "scripts": {},
-  "devDependencies": {}
+  "scripts": {
+    "check-deps": "node ../../scripts/check-deps.js --verbose"
+  }
 }
