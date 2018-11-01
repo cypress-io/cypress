@@ -81,10 +81,9 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           const copyingFileRe = /^copying file/
 
           const sp = cp.spawn('ditto', ['-xkV', zipFilePath, installDir])
-          sp.on('error', () =>
+
           // f-it just unzip with node
-            unzipWithNode()
-          )
+          sp.on('error', unzipWithNode)
 
           sp.on('close', (code) => {
             if (code === 0) {
