@@ -29,6 +29,7 @@ function normalizeModuleOptions (options = {}) {
 function stdoutLineMatches (expectedLine, stdout) {
   const lines = stdout.split('\n').map(R.trim)
   const lineMatches = R.equals(expectedLine)
+
   return lines.some(lineMatches)
 }
 
@@ -179,11 +180,16 @@ const util = {
     return Promise.try(() => {
       if (os.platform() === 'linux') {
         return getosAsync()
-        .then((osInfo) => [osInfo.dist, osInfo.release].join(' - '))
-        .catch(() => os.release())
-      } else {
-        return os.release()
+        .then((osInfo) => {
+          return [osInfo.dist, osInfo.release].join(' - ')
+        })
+        .catch(() => {
+          return os.release()
+        })
       }
+
+      return os.release()
+
     })
   },
 
@@ -195,6 +201,7 @@ const util = {
     if (path.isAbsolute(filename)) {
       return filename
     }
+
     return path.join(process.cwd(), '..', '..', filename)
   },
 
@@ -202,18 +209,25 @@ const util = {
     const envVar = process.env[varName]
     const configVar = process.env[`npm_config_${varName}`]
     const packageConfigVar = process.env[`npm_package_config_${varName}`]
+
     if (envVar) {
       debug(`Using ${varName} from environment variable`)
+
       return envVar
     }
+
     if (configVar) {
       debug(`Using ${varName} from npm config`)
+
       return configVar
     }
+
     if (packageConfigVar) {
       debug(`Using ${varName} from package.json config`)
+
       return packageConfigVar
     }
+
     return undefined
 
   },

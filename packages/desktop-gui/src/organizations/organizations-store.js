@@ -10,9 +10,11 @@ export class Orgs {
   @observable isLoaded = false
 
   @action setOrgs (orgs) {
-    this.orgs = _.map(orgs, (org) => (
-      new Org(org)
-    ))
+    this.orgs = _.map(orgs, (org) => {
+      return (
+        new Org(org)
+      )
+    })
 
     this.isLoading = false
     this.isLoaded = true

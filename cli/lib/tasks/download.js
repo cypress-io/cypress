@@ -32,27 +32,32 @@ const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
   const arch = os.arch()
+
   return `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
 const getUrl = (version) => {
   if (is.url(version)) {
     debug('version is already an url', version)
+
     return version
   }
+
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 
-const statusMessage = (err) =>
-  (err.statusCode
+const statusMessage = (err) => {
+  return (err.statusCode
     ? [err.statusCode, err.statusMessage].join(' - ')
     : err.toString())
+}
 
 const prettyDownloadErr = (err, version) => {
   const msg = stripIndent`
     URL: ${getUrl(version)}
     ${statusMessage(err)}
   `
+
   debug(msg)
 
   return throwFormErrorText(errors.failedDownload)(msg)
@@ -72,6 +77,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
       url,
       followRedirect (response) {
         const version = response.headers['x-version']
+
         debug('redirect version:', version)
         if (version) {
           // set the version in options if we have one.
@@ -136,11 +142,15 @@ const start = ({ version, downloadDestination, progress }) => {
   if (!downloadDestination) {
     la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
   }
+
   if (!progress) {
-    progress = { onProgress: () => ({}) }
+    progress = { onProgress: () => {
+      return {}
+    } }
   }
 
   const url = getUrl(version)
+
   progress.throttle = 100
 
   debug('needed Cypress version: %s', version)
