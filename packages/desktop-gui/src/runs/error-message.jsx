@@ -5,6 +5,7 @@ import errors from '../lib/errors'
 
 const ErrorMessage = observer(({ error }) => {
   let errorMessage
+
   if (errors.isTimedOut(error)) {
     errorMessage = (
       <p>The request for runs timed out.</p>

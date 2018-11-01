@@ -12,14 +12,17 @@ export default {
   specPath () {
     if (location.hash) {
       const match = location.hash.match(/tests\/(.*)$/)
+
       return match && match[1] || ''
-    } else {
-      return ''
     }
+
+    return ''
+
   },
 
   absoluteSpecPath (config) {
     const relativeSpecPath = path.relative('integration', this.specPath())
+
     return path.join(config.integrationFolder, relativeSpecPath)
   },
 }
