@@ -1104,7 +1104,7 @@ declare namespace Cypress {
      *    cy.screenshot()
      *    cy.get(".post").screenshot()
      */
-    screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
     /**
      * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
      *
