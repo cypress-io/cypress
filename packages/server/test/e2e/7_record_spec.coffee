@@ -850,6 +850,28 @@ describe "e2e record", ->
           expectedExitCode: 1
         })
 
+    describe "create run 402 - grouping feature not available in plan", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+          payload: {
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when attempting parallel run when not available in plan", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
     describe "create run 402 - unknown error", ->
       setup([{
         method: "post"
@@ -1185,6 +1207,36 @@ describe "e2e record", ->
             runUrl
             warnings: [{
               code: "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when using parallel feature", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - grouping feature", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
               gracePeriodEnds: "2999-12-31"
               orgId: "org-id-1234"
             }]

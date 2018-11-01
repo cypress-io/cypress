@@ -321,6 +321,11 @@ createRun = (options = {}) ->
             usedMessage: usedMessage(warning.limit)
             link: billingLink(warning.orgId)
           })
+        when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
+          errors.warning("PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED", {
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
 
   .catch (err) ->
     debug("failed creating run %o", {
@@ -345,6 +350,10 @@ createRun = (options = {}) ->
             })
           when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
             errors.throw("PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN", {
+              link: billingLink(orgId)
+            })
+          when "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+            errors.throw("RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN", {
               link: billingLink(orgId)
             })
           else

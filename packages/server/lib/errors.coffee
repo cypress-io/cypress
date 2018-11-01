@@ -687,12 +687,27 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.link}
       """
-
     when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
       """
       Parallelization is not included under your current billing plan.
 
       To run your tests in parallel, please visit your billing and upgrade to another plan with parallelization.
+
+      #{arg1.link}
+      """
+    when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
+      """
+      Grouping is not included under your free plan.
+
+      Your plan is now in a grace period, which means your tests will still run with groups until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests with groups in the future.
+
+      #{arg1.link}
+      """
+    when "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+      """
+      Grouping is not included under your current billing plan.
+
+      To run your tests with groups, please visit your billing and upgrade to another plan with parallelization.
 
       #{arg1.link}
       """
