@@ -180,6 +180,24 @@ describe('util', () => {
         DEBUG_COLORS: '0',
       })
     })
+
+    it('returns windowsHide: false on windows environment with node 11', () => {
+
+      sinon.stub(util, 'getPlatform').returns('win32')
+      sinon.stub(util, 'getNodeVersion').returns('v11.0.0')
+
+      expect(util.getEnvOverrides().windowsHide).to.be.false;
+
+      util.getPlatform.returns('win32')
+      util.getNodeVersion.returns('v10.0.0')
+
+      expect('windowsHide' in util.getEnvOverrides()).to.be.false;
+
+      util.getPlatform.returns('darvin')
+      util.getNodeVersion.returns('v11.0.0')
+
+      expect('windowsHide' in util.getEnvOverrides()).to.be.false;
+    })
   })
 
   context('.getForceTty', () => {

@@ -79,9 +79,9 @@ const util = {
   },
 
   getNode11WindowsFix () {
-    if (process.version >= 'v11'&& process.platform === 'win32') {
+    if (util.getNodeVersion() >= 'v11' && util.getPlatform() === 'win32') {
       return {
-        windowsHide: false
+        windowsHide: false,
       }
     }
   },
@@ -94,6 +94,14 @@ const util = {
       DEBUG_COLORS: sc,
       MOCHA_COLORS: sc ? true : undefined,
     }
+  },
+
+  getPlatform () {
+    return process.platform
+  },
+
+  getNodeVersion () {
+    return process.version
   },
 
   isTty (fd) {
