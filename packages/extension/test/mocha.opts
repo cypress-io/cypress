@@ -1,5 +1,5 @@
 test/unit
 test/integration
 --reporter spec
---compilers coffee:@packages/coffee/register
+--require @packages/coffee/register
 --recursive

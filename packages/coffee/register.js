@@ -1,5 +1,5 @@
 if (process.env.CYPRESS_ENV !== 'production') {
-  require('coffee-script/register')
+  require('coffeescript/register')
 
   // using hack found here to prevent problems with
   // cypress coffee script being replaced by modules which

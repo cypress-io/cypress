@@ -18,7 +18,7 @@ global.window = j.window
 global.document = window.document
 
 beforeEach ->
-  @sandbox = sinon.sandbox.create()
+  @sandbox = sinon.createSandbox(()
 
 afterEach ->
   @sandbox.restore()

@@ -10,10 +10,10 @@
     "test": "node test"
   },
   "devDependencies": {
-    "ts-node": "3.3.0",
-    "typescript": "2.5.2"
+    "ts-node": "7.0.1",
+    "typescript": "3.1.5"
   },
   "dependencies": {
-    "debug": "^2.6.8"
+    "debug": "^4.1.0"
   }
 }

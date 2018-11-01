@@ -9,7 +9,7 @@
     "prestart": "npm run check-deps-pre",
     "start": "./bin/cypress-electron",
     "pretest": "npm run check-deps-pre",
-    "test": "mocha --compilers coffee:@packages/coffee/register",
+    "test": "mocha --require @packages/coffee/register",
     "prebuild": "npm run check-deps-pre",
     "build": "node ./bin/cypress-electron --install",
     "check-deps": "node ../../scripts/check-deps.js --verbose",

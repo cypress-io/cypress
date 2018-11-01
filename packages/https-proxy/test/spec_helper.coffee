@@ -12,7 +12,7 @@ chai.use(sinonChai)
 global.expect = chai.expect
 
 beforeEach ->
-  @sandbox = sinon.sandbox.create()
+  @sandbox = sinon.createSandbox(()
 
 afterEach ->
   @sandbox.restore()

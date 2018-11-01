@@ -1,3 +1,4 @@
 test/unit
---compilers ts:@packages/ts/register,coffee:@packages/coffee/register
+--require @packages/ts/register
+--require @packages/coffee/register
 --recursive
