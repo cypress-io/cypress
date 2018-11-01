@@ -1,6 +1,0 @@
-{
-  "javascript.implicitProjectConfig.checkJs": false,
-  "files.trimTrailingWhitespace": true,
-  "eslint.enable": true,
-  "debug.node.autoAttach": "on",
-}
