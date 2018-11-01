@@ -135,10 +135,6 @@ class $Cypress
     @action("cypress:config", config)
 
   initialize: ($autIframe) ->
-    ## push down the options
-    ## to the runner
-    @mocha.options(@runner)
-
     @cy.initialize($autIframe)
 
   run: (fn) ->

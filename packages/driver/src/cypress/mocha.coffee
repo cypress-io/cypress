@@ -192,9 +192,6 @@ create = (specWindow, Cypress, reporter) ->
 
     getRootSuite: ->
       _mocha.suite
-
-    options: (runner) ->
-      runner.options(_mocha.options)
   }
 
 module.exports = {
