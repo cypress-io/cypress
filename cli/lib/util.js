@@ -62,11 +62,11 @@ const util = {
     .chain({})
     .extend(util.getEnvColors())
     .extend(util.getForceTty())
-    .extend(util.getNode11WindowsFix())
     .omitBy(_.isUndefined) // remove undefined values
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
+    .extend(util.getNode11WindowsFix()) // the value has to be falsy, '0' as a string not good enoughs
     .value()
   },
 
@@ -79,7 +79,7 @@ const util = {
   },
 
   getNode11WindowsFix () {
-    if (process.version>'v11' && process.platform==='win32') {
+    if (process.version >= 'v11'&& process.platform === 'win32') {
       return {
         windowsHide: false
       }
