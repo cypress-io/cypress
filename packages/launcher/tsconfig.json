@@ -6,5 +6,18 @@
   ],
   "files": [
     "./../ts/index.d.ts"
-  ]
+  ],
+  "c": {
+    // types option has been previously configured
+     "types": [
+        // add node as an option
+        "node",
+        "jest"
+     ],
+     // typeRoots option has been previously configured
+     "typeRoots": [
+        // add path to @types
+        "node_modules/@types"
+     ]
+}
 }
