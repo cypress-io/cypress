@@ -455,10 +455,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
-    visit: (url, options = {}) ->
+    visit: (url, userOptions = {}) ->
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
+      options = _.clone(userOptions)
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
@@ -469,11 +470,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       consoleProps = {}
+      logOptions = {
+        consoleProps: -> consoleProps
+      }
+
+      if !_.isEmpty(userOptions)
+        logOptions.message = [url, $utils.stringify(userOptions)].join(", ")
 
       if options.log
-        options._log = Cypress.log({
-          consoleProps: -> consoleProps
-        })
+        options._log = Cypress.log(logOptions)
 
       url = $Location.normalize(url)
 
@@ -596,9 +601,19 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             options._log.set({message: indicateRedirects()})
 
+          documentedOptions = [
+            "log",
+            "auth",
+            "failOnStatusCode",
+            "onBeforeLoad",
+            "onLoad",
+            "timeout"
+          ]
+
           consoleProps["Resolved Url"]  = url
           consoleProps["Redirects"]     = redirects
           consoleProps["Cookies Set"]   = cookies
+          consoleProps["Options"]       = _.pick(options, documentedOptions)
 
           remote = $Location.create(url)
 

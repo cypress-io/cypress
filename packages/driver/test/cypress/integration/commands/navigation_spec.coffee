@@ -757,7 +757,7 @@ describe "src/cy/commands/navigation", ->
         })
 
         cy.visit("/fixtures/jquery.html").then ->
-          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+          expect(_.omit(@lastLog.invoke("consoleProps"), "Options")).to.deep.eq({
             "Command": "visit"
             "File Served": "/path/to/foo/bar"
             "Resolved Url": "http://localhost:3500/foo/bar"
@@ -779,7 +779,7 @@ describe "src/cy/commands/navigation", ->
         })
 
         cy.visit("http://localhost:3500/foo").then ->
-          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+          expect(_.omit(@lastLog.invoke("consoleProps"), "Options")).to.deep.eq({
             "Command": "visit"
             "Resolved Url": "http://localhost:3500/foo"
             "Redirects": [1, 2]
@@ -800,7 +800,30 @@ describe "src/cy/commands/navigation", ->
         })
 
         cy.visit("http://localhost:3500/foo").then ->
-          expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+          expect(_.omit(@lastLog.invoke("consoleProps"), "Options")).to.deep.eq({
+            "Command": "visit"
+            "Original Url": "http://localhost:3500/foo"
+            "Resolved Url": "http://localhost:3500/foo/bar"
+            "Redirects": [1, 2]
+            "Cookies Set": [{}, {}]
+          })
+
+      it "displays options as consoleProps", ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves({
+          isOkStatusCode: true
+          isHtml: true
+          contentType: "text/html"
+          url: "http://localhost:3500/foo/bar"
+          originalUrl: "http://localhost:3500/foo"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        cy.visit("http://localhost:3500/foo", {timeout: 100}).then ->
+          expect(@lastLog.invoke("consoleProps")["Options"]).to.exist
+          expect(_.omit(@lastLog.invoke("consoleProps"), "Options")).to.deep.eq({
             "Command": "visit"
             "Original Url": "http://localhost:3500/foo"
             "Resolved Url": "http://localhost:3500/foo/bar"
@@ -826,6 +849,34 @@ describe "src/cy/commands/navigation", ->
 
           expect(lastLog.get("message")).to.eq(
             "http://localhost:3500/foo -> 1 -> 2"
+          )
+
+      it "shows user options in the message", ->
+        cy.stub(Cypress, "backend")
+        .withArgs("resolve:url")
+        .resolves({
+          isOkStatusCode: true
+          isHtml: true
+          contentType: "text/html"
+          url: "http://localhost:3500/foo/bar"
+          originalUrl: "http://localhost:3500/foo"
+          cookies: [{}, {}]
+        })
+
+        cy.visit("http://localhost:3500/foo", {timeout: 10000}).then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("message")).to.eq(
+            "http://localhost:3500/foo, {timeout: 10000}"
+          )
+
+        noop = ->
+
+        cy.visit("http://localhost:3500/foo", {timeout: 10000, onLoad: noop, onBeforeLog: noop}).then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("message")).to.eq(
+            "http://localhost:3500/foo, Object{3}"
           )
 
     describe "errors", ->
