@@ -2,7 +2,11 @@ _ = require("lodash")
 lolex = require("lolex")
 
 install = (win, now, methods) ->
-  lolex.install(win, now, methods)
+  lolex.withGlobal(win).install({
+    target: win
+    now
+    toFake: methods
+  })
 
 create = (win, now, methods) ->
   clock = install(win, now, methods)

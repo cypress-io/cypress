@@ -94,6 +94,36 @@ describe "lib/util/ci_provider", ->
       branch: "bamboo.planRepository.branch"
     })
 
+  it "bitbucket", ->
+    process.env.CI = "1"
+
+    # build information
+    process.env.BITBUCKET_BUILD_NUMBER = "bitbucketBuildNumber"
+    process.env.BITBUCKET_REPO_OWNER = "bitbucketRepoOwner"
+    process.env.BITBUCKET_REPO_SLUG = "bitbucketRepoSlug"
+
+    # git information
+    process.env.BITBUCKET_COMMIT = "bitbucketCommit"
+    process.env.BITBUCKET_BRANCH = "bitbucketBranch"
+
+    expectsName("bitbucket")
+    expectsCiParams({
+      bitbucketBuildNumber: "bitbucketBuildNumber"
+      bitbucketRepoOwner: "bitbucketRepoOwner"
+      bitbucketRepoSlug: "bitbucketRepoSlug"
+    })
+    expectsCommitParams({
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
+    expectsCommitDefaults({
+      sha: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "bitbucketCommit"
+      branch: "gitFoundBranch"
+    })
+
   it "buildkite", ->
     process.env.BUILDKITE = true
 
@@ -176,7 +206,8 @@ describe "lib/util/ci_provider", ->
       authorName: "circleUsername"
     })
 
-  it "codeship", ->
+  it "codeshipBasic", ->
+    process.env.CODESHIP = "TRUE"
     process.env.CI_NAME = "codeship"
 
     process.env.CI_BUILD_ID = "ciBuildId"
@@ -192,7 +223,7 @@ describe "lib/util/ci_provider", ->
     process.env.CI_COMMITTER_NAME = "ciCommitterName"
     process.env.CI_COMMITTER_EMAIL = "ciCommitterEmail"
 
-    expectsName("codeship")
+    expectsName("codeshipBasic")
     expectsCiParams({
       ciBuildId: "ciBuildId"
       ciRepoName: "ciRepoName"
@@ -200,6 +231,33 @@ describe "lib/util/ci_provider", ->
       ciProjectId: "ciProjectId"
       ciBuildNumber: "ciBuildNumber"
       ciPullRequest: "ciPullRequest"
+    })
+    expectsCommitParams({
+      sha: "ciCommitId"
+      branch: "ciBranch"
+      message: "ciCommitMessage"
+      authorName: "ciCommitterName"
+      authorEmail: "ciCommitterEmail"
+    })
+
+  it "codeshipPro", ->
+    process.env.CI_NAME = "codeship"
+
+    process.env.CI_BUILD_ID = "ciBuildId"
+    process.env.CI_REPO_NAME = "ciRepoName"
+    process.env.CI_PROJECT_ID = "ciProjectId"
+
+    process.env.CI_COMMIT_ID = "ciCommitId"
+    process.env.CI_BRANCH = "ciBranch"
+    process.env.CI_COMMIT_MESSAGE = "ciCommitMessage"
+    process.env.CI_COMMITTER_NAME = "ciCommitterName"
+    process.env.CI_COMMITTER_EMAIL = "ciCommitterEmail"
+
+    expectsName("codeshipPro")
+    expectsCiParams({
+      ciBuildId: "ciBuildId"
+      ciRepoName: "ciRepoName"
+      ciProjectId: "ciProjectId"
     })
     expectsCommitParams({
       sha: "ciCommitId"
@@ -243,9 +301,14 @@ describe "lib/util/ci_provider", ->
   it "gitlab", ->
     process.env.GITLAB_CI = true
 
+    # Gitlab has job id and build id as synonyms
+    process.env.CI_BUILD_ID = "ciJobId"
     process.env.CI_JOB_ID = "ciJobId"
     process.env.CI_JOB_URL = "ciJobUrl"
-    process.env.CI_BUILD_ID = "ciBuildId"
+
+    process.env.CI_PIPELINE_ID = "ciPipelineId"
+    process.env.CI_PIPELINE_URL = "ciPipelineUrl"
+
     process.env.GITLAB_HOST = "gitlabHost"
     process.env.CI_PROJECT_ID = "ciProjectId"
     process.env.CI_PROJECT_URL = "ciProjectUrl"
@@ -262,7 +325,9 @@ describe "lib/util/ci_provider", ->
     expectsCiParams({
       ciJobId: "ciJobId"
       ciJobUrl: "ciJobUrl"
-      ciBuildId: "ciBuildId"
+      ciBuildId: "ciJobId"
+      ciPipelineId: "ciPipelineId"
+      ciPipelineUrl: "ciPipelineUrl"
       gitlabHost: "gitlabHost"
       ciProjectId: "ciProjectId"
       ciProjectUrl: "ciProjectUrl"
@@ -280,6 +345,12 @@ describe "lib/util/ci_provider", ->
     resetEnv()
 
     process.env.CI_SERVER_NAME = "GitLab CI"
+
+    expectsName("gitlab")
+
+    resetEnv()
+
+    process.env.CI_SERVER_NAME = "GitLab"
 
     expectsName("gitlab")
 
@@ -325,9 +396,19 @@ describe "lib/util/ci_provider", ->
   it "semaphore", ->
     process.env.SEMAPHORE = true
 
-    process.env.SEMAPHORE_REPO_SLUG = "semaphoreRepoSlug"
+    process.env.SEMAPHORE_BRANCH_ID = "semaphoreBranchId"
     process.env.SEMAPHORE_BUILD_NUMBER = "semaphoreBuildNumber"
+    process.env.SEMAPHORE_CURRENT_JOB = "semaphoreCurrentJob"
+    process.env.SEMAPHORE_CURRENT_THREAD = "semaphoreCurrentThread"
+    process.env.SEMAPHORE_EXECUTABLE_UUID = "semaphoreExecutableUuid"
+    process.env.SEMAPHORE_JOB_COUNT = "semaphoreJobCount"
+    process.env.SEMAPHORE_JOB_UUID = "semaphoreJobUuid"
+    process.env.SEMAPHORE_PLATFORM = "semaphorePlatform"
+    process.env.SEMAPHORE_PROJECT_DIR = "semaphoreProjectDir"
+    process.env.SEMAPHORE_PROJECT_HASH_ID = "semaphoreProjectHashId"
     process.env.SEMAPHORE_PROJECT_NAME = "semaphoreProjectName"
+    process.env.SEMAPHORE_PROJECT_UUID = "semaphoreProjectUuid"
+    process.env.SEMAPHORE_REPO_SLUG = "semaphoreRepoSlug"
     process.env.SEMAPHORE_TRIGGER_SOURCE = "semaphoreTriggerSource"
     process.env.PULL_REQUEST_NUMBER = "pullRequestNumber"
 
@@ -336,11 +417,21 @@ describe "lib/util/ci_provider", ->
 
     expectsName("semaphore")
     expectsCiParams({
-      semaphoreRepoSlug: "semaphoreRepoSlug"
-      semaphoreBuildNumber: "semaphoreBuildNumber"
-      semaphoreProjectName: "semaphoreProjectName"
-      semaphoreTriggerSource: "semaphoreTriggerSource"
       pullRequestNumber: "pullRequestNumber"
+      semaphoreBranchId: "semaphoreBranchId"
+      semaphoreBuildNumber: "semaphoreBuildNumber"
+      semaphoreCurrentJob: "semaphoreCurrentJob"
+      semaphoreCurrentThread: "semaphoreCurrentThread"
+      semaphoreExecutableUuid: "semaphoreExecutableUuid"
+      semaphoreJobCount: "semaphoreJobCount"
+      semaphoreJobUuid: "semaphoreJobUuid"
+      semaphorePlatform: "semaphorePlatform"
+      semaphoreProjectDir: "semaphoreProjectDir"
+      semaphoreProjectHashId: "semaphoreProjectHashId"
+      semaphoreProjectName: "semaphoreProjectName"
+      semaphoreProjectUuid: "semaphoreProjectUuid"
+      semaphoreRepoSlug: "semaphoreRepoSlug"
+      semaphoreTriggerSource: "semaphoreTriggerSource"
     })
     expectsCommitParams({
       sha: "revision"
@@ -348,20 +439,36 @@ describe "lib/util/ci_provider", ->
     })
 
   it "shippable", ->
-    process.env.SHIPPABLE = true
+    process.env.SHIPPABLE = "true"
 
-    process.env.JOB_ID = "jobId"
-    process.env.BUILD_URL = "buildUrl"
-    process.env.PROJECT_ID = "projectId"
-    process.env.JOB_NUMBER = "jobNumber"
-    process.env.COMPARE_URL = "compareUrl"
-    process.env.BASE_BRANCH = "baseBranch"
-    process.env.BUILD_NUMBER = "buildNumber"
-    process.env.PULL_REQUEST = "pullRequest"
+    # build environment variables
+    process.env.SHIPPABLE_BUILD_ID = "buildId"
+    process.env.SHIPPABLE_BUILD_NUMBER = "buildNumber"
+    process.env.SHIPPABLE_COMMIT_RANGE = "commitRange"
+    process.env.SHIPPABLE_CONTAINER_NAME = "containerName"
+    process.env.SHIPPABLE_JOB_ID = "jobId"
+    process.env.SHIPPABLE_JOB_NUMBER = "jobNumber"
+    process.env.SHIPPABLE_REPO_SLUG = "repoSlug"
+
+    # additional information
+    process.env.IS_FORK = "isFork"
+    process.env.IS_GIT_TAG = "isGitTag"
+    process.env.IS_PRERELEASE = "isPrerelease"
+    process.env.IS_RELEASE = "isRelease"
     process.env.REPOSITORY_URL = "repositoryUrl"
+    process.env.REPO_FULL_NAME = "repoFullName"
+    process.env.REPO_NAME = "repoName"
+    process.env.BUILD_URL = "buildUrl"
+
+    # pull request variables
+    process.env.BASE_BRANCH = "baseBranch"
+    process.env.HEAD_BRANCH = "headBranch"
+    process.env.IS_PULL_REQUEST = "isPullRequest"
+    process.env.PULL_REQUEST = "pullRequest"
     process.env.PULL_REQUEST_BASE_BRANCH = "pullRequestBaseBranch"
     process.env.PULL_REQUEST_REPO_FULL_NAME = "pullRequestRepoFullName"
 
+    # git information
     process.env.COMMIT = "commit"
     process.env.BRANCH = "branch"
     process.env.COMMITTER = "committer"
@@ -369,15 +476,28 @@ describe "lib/util/ci_provider", ->
 
     expectsName("shippable")
     expectsCiParams({
-      jobId: "jobId"
-      buildUrl: "buildUrl"
-      projectId: "projectId"
-      jobNumber: "jobNumber"
-      compareUrl: "compareUrl"
-      baseBranch: "baseBranch"
-      buildNumber: "buildNumber"
-      pullRequest: "pullRequest"
+      # build information
+      shippableBuildId: "buildId"
+      shippableBuildNumber: "buildNumber"
+      shippableCommitRange: "commitRange"
+      shippableContainerName: "containerName"
+      shippableJobId: "jobId"
+      shippableJobNumber: "jobNumber"
+      shippableRepoSlug: "repoSlug"
+      # additional information
+      isFork: "isFork"
+      isGitTag: "isGitTag"
+      isPrerelease: "isPrerelease"
+      isRelease: "isRelease"
       repositoryUrl: "repositoryUrl"
+      repoFullName: "repoFullName"
+      repoName: "repoName"
+      buildUrl: "buildUrl"
+      # pull request information
+      baseBranch: "baseBranch"
+      headBranch: "headBranch"
+      isPullRequest: "isPullRequest"
+      pullRequest: "pullRequest"
       pullRequestBaseBranch: "pullRequestBaseBranch"
       pullRequestRepoFullName: "pullRequestRepoFullName"
     })
@@ -405,9 +525,27 @@ describe "lib/util/ci_provider", ->
   it "teamfoundation", ->
     process.env.TF_BUILD = true
 
+    process.env.BUILD_BUILDID = "buildId"
+    process.env.BUILD_BUILDNUMBER = "buildNumber"
+    process.env.BUILD_CONTAINERID = "containerId"
+
+    process.env.BUILD_SOURCEVERSION = "commit"
+    process.env.BUILD_SOURCEBRANCHNAME = "branch"
+    process.env.BUILD_SOURCEVERSIONMESSAGE = "message"
+    process.env.BUILD_SOURCEVERSIONAUTHOR = "name"
+
     expectsName("teamfoundation")
-    expectsCiParams(null)
-    expectsCommitParams(null)
+    expectsCiParams({
+      buildBuildid: "buildId"
+      buildBuildnumber: "buildNumber"
+      buildContainerid: "containerId"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      message: "message"
+      authorName: "name"
+    })
 
   it "travis", ->
     process.env.TRAVIS = true
