@@ -144,6 +144,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
+      ## return null to trick contentWindow into thinking
+      ## its not been iframed if modifyObstructiveCode is true
+      if config("modifyObstructiveCode")
+        Object.defineProperty(contentWindow, "frameElement", {
+          get: -> null
+        })
+
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
 

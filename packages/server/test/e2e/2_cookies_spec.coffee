@@ -45,11 +45,18 @@ onServer = (app) ->
     # auth=; Domain=.surveymonkey.com; Max-Age=0; Path=/; expires=Wed, 31-Dec-97 23:59:59 GMT
 
     res.send("<html></html>")
-
+    
   app.get "/expirationExpires", (req, res) ->
     res.cookie("shouldExpire", "now", {
       expires: moment().subtract(1, "day").toDate()
     })
+
+    res.send("<html></html>")
+
+  app.get "/cookieWithNoName", (req, res) ->
+    res.header("Set-Cookie",
+      "=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=/"
+    )
 
     res.send("<html></html>")
 
