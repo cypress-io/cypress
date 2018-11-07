@@ -534,6 +534,18 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
 
+
+    it "passes certificate key and crt options", ->
+      backend = cy.spy(Cypress, "backend")
+
+      cert = 'a-cert'
+      key = 'a-key'
+
+      cy
+        .visit("http://localhost:3500/timeout", { cert, key })
+        .then ->
+          expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { cert, key })
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0

@@ -260,7 +260,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "failOnStatusCode", "auth")
+      _.pick(options, "failOnStatusCode", "auth", "cert", "key")
     )
     .then (resp = {}) ->
       switch
