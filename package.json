@@ -33,6 +33,9 @@
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.1",
+    "@babel/preset-env": "^7.0.0",
+    "babel-loader": "^8.0.2",
     "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
     "chokidar-cli": "1.2.0",
@@ -52,7 +55,8 @@
     "semantic-release": "8.2.0",
     "simple-commit-message": "3.3.1",
     "sinon": "3.2.1",
-    "sinon-chai": "2.13.0"
+    "sinon-chai": "2.13.0",
+    "webpack": "^4.18.1"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
