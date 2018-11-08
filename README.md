@@ -63,10 +63,7 @@ Object of webpack options. Just `require` in the options from your `webpack.conf
         use: [{
           loader: 'babel-loader',
           options: {
-            presets: [
-              'babel-preset-env',
-              'babel-preset-react',
-            ],
+            presets: ['babel-preset-env'],
           },
         }],
       },
