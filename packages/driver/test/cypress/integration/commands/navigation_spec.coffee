@@ -534,7 +534,6 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
 
-
     it "passes certificate key and crt options", ->
       backend = cy.spy(Cypress, "backend")
 
