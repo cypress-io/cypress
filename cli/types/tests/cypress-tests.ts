@@ -5,6 +5,14 @@ namespace CypressLodashTests {
   })
 }
 
+namespace CypressMomentTests {
+  Cypress.moment() // $ExpectType Moment
+  Cypress.moment('1982-08-23') // $ExpectType Moment
+  Cypress.moment(Date()) // $ExpectType Moment
+  Cypress.moment(Date()).format() // $ExpectType string
+  Cypress.moment().startOf('week') // $ExpectType Moment
+}
+
 namespace CypressJqueryTests {
   Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
@@ -21,8 +29,6 @@ namespace CypressConfigTests {
   Cypress.config('baseUrl', null) // $ExpectType void
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
 }
-
-Cypress.moment()
 
 namespace CypressEnvTests {
   // Just making sure these are valid - no real type safety
