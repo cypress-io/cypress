@@ -19,7 +19,7 @@ const defaultOptions = {
             {
               loader: require.resolve('babel-loader'),
               options: {
-                presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve),
+                presets: require.resolve('@babel/preset-env'),
               },
             },
           ],

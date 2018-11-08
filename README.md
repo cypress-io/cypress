@@ -8,9 +8,22 @@ Cypress preprocessor for bundling JavaScript via webpack
 npm install --save-dev @cypress/webpack-preprocessor
 ```
 
+This package relies on the following [peer dependencies](https://docs.npmjs.com/files/package.json#peerdependencies):
+
+* @babel/core
+* @babel/preset-env
+* babel-loader
+* webpack
+
+It is likely you already have these installed either directly or as a transient dependency, but if not, you will need to install them.
+
+```sh
+npm install --save-dev @babel/core @babel/preset-env babel-loader webpack
+```
+
 ## Compatibility
 
-This version is only compatible with webpack 4.x+ and Babel 7.x+. 
+This version is only compatible with webpack 4.x+ and Babel 7.x+.
 
 * If you need webpack 2 or 3 support, use `@cypress/webpack-preprocessor` 1.x
 * If you need Babel 6 support, use `@cypress/webpack-preprocessor` <= 2.x
@@ -63,10 +76,7 @@ Object of webpack options. Just `require` in the options from your `webpack.conf
         use: [{
           loader: 'babel-loader',
           options: {
-            presets: [
-              'babel-preset-env',
-              'babel-preset-react',
-            ],
+            presets: ['babel-preset-env'],
           },
         }],
       },
