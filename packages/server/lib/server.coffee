@@ -456,8 +456,8 @@ class Server
           ## rewrite these contents
           auth: options.auth
           gzip: false
-          url: urlFile ? urlStr,
-          cert: options.cert || undefined,
+          url: urlFile ? urlStr
+          cert: options.cert || undefined
           key: options.key || undefined
           headers: {
             accept: "text/html,*/*"
