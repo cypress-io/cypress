@@ -201,32 +201,44 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
-  it('can use string code as timer function', () => {
-    cy
-    .window()
-    .then((win) => {
-      win.stub = cy.stub()
-
-      win.setTimeout('this.stub()', 1)
-
+  describe('accepts different types of timer function', () => {
+    it('string', () => {
       cy
-      .wait(10)
-      .then(() => {
-        expect(win.stub).to.be.called
+      .window()
+      .then((win) => {
+        win.stub = cy.stub()
+
+        win.setTimeout('this.stub()', 1)
+
+        cy
+        .wait(10)
+        .then(() => {
+          expect(win.stub).to.be.called
+        })
       })
     })
-  })
 
-  it('can take undefined as timer function', (done) => {
-    cy
-    .window()
-    .then((win) => {
-      win.setTimeout(undefined, 1)
+    const codes = [
+      ['undefined', undefined],
+      ['boolean', true],
+      ['number', 42],
+      ['array', []],
+      ['object', {}],
+    ]
 
-      cy
-      .wait(10)
-      .then(() => {
-        done()
+    codes.forEach((code) => {
+      it(code[0], (done) => {
+        cy
+        .window()
+        .then((win) => {
+          win.setTimeout(code[1], 1)
+
+          cy
+          .wait(10)
+          .then(() => {
+            done()
+          })
+        })
       })
     })
   })
