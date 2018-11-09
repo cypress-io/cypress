@@ -18,7 +18,7 @@ const create = () => {
   }
 
   const invoke = (contentWindow, fnOrCode, params = []) => {
-    if (_.isString(fnOrCode)) {
+    if (_.isString(fnOrCode) || _.isUndefined(fnOrCode)) {
       return contentWindow.eval(fnOrCode)
     }
 

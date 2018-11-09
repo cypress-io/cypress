@@ -217,6 +217,20 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
+  it('can take undefined as timer function', (done) => {
+    cy
+    .window()
+    .then((win) => {
+      win.setTimeout(undefined, 1)
+
+      cy
+      .wait(10)
+      .then(() => {
+        done()
+      })
+    })
+  })
+
   it('can cancel setIntervals paused or unpaused', () => {
     // 1. setInterval works unpaused and can be canceled after N calls
     // 2. setInterval stops invoking when paused and when resumed invokes all paused calls
