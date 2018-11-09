@@ -38,7 +38,9 @@ const eventManager = {
   },
 
   addGlobalListeners (state, connectionInfo) {
-    const rerun = () => this._reRun(state)
+    const rerun = () => {
+      return this._reRun(state)
+    }
 
     channel.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
@@ -71,6 +73,7 @@ const eventManager = {
       if (!Cypress) return
 
       const err = Cypress.getErrorByTestId(testId)
+
       if (err) {
         logger.clearLog()
         logger.logError(err.stack)
@@ -83,6 +86,7 @@ const eventManager = {
       if (!Cypress) return
 
       const consoleProps = Cypress.getConsolePropsForLogById(logId)
+
       logger.clearLog()
       logger.logFormatted(consoleProps)
     })
@@ -219,20 +223,26 @@ const eventManager = {
     })
 
     _.each(driverToSocketEvents, (event) => {
-      Cypress.on(event, (...args) => channel.emit(event, ...args))
+      Cypress.on(event, (...args) => {
+        return channel.emit(event, ...args)
+      })
     })
 
-    Cypress.on('collect:run:state', () => new Promise((resolve) => {
-      reporterBus.emit('reporter:collect:run:state', resolve)
-    }))
+    Cypress.on('collect:run:state', () => {
+      return new Promise((resolve) => {
+        reporterBus.emit('reporter:collect:run:state', resolve)
+      })
+    })
 
     Cypress.on('log:added', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
+
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
+
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
@@ -243,9 +253,11 @@ const eventManager = {
       }
 
       const wait = !config.appOnly && config.waitForCommandSynchronization
+
       if (!config.appOnly) {
         reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? beforeThenCb : undefined)
       }
+
       if (!wait) beforeThenCb()
     })
 
@@ -280,7 +292,9 @@ const eventManager = {
     })
 
     _.each(driverToLocalEvents, (event) => {
-      Cypress.on(event, (...args) => localBus.emit(event, ...args))
+      Cypress.on(event, (...args) => {
+        return localBus.emit(event, ...args)
+      })
     })
 
     Cypress.on('script:error', (err) => {

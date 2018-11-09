@@ -218,3 +218,15 @@ namespace CypressFilterTests {
       return true
     })
 }
+
+cy.screenshot('example-name')
+cy.screenshot('example', {log: false})
+cy.screenshot({log: false})
+cy.screenshot({
+  log: true,
+  blackout: []
+})
+cy.screenshot('example', {
+  log: true,
+  blackout: []
+})
