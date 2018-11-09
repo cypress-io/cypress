@@ -322,28 +322,46 @@ getSelectionBounds = (el) ->
         end: null
       }
 
-moveSelectionToEnd = (el) ->
-  if $elements.isInput(el) || $elements.isTextarea(el)
-    length = $elements.getNativeProp(el, "value").length
-    setSelectionRange(el, length, length)
+moveSelectionToEnd = () ->
+  _moveSelectionTo(false)
 
-  else if $elements.isContentEditable(el)
-    ## NOTE: can't use execCommand API here because we would have
-    ## to selectAll and then collapse so we use the Selection API
+moveSelectionToStart = () ->
+  _moveSelectionTo(true)
+
+_moveSelectionTo = (toStart) ->
+  $el = cy.getFocused()
+  if ($el[0])
+    el = $el[0]
     doc = $document.getDocumentFromElement(el)
-    range = $elements.callNativeMethod(doc, "createRange")
-    hostContenteditable = _getHostContenteditable(el)
-    lastTextNode = _getInnerLastChild(hostContenteditable)
+    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
+    selection = doc.getSelection()
+    if selection.rangeCount > 0
+      range = selection.getRangeAt(0)
+      range.collapse(toStart)
 
-    if lastTextNode.tagName is "BR"
-      lastTextNode = lastTextNode.parentNode
 
-    range.setStart(lastTextNode, lastTextNode.length)
-    range.setEnd(lastTextNode, lastTextNode.length)
 
-    sel = $elements.callNativeMethod(doc, "getSelection")
-    $elements.callNativeMethod(sel, "removeAllRanges")
-    $elements.callNativeMethod(sel, "addRange", range)
+  # if $elements.isInput(el) || $elements.isTextarea(el)
+  #   length = $elements.getNativeProp(el, "value").length
+  #   setSelectionRange(el, length, length)
+
+  # else if $elements.isContentEditable(el)
+  #   ## NOTE: can't use execCommand API here because we would have
+  #   ## to selectAll and then collapse so we use the Selection API
+  #   # doc = $document.getDocumentFromElement(el)
+  #   # range = $elements.callNativeMethod(doc, "createRange")
+  #   # hostContenteditable = _getHostContenteditable(el)
+  #   # lastTextNode = _getInnerLastChild(hostContenteditable)
+
+  #   # if lastTextNode.tagName is "BR"
+  #   #   lastTextNode = lastTextNode.parentNode
+
+  #   # range.setStart(lastTextNode, lastTextNode.length)
+  #   # range.setEnd(lastTextNode, lastTextNode.length)
+
+  #   # sel = $elements.callNativeMethod(doc, "getSelection")
+  #   # $elements.callNativeMethod(sel, "removeAllRanges")
+  #   # $elements.callNativeMethod(sel, "addRange", range)
 
 ## TODO: think about renaming this
 replaceSelectionContents = (el, key) ->
@@ -460,6 +478,7 @@ module.exports = {
   selectAll
   deleteSelectionContents
   moveSelectionToEnd
+  moveSelectionToStart
   getCaretPosition
   moveCursorLeft
   moveCursorRight

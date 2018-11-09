@@ -155,7 +155,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       options.chars = "" + chars
-
       win = state("window")
 
       getDefaultButtons = (form) ->
@@ -345,17 +344,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               ## click the element first to simulate focus
               ## and typical user behavior in case the window
               ## is out of focus
-              cy.now("click", $elToClick, {
-                $el: $elToClick
-                log: false
-                verify: false
-                _log: options._log
-                force: true ## force the click, avoid waiting
-                timeout: options.timeout
-                interval: options.interval
-              })
-              .then ->
-                type()
+              
+              # cy.now("click", $elToClick, {
+              #   $el: $elToClick
+              #   log: false
+              #   verify: false
+              #   _log: options._log
+              #   force: true ## force the click, avoid waiting
+              #   timeout: options.timeout
+              #   interval: options.interval
+              # })
+
+              $elToClick[0].focus()
+              cy.getFocused()
+              type()
             else
               type()
           })

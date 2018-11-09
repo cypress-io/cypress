@@ -16,7 +16,39 @@ describe "src/cy/commands/actions/type", ->
 
     $(doc.body).empty().html(@body)
 
+    cy.state('window').addEventListener('keydown', ()=>debugger)
+    window.addEventListener('keydown', ()=>debugger)
+
   context "#type", ->
+
+    it 'can moveToStart', ->
+      input = cy.$$('input:first')
+
+      input.val('foo')
+
+      cy.get('input:first').type('{moveToStart}bar')
+        .invoke('val').should('eq', 'barfoo')
+
+    it 'can moveToEnd', ->
+      input = cy.$$('input:first')
+
+      input.val('foo')
+
+      cy.get('input:first').type('{moveToEnd}{{}')
+        .invoke('val').should('eq', 'foobar')
+
+    it 'can moveToEnd from middle', ->
+      input = cy.$$('input:first')
+
+      input.val('foo')
+
+      input.get(0).setSelectionRange(0,0)
+
+      cy.get('input:first').type('{moveToEnd}bar')
+        .invoke('val').should('eq', 'foobar')
+
+
+
     it "does not change the subject", ->
       input = cy.$$("input:first")
 
@@ -1119,14 +1151,26 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
 
-        it "fires keypress event with 219 charCode", (done) ->
-          cy.$$(":text:first").on "keypress", (e) ->
-            expect(e.charCode).to.eq 219
-            expect(e.which).to.eq 219
-            expect(e.keyCode).to.eq 219
-            done()
+        it.only "fires keypress event with 219 charCode", (done) ->
+
+          keypress = cy.stub()
+          .callsFake (e) =>
+            expect(e.charCode).to.eq 123
+            expect(e.which).to.eq 123
+            expect(e.keyCode).to.eq 123
+            expect(e.key).to.eq '{'
+            
+          # .onCall(1).callsFake (e) =>
+          #   expect(e.charCode).to.eq 219
+          #   expect(e.which).to.eq 219
+          #   expect(e.keyCode).to.eq 219
+            
+    
+          ## native event presses Shift before { to mimic real user
+          cy.$$(":text:first").on "keypress", keypress
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
+          .then -> expect(keypress).to.be.calledOnce
 
         it "fires textInput event with e.data", (done) ->
           cy.$$(":text:first").on "textInput", (e) ->

@@ -114,7 +114,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               return Promise.resolve(null) #$native.mouseup($elToClick, coords.fromViewport)
           .delay($actionability.delay, "click")
           .then ->
-            debugger
             ## display the red dot at these coords
             if options._log
               consoleObj = options._log.invoke("consoleProps")

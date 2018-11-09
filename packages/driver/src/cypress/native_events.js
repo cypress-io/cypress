@@ -74,10 +74,66 @@ const mouseEvent = (coords, type) => {
   })
 }
 
+const keypress = (keyInfo) => {
+
+  return init()
+  .then(() => {
+    return Promise.all([
+      keyDown(keyInfo),
+      keyUp(keyInfo),
+    ]).then(()=>{debugger})
+  })
+}
+
+function keySequence (keyInfoArray, delay) {
+  if (delay) {
+    return keyInfoArray.map((keyInfo) => {
+
+    })
+  }
+  return keyInfoArray.map((keyInfo) => [
+    keyDown(keyInfo),
+    keyUp(keyInfo),
+  ])
+}
+
+const keyDown = (keyInfo) => {
+  return client.send('Input.dispatchKeyEvent', {
+    // type: text ? 'keyDown' : 'rawKeyDown',
+    type: keyInfo.text ? 'keyDown' : 'rawKeyDown',
+    // modifiers: this._modifiers,
+    windowsVirtualKeyCode: keyInfo.keyCode,
+    code: keyInfo.code,
+    key: keyInfo.key,
+    text: keyInfo.text,
+    // unmodifiedText: text,
+    // autoRepeat,
+    location: keyInfo.location,
+    isKeypad: keyInfo.location === 3,
+  })
+}
+
+const keyUp = (keyInfo) => {
+  return client.send('Input.dispatchKeyEvent', {
+    // type: text ? 'keyUp' : 'rawKeyUp',
+    type: 'keyUp',
+    // modifiers: this._modifiers,
+    windowsVirtualKeyCode: keyInfo.keyCode,
+    code: keyInfo.code,
+    key: keyInfo.key,
+    text: keyInfo.text,
+    // unmodifiedText: text,
+    // autoRepeat,
+    location: keyInfo.location,
+    isKeypad: keyInfo.location === 3,
+  })
+}
+
 module.exports = {
   mouseDown,
   mouseUp,
   click,
+  keypress,
   init,
 }
 
