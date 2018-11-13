@@ -132,7 +132,7 @@ deploy = {
         fail("Release Failed")
         throw err
 
-    askMissingOptions(['version', 'nextVersion'])(options)
+    askMissingOptions(['version', 'commit', 'nextVersion'])(options)
     .then(release)
 
   build: (options) ->
