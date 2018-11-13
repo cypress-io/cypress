@@ -105,6 +105,10 @@ const util = {
     return process.version
   },
 
+  isPlatform (platform) {
+    return os.platform() === platform
+  },
+
   isTty (fd) {
     return tty.isatty(fd)
   },
