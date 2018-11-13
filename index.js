@@ -7,24 +7,30 @@ const createDeferred = require('./deferred')
 
 const bundles = {}
 
-// by default, we transform JavaScript (up to anything at stage-4) and JSX
+// by default, we transform JavaScript supported by @babel/preset-env
+const defaultBabelLoaderRules = () => {
+  return [
+    {
+      test: /\.js?$/,
+      exclude: [/node_modules/],
+      use: [
+        {
+          loader: require.resolve('babel-loader'),
+          options: {
+            presets: [require.resolve('@babel/preset-env')],
+          },
+        },
+      ],
+    },
+  ]
+}
+
+// we don't automatically load the rules, so that the babel dependencies are
+// not required if a user passes in their own configuration
 const defaultOptions = {
   webpackOptions: {
     module: {
-      rules: [
-        {
-          test: /\.jsx?$/,
-          exclude: [/node_modules/],
-          use: [
-            {
-              loader: require.resolve('babel-loader'),
-              options: {
-                presets: [require.resolve('@babel/preset-env')],
-              },
-            },
-          ],
-        },
-      ],
+      rules: [],
     },
   },
   watchOptions: {},
@@ -63,6 +69,11 @@ const preprocessor = (options = {}) => {
 
     // user can override the default options
     let webpackOptions = Object.assign({}, defaultOptions.webpackOptions, options.webpackOptions)
+    // here is where we load the default rules if the user has not passed
+    // in their own configuration
+    if (webpackOptions.module.rules === defaultOptions.webpackOptions) {
+      webpackOptions.module.rules = defaultBabelLoaderRules()
+    }
     let watchOptions = Object.assign({}, defaultOptions.watchOptions, options.watchOptions)
 
     // we're provided a default output path that lives alongside Cypress's
@@ -173,7 +184,15 @@ const preprocessor = (options = {}) => {
   }
 }
 
-// provide a clone of the default options
-preprocessor.defaultOptions = cloneDeep(defaultOptions)
+// provide a clone of the default options, making sure to lazy-load
+// babel dependencies so that they aren't required unless the user
+// utilizes them
+Object.defineProperty(preprocessor, 'defaultOptions', {
+  get () {
+    const clonedDefaults = cloneDeep(defaultOptions)
+    clonedDefaults.webpackOptions.module.rules = defaultBabelLoaderRules()
+    return clonedDefaults
+  },
+})
 
 module.exports = preprocessor
