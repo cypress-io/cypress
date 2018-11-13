@@ -1,8 +1,3 @@
-/* eslint-disable
-    brace-style,
-    default-case,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -13,8 +8,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const _ = require('lodash')
-const la = require('lazy-ass')
-const check = require('check-more-types')
 const debug = require('debug')('cypress:server')
 
 const join = (char, ...pieces) => {
@@ -49,7 +42,6 @@ const isJenkins = () => {
     process.env.HUDSON_HOME
 }
 
-
 const isWercker = () => {
   return process.env.WERCKER || process.env.WERCKER_MAIN_PIPELINE_STARTED
 }
@@ -81,12 +73,13 @@ const _detectProviderName = function () {
 
   //# return the key of the first provider
   //# which is truthy
-  return _.findKey(CI_PROVIDERS, (value, key) => {
-    switch (false) {
-      case !_.isString(value):
-        return env[value]
-      case !_.isFunction(value):
-        return value()
+  return _.findKey(CI_PROVIDERS, (value) => {
+    if (_.isString(value)) {
+      return env[value]
+    }
+
+    if (_.isFunction(value)) {
+      return value()
     }
   })
 }
@@ -251,7 +244,6 @@ const _providerCiParams = () => {
   }
 }
 
-
 // tries to grab commit information from CI environment variables
 // very useful to fill missing information when Git cannot grab correct values
 const _providerCommitParams = function () {
@@ -403,7 +395,6 @@ const _get = (fn) => {
   .value()
 }
 
-
 const ciParams = () => {
   return _get(_providerCiParams)
 }
@@ -438,17 +429,15 @@ const list = () => {
   return _.keys(CI_PROVIDERS)
 }
 
-const detectableCiBuildIdProviders = () =>
-//# grab all detectable providers
-//# that we can extract ciBuildId from
-{
+// grab all detectable providers
+// that we can extract ciBuildId from
+const detectableCiBuildIdProviders = () => {
   return _
   .chain(_providerCiParams())
   .omitBy(_.isNull)
   .keys()
   .value()
 }
-
 
 module.exports = {
   list,
@@ -462,5 +451,4 @@ module.exports = {
   commitDefaults,
 
   detectableCiBuildIdProviders,
-
 }

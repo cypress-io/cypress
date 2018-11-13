@@ -40,6 +40,7 @@ original = """
       if (self === top) return
       if (top.location != self.location) run()
       if (top.location != location) run()
+      if (self.location != top.location) run()
       if (parent.frames.length > 0) run()
       if (window != top) run()
       if (window.top !== window.self) run()
@@ -97,6 +98,7 @@ expected = """
       if (self === self) return
       if (self.location != self.location) run()
       if (self.location != location) run()
+      if (self.location != self.location) run()
       if (self.frames.length > 0) run()
       if (window != self) run()
       if (window.self !== window.self) run()

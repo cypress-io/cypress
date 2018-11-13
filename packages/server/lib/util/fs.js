@@ -1,19 +1,11 @@
-/* eslint-disable
-    no-console,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-console */
+
 const fs = require('fs-extra')
 const Promise = require('bluebird')
 
 //# warn users if somehow synchronous file methods are invoked
 //# these methods due to "too many files" errors are a huge pain
-const warnOnSyncFileSystem = function () {
+const warnOnSyncFileSystem = () => {
   console.error('WARNING: fs sync methods can fail due to EMFILE errors')
   console.error('Cypress only works reliably when ALL fs calls are async')
 
@@ -26,16 +18,16 @@ const topLines = (from, n, text) => {
 
 // just hide this function itself
 // stripping top few lines of the stack
-const getStack = function () {
+const getStack = () => {
   const err = new Error()
 
   return topLines(3, 10, err.stack)
 }
 
-const addSyncFileSystemWarnings = function (fs) {
+const addSyncFileSystemWarnings = (fs) => {
   const oldExistsSync = fs.existsSync
 
-  fs.existsSync = function (filename) {
+  fs.existsSync = (filename) => {
     warnOnSyncFileSystem()
     console.error(getStack())
 

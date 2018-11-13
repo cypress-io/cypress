@@ -123,6 +123,7 @@ class SelectorPlayground extends Component {
       if (this.props.model.isEnabled) {
         this._focusAndSelectInputText()
       }
+
       this._previousIsEnabled = this.props.model.isEnabled
       this._previousMethod = this.props.model.method
     }
@@ -186,6 +187,7 @@ class SelectorPlayground extends Component {
     try {
       this.refs.copyText.select()
       const successful = document.execCommand('copy')
+
       this._setCopyText(successful ? 'Copied!' : 'Oops, unable to copy')
     } catch (err) {
       this._setCopyText('Oops, unable to copy')
@@ -223,6 +225,7 @@ class SelectorPlayground extends Component {
 
   _updateSelector = (e) => {
     const { model } = this.props
+
     model.setSelector(e.target.value)
     model.setShowingHighlight(true)
   }

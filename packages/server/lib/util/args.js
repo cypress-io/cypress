@@ -88,14 +88,12 @@ const commasToPipes = (match, p1, p2, p3) =>
   return match.split(',').join('|')
 }
 
-
 const pipesToCommas = (str) =>
 //# convert foo=bar|version=1.2.3 to
 //# foo=bar,version=1.2.3
 {
   return str.split('|').join(',')
 }
-
 
 const tryJSONParse = function (str) {
   try {
