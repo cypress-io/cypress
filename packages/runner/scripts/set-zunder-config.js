@@ -1,5 +1,6 @@
 module.exports = function setZunderConfig (zunder) {
   const { browserifyOptions } = zunder.config
+
   // coffeescript support
   browserifyOptions.extensions.push('.coffee')
   browserifyOptions.transform.push([

@@ -15,6 +15,7 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
+const compareVersions = require('compare-versions')
 
 const getosAsync = Promise.promisify(getos)
 
@@ -29,6 +30,7 @@ function normalizeModuleOptions (options = {}) {
 function stdoutLineMatches (expectedLine, stdout) {
   const lines = stdout.split('\n').map(R.trim)
   const lineMatches = R.equals(expectedLine)
+
   return lines.some(lineMatches)
 }
 
@@ -66,6 +68,7 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
+    .extend(util.getNode11WindowsFix()) // the value has to be falsy, '0' as a string not good enoughs
     .value()
   },
 
@@ -77,6 +80,14 @@ const util = {
     }
   },
 
+  getNode11WindowsFix () {
+    if (compareVersions(util.getNodeVersion(), 'v11') >= 0 && util.isPlatform('win32')) {
+      return {
+        windowsHide: false,
+      }
+    }
+  },
+
   getEnvColors () {
     const sc = util.supportsColor()
 
@@ -85,6 +96,14 @@ const util = {
       DEBUG_COLORS: sc,
       MOCHA_COLORS: sc ? true : undefined,
     }
+  },
+
+  getNodeVersion () {
+    return process.version
+  },
+
+  isPlatform (platform) {
+    return os.platform() === platform
   },
 
   isTty (fd) {
@@ -179,11 +198,16 @@ const util = {
     return Promise.try(() => {
       if (os.platform() === 'linux') {
         return getosAsync()
-        .then((osInfo) => [osInfo.dist, osInfo.release].join(' - '))
-        .catch(() => os.release())
-      } else {
-        return os.release()
+        .then((osInfo) => {
+          return [osInfo.dist, osInfo.release].join(' - ')
+        })
+        .catch(() => {
+          return os.release()
+        })
       }
+
+      return os.release()
+
     })
   },
 
@@ -195,6 +219,7 @@ const util = {
     if (path.isAbsolute(filename)) {
       return filename
     }
+
     return path.join(process.cwd(), '..', '..', filename)
   },
 
@@ -202,18 +227,25 @@ const util = {
     const envVar = process.env[varName]
     const configVar = process.env[`npm_config_${varName}`]
     const packageConfigVar = process.env[`npm_package_config_${varName}`]
+
     if (envVar) {
       debug(`Using ${varName} from environment variable`)
+
       return envVar
     }
+
     if (configVar) {
       debug(`Using ${varName} from npm config`)
+
       return configVar
     }
+
     if (packageConfigVar) {
       debug(`Using ${varName} from package.json config`)
+
       return packageConfigVar
     }
+
     return undefined
 
   },

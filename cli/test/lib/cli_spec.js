@@ -11,7 +11,6 @@ const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
 const execa = require('execa-wrap')
-const stdout = require('../support/stdout')
 
 describe('cli', () => {
   require('mocha-banner').register()
@@ -22,59 +21,61 @@ describe('cli', () => {
     os.platform.returns('darwin')
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
-    this.exec = (args) => cli.init(`node test ${args}`.split(' '))
-    this.stdout = stdout.capture()
+    this.exec = (args) => {
+      return cli.init(`node test ${args}`.split(' '))
+    }
   })
 
   context('unknown option', () => {
     // note it shows help for that specific command
-    it('shows help', () =>
-      execa('bin/cypress', ['open', '--foo']).then((result) => {
+    it('shows help', () => {
+      return execa('bin/cypress', ['open', '--foo']).then((result) => {
         snapshot('shows help for open --foo', result)
       })
-    )
+    })
 
-    it('shows help for run command', () =>
-      execa('bin/cypress', ['run', '--foo']).then((result) => {
+    it('shows help for run command', () => {
+      return execa('bin/cypress', ['run', '--foo']).then((result) => {
         snapshot('shows help for run --foo', result)
       })
-    )
+    })
 
-    it('shows help for cache command - unknown option --foo', () =>
-      execa('bin/cypress', ['cache', '--foo']).then(snapshot)
-    )
+    it('shows help for cache command - unknown option --foo', () => {
+      return execa('bin/cypress', ['cache', '--foo']).then(snapshot)
+    })
 
-    it('shows help for cache command - unknown sub-command foo', () =>
-      execa('bin/cypress', ['cache', 'foo']).then(snapshot)
-    )
+    it('shows help for cache command - unknown sub-command foo', () => {
+      return execa('bin/cypress', ['cache', 'foo']).then(snapshot)
+    })
 
-    it('shows help for cache command - no sub-command', () =>
-      execa('bin/cypress', ['cache']).then(snapshot)
-    )
+    it('shows help for cache command - no sub-command', () => {
+      return execa('bin/cypress', ['cache']).then(snapshot)
+    })
   })
 
   context('help command', () => {
-    it('shows help', () =>
-      execa('bin/cypress', ['help']).then(snapshot)
-    )
+    it('shows help', () => {
+      return execa('bin/cypress', ['help']).then(snapshot)
+    })
 
-    it('shows help for -h', () =>
-      execa('bin/cypress', ['-h']).then(snapshot)
-    )
+    it('shows help for -h', () => {
+      return execa('bin/cypress', ['-h']).then(snapshot)
+    })
 
-    it('shows help for --help', () =>
-      execa('bin/cypress', ['--help']).then(snapshot)
-    )
+    it('shows help for --help', () => {
+      return execa('bin/cypress', ['--help']).then(snapshot)
+    })
   })
 
   context('unknown command', () => {
-    it('shows usage and exits', () =>
-      execa('bin/cypress', ['foo']).then(snapshot)
-    )
+    it('shows usage and exits', () => {
+      return execa('bin/cypress', ['foo']).then(snapshot)
+    })
   })
 
   context('cypress version', () => {
     const binaryDir = '/binary/dir'
+
     beforeEach(() => {
       sinon.stub(state, 'getBinaryDir').returns(binaryDir)
     })
@@ -152,6 +153,7 @@ describe('cli', () => {
 
     it('run.start with options + catches errors', (done) => {
       const err = new Error('foo')
+
       run.start.rejects(err)
       this.exec('run')
 
@@ -277,7 +279,6 @@ describe('cli', () => {
     })
   })
 
-
   it('install calls install.start without forcing', () => {
     sinon.stub(install, 'start').resolves()
     this.exec('install')
@@ -302,7 +303,6 @@ describe('cli', () => {
     })
   })
   context('cypress verify', () => {
-
 
     it('verify calls verify.start with force: true', () => {
       sinon.stub(verify, 'start').resolves()

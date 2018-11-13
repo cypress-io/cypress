@@ -73,7 +73,13 @@ create = (Cypress, cy, state, config, log) ->
     ## store the backup again now
     commandBackups[name] = original
 
-    originalFn = original.fn
+    originalFn = (args...) ->
+      current = state("current")
+      storedArgs = args
+      if current.get("type") is "child"
+        storedArgs = args.slice(1)
+      current.set("args", storedArgs)
+      original.fn(args...)
 
     overridden = _.clone(original)
     overridden.fn = (args...) ->

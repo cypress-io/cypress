@@ -18,11 +18,11 @@ const create = () => {
   }
 
   const invoke = (contentWindow, fnOrCode, params = []) => {
-    if (_.isString(fnOrCode)) {
-      return contentWindow.eval(fnOrCode)
+    if (_.isFunction(fnOrCode)) {
+      return fnOrCode(...params)
     }
 
-    return fnOrCode(...params)
+    return contentWindow.eval(fnOrCode)
   }
 
   const flushTimerQueue = () => {

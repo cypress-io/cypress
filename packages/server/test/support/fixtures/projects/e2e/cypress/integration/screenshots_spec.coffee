@@ -239,3 +239,10 @@ describe "taking screenshots", ->
       throw new Error("after each hook failed")
 
     it "empty test 2", ->
+
+  context "really long test title #{Cypress._.repeat('a', 255)}", ->
+    it "takes a screenshot", ->
+      cy.screenshot()
+
+    it "takes another screenshot", ->
+      cy.screenshot()
