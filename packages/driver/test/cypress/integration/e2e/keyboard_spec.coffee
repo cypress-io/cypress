@@ -22,3 +22,22 @@ describe "keyboard", ->
             expect(e.ctrlKey).to.be.false
 
           cy.get("input").type("s")
+
+    it "handles charCodes, keyCodes, and which for keyup, keydown, and keypress", ->
+      cy.window().then (win) ->
+        win.$("input").one "keyup", (e) ->
+          expect(e.charCode).to.equal(0)
+          expect(e.which).to.equal(190)
+          expect(e.keyCode).to.equal(190)
+
+        win.$("input").one "keydown", (e) ->
+          expect(e.charCode).to.equal(0)
+          expect(e.which).to.equal(190)
+          expect(e.keyCode).to.equal(190)
+
+        win.$("input").one "keypress", (e) ->
+          expect(e.charCode).to.equal(46)
+          expect(e.which).to.equal(46)
+          expect(e.keyCode).to.equal(46)
+
+        cy.get("input").type(".")

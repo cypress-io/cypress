@@ -335,16 +335,19 @@ $Keyboard = {
       when "keydown", "keyup"
         charCodeAt = options.charCode ? @getCharCode(key.toUpperCase())
 
+        ## zero
         charCode = 0
+        ## browser keycode
         keyCode  = charCodeAt
         which    = charCodeAt
 
       when "keypress"
         charCodeAt = options.charCode ? @getCharCode(key)
 
-        charCode = charCodeAt
-        keyCode  = charCodeAt
-        which    = charCodeAt
+        ## ASCII code
+        charCode = key.charCodeAt(0)
+        keyCode  = key.charCodeAt(0)
+        which    = key.charCodeAt(0)
 
       when "textInput"
         charCode  = 0
