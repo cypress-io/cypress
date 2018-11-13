@@ -2,12 +2,14 @@ module.exports = {
   configs: {
     general: {
       env: {
-        commonjs: true
+        es6: true,
+        commonjs: true,
       },
       parserOptions: {
-        ecmaVersion: 6
+        ecmaVersion: 2018,
       },
       rules: {
+        'array-bracket-newline': ['error', 'consistent'],
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
         'arrow-spacing': 'error',
@@ -15,12 +17,12 @@ module.exports = {
         'brace-style': ['error', '1tbs', { allowSingleLine: true }],
         'comma-dangle': ['error', 'always-multiline'],
         'comma-spacing': 'error',
-        curly: ['error', 'multi-line', 'consistent'],
+        'curly': ['error', 'multi-line', 'consistent'],
         'constructor-super': 'error',
         'default-case': 'error',
         'eol-last': 'error',
-        eqeqeq: ['error', 'allow-null'],
-        indent: ['error', 2, { SwitchCase: 1, MemberExpression: 0 }],
+        'eqeqeq': ['error', 'allow-null'],
+        'indent': ['error', 2, { SwitchCase: 1, MemberExpression: 0 }],
         'key-spacing': 'error',
         'keyword-spacing': 'error',
         'no-case-declarations': 'error',
@@ -37,6 +39,7 @@ module.exports = {
         'no-dupe-args': 'error',
         'no-duplicate-case': 'error',
         'no-duplicate-imports': 'error',
+        'no-else-return': ['error', { 'allowElseIf': false }],
         'no-empty': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
@@ -64,6 +67,7 @@ module.exports = {
         'no-trailing-spaces': 'error',
         'no-undef': 'error',
         'no-unexpected-multiline': 'error',
+        'no-unneeded-ternary': 'error',
         'no-unreachable': 'error',
         'no-unused-labels': 'error',
         'no-unused-vars': 'error',
@@ -74,11 +78,51 @@ module.exports = {
         'object-curly-spacing': ['error', 'always'],
         'object-shorthand': 'error',
         'one-var': ['error', 'never'],
+        'padding-line-between-statements': [
+          'error',
+          {
+            'blankLine': 'always',
+            'prev': '*',
+            'next': 'return'
+          },
+          {
+            'blankLine': 'always',
+            'prev': [
+              'const',
+              'let',
+              'var',
+              'if',
+              'while',
+              'export',
+              'cjs-export',
+              'import',
+              'cjs-import'
+            ],
+            'next': '*'
+          },
+          {
+            'blankLine': 'any',
+            'prev': [
+              'const',
+              'let',
+              'var',
+              'import',
+              'cjs-import'
+            ],
+            'next': [
+              'const',
+              'let',
+              'var',
+              'import',
+              'cjs-import'
+            ]
+          }
+        ],
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
         'prefer-template': 'error',
-        quotes: ['error', 'single'],
-        semi: ['error', 'never'],
+        'quotes': ['error', 'single'],
+        'semi': ['error', 'never'],
         'semi-spacing': 'error',
         'space-before-blocks': 'error',
         'space-before-function-paren': 'error',
@@ -87,8 +131,8 @@ module.exports = {
         'space-unary-ops': 'error',
         'template-curly-spacing': 'error',
         'use-isnan': 'error',
-        'valid-typeof': 'error'
-      }
+        'valid-typeof': 'error',
+      },
     },
 
     tests: {
@@ -103,7 +147,7 @@ module.exports = {
         'mocha/handle-done-callback': 'error',
         'mocha/no-exclusive-tests': 'error',
         'mocha/no-global-tests': 'error'
-      }
+      },
     },
 
     react: {
@@ -112,11 +156,12 @@ module.exports = {
       },
       parser: 'babel-eslint',
       parserOptions: {
-        ecmaVersion: 6,
+        ecmaVersion: 2018,
         sourceType: 'module',
         ecmaFeatures: {
-          jsx: true
-        }
+          jsx: true,
+          legacyDecorators: true,
+        },
       },
       plugins: ['react'],
       rules: {
@@ -134,7 +179,7 @@ module.exports = {
         'react/prefer-es6-class': 'error',
         'react/react-in-jsx-scope': 'error',
         'react/require-render-return': 'error'
-      }
-    }
-  }
+      },
+    },
+  },
 }
