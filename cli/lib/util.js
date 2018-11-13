@@ -15,6 +15,7 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
+const compareVersions = require('compare-versions')
 
 const getosAsync = Promise.promisify(getos)
 
@@ -80,7 +81,7 @@ const util = {
   },
 
   getNode11WindowsFix () {
-    if (util.getNodeVersion() >= 'v11' && util.getPlatform() === 'win32') {
+    if (compareVersions(util.getNodeVersion(), 'v11') >= 0 && util.isPlatform('win32')) {
       return {
         windowsHide: false,
       }
@@ -95,10 +96,6 @@ const util = {
       DEBUG_COLORS: sc,
       MOCHA_COLORS: sc ? true : undefined,
     }
-  },
-
-  getPlatform () {
-    return process.platform
   },
 
   getNodeVersion () {

@@ -192,22 +192,34 @@ describe('util', () => {
       })
     })
 
-    it('returns windowsHide: false on windows environment with node 11', () => {
+    context('.windowsHide', () => {
+      it('is false on windows with node 11', () => {
+        os.platform.returns('win32')
+        sinon.stub(process, 'version').value('v11.0.0')
+        expect(util.getEnvOverrides().windowsHide).to.be.false
+      })
 
-      sinon.stub(util, 'getPlatform').returns('win32')
-      sinon.stub(util, 'getNodeVersion').returns('v11.0.0')
+      it('is false on windows with node > 11', () => {
+        os.platform.returns('win32')
+        sinon.stub(process, 'version').value('v12.0.0')
+        expect(util.getEnvOverrides().windowsHide).to.be.false
+      })
 
-      expect(util.getEnvOverrides().windowsHide).to.be.false
+      it('is undefined on windows with node < 11', () => {
+        os.platform.returns('win32')
+        sinon.stub(process, 'version').value('v8.0.0')
+        expect(util.getEnvOverrides().windowsHide).to.be.undefined
 
-      util.getPlatform.returns('win32')
-      util.getNodeVersion.returns('v10.0.0')
+        os.platform.returns('win32')
+        sinon.stub(process, 'version').value('v10.0.0')
+        expect(util.getEnvOverrides().windowsHide).to.be.undefined
+      })
 
-      expect('windowsHide' in util.getEnvOverrides()).to.be.false
-
-      util.getPlatform.returns('darvin')
-      util.getNodeVersion.returns('v11.0.0')
-
-      expect('windowsHide' in util.getEnvOverrides()).to.be.false
+      it('is undefined on non-windows with node 11', () => {
+        os.platform.returns('darwin')
+        sinon.stub(process, 'version').value('v11.0.0')
+        expect(util.getEnvOverrides().windowsHide).to.be.undefined
+      })
     })
   })
 
