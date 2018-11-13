@@ -655,6 +655,62 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
       """
+    when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+      """
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+      """
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+      """
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+      """
+      Parallelization is not included under your free plan.
+
+      Your plan is now in a grace period, which means your tests will still run in parallel until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests in parallel in the future.
+
+      #{arg1.link}
+      """
+    when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+      """
+      Parallelization is not included under your current billing plan.
+
+      To run your tests in parallel, please visit your billing and upgrade to another plan with parallelization.
+
+      #{arg1.link}
+      """
+    when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
+      """
+      Grouping is not included under your free plan.
+
+      Your plan is now in a grace period, which means your tests will still run with groups until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests with groups in the future.
+
+      #{arg1.link}
+      """
+    when "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+      """
+      Grouping is not included under your current billing plan.
+
+      To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
+
+      #{arg1.link}
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
@@ -664,8 +720,8 @@ get = (type, arg1, arg2) ->
   err.type = type
   err
 
-warning = (type, arg) ->
-  err = get(type, arg)
+warning = (type, arg1, arg2) ->
+  err = get(type, arg1, arg2)
   log(err, "magenta")
 
 throwErr = (type, arg1, arg2) ->

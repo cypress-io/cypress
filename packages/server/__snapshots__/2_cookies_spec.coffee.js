@@ -18,22 +18,26 @@ exports['e2e cookies passes 1'] = `
 
 
   cookies
-    ✓ can get all cookies
-    ✓ resets cookies between tests correctly
-    ✓ should be only two left now
-    ✓ sends cookies to localhost:2121
-    ✓ handles expired cookies
-    ✓ issue: #224 sets expired cookies between redirects
+    with whitelist
+      ✓ can get all cookies
+      ✓ resets cookies between tests correctly
+      ✓ should be only two left now
+      ✓ handles undefined cookies
+    without whitelist
+      ✓ sends cookies to localhost:2121
+      ✓ handles expired cookies secure
+      ✓ issue: #224 sets expired cookies between redirects
+      ✓ issue: #1321 failing to set or parse cookie
 
 
-  6 passing
+  8 passing
 
 
   (Results)
 
   ┌───────────────────────────────────┐
-  │ Tests:        6                   │
-  │ Passing:      6                   │
+  │ Tests:        8                   │
+  │ Passing:      8                   │
   │ Failing:      0                   │
   │ Pending:      0                   │
   │ Skipped:      0                   │
@@ -57,9 +61,9 @@ exports['e2e cookies passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cookies_spec.coffee                       XX:XX        6        6        -        -        - │
+  │ ✔ cookies_spec.coffee                       XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        6        6        -        -        -  
+    All specs passed!                           XX:XX        8        8        -        -        -  
 
 
 `

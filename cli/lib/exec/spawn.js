@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const os = require('os')
 const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
@@ -13,16 +12,12 @@ const { throwFormErrorText, errors } = require('../errors')
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
 
-function isPlatform (platform) {
-  return os.platform() === platform
-}
-
 function needsStderrPiped (needsXvfb) {
-  return isPlatform('darwin') || (needsXvfb && isPlatform('linux'))
+  return util.isPlatform('darwin') || (needsXvfb && util.isPlatform('linux'))
 }
 
 function needsEverythingPipedDirectly () {
-  return isPlatform('win32')
+  return util.isPlatform('win32')
 }
 
 function getStdio (needsXvfb) {
@@ -88,6 +83,7 @@ module.exports = {
         options.env = _.extend({}, options.env, overrides)
 
         const child = cp.spawn(executable, args, options)
+
         child.on('close', resolve)
         child.on('error', reject)
 
@@ -137,8 +133,9 @@ module.exports = {
       return xvfb.start()
       .then(userFriendlySpawn)
       .finally(xvfb.stop)
-    } else {
-      return userFriendlySpawn()
     }
+
+    return userFriendlySpawn()
+
   },
 }

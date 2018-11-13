@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-cond-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const moment = require('moment')
 const pluralize = require('pluralize')
 
@@ -33,7 +23,9 @@ const long = function (ms, alwaysIncludeSeconds = true) {
 
   let { mins, duration } = parse(ms)
 
-  if (mins += duration.minutes()) {
+  mins += duration.minutes()
+
+  if (mins) {
     word = pluralize('minute', mins)
     msg.push(`${mins} ${word}`)
   }
@@ -53,7 +45,9 @@ const short = function (ms) {
 
   let { mins, duration } = parse(ms)
 
-  if (mins += duration.minutes()) {
+  mins += duration.minutes()
+
+  if (mins) {
     msg.push(`${mins}m`)
   }
 

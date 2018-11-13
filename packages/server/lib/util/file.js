@@ -1,15 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const os = require('os')
 const md5 = require('md5')
@@ -76,7 +64,8 @@ class File {
     return this._lock()
     .then(() => {
       return fs.removeAsync(this.path)
-    }).finally(() => {
+    })
+    .finally(() => {
       debug('remove succeeded or failed for %s', this.path)
 
       return this._unlock()
@@ -91,23 +80,19 @@ class File {
         return this._getContents()
       })
 
-    return get.then((contents) => {
+    return get
+    .then((contents) => {
       if ((key == null)) {
         return contents
       }
 
       const value = _.get(contents, key)
 
-      if (value === undefined) {
-        return defaultValue
-      }
-
-      return value
-
+      return value === undefined ? defaultValue : value
     })
   }
 
-  _getContents (inTransaction) {
+  _getContents () {
     //# read from disk on first call, but resolve cache for any subsequent
     //# calls within the DEBOUNCE_LIMIT
     //# once the DEBOUNCE_LIMIT passes, read from disk again
@@ -115,13 +100,13 @@ class File {
     if ((Date.now() - this._lastRead) > DEBOUNCE_LIMIT) {
       this._lastRead = Date.now()
 
-      return this._read().then((contents) => {
+      return this._read()
+      .tap((contents) => {
         this._cache = contents
       })
     }
 
     return Promise.resolve(this._cache)
-
   }
 
   _read () {
@@ -130,7 +115,8 @@ class File {
       debug('read %s', this.path)
 
       return fs.readJsonAsync(this.path, 'utf8')
-    }).catch((err) => {
+    })
+    .catch((err) => {
       //# default to {} in certain cases, otherwise bubble up error
       if (
         (err.code === 'ENOENT') || //# file doesn't exist
@@ -142,7 +128,8 @@ class File {
 
       throw err
 
-    }).finally(() => {
+    })
+    .finally(() => {
       debug('read succeeded or failed for %s', this.path)
 
       return this._unlock()
@@ -166,7 +153,6 @@ class File {
       }
 
       return key
-
     })()
 
     if (inTransaction) {
@@ -176,13 +162,13 @@ class File {
     return this._addToQueue(() => {
       return this._setContents(valueObject)
     })
-
   }
 
   _setContents (valueObject) {
-    return this._getContents().then((contents) => {
+    return this._getContents()
+    .then((contents) => {
       _.each(valueObject, (value, key) => {
-        return _.set(contents, key, value)
+        _.set(contents, key, value)
       })
 
       this._cache = contents
@@ -204,7 +190,8 @@ class File {
       debug('write %s', this.path)
 
       return fs.outputJsonAsync(this.path, this._cache, { spaces: 2 })
-    }).finally(() => {
+    })
+    .finally(() => {
       debug('write succeeded or failed for %s', this.path)
 
       return this._unlock()
@@ -214,10 +201,13 @@ class File {
   _lock () {
     debug('attempt to get lock on %s', this.path)
 
-    return fs.ensureDirAsync(this._lockFileDir).then(() => {
+    return fs
+    .ensureDirAsync(this._lockFileDir)
+    .then(() => {
       //# polls every 100ms up to 2000ms to obtain lock, otherwise rejects
       return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
-    }).finally(() => {
+    })
+    .finally(() => {
       return debug('gettin lock succeeded or failed for %s', this.path)
     })
   }
@@ -225,7 +215,8 @@ class File {
   _unlock () {
     debug('attempt to unlock %s', this.path)
 
-    return lockFile.unlockAsync(this._lockFilePath)
+    return lockFile
+    .unlockAsync(this._lockFilePath)
     .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
     .catch(Promise.TimeoutError, () => {}) //# ignore timeouts
     .finally(() => {
