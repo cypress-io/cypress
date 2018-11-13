@@ -71,7 +71,7 @@ Object of webpack options. Just `require` in the options from your `webpack.conf
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.js?$/,
         exclude: [/node_modules/],
         use: [{
           loader: 'babel-loader',
