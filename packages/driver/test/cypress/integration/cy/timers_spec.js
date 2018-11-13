@@ -226,13 +226,13 @@ describe('driver/src/cy/timers', () => {
       ['object', {}],
     ]
 
-    codes.forEach((code) => {
-      it(code[0], () => {
+    codes.forEach(([name, value]) => {
+      it(name, () => {
         cy
         .window()
         .then((win) => {
           win.eval = cy.stub()
-          win.setTimeout(code[1], 1)
+          win.setTimeout(value, 1)
 
           cy
           .wait(10)
