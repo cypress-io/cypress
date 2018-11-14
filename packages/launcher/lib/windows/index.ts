@@ -83,6 +83,7 @@ function getWindowsBrowser(
       }
       // on Windows using "--version" seems to always start the full
       // browser, no matter what one does.
+      // @ts-ignore
       const args: [string] = [
         'datafile',
         'where',
