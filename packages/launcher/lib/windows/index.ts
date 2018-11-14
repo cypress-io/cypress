@@ -1,6 +1,6 @@
 import { log } from '../log'
 import { FoundBrowser, Browser, NotInstalledError } from '../types'
-import execa from 'execa'
+import * as execa from 'execa'
 import { normalize, join } from 'path'
 import { trim, tap } from 'ramda'
 import { pathExists } from 'fs-extra'
@@ -83,6 +83,7 @@ function getWindowsBrowser(
       }
       // on Windows using "--version" seems to always start the full
       // browser, no matter what one does.
+      // @ts-ignore
       const args: [string] = [
         'datafile',
         'where',

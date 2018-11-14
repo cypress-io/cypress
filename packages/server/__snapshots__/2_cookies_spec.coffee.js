@@ -22,6 +22,7 @@ exports['e2e cookies passes 1'] = `
       ✓ can get all cookies
       ✓ resets cookies between tests correctly
       ✓ should be only two left now
+      ✓ handles undefined cookies
     without whitelist
       ✓ sends cookies to localhost:2121
       ✓ handles expired cookies secure
@@ -29,14 +30,14 @@ exports['e2e cookies passes 1'] = `
       ✓ issue: #1321 failing to set or parse cookie
 
 
-  7 passing
+  8 passing
 
 
   (Results)
 
   ┌───────────────────────────────────┐
-  │ Tests:        7                   │
-  │ Passing:      7                   │
+  │ Tests:        8                   │
+  │ Passing:      8                   │
   │ Failing:      0                   │
   │ Pending:      0                   │
   │ Skipped:      0                   │
@@ -60,9 +61,9 @@ exports['e2e cookies passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cookies_spec.coffee                       XX:XX        7        7        -        -        - │
+  │ ✔ cookies_spec.coffee                       XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        7        7        -        -        -  
+    All specs passed!                           XX:XX        8        8        -        -        -  
 
 
 `

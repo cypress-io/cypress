@@ -74,6 +74,9 @@ describe "cookies", ->
     it "should be only two left now", ->
       cy.getCookies().should("have.length", 2)
 
+    it "handles undefined cookies", ->
+      cy.visit("http://localhost:2121/cookieWithNoName")
+
   context "without whitelist", ->
     before ->
       Cypress.Cookies.defaults({
