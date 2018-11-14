@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const minimatch = require('minimatch')
 const uri = require('./uri')
@@ -18,17 +8,14 @@ const matches = function (urlToCheck, blacklistHosts) {
 
   urlToCheck = uri.stripProtocolAndDefaultPorts(urlToCheck)
 
-  const matchUrl = (hostMatcher) =>
-  //# use minimatch against the url
-  //# to see if any match
-  {
+  // use minimatch against the url
+  // to see if any match
+  const matchUrl = (hostMatcher) => {
     return minimatch(urlToCheck, hostMatcher)
   }
 
-
   return _.find(blacklistHosts, matchUrl)
 }
-
 
 module.exports = {
   matches,
