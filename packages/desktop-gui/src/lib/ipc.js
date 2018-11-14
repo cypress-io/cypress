@@ -22,7 +22,9 @@ const register = (eventName, isPromiseApi = true) => {
     return ipcBus(eventName, ...args)
   }
   if (!isPromiseApi) {
-    ipc[_.camelCase(`off:${eventName}`)] = () => ipcBus.off(eventName)
+    ipc[_.camelCase(`off:${eventName}`)] = () => {
+      return ipcBus.off(eventName)
+    }
   }
 }
 
