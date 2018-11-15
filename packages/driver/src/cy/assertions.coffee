@@ -12,6 +12,8 @@ bTagOpen = /\*\*/g
 bTagClosed = /\*\*/g
 stackTracesRe = / at .*\n/gm
 
+IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
+
 functionHadArguments = (current) ->
   fn = current and current.get("args") and current.get("args")[0]
   fn and _.isFunction(fn) and fn.length > 0
@@ -27,9 +29,12 @@ isDomSubjectAndMatchesValue = (value, subject) ->
     ## no difference
     _.difference(els1, els2).length is 0
 
-  $dom.isDom(value) and
-    $dom.isDom(subject) and
-      allElsAreTheSame()
+  ## iterate through each dom type until we
+  ## find the function for this particular value
+  if isDomTypeFn = _.find(IS_DOM_TYPES, _.iteratee(value))
+    ## then check that subject also matches this
+    ## and that all the els are the same
+    return isDomTypeFn(subject) and allElsAreTheSame()
 
 ## Rules:
 ## 1. always remove value
