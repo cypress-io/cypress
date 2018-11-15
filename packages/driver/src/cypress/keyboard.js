@@ -883,13 +883,6 @@ const $Keyboard = {
     return this.specialCharsNative[chars].call(this, el, options)
   },
 
-  modifiers: {
-    alt: false,
-    ctrl: false,
-    meta: false,
-    shift: false,
-  },
-
   isModifier (chars) {
     return !!this.modifierChars[chars]
   },
