@@ -1629,10 +1629,10 @@ declare namespace Cypress {
   interface Withinable {
     /**
      * The subject of the within wrapper.
-     * 
+     *
      * @default depends on context, null if outside of within wrapper
      */
-    withinSubject: JQuery<HTMLElement> | null
+    withinSubject: JQuery | null
   }
 
   /**
