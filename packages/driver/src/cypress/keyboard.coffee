@@ -304,9 +304,13 @@ $Keyboard = {
           .resolve @typeKey(el, char, options)
           .delay(options.delay)
 
-  getCharCode: (key) ->
+  getKeyCode: (key) ->
     code = key.charCodeAt(0)
     @charCodeMap[code] ? code
+
+  getAsciiCode: (key) ->
+    code = key.charCodeAt(0)
+    return code
 
   expectedValueDoesNotMatchCurrentValue: (expected, rng) ->
     expected isnt rng.all()
@@ -333,18 +337,18 @@ $Keyboard = {
 
     switch eventType
       when "keydown", "keyup"
-        charCodeAt = options.charCode ? @getCharCode(key.toUpperCase())
+        keyCode = options.charCode ? @getKeyCode(key.toUpperCase())
 
         charCode = 0
-        keyCode  = charCodeAt
-        which    = charCodeAt
+        keyCode  = keyCode
+        which    = keyCode
 
       when "keypress"
-        charCodeAt = options.charCode ? @getCharCode(key)
+        asciiCode = options.charCode ? @getAsciiCode(key)
 
-        charCode = charCodeAt
-        keyCode  = charCodeAt
-        which    = charCodeAt
+        charCode = asciiCode
+        keyCode  = asciiCode
+        which    = asciiCode
 
       when "textInput"
         charCode  = 0
@@ -385,7 +389,7 @@ $Keyboard = {
         which: which
       }
 
-    args = [options.id, key, eventType, charCodeAt]
+    args = [options.id, key, eventType, which]
 
     ## give the driver a chance to bail on this event
     ## if we return false here
