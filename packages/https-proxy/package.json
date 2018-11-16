@@ -36,7 +36,7 @@
     "bluebird": "^3.4.0",
     "debug": "^2.6.8",
     "fs-extra": "^0.30.0",
-    "lodash": "^4.17.4",
+    "lodash": "4.17.11",
     "node-forge": "^0.6.39",
     "semaphore": "^1.0.5",
     "server-destroy-vvo": "1.0.1",
