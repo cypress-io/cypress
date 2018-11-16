@@ -43,6 +43,16 @@ module.exports = {
 
     return item
 
+  switchCase: (value, casesObj, defaultKey = "default") ->
+    if _.has(casesObj, value)
+      return casesObj[value]
+
+    if _.has(casesObj, defaultKey)
+      return casesObj[defaultKey]
+
+    keys = _.keys(casesObj)
+    throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
+
   appendErrMsg: (err, message) ->
     ## preserve stack
     ## this is the critical part
