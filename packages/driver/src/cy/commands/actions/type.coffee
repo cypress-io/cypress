@@ -413,18 +413,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             args: { word, node }
           }
 
-        cy.now("type", $el, "{selectall}{del}", {
-          $el: $el
-          log: false
-          verify: false ## handle verification ourselves
-          _log: options._log
-          force: options.force
-          timeout: options.timeout
-          interval: options.interval
-        }).then ->
+        if ["date", "month", "time", "week"].includes($el.attr("type"))
+          $el.val("")
           options._log.snapshot().end() if options._log
+        else
+          cy.now("type", $el, "{selectall}{del}", {
+            $el: $el
+            log: false
+            verify: false ## handle verification ourselves
+            _log: options._log
+            force: options.force
+            timeout: options.timeout
+            interval: options.interval
+          }).then ->
+            options._log.snapshot().end() if options._log
 
-          return null
+            return null
 
       Promise
       .resolve(subject.toArray())
