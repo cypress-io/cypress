@@ -1,8 +1,13 @@
+$jquery = require("./jquery")
+
 docNode = Node.DOCUMENT_NODE
 
 isDocument = (obj) ->
   try
-    !!((obj and obj.nodeType is docNode) or (obj and obj[0] and obj[0].nodeType is docNode))
+    if $jquery.isJquery(obj)
+      obj = obj[0]
+
+    Boolean(obj and obj.nodeType is docNode)
   catch
     false
 
