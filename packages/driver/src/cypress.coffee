@@ -378,8 +378,8 @@ class $Cypress
       when "cy:command:queue:end"
         @emit("command:queue:end")
 
-      when "cy:url:changed"
-        @emit("url:changed", args[0])
+      when "cy:page:url:changed"
+        @emit("page:url:changed", args[0])
 
       when "cy:next:subject:prepared"
         @emit("next:subject:prepared", args...)

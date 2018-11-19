@@ -82,7 +82,7 @@ navigationChanged = (Cypress, cy, state, source, arg) ->
   return if url is previousUrl
 
   ## else notify the world and log this event
-  Cypress.action("cy:url:changed", url)
+  Cypress.action("cy:page:url:changed", url)
 
   urls.push(url)
 

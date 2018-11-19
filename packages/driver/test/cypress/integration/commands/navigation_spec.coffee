@@ -1699,7 +1699,7 @@ describe "src/cy/commands/navigation", ->
 
         null
 
-  context "#url:changed", ->
+  context "#page:url:changed", ->
     beforeEach ->
       @logs = []
 
@@ -1712,8 +1712,8 @@ describe "src/cy/commands/navigation", ->
       return null
 
     describe "page navigation", ->
-      it "emits url:changed event on initial visit", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed event on initial visit", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1721,12 +1721,12 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledOnce
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
-      it "emits url:changed on 2nd visit to different page", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed on 2nd visit to different page", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1735,17 +1735,17 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledTwice
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/jquery.html"
             )
 
-      it "does not emit url:changed twice on visit to the same page", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "does not emit page:url:changed twice on visit to the same page", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1754,18 +1754,18 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledOnce
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
-      it "does not log url:changed event on visit", ->
+      it "does not log page:url:changed event on visit", ->
         cy
           .visit("/fixtures/generic.html")
           .then ->
             expect(@lastLog).not.to.exist
 
-      it "emits url:changed event on page navigation", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed event on page navigation", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1774,16 +1774,16 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledTwice
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/dimensions.html"
             )
 
-      it "logs url:changed event on page navigation", ->
+      it "logs page:url:changed event on page navigation", ->
         cy
           .visit("/fixtures/generic.html")
           .get("#dimensions").click()
@@ -1801,7 +1801,7 @@ describe "src/cy/commands/navigation", ->
             })
 
     describe "hashchange events", ->
-      it "emits url:changed event", ->
+      it "emits page:url:changed event", ->
         emit = cy.spy(Cypress, "emit").log(false)
 
         cy
@@ -1809,12 +1809,12 @@ describe "src/cy/commands/navigation", ->
           .get("#hashchange").click()
           .then ->
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html#hashchange"
             )
 
-      it "emits url:changed event as navigation events occur", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed event as navigation events occur", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
         .visit("/fixtures/generic.html")
@@ -1833,22 +1833,22 @@ describe "src/cy/commands/navigation", ->
             expect(emit.callCount).to.eq(4)
 
             expect(emit.firstCall).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit.secondCall).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html#hashchange"
             )
 
             expect(emit.thirdCall).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit.getCall(3)).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html#hashchange"
             )
 
@@ -1877,7 +1877,7 @@ describe "src/cy/commands/navigation", ->
                 "Args": ohc
               })
 
-      it "logs url:changed event as navigation events occur", ->
+      it "logs page:url:changed event as navigation events occur", ->
         cy
         .visit("/fixtures/generic.html")
         .get("#hashchange").click()
@@ -1907,7 +1907,7 @@ describe "src/cy/commands/navigation", ->
           )
 
     describe "history.pushState", ->
-      it "emits url:changed event", ->
+      it "emits page:url:changed event", ->
         emit = cy.spy(Cypress, "emit").log(false)
 
         cy
@@ -1916,7 +1916,7 @@ describe "src/cy/commands/navigation", ->
             win.history.pushState({foo: "bar"}, null, "pushState.html")
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/pushState.html"
             )
 
@@ -1944,7 +1944,7 @@ describe "src/cy/commands/navigation", ->
             })
 
     describe "history.replaceState", ->
-      it "emits url:changed event", ->
+      it "emits page:url:changed event", ->
         emit = cy.spy(Cypress, "emit").log(false)
 
         cy
@@ -1953,7 +1953,7 @@ describe "src/cy/commands/navigation", ->
             win.history.replaceState({foo: "bar"}, null, "replaceState.html")
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/replaceState.html"
             )
 

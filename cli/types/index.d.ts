@@ -3708,7 +3708,7 @@ declare namespace Cypress {
      * Fires whenever Cypress detects that your application's URL has changed.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'url:changed', fn: (url: string) => void): void
+    (action: 'page:url:changed', fn: (url: string) => void): void
     /**
      * Fires when the test has failed. It is technically possible to prevent the test from actually failing by binding to this event and invoking an async `done` callback. However this is **strongly discouraged**. Tests should never legitimately fail. This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events

@@ -119,7 +119,7 @@ paused | Cypress | Runner | when pausing is being requested
 
 Event | From | To | Description
 --- | --- | --- | ---
-url:changed | Cypress | Anyone | when aut app url is changed
+page:url:changed | Cypress | Anyone | when aut app url is changed
 page:loading | Cypress | Anyone | when aut app is currently loading a page
 viewport | Cypress | Anyone | when viewport has changed
 

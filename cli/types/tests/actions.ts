@@ -27,7 +27,7 @@ Cypress.on('page:end', (event) => {
   event // $ExpectType Event
 })
 
-Cypress.on('url:changed', (url) => {
+Cypress.on('page:url:changed', (url) => {
   url // $ExpectType string
 })
 
