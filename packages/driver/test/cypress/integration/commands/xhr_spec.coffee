@@ -1850,11 +1850,11 @@ describe "src/cy/commands/xhr", ->
         _.each xhrs, (xhr) ->
           expect(xhr.aborted).to.be.true
 
-  context "Cypress.on(before:window:load)", ->
+  context "Cypress.on(page:start)", ->
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe
-      ## causing an onBeforeLoad event
+      ## causing an onStart event
       cy
         .server()
         .route(/foo/, {foo: "bar"}).as("getFoo")
@@ -1878,7 +1878,7 @@ describe "src/cy/commands/xhr", ->
     it "reapplies server + route automatically during page transitions", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe
-      ## causing an onBeforeLoad event
+      ## causing an onStart event
       cy
         .server()
         .route(/foo/, {foo: "bar"}).as("getFoo")

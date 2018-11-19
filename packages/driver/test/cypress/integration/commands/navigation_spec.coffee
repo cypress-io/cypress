@@ -461,11 +461,11 @@ describe "src/cy/commands/navigation", ->
           done()
       })
 
-    it "invokes onBeforeLoad callback with cy context", (done) ->
+    it "invokes onStart callback with cy context", (done) ->
       ctx = @
 
       cy.visit("/fixtures/jquery.html", {
-        onBeforeLoad: (contentWindow) ->
+        onStart: (contentWindow) ->
           thisValue = @ is ctx
 
           expect(thisValue).be.true
@@ -474,7 +474,7 @@ describe "src/cy/commands/navigation", ->
           done()
       })
 
-    it "does not error without an onBeforeLoad callback", ->
+    it "does not error without an onStart callback", ->
       cy.visit("/fixtures/jquery.html").then ->
         prev = cy.state("current").get("prev")
         expect(prev.get("args")).to.have.length(1)
@@ -901,6 +901,29 @@ describe "src/cy/commands/navigation", ->
           done()
 
         cy.visit()
+
+      it "throws when onBeforeLoad callback is used", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq """
+            The 'onBeforeLoad' callback for cy.visit() has been renamed to 'onStart'.
+
+            Please change:
+
+              cy.visit({
+                onBeforeLoad () {}
+              })
+
+            to:
+
+              cy.visit({
+                onStart () {}
+              })
+          """
+          done()
+
+        cy.visit("/fixtures/dom.html", {
+          onBeforeLoad: ->
+        })
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
         cy.on "fail", (err) =>
@@ -1546,7 +1569,7 @@ describe "src/cy/commands/navigation", ->
 
       cy
         .visit("/timeout?ms=10", {
-          onBeforeLoad: ->
+          onStart: ->
             expect(emit).to.be.calledOnce
             expect(emit.firstCall).to.be.calledWith("page:loading", true)
         })

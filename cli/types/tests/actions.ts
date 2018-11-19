@@ -11,7 +11,7 @@ Cypress.on('page:alert', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('before:window:load', (win) => {
+Cypress.on('page:start', (win) => {
   win // $ExpectType Window
 })
 

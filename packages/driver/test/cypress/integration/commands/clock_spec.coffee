@@ -152,7 +152,7 @@ describe "src/cy/commands/clock", ->
           }
         }
         cy.clock(null, ["setTimeout"]).then (clock) =>
-          Cypress.emit("before:window:load", newWindow)
+          Cypress.emit("page:start", newWindow)
           onSetTimeout = cy.spy()
           newWindow.setTimeout(onSetTimeout)
           clock.tick()

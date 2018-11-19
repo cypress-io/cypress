@@ -1984,7 +1984,7 @@ declare namespace Cypress {
      *
      * @param {Window} contentWindow the remote page's window object
      */
-    onBeforeLoad(win: Window): void
+    onStart(win: Window): void
 
     /**
      * Called once your page has fired its load event.
@@ -3685,10 +3685,10 @@ declare namespace Cypress {
      */
     (action: 'page:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
     /**
-     * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
+     * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onStart` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'before:window:load', fn: (win: Window) => void): void
+    (action: 'page:start', fn: (win: Window) => void): void
     /**
      * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onLoad` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events

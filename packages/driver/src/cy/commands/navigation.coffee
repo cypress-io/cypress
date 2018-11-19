@@ -284,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  Cypress.on "before:window:load", (contentWindow) ->
+  Cypress.on "page:start", (contentWindow) ->
     ## TODO: just use a closure here
     current = state("current")
 
@@ -295,7 +295,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     return if not runnable
 
     options = _.last(current.get("args"))
-    options?.onBeforeLoad?.call(runnable.ctx, contentWindow)
+    options?.onStart?.call(runnable.ctx, contentWindow)
 
   Commands.addAll({
     reload: (args...) ->
@@ -459,12 +459,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
+      if options.onBeforeLoad
+        $utils.throwErrByPath("visit.renamed_callback", {
+          args: {
+            oldName: "onBeforeLoad"
+            newName: "onStart"
+          }
+        })
+
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
         log: true
         timeout: config("pageLoadTimeout")
-        onBeforeLoad: ->
+        onStart: ->
         onLoad: ->
       })
 

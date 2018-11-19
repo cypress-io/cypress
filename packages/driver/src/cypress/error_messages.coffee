@@ -214,14 +214,14 @@ module.exports = {
     non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: '{{subject}}'"
 
   events:
-    renamed_event: """The '{{oldEvent}}' event has been renamed to '{{newEvent}}'. 
-    
+    renamed_event: """The '{{oldEvent}}' event has been renamed to '{{newEvent}}'.
+
       Please change:
-    
+
         {{object}}.{{method}}('{{oldEvent}}', <handler>)
-      
+
       to:
-      
+
         {{object}}.{{method}}('{{newEvent}}', <handler>)
     """
 
@@ -945,6 +945,21 @@ module.exports = {
         However, you can likely use #{cmd('request')} instead of #{cmd('visit')}.
 
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
+      """
+    renamed_callback: """
+      The '{{oldName}}' callback for #{cmd('visit')} has been renamed to '{{newName}}'.
+
+      Please change:
+
+        cy.visit({
+          {{oldName}} () {}
+        })
+
+      to:
+
+        cy.visit({
+          {{newName}} () {}
+        })
       """
 
   wait:

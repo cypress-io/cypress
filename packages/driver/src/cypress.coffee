@@ -405,10 +405,10 @@ class $Cypress
       when "app:page:loading"
         @emit("page:loading", args[0])
 
-      when "app:before:window:load"
+      when "app:page:start"
         @cy.onBeforeAppWindowLoad(args[0])
 
-        @emit("before:window:load", args[0])
+        @emit("page:start", args[0])
 
       when "app:navigation:changed"
         @emit("navigation:changed", args...)

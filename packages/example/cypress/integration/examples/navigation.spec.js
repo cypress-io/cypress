@@ -43,7 +43,7 @@ context('Navigation', () => {
     // Pass options to the visit
     cy.visit('https://example.cypress.io/commands/navigation', {
       timeout: 50000, // increase total time for the visit to resolve
-      onBeforeLoad (contentWindow) {
+      onStart (contentWindow) {
         // contentWindow is the remote page's window object
         expect(typeof contentWindow === 'object').to.be.true
       },

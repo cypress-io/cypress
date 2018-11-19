@@ -7,7 +7,7 @@ describe "events", ->
       "test:before:run:async": "before:test:run:async"
       "test:after:run": "after:test:run"
       "command:queue:before:end": "before:command:queue:end"
-      "window:before:load": "before:window:load"
+      "window:before:load": "page:start"
       "window:before:unload": "before:window:unload"
       "window:alert": "page:alert"
       "window:confirm": "page:confirm"
