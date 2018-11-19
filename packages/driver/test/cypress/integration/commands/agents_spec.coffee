@@ -301,7 +301,7 @@ describe "src/cy/commands/agents", ->
       it "resets unique name counter on restore", ->
         expect(@agentLogs[0].get("name")).to.eq("stub-1")
 
-        Cypress.emit("before:test:run", {})
+        Cypress.emit("test:run:start", {})
 
         cy.stub()
 

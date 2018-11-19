@@ -13,18 +13,18 @@ exports['e2e plugins sends driver events 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: plugin_driver_events_spec.coffee...                                             (1 of 1) 
+
+  Running: plugin_driver_events_spec.coffee...                                             (1 of 1)
 
 
-before:test:run: fails to get
-An error was thrown in your background file while executing the handler for the 'before:test:run' event.
+test:run:start: fails to get
+An error was thrown in your background file while executing the handler for the 'test:run:start' event.
 
 This error is being ignored because the event cannot affect the results of the run.
 
 The error we received was:
 
-Error: Error thrown synchronously from "before:test:run". Should be ignored.
+Error: Error thrown synchronously from "test:run:start". Should be ignored.
     at stack trace line
     at stack trace line
     at stack trace line
@@ -138,11 +138,11 @@ Error: Error thrown in promise from "test:after:run". Should be ignored.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ plugin_driver_events_spec.coffee          XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -
 
 
 `

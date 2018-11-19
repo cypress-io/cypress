@@ -68,7 +68,7 @@ Cypress.on('log:changed', (log, interactive: boolean) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('before:test:run', (attributes , test) => {
+Cypress.on('test:run:start', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })

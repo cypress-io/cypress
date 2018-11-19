@@ -21,7 +21,7 @@ clearLocalStorage = (state, keys) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   ## this MUST be prepended before anything else
-  Cypress.prependListener "before:test:run", ->
+  Cypress.prependListener "test:run:start", ->
     try
       ## this may fail if the current
       ## window is bound to another origin

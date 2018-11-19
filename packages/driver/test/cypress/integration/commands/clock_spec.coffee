@@ -55,7 +55,7 @@ describe "src/cy/commands/clock", ->
       cy.clock().then (clock) ->
         r = cy.spy(clock, "restore")
 
-        Cypress.emit("before:test:run", {})
+        Cypress.emit("test:run:start", {})
 
         expect(r).to.be.called
 
@@ -195,7 +195,7 @@ describe "src/cy/commands/clock", ->
 
       it "does not log when auto-restored", (done) ->
         cy.clock().then =>
-          Cypress.emit("before:test:run", {})
+          Cypress.emit("test:run:start", {})
           expect(@logs.length).to.equal(1)
           done()
 

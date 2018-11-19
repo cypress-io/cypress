@@ -112,8 +112,8 @@ module.exports = {
 
   throwOnRenamedEvent: (eventEmitter, name) ->
     renamedEvents = {
-      "test:before:run": "before:test:run"
-      "test:before:run:async": "before:test:run:async"
+      "test:before:run": "test:run:start"
+      "test:before:run:async": "test:run:start:async"
       "test:after:run": "after:test:run"
       "command:queue:before:end": "before:command:queue:end"
       "window:before:load": "page:start"
