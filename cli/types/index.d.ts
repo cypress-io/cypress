@@ -1569,6 +1569,16 @@ declare namespace Cypress {
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
+     * Yield the element passed into `.wrap()` to the next command in the Cypress chain.
+     *
+     * @see https://on.cypress.io/wrap
+     * @example
+     *    cy.wrap(new Promise((resolve, reject) => {
+     *      setTimeout(resolve, 1000);
+     *    }).then(result => {})
+     */
+    wrap<F extends Promise<S>, S>(promise: F, options?: Partial<Loggable & Timeoutable>): Chainable<S>
+    /**
      * Yields whatever is passed into `.wrap()` to the next command in the Cypress chain.
      *
      * @see https://on.cypress.io/wrap
