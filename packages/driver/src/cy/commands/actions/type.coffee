@@ -413,7 +413,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             args: { word, node }
           }
 
-        if ["date", "month", "time", "week"].includes($el.attr("type"))
+        if $dom.isType($el, ["date", "month", "time", "week"])
           $el.val("")
           options._log.snapshot().end() if options._log
         else
