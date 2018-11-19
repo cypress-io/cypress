@@ -3723,7 +3723,7 @@ declare namespace Cypress {
      * Fires whenever **Cypress** is scrolling your application. This event is fired when Cypress is {% url 'waiting for and calculating actionability' interacting-with-elements %}. It will scroll to 'uncover' elements currently being covered. This event is extremely useful to debug why Cypress may think an element is not interactive.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'scrolled', fn: ($el: JQuery) => void): void
+    (action: 'internal:scrolled', fn: ($el: JQuery) => void): void
     /**
      * Fires when a cy command is first invoked and enqueued to be run later. Useful for debugging purposes if you're confused about the order in which commands will execute.
      * @see https://on.cypress.io/catalog-of-events#App-Events

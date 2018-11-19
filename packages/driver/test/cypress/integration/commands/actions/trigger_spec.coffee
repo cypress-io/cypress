@@ -165,7 +165,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "does not scroll when being forced", ->
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy
@@ -187,7 +187,7 @@ describe "src/cy/commands/actions/trigger", ->
         retried = false
         tapped = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.on "command:retry", ($el, type) ->
@@ -218,7 +218,7 @@ describe "src/cy/commands/actions/trigger", ->
         scrolled = []
         retried = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.on "command:retry", _.after 3, ->
@@ -271,7 +271,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").trigger("mouseover").then ->
@@ -305,7 +305,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").trigger("mouseover").then ->
@@ -359,7 +359,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").trigger("mouseover").then ->

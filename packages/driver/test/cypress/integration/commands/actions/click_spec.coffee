@@ -426,7 +426,7 @@ describe "src/cy/commands/actions/click", ->
       it "does not scroll when being forced", ->
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy
@@ -437,7 +437,7 @@ describe "src/cy/commands/actions/click", ->
       it "does not scroll when position sticky and display flex", ->
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.viewport(1000, 660)
@@ -544,7 +544,7 @@ describe "src/cy/commands/actions/click", ->
         retried = false
         clicked = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.on "command:retry", ($el, type) ->
@@ -575,7 +575,7 @@ describe "src/cy/commands/actions/click", ->
         scrolled = []
         retried = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.on "command:retry", _.after 3, ->
@@ -608,7 +608,7 @@ describe "src/cy/commands/actions/click", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -642,7 +642,7 @@ describe "src/cy/commands/actions/click", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -696,7 +696,7 @@ describe "src/cy/commands/actions/click", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->

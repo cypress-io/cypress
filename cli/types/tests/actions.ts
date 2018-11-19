@@ -40,7 +40,7 @@ Cypress.on('viewport:changed', (viewport) => {
   viewport // $ExpectType Viewport
 })
 
-Cypress.on('scrolled', ($el) => {
+Cypress.on('internal:scrolled', ($el) => {
   $el // $ExpectType JQuery<HTMLElement>
 })
 

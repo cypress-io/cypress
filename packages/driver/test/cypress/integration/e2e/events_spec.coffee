@@ -13,6 +13,7 @@ describe "events", ->
       "window:confirm": "page:confirm"
       "window:unload": "page:end"
       "runnable:after:run:async": "after:runnable:run:async"
+      "scrolled": "internal:scrolled"
       "url:changed": "page:url:changed"
     }
     methods = "addListener on once prependListener prependOnceListener".split(" ")

@@ -388,7 +388,7 @@ class $Cypress
         @emitThen("collect:run:state")
 
       when "cy:scrolled"
-        @emit("scrolled", args...)
+        @emit("internal:scrolled", args...)
 
       when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)
