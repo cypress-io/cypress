@@ -393,8 +393,8 @@ class $Cypress
       when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)
 
-      when "app:window:alert"
-        @emit("window:alert", args[0])
+      when "app:page:alert"
+        @emit("page:alert", args[0])
 
       when "app:window:confirm"
         @emitMap("window:confirm", args[0])

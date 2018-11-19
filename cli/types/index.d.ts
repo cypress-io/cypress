@@ -3624,7 +3624,7 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
-  // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
+  // for just a few events like "page:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
   /**
@@ -3650,7 +3650,7 @@ declare namespace Cypress {
      * // stub "window.alert" in a single test
      * it('shows alert', () => {
      *    const stub = cy.stub()
-     *    cy.on('window:alert', stub)
+     *    cy.on('page:alert', stub)
      *    // trigger application code that calls alert(...)
      *    .then(() => {
      *      expect(stub).to.have.been.calledOnce
@@ -3675,7 +3675,7 @@ declare namespace Cypress {
      * Cypress will auto accept alerts. You cannot change this behavior.
      * @example
      *    const stub = cy.stub()
-     *    cy.on('window:alert', stub)
+     *    cy.on('page:alert', stub)
      *    // assume the button calls window.alert()
      *    cy.get('.my-button').click()
      *    .then(() => {
@@ -3683,7 +3683,7 @@ declare namespace Cypress {
      *    })
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
+    (action: 'page:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events

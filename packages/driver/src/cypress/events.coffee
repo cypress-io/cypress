@@ -118,11 +118,12 @@ module.exports = {
       "command:queue:before:end": "before:command:queue:end"
       "window:before:load": "before:window:load"
       "window:before:unload": "before:window:unload"
+      "window:alert": "page:alert"
       "runnable:after:run:async": "after:runnable:run:async"
     }
 
     methods = "addListener on once prependListener prependOnceListener".split(" ")
-    
+
     _.each methods, (method) ->
       eventEmitter[method] = _.wrap eventEmitter[method], (original, eventName, listener) ->
         if renamedEvents[eventName]

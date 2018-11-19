@@ -9,6 +9,7 @@ describe "events", ->
       "command:queue:before:end": "before:command:queue:end"
       "window:before:load": "before:window:load"
       "window:before:unload": "before:window:unload"
+      "window:alert": "page:alert"
       "runnable:after:run:async": "after:runnable:run:async"
     }
     methods = "addListener on once prependListener prependOnceListener".split(" ")

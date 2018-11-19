@@ -26,7 +26,7 @@ windowConfirmed = (Cypress, str, ret) ->
   })
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "window:alert", (str) ->
+  Cypress.on "page:alert", (str) ->
     windowAlert(Cypress, str)
 
   Cypress.on "window:confirmed", (str, ret) ->

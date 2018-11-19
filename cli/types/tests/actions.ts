@@ -7,7 +7,7 @@ Cypress.on('window:confirm', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('window:alert', (text) => {
+Cypress.on('page:alert', (text) => {
   text // $ExpectType string
 })
 
