@@ -804,6 +804,93 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
+    describe "create run 402 - free plan exceeds monthly private tests", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          payload: {
+            used: 600
+            limit: 500
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when on free plan and over recorded runs limit", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - parallel feature not available in plan", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+          payload: {
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when attempting parallel run when not available in plan", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - grouping feature not available in plan", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+          payload: {
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when attempting parallel run when not available in plan", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - unknown error", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          error: "Something went wrong"
+        })
+      }])
+
+      it "errors and exits when there's an unknown 402 error", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
     describe "create instance", ->
       routes = [
         {
@@ -1072,3 +1159,128 @@ describe "e2e record", ->
             "PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout"
             "POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances"
           ])
+
+  describe "api interaction warnings", ->
+
+    describe "create run warnings", ->
+      describe "grace period - over limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+              limit: 500
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over private test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - parallel feature", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when using parallel feature", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - grouping feature", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when using parallel feature", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "paid plan - over limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over private test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })

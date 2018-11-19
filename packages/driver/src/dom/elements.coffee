@@ -238,7 +238,10 @@ isSvg = (el) ->
 
 isElement = (obj) ->
   try
-    !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
+    if $jquery.isJquery(obj)
+      obj = obj[0]
+
+    Boolean(obj and _.isElement(obj))
   catch
     false
 

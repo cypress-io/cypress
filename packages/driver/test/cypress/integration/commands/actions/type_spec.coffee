@@ -1119,11 +1119,11 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
 
-        it "fires keypress event with 219 charCode", (done) ->
+        it "fires keypress event with 123 charCode", (done) ->
           cy.$$(":text:first").on "keypress", (e) ->
-            expect(e.charCode).to.eq 219
-            expect(e.which).to.eq 219
-            expect(e.keyCode).to.eq 219
+            expect(e.charCode).to.eq 123
+            expect(e.which).to.eq 123
+            expect(e.keyCode).to.eq 123
             done()
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
