@@ -109,7 +109,7 @@ describe "xhrs", ->
         .get("#create").click()
         .then ->
           ## simulate an open request which should become
-          ## aborted due to window:unload event
-          Cypress.action("app:window:unload", {})
+          ## aborted due to page:end event
+          Cypress.action("app:page:end", {})
 
         .wait("@createUser").its("aborted").should("be.true")

@@ -1835,7 +1835,7 @@ describe "src/cy/commands/xhr", ->
       _.each xhrs, (xhr) ->
         expect(xhr.aborted).not.to.be.false
 
-  context "Cypress.on(window:unload)", ->
+  context "Cypress.on(page:end)", ->
     it "aborts all open XHR's", ->
       xhrs = []
 

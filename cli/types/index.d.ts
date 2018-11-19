@@ -3703,7 +3703,7 @@ declare namespace Cypress {
      * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:unload', fn: (event: Event) => void): void
+    (action: 'page:end', fn: (event: Event) => void): void
     /**
      * Fires whenever Cypress detects that your application's URL has changed.
      * @see https://on.cypress.io/catalog-of-events#App-Events

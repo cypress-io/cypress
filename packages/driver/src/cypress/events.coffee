@@ -120,6 +120,7 @@ module.exports = {
       "window:before:unload": "before:window:unload"
       "window:alert": "page:alert"
       "window:confirm": "page:confirm"
+      "window:unload": "page:end"
       "runnable:after:run:async": "after:runnable:run:async"
     }
 

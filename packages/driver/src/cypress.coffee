@@ -422,8 +422,8 @@ class $Cypress
       when "app:before:window:unload"
         @emit("before:window:unload", args[0])
 
-      when "app:window:unload"
-        @emit("window:unload", args[0])
+      when "app:page:end"
+        @emit("page:end", args[0])
 
       when "spec:script:error"
         @emit("script:error", args...)

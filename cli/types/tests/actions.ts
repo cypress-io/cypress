@@ -23,7 +23,7 @@ Cypress.on('before:window:unload', (event) => {
   event // $ExpectType BeforeUnloadEvent
 })
 
-Cypress.on('window:unload', (event) => {
+Cypress.on('page:end', (event) => {
   event // $ExpectType Event
 })
 

@@ -125,7 +125,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## doesnt trigger a confirmation dialog
         return undefined
       onUnload: (e) ->
-        Cypress.action("app:window:unload", e)
+        Cypress.action("app:page:end", e)
       onNavigation: (args...) ->
         Cypress.action("app:navigation:changed", args...)
       onAlert: (str) ->

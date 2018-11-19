@@ -83,7 +83,7 @@ describe "src/cy/commands/navigation", ->
 
       cy.on("stability:changed", stub1)
       cy.on("before:window:unload", stub2)
-      cy.on("window:unload", stub3)
+      cy.on("page:end", stub3)
 
       cy.reload().then ->
         expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
@@ -270,7 +270,7 @@ describe "src/cy/commands/navigation", ->
         .then ->
           cy.on("stability:changed", stub1)
           cy.on("before:window:unload", stub2)
-          cy.on("window:unload", stub3)
+          cy.on("page:end", stub3)
         .go("back").then ->
           expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
           expect(stub1.secondCall).to.be.calledWith(true, "load")
@@ -1328,7 +1328,7 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/form.html")
         .then ->
-          cy.once "window:unload", ->
+          cy.once "page:end", ->
             expect(cy.state("onPageLoadErr")).to.be.a("function")
 
           null
@@ -1561,7 +1561,7 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/generic.html")
         .then ->
-          cy.once "window:unload", ->
+          cy.once "page:end", ->
             expected = true
             expect(emit.callCount).to.eq(3)
             expect(emit.thirdCall).to.be.calledWith("page:loading", true)
