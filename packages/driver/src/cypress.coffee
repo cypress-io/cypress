@@ -416,8 +416,8 @@ class $Cypress
       when "app:form:submitted"
         @emit("form:submitted", args[0])
 
-      when "app:window:load"
-        @emit("window:load", args[0])
+      when "app:page:ready"
+        @emit("page:ready", args[0])
 
       when "app:before:window:unload"
         @emit("before:window:unload", args[0])

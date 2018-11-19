@@ -60,7 +60,7 @@ cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
 
 aboutBlank = (win) ->
   new Promise (resolve) ->
-    cy.once("window:load", resolve)
+    cy.once("page:ready", resolve)
 
     $utils.locHref("about:blank", win)
 
@@ -211,7 +211,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   loading = ->
     new Promise (resolve, reject) ->
-      cy.once "window:load", ->
+      cy.once "page:ready", ->
         cy.state("onPageLoadErr", null)
 
         options._log.set("message", "--page loaded--").snapshot().end()
@@ -349,11 +349,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cleanup = ->
             knownCommandCausedInstability = false
 
-            cy.removeListener("window:load", resolve)
+            cy.removeListener("page:ready", resolve)
 
           knownCommandCausedInstability = true
 
-          cy.once("window:load", resolve)
+          cy.once("page:ready", resolve)
 
           $utils.locReload(forceReload, state("window"))
 
@@ -400,10 +400,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             didLoad = new Promise (resolve) ->
               cleanup = ->
-                cy.removeListener("window:load", resolve)
+                cy.removeListener("page:ready", resolve)
                 cy.removeListener("before:window:unload", beforeUnload)
 
-              cy.once("window:load", resolve)
+              cy.once("page:ready", resolve)
 
             knownCommandCausedInstability = true
 
@@ -467,13 +467,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           }
         })
 
+      if options.onLoad
+        $utils.throwErrByPath("visit.renamed_callback", {
+          args: {
+            oldName: "onLoad"
+            newName: "onReady"
+          }
+        })
+
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
         log: true
         timeout: config("pageLoadTimeout")
         onStart: ->
-        onLoad: ->
+        onReady: ->
       })
 
       consoleProps = {}
@@ -527,11 +535,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ->
+      onReady = ->
         ## reset window on load
         win = state("window")
 
-        options.onLoad?.call(runnable.ctx, win)
+        options.onReady?.call(runnable.ctx, win)
 
         options._log.set({url: url}) if options._log
 
@@ -569,11 +577,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## if all that is changing is the hash then we know
         ## the browser won't actually make a new http request
-        ## for this, and so we need to resolve onLoad immediately
+        ## for this, and so we need to resolve onReady immediately
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
           return changeIframeSrc(remote.href, "hashchange")
-          .then(onLoad)
+          .then(onReady)
 
         if existingHash
           ## strip out the existing hash if we have one
@@ -619,8 +627,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             url = $Location.fullyQualifyUrl(url)
 
-            changeIframeSrc(url, "window:load")
-            .then(onLoad)
+            changeIframeSrc(url, "page:ready")
+            .then(onReady)
           else
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop

@@ -15,7 +15,7 @@ Cypress.on('page:start', (win) => {
   win // $ExpectType Window
 })
 
-Cypress.on('window:load', (win) => {
+Cypress.on('page:ready', (win) => {
   win // $ExpectType Window
 })
 

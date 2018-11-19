@@ -1851,7 +1851,7 @@ describe "src/cy/commands/xhr", ->
           expect(xhr.aborted).to.be.true
 
   context "Cypress.on(page:start)", ->
-    it "reapplies server + route automatically before window:load", ->
+    it "reapplies server + route automatically before page:ready", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe
       ## causing an onStart event

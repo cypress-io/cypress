@@ -1991,7 +1991,7 @@ declare namespace Cypress {
      *
      * @param {Window} contentWindow the remote page's window object
      */
-    onLoad(win: Window): void
+    onReady(win: Window): void
 
     /**
      * Whether to fail on response codes other than 2xx and 3xx
@@ -3690,10 +3690,10 @@ declare namespace Cypress {
      */
     (action: 'page:start', fn: (win: Window) => void): void
     /**
-     * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onLoad` callback.
+     * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onReady` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:load', fn: (win: Window) => void): void
+    (action: 'page:ready', fn: (win: Window) => void): void
     /**
      * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
      * @see https://on.cypress.io/catalog-of-events#App-Events

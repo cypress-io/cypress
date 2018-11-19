@@ -684,7 +684,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## about:blank in a visit, we do need these
           contentWindowListeners(getContentWindow($autIframe))
 
-          Cypress.action("app:window:load", state("window"))
+          Cypress.action("app:page:ready", state("window"))
 
           ## we are now stable again which is purposefully
           ## the last event we call here, to give our event

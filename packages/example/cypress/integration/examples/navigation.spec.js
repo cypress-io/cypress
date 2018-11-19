@@ -47,7 +47,7 @@ context('Navigation', () => {
         // contentWindow is the remote page's window object
         expect(typeof contentWindow === 'object').to.be.true
       },
-      onLoad (contentWindow) {
+      onReady (contentWindow) {
         // contentWindow is the remote page's window object
         expect(typeof contentWindow === 'object').to.be.true
       },

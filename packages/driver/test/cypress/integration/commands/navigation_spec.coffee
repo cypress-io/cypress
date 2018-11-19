@@ -57,15 +57,15 @@ describe "src/cy/commands/navigation", ->
 
             expect(win).to.eq(cy.state("window"))
 
-    it "removes window:load listeners", ->
-      listeners = cy.listeners("window:load")
+    it "removes page:ready listeners", ->
+      listeners = cy.listeners("page:ready")
 
-      winLoad = cy.spy(cy, "once").withArgs("window:load")
+      winLoad = cy.spy(cy, "once").withArgs("page:ready")
 
       cy.reload().then ->
         expect(winLoad).to.be.calledOnce
 
-        expect(cy.listeners("window:load")).to.deep.eq(listeners)
+        expect(cy.listeners("page:ready")).to.deep.eq(listeners)
 
     ## TODO: fix this
     it.skip "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
@@ -160,7 +160,7 @@ describe "src/cy/commands/navigation", ->
             ## while we're still unstable, which will result in
             ## properties on the window being inaccessible
             ## since we only visit once at the beginning of these tests
-            cy.on "window:load", ->
+            cy.on "page:ready", ->
               expect(expected).to.be.true
               done()
 
@@ -245,19 +245,19 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/jquery.html")
         .then ->
-          winLoadListeners = cy.listeners("window:load")
+          winLoadListeners = cy.listeners("page:ready")
           beforeWinUnloadListeners = cy.listeners("before:window:unload")
 
           cyOn = cy.spy(cy, "once")
 
-          winLoad = cyOn.withArgs("window:load")
+          winLoad = cyOn.withArgs("page:ready")
           beforeWinUnload = cyOn.withArgs("before:window:unload")
 
           cy.go("back").then ->
             expect(winLoad).to.be.calledOnce
             expect(beforeWinUnload).to.be.calledOnce
 
-            expect(cy.listeners("window:load")).to.deep.eq(winLoadListeners)
+            expect(cy.listeners("page:ready")).to.deep.eq(winLoadListeners)
             expect(cy.listeners("before:window:unload")).to.deep.eq(beforeWinUnloadListeners)
 
     it "fires stability:changed and window events events", ->
@@ -334,7 +334,7 @@ describe "src/cy/commands/navigation", ->
             ## while we're still unstable, which will result in
             ## properties on the window being inaccessible
             ## since we only visit once at the beginning of these tests
-            cy.on "window:load", ->
+            cy.on "page:ready", ->
               expect(expected).to.be.true
               done()
 
@@ -423,16 +423,16 @@ describe "src/cy/commands/navigation", ->
       cy.visit("/fixtures/jquery.html").then ->
         expect(timeout).to.be.calledWith(4567)
 
-    it "removes window:load listeners", ->
-      listeners = cy.listeners("window:load")
+    it "removes page:ready listeners", ->
+      listeners = cy.listeners("page:ready")
 
-      winLoad = cy.spy(cy, "once").withArgs("window:load")
+      winLoad = cy.spy(cy, "once").withArgs("page:ready")
 
       cy.visit("/fixtures/generic.html").then ->
         ## once for about:blank, once for $iframe src
         expect(winLoad).to.be.calledTwice
 
-        expect(cy.listeners("window:load")).to.deep.eq(listeners)
+        expect(cy.listeners("page:ready")).to.deep.eq(listeners)
 
     it "can visit pages on the same originPolicy", ->
       cy
@@ -449,11 +449,11 @@ describe "src/cy/commands/navigation", ->
         src = cy.state("$autIframe").attr("src")
         expect(src).to.eq "http://localhost:3500/fixtures/jquery.html"
 
-    it "invokes onLoad callback", (done) ->
+    it "invokes onReady callback", (done) ->
       ctx = @
 
       cy.visit("/fixtures/jquery.html", {
-        onLoad: (contentWindow) ->
+        onReady: (contentWindow) ->
           thisValue = @ is ctx
 
           expect(thisValue).be.true
@@ -539,7 +539,7 @@ describe "src/cy/commands/navigation", ->
         count = 0
         urls = []
 
-        cy.on "window:load", ->
+        cy.on "page:ready", ->
           urls.push cy.state("window").location.href
 
           count += 1
@@ -923,6 +923,29 @@ describe "src/cy/commands/navigation", ->
 
         cy.visit("/fixtures/dom.html", {
           onBeforeLoad: ->
+        })
+
+      it "throws when onLoad callback is used", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq """
+            The 'onLoad' callback for cy.visit() has been renamed to 'onReady'.
+
+            Please change:
+
+              cy.visit({
+                onLoad () {}
+              })
+
+            to:
+
+              cy.visit({
+                onReady () {}
+              })
+          """
+          done()
+
+        cy.visit("/fixtures/dom.html", {
+          onLoad: ->
         })
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
@@ -1356,7 +1379,7 @@ describe "src/cy/commands/navigation", ->
 
           null
         .get("a:first").click().then ->
-          listeners = cy.listeners("window:load")
+          listeners = cy.listeners("page:ready")
 
           ## everything should have unbound properly
           expect(listeners.length).to.eq(0)
@@ -1661,7 +1684,7 @@ describe "src/cy/commands/navigation", ->
       cy
       .visit("/fixtures/generic.html")
       .then (win) ->
-        cy.on "window:load", ->
+        cy.on "page:ready", ->
           cy.on "command:queue:end", ->
             done()
 
