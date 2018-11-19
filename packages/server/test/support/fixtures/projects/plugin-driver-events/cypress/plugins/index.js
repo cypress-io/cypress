@@ -28,8 +28,8 @@ module.exports = (on) => {
     console.log('command:end:', command.name, command.args.join(', '))
   })
 
-  on('after:test:run', (test) => {
-    console.log('after:test:run:', test.title)
+  on('test:run:end', (test) => {
+    console.log('test:run:end:', test.title)
 
     return Promise.reject(new Error('Error thrown in promise from "test:after:run". Should be ignored.'))
   })

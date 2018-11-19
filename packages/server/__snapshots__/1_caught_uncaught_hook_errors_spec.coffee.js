@@ -13,8 +13,8 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: hook_caught_error_failing_spec.coffee...                                        (1 of 1) 
+
+  Running: hook_caught_error_failing_spec.coffee...                                        (1 of 1)
 
 
   ✓ t1a
@@ -33,7 +33,7 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
     3) "before all" hook for "t10a"
 
   s5a
-    ✓ fires all after:test:run events
+    ✓ fires all test:run:end events
 
 
   5 passing
@@ -106,11 +106,11 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ hook_caught_error_failing_spec.coffee     XX:XX       11        5        3        -        3 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       11        5        3        -        3  
+    1 of 1 failed (100%)                        XX:XX       11        5        3        -        3
 
 
 `
@@ -130,8 +130,8 @@ exports['e2e caught and uncaught hooks errors failing2 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: hook_uncaught_error_failing_spec.coffee...                                      (1 of 1) 
+
+  Running: hook_uncaught_error_failing_spec.coffee...                                      (1 of 1)
 
 
   ✓ t1b
@@ -195,11 +195,11 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ hook_uncaught_error_failing_spec.cof…     XX:XX        7        4        1        -        2 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        7        4        1        -        2  
+    1 of 1 failed (100%)                        XX:XX        7        4        1        -        2
 
 
 `
@@ -219,8 +219,8 @@ exports['e2e caught and uncaught hooks errors failing3 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: hook_uncaught_root_error_failing_spec.coffee...                                 (1 of 1) 
+
+  Running: hook_uncaught_root_error_failing_spec.coffee...                                 (1 of 1)
 
 
   1) "before each" hook for "t1c"
@@ -276,11 +276,11 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ hook_uncaught_root_error_failing_spe…     XX:XX        4        -        1        -        3 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        4        -        1        -        3  
+    1 of 1 failed (100%)                        XX:XX        4        -        1        -        3
 
 
 `
@@ -300,8 +300,8 @@ exports['e2e caught and uncaught hooks errors failing4 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: hook_uncaught_error_events_failing_spec.coffee...                               (1 of 1) 
+
+  Running: hook_uncaught_error_events_failing_spec.coffee...                               (1 of 1)
 
 
   uncaught hook error should continue to fire all mocha events
@@ -363,11 +363,11 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ hook_uncaught_error_events_failing_s…     XX:XX        3        2        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        3        2        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        3        2        1        -        -
 
 
 `

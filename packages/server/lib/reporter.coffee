@@ -124,7 +124,7 @@ events = {
   "pass":      mergeRunnable("pass")
   "pending":   mergeRunnable("pending")
   "fail":      mergeErr
-  "after:test:run": mergeRunnable("after:test:run") ## our own custom event
+  "test:run:end": mergeRunnable("test:run:end") ## our own custom event
 }
 
 reporters = {

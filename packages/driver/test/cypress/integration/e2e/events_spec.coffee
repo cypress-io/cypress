@@ -5,7 +5,7 @@ describe "events", ->
     renamedEvents = {
       "test:before:run": "test:run:start"
       "test:before:run:async": "test:run:start:async"
-      "test:after:run": "after:test:run"
+      "test:after:run": "test:run:end"
       "command:queue:before:end": "before:command:queue:end"
       "window:before:load": "page:start"
       "window:before:unload": "before:window:unload"

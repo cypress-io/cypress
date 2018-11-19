@@ -51,7 +51,7 @@ export default {
       runnablesStore.runnableStarted(runnable)
     }))
 
-    runner.on('after:test:run', action('after:test:run', (runnable) => {
+    runner.on('test:run:end', action('test:run:end', (runnable) => {
       runnablesStore.runnableFinished(runnable)
       statsStore.incrementCount(runnable.state)
     }))

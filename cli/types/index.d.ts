@@ -3763,7 +3763,7 @@ declare namespace Cypress {
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'after:test:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'test:run:end', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
   }
 
   // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS

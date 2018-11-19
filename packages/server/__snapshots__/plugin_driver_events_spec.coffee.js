@@ -50,7 +50,7 @@ command:end: log you had logs?
 command:start: get #non-existent
 command:retry: get expected '#non-existent' to exist in the DOM
   1) fails to get
-after:test:run: fails to get
+test:run:end: fails to get
 
 Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
