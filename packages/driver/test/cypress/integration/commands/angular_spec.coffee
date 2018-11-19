@@ -27,14 +27,14 @@ describe "src/cy/commands/angular", ->
         it "throws when cannot find angular", (done) ->
           delete cy.state("window").angular
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 
           cy.ng("binding", "phone")
 
         it "throws when binding cannot be found", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Could not find element for binding: 'not-found'."
             done()
 
@@ -48,7 +48,7 @@ describe "src/cy/commands/angular", ->
 
           cy.on "command:retry", retry
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             done(err)
 
           cy.on "stop", =>
@@ -101,7 +101,7 @@ describe "src/cy/commands/angular", ->
           cy.state("window").angular = @angular
 
         it "throws when repeater cannot be found", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Could not find element for repeater: 'not-found'.  Searched [ng-repeat*='not-found'], [ng_repeat*='not-found'], [data-ng-repeat*='not-found'], [x-ng-repeat*='not-found']."
             done()
 
@@ -115,7 +115,7 @@ describe "src/cy/commands/angular", ->
 
           cy.on "command:retry", retry
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             done(err)
 
           cy.on "stop", =>
@@ -131,7 +131,7 @@ describe "src/cy/commands/angular", ->
         it "throws when cannot find angular", (done) ->
           delete cy.state("window").angular
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 
@@ -216,7 +216,7 @@ describe "src/cy/commands/angular", ->
         it "throws when model cannot be found", (done) ->
           cy.ng("model", "not-found")
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Could not find element for model: 'not-found'.  Searched [ng-model='not-found'], [ng_model='not-found'], [data-ng-model='not-found'], [x-ng-model='not-found']."
             done()
 
@@ -228,7 +228,7 @@ describe "src/cy/commands/angular", ->
 
           cy.on "command:retry", retry
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             done(err)
 
           cy.on "stop", =>
@@ -244,7 +244,7 @@ describe "src/cy/commands/angular", ->
         it "throws when cannot find angular", (done) ->
           delete cy.state("window").angular
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 

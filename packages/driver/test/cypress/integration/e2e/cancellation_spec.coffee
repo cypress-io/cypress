@@ -48,7 +48,7 @@ describe "cancelling command queues", ->
 
     calledAfterFailure = false
 
-    cy.on "fail", ->
+    cy.on "test:fail", ->
       Promise
       .delay(50)
       .then ->

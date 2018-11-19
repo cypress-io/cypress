@@ -349,7 +349,7 @@ describe "src/cy/commands/agents", ->
             expect(@lastLog.get("message")).to.include("expected foo to have been called with arguments {g: 1}, Array[5], Object{6}")
 
           it "does not include stack with calls when assertion fails", (done) ->
-            cy.on "fail", =>
+            cy.on "test:fail", =>
               expect(@lastLog.get("message")).to.include("""
                 #{"    "}foo("str", 5, true) => "return value"
                 #{"    "}foo(null, undefined, [1, 2, 3]) => "return value"

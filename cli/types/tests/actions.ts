@@ -31,7 +31,7 @@ Cypress.on('page:url:changed', (url) => {
   url // $ExpectType string
 })
 
-Cypress.on('fail', (error, mocha) => {
+Cypress.on('test:fail', (error, mocha) => {
   error // $ExpectType Error
   mocha // $ExpectType IRunnable
 })

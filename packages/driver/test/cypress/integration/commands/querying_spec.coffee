@@ -143,7 +143,7 @@ describe "src/cy/commands/querying", ->
         button.get(0).focus()
         button.get(0).blur()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find element: 'focused', but never found it."
           done()
 
@@ -152,7 +152,7 @@ describe "src/cy/commands/querying", ->
       it "fails waiting for the focused element not to exist", (done) ->
         cy.$$("input:first").focus()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "Expected <input#input> not to exist in the DOM, but it was continuously found."
           done()
 
@@ -161,7 +161,7 @@ describe "src/cy/commands/querying", ->
       it "eventually fails the assertion", (done) ->
         cy.$$("input:first").focus()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -175,7 +175,7 @@ describe "src/cy/commands/querying", ->
         cy.focused().should("have.class", "focused")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -322,7 +322,7 @@ describe "src/cy/commands/querying", ->
         return null
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -332,13 +332,13 @@ describe "src/cy/commands/querying", ->
         cy.noop().within ->
 
       it "throws when not a DOM subject", (done) ->
-        cy.on "fail", (err) -> done()
+        cy.on "test:fail", (err) -> done()
 
         cy.noop().within ->
 
       _.each ["", [], {}, 1, null, undefined], (value) =>
         it "throws if passed anything other than a function, such as: #{value}", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "cy.within() must be called with a function."
             done()
 
@@ -348,7 +348,7 @@ describe "src/cy/commands/querying", ->
         cy.on "command:end", =>
           cy.$$("#list").remove()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.within() failed because this element"
           done()
 
@@ -999,7 +999,7 @@ describe "src/cy/commands/querying", ->
         return null
 
       it "throws once when incorrect sizzle selector", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq 1
           done()
 
@@ -1008,7 +1008,7 @@ describe "src/cy/commands/querying", ->
       it "throws on too many elements after timing out waiting for length", (done) ->
         buttons = cy.$$("button")
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Too many elements found. Found '#{buttons.length}', expected '#{buttons.length - 1}'."
           done()
 
@@ -1017,28 +1017,28 @@ describe "src/cy/commands/querying", ->
       it "throws on too few elements after timing out waiting for length", (done) ->
         buttons = cy.$$("button")
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Not enough elements found. Found '#{buttons.length}', expected '#{buttons.length + 1}'."
           done()
 
         cy.get("button").should("have.length", buttons.length + 1)
 
       it "throws after timing out not finding element", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
           done()
 
         cy.get("#missing-el")
 
       it "throws after timing out not finding element when should exist", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
           done()
 
         cy.get("#missing-el").should("exist")
 
       it "throws existence error without running assertions", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
           done()
 
@@ -1047,7 +1047,7 @@ describe "src/cy/commands/querying", ->
       it "throws when using an alias that does not exist"
 
       it "throws after timing out after a .wait() alias reference", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find element: 'getJsonButton', but never found it."
           done()
 
@@ -1067,21 +1067,21 @@ describe "src/cy/commands/querying", ->
           .get("getJsonButton")
 
       it "throws after timing out while not trying to find an element", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected <div#dom> not to exist in the DOM, but it was continuously found."
           done()
 
         cy.get("div:first").should("not.exist")
 
       it "throws after timing out while trying to find an invisible element", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "expected '<div#dom>' not to be 'visible'"
           done()
 
         cy.get("div:first").should("not.be.visible")
 
       it "does not include message about why element was not visible", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).not.to.include "why this element is not visible"
           done()
 
@@ -1090,7 +1090,7 @@ describe "src/cy/commands/querying", ->
       it "throws after timing out trying to find a visible element", (done) ->
         cy.$$("#button").hide()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "expected '<button#button>' to be 'visible'"
           done()
 
@@ -1099,14 +1099,14 @@ describe "src/cy/commands/querying", ->
       it "includes a message about why the element was not visible", (done) ->
         cy.$$("#button").hide()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "element '<button#button>' is not visible because"
           done()
 
         cy.get("#button").should("be.visible")
 
       it "sets error command state", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(lastLog.get("state")).to.eq "failed"
@@ -1116,7 +1116,7 @@ describe "src/cy/commands/querying", ->
         cy.get("foobar")
 
       it "throws when alias property is '0'", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @getUsers.1"
           done()
 
@@ -1126,7 +1126,7 @@ describe "src/cy/commands/querying", ->
           .get("@getUsers.0")
 
       it "throws when alias property isnt just a digit", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "'1b' is not a valid alias property. Only 'numbers' or 'all' is permitted."
           done()
 
@@ -1136,7 +1136,7 @@ describe "src/cy/commands/querying", ->
           .get("@getUsers.1b")
 
       it "throws when alias property isnt a digit or 'all'", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "'all ' is not a valid alias property. Only 'numbers' or 'all' is permitted."
           done()
 
@@ -1148,7 +1148,7 @@ describe "src/cy/commands/querying", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button").hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(lastLog.get("state")).to.eq("failed")
@@ -1490,60 +1490,60 @@ describe "src/cy/commands/querying", ->
 
       _.each [undefined, null], (val) ->
         it "throws when text is #{val}", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.eq("cy.contains() can only accept a string, number or regular expression.")
             done()
 
           cy.contains(val)
 
       it "throws on a blank string", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.contains() cannot be passed an empty string."
           done()
 
         cy.contains("")
 
       it "logs once on error", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           done()
 
         cy.contains(undefined)
 
       it "throws when passed a subject not an element", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
         cy.wrap("foo").contains("bar")
 
       it "throws when there is no filter and no subject", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find content: 'brand new content' but never did."
           done()
 
         cy.contains("brand new content")
 
       it "throws when there is a filter", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find content: 'brand new content' within the selector: 'span' but never did."
           done()
 
         cy.contains("span", "brand new content")
 
       it "throws when there is no filter but there is a subject", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find content: '0' within the element: <div.badge> but never did."
           done()
 
         cy.get("#edge-case-contains").find(".badge").contains(0)
 
       it "throws when there is both a subject and a filter", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected to find content: 'foo' within the element: <div#edge-case-contains> and with the selector: 'ul' but never did."
           done()
 
         cy.get("#edge-case-contains").contains("ul", "foo")
 
       it "throws after timing out while not trying to find an element that contains content", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "Expected not to find content: 'button' but continuously found it."
           done()
 
@@ -1552,7 +1552,7 @@ describe "src/cy/commands/querying", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button")
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@lastLog.get("state")).to.eq("failed")
           expect(@lastLog.get("error")).to.eq err
           expect(@lastLog.get("$el").get(0)).to.eq button.get(0)
@@ -1564,7 +1564,7 @@ describe "src/cy/commands/querying", ->
         cy.contains("button").should("not.exist")
 
       it "throws when assertion is have.length > 1", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq 1
           expect(err.message).to.eq "cy.contains() cannot be passed a length option because it will only ever return 1 element."
           done()
@@ -1576,7 +1576,7 @@ describe "src/cy/commands/querying", ->
 
         cyNow = cy.now
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("Syntax error, unrecognized expression")
           expect(Cypress.$Cypress.$.expr[":"].contains).to.eq(contains)
           done()

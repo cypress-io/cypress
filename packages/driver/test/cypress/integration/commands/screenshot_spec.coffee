@@ -610,7 +610,7 @@ describe "src/cy/commands/screenshot", ->
             @logs.push(log)
 
         @assertErrorMessage = (message, done) =>
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@lastLog.get("error").message).to.eq(message)
             done()
 
@@ -668,7 +668,7 @@ describe "src/cy/commands/screenshot", ->
 
         Cypress.automation.withArgs("take:screenshot").rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -683,7 +683,7 @@ describe "src/cy/commands/screenshot", ->
       it "throws after timing out", (done) ->
         Cypress.automation.withArgs("take:screenshot").resolves(Promise.delay(1000))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)

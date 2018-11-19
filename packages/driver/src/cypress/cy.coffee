@@ -554,8 +554,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## 1. callback with state("done") when async
     ## 2. throw the error for the promise chain
     try
-      ## collect all of the callbacks for 'fail'
-      rets = Cypress.action("cy:fail", err, state("runnable"))
+      ## collect all of the callbacks for 'test:fail'
+      rets = Cypress.action("cy:test:fail", err, state("runnable"))
     catch err2
       ## and if any of these throw synchronously immediately error
       finish(err2)

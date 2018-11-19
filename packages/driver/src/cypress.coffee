@@ -337,9 +337,9 @@ class $Cypress
 
         @emit("log:changed", args...)
 
-      when "cy:fail"
+      when "cy:test:fail"
         ## comes from cypress errors fail()
-        @emitMap("fail", args...)
+        @emitMap("test:fail", args...)
 
       when "cy:stability:changed"
         @emit("stability:changed", args...)

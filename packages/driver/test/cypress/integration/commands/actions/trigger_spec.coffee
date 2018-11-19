@@ -601,21 +601,21 @@ describe "src/cy/commands/actions/trigger", ->
         return null
 
       it "throws when eventName is not a string", ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 15 elements."
           done()
 
         cy.get("button:first").trigger("cy.trigger() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.trigger("mouseover")
 
       it "throws when attempting to trigger multiple elements", (done) ->
         num = cy.$$("button").length
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained #{num} elements."
           done()
 
@@ -629,7 +629,7 @@ describe "src/cy/commands/actions/trigger", ->
           checkbox.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(mouseover).to.eq 1
           expect(err.message).to.include "cy.trigger() failed because this element"
           done()
@@ -637,7 +637,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get(":checkbox:first").trigger("mouseover").trigger("mouseover")
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -649,7 +649,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "throws when the subject isnt visible", (done) ->
         $btn = cy.$$("#button:first").hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -662,7 +662,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "throws when subject is disabled", (done) ->
         $btn = cy.$$("#button").prop("disabled", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## get + click logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("cy.trigger() failed because this element is disabled:\n")
@@ -671,7 +671,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get("#button").trigger("mouseover")
 
       it "throws when provided invalid position", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()
@@ -687,7 +687,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.$$("button:first").on "tap", ->
           clicks += 1
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.trigger() could not be issued because this element is currently animating:\n")
           done()
@@ -695,7 +695,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get("button:first").trigger("tap")
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -709,7 +709,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get("button:first").trigger("mouseover").should("have.class", "moused-over")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 

@@ -188,7 +188,7 @@ describe "driver/src/cypress/cy", ->
             expect(arr).to.deep.eq([null, "baz2"])
 
       it "fails when calling child command before parent", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("Oops, it looks like you are trying to call a child command before running a parent command")
           expect(err.message).to.include("cy.c()")
           done()
@@ -200,7 +200,7 @@ describe "driver/src/cypress/cy", ->
         cy.$$("button:first").click ->
           $(@).remove()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.parent() failed because this element is detached from the DOM.")
           expect(err.message).to.include('<button id="button">button</button>')
           expect(err.message).to.include("> cy.click()")
@@ -209,7 +209,7 @@ describe "driver/src/cypress/cy", ->
         cy.get("button:first").click().parent()
 
       it "fails when previous subject isnt window", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.winOnly() failed because it requires the subject be a global 'window' object.")
           expect(err.message).to.include("{foo: bar}")
           expect(err.message).to.include("> cy.wrap()")
@@ -218,7 +218,7 @@ describe "driver/src/cypress/cy", ->
         cy.wrap({foo: 'bar'}).winOnly()
 
       it "fails when previous subject isnt document", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.docOnly() failed because it requires the subject be a global 'document' object.")
           expect(err.message).to.include("[1, 2, 3]")
           expect(err.message).to.include("> cy.wrap()")
@@ -229,7 +229,7 @@ describe "driver/src/cypress/cy", ->
       it "fails when previous subject isnt an element or window", (done) ->
         firstPassed = false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(firstPassed).to.be.true
           expect(err.message).to.include("cy.elWinOnly() failed because it requires a DOM element.")
           expect(err.message).to.include("string")

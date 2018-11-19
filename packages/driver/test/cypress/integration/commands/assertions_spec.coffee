@@ -224,14 +224,14 @@ describe "src/cy/commands/assertions", ->
         cy.get("button").should("have.length", ""+length)
 
       it "throws when should('have.length') isnt a number", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "You must provide a valid number to a length assertion. You passed: 'asdf'"
           done()
 
         cy.get("button").should("have.length", "asdf")
 
       it "does not log extra commands on fail and properly fails command + assertions", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(6)
 
           expect(@logs[3].get("name")).to.eq("get")
@@ -249,7 +249,7 @@ describe "src/cy/commands/assertions", ->
           .get("button").should("have.length", "asdf")
 
       it "finishes failed assertions and does not log extra commands when cy.contains fails", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
 
           expect(@logs[0].get("name")).to.eq("contains")
@@ -293,28 +293,28 @@ describe "src/cy/commands/assertions", ->
         Cypress.config("defaultCommandTimeout", 50)
 
       it "should not be true", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "expected false to be true"
           done()
 
         cy.noop(false).should("be.true")
 
       it "throws err when not available chainable", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "The chainer: 'dee' was not found. Could not build assertion."
           done()
 
         cy.noop({}).should("dee.eq", {})
 
       it "throws err when ends with a non available chainable", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "The chainer: 'eq2' was not found. Could not build assertion."
           done()
 
         cy.noop({}).should("deep.eq2", {})
 
       it "logs 'should' when non available chainer", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -329,7 +329,7 @@ describe "src/cy/commands/assertions", ->
         cy.get("div:first").should("not.contain2", "does-not-exist-foo-bar")
 
       it "throws when eventually times out", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "Timed out retrying: expected '<button>' to have class 'does-not-have-class'"
           done()
 
@@ -339,7 +339,7 @@ describe "src/cy/commands/assertions", ->
         cy.$$("button:first").click ->
           $(@).addClass("foo").remove()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           names = _.invokeMap(@logs, "get", "name")
 
           ## the 'should' is not here because based on
@@ -360,7 +360,7 @@ describe "src/cy/commands/assertions", ->
         cy.on "command:retry", _.after 2, _.once ->
           button.addClass("foo").remove()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           names = _.invokeMap(@logs, "get", "name")
 
           ## should is present here due to the retry
@@ -374,7 +374,7 @@ describe "src/cy/commands/assertions", ->
       it "throws when should('have.length') isnt a number", (done) ->
         ## we specifically turn off logging have.length validation errors
         ## because the assertion will already be logged
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(3)
@@ -390,7 +390,7 @@ describe "src/cy/commands/assertions", ->
         cy.get("button").should("have.length", "foo")
 
       it "eventually.have.length is deprecated", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -406,7 +406,7 @@ describe "src/cy/commands/assertions", ->
         cy.get("div:first").should("eventually.have.length", 1)
 
       it "does not additionally log when .should is the current command", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -422,7 +422,7 @@ describe "src/cy/commands/assertions", ->
         cy.noop({}).should("deep.eq2", {})
 
       it "logs and immediately fails on custom match assertions", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -438,14 +438,14 @@ describe "src/cy/commands/assertions", ->
         cy.wrap("foo").should("match", "foo")
 
       it "does not log ensureElExistence errors", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           done()
 
         cy.get("#does-not-exist")
 
       it "throws if used as a parent command", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.include("looks like you are trying to call a child command before running a parent command")
 
@@ -485,7 +485,7 @@ describe "src/cy/commands/assertions", ->
       return null
 
     it "does not output should logs on failures", (done) ->
-      cy.on "fail", =>
+      cy.on "test:fail", =>
         length = @logs.length
 
         expect(length).to.eq(1)
@@ -772,7 +772,7 @@ describe "src/cy/commands/assertions", ->
         expect(fn).to.throw("'match' requires its argument be a 'RegExp'. You passed: 'foo'")
 
       it "throws with cy.should", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "'match' requires its argument be a 'RegExp'. You passed: 'bar'"
           done()
 
@@ -866,7 +866,7 @@ describe "src/cy/commands/assertions", ->
         expect(@logs.length).to.eq(8)
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.be.ok
           expect(err.message).to.include("> data")
@@ -900,7 +900,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected 'foo' to have class 'bar'"
@@ -950,7 +950,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected [] to have id 'foo'"
@@ -994,7 +994,7 @@ describe "src/cy/commands/assertions", ->
           )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected null to have HTML 'foo'"
@@ -1038,7 +1038,7 @@ describe "src/cy/commands/assertions", ->
           )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected undefined to have text 'foo'"
@@ -1082,7 +1082,7 @@ describe "src/cy/commands/assertions", ->
           )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to have value 'foo'"
@@ -1117,7 +1117,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to have descendants 'foo'"
@@ -1173,7 +1173,7 @@ describe "src/cy/commands/assertions", ->
           )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to be 'visible'"
@@ -1223,7 +1223,7 @@ describe "src/cy/commands/assertions", ->
           expect(l6.get("error").message).to.eq("expected '<div>' to be 'hidden'")
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to be 'hidden'"
@@ -1261,7 +1261,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to be 'selected'"
@@ -1299,7 +1299,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to be 'checked'"
@@ -1337,7 +1337,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to be 'enabled'"
@@ -1375,7 +1375,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to be 'disabled'"
@@ -1625,7 +1625,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to have attribute 'foo'"
@@ -1718,7 +1718,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to have property 'foo'"
@@ -1780,7 +1780,7 @@ describe "src/cy/commands/assertions", ->
         )
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.eq(
             "expected {} to have CSS property 'foo'"

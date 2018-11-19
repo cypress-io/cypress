@@ -113,28 +113,28 @@ describe "src/cy/commands/navigation", ->
         return null
 
       it "logs once on failure", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           done()
 
         cy.reload(Infinity)
 
       it "throws passing more than 2 args", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
         cy.reload(1, 2, 3)
 
       it "throws passing 2 invalid arguments", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
         cy.reload(true, 1)
 
       it "throws passing 1 invalid argument", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
@@ -164,7 +164,7 @@ describe "src/cy/commands/navigation", ->
               expect(expected).to.be.true
               done()
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expected = true
 
               expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
@@ -302,21 +302,21 @@ describe "src/cy/commands/navigation", ->
 
       _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
         it "throws on: '#{val}'", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.eq("cy.go() accepts only a string or number argument")
             done()
 
           cy.go(val)
 
       it "throws on invalid string", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.go() accepts either 'forward' or 'back'. You passed: 'foo'")
           done()
 
         cy.go("foo")
 
       it "throws on zero", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.go() cannot accept '0'. The number must be greater or less than '0'.")
           done()
 
@@ -338,7 +338,7 @@ describe "src/cy/commands/navigation", ->
               expect(expected).to.be.true
               done()
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expected = true
 
               expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
@@ -346,7 +346,7 @@ describe "src/cy/commands/navigation", ->
             cy.go("back", {timeout: 1})
 
       it "only logs once on error", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error")).to.eq(err)
           done()
@@ -846,7 +846,7 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .rejects(new Error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(lastLog.get("state")).to.eq "failed"
@@ -860,14 +860,14 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .rejects(new Error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           done()
 
         cy.visit("/fixtures/generic.html")
 
       it "logs once on timeout error", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -891,19 +891,19 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .callsFake(fn)
 
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.visit("/", {timeout: 20})
 
       it "throws when url isnt a string", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
           done()
 
         cy.visit()
 
       it "throws when onBeforeLoad callback is used", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq """
             The 'onBeforeLoad' callback for cy.visit() has been renamed to 'onStart'.
 
@@ -926,7 +926,7 @@ describe "src/cy/commands/navigation", ->
         })
 
       it "throws when onLoad callback is used", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq """
             The 'onLoad' callback for cy.visit() has been renamed to 'onReady'.
 
@@ -949,7 +949,7 @@ describe "src/cy/commands/navigation", ->
         })
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -962,7 +962,7 @@ describe "src/cy/commands/navigation", ->
           .visit("http://localhost:3501/fixtures/generic.html")
 
       it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -975,7 +975,7 @@ describe "src/cy/commands/navigation", ->
           .visit("https://localhost:3500/fixtures/generic.html")
 
       it "throws when attempting to visit a 2nd domain on different host", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -1010,7 +1010,7 @@ describe "src/cy/commands/navigation", ->
         cy.stub(Cypress.utils, "locExisting")
         .returns(one)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -1025,7 +1025,7 @@ describe "src/cy/commands/navigation", ->
       it "does not call resolve:url when throws attemping to visit a 2nd domain", (done) ->
         backend = cy.spy(Cypress, "backend")
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/fixtures/generic.html")
           expect(backend).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500/fixtures/generic.html")
           done()
@@ -1044,7 +1044,7 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .rejects(err1)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1096,7 +1096,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1143,7 +1143,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1191,7 +1191,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1238,7 +1238,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1286,7 +1286,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1332,7 +1332,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1455,7 +1455,7 @@ describe "src/cy/commands/navigation", ->
       it "can time out", (done) ->
         thenCalled = false
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           ## visit, window, page loading
@@ -1494,7 +1494,7 @@ describe "src/cy/commands/navigation", ->
           _.find @logs, (log) ->
             log.get("name") is name
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           cy.on "command:retry", ->
             throw new Error("should not have retried twice")
 

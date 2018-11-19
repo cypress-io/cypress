@@ -3,6 +3,7 @@ _ = Cypress._
 describe "events", ->
   describe "renamed events", ->
     renamedEvents = {
+      "fail": "test:fail"
       "test:before:run": "test:run:start"
       "test:before:run:async": "test:run:start:async"
       "test:after:run": "test:run:end"
@@ -21,7 +22,7 @@ describe "events", ->
     _.each renamedEvents, (newEvent, oldEvent) ->
       _.each methods, (method) ->
         it "fails on use of cy.#{method}('#{oldEvent}')", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(err.message).to.include("The '#{oldEvent}' event has been renamed to '#{newEvent}'")
 
             done()
@@ -30,7 +31,7 @@ describe "events", ->
           cy.viewport(400, 400)
 
         it "fails on use of Cypress.#{method}('#{oldEvent}')", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(err.message).to.include("The '#{oldEvent}' event has been renamed to '#{newEvent}'")
 
             done()

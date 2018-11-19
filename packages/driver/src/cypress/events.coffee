@@ -112,6 +112,7 @@ module.exports = {
 
   throwOnRenamedEvent: (eventEmitter, name) ->
     renamedEvents = {
+      "fail": "test:fail"
       "test:before:run": "test:run:start"
       "test:before:run:async": "test:run:start:async"
       "test:after:run": "test:run:end"
