@@ -112,19 +112,19 @@ module.exports = {
 
   throwOnRenamedEvent: (eventEmitter, name) ->
     renamedEvents = {
-      "fail": "test:fail"
-      "test:before:run": "test:run:start"
-      "test:before:run:async": "test:run:start:async"
-      "test:after:run": "test:run:end"
       "command:queue:before:end": "before:command:queue:end"
-      "window:before:load": "page:start"
-      "window:before:unload": "before:window:unload"
-      "window:alert": "page:alert"
-      "window:confirm": "page:confirm"
-      "window:unload": "page:end"
+      "fail": "test:fail"
       "runnable:after:run:async": "after:runnable:run:async"
       "scrolled": "internal:scrolled"
+      "test:after:run": "test:run:end"
+      "test:before:run": "test:run:start"
+      "test:before:run:async": "test:run:start:async"
       "url:changed": "page:url:changed"
+      "window:alert": "page:alert"
+      "window:before:load": "page:start"
+      "window:before:unload": "before:window:unload"
+      "window:confirm": "page:confirm"
+      "window:unload": "page:end"
     }
 
     methods = "addListener on once prependListener prependOnceListener".split(" ")
