@@ -3040,11 +3040,17 @@ describe "src/cy/commands/actions/type", ->
     context "works on input type", ->
       inputTypes = [
         "date",
+        "datetime",
+        "datetime-local",
         "email",
         "month",
         "number",
+        "password",
+        "search",
         "tel",
+        "text",
         "time",
+        "url",
         "week"
       ]
 
