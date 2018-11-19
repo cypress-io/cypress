@@ -131,13 +131,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       onAlert: (str) ->
         Cypress.action("app:page:alert", str)
       onConfirm: (str) ->
-        results = Cypress.action("app:window:confirm", str)
+        results = Cypress.action("app:page:confirm", str)
 
         ## return false if ANY results are false
         ## else true
         ret = !_.some(results, returnedFalse)
 
-        Cypress.action("app:window:confirmed", str, ret)
+        Cypress.action("app:page:confirmed", str, ret)
 
         return ret
     })

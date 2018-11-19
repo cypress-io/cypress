@@ -396,11 +396,11 @@ class $Cypress
       when "app:page:alert"
         @emit("page:alert", args[0])
 
-      when "app:window:confirm"
-        @emitMap("window:confirm", args[0])
+      when "app:page:confirm"
+        @emitMap("page:confirm", args[0])
 
-      when "app:window:confirmed"
-        @emit("window:confirmed", args...)
+      when "app:page:confirmed"
+        @emit("page:confirmed", args...)
 
       when "app:page:loading"
         @emit("page:loading", args[0])

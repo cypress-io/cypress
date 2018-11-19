@@ -44,9 +44,9 @@ Cypress.on('page:alert', cy.stub())
 cy.on('page:alert', () => {})
 cy.on('page:alert', cy.stub())
 
-// window:confirm stubbing
-cy.on('window:confirm', () => {})
-cy.on('window:confirm', cy.stub())
+// page:confirm stubbing
+cy.on('page:confirm', () => {})
+cy.on('page:confirm', cy.stub())
 
 // specifying HTTP method directly in the options object
 cy.request({

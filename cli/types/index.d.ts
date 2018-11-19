@@ -3664,12 +3664,12 @@ declare namespace Cypress {
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      * @example
-     *    cy.on('window:confirm', (str) => {
+     *    cy.on('page:confirm', (str) => {
      *      console.log(str)
      *      return false // simulate "Cancel"
      *    })
      */
-    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
+    (action: 'page:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.

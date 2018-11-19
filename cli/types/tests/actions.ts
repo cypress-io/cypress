@@ -3,7 +3,7 @@ Cypress.on('uncaught:exception', (error, runnable) => {
   runnable // $ExpectType IRunnable
 })
 
-Cypress.on('window:confirm', (text) => {
+Cypress.on('page:confirm', (text) => {
   text // $ExpectType string
 })
 
