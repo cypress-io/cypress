@@ -5,7 +5,7 @@ normalizeStyles = (styles) ->
   .replace(/\s+/gm, "")
   .replace(/['"]/gm, "'")
 
-describe "src/cy/snapshot", ->
+describe "driver/src/cy/snapshot", ->
   context "invalid snapshot html", ->
     beforeEach ->
       cy.visit("/fixtures/invalid_html.html")

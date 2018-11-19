@@ -279,7 +279,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "after:runnable:run:async", (test, runnable) ->
     screenshotConfig = $Screenshot.getConfig()
 
-    return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
+    return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive") or test.err.isPending
 
     ## if a screenshot has not been taken (by cy.screenshot()) in the test
     ## that failed, we can bypass UI-changing and pixel-checking (simple: true)

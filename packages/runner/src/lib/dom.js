@@ -56,6 +56,7 @@ function addHitBoxLayer (coords, body) {
     background-color: pink;
     border-radius: 5px;
   `)
+
   $(`<div style="${dotStyles}">`).appendTo(wrapper)
 
   return box.appendTo(body)
@@ -80,6 +81,7 @@ function addElementBoxModelLayers ($el, body) {
   // create the margin / bottom / padding layers
   _.each(layers, (color, attr) => {
     let obj
+
     switch (attr) {
       case 'Content':
         // rearrange the contents offset so
@@ -124,7 +126,9 @@ function addElementBoxModelLayers ($el, body) {
 
     // dont ask... for some reason we
     // have to run offset twice!
-    _.times(2, () => $el.offset({ top, left }))
+    _.times(2, () => {
+      return $el.offset({ top, left })
+    })
   })
 
   return container
@@ -164,16 +168,20 @@ function getOrCreateSelectorHelperDom ($body) {
   .addClass('__cypress-selector-playground-cover')
   .appendTo($container)
 
-  return Promise.try(() => fetch('/__cypress/runner/cypress_selector_playground.css'))
+  return Promise.try(() => {
+    return fetch('/__cypress/runner/cypress_selector_playground.css')
+  })
   .then((result) => {
     return result.text()
   })
   .then((content) => {
     $('<style />', { html: content }).prependTo(shadowRoot)
+
     return { $container, shadowRoot, $reactContainer, $cover }
   })
   .catch((error) => {
     console.error('Selector playground failed to load styles:', error) // eslint-disable-line no-console
+
     return { $container, shadowRoot, $reactContainer, $cover }
   })
 }
@@ -185,6 +193,7 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
       selectorPlaygroundHighlight.unmount($reactContainer[0])
       $cover.off('click')
       $container.remove()
+
       return
     }
 
@@ -251,7 +260,9 @@ function dimensionsMatchPreviousLayer (obj, container) {
   const previousLayer = container.children().first()
 
   // bail if there is no previous layer
-  if (!previousLayer.length) { return }
+  if (!previousLayer.length) {
+    return
+  }
 
   return obj.width === previousLayer.width() &&
   obj.height === previousLayer.height()
@@ -264,28 +275,29 @@ function getDimensionsFor (dimensions, attr, dimension) {
 function getZIndex (el) {
   if (/^(auto|0)$/.test(el.css('zIndex'))) {
     return 2147483647
-  } else {
-    return _.toNumber(el.css('zIndex'))
   }
+
+  return _.toNumber(el.css('zIndex'))
+
 }
 
-function getElementDimensions (el) {
+function getElementDimensions ($el) {
   const dimensions = {
-    offset: el.offset(), // offset disregards margin but takes into account border + padding
-    height: el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: el.width(),
-    paddingTop: getPadding(el, 'top'),
-    paddingRight: getPadding(el, 'right'),
-    paddingBottom: getPadding(el, 'bottom'),
-    paddingLeft: getPadding(el, 'left'),
-    borderTop: getBorder(el, 'top'),
-    borderRight: getBorder(el, 'right'),
-    borderBottom: getBorder(el, 'bottom'),
-    borderLeft: getBorder(el, 'left'),
-    marginTop: getMargin(el, 'top'),
-    marginRight: getMargin(el, 'right'),
-    marginBottom: getMargin(el, 'bottom'),
-    marginLeft: getMargin(el, 'left'),
+    offset: $el.offset(), // offset disregards margin but takes into account border + padding
+    height: $el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
+    width: $el.width(),
+    paddingTop: getPadding($el, 'top'),
+    paddingRight: getPadding($el, 'right'),
+    paddingBottom: getPadding($el, 'bottom'),
+    paddingLeft: getPadding($el, 'left'),
+    borderTop: getBorder($el, 'top'),
+    borderRight: getBorder($el, 'right'),
+    borderBottom: getBorder($el, 'bottom'),
+    borderLeft: getBorder($el, 'left'),
+    marginTop: getMargin($el, 'top'),
+    marginRight: getMargin($el, 'right'),
+    marginBottom: getMargin($el, 'bottom'),
+    marginLeft: getMargin($el, 'left'),
   }
 
   // innerHeight: Get the current computed height for the first
@@ -296,13 +308,13 @@ function getElementDimensions (el) {
   // and optionally margin. Returns a number (without 'px') representation
   // of the value or null if called on an empty set of elements.
 
-  dimensions.heightWithPadding = el.innerHeight()
-  dimensions.heightWithBorder = el.innerHeight() + getTotalFor(['borderTop', 'borderBottom'], dimensions)
-  dimensions.heightWithMargin = el.outerHeight(true)
+  dimensions.heightWithPadding = $el.innerHeight()
+  dimensions.heightWithBorder = $el.innerHeight() + getTotalFor(['borderTop', 'borderBottom'], dimensions)
+  dimensions.heightWithMargin = $el.outerHeight(true)
 
-  dimensions.widthWithPadding = el.innerWidth()
-  dimensions.widthWithBorder = el.innerWidth() + getTotalFor(['borderRight', 'borderLeft'], dimensions)
-  dimensions.widthWithMargin = el.outerWidth(true)
+  dimensions.widthWithPadding = $el.innerWidth()
+  dimensions.widthWithBorder = $el.innerWidth() + getTotalFor(['borderRight', 'borderLeft'], dimensions)
+  dimensions.widthWithMargin = $el.outerWidth(true)
 
   return dimensions
 }
@@ -331,7 +343,9 @@ function getMargin (el, dir) {
 }
 
 function getTotalFor (directions, dimensions) {
-  return _.reduce(directions, (memo, direction) => memo + dimensions[direction], 0)
+  return _.reduce(directions, (memo, direction) => {
+    return memo + dimensions[direction]
+  }, 0)
 }
 
 function getOuterSize (el) {
@@ -395,16 +409,7 @@ function removeCssAnimationDisabler ($body) {
   $body.find('#__cypress-animation-disabler').remove()
 }
 
-function addBlackout ($body, selector) {
-  let $el
-  try {
-    $el = $body.find(selector)
-    if (!$el.length) return
-  } catch (err) {
-    // if it's an invalid selector, just ignore it
-    return
-  }
-
+function addBlackoutForElement ($body, $el) {
   const dimensions = getElementDimensions($el)
   const width = dimensions.widthWithBorder
   const height = dimensions.heightWithBorder
@@ -423,6 +428,22 @@ function addBlackout ($body, selector) {
   `)
 
   $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
+}
+
+function addBlackout ($body, selector) {
+  let $el
+
+  try {
+    $el = $body.find(selector)
+    if (!$el.length) return
+  } catch (err) {
+    // if it's an invalid selector, just ignore it
+    return
+  }
+
+  $el.each(function () {
+    addBlackoutForElement($body, $(this))
+  })
 }
 
 function removeBlackouts ($body) {

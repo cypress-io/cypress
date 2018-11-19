@@ -17,6 +17,7 @@ $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
+$Timers = require("../cy/timers")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
@@ -52,18 +53,6 @@ setRemoteIframeProps = ($autIframe, state) ->
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
-  timersPaused = false
-
-  ## TODO: move this to its own module
-  timerQueues = {}
-  timerQueues.reset = ->
-    _.extend(timerQueues, {
-      setTimeout: []
-      setInterval: []
-      requestAnimationFrame: []
-    })
-
-  timerQueues.reset()
 
   isStopped = -> stopped
 
@@ -91,6 +80,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
 
@@ -127,6 +117,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
+        timers.reset()
+
         Cypress.action("app:before:window:unload", e)
 
         ## return undefined so our beforeunload handler
@@ -152,6 +144,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
+      ## return null to trick contentWindow into thinking
+      ## its not been iframed if modifyObstructiveCode is true
+      if config("modifyObstructiveCode")
+        Object.defineProperty(contentWindow, "frameElement", {
+          get: -> null
+        })
+
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
 
@@ -160,30 +159,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
-
-  runTimerQueue = (queue) ->
-    _.each timerQueues[queue], ([contentWindow, args]) ->
-      contentWindow[queue].apply(contentWindow, args)
-
-    timerQueues[queue] = []
-
-  wrapTimers = (contentWindow) ->
-    originals = {
-      setTimeout: contentWindow.setTimeout
-      setInterval: contentWindow.setInterval
-      requestAnimationFrame: contentWindow.requestAnimationFrame
-    }
-
-    wrapFn = (fnName) ->
-      return (args...) ->
-        if timersPaused
-          timerQueues[fnName].push([contentWindow, args])
-        else
-          originals[fnName].apply(contentWindow, args)
-
-    contentWindow.setTimeout = wrapFn("setTimeout")
-    contentWindow.setInterval = wrapFn("setInterval")
-    contentWindow.requestAnimationFrame = wrapFn("requestAnimationFrame")
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -646,6 +621,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
+    ## timer sync methods
+    pauseTimers: timers.pauseTimers
+
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
 
@@ -749,7 +727,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state(backup)
 
       queue.reset()
-      timerQueues.reset()
+      timers.reset()
 
       cy.removeAllListeners()
 
@@ -917,15 +895,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       wrapNativeMethods(contentWindow)
 
-      wrapTimers(contentWindow)
-
-    pauseTimers: (pause) ->
-      timersPaused = pause
-
-      if not pause
-        runTimerQueue("setTimeout")
-        runTimerQueue("setInterval")
-        runTimerQueue("requestAnimationFrame")
+      timers.wrap(contentWindow)
 
     onSpecWindowUncaughtException: (args...) ->
       ## create the special uncaught exception err

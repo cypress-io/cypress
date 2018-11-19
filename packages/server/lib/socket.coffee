@@ -212,7 +212,7 @@ class Socket
         socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
-        debug("automation:request %o", message, data)
+        debug("automation:request %s %o", message, data)
 
         automationRequest(message, data)
         .then (resp) ->

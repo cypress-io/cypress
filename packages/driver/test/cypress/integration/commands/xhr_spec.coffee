@@ -69,6 +69,27 @@ describe "src/cy/commands/xhr", ->
           expect(onreadystatechanged).to.be.true
           expect(xhr.status).to.eq(404)
 
+    it "allows multiple readystatechange calls", ->
+      responseText = null
+      responseStatuses = 0
+
+      cy
+        .server()
+        .route({ url: /longtext.txt/ }).as("getLongText")
+        .task('create:long:file')
+        .window().then (win) ->
+          xhr = new win.XMLHttpRequest()
+          xhr.onreadystatechange = ->
+            responseText = xhr.responseText
+            if xhr.readyState == 3
+              responseStatuses++
+          xhr.open("GET", "/_test-output/longtext.txt?" + Cypress._.random(0, 1e6))
+          xhr.send()
+          null
+        .wait("@getLongText").then (xhr) ->
+          expect(responseStatuses).to.be.gt(1)
+          expect(xhr.status).to.eq(200)
+
     it "works with jquery too", ->
       failed = false
       onloaded = false

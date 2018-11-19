@@ -10,12 +10,14 @@
 /// <reference path="./blob-util.d.ts" />
 /// <reference path="./bluebird.d.ts" />
 /// <reference path="./minimatch.d.ts" />
+/// <reference path="./moment.d.ts" />
 
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
 /// <reference types="lodash" />
 /// <reference types="mocha" />
+/// <reference types="moment" />
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
 
@@ -100,7 +102,7 @@ declare namespace Cypress {
      * @example
      *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
      */
-    moment: (...args: any[]) => any // perhaps we want to add moment as a dependency for types?
+    moment: Moment.MomentStatic
     /**
      * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
      *
@@ -1104,7 +1106,7 @@ declare namespace Cypress {
      *    cy.screenshot()
      *    cy.get(".post").screenshot()
      */
-    screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
     /**
      * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
      *

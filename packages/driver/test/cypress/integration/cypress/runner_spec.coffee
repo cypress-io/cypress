@@ -5,6 +5,12 @@ Cypress.on "after:test:run", (test) ->
     pending.push(test)
 
 describe "src/cypress/runner", ->
+  it 'handles "double quotes" in test name', (done) ->
+    cy.once "log:added", (log) ->
+      expect(log.hookName).to.equal("test")
+      done()
+    cy.wrap({})
+
   context "pending tests", ->
     it "is not pending", ->
 
