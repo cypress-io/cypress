@@ -279,6 +279,9 @@ module.exports = {
     if options.exit?
       args.push("--exit", options.exit)
 
+    if options.inspectBrk
+      args.push("--inspect-brk")
+
     return args
 
   start: (ctx, options = {}) ->

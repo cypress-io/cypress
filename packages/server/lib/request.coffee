@@ -66,8 +66,12 @@ newCookieJar = ->
 
     setCookie: (cookieOrStr, uri, options) ->
       ## store the original URL this cookie was set on
-      cookie = j.setCookieSync(cookieOrStr, uri, options)
-      cookie.url = uri
+      if cookie = j.setCookieSync(cookieOrStr, uri, options)
+        ## only set cookie URL if it was created correctly
+        ## since servers may send invalid cookies that fail
+        ## to parse - we may get undefined here
+        cookie.url = uri
+
       return cookie
 
     getCookieString: (uri) ->
