@@ -94,8 +94,6 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       ## then notify the user of this note
       ## and bail
       if isNoop($el)
-        ## still ensure visibility even if the command is noop
-        cy.ensureVisibility($el, options._log)
         if options._log
           inputType = if $el.is(":radio") then "radio" else "checkbox"
           consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
