@@ -458,10 +458,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
       if prevSubject and ("optional" not in [].concat(prevSubject))
+        stringifiedArg = $utils.stringifyActual(args[0])
         $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
           args: {
             cmd:  name
-            args: $utils.stringifyActual(args[0])
+            args: if _.isString(args[0]) then "\"#{stringifiedArg}\"" else stringifiedArg
           }
         })
 
