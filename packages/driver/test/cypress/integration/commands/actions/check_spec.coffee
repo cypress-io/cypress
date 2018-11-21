@@ -556,7 +556,7 @@ describe "src/cy/commands/actions/check", ->
         checked = true
 
       cy.get(checkbox).uncheck().then ->
-        expect(checked).to.be.falsed
+        expect(checked).to.be.false
 
     it "can forcibly click even when being covered by another element", (done) ->
       checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo($("body"))
