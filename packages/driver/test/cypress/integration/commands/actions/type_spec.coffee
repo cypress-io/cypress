@@ -16,8 +16,8 @@ describe "src/cy/commands/actions/type", ->
 
     $(doc.body).empty().html(@body)
 
-    cy.state('window').addEventListener('keydown', ()=>debugger)
-    window.addEventListener('keydown', ()=>debugger)
+    # cy.state('window').addEventListener('keydown', ()=>debugger)
+    # window.addEventListener('keydown', ()=>debugger)
 
   context "#type", ->
 
@@ -27,14 +27,16 @@ describe "src/cy/commands/actions/type", ->
       input.val('foo')
 
       cy.get('input:first').type('{moveToStart}bar')
-        .invoke('val').should('eq', 'barfoo')
+        .should('have.value', 'barfoo')
 
     it 'can moveToEnd', ->
       input = cy.$$('input:first')
 
       input.val('foo')
+      input[0].focus()
+      input[0].setSelectionRange(0,0)
 
-      cy.get('input:first').type('{moveToEnd}{{}')
+      cy.get('input:first').type('{moveToEnd}bar')
         .invoke('val').should('eq', 'foobar')
 
     it 'can moveToEnd from middle', ->
@@ -42,7 +44,7 @@ describe "src/cy/commands/actions/type", ->
 
       input.val('foo')
 
-      input.get(0).setSelectionRange(0,0)
+      input.get(0).setSelectionRange(1,1)
 
       cy.get('input:first').type('{moveToEnd}bar')
         .invoke('val').should('eq', 'foobar')
@@ -134,15 +136,15 @@ describe "src/cy/commands/actions/type", ->
     it "accepts body as subject", ->
       cy.get("body").type("foo")
 
-    it "does not click when body is subject", ->
+    it "does not focus when body is subject", ->
       bodyClicked = false
-      cy.$$("body").on "click", -> bodyClicked = true
+      cy.$$("body").on 'selection'
 
       cy.get("body").type("foo").then ->
         expect(bodyClicked).to.be.false
 
     describe "actionability", ->
-      it "can forcibly click even when element is invisible", ->
+      it.skip "can forcibly click even when element is invisible", ->
         $txt = cy.$$(":text:first").hide()
 
         expect($txt).not.to.have.value("foo")
@@ -156,7 +158,21 @@ describe "src/cy/commands/actions/type", ->
           expect(clicked).to.be.true
           expect($input).to.have.value("foo")
 
-      it "can forcibly click even when being covered by another element", ->
+      it "can forcibly type even when element is invisible", ->
+        $txt = cy.$$(":text:first").hide()
+
+        expect($txt).not.to.have.value("foo")
+
+        clicked = false
+
+        $txt.on "keydown", ->
+          clicked = true
+
+        cy.get(":text:first").type("foo", {force: true}).then ($input) ->
+          expect($input).to.have.value("foo")
+          expect(clicked).to.be.true
+
+      it.skip "can forcibly click even when being covered by another element", ->
         $input = $("<input />")
         .attr("id", "input-covered-in-span")
         .css({
@@ -184,6 +200,28 @@ describe "src/cy/commands/actions/type", ->
           expect(clicked).to.be.true
           expect($input).to.have.value("foo")
 
+      it "can forcibly type even when being covered by another element", ->
+        $input = $("<input />")
+        .attr("id", "input-covered-in-span")
+        .css({
+          width: 50
+        })
+        .prependTo(cy.$$("body"))
+
+        $span = $("<span>span on input</span>")
+        .css({
+          position: "absolute",
+          left: $input.offset().left,
+          top: $input.offset().top,
+          padding: 5,
+          display: "inline-block",
+          backgroundColor: "yellow"
+        })
+        .prependTo(cy.$$("body"))
+
+        cy.get("#input-covered-in-span").type("foo", {force: true}).then ($input) ->
+          expect($input).to.have.value("foo")
+
       it "waits until element becomes visible", ->
         $txt = cy.$$(":text:first").hide()
 
@@ -196,7 +234,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get(":text:first").type("foo").then ->
           expect(retried).to.be.true
 
-      it "waits until element is no longer disabled", ->
+      it.skip "waits until element is no longer disabled", ->
         $txt = cy.$$(":text:first").prop("disabled", true)
 
         retried = false
@@ -211,6 +249,18 @@ describe "src/cy/commands/actions/type", ->
 
         cy.get(":text:first").type("foo").then ->
           expect(clicks).to.eq(1)
+          expect(retried).to.be.true
+
+      it "waits until element is no longer disabled", ->
+        $txt = cy.$$(":text:first").prop("disabled", true)
+
+        retried = false
+
+        cy.on "command:retry", _.after 3, ->
+          $txt.prop("disabled", false)
+          retried = true
+
+        cy.get(":text:first").type("foo").then ->
           expect(retried).to.be.true
 
       it "waits until element stops animating", ->
@@ -420,65 +470,64 @@ describe "src/cy/commands/actions/type", ->
         cy.get(":text:first").type("foo{enter}bar{leftarrow}")
 
     describe "events", ->
-      it "receives keydown event", (done) ->
+      it "receives keydown event", () ->
         $txt = cy.$$(":text:first")
 
-        $txt.on "keydown", (e) =>
+        keydown = cy.spy((e) =>
+          return
           obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
           expect(obj).to.deep.eq {
-            altKey: false
-            bubbles: true
-            cancelable: true
-            charCode: 0 ## deprecated
-            ctrlKey: false
-            detail: 0
-            key: "a"
-            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
-            layerX: 0
-            layerY: 0
-            location: 0
-            metaKey: false
-            pageX: 0
-            pageY: 0
-            repeat: false
-            shiftKey: false
-            type: "keydown"
-            view: cy.state("window")
-            which: 65 ## deprecated but fired by chrome
-          }
-          done()
+            altKey: false,
+            bubbles: true,
+            cancelable: true,
+            charCode: 0,
+            ctrlKey: false,
+            detail: 0,
+            key: "a",
+            keyCode: 65,
+            location: 0,
+            metaKey: false,
+            repeat: false,
+            shiftKey: false,
+            type: "keydown",
+            view: cy.state('window'),
+            which: 65,
+          })
+        .as 'keydown'
+        
+        $txt.on "keydown", keydown
 
         cy.get(":text:first").type("a")
+        .then -> expect(keydown).to.be.calledOnce
 
-      it "receives keypress event", (done) ->
+      it "receives keypress event", () ->
         $txt = cy.$$(":text:first")
 
-        $txt.on "keypress", (e) =>
+        keypress = cy.spy (e) =>
           obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
             cancelable: true
-            charCode: 97 ## deprecated
+            charCode: 97
             ctrlKey: false
             detail: 0
             key: "a"
-            keyCode: 97 ## deprecated
-            layerX: 0
-            layerY: 0
+            keyCode: 97
             location: 0
             metaKey: false
-            pageX: 0
-            pageY: 0
             repeat: false
             shiftKey: false
             type: "keypress"
-            view: cy.state("window")
-            which: 97 ## deprecated
+            view: cy.state('window')
+            which: 97
           }
-          done()
+        .as 'keypress'
+
+        $txt.on "keypress", keypress
 
         cy.get(":text:first").type("a")
+        .then -> expect(keypress).to.be.calledOnce
 
       it "receives keyup event", (done) ->
         $txt = cy.$$(":text:first")
@@ -489,22 +538,18 @@ describe "src/cy/commands/actions/type", ->
             altKey: false
             bubbles: true
             cancelable: true
-            charCode: 0 ## deprecated
+            charCode: 0
             ctrlKey: false
             detail: 0
             key: "a"
-            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
-            layerX: 0
-            layerY: 0
+            keyCode: 65
             location: 0
             metaKey: false
-            pageX: 0
-            pageY: 0
             repeat: false
             shiftKey: false
             type: "keyup"
-            view: cy.state("window")
-            which: 65 ## deprecated but fired by chrome
+            view: cy.state('window')
+            which: 65
           }
           done()
 
@@ -518,14 +563,8 @@ describe "src/cy/commands/actions/type", ->
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: true
-            charCode: 0
             data: "a"
             detail: 0
-            keyCode: 0
-            layerX: 0
-            layerY: 0
-            pageX: 0
-            pageY: 0
             type: "textInput"
             view: cy.state("window")
             which: 0
@@ -1151,7 +1190,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
 
-        it.only "fires keypress event with 219 charCode", (done) ->
+        it "fires keypress event with 219 charCode", (done) ->
 
           keypress = cy.stub()
           .callsFake (e) =>
@@ -2226,7 +2265,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get('[contenteditable]:first')
         ## move cursor to beginning of div
         .type('{selectall}{leftarrow}')
-        .type('{rightarrow}'.repeat(14)+'[_I_]').then ->
+        .type('{rightarrow}'.repeat(14) + '[_I_]').then ->
           expect(cy.$$('[contenteditable]:first').get(0).innerText).to.eql('start\nmiddle\ne[_I_]nd\n')
 
       it "can wrap cursor to prev line in [contenteditable] with {leftarrow}", ->
@@ -2235,7 +2274,7 @@ describe "src/cy/commands/actions/type", ->
         el.innerHTML = 'start'+
         '<div>middle</div>'+
         '<div>end</div>'
-        cy.get('[contenteditable]:first').type('{leftarrow}'.repeat(12)+'[_I_]').then ->
+        cy.get('[contenteditable]:first').type('{leftarrow}'.repeat(12) + '[_I_]').then ->
           expect(cy.$$('[contenteditable]:first').get(0).innerText).to.eql('star[_I_]t\nmiddle\nend\n')
 
 
@@ -2257,7 +2296,7 @@ describe "src/cy/commands/actions/type", ->
 
         cy.get('[contenteditable]:first')
         .type('{selectall}{leftarrow}')
-        .type('{rightarrow}'.repeat(3)+'[_I_]').then ->
+        .type('{rightarrow}'.repeat(3) + '[_I_]').then ->
           expect(cy.$$('[contenteditable]:first').get(0).innerText).to.eql('sta[_I_]rt\n')
 
       it "enter and \\n should act the same for [contenteditable]", ->
@@ -3072,7 +3111,7 @@ describe "src/cy/commands/actions/type", ->
 
     it "passes timeout and interval down to click", (done) ->
       input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"))
-      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
+      span = $("<span>span on input</span>").css({position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow"}).prependTo(cy.$$("body"))
 
       cy.on "command:retry", (options) ->
         expect(options.timeout).to.eq 1000

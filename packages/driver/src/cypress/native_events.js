@@ -1,10 +1,10 @@
 require('@babel/polyfill')
-const Promise = require('bluebird')
+const _ = require('lodash')
 const CRI = require('chrome-remote-interface')
-
-const elements = require('../dom/elements')
+const Promise = require('bluebird')
 // const _ = require('lodash')
 // const debug = require('debug')('cypress:driver')
+const elements = require('../dom/elements')
 
 // eslint-disable-next-line
 window.criRequest = function () {}
@@ -21,6 +21,7 @@ const init = () => {
     // TODO: import Cypress correctly
     // eslint-disable-next-line
     const wsUrl = Cypress.config('wsUrl')
+
     return CRI({
       target: wsUrl,
       local: true,
@@ -40,6 +41,7 @@ const click = ($elToClick, coords) => {
     // eslint-disable-next-line
     Cypress.action('cy:before:native:event', coordsFromAutIframe)
     const coordsToClick = calculateCoordsToClick(coordsFromAutIframe, autIframe)
+
     return Promise.all([
       mouseMoved(coordsToClick),
       mouseDown(coordsToClick),
@@ -65,6 +67,7 @@ const mouseUp = (coords) => {
 
 const mouseEvent = (coords, type) => {
   const { x, y } = coords
+
   return client.send('Input.dispatchMouseEvent', {
     x,
     y,
@@ -81,24 +84,31 @@ const keypress = (keyInfo) => {
     return Promise.all([
       keyDown(keyInfo),
       keyUp(keyInfo),
-    ]).then(()=>{debugger})
+    ]).then(() => {
+      console.log('keypress')
+    })
   })
 }
 
-function keySequence (keyInfoArray, delay) {
-  if (delay) {
-    return keyInfoArray.map((keyInfo) => {
-
+function keypressAll (keyInfoArray) {
+  return init().then(() => {
+    return Promise.all(
+      _.flatten(
+        keyInfoArray.map((keyInfo) => {
+          return [
+            keyDown(keyInfo),
+            keyUp(keyInfo),
+          ]
+        })
+      )
+    ).then(() => {
+      console.log('keypressAll')
     })
-  }
-  return keyInfoArray.map((keyInfo) => [
-    keyDown(keyInfo),
-    keyUp(keyInfo),
-  ])
+  })
 }
 
 const keyDown = (keyInfo) => {
-  return client.send('Input.dispatchKeyEvent', {
+  return Promise.resolve(client.send('Input.dispatchKeyEvent', {
     // type: text ? 'keyDown' : 'rawKeyDown',
     type: keyInfo.text ? 'keyDown' : 'rawKeyDown',
     // modifiers: this._modifiers,
@@ -110,7 +120,9 @@ const keyDown = (keyInfo) => {
     // autoRepeat,
     location: keyInfo.location,
     isKeypad: keyInfo.location === 3,
-  })
+  }).then(() => {
+    return console.log('keydown')
+  }))
 }
 
 const keyUp = (keyInfo) => {
@@ -126,6 +138,8 @@ const keyUp = (keyInfo) => {
     // autoRepeat,
     location: keyInfo.location,
     isKeypad: keyInfo.location === 3,
+  }).then(() => {
+    return console.log('keyup')
   })
 }
 
@@ -134,9 +148,9 @@ module.exports = {
   mouseUp,
   click,
   keypress,
+  keypressAll,
   init,
 }
-
 
 function calculateAutIframeCoords (coords, $elToClick) {
   let x = coords.x
@@ -150,6 +164,7 @@ function calculateAutIframeCoords (coords, $elToClick) {
 
     if (curWindow && elements.getNativeProp(curWindow, 'frameElement')) {
       const rect = frame.getBoundingClientRect()
+
       x += rect.x
       y += rect.y
     }
@@ -166,6 +181,7 @@ function calculateAutIframeCoords (coords, $elToClick) {
 function calculateCoordsToClick (coordsFromAutIframe, autIframe) {
   const { x, y } = coordsFromAutIframe
   const iframeRect = autIframe.getBoundingClientRect()
+
   return {
     x: x + iframeRect.x,
     y: y + iframeRect.y,

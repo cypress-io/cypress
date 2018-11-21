@@ -31,6 +31,7 @@ const dateRegex = /^\d{4}-\d{2}-\d{2}$/
 const monthRegex = /^\d{4}-(0\d|1[0-2])$/
 const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
+const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   Cypress.on('test:before:run', () => {
@@ -128,6 +129,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const isTime = $dom.isType(options.$el, 'time')
       const isMonth = $dom.isType(options.$el, 'month')
       const isWeek = $dom.isType(options.$el, 'week')
+      const isDateTime = $dom.isType(options.$el, 'datetime') || $dom.isType(options.$el, 'datetime-local')
       const hasTabIndex = $dom.isSelector(options.$el, '[tabindex]')
 
       //# TODO: tabindex can't be -1
@@ -198,6 +200,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         !timeRegex.test(chars)
       )) {
         $utils.throwErrByPath('type.invalid_time', {
+          onFail: options._log,
+          args: { chars },
+        })
+      }
+
+      if (isDateTime && (
+        !_.isString(chars) ||
+        !dateTimeRegex.test(chars)
+      )) {
+        $utils.throwErrByPath('type.invalid_dateTime', {
           onFail: options._log,
           args: { chars },
         })
@@ -295,7 +307,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         }
 
         const needSingleValueChange = () => {
-          return $elements.isNeedSingleValueChangeInputElement(options.$el.get(0))
+          return $elements.isNeedSingleValueChangeInputElement(el)
         }
 
         //# see comment in updateValue below
@@ -310,13 +322,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           delay: options.delay,
           release: options.release,
           window: win,
+          simulated: options.force,
 
           updateValue (el, key) {
             //# in these cases, the value must only be set after all
             //# the characters are input because attemping to set
             //# a partial/invalid value results in the value being
             //# set to an empty string
-            if (needSingleValueChange()) {
+            if (needSingleValueChange(el)) {
               typed += key
               if (typed === options.chars) {
                 return $elements.setNativeProp(el, 'value', options.chars)
@@ -436,7 +449,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             return Cypress.action('cy:scrolled', $el, type)
           },
 
-          onReady ($elToClick) {
+          onReady ($elToFocus) {
             let el
             const $focused = cy.getFocused()
 
@@ -447,22 +460,23 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             //# if we dont have a focused element
             //# or if we do and its not ourselves
             //# then issue the click
-            if (!$focused || ($focused && ($focused.get(0) !== options.$el.get(0)))) {
+            if (!$focused || ($focused && ($focused.get(0) !== $elToFocus.get(0)))) {
               //# click the element first to simulate focus
               //# and typical user behavior in case the window
               //# is out of focus
-              return cy.now('click', $elToClick, {
-                $el: $elToClick,
-                log: false,
-                verify: false,
-                _log: options._log,
-                force: true, //# force the click, avoid waiting
-                timeout: options.timeout,
-                interval: options.interval,
-              })
-              .then(() => {
-                return type()
-              })
+              // return cy.now('click', $elToClick, {
+              //   $el: $elToClick,
+              //   log: false,
+              //   verify: false,
+              //   _log: options._log,
+              //   force: true, //# force the click, avoid waiting
+              //   timeout: options.timeout,
+              //   interval: options.interval,
+              // })
+              $elToFocus[0].focus()
+              $selection.moveSelectionToEnd()
+
+              return type().then(() => { console.log('afterType') })
             }
 
             return type()

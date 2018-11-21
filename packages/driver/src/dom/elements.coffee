@@ -9,7 +9,7 @@ fixedOrStickyRe = /(fixed|sticky)/
 
 focusable = "body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]"
 
-inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
+inputTypeNeedSingleValueChangeRe = /^(date|time|month|week|datetime|datetime-local)$/
 canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
 ## rules for native methods and props
@@ -119,13 +119,13 @@ _getType = ->
 
 nativeGetters = {
   value: _getValue
-  selectionStart: descriptor("HTMLInputElement", "selectionStart").get
   isContentEditable: _isContentEditable
   isCollapsed: descriptor("Selection", 'isCollapsed').get
   selectionStart: _getSelectionStart
   selectionEnd: _getSelectionEnd
   type: _getType
   frameElement: Object.getOwnPropertyDescriptor(window, "frameElement").get
+  activeElement: descriptor("Document", "activeElement").get
 }
 
 nativeSetters = {

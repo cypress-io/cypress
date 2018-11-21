@@ -1,9 +1,7 @@
 /* eslint-disable
     default-case,
     no-case-declarations,
-    no-undef,
     no-unused-vars,
-    one-var,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -601,6 +599,8 @@ const $Keyboard = {
 
     //# should make each keystroke async to mimic
     //# how keystrokes come into javascript naturally
+    console.log(keys)
+
     return Promise
     .each(keys, (key) => {
       return this.typeChars(el, key, options)
@@ -653,15 +653,29 @@ const $Keyboard = {
         .delay(options.delay)
 
       default:
-        return Promise
-        .each(chars.split(''), (char) => {
-          return Promise
-          .resolve(
-            $native.keypress(getKeyInfo(char))
-            // @typeKey(el, char, options)
+        console.log(chars)
+        const charsArr = chars.split('')
+        const { delay, simulated } = options
+
+        if (simulated) {
+          return Promise.each(charsArr,
+            (char) => {
+              return Promise.resolve(
+                this.typeKey(el, char, options)
+              )
+              .delay(delay)
+            }
           )
-          .delay(options.delay)
-        })
+        }
+
+        if (delay) {
+          return Promise.each(charsArr, (char) => {
+            return $native.keypress(getKeyInfo(char)).delay(delay)
+          })
+        }
+
+        return $native.keypressAll(getKeyInfo(charsArr))
+
     }
   },
 
@@ -685,7 +699,10 @@ const $Keyboard = {
     //# bail if we've said not to fire this specific event
     //# in our options
 
-    let charCode, charCodeAt, keyCode, which
+    let charCode
+    let charCodeAt
+    let keyCode
+    let which
 
     if (options[eventType] === false) {
       return true
@@ -876,11 +893,20 @@ const $Keyboard = {
 
   handleSpecialChars (el, chars, options) {
     options.key = chars
-    if (options.force) {
+    const { simulated } = options
+
+    if (simulated) {
       return this.specialChars[chars].call(this, el, options)
     }
 
     return this.specialCharsNative[chars].call(this, el, options)
+  },
+
+  modifiers: {
+    alt: false,
+    ctrl: false,
+    meta: false,
+    shift: false,
   },
 
   isModifier (chars) {

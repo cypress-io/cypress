@@ -208,6 +208,7 @@ create = (state) ->
 
   getFocused = ->
     try
+    ## need to use native getters for these
       { activeElement, body } = state("document")
 
       ## active element is the default if its null

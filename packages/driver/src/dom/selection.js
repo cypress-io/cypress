@@ -383,17 +383,22 @@ const isCollapsed = function (el) {
 }
 
 const selectAll = function (el) {
-  if ($elements.isTextarea(el) || $elements.isInput(el)) {
-    setSelectionRange(el, 0, $elements.getNativeProp(el, 'value').length)
+  const doc = cy.state('document')
 
-    return
-  }
+  $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
 
-  if ($elements.isContentEditable(el)) {
-    const doc = $document.getDocumentFromElement(el)
+  return
+  // if ($elements.isTextarea(el) || $elements.isInput(el)) {
+  //   setSelectionRange(el, 0, $elements.getNativeProp(el, 'value').length)
 
-    return $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
-  }
+  //   return
+  // }
+
+  // if ($elements.isContentEditable(el)) {
+  //   const doc = $document.getDocumentFromElement(el)
+
+  //   return $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
+  // }
 }
 //# Keeping around native implementation
 //# for same reasons as listed below
@@ -433,19 +438,27 @@ const moveSelectionToStart = () => {
 }
 
 const _moveSelectionTo = function (toStart) {
-  const $el = cy.getFocused()
+  const el = _getActive()
 
-  if ($el[0]) {
-    const el = $el[0]
+  if (el) {
+
+    /**
+     * @type {HTMLDocument}
+     */
     const doc = $document.getDocumentFromElement(el)
 
     $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
     const selection = doc.getSelection()
 
     if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
+      // collapsing the range doesn't work, since the range contains more than the input element
+      // const range = selection.getRangeAt(0)
+      // doc.getSelection().removeAllRanges()
+      // selection.addRange(range)
+      // range.collapse(toStart)
+      const direction = toStart ? 'backward' : 'forward'
 
-      return range.collapse(toStart)
+      selection.modify('move', direction, 'line')
     }
   }
 }
@@ -511,6 +524,13 @@ const interceptSelect = function () {
   }
 
   return $elements.callNativeMethod(this, 'select')
+}
+
+const _getActive = function () {
+  const doc = cy.state('document')
+  const activeEl = $elements.getNativeProp(doc, 'activeElement')
+
+  return activeEl
 }
 
 //# Selection API implementation of insert newline.
