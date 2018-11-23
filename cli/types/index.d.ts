@@ -1514,13 +1514,13 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/wait
      */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
+    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
     /**
      * Wait for list of XHR requests to complete.
      *
      * @see https://on.cypress.io/wait
      */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
+    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
@@ -1645,6 +1645,26 @@ declare namespace Cypress {
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
     timeout: number
+  }
+
+  /**
+   * Options that control how long the Test Runner waits for an XHR request and response to succeed
+   */
+  interface TimeoutableXHR {
+    /**
+     * Time to wait for the request (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    requestTimeout: number,
+    /**
+     * Time to wait for the response (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    responseTimeout: number
   }
 
   /**
