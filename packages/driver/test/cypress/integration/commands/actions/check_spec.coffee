@@ -268,6 +268,20 @@ describe "src/cy/commands/actions/check", ->
 
         cy.get(":checkbox:first").check()
 
+      it "still ensures visibility even during a noop", (done) ->
+        chk = $(":checkbox")
+        chk.show().last().hide()
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(chk.length + 1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(err.message).to.include "cy.check() failed because this element is not visible"
+          done()
+
+        cy.get(":checkbox").check()
+
       it "logs once when not dom subject", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
