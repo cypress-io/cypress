@@ -117,42 +117,43 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
-      if isDate and (
-        not _.isString(chars) or
-        not dateRegex.test(chars) or
-        not moment(chars).isValid()
-      )
-        $utils.throwErrByPath("type.invalid_date", {
-          onFail: options._log
-          args: { chars }
-        })
+      if !(chars == "{selectall}{del}")
+        if isDate and (
+          not _.isString(chars) or
+          not dateRegex.test(chars) or
+          not moment(chars).isValid()
+        )
+          $utils.throwErrByPath("type.invalid_date", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isMonth and (
-        not _.isString(chars) or
-        not monthRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_month", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isMonth and (
+          not _.isString(chars) or
+          not monthRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_month", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isWeek and (
-        not _.isString(chars) or
-        not weekRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_week", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isWeek and (
+          not _.isString(chars) or
+          not weekRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_week", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isTime and (
-        not _.isString(chars) or
-        not timeRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_time", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isTime and (
+          not _.isString(chars) or
+          not timeRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_time", {
+            onFail: options._log
+            args: { chars }
+          })
 
       options.chars = "" + chars
 
@@ -378,8 +379,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             })
 
     clear: (subject, options = {}) ->
-      ## what about other types of inputs besides just text?
-      ## what about the new HTML5 ones?
       _.defaults(options, {
         log: true
         force: false
