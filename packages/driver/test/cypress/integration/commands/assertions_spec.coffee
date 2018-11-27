@@ -598,7 +598,7 @@ describe "src/cy/commands/assertions", ->
           expect(log.invoke("consoleProps")).to.deep.eq {
             Command: "assert"
             subject: log.get("subject")
-            Message: "expected <body> to have a property length"
+            Message: "expected <body> to have property length"
           }
 
           done()
@@ -1536,11 +1536,11 @@ describe "src/cy/commands/assertions", ->
         )
 
         expect(l2.get("message")).to.eq(
-          "expected **{ foo: bar, baz: quux }** to have a property **foo**"
+          "expected **{ foo: bar, baz: quux }** to have property **foo**"
         )
 
         expect(l3.get("message")).to.eq(
-          "expected **{ foo: bar, baz: quux }** to have a property **foo** of **bar**"
+          "expected **{ foo: bar, baz: quux }** to have property **foo** of **bar**"
         )
 
         expect(l4.get("message")).to.eq(

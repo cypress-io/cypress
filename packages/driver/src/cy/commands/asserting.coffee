@@ -121,7 +121,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not 'isCheckingExistence' in exp and $dom.isElement(subject)
         cy.ensureAttached(subject, "should")
 
-      _.reduce chainers, (memo, value) =>
+      newExp = _.reduce chainers, (memo, value) =>
         if value not of memo
           err = $utils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
           err.retry = false
@@ -130,6 +130,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         applyChainer(memo, value)
 
       , exp
+
+      exp = if newExp then newExp else exp
 
     Promise.try(applyChainers).then ->
       ## if the _obj has been mutated then we

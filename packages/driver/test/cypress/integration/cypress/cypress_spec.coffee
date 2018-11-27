@@ -36,4 +36,4 @@ describe "driver/src/cypress/index", ->
       fn = ->
         Cypress.Log.command({})
 
-      expect(fn).to.throw(/has been renamed to Cypress.log/)
+      expect(fn).to.throw('has been renamed to Cypress.log')
