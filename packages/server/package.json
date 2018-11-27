@@ -169,7 +169,7 @@
     "ramda": "^0.24.0",
     "randomstring": "^1.1.5",
     "replacestream": "^4.0.3",
-    "request": "2.87.0",
+    "request": "2.88.0",
     "request-promise": "4.1.1",
     "return-deep-diff": "^0.2.9",
     "sanitize-filename": "^1.6.1",
