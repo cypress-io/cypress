@@ -572,17 +572,23 @@ const $Keyboard = {
   },
 
   type (options = {}) {
+    console.log('type, options', options)
     _.defaults(options, {
       delay: 10,
       onEvent () {},
       onBeforeEvent () {},
+      onFocusChange () {},
       onBeforeType () {},
+      onAfterType () {},
       onValueChange () {},
       onEnterPressed () {},
       onNoMatchingSpecialChars () {},
       onBeforeSpecialCharAction () {},
     })
 
+    /**
+     * @type {HTMLElement}
+     */
     const el = options.$el.get(0)
 
     const keys = options.chars.split(charsBetweenCurlyBracesRe).map((chars) => {
@@ -599,12 +605,34 @@ const $Keyboard = {
 
     //# should make each keystroke async to mimic
     //# how keystrokes come into javascript naturally
-    console.log(keys)
+
+    let prevElement = $elements.getActiveElement(el.ownerDocument)
 
     return Promise
-    .each(keys, (key) => {
+    .each(keys, (key, i) => {
+      let activeEl = $elements.getActiveElement(el.ownerDocument)
+
+      if (activeEl !== prevElement) {
+        let charsNeedingType = options.onFocusChange(activeEl, keys.slice(i))
+
+        if (charsNeedingType) {
+          options.chars = charsNeedingType
+
+          return this.type(options)
+        }
+      }
+
       return this.typeChars(el, key, options)
+
     }).then(() => {
+      let charsNeedingType = options.onAfterType($elements.getActiveElement(el.ownerDocument))
+
+      if (charsNeedingType) {
+        options.chars = charsNeedingType
+
+        return this.type(options)
+      }
+
       if (options.release !== false) {
         return this.resetModifiers(el, options.window)
       }
@@ -824,7 +852,7 @@ const $Keyboard = {
         }
       }
 
-      return options.updateValue(el, key)
+      return options.updateValue(el, key, options.chars)
     })
   },
 

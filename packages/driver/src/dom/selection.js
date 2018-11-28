@@ -382,6 +382,13 @@ const isCollapsed = function (el) {
   }
 }
 
+const focusCursor = (el) => {
+  if $elements.isContentEditable(el) {
+    _getsele
+  }
+
+}
+
 const selectAll = function (el) {
   const doc = cy.state('document')
 

@@ -469,6 +469,11 @@ getContainsSelector = (text, filter = "") ->
 
 priorityElement = "input[type='submit'], button, a, label"
 
+getActiveElement = (doc) ->
+  getNativeProp(doc, 'activeElement')
+
+
+
 getFirstDeepestElement = (elements, index = 0) ->
   ## iterate through all of the elements in pairs
   ## and check if the next item in the array is a
@@ -584,6 +589,8 @@ module.exports = {
   tryCallNativeMethod
 
   getElements
+
+  getActiveElement
 
   getFirstFocusableEl
 
