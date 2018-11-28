@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const os = require('os')
 const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
@@ -12,12 +13,16 @@ const { throwFormErrorText, errors } = require('../errors')
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
 
+function isPlatform (platform) {
+  return os.platform() === platform
+}
+
 function needsStderrPiped (needsXvfb) {
-  return util.isPlatform('darwin') || (needsXvfb && util.isPlatform('linux'))
+  return isPlatform('darwin') || (needsXvfb && isPlatform('linux'))
 }
 
 function needsEverythingPipedDirectly () {
-  return util.isPlatform('win32')
+  return isPlatform('win32')
 }
 
 function getStdio (needsXvfb) {
