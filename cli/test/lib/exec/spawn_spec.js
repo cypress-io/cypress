@@ -192,7 +192,7 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('does not set windowsHide property when getNode11WindowsFix():true', function () {
+    it('does not set windowsHide property when in darwin', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       return spawn.start([], { env: {} })
