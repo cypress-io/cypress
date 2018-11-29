@@ -705,7 +705,7 @@ describe "src/cy/commands/assertions", ->
               if attrs.name is "assert"
                 cy.removeAllListeners("log:added")
 
-                expect(log.get("message")).to.eq "expected **<button>** to have a property **length**"
+                expect(log.get("message")).to.eq "expected **<button>** to have property **length**"
                 done()
 
             cy.get("button:first").should("have.property", "length")

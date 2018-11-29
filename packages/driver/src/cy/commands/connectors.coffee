@@ -42,7 +42,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     remoteSubject = cy.getRemotejQueryInstance(subject)
 
     args = remoteSubject or subject
-    args = if "._spreadArray" in subject? then args else [args]
+    # TODO see if this can be simplified
+    hasSpreadArray = "._spreadArray" in subject? or subject?._spreadArray
+    args = if hasSpreadArray then args else [args]
 
     ## name could be invoke or its!
     name = state("current").get("name")
