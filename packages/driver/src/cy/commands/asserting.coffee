@@ -133,7 +133,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       , exp
 
-      exp = if newExp then newExp else exp
+      exp = newExp ? exp
 
     Promise.try(applyChainers).then ->
       ## if the _obj has been mutated then we
