@@ -3,7 +3,7 @@ _ = require("lodash")
 
 ## wrap the object in jquery
 wrap = (obj) ->
-  if isJquery(obj) then obj else $(obj)
+  $(obj)
 
 query = (selector, context) ->
   new $.fn.init(selector, context)
