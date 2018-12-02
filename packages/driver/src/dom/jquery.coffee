@@ -5,6 +5,9 @@ _ = require("lodash")
 wrap = (obj) ->
   if isJquery(obj) then obj else $(obj)
 
+query = (selector, context) ->
+  new $.fn.init(selector, context)
+
 ## pull out the raw elements if this is wrapped
 unwrap = (obj) ->
   if isJquery(obj)
@@ -22,6 +25,8 @@ isJquery = (obj) ->
 ## to avoid circular dependencies
 module.exports = {
   wrap
+
+  query
 
   unwrap
 

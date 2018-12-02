@@ -86,7 +86,7 @@ describe "src/cy/commands/actions/check", ->
     it "can check a collection", ->
       cy.get("[name=colors]").check().then ($inputs) ->
         $inputs.each (i, el) ->
-          expect($(el)).to.be.checked
+          expect(dom.wrap(el)).to.be.checked
 
     it "can check a specific value from a collection", ->
       cy.get("[name=colors]").check("blue").then ($inputs) ->
