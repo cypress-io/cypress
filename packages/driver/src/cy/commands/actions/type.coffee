@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 moment = require("moment")
 
@@ -161,7 +160,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getDefaultButtons = (form) ->
         form.find("input, button").filter (__, el) ->
-          $el = $(el)
+          $el = $dom.wrap(el)
           ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
           ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
 
@@ -387,7 +386,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## blow up if any member of the subject
       ## isnt a textarea or text-like
       clear = (el, index) ->
-        $el = $(el)
+        $el = $dom.wrap(el)
 
         if options.log
           ## figure out the options which actually change the behavior of clicks

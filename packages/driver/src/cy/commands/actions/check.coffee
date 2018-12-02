@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../../dom")
@@ -53,7 +52,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## blow up if any member of the subject
   ## isnt a checkbox or radio
   checkOrUncheckEl = (el, index) =>
-    $el = $(el)
+    $el = $dom.wrap(el)
 
     if not isAcceptableElement($el)
       node   = $dom.stringify($el)
