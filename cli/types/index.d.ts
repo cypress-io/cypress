@@ -10,12 +10,14 @@
 /// <reference path="./blob-util.d.ts" />
 /// <reference path="./bluebird.d.ts" />
 /// <reference path="./minimatch.d.ts" />
+/// <reference path="./moment.d.ts" />
 
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
 /// <reference types="lodash" />
 /// <reference types="mocha" />
+/// <reference types="moment" />
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
 
@@ -100,7 +102,7 @@ declare namespace Cypress {
      * @example
      *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
      */
-    moment: (...args: any[]) => any // perhaps we want to add moment as a dependency for types?
+    moment: Moment.MomentStatic
     /**
      * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
      *
@@ -1104,7 +1106,7 @@ declare namespace Cypress {
      *    cy.screenshot()
      *    cy.get(".post").screenshot()
      */
-    screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
     /**
      * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
      *
@@ -1512,13 +1514,13 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/wait
      */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
+    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
     /**
      * Wait for list of XHR requests to complete.
      *
      * @see https://on.cypress.io/wait
      */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
+    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
@@ -1566,6 +1568,16 @@ declare namespace Cypress {
      *    })
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Yield the element passed into `.wrap()` to the next command in the Cypress chain.
+     *
+     * @see https://on.cypress.io/wrap
+     * @example
+     *    cy.wrap(new Promise((resolve, reject) => {
+     *      setTimeout(resolve, 1000);
+     *    }).then(result => {})
+     */
+    wrap<F extends Promise<S>, S>(promise: F, options?: Partial<Loggable & Timeoutable>): Chainable<S>
     /**
      * Yields whatever is passed into `.wrap()` to the next command in the Cypress chain.
      *
@@ -1643,6 +1655,26 @@ declare namespace Cypress {
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
     timeout: number
+  }
+
+  /**
+   * Options that control how long the Test Runner waits for an XHR request and response to succeed
+   */
+  interface TimeoutableXHR {
+    /**
+     * Time to wait for the request (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    requestTimeout: number,
+    /**
+     * Time to wait for the response (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    responseTimeout: number
   }
 
   /**

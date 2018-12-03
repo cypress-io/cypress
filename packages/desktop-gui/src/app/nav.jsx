@@ -72,7 +72,6 @@ export default class Nav extends Component {
     return (
       <div className='logo'>
         <img src='img/cypress-inverse.png' />
-        <span>Beta</span>
       </div>
     )
   }
@@ -123,14 +122,15 @@ export default class Nav extends Component {
           {' '}{authStore.user.displayName}
         </span>
       )
-    } else {
-      return (
-        <span>
-          <i className='fa fa-sign-out'></i>{' '}
-          Log Out
-        </span>
-      )
     }
+
+    return (
+      <span>
+        <i className='fa fa-sign-out'></i>{' '}
+          Log Out
+      </span>
+    )
+
   }
 
   _select = (item) => {

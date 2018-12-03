@@ -1,4 +1,64 @@
-exports['e2e task fails 1'] = `
+exports['e2e task merges task events on subsequent registrations and logs warning for conflicts 1'] = `
+Warning: Multiple attempts to register the following task(s): two. Only the last attempt will be registered.
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (multiple_task_registrations_spec.coffee)                                  │
+  │ Searched:   cypress/integration/multiple_task_registrations_spec.coffee                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: multiple_task_registrations_spec.coffee...                                      (1 of 1) 
+
+
+  ✓ merges task events
+
+  1 passing
+
+
+  (Results)
+
+  ┌───────────────────────────────────────────────────────┐
+  │ Tests:        1                                       │
+  │ Passing:      1                                       │
+  │ Failing:      0                                       │
+  │ Pending:      0                                       │
+  │ Skipped:      0                                       │
+  │ Screenshots:  0                                       │
+  │ Video:        true                                    │
+  │ Duration:     X seconds                               │
+  │ Spec Ran:     multiple_task_registrations_spec.coffee │
+  └───────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/multiple-task-registrations/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ multiple_task_registrations_spec.cof…     XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e task handles undefined return and includes stack trace in error 1'] = `
 
 ====================================================================================================
 

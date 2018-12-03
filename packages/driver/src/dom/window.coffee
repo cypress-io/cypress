@@ -1,4 +1,4 @@
-$ = require("jquery")
+$jquery = require("./jquery")
 $document = require("./document")
 
 getWindowByElement = (el) ->
@@ -14,7 +14,10 @@ getWindowByDocument = (doc) ->
 
 isWindow = (obj) ->
   try
-    !!(obj and $.isWindow(obj[0])) or $.isWindow(obj)
+    if $jquery.isJquery(obj)
+      obj = obj[0]
+
+    Boolean(obj and obj.window is obj)
   catch
     false
 

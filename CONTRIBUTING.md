@@ -186,7 +186,11 @@ This outputs a lot of debugging lines. To focus on an individual module, run wit
 
 When running `npm start` this routes through the CLI and eventually calls `npm run dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
 
-If you want to bypass the CLI entirely, you can use the `npm run dev` task and pass arguments directly.
+If you want to bypass the CLI entirely, you can use the `npm run dev` task and pass arguments directly. For example to headlessly run a project in a given folder, while trying to record to the Dashboard
+
+```text
+npm run dev -- --run-project /project/folder --record --key <key>
+```
 
 #### Tasks
 

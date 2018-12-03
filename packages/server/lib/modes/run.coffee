@@ -7,6 +7,7 @@ human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
+
 recordMode = require("./record")
 errors     = require("../errors")
 Project    = require("../project")
@@ -21,7 +22,6 @@ trash      = require("../util/trash")
 random     = require("../util/random")
 system     = require("../util/system")
 duration   = require("../util/duration")
-progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
@@ -520,7 +520,6 @@ module.exports = {
 
       console.log("")
 
-      # bar = progress.create("Post Processing Video")
       console.log(
         gray("  - Started processing:  "),
         chalk.cyan("Compressing to #{videoCompression} CRF")
@@ -766,6 +765,7 @@ module.exports = {
       osName: sys.osName,
       osVersion: sys.osVersion,
       cypressVersion: pkg.version,
+      runUrl: runUrl,
       config,
     }
 
@@ -949,14 +949,14 @@ module.exports = {
         if not specs.length
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
+        runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
           @runSpecs({
             beforeSpecRun
             afterSpecRun
             projectRoot
             specPattern
             socketId
-            parallel
+            parallel: parallelOverride
             browser
             project
             runUrl
@@ -992,7 +992,8 @@ module.exports = {
             runAllSpecs
           })
         else
-          runAllSpecs()
+          ## not recording, can't be parallel
+          runAllSpecs({}, false)
 
   run: (options) ->
     electronApp

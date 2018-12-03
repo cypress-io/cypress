@@ -193,9 +193,10 @@ export default class RunsListItem extends Component {
   _osIcon () {
     if (!this._moreThanOneInstance() && this.props.run.instances.length) {
       return (osIcon(this.props.run.instances[0].platform.osName))
-    } else {
-      return 'desktop'
     }
+
+    return 'desktop'
+
   }
 
   _getUniqOs () {

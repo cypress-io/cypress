@@ -48,7 +48,9 @@ module.exports = {
   gravatarUrl: (email) => {
     let opts = { size: '13', default: 'mm' }
 
-    if (!email) { opts.forcedefault = 'y' }
+    if (!email) {
+      opts.forcedefault = 'y'
+    }
 
     return gravatar.url(email, opts, true)
   },
@@ -78,6 +80,7 @@ module.exports = {
 
   stripLeadingCyDirs (spec) {
     if (!spec) return null
+
     // remove leading 'cypress/integration' from spec
     return spec.replace(cyDirRegex, '')
   },

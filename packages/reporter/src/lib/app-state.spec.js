@@ -8,12 +8,14 @@ describe('app state', () => {
   context('#startRunning', () => {
     it('sets isRunning to true', () => {
       const instance = new AppState()
+
       instance.startRunning()
       expect(instance.isRunning).to.be.true
     })
 
     it('sets isStopped to false', () => {
       const instance = new AppState()
+
       instance.isStopped = true
       instance.startRunning()
       expect(instance.isStopped).to.be.false
@@ -23,12 +25,14 @@ describe('app state', () => {
   context('#pause', () => {
     it('sets isPaused to true', () => {
       const instance = new AppState()
+
       instance.pause()
       expect(instance.isPaused).to.be.true
     })
 
     it('sets the next command name', () => {
       const instance = new AppState()
+
       instance.pause('next command')
       expect(instance.nextCommandName).to.equal('next command')
     })
@@ -37,12 +41,14 @@ describe('app state', () => {
   context('#resume', () => {
     it('sets isPaused to false', () => {
       const instance = new AppState()
+
       instance.resume()
       expect(instance.isPaused).to.be.false
     })
 
     it('unsets the next command name', () => {
       const instance = new AppState()
+
       instance.resume()
       expect(instance.nextCommandName).to.be.null
     })
@@ -51,6 +57,7 @@ describe('app state', () => {
   context('#stop', () => {
     it('sets isStopped to true', () => {
       const instance = new AppState()
+
       instance.stop()
       expect(instance.isStopped).to.be.true
     })
@@ -59,12 +66,14 @@ describe('app state', () => {
   context('#end', () => {
     it('sets isRunning to false', () => {
       const instance = new AppState()
+
       instance.end()
       expect(instance.isRunning).to.be.false
     })
 
     it('resets autoScrollingEnabled', () => {
       const instance = new AppState()
+
       instance.temporarilySetAutoScrolling(false)
       instance.end()
       expect(instance.autoScrollingEnabled).to.be.true
@@ -74,18 +83,21 @@ describe('app state', () => {
   context('#temporarilySetAutoScrolling', () => {
     it('sets autoScrollingEnabled to boolean specified', () => {
       const instance = new AppState()
+
       instance.temporarilySetAutoScrolling(false)
       expect(instance.autoScrollingEnabled).to.be.false
     })
 
     it('does nothing if argument is null', () => {
       const instance = new AppState()
+
       instance.temporarilySetAutoScrolling(null)
       expect(instance.autoScrollingEnabled).to.be.true
     })
 
     it('does nothing if argument is undefined', () => {
       const instance = new AppState()
+
       instance.temporarilySetAutoScrolling()
       expect(instance.autoScrollingEnabled).to.be.true
     })
@@ -94,6 +106,7 @@ describe('app state', () => {
   context('#setAutoScrolling', () => {
     it('sets autoScrollingEnabled', () => {
       const instance = new AppState()
+
       instance.setAutoScrolling(false)
       expect(instance.autoScrollingEnabled).to.be.false
       instance.setAutoScrolling(true)
@@ -102,6 +115,7 @@ describe('app state', () => {
 
     it('sets reset value for autoScrollingEnabled', () => {
       const instance = new AppState()
+
       instance.setAutoScrolling(false)
       instance.reset()
       expect(instance.autoScrollingEnabled).to.be.false
@@ -111,6 +125,7 @@ describe('app state', () => {
   context('#toggleAutoScrolling', () => {
     it('toggles autoScrollingEnabled', () => {
       const instance = new AppState()
+
       instance.toggleAutoScrolling()
       expect(instance.autoScrollingEnabled).to.be.false
       instance.toggleAutoScrolling()
@@ -119,6 +134,7 @@ describe('app state', () => {
 
     it('sets reset value for autoScrollingEnabled', () => {
       const instance = new AppState()
+
       instance.toggleAutoScrolling()
       instance.reset()
       expect(instance.autoScrollingEnabled).to.be.false
@@ -128,6 +144,7 @@ describe('app state', () => {
   context('#reset', () => {
     it('resets autoScrollingEnabled when it has not been toggled', () => {
       const instance = new AppState()
+
       instance.temporarilySetAutoScrolling(false)
       instance.reset()
       expect(instance.autoScrollingEnabled).to.be.true
@@ -135,6 +152,7 @@ describe('app state', () => {
 
     it('does not reset autoScrollingEnabled when it has been toggled', () => {
       const instance = new AppState()
+
       instance.toggleAutoScrolling()
       instance.reset()
       expect(instance.autoScrollingEnabled).to.be.false
@@ -142,6 +160,7 @@ describe('app state', () => {
 
     it('sets isPaused to false', () => {
       const instance = new AppState()
+
       instance.isPaused = true
       instance.reset()
       expect(instance.isPaused).to.be.false
@@ -149,6 +168,7 @@ describe('app state', () => {
 
     it('sets isRunning to false', () => {
       const instance = new AppState()
+
       instance.isRunning = true
       instance.reset()
       expect(instance.isRunning).to.be.false
@@ -156,6 +176,7 @@ describe('app state', () => {
 
     it('sets nextCommandName to null', () => {
       const instance = new AppState()
+
       instance.nextCommandName = 'next command'
       instance.reset()
       expect(instance.nextCommandName).to.be.null
@@ -163,6 +184,7 @@ describe('app state', () => {
 
     it('sets pinnedSnapshotId to null', () => {
       const instance = new AppState()
+
       instance.pinnedSnapshotId = 'c4'
       instance.reset()
       expect(instance.pinnedSnapshotId).to.be.null

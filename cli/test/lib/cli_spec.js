@@ -19,46 +19,55 @@ describe('cli', function () {
     sinon.stub(process, 'exit')
     sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
-    this.exec = (args) => cli.init(`node test ${args}`.split(' '))
+    this.exec = (args) => {
+      return cli.init(`node test ${args}`.split(' '))
+    }
   })
 
   context('unknown option', () => {
     // note it shows help for that specific command
-    it('shows help', () =>
-      execa('bin/cypress', ['open', '--foo']).then((result) => {
+    it('shows help', () => {
+      return execa('bin/cypress', ['open', '--foo']).then((result) => {
         snapshot('shows help for open --foo', result)
       })
+    }
     )
 
-    it('shows help for run command', () =>
-      execa('bin/cypress', ['run', '--foo']).then((result) => {
+    it('shows help for run command', () => {
+      return execa('bin/cypress', ['run', '--foo']).then((result) => {
         snapshot('shows help for run --foo', result)
       })
+    }
     )
   })
 
   context('help command', () => {
-    it('shows help', () =>
-      execa('bin/cypress', ['help']).then(snapshot)
+    it('shows help', () => {
+      return execa('bin/cypress', ['help']).then(snapshot)
+    }
     )
 
-    it('shows help for -h', () =>
-      execa('bin/cypress', ['-h']).then(snapshot)
+    it('shows help for -h', () => {
+      return execa('bin/cypress', ['-h']).then(snapshot)
+    }
     )
 
-    it('shows help for --help', () =>
-      execa('bin/cypress', ['--help']).then(snapshot)
+    it('shows help for --help', () => {
+      return execa('bin/cypress', ['--help']).then(snapshot)
+    }
     )
   })
 
   context('unknown command', () => {
-    it('shows usage and exits', () =>
-      execa('bin/cypress', ['foo']).then(snapshot)
+    it('shows usage and exits', () => {
+      return execa('bin/cypress', ['foo']).then(snapshot)
+    }
     )
   })
 
   context('cypress version', function () {
     const binaryDir = '/binary/dir'
+
     beforeEach(function () {
       sinon.stub(state, 'getBinaryDir').returns(binaryDir)
     })
@@ -136,6 +145,7 @@ describe('cli', function () {
 
     it('run.start with options + catches errors', function (done) {
       const err = new Error('foo')
+
       run.start.rejects(err)
       this.exec('run')
 
@@ -261,7 +271,6 @@ describe('cli', function () {
     })
   })
 
-
   it('install calls install.start without forcing', function () {
     sinon.stub(install, 'start').resolves()
     this.exec('install')
@@ -286,7 +295,6 @@ describe('cli', function () {
     })
   })
   context('cypress verify', function () {
-
 
     it('verify calls verify.start with force: true', function () {
       sinon.stub(verify, 'start').resolves()
