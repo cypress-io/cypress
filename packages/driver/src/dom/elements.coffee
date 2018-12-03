@@ -252,7 +252,12 @@ isType = ($el, type) ->
   el = [].concat($jquery.unwrap($el))[0]
   ## NOTE: use DOMElement.type instead of getAttribute('type') since
   ##       <input type="asdf"> will have type="text", and behaves like text type
-  (getNativeProp(el, 'type') or "").toLowerCase() is type
+  elType = (getNativeProp(el, 'type') or "").toLowerCase()
+
+  if _.isArray(type)
+    return _.includes(type, elType)
+
+  elType is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"

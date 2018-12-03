@@ -1514,13 +1514,13 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/wait
      */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
+    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
     /**
      * Wait for list of XHR requests to complete.
      *
      * @see https://on.cypress.io/wait
      */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
+    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
@@ -1568,6 +1568,16 @@ declare namespace Cypress {
      *    })
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Yield the element passed into `.wrap()` to the next command in the Cypress chain.
+     *
+     * @see https://on.cypress.io/wrap
+     * @example
+     *    cy.wrap(new Promise((resolve, reject) => {
+     *      setTimeout(resolve, 1000);
+     *    }).then(result => {})
+     */
+    wrap<F extends Promise<S>, S>(promise: F, options?: Partial<Loggable & Timeoutable>): Chainable<S>
     /**
      * Yields whatever is passed into `.wrap()` to the next command in the Cypress chain.
      *
@@ -1645,6 +1655,26 @@ declare namespace Cypress {
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
     timeout: number
+  }
+
+  /**
+   * Options that control how long the Test Runner waits for an XHR request and response to succeed
+   */
+  interface TimeoutableXHR {
+    /**
+     * Time to wait for the request (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    requestTimeout: number,
+    /**
+     * Time to wait for the response (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    responseTimeout: number
   }
 
   /**
