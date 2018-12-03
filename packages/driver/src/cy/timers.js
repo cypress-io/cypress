@@ -79,12 +79,15 @@ const create = () => {
 
     const wrapTimer = (fnName) => {
       return (...args) => {
-        const [fnOrCode, delay, ...params] = args
-
         let timerId
+        let [fnOrCode, delay, ...params] = args
 
         const timerOverride = (timestamp) => {
-          const paramsWithTimestamp = params.concat(timestamp)
+          // https://github.com/cypress-io/cypress/issues/2725
+          // requestAnimationFrame yields a high res timestamp
+          if (arguments.length) {
+            params = [timestamp]
+          }
 
           // if we're currently paused then we need
           // to enqueue this timer callback and invoke
@@ -93,8 +96,8 @@ const create = () => {
             timerQueue.push({
               timerId,
               fnOrCode,
+              params,
               contentWindow,
-              params: paramsWithTimestamp,
               type: fnName,
             })
 
@@ -103,7 +106,7 @@ const create = () => {
 
           // else go ahead and invoke the real function
           // the same way the browser otherwise would
-          return invoke(contentWindow, fnOrCode, paramsWithTimestamp)
+          return invoke(contentWindow, fnOrCode, params)
         }
 
         timerId = callThrough(fnName, [timerOverride, delay, ...params])

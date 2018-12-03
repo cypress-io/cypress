@@ -84,7 +84,7 @@ describe('driver/src/cy/timers', () => {
         win.bar = 'bar'
       })
 
-      const id1 = win.requestAnimationFrame(rafStub, 1)
+      const id1 = win.requestAnimationFrame(rafStub, 'foo', 'bar', 'baz')
 
       // the timer id is 1 by default since
       // timers increment and always start at 0
@@ -97,10 +97,11 @@ describe('driver/src/cy/timers', () => {
         // requestAnimationFrame should have passed through
         // its high res timestamp from performance.now()
         expect(rafStub).to.be.calledWithMatch(Number)
+        expect(rafStub.firstCall.args.length).to.eq(1)
 
         win.bar = null
 
-        const id2 = win.requestAnimationFrame(rafStub, 2)
+        const id2 = win.requestAnimationFrame(rafStub)
 
         expect(id2).to.eq(2)
 
