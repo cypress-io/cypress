@@ -626,20 +626,6 @@ describe "$Cypress.Runner API", ->
           expect(calls).to.have.length(1)
           done()
 
-  context "#grep", ->
-    beforeEach ->
-      @runner = $Cypress.Runner.runner(@Cypress, {})
-
-    it "set /.*/ by default", ->
-      @runner.grep()
-      expect(@runner.runner._grep).to.match /.*/
-
-    it "can set to another RegExp", ->
-      re = /.+/
-      @runner.grep(re)
-
-      expect(@runner.runner._grep).to.eq re
-
   context "#anyTestInSuite", ->
     beforeEach ->
       runner = Fixtures.createRunnables {
@@ -716,17 +702,6 @@ describe "$Cypress.Runner API", ->
     it "pushes tests into tests array", ->
       ## 4 tests
       expect(@runner.tests).to.have.length(4)
-
-    it "only pushes matching grep tests", ->
-      ## with 4 existing tests
-      expect(@runner.tests).to.have.length(4)
-
-      @runner.grep(/four/)
-
-      @runner.normalizeAll()
-
-      ## only 1 test should have matched the grep
-      expect(@runner.tests).to.have.length(1)
 
     it "sets runnable type", ->
       types = _.map @runner.runnables, "type"

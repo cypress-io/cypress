@@ -1054,9 +1054,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
           ## if we're cy or we've enqueued commands
           if isCy(ret) or (queue.length > currentLength)
-            ## the run should already be kicked off
-            ## by now and return this promise
-            return state("promise")
+            if fn.length
+              ## if user has passed done callback
+              ## don't return anything so we don't get an
+              ## 'overspecified' error from mocha
+              return
+            else
+              ## otherwise, return the 'queue promise'
+              ## so mocha awaits it
+              return state("promise")
 
           ## else just return ret
           return ret

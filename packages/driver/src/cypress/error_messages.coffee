@@ -547,6 +547,17 @@ module.exports = {
     async_timed_out: "Timed out after '{{ms}}ms'. The done() callback was never invoked!"
     invalid_interface: "Invalid mocha interface '{{name}}'"
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
+    overspecified: """
+    Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+    Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
+
+    #{divider(60, '-')}
+
+    Original mocha error:
+
+    {{error}}
+    """
 
   navigation:
     cross_origin: """

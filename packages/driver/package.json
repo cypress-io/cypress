@@ -49,7 +49,7 @@
     "method-override": "3.0.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
-    "mocha": "cypress-io/mocha#58f6eac05e664fc6b69aa9fba70f1f6b5531a900",
+    "mocha": "5.2.0",
     "moment": "2.24.0",
     "morgan": "1.9.1",
     "npm-install-version": "6.0.2",

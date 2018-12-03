@@ -106,7 +106,7 @@ describe "promises", ->
 
     cy.foo()
 
-  it "can return a promise that throws on its own without warning", (done) ->
+  it "can return a promise that throws on its own without warning", ->
     Cypress.Promise
     .delay(10)
     .then ->
@@ -116,7 +116,6 @@ describe "promises", ->
 
       throw new Error("foo")
     .catch ->
-      done()
 
   it "can still fail cypress commands", (done) ->
     cy.on "fail", (err) ->
@@ -128,3 +127,4 @@ describe "promises", ->
     .then ->
       cy.wrap({}).then ->
         throw new Error("foo")
+    return
