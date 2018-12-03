@@ -7,7 +7,7 @@ config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
 specsUtil = require("./util/specs")
-preprocessor = require("./plugins/preprocessor")
+preprocessor = require("./background/preprocessor")
 
 create = ->
   openProject     = null

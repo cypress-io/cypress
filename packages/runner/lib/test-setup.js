@@ -22,7 +22,9 @@ Object.keys(document.defaultView).forEach((property) => {
 global.navigator = {
   userAgent: 'node.js',
 }
-global.requestAnimationFrame = (fn) => fn()
+global.requestAnimationFrame = (fn) => {
+  return fn()
+}
 global.cancelAnimationFrame = () => {}
 
 // enzyme, and therefore chai-enzyme, needs to be required after
@@ -48,4 +50,6 @@ class Runner {
 
 global.Mocha = { Runnable, Runner }
 $Cypress.create = () => {}
-io.connect = () => { return { emit: () => {}, on: () => {} } }
+io.connect = () => {
+  return { emit: () => {}, on: () => {} }
+}

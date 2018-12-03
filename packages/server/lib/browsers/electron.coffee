@@ -5,7 +5,7 @@ debug         = require("debug")("cypress:server:browsers:electron")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
 appData       = require("../util/app_data")
-plugins       = require("../plugins")
+background    = require("../background")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
@@ -172,12 +172,12 @@ module.exports = {
       Promise
       .try =>
         ## bail if we're not registered to this event
-        return options if not plugins.has("before:browser:launch")
+        return options if not background.isRegistered("before:browser:launch")
 
-        plugins.execute("before:browser:launch", options.browser, options)
+        background.execute("before:browser:launch", options.browser, options)
         .then (newOptions) ->
           if newOptions
-            debug("received new options from plugin event %o", newOptions)
+            debug("received new options from background event %o", newOptions)
             _.extend(options, newOptions)
 
           return options

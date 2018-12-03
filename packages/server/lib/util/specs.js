@@ -24,7 +24,6 @@ const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
   })
 }
 
-
 const find = function (config, specPattern) {
   let fixturesFolderPath
 
@@ -114,7 +113,6 @@ const find = function (config, specPattern) {
       return !minimatch(file, pattern, MINIMATCH_OPTIONS)
     })
   }
-
 
   const matchesSpecPattern = function (file) {
     if (!specPattern) {

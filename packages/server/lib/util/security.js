@@ -25,7 +25,6 @@ const strip = (html) => {
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
 }
 
-
 const stripStream = () => {
   return pumpify(
     replacestream(topOrParentEqualityBeforeRe, '$1self'),
@@ -34,7 +33,6 @@ const stripStream = () => {
     replacestream(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
   )
 }
-
 
 module.exports = {
   strip,
