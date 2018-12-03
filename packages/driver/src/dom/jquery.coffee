@@ -19,7 +19,10 @@ unwrap = (obj) ->
 isJquery = (obj) ->
   ## does it have the jquery property and is the
   ## constructor a function?
-  !!(obj and obj.jquery and _.isFunction(obj.constructor))
+  try
+    hasJqueryProperty = "jquery" in obj or obj?.jquery
+
+  !!(hasJqueryProperty and _.isFunction(obj.constructor))
 
 ## doing a little jiggle wiggle here
 ## to avoid circular dependencies
