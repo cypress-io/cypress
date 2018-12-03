@@ -7,7 +7,7 @@ $coordinates = require("./coordinates")
 
 { isWindow, getWindowByElement } = $window
 { isDocument } = $document
-{ wrap, unwrap, isJquery } = $jquery
+{ wrap, unwrap, isJquery, query } = $jquery
 { isVisible, isHidden, getReasonIsHidden } = $visibility
 { isType, isFocusable, isElement, isScrollable, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent,  getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent,  getFirstScrollableParent } = $elements
 { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
@@ -22,6 +22,8 @@ isDom = (obj) ->
 ## can be tucked away behind these interfaces.
 module.exports = {
   wrap
+
+  query
 
   unwrap
 

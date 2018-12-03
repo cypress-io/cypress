@@ -76,6 +76,13 @@ describe "src/cy/commands/actions/check", ->
 
       cy.get(checkbox).check()
 
+    it "does not require visibility with force: true", ->
+      checkbox = ":checkbox[name='birds']"
+      $(checkbox).last().hide()
+
+      cy.get(checkbox).check({force: true}).then ($checkbox) ->
+        expect($checkbox).to.be.checked
+
     it "can check a collection", ->
       cy.get("[name=colors]").check().then ($inputs) ->
         $inputs.each (i, el) ->
