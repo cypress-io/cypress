@@ -243,7 +243,7 @@ class Server
           resolve([port, warning])
 
   _port: ->
-    @_server?.address()?.port
+    _.chain(@_server).invoke("address").get("port").value()
 
   _listen: (port, onError) ->
     new Promise (resolve) =>
@@ -326,6 +326,8 @@ class Server
     ## so we are idempotant and do not make
     ## another request
     if obj = buffers.getByOriginalUrl(urlStr)
+      debug("got previous request buffer for url:", urlStr)
+
       ## reset the cookies from the existing stream's jar
       request.setJarCookies(obj.jar, automationRequest)
       .then (c) ->
@@ -360,6 +362,11 @@ class Server
           pt = str
           .on("error", error)
           .on "response", (incomingRes) =>
+            debug(
+              "got resolve:url response %o",
+              _.pick(incomingRes, "headers", "statusCode")
+            )
+
             str.removeListener("error", error)
             str.on "error", (err) ->
               ## if we have listeners on our
@@ -404,12 +411,18 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
-              debug("received response for resolving url %o", details)
+              debug("setting details resolving url %o", details)
 
+              ## TODO: think about moving this logic back into the
+              ## frontend so that the driver can be in control of
+              ## when the server should cache the request buffer
+              ## and set the domain vs not
               if isOk and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
                 @_onDomainSet(newUrl, options) if not handlingLocalFile
+
+                debug("setting buffer for url:", newUrl)
 
                 buffers.set({
                   url: newUrl
@@ -420,6 +433,8 @@ class Server
                   response: incomingRes
                 })
               else
+                ## TODO: move this logic to the driver too for
+                ## the same reasons listed above
                 restorePreviousState()
 
               resolve(details)

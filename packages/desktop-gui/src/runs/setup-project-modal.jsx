@@ -334,6 +334,7 @@ class SetupProject extends Component {
 
   _error () {
     const error = this.state.error
+
     if (!error) return null
 
     return (
@@ -426,6 +427,7 @@ class SetupProject extends Component {
         isSubmitting: false,
       })
       this.props.onSetup(projectDetails)
+
       return null
     })
     .catch(ipc.isUnauthed, ipc.handleUnauthed)

@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $Mouse = require("../../../cypress/mouse")
@@ -42,7 +41,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       win = state("window")
 
       click = (el, index) =>
-        $el = $(el)
+        $el = $dom.wrap(el)
 
         domEvents = {}
         $previouslyFocusedEl = null
@@ -217,7 +216,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       dblclicks = []
 
       dblclick = (el, index) =>
-        $el = $(el)
+        $el = $dom.wrap(el)
 
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from

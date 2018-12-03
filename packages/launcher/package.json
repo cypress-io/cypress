@@ -34,6 +34,7 @@
     "@types/lodash": "^4.14.64",
     "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.18",
+    "@types/ramda": "^0.25.40",
     "bin-up": "^1.1.0",
     "chai": "^3.5.0",
     "prettier": "^1.7.0",
@@ -42,8 +43,7 @@
     "sinon-chai": "^2.8.0",
     "tslint": "5.8.0",
     "tslint-config-standard": "7.0.0",
-    "typescript": "2.6.2",
-    "@types/ramda": "0.24.14"
+    "typescript": "2.9.2"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
