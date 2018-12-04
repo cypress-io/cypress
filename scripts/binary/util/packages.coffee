@@ -19,14 +19,14 @@ DEFAULT_PATHS = "package.json".split(" ")
 pathToPackageJson = (pkg) ->
   path.join(pkg, "package.json")
 
-npmRun = (args, cwd) ->
+npmRun = (args, cwd, env = {}) ->
   command = "npm " + args.join(" ")
   console.log(command)
   if cwd
     console.log("in folder:", cwd)
 
   la(check.maybe.string(cwd), "invalid CWD string", cwd)
-  execa("npm", args, { stdio: "inherit", cwd })
+  execa("npm", args, { stdio: "inherit", cwd, env })
   # if everything is ok, resolve with nothing
   .then R.always(undefined)
   .catch (result) ->
@@ -114,9 +114,10 @@ npmInstallAll = (pathToPackages) ->
     console.log("installing %s", pkg)
     console.log("NODE_ENV is %s", process.env.NODE_ENV)
 
+    # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
     npmInstall = _.partial(npmRun, ["install", "--only=production", "--quiet"])
-    npmInstall(pkg)
+    npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
       Promise
       .delay(1000)
