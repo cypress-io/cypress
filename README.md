@@ -66,7 +66,33 @@ npm install --save-dev cypress cypress-vue-unit-test
 
 1. Create a new project with `vue create <project-name>` and select Cypress for E2E testing
 1. Install this package with `npm install --save-dev cypress-vue-unit-test`
-1. Enable the import of Vue files by uncommenting the "webpack import" and the "file:processor event" lines in tests/e2e/plugins/index.js
+1. Enable the import of Vue files by uncommenting the "webpack import" and the "file:processor event" lines in tests/e2e/plugins/index.js. The file should then look like this:
+
+```js
+// tests/e2e/plugins/index.js
+
+// webpack import
+const webpack = require('@cypress/webpack-preprocessor')
+
+module.exports = (on, config) => {
+  // file:processor event
+  on(
+    'file:preprocessor',
+    webpack({
+      webpackOptions: require('@vue/cli-service/webpack.config'),
+      watchOptions: {}
+    })
+  )
+
+  return Object.assign({}, config, {
+    fixturesFolder: 'tests/e2e/fixtures',
+    integrationFolder: 'tests/e2e/specs',
+    screenshotsFolder: 'tests/e2e/screenshots',
+    videosFolder: 'tests/e2e/videos',
+    supportFile: 'tests/e2e/support/index.js'
+  })
+}
+```
 
 <a name="use"/>
 
