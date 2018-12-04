@@ -7,7 +7,7 @@ Jimp            = require("jimp")
 sizeOf          = require("image-size")
 colorString     = require("color-string")
 debug           = require("debug")("cypress:server:screenshot")
-plugins         = require("./plugins")
+background      = require("./background")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
 pathHelpers     = require("./util/path_helpers")
@@ -453,10 +453,10 @@ module.exports = {
     details = _.extend({}, data, details, { duration })
     details = _.pick(details, "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
 
-    if not plugins.has("after:screenshot")
+    if not background.isRegistered("after:screenshot")
       return Promise.resolve(details)
 
-    plugins.execute("after:screenshot", details)
+    background.execute("after:screenshot", details)
     .then (updates) =>
       if not _.isPlainObject(updates)
         return details

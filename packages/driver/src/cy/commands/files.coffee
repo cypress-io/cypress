@@ -94,16 +94,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if _.isObject(contents)
-        objContents = contents
         contents = JSON.stringify(contents, null, 2)
 
       Cypress.backend("write:file", fileName, contents, _.pick(options, ["encoding", "flag"]))
       .then ({ contents, filePath }) ->
         consoleProps["File Path"] = filePath
         consoleProps["Contents"] = contents
-        if objContents?
-          return objContents
-        return contents
+        return null
       .catch Promise.TimeoutError, (err) ->
         $utils.throwErrByPath "files.timed_out", {
           onFail: options._log

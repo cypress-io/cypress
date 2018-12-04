@@ -34,7 +34,6 @@ const checkIfResolveChangedRootFolder = (resolved, initial) => {
   !resolved.startsWith(initial)
 }
 
-
 // real folder path found could be different due to symlinks
 // For example, folder /tmp/foo on Mac is really /private/tmp/foo
 const getRealFolderPath = function (folder) {

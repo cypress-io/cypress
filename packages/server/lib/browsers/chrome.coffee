@@ -4,7 +4,7 @@ path      = require("path")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
-plugins   = require("../plugins")
+background = require("../background")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
@@ -65,11 +65,11 @@ defaultArgs = [
   "--disable-default-apps"
 ]
 
-pluginsBeforeBrowserLaunch = (browser, args) ->
+backgroundBeforeBrowserLaunch = (browser, args) ->
   ## bail if we're not registered to this event
-  return args if not plugins.has("before:browser:launch")
+  return args if not background.isRegistered("before:browser:launch")
 
-  plugins.execute("before:browser:launch", browser, args)
+  background.execute("before:browser:launch", browser, args)
   .then (newArgs) ->
     debug("got user args for 'before:browser:launch'", newArgs)
 
@@ -161,7 +161,7 @@ module.exports = {
         ## before launching the browser every time
         utils.ensureCleanCache(browserName, isTextTerminal),
 
-        pluginsBeforeBrowserLaunch(options.browser, args)
+        backgroundBeforeBrowserLaunch(options.browser, args)
       ])
     .spread (cacheDir, args) =>
       Promise.all([

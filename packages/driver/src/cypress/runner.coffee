@@ -6,7 +6,6 @@ Pending = require("mocha/lib/pending")
 $Log = require("./log")
 $utils = require("./utils")
 
-defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
@@ -193,7 +192,7 @@ getAllSiblingTests = (suite, getTestById) ->
     ## iterate through each of our suites tests.
     ## this will iterate through all nested tests
     ## as well.  and then we add it only if its
-    ## in our grepp'd tests array
+    ## in our filtered tests array
     if getTestById(test.id)
       tests.push test
 
@@ -212,7 +211,7 @@ getTestFromHook = (hook, suite, getTestById) ->
     return found if found
 
   ## returns us the very first test
-  ## which is in our grepped tests array
+  ## which is in our filtered tests array
   ## based on walking down the current suite
   ## iterating through each test until it matches
   found = onFirstTest suite, (test) =>
@@ -227,11 +226,11 @@ getTestFromHook = (hook, suite, getTestById) ->
 
 ## we have to see if this is the last suite amongst
 ## its siblings.  but first we have to filter out
-## suites which dont have a grep'd test in them
+## suites which dont have a filtered test in them
 isLastSuite = (suite, tests) ->
   return false if suite.root
 
-  ## grab all of the suites from our grep'd tests
+  ## grab all of the suites from our filtered tests
   ## including all of their ancestor suites!
   suites = _.reduce tests, (memo, test) ->
     while parent = test.parent
@@ -296,17 +295,17 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
       when "afterEach"
         t = getTest()
 
-        ## find all of the grep'd _tests which share
+        ## find all of the filtered _tests which share
         ## the same parent suite as our current _test
         tests = getAllSiblingTests(t.parent, getTestById)
 
         ## make sure this test isnt the last test overall but also
-        ## isnt the last test in our grep'd parent suite's tests array
+        ## isnt the last test in our filtered parent suite's tests array
         if @suite.root and (t isnt _.last(allTests)) and (t isnt _.last(tests))
           changeFnToRunAfterHooks()
 
       when "afterAll"
-        ## find all of the grep'd allTests which share
+        ## find all of the filtered allTests which share
         ## the same parent suite as our current _test
         if t = getTest()
           siblings = getAllSiblingTests(t.parent, getTestById)
@@ -327,17 +326,6 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
 
     _runnerHook.call(@, name, fn)
 
-matchesGrep = (runnable, grep) ->
-  ## we have optimized this iteration to the maximum.
-  ## we memoize the existential matchesGrep property
-  ## so we dont regex again needlessly when going
-  ## through tests which have already been set earlier
-  if (not runnable.matchesGrep?) or (not _.isEqual(runnable.grepRe, grep))
-    runnable.grepRe      = grep
-    runnable.matchesGrep = grep.test(runnable.fullTitle())
-
-  runnable.matchesGrep
-
 getTestResults = (tests) ->
   _.map tests, (test) ->
     obj = _.pick(test, "id", "duration", "state")
@@ -347,7 +335,12 @@ getTestResults = (tests) ->
       obj.state = "skipped"
     obj
 
-normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getTestId) ->
+hasOnly = (suite) ->
+  suite._onlyTests.length or
+  suite._onlySuites.length or
+  _.some(suite.suites, hasOnly)
+
+normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getTestId) ->
   hasTests = false
 
   ## only loop until we find the first test
@@ -361,10 +354,8 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
   ## we hand back a normalized object but also
   ## create optimized lookups for the tests without
   ## traversing through it multiple times
-  tests         = {}
-  grepIsDefault = _.isEqual(grep, defaultGrepRe)
-
-  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
+  tests = {}
+  normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
 
   if setTestsById
     ## use callback here to hand back
@@ -375,10 +366,10 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
     ## same pattern here
     setTests(_.values(tests))
 
-  return obj
+  return normalizedSuite
 
-normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId) ->
-  normalizer = (runnable) =>
+normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTestId) ->
+  normalizeRunnable = (runnable) =>
     runnable.id = getTestId()
 
     ## tests have a type of 'test' whereas suites do not have a type property
@@ -402,57 +393,50 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
   push = (test) =>
     tests[test.id] ?= test
 
-  obj = normalizer(runnable)
+  normalizedRunnable = normalizeRunnable(runnable)
 
-  ## if we have a default grep then avoid
-  ## grepping altogether and just push
-  ## tests into the array of tests
-  if grepIsDefault
+  if runnable.type isnt "suite" or not hasOnly(runnable)
     if runnable.type is "test"
       push(runnable)
 
-    ## and recursively iterate and normalize all other _runnables
-    _.each {tests: runnable.tests, suites: runnable.suites}, (_runnables, key) =>
-      if runnable[key]
-        obj[key] = _.map _runnables, (runnable) =>
-          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
-  else
-    ## iterate through all tests and only push them in
-    ## if they match the current grep
-    obj.tests = _.reduce runnable.tests ? [], (memo, test) =>
-      ## only push in the test if it matches
-      ## our grep
-      if matchesGrep(test, grep)
-        memo.push(normalizer(test))
-        push(test)
-      memo
-    , []
+    ## recursively iterate and normalize all other _runnables
+    _.each {tests: runnable.tests, suites: runnable.suites}, (_runnables, type) =>
+      if runnable[type]
+        normalizedRunnable[type] = _.map _runnables, (runnable) =>
+          normalize(runnable, tests, initialTests, onRunnable, onLogsById, getTestId)
 
-    ## and go through the suites
-    obj.suites = _.reduce runnable.suites ? [], (memo, suite) =>
-      ## but only add them if a single nested test
-      ## actually matches the grep
-      any = anyTestInSuite suite, (test) =>
-        matchesGrep(test, grep)
+    return normalizedRunnable
 
-      if any
-        memo.push(
-          normalize(
-            suite,
-            tests,
-            initialTests,
-            grep,
-            grepIsDefault,
-            onRunnable,
-            onLogsById,
-            getTestId
-          )
-        )
+  ## this follows how mocha filters onlys. its runner#filterOnly
+  ## is pretty much the same minus the normalization part
+  filterOnly = (normalizedSuite, suite) ->
+    if suite._onlyTests.length
+      suite.tests = suite._onlyTests
+      normalizedSuite.tests = _.map suite._onlyTests, (test) =>
+        normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById, getTestId)
+        push(normalizedTest)
+        normalizedTest
+      suite.suites = []
+      normalizedSuite.suites = []
+    else
+      suite.tests = []
+      normalizedSuite.tests = []
+      _.each suite._onlySuites, (onlySuite) ->
+        normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById, getTestId)
+        if hasOnly(onlySuite)
+          filterOnly(normalizedOnlySuite, onlySuite)
 
-      memo
-    , []
+      suite.suites = _.filter suite.suites, (childSuite) ->
+        normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById, getTestId)
+        suite._onlySuites.indexOf(childSuite) isnt -1 or filterOnly(normalizedChildSuite, childSuite)
+      normalizedSuite.suites = _.map suite.suites, (childSuite) ->
+        normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId)
 
-  return obj
+    return suite.tests.length or suite.suites.length
+
+  filterOnly(normalizedRunnable, runnable)
+
+  return normalizedRunnable
 
 afterEachFailed = (Cypress, test, err) ->
   test.state = "failed"
@@ -717,23 +701,6 @@ create = (specWindow, mocha, Cypress, cy) ->
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
-    grep: (re) ->
-      if arguments.length
-        _runner._grep = re
-      else
-        ## grab grep from the mocha _runner
-        ## or just set it to all in case
-        ## there is a mocha regression
-        _runner._grep ?= defaultGrepRe
-
-    options: (options = {}) ->
-      ## TODO
-      ## need to handle
-      ## ignoreLeaks, asyncOnly, globals
-
-      if re = options.grep
-        @grep(re)
-
     normalizeAll: (tests) ->
       ## if we have an uncaught error then slice out
       ## all of the tests and suites and just generate
@@ -750,7 +717,6 @@ create = (specWindow, mocha, Cypress, cy) ->
       normalizeAll(
         _runner.suite,
         tests,
-        @grep(),
         setTestsById,
         setTests,
         onRunnable,

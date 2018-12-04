@@ -92,8 +92,8 @@ The task handler was:
 
 returns:undefined() {}
 
-Fix this in your plugins file here:
-/foo/bar/.projects/e2e/cypress/plugins/index.js
+Fix this in your background file here:
+/foo/bar/.projects/e2e/cypress/background/index.js
 
 https://on.cypress.io/api/task
       at stack trace line

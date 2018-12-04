@@ -63,7 +63,7 @@ describe "Specs List", ->
           cy.contains("commands.js")
           cy.contains("defaults.js")
           cy.contains("index.js")
-        cy.contains("span", "plugins").siblings("ul").within ->
+        cy.contains("span", "background").siblings("ul").within ->
           cy.contains("index.js")
 
     it "lists folders and files alphabetically", ->
