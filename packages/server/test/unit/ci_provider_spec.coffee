@@ -1,4 +1,5 @@
 R = require("ramda")
+mockedEnv = require("mocked-env")
 require("../spec_helper")
 
 ciProvider = require("#{root}lib/util/ci_provider")
@@ -15,36 +16,40 @@ expectsCommitParams = (params) ->
 expectsCommitDefaults = (existing, expected) ->
   expect(ciProvider.commitDefaults(existing), "CI providers default git params").to.deep.eq(expected)
 
-resetEnv = ->
-  process.env = {}
-
 describe "lib/util/ci_provider", ->
+  resetEnv = null
+
   beforeEach ->
-    resetEnv()
+    resetEnv?()
+
+  afterEach ->
+    resetEnv?()
 
   it "null when unknown", ->
-    resetEnv()
+    resetEnv = mockedEnv({}, {clear: true})
 
     expectsName(null)
     expectsCiParams(null)
     expectsCommitParams(null)
 
   it "appveyor", ->
-    process.env.APPVEYOR = true
+    resetEnv = mockedEnv({
+      APPVEYOR: "true"
 
-    process.env.APPVEYOR_JOB_ID = "appveyorJobId2"
-    process.env.APPVEYOR_ACCOUNT_NAME = "appveyorAccountName"
-    process.env.APPVEYOR_PROJECT_SLUG = "appveyorProjectSlug"
-    process.env.APPVEYOR_BUILD_VERSION = "appveyorBuildVersion"
-    process.env.APPVEYOR_BUILD_NUMBER = "appveyorBuildNumber"
-    process.env.APPVEYOR_PULL_REQUEST_NUMBER = "appveyorPullRequestNumber"
-    process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH = "appveyorPullRequestHeadRepoBranch"
+      APPVEYOR_JOB_ID: "appveyorJobId2"
+      APPVEYOR_ACCOUNT_NAME: "appveyorAccountName"
+      APPVEYOR_PROJECT_SLUG: "appveyorProjectSlug"
+      APPVEYOR_BUILD_VERSION: "appveyorBuildVersion"
+      APPVEYOR_BUILD_NUMBER: "appveyorBuildNumber"
+      APPVEYOR_PULL_REQUEST_NUMBER: "appveyorPullRequestNumber"
+      APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH: "appveyorPullRequestHeadRepoBranch"
 
-    process.env.APPVEYOR_REPO_COMMIT = "repoCommit"
-    process.env.APPVEYOR_REPO_COMMIT_MESSAGE = "repoCommitMessage"
-    process.env.APPVEYOR_REPO_BRANCH = "repoBranch"
-    process.env.APPVEYOR_REPO_COMMIT_AUTHOR = "repoCommitAuthor"
-    process.env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL = "repoCommitAuthorEmail"
+      APPVEYOR_REPO_COMMIT: "repoCommit"
+      APPVEYOR_REPO_COMMIT_MESSAGE: "repoCommitMessage"
+      APPVEYOR_REPO_BRANCH: "repoBranch"
+      APPVEYOR_REPO_COMMIT_AUTHOR: "repoCommitAuthor"
+      APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL: "repoCommitAuthorEmail"
+    }, {clear: true})
 
     expectsName("appveyor")
     expectsCiParams({
@@ -66,22 +71,26 @@ describe "lib/util/ci_provider", ->
 
     resetEnv()
 
-    process.env.APPVEYOR = true
-    process.env.APPVEYOR_REPO_COMMIT_MESSAGE = "repoCommitMessage"
-    process.env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED = "repoCommitMessageExtended"
+    resetEnv = mockedEnv({
+      APPVEYOR: "true"
+      APPVEYOR_REPO_COMMIT_MESSAGE: "repoCommitMessage"
+      APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED: "repoCommitMessageExtended"
+    }, {clear: true})
 
     expectsCommitParams({
       message: "repoCommitMessage\nrepoCommitMessageExtended"
     })
 
-  it "bamboo", ->
-    process.env["bamboo.buildNumber"] = "123"
+  it.only "bamboo", ->
+    resetEnv = mockedEnv({
+      "bamboo.buildNumber": "123"
 
-    process.env["bamboo.resultsUrl"] = "bamboo.resultsUrl"
-    process.env["bamboo.buildResultsUrl"] = "bamboo.buildResultsUrl"
-    process.env["bamboo.planRepository.repositoryUrl"] = "bamboo.planRepository.repositoryUrl"
+      "bamboo.resultsUrl": "bamboo.resultsUrl"
+      "bamboo.buildResultsUrl": "bamboo.buildResultsUrl"
+      "bamboo.planRepository.repositoryUrl": "bamboo.planRepository.repositoryUrl"
 
-    process.env["bamboo.planRepository.branch"] = "bamboo.planRepository.branch"
+      "bamboo.planRepository.branch": "bamboo.planRepository.branch"
+    }, {clear: true})
 
     expectsName("bamboo")
     expectsCiParams({
