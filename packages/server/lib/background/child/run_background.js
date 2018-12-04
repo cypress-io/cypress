@@ -100,6 +100,7 @@ const execute = (ipc, event, ids, args = []) => {
       return
     case 'driver:event':
       driverEvents.execute(ipc, registeredEvents, ids, args)
+
       return
     case '_get:task:keys':
       task.getKeys(ipc, registeredEvents, ids)
