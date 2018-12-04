@@ -664,6 +664,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
       """
+    when "BACKGROUND_DRIVER_EVENT_ERROR"
+      """
+      An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1.event)}' event.
+
+      This error is being ignored because the event cannot affect the results of the run.
+
+      The error we received was:
+
+      #{chalk.yellow(arg1.error)}
+      """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
       You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}

@@ -226,9 +226,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## we need to cancel all outstanding
   ## XHR's so the command log displays
   ## correctly
-  Cypress.on("window:unload", abort)
+  Cypress.on("page:end", abort)
 
-  Cypress.on "test:before:run", ->
+  Cypress.on "test:run:start", ->
     ## reset the existing server
     reset()
 
@@ -245,7 +245,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     return null
 
-  Cypress.on "window:before:load", (contentWindow) ->
+  Cypress.on "page:start", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
       server.bindTo(contentWindow)

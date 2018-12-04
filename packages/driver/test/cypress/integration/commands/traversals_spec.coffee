@@ -43,7 +43,7 @@ describe "src/cy/commands/traversals", ->
           Cypress.config("defaultCommandTimeout", 100)
 
         it "throws when options.length isnt a number", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "You must provide a valid number to a length assertion. You passed: 'asdf'"
             done()
 
@@ -54,7 +54,7 @@ describe "src/cy/commands/traversals", ->
 
           node = dom.stringify cy.$$("#list"), "short"
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}'."
             done()
 
@@ -65,21 +65,21 @@ describe "src/cy/commands/traversals", ->
 
           node = dom.stringify cy.$$("#list"), "short"
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}'."
             done()
 
           cy.get("#list")[name](arg).should("have.length", el.length + 1)
 
         it "without a dom element", (done) ->
-          cy.on "fail", -> done()
+          cy.on "test:fail", -> done()
           cy.noop({})[name](arg)
 
         it "throws when subject is not in the document", (done) ->
           cy.on "command:end", =>
             cy.$$("#list").remove()
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "cy.#{name}() failed because this element"
             done()
 
@@ -89,7 +89,7 @@ describe "src/cy/commands/traversals", ->
           errIncludes = (el, node) =>
             node = dom.stringify cy.$$(node), "short"
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
               done()
 
@@ -231,14 +231,14 @@ describe "src/cy/commands/traversals", ->
       return null
 
     it "errors after timing out not finding element", (done) ->
-      cy.on "fail", (err) ->
+      cy.on "test:fail", (err) ->
         expect(err.message).to.include "Expected to find element: 'span', but never found it. Queried from element: <li.item>"
         done()
 
       cy.get("#list li:last").find("span")
 
     it "throws once when incorrect sizzle selector", (done) ->
-      cy.on "fail", (err) =>
+      cy.on "test:fail", (err) =>
         expect(@logs.length).to.eq 2
         done()
 
@@ -247,7 +247,7 @@ describe "src/cy/commands/traversals", ->
     it "logs out $el when existing $el is found even on failure", (done) ->
       button = cy.$$("#button").hide()
 
-      cy.on "fail", (err) =>
+      cy.on "test:fail", (err) =>
         log = @logs[1]
 
         expect(log.get("state")).to.eq("failed")

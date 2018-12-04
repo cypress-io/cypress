@@ -3,35 +3,35 @@ Cypress.on('uncaught:exception', (error, runnable) => {
   runnable // $ExpectType IRunnable
 })
 
-Cypress.on('window:confirm', (text) => {
+Cypress.on('page:confirm', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('window:alert', (text) => {
+Cypress.on('page:alert', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('window:before:load', (win) => {
+Cypress.on('page:start', (win) => {
   win // $ExpectType Window
 })
 
-Cypress.on('window:load', (win) => {
+Cypress.on('page:ready', (win) => {
   win // $ExpectType Window
 })
 
-Cypress.on('window:before:unload', (event) => {
+Cypress.on('before:window:unload', (event) => {
   event // $ExpectType BeforeUnloadEvent
 })
 
-Cypress.on('window:unload', (event) => {
+Cypress.on('page:end', (event) => {
   event // $ExpectType Event
 })
 
-Cypress.on('url:changed', (url) => {
+Cypress.on('page:url:changed', (url) => {
   url // $ExpectType string
 })
 
-Cypress.on('fail', (error, mocha) => {
+Cypress.on('test:fail', (error, mocha) => {
   error // $ExpectType Error
   mocha // $ExpectType IRunnable
 })
@@ -40,7 +40,7 @@ Cypress.on('viewport:changed', (viewport) => {
   viewport // $ExpectType Viewport
 })
 
-Cypress.on('scrolled', ($el) => {
+Cypress.on('internal:scrolled', ($el) => {
   $el // $ExpectType JQuery<HTMLElement>
 })
 
@@ -68,12 +68,12 @@ Cypress.on('log:changed', (log, interactive: boolean) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('test:before:run', (attributes , test) => {
+Cypress.on('test:run:start', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })
 
-Cypress.on('test:after:run', (attributes , test) => {
+Cypress.on('test:run:end', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })

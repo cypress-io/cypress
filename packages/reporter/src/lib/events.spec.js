@@ -142,18 +142,18 @@ describe('events', () => {
       expect(runnablesStore.setInitialScrollTop).to.have.been.calledWith(123)
     })
 
-    it('sends runnable started on test:before:run:async', () => {
-      runner.on.withArgs('test:before:run:async').callArgWith(1, 'the runnable')
+    it('sends runnable started on test:run:start:async', () => {
+      runner.on.withArgs('test:run:start:async').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableStarted).to.have.been.calledWith('the runnable')
     })
 
-    it('sends runnable finished on test:after:run', () => {
-      runner.on.withArgs('test:after:run').callArgWith(1, 'the runnable')
+    it('sends runnable finished on test:run:end', () => {
+      runner.on.withArgs('test:run:end').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableFinished).to.have.been.calledWith('the runnable')
     })
 
-    it('increments the stats count on test:after:run', () => {
-      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
+    it('increments the stats count on test:run:end', () => {
+      runner.on.withArgs('test:run:end').callArgWith(1, { state: 'passed' })
       expect(statsStore.incrementCount).to.have.been.calledWith('passed')
     })
 

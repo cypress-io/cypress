@@ -781,7 +781,7 @@ describe "$Cypress.Log API", ->
           it "preserves errors", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               expect(@log.get("name")).to.eq "get"
               expect(@log.get("message")).to.eq "foo"
               expect(@log.get("error")).to.eq err
@@ -792,7 +792,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for parent commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "get"
                 Selector: "foo"
@@ -807,7 +807,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for dual commands as a parent", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 Error: err.toString()
@@ -820,7 +820,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for dual commands as a child", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               if @log.get("name") is "wait"
                 btns = getFirstSubjectByName.call(@, "get")
                 expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -836,7 +836,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for children commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               if @log.get("name") is "contains"
                 btns = getFirstSubjectByName.call(@, "get")
                 expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -855,7 +855,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for nested children commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               if @log.get("name") is "contains"
                 expect(@log.attributes.consoleProps()).to.deep.eq {
                   Command: "contains"

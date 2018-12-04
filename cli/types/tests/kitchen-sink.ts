@@ -38,15 +38,15 @@ Cypress.browser // $ExpectType Browser
 
 // stubbing window.alert type on "Cypress" should
 // work with plain function or with a Sinon stub
-Cypress.on('window:alert', () => {})
-Cypress.on('window:alert', cy.stub())
+Cypress.on('page:alert', () => {})
+Cypress.on('page:alert', cy.stub())
 // same for a single test
-cy.on('window:alert', () => {})
-cy.on('window:alert', cy.stub())
+cy.on('page:alert', () => {})
+cy.on('page:alert', cy.stub())
 
-// window:confirm stubbing
-cy.on('window:confirm', () => {})
-cy.on('window:confirm', cy.stub())
+// page:confirm stubbing
+cy.on('page:confirm', () => {})
+cy.on('page:confirm', cy.stub())
 
 // specifying HTTP method directly in the options object
 cy.request({

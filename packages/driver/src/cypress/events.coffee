@@ -1,16 +1,9 @@
-# _ = require("lodash")
-# Backbone = require("backbone")
-
-## adds a custom lightweight event bus
-## to the Cypress class
-
-# splice = (index) ->
-  # @_events.splice(index, 1)
-
 _ = require("lodash")
 EE = require("eventemitter2")
 log = require("debug")("cypress:driver")
 Promise = require("bluebird")
+
+$utils = require("./utils")
 
 proxyFunctions = "emit emitThen emitMap".split(" ")
 
@@ -108,8 +101,46 @@ module.exports = {
 
         return ret
 
+    events.emitToBackend = (eventName, args...) ->
+      args = _.reject(args, _.isFunction)
+      Cypress.backend("driver:event", eventName, args...)
+
     _.extend(obj, events)
 
     ## return the events object
     return events
+
+  throwOnRenamedEvent: (eventEmitter, name) ->
+    renamedEvents = {
+      "command:queue:before:end": "before:command:queue:end"
+      "fail": "test:fail"
+      "runnable:after:run:async": "after:runnable:run:async"
+      "scrolled": "internal:scrolled"
+      "test:after:run": "test:run:end"
+      "test:before:run": "test:run:start"
+      "test:before:run:async": "test:run:start:async"
+      "url:changed": "page:url:changed"
+      "window:alert": "page:alert"
+      "window:before:load": "page:start"
+      "window:before:unload": "before:window:unload"
+      "window:confirm": "page:confirm"
+      "window:unload": "page:end"
+    }
+
+    methods = "addListener on once prependListener prependOnceListener".split(" ")
+
+    _.each methods, (method) ->
+      eventEmitter[method] = _.wrap eventEmitter[method], (original, eventName, listener) ->
+        if renamedEvents[eventName]
+          $utils.throwErrByPath("events.renamed_event", {
+            args: {
+              oldEvent: eventName
+              newEvent: renamedEvents[eventName]
+              object: name
+              method: method
+            }
+            from: "cypress"
+          })
+        else
+          original.call(@, eventName, listener)
 }

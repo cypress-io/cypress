@@ -38,7 +38,7 @@ describe "src/cy/commands/window", ->
         cy.on "command:retry", _.after 2, =>
           @remoteWindow.foo = "foo"
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -56,7 +56,7 @@ describe "src/cy/commands/window", ->
 
         cy.state("window", undefined)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           cy.state("window", win)
 
           lastLog = @lastLog
@@ -73,7 +73,7 @@ describe "src/cy/commands/window", ->
       it "does not log an additional log on failure", (done) ->
         @remoteWindow.foo = "foo"
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -180,7 +180,7 @@ describe "src/cy/commands/window", ->
         cy.on "command:retry", _.after 2, =>
           @remoteDocument.foo = "foo"
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -198,7 +198,7 @@ describe "src/cy/commands/window", ->
 
         cy.state("window", undefined)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           cy.state("window", win)
 
           lastLog = @lastLog
@@ -215,7 +215,7 @@ describe "src/cy/commands/window", ->
       it "does not log an additional log on failure", (done) ->
         @remoteDocument.foo = "foo"
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -372,7 +372,7 @@ describe "src/cy/commands/window", ->
       it "throws after timing out", (done) ->
         cy.$$("title").remove()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "expected '' to equal 'asdf'"
           done()
 
@@ -381,7 +381,7 @@ describe "src/cy/commands/window", ->
       it "only logs once", (done) ->
         cy.$$("title").remove()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -526,7 +526,7 @@ describe "src/cy/commands/window", ->
         { viewportHeight, viewportWidth } = Cypress.config()
 
         cy.viewport(500, 400).then ->
-          Cypress.action("runner:test:before:run:async", {})
+          Cypress.action("runner:test:run:start:async", {})
           .then ->
             expect(Cypress.config("viewportWidth")).to.eq(viewportWidth)
             expect(Cypress.config("viewportHeight")).to.eq(viewportHeight)
@@ -594,7 +594,7 @@ describe "src/cy/commands/window", ->
         return null
 
       it "throws with passed invalid preset", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
           done()
@@ -602,7 +602,7 @@ describe "src/cy/commands/window", ->
         cy.viewport("foo")
 
       it "throws when passed a string as height", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() can only accept a string preset or a width and height as numbers."
           done()
@@ -610,7 +610,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(800, "600")
 
       it "throws when passed negative numbers", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
           done()
@@ -618,7 +618,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(800, -600)
 
       it "throws when passed width less than 20", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
           done()
@@ -629,7 +629,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(20, 600)
 
       it "throws when passed height greater than than 3000", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
           done()
@@ -640,7 +640,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(200, 3000)
 
       it "throws when passed an empty string as width", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() cannot be passed an empty string."
           done()
@@ -648,7 +648,7 @@ describe "src/cy/commands/window", ->
         cy.viewport("")
 
       it "throws when passed an invalid orientation on a preset", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() can only accept 'landscape' or 'portrait' as valid orientations. Your orientation was: 'foobar'"
           done()
@@ -662,7 +662,7 @@ describe "src/cy/commands/window", ->
           cy.on "log:added", (attrs, log) ->
             logs.push(log)
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(1)
             expect(err.message).to.eq "cy.viewport() can only accept a string preset or a width and height as numbers."
             done()

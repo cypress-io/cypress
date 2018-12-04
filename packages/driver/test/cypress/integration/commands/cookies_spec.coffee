@@ -7,7 +7,7 @@ describe "src/cy/commands/cookies", ->
 
     cy.stub(Cypress, "automation").callThrough()
 
-  context "test:before:run:async", ->
+  context "test:run:start:async", ->
     it "clears cookies before each test run", ->
       Cypress.automation
       .withArgs("get:cookies", { domain: "localhost" })
@@ -15,7 +15,7 @@ describe "src/cy/commands/cookies", ->
       .withArgs("clear:cookies", [ { domain: "localhost", name: "foo" } ])
       .resolves([])
 
-      Cypress.emitThen("test:before:run:async", {})
+      Cypress.emitThen("test:run:start:async", {})
       .then ->
         expect(Cypress.automation).to.be.calledWith(
           "get:cookies",
@@ -30,7 +30,7 @@ describe "src/cy/commands/cookies", ->
     it "does not call clear:cookies when get:cookies returns empty array", ->
       Cypress.automation.withArgs("get:cookies").resolves([])
 
-      Cypress.emitThen("test:before:run:async", {})
+      Cypress.emitThen("test:run:start:async", {})
       .then ->
         expect(Cypress.automation).not.to.be.calledWith(
           "clear:cookies"
@@ -45,7 +45,7 @@ describe "src/cy/commands/cookies", ->
 
       timeout = cy.spy(Promise.prototype, "timeout")
 
-      Cypress.emitThen("test:before:run:async", {})
+      Cypress.emitThen("test:run:start:async", {})
       .then ->
         expect(timeout).not.to.be.called
 
@@ -111,7 +111,7 @@ describe "src/cy/commands/cookies", ->
 
         Cypress.automation.rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -126,7 +126,7 @@ describe "src/cy/commands/cookies", ->
       it "throws after timing out", (done) ->
         Cypress.automation.resolves(Promise.delay(1000))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -253,7 +253,7 @@ describe "src/cy/commands/cookies", ->
 
         Cypress.automation.rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -268,7 +268,7 @@ describe "src/cy/commands/cookies", ->
       it "throws after timing out", (done) ->
         Cypress.automation.resolves(Promise.delay(1000))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -282,7 +282,7 @@ describe "src/cy/commands/cookies", ->
         cy.getCookie("foo", {timeout: 50})
 
       it "requires a string name", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -431,7 +431,7 @@ describe "src/cy/commands/cookies", ->
 
         Cypress.automation.rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -445,7 +445,7 @@ describe "src/cy/commands/cookies", ->
       it "throws after timing out", (done) ->
         Cypress.automation.resolves(Promise.delay(1000))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -459,7 +459,7 @@ describe "src/cy/commands/cookies", ->
         cy.setCookie("foo", "bar", {timeout: 50})
 
       it "requires a string name", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -470,7 +470,7 @@ describe "src/cy/commands/cookies", ->
         cy.setCookie(123)
 
       it "requires a string value", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -586,7 +586,7 @@ describe "src/cy/commands/cookies", ->
 
         Cypress.automation.rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -600,7 +600,7 @@ describe "src/cy/commands/cookies", ->
       it "throws after timing out", (done) ->
         Cypress.automation.resolves(Promise.delay(1000))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -614,7 +614,7 @@ describe "src/cy/commands/cookies", ->
         cy.clearCookie("foo", {timeout: 50})
 
       it "requires a string name", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -812,7 +812,7 @@ describe "src/cy/commands/cookies", ->
 
         Cypress.automation.rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -827,7 +827,7 @@ describe "src/cy/commands/cookies", ->
       it "throws after timing out", (done) ->
         Cypress.automation.resolves(Promise.delay(1000))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -851,7 +851,7 @@ describe "src/cy/commands/cookies", ->
 
         Cypress.automation.withArgs("clear:cookies").rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)

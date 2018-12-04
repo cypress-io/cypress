@@ -25,7 +25,7 @@ export default class IframeModel {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     }))
 
-    eventManager.on('url:changed', action('url:changed', this._updateUrl))
+    eventManager.on('page:url:changed', action('page:url:changed', this._updateUrl))
     eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
 
     eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))

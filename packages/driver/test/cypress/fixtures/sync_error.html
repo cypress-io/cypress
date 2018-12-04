@@ -15,7 +15,7 @@
       if (!Cypress) {
         throw new Error('Cypress must exist in the parent window!');
       };
-      Cypress.onBeforeLoad(window);
+      Cypress.onStart(window);
     </script>
     <script type="text/javascript">
       foo.bar()

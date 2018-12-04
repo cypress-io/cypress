@@ -215,7 +215,7 @@ describe "src/cy/commands/actions/check", ->
         return null
 
       it "throws when subject isnt dom", (done) ->
-        cy.on "fail", (err) -> done()
+        cy.on "test:fail", (err) -> done()
 
         cy.noop({}).check()
 
@@ -227,7 +227,7 @@ describe "src/cy/commands/actions/check", ->
           checkbox.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(checked).to.eq 1
           expect(err.message).to.include "cy.check() failed because this element"
           done()
@@ -235,7 +235,7 @@ describe "src/cy/commands/actions/check", ->
         cy.get(":checkbox:first").check().check()
 
       it "throws when subject isnt a checkbox or radio", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.check() can only be called on :checkbox and :radio. Your subject contains a: <form id=\"by-id\">...</form>"
           done()
 
@@ -243,7 +243,7 @@ describe "src/cy/commands/actions/check", ->
         cy.get("form").check()
 
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.check() can only be called on :checkbox and :radio. Your subject contains a: <textarea id=\"comments\"></textarea>"
           done()
 
@@ -254,7 +254,7 @@ describe "src/cy/commands/actions/check", ->
       it "throws when any member of the subject isnt visible", (done) ->
         chk = $(":checkbox").first().hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(chk.length + 1)
@@ -267,7 +267,7 @@ describe "src/cy/commands/actions/check", ->
       it "throws when subject is disabled", (done) ->
         $(":checkbox:first").prop("disabled", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("cy.check() failed because this element is disabled:\n")
@@ -279,7 +279,7 @@ describe "src/cy/commands/actions/check", ->
         chk = $(":checkbox")
         chk.show().last().hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(chk.length + 1)
@@ -290,7 +290,7 @@ describe "src/cy/commands/actions/check", ->
         cy.get(":checkbox").check()
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -303,7 +303,7 @@ describe "src/cy/commands/actions/check", ->
         checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo($("body"))
         span = $("<span>span on button</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo($("body"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.include "cy.check() failed because this element"
           expect(err.message).to.include "is being covered by another element"
@@ -312,7 +312,7 @@ describe "src/cy/commands/actions/check", ->
         cy.get("#checkbox-covered-in-span").check()
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -327,7 +327,7 @@ describe "src/cy/commands/actions/check", ->
         cy.get(":checkbox:first").check().should("have.class", "checked")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
@@ -646,20 +646,20 @@ describe "src/cy/commands/actions/check", ->
       it "throws specifically on a radio", (done) ->
         cy.get(":radio").uncheck()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.uncheck() can only be called on :checkbox."
           done()
 
       it "throws if not a checkbox", (done) ->
         cy.noop({}).uncheck()
 
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
       it "throws when any member of the subject isnt visible", (done) ->
         ## grab the first 3 checkboxes.
         chk = $(":checkbox").slice(0, 3).show()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           len  = (chk.length * 2) + 6
@@ -673,7 +673,7 @@ describe "src/cy/commands/actions/check", ->
           .get(":checkbox").invoke("slice", 0, 3).uncheck()
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -691,7 +691,7 @@ describe "src/cy/commands/actions/check", ->
           checkbox.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(unchecked).to.eq 1
           expect(err.message).to.include "cy.uncheck() failed because this element"
           done()
@@ -702,7 +702,7 @@ describe "src/cy/commands/actions/check", ->
         checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo($("body"))
         span = $("<span>span on button</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo($("body"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.include "cy.uncheck() failed because this element"
           expect(err.message).to.include "is being covered by another element"
@@ -713,7 +713,7 @@ describe "src/cy/commands/actions/check", ->
       it "throws when subject is disabled", (done) ->
         $(":checkbox:first").prop("checked", true).prop("disabled", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("cy.uncheck() failed because this element is disabled:\n")
@@ -732,7 +732,7 @@ describe "src/cy/commands/actions/check", ->
       it "eventually fails the assertion", (done) ->
         $(":checkbox:first").prop("checked", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -746,7 +746,7 @@ describe "src/cy/commands/actions/check", ->
         cy.get(":checkbox:first").uncheck().should("have.class", "unchecked")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 

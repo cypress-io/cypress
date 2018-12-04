@@ -51,7 +51,7 @@ describe "promises", ->
 
       logs.push(log)
 
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(logs.length).to.eq(1)
@@ -80,7 +80,7 @@ describe "promises", ->
 
       logs.push(log)
 
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(logs.length).to.eq(1)
@@ -118,7 +118,7 @@ describe "promises", ->
     .catch ->
 
   it "can still fail cypress commands", (done) ->
-    cy.on "fail", (err) ->
+    cy.on "test:fail", (err) ->
       expect(err.message).to.eq("foo")
       done()
 

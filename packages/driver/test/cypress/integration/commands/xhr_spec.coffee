@@ -781,7 +781,7 @@ describe "src/cy/commands/xhr", ->
       it "sets err on log when caused by code errors", (done) ->
         finalThenCalled = false
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -799,7 +799,7 @@ describe "src/cy/commands/xhr", ->
       it "causes errors caused by onreadystatechange callback function", (done) ->
         e = new Error("onreadystatechange caused this error")
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -868,14 +868,14 @@ describe "src/cy/commands/xhr", ->
       context "argument signature", ->
         _.each ["asdf", 123, null, undefined], (arg) ->
           it "throws on bad argument: #{arg}", (done) ->
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expect(err.message).to.include "cy.server() accepts only an object literal as its argument"
               done()
 
             cy.server(arg)
 
       it "after turning off server it throws attempting to route", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.route() cannot be invoked before starting the cy.server()")
           done()
 
@@ -897,7 +897,7 @@ describe "src/cy/commands/xhr", ->
           return null
 
         it "provides specific #onFail", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             obj = {
               name: "xhr"
               referencesAlias: undefined
@@ -1397,14 +1397,14 @@ describe "src/cy/commands/xhr", ->
       it "throws if cy.server() hasnt been invoked", (done) ->
         cy.state("serverIsStubbed", false)
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.route() cannot be invoked before starting the cy.server()"
           done()
 
         cy.route()
 
       it "url must be a string or regexp", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.route() was called with an invalid url. Url must be either a string or regular expression."
           done()
 
@@ -1413,7 +1413,7 @@ describe "src/cy/commands/xhr", ->
         })
 
       it "url must be a string or regexp when a function", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.route() was called with an invalid url. Url must be either a string or regular expression."
           done()
 
@@ -1425,7 +1425,7 @@ describe "src/cy/commands/xhr", ->
       it "fails when functions reject", (done) ->
         error = new Error
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err).to.eq(error)
           done()
 
@@ -1435,14 +1435,14 @@ describe "src/cy/commands/xhr", ->
         cy.route(getUrl)
 
       it "url must be one of get, put, post, delete, patch, head, options", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.route() was called with an invalid method: 'POSTS'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
           done()
 
         cy.route("posts", "/foo", {})
 
       it "requires a url when given a response", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
           done()
 
@@ -1450,21 +1450,21 @@ describe "src/cy/commands/xhr", ->
 
       _.each [null, undefined], (val) ->
         it "throws if response options was explicitly set to #{val}", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
             done()
 
           cy.route({url: /foo/, response: val})
 
         it "throws if response argument was explicitly set to #{val}", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
             done()
 
           cy.route(/foo/, val)
 
       it "requires arguments", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.route() was not provided any arguments. You must provide valid arguments."
           done()
 
@@ -1473,7 +1473,7 @@ describe "src/cy/commands/xhr", ->
       it "sets err on log when caused by the XHR response", (done) ->
         @route.restore()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           ## route + window + xhr log === 3
@@ -1504,7 +1504,7 @@ describe "src/cy/commands/xhr", ->
         cy.on "log:added", (attrs, @log) =>
           logs.push @log
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.eq "some error"
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("name")).to.eq "route"
@@ -1523,7 +1523,7 @@ describe "src/cy/commands/xhr", ->
           if cy.state("error")
             done("should have cancelled and not retried after failing")
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           p = cy.state("promise")
 
           _.delay =>
@@ -1544,7 +1544,7 @@ describe "src/cy/commands/xhr", ->
           .get("button").should("have.class", "does-not-exist")
 
       it "explodes if response alias cannot be found", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -1835,7 +1835,7 @@ describe "src/cy/commands/xhr", ->
       _.each xhrs, (xhr) ->
         expect(xhr.aborted).not.to.be.false
 
-  context "Cypress.on(window:unload)", ->
+  context "Cypress.on(page:end)", ->
     it "aborts all open XHR's", ->
       xhrs = []
 
@@ -1850,11 +1850,11 @@ describe "src/cy/commands/xhr", ->
         _.each xhrs, (xhr) ->
           expect(xhr.aborted).to.be.true
 
-  context "Cypress.on(window:before:load)", ->
-    it "reapplies server + route automatically before window:load", ->
+  context "Cypress.on(page:start)", ->
+    it "reapplies server + route automatically before page:ready", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe
-      ## causing an onBeforeLoad event
+      ## causing an onStart event
       cy
         .server()
         .route(/foo/, {foo: "bar"}).as("getFoo")
@@ -1878,7 +1878,7 @@ describe "src/cy/commands/xhr", ->
     it "reapplies server + route automatically during page transitions", ->
       ## this tests that the server + routes are automatically reapplied
       ## after the 2nd visit - which is an example of the remote iframe
-      ## causing an onBeforeLoad event
+      ## causing an onStart event
       cy
         .server()
         .route(/foo/, {foo: "bar"}).as("getFoo")
@@ -1930,14 +1930,14 @@ describe "src/cy/commands/xhr", ->
         @allowErrors()
 
       it "errors without a server", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.eq "cy.respond() cannot be invoked before starting the cy.server()"
           done()
 
         cy.respond()
 
       it "errors with no pending requests", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.eq "cy.respond() did not find any pending requests to respond to"
           done()
 
@@ -1952,7 +1952,7 @@ describe "src/cy/commands/xhr", ->
 
       ## currently this does not fail. we'll wait until someone cares
       # it "errors if response was null or undefined", (done) ->
-      #   cy.on "fail", (err) ->
+      #   cy.on "test:fail", (err) ->
 
       #   cy
       #     .server()
