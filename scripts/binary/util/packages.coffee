@@ -111,8 +111,11 @@ npmInstallAll = (pathToPackages) ->
 
 
   retryNpmInstall = (pkg) ->
-    console.log("installing", pkg)
-    npmInstall = _.partial(npmRun, ["install", "--production", "--quiet"])
+    console.log("installing %s", pkg)
+    console.log("NODE_ENV is %s", process.env.NODE_ENV)
+
+    # https://docs.npmjs.com/cli/install
+    npmInstall = _.partial(npmRun, ["install", "--only=production", "--quiet"])
     npmInstall(pkg)
     .catch {code: "EMFILE"}, ->
       Promise
