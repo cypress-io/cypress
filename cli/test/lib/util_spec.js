@@ -191,36 +191,6 @@ describe('util', () => {
         DEBUG_COLORS: '0',
       })
     })
-
-    context('.windowsHide', () => {
-      it('is false on windows with node 11', () => {
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v11.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.false
-      })
-
-      it('is false on windows with node > 11', () => {
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v12.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.false
-      })
-
-      it('is undefined on windows with node < 11', () => {
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v8.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.undefined
-
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v10.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.undefined
-      })
-
-      it('is undefined on non-windows with node 11', () => {
-        os.platform.returns('darwin')
-        sinon.stub(process, 'version').value('v11.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.undefined
-      })
-    })
   })
 
   context('.getForceTty', () => {

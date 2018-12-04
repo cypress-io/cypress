@@ -1,5 +1,5 @@
 __snapshots__
-packages/server/lib/scaffold/plugins/index.js
+packages/server/lib/scaffold/background/index.js
 packages/server/lib/scaffold/support/index.js
 packages/server/lib/scaffold/support/commands.js
 packages/server/test/fixtures

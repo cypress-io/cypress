@@ -14,9 +14,8 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
-plugins       = require("./plugins")
-preprocessor  = require("./plugins/preprocessor")
-driverEvents  = require("./plugins/driver_events")
+preprocessor  = require("./background/preprocessor")
+driverEvents  = require("./background/driver_events")
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -309,7 +308,7 @@ class Socket
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
-              task.run(config.pluginsFile, args[0])
+              task.run(config.backgroundFile, args[0])
             when "driver:event"
               driverEvents.execute(args...)
             else

@@ -79,14 +79,19 @@ const create = () => {
 
     const wrapTimer = (fnName) => {
       return (...args) => {
-        const [fnOrCode, delay, ...params] = args
-
         let timerId
+        let [fnOrCode, delay, ...params] = args
 
-        const timerOverride = () => {
-        // if we're currently paused then we need
-        // to enqueue this timer callback and invoke
-        // it immediately once we're unpaused
+        const timerOverride = (timestamp) => {
+          // https://github.com/cypress-io/cypress/issues/2725
+          // requestAnimationFrame yields a high res timestamp
+          if (arguments.length) {
+            params = [timestamp]
+          }
+
+          // if we're currently paused then we need
+          // to enqueue this timer callback and invoke
+          // it immediately once we're unpaused
           if (paused) {
             timerQueue.push({
               timerId,

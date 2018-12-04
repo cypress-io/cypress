@@ -51,12 +51,6 @@ describe "$Cypress.Mocha API", ->
     beforeEach ->
       @mocha = $Cypress.Mocha.create(@Cypress, @iframe)
 
-    describe "abort", ->
-      it "resets mocha grep to all", ->
-        @mocha.grep /\w+/
-        @Cypress.trigger "abort"
-        expect(@mocha.mocha._grep).to.match /.*/
-
     describe "stop", ->
       it "calls stop", ->
         stop = @sandbox.stub @mocha, "stop"
@@ -103,16 +97,6 @@ describe "$Cypress.Mocha API", ->
       expect(@Cypress.mocha).to.be.ok
       @Cypress.trigger("stop")
       expect(@Cypress.mocha).to.be.null
-
-  context "#grep", ->
-    beforeEach ->
-      @mocha = $Cypress.Mocha.create(@Cypress, @iframe)
-
-    it "proxies argument to mocha.grep", ->
-      grep = @sandbox.spy @mocha.mocha, "grep"
-      re = /\w+/
-      @mocha.grep(re)
-      expect(grep).to.be.calledWith re
 
   context "#getRunner", ->
     beforeEach ->

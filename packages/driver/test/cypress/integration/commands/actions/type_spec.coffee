@@ -2891,7 +2891,7 @@ describe "src/cy/commands/actions/type", ->
 
       context "[type=tel]", ->
         it "can edit tel", ->
-          cy.get('input[type="tel"]')
+          cy.get('#by-name > input[type="tel"]')
           .type('1234567890')
           .should('have.prop', 'value', '1234567890')
 
@@ -3037,9 +3037,27 @@ describe "src/cy/commands/actions/type", ->
 
       cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
 
-    it "works on input[type=number]", ->
-      cy.get("#number-with-value").clear().then ($input) ->
-        expect($input.val()).to.equal("")
+    context "works on input type", ->
+      inputTypes = [
+        "date",
+        "datetime",
+        "datetime-local",
+        "email",
+        "month",
+        "number",
+        "password",
+        "search",
+        "tel",
+        "text",
+        "time",
+        "url",
+        "week"
+      ]
+
+      inputTypes.forEach (type) ->
+        it type, ->
+          cy.get("##{type}-with-value").clear().then ($input) ->
+            expect($input.val()).to.equal("")
 
     describe "assertion verification", ->
       beforeEach ->

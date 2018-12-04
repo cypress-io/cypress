@@ -181,6 +181,26 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    it('sets windowsHide:false property in windows', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      os.platform.returns('win32')
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.false
+      })
+    })
+
+    it('does not set windowsHide property when in darwin', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.undefined
+      })
+    })
+
     it('does not force colors and streams when not supported', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 

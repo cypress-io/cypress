@@ -145,8 +145,8 @@ const Configuration = observer(({ project }) => (
           <td>set from CLI arguments</td>
         </tr>
         <tr className='config-keys'>
-          <td><span className='plugin'>plugin</span></td>
-          <td>set from plugin file</td>
+          <td><span className='background'>background</span></td>
+          <td>set from background file</td>
         </tr>
       </tbody>
     </table>
