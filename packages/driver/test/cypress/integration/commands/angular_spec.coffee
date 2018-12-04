@@ -199,7 +199,7 @@ describe "src/cy/commands/angular", ->
         ## to retry after the first one resolves
         cy.ng("model", "missing-input")
         .then ->
-          retry.reset()
+          retry.resetHistory()
         .wait(100)
         .then ->
           expect(retry.callCount).to.eq 0
