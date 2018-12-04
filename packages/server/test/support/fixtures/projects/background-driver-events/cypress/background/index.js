@@ -31,6 +31,6 @@ module.exports = (on) => {
   on('test:run:end', (test) => {
     console.log('test:run:end:', test.title)
 
-    return Promise.reject(new Error('Error thrown in promise from "test:after:run". Should be ignored.'))
+    return Promise.reject(new Error('Error thrown in promise from "test:run:end". Should be ignored.'))
   })
 }

@@ -1,7 +1,7 @@
-testAfterRuns = []
+testRunEnds = []
 
 Cypress.on "test:run:end", (test) ->
-  testAfterRuns.push(test.title)
+  testRunEnds.push(test.title)
 
 ## this should run
 it "t1a", ->
@@ -29,7 +29,7 @@ describe "s3a", ->
   after ->
     ## it should not have fired test:run:end
     ## for t8a yet
-    expect(testAfterRuns).to.deep.eq([
+    expect(testRunEnds).to.deep.eq([
       "t1a"
       "t2a"
       "t5a"
@@ -48,7 +48,7 @@ describe "s4a", ->
 
 describe "s5a", ->
   it "fires all test:run:end events", ->
-    expect(testAfterRuns).to.deep.eq([
+    expect(testRunEnds).to.deep.eq([
       "t1a"
       "t2a"
       "t5a"

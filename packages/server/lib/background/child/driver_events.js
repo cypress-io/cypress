@@ -4,6 +4,7 @@ const util = require('../util')
 module.exports = {
   execute (ipc, events, ids, args) {
     const eventName = args[0]
+
     args = args.slice(1)
     const event = _.find(events, { event: eventName })
 

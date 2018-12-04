@@ -197,7 +197,7 @@ describe "driver/src/cypress/cy", ->
         cy.c()
 
       it "fails when calling child command before parent with arguments", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("Oops, it looks like you are trying to call a child command before running a parent command")
           expect(err.message).to.include("cy.c(\"bar\")")
           done()
