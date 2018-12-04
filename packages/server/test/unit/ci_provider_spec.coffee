@@ -16,7 +16,7 @@ expectsCommitParams = (params) ->
 expectsCommitDefaults = (existing, expected) ->
   expect(ciProvider.commitDefaults(existing), "CI providers default git params").to.deep.eq(expected)
 
-describe.only "lib/util/ci_provider", ->
+describe "lib/util/ci_provider", ->
   resetEnv = null
 
   afterEach ->
@@ -30,6 +30,26 @@ describe.only "lib/util/ci_provider", ->
     expectsName(null)
     expectsCiParams(null)
     expectsCommitParams(null)
+
+  it "does not extract from commit environment variables yet", ->
+    # see fallback environment variables
+    # https://github.com/cypress-io/commit-info#fallback-environment-variables
+    # BUT those defaults are NOT used by "ci_provider"
+    # instead they are used in the "record" module
+    # this test just confirms that these defaults are not considered
+    env = {
+      COMMIT_INFO_BRANCH: "my-branch-221",
+      COMMIT_INFO_MESSAGE: "best commit ever",
+      COMMIT_INFO_EMAIL: "user@company.com",
+      COMMIT_INFO_AUTHOR: "Agent Smith",
+      COMMIT_INFO_SHA: "0123456",
+      COMMIT_INFO_REMOTE: "remote repo"
+    }
+    resetEnv = mockedEnv(env, {clear: true})
+
+    expectsName(null) # we don't know CI
+    expectsCiParams(null) # we don't know CI params
+    expectsCommitParams(null) # we don't know CI-specific params
 
   it "appveyor", ->
     resetEnv = mockedEnv({
