@@ -1549,7 +1549,7 @@ describe "src/cy/commands/navigation", ->
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
       it "captures cross origin failures", (done) ->
-        cy.once "fail", (err) =>
+        cy.once "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
