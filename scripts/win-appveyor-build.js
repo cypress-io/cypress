@@ -15,8 +15,10 @@ shell.set('-e') // any error is fatal
 // https://www.appveyor.com/docs/environment-variables/
 
 const isRightBranch = () => {
-  return process.env.APPVEYOR_REPO_BRANCH === 'develop' ||
-  process.env.APPVEYOR_REPO_BRANCH === 'win-build-shell'
+  const branch = process.env.APPVEYOR_REPO_BRANCH
+  return branch === 'develop' ||
+    branch === 'win-build-shell' ||
+    branch === 'no-dev-deps-in-windows-binary-2896'
 }
 
 const isPullRequest = () => {
@@ -44,6 +46,16 @@ console.log('building version', version)
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 shell.cat('npm-package-url.json')
 shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
+
+// make sure we are not including dev dependencies accidentally
+// https://github.com/cypress-io/cypress/issues/2896
+shell.exec('npm ls --prod --depth 0', {cwd: 'packages/server'})
+const result = shell.exec('npm ls --dev --depth 0', {cwd: 'packages/server'})
+if (result.stdout.includes('nodemon')) {
+  console.error('Hmm, server package includes dev dependency "nodemon"')
+  process.exit(1)
+}
+
 shell.exec('npm run binary-zip')
 shell.ls('-l', '*.zip')
 shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
