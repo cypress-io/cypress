@@ -49,12 +49,14 @@ shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
 
 // make sure we are not including dev dependencies accidentally
 // https://github.com/cypress-io/cypress/issues/2896
-shell.exec('npm ls --prod --depth 0', {cwd: 'packages/server'})
-const result = shell.exec('npm ls --dev --depth 0', {cwd: 'packages/server'})
-if (result.stdout.includes('nodemon')) {
-  console.error('Hmm, server package includes dev dependency "nodemon"')
-  process.exit(1)
-}
+const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
+shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
+shell.exec('npm ls --prod --depth 0 || true', {cwd: serverPackageFolder})
+shell.exec('npm ls --dev --depth 0 || true', {cwd: serverPackageFolder})
+// if (result.stdout.includes('nodemon')) {
+//   console.error('Hmm, server package includes dev dependency "nodemon"')
+//   process.exit(1)
+// }
 
 shell.exec('npm run binary-zip')
 shell.ls('-l', '*.zip')

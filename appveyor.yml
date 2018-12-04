@@ -36,7 +36,7 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - npm run check-node-version
   # NPM v3 has flaky permission issues on Windows
-  - npm install -g npm@5
+  - npm install -g npm@6
   - npm install -g @bahmutov/print-env
   # Output useful info for debugging.
   - node --version
