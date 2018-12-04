@@ -173,7 +173,6 @@ describe "lib/util/ci_provider", ->
       BUILDKITE_MESSAGE: "buildKiteMessage"
       BUILDKITE_BUILD_CREATOR: "buildKiteBuildCreator"
       BUILDKITE_BUILD_CREATOR_EMAIL: "buildKiteCreatorEmail"
-      BUILDKITE_REPO: "buildkiteRepo"
       BUILDKITE_PIPELINE_DEFAULT_BRANCH: "buildkitePipelineDefaultBranch"
     }, {clear: true})
 
