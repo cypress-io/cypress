@@ -20,6 +20,8 @@
 
 [Install](#install)
 
+[Vue CLI 3](#vue-cli)
+
 [Use](#use)
 - [Options](#options)
 - [Global Vue Extensions](#global-vue-extensions)
@@ -57,6 +59,14 @@ Requires [Node](https://nodejs.org/en/) version 6 or above and Cypress (peer dep
 ```sh
 npm install --save-dev cypress cypress-vue-unit-test
 ```
+
+<a name="vue-cli"/>
+
+## Vue CLI 3
+
+1. Create a new project with `vue create <project-name>` and select Cypress for E2E testing
+1. Install this package with `npm install --save-dev cypress-vue-unit-test`
+1. Enable the import of Vue files by uncommenting the "webpack import" and the "file:processor event" lines in tests/e2e/plugins/index.js
 
 <a name="use"/>
 
