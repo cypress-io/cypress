@@ -16,13 +16,12 @@ expectsCommitParams = (params) ->
 expectsCommitDefaults = (existing, expected) ->
   expect(ciProvider.commitDefaults(existing), "CI providers default git params").to.deep.eq(expected)
 
-describe "lib/util/ci_provider", ->
+describe.only "lib/util/ci_provider", ->
   resetEnv = null
 
-  beforeEach ->
-    resetEnv?()
-
   afterEach ->
+    # we need to reset environment
+    # to avoid affecting tests in other suites
     resetEnv?()
 
   it "null when unknown", ->
@@ -221,7 +220,7 @@ describe "lib/util/ci_provider", ->
       authorName: "circleUsername"
     })
 
-  it.only "codeshipBasic", ->
+  it "codeshipBasic", ->
     resetEnv = mockedEnv({
       CODESHIP: "TRUE"
       CI_NAME: "codeship"
@@ -377,7 +376,7 @@ describe "lib/util/ci_provider", ->
 
     expectsName("gitlab")
 
-  it.only "jenkins", ->
+  it "jenkins", ->
     resetEnv = mockedEnv({
       JENKINS_URL: "true"
 
@@ -423,26 +422,28 @@ describe "lib/util/ci_provider", ->
     expectsName("jenkins")
 
   it "semaphore", ->
-    process.env.SEMAPHORE = true
+    resetEnv = mockedEnv({
+      SEMAPHORE: "true"
 
-    process.env.SEMAPHORE_BRANCH_ID = "semaphoreBranchId"
-    process.env.SEMAPHORE_BUILD_NUMBER = "semaphoreBuildNumber"
-    process.env.SEMAPHORE_CURRENT_JOB = "semaphoreCurrentJob"
-    process.env.SEMAPHORE_CURRENT_THREAD = "semaphoreCurrentThread"
-    process.env.SEMAPHORE_EXECUTABLE_UUID = "semaphoreExecutableUuid"
-    process.env.SEMAPHORE_JOB_COUNT = "semaphoreJobCount"
-    process.env.SEMAPHORE_JOB_UUID = "semaphoreJobUuid"
-    process.env.SEMAPHORE_PLATFORM = "semaphorePlatform"
-    process.env.SEMAPHORE_PROJECT_DIR = "semaphoreProjectDir"
-    process.env.SEMAPHORE_PROJECT_HASH_ID = "semaphoreProjectHashId"
-    process.env.SEMAPHORE_PROJECT_NAME = "semaphoreProjectName"
-    process.env.SEMAPHORE_PROJECT_UUID = "semaphoreProjectUuid"
-    process.env.SEMAPHORE_REPO_SLUG = "semaphoreRepoSlug"
-    process.env.SEMAPHORE_TRIGGER_SOURCE = "semaphoreTriggerSource"
-    process.env.PULL_REQUEST_NUMBER = "pullRequestNumber"
+      SEMAPHORE_BRANCH_ID: "semaphoreBranchId"
+      SEMAPHORE_BUILD_NUMBER: "semaphoreBuildNumber"
+      SEMAPHORE_CURRENT_JOB: "semaphoreCurrentJob"
+      SEMAPHORE_CURRENT_THREAD: "semaphoreCurrentThread"
+      SEMAPHORE_EXECUTABLE_UUID: "semaphoreExecutableUuid"
+      SEMAPHORE_JOB_COUNT: "semaphoreJobCount"
+      SEMAPHORE_JOB_UUID: "semaphoreJobUuid"
+      SEMAPHORE_PLATFORM: "semaphorePlatform"
+      SEMAPHORE_PROJECT_DIR: "semaphoreProjectDir"
+      SEMAPHORE_PROJECT_HASH_ID: "semaphoreProjectHashId"
+      SEMAPHORE_PROJECT_NAME: "semaphoreProjectName"
+      SEMAPHORE_PROJECT_UUID: "semaphoreProjectUuid"
+      SEMAPHORE_REPO_SLUG: "semaphoreRepoSlug"
+      SEMAPHORE_TRIGGER_SOURCE: "semaphoreTriggerSource"
+      PULL_REQUEST_NUMBER: "pullRequestNumber"
 
-    process.env.REVISION = "revision"
-    process.env.BRANCH_NAME = "branchName"
+      REVISION: "revision"
+      BRANCH_NAME: "branchName"
+    }, {clear: true})
 
     expectsName("semaphore")
     expectsCiParams({
@@ -468,40 +469,42 @@ describe "lib/util/ci_provider", ->
     })
 
   it "shippable", ->
-    process.env.SHIPPABLE = "true"
+    resetEnv = mockedEnv({
+      SHIPPABLE: "true"
 
-    # build environment variables
-    process.env.SHIPPABLE_BUILD_ID = "buildId"
-    process.env.SHIPPABLE_BUILD_NUMBER = "buildNumber"
-    process.env.SHIPPABLE_COMMIT_RANGE = "commitRange"
-    process.env.SHIPPABLE_CONTAINER_NAME = "containerName"
-    process.env.SHIPPABLE_JOB_ID = "jobId"
-    process.env.SHIPPABLE_JOB_NUMBER = "jobNumber"
-    process.env.SHIPPABLE_REPO_SLUG = "repoSlug"
+      # build environment variables
+      SHIPPABLE_BUILD_ID: "buildId"
+      SHIPPABLE_BUILD_NUMBER: "buildNumber"
+      SHIPPABLE_COMMIT_RANGE: "commitRange"
+      SHIPPABLE_CONTAINER_NAME: "containerName"
+      SHIPPABLE_JOB_ID: "jobId"
+      SHIPPABLE_JOB_NUMBER: "jobNumber"
+      SHIPPABLE_REPO_SLUG: "repoSlug"
 
-    # additional information
-    process.env.IS_FORK = "isFork"
-    process.env.IS_GIT_TAG = "isGitTag"
-    process.env.IS_PRERELEASE = "isPrerelease"
-    process.env.IS_RELEASE = "isRelease"
-    process.env.REPOSITORY_URL = "repositoryUrl"
-    process.env.REPO_FULL_NAME = "repoFullName"
-    process.env.REPO_NAME = "repoName"
-    process.env.BUILD_URL = "buildUrl"
+      # additional information
+      IS_FORK: "isFork"
+      IS_GIT_TAG: "isGitTag"
+      IS_PRERELEASE: "isPrerelease"
+      IS_RELEASE: "isRelease"
+      REPOSITORY_URL: "repositoryUrl"
+      REPO_FULL_NAME: "repoFullName"
+      REPO_NAME: "repoName"
+      BUILD_URL: "buildUrl"
 
-    # pull request variables
-    process.env.BASE_BRANCH = "baseBranch"
-    process.env.HEAD_BRANCH = "headBranch"
-    process.env.IS_PULL_REQUEST = "isPullRequest"
-    process.env.PULL_REQUEST = "pullRequest"
-    process.env.PULL_REQUEST_BASE_BRANCH = "pullRequestBaseBranch"
-    process.env.PULL_REQUEST_REPO_FULL_NAME = "pullRequestRepoFullName"
+      # pull request variables
+      BASE_BRANCH: "baseBranch"
+      HEAD_BRANCH: "headBranch"
+      IS_PULL_REQUEST: "isPullRequest"
+      PULL_REQUEST: "pullRequest"
+      PULL_REQUEST_BASE_BRANCH: "pullRequestBaseBranch"
+      PULL_REQUEST_REPO_FULL_NAME: "pullRequestRepoFullName"
 
-    # git information
-    process.env.COMMIT = "commit"
-    process.env.BRANCH = "branch"
-    process.env.COMMITTER = "committer"
-    process.env.COMMIT_MESSAGE = "commitMessage"
+      # git information
+      COMMIT: "commit"
+      BRANCH: "branch"
+      COMMITTER: "committer"
+      COMMIT_MESSAGE: "commitMessage"
+    }, {clear: true})
 
     expectsName("shippable")
     expectsCiParams({
@@ -538,30 +541,36 @@ describe "lib/util/ci_provider", ->
     })
 
   it "snap", ->
-    process.env.SNAP_CI = true
+    resetEnv = mockedEnv({
+      SNAP_CI: "true"
+    }, {clear: true})
 
     expectsName("snap")
     expectsCiParams(null)
     expectsCommitParams(null)
 
   it "teamcity", ->
-    process.env.TEAMCITY_VERSION = true
+    resetEnv = mockedEnv({
+      TEAMCITY_VERSION: "true"
+    }, {clear: true})
 
     expectsName("teamcity")
     expectsCiParams(null)
     expectsCommitParams(null)
 
   it "teamfoundation", ->
-    process.env.TF_BUILD = true
+    resetEnv = mockedEnv({
+      TF_BUILD: "true"
 
-    process.env.BUILD_BUILDID = "buildId"
-    process.env.BUILD_BUILDNUMBER = "buildNumber"
-    process.env.BUILD_CONTAINERID = "containerId"
+      BUILD_BUILDID: "buildId"
+      BUILD_BUILDNUMBER: "buildNumber"
+      BUILD_CONTAINERID: "containerId"
 
-    process.env.BUILD_SOURCEVERSION = "commit"
-    process.env.BUILD_SOURCEBRANCHNAME = "branch"
-    process.env.BUILD_SOURCEVERSIONMESSAGE = "message"
-    process.env.BUILD_SOURCEVERSIONAUTHOR = "name"
+      BUILD_SOURCEVERSION: "commit"
+      BUILD_SOURCEBRANCHNAME: "branch"
+      BUILD_SOURCEVERSIONMESSAGE: "message"
+      BUILD_SOURCEVERSIONAUTHOR: "name"
+    }, {clear: true})
 
     expectsName("teamfoundation")
     expectsCiParams({
@@ -577,21 +586,23 @@ describe "lib/util/ci_provider", ->
     })
 
   it "travis", ->
-    process.env.TRAVIS = true
+    resetEnv = mockedEnv({
+      TRAVIS: "true"
 
-    process.env.TRAVIS_JOB_ID = "travisJobId"
-    process.env.TRAVIS_BUILD_ID = "travisBuildId"
-    process.env.TRAVIS_REPO_SLUG = "travisRepoSlug"
-    process.env.TRAVIS_JOB_NUMBER = "travisJobNumber"
-    process.env.TRAVIS_EVENT_TYPE = "travisEventType"
-    process.env.TRAVIS_COMMIT_RANGE = "travisCommitRange"
-    process.env.TRAVIS_BUILD_NUMBER = "travisBuildNumber"
-    process.env.TRAVIS_PULL_REQUEST = "travisPullRequest"
-    process.env.TRAVIS_PULL_REQUEST_BRANCH = "travisPullRequestBranch"
+      TRAVIS_JOB_ID: "travisJobId"
+      TRAVIS_BUILD_ID: "travisBuildId"
+      TRAVIS_REPO_SLUG: "travisRepoSlug"
+      TRAVIS_JOB_NUMBER: "travisJobNumber"
+      TRAVIS_EVENT_TYPE: "travisEventType"
+      TRAVIS_COMMIT_RANGE: "travisCommitRange"
+      TRAVIS_BUILD_NUMBER: "travisBuildNumber"
+      TRAVIS_PULL_REQUEST: "travisPullRequest"
+      TRAVIS_PULL_REQUEST_BRANCH: "travisPullRequestBranch"
 
-    process.env.TRAVIS_COMMIT = "travisCommit"
-    process.env.TRAVIS_BRANCH = "travisBranch"
-    process.env.TRAVIS_COMMIT_MESSAGE = "travisCommitMessage"
+      TRAVIS_COMMIT: "travisCommit"
+      TRAVIS_BRANCH: "travisBranch"
+      TRAVIS_COMMIT_MESSAGE: "travisCommitMessage"
+    }, {clear: true})
 
     expectsName("travis")
     expectsCiParams({
@@ -611,20 +622,26 @@ describe "lib/util/ci_provider", ->
       message: "travisCommitMessage"
     })
 
-    resetEnv()
-    process.env.TRAVIS = true
-    process.env.TRAVIS_BRANCH = "travisBranch"
+    resetEnv = mockedEnv({
+      TRAVIS: "true"
+      TRAVIS_BRANCH: "travisBranch"
+    }, {clear: true})
+
     expectsCommitParams({
       branch: "travisBranch"
     })
 
   it "wercker", ->
-    process.env.WERCKER = true
+    resetEnv = mockedEnv({
+      WERCKER: "true"
+    }, {clear: true})
 
     expectsName("wercker")
     expectsCiParams(null)
     expectsCommitParams(null)
 
-    resetEnv()
-    process.env.WERCKER_MAIN_PIPELINE_STARTED = true
+    resetEnv = mockedEnv({
+      WERCKER_MAIN_PIPELINE_STARTED: "true"
+    }, {clear: true})
+
     expectsName("wercker")
