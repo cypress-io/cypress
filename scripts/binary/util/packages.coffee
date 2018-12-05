@@ -94,6 +94,15 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   la(check.unemptyString(packageToInstall), "missing package to install")
   npmRun(["install", "--force", packageToInstall], packagePath)
 
+removeDevDependencies = (packagePath) ->
+  la(check.unemptyString(packagePath), "expected package path", packagePath)
+  console.log("removing devDependencies from %s", packagePath)
+
+  fs.readJsonAsync(packagePath)
+  .then (json) ->
+    delete json.devDependencies
+    fs.writeJsonAsync(packagePath)
+
 retryGlobbing = (pathToPackages, delay = 1000) ->
   retryGlob = ->
     glob(pathToPackages)
@@ -131,6 +140,7 @@ npmInstallAll = (pathToPackages) ->
 
   ## only installs production dependencies
   retryGlobbing(pathToPackages)
+  .mapSeries(removeDevDependencies)
   .mapSeries(retryNpmInstall)
   .then ->
     end = new Date()
