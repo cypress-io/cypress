@@ -3763,7 +3763,7 @@ declare namespace Cypress {
      * Fires when cy begins actually running and executing your command. Useful for debugging and understanding how the command queue is async.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:start', fn: (command: CommandQueue) => void): void
+    (action: 'internal:commandStart', fn: (command: CommandQueue) => void): void
     /**
      * Fires when cy finishes running and executing your command. Useful for debugging and understanding how commands are handled.
      * @see https://on.cypress.io/catalog-of-events#App-Events

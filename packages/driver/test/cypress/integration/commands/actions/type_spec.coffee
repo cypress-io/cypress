@@ -2267,7 +2267,7 @@ describe "src/cy/commands/actions/type", ->
         it "triggers form submit synchronously before type logs or resolves", ->
           events = []
 
-          cy.on "command:start", (cmd) ->
+          cy.on "internal:commandStart", (cmd) ->
             events.push "#{cmd.get('name')}:start"
 
           @$forms.find("#single-input").submit (e) ->

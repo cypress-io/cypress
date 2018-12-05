@@ -250,13 +250,13 @@ describe "src/cy/commands/querying", ->
       cy.get("input:first").then ($input) ->
         expect($input.get(0)).to.eq input.get(0)
 
-    it "removes command:start listeners after within is over", ->
+    it "removes internal:commandStart listeners after within is over", ->
       cy.get("#button-text").within ->
         cy.get("button").within ->
           cy.get("span")
 
       cy.then ->
-        expect(cy._events).not.to.have.property "command:start"
+        expect(cy._events).not.to.have.property "internal:commandStart"
 
     it "clears withinSubject even if next is null", (done) ->
       span = cy.$$("#button-text button span")

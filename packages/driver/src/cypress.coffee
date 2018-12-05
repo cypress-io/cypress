@@ -360,9 +360,9 @@ class $Cypress
       when "cy:viewport:changed"
         @emit("viewport:changed", args...)
 
-      when "cy:command:start"
-        @emitToBackend("command:start", serializeCommand(args[0]))
-        @emit("command:start", args...)
+      when "cy:internal:commandStart"
+        @emitToBackend("internal:commandStart", serializeCommand(args[0]))
+        @emit("internal:commandStart", args...)
 
       when "cy:internal:commandEnd"
         @emitToBackend("internal:commandEnd", serializeCommand(args[0]))

@@ -7,6 +7,7 @@ describe "events", ->
       "command:enqueued": "internal:commandEnqueued"
       "command:queue:before:end": "before:command:queue:end"
       "command:retry": "internal:commandRetry"
+      "command:start": "internal:commandStart"
       "fail": "test:fail"
       "runnable:after:run:async": "after:runnable:run:async"
       "scrolled": "internal:scrolled"

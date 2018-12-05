@@ -48,7 +48,7 @@ Cypress.on('internal:commandEnqueue', (command) => {
   command // $ExpectType EnqueuedCommand
 })
 
-Cypress.on('command:start', (command) => {
+Cypress.on('internal:commandStart', (command) => {
   command // $ExpectType CommandQueue
 })
 

@@ -10,8 +10,8 @@ module.exports = (on) => {
     console.log('internal:commandEnqueue:', command.name, command.args.join(', '))
   })
 
-  on('command:start', (command) => {
-    console.log('command:start:', command.name, command.args.join(', '))
+  on('internal:commandStart', (command) => {
+    console.log('internal:commandStart:', command.name, command.args.join(', '))
   })
 
   // only do this once or it's a lot of logging

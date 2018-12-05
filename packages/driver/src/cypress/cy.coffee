@@ -371,7 +371,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## store the current runnable
       runnable = state("runnable")
 
-      Cypress.action("cy:command:start", command)
+      Cypress.action("cy:internal:commandStart", command)
 
       runCommand(command)
       .then ->
