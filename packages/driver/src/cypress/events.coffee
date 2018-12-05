@@ -115,6 +115,7 @@ module.exports = {
       "command:end": "internal:commandEnd"
       "command:enqueued": "internal:commandEnqueued"
       "command:queue:before:end": "before:command:queue:end"
+      "command:retry": "internal:commandRetry"
       "fail": "test:fail"
       "runnable:after:run:async": "after:runnable:run:async"
       "scrolled": "internal:scrolled"

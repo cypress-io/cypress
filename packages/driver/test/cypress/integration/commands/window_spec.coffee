@@ -24,7 +24,7 @@ describe "src/cy/commands/window", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteWindow.foo = "bar"
 
         cy.window().should("have.property", "foo", "bar").then ->
@@ -35,7 +35,7 @@ describe "src/cy/commands/window", ->
           expect(lastLog.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteWindow.foo = "foo"
 
         cy.on "test:fail", (err) =>
@@ -166,7 +166,7 @@ describe "src/cy/commands/window", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteDocument.foo = "bar"
 
         cy.document().should("have.property", "foo", "bar").then ->
@@ -177,7 +177,7 @@ describe "src/cy/commands/window", ->
           expect(lastLog.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteDocument.foo = "foo"
 
         cy.on "test:fail", (err) =>
@@ -319,7 +319,7 @@ describe "src/cy/commands/window", ->
       retry = _.after 2, =>
         cy.$$("head").append $("<title>waiting on title</title>")
 
-      cy.on "command:retry", retry
+      cy.on "internal:commandRetry", retry
 
       cy.title().should("eq", "waiting on title")
 

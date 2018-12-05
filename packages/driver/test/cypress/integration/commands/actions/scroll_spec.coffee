@@ -268,7 +268,7 @@ describe "src/cy/commands/actions/scroll", ->
 
         retried = false
 
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           $container.css("overflow", "scroll")
           retried = true
 
@@ -286,7 +286,7 @@ describe "src/cy/commands/actions/scroll", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$("#scroll-into-view-horizontal").addClass("scrolled")
 
         cy
@@ -303,7 +303,7 @@ describe "src/cy/commands/actions/scroll", ->
         cy.stub(cy, "ensureScrollability")
         .onFirstCall().throws(new Error)
 
-        cy.on "command:retry", ->
+        cy.on "internal:commandRetry", ->
           cy.ensureScrollability.returns()
 
         cy
@@ -597,7 +597,7 @@ describe "src/cy/commands/actions/scroll", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$("#scroll-into-view-win-vertical div").addClass("scrolled")
 
         cy

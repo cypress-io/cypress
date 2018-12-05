@@ -56,7 +56,7 @@ Cypress.on('internal:commandEnd', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('command:retry', (command) => {
+Cypress.on('internal:commandRetry', (command) => {
   command // $ExpectType CommandQueue
 })
 

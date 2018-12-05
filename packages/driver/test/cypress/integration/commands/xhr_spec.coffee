@@ -1519,7 +1519,7 @@ describe "src/cy/commands/xhr", ->
       it.skip "does not retry (cancels existing promise) when xhr errors", (done) ->
         cancel = cy.spy(Promise.prototype, "cancel")
 
-        cy.on "command:retry", =>
+        cy.on "internal:commandRetry", =>
           if cy.state("error")
             done("should have cancelled and not retried after failing")
 

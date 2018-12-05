@@ -49,19 +49,19 @@ describe "src/cy/commands/assertions", ->
           .should("have.property", "length", 1)
 
     it "skips over utility commands", ->
-      cy.on "command:retry", _.after 2, =>
+      cy.on "internal:commandRetry", _.after 2, =>
         cy.$$("div:first").addClass("foo")
 
-      cy.on "command:retry", _.after 4, =>
+      cy.on "internal:commandRetry", _.after 4, =>
         cy.$$("div:first").attr("id", "bar")
 
       cy.get("div:first").should("have.class", "foo").debug().and("have.id", "bar")
 
     it "skips over aliasing", ->
-      cy.on "command:retry", _.after 2, =>
+      cy.on "internal:commandRetry", _.after 2, =>
         cy.$$("div:first").addClass("foo")
 
-      cy.on "command:retry", _.after 4, =>
+      cy.on "internal:commandRetry", _.after 4, =>
         cy.$$("div:first").attr("id", "bar")
 
       cy.get("div:first").as("div").should("have.class", "foo").debug().and("have.id", "bar")
@@ -107,7 +107,7 @@ describe "src/cy/commands/assertions", ->
       it "waits until function is true", ->
         button = cy.$$("button:first")
 
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           button.addClass("ready")
 
         cy.get("button:first").should ($button) ->
@@ -116,7 +116,7 @@ describe "src/cy/commands/assertions", ->
       it "works with regular objects", ->
         obj = {}
 
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           obj.foo = "bar"
 
         cy.wrap(obj).should (o) ->
@@ -188,7 +188,7 @@ describe "src/cy/commands/assertions", ->
       it "resolves eventually not exist", ->
         button = cy.$$("button:first")
 
-        cy.on "command:retry", _.after 2, _.once ->
+        cy.on "internal:commandRetry", _.after 2, _.once ->
           button.remove()
 
         cy.get("button:first").click().should("not.exist")
@@ -266,7 +266,7 @@ describe "src/cy/commands/assertions", ->
 
     describe "have.class", ->
       it "snapshots and ends the assertion after retrying", ->
-        cy.on "command:retry", _.after 3, =>
+        cy.on "internal:commandRetry", _.after 3, =>
           cy.$$("#foo").addClass("active")
 
         cy.contains("foo").should("have.class", "active").then ->
@@ -284,7 +284,7 @@ describe "src/cy/commands/assertions", ->
         retry = _.after 3, ->
           button.addClass("new-class")
 
-        cy.on "command:retry", retry
+        cy.on "internal:commandRetry", retry
 
         cy.get("button:first").should("have.class", "new-class")
 
@@ -357,7 +357,7 @@ describe "src/cy/commands/assertions", ->
 
         button = cy.$$("button:first")
 
-        cy.on "command:retry", _.after 2, _.once ->
+        cy.on "internal:commandRetry", _.after 2, _.once ->
           button.addClass("foo").remove()
 
         cy.on "test:fail", (err) =>
@@ -837,7 +837,7 @@ describe "src/cy/commands/assertions", ->
 
         length = buttons.length
 
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           cy.$$("button:last").remove()
 
         cy.wrap(buttons).should("have.length", length - 1)

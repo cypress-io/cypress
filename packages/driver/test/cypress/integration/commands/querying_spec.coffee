@@ -41,7 +41,7 @@ describe "src/cy/commands/querying", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$(":text:first").addClass("focused").focus()
 
         cy.focused().should("have.class", "focused").then ->
@@ -55,7 +55,7 @@ describe "src/cy/commands/querying", ->
       it "retries on an elements value", ->
         $input = cy.$$("input:first")
 
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           $input.val("1234")
           $input.get(0).focus()
 
@@ -447,7 +447,7 @@ describe "src/cy/commands/querying", ->
 
       ## wait until we're ALMOST about to time out before
       ## appending the missingEl
-      cy.on "command:retry", (options) =>
+      cy.on "internal:commandRetry", (options) =>
         if options.total + (options._interval * 4) > options._runnableTimeout
           cy.$$("body").append(missingEl)
 
@@ -457,7 +457,7 @@ describe "src/cy/commands/querying", ->
     it "can increase the timeout", ->
       missingEl = $("<div />", id: "missing-el")
 
-      cy.on "command:retry", _.after 2, (options) ->
+      cy.on "internal:commandRetry", _.after 2, (options) ->
         ## make sure runnableTimeout is 10secs
         expect(options._runnableTimeout).to.eq 10000
 
@@ -469,7 +469,7 @@ describe "src/cy/commands/querying", ->
     it "does not factor in the total time the test has been running", ->
       missingEl = $("<div />", id: "missing-el")
 
-      cy.on "command:retry", _.after 2, ->
+      cy.on "internal:commandRetry", _.after 2, ->
         cy.$$("body").append(missingEl)
 
       ## in this example our test has been running 200ms
@@ -498,7 +498,7 @@ describe "src/cy/commands/querying", ->
           done()
         , 100
 
-      cy.on "command:retry", ->
+      cy.on "internal:commandRetry", ->
         retrys += 1
         stop()
 
@@ -533,7 +533,7 @@ describe "src/cy/commands/querying", ->
         Cypress.config("defaultCommandTimeout", 1000)
 
       it "waits until button exists", ->
-        cy.on "command:retry", _.after 3, =>
+        cy.on "internal:commandRetry", _.after 3, =>
           cy.$$("body").append $("<div id='missing-el'>missing el</div>")
 
         cy.get("#missing-el").should("exist")
@@ -542,7 +542,7 @@ describe "src/cy/commands/querying", ->
       it "waits until button does not exist", ->
         cy.timeout(500, true)
 
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$("#button").remove()
 
         cy.get("#button").should("not.exist")
@@ -558,7 +558,7 @@ describe "src/cy/commands/querying", ->
         retry = _.after 3, =>
           cy.$$("#list li:last").remove()
 
-        cy.on "command:retry", retry
+        cy.on "internal:commandRetry", retry
 
         cy.get("#list li:last").should("not.exist").then ($el) ->
           expect($el).to.be.null
@@ -589,7 +589,7 @@ describe "src/cy/commands/querying", ->
         retry = _.after 3, =>
           button = cy.$$("#button").hide()
 
-        cy.on "command:retry", retry
+        cy.on "internal:commandRetry", retry
 
         cy.get("#button").should("not.be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
@@ -610,7 +610,7 @@ describe "src/cy/commands/querying", ->
         retry = _.after 3, =>
           button.show()
 
-        cy.on "command:retry", retry
+        cy.on "internal:commandRetry", retry
 
         cy.get("#button").should("be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
@@ -630,7 +630,7 @@ describe "src/cy/commands/querying", ->
 
         length = buttons.length - 2
 
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           buttons.last().remove()
           buttons = cy.$$("button")
 
@@ -647,7 +647,7 @@ describe "src/cy/commands/querying", ->
         length = buttons.length + 1
 
         ## add another button after 2 retries, once
-        cy.on "command:retry", _.after 2, _.once =>
+        cy.on "internal:commandRetry", _.after 2, _.once =>
           $("<button />").appendTo cy.$$("body")
 
         ## should eventually resolve after adding 1 button
@@ -666,7 +666,7 @@ describe "src/cy/commands/querying", ->
 
         replayCommandsFrom = cy.spy(cy, "replayCommandsFrom")
 
-        cy.on "command:retry", ->
+        cy.on "internal:commandRetry", ->
           buttons.last().remove()
           buttons = cy.$$("button")
 
@@ -684,13 +684,13 @@ describe "src/cy/commands/querying", ->
 
     describe "assertion verification", ->
       it "automatically retries", ->
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$("button:first").attr("data-foo", "bar")
 
         cy.get("button:first").should("have.attr", "data-foo").and("match", /bar/)
 
       it "eventually resolves an alias", ->
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$("button:first").addClass("foo-bar-baz")
 
         cy
@@ -716,7 +716,7 @@ describe "src/cy/commands/querying", ->
         ## add 500ms to the delta
         cy.timeout(500, true)
 
-        cy.on "command:retry", ->
+        cy.on "internal:commandRetry", ->
           buttons.last().remove()
           buttons = cy.$$("button")
 
@@ -1061,7 +1061,7 @@ describe "src/cy/commands/querying", ->
               retry = _.after 3, _.once =>
                 cy.state("window").$.getJSON("/json")
 
-              cy.on "command:retry", retry
+              cy.on "internal:commandRetry", retry
           .get("#get-json").as("getJsonButton").click()
           .wait("@getJSON")
           .get("getJsonButton")
@@ -1237,7 +1237,7 @@ describe "src/cy/commands/querying", ->
       retry = _.after 3, =>
         cy.$$("body").append span
 
-      cy.on "command:retry", retry
+      cy.on "internal:commandRetry", retry
 
       cy.contains("brand new content").then ($span) ->
         expect($span.get(0)).to.eq span.get(0)
@@ -1293,7 +1293,7 @@ describe "src/cy/commands/querying", ->
           done()
         , 50
 
-      cy.on "command:retry", ->
+      cy.on "internal:commandRetry", ->
         retrys += 1
         abort()
 
@@ -1356,7 +1356,7 @@ describe "src/cy/commands/querying", ->
           retried3Times = true
           cy.$$("#edge-case-contains").append(count)
 
-        cy.on "command:retry", retry
+        cy.on "internal:commandRetry", retry
 
         cy.get("#edge-case-contains").contains(100).then ($count) ->
           expect(retried3Times).to.be.true
@@ -1371,7 +1371,7 @@ describe "src/cy/commands/querying", ->
           retried3Times = true
           cy.$$("#edge-case-contains").append(count)
 
-        cy.on "command:retry", retry
+        cy.on "internal:commandRetry", retry
 
         cy.get("#edge-case-contains").contains(".count", 100).then ($count) ->
           expect(retried3Times).to.be.true
@@ -1599,7 +1599,7 @@ describe "src/cy/commands/querying", ->
             done()
           , 50
 
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           Cypress.stop()
 
         cy.contains(/^does not contain asdfasdf at all$/)

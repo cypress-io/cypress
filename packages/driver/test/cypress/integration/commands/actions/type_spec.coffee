@@ -157,7 +157,7 @@ describe "src/cy/commands/actions/type", ->
 
         retried = false
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $txt.show()
           retried = true
 
@@ -173,7 +173,7 @@ describe "src/cy/commands/actions/type", ->
         $txt.on "click", ->
           clicks += 1
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $txt.prop("disabled", false)
           retried = true
 
@@ -184,7 +184,7 @@ describe "src/cy/commands/actions/type", ->
       it "waits until element stops animating", ->
         retries = 0
 
-        cy.on "command:retry", (obj) ->
+        cy.on "internal:commandRetry", (obj) ->
           retries += 1
 
         cy.stub(cy, "ensureElementIsNotAnimating")
@@ -1839,7 +1839,7 @@ describe "src/cy/commands/actions/type", ->
           }
           .prependTo cy.$$("body")
 
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           expect(options.timeout).to.eq 1000
           expect(options.interval).to.eq 60
           done()
@@ -2994,7 +2994,7 @@ describe "src/cy/commands/actions/type", ->
       textarea.on "click", ->
         clicks += 1
 
-      cy.on "command:retry", _.after 3, ->
+      cy.on "internal:commandRetry", _.after 3, ->
         textarea.prop("disabled", false)
         retried = true
 
@@ -3030,7 +3030,7 @@ describe "src/cy/commands/actions/type", ->
       input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"))
       span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-      cy.on "command:retry", (options) ->
+      cy.on "internal:commandRetry", (options) ->
         expect(options.timeout).to.eq 1000
         expect(options.interval).to.eq 60
         done()

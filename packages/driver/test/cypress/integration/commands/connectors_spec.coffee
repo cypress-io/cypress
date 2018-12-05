@@ -260,7 +260,7 @@ describe "src/cy/commands/connectors", ->
           return null
 
         it "eventually passes the assertion", ->
-          cy.on "command:retry", _.after 2, =>
+          cy.on "internal:commandRetry", _.after 2, =>
             @remoteWindow.$.fn.foo = -> "foo"
 
           cy.get("div:first").invoke("foo").should("eq", "foo").then ->
@@ -271,7 +271,7 @@ describe "src/cy/commands/connectors", ->
             expect(lastLog.get("ended")).to.be.true
 
         it "eventually fails the assertion", (done) ->
-          cy.on "command:retry", _.after 2, =>
+          cy.on "internal:commandRetry", _.after 2, =>
             @remoteWindow.$.fn.foo = -> "foo"
 
           cy.on "test:fail", (err) =>

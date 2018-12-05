@@ -190,7 +190,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", ($el, type) ->
+        cy.on "internal:commandRetry", ($el, type) ->
           retried = true
 
         $btn.on "tap", ->
@@ -221,7 +221,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $span.hide()
           retried = true
 
@@ -374,7 +374,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         retried = false
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.show()
           retried = true
 
@@ -390,7 +390,7 @@ describe "src/cy/commands/actions/trigger", ->
         $btn.on "mouseover", ->
           mouseovers += 1
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.prop("disabled", false)
           retried = true
 
@@ -401,7 +401,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "waits until element stops animating", ->
         retries = 0
 
-        cy.on "command:retry", (obj) ->
+        cy.on "internal:commandRetry", (obj) ->
           retries += 1
 
         cy.stub(cy, "ensureElementIsNotAnimating")
@@ -469,7 +469,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "eventually passes the assertion", ->
         $btn = cy.$$("button:first")
 
-        cy.on "command:retry", _.once ->
+        cy.on "internal:commandRetry", _.once ->
           $btn.addClass("moused-over")
 
         cy.get("button:first").trigger("mouseover").should("have.class", "moused-over").then ->

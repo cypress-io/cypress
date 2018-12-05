@@ -17,11 +17,11 @@ module.exports = (on) => {
   // only do this once or it's a lot of logging
   let retryCalled = false
 
-  on('command:retry', (retry) => {
+  on('internal:commandRetry', (retry) => {
     if (retryCalled) return
 
     retryCalled = true
-    console.log('command:retry:', retry.name, retry.error.message)
+    console.log('internal:commandRetry:', retry.name, retry.error.message)
   })
 
   on('internal:commandEnd', (command) => {

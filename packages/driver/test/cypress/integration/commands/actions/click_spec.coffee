@@ -547,7 +547,7 @@ describe "src/cy/commands/actions/click", ->
         cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", ($el, type) ->
+        cy.on "internal:commandRetry", ($el, type) ->
           retried = true
 
         $btn.on "click", ->
@@ -578,7 +578,7 @@ describe "src/cy/commands/actions/click", ->
         cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $span.hide()
           retried = true
 
@@ -711,7 +711,7 @@ describe "src/cy/commands/actions/click", ->
 
         retried = false
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.show()
           retried = true
 
@@ -727,7 +727,7 @@ describe "src/cy/commands/actions/click", ->
         $btn.on "click", ->
           clicks += 1
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.prop("disabled", false)
           retried = true
 
@@ -738,7 +738,7 @@ describe "src/cy/commands/actions/click", ->
       it "waits until element stops animating", ->
         retries = 0
 
-        cy.on "command:retry", (obj) ->
+        cy.on "internal:commandRetry", (obj) ->
           retries += 1
 
         cy.stub(cy, "ensureElementIsNotAnimating")

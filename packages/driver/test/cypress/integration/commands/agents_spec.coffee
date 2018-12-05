@@ -238,7 +238,7 @@ describe "src/cy/commands/agents", ->
         expect(@myStub).to.eq(@stub)
 
       it "retries until assertions pass", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @myStub("foo")
 
         cy.get("@myStub").should("be.calledWith", "foo")

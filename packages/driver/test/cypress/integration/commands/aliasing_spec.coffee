@@ -44,7 +44,7 @@ describe "src/cy/commands/aliasing", ->
     it "retries primitives and assertions", ->
       obj = {}
 
-      cy.on "command:retry", _.after 2, ->
+      cy.on "internal:commandRetry", _.after 2, ->
         obj.foo = "bar"
 
       cy.wrap(obj).as("obj")

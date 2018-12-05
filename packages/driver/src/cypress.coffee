@@ -368,9 +368,9 @@ class $Cypress
         @emitToBackend("internal:commandEnd", serializeCommand(args[0]))
         @emit("internal:commandEnd", args...)
 
-      when "cy:command:retry"
-        @emitToBackend("command:retry", serializeRetry(args[0]))
-        @emit("command:retry", args...)
+      when "cy:internal:commandRetry"
+        @emitToBackend("internal:commandRetry", serializeRetry(args[0]))
+        @emit("internal:commandRetry", args...)
 
       when "cy:internal:commandEnqueue"
         @emitToBackend("internal:commandEnqueue", serializeCommand(args[0]))
