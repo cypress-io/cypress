@@ -148,7 +148,8 @@ npmInstallAll = (pathToPackages) ->
   .tap(printFolders)
   .mapSeries (packageFolder) ->
     removeDevDependencies(packageFolder)
-    .then retryNpmInstall
+    .then ->
+      retryNpmInstall(packageFolder)
   .then ->
     end = new Date()
     console.log("Finished NPM Installing", prettyMes(end - started))
