@@ -3748,7 +3748,7 @@ declare namespace Cypress {
      * Fires whenever the viewport changes via a `cy.viewport()` or naturally when Cypress resets the viewport to the default between tests. Useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'viewport:changed', fn: (viewport: Viewport) => void): void
+    (action: 'viewport:change', fn: (viewport: Viewport) => void): void
     /**
      * Fires whenever **Cypress** is scrolling your application. This event is fired when Cypress is {% url 'waiting for and calculating actionability' interacting-with-elements %}. It will scroll to 'uncover' elements currently being covered. This event is extremely useful to debug why Cypress may think an element is not interactive.
      * @see https://on.cypress.io/catalog-of-events#App-Events

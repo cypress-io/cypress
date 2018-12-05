@@ -440,10 +440,10 @@ describe "src/cy/commands/window", ->
           }
 
   context "#viewport", ->
-    it "triggers 'viewport:changed' event with dimensions object", ->
+    it "triggers 'viewport:change' event with dimensions object", ->
       expected = false
 
-      cy.on "viewport:changed", (viewport, fn) ->
+      cy.on "viewport:change", (viewport, fn) ->
         expected = true
         expect(viewport).to.deep.eq {viewportWidth: 800, viewportHeight: 600}
         expect(fn).to.be.a("function")
@@ -451,36 +451,36 @@ describe "src/cy/commands/window", ->
       cy.viewport(800, 600).then ->
         expect(expected).to.be.true
 
-    it "does not trigger 'viewport:changed' when changing to the default", ->
+    it "does not trigger 'viewport:change' when changing to the default", ->
       fn = ->
-        throw new Error("Should not trigger 'viewport:changed'")
+        throw new Error("Should not trigger 'viewport:change'")
 
-      Cypress.prependListener("viewport:changed", fn)
+      Cypress.prependListener("viewport:change", fn)
 
       cy.viewport(1000, 660).then ->
-        Cypress.removeListener("viewport:changed", fn)
+        Cypress.removeListener("viewport:change", fn)
 
-    it "does not trigger 'viewport:changed' when changing to the same viewport", ->
+    it "does not trigger 'viewport:change' when changing to the same viewport", ->
       triggeredOnce = false
       fn = ->
         if triggeredOnce
-          throw new Error("Should not trigger 'viewport:changed'")
+          throw new Error("Should not trigger 'viewport:change'")
         triggeredOnce = true
 
-      Cypress.prependListener("viewport:changed", fn)
+      Cypress.prependListener("viewport:change", fn)
 
       cy.viewport(800, 600)
       cy.viewport(800, 600).then ->
-        Cypress.removeListener("viewport:changed", fn)
+        Cypress.removeListener("viewport:change", fn)
 
-    it "triggers 'viewport:changed' if width changes", (done) ->
+    it "triggers 'viewport:change' if width changes", (done) ->
       finished = false
       setTimeout ->
         if not finished
-          done("Timed out before 'viewport:changed'")
+          done("Timed out before 'viewport:change'")
       , 1000
       triggeredOnce = false
-      cy.on "viewport:changed", (viewport) ->
+      cy.on "viewport:change", (viewport) ->
         if triggeredOnce
           expect(viewport).to.eql({ viewportWidth: 900, viewportHeight: 600 })
           finished = true
@@ -490,14 +490,14 @@ describe "src/cy/commands/window", ->
       cy.viewport(800, 600)
       cy.viewport(900, 600)
 
-    it "triggers 'viewport:changed' if height changes", (done) ->
+    it "triggers 'viewport:change' if height changes", (done) ->
       finished = false
       setTimeout ->
         if not finished
-          done("Timed out before 'viewport:changed'")
+          done("Timed out before 'viewport:change'")
       , 1000
       triggeredOnce = false
-      cy.on "viewport:changed", (viewport) ->
+      cy.on "viewport:change", (viewport) ->
         if triggeredOnce
           expect(viewport).to.eql({ viewportWidth: 800, viewportHeight: 700 })
           finished = true
@@ -513,7 +513,7 @@ describe "src/cy/commands/window", ->
 
     it "does not modify viewportWidth and viewportHeight in config", ->
       expected = false
-      cy.on "viewport:changed", ->
+      cy.on "viewport:change", ->
         expected = true
         expect(Cypress.config("viewportWidth")).not.to.eq(800)
         expect(Cypress.config("viewportHeight")).not.to.eq(600)
@@ -533,49 +533,49 @@ describe "src/cy/commands/window", ->
 
     context "presets", ->
       it "ipad-2", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 768, viewportHeight: 1024}
           done()
 
         cy.viewport("ipad-2")
 
       it "ipad-mini", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 768, viewportHeight: 1024}
           done()
 
         cy.viewport("ipad-mini")
 
       it "iphone-6+", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 736}
           done()
 
         cy.viewport("iphone-6+")
 
       it "iphone-6", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 667}
           done()
 
         cy.viewport("iphone-6")
 
       it "iphone-5", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 320, viewportHeight: 568}
           done()
 
         cy.viewport("iphone-5")
 
       it "can change the orientation to landspace", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 568, viewportHeight: 320}
           done()
 
         cy.viewport("iphone-5", "landscape")
 
       it "can change the orientation to portrait", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 320, viewportHeight: 568}
           done()
 

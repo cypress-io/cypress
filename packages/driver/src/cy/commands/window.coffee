@@ -57,7 +57,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## force our UI to change to the viewport and wait for it
       ## to be updated
-      Cypress.action "cy:viewport:changed", viewport, ->
+      Cypress.action "cy:viewport:change", viewport, ->
         resolve(viewport)
 
   Commands.addAll({

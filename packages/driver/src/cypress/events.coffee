@@ -124,6 +124,7 @@ module.exports = {
       "test:before:run": "test:start"
       "test:before:run:async": "test:start:async"
       "url:changed": "page:url:changed"
+      "viewport:changed": "viewport:change"
       "window:alert": "page:alert"
       "window:before:load": "page:start"
       "window:before:unload": "before:window:unload"

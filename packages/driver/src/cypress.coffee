@@ -357,8 +357,8 @@ class $Cypress
       when "cy:visit:failed"
         @emit("visit:failed", args[0])
 
-      when "cy:viewport:changed"
-        @emit("viewport:changed", args...)
+      when "cy:viewport:change"
+        @emit("viewport:change", args...)
 
       when "cy:internal:commandStart"
         @emitToBackend("internal:commandStart", serializeCommand(args[0]))

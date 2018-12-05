@@ -36,7 +36,7 @@ Cypress.on('test:fail', (error, mocha) => {
   mocha // $ExpectType IRunnable
 })
 
-Cypress.on('viewport:changed', (viewport) => {
+Cypress.on('viewport:change', (viewport) => {
   viewport // $ExpectType Viewport
 })
 
