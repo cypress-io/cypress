@@ -3788,7 +3788,7 @@ declare namespace Cypress {
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:run:start', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'test:start', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
     /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events

@@ -292,16 +292,16 @@ class $Cypress
       when "mocha:runnable:run"
         @runner.onRunnableRun(args...)
 
-      when "runner:test:run:start"
+      when "runner:test:start"
         ## get back to a clean slate
         @cy.reset()
 
-        @emitToBackend("test:run:start", serializeTest(args[1]))
-        @emit("test:run:start", args...)
+        @emitToBackend("test:start", serializeTest(args[1]))
+        @emit("test:start", args...)
 
-      when "runner:test:run:start:async"
+      when "runner:test:start:async"
         ## TODO: handle timeouts here? or in the runner?
-        @emitThen("test:run:start:async", args...)
+        @emitThen("test:start:async", args...)
 
       when "runner:after:runnable:run:async"
         @emitThen("after:runnable:run:async", args...)

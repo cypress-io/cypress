@@ -10,7 +10,7 @@ mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
 HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
-TEST_RUN_START_EVENT = "runner:test:run:start"
+TEST_RUN_START_EVENT = "runner:test:start"
 TEST_RUN_END_EVENT = "runner:test:run:end"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
@@ -77,8 +77,8 @@ fired = (event, runnable) ->
 
 testBeforeRunAsync = (test, Cypress) ->
   Promise.try ->
-    if not fired("runner:test:run:start:async", test)
-      fire("runner:test:run:start:async", test, Cypress)
+    if not fired("runner:test:start:async", test)
+      fire("runner:test:start:async", test, Cypress)
 
 runnableAfterRunAsync = (runnable, Cypress) ->
   Promise.try ->
@@ -867,7 +867,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## whenever any runnable is about to run
       ## we figure out what test its associated to
       ## if its a hook, and then we fire the
-      ## test:run:start:async action if its not
+      ## test:start:async action if its not
       ## been fired before for this test
       testBeforeRunAsync(test, Cypress)
       .catch (err) ->

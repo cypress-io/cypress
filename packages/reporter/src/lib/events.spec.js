@@ -142,8 +142,8 @@ describe('events', () => {
       expect(runnablesStore.setInitialScrollTop).to.have.been.calledWith(123)
     })
 
-    it('sends runnable started on test:run:start:async', () => {
-      runner.on.withArgs('test:run:start:async').callArgWith(1, 'the runnable')
+    it('sends runnable started on test:start:async', () => {
+      runner.on.withArgs('test:start:async').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableStarted).to.have.been.calledWith('the runnable')
     })
 

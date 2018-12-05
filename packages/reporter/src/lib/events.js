@@ -47,7 +47,7 @@ export default {
       }
     }))
 
-    runner.on('test:run:start:async', action('test:run:start:async', (runnable) => {
+    runner.on('test:start:async', action('test:start:async', (runnable) => {
       runnablesStore.runnableStarted(runnable)
     }))
 

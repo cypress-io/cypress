@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 
 module.exports = (on) => {
-  on('test:run:start', (test) => {
-    console.log('test:run:start:', test.title)
-    throw new Error('Error thrown synchronously from "test:run:start". Should be ignored.')
+  on('test:start', (test) => {
+    console.log('test:start:', test.title)
+    throw new Error('Error thrown synchronously from "test:start". Should be ignored.')
   })
 
   on('internal:commandEnqueue', (command) => {

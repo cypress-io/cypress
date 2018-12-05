@@ -77,8 +77,8 @@ after:add | Runner | Anyone | when all runnables have been added to the UI
 runnables:ready | Runner | Anyone | when all runnables have been reduced to basic objects
 mocha:start | Mocha | Cypress | when mocha runner triggers its 'start' event
 suite:start | Mocha | Cypress | when mocha runner fires its 'suite' event
-test:run:start:async | Cypress | Anyone | before any code has run for a particular test
-test:run:start:async | Cypress | Cypress | before any hooks for a test have started
+test:start:async | Cypress | Anyone | before any code has run for a particular test
+test:start:async | Cypress | Cypress | before any hooks for a test have started
 hook:start | Mocha | Cypress | when mocha runner fires its 'hook' event
 test:start | Mocha | Cypress | when mocha runner fires its 'test' event
 suite:end | Mocha | Cypress | when mocha runner fires its 'suite end' event

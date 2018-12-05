@@ -236,7 +236,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
-  Cypress.on("test:run:start", reset)
+  Cypress.on("test:start", reset)
 
   Cypress.on "stability:changed", (bool, event) ->
     ## only send up page loading events when we're

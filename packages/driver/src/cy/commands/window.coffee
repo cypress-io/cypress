@@ -31,7 +31,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## currentViewport could already be set due to previous runs
   currentViewport ?= defaultViewport
 
-  Cypress.on "test:run:start:async", ->
+  Cypress.on "test:start:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
     ## need to restore prior to running the next test

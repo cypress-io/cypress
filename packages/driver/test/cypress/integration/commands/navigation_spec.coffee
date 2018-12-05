@@ -569,7 +569,7 @@ describe "src/cy/commands/navigation", ->
 
     describe "when origins don't match", ->
       beforeEach ->
-        Cypress.emit("test:run:start", { id: 888 })
+        Cypress.emit("test:start", { id: 888 })
 
         cy.stub(Cypress, "getEmissions").returns([])
         cy.stub(Cypress, "getTestsState").returns([])

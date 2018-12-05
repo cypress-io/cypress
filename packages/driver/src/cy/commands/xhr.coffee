@@ -228,7 +228,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("page:end", abort)
 
-  Cypress.on "test:run:start", ->
+  Cypress.on "test:start", ->
     ## reset the existing server
     reset()
 

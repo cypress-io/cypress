@@ -22,7 +22,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## this MUST be prepended else if we are stubbing or spying on
   ## global timers they will be reset in agents before this runs
   ## its reset function
-  Cypress.prependListener("test:run:start", reset)
+  Cypress.prependListener("test:start", reset)
 
   Cypress.on "page:start", (contentWindow) ->
     ## if a clock has been created before this event (likely before
