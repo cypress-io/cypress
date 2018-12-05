@@ -103,7 +103,7 @@ removeDevDependencies = (packageFolder) ->
   fs.readJsonAsync(packagePath)
   .then (json) ->
     delete json.devDependencies
-    fs.writeJsonAsync(packagePath)
+    fs.writeJsonAsync(packagePath, json, {spaces: 2})
 
 retryGlobbing = (pathToPackages, delay = 1000) ->
   retryGlob = ->
@@ -152,7 +152,7 @@ npmInstallAll = (pathToPackages) ->
       retryNpmInstall(packageFolder)
   .then ->
     end = new Date()
-    console.log("Finished NPM Installing", prettyMes(end - started))
+    console.log("Finished NPM Installing", prettyMs(end - started))
 
 removePackageJson = (filename) ->
   if filename.endsWith("/package.json") then path.dirname(filename) else filename
