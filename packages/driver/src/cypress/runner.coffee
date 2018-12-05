@@ -11,7 +11,7 @@ betweenQuotesRe = /\"(.+?)\"/
 
 HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
 TEST_RUN_START_EVENT = "runner:test:start"
-TEST_RUN_END_EVENT = "runner:test:run:end"
+TEST_RUN_END_EVENT = "runner:test:end"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
@@ -266,7 +266,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
   return if not _runner.hook
 
   ## monkey patch the hook event so we can wrap
-  ## 'test:run:end' around all of
+  ## 'test:end' around all of
   ## the hooks surrounding a test runnable
   _runnerHook = _runner.hook
 
@@ -560,7 +560,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
     @emit("test", test)
 
     ## if this is not the last test amongst its siblings
-    ## then go ahead and fire its test:run:end event
+    ## then go ahead and fire its test:end event
     ## else this will not get called
     tests = getAllSiblingTests(test.parent, getTestById)
 

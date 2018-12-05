@@ -234,7 +234,7 @@ class $Cypress
         ## when this happens mocha aborts the entire run
         ## and does not do the usual cleanup so that means
         ## we have to fire the after:test:hooks and
-        ## test:run:end events ourselves
+        ## test:end events ourselves
         @emit("run:end")
 
         if @config("isTextTerminal")
@@ -306,18 +306,18 @@ class $Cypress
       when "runner:after:runnable:run:async"
         @emitThen("after:runnable:run:async", args...)
 
-      when "runner:test:run:end"
+      when "runner:test:end"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 
         ## this event is how the reporter knows how to display
         ## stats and runnable properties such as errors
-        @emitToBackend("test:run:end", serializeTest(args[1]))
-        @emit("test:run:end", args...)
+        @emitToBackend("test:end", serializeTest(args[1]))
+        @emit("test:end", args...)
 
         if @config("isTextTerminal")
           ## needed for calculating wallClockDuration
           ## and the timings of after + afterEach hooks
-          @emit("mocha", "test:run:end", args[0])
+          @emit("mocha", "test:end", args[0])
 
       when "cy:before:all:screenshots"
         @emit("before:all:screenshots", args...)

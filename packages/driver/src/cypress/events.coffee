@@ -120,7 +120,7 @@ module.exports = {
       "fail": "test:fail"
       "runnable:after:run:async": "after:runnable:run:async"
       "scrolled": "internal:scrolled"
-      "test:after:run": "test:run:end"
+      "test:after:run": "test:end"
       "test:before:run": "test:start"
       "test:before:run:async": "test:start:async"
       "url:changed": "page:url:changed"

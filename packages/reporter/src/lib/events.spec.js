@@ -147,13 +147,13 @@ describe('events', () => {
       expect(runnablesStore.runnableStarted).to.have.been.calledWith('the runnable')
     })
 
-    it('sends runnable finished on test:run:end', () => {
-      runner.on.withArgs('test:run:end').callArgWith(1, 'the runnable')
+    it('sends runnable finished on test:end', () => {
+      runner.on.withArgs('test:end').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableFinished).to.have.been.calledWith('the runnable')
     })
 
-    it('increments the stats count on test:run:end', () => {
-      runner.on.withArgs('test:run:end').callArgWith(1, { state: 'passed' })
+    it('increments the stats count on test:end', () => {
+      runner.on.withArgs('test:end').callArgWith(1, { state: 'passed' })
       expect(statsStore.incrementCount).to.have.been.calledWith('passed')
     })
 

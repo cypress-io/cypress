@@ -73,7 +73,7 @@ Cypress.on('test:start', (attributes , test) => {
   test // $ExpectType ITest
 })
 
-Cypress.on('test:run:end', (attributes , test) => {
+Cypress.on('test:end', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })

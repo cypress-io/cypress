@@ -28,9 +28,9 @@ module.exports = (on) => {
     console.log('internal:commandEnd:', command.name, command.args.join(', '))
   })
 
-  on('test:run:end', (test) => {
-    console.log('test:run:end:', test.title)
+  on('test:end', (test) => {
+    console.log('test:end:', test.title)
 
-    return Promise.reject(new Error('Error thrown in promise from "test:run:end". Should be ignored.'))
+    return Promise.reject(new Error('Error thrown in promise from "test:end". Should be ignored.'))
   })
 }

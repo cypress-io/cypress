@@ -82,14 +82,14 @@ describe "$Cypress.Runner API", ->
           expect(restore).to.be.called
           done()
 
-      it "calls after:test:hooks and test:run:end when uncaught err from hook", (done) ->
+      it "calls after:test:hooks and test:end when uncaught err from hook", (done) ->
         fn = _.after 3, -> done()
 
         @Cypress.on "after:test:hooks", (test) ->
           expect(test.title).to.eq("one")
           fn()
 
-        @Cypress.on "test:run:end", (test) ->
+        @Cypress.on "test:end", (test) ->
           expect(test.title).to.eq("one")
           fn()
 
@@ -305,7 +305,7 @@ describe "$Cypress.Runner API", ->
       ## we're additionally testing that Cypress
       ## fires this test:end event since thats
       ## how we actually get our test!
-      @Cypress.on "test:run:end", (@relatedTest) =>
+      @Cypress.on "test:end", (@relatedTest) =>
 
       @runner.run -> done()
 
@@ -459,11 +459,11 @@ describe "$Cypress.Runner API", ->
               expect(calls.length).to.eq(2)
               done()
 
-          it "fires test:run:end twice", (done) ->
+          it "fires test:end twice", (done) ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:run:end"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:end"
               expect(calls.length).to.eq(2)
               done()
 
@@ -508,7 +508,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:run:end"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:end"
               expect(calls.length).to.eq(3)
               done()
 
@@ -557,7 +557,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:run:end"
+              calls = _.filter trigger.getCalls(), (call) -> call.args[0] is "test:end"
               expect(calls.length).to.eq(5)
               done()
 
