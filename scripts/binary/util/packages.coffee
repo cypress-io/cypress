@@ -10,6 +10,7 @@ check = require("check-more-types")
 execa = require("execa")
 R = require("ramda")
 os = require("os")
+prettyMs = require("pretty-ms")
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -93,22 +94,20 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   la(check.unemptyString(packageToInstall), "missing package to install")
   npmRun(["install", "--force", packageToInstall], packagePath)
 
-npmInstallAll = (pathToPackages) ->
-  ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items
-  ## 313,416,512 bytes (376.6 MB on disk) for 23,576 items
+retryGlobbing = (delay = 1000) ->
+  glob(pathToPackages)
+  .catch {code: "EMFILE"}, ->
+    ## wait, then retry
+    Promise
+    .delay(delay)
+    .then(retryGlobbing)
 
+# installs all packages given a wildcard
+# pathToPackages would be something like "C:\projects\cypress\dist\win32\packages\*"
+npmInstallAll = (pathToPackages) ->
   console.log("npmInstallAll packages in #{pathToPackages}")
 
   started = new Date()
-
-  retryGlobbing = ->
-    glob(pathToPackages)
-    .catch {code: "EMFILE"}, ->
-      ## wait 1 second then retry
-      Promise
-      .delay(1000)
-      .then(retryGlobbing)
-
 
   retryNpmInstall = (pkg) ->
     console.log("installing %s", pkg)
@@ -127,12 +126,12 @@ npmInstallAll = (pathToPackages) ->
       console.log(err, err.code)
       throw err
 
-  ## prunes out all of the devDependencies
-  ## from what was copied
+  ## only installs production dependencies
   retryGlobbing()
   .mapSeries(retryNpmInstall)
   .then ->
-    console.log("Finished NPM Installing", new Date() - started)
+    end = new Date()
+    console.log("Finished NPM Installing", prettyMes(end - started))
 
 removePackageJson = (filename) ->
   if filename.endsWith("/package.json") then path.dirname(filename) else filename
