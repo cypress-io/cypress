@@ -17,8 +17,9 @@ glob = Promise.promisify(glob)
 
 DEFAULT_PATHS = "package.json".split(" ")
 
-pathToPackageJson = (pkg) ->
-  path.join(pkg, "package.json")
+pathToPackageJson = (packageFolder) ->
+  la(check.unemptyString(packageFolder), "expected package path", packageFolder)
+  path.join(packageFolder, "package.json")
 
 npmRun = (args, cwd, env = {}) ->
   command = "npm " + args.join(" ")
@@ -94,8 +95,8 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   la(check.unemptyString(packageToInstall), "missing package to install")
   npmRun(["install", "--force", packageToInstall], packagePath)
 
-removeDevDependencies = (packagePath) ->
-  la(check.unemptyString(packagePath), "expected package path", packagePath)
+removeDevDependencies = (packageFolder) ->
+  packagePath = pathToPackageJson(packageFolder)
   console.log("removing devDependencies from %s", packagePath)
 
   fs.readJsonAsync(packagePath)
