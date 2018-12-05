@@ -11,6 +11,7 @@ execa = require("execa")
 R = require("ramda")
 os = require("os")
 prettyMs = require("pretty-ms")
+pluralize = require('pluralize')
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -139,10 +140,15 @@ npmInstallAll = (pathToPackages) ->
       console.log(err, err.code)
       throw err
 
+  printFolders = (folders) ->
+    console.log("found %s", pluralize("folder", folders.length, true))
+
   ## only installs production dependencies
   retryGlobbing(pathToPackages)
-  .mapSeries(removeDevDependencies)
-  .mapSeries(retryNpmInstall)
+  .tap(printFolders)
+  .mapSeries (packageFolder) ->
+    removeDevDependencies(packageFolder)
+    .then retryNpmInstall
   .then ->
     end = new Date()
     console.log("Finished NPM Installing", prettyMes(end - started))
