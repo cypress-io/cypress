@@ -4,6 +4,7 @@ describe "events", ->
   describe "renamed events", ->
     renamedEvents = {
       "command:end": "internal:commandEnd"
+      "command:enqueued": "internal:commandEnqueued"
       "command:queue:before:end": "before:command:queue:end"
       "fail": "test:fail"
       "runnable:after:run:async": "after:runnable:run:async"

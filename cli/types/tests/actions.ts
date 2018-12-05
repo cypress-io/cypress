@@ -44,7 +44,7 @@ Cypress.on('internal:scrolled', ($el) => {
   $el // $ExpectType JQuery<HTMLElement>
 })
 
-Cypress.on('command:enqueued', (command) => {
+Cypress.on('internal:commandEnqueue', (command) => {
   command // $ExpectType EnqueuedCommand
 })
 

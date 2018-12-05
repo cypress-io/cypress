@@ -3758,7 +3758,7 @@ declare namespace Cypress {
      * Fires when a cy command is first invoked and enqueued to be run later. Useful for debugging purposes if you're confused about the order in which commands will execute.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:enqueued', fn: (command: EnqueuedCommand) => void): void
+    (action: 'internal:commandEnqueue', fn: (command: EnqueuedCommand) => void): void
     /**
      * Fires when cy begins actually running and executing your command. Useful for debugging and understanding how the command queue is async.
      * @see https://on.cypress.io/catalog-of-events#App-Events

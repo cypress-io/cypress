@@ -6,8 +6,8 @@ module.exports = (on) => {
     throw new Error('Error thrown synchronously from "test:run:start". Should be ignored.')
   })
 
-  on('command:enqueued', (command) => {
-    console.log('command:enqueued:', command.name, command.args.join(', '))
+  on('internal:commandEnqueue', (command) => {
+    console.log('internal:commandEnqueue:', command.name, command.args.join(', '))
   })
 
   on('command:start', (command) => {

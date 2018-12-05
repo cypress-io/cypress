@@ -204,18 +204,18 @@ describe "src/cy/commands/connectors", ->
 
             return "foo"
 
-        it "unbinds command:enqueued in the case of an error thrown", (done) ->
+        it "unbinds internal:commandEnqueue in the case of an error thrown", (done) ->
           listeners = []
 
           cy.on "test:fail", (err) =>
-            listeners.push(cy.listeners("command:enqueued").length)
+            listeners.push(cy.listeners("internal:commandEnqueue").length)
 
             expect(@logs.length).to.eq(1)
             expect(listeners).to.deep.eq([1, 0])
             done()
 
           cy.then ->
-            listeners.push(cy.listeners("command:enqueued").length)
+            listeners.push(cy.listeners("internal:commandEnqueue").length)
 
             throw new Error("foo")
 

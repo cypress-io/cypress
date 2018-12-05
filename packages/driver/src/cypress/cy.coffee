@@ -189,7 +189,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     queue.splice(index, 0, obj)
 
-    Cypress.action("cy:command:enqueued", obj)
+    Cypress.action("cy:internal:commandEnqueue", obj)
 
   getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
     return null if not command
@@ -239,7 +239,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## since they return promises and queue more
       ## new commands
       if noArgsAreAFunction(args)
-        Cypress.once("command:enqueued", commandEnqueued)
+        Cypress.once("internal:commandEnqueue", commandEnqueued)
 
       ## run the command's fn with runnable's context
       try
@@ -248,7 +248,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         throw err
       finally
         ## always remove this listener
-        Cypress.removeListener("command:enqueued", commandEnqueued)
+        Cypress.removeListener("internal:commandEnqueue", commandEnqueued)
 
       state("commandIntermediateValue", ret)
 
