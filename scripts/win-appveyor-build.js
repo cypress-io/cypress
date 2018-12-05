@@ -12,13 +12,12 @@ const is = require('check-more-types')
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
 
+// see what variables AppVeyor provides
 // https://www.appveyor.com/docs/environment-variables/
 
 const isRightBranch = () => {
   const branch = process.env.APPVEYOR_REPO_BRANCH
-  return branch === 'develop' ||
-    branch === 'win-build-shell' ||
-    branch === 'no-dev-deps-in-windows-binary-2896'
+  return branch === 'develop'
 }
 
 const isPullRequest = () => {
