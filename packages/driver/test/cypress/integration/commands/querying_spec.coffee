@@ -18,7 +18,7 @@ describe "src/cy/commands/querying", ->
     it "returns the activeElement", ->
       $button = cy.$$("#button")
       $button.get(0).focus()
-      
+
       expect(cy.state("document").activeElement).to.eq($button.get(0))
 
       cy.focused().then ($focused) ->
@@ -434,7 +434,7 @@ describe "src/cy/commands/querying", ->
 
   context "#get", ->
     beforeEach ->
-      Cypress.config("defaultCommandTimeout", 100)
+      Cypress.config("defaultCommandTimeout", 200)
 
     it "finds by selector", ->
       list = cy.$$("#list")
@@ -477,12 +477,12 @@ describe "src/cy/commands/querying", ->
       ## still passes because the total running time is
       ## not factored in (which is correct)
       cy
-        .wait(200)
-        .get("#missing-el", {timeout: 125})
+        .wait(400)
+        .get("#missing-el", {timeout: 225})
         .then ->
           ## it should reset the timeout back
-          ## to 100 after successfully finished get method
-          expect(cy.timeout()).to.eq(100)
+          ## to 200 after successfully finished get method
+          expect(cy.timeout()).to.eq(200)
 
     it "cancels existing promises", (done) ->
       cy.stub(Cypress.runner, "stop")
