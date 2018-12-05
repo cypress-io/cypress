@@ -27,7 +27,7 @@ describe "src/cy/commands/aliasing", ->
 
     it "stores the lookup as an alias", ->
       cy.get("body").as("b").then ->
-        expect(cy.state("aliases").b).to.be.defined
+        expect(cy.state("aliases").b).to.exist
 
     it "stores the resulting subject as the alias", ->
       $body = cy.$$("body")
@@ -356,7 +356,7 @@ describe "src/cy/commands/aliasing", ->
         .get("input:first").as("firstInput")
         .get("div:last").as("lastDiv")
         .then ->
-          expect(cy.getAlias("@firstInput")).to.be.defined
+          expect(cy.getAlias("@firstInput")).to.exist
 
     describe "errors", ->
       it "throws when an alias cannot be found", (done) ->

@@ -18,15 +18,15 @@ describe "driver/src/cypress/cy", ->
       fn = ->
         cy.props.foo
 
-      expect(fn).to.throw(/You are accessing a private property/)
-      expect(fn).to.throw(/function: cy.state\(\.\.\.\)/)
+      expect(fn).to.throw('You are accessing a private property')
+      expect(fn).to.throw('function: cy.state\(\.\.\.\)')
 
     it "throws on accessing privates", ->
       fn = ->
         cy.privates.foo
 
-      expect(fn).to.throw(/You are accessing a private property/)
-      expect(fn).to.throw(/function: cy.state\(\.\.\.\)/)
+      expect(fn).to.throw('You are accessing a private property')
+      expect(fn).to.throw('function: cy.state\(\.\.\.\)')
 
   context "internals of custom commands", ->
     beforeEach ->

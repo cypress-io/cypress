@@ -241,7 +241,7 @@ describe "src/cy/commands/agents", ->
         it "retries until assertions pass", ->
           cy.on "command:retry", _.after 2, =>
             @myStub("foo")
-          
+
           cy.get("@myStub").should("be.calledWith", "foo")
 
         describe "errors", ->
@@ -255,7 +255,7 @@ describe "src/cy/commands/agents", ->
           _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
             it "throws on a blacklisted word: #{blacklist}", ->
               expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
-      
+
       context "with dots", ->
         beforeEach ->
           @logs = []
@@ -296,7 +296,7 @@ describe "src/cy/commands/agents", ->
         it "retries until assertions pass", ->
           cy.on "command:retry", _.after 2, =>
             @["my.stub"]("foo")
-          
+
           cy.get("@my.stub").should("be.calledWith", "foo")
 
         describe "errors", ->
