@@ -94,13 +94,16 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   la(check.unemptyString(packageToInstall), "missing package to install")
   npmRun(["install", "--force", packageToInstall], packagePath)
 
-retryGlobbing = (delay = 1000) ->
-  glob(pathToPackages)
-  .catch {code: "EMFILE"}, ->
-    ## wait, then retry
-    Promise
-    .delay(delay)
-    .then(retryGlobbing)
+retryGlobbing = (pathToPackages, delay = 1000) ->
+  retryGlob = ->
+    glob(pathToPackages)
+    .catch {code: "EMFILE"}, ->
+      ## wait, then retry
+      Promise
+      .delay(delay)
+      .then(retryGlob)
+
+  retryGlob()
 
 # installs all packages given a wildcard
 # pathToPackages would be something like "C:\projects\cypress\dist\win32\packages\*"
@@ -127,7 +130,7 @@ npmInstallAll = (pathToPackages) ->
       throw err
 
   ## only installs production dependencies
-  retryGlobbing()
+  retryGlobbing(pathToPackages)
   .mapSeries(retryNpmInstall)
   .then ->
     end = new Date()
