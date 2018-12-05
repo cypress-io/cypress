@@ -2283,7 +2283,7 @@ describe "src/cy/commands/actions/type", ->
 
               events.push "#{log.get('name')}:log:#{state}"
 
-          cy.on "command:end", (cmd) ->
+          cy.on "internal:commandEnd", (cmd) ->
             events.push "#{cmd.get('name')}:end"
 
           cy.get("#single-input input").type("f{enter}").then ->

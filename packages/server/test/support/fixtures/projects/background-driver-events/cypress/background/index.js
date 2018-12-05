@@ -24,8 +24,8 @@ module.exports = (on) => {
     console.log('command:retry:', retry.name, retry.error.message)
   })
 
-  on('command:end', (command) => {
-    console.log('command:end:', command.name, command.args.join(', '))
+  on('internal:commandEnd', (command) => {
+    console.log('internal:commandEnd:', command.name, command.args.join(', '))
   })
 
   on('test:run:end', (test) => {

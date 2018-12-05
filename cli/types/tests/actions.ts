@@ -52,7 +52,7 @@ Cypress.on('command:start', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('command:end', (command) => {
+Cypress.on('internal:commandEnd', (command) => {
   command // $ExpectType CommandQueue
 })
 

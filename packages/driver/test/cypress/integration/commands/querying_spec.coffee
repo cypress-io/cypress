@@ -345,7 +345,7 @@ describe "src/cy/commands/querying", ->
           cy.get("body").within(value)
 
       it "throws when subject is not in the document", (done) ->
-        cy.on "command:end", =>
+        cy.on "internal:commandEnd", =>
           cy.$$("#list").remove()
 
         cy.on "test:fail", (err) ->

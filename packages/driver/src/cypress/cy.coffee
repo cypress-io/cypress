@@ -390,7 +390,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## over at 0
         state("index", index += 1)
 
-        Cypress.action("cy:command:end", command)
+        Cypress.action("cy:internal:commandEnd", command)
 
         if fn = state("onPaused")
           new Promise (resolve) ->

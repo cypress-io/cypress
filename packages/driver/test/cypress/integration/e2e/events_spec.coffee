@@ -3,6 +3,7 @@ _ = Cypress._
 describe "events", ->
   describe "renamed events", ->
     renamedEvents = {
+      "command:end": "internal:commandEnd"
       "command:queue:before:end": "before:command:queue:end"
       "fail": "test:fail"
       "runnable:after:run:async": "after:runnable:run:async"

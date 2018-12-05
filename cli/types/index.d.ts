@@ -3768,7 +3768,7 @@ declare namespace Cypress {
      * Fires when cy finishes running and executing your command. Useful for debugging and understanding how commands are handled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:end', fn: (command: CommandQueue) => void): void
+    (action: 'internal:commandEnd', fn: (command: CommandQueue) => void): void
     /**
      * Fires whenever a command begins its retrying routines. This is called on the trailing edge after Cypress has internally waited for the retry interval. Useful to understand **why** a command is retrying, and generally includes the actual error causing the retry to happen. When commands fail the final error is the one that actually bubbles up to fail the test. This event is essentially to debug why Cypress is failing.
      * @see https://on.cypress.io/catalog-of-events#App-Events
