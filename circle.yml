@@ -676,6 +676,7 @@ workflows:
             branches:
               only:
                 - develop
+                - no-dev-deps-in-windows-binary-2896
           requires:
             - build
       - test-next-version:
