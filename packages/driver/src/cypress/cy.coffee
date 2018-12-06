@@ -154,8 +154,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
 
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(this)
+      ## no longer needed since we no longer keep state on cy.type
+      # contentWindow.HTMLInputElement.prototype.select = ->
+      #   $selection.interceptSelect.call(this)
 
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()

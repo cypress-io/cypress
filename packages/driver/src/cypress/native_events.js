@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const elements = require('../dom/elements')
 
 // eslint-disable-next-line
-window.criRequest = function () {}
+window.criRequest = function() {}
 
 let client
 
@@ -29,25 +29,26 @@ const init = () => {
     .then((cri_client) => {
       client = cri_client
     })
-    .catch(() => { })
+    .catch(() => {})
   })
 }
 
-const click = ($elToClick, coords) => {
-  return init()
-  .then(() => {
-    const { coordsFromAutIframe, autIframe } = calculateAutIframeCoords(coords, $elToClick)
+const click = ($elToClick, coords, modifiers) => {
+  return init().then(() => {
+    const { coordsFromAutIframe, autIframe } = calculateAutIframeCoords(
+      coords,
+      $elToClick
+    )
     // TODO: import Cypress correctly
     // eslint-disable-next-line
     Cypress.action('cy:before:native:event', coordsFromAutIframe)
     const coordsToClick = calculateCoordsToClick(coordsFromAutIframe, autIframe)
 
     return Promise.all([
-      mouseMoved(coordsToClick),
-      mouseDown(coordsToClick),
-      mouseUp(coordsToClick),
-    ])
-    .finally(() => {
+      mouseMoved(coordsToClick, modifiers),
+      mouseDown(coordsToClick, modifiers),
+      mouseUp(coordsToClick, modifiers),
+    ]).finally(() => {
       // TODO: import Cypress correctly
       // eslint-disable-next-line
       Cypress.action('cy:after:native:event')
@@ -55,17 +56,17 @@ const click = ($elToClick, coords) => {
   })
 }
 
-const mouseMoved = (coords) => {
-  return mouseEvent(coords, 'mouseMoved')
+const mouseMoved = (coords, modifiers) => {
+  return mouseEvent(coords, 'mouseMoved', modifiers)
 }
-const mouseDown = (coords) => {
-  return mouseEvent(coords, 'mousePressed')
+const mouseDown = (coords, modifiers) => {
+  return mouseEvent(coords, 'mousePressed', modifiers)
 }
-const mouseUp = (coords) => {
-  return mouseEvent(coords, 'mouseReleased')
+const mouseUp = (coords, modifiers) => {
+  return mouseEvent(coords, 'mouseReleased', modifiers)
 }
 
-const mouseEvent = (coords, type) => {
+const mouseEvent = (coords, type, modifiers) => {
   const { x, y } = coords
 
   return client.send('Input.dispatchMouseEvent', {
@@ -74,19 +75,13 @@ const mouseEvent = (coords, type) => {
     type,
     button: 'left',
     clickCount: 1,
+    modifiers,
   })
 }
 
 const keypress = (keyInfo) => {
-
-  return init()
-  .then(() => {
-    return Promise.all([
-      keyDown(keyInfo),
-      keyUp(keyInfo),
-    ]).then(() => {
-      console.log('keypress')
-    })
+  return init().then(() => {
+    return Promise.all([keyDown(keyInfo), keyUp(keyInfo)])
   })
 }
 
@@ -95,34 +90,29 @@ function keypressAll (keyInfoArray) {
     return Promise.all(
       _.flatten(
         keyInfoArray.map((keyInfo) => {
-          return [
-            keyDown(keyInfo),
-            keyUp(keyInfo),
-          ]
+          return [keyDown(keyInfo), keyUp(keyInfo)]
         })
       )
-    ).then(() => {
-      console.log('keypressAll')
-    })
+    )
   })
 }
 
 const keyDown = (keyInfo) => {
-  return Promise.resolve(client.send('Input.dispatchKeyEvent', {
-    // type: text ? 'keyDown' : 'rawKeyDown',
-    type: keyInfo.text ? 'keyDown' : 'rawKeyDown',
-    // modifiers: this._modifiers,
-    windowsVirtualKeyCode: keyInfo.keyCode,
-    code: keyInfo.code,
-    key: keyInfo.key,
-    text: keyInfo.text,
-    // unmodifiedText: text,
-    // autoRepeat,
-    location: keyInfo.location,
-    isKeypad: keyInfo.location === 3,
-  }).then(() => {
-    return console.log('keydown')
-  }))
+  return Promise.resolve(
+    client.send('Input.dispatchKeyEvent', {
+      // type: text ? 'keyDown' : 'rawKeyDown',
+      type: keyInfo.text ? 'keyDown' : 'rawKeyDown',
+      modifiers: keyInfo.modifiers,
+      windowsVirtualKeyCode: keyInfo.keyCode,
+      code: keyInfo.code,
+      key: keyInfo.key,
+      text: keyInfo.text,
+      // unmodifiedText: text,
+      // autoRepeat,
+      location: keyInfo.location,
+      isKeypad: keyInfo.location === 3,
+    })
+  )
 }
 
 const keyUp = (keyInfo) => {
@@ -138,8 +128,6 @@ const keyUp = (keyInfo) => {
     // autoRepeat,
     location: keyInfo.location,
     isKeypad: keyInfo.location === 3,
-  }).then(() => {
-    return console.log('keyup')
   })
 }
 

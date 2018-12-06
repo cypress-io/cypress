@@ -14,10 +14,10 @@ describe "src/cy/commands/actions/click", ->
 
   beforeEach ->
     ## TODO: remove listeners
-    window.top.addEventListener('mousedown', ()=>debugger)
-    window.top.addEventListener('mouseup', ()=>debugger)
-    cy.state("window").addEventListener('mousedown', ()=>debugger)
-    cy.state("window").addEventListener('mouseup', ()=>debugger)
+    # window.top.addEventListener('mousedown', ()=>debugger)
+    # window.top.addEventListener('mouseup', ()=>debugger)
+    # cy.state("window").addEventListener('mousedown', ()=>debugger)
+    # cy.state("window").addEventListener('mouseup', ()=>debugger)
     doc = cy.state("document")
 
     $(doc.body).empty().html(@body)

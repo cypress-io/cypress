@@ -10,7 +10,12 @@ fixedOrStickyRe = /(fixed|sticky)/
 focusable = "body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]"
 
 inputTypeNeedSingleValueChangeRe = /^(date|time|month|week|datetime|datetime-local)$/
-canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
+
+canSetSelectionRangeElementRe = /^(text|search|url|tel|password)$/
+
+## TODO: enable for ie
+canSetSelectionRangeOnNumberInput = false
+canSetSelectionRangeOnNumberInputElementRe = /^(text|search|url|tel|password|number)$/
 
 ## rules for native methods and props
 ## if a setter or getter or function then add a native method
@@ -126,6 +131,7 @@ nativeGetters = {
   type: _getType
   frameElement: Object.getOwnPropertyDescriptor(window, "frameElement").get
   activeElement: descriptor("Document", "activeElement").get
+  'nodeListLength': descriptor("NodeList", "length").get
 }
 
 nativeSetters = {
@@ -200,7 +206,11 @@ isNeedSingleValueChangeInputElement = (el) ->
   return inputTypeNeedSingleValueChangeRe.test(el.type)
 
 canSetSelectionRangeElement = (el) ->
-  isTextarea(el) or (isInput(el) and canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
+  if canSetSelectionRangeOnNumberInput
+    return isTextarea(el) or (isInput(el) and canSetSelectionRangeOnNumberInputElementRe.test(getNativeProp(el, 'type')))
+
+  return isTextarea(el) or (isInput(el) and canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
+
 
 getTagName = (el) ->
   tagName = el.tagName or ""

@@ -32,7 +32,6 @@ const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
-
   function type (subject, chars, options = {}) {
     let updateTable
 
@@ -57,25 +56,28 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const table = {}
 
       const getRow = (id, key, which) => {
-        return table[id] || (function () {
-          let obj
+        return (
+          table[id] ||
+          (function () {
+            let obj
 
-          table[id] = (obj = {})
-          const modifiers = $Keyboard.activeModifiers()
+            table[id] = obj = {}
+            const modifiers = $Keyboard.activeModifiers()
 
-          if (modifiers.length) {
-            obj.modifiers = modifiers.join(', ')
-          }
-
-          if (key) {
-            obj.typed = key
-            if (which) {
-              obj.which = which
+            if (modifiers.length) {
+              obj.modifiers = modifiers.join(', ')
             }
-          }
 
-          return obj
-        })()
+            if (key) {
+              obj.typed = key
+              if (which) {
+                obj.which = which
+              }
+            }
+
+            return obj
+          })()
+        )
       }
 
       updateTable = function (id, key, column, which, value) {
@@ -87,12 +89,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const getTableData = () =>
       //# transform table object into object with zero based index as keys
       {
-        return _.reduce(_.values(table), (memo, value, index) => {
-          memo[index + 1] = value
+        return _.reduce(
+          _.values(table),
+          (memo, value, index) => {
+            memo[index + 1] = value
 
-          return memo
-        }
-          , {})
+            return memo
+          },
+          {}
+        )
       }
 
       options._log = Cypress.log({
@@ -100,14 +105,24 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         $el: options.$el,
         consoleProps () {
           return {
-            'Typed': chars,
+            Typed: chars,
             'Applied To': $dom.getElements(options.$el),
-            'Options': deltaOptions,
-            'table' () {
+            Options: deltaOptions,
+            table () {
               return {
                 name: 'Key Events Table',
                 data: getTableData(),
-                columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
+                columns: [
+                  'typed',
+                  'which',
+                  'keydown',
+                  'keypress',
+                  'textInput',
+                  'input',
+                  'keyup',
+                  'change',
+                  'modifiers',
+                ],
               }
             },
           }
@@ -118,7 +133,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     const validateTyping = (el, chars) => {
-      console.log('validate typing')
       const $el = $(el)
       const numElements = $el.length
       const isBody = $el.is('body')
@@ -127,7 +141,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const isTime = $dom.isType($el, 'time')
       const isMonth = $dom.isType($el, 'month')
       const isWeek = $dom.isType($el, 'week')
-      const isDateTime = $dom.isType($el, 'datetime') || $dom.isType($el, 'datetime-local')
+      const isDateTime =
+        $dom.isType($el, 'datetime') || $dom.isType($el, 'datetime-local')
       const hasTabIndex = $dom.isSelector($el, '[tabindex]')
 
       //# TODO: tabindex can't be -1
@@ -162,20 +177,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         $utils.throwErrByPath('type.empty_string', { onFail: options._log })
       }
 
-      console.log(chars)
       if (isDate) {
         let dateChars
 
-        if (_.isString(chars)
-          && ((dateChars = dateRegex.exec(chars)) !== null)
-          && moment(dateChars[0]).isValid()
+        if (
+          _.isString(chars) &&
+          (dateChars = dateRegex.exec(chars)) !== null &&
+          moment(dateChars[0]).isValid()
         ) {
-          console.log('valid date')
-
           return _getEndIndex(chars, dateChars[0])
         }
-
-        console.log(dateChars)
 
         $utils.throwErrByPath('type.invalid_date', {
           onFail: options._log,
@@ -187,8 +198,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (isMonth) {
         let monthChars
 
-        if (_.isString(chars)
-          && ((monthChars = monthRegex.exec(chars)) !== null)
+        if (
+          _.isString(chars) &&
+          (monthChars = monthRegex.exec(chars)) !== null
         ) {
           return _getEndIndex(chars, monthChars[0])
         }
@@ -202,7 +214,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (isWeek) {
         let weekChars
 
-        if (_.isString(chars) && ((weekChars = weekRegex.exec(chars)) !== null)) {
+        if (_.isString(chars) && (weekChars = weekRegex.exec(chars)) !== null) {
           return _getEndIndex(chars, weekChars[0])
         }
 
@@ -215,7 +227,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (isTime) {
         let timeChars
 
-        if (_.isString(chars) && ((timeChars = timeRegex.exec(chars)) !== null)) {
+        if (_.isString(chars) && (timeChars = timeRegex.exec(chars)) !== null) {
           return _getEndIndex(chars, timeChars[0])
         }
 
@@ -228,7 +240,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (isDateTime) {
         let dateTimeChars
 
-        if (_.isString(chars) && ((dateTimeChars = dateTimeRegex.exec(chars)) !== null)) {
+        if (
+          _.isString(chars) &&
+          (dateTimeChars = dateTimeRegex.exec(chars)) !== null
+        ) {
           return _getEndIndex(chars, dateTimeChars[0])
         }
 
@@ -239,14 +254,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return chars.length + 1
-
     }
 
     let charsNeedingType
 
     function _setCharsNeedingType (value) {
       // not sure why using template literal
-      console.log('setCharsNeedingType', value)
       charsNeedingType = `${value}`
     }
 
@@ -263,13 +276,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       return form.find('input, button').filter((__, el) => {
         const $el = $(el)
 
-        return ($dom.isSelector($el, 'input') && $dom.isType($el, 'submit')) ||
-        ($dom.isSelector($el, 'button') && !$dom.isType($el, 'button'))
+        return (
+          ($dom.isSelector($el, 'input') && $dom.isType($el, 'submit')) ||
+          ($dom.isSelector($el, 'button') && !$dom.isType($el, 'button'))
+        )
       })
     }
 
     const type = function () {
-
       const simulateSubmitHandler = function () {
         const form = options.$el.parents('form')
 
@@ -281,7 +295,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           const inputs = form.find('input')
           const submits = getDefaultButtons(form)
 
-          return (inputs.length > 1) && (submits.length === 0)
+          return inputs.length > 1 && submits.length === 0
         }
 
         //# throw an error here if there are multiple form parents
@@ -301,7 +315,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
 
           return false
-
         }
 
         const getDefaultButton = (form) => {
@@ -336,6 +349,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       const dispatchChangeEvent = function (el, id) {
+        // eslint-disable-next-line no-undef
         const change = document.createEvent('HTMLEvents')
 
         change.initEvent('change', true, false)
@@ -377,8 +391,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           if (needSingleValueChange(el)) {
             typed += key
             if (typed === charsToType) {
-              console.log('setting value', charsToType)
-
               return $elements.setNativeProp(el, 'value', charsToType)
             }
           } else {
@@ -387,28 +399,29 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         },
 
         onFocusChange (el, chars) {
-          console.log('onFocusChange')
           const lastIndexToType = validateTyping(el, chars)
-          const [charsToType, nextChars] = _splitChars(`${chars}`, lastIndexToType)
+          const [charsToType, nextChars] = _splitChars(
+            `${chars}`,
+            lastIndexToType
+          )
 
           _setCharsNeedingType(nextChars)
 
           return charsToType
-
         },
 
         onAfterType (el) {
-          console.log('onAfterType, charsNeeding:', charsNeedingType)
           if (charsNeedingType) {
             const lastIndexToType = validateTyping(el, charsNeedingType)
-            const [charsToType, nextChars] = _splitChars(charsNeedingType, lastIndexToType)
+            const [charsToType, nextChars] = _splitChars(
+              charsNeedingType,
+              lastIndexToType
+            )
 
             _setCharsNeedingType(nextChars)
 
             return charsToType
           }
-
-          console.log('onAfterType -> false')
 
           return false
         },
@@ -417,14 +430,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           //# for the total number of keys we're about to
           //# type, ensure we raise the timeout to account
           //# for the delay being added to each keystroke
-          return cy.timeout((totalKeys * options.delay), true, 'type')
+          return cy.timeout(totalKeys * options.delay, true, 'type')
         },
 
         onBeforeSpecialCharAction (id, key) {
           //# don't apply any special char actions such as
           //# inserting new lines on {enter} or moving the
           //# caret / range on left or right movements
-
           // if (isTypeableButNotAnInput) {
           //   return false
           // }
@@ -463,7 +475,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
 
           return state('changeEvent', (id, readOnly) => {
-            const changed = $elements.getNativeProp(el, 'value') !== originalText
+            const changed =
+              $elements.getNativeProp(el, 'value') !== originalText
 
             if (!readOnly) {
               if (changed) {
@@ -507,15 +520,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             onFail: options._log,
             args: { chars, allChars },
           })
-
         },
-
       })
     }
 
     const handleFocused = function () {
       //# if it's the body, don't need to worry about focus
       const isBody = options.$el.is('body')
+
       if (isBody) {
         return type()
       }
@@ -532,11 +544,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           if (el) {
             cy.fireFocus(el)
           }
-          debugger
+
           //# if we dont have a focused element
           //# or if we do and its not ourselves
           //# then issue the click
-          if (!$focused || ($focused && ($focused.get(0) !== $elToFocus.get(0)))) {
+          if (
+            !$focused ||
+            ($focused && $focused.get(0) !== $elToFocus.get(0))
+          ) {
             //# click the element first to simulate focus
             //# and typical user behavior in case the window
             //# is out of focus
@@ -549,25 +564,26 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             //   timeout: options.timeout,
             //   interval: options.interval,
             // })
-            $elToFocus[0].focus()
-            $selection.moveSelectionToEnd()
+
+            // cannot just call .focus, since children of contenteditable will not receive cursor
+            // with .focus()
+
+            // focusCursor calls focus on first focusable
+            // then moves cursor to end if in textarea, input, or contenteditable
+            $selection.focusCursor($elToFocus[0])
 
             return type()
           }
 
           return type()
-
         },
       })
     }
 
-    return handleFocused()
-    .then(() => {
+    return handleFocused().then(() => {
       cy.timeout($actionability.delay, true, 'type')
 
-      return Promise
-      .delay($actionability.delay, 'type')
-      .then(() => {
+      return Promise.delay($actionability.delay, 'type').then(() => {
         //# command which consume cy.type may
         //# want to handle verification themselves
         let verifyAssertions
@@ -580,8 +596,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return cy.verifyUpcomingAssertions(options.$el, options, {
             onRetry: verifyAssertions,
           })
-        }
-        )()
+        })()
       })
     })
   }
@@ -609,8 +624,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           consoleProps () {
             return {
               'Applied To': $dom.getElements($el),
-              'Elements': $el.length,
-              'Options': deltaOptions,
+              Elements: $el.length,
+              Options: deltaOptions,
             }
           },
         })
@@ -627,7 +642,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      return cy.now('type', $el, '{selectall}{del}', {
+      return cy
+      .now('type', $el, '{selectall}{del}', {
         $el,
         log: false,
         verify: false, //# handle verification ourselves
@@ -635,7 +651,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         force: options.force,
         timeout: options.timeout,
         interval: options.interval,
-      }).then(() => {
+      })
+      .then(() => {
         if (options._log) {
           options._log.snapshot().end()
         }
@@ -644,8 +661,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       })
     }
 
-    return Promise
-    .resolve(subject.toArray())
+    return Promise.resolve(subject.toArray())
     .each(clear)
     .then(() => {
       let verifyAssertions
@@ -654,8 +670,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         return cy.verifyUpcomingAssertions(subject, options, {
           onRetry: verifyAssertions,
         })
-      }
-      )()
+      })()
     })
   }
 
@@ -663,10 +678,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     return $Keyboard.resetModifiers(state('document'), state('window'))
   })
 
-  return Commands.addAll({ prevSubject: 'element' }, {
-    type,
-    clear,
-  })
+  return Commands.addAll(
+    { prevSubject: 'element' },
+    {
+      type,
+      clear,
+    }
+  )
 }
 
 function _getEndIndex (str, substr) {
