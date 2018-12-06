@@ -2,12 +2,14 @@
 * These styles are shared between the runner and the reporter
 */
 
+.command-alias-count,
 .num-elements,
 .num-duplicates {
   border-radius: 5px;
   color: #fff;
   display: none;
   font-size: 85%;
+  font-style: normal;
   line-height: 1;
   margin-left: 5px;
   padding: 2px 4px;
@@ -20,6 +22,7 @@
   background-color: #476fc9;
 }
 
+.command-alias-count,
 .num-duplicates {
   background-color: #999;
 }

@@ -93,7 +93,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         aliases.push(str)
 
         log.set "referencesAlias", aliases
-        log.set "referencesAliasCount", {cardinal: index + 1, ordinal: num}
+        log.set "aliasCount", {cardinal: index + 1, ordinal: num}
 
       if command.get("name") isnt "route"
         $utils.throwErrByPath("wait.invalid_alias", {

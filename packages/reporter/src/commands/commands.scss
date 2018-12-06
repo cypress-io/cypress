@@ -123,6 +123,11 @@
         background-color: darken(#FFE0DE, 3%);
       }
     }
+
+    .command-alias-count {
+      display: inline;
+      margin-right: 10px;
+    }
   }
 
   .command-number {

@@ -14,7 +14,7 @@ groupsOrTableRe = /^(groups|table)$/
 parentOrChildRe = /parent|child/
 ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
-DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias referencesAliasCount renderProps state testId type url visible".split(" ")
+DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias aliasCount renderProps state testId type url visible".split(" ")
 BLACKLIST_PROPS = "snapshots".split(" ")
 
 delay = null

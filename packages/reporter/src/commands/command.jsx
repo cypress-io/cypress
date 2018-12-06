@@ -27,9 +27,14 @@ const visibleMessage = (model) => {
 const AliasesReferences = observer(({ model }) => (
   <span>
     {_.map([].concat(model.referencesAlias), (alias) => (
-      <Tooltip key={alias} placement='top' title={`Found an alias for: '${alias}'`}>
-        <span className={`command-alias ${model.aliasType}`}>@{alias}</span>
-      </Tooltip>
+      <span key={alias}>
+        <Tooltip placement='top' title={`Found an alias for: '${alias}'`}>
+          <span className={`command-alias ${model.aliasType}`}>@{alias}</span>
+        </Tooltip>
+        <Tooltip placement='top' title={`${model.aliasCount.ordinal} occurence of this event`}>
+          <span className={'command-alias-count'}>{model.aliasCount.cardinal}</span>
+        </Tooltip>
+      </span>
     ))}
   </span>
 ))
