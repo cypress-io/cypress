@@ -82,6 +82,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       type = cy.getXhrTypeByAlias(str)
 
+      [ index, num ] = getNumRequests(state, alias)
+
       ## if we have a command then continue to
       ## build up an array of referencesAlias
       ## because wait can reference an array of aliases
@@ -89,7 +91,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         referencesAlias = log.get("referencesAlias") ? []
         aliases = [].concat(referencesAlias)
         aliases.push(str)
+
         log.set "referencesAlias", aliases
+        log.set "referencesAliasCount", {cardinal: index + 1, ordinal: num}
 
       if command.get("name") isnt "route"
         $utils.throwErrByPath("wait.invalid_alias", {
@@ -103,8 +107,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       timeout = options.timeout
       requestTimeout = options.requestTimeout ? timeout
       responseTimeout = options.responseTimeout ? timeout
-
-      [ index, num ] = getNumRequests(state, alias)
 
       waitForRequest = ->
         options = _.omit(options, "_runnableTimeout")
