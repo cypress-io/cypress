@@ -10,7 +10,6 @@ export default class Log {
   @observable type
   @observable state
   @observable.ref referencesAlias = null
-  @observable.ref aliasCount = null
 
   constructor (props) {
     this.id = props.id
@@ -22,7 +21,6 @@ export default class Log {
     this.type = props.type
     this.state = props.state
     this.referencesAlias = props.referencesAlias
-    this.aliasCount = props.aliasCount
   }
 
   update (props) {
@@ -34,6 +32,5 @@ export default class Log {
     this.type = props.type
     this.state = props.state
     this.referencesAlias = props.referencesAlias
-    this.aliasCount = props.aliasCount
   }
 }

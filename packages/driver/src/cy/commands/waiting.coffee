@@ -90,7 +90,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if log
         referencesAlias = log.get("referencesAlias") ? []
         aliases = [].concat(referencesAlias)
-        aliases.push(str)
+
+        if str
+          aliases.push({
+            alias: str
+            cardinal: index + 1,
+            ordinal: num
+          })
 
         log.set "referencesAlias", aliases
         log.set "aliasCount", {cardinal: index + 1, ordinal: num}

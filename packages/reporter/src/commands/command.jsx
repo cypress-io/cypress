@@ -24,20 +24,24 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const AliasesReferences = observer(({ model }) => (
-  <span>
-    {_.map([].concat(model.referencesAlias), (alias) => (
-      <span key={alias}>
-        <Tooltip placement='top' title={`Found an alias for: '${alias}'`}>
-          <span className={`command-alias ${model.aliasType}`}>@{alias}</span>
-        </Tooltip>
-        <Tooltip placement='top' title={`${model.aliasCount.ordinal} occurence of this event`}>
-          <span className={'command-alias-count'}>{model.aliasCount.cardinal}</span>
-        </Tooltip>
-      </span>
-    ))}
-  </span>
-))
+const AliasesReferences = observer(({ model }) => {
+  return (
+    <span>
+      {_.map([].concat(model.referencesAlias), (aliasObj) => (
+        <span key={aliasObj.alias + aliasObj.cardinal}>
+          <Tooltip placement='top' title={'1st alias found'}>
+            <span className={`command-alias ${model.aliasType}`}>@{aliasObj.alias}</span>
+          </Tooltip>
+          {aliasObj.cardinal &&
+            <Tooltip placement='top' title={`${aliasObj.ordinal} occurence of this event`}>
+              <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
+            </Tooltip>
+          }
+        </span>
+      ))}
+    </span>
+  )
+})
 
 const Aliases = observer(({ model }) => {
   if (!model.alias) return null
