@@ -25,19 +25,30 @@ const visibleMessage = (model) => {
 }
 
 const AliasesReferences = observer(({ model }) => {
-  return (
-    <span>
-      {_.map([].concat(model.referencesAlias), (aliasObj) => (
-        <span key={aliasObj.alias + aliasObj.cardinal}>
-          <Tooltip placement='top' title={'1st alias found'}>
-            <span className={`command-alias ${model.aliasType}`}>@{aliasObj.alias}</span>
-          </Tooltip>
-          {aliasObj.cardinal &&
-            <Tooltip placement='top' title={`${aliasObj.ordinal} occurence of this event`}>
+  debugger // eslint-disable-line
+  const shouldShowCount = true
+
+  if (shouldShowCount) {
+    return (
+      <span>
+        {_.map([].concat(model.referencesAlias), (aliasObj) => (
+          <Tooltip key={aliasObj.alias + aliasObj.cardinal} placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.alias}'`}>
+            <span className='command-alias-container'>
+              <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.alias}</span>
               <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
-            </Tooltip>
-          }
-        </span>
+            </span>
+          </Tooltip>
+        ))}
+      </span>
+    )
+  }
+
+  return (
+    <span className='command-alias-container'>
+      {_.map([].concat(model.referencesAlias), (aliasObj) => (
+        <Tooltip key={aliasObj.alias} placement='top' title={`Found an alias for: '${aliasObj.alias}'`}>
+          <span className={`command-alias ${model.aliasType}`}>@{aliasObj.alias}</span>
+        </Tooltip>
       ))}
     </span>
   )
