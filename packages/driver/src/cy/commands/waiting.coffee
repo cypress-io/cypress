@@ -144,7 +144,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if log
         log.set "consoleProps", -> {
-          "Waited For": (log.get("referencesAlias") || []).join(", ")
+          "Waited For": (_.map(log.get("referencesAlias"), 'alias') || []).join(", ")
           "Yielded": ret
         }
 
