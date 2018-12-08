@@ -64,7 +64,7 @@ npm install --save-dev cypress cypress-vue-unit-test
 
 ## Vue CLI 3
 
-1. Create a new project with `vue create <project-name>` and select Cypress for E2E testing
+1. Create a new project with `vue create <project-name>` and select Cypress for E2E testing OR add the Cypress plugin to an existing Vue project with `vue add @vue/cli-plugin-e2e-cypress`
 1. Install this package with `npm install --save-dev cypress-vue-unit-test`
 1. Enable the import of Vue files by uncommenting the "webpack import" and the "file:processor event" lines in tests/e2e/plugins/index.js. The file should then look like this:
 
