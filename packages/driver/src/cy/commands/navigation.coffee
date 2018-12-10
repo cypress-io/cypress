@@ -284,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  Cypress.on "page:start", (contentWindow) ->
+  Cypress.on "page:start", ({ win }) ->
     ## TODO: just use a closure here
     current = state("current")
 
@@ -295,7 +295,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     return if not runnable
 
     options = _.last(current.get("args"))
-    options?.onStart?.call(runnable.ctx, contentWindow)
+    options?.onStart?.call(runnable.ctx, win)
 
   Commands.addAll({
     reload: (args...) ->

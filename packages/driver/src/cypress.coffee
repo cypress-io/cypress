@@ -216,7 +216,7 @@ class $Cypress
       when "cypress:config"
         @emit("config", args[0])
 
-      when "runner:start"
+      when "runner:mocha:start"
         ## mocha runner has begun running the tests
         @emit("run:start")
 
@@ -225,7 +225,7 @@ class $Cypress
         if @config("isTextTerminal")
           @emit("mocha", "start", args[0])
 
-      when "runner:end"
+      when "runner:mocha:end"
         ## mocha runner has finished running the tests
 
         ## end may have been caused by an uncaught error
@@ -245,46 +245,46 @@ class $Cypress
         ## is about to be invoked
         @cy.setRunnable(args...)
 
-      when "runner:suite:start"
+      when "runner:mocha:suite:start"
         ## mocha runner started processing a suite
         if @config("isTextTerminal")
           @emit("mocha", "suite", args...)
 
-      when "runner:suite:end"
+      when "runner:mocha:suite:end"
         ## mocha runner finished processing a suite
         if @config("isTextTerminal")
           @emit("mocha", "suite end", args...)
 
-      when "runner:hook:start"
+      when "runner:mocha:hook:start"
         ## mocha runner started processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "hook", args...)
 
-      when "runner:hook:end"
+      when "runner:mocha:hook:end"
         ## mocha runner finished processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "hook end", args...)
 
-      when "runner:test:start"
+      when "runner:mocha:test:start"
         ## mocha runner started processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "test", args...)
 
-      when "runner:test:end"
+      when "runner:mocha:test:end"
         if @config("isTextTerminal")
           @emit("mocha", "test end", args...)
 
-      when "runner:pass"
+      when "runner:mocha:pass"
         ## mocha runner calculated a pass
         if @config("isTextTerminal")
           @emit("mocha", "pass", args...)
 
-      when "runner:pending"
+      when "runner:mocha:pending"
         ## mocha runner calculated a pending test
         if @config("isTextTerminal")
           @emit("mocha", "pending", args...)
 
-      when "runner:fail"
+      when "runner:mocha:fail"
         ## mocha runner calculated a failure
         if @config("isTextTerminal")
           @emit("mocha", "fail", args...)

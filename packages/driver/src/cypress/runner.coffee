@@ -442,7 +442,7 @@ afterEachFailed = (Cypress, test, err) ->
   test.state = "failed"
   test.err = wrapErr(err)
 
-  Cypress.action("runner:test:end", wrap(test))
+  Cypress.action("runner:mocha:test:end", wrap(test))
 
 hookFailed = (hook, err, hookName, getTestById, getTest) ->
   ## finds the test by returning the first test from
@@ -460,16 +460,16 @@ hookFailed = (hook, err, hookName, getTestById, getTest) ->
     ## when would the hook not be emitted at this point?
     test.alreadyEmittedMocha = true
   else
-    Cypress.action("runner:test:end", wrap(test))
+    Cypress.action("runner:mocha:test:end", wrap(test))
 
 _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId) ->
   _runner.on "start", ->
-    Cypress.action("runner:start", {
+    Cypress.action("runner:mocha:start", {
       start: new Date()
     })
 
   _runner.on "end", ->
-    Cypress.action("runner:end", {
+    Cypress.action("runner:mocha:end", {
       end: new Date()
     })
 
@@ -478,7 +478,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.started[suite.id] = true
 
-    Cypress.action("runner:suite:start", wrap(suite))
+    Cypress.action("runner:mocha:suite:start", wrap(suite))
 
   _runner.on "suite end", (suite) ->
     ## cleanup our suite + its hooks
@@ -489,7 +489,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.ended[suite.id] = true
 
-    Cypress.action("runner:suite:end", wrap(suite))
+    Cypress.action("runner:mocha:suite:end", wrap(suite))
 
   _runner.on "hook", (hook) ->
     hook.hookId ?= getHookId()
@@ -515,10 +515,10 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
     ## will never fire if this failed in a before hook
     setTest(test)
 
-    Cypress.action("runner:hook:start", wrap(hook))
+    Cypress.action("runner:mocha:hook:start", wrap(hook))
 
   _runner.on "hook end", (hook) ->
-    Cypress.action("runner:hook:end", wrap(hook))
+    Cypress.action("runner:mocha:hook:end", wrap(hook))
 
   _runner.on "test", (test) ->
     setTest(test)
@@ -527,17 +527,17 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.started[test.id] = true
 
-    Cypress.action("runner:test:start", wrap(test))
+    Cypress.action("runner:mocha:test:start", wrap(test))
 
   _runner.on "test end", (test) ->
     return if _emissions.ended[test.id]
 
     _emissions.ended[test.id] = true
 
-    Cypress.action("runner:test:end", wrap(test))
+    Cypress.action("runner:mocha:test:end", wrap(test))
 
   _runner.on "pass", (test) ->
-    Cypress.action("runner:pass", wrap(test))
+    Cypress.action("runner:mocha:pass", wrap(test))
 
   ## if a test is pending mocha will only
   ## emit the pending event instead of the test
@@ -555,7 +555,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## do not double emit this event
       test.alreadyEmittedMocha = true
 
-      Cypress.action("runner:pending", wrap(test))
+      Cypress.action("runner:mocha:pending", wrap(test))
 
     @emit("test", test)
 
@@ -592,7 +592,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## do not double emit this event
       runnable.alreadyEmittedMocha = true
 
-      Cypress.action("runner:fail", wrap(runnable), runnable.err)
+      Cypress.action("runner:mocha:fail", wrap(runnable), runnable.err)
 
     ## if we've already fired the test after run event
     ## it means that this runnable likely failed due to

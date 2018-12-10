@@ -3654,6 +3654,17 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
+
+  /**
+   * Page details included with actions like 'page:start'
+   */
+  interface PageDetails {
+    win: Window
+    url: string
+    statusCode?: number
+    headers?: { [key: string]: string }
+  }
+
   // for just a few events like "page:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -3718,22 +3729,22 @@ declare namespace Cypress {
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onStart` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'page:start', fn: (win: Window) => void): void
+    (action: 'page:start', fn: (details: PageDetails) => void): void
     /**
      * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onReady` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'page:ready', fn: (win: Window) => void): void
+    (action: 'page:ready', fn: (details: PageDetails) => void): void
+    /**
+     * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'page:end', fn: (details: PageDetails) => void): void
     /**
      * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'before:window:unload', fn: (event: BeforeUnloadEvent) => void): void
-    /**
-     * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
-     * @see https://on.cypress.io/catalog-of-events#App-Events
-     */
-    (action: 'page:end', fn: (event: Event) => void): void
     /**
      * Fires whenever Cypress detects that your application's URL has changed.
      * @see https://on.cypress.io/catalog-of-events#App-Events

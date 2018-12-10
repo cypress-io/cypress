@@ -126,10 +126,13 @@ module.exports = {
       "url:changed": "page:url:changed"
       "viewport:changed": "viewport:change"
       "window:alert": "page:alert"
-      "window:before:load": "page:start"
       "window:before:unload": "before:window:unload"
       "window:confirm": "page:confirm"
-      "window:unload": "page:end"
+    }
+
+    renamedEventsWithWinChangedtoDetails = {
+      "window:before:load": "page:start"
+      "window:load": "page:ready"
     }
 
     methods = "addListener on once prependListener prependOnceListener".split(" ")
@@ -141,6 +144,16 @@ module.exports = {
             args: {
               oldEvent: eventName
               newEvent: renamedEvents[eventName]
+              object: name
+              method: method
+            }
+            from: "cypress"
+          })
+        else if renamedEventsWithWinChangedtoDetails[eventName]
+          $utils.throwErrByPath("events.renamed_event_win_to_details", {
+            args: {
+              oldEvent: eventName
+              newEvent: renamedEventsWithWinChangedtoDetails[eventName]
               object: name
               method: method
             }

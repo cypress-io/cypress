@@ -11,20 +11,20 @@ Cypress.on('page:alert', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('page:start', (win) => {
-  win // $ExpectType Window
+Cypress.on('page:start', (details) => {
+  details // $ExpectType PageDetails
 })
 
-Cypress.on('page:ready', (win) => {
-  win // $ExpectType Window
+Cypress.on('page:ready', (details) => {
+  details // $ExpectType PageDetails
+})
+
+Cypress.on('page:end', (details) => {
+  details // $ExpectType PageDetails
 })
 
 Cypress.on('before:window:unload', (event) => {
   event // $ExpectType BeforeUnloadEvent
-})
-
-Cypress.on('page:end', (event) => {
-  event // $ExpectType Event
 })
 
 Cypress.on('page:url:changed', (url) => {
