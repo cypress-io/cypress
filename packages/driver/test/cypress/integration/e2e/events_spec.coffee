@@ -1,7 +1,7 @@
 _ = Cypress._
 
 describe "events", ->
-  describe.only "page events", ->
+  describe "page events", ->
     it "includes page details in page:start event", (done) ->
       cy.on "page:start", ({ win, url, statusCode, headers }) ->
         expect(win.Cypress).to.equal(Cypress)

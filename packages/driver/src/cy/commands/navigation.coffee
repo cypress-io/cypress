@@ -346,14 +346,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             options._log.snapshot("before", {next: "after"})
 
+          onPageReady = ({ win }) ->
+            resolve(win)
+
           cleanup = ->
             knownCommandCausedInstability = false
 
-            cy.removeListener("page:ready", resolve)
+            cy.removeListener("page:ready", onPageReady)
 
           knownCommandCausedInstability = true
 
-          cy.once("page:ready", resolve)
+          cy.once("page:ready", onPageReady)
 
           $utils.locReload(forceReload, state("window"))
 
