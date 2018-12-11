@@ -368,7 +368,7 @@ create = (options = {}) ->
             return if isCalled
             isCalled = true
             try
-              return fn.apply(arguments)
+              return fn.apply(null, arguments)
             finally
               isCalled = false
 
