@@ -325,8 +325,8 @@ class $Cypress
       when "cy:before:screenshot"
         @emit("before:screenshot", args...)
 
-      when "cy:after:screenshot"
-        @emit("after:screenshot", args...)
+      when "cy:screenshot"
+        @emit("screenshot", args...)
 
       when "cy:after:all:screenshots"
         @emit("after:all:screenshots", args...)

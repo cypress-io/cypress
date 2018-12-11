@@ -46,7 +46,7 @@ setDefaultPreprocessor = ->
   debug("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-  background.register("file:preprocessor", browserify())
+  background.register("browser:filePreprocessor", browserify())
 
 background.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
@@ -75,7 +75,7 @@ module.exports = {
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
       shouldWatch = not config.isTextTerminal
-      
+
       baseFilePath = filePath
       .replace(config.projectRoot, "")
       .replace(config.integrationFolder, "")
@@ -94,7 +94,7 @@ module.exports = {
         debug("base emitter native close event")
         fileObject.emit("close")
  
-    if not background.isRegistered("file:preprocessor")
+    if not background.isRegistered("browser:filePreprocessor")
       setDefaultPreprocessor(config)
 
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
@@ -102,7 +102,7 @@ module.exports = {
       return fileProcessor
 
     preprocessor = fileProcessors[filePath] = Promise.try ->
-      background.execute("file:preprocessor", fileObject)
+      background.execute("browser:filePreprocessor", fileObject)
 
     return preprocessor
 

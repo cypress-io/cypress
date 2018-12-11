@@ -67,11 +67,11 @@ defaultArgs = [
 
 backgroundBeforeBrowserLaunch = (browser, args) ->
   ## bail if we're not registered to this event
-  return args if not background.isRegistered("before:browser:launch")
+  return args if not background.isRegistered("browser:launch")
 
-  background.execute("before:browser:launch", browser, args)
+  background.execute("browser:launch", browser, args)
   .then (newArgs) ->
-    debug("got user args for 'before:browser:launch'", newArgs)
+    debug("got user args for 'browser:launch'", newArgs)
 
     ## reset args if we got 'em
     return newArgs ? args

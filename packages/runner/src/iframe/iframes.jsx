@@ -48,7 +48,7 @@ export default class Iframes extends Component {
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
-    this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
+    this.props.eventManager.on('screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
 
     // TODO: need to take headless mode into account

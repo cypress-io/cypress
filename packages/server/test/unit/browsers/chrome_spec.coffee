@@ -20,7 +20,7 @@ describe "lib/browsers/chrome", ->
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
 
-    it "is noop without before:browser:launch", ->
+    it "is noop without browser:launch", ->
       background.isRegistered.returns(false)
 
       chrome.open("chrome", "http://", {}, {})

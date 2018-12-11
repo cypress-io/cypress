@@ -13,8 +13,8 @@ exports['e2e background events fails 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: app_spec.coffee...                                                              (1 of 1) 
+
+  Running: app_spec.coffee...                                                              (1 of 1)
 
 Error: The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
@@ -61,11 +61,11 @@ Error: Async error from background file
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -
 
 
 `
@@ -85,8 +85,8 @@ exports['e2e background events passes 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: app_spec.coffee...                                                              (1 of 1) 
+
+  Running: app_spec.coffee...                                                              (1 of 1)
 
 
   ✓ is another spec
@@ -121,11 +121,11 @@ exports['e2e background events passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -
 
 
 `
@@ -145,8 +145,8 @@ exports['e2e background events can modify config from background 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: app_spec.coffee...                                                              (1 of 1) 
+
+  Running: app_spec.coffee...                                                              (1 of 1)
 
 
   ✓ overrides config
@@ -181,11 +181,11 @@ exports['e2e background events can modify config from background 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -
 
 
 `
@@ -205,8 +205,8 @@ exports['e2e background events works with user extensions 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: app_spec.coffee...                                                              (1 of 1) 
+
+  Running: app_spec.coffee...                                                              (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -240,11 +240,11 @@ A video will not be recorded when using this browser.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ app_spec.coffee                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -
 
 
 `
@@ -264,8 +264,8 @@ exports['e2e background events handles absolute path to backgroundFile 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: absolute_spec.coffee...                                                         (1 of 1) 
+
+  Running: absolute_spec.coffee...                                                         (1 of 1)
 
 
   ✓ uses the background file
@@ -299,16 +299,16 @@ exports['e2e background events handles absolute path to backgroundFile 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ absolute_spec.coffee                      XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -
 
 
 `
 
-exports['e2e background events calls after:screenshot for cy.screenshot() and failure screenshots 1'] = `
+exports['e2e background events calls screenshot for cy.screenshot() and failure screenshots 1'] = `
 
 ====================================================================================================
 
@@ -323,8 +323,8 @@ exports['e2e background events calls after:screenshot for cy.screenshot() and fa
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: after_screenshot_spec.coffee...                                                 (1 of 1) 
+
+  Running: after_screenshot_spec.coffee...                                                 (1 of 1)
 
 
   ✓ cy.screenshot() - replacement
@@ -376,11 +376,11 @@ exports['e2e background events calls after:screenshot for cy.screenshot() and fa
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ after_screenshot_spec.coffee              XX:XX        4        3        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        4        3        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        4        3        1        -        -
 
 
 `

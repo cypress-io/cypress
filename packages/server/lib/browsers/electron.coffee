@@ -172,9 +172,9 @@ module.exports = {
       Promise
       .try =>
         ## bail if we're not registered to this event
-        return options if not background.isRegistered("before:browser:launch")
+        return options if not background.isRegistered("browser:launch")
 
-        background.execute("before:browser:launch", options.browser, options)
+        background.execute("browser:launch", options.browser, options)
         .then (newOptions) ->
           if newOptions
             debug("received new options from background event %o", newOptions)
