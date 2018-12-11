@@ -697,12 +697,13 @@ to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmuto
 - [Testing Vue web applications with Vuex data store & REST backend](https://www.cypress.io/blog/2017/11/28/testing-vue-web-application-with-vuex-data-store-and-rest-backend/)
 - [Why Cypress?](https://on.cypress.io/why-cypress)
 - [Cypress API](https://on.cypress.io/api)
+- [Learn TDD in Vue](https://learntdd.in/vue)
+- [cypress-vue-unit-test vs vue-test-utils](https://codingitwrong.com/2018/03/04/comparing-vue-component-testing-tools.html)
 
 <a name="#other"/>
 
 ## Test adapters for other frameworks
 
-* [cypress-vue-unit-test](https://github.com/bahmutov/cypress-vue-unit-test)
 * [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test)
 * [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 * [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
