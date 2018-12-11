@@ -20,6 +20,8 @@
 
 [Install](#install)
 
+[Vue CLI 3](#vue-cli)
+
 [Use](#use)
 - [Options](#options)
 - [Global Vue Extensions](#global-vue-extensions)
@@ -56,6 +58,40 @@ Requires [Node](https://nodejs.org/en/) version 6 or above and Cypress (peer dep
 
 ```sh
 npm install --save-dev cypress cypress-vue-unit-test
+```
+
+<a name="vue-cli"/>
+
+## Vue CLI 3
+
+1. Create a new project with `vue create <project-name>` and select Cypress for E2E testing OR add the Cypress plugin to an existing Vue project with `vue add @vue/cli-plugin-e2e-cypress`
+1. Install this package with `npm install --save-dev cypress-vue-unit-test`
+1. Enable the import of Vue files by uncommenting the "webpack import" and the "file:processor event" lines in tests/e2e/plugins/index.js. The file should then look like this:
+
+```js
+// tests/e2e/plugins/index.js
+
+// webpack import
+const webpack = require('@cypress/webpack-preprocessor')
+
+module.exports = (on, config) => {
+  // file:processor event
+  on(
+    'file:preprocessor',
+    webpack({
+      webpackOptions: require('@vue/cli-service/webpack.config'),
+      watchOptions: {}
+    })
+  )
+
+  return Object.assign({}, config, {
+    fixturesFolder: 'tests/e2e/fixtures',
+    integrationFolder: 'tests/e2e/specs',
+    screenshotsFolder: 'tests/e2e/screenshots',
+    videosFolder: 'tests/e2e/videos',
+    supportFile: 'tests/e2e/support/index.js'
+  })
+}
 ```
 
 <a name="use"/>
