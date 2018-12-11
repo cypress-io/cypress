@@ -1634,7 +1634,7 @@ describe "src/cy/commands/navigation", ->
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
         .get("#dimensions").click()
         .then ->
@@ -1659,7 +1659,7 @@ describe "src/cy/commands/navigation", ->
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
           cy
             .get("form#click-me")

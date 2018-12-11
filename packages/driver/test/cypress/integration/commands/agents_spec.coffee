@@ -229,7 +229,7 @@ describe "src/cy/commands/agents", ->
         expect(@myStub.displayName).to.eq("myStub")
 
       it "stores the lookup as an alias", ->
-        expect(cy.state("aliases").myStub).to.be.defined
+        expect(cy.state("aliases").myStub).to.exist
 
       it "stores the agent as the subject", ->
         expect(cy.state("aliases").myStub.subject).to.eq(@stub)
