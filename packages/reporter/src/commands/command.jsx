@@ -24,31 +24,34 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const AliasesReferences = observer(({ model }) => {
-  debugger // eslint-disable-line
-  const shouldShowCount = true
-
+const AliasReference = observer(({ model, aliasObj, shouldShowCount }) => {
   if (shouldShowCount) {
     return (
-      <span>
-        {_.map([].concat(model.referencesAlias), (aliasObj) => (
-          <Tooltip key={aliasObj.alias + aliasObj.cardinal} placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.alias}'`}>
-            <span className='command-alias-container'>
-              <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.alias}</span>
-              <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
-            </span>
-          </Tooltip>
-        ))}
-      </span>
+      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.alias}'`}>
+        <span className='command-alias-container'>
+          <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.alias}</span>
+          <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
+        </span>
+      </Tooltip>
     )
   }
 
   return (
     <span className='command-alias-container'>
+      <Tooltip placement='top' title={`Found an alias for: '${aliasObj.alias}'`}>
+        <span className={`command-alias ${model.aliasType}`}>@{aliasObj.alias}</span>
+      </Tooltip>
+    </span>
+  )
+})
+
+const AliasesReferences = observer(({ model }) => {
+  const shouldShowCount = false
+
+  return (
+    <span>
       {_.map([].concat(model.referencesAlias), (aliasObj) => (
-        <Tooltip key={aliasObj.alias} placement='top' title={`Found an alias for: '${aliasObj.alias}'`}>
-          <span className={`command-alias ${model.aliasType}`}>@{aliasObj.alias}</span>
-        </Tooltip>
+        <AliasReference key={aliasObj.alias + aliasObj.cardinal} aliasObj={aliasObj} model={model} shouldShowCount={shouldShowCount} />
       ))}
     </span>
   )
