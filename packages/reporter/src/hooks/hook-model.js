@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { observable, computed } from 'mobx'
 
 export default class Hook {
   @observable id
@@ -11,6 +11,22 @@ export default class Hook {
   constructor (props) {
     this.id = _.uniqueId('h')
     this.name = props.name
+  }
+
+  @computed get referencedAliases () {
+    return _.flatten(this.commands.map((command) => {
+      if (!command.referencesAlias) {
+        return
+      }
+
+      if (!_.isArray(command.referencesAlias)) {
+        return command.referencesAlias.alias
+      }
+
+      return command.referencesAlias.map((aliasReference) => {
+        return aliasReference.alias
+      })
+    }))
   }
 
   addCommand (command) {
