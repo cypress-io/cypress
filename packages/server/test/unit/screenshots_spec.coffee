@@ -521,7 +521,7 @@ describe "lib/screenshots", ->
       sinon.stub(background, "isRegistered")
       sinon.stub(background, "execute")
 
-    it "resolves whitelisted details if no after:screenshot event registered", ->
+    it "resolves whitelisted details if no screenshot event registered", ->
       background.isRegistered.returns(false)
 
       screenshots.afterScreenshot(@data, @details).then (result) =>
@@ -540,7 +540,7 @@ describe "lib/screenshots", ->
           })
         expect(result.duration).to.be.a("number")
 
-    it "executes after:screenshot event and merges in size, dimensions, and/or path", ->
+    it "executes screenshot event and merges in size, dimensions, and/or path", ->
       background.isRegistered.returns(true)
       background.execute.resolves({
         size: 200

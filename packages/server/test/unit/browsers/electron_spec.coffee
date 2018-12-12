@@ -79,7 +79,7 @@ describe "lib/browsers/electron", ->
         expect(@automation.use).to.be.called
         expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
 
-    it "is noop when before:browser:launch yields null", ->
+    it "is noop when browser:launch yields null", ->
       background.isRegistered.returns(true)
       background.execute.resolves(null)
 

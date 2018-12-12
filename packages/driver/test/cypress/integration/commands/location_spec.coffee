@@ -34,7 +34,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, _.once =>
+        cy.on "internal:commandRetry", _.after 2, _.once =>
           win = cy.state("window")
           win.location.href = "/foo/bar/baz.html"
 
@@ -149,7 +149,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           win = cy.state("window")
           win.location.hash = "users/1"
 
@@ -268,7 +268,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, _.once =>
+        cy.on "internal:commandRetry", _.after 2, _.once =>
           win = cy.state("window")
           win.location.pathname = "users/1"
 

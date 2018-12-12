@@ -453,10 +453,10 @@ module.exports = {
     details = _.extend({}, data, details, { duration })
     details = _.pick(details, "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
 
-    if not background.isRegistered("after:screenshot")
+    if not background.isRegistered("screenshot")
       return Promise.resolve(details)
 
-    background.execute("after:screenshot", details)
+    background.execute("screenshot", details)
     .then (updates) =>
       if not _.isPlainObject(updates)
         return details

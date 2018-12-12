@@ -59,6 +59,36 @@ describe "lib/background/index", ->
       .then =>
         expect(@backgroundProcess.kill).to.be.calledOnce
 
+    it "errors when a renamed event is registered", ->
+      @ipc.on.withArgs("loaded").yields({}, [{
+        event: "file:preprocessor"
+        eventId: 0
+      }])
+      background.init({ backgroundFile: "background-file" })
+      .catch (err) =>
+        expect(err.message).to.include("background event has been renamed")
+        expect(err.message).to.include("'file:preprocessor' has been renamed to 'browser:filePreprocessor'")
+        expect(err.message).to.include("Background file location:")
+
+    it "errors once when multiple renamed events are registered", ->
+      @ipc.on.withArgs("loaded").yields({}, [{
+        event: "file:preprocessor"
+        eventId: 0
+      },{
+        event: "after:screenshot"
+        eventId: 1
+      },{
+        event: "before:browser:launch"
+        eventId: 2
+      }])
+      background.init({ backgroundFile: "background-file" })
+      .catch (err) =>
+        expect(err.message).to.include("background events have been renamed")
+        expect(err.message).to.include("'file:preprocessor' has been renamed to 'browser:filePreprocessor'")
+        expect(err.message).to.include("'after:screenshot' has been renamed to 'screenshot'")
+        expect(err.message).to.include("'before:browser:launch' has been renamed to 'browser:launch'")
+        expect(err.message).to.include("Background file location:")
+
     describe "loaded message", ->
       beforeEach ->
         @config = {}

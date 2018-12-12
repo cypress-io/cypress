@@ -772,7 +772,7 @@ describe "lib/cypress", ->
         sinon.stub(Windows, "create").returns(ee)
         sinon.stub(Windows, "automation")
 
-      context "before:browser:launch", ->
+      context "browser:launch", ->
         it "chrome", ->
           cypress.start([
             "--run-project=#{@backgroundBrowser}"

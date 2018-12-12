@@ -1,36 +1,36 @@
 /* eslint-disable no-console */
 
 module.exports = (on) => {
-  on('test:run:start', (test) => {
-    console.log('test:run:start:', test.title)
-    throw new Error('Error thrown synchronously from "test:run:start". Should be ignored.')
+  on('test:start', (test) => {
+    console.log('test:start:', test.title)
+    throw new Error('Error thrown synchronously from "test:start". Should be ignored.')
   })
 
-  on('command:enqueued', (command) => {
-    console.log('command:enqueued:', command.name, command.args.join(', '))
+  on('internal:commandEnqueue', (command) => {
+    console.log('internal:commandEnqueue:', command.name, command.args.join(', '))
   })
 
-  on('command:start', (command) => {
-    console.log('command:start:', command.name, command.args.join(', '))
+  on('internal:commandStart', (command) => {
+    console.log('internal:commandStart:', command.name, command.args.join(', '))
   })
 
   // only do this once or it's a lot of logging
   let retryCalled = false
 
-  on('command:retry', (retry) => {
+  on('internal:commandRetry', (retry) => {
     if (retryCalled) return
 
     retryCalled = true
-    console.log('command:retry:', retry.name, retry.error.message)
+    console.log('internal:commandRetry:', retry.name, retry.error.message)
   })
 
-  on('command:end', (command) => {
-    console.log('command:end:', command.name, command.args.join(', '))
+  on('internal:commandEnd', (command) => {
+    console.log('internal:commandEnd:', command.name, command.args.join(', '))
   })
 
-  on('test:run:end', (test) => {
-    console.log('test:run:end:', test.title)
+  on('test:end', (test) => {
+    console.log('test:end:', test.title)
 
-    return Promise.reject(new Error('Error thrown in promise from "test:run:end". Should be ignored.'))
+    return Promise.reject(new Error('Error thrown in promise from "test:end". Should be ignored.'))
   })
 }

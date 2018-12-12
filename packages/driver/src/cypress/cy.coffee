@@ -124,8 +124,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## return undefined so our beforeunload handler
         ## doesnt trigger a confirmation dialog
         return undefined
-      onUnload: (e) ->
-        Cypress.action("app:page:end", e)
+      onUnload: ->
+        Cypress.action("app:page:end", {
+          win: contentWindow
+          url: state("url")
+        })
       onNavigation: (args...) ->
         Cypress.action("app:navigation:changed", args...)
       onAlert: (str) ->
@@ -189,7 +192,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     queue.splice(index, 0, obj)
 
-    Cypress.action("cy:command:enqueued", obj)
+    Cypress.action("cy:internal:commandEnqueue", obj)
 
   getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
     return null if not command
@@ -239,7 +242,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## since they return promises and queue more
       ## new commands
       if noArgsAreAFunction(args)
-        Cypress.once("command:enqueued", commandEnqueued)
+        Cypress.once("internal:commandEnqueue", commandEnqueued)
 
       ## run the command's fn with runnable's context
       try
@@ -248,7 +251,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         throw err
       finally
         ## always remove this listener
-        Cypress.removeListener("command:enqueued", commandEnqueued)
+        Cypress.removeListener("internal:commandEnqueue", commandEnqueued)
 
       state("commandIntermediateValue", ret)
 
@@ -371,7 +374,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## store the current runnable
       runnable = state("runnable")
 
-      Cypress.action("cy:command:start", command)
+      Cypress.action("cy:internal:commandStart", command)
 
       runCommand(command)
       .then ->
@@ -390,7 +393,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## over at 0
         state("index", index += 1)
 
-        Cypress.action("cy:command:end", command)
+        Cypress.action("cy:internal:commandEnd", command)
 
         if fn = state("onPaused")
           new Promise (resolve) ->
@@ -693,7 +696,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## about:blank in a visit, we do need these
           contentWindowListeners(getContentWindow($autIframe))
 
-          Cypress.action("app:page:ready", state("window"))
+          Cypress.action("app:page:ready", {
+            win: state("window")
+            url: state("url")
+          })
 
           ## we are now stable again which is purposefully
           ## the last event we call here, to give our event
@@ -892,19 +898,19 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## prevent loop comprehension
       return null
 
-    onBeforeAppWindowLoad: (contentWindow) ->
+    onBeforeAppWindowLoad: ({ win }) ->
       ## we set window / document props before the window load event
       ## so that we properly handle events coming from the application
       ## from the time that happens BEFORE the load event occurs
-      setWindowDocumentProps(contentWindow, state)
+      setWindowDocumentProps(win, state)
 
       urlNavigationEvent("before:load")
 
-      contentWindowListeners(contentWindow)
+      contentWindowListeners(win)
 
-      wrapNativeMethods(contentWindow)
+      wrapNativeMethods(win)
 
-      timers.wrap(contentWindow)
+      timers.wrap(win)
 
     onSpecWindowUncaughtException: (args...) ->
       ## create the special uncaught exception err

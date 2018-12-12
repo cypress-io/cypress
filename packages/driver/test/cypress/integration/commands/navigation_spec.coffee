@@ -569,7 +569,7 @@ describe "src/cy/commands/navigation", ->
 
     describe "when origins don't match", ->
       beforeEach ->
-        Cypress.emit("test:run:start", { id: 888 })
+        Cypress.emit("test:start", { id: 888 })
 
         cy.stub(Cypress, "getEmissions").returns([])
         cy.stub(Cypress, "getTestsState").returns([])
@@ -1409,7 +1409,7 @@ describe "src/cy/commands/navigation", ->
 
     it "does not time out current commands until stability is reached", ->
       ## on the first retry cause a page load event synchronously
-      cy.on "command:retry", (options) ->
+      cy.on "internal:commandRetry", (options) ->
         switch options._retries
           when 1
             win = cy.state("window")
@@ -1495,7 +1495,7 @@ describe "src/cy/commands/navigation", ->
             log.get("name") is name
 
         cy.on "test:fail", (err) ->
-          cy.on "command:retry", ->
+          cy.on "internal:commandRetry", ->
             throw new Error("should not have retried twice")
 
           expect(err.message).to.include("Expected to find element")
@@ -1513,7 +1513,7 @@ describe "src/cy/commands/navigation", ->
         start = null
 
         ## on the first retry cause a page load event synchronously
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           switch options._retries
             when 1
               ## hold a ref to this

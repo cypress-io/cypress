@@ -3,7 +3,7 @@ const path = require('path')
 const replacementPath = path.join(__dirname, '../../screenshot-replacement.png')
 
 module.exports = (on) => {
-  on('after:screenshot', (details) => {
+  on('screenshot', (details) => {
     if (details.testFailure) {
       return {
         path: replacementPath,

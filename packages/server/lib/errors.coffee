@@ -563,6 +563,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg1)}
       """.trim()
+    when "BACKGROUND_RENAMED_EVENTS"
+      """
+      The following background #{if arg1.events.length > 1 then "events have" else "event has"} been renamed.
+
+      Please update them in your background file and try again.
+
+      #{_.map(arg1.events, ({ oldEvent, newEvent }) -> "'#{oldEvent}' has been renamed to '#{newEvent}'").join("\n")}
+
+      Background file location: #{arg1.backgroundFile}
+      """
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO

@@ -58,7 +58,7 @@ describe "src/cy/commands/waiting", ->
             expect(xhr.responseBody).to.deep.eq response
 
       it "waits for the route alias to have a request", ->
-        cy.on "command:retry", _.once =>
+        cy.on "internal:commandRetry", _.once =>
           win = cy.state("window")
           win.$.get("/users")
           null
@@ -74,7 +74,7 @@ describe "src/cy/commands/waiting", ->
         retry = _.after 3, _.once =>
           cy.state("window").$.get("/foo")
 
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           expect(options.timeout).to.eq 900
           done()
 
@@ -89,7 +89,7 @@ describe "src/cy/commands/waiting", ->
         retry = _.after 3, _.once =>
           cy.state("window").$.get("/foo")
 
-        cy.on "command:retry", retry
+        cy.on "internal:commandRetry", retry
 
         cy
           .server()
@@ -100,7 +100,7 @@ describe "src/cy/commands/waiting", ->
       it "waits for requestTimeout", (done) ->
         Cypress.config("requestTimeout", 199)
 
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           expect(options.timeout).to.eq(199)
           done()
 
@@ -111,7 +111,7 @@ describe "src/cy/commands/waiting", ->
             expect(cy.timeout()).to.eq 199
 
       it "waits for requestTimeout override", (done) ->
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           expect(options.type).to.eq("request")
           expect(options.timeout).to.eq(199)
           done()
@@ -124,7 +124,7 @@ describe "src/cy/commands/waiting", ->
       it "waits for responseTimeout", (done) ->
         Cypress.config("responseTimeout", 299)
 
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           expect(options.timeout).to.eq(299)
           done()
 
@@ -137,7 +137,7 @@ describe "src/cy/commands/waiting", ->
           .wait("@fetch")
 
       it "waits for responseTimeout override", (done) ->
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           expect(options.type).to.eq("response")
           expect(options.timeout).to.eq(299)
           done()
@@ -152,7 +152,7 @@ describe "src/cy/commands/waiting", ->
 
       it "waits for requestTimeout and responseTimeout override", (done) ->
         retryCount = 0
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           retryCount++
           if retryCount == 1
             expect(options.type).to.eq("request")
@@ -276,7 +276,7 @@ describe "src/cy/commands/waiting", ->
             expect(err.message).to.include "cy.wait() timed out waiting 1000ms for the 1st request to the route: 'foo'. No request ever occurred."
             done()
 
-          cy.on "command:retry", (options) ->
+          cy.on "internal:commandRetry", (options) ->
             ## force foo to time out before bar
             if /foo/.test options.error
               options._runnableTimeout = 0
@@ -294,7 +294,7 @@ describe "src/cy/commands/waiting", ->
             expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'bar'. No request ever occurred."
             done()
 
-          cy.on "command:retry", _.once =>
+          cy.on "internal:commandRetry", _.once =>
             win = cy.state("window")
             win.$.get("/foo")
             null
@@ -312,7 +312,7 @@ describe "src/cy/commands/waiting", ->
             expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'foo'. No request ever occurred."
             done()
 
-          cy.on "command:retry", _.once =>
+          cy.on "internal:commandRetry", _.once =>
             win = cy.state("window")
             win.$.get("/bar")
             null
@@ -358,7 +358,7 @@ describe "src/cy/commands/waiting", ->
 
           Cypress.config("requestTimeout", 1000)
 
-          cy.on "command:retry", (options) ->
+          cy.on "internal:commandRetry", (options) ->
             ## force bar to time out before foo
             if /bar/.test options.error
               options._runnableTimeout = 0
@@ -382,11 +382,11 @@ describe "src/cy/commands/waiting", ->
             expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 3rd request to the route: 'getUsers'. No request ever occurred."
             done()
 
-          cy.on "command:retry", =>
+          cy.on "internal:commandRetry", =>
             response += 1
 
             ## dont send the 3rd response
-            return cy.removeAllListeners("command:retry") if response is 3
+            return cy.removeAllListeners("internal:commandRetry") if response is 3
             win = cy.state("window")
             win.$.get("/users", {num: response})
 
@@ -406,7 +406,7 @@ describe "src/cy/commands/waiting", ->
             done()
 
           ## dont send the 2nd response
-          cy.on "command:retry", _.once =>
+          cy.on "internal:commandRetry", _.once =>
             response += 1
             win = cy.state("window")
             win.$.get("/users", {num: response})
@@ -428,7 +428,7 @@ describe "src/cy/commands/waiting", ->
             done()
 
           ## dont send the 2nd request
-          cy.on "command:retry", _.once =>
+          cy.on "internal:commandRetry", _.once =>
             request += 1
             win = cy.state("window")
             win.$.get("/users", {num: request})
@@ -490,7 +490,7 @@ describe "src/cy/commands/waiting", ->
         it "throws when waiting on the 2nd request", (done) ->
           Cypress.config("requestTimeout", 200)
 
-          cy.on "command:retry", _.once =>
+          cy.on "internal:commandRetry", _.once =>
             win = cy.state("window")
             win.$.get("/users")
             null
@@ -511,7 +511,7 @@ describe "src/cy/commands/waiting", ->
           Cypress.config("requestTimeout", 500)
           Cypress.config("responseTimeout", 10000)
 
-          cy.on "command:retry", _.once =>
+          cy.on "internal:commandRetry", _.once =>
             win = cy.state("window")
             _.defer => win.$.get("/timeout?ms=2001")
             _.defer => win.$.get("/timeout?ms=2002")
@@ -533,7 +533,7 @@ describe "src/cy/commands/waiting", ->
 
           win = cy.state("window")
 
-          cy.on "command:retry", (options) ->
+          cy.on "internal:commandRetry", (options) ->
             if /getThree/.test(options.error)
               ## force 3 to immediately time out
               options._runnableTimeout = 0
@@ -592,7 +592,7 @@ describe "src/cy/commands/waiting", ->
 
         win = cy.state("window")
 
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           if options._retries is 1
             response += 1
             win.$.get("/users", {num: response})
@@ -618,7 +618,7 @@ describe "src/cy/commands/waiting", ->
 
         win = cy.state("window")
 
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           ## only add a request for the first unique retry
           ## for each request
           if options._retries is 1
@@ -786,7 +786,7 @@ describe "src/cy/commands/waiting", ->
 
             done()
 
-          cy.on "command:retry", ->
+          cy.on "internal:commandRetry", ->
             numRetries += 1
 
           cy
@@ -890,7 +890,7 @@ describe "src/cy/commands/waiting", ->
       #     retry = _.after 3, ->
       #       retriedThreeTimes = true
 
-      #     cy.on "command:retry", retry
+      #     cy.on "internal:commandRetry", retry
 
       #     fn = ->
       #       expect(retriedThreeTimes).to.be.true;

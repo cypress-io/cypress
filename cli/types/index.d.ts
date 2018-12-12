@@ -1789,10 +1789,10 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
-     * Path to plugins file. (Pass false to disable)
-     * @default "cypress/plugins/index.js"
+     * Path to background file. (Pass false to disable)
+     * @default "cypress/background/index.js"
      */
-    pluginsFile: string
+    backgroundFile: string
     /**
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
@@ -3654,6 +3654,17 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
+
+  /**
+   * Page details included with actions like 'page:start'
+   */
+  interface PageDetails {
+    win: Window
+    url: string
+    statusCode?: number
+    headers?: { [key: string]: string }
+  }
+
   // for just a few events like "page:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -3718,22 +3729,22 @@ declare namespace Cypress {
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onStart` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'page:start', fn: (win: Window) => void): void
+    (action: 'page:start', fn: (details: PageDetails) => void): void
     /**
      * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onReady` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'page:ready', fn: (win: Window) => void): void
+    (action: 'page:ready', fn: (details: PageDetails) => void): void
+    /**
+     * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'page:end', fn: (details: PageDetails) => void): void
     /**
      * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'before:window:unload', fn: (event: BeforeUnloadEvent) => void): void
-    /**
-     * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
-     * @see https://on.cypress.io/catalog-of-events#App-Events
-     */
-    (action: 'page:end', fn: (event: Event) => void): void
     /**
      * Fires whenever Cypress detects that your application's URL has changed.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -3748,7 +3759,7 @@ declare namespace Cypress {
      * Fires whenever the viewport changes via a `cy.viewport()` or naturally when Cypress resets the viewport to the default between tests. Useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'viewport:changed', fn: (viewport: Viewport) => void): void
+    (action: 'viewport:change', fn: (viewport: Viewport) => void): void
     /**
      * Fires whenever **Cypress** is scrolling your application. This event is fired when Cypress is {% url 'waiting for and calculating actionability' interacting-with-elements %}. It will scroll to 'uncover' elements currently being covered. This event is extremely useful to debug why Cypress may think an element is not interactive.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -3758,22 +3769,22 @@ declare namespace Cypress {
      * Fires when a cy command is first invoked and enqueued to be run later. Useful for debugging purposes if you're confused about the order in which commands will execute.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:enqueued', fn: (command: EnqueuedCommand) => void): void
+    (action: 'internal:commandEnqueue', fn: (command: EnqueuedCommand) => void): void
     /**
      * Fires when cy begins actually running and executing your command. Useful for debugging and understanding how the command queue is async.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:start', fn: (command: CommandQueue) => void): void
+    (action: 'internal:commandStart', fn: (command: CommandQueue) => void): void
     /**
      * Fires when cy finishes running and executing your command. Useful for debugging and understanding how commands are handled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:end', fn: (command: CommandQueue) => void): void
+    (action: 'internal:commandEnd', fn: (command: CommandQueue) => void): void
     /**
      * Fires whenever a command begins its retrying routines. This is called on the trailing edge after Cypress has internally waited for the retry interval. Useful to understand **why** a command is retrying, and generally includes the actual error causing the retry to happen. When commands fail the final error is the one that actually bubbles up to fail the test. This event is essentially to debug why Cypress is failing.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:retry', fn: (command: CommandQueue) => void): void
+    (action: 'internal:commandRetry', fn: (command: CommandQueue) => void): void
     /**
      * Fires whenever a command emits this event so it can be displayed in the Command Log. Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -3788,12 +3799,12 @@ declare namespace Cypress {
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:run:start', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'test:start', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
     /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:run:end', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'test:end', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
   }
 
   // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS
