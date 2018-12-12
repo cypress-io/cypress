@@ -582,6 +582,45 @@ describe "src/cy/commands/waiting", ->
             expect(xhr1.responseBody).to.deep.eq resp1
             expect(xhr2.responseBody).to.deep.eq resp2
 
+      it.skip "does normal stuff", ->
+        resp1 = {foo: "foo"}
+
+        cy
+          .server()
+          .route(/users/, resp1).as("getUsers")
+          .window().then (win) ->
+            win.$.get("/users")
+            null
+          .wait("@getUsers", (xhr1) ->
+            expect(xhr1.responseBody).to.deep.eq resp1
+          )
+
+      it.skip "does weird stuff", ->
+        resp1 = {foo: "foo"}
+        resp2 = {bar: "bar"}
+
+        cy
+          .server()
+          .route(/users/, resp1).as("getUsers")
+          .route(/posts/, resp2).as("getPosts")
+          .window().then (win) ->
+            win.$.get("/users")
+            win.$.get("/posts")
+            win.$.get("/users")
+            win.$.get("/users")
+            # win.$.get("/posts")
+            win.$.get("/users")
+            null
+          .wait(["@getUsers", "@getPosts"]).spread (xhr1, xhr2) ->
+            expect(xhr1.responseBody).to.deep.eq resp1
+            expect(xhr2.responseBody).to.deep.eq resp2
+          .wait(["@getUsers", "@getUsers"]).spread (xhr1, xhr2) ->
+            expect(xhr1.responseBody).to.deep.eq resp1
+            expect(xhr2.responseBody).to.deep.eq resp1
+          .wait(["@getPosts", "@getUsers"]).spread (xhr1, xhr2) ->
+            expect(xhr1.responseBody).to.deep.eq resp2
+            expect(xhr2.responseBody).to.deep.eq resp1
+
     describe "multiple separate alias waits", ->
       before ->
         cy.visit("/fixtures/jquery.html")
@@ -770,7 +809,7 @@ describe "src/cy/commands/waiting", ->
           cy.on "fail", (err) =>
             obj = {
               name: "wait"
-              referencesAlias: [{alias: 'getFoo', cardinal: 1, ordinal: "1st"}]
+              referencesAlias: [{name: 'getFoo', cardinal: 1, ordinal: "1st"}]
               aliasType: "route"
               type: "parent"
               error: err
@@ -854,17 +893,17 @@ describe "src/cy/commands/waiting", ->
 
               expect(lastLog.get("referencesAlias")).to.deep.eq [
                 {
-                  alias: "getFoo",
+                  name: "getFoo",
                   cardinal: 1,
                   ordinal: '1st'
                 },
                 {
-                  alias: "getBar",
+                  name: "getBar",
                   cardinal: 1,
                   ordinal: '1st'
                 },
                 {
-                  alias: "getFoo",
+                  name: "getFoo",
                   cardinal: 2,
                   ordinal: '2nd'
                 }

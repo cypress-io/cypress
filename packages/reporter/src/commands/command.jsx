@@ -27,9 +27,9 @@ const visibleMessage = (model) => {
 const AliasReference = observer(({ model, aliasObj, shouldShowCount }) => {
   if (shouldShowCount) {
     return (
-      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.alias}'`}>
+      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`}>
         <span className='command-alias-container'>
-          <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.alias}</span>
+          <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.name}</span>
           <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
         </span>
       </Tooltip>
@@ -38,8 +38,8 @@ const AliasReference = observer(({ model, aliasObj, shouldShowCount }) => {
 
   return (
     <span className='command-alias-container'>
-      <Tooltip placement='top' title={`Found an alias for: '${aliasObj.alias}'`}>
-        <span className={`command-alias ${model.aliasType}`}>@{aliasObj.alias}</span>
+      <Tooltip placement='top' title={`Found an alias for: '${aliasObj.name}'`}>
+        <span className={`command-alias ${model.aliasType}`}>@{aliasObj.name}</span>
       </Tooltip>
     </span>
   )
@@ -49,7 +49,7 @@ const AliasesReferences = observer(({ model, aliasesWithDuplicates }) => {
   return (
     <span>
       {_.map([].concat(model.referencesAlias), (aliasObj) => (
-        <AliasReference key={aliasObj.alias + aliasObj.cardinal} aliasObj={aliasObj} model={model} shouldShowCount={_.includes(aliasesWithDuplicates, aliasObj.alias)} />
+        <AliasReference key={aliasObj.name + aliasObj.cardinal} aliasObj={aliasObj} model={model} shouldShowCount={_.includes(aliasesWithDuplicates, aliasObj.name)} />
       ))}
     </span>
   )

@@ -93,13 +93,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         if str
           aliases.push({
-            alias: str
+            name: str
             cardinal: index + 1,
             ordinal: num
           })
 
         log.set "referencesAlias", aliases
-        log.set "aliasCount", {cardinal: index + 1, ordinal: num}
 
       if command.get("name") isnt "route"
         $utils.throwErrByPath("wait.invalid_alias", {
@@ -144,7 +143,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if log
         log.set "consoleProps", -> {
-          "Waited For": (_.map(log.get("referencesAlias"), 'alias') || []).join(", ")
+          "Waited For": (_.map(log.get("referencesAlias"), 'name') || []).join(", ")
           "Yielded": ret
         }
 

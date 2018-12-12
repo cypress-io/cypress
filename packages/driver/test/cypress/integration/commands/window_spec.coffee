@@ -109,7 +109,7 @@ describe "src/cy/commands/window", ->
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
-      it "can be aliased", ->
+      it.only "can be aliased", ->
         cy
           .window().as("win")
           .get("body")
@@ -123,7 +123,7 @@ describe "src/cy/commands/window", ->
             expect(@logs[0].get("aliasType")).to.eq("primitive")
 
             expect(@logs[2].get("aliasType")).to.eq("primitive")
-            expect(@logs[2].get("referencesAlias")).to.eq("win")
+            expect(@logs[2].get("referencesAlias").name).to.eq("win")
 
       it "logs obj", ->
         cy.window().then ->

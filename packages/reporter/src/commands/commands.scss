@@ -134,11 +134,13 @@
     }
 
     .command-alias-count {
+      background-color: lighten(#ffdf9c, 8%);
       border-radius: 0 10px 10px 0;
       display: inline;
       font-size: 90%;
+      line-height: 1;
       margin-left: 0;
-      padding-right: 6px;
+      padding: 2px 6px 2px 4px;
     }
   }
 
