@@ -1789,10 +1789,10 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
-     * Path to plugins file. (Pass false to disable)
-     * @default "cypress/plugins/index.js"
+     * Path to background file. (Pass false to disable)
+     * @default "cypress/background/index.js"
      */
-    pluginsFile: string
+    backgroundFile: string
     /**
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"

@@ -304,7 +304,7 @@ module.exports = {
 
     exit = (code) ->
       if (expected = options.expectedExitCode)?
-        expect(expected).to.eq(code, "expected exit code")
+        expect(code).to.eq(expected, "expected exit code")
 
       ## snapshot the stdout!
       if options.snapshot
