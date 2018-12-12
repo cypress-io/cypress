@@ -24,8 +24,6 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const getArrayDuplicates = (arr) => _.filter(arr, (val, i, iteratee) => _.includes(iteratee, val, i + 1))
-
 const AliasReference = observer(({ model, aliasObj, shouldShowCount }) => {
   if (shouldShowCount) {
     return (
@@ -47,11 +45,11 @@ const AliasReference = observer(({ model, aliasObj, shouldShowCount }) => {
   )
 })
 
-const AliasesReferences = observer(({ model, aliasesWithMultipleReferences }) => {
+const AliasesReferences = observer(({ model, aliasesWithDuplicates }) => {
   return (
     <span>
       {_.map([].concat(model.referencesAlias), (aliasObj) => (
-        <AliasReference key={aliasObj.alias + aliasObj.cardinal} aliasObj={aliasObj} model={model} shouldShowCount={_.includes(aliasesWithMultipleReferences, aliasObj.alias)} />
+        <AliasReference key={aliasObj.alias + aliasObj.cardinal} aliasObj={aliasObj} model={model} shouldShowCount={_.includes(aliasesWithDuplicates, aliasObj.alias)} />
       ))}
     </span>
   )
@@ -92,9 +90,8 @@ class Command extends Component {
   }
 
   render () {
-    const { model, referencedAliases } = this.props
+    const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
-    const aliasesWithMultipleReferences = getArrayDuplicates(referencedAliases)
 
     return (
       <li
@@ -141,7 +138,7 @@ class Command extends Component {
               <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
             </span>
             <span className='command-message'>
-              {model.referencesAlias ? <AliasesReferences model={model} aliasesWithMultipleReferences={aliasesWithMultipleReferences} /> : <Message model={model} />}
+              {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
               <Aliases model={model} />

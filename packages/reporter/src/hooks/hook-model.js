@@ -13,20 +13,12 @@ export default class Hook {
     this.name = props.name
   }
 
-  @computed get referencedAliases () {
-    return _.flatten(this.commands.map((command) => {
-      if (!command.referencesAlias) {
-        return
+  @computed get aliasesWithDuplicates () {
+    return this.commands.map((command) => {
+      if (command.alias && command.hasDuplicates) {
+        return command.alias
       }
-
-      if (!_.isArray(command.referencesAlias)) {
-        return command.referencesAlias.alias
-      }
-
-      return command.referencesAlias.map((aliasReference) => {
-        return aliasReference.alias
-      })
-    }))
+    })
   }
 
   addCommand (command) {
