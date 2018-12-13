@@ -26,7 +26,7 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
-serverEvents = require("../plugins/server_events")
+serverEvents = require("../background/server_events")
 
 color = (val, c) ->
   chalk[c](val)

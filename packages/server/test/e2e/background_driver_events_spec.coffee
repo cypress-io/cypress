@@ -3,7 +3,7 @@
 e2e      = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
-describe "e2e plugins", ->
+describe "e2e background driver events", ->
   e2e.setup()
 
   it "sends driver events", ->

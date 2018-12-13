@@ -93,7 +93,7 @@ module.exports = {
       return fileProcessor
 
     preprocessor = fileProcessors[filePath] = Promise.try ->
-      if background.has("browser:filePreprocessor")
+      if background.isRegistered("browser:filePreprocessor")
         background.execute("browser:filePreprocessor", fileObject)
       else
         debug("execute default preprocessor")

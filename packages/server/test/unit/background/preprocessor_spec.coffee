@@ -73,7 +73,7 @@ describe "lib/background/preprocessor", ->
 
     it "uses default preprocessor if none registered", ->
       background._reset()
-      background.has.returns(false)
+      background.isRegistered.returns(false)
       browserify = sinon.stub()
       browserifyMock = sinon.stub().returns(browserify)
       mockery.registerMock("@cypress/browserify-preprocessor", browserifyMock)

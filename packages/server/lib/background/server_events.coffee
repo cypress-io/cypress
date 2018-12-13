@@ -1,13 +1,13 @@
 Promise = require("bluebird")
 
 errors = require("../errors")
-plugins = require("../plugins")
+background = require("../background")
 
 module.exports = {
   execute: (eventName, args...) ->
-    if plugins.has("server:event")
+    if background.isRegistered("server:event")
       Promise.try ->
-        plugins.execute("server:event", eventName, args...)
+        background.execute("server:event", eventName, args...)
       .catch (err) ->
         errors.throw("BACKGROUND_SERVER_EVENT_ERROR", eventName, err?.stack or err?.message or err)
 }
