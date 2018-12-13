@@ -33,6 +33,7 @@ describe('<Runnables />', () => {
         specPath=''
       />
     )
+
     expect(component.find(RunnablesList)).to.exist
   })
 
@@ -44,6 +45,7 @@ describe('<Runnables />', () => {
         specPath='/path/to/foo_spec.js'
       />
     )
+
     expect(component.find(AnError)).to.exist
     expect(component.find(AnError).prop('error')).to.eql({
       title: 'No tests found in your file:',
@@ -61,6 +63,7 @@ describe('<Runnables />', () => {
         specPath=''
       />
     )
+
     expect(component.find('.wrap')).to.be.empty
   })
 
@@ -73,12 +76,14 @@ describe('<Runnables />', () => {
         specPath=''
       />
     )
-    expect(scroller.setContainer).to.have.been.calledWith(component.ref('container').node)
+
+    expect(scroller.setContainer).to.have.been.calledWith(component.ref('container'))
   })
 
   it('disables auto-scrolling when user scrolls and app is running', () => {
     const appState = appStateStub()
     const scroller = scrollerStub()
+
     mount(
       <Runnables
         appState={appState}
@@ -94,6 +99,7 @@ describe('<Runnables />', () => {
   it('does nothing when user scrolls and app is not running', () => {
     const appState = appStateStub({ isRunning: false })
     const scroller = scrollerStub()
+
     mount(
       <Runnables
         appState={appState}
@@ -109,6 +115,7 @@ describe('<Runnables />', () => {
   context('<RunnablesList />', () => {
     it('renders a runnable for each runnable in model', () => {
       const component = shallow(<RunnablesList runnables={[{ id: 1 }, { id: 2 }]} />)
+
       expect(component.find('Runnable').length).to.equal(2)
     })
   })

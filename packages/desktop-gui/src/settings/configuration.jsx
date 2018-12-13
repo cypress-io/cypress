@@ -11,6 +11,7 @@ const display = (obj) => {
 
   return _.map(obj, (value, key) => {
     const hasComma = lastKey !== key
+
     if (value.from == null) {
       return displayNestedObj(key, value, hasComma)
     }
@@ -144,8 +145,8 @@ const Configuration = observer(({ project }) => (
           <td>set from CLI arguments</td>
         </tr>
         <tr className='config-keys'>
-          <td><span className='plugin'>plugin</span></td>
-          <td>set from plugin file</td>
+          <td><span className='background'>background</span></td>
+          <td>set from background file</td>
         </tr>
       </tbody>
     </table>

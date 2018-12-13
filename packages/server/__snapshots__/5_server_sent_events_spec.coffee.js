@@ -19,16 +19,17 @@ exports['e2e server sent events passes 1'] = `
 
   server sent events
     ✓ does not crash
+    ✓ aborts proxied connections to prevent client connection buildup
 
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌──────────────────────────────────────────────┐
-  │ Tests:        1                              │
-  │ Passing:      1                              │
+  │ Tests:        2                              │
+  │ Passing:      2                              │
   │ Failing:      0                              │
   │ Pending:      0                              │
   │ Skipped:      0                              │
@@ -52,9 +53,9 @@ exports['e2e server sent events passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ server_sent_events_spec.coffee            XX:XX        1        1        -        -        - │
+  │ ✔ server_sent_events_spec.coffee            XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 
 `

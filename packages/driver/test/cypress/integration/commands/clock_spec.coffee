@@ -16,9 +16,13 @@ describe "src/cy/commands/clock", ->
         expect(clock).to.eq(@clock)
 
     it "proxies lolex clock, replacing window time methods", (done) ->
+      expect(@setTimeoutSpy).not.to.be.called
       cy.clock().then (clock) ->
+        ## lolex calls setTimeout once as part of its setup
+        ## but it shouldn't be called again by the @window.setTimeout()
+        expect(@setTimeoutSpy).to.be.calledOnce
         @window.setTimeout =>
-          expect(@setTimeoutSpy).not.to.be.called
+          expect(@setTimeoutSpy).to.be.calledOnce
           done()
         clock.tick()
 
@@ -29,12 +33,15 @@ describe "src/cy/commands/clock", ->
         clock.tick(4321)
         expect(new @window.Date().getTime()).to.equal(now + 4321)
 
-    it "restores window time methods when calling restore", ->
+    it "restores window time methods when calling restore", (done) ->
       cy.clock().then (clock) ->
         @window.setTimeout =>
-          expect(@setTimeoutSpy).not.to.be.called
+          expect(@setTimeoutSpy).to.be.calledOnce
           clock.restore()
           expect(@window.setTimeout).to.equal(@setTimeoutSpy)
+          @window.setTimeout =>
+            expect(@setTimeoutSpy).to.be.calledTwice
+            done()
         clock.tick()
 
     it "unsets clock after restore", ->
@@ -48,7 +55,7 @@ describe "src/cy/commands/clock", ->
       cy.clock().then (clock) ->
         r = cy.spy(clock, "restore")
 
-        Cypress.emit("test:before:run", {})
+        Cypress.emit("test:start", {})
 
         expect(r).to.be.called
 
@@ -59,23 +66,29 @@ describe "src/cy/commands/clock", ->
         .then (clock) ->
           expect(clock.details().now).to.equal(0)
 
+    it "new Date() is an instance of Date", ->
+      cy.clock()
+      cy.window().then (win) ->
+        expect(new win.Date()).to.be.an.instanceof(win.Date)
+        expect(new win.Date() instanceof win.Date).to.be.true
+
     context "errors", ->
       it "throws if now is not a number (or options object)", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.clock() only accepts a number or an options object for its first argument. You passed: \"250\"")
           done()
 
         cy.clock("250")
 
       it "throws if methods is not an array (or options object)", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.clock() only accepts an array of function names or an options object for its second argument. You passed: \"setTimeout\"")
           done()
 
         cy.clock(0, "setTimeout")
 
       it "throws if methods is not an array of strings (or options object)", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.clock() only accepts an array of function names or an options object for its second argument. You passed: [42]")
           done()
 
@@ -85,7 +98,7 @@ describe "src/cy/commands/clock", ->
       it "replaces specified functions", (done) ->
         cy.clock(null, ["setTimeout"]).then (clock) ->
           @window.setTimeout =>
-            expect(@setTimeoutSpy).not.to.be.called
+            expect(@setTimeoutSpy).to.be.calledOnce
             done()
           clock.tick()
 
@@ -95,28 +108,31 @@ describe "src/cy/commands/clock", ->
             @window.clearInterval(interval)
             expect(@setIntervalSpy).to.be.called
             @window.setTimeout =>
-              expect(@setTimeoutSpy).not.to.be.called
+              expect(@setTimeoutSpy).to.be.calledOnce
               done()
             clock.tick()
           , 5
 
     context "options", ->
       beforeEach ->
-        cy.on "log:added", (attrs, @log) =>
+        @logged = false
+        cy.on "log:added", (attrs, log) =>
+          if log.get("name") is "clock"
+            @logged = true
 
         return null
 
       it "can be first arg", ->
-        cy.clock({log: false}).then ->
-          expect(@log).to.be.undefined
+        cy.clock({log: false}).then =>
+          expect(@logged).to.be.false
 
       it "can be second arg", ->
-        cy.clock(new Date().getTime(), {log: false}).then ->
-          expect(@log).to.be.undefined
+        cy.clock(new Date().getTime(), {log: false}).then =>
+          expect(@logged).to.be.false
 
       it "can be third arg", ->
-        cy.clock(new Date().getTime(), ["setTimeout"], {log: false}).then ->
-          expect(@log).to.be.undefined
+        cy.clock(new Date().getTime(), ["setTimeout"], {log: false}).then =>
+          expect(@logged).to.be.false
 
     context "window changes", ->
       it "binds to default window before visit", ->
@@ -129,12 +145,14 @@ describe "src/cy/commands/clock", ->
       it "re-binds to new window when window changes", ->
         newWindow = {
           setTimeout: ->
+          clearTimeout: ->
+          Date: ->
           XMLHttpRequest: {
             prototype: {}
           }
         }
         cy.clock(null, ["setTimeout"]).then (clock) =>
-          Cypress.emit("window:before:load", newWindow)
+          Cypress.emit("page:start", { win: newWindow })
           onSetTimeout = cy.spy()
           newWindow.setTimeout(onSetTimeout)
           clock.tick()
@@ -149,7 +167,9 @@ describe "src/cy/commands/clock", ->
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
-          @logs.push(log)
+          name = log.get("name")
+          if name in ["clock", "tick", "restore"]
+            @logs.push(log)
 
         return null
 
@@ -175,7 +195,7 @@ describe "src/cy/commands/clock", ->
 
       it "does not log when auto-restored", (done) ->
         cy.clock().then =>
-          Cypress.emit("test:before:run", {})
+          Cypress.emit("test:start", {})
           expect(@logs.length).to.equal(1)
           done()
 
@@ -199,11 +219,11 @@ describe "src/cy/commands/clock", ->
             @clock.tick(100)
 
         it "includes clock's now value", ->
-          consoleProps = @logs[1].invoke("consoleProps")
-          expect(consoleProps["Now"]).to.equal(200)
+          consoleProps = @logs[0].invoke("consoleProps")
+          expect(consoleProps["Now"]).to.equal(100)
 
         it "includes methods replaced by clock", ->
-          consoleProps = @logs[1].invoke("consoleProps")
+          consoleProps = @logs[0].invoke("consoleProps")
           expect(consoleProps["Methods replaced"]).to.eql(["setTimeout"])
 
         it "logs ticked amount on tick", ->
@@ -220,6 +240,15 @@ describe "src/cy/commands/clock", ->
           expect(consoleProps["Methods replaced"]).to.eql(["setTimeout"])
 
   describe "#tick", ->
+    beforeEach ->
+      @logs = []
+
+      cy.on "log:added", (attrs, log) =>
+        if log.get("name") is "tick"
+          @logs.push(log)
+
+      return null
+
     it "moves time ahead and triggers callbacks", (done) ->
       cy
         .clock()
@@ -235,37 +264,36 @@ describe "src/cy/commands/clock", ->
         .tick(1000).then (clock) ->
           expect(clock).to.equal(@clock)
 
+    it "defaults to 0ms", ->
+      cy
+        .clock()
+        .tick().then (clock) ->
+          consoleProps = @logs[0].invoke("consoleProps")
+          expect(consoleProps["Ticked"]).to.equal("0 milliseconds")
+
     context "errors", ->
       it "throws if there is not a clock", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.tick() cannot be called without first calling cy.clock()")
           done()
 
         cy.tick()
 
       it "throws if ms is not undefined or a number", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("clock.tick()/cy.tick() only accept a number as their argument. You passed: \"100\"")
           done()
 
         cy.clock().tick("100")
 
     context "logging", ->
-      beforeEach ->
-        @logs = []
-
-        cy.on "log:added", (attrs, log) =>
-          @logs.push(log)
-
-        return null
-
       it "logs number of milliseconds", ->
         cy
           .clock()
           .tick(250)
           .then ->
-            log = @logs[1]
-            expect(@logs.length).to.equal(2)
+            log = @logs[0]
+            expect(@logs.length).to.equal(1)
             expect(log.get("name")).to.eq("tick")
             expect(log.get("message")).to.eq("250ms")
 
@@ -274,7 +302,7 @@ describe "src/cy/commands/clock", ->
           .clock()
           .tick(250)
           .then ->
-            log = @logs[1]
+            log = @logs[0]
             expect(log.get("snapshots").length).to.eq(2)
             expect(log.get("snapshots")[0].name).to.equal("before")
             expect(log.get("snapshots")[1].name).to.equal("after")

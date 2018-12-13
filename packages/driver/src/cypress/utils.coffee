@@ -3,6 +3,7 @@ _ = require("lodash")
 moment = require("moment")
 Promise = require("bluebird")
 
+$jquery = require("../dom/jquery")
 $Location = require("./location")
 $errorMessages = require("./error_messages")
 
@@ -30,6 +31,17 @@ module.exports = {
 
   logInfo: (msgs...) ->
     console.info(msgs...)
+
+  unwrapFirst: (val) ->
+    ## this method returns the first item in an array
+    ## and if its still a jquery object, then we return
+    ## the first() jquery element
+    item = [].concat(val)[0]
+
+    if $jquery.isJquery(item)
+      return item.first()
+
+    return item
 
   appendErrMsg: (err, message) ->
     ## preserve stack
@@ -83,6 +95,7 @@ module.exports = {
         command.error(err)
 
     err.onFail = onFail if onFail
+    err.from = options.from
 
     throw err
 
@@ -105,7 +118,8 @@ module.exports = {
     err
 
   errMessageByPath: (errPath, args) ->
-    if not errMessage = @getObjValueByPath($errorMessages, errPath)
+    errMessage = @getObjValueByPath($errorMessages, errPath)
+    if not errMessage?
       throw new Error "Error message path '#{errPath}' does not exist"
 
     getMsg = ->

@@ -20,12 +20,12 @@ export default class IframeModel {
     eventManager.on('run:start', action('run:start', this._beforeRun))
     eventManager.on('run:end', action('run:end', this._afterRun))
 
-    eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
+    eventManager.on('viewport:change', action('viewport:change', this._updateViewport))
     eventManager.on('config', action('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     }))
 
-    eventManager.on('url:changed', action('url:changed', this._updateUrl))
+    eventManager.on('page:url:changed', action('page:url:changed', this._updateUrl))
     eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
 
     eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
@@ -80,6 +80,7 @@ export default class IframeModel {
     if (!snapshots || !snapshots.length) {
       this._clearSnapshots()
       this._setMissingSnapshotMessage()
+
       return
     }
 
@@ -100,6 +101,7 @@ export default class IframeModel {
 
     if (snapshots.length > 1) {
       let i = 0
+
       this.intervalId = setInterval(() => {
         if (this.isSnapshotPinned) return
 
@@ -168,6 +170,7 @@ export default class IframeModel {
     if (!snapshots || !snapshots.length) {
       eventManager.snapshotUnpinned()
       this._setMissingSnapshotMessage()
+
       return
     }
 
@@ -206,6 +209,7 @@ export default class IframeModel {
 
   _storeOriginalState () {
     const originalState = this.detachDom()
+
     if (!originalState) return
 
     const { body, htmlAttrs, headStyles, bodyStyles } = originalState

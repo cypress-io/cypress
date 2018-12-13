@@ -27,7 +27,7 @@ describe "cancelling command queues", ->
       calledAfterStop = true
 
   it "done early", (done) ->
-    cy.once "command:start", (cmd) ->
+    cy.once "internal:commandStart", (cmd) ->
       cancel = cy.state("promise").cancel
       cy.state("promise").cancel = ->
         previousTestWasCanceled = true
@@ -48,7 +48,7 @@ describe "cancelling command queues", ->
 
     calledAfterFailure = false
 
-    cy.on "fail", ->
+    cy.on "test:fail", ->
       Promise
       .delay(50)
       .then ->

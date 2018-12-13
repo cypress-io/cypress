@@ -213,6 +213,32 @@ module.exports = {
     invalid_argument: "#{cmd('each')} must be passed a callback function."
     non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: '{{subject}}'"
 
+  events:
+    renamed_event: """The '{{oldEvent}}' event has been renamed to '{{newEvent}}'.
+
+      Please change:
+
+        {{object}}.{{method}}('{{oldEvent}}', <handler>)
+
+      to:
+
+        {{object}}.{{method}}('{{newEvent}}', <handler>)
+    """
+    renamed_event_win_to_details: """The '{{oldEvent}}' event has been renamed to '{{newEvent}}' and its argument signature has been changed.
+
+      Please change:
+
+        {{object}}.{{method}}('{{oldEvent}}', (win) => {
+          win // use of win argument
+        })
+
+      to:
+
+        {{object}}.{{method}}('{{newEvent}}', (details) => {
+          details.win // win is now a property on the details argument
+        })
+    """
+
   exec:
     failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
 
@@ -470,6 +496,17 @@ module.exports = {
     async_timed_out: "Timed out after '{{ms}}ms'. The done() callback was never invoked!"
     invalid_interface: "Invalid mocha interface '{{name}}'"
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
+    overspecified: """
+    Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+    Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
+
+    #{divider(60, '-')}
+
+    Original mocha error:
+
+    {{error}}
+    """
 
   navigation:
     cross_origin: """
@@ -837,6 +874,8 @@ module.exports = {
       When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
     """
 
+    fromCypress: ""
+
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
     dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 3000px."
@@ -931,6 +970,21 @@ module.exports = {
         However, you can likely use #{cmd('request')} instead of #{cmd('visit')}.
 
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
+      """
+    renamed_callback: """
+      The '{{oldName}}' callback for #{cmd('visit')} has been renamed to '{{newName}}'.
+
+      Please change:
+
+        cy.visit({
+          {{oldName}} () {}
+        })
+
+      to:
+
+        cy.visit({
+          {{newName}} () {}
+        })
       """
 
   wait:

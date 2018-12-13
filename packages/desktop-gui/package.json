@@ -5,9 +5,14 @@
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
+    "prebuild": "npm run check-deps-pre",
     "build": "node ./scripts/build-dev.js",
+    "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "node ./scripts/build-prod.js",
+    "prewatch": "npm run check-deps-pre",
     "watch": "node ./scripts/watch.js",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
@@ -19,6 +24,7 @@
     "lib"
   ],
   "devDependencies": {
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.26.0",
     "@cypress/react-tooltip": "^0.2.2",
@@ -44,6 +50,6 @@
     "react-bootstrap-modal": "3.0.1",
     "react-dom": "^15.6.1",
     "react-loader": "^2.4.0",
-    "zunder": "5.6.5"
+    "zunder": "6.2.1"
   }
 }

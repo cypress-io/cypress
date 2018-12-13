@@ -28,8 +28,11 @@ class AppStore {
 
   @action set (props) {
     if (props.cypressEnv != null) this.cypressEnv = props.cypressEnv
+
     if (props.os != null) this.os = props.os
+
     if (props.projectRoot != null) this.projectRoot = props.projectRoot
+
     if (props.version != null) this.version = this.newVersion = props.version
   }
 

@@ -55,7 +55,7 @@ describe "src/cy/commands/popups", ->
         })
 
     it "can turn on and off confirmation", ->
-      cy.on "window:confirm", (str) ->
+      cy.on "page:confirm", (str) ->
         switch str
           when "foo" then false
           when "bar" then true

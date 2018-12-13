@@ -22,13 +22,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## this MUST be prepended else if we are stubbing or spying on
   ## global timers they will be reset in agents before this runs
   ## its reset function
-  Cypress.prependListener("test:before:run", reset)
+  Cypress.prependListener("test:start", reset)
 
-  Cypress.on "window:before:load", (contentWindow) ->
+  Cypress.on "page:start", ({ win }) ->
     ## if a clock has been created before this event (likely before
     ## a cy.visit(), then bind that clock to the new window
     if clock
-      clock.bind(contentWindow)
+      clock.bind(win)
 
   Commands.addAll({ type: "utility" }, {
     clock: (subject, now, methods, options = {}) ->
@@ -83,6 +83,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       clock.tick = (ms) ->
         if ms? and not _.isNumber(ms)
           $utils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
+
+        ms ?= 0
 
         theLog = log("tick", "#{ms}ms", false, {
           "Now": clock.details().now + ms

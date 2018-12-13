@@ -10,6 +10,8 @@ config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 
+s3StaticHtmlUrl = "https://s3.amazonaws.com/static.cypress.io/cypress-project-internal-test-assets/index.html"
+
 describe "Server", ->
   beforeEach ->
     sinon.stub(Server.prototype, "reset")
@@ -134,7 +136,7 @@ describe "Server", ->
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
             expect(res.body).to.include("index.html content")
             expect(res.body).to.include("document.domain = 'localhost'")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
 
       it "sends back the content type", ->
         @server._onResolveUrl("/assets/foo.json", {}, @automationRequest)
@@ -319,7 +321,7 @@ describe "Server", ->
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
             expect(res.body).to.include("content")
             expect(res.body).to.include("document.domain = 'getbootstrap.com'")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script> </head>content</html>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
 
       it "sends back the content type", ->
         nock("http://getbootstrap.com")
@@ -379,7 +381,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("content")
             expect(res.body).to.include("document.domain = 'go.com'")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script> </head>content</html>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
 
             expect(@server._getRemoteState()).to.deep.eq({
               auth: undefined
@@ -457,7 +459,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("go.com")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>espn</body></html>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
             expect(buffers.keys()).to.deep.eq([])
 
       it "does not buffer 'bad' responses", ->
@@ -614,13 +616,13 @@ describe "Server", ->
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
             expect(res.body).to.include("content")
             expect(res.body).to.include("document.domain = 'google.com'")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script> </head>content</html>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
 
       it "passes auth through", ->
         username = "u"
         password = "p"
 
-        base64 = new Buffer(username + ":" + password).toString("base64")
+        base64 = Buffer.from(username + ":" + password).toString("base64")
 
         auth = {
           username
@@ -803,7 +805,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("google.com")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>google</body></html>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             auth: undefined
@@ -839,7 +841,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             auth: undefined
@@ -870,7 +872,7 @@ describe "Server", ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
               expect(res.body).to.include("google.com")
-              expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>google</body></html>")
+              expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               auth: undefined
@@ -908,7 +910,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("foobar.com")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>https server</body></html>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             auth: undefined
@@ -944,7 +946,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             auth: undefined
@@ -975,7 +977,7 @@ describe "Server", ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
               expect(res.body).to.include("foobar.com")
-              expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>https server</body></html>")
+              expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               auth: undefined
@@ -994,14 +996,14 @@ describe "Server", ->
       it "can go from https -> file -> https without a port", ->
         @timeout(5000)
 
-        @server._onResolveUrl("https://www.apple.com/", {}, @automationRequest)
+        @server._onResolveUrl(s3StaticHtmlUrl, {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
-            url: "https://www.apple.com/"
-            originalUrl: "https://www.apple.com/"
+            url: s3StaticHtmlUrl
+            originalUrl: s3StaticHtmlUrl
             status: 200
             statusText: "OK"
             redirects: []
@@ -1011,28 +1013,28 @@ describe "Server", ->
           # @server.onRequest (req, res) ->
           #   console.log "ON REQUEST!!!!!!!!!!!!!!!!!!!!!!"
 
-          #   nock("https://www.apple.com")
-          #   .get("/")
-          #   .reply 200, "<html><head></head><body>apple</body></html>", {
+          #   nock("https://s3.amazonaws.com")
+          #   .get("/static.cypress.io/cypress-project-internal-test-assets/index.html")
+          #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
           #     "Content-Type": "text/html"
           #   }
 
-          @rp("https://www.apple.com/")
+          @rp(s3StaticHtmlUrl)
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
-            expect(res.body).to.include("apple.com")
+            expect(res.body).to.include("amazonaws.com")
             expect(res.body).to.include("Cypress")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             auth: undefined
-            origin: "https://www.apple.com"
+            origin: "https://s3.amazonaws.com"
             strategy: "http"
             visiting: false
-            domainName: "apple.com"
+            domainName: "amazonaws.com"
             fileServer: null
             props: {
-              domain: "apple"
+              domain: "amazonaws"
               tld: "com"
               port: "443"
             }
@@ -1058,7 +1060,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
-            expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script>\n  </head>")
+            expect(res.body).to.include("Cypress.action('app:page:start', { win: window")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             auth: undefined
@@ -1070,14 +1072,14 @@ describe "Server", ->
             props: null
           })
         .then =>
-          @server._onResolveUrl("https://www.apple.com/", {}, @automationRequest)
+          @server._onResolveUrl(s3StaticHtmlUrl, {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
-              url: "https://www.apple.com/"
-              originalUrl: "https://www.apple.com/"
+              url: s3StaticHtmlUrl
+              originalUrl: s3StaticHtmlUrl
               status: 200
               statusText: "OK"
               redirects: []
@@ -1085,28 +1087,28 @@ describe "Server", ->
             })
           .then =>
             # @server.onNextRequest (req, res) ->
-            #   nock("https://www.apple.com")
-            #   .get("/")
-            #   .reply 200, "<html><head></head><body>apple</body></html>", {
+            #   nock("https://s3.amazonaws.com")
+            #   .get("/static.cypress.io/cypress-project-internal-test-assets/index.html")
+            #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
             #     "Content-Type": "text/html"
             #   }
 
-            @rp("https://www.apple.com/")
+            @rp(s3StaticHtmlUrl)
             .then (res) ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
-              expect(res.body).to.include("apple.com")
+              expect(res.body).to.include("amazonaws.com")
               expect(res.body).to.include("Cypress")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               auth: undefined
-              origin: "https://www.apple.com"
+              origin: "https://s3.amazonaws.com"
               strategy: "http"
               visiting: false
               fileServer: null
-              domainName: "apple.com"
+              domainName: "amazonaws.com"
               props: {
-                domain: "apple"
+                domain: "amazonaws"
                 tld: "com"
                 port: "443"
               }

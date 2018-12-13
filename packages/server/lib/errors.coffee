@@ -525,31 +525,31 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
-    when "PLUGINS_FILE_ERROR"
+    when "BACKGROUND_FILE_ERROR"
       """
-      The plugins file is missing or invalid.
+      The background file is missing or invalid.
 
-      Your pluginsFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The pluginsFile must be a .js or .coffee file.
+      Your backgroundFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The backgroundFile must be a .js or .coffee file.
 
-      Please fix this, or set 'pluginsFile' to 'false' if a plugins file is not necessary for your project.
+      Please fix this, or set 'backgroundFile' to 'false' if a background file is not necessary for your project.
 
       #{if arg2 then "The following error was thrown:" else ""}
 
       #{if arg2 then chalk.yellow(arg2) else ""}
       """.trim()
-    when "PLUGINS_DIDNT_EXPORT_FUNCTION"
+    when "BACKGROUND_DIDNT_EXPORT_FUNCTION"
       """
-      The pluginsFile must export a function.
+      The backgroundFile must export a function.
 
-      We loaded the pluginsFile from: #{arg1}
+      We loaded the backgroundFile from: #{arg1}
 
       It exported:
 
       #{JSON.stringify(arg2)}
       """
-    when "PLUGINS_FUNCTION_ERROR"
+    when "BACKGROUND_FUNCTION_ERROR"
       """
-      The function exported by the plugins file threw an error.
+      The function exported by the background file threw an error.
 
       We invoked the function exported by '#{arg1}', but it threw an error.
 
@@ -557,12 +557,22 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """.trim()
-    when "PLUGINS_ERROR"
+    when "BACKGROUND_ERROR"
       """
-      The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+      The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
       #{chalk.yellow(arg1)}
       """.trim()
+    when "BACKGROUND_RENAMED_EVENTS"
+      """
+      The following background #{if arg1.events.length > 1 then "events have" else "event has"} been renamed.
+
+      Please update them in your background file and try again.
+
+      #{_.map(arg1.events, ({ oldEvent, newEvent }) -> "'#{oldEvent}' has been renamed to '#{newEvent}'").join("\n")}
+
+      Background file location: #{arg1.backgroundFile}
+      """
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -651,13 +661,92 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
-    when "PLUGIN_SERVER_EVENT_ERROR"
+    when "BACKGROUND_SERVER_EVENT_ERROR"
       """
-      An error was thrown in your plugins file while executing the handler for the '#{chalk.blue(arg1)}' event.
+      An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1)}' event.
 
       The error we received was:
 
       #{chalk.yellow(arg2)}
+      """
+    when "REPATHED_BACKGROUND_FILE"
+      """
+      The "plugins file" has been renamed to the "background file" and has a new default path.
+
+      Please rename
+        #{chalk.yellow(arg1)}
+      to
+        #{chalk.blue(arg2)}
+      """
+    when "DUPLICATE_TASK_KEY"
+      """
+      Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
+      """
+    when "BACKGROUND_DRIVER_EVENT_ERROR"
+      """
+      An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1.event)}' event.
+
+      This error is being ignored because the event cannot affect the results of the run.
+
+      The error we received was:
+
+      #{chalk.yellow(arg1.error)}
+      """
+    when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+      """
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+      """
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+      """
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+      """
+      Parallelization is not included under your free plan.
+
+      Your plan is now in a grace period, which means your tests will still run in parallel until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests in parallel in the future.
+
+      #{arg1.link}
+      """
+    when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+      """
+      Parallelization is not included under your current billing plan.
+
+      To run your tests in parallel, please visit your billing and upgrade to another plan with parallelization.
+
+      #{arg1.link}
+      """
+    when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
+      """
+      Grouping is not included under your free plan.
+
+      Your plan is now in a grace period, which means your tests will still run with groups until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests with groups in the future.
+
+      #{arg1.link}
+      """
+    when "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+      """
+      Grouping is not included under your current billing plan.
+
+      To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
+
+      #{arg1.link}
       """
 
 get = (type, arg1, arg2) ->
@@ -668,8 +757,8 @@ get = (type, arg1, arg2) ->
   err.type = type
   err
 
-warning = (type, arg) ->
-  err = get(type, arg)
+warning = (type, arg1, arg2) ->
+  err = get(type, arg1, arg2)
   log(err, "magenta")
 
 throwErr = (type, arg1, arg2) ->

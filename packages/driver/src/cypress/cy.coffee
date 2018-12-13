@@ -17,6 +17,7 @@ $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
+$Timers = require("../cy/timers")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
@@ -52,18 +53,6 @@ setRemoteIframeProps = ($autIframe, state) ->
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
-  timersPaused = false
-
-  ## TODO: move this to its own module
-  timerQueues = {}
-  timerQueues.reset = ->
-    _.extend(timerQueues, {
-      setTimeout: []
-      setInterval: []
-      requestAnimationFrame: []
-    })
-
-  timerQueues.reset()
 
   isStopped = -> stopped
 
@@ -79,7 +68,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   $$ = (selector, context) ->
     context ?= state("document")
-    new $.fn.init(selector, context)
+    $dom.query(selector, context)
 
   queue = $CommandQueue.create()
 
@@ -91,6 +80,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
 
@@ -127,31 +117,43 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
-        Cypress.action("app:window:before:unload", e)
+        timers.reset()
+
+        Cypress.action("app:before:window:unload", e)
 
         ## return undefined so our beforeunload handler
         ## doesnt trigger a confirmation dialog
         return undefined
-      onUnload: (e) ->
-        Cypress.action("app:window:unload", e)
+      onUnload: ->
+        Cypress.action("app:page:end", {
+          win: contentWindow
+          url: state("url")
+        })
       onNavigation: (args...) ->
         Cypress.action("app:navigation:changed", args...)
       onAlert: (str) ->
-        Cypress.action("app:window:alert", str)
+        Cypress.action("app:page:alert", str)
       onConfirm: (str) ->
-        results = Cypress.action("app:window:confirm", str)
+        results = Cypress.action("app:page:confirm", str)
 
         ## return false if ANY results are false
         ## else true
         ret = !_.some(results, returnedFalse)
 
-        Cypress.action("app:window:confirmed", str, ret)
+        Cypress.action("app:page:confirmed", str, ret)
 
         return ret
     })
 
   wrapNativeMethods = (contentWindow) ->
     try
+      ## return null to trick contentWindow into thinking
+      ## its not been iframed if modifyObstructiveCode is true
+      if config("modifyObstructiveCode")
+        Object.defineProperty(contentWindow, "frameElement", {
+          get: -> null
+        })
+
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
 
@@ -160,30 +162,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
-
-  runTimerQueue = (queue) ->
-    _.each timerQueues[queue], ([contentWindow, args]) ->
-      contentWindow[queue].apply(contentWindow, args)
-
-    timerQueues[queue] = []
-
-  wrapTimers = (contentWindow) ->
-    originals = {
-      setTimeout: contentWindow.setTimeout
-      setInterval: contentWindow.setInterval
-      requestAnimationFrame: contentWindow.requestAnimationFrame
-    }
-
-    wrapFn = (fnName) ->
-      return (args...) ->
-        if timersPaused
-          timerQueues[fnName].push([contentWindow, args])
-        else
-          originals[fnName].apply(contentWindow, args)
-
-    contentWindow.setTimeout = wrapFn("setTimeout")
-    contentWindow.setInterval = wrapFn("setInterval")
-    contentWindow.requestAnimationFrame = wrapFn("requestAnimationFrame")
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -214,7 +192,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     queue.splice(index, 0, obj)
 
-    Cypress.action("cy:command:enqueued", obj)
+    Cypress.action("cy:internal:commandEnqueue", obj)
 
   getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
     return null if not command
@@ -264,7 +242,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## since they return promises and queue more
       ## new commands
       if noArgsAreAFunction(args)
-        Cypress.once("command:enqueued", commandEnqueued)
+        Cypress.once("internal:commandEnqueue", commandEnqueued)
 
       ## run the command's fn with runnable's context
       try
@@ -273,7 +251,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         throw err
       finally
         ## always remove this listener
-        Cypress.removeListener("command:enqueued", commandEnqueued)
+        Cypress.removeListener("internal:commandEnqueue", commandEnqueued)
 
       state("commandIntermediateValue", ret)
 
@@ -316,15 +294,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     .then (subject) ->
       state("commandIntermediateValue", undefined)
 
+      ## we may be given a regular array here so
+      ## we need to re-wrap the array in jquery
+      ## if that's the case if the first item
+      ## in this subject is a jquery element.
+      ## we want to do this because in 3.1.2 there
+      ## was a regression when wrapping an array of elements
+      firstSubject = $utils.unwrapFirst(subject)
+
       ## if ret is a DOM element and its not an instance of our own jQuery
-      if subject and $dom.isElement(subject) and not $utils.isInstanceOf(subject, $)
+      if subject and $dom.isElement(firstSubject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
         ## TODO: enable turning this off
         ## wrapSubjectsInJquery: false
         ## which will just pass subjects downstream
         ## without modifying them
-        subject = $(subject)
+        subject = $dom.wrap(subject)
 
       command.set({ subject: subject })
 
@@ -371,7 +357,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       if not command
 
         ## trigger queue is almost finished
-        Cypress.action("cy:command:queue:before:end")
+        Cypress.action("cy:before:command:queue:end")
 
         ## we need to wait after all commands have
         ## finished running if the application under
@@ -388,7 +374,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## store the current runnable
       runnable = state("runnable")
 
-      Cypress.action("cy:command:start", command)
+      Cypress.action("cy:internal:commandStart", command)
 
       runCommand(command)
       .then ->
@@ -407,7 +393,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## over at 0
         state("index", index += 1)
 
-        Cypress.action("cy:command:end", command)
+        Cypress.action("cy:internal:commandEnd", command)
 
         if fn = state("onPaused")
           new Promise (resolve) ->
@@ -483,10 +469,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
       if prevSubject and ("optional" not in [].concat(prevSubject))
+        stringifiedArg = $utils.stringifyActual(args[0])
         $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
           args: {
             cmd:  name
-            args: $utils.stringifyActual(args[0])
+            args: if _.isString(args[0]) then "\"#{stringifiedArg}\"" else stringifiedArg
           }
         })
 
@@ -579,8 +566,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## 1. callback with state("done") when async
     ## 2. throw the error for the promise chain
     try
-      ## collect all of the callbacks for 'fail'
-      rets = Cypress.action("cy:fail", err, state("runnable"))
+      ## collect all of the callbacks for 'test:fail'
+      rets = Cypress.action("cy:test:fail", err, state("runnable"))
     catch err2
       ## and if any of these throw synchronously immediately error
       finish(err2)
@@ -646,6 +633,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
+    ## timer sync methods
+    pauseTimers: timers.pauseTimers
+
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
 
@@ -689,7 +679,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## by trying to talk to the contentWindow document to see if
       ## its accessible.
       ## when we find ourselves in a cross origin situation, then our
-      ## proxy has not injected Cypress.action('window:before:load')
+      ## proxy has not injected Cypress.action('page:start')
       ## so Cypress.onBeforeAppWindowLoad() was never called
       $autIframe.on "load", ->
         ## if setting these props failed
@@ -706,7 +696,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## about:blank in a visit, we do need these
           contentWindowListeners(getContentWindow($autIframe))
 
-          Cypress.action("app:window:load", state("window"))
+          Cypress.action("app:page:ready", {
+            win: state("window")
+            url: state("url")
+          })
 
           ## we are now stable again which is purposefully
           ## the last event we call here, to give our event
@@ -749,7 +742,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state(backup)
 
       queue.reset()
-      timerQueues.reset()
+      timers.reset()
 
       cy.removeAllListeners()
 
@@ -905,31 +898,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## prevent loop comprehension
       return null
 
-    onBeforeAppWindowLoad: (contentWindow) ->
+    onBeforeAppWindowLoad: ({ win }) ->
       ## we set window / document props before the window load event
       ## so that we properly handle events coming from the application
       ## from the time that happens BEFORE the load event occurs
-      setWindowDocumentProps(contentWindow, state)
+      setWindowDocumentProps(win, state)
 
       urlNavigationEvent("before:load")
 
-      contentWindowListeners(contentWindow)
+      contentWindowListeners(win)
 
-      wrapNativeMethods(contentWindow)
+      wrapNativeMethods(win)
 
-      wrapTimers(contentWindow)
+      timers.wrap(win)
 
-    pauseTimers: (pause) ->
-      timersPaused = pause
-
-      if not pause
-        runTimerQueue("setTimeout")
-        runTimerQueue("setInterval")
-        runTimerQueue("requestAnimationFrame")
-
-    onSpecWindowUncaughtException: ->
+    onSpecWindowUncaughtException: (args...) ->
       ## create the special uncaught exception err
-      err = errors.createUncaughtException("spec", arguments)
+      err = errors.createUncaughtException("spec", args)
 
       if runnable = state("runnable")
         ## we're using an explicit done callback here
@@ -1075,9 +1060,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
           ## if we're cy or we've enqueued commands
           if isCy(ret) or (queue.length > currentLength)
-            ## the run should already be kicked off
-            ## by now and return this promise
-            return state("promise")
+            if fn.length
+              ## if user has passed done callback
+              ## don't return anything so we don't get an
+              ## 'overspecified' error from mocha
+              return
+            else
+              ## otherwise, return the 'queue promise'
+              ## so mocha awaits it
+              return state("promise")
 
           ## else just return ret
           return ret
@@ -1102,6 +1093,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   specWindow.cy = cy
 
   $Events.extend(cy)
+
+  $Events.throwOnRenamedEvent(cy, "cy")
 
   return cy
 

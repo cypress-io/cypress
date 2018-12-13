@@ -11,7 +11,7 @@ config      = require("#{root}lib/config")
 screenshots = require("#{root}lib/screenshots")
 fs          = require("#{root}lib/util/fs")
 settings    = require("#{root}lib/util/settings")
-plugins     = require("#{root}lib/plugins")
+background  = require("#{root}lib/background")
 screenshotAutomation = require("#{root}lib/automation/screenshot")
 
 image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC"
@@ -32,7 +32,7 @@ describe "lib/screenshots", ->
       viewport: { width: 40, height: 40 }
     }
 
-    @buffer = new Buffer("image 1 data buffer")
+    @buffer = Buffer.from("image 1 data buffer")
 
     @jimpImage = {
       id: 1
@@ -168,21 +168,21 @@ describe "lib/screenshots", ->
         @jimpImage2 = clone(@jimpImage, {
           id: 2
           bitmap: {
-            data: new Buffer("image 2 data buffer")
+            data: Buffer.from("image 2 data buffer")
           }
         })
 
         @jimpImage3 = clone(@jimpImage, {
           id: 3
           bitmap: {
-            data: new Buffer("image 3 data buffer")
+            data: Buffer.from("image 3 data buffer")
           }
         })
 
         @jimpImage4 = clone(@jimpImage, {
           id: 4
           bitmap: {
-            data: new Buffer("image 4 data buffer")
+            data: Buffer.from("image 4 data buffer")
           }
         })
 
@@ -469,48 +469,27 @@ describe "lib/screenshots", ->
 
   context ".getPath", ->
     it "concats spec name, screenshotsFolder, and name", ->
-      p = screenshots.getPath({
+      screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz"]
         name: "quux/lorem*"
       }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
-      )
-
-      p2 = screenshots.getPath({
-        specName: "examples$/user/list.js"
-        titles: ["bar", "baz"]
-        name: "quux*"
-        takenPaths: ["path/to/screenshots/examples$/user/list.js/quux.png"]
-      }, "png", "path/to/screenshots")
-
-      expect(p2).to.eq(
-        "path/to/screenshots/examples$/user/list.js/quux (1).png"
-      )
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
+        )
 
     it "concats spec name, screenshotsFolder, and titles", ->
-      p = screenshots.getPath({
+      screenshots.getPath({
         specName: "examples$/user/list.js"
         titles: ["bar", "baz^"]
         takenPaths: ["a"]
         testFailure: true
       }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
-      )
-
-      p2 = screenshots.getPath({
-        specName: "examples$/user/list.js"
-        titles: ["bar", "baz^"]
-        takenPaths: ["path/to/screenshots/examples$/user/list.js/bar -- baz.png"]
-      }, "png", "path/to/screenshots")
-
-      expect(p2).to.eq(
-        "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
-      )
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
+        )
 
   context ".afterScreenshot", ->
     beforeEach ->
@@ -539,11 +518,11 @@ describe "lib/screenshots", ->
         path: "/path/to/my-screenshot.png"
       }
 
-      sinon.stub(plugins, "has")
-      sinon.stub(plugins, "execute")
+      sinon.stub(background, "isRegistered")
+      sinon.stub(background, "execute")
 
-    it "resolves whitelisted details if no after:screenshot plugin registered", ->
-      plugins.has.returns(false)
+    it "resolves whitelisted details if no screenshot event registered", ->
+      background.isRegistered.returns(false)
 
       screenshots.afterScreenshot(@data, @details).then (result) =>
         expect(_.omit(result, "duration")).to.eql({
@@ -561,9 +540,9 @@ describe "lib/screenshots", ->
           })
         expect(result.duration).to.be.a("number")
 
-    it "executes after:screenshot plugin and merges in size, dimensions, and/or path", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves({
+    it "executes screenshot event and merges in size, dimensions, and/or path", ->
+      background.isRegistered.returns(true)
+      background.execute.resolves({
         size: 200
         dimensions: { width: 2000, height: 1320 }
         path: "/new/path/to/screenshot.png"
@@ -588,7 +567,7 @@ describe "lib/screenshots", ->
         expect(result.duration).to.be.a("number")
 
     it "ignores updates that are not an object", ->
-      plugins.execute.resolves("foo")
+      background.execute.resolves("foo")
 
       screenshots.afterScreenshot(@data, @details).then (result) =>
         expect(_.omit(result, "duration")).to.eql({

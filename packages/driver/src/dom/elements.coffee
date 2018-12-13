@@ -238,7 +238,10 @@ isSvg = (el) ->
 
 isElement = (obj) ->
   try
-    !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
+    if $jquery.isJquery(obj)
+      obj = obj[0]
+
+    Boolean(obj and _.isElement(obj))
   catch
     false
 
@@ -249,7 +252,12 @@ isType = ($el, type) ->
   el = [].concat($jquery.unwrap($el))[0]
   ## NOTE: use DOMElement.type instead of getAttribute('type') since
   ##       <input type="asdf"> will have type="text", and behaves like text type
-  (getNativeProp(el, 'type') or "").toLowerCase() is type
+  elType = (getNativeProp(el, 'type') or "").toLowerCase()
+
+  if _.isArray(type)
+    return _.includes(type, elType)
+
+  elType is type
 
 isScrollOrAuto = (prop) ->
   prop is "scroll" or prop is "auto"

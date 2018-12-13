@@ -229,7 +229,7 @@ describe "src/cy/commands/agents", ->
         expect(@myStub.displayName).to.eq("myStub")
 
       it "stores the lookup as an alias", ->
-        expect(cy.state("aliases").myStub).to.be.defined
+        expect(cy.state("aliases").myStub).to.exist
 
       it "stores the agent as the subject", ->
         expect(cy.state("aliases").myStub.subject).to.eq(@stub)
@@ -238,9 +238,9 @@ describe "src/cy/commands/agents", ->
         expect(@myStub).to.eq(@stub)
 
       it "retries until assertions pass", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @myStub("foo")
-        
+
         cy.get("@myStub").should("be.calledWith", "foo")
 
       describe "errors", ->
@@ -301,7 +301,7 @@ describe "src/cy/commands/agents", ->
       it "resets unique name counter on restore", ->
         expect(@agentLogs[0].get("name")).to.eq("stub-1")
 
-        Cypress.emit("test:before:run", {})
+        Cypress.emit("test:start", {})
 
         cy.stub()
 
@@ -349,7 +349,7 @@ describe "src/cy/commands/agents", ->
             expect(@lastLog.get("message")).to.include("expected foo to have been called with arguments {g: 1}, Array[5], Object{6}")
 
           it "does not include stack with calls when assertion fails", (done) ->
-            cy.on "fail", =>
+            cy.on "test:fail", =>
               expect(@lastLog.get("message")).to.include("""
                 #{"    "}foo("str", 5, true) => "return value"
                 #{"    "}foo(null, undefined, [1, 2, 3]) => "return value"

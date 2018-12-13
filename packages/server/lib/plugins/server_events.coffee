@@ -9,5 +9,5 @@ module.exports = {
       Promise.try ->
         plugins.execute("server:event", eventName, args...)
       .catch (err) ->
-        errors.throw("PLUGIN_SERVER_EVENT_ERROR", eventName, err?.stack or err?.message or err)
+        errors.throw("BACKGROUND_SERVER_EVENT_ERROR", eventName, err?.stack or err?.message or err)
 }

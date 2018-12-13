@@ -43,10 +43,10 @@ describe "src/cy/commands/files", ->
 
       retries = 0
 
-      cy.on "command:retry", ->
+      cy.on "internal:commandRetry", ->
         retries += 1
 
-      Cypress.backend
+      Cypress.backend.withArgs("read:file")
       .onFirstCall()
       .rejects(err)
       .onSecondCall()
@@ -58,10 +58,10 @@ describe "src/cy/commands/files", ->
     it "retries assertions until they pass", ->
       retries = 0
 
-      cy.on "command:retry", ->
+      cy.on "internal:commandRetry", ->
         retries += 1
 
-      Cypress.backend
+      Cypress.backend.withArgs("read:file")
       .onFirstCall()
       .resolves({
         contents: "foobarbaz"
@@ -124,7 +124,7 @@ describe "src/cy/commands/files", ->
         return null
 
       it "throws when file argument is absent", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -136,7 +136,7 @@ describe "src/cy/commands/files", ->
         cy.readFile()
 
       it "throws when file argument is not a string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -148,7 +148,7 @@ describe "src/cy/commands/files", ->
         cy.readFile(2)
 
       it "throws when file argument is an empty string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -167,7 +167,7 @@ describe "src/cy/commands/files", ->
 
         Cypress.backend.rejects(err)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -194,7 +194,7 @@ describe "src/cy/commands/files", ->
 
         Cypress.backend.rejects(err)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -212,7 +212,7 @@ describe "src/cy/commands/files", ->
       it "throws a specific error when file exists when it shouldn't", (done) ->
         Cypress.backend.resolves(okResponse)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -232,7 +232,7 @@ describe "src/cy/commands/files", ->
           contents: "foo"
         })
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -252,7 +252,10 @@ describe "src/cy/commands/files", ->
           "write:file",
           "foo.txt",
           "contents",
-          { encoding: "utf8" }
+          {
+            encoding: "utf8"
+            flag: "w"
+          }
         )
 
     it "can take encoding as third argument", ->
@@ -263,14 +266,31 @@ describe "src/cy/commands/files", ->
           "write:file",
           "foo.txt",
           "contents",
-          { encoding: "ascii" }
+          {
+            encoding: "ascii"
+            flag: "w"
+          }
         )
 
-    it "sets the contents as the subject", ->
+    it "can take encoding as part of options", ->
+      Cypress.backend.resolves(okResponse)
+
+      cy.writeFile("foo.txt", "contents", {encoding: "ascii"}).then ->
+        expect(Cypress.backend).to.be.calledWith(
+          "write:file",
+          "foo.txt",
+          "contents",
+          {
+            encoding: "ascii"
+            flag: "w"
+          }
+        )
+
+    it "yields null", ->
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.txt", "contents").then (subject) ->
-        expect(subject).to.equal("contents")
+        expect(subject).to.not.exist
 
     it "can write a string", ->
       Cypress.backend.resolves(okResponse)
@@ -287,12 +307,33 @@ describe "src/cy/commands/files", ->
 
       cy.writeFile("foo.json", {})
 
-    it "writes the file to the filesystem, overriding existing file", ->
+    it "writes the file to the filesystem, overwriting existing file", ->
       cy
         .writeFile("cypress/fixtures/foo.txt", "")
         .writeFile("cypress/fixtures/foo.txt", "bar")
         .readFile("cypress/fixtures/foo.txt").should("equal", "bar")
         .exec("rm cypress/fixtures/foo.txt")
+
+    describe ".flag", ->
+      it "sends a flag if specified", ->
+        Cypress.backend.resolves(okResponse)
+
+        cy.writeFile("foo.txt", "contents", { flag: "a+" }).then ->
+          expect(Cypress.backend).to.be.calledWith(
+            "write:file",
+            "foo.txt",
+            "contents",
+            {
+              encoding: "utf8",
+              flag: "a+"
+            })
+
+      it "appends content to existing file if specified", ->
+        cy
+          .writeFile("cypress/fixtures/foo.txt", "foo")
+          .writeFile("cypress/fixtures/foo.txt", "bar", { flag: "a+"})
+          .readFile("cypress/fixtures/foo.txt").should("equal", "foobar")
+          .exec("rm cypress/fixtures/foo.txt")
 
     describe ".log", ->
       beforeEach ->
@@ -338,7 +379,7 @@ describe "src/cy/commands/files", ->
         return null
 
       it "throws when file name argument is absent", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -350,7 +391,7 @@ describe "src/cy/commands/files", ->
         cy.writeFile()
 
       it "throws when file name argument is not a string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -362,7 +403,7 @@ describe "src/cy/commands/files", ->
         cy.writeFile(2)
 
       it "throws when contents argument is absent", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -374,7 +415,7 @@ describe "src/cy/commands/files", ->
         cy.writeFile("foo.txt")
 
       it "throws when contents argument is not a string, object, or array", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -393,7 +434,7 @@ describe "src/cy/commands/files", ->
 
         Cypress.backend.rejects(err)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)

@@ -527,7 +527,7 @@ describe "src/cy/commands/request", ->
 
         describe "when response is outside 200 range", ->
           it "sends correct indicator", (done) ->
-            cy.on "fail", (err) =>
+            cy.on "test:fail", (err) =>
               expect(@lastLog.invoke("renderProps").indicator).to.equal "bad"
               done()
 
@@ -551,7 +551,7 @@ describe "src/cy/commands/request", ->
         return null
 
       it "throws when no url is passed", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -566,7 +566,7 @@ describe "src/cy/commands/request", ->
         Cypress.config("baseUrl", "")
         cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("")
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -578,7 +578,7 @@ describe "src/cy/commands/request", ->
         cy.request("/foo/bar")
 
       it "throws when url isnt a string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -592,7 +592,7 @@ describe "src/cy/commands/request", ->
         })
 
       it "throws when auth is truthy but not an object", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -607,7 +607,7 @@ describe "src/cy/commands/request", ->
         })
 
       it "throws when headers is truthy but not an object", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -622,7 +622,7 @@ describe "src/cy/commands/request", ->
         })
 
       it "throws on invalid method", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -637,7 +637,7 @@ describe "src/cy/commands/request", ->
         })
 
       it "throws when gzip is not boolean", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -652,7 +652,7 @@ describe "src/cy/commands/request", ->
         })
 
       it "throws when form isnt a boolean", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -686,7 +686,7 @@ describe "src/cy/commands/request", ->
           ]
         })
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -756,7 +756,7 @@ describe "src/cy/commands/request", ->
           requestBody: "request body"
         })
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -814,7 +814,7 @@ describe "src/cy/commands/request", ->
         .withArgs("http:request")
         .rejects(error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -833,7 +833,7 @@ describe "src/cy/commands/request", ->
           .withArgs("http:request")
           .rejects(error)
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(err.message).to.include("""
             cy.request() failed trying to load:
 
@@ -872,7 +872,7 @@ describe "src/cy/commands/request", ->
           .withArgs("http:request")
           .resolves(Promise.delay(1000))
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(@logs.length).to.eq(1)

@@ -175,7 +175,15 @@ module.exports = {
       ## bypass the stream buffer and pipe this back
       if wantsInjection
         rewrite = (body) ->
-          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          rewriter.html(body.toString("utf8"), {
+            domainName: remoteState.domainName
+            url: remoteUrl
+            headers
+            statusCode
+          }, {
+            wantsInjection
+            wantsSecurityRemoved
+          })
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
@@ -363,7 +371,7 @@ module.exports = {
       if (a = remoteState.auth) and resMatchesOriginPolicy()
         ## and no existing Authentication headers
         if not req.headers["authorization"]
-          base64 = new Buffer(a.username + ":" + a.password).toString("base64")
+          base64 = Buffer.from(a.username + ":" + a.password).toString("base64")
           req.headers["authorization"] = "Basic #{base64}"
 
       rq = request.create(opts)
@@ -372,6 +380,16 @@ module.exports = {
 
       rq.on "response", (incomingRes) ->
         onResponse(rq, incomingRes)
+
+      ## if our original request has been
+      ## aborted, then ensure we forward
+      ## this onto the proxied request
+      ## https://github.com/cypress-io/cypress/issues/2612
+      ## this can happen on permanent connections
+      ## like SSE, but also on any regular ol'
+      ## http request
+      req.on "aborted", ->
+        rq.abort()
 
       ## proxy the request body, content-type, headers
       ## to the new rq

@@ -426,7 +426,7 @@ describe "src/cy/commands/actions/click", ->
       it "does not scroll when being forced", ->
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy
@@ -437,7 +437,7 @@ describe "src/cy/commands/actions/click", ->
       it "does not scroll when position sticky and display flex", ->
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.viewport(1000, 660)
@@ -544,10 +544,10 @@ describe "src/cy/commands/actions/click", ->
         retried = false
         clicked = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", ($el, type) ->
+        cy.on "internal:commandRetry", ($el, type) ->
           retried = true
 
         $btn.on "click", ->
@@ -575,10 +575,10 @@ describe "src/cy/commands/actions/click", ->
         scrolled = []
         retried = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $span.hide()
           retried = true
 
@@ -608,7 +608,7 @@ describe "src/cy/commands/actions/click", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -642,7 +642,7 @@ describe "src/cy/commands/actions/click", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -696,7 +696,7 @@ describe "src/cy/commands/actions/click", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").click().then ->
@@ -711,7 +711,7 @@ describe "src/cy/commands/actions/click", ->
 
         retried = false
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.show()
           retried = true
 
@@ -727,7 +727,7 @@ describe "src/cy/commands/actions/click", ->
         $btn.on "click", ->
           clicks += 1
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.prop("disabled", false)
           retried = true
 
@@ -738,7 +738,7 @@ describe "src/cy/commands/actions/click", ->
       it "waits until element stops animating", ->
         retries = 0
 
-        cy.on "command:retry", (obj) ->
+        cy.on "internal:commandRetry", (obj) ->
           retries += 1
 
         cy.stub(cy, "ensureElementIsNotAnimating")
@@ -1097,14 +1097,14 @@ describe "src/cy/commands/actions/click", ->
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.click()
 
       it "throws when attempting to click multiple elements", (done) ->
         num = cy.$$("button").length
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 15 elements. Pass { multiple: true } if you want to serially click each element."
           done()
 
@@ -1118,7 +1118,7 @@ describe "src/cy/commands/actions/click", ->
           $checkbox.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(clicked).to.eq 1
           expect(err.message).to.include "cy.click() failed because this element"
           done()
@@ -1126,7 +1126,7 @@ describe "src/cy/commands/actions/click", ->
         cy.get(":checkbox:first").click().click()
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -1140,7 +1140,7 @@ describe "src/cy/commands/actions/click", ->
 
         $btn = cy.$$("#three-buttons button").show().last().hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(4)
@@ -1153,7 +1153,7 @@ describe "src/cy/commands/actions/click", ->
       it "throws when subject is disabled", (done) ->
         $btn = cy.$$("#button").prop("disabled", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## get + click logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("cy.click() failed because this element is disabled:\n")
@@ -1165,7 +1165,7 @@ describe "src/cy/commands/actions/click", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
         span = $("<span>span on button</span>").css(position: "absolute", left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           ## get + click logs
@@ -1196,7 +1196,7 @@ describe "src/cy/commands/actions/click", ->
         $btn = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(cy.$$("body"))
         span = $("<span>span on button</span>").css(position: "fixed", left: 0, top: 0, padding: 20, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           ## get + click logs
@@ -1230,7 +1230,7 @@ describe "src/cy/commands/actions/click", ->
         .css({position: "fixed", left: 0, top: 0, padding: 20, display: "inline-block", backgroundColor: "yellow", zIndex: 10})
         .prependTo(cy.$$("body"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           ## get + click logs
@@ -1263,7 +1263,7 @@ describe "src/cy/commands/actions/click", ->
 
         cy.stub(Cypress.dom, "getElementAtPointFromViewport").returns(null)
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.click() failed because the center of this element is hidden from view:"
           expect(err.message).to.include "<li>quux</li>"
           done()
@@ -1271,7 +1271,7 @@ describe "src/cy/commands/actions/click", ->
         cy.get("#overflow-auto-container").contains("quux").click()
 
       it "throws when attempting to click a <select> element", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.eq "cy.click() cannot be called on a <select> element. Use cy.select() command instead to change the value."
           done()
@@ -1279,7 +1279,7 @@ describe "src/cy/commands/actions/click", ->
         cy.get("select:first").click()
 
       it "throws when provided invalid position", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()
@@ -1295,7 +1295,7 @@ describe "src/cy/commands/actions/click", ->
         cy.$$("button:first").on "click", ->
           clicks += 1
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
           done()
@@ -1303,7 +1303,7 @@ describe "src/cy/commands/actions/click", ->
         cy.get("button:first").click()
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -1317,7 +1317,7 @@ describe "src/cy/commands/actions/click", ->
         cy.get("button:first").click().should("have.class", "clicked")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
@@ -1759,7 +1759,7 @@ describe "src/cy/commands/actions/click", ->
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.dblclick()
 
@@ -1771,7 +1771,7 @@ describe "src/cy/commands/actions/click", ->
           $button.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(dblclicked).to.eq 1
           expect(err.message).to.include "cy.dblclick() failed because this element"
           done()
@@ -1781,14 +1781,14 @@ describe "src/cy/commands/actions/click", ->
       it "throws when any member of the subject isnt visible", (done) ->
         $btn = cy.$$("button").slice(0, 3).show().last().hide()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
           done()
 
         cy.get("button").invoke("slice", 0, 3).dblclick()
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -1800,7 +1800,7 @@ describe "src/cy/commands/actions/click", ->
       it "throws when any member of the subject isnt visible", (done) ->
         $btn = cy.$$("#three-buttons button").show().last().hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(4)

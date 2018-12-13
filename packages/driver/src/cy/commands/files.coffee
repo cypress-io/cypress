@@ -70,6 +70,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults options,
         encoding: encoding ? "utf8"
+        flag: options.flag ? "w"
         log: true
 
       consoleProps = {}
@@ -95,12 +96,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.isObject(contents)
         contents = JSON.stringify(contents, null, 2)
 
-      Cypress.backend("write:file", fileName, contents, _.pick(options, "encoding"))
+      Cypress.backend("write:file", fileName, contents, _.pick(options, ["encoding", "flag"]))
       .then ({ contents, filePath }) ->
         consoleProps["File Path"] = filePath
         consoleProps["Contents"] = contents
-
-        return contents
+        return null
       .catch Promise.TimeoutError, (err) ->
         $utils.throwErrByPath "files.timed_out", {
           onFail: options._log

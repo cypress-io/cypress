@@ -22,7 +22,7 @@ describe "src/dom/elements", ->
       cy.get("span").then ($span) ->
         expect(Cypress.dom.isAttached($span)).to.be.true
 
-        cy.on "window:load", ->
+        cy.on "page:ready", ->
           expect(Cypress.dom.isAttached($span)).to.be.false
           done()
 
@@ -43,7 +43,7 @@ describe "src/dom/elements", ->
         ## be null when the documents are stale
         expect(Cypress.dom.isAttached(doc)).to.be.true
 
-        cy.on "window:load", ->
+        cy.on "page:ready", ->
           expect(Cypress.dom.isAttached(doc)).to.be.false
           done()
 
@@ -75,3 +75,19 @@ describe "src/dom/elements", ->
       $el = $(null)
 
       expect(Cypress.dom.isDetached($el)).to.be.true
+
+  context ".isType", ->
+    beforeEach ->
+      cy.visit("/fixtures/dom.html")
+
+    it "when type is a string", ->
+      $el = $('input[type="number"]')
+
+      expect(Cypress.dom.isType($el, 'number')).to.be.true
+      expect(Cypress.dom.isType($el, 'text')).to.be.false
+
+    it "when type is an array", ->
+      $el = $('input[type="number"]')
+
+      expect(Cypress.dom.isType($el, ['number', 'text', 'email'])).to.be.true
+      expect(Cypress.dom.isType($el, ['text', 'email'])).to.be.false

@@ -22,7 +22,6 @@ trash      = require("../util/trash")
 random     = require("../util/random")
 system     = require("../util/system")
 duration   = require("../util/duration")
-progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
@@ -522,7 +521,6 @@ module.exports = {
 
       console.log("")
 
-      # bar = progress.create("Post Processing Video")
       console.log(
         gray("  - Started processing:  "),
         chalk.cyan("Compressing to #{videoCompression} CRF")
@@ -769,7 +767,8 @@ module.exports = {
       browserVersion: browser.version
       osName: sys.osName
       osVersion: sys.osVersion
-      cypressVersion
+      cypressVersion: pkg.version
+      runUrl: runUrl
       config
     }
 

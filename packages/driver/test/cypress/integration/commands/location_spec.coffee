@@ -34,7 +34,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, _.once =>
+        cy.on "internal:commandRetry", _.after 2, _.once =>
           win = cy.state("window")
           win.location.href = "/foo/bar/baz.html"
 
@@ -58,7 +58,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -72,7 +72,7 @@ describe "src/cy/commands/location", ->
         cy.url().should("eq", "not-this")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -149,7 +149,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           win = cy.state("window")
           win.location.hash = "users/1"
 
@@ -173,7 +173,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -187,7 +187,7 @@ describe "src/cy/commands/location", ->
         cy.hash().should("eq", "not-this")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -268,7 +268,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, _.once =>
+        cy.on "internal:commandRetry", _.after 2, _.once =>
           win = cy.state("window")
           win.location.pathname = "users/1"
 
@@ -292,7 +292,7 @@ describe "src/cy/commands/location", ->
         return null
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -311,7 +311,7 @@ describe "src/cy/commands/location", ->
         cy.on "log:added", (attrs, log) ->
           logs.push(log)
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 

@@ -35,6 +35,7 @@ const loadProjects = (shouldLoad = true) => {
   .then((projectsWithStatuses) => {
     projectsStore.updateProjectsWithStatuses(projectsWithStatuses)
     saveToLocalStorage()
+
     return null
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
@@ -46,6 +47,7 @@ const loadProjects = (shouldLoad = true) => {
 
 const addProject = (path) => {
   const project = projectsStore.addProject(path)
+
   project.setLoading(true)
 
   return ipc.addProject(path)
@@ -168,11 +170,14 @@ const openProject = (project) => {
   return ipc.openProject(project.path)
   .then((config = {}) => {
     updateConfig(config)
-    specsStore.setFilter(config.projectId, localData.get(`specsFilter-${config.projectId}`))
+    const projectIdAndPath = { id: config.projectId, path: project.path }
+
+    specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))
     project.setLoading(false)
     getSpecs(setProjectError)
 
     projectPollingId = setInterval(updateProjectStatus, 10000)
+
     return updateProjectStatus()
   })
   .catch(setProjectError)
@@ -183,7 +188,9 @@ const reopenProject = (project) => {
   project.clearWarning()
 
   return closeProject(project)
-  .then(() => openProject(project))
+  .then(() => {
+    return openProject(project)
+  })
 }
 
 const removeProject = (project) => {
@@ -201,7 +208,9 @@ const getRecordKeys = () => {
   return ipc.getRecordKeys()
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   // ignore error, settle for no keys
-  .catch(() => [])
+  .catch(() => {
+    return []
+  })
 }
 
 export default {

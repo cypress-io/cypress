@@ -31,7 +31,7 @@ user       = require("#{root}lib/user")
 config     = require("#{root}lib/config")
 cache      = require("#{root}lib/cache")
 errors     = require("#{root}lib/errors")
-plugins    = require("#{root}lib/plugins")
+background = require("#{root}lib/background")
 cypress    = require("#{root}lib/cypress")
 Project    = require("#{root}lib/project")
 Server     = require("#{root}lib/server")
@@ -97,14 +97,14 @@ describe "lib/cypress", ->
     @pristinePath = Fixtures.projectPath("pristine")
     @noScaffolding = Fixtures.projectPath("no-scaffolding")
     @recordPath = Fixtures.projectPath("record")
-    @pluginConfig = Fixtures.projectPath("plugin-config")
-    @pluginBrowser = Fixtures.projectPath("plugin-browser")
+    @backgroundConfig = Fixtures.projectPath("background-config")
+    @backgroundBrowser = Fixtures.projectPath("background-browser")
     @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
     ## spawning a separate process
     sinon.stub(videoCapture, "start").resolves({})
-    sinon.stub(plugins, "init").resolves(undefined)
+    sinon.stub(background, "init").resolves(undefined)
     sinon.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     sinon.stub(extension, "setHostAndPath").resolves()
     sinon.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
@@ -705,11 +705,11 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
-      it "can override values in plugins", ->
-        plugins.init.restore()
+      it "can override values in background", ->
+        background.init.restore()
 
         cypress.start([
-          "--run-project=#{@pluginConfig}", "--config=requestTimeout=1234,videoCompression=false"
+          "--run-project=#{@backgroundConfig}", "--config=requestTimeout=1234,videoCompression=false"
           "--env=foo=foo,bar=bar"
         ])
         .then =>
@@ -724,7 +724,7 @@ describe "lib/cypress", ->
 
           expect(cfg.resolved.videoCompression).to.deep.eq({
             value: 20
-            from: "plugin"
+            from: "background"
           })
           expect(cfg.resolved.requestTimeout).to.deep.eq({
             value: 1234
@@ -732,7 +732,7 @@ describe "lib/cypress", ->
           })
           expect(cfg.resolved.env.foo).to.deep.eq({
             value: "bar"
-            from: "plugin"
+            from: "background"
           })
           expect(cfg.resolved.env.bar).to.deep.eq({
             value: "bar"
@@ -741,9 +741,9 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
-    describe "plugins", ->
+    describe "background", ->
       beforeEach ->
-        plugins.init.restore()
+        background.init.restore()
         browsers.open.restore()
 
         ee = new EE()
@@ -772,10 +772,10 @@ describe "lib/cypress", ->
         sinon.stub(Windows, "create").returns(ee)
         sinon.stub(Windows, "automation")
 
-      context "before:browser:launch", ->
+      context "browser:launch", ->
         it "chrome", ->
           cypress.start([
-            "--run-project=#{@pluginBrowser}"
+            "--run-project=#{@backgroundBrowser}"
             "--browser=chrome"
           ])
           .then =>
@@ -798,11 +798,11 @@ describe "lib/cypress", ->
           videoCapture.start.returns({ write })
 
           cypress.start([
-            "--run-project=#{@pluginBrowser}"
+            "--run-project=#{@backgroundBrowser}"
             "--browser=electron"
           ])
           .then =>
-            expect(Windows.create).to.be.calledWithMatch(@pluginBrowser, {
+            expect(Windows.create).to.be.calledWithMatch(@backgroundBrowser, {
               browser: "electron"
               foo: "bar"
               onNewWindow: sinon.match.func

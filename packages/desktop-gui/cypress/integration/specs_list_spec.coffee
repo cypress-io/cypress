@@ -63,7 +63,7 @@ describe "Specs List", ->
           cy.contains("commands.js")
           cy.contains("defaults.js")
           cy.contains("index.js")
-        cy.contains("span", "plugins").siblings("ul").within ->
+        cy.contains("span", "background").siblings("ul").within ->
           cy.contains("index.js")
 
     it "lists folders and files alphabetically", ->
@@ -149,6 +149,10 @@ describe "Specs List", ->
 
         it "lists test specs", ->
           cy.get(".file a").contains("app_spec.coffee")
+
+        it "lists folder with '.'", ->
+          cy.get(".file").should("have.length", 7)
+          cy.get(".folder").should("have.length", 10)
 
       context "collapsing specs", ->
         it "sets folder collapsed when clicked", ->
@@ -238,14 +242,14 @@ describe "Specs List", ->
 
         it "saves the filter to local storage for the project", ->
           cy.window().then (win) =>
-            expect(win.localStorage["specsFilter-#{@config.projectId}"]).to.be.a("string")
-            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}"])).to.equal("new")
+            expect(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"]).to.be.a("string")
+            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"])).to.equal("new")
 
       describe "when there's a saved filter", ->
         beforeEach ->
           @ipc.getSpecs.yields(null, @specs)
           cy.window().then (win) ->
-            win.localStorage["specsFilter-#{@config.projectId}"] = JSON.stringify("app")
+            win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"] = JSON.stringify("app")
 
         it "applies it for the appropriate project", ->
           @openProject.resolve(@config)
@@ -255,7 +259,6 @@ describe "Specs List", ->
           @config.projectId = "different"
           @openProject.resolve(@config)
           cy.get(".filter").should("have.value", "")
-
 
     context "click on spec", ->
       beforeEach ->

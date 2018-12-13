@@ -48,7 +48,7 @@ export default class Iframes extends Component {
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
-    this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
+    this.props.eventManager.on('screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
 
     // TODO: need to take headless mode into account
@@ -76,6 +76,7 @@ export default class Iframes extends Component {
       highlightEl: this.autIframe.highlightEl,
       detachDom: () => {
         const Cypress = eventManager.getCypress()
+
         if (Cypress) {
           return this.autIframe.detachDom(Cypress)
         }
@@ -122,6 +123,7 @@ export default class Iframes extends Component {
 
       const $container = $(this.refs.container).empty()
       const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
+
       this.autIframe.showBlankContents()
 
       const $specIframe = $('<iframe />', {
@@ -140,6 +142,7 @@ export default class Iframes extends Component {
 
     if (this.props.state.snapshot.showingHighlights) {
       const snapshot = snapshotProps.snapshots[this.props.state.snapshot.stateIndex]
+
       this.autIframe.highlightEl(snapshot, snapshotProps)
     } else {
       this.autIframe.removeHighlights()
@@ -148,6 +151,7 @@ export default class Iframes extends Component {
 
   _changeSnapshotState = (snapshotProps, index) => {
     const snapshot = snapshotProps.snapshots[index]
+
     this.props.state.snapshot.stateIndex = index
     this.autIframe.restoreDom(snapshot)
 

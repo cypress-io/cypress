@@ -77,8 +77,8 @@ after:add | Runner | Anyone | when all runnables have been added to the UI
 runnables:ready | Runner | Anyone | when all runnables have been reduced to basic objects
 mocha:start | Mocha | Cypress | when mocha runner triggers its 'start' event
 suite:start | Mocha | Cypress | when mocha runner fires its 'suite' event
-test:before:run:async | Cypress | Anyone | before any code has run for a particular test
-test:before:run:async | Cypress | Cypress | before any hooks for a test have started
+test:start:async | Cypress | Anyone | before any code has run for a particular test
+test:start:async | Cypress | Cypress | before any hooks for a test have started
 hook:start | Mocha | Cypress | when mocha runner fires its 'hook' event
 test:start | Mocha | Cypress | when mocha runner fires its 'test' event
 suite:end | Mocha | Cypress | when mocha runner fires its 'suite end' event
@@ -88,8 +88,8 @@ mocha:pending | Mocha | Cypress | when mocha runner fires its 'pending' event
 mocha:fail | Mocha | Cypress | when mocha runner fires its 'fail' event
 test:end | Mocha | Cypress | when mocha runner fires its 'test end' event
 test:results:ready | Runner | Anyone | when we receive the 'test:end' event
-test:after:hooks | Cypress | Cypress | after all hooks have run for a test
-test:after:run | Cypress | Anyone | after any code has run for a test
+after:test:hooks | Cypress | Cypress | after all hooks have run for a test
+test:end | Cypress | Anyone | after any code has run for a test
 mocha:end | Mocha | Cypress | when mocha runner fires its 'end' event
 after:run | Runner | Anyone | after run has finished
 
@@ -119,7 +119,7 @@ paused | Cypress | Runner | when pausing is being requested
 
 Event | From | To | Description
 --- | --- | --- | ---
-url:changed | Cypress | Anyone | when aut app url is changed
+page:url:changed | Cypress | Anyone | when aut app url is changed
 page:loading | Cypress | Anyone | when aut app is currently loading a page
 viewport | Cypress | Anyone | when viewport has changed
 

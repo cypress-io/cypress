@@ -53,7 +53,7 @@
     padding: 10px;
     font-family: $font-mono;
 
-    .envFile:hover, .env:hover, .config:hover, .cli:hover, .plugin:hover, .default:hover {
+    .envFile:hover, .env:hover, .config:hover, .cli:hover, .background:hover, .default:hover {
       border-bottom: 1px dotted #777;
     }
 
@@ -83,7 +83,7 @@
     }
   }
 
-  .envFile, .env, .config, .cli, .plugin, .default {
+  .envFile, .env, .config, .cli, .background, .default {
     font-family: $font-mono;
 
     padding: 2px;
@@ -109,7 +109,7 @@
     color: #A21313;
   }
 
-  .plugin {
+  .background {
     background-color: #f0e7fc;
     color: #134aa2;
   }
