@@ -21,7 +21,7 @@ runnerEvents = [
   "reporter:restart:test:run"
   "runnables:ready"
   "run:start"
-  "test:run:start:async"
+  "test:start:async"
   "reporter:log:add"
   "reporter:log:state:changed"
   "paused"

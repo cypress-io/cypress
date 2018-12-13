@@ -43,7 +43,7 @@ describe "src/cy/commands/files", ->
 
       retries = 0
 
-      cy.on "command:retry", ->
+      cy.on "internal:commandRetry", ->
         retries += 1
 
       Cypress.backend.withArgs("read:file")
@@ -58,7 +58,7 @@ describe "src/cy/commands/files", ->
     it "retries assertions until they pass", ->
       retries = 0
 
-      cy.on "command:retry", ->
+      cy.on "internal:commandRetry", ->
         retries += 1
 
       Cypress.backend.withArgs("read:file")

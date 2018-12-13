@@ -236,7 +236,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
-  Cypress.on("test:run:start", reset)
+  Cypress.on("test:start", reset)
 
   Cypress.on "stability:changed", (bool, event) ->
     ## only send up page loading events when we're
@@ -284,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  Cypress.on "page:start", (contentWindow) ->
+  Cypress.on "page:start", ({ win }) ->
     ## TODO: just use a closure here
     current = state("current")
 
@@ -295,7 +295,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     return if not runnable
 
     options = _.last(current.get("args"))
-    options?.onStart?.call(runnable.ctx, contentWindow)
+    options?.onStart?.call(runnable.ctx, win)
 
   Commands.addAll({
     reload: (args...) ->
@@ -346,14 +346,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             options._log.snapshot("before", {next: "after"})
 
+          onPageReady = ({ win }) ->
+            resolve(win)
+
           cleanup = ->
             knownCommandCausedInstability = false
 
-            cy.removeListener("page:ready", resolve)
+            cy.removeListener("page:ready", onPageReady)
 
           knownCommandCausedInstability = true
 
-          cy.once("page:ready", resolve)
+          cy.once("page:ready", onPageReady)
 
           $utils.locReload(forceReload, state("window"))
 

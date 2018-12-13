@@ -23,7 +23,7 @@ describe "lib/background/preprocessor", ->
     @localPreprocessorPath = path.join(@todosPath, "prep.coffee")
 
     @plugin = sinon.stub().returns("/path/to/output.js")
-    background.register("file:preprocessor", @plugin)
+    background.register("browser:filePreprocessor", @plugin)
 
     preprocessor.close()
 
@@ -79,7 +79,7 @@ describe "lib/background/preprocessor", ->
       browserify = sinon.stub().returns(browserifyFn)
       mockery.registerMock("@cypress/browserify-preprocessor", browserify)
       preprocessor.getFile(@filePath, @config)
-      expect(background.register).to.be.calledWith("file:preprocessor", browserifyFn)
+      expect(background.register).to.be.calledWith("browser:filePreprocessor", browserifyFn)
       expect(browserify).to.be.called
 
   context "#removeFile", ->

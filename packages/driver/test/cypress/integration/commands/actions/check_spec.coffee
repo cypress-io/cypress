@@ -126,7 +126,7 @@ describe "src/cy/commands/actions/check", ->
       })
       .prependTo($("body"))
 
-      cy.on "command:retry", _.once (options) ->
+      cy.on "internal:commandRetry", _.once (options) ->
         expect(options.timeout).to.eq 1000
         expect(options.interval).to.eq 60
         done()
@@ -142,7 +142,7 @@ describe "src/cy/commands/actions/check", ->
       chk.on "click", ->
         clicks += 1
 
-      cy.on "command:retry", _.after 3, ->
+      cy.on "internal:commandRetry", _.after 3, ->
         chk.prop("disabled", false)
         retried = true
 
@@ -577,7 +577,7 @@ describe "src/cy/commands/actions/check", ->
       checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo($("body"))
       span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo($("body"))
 
-      cy.on "command:retry", (options) ->
+      cy.on "internal:commandRetry", (options) ->
         expect(options.timeout).to.eq 1000
         expect(options.interval).to.eq 60
         done()
@@ -593,7 +593,7 @@ describe "src/cy/commands/actions/check", ->
       chk.on "click", ->
         clicks += 1
 
-      cy.on "command:retry", _.after 3, ->
+      cy.on "internal:commandRetry", _.after 3, ->
         chk.prop("disabled", false)
         retried = true
 

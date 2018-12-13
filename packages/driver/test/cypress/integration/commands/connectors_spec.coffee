@@ -204,18 +204,18 @@ describe "src/cy/commands/connectors", ->
 
             return "foo"
 
-        it "unbinds command:enqueued in the case of an error thrown", (done) ->
+        it "unbinds internal:commandEnqueue in the case of an error thrown", (done) ->
           listeners = []
 
           cy.on "test:fail", (err) =>
-            listeners.push(cy.listeners("command:enqueued").length)
+            listeners.push(cy.listeners("internal:commandEnqueue").length)
 
             expect(@logs.length).to.eq(1)
             expect(listeners).to.deep.eq([1, 0])
             done()
 
           cy.then ->
-            listeners.push(cy.listeners("command:enqueued").length)
+            listeners.push(cy.listeners("internal:commandEnqueue").length)
 
             throw new Error("foo")
 
@@ -260,7 +260,7 @@ describe "src/cy/commands/connectors", ->
           return null
 
         it "eventually passes the assertion", ->
-          cy.on "command:retry", _.after 2, =>
+          cy.on "internal:commandRetry", _.after 2, =>
             @remoteWindow.$.fn.foo = -> "foo"
 
           cy.get("div:first").invoke("foo").should("eq", "foo").then ->
@@ -271,7 +271,7 @@ describe "src/cy/commands/connectors", ->
             expect(lastLog.get("ended")).to.be.true
 
         it "eventually fails the assertion", (done) ->
-          cy.on "command:retry", _.after 2, =>
+          cy.on "internal:commandRetry", _.after 2, =>
             @remoteWindow.$.fn.foo = -> "foo"
 
           cy.on "test:fail", (err) =>

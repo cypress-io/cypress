@@ -112,19 +112,27 @@ module.exports = {
 
   throwOnRenamedEvent: (eventEmitter, name) ->
     renamedEvents = {
+      "command:end": "internal:commandEnd"
+      "command:enqueued": "internal:commandEnqueued"
       "command:queue:before:end": "before:command:queue:end"
+      "command:retry": "internal:commandRetry"
+      "command:start": "internal:commandStart"
       "fail": "test:fail"
       "runnable:after:run:async": "after:runnable:run:async"
       "scrolled": "internal:scrolled"
-      "test:after:run": "test:run:end"
-      "test:before:run": "test:run:start"
-      "test:before:run:async": "test:run:start:async"
+      "test:after:run": "test:end"
+      "test:before:run": "test:start"
+      "test:before:run:async": "test:start:async"
       "url:changed": "page:url:changed"
+      "viewport:changed": "viewport:change"
       "window:alert": "page:alert"
-      "window:before:load": "page:start"
       "window:before:unload": "before:window:unload"
       "window:confirm": "page:confirm"
-      "window:unload": "page:end"
+    }
+
+    renamedEventsWithWinChangedtoDetails = {
+      "window:before:load": "page:start"
+      "window:load": "page:ready"
     }
 
     methods = "addListener on once prependListener prependOnceListener".split(" ")
@@ -136,6 +144,16 @@ module.exports = {
             args: {
               oldEvent: eventName
               newEvent: renamedEvents[eventName]
+              object: name
+              method: method
+            }
+            from: "cypress"
+          })
+        else if renamedEventsWithWinChangedtoDetails[eventName]
+          $utils.throwErrByPath("events.renamed_event_win_to_details", {
+            args: {
+              oldEvent: eventName
+              newEvent: renamedEventsWithWinChangedtoDetails[eventName]
               object: name
               method: method
             }

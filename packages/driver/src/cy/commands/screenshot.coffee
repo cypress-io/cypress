@@ -223,7 +223,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     sendAsync("before:screenshot", getOptions(true))
 
   after = ->
-    send("after:screenshot", getOptions(false))
+    send("screenshot", getOptions(false))
 
     if disableTimersAndAnimations
       cy.pauseTimers(false)

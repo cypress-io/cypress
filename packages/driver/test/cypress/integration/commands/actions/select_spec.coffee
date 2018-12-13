@@ -99,7 +99,7 @@ describe "src/cy/commands/actions/select", ->
       select  = $("<select />").attr("id", "select-covered-in-span").prependTo(cy.$$("body"))
       span = $("<span>span on select</span>").css(position: "absolute", left: select.offset().left, top: select.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-      cy.on "command:retry", (options) ->
+      cy.on "internal:commandRetry", (options) ->
         expect(options.timeout).to.eq 1000
         expect(options.interval).to.eq 60
         done()
@@ -116,7 +116,7 @@ describe "src/cy/commands/actions/select", ->
     it "retries until <option> can be selected", ->
       option = cy.$$("<option>foo</option>")
 
-      cy.on "command:retry", _.once =>
+      cy.on "internal:commandRetry", _.once =>
         cy.$$("select:first").append option
 
       cy.get("select:first").select("foo")
@@ -124,7 +124,7 @@ describe "src/cy/commands/actions/select", ->
     it "retries until <select> is no longer disabled", ->
       select = cy.$$("select[name=disabled]")
 
-      cy.on "command:retry", _.once =>
+      cy.on "internal:commandRetry", _.once =>
         select.prop("disabled", false)
 
       cy.get("select[name=disabled]").select("foo")
@@ -132,7 +132,7 @@ describe "src/cy/commands/actions/select", ->
     it "retries until <options> are no longer disabled", ->
       select = cy.$$("select[name=opt-disabled]")
 
-      cy.on "command:retry", _.once =>
+      cy.on "internal:commandRetry", _.once =>
         select.find("option").prop("disabled", false)
 
       cy.get("select[name=opt-disabled]").select("bar")

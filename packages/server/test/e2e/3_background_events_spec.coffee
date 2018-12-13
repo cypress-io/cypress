@@ -63,7 +63,7 @@ describe "e2e background events", ->
       expectedExitCode: 0
     })
 
-  it "calls after:screenshot for cy.screenshot() and failure screenshots", ->
+  it "calls screenshot for cy.screenshot() and failure screenshots", ->
     e2e.exec(@, {
       spec: "after_screenshot_spec.coffee"
       project: backgroundAfterScreenshot

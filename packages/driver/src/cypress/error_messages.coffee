@@ -224,6 +224,20 @@ module.exports = {
 
         {{object}}.{{method}}('{{newEvent}}', <handler>)
     """
+    renamed_event_win_to_details: """The '{{oldEvent}}' event has been renamed to '{{newEvent}}' and its argument signature has been changed.
+
+      Please change:
+
+        {{object}}.{{method}}('{{oldEvent}}', (win) => {
+          win // use of win argument
+        })
+
+      to:
+
+        {{object}}.{{method}}('{{newEvent}}', (details) => {
+          details.win // win is now a property on the details argument
+        })
+    """
 
   exec:
     failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:

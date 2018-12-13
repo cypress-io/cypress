@@ -238,7 +238,7 @@ describe "src/cy/commands/agents", ->
         expect(@myStub).to.eq(@stub)
 
       it "retries until assertions pass", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @myStub("foo")
 
         cy.get("@myStub").should("be.calledWith", "foo")
@@ -301,7 +301,7 @@ describe "src/cy/commands/agents", ->
       it "resets unique name counter on restore", ->
         expect(@agentLogs[0].get("name")).to.eq("stub-1")
 
-        Cypress.emit("test:run:start", {})
+        Cypress.emit("test:start", {})
 
         cy.stub()
 

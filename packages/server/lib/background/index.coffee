@@ -10,6 +10,18 @@ backgroundProcess = null
 registeredEvents = {}
 handlers = []
 
+renamedEvents = {
+  "file:preprocessor": "browser:filePreprocessor"
+  "before:browser:launch": "browser:launch"
+  "after:screenshot": "screenshot"
+}
+
+getRenamedEvents = (registrations) ->
+  _(registrations)
+  .map ({ event }) -> { oldEvent: event, newEvent: renamedEvents[event] }
+  .filter ({ newEvent }) -> !!newEvent
+  .value()
+
 register = (event, callback) ->
   debug("register event '#{event}'")
 
@@ -45,6 +57,13 @@ module.exports = {
       ipc.send("load", config)
 
       ipc.on "loaded", (newCfg, registrations) ->
+        renamed = getRenamedEvents(registrations)
+        if renamed.length
+          reject(errors.get("BACKGROUND_RENAMED_EVENTS", {
+            backgroundFile: config.backgroundFile
+            events: renamed
+          }))
+
         _.each registrations, (registration) ->
           debug("register background process event", registration.event, "with id", registration.eventId)
 

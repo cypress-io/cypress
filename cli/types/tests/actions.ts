@@ -11,20 +11,20 @@ Cypress.on('page:alert', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('page:start', (win) => {
-  win // $ExpectType Window
+Cypress.on('page:start', (details) => {
+  details // $ExpectType PageDetails
 })
 
-Cypress.on('page:ready', (win) => {
-  win // $ExpectType Window
+Cypress.on('page:ready', (details) => {
+  details // $ExpectType PageDetails
+})
+
+Cypress.on('page:end', (details) => {
+  details // $ExpectType PageDetails
 })
 
 Cypress.on('before:window:unload', (event) => {
   event // $ExpectType BeforeUnloadEvent
-})
-
-Cypress.on('page:end', (event) => {
-  event // $ExpectType Event
 })
 
 Cypress.on('page:url:changed', (url) => {
@@ -36,7 +36,7 @@ Cypress.on('test:fail', (error, mocha) => {
   mocha // $ExpectType IRunnable
 })
 
-Cypress.on('viewport:changed', (viewport) => {
+Cypress.on('viewport:change', (viewport) => {
   viewport // $ExpectType Viewport
 })
 
@@ -44,19 +44,19 @@ Cypress.on('internal:scrolled', ($el) => {
   $el // $ExpectType JQuery<HTMLElement>
 })
 
-Cypress.on('command:enqueued', (command) => {
+Cypress.on('internal:commandEnqueue', (command) => {
   command // $ExpectType EnqueuedCommand
 })
 
-Cypress.on('command:start', (command) => {
+Cypress.on('internal:commandStart', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('command:end', (command) => {
+Cypress.on('internal:commandEnd', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('command:retry', (command) => {
+Cypress.on('internal:commandRetry', (command) => {
   command // $ExpectType CommandQueue
 })
 
@@ -68,12 +68,12 @@ Cypress.on('log:changed', (log, interactive: boolean) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('test:run:start', (attributes , test) => {
+Cypress.on('test:start', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })
 
-Cypress.on('test:run:end', (attributes , test) => {
+Cypress.on('test:end', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })

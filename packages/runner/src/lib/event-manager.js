@@ -21,8 +21,8 @@ channel.on('connect', () => {
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha'.split(' ')
-const driverTestEvents = 'test:run:start:async test:run:end'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop page:url:changed page:loading visit:failed'.split(' ')
+const driverTestEvents = 'test:start:async test:end'.split(' ')
+const driverToLocalEvents = 'viewport:change config stop page:url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
 const localBus = new EventEmitter()
@@ -261,8 +261,8 @@ const eventManager = {
       if (!wait) beforeThenCb()
     })
 
-    Cypress.on('after:screenshot', (config) => {
-      localBus.emit('after:screenshot', config)
+    Cypress.on('screenshot', (config) => {
+      localBus.emit('screenshot', config)
     })
 
     _.each(driverToReporterEvents, (event) => {

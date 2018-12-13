@@ -27,11 +27,11 @@ describe "src/cy/commands/local_storage", ->
       cy.clearLocalStorage().then (remote) ->
         expect(remote).to.eq ls
 
-    describe "test:run:start", ->
+    describe "test:start", ->
       it "clears localStorage before each test run", ->
         clear = cy.spy Cypress.LocalStorage, "clear"
 
-        Cypress.emit("test:run:start", {})
+        Cypress.emit("test:start", {})
 
         expect(clear).to.be.calledWith []
 

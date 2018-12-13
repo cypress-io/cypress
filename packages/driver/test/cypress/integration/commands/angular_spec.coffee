@@ -46,7 +46,7 @@ describe "src/cy/commands/angular", ->
           retry = _.after 2, =>
             Cypress.stop()
 
-          cy.on "command:retry", retry
+          cy.on "internal:commandRetry", retry
 
           cy.on "test:fail", (err) ->
             done(err)
@@ -85,7 +85,7 @@ describe "src/cy/commands/angular", ->
 
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           cy.$$("body").append(missingLi)
 
         cy.ng("repeater", "li in lis").then ($li) ->
@@ -113,7 +113,7 @@ describe "src/cy/commands/angular", ->
           retry = _.after 2, =>
             Cypress.stop()
 
-          cy.on "command:retry", retry
+          cy.on "internal:commandRetry", retry
 
           cy.on "test:fail", (err) ->
             done(err)
@@ -181,7 +181,7 @@ describe "src/cy/commands/angular", ->
 
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$("body").append(missingInput)
 
         cy.ng("model", "missing-input").then ($input) ->
@@ -192,7 +192,7 @@ describe "src/cy/commands/angular", ->
 
         missingInput = $("<input />", "data-ng-model": "missing-input")
 
-        cy.on "command:retry", _.after 6, _.once =>
+        cy.on "internal:commandRetry", _.after 6, _.once =>
           cy.$$("body").append(missingInput)
 
         ## we want to make sure that the ng promises do not continue
@@ -226,7 +226,7 @@ describe "src/cy/commands/angular", ->
           retry = _.after 2, =>
             Cypress.stop()
 
-          cy.on "command:retry", retry
+          cy.on "internal:commandRetry", retry
 
           cy.on "test:fail", (err) ->
             done(err)

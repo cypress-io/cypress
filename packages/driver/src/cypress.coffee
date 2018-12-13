@@ -216,7 +216,7 @@ class $Cypress
       when "cypress:config"
         @emit("config", args[0])
 
-      when "runner:start"
+      when "runner:mocha:start"
         ## mocha runner has begun running the tests
         @emit("run:start")
 
@@ -225,7 +225,7 @@ class $Cypress
         if @config("isTextTerminal")
           @emit("mocha", "start", args[0])
 
-      when "runner:end"
+      when "runner:mocha:end"
         ## mocha runner has finished running the tests
 
         ## end may have been caused by an uncaught error
@@ -234,7 +234,7 @@ class $Cypress
         ## when this happens mocha aborts the entire run
         ## and does not do the usual cleanup so that means
         ## we have to fire the after:test:hooks and
-        ## test:run:end events ourselves
+        ## test:end events ourselves
         @emit("run:end")
 
         if @config("isTextTerminal")
@@ -245,46 +245,46 @@ class $Cypress
         ## is about to be invoked
         @cy.setRunnable(args...)
 
-      when "runner:suite:start"
+      when "runner:mocha:suite:start"
         ## mocha runner started processing a suite
         if @config("isTextTerminal")
           @emit("mocha", "suite", args...)
 
-      when "runner:suite:end"
+      when "runner:mocha:suite:end"
         ## mocha runner finished processing a suite
         if @config("isTextTerminal")
           @emit("mocha", "suite end", args...)
 
-      when "runner:hook:start"
+      when "runner:mocha:hook:start"
         ## mocha runner started processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "hook", args...)
 
-      when "runner:hook:end"
+      when "runner:mocha:hook:end"
         ## mocha runner finished processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "hook end", args...)
 
-      when "runner:test:start"
+      when "runner:mocha:test:start"
         ## mocha runner started processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "test", args...)
 
-      when "runner:test:end"
+      when "runner:mocha:test:end"
         if @config("isTextTerminal")
           @emit("mocha", "test end", args...)
 
-      when "runner:pass"
+      when "runner:mocha:pass"
         ## mocha runner calculated a pass
         if @config("isTextTerminal")
           @emit("mocha", "pass", args...)
 
-      when "runner:pending"
+      when "runner:mocha:pending"
         ## mocha runner calculated a pending test
         if @config("isTextTerminal")
           @emit("mocha", "pending", args...)
 
-      when "runner:fail"
+      when "runner:mocha:fail"
         ## mocha runner calculated a failure
         if @config("isTextTerminal")
           @emit("mocha", "fail", args...)
@@ -292,32 +292,32 @@ class $Cypress
       when "mocha:runnable:run"
         @runner.onRunnableRun(args...)
 
-      when "runner:test:run:start"
+      when "runner:test:start"
         ## get back to a clean slate
         @cy.reset()
 
-        @emitToBackend("test:run:start", serializeTest(args[1]))
-        @emit("test:run:start", args...)
+        @emitToBackend("test:start", serializeTest(args[1]))
+        @emit("test:start", args...)
 
-      when "runner:test:run:start:async"
+      when "runner:test:start:async"
         ## TODO: handle timeouts here? or in the runner?
-        @emitThen("test:run:start:async", args...)
+        @emitThen("test:start:async", args...)
 
       when "runner:after:runnable:run:async"
         @emitThen("after:runnable:run:async", args...)
 
-      when "runner:test:run:end"
+      when "runner:test:end"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 
         ## this event is how the reporter knows how to display
         ## stats and runnable properties such as errors
-        @emitToBackend("test:run:end", serializeTest(args[1]))
-        @emit("test:run:end", args...)
+        @emitToBackend("test:end", serializeTest(args[1]))
+        @emit("test:end", args...)
 
         if @config("isTextTerminal")
           ## needed for calculating wallClockDuration
           ## and the timings of after + afterEach hooks
-          @emit("mocha", "test:run:end", args[0])
+          @emit("mocha", "test:end", args[0])
 
       when "cy:before:all:screenshots"
         @emit("before:all:screenshots", args...)
@@ -325,8 +325,8 @@ class $Cypress
       when "cy:before:screenshot"
         @emit("before:screenshot", args...)
 
-      when "cy:after:screenshot"
-        @emit("after:screenshot", args...)
+      when "cy:screenshot"
+        @emit("screenshot", args...)
 
       when "cy:after:all:screenshots"
         @emit("after:all:screenshots", args...)
@@ -357,24 +357,24 @@ class $Cypress
       when "cy:visit:failed"
         @emit("visit:failed", args[0])
 
-      when "cy:viewport:changed"
-        @emit("viewport:changed", args...)
+      when "cy:viewport:change"
+        @emit("viewport:change", args...)
 
-      when "cy:command:start"
-        @emitToBackend("command:start", serializeCommand(args[0]))
-        @emit("command:start", args...)
+      when "cy:internal:commandStart"
+        @emitToBackend("internal:commandStart", serializeCommand(args[0]))
+        @emit("internal:commandStart", args...)
 
-      when "cy:command:end"
-        @emitToBackend("command:end", serializeCommand(args[0]))
-        @emit("command:end", args...)
+      when "cy:internal:commandEnd"
+        @emitToBackend("internal:commandEnd", serializeCommand(args[0]))
+        @emit("internal:commandEnd", args...)
 
-      when "cy:command:retry"
-        @emitToBackend("command:retry", serializeRetry(args[0]))
-        @emit("command:retry", args...)
+      when "cy:internal:commandRetry"
+        @emitToBackend("internal:commandRetry", serializeRetry(args[0]))
+        @emit("internal:commandRetry", args...)
 
-      when "cy:command:enqueued"
-        @emitToBackend("command:enqueued", serializeCommand(args[0]))
-        @emit("command:enqueued", args[0])
+      when "cy:internal:commandEnqueue"
+        @emitToBackend("internal:commandEnqueue", serializeCommand(args[0]))
+        @emit("internal:commandEnqueue", args[0])
 
       when "cy:before:command:queue:end"
         @emit("before:command:queue:end")

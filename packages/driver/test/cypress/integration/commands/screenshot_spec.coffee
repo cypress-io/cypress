@@ -103,7 +103,7 @@ describe "src/cy/commands/screenshot", ->
           disableTimersAndAnimations: true
           blackout: []
         })
-        expect(Cypress.action).to.be.calledWith("cy:after:screenshot", {
+        expect(Cypress.action).to.be.calledWith("cy:screenshot", {
           id: runnable.id
           isOpen: false
           appOnly: false
@@ -325,13 +325,13 @@ describe "src/cy/commands/screenshot", ->
             blackout: [".foo"]
           })
 
-      it "sends after:screenshot", ->
+      it "sends screenshot", ->
         runnable = cy.state("runnable")
         cy
         .screenshot("foo")
         .then ->
-          expect(Cypress.action.withArgs("cy:after:screenshot")).to.be.calledOnce
-          expect(Cypress.action.withArgs("cy:after:screenshot").args[0][1]).to.eql({
+          expect(Cypress.action.withArgs("cy:screenshot")).to.be.calledOnce
+          expect(Cypress.action.withArgs("cy:screenshot").args[0][1]).to.eql({
             id: runnable.id
             isOpen: false
             appOnly: true

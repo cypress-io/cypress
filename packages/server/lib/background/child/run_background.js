@@ -82,15 +82,15 @@ const execute = (ipc, event, ids, args = []) => {
   debug(`execute background event: ${event} (%o)`, ids)
 
   switch (event) {
-    case 'after:screenshot':
+    case 'screenshot':
       util.wrapChildPromise(ipc, invoke, ids, args)
 
       return
-    case 'file:preprocessor':
+    case 'browser:filePreprocessor':
       preprocessor.wrap(ipc, invoke, ids, args)
 
       return
-    case 'before:browser:launch':
+    case 'browser:launch':
       util.wrapChildPromise(ipc, invoke, ids, args)
 
       return

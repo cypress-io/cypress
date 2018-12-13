@@ -1,5 +1,5 @@
 module.exports = (on) => {
-  on('file:preprocessor', () => {
+  on('browser:filePreprocessor', () => {
     return '/does/not/exist.js'
   })
 }

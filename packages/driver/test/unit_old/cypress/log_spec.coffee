@@ -772,7 +772,7 @@ describe "$Cypress.Log API", ->
           beforeEach ->
             @allowErrors()
 
-            @cy.on "command:start", ->
+            @cy.on "internal:commandStart", ->
               cy.timeout(100)
 
             ## prevent accidentally adding a .then to @cy

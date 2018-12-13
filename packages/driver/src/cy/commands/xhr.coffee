@@ -228,7 +228,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("page:end", abort)
 
-  Cypress.on "test:run:start", ->
+  Cypress.on "test:start", ->
     ## reset the existing server
     reset()
 
@@ -245,10 +245,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     return null
 
-  Cypress.on "page:start", (contentWindow) ->
+  Cypress.on "page:start", ({ win }) ->
     if server
       ## dynamically bind the server to whatever is currently running
-      server.bindTo(contentWindow)
+      server.bindTo(win)
     else
       ## if we don't have a server such as the case when
       ## the last window was cross origin, try to bind

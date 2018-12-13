@@ -77,7 +77,7 @@ describe "src/cy/commands/misc", ->
           $("<li class='appended'>appended</li>").appendTo cy.$$("#list")
         , 50
 
-      cy.on "command:retry", _.after(2, _.once(append))
+      cy.on "internal:commandRetry", _.after(2, _.once(append))
 
       cy.get("#list").then ($ul) ->
 

@@ -24,7 +24,7 @@ describe "lib/background/child/run_background", ->
     @process = {
       on: sinon.stub()
     }
-  
+
     @ipc = {
       send: sinon.spy()
       on: sinon.stub()
@@ -116,20 +116,20 @@ describe "lib/background/child/run_background", ->
       @beforeBrowserLaunch = sinon.stub().resolves()
       @taskRequested = sinon.stub().resolves("foo")
       backgroundFn = (register) =>
-        register("file:preprocessor", @onFilePreprocessor)
-        register("before:browser:launch", @beforeBrowserLaunch)
+        register("browser:filePreprocessor", @onFilePreprocessor)
+        register("browser:launch", @beforeBrowserLaunch)
         register("task", @taskRequested)
       mockery.registerMock("background-file", backgroundFn)
       runBackground(@process, @ipc, "background-file")
       @ipc.on.withArgs("load").yield()
 
-    context "file:preprocessor", ->
+    context "browser:filePreprocessor", ->
       beforeEach ->
         @ids = { eventId: 0, invocationId: "00" }
 
       it "calls preprocessor handler", ->
         args = ["arg1", "arg2"]
-        @ipc.on.withArgs("execute").yield("file:preprocessor", @ids, args)
+        @ipc.on.withArgs("execute").yield("browser:filePreprocessor", @ids, args)
         expect(preprocessor.wrap).to.be.called
         expect(preprocessor.wrap.lastCall.args[0]).to.equal(@ipc)
         expect(preprocessor.wrap.lastCall.args[1]).to.be.a("function")
@@ -137,18 +137,18 @@ describe "lib/background/child/run_background", ->
         expect(preprocessor.wrap.lastCall.args[3]).to.equal(args)
 
       it "invokes registered function when invoked by preprocessor handler", ->
-        @ipc.on.withArgs("execute").yield("file:preprocessor", @ids, [])
+        @ipc.on.withArgs("execute").yield("browser:filePreprocessor", @ids, [])
         preprocessor.wrap.lastCall.args[1](3, ["one", "two"])
         expect(@onFilePreprocessor).to.be.calledWith("one", "two")
 
-    context "before:browser:launch", ->
+    context "browser:launch", ->
       beforeEach ->
         sinon.stub(util, "wrapChildPromise")
         @ids = { eventId: 1, invocationId: "00" }
 
       it "wraps child promise", ->
         args = ["arg1", "arg2"]
-        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, args)
+        @ipc.on.withArgs("execute").yield("browser:launch", @ids, args)
         expect(util.wrapChildPromise).to.be.called
         expect(util.wrapChildPromise.lastCall.args[0]).to.equal(@ipc)
         expect(util.wrapChildPromise.lastCall.args[1]).to.be.a("function")
@@ -156,7 +156,7 @@ describe "lib/background/child/run_background", ->
         expect(util.wrapChildPromise.lastCall.args[3]).to.equal(args)
 
       it "invokes registered function when invoked by preprocessor handler", ->
-        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, [])
+        @ipc.on.withArgs("execute").yield("browser:launch", @ids, [])
         args = ["one", "two"]
         util.wrapChildPromise.lastCall.args[1](4, args)
         expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")

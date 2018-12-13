@@ -8,7 +8,7 @@ Cypress.on "after:runnable:run:async", (obj, runnable) ->
   if obj.err
     runnableAfterRunAsync.push(obj.title)
 
-Cypress.on "test:run:end", (test) ->
+Cypress.on "test:end", (test) ->
   testAfterRun.push(test.title)
 
 describe "uncaught hook error should continue to fire all mocha events", ->
@@ -44,10 +44,10 @@ describe "uncaught hook error should continue to fire all mocha events", ->
         '"before each" hook'
       ])
 
-      ## our last test here has not yet pushed into test:run:end
+      ## our last test here has not yet pushed into test:end
       expect(testAfterRun).to.deep.eq([
         ## even though the test code itself did not
-        ## run, we should still receive a test:run:end
+        ## run, we should still receive a test:end
         ## event for this
         "does not run",
 
