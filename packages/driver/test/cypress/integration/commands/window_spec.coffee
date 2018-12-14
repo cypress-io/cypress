@@ -109,7 +109,7 @@ describe "src/cy/commands/window", ->
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
-      it.only "can be aliased", ->
+      it "can be aliased", ->
         cy
           .window().as("win")
           .get("body")
