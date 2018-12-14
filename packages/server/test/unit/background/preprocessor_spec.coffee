@@ -23,7 +23,7 @@ describe "lib/background/preprocessor", ->
     @localPreprocessorPath = path.join(@todosPath, "prep.coffee")
 
     sinon.stub(background, "execute").resolves("/path/to/output.js")
-    sinon.stub(background, "has").returns(true)
+    sinon.stub(background, "isRegistered").returns(true)
 
     preprocessor.close()
 
