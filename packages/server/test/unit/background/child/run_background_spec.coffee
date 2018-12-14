@@ -114,11 +114,10 @@ describe "lib/background/child/run_background", ->
       sinon.stub(preprocessor, "wrap")
       @onFilePreprocessor = sinon.stub().resolves()
       @beforeBrowserLaunch = sinon.stub().resolves()
-      @taskRequested = sinon.stub().resolves("foo")
       backgroundFn = (register) =>
         register("browser:filePreprocessor", @onFilePreprocessor)
         register("browser:launch", @beforeBrowserLaunch)
-        register("task", @taskRequested)
+        register("task", {})
       mockery.registerMock("background-file", backgroundFn)
       runBackground(@process, @ipc, "background-file")
       @ipc.on.withArgs("load").yield()
@@ -138,7 +137,7 @@ describe "lib/background/child/run_background", ->
 
       it "invokes registered function when invoked by preprocessor handler", ->
         @ipc.on.withArgs("execute").yield("browser:filePreprocessor", @ids, [])
-        preprocessor.wrap.lastCall.args[1](3, ["one", "two"])
+        preprocessor.wrap.lastCall.args[1](4, ["one", "two"])
         expect(@onFilePreprocessor).to.be.calledWith("one", "two")
 
     context "browser:launch", ->
@@ -158,7 +157,7 @@ describe "lib/background/child/run_background", ->
       it "invokes registered function when invoked by preprocessor handler", ->
         @ipc.on.withArgs("execute").yield("browser:launch", @ids, [])
         args = ["one", "two"]
-        util.wrapChildPromise.lastCall.args[1](4, args)
+        util.wrapChildPromise.lastCall.args[1](5, args)
         expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")
 
     context "task", ->
