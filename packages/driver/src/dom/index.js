@@ -1,23 +1,27 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const $jquery = require("./jquery");
-const $window = require("./window");
-const $document = require("./document");
-const $elements = require("./elements");
-const $visibility = require("./visibility");
-const $coordinates = require("./coordinates");
+const $jquery = require('./jquery')
+const $window = require('./window')
+const $document = require('./document')
+const $elements = require('./elements')
+const $visibility = require('./visibility')
+const $coordinates = require('./coordinates')
 
-const { isWindow, getWindowByElement } = $window;
-const { isDocument } = $document;
-const { wrap, unwrap, isJquery, query } = $jquery;
-const { isVisible, isHidden, getReasonIsHidden } = $visibility;
-const { isType, isFocusable, isElement, isScrollable, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent,  getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent,  getFirstScrollableParent } = $elements;
-const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates;
+const { isWindow, getWindowByElement } = $window
+const { isDocument } = $document
+const { wrap, unwrap, isJquery, query } = $jquery
+const { isVisible, isHidden, getReasonIsHidden } = $visibility
+const { isType, isFocusable, isElement, isScrollable, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent } = $elements
+const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
 
-const isDom = obj => isElement(obj) || isWindow(obj) || isDocument(obj);
+const isDom = (obj) => {
+  return isElement(obj) || isWindow(obj) || isDocument(obj)
+}
 
 //# we are exposing these publicly to be used
 //# by our own internal code, but also for
@@ -87,6 +91,6 @@ module.exports = {
 
   getElementCoordinatesByPosition,
 
-  getElementCoordinatesByPositionRelativeToXY
+  getElementCoordinatesByPositionRelativeToXY,
 
-};
+}
