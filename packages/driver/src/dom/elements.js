@@ -1,163 +1,178 @@
+/* eslint-disable
+    brace-style,
+    default-case,
+    no-case-declarations,
+    no-cond-assign,
+    no-const-assign,
+    no-dupe-keys,
+    no-undef,
+    no-unused-vars,
+    one-var,
+    prefer-rest-params,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const $ = require("jquery");
-const $jquery = require("./jquery");
-const $window = require("./window");
-const $document = require("./document");
-const $utils = require("../cypress/utils");
+const _ = require('lodash')
+const $ = require('jquery')
+const $jquery = require('./jquery')
+const $window = require('./window')
+const $document = require('./document')
+const $utils = require('../cypress/utils')
 
-const fixedOrStickyRe = /(fixed|sticky)/;
+const fixedOrStickyRe = /(fixed|sticky)/
 
-const focusable = "body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]";
+const focusable = 'body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]'
 
-const inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/;
-const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/;
+const inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
+const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
 //# rules for native methods and props
 //# if a setter or getter or function then add a native method
 //# if a traversal, don't
 
-const descriptor = (klass, prop) => Object.getOwnPropertyDescriptor(window[klass].prototype, prop);
+const descriptor = (klass, prop) => {
+  return Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
+}
 
-const _getValue = function() {
+const _getValue = function () {
   switch (false) {
     case !isInput(this):
-      return descriptor("HTMLInputElement", "value").get;
+      return descriptor('HTMLInputElement', 'value').get
     case !isTextarea(this):
-      return descriptor("HTMLTextAreaElement", "value").get;
+      return descriptor('HTMLTextAreaElement', 'value').get
     case !isSelect(this):
-      return descriptor("HTMLSelectElement", "value").get;
+      return descriptor('HTMLSelectElement', 'value').get
     case !isButton(this):
-      return descriptor("HTMLButtonElement", "value").get;
+      return descriptor('HTMLButtonElement', 'value').get
     default:
       //# is an option element
-      return descriptor("HTMLOptionElement", "value").get;
+      return descriptor('HTMLOptionElement', 'value').get
   }
-};
+}
 
-const _setValue = function() {
+const _setValue = function () {
   switch (false) {
     case !isInput(this):
-      return descriptor("HTMLInputElement", "value").set;
+      return descriptor('HTMLInputElement', 'value').set
     case !isTextarea(this):
-      return descriptor("HTMLTextAreaElement", "value").set;
+      return descriptor('HTMLTextAreaElement', 'value').set
     case !isSelect(this):
-      return descriptor("HTMLSelectElement", "value").set;
+      return descriptor('HTMLSelectElement', 'value').set
     case !isButton(this):
-      return descriptor("HTMLButtonElement", "value").set;
+      return descriptor('HTMLButtonElement', 'value').set
     default:
       //# is an options element
-      return descriptor("HTMLOptionElement", "value").set;
+      return descriptor('HTMLOptionElement', 'value').set
   }
-};
+}
 
-const _getSelectionStart = function() {
+const _getSelectionStart = function () {
   switch (false) {
     case !isInput(this):
-      return descriptor('HTMLInputElement', 'selectionStart').get;
+      return descriptor('HTMLInputElement', 'selectionStart').get
     case !isTextarea(this):
-      return descriptor('HTMLTextAreaElement', 'selectionStart').get;
+      return descriptor('HTMLTextAreaElement', 'selectionStart').get
   }
-};
+}
 
-const _getSelectionEnd = function() {
+const _getSelectionEnd = function () {
   switch (false) {
     case !isInput(this):
-      return descriptor('HTMLInputElement', 'selectionEnd').get;
+      return descriptor('HTMLInputElement', 'selectionEnd').get
     case !isTextarea(this):
-      return descriptor('HTMLTextAreaElement', 'selectionEnd').get;
+      return descriptor('HTMLTextAreaElement', 'selectionEnd').get
   }
-};
+}
 
-const _nativeFocus = function() {
+const _nativeFocus = function () {
   switch (false) {
     case !$window.isWindow(this):
-      return window.focus;
+      return window.focus
     case !isSvg(this):
-      return window.SVGElement.prototype.focus;
+      return window.SVGElement.prototype.focus
     default:
-      return window.HTMLElement.prototype.focus;
+      return window.HTMLElement.prototype.focus
   }
-};
+}
 
-const _nativeBlur = function() {
+const _nativeBlur = function () {
   switch (false) {
     case !$window.isWindow(this):
-      return window.blur;
+      return window.blur
     case !isSvg(this):
-      return window.SVGElement.prototype.blur;
+      return window.SVGElement.prototype.blur
     default:
-      return window.HTMLElement.prototype.blur;
+      return window.HTMLElement.prototype.blur
   }
-};
+}
 
-const _nativeSetSelectionRange = function() {
+const _nativeSetSelectionRange = function () {
   switch (false) {
     case !isInput(this):
-      return window.HTMLInputElement.prototype.setSelectionRange;
+      return window.HTMLInputElement.prototype.setSelectionRange
     default:
       //# is textarea
-      return window.HTMLTextAreaElement.prototype.setSelectionRange;
+      return window.HTMLTextAreaElement.prototype.setSelectionRange
   }
-};
+}
 
-const _nativeSelect = function() {
+const _nativeSelect = function () {
   switch (false) {
     case !isInput(this):
-      return window.HTMLInputElement.prototype.select;
+      return window.HTMLInputElement.prototype.select
     default:
       //# is textarea
-      return window.HTMLTextAreaElement.prototype.select;
+      return window.HTMLTextAreaElement.prototype.select
   }
-};
+}
 
-const _isContentEditable = function() {
+const _isContentEditable = function () {
   switch (false) {
     case !isSvg(this):
-      return false;
+      return false
     default:
-      return descriptor("HTMLElement", "isContentEditable").get;
+      return descriptor('HTMLElement', 'isContentEditable').get
   }
-};
+}
 
-const _setType = function() {
+const _setType = function () {
   switch (false) {
     case !isInput(this):
-      return descriptor("HTMLInputElement", "type").set;
+      return descriptor('HTMLInputElement', 'type').set
     case !isButton(this):
-      return descriptor("HTMLButtonElement", "type").set;
+      return descriptor('HTMLButtonElement', 'type').set
   }
-};
+}
 
-
-const _getType = function() {
+const _getType = function () {
   switch (false) {
     case !isInput(this):
-      return descriptor("HTMLInputElement", "type").get;
+      return descriptor('HTMLInputElement', 'type').get
     case !isButton(this):
-      return descriptor("HTMLButtonElement", "type").get;
+      return descriptor('HTMLButtonElement', 'type').get
   }
-};
+}
 
 const nativeGetters = {
   value: _getValue,
-  selectionStart: descriptor("HTMLInputElement", "selectionStart").get,
+  selectionStart: descriptor('HTMLInputElement', 'selectionStart').get,
   isContentEditable: _isContentEditable,
-  isCollapsed: descriptor("Selection", 'isCollapsed').get,
+  isCollapsed: descriptor('Selection', 'isCollapsed').get,
   selectionStart: _getSelectionStart,
   selectionEnd: _getSelectionEnd,
-  type: _getType
-};
+  type: _getType,
+}
 
 const nativeSetters = {
   value: _setValue,
-  type: _setType
-};
+  type: _setType,
+}
 
 const nativeMethods = {
   addEventListener: window.EventTarget.prototype.addEventListener,
@@ -172,152 +187,184 @@ const nativeMethods = {
   modify: window.Selection.prototype.modify,
   focus: _nativeFocus,
   blur: _nativeBlur,
-  select: _nativeSelect
-};
+  select: _nativeSelect,
+}
 
-const tryCallNativeMethod = function() {
+const tryCallNativeMethod = function () {
   try {
-    return callNativeMethod.apply(null, arguments);
+    return callNativeMethod(...arguments)
   } catch (err) {
-    return;
+    return
   }
-};
+}
 
-var callNativeMethod = function(obj, fn, ...args) {
-  let nativeFn;
+const callNativeMethod = function (obj, fn, ...args) {
+  let nativeFn
+
   if (!(nativeFn = nativeMethods[fn])) {
-    const fns = _.keys(nativeMethods).join(", ");
-    throw new Error(`attempted to use a native fn called: ${fn}. Available fns are: ${fns}`);
+    const fns = _.keys(nativeMethods).join(', ')
+
+    throw new Error(`attempted to use a native fn called: ${fn}. Available fns are: ${fns}`)
   }
 
-  let retFn = nativeFn.apply(obj, args);
+  let retFn = nativeFn.apply(obj, args)
 
   if (_.isFunction(retFn)) {
-    retFn = retFn.apply(obj, args);
+    retFn = retFn.apply(obj, args)
   }
 
-  return retFn;
-};
+  return retFn
+}
 
-const getNativeProp = function(obj, prop) {
-  let nativeProp;
+const getNativeProp = function (obj, prop) {
+  let nativeProp
+
   if (!(nativeProp = nativeGetters[prop])) {
-    const props = _.keys(nativeGetters).join(", ");
-    throw new Error(`attempted to use a native getter prop called: ${prop}. Available props are: ${props}`);
+    const props = _.keys(nativeGetters).join(', ')
+
+    throw new Error(`attempted to use a native getter prop called: ${prop}. Available props are: ${props}`)
   }
 
-  let retProp = nativeProp.call(obj, prop);
+  let retProp = nativeProp.call(obj, prop)
 
   if (_.isFunction(retProp)) {
     //# if we got back another function
     //# then invoke it again
-    retProp = retProp.call(obj, prop);
+    retProp = retProp.call(obj, prop)
   }
 
-  return retProp;
-};
+  return retProp
+}
 
-const setNativeProp = function(obj, prop, val) {
-  let nativeProp;
+const setNativeProp = function (obj, prop, val) {
+  let nativeProp
+
   if (!(nativeProp = nativeSetters[prop])) {
-    const fns = _.keys(nativeSetters).join(", ");
-    throw new Error(`attempted to use a native setter prop called: ${fn}. Available props are: ${fns}`);
+    const fns = _.keys(nativeSetters).join(', ')
+
+    throw new Error(`attempted to use a native setter prop called: ${fn}. Available props are: ${fns}`)
   }
 
-  let retProp = nativeProp.call(obj, val);
+  let retProp = nativeProp.call(obj, val)
 
   if (_.isFunction(retProp)) {
-    retProp = retProp.call(obj, val);
+    retProp = retProp.call(obj, val)
   }
 
-  return retProp;
-};
+  return retProp
+}
 
-const isNeedSingleValueChangeInputElement = function(el) {
+const isNeedSingleValueChangeInputElement = function (el) {
   if (!isInput(el)) {
-    return false;
+    return false
   }
 
-  return inputTypeNeedSingleValueChangeRe.test(el.type);
-};
+  return inputTypeNeedSingleValueChangeRe.test(el.type)
+}
 
-const canSetSelectionRangeElement = el => isTextarea(el) || (isInput(el) && canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')));
+const canSetSelectionRangeElement = (el) => {
+  return isTextarea(el) || (isInput(el) && canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
+}
 
-const getTagName = function(el) {
-  const tagName = el.tagName || "";
-  return tagName.toLowerCase();
-};
+const getTagName = function (el) {
+  const tagName = el.tagName || ''
 
-const isContentEditable = el =>
-  //# this property is the tell-all for contenteditable
-  //# should be true for elements:
-  //#   - with [contenteditable]
-  //#   - with document.designMode = 'on'
-  getNativeProp(el, "isContentEditable")
-;
+  return tagName.toLowerCase()
+}
 
-var isTextarea = el => getTagName(el) === 'textarea';
+const isContentEditable = (el) =>
+//# this property is the tell-all for contenteditable
+//# should be true for elements:
+//#   - with [contenteditable]
+//#   - with document.designMode = 'on'
+{
+  return getNativeProp(el, 'isContentEditable')
+}
 
-var isInput = el => getTagName(el) === 'input';
+const isTextarea = (el) => {
+  return getTagName(el) === 'textarea'
+}
 
-var isButton = el => getTagName(el) === 'button';
+const isInput = (el) => {
+  return getTagName(el) === 'input'
+}
 
-var isSelect = el => getTagName(el) === 'select';
+const isButton = (el) => {
+  return getTagName(el) === 'button'
+}
 
-const isOption = el => getTagName(el) === 'option';
+const isSelect = (el) => {
+  return getTagName(el) === 'select'
+}
 
-const isBody = el => getTagName(el) === 'body';
+const isOption = (el) => {
+  return getTagName(el) === 'option'
+}
 
-var isSvg = function(el) {
+const isBody = (el) => {
+  return getTagName(el) === 'body'
+}
+
+const isSvg = function (el) {
   try {
-    return "ownerSVGElement" in el;
+    return 'ownerSVGElement' in el
   } catch (error) {
-    return false;
+    return false
   }
-};
+}
 
-const isElement = function(obj) {
+const isElement = function (obj) {
   try {
     if ($jquery.isJquery(obj)) {
-      obj = obj[0];
+      obj = obj[0]
     }
 
-    return Boolean(obj && _.isElement(obj));
+    return Boolean(obj && _.isElement(obj))
   } catch (error) {
-    return false;
+    return false
   }
-};
+}
 
-const isFocusable = $el => $el.is(focusable);
+const isFocusable = ($el) => {
+  return $el.is(focusable)
+}
 
-const isType = function($el, type) {
-  const el = [].concat($jquery.unwrap($el))[0];
+const isType = function ($el, type) {
+  const el = [].concat($jquery.unwrap($el))[0]
   //# NOTE: use DOMElement.type instead of getAttribute('type') since
   //#       <input type="asdf"> will have type="text", and behaves like text type
-  const elType = (getNativeProp(el, 'type') || "").toLowerCase();
+  const elType = (getNativeProp(el, 'type') || '').toLowerCase()
 
   if (_.isArray(type)) {
-    return _.includes(type, elType);
+    return _.includes(type, elType)
   }
 
-  return elType === type;
-};
+  return elType === type
+}
 
-const isScrollOrAuto = prop => (prop === "scroll") || (prop === "auto");
+const isScrollOrAuto = (prop) => {
+  return (prop === 'scroll') || (prop === 'auto')
+}
 
-const isAncestor = ($el, $maybeAncestor) => $el.parents().index($maybeAncestor) >= 0;
+const isAncestor = ($el, $maybeAncestor) => {
+  return $el.parents().index($maybeAncestor) >= 0
+}
 
-const isSelector = ($el, selector) => $el.is(selector);
+const isSelector = ($el, selector) => {
+  return $el.is(selector)
+}
 
-const isDetached = $el => !isAttached($el);
+const isDetached = ($el) => {
+  return !isAttached($el)
+}
 
-var isAttached = function($el) {
+const isAttached = function ($el) {
   //# if we're being given window
   //# then these are automaticallyed attached
   if ($window.isWindow($el)) {
     //# there is a code path when forcing focus and
     //# blur on the window where this check is necessary.
-    return true;
+    return true
   }
 
   //# if this is a document we can simply check
@@ -325,165 +372,187 @@ var isAttached = function($el) {
   //# documents which are part of stale pages
   //# will have this property null'd out
   if ($document.isDocument($el)) {
-    return $document.hasActiveWindow($el);
+    return $document.hasActiveWindow($el)
   }
 
   //# normalize into an array
-  const els = [].concat($jquery.unwrap($el));
+  const els = [].concat($jquery.unwrap($el))
 
   //# we could be passed an empty array here
   //# which in that case it is not attached
   if (els.length === 0) {
-    return false;
+    return false
   }
 
   //# get the document from the first element
-  const doc = $document.getDocumentFromElement(els[0]);
+  const doc = $document.getDocumentFromElement(els[0])
 
   //# TODO: i guess its possible each element
   //# is technically bound to a differnet document
   //# but c'mon
-  const isIn = el => $.contains(doc, el);
+  const isIn = (el) => {
+    return $.contains(doc, el)
+  }
 
   //# make sure the document is currently
   //# active (it has a window) and
   //# make sure every single element
   //# is attached to this document
-  return $document.hasActiveWindow(doc) && _.every(els, isIn);
-};
+  return $document.hasActiveWindow(doc) && _.every(els, isIn)
+}
 
-const isSame = function($el1, $el2) {
-  const el1 = $jquery.unwrap($el1);
-  const el2 = $jquery.unwrap($el2);
+const isSame = function ($el1, $el2) {
+  const el1 = $jquery.unwrap($el1)
+  const el2 = $jquery.unwrap($el2)
 
-  return el1 && el2 && _.isEqual(el1, el2);
-};
+  return el1 && el2 && _.isEqual(el1, el2)
+}
 
-const isTextLike = function($el) {
-  const sel = selector => isSelector($el, selector);
-  const type = type => isType($el, type);
+const isTextLike = function ($el) {
+  const sel = (selector) => {
+    return isSelector($el, selector)
+  }
+  const type = (type) => {
+    return isType($el, type)
+  }
 
-  const isContentEditableElement = isContentEditable($el.get(0));
+  const isContentEditableElement = isContentEditable($el.get(0))
 
   return _.some([
     isContentEditableElement,
-    sel("textarea"),
-    sel(":text"),
-    type("text"),
-    type("password"),
-    type("email"),
-    type("number"),
-    type("date"),
-    type("week"),
-    type("month"),
-    type("time"),
-    type("datetime"),
-    type("datetime-local"),
-    type("search"),
-    type("url"),
-    type("tel")
-  ]);
-};
+    sel('textarea'),
+    sel(':text'),
+    type('text'),
+    type('password'),
+    type('email'),
+    type('number'),
+    type('date'),
+    type('week'),
+    type('month'),
+    type('time'),
+    type('datetime'),
+    type('datetime-local'),
+    type('search'),
+    type('url'),
+    type('tel'),
+  ])
+}
 
-const isScrollable = function($el) {
-  const checkDocumentElement = function(win, documentElement) {
+const isScrollable = function ($el) {
+  const checkDocumentElement = function (win, documentElement) {
     //# Check if body height is higher than window height
-    if (win.innerHeight < documentElement.scrollHeight) { return true; }
+    if (win.innerHeight < documentElement.scrollHeight) {
+      return true
+    }
 
     //# Check if body width is higher than window width
-    if (win.innerWidth < documentElement.scrollWidth) { return true; }
+    if (win.innerWidth < documentElement.scrollWidth) {
+      return true
+    }
 
     //# else return false since the window is not scrollable
-    return false;
-  };
+    return false
+  }
 
   //# if we're the window, we want to get the document's
   //# element and check its size against the actual window
   switch (false) {
     case !$window.isWindow($el):
-      var win = $el;
+      const win = $el
 
-      return checkDocumentElement(win, win.document.documentElement);
+      return checkDocumentElement(win, win.document.documentElement)
     default:
       //# if we're any other element, we do some css calculations
       //# to see that the overflow is correct and the scroll
       //# area is larger than the actual height or width
-      var el = $el[0];
+      const el = $el[0]
 
-      var {overflow, overflowY, overflowX} = window.getComputedStyle(el);
+      const { overflow, overflowY, overflowX } = window.getComputedStyle(el)
 
       //# y axis
       //# if our content height is less than the total scroll height
       if (el.clientHeight < el.scrollHeight) {
         //# and our element has scroll or auto overflow or overflowX
-        if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowY)) { return true; }
+        if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowY)) {
+          return true
+        }
       }
 
       //# x axis
       if (el.clientWidth < el.scrollWidth) {
-        if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowX)) { return true; }
+        if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowX)) {
+          return true
+        }
       }
 
-      return false;
+      return false
   }
-};
+}
 
-const isDescendent = function($el1, $el2) {
-  if (!$el2) { return false; }
+const isDescendent = function ($el1, $el2) {
+  if (!$el2) {
+    return false
+  }
 
-  return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length);
-};
+  return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length)
+}
 
 //# in order to simulate actual user behavior we need to do the following:
 //# 1. take our element and figure out its center coordinate
 //# 2. check to figure out the element listed at those coordinates
 //# 3. if this element is ourself or our descendants, click whatever was returned
 //# 4. else throw an error because something is covering us up
-var getFirstFocusableEl = function($el) {
-  if (isFocusable($el)) { return $el; }
+const getFirstFocusableEl = function ($el) {
+  if (isFocusable($el)) {
+    return $el
+  }
 
-  const parent = $el.parent();
+  const parent = $el.parent()
 
   //# if we have no parent then just return
   //# the window since that can receive focus
   if (!parent.length) {
-    const win = $window.getWindowByElement($el.get(0));
+    const win = $window.getWindowByElement($el.get(0))
 
-    return $(win);
+    return $(win)
   }
 
-  return getFirstFocusableEl($el.parent());
-};
+  return getFirstFocusableEl($el.parent())
+}
 
-var getFirstFixedOrStickyPositionParent = function($el) {
+const getFirstFixedOrStickyPositionParent = function ($el) {
   //# return null if we're at body/html
   //# cuz that means nothing has fixed position
-  if (!$el || $el.is("body,html")) { return null; }
+  if (!$el || $el.is('body,html')) {
+    return null
+  }
 
   //# if we have fixed position return ourselves
-  if (fixedOrStickyRe.test($el.css("position"))) {
-    return $el;
+  if (fixedOrStickyRe.test($el.css('position'))) {
+    return $el
   }
 
   //# else recursively continue to walk up the parent node chain
-  return getFirstFixedOrStickyPositionParent($el.parent());
-};
+  return getFirstFixedOrStickyPositionParent($el.parent())
+}
 
-var getFirstStickyPositionParent = function($el) {
+const getFirstStickyPositionParent = function ($el) {
   //# return null if we're at body/html
   //# cuz that means nothing has sticky position
-  if (!$el || $el.is("body,html")) { return null; }
+  if (!$el || $el.is('body,html')) {
+    return null
+  }
 
   //# if we have sticky position return ourselves
-  if ($el.css("position") === "sticky") {
-    return $el;
+  if ($el.css('position') === 'sticky') {
+    return $el
   }
 
   //# else recursively continue to walk up the parent node chain
-  return getFirstStickyPositionParent($el.parent());
-};
+  return getFirstStickyPositionParent($el.parent())
+}
 
-const getFirstScrollableParent = function($el) {
+const getFirstScrollableParent = function ($el) {
   // doc = $el.prop("ownerDocument")
 
   // win = getWindowFromDoc(doc)
@@ -491,12 +560,12 @@ const getFirstScrollableParent = function($el) {
   //# this may be null or not even defined in IE
   // scrollingElement = doc.scrollingElement
 
-  var search = function($el) {
-    const $parent = $el.parent();
+  const search = function ($el) {
+    const $parent = $el.parent()
 
     //# we have no more parents
     if (!($parent || $parent.length)) {
-      return null;
+      return null
     }
 
     //# we match the scrollingElement
@@ -507,117 +576,133 @@ const getFirstScrollableParent = function($el) {
     //# we'll simply return null here and let our
     //# caller deal with situations where they're
     //# needing to scroll the window or scrollableElement
-    if ($parent.is("html,body") || $document.isDocument($parent)) {
-      return null;
+    if ($parent.is('html,body') || $document.isDocument($parent)) {
+      return null
     }
 
     if (isScrollable($parent)) {
-      return $parent;
+      return $parent
     }
 
-    return search($parent);
-  };
+    return search($parent)
+  }
 
-  return search($el);
-};
+  return search($el)
+}
 
-const getElements = function($el) {
-  if (!($el != null ? $el.length : undefined)) { return; }
+const getElements = function ($el) {
+  if (!($el != null ? $el.length : undefined)) {
+    return
+  }
 
   //# unroll the jquery object
-  const els = $jquery.unwrap($el);
+  const els = $jquery.unwrap($el)
 
   if (els.length === 1) {
-    return els[0];
-  } else {
-    return els;
+    return els[0]
   }
-};
 
-const getContainsSelector = function(text, filter = "") {
-  const escapedText = $utils.escapeQuotes(text);
-  return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`;
-};
+  return els
 
-const priorityElement = "input[type='submit'], button, a, label";
+}
 
-var getFirstDeepestElement = function(elements, index = 0) {
+const getContainsSelector = function (text, filter = '') {
+  const escapedText = $utils.escapeQuotes(text)
+
+  return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+}
+
+const priorityElement = 'input[type=\'submit\'], button, a, label'
+
+const getFirstDeepestElement = function (elements, index = 0) {
   //# iterate through all of the elements in pairs
   //# and check if the next item in the array is a
   //# descedent of the current. if it is continue
   //# to recurse. if not, or there is no next item
   //# then return the current
-  const $current = elements.slice(index,     index + 1);
-  const $next    = elements.slice(index + 1, index + 2);
+  const $current = elements.slice(index, index + 1)
+  const $next = elements.slice(index + 1, index + 2)
 
-  if (!$next) { return $current; }
+  if (!$next) {
+    return $current
+  }
 
   //# does current contain next?
   if ($.contains($current.get(0), $next.get(0))) {
-    return getFirstDeepestElement(elements, index + 1);
-  } else {
-    //# return the current if it already is a priority element
-    if ($current.is(priorityElement)) { return $current; }
-
-    //# else once we find the first deepest element then return its priority
-    //# parent if it has one and it exists in the elements chain
-    const $priorities = elements.filter($current.parents(priorityElement));
-    if ($priorities.length) { return $priorities.last(); } else { return $current; }
+    return getFirstDeepestElement(elements, index + 1)
   }
-};
+
+  //# return the current if it already is a priority element
+  if ($current.is(priorityElement)) {
+    return $current
+  }
+
+  //# else once we find the first deepest element then return its priority
+  //# parent if it has one and it exists in the elements chain
+  const $priorities = elements.filter($current.parents(priorityElement))
+
+  if ($priorities.length) {
+    return $priorities.last()
+  }
+
+  return $current
+
+}
 
 //# short form css-inlines the element
 //# long form returns the outerHTML
-const stringify = function(el, form = "long") {
+const stringify = function (el, form = 'long') {
   //# if we are formatting the window object
-  let id, klass;
+  let id, klass
+
   if ($window.isWindow(el)) {
-    return "<window>";
+    return '<window>'
   }
 
   //# if we are formatting the document object
   if ($document.isDocument(el)) {
-    return "<document>";
+    return '<document>'
   }
 
   //# convert this to jquery if its not already one
-  const $el = $jquery.wrap(el);
+  const $el = $jquery.wrap(el)
 
   switch (form) {
-    case "long":
-      var text     = _.chain($el.text()).clean().truncate({length: 10 }).value();
-      var children = $el.children().length;
-      var str      = $el.clone().empty().prop("outerHTML");
+    case 'long':
+      const text = _.chain($el.text()).clean().truncate({ length: 10 }).value()
+      const children = $el.children().length
+      const str = $el.clone().empty().prop('outerHTML')
+
       switch (false) {
-        case !children: return str.replace("></", ">...</");
-        case !text:     return str.replace("></", `>${text}</`);
+        case !children: return str.replace('></', '>...</')
+        case !text: return str.replace('></', `>${text}</`)
         default:
-          return str;
+          return str
       }
-    case "short":
-      str = $el.prop("tagName").toLowerCase();
-      if (id = $el.prop("id")) {
-        str += `#${id}`;
+    case 'short':
+      str = $el.prop('tagName').toLowerCase()
+      if (id = $el.prop('id')) {
+        str += `#${id}`
       }
 
       //# using attr here instead of class because
       //# svg's return an SVGAnimatedString object
       //# instead of a normal string when calling
       //# the property 'class'
-      if (klass = $el.attr("class")) {
-        str += `.${klass.split(/\s+/).join(".")}`;
+      if (klass = $el.attr('class')) {
+        str += `.${klass.split(/\s+/).join('.')}`
       }
 
       //# if we have more than one element,
       //# format it so that the user can see there's more
       if ($el.length > 1) {
-        return `[ <${str}>, ${$el.length - 1} more... ]`;
-      } else {
-        return `<${str}>`;
+        return `[ <${str}>, ${$el.length - 1} more... ]`
       }
-  }
-};
 
+      return `<${str}>`
+
+  }
+}
 
 module.exports = {
   isElement,
@@ -678,5 +763,5 @@ module.exports = {
 
   getFirstStickyPositionParent,
 
-  getFirstScrollableParent
-};
+  getFirstScrollableParent,
+}
