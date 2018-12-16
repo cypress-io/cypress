@@ -1,30 +1,41 @@
-$jquery = require("./jquery")
-$document = require("./document")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $jquery = require("./jquery");
+const $document = require("./document");
 
-getWindowByElement = (el) ->
-  if isWindow(el)
-    return el
+const getWindowByElement = function(el) {
+  if (isWindow(el)) {
+    return el;
+  }
 
-  doc = $document.getDocumentFromElement(el)
-  getWindowByDocument(doc)
+  const doc = $document.getDocumentFromElement(el);
+  return getWindowByDocument(doc);
+};
 
-getWindowByDocument = (doc) ->
-  ## parentWindow for IE
-  doc.defaultView or doc.parentWindow
+var getWindowByDocument = doc =>
+  //# parentWindow for IE
+  doc.defaultView || doc.parentWindow
+;
 
-isWindow = (obj) ->
-  try
-    if $jquery.isJquery(obj)
-      obj = obj[0]
+var isWindow = function(obj) {
+  try {
+    if ($jquery.isJquery(obj)) {
+      obj = obj[0];
+    }
 
-    Boolean(obj and obj.window is obj)
-  catch
-    false
+    return Boolean(obj && (obj.window === obj));
+  } catch (error) {
+    return false;
+  }
+};
 
 module.exports = {
-  getWindowByElement
+  getWindowByElement,
 
-  getWindowByDocument
+  getWindowByDocument,
 
   isWindow
-}
+};
