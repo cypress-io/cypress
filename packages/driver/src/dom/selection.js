@@ -1,7 +1,3 @@
-/* eslint-disable
-    no-cond-assign,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -12,7 +8,6 @@
  */
 const $document = require('./document')
 const $elements = require('./elements')
-const $ = require('jquery')
 
 const INTERNAL_STATE = '__Cypress_state__'
 
@@ -24,8 +19,6 @@ const _getSelectionBoundsFromTextarea = (el) => {
 }
 
 const _getSelectionBoundsFromInput = function (el) {
-  let internalState
-
   if ($elements.canSetSelectionRangeElement(el)) {
     return {
       start: $elements.getNativeProp(el, 'selectionStart'),
@@ -33,7 +26,9 @@ const _getSelectionBoundsFromInput = function (el) {
     }
   }
 
-  if (internalState = el[INTERNAL_STATE]) {
+  const internalState = el[INTERNAL_STATE]
+
+  if (internalState) {
     return {
       start: internalState.start,
       end: internalState.end,
@@ -158,16 +153,6 @@ const _getSelectionByEl = function (el) {
   const doc = $document.getDocumentFromElement(el)
 
   return doc.getSelection()
-}
-
-const _getSelectionRangeByEl = function (el) {
-  const sel = _getSelectionByEl(el)
-
-  if (sel.rangeCount > 0) {
-    return sel.getRangeAt(0)
-  }
-
-  throw new Error('No selection in document')
 }
 
 const deleteSelectionContents = function (el) {
@@ -295,6 +280,16 @@ const moveCursorLeft = function (el) {
     return $elements.callNativeMethod(selection, 'modify', 'move', 'backward', 'character')
   }
 }
+
+// const _getSelectionRangeByEl = function (el) {
+//   const sel = _getSelectionByEl(el)
+
+//   if (sel.rangeCount > 0) {
+//     return sel.getRangeAt(0)
+//   }
+
+//   throw new Error('No selection in document')
+// }
 
 //# Keeping around native implementation
 //# for same reasons as listed below
