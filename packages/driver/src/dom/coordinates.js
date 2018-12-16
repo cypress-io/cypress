@@ -1,28 +1,35 @@
+/* eslint-disable
+    default-case,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const $window = require("./window");
+const $window = require('./window')
 
-const getElementAtPointFromViewport = (doc, x, y) => doc.elementFromPoint(x, y);
+const getElementAtPointFromViewport = (doc, x, y) => {
+  return doc.elementFromPoint(x, y)
+}
 
-const getElementPositioning = function($el) {
-  const el = $el[0];
+const getElementPositioning = function ($el) {
+  const el = $el[0]
 
-  const win = $window.getWindowByElement(el);
+  const win = $window.getWindowByElement(el)
 
   //# properties except for width / height
   //# are relative to the top left of the viewport
-  const rect = el.getBoundingClientRect();
+  const rect = el.getBoundingClientRect()
 
-  const center = getCenterCoordinates(rect);
+  const center = getCenterCoordinates(rect)
 
   //# add the center coordinates
   //# because its useful to any caller
-  const topCenter = center.y;
-  const leftCenter = center.x;
+  const topCenter = center.y
+  const leftCenter = center.x
 
   return {
     scrollTop: el.scrollTop,
@@ -35,29 +42,33 @@ const getElementPositioning = function($el) {
       right: rect.right,
       bottom: rect.bottom,
       topCenter,
-      leftCenter
+      leftCenter,
     },
     fromWindow: {
       top: rect.top + win.pageYOffset,
       left: rect.left + win.pageXOffset,
       topCenter: topCenter + win.pageYOffset,
-      leftCenter: leftCenter + win.pageXOffset
+      leftCenter: leftCenter + win.pageXOffset,
+    },
+  }
+}
+
+const getCoordsByPosition = function (left, top, xPosition = 'center', yPosition = 'center') {
+  left = (() => {
+    switch (xPosition) {
+      case 'left': return Math.ceil(left)
+      case 'center': return Math.floor(left)
+      case 'right': return Math.floor(left) - 1
     }
-  };
-};
+  })()
 
-const getCoordsByPosition = function(left, top, xPosition = "center", yPosition = "center") {
-  left = (() => { switch (xPosition) {
-    case "left":   return Math.ceil(left);
-    case "center": return Math.floor(left);
-    case "right":  return Math.floor(left) - 1;
-  } })();
-
-  top = (() => { switch (yPosition) {
-    case "top":    return Math.ceil(top);
-    case "center": return Math.floor(top);
-    case "bottom": return Math.floor(top) - 1;
-  } })();
+  top = (() => {
+    switch (yPosition) {
+      case 'top': return Math.ceil(top)
+      case 'center': return Math.floor(top)
+      case 'bottom': return Math.floor(top) - 1
+    }
+  })()
 
   //# returning x/y here because this is
   //# about the target position we want
@@ -65,104 +76,113 @@ const getCoordsByPosition = function(left, top, xPosition = "center", yPosition 
   //# the desired xPosition and yPosition is
   return {
     x: left,
-    y: top
-  };
-};
+    y: top,
+  }
+}
 
-const getTopLeftCoordinates = function(rect) {
-  const x = rect.left;
-  const y = rect.top;
-  return getCoordsByPosition(x, y, "left", "top");
-};
+const getTopLeftCoordinates = function (rect) {
+  const x = rect.left
+  const y = rect.top
 
-const getTopCoordinates = function(rect) {
-  const x = rect.left + (rect.width / 2);
-  const y = rect.top;
-  return getCoordsByPosition(x, y, "center", "top");
-};
+  return getCoordsByPosition(x, y, 'left', 'top')
+}
 
-const getTopRightCoordinates = function(rect) {
-  const x = rect.left + rect.width;
-  const y = rect.top;
-  return getCoordsByPosition(x, y, "right", "top");
-};
+const getTopCoordinates = function (rect) {
+  const x = rect.left + (rect.width / 2)
+  const y = rect.top
 
-const getLeftCoordinates = function(rect) {
-  const x = rect.left;
-  const y = rect.top + (rect.height / 2);
-  return getCoordsByPosition(x, y, "left", "center");
-};
+  return getCoordsByPosition(x, y, 'center', 'top')
+}
 
-var getCenterCoordinates = function(rect) {
-  const x = rect.left + (rect.width / 2);
-  const y = rect.top + (rect.height / 2);
-  return getCoordsByPosition(x, y, "center", "center");
-};
+const getTopRightCoordinates = function (rect) {
+  const x = rect.left + rect.width
+  const y = rect.top
 
-const getRightCoordinates = function(rect) {
-  const x = rect.left + rect.width;
-  const y = rect.top + (rect.height / 2);
-  return getCoordsByPosition(x, y, "right", "center");
-};
+  return getCoordsByPosition(x, y, 'right', 'top')
+}
 
-const getBottomLeftCoordinates = function(rect) {
-  const x = rect.left;
-  const y = rect.top + rect.height;
-  return getCoordsByPosition(x, y, "left", "bottom");
-};
+const getLeftCoordinates = function (rect) {
+  const x = rect.left
+  const y = rect.top + (rect.height / 2)
 
-const getBottomCoordinates = function(rect) {
-  const x = rect.left + (rect.width / 2);
-  const y = rect.top + rect.height;
-  return getCoordsByPosition(x, y, "center", "bottom");
-};
+  return getCoordsByPosition(x, y, 'left', 'center')
+}
 
-const getBottomRightCoordinates = function(rect) {
-  const x = rect.left + rect.width;
-  const y = rect.top + rect.height;
-  return getCoordsByPosition(x, y, "right", "bottom");
-};
+const getCenterCoordinates = function (rect) {
+  const x = rect.left + (rect.width / 2)
+  const y = rect.top + (rect.height / 2)
 
-const getElementCoordinatesByPositionRelativeToXY = function($el, x, y) {
-  const positionProps = getElementPositioning($el);
+  return getCoordsByPosition(x, y, 'center', 'center')
+}
 
-  const { fromViewport, fromWindow } = positionProps;
+const getRightCoordinates = function (rect) {
+  const x = rect.left + rect.width
+  const y = rect.top + (rect.height / 2)
 
-  fromViewport.left += x;
-  fromViewport.top += y;
+  return getCoordsByPosition(x, y, 'right', 'center')
+}
 
-  fromWindow.left += x;
-  fromWindow.top += y;
+const getBottomLeftCoordinates = function (rect) {
+  const x = rect.left
+  const y = rect.top + rect.height
 
-  const viewportTargetCoords = getTopLeftCoordinates(fromViewport);
-  const windowTargetCoords = getTopLeftCoordinates(fromWindow);
+  return getCoordsByPosition(x, y, 'left', 'bottom')
+}
 
-  fromViewport.x = viewportTargetCoords.x;
-  fromViewport.y = viewportTargetCoords.y;
+const getBottomCoordinates = function (rect) {
+  const x = rect.left + (rect.width / 2)
+  const y = rect.top + rect.height
 
-  fromWindow.x = windowTargetCoords.x;
-  fromWindow.y = windowTargetCoords.y;
+  return getCoordsByPosition(x, y, 'center', 'bottom')
+}
 
-  return positionProps;
-};
+const getBottomRightCoordinates = function (rect) {
+  const x = rect.left + rect.width
+  const y = rect.top + rect.height
 
-const getElementCoordinatesByPosition = function($el, position = "center") {
-  const positionProps = getElementPositioning($el);
+  return getCoordsByPosition(x, y, 'right', 'bottom')
+}
+
+const getElementCoordinatesByPositionRelativeToXY = function ($el, x, y) {
+  const positionProps = getElementPositioning($el)
+
+  const { fromViewport, fromWindow } = positionProps
+
+  fromViewport.left += x
+  fromViewport.top += y
+
+  fromWindow.left += x
+  fromWindow.top += y
+
+  const viewportTargetCoords = getTopLeftCoordinates(fromViewport)
+  const windowTargetCoords = getTopLeftCoordinates(fromWindow)
+
+  fromViewport.x = viewportTargetCoords.x
+  fromViewport.y = viewportTargetCoords.y
+
+  fromWindow.x = windowTargetCoords.x
+  fromWindow.y = windowTargetCoords.y
+
+  return positionProps
+}
+
+const getElementCoordinatesByPosition = function ($el, position = 'center') {
+  const positionProps = getElementPositioning($el)
 
   //# get the coordinates from the window
   //# but also from the viewport so
   //# whoever is calling us can use it
   //# however they'd like
-  const { width, height, fromViewport, fromWindow } = positionProps;
+  const { width, height, fromViewport, fromWindow } = positionProps
 
   //# dynamically call the function by transforming the name
   //# bottom -> getBottomCoordinates
   //# topLeft -> getTopLeftCoordinates
-  const capitalizedPosition = position.charAt(0).toUpperCase() + position.slice(1);
+  const capitalizedPosition = position.charAt(0).toUpperCase() + position.slice(1)
 
-  const fnName = `get${capitalizedPosition}Coordinates`;
+  const fnName = `get${capitalizedPosition}Coordinates`
 
-  const fn = calculations[fnName];
+  const fn = calculations[fnName]
 
   //# get the desired x/y coords based on
   //# what position we're trying to target
@@ -170,8 +190,8 @@ const getElementCoordinatesByPosition = function($el, position = "center") {
     width,
     height,
     top: fromViewport.top,
-    left: fromViewport.left
-  });
+    left: fromViewport.left,
+  })
 
   //# get the desired x/y coords based on
   //# what position we're trying to target
@@ -179,14 +199,14 @@ const getElementCoordinatesByPosition = function($el, position = "center") {
     width,
     height,
     top: fromWindow.top,
-    left: fromWindow.left
-  });
+    left: fromWindow.left,
+  })
 
-  fromViewport.x = viewportTargetCoords.x;
-  fromViewport.y = viewportTargetCoords.y;
+  fromViewport.x = viewportTargetCoords.x
+  fromViewport.y = viewportTargetCoords.y
 
-  fromWindow.x = windowTargetCoords.x;
-  fromWindow.y = windowTargetCoords.y;
+  fromWindow.x = windowTargetCoords.x
+  fromWindow.y = windowTargetCoords.y
 
   //# return an object with both sets
   //# of normalized coordinates for both
@@ -195,11 +215,11 @@ const getElementCoordinatesByPosition = function($el, position = "center") {
     width,
     height,
     fromViewport,
-    fromWindow
-  };
-};
+    fromWindow,
+  }
+}
 
-var calculations = {
+const calculations = {
   getTopCoordinates,
   getTopLeftCoordinates,
   getTopRightCoordinates,
@@ -208,8 +228,8 @@ var calculations = {
   getRightCoordinates,
   getBottomLeftCoordinates,
   getBottomCoordinates,
-  getBottomRightCoordinates
-};
+  getBottomRightCoordinates,
+}
 
 module.exports = {
   getCoordsByPosition,
@@ -220,5 +240,5 @@ module.exports = {
 
   getElementCoordinatesByPosition,
 
-  getElementCoordinatesByPositionRelativeToXY
-};
+  getElementCoordinatesByPositionRelativeToXY,
+}
