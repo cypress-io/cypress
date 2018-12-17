@@ -864,6 +864,14 @@ describe "src/cy/commands/xhr", ->
         .then ->
           expect(cy.state("server").getRoutes()[0].delay).to.eq(100)
 
+    it "passes event argument to xhr.onreadystatechange", (done) ->
+      cy.window().then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.onreadystatechange = (e) ->
+          expect(e).to.be.an.instanceof(win.Event)
+          done()
+        xhr.open("GET", "http://localhost:3500/")
+
     describe "errors", ->
       context "argument signature", ->
         _.each ["asdf", 123, null, undefined], (arg) ->
