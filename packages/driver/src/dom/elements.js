@@ -685,8 +685,8 @@ const stringify = (el, form = 'long') => {
 
   const short = () => {
     const id = $el.prop('id')
-    const str = $el.prop('tagName').toLowerCase()
     const klass = $el.attr('class')
+    let str = $el.prop('tagName').toLowerCase()
 
     if (id) {
       str += `#${id}`

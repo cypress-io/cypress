@@ -45,10 +45,10 @@ module.exports = {
 
   switchCase: (value, casesObj, defaultKey = "default") ->
     if _.has(casesObj, value)
-      return casesObj[value]
+      return _.result(casesObj, value)
 
     if _.has(casesObj, defaultKey)
-      return casesObj[defaultKey]
+      return _.result(casesObj, defaultKey)
 
     keys = _.keys(casesObj)
     throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
