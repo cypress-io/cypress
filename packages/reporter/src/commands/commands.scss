@@ -129,17 +129,27 @@
 
       &.show-count {
         border-radius: 10px 0 0 10px;
-        margin-right: 0;
       }
     }
 
+    .num-duplicates,
     .command-alias-count {
-      background-color: lighten(#ffdf9c, 8%);
       border-radius: 0 10px 10px 0;
-      display: inline;
+      color: #777;
       font-size: 90%;
+      font-style: normal;
       line-height: 1;
       margin-left: 0;
+      padding: 0px 6px 1px 4px;
+    }
+
+    .num-duplicates,
+    .command-alias-count {
+      background-color: lighten(#ffdf9c, 8%);
+    }
+
+    .command-alias-count {
+      display: inline;
       padding: 2px 6px 2px 4px;
     }
   }
@@ -457,6 +467,10 @@
 
     .num-duplicates {
       display: none;
+    }
+
+    .command-alias {
+      border-radius: 10px !important;
     }
   }
 

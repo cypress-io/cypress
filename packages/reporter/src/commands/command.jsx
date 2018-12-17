@@ -24,8 +24,12 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const AliasReference = observer(({ model, aliasObj, shouldShowCount }) => {
-  if (shouldShowCount) {
+const shouldShowCount = (aliasesWithDuplicates, aliasName) => {
+  return _.includes(aliasesWithDuplicates, aliasName)
+}
+
+const AliasReference = observer(({ model, aliasObj, aliasesWithDuplicates }) => {
+  if (shouldShowCount(aliasesWithDuplicates, aliasObj.name)) {
     return (
       <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`}>
         <span>
@@ -47,20 +51,20 @@ const AliasesReferences = observer(({ model, aliasesWithDuplicates }) => (
   <span>
     {_.map([].concat(model.referencesAlias), (aliasObj) => (
       <span className="command-alias-container" key={aliasObj.name + aliasObj.cardinal}>
-        <AliasReference aliasObj={aliasObj} model={model} shouldShowCount={_.includes(aliasesWithDuplicates, aliasObj.name)} />
+        <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
       </span>
     ))}
   </span>
 ))
 
-const Aliases = observer(({ model }) => {
+const Aliases = observer(({ model, aliasesWithDuplicates }) => {
   if (!model.alias) return null
 
   return (
     <span>
       {_.map([].concat(model.alias), (alias) => (
         <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`}>
-          <span className={`command-alias ${model.aliasType}`}>{alias}</span>
+          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': model.aliasType === 'route' ? shouldShowCount(aliasesWithDuplicates, alias) : false })}>{alias}</span>
         </Tooltip>
       ))}
     </span>
@@ -139,7 +143,7 @@ class Command extends Component {
               {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
-              <Aliases model={model} />
+              <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates}/>
               <Tooltip placement='top' title={visibleMessage(model)}>
                 <i className='command-invisible fa fa-eye-slash'></i>
               </Tooltip>
