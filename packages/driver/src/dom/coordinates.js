@@ -158,7 +158,9 @@ const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   return positionProps
 }
 
-const getElementCoordinatesByPosition = ($el, position = 'center') => {
+const getElementCoordinatesByPosition = ($el, position) => {
+  position = position || 'center'
+
   const positionProps = getElementPositioning($el)
 
   // get the coordinates from the window
