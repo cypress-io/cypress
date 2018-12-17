@@ -2,40 +2,40 @@
 const Promise = require('bluebird')
 
 module.exports = (on) => {
-  on('before:run', (runDetails) => {
-    console.log('before:run', runDetails.specs[0].relative)
+  on('run:start', (runDetails) => {
+    console.log('run:start', runDetails.specs[0].relative)
 
     return Promise.delay(10).then(() => {
-      return console.log('before:run is awaited')
+      return console.log('run:start is awaited')
     })
   })
 
-  on('before:spec', (spec) => {
-    console.log('before:spec:', spec.relative)
+  on('spec:start', (spec) => {
+    console.log('spec:start:', spec.relative)
 
     return Promise.delay(10).then(() => {
-      return console.log('before:spec is awaited')
+      return console.log('spec:start is awaited')
     })
   })
 
-  on('after:spec', (spec, results) => {
+  on('spec:end', (spec, results) => {
     const { stats } = results
     const { tests, passes, failures } = stats
 
-    console.log('after:spec:', spec.relative, { tests, passes, failures })
+    console.log('spec:end:', spec.relative, { tests, passes, failures })
 
     return Promise.delay(10).then(() => {
-      return console.log('after:spec is awaited')
+      return console.log('spec:end is awaited')
     })
   })
 
-  on('after:run', (results) => {
+  on('run:end', (results) => {
     const { totalTests, totalPassed, totalFailed } = results
 
-    console.log('after:run:', { totalTests, totalPassed, totalFailed })
+    console.log('run:end:', { totalTests, totalPassed, totalFailed })
 
     return Promise.delay(10).then(() => {
-      return console.log('after:run is awaited')
+      return console.log('run:end is awaited')
     })
   })
 }

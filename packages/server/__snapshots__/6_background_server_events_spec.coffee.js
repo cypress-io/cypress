@@ -10,14 +10,14 @@ exports['e2e background server events sends server events 1'] = `
   │ Specs:      2 found (background_server_events_1_spec.coffee, background_server_events_2_spec.… │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-before:run cypress/integration/background_server_events_1_spec.coffee
-before:run is awaited
+run:start cypress/integration/background_server_events_1_spec.coffee
+run:start is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: background_server_events_1_spec.coffee...                                       (1 of 2) 
-before:spec: cypress/integration/background_server_events_1_spec.coffee
-before:spec is awaited
+spec:start: cypress/integration/background_server_events_1_spec.coffee
+spec:start is awaited
 
 
   ✓ passes
@@ -45,14 +45,14 @@ before:spec is awaited
   - Started processing:   Compressing to 32 CRF
   - Finished processing:  /foo/bar/.projects/background-server-events/cypress/videos/abc123.mp4 (X seconds)
 
-after:spec: cypress/integration/background_server_events_1_spec.coffee { tests: 1, passes: 1, failures: 0 }
-after:spec is awaited
+spec:end: cypress/integration/background_server_events_1_spec.coffee { tests: 1, passes: 1, failures: 0 }
+spec:end is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: background_server_events_2_spec.coffee...                                       (2 of 2) 
-before:spec: cypress/integration/background_server_events_2_spec.coffee
-before:spec is awaited
+spec:start: cypress/integration/background_server_events_2_spec.coffee
+spec:start is awaited
 
 
   1) fails
@@ -113,10 +113,10 @@ before:spec is awaited
   - Started processing:   Compressing to 32 CRF
   - Finished processing:  /foo/bar/.projects/background-server-events/cypress/videos/abc123.mp4 (X seconds)
 
-after:spec: cypress/integration/background_server_events_2_spec.coffee { tests: 1, passes: 0, failures: 1 }
-after:spec is awaited
-after:run: { totalTests: 2, totalPassed: 1, totalFailed: 1 }
-after:run is awaited
+spec:end: cypress/integration/background_server_events_2_spec.coffee { tests: 1, passes: 0, failures: 1 }
+spec:end is awaited
+run:end: { totalTests: 2, totalPassed: 1, totalFailed: 1 }
+run:end is awaited
 
 ====================================================================================================
 
@@ -150,11 +150,11 @@ exports['e2e background server events fails run if server event handler throws 1
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: background_server_events_throw.coffee...                                        (1 of 1) 
-An error was thrown in your background file while executing the handler for the 'before:spec' event.
+An error was thrown in your background file while executing the handler for the 'spec:start' event.
 
 The error we received was:
 
-Error: before:spec throws error
+Error: spec:start throws error
     at stack trace line
     at stack trace line
     at stack trace line

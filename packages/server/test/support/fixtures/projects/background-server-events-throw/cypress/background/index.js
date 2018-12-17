@@ -1,5 +1,5 @@
 module.exports = (on) => {
-  on('before:spec', () => {
-    throw new Error('before:spec throws error')
+  on('spec:start', () => {
+    throw new Error('spec:start throws error')
   })
 }

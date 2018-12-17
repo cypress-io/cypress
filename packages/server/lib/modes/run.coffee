@@ -742,7 +742,7 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
-    ## TODO: add ciGroupId to these options and pass to 'before:run' event
+    ## TODO: add ciGroupId to these options and pass to 'run:start' event
     { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
 
     isHeadless = browser.name is "electron" and not headed
@@ -788,7 +788,7 @@ module.exports = {
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
-        serverEvents.execute("after:spec", spec, results)
+        serverEvents.execute("spec:end", spec, results)
 
     Promise.try ->
       runDetails = {
@@ -803,7 +803,7 @@ module.exports = {
         group
       }
 
-      serverEvents.execute("before:run", runDetails)
+      serverEvents.execute("run:start", runDetails)
     .then ->
       iterateThroughSpecs({
         specs
@@ -828,7 +828,7 @@ module.exports = {
       debug("final results of all runs: %o", results)
 
       Promise.try ->
-        serverEvents.execute("after:run", results)
+        serverEvents.execute("run:end", results)
       .then ->
         writeOutput(outputPath, results)
       .return(results)
@@ -865,7 +865,7 @@ module.exports = {
     ## to gracefully handle this in promise land
 
     Promise.try ->
-      serverEvents.execute("before:spec", spec)
+      serverEvents.execute("spec:start", spec)
     .then =>
       if video
         if browserCanBeRecorded(browserName)
