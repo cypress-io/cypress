@@ -308,6 +308,8 @@ const getReasonIsHidden = function ($el) {
   //# is hidden when its fixed position and its
   //# either being covered or there is no el
 
+  let width
+  let height
   let $parent
   let parentNode
   const node = $elements.stringify($el, 'short')
@@ -331,8 +333,8 @@ const getReasonIsHidden = function ($el) {
       return `This element '${node}' is not visible because it has CSS property: 'visibility: hidden'`
 
     case !elHasNoOffsetWidthOrHeight($el):
-      const width = elOffsetWidth($el)
-      const height = elOffsetHeight($el)
+      width = elOffsetWidth($el)
+      height = elOffsetHeight($el)
 
       return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
 
