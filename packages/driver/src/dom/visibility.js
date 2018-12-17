@@ -309,6 +309,7 @@ const getReasonIsHidden = function ($el) {
   //# either being covered or there is no el
 
   let $parent
+  let parentNode
   const node = $elements.stringify($el, 'short')
 
   //# returns the reason in human terms why an element is considered not visible
@@ -317,7 +318,7 @@ const getReasonIsHidden = function ($el) {
       return `This element '${node}' is not visible because it has CSS property: 'display: none'`
 
     case !($parent = parentHasDisplayNone($el.parent())):
-      const parentNode = $elements.stringify($parent, 'short')
+      parentNode = $elements.stringify($parent, 'short')
 
       return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'display: none'`
 
