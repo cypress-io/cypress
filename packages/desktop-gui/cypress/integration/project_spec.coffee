@@ -95,7 +95,7 @@ describe "Project", ->
           .should("contain", @err.message)
 
     it "displays error message with html escaped", ->
-      @err.message = "Error reading from: <span class='ansi-blur-gf'>/Users/cypress.json</span><br /><br /> <span class=ansi-yellow-fg'>SyntaxError</span>"
+      @err.message = "Error reading from: <span class='ansi-blur-gf'>/Users/cypress.json</span><br /><br /> <span class='ansi-yellow-fg'>SyntaxError</span>"
       @ipc.openProject.rejects(@err)
       @start()
       cy
@@ -140,6 +140,21 @@ describe "Project", ->
         .get(".error").contains("Try Again").click().should =>
           expect(@ipc.closeProject).to.be.called
           expect(@ipc.openProject).to.be.called
+
+    it "renders markdown", ->
+      @withMarkdown = '**this** is _markdown_'
+      @markdownErr = {
+        name: "Error",
+        message: @withMarkdown,
+        stack: "[object Object]↵"
+      }
+
+      cy.stub(@ipc, "onProjectError").yields(null, @markdownErr)
+      @start()
+      cy
+        .get(".error")
+          .should("not.contain", @withMarkdown)
+          .should("contain", "this is markdown")
 
   describe "polling", ->
     beforeEach ->

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
+import Markdown from 'markdown-it'
 
 import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
@@ -12,6 +13,8 @@ import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
+
+const md = new Markdown({ html: true })
 
 @observer
 class Project extends Component {
@@ -90,7 +93,7 @@ class Project extends Component {
           <strong>{err.title || 'Can\'t start server'}</strong>
         </p>
         <p dangerouslySetInnerHTML={{
-          __html: err.message.split('\n').join('<br />'),
+          __html: md.render(err.message),
         }} />
         {err.portInUse && (
           <div>
