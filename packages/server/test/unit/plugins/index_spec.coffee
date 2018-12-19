@@ -104,8 +104,7 @@ describe "lib/plugins/index", ->
           .catch (err) =>
             expect(err.message).to.contain("The function exported by the plugins file threw an error.")
             expect(err.message).to.contain("path/to/pluginsFile.js")
-            expect(err.message).to.contain("The following error was thrown:")
-            expect(err.message).to.contain("error message stack")
+            expect(err.details).to.contain("error message stack")
 
     describe "error message", ->
       beforeEach ->
