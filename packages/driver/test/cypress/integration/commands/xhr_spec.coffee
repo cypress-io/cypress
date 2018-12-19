@@ -1873,7 +1873,7 @@ describe "src/cy/commands/xhr", ->
           expect(xhr.aborted).to.be.true
 
     ## https://github.com/cypress-io/cypress/issues/1652
-    it.only "does not set aborted on XHR's that have completed by have had .abort() called", ->
+    it "does not set aborted on XHR's that have completed by have had .abort() called", ->
       log = null
 
       cy.on "log:changed", (attrs, l) =>
