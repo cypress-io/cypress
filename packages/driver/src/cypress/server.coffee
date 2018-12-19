@@ -313,21 +313,22 @@ create = (options = {}) ->
         ## then do not get the abort stack or
         ## set the aborted property or call onXhrAbort
         ## to test this just use a regular XHR
-        @aborted = true
+        if @readyState isnt 4
+          @aborted = true
 
-        abortStack = server.getStack()
+          abortStack = server.getStack()
 
-        proxy = server.getProxyFor(@)
-        proxy.aborted = true
+          proxy = server.getProxyFor(@)
+          proxy.aborted = true
 
-        options.onXhrAbort(proxy, abortStack)
+          options.onXhrAbort(proxy, abortStack)
 
-        if _.isFunction(options.onAnyAbort)
-          route = server.getRouteForXhr(@)
+          if _.isFunction(options.onAnyAbort)
+            route = server.getRouteForXhr(@)
 
-          ## call the onAnyAbort function
-          ## after we've called options.onSend
-          options.onAnyAbort(route, proxy)
+            ## call the onAnyAbort function
+            ## after we've called options.onSend
+            options.onAnyAbort(route, proxy)
 
         abort.apply(@, arguments)
 
