@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
@@ -85,7 +86,15 @@ class Project extends Component {
 
   _error () {
     let err = this.props.project.error
-    const msg = md.render(err.message)
+    let detailsTitle
+    let detailsBody
+
+    if (err.details) {
+      let details = _.clone(err.details).split('\n')
+
+      detailsTitle = details.shift()
+      detailsBody = details.join('\n')
+    }
 
     return (
       <div className='full-alert alert alert-danger error'>
@@ -95,15 +104,15 @@ class Project extends Component {
         </p>
         <span className='alert-content'>
           <p dangerouslySetInnerHTML={{
-            __html: msg,
+            __html: md.render(err.message),
           }} />
           {err.details &&
-            <details>
-              <summary>See more</summary>
-              <pre>
-                {err.details}
-              </pre>
-            </details>
+            <pre>
+              <details>
+                <summary>{detailsTitle}</summary>
+                {detailsBody}
+              </details>
+            </pre>
           }
           {err.portInUse && (
             <div>

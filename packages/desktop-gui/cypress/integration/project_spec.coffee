@@ -183,7 +183,7 @@ describe "Project", ->
       @start()
       cy
         .get(".error")
-        .contains("See more")
+        .contains("ReferenceError: alsdkjf is not defined")
         .get("details")
           .should("not.have.attr", "open")
         .get("details")
