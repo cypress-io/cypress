@@ -45,3 +45,67 @@ describe('issue #761 - aborted XHRs from previous tests', () => {
     })
   })
 })
+
+// this tests that XHR references are blown away
+// and no longer invoked when unloading the window
+// and that its unnecessary to abort them
+// https://github.com/cypress-io/cypress/issues/2968
+describe('issue #2968 - unloaded xhrs do not need to be aborted', () => {
+  it('let the browser naturally abort requests without manual intervention on unload', () => {
+    let xhr
+    let log
+
+    const stub = cy.stub()
+
+    cy.on('log:changed', (attrs, l) => {
+      if (attrs.name === 'xhr') {
+        log = l
+      }
+    })
+
+    cy
+    .visit('http://localhost:3500/fixtures/generic.html')
+    .window()
+    .then((win) => {
+      return new Promise((resolve, reject) => {
+        xhr = new win.XMLHttpRequest()
+
+        win.XMLHttpRequest.prototype.abort = stub
+
+        xhr.open('GET', '/timeout?ms=1000')
+        xhr.abort = stub // this should not get called
+        xhr.onerror = stub // this should not fire
+        xhr.onload = stub // this should not fire
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            try {
+              // the browser should naturally
+              // abort / cancel this request when
+              // the unload event is called which
+              // should cause this xhr to have
+              // these properties and be displayed
+              // correctly in the Cypress Command Log
+              expect(xhr.aborted).to.be.true
+              expect(xhr.readyState).to.eq(4)
+              expect(xhr.status).to.eq(0)
+              expect(xhr.responseText).to.eq('')
+            } catch (err) {
+              reject(err)
+            }
+
+            resolve()
+          }
+        }
+
+        xhr.send()
+
+        win.location.href = 'about:blank'
+      })
+    })
+    .wrap(null)
+    .should(() => {
+      expect(stub).not.to.be.called
+      expect(log.get('state')).to.eq('failed')
+    })
+  })
+})

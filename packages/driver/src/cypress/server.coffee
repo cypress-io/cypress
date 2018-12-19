@@ -26,6 +26,13 @@ normalize = (val) ->
 
 nope = -> return null
 
+## when the browser naturally cancels/aborts
+## an XHR because the window is unloading
+isAbortedThroughUnload = (xhr) ->
+  xhr.readyState is 4 and
+    xhr.status is 0 and
+      xhr.responseText is ""
+
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
     $utils.warning("""
@@ -296,6 +303,34 @@ create = (options = {}) ->
       abort  = XHR.prototype.abort
       srh    = XHR.prototype.setRequestHeader
 
+      abortXhr = (xhr) ->
+        proxy = server.getProxyFor(xhr)
+
+        ## if the XHR leaks into the next test
+        ## after we've reset our internal server
+        ## then this may be undefined
+        return if not proxy
+
+        ## return if we're already aborted which
+        ## can happen if the browser already canceled
+        ## this xhr but we called abort later
+        return if xhr.aborted
+
+        xhr.aborted = true
+
+        abortStack = server.getStack()
+
+        proxy.aborted = true
+
+        options.onXhrAbort(proxy, abortStack)
+
+        if _.isFunction(options.onAnyAbort)
+          route = server.getRouteForXhr(xhr)
+
+          ## call the onAnyAbort function
+          ## after we've called options.onSend
+          options.onAnyAbort(route, proxy)
+
       restoreFn = ->
         ## restore the property back on the window
         _.each {send: send, open: open, abort: abort, setRequestHeader: srh}, (value, key) ->
@@ -316,24 +351,7 @@ create = (options = {}) ->
         ## set the aborted property or call onXhrAbort
         ## to test this just use a regular XHR
         if @readyState isnt 4
-          ## if the XHR leaks into the next test
-          ## after we've reset our internal server
-          ## then this may be undefined
-          if proxy = server.getProxyFor(@)
-            @aborted = true
-
-            abortStack = server.getStack()
-
-            proxy.aborted = true
-
-            options.onXhrAbort(proxy, abortStack)
-
-            if _.isFunction(options.onAnyAbort)
-              route = server.getRouteForXhr(@)
-
-              ## call the onAnyAbort function
-              ## after we've called options.onSend
-              options.onAnyAbort(route, proxy)
+          abortXhr(@)
 
         abort.apply(@, arguments)
 
@@ -413,6 +431,9 @@ create = (options = {}) ->
           ## catch synchronous errors caused
           ## by the onreadystatechange function
           try
+            if isAbortedThroughUnload(xhr)
+              abortXhr(xhr)
+
             if _.isFunction(orst = fns.onreadystatechange)
               orst.apply(xhr, arguments)
           catch err
