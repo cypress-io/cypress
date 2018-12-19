@@ -302,9 +302,11 @@ create = (options = {}) ->
           XHR.prototype[key] = value
 
       XHR.prototype.setRequestHeader = ->
-        proxy = server.getProxyFor(@)
-
-        proxy._setRequestHeader.apply(proxy, arguments)
+        ## if the XHR leaks into the next test
+        ## after we've reset our internal server
+        ## then this may be undefined
+        if proxy = server.getProxyFor(@)
+          proxy._setRequestHeader.apply(proxy, arguments)
 
         srh.apply(@, arguments)
 
@@ -314,21 +316,24 @@ create = (options = {}) ->
         ## set the aborted property or call onXhrAbort
         ## to test this just use a regular XHR
         if @readyState isnt 4
-          @aborted = true
+          ## if the XHR leaks into the next test
+          ## after we've reset our internal server
+          ## then this may be undefined
+          if proxy = server.getProxyFor(@)
+            @aborted = true
 
-          abortStack = server.getStack()
+            abortStack = server.getStack()
 
-          proxy = server.getProxyFor(@)
-          proxy.aborted = true
+            proxy.aborted = true
 
-          options.onXhrAbort(proxy, abortStack)
+            options.onXhrAbort(proxy, abortStack)
 
-          if _.isFunction(options.onAnyAbort)
-            route = server.getRouteForXhr(@)
+            if _.isFunction(options.onAnyAbort)
+              route = server.getRouteForXhr(@)
 
-            ## call the onAnyAbort function
-            ## after we've called options.onSend
-            options.onAnyAbort(route, proxy)
+              ## call the onAnyAbort function
+              ## after we've called options.onSend
+              options.onAnyAbort(route, proxy)
 
         abort.apply(@, arguments)
 
