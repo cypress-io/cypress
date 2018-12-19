@@ -85,22 +85,33 @@ class Project extends Component {
 
   _error () {
     let err = this.props.project.error
+    const msg = md.render(err.message)
 
     return (
       <div className='full-alert alert alert-danger error'>
-        <p>
+        <p className='header'>
           <i className='fa fa-warning'></i>{' '}
           <strong>{err.title || 'Can\'t start server'}</strong>
         </p>
-        <p dangerouslySetInnerHTML={{
-          __html: md.render(err.message),
-        }} />
-        {err.portInUse && (
-          <div>
-            <hr />
-            <p>To fix, stop the other running process or change the port in cypress.json</p>
-          </div>
-        )}
+        <span className='alert-content'>
+          <p dangerouslySetInnerHTML={{
+            __html: msg,
+          }} />
+          {err.details &&
+            <details>
+              <summary>See more</summary>
+              <pre>
+                {err.details}
+              </pre>
+            </details>
+          }
+          {err.portInUse && (
+            <div>
+              <hr />
+              <p>To fix, stop the other running process or change the port in cypress.json</p>
+            </div>
+          )}
+        </span>
         <button
           className='btn btn-default btn-sm'
           onClick={this._reopenProject}

@@ -156,6 +156,49 @@ describe "Project", ->
           .should("not.contain", @withMarkdown)
           .should("contain", "this is markdown")
 
+    it "shows error details if provided", ->
+      messageText = "This is an error message explaining an event. Learn more about this event in the error details section."
+      @detailsErr = {
+        name: "Error",
+        message: messageText,
+        stack: "[object Object]↵",
+        details:"ReferenceError: alsdkjf is not defined\n
+            \tat module.exports (/Users/lilaconlee/cypress/debug/desktop-gui-mishap/cypress/plugins/index.js:15:3)\n
+            \tat Promise.try (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:62:12)\n
+            \tat tryCatcher (/Users/lilaconlee/cypress/cypress/packages/server/node_modules/bluebird/js/release/util.js:16:23)\n
+            \tat Function.Promise.attempt.Promise.try (/Users/lilaconlee/cypress/cypress/packages/server/node_modules/bluebird/js/release/method.js:39:29)\n
+            \tat load (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:61:7)\n
+            \tat EventEmitter.ipc.on (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:132:5)\n
+            \tat emitOne (events.js:115:13)\n
+            \tat EventEmitter.emit (events.js:210:7)\n
+            \tat process.<anonymous> (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/util.coffee:18:7)\n
+            \tat emitTwo (events.js:125:13)\n
+            \tat process.emit (events.js:213:7)\n
+            \tat emit (internal/child_process.js:768:12)\n
+            \tat _combinedTickCallback (internal/process/next_tick.js:141:11)\n
+            \tat process._tickCallback (internal/process/next_tick.js:180:9)"
+      }
+
+      cy.stub(@ipc, "onProjectError").yields(null, @detailsErr)
+      @start()
+      cy
+        .get(".error")
+        .contains("See more")
+        .get("details")
+          .should("not.have.attr", "open")
+        .get("details")
+        .click()
+          .should("have.attr", "open")
+        .get("pre")
+          .should("contain", "ReferenceError")
+
+    it "doesn't show error details if not provided", ->
+      cy.stub(@ipc, "onProjectError").yields(null, @err)
+      @start()
+      cy
+        .get(".error")
+        .should("not.contain", "See more")
+
   describe "polling", ->
     beforeEach ->
       @ipc.getProjectStatus.resolves(@projectStatuses[0])

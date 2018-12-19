@@ -548,15 +548,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       #{JSON.stringify(arg2)}
       """
     when "PLUGINS_FUNCTION_ERROR"
-      """
+      msg = """
       The function exported by the plugins file threw an error.
 
-      We invoked the function exported by '#{arg1}', but it threw an error.
-
-      The following error was thrown:
-
-      #{chalk.yellow(arg2)}
+      We invoked the function exported by `#{arg1}`, but it threw an error.
       """.trim()
+
+      return {msg: msg, details: arg2}
     when "PLUGINS_ERROR"
       """
       The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
@@ -714,10 +712,18 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
+
+  if _.isObject(msg)
+    details = msg.details
+    msg = msg.msg
+
   msg = trimMultipleNewLines(msg)
+
   err = new Error(msg)
   err.isCypressErr = true
   err.type = type
+  err.details = details
+
   err
 
 warning = (type, arg1, arg2) ->
@@ -752,6 +758,10 @@ clone = (err, options = {}) ->
 log = (err, color = "red") ->
   Promise.try ->
     console.log chalk[color](err.message)
+    if err.details
+      ## TODO add newline here
+      ## can't figure out how to write passing test
+      console.log(chalk["yellow"](err.details))
 
     ## bail if this error came from known
     ## list of Cypress errors
