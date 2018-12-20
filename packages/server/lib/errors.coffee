@@ -519,34 +519,35 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       The support file is missing or invalid.
 
-      Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file or, if you're using a preprocessor plugin, it must be supported by that plugin.
+      Your `supportFile` is set to `#{arg1}`, but either the file is missing or it's invalid. The `supportFile` must be a `.js` or `.coffee` file or, if you're using a preprocessor plugin, it must be supported by that plugin.
 
-      Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
+      Correct your `cypress.json`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
     when "PLUGINS_FILE_ERROR"
-      """
+      msg = """
       The plugins file is missing or invalid.
 
-      Your pluginsFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The pluginsFile must be a .js or .coffee file.
+      Your `pluginsFile` is set to `#{arg1}`, but either the file is missing, it contains a syntax error, or threw an error when required. The `pluginsFile` must be a `.js` or `.coffee` file.
 
-      Please fix this, or set 'pluginsFile' to 'false' if a plugins file is not necessary for your project.
-
-      #{if arg2 then "The following error was thrown:" else ""}
-
-      #{if arg2 then chalk.yellow(arg2) else ""}
+      Please fix this, or set `pluginsFile` to `false` if a plugins file is not necessary for your project.
       """.trim()
-    when "PLUGINS_DIDNT_EXPORT_FUNCTION"
-      """
-      The pluginsFile must export a function.
 
-      We loaded the pluginsFile from: #{arg1}
+      if arg2
+        return {msg: msg, details: arg2}
+
+      return msg
+    when "PLUGINS_DIDNT_EXPORT_FUNCTION"
+      msg = """
+      The `pluginsFile` must export a function.
+
+      We loaded the `pluginsFile` from: `#{arg1}`
 
       It exported:
-
-      #{JSON.stringify(arg2)}
       """
+
+      return {msg: msg, details: JSON.stringify(arg2)}
     when "PLUGINS_FUNCTION_ERROR"
       msg = """
       The function exported by the plugins file threw an error.
@@ -600,12 +601,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Example:
 
+        ```
         // cypress/support/index.js
         Cypress.Screenshot.defaults({
           screenshotOnRunFailure: false
         })
+        ```
 
-      https://on.cypress.io/screenshot-api
+      Learn more at https://on.cypress.io/screenshot-api
       """
     when "RENAMED_CONFIG_OPTION"
       """
@@ -615,11 +618,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_CONNECT_BASE_URL"
       """
-      Cypress could not verify that the server set as your 'baseUrl' is running:
+      Cypress could not verify that the server set as your `baseUrl` is running:
 
         > #{chalk.blue(arg1)}
 
-      Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
 
       Please start this server and then run Cypress again.
       """

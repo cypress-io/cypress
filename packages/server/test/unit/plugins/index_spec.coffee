@@ -92,8 +92,7 @@ describe "lib/plugins/index", ->
           .catch (err) =>
             expect(err.message).to.contain("The plugins file is missing or invalid")
             expect(err.message).to.contain("path/to/pluginsFile.js")
-            expect(err.message).to.contain("The following error was thrown")
-            expect(err.message).to.contain("error message stack")
+            expect(err.details).to.contain("error message stack")
 
       context "PLUGINS_FUNCTION_ERROR", ->
         beforeEach ->
