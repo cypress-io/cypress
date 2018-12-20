@@ -603,7 +603,9 @@ jobs:
             $(npm bin)/cypress run --record
 
   mac-os-build:
-    executor: mac
+    executor:
+      macos:
+        xcode: "10.1.0"
     steps:
       - run: security find-identity -p codesigning
       - run: security list-keychains
