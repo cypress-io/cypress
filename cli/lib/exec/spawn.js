@@ -73,6 +73,7 @@ module.exports = {
         }
 
         const overrides = util.getEnvOverrides()
+        const node11WindowsFix = isPlatform('win32')
 
         debug('spawning Cypress with executable: %s', executable)
         debug('spawn forcing env overrides %o', overrides)
@@ -86,6 +87,9 @@ module.exports = {
         // also figure out whether we should force stdout and stderr into thinking
         // it is a tty as opposed to a pipe.
         options.env = _.extend({}, options.env, overrides)
+        if (node11WindowsFix) {
+          options = _.extend({}, options, { windowsHide: false })
+        }
 
         const child = cp.spawn(executable, args, options)
 
