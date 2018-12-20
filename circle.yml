@@ -17,6 +17,11 @@ defaults: &defaults
         COLUMNS: 100
         LINES: 24
 
+executors:
+  mac:
+    macos:
+      xcode: "10.1.0"
+
 jobs:
   ## code checkout and NPM installs
   build:
@@ -597,108 +602,115 @@ jobs:
             CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
 
+  mac-os-build:
+    executor: mac
+    steps:
+      - run: security find-identity -p codesigning
+      - run: security list-keychains
+
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
-      - lint:
-          requires:
-            - build
-      # unit, integration and e2e tests
-      - unit-tests:
-          requires:
-            - build
-      - server-unit-tests:
-          requires:
-            - build
-      - server-integration-tests:
-          requires:
-            - build
-      - server-e2e-tests-1:
-          requires:
-            - build
-      - server-e2e-tests-2:
-          requires:
-            - build
-      - server-e2e-tests-3:
-          requires:
-            - build
-      - server-e2e-tests-4:
-          requires:
-            - build
-      - server-e2e-tests-5:
-          requires:
-            - build
-      - server-e2e-tests-6:
-          requires:
-            - build
-      - server-e2e-tests-7:
-          requires:
-            - build
-      - server-e2e-tests-8:
-          requires:
-            - build
-      - 3x-driver-integration-tests:
-          requires:
-            - build
-      - 2x-desktop-gui-integration-tests:
-          requires:
-            - build
-      - run-launcher:
-          requires:
-            - build
-      # various testing scenarios, like building full binary
-      # and testing it on a real project
-      - test-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - test-kitchensink-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-npm-package:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-binary:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - test-next-version:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-next-version-locally:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-binary-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
+      - mac-os-build
+      # - build
+      # - lint:
+      #     requires:
+      #       - build
+      # # unit, integration and e2e tests
+      # - unit-tests:
+      #     requires:
+      #       - build
+      # - server-unit-tests:
+      #     requires:
+      #       - build
+      # - server-integration-tests:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-1:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-2:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-3:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-4:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-5:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-6:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-7:
+      #     requires:
+      #       - build
+      # - server-e2e-tests-8:
+      #     requires:
+      #       - build
+      # - 3x-driver-integration-tests:
+      #     requires:
+      #       - build
+      # - 2x-desktop-gui-integration-tests:
+      #     requires:
+      #       - build
+      # - run-launcher:
+      #     requires:
+      #       - build
+      # # various testing scenarios, like building full binary
+      # # and testing it on a real project
+      # - test-against-staging:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #     requires:
+      #       - build
+      # - test-kitchensink-against-staging:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #     requires:
+      #       - build
+      # - build-npm-package:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #     requires:
+      #       - build
+      # - build-binary:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #     requires:
+      #       - build
+      # - test-next-version:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #     requires:
+      #       - build-npm-package
+      #       - build-binary
+      # - test-next-version-locally:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - develop
+      #     requires:
+      #       - build-npm-package
+      #       - build-binary
+      # - test-binary-against-staging:
+          # filters:
+          #   branches:
+          #     only:
+          #       - develop
+          # requires:
+            # - build-npm-package
+            # - build-binary
