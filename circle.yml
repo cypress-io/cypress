@@ -328,7 +328,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  "3x-driver-integration-tests":
+  "driver-integration-tests-3x":
     <<: *defaults
     parallelism: 3
     steps:
@@ -352,7 +352,7 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
 
-  "2x-desktop-gui-integration-tests":
+  "desktop-gui-integration-tests-2x":
     <<: *defaults
     parallelism: 2
     steps:
@@ -651,10 +651,10 @@ workflows:
       # - server-e2e-tests-8:
       #     requires:
       #       - build
-      # - 3x-driver-integration-tests:
+      # - driver-integration-tests-3x:
       #     requires:
       #       - build
-      # - 2x-desktop-gui-integration-tests:
+      # - desktop-gui-integration-tests-2x:
       #     requires:
       #       - build
       # - run-launcher:
