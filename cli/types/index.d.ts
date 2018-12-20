@@ -623,9 +623,11 @@ declare namespace Cypress {
     fixture<Contents = any>(path: string, encoding: Encodings, options?: Partial<Timeoutable>): Chainable<Contents> // no log?
 
     /**
-     * Get the DOM element that is currently focused.
+     * Focus on a DOM element.
      *
      * @see https://on.cypress.io/focus
+     * @example
+     * cy.get('input').first().focus() // Focus on the first input
      */
     focus(options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
