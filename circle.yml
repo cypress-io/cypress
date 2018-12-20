@@ -17,11 +17,6 @@ defaults: &defaults
         COLUMNS: 100
         LINES: 24
 
-executors:
-  mac:
-    macos:
-      xcode: "10.1.0"
-
 jobs:
   ## code checkout and NPM installs
   build:
