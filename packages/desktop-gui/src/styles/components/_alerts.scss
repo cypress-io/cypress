@@ -46,6 +46,24 @@
   .alert-content {
     text-align: left;
   }
+
+  code, pre {
+    background-color: #f9f2f4;
+    color: #a94442;
+    border: none;
+  }
+
+  code {
+    padding: 1px 4px;
+  }
+
+  summary {
+    outline: none;
+  }
+
+  summary:focus {
+    text-decoration: underline;
+  }
 }
 
 .global-error {
