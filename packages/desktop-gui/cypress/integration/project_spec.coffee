@@ -189,7 +189,7 @@ describe "Project", ->
         .get("details")
         .click()
           .should("have.attr", "open")
-        .get("pre")
+        .get("summary")
           .should("contain", "ReferenceError")
 
     it "doesn't show error details if not provided", ->
@@ -197,7 +197,23 @@ describe "Project", ->
       @start()
       cy
         .get(".error")
-        .should("not.contain", "See more")
+        .get("summary").should("not.exist")
+
+    it "shows abbreviated error details if only one line", ->
+      messageText = "This is an error message explaining an event. Learn more about this event in the error details section."
+      @detailsErr = {
+        name: "Error",
+        message: messageText,
+        stack: "[object Object]↵",
+        details:"ReferenceError: alsdkjf is not defined"
+      }
+
+      cy.stub(@ipc, "onProjectError").yields(null, @detailsErr)
+      @start()
+      cy
+        .get(".error")
+        .contains("ReferenceError: alsdkjf is not defined")
+        .get("summary").should("not.exist")
 
   describe "polling", ->
     beforeEach ->

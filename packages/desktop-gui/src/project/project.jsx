@@ -17,6 +17,29 @@ import SpecsList from '../specs/specs-list'
 
 const md = new Markdown({ html: true })
 
+const ErrorDetails = observer(({ err }) => {
+  let details = _.clone(err.details).split('\n')
+  const detailsTitle = details.shift()
+  const detailsBody = details.join('\n')
+
+  if (detailsBody) {
+    return (
+      <pre>
+        <details>
+          <summary>{detailsTitle}</summary>
+          {detailsBody}
+        </details>
+      </pre>
+    )
+  }
+
+  return (
+    <pre>
+      {detailsTitle}
+    </pre>
+  )
+})
+
 @observer
 class Project extends Component {
   componentDidMount () {
@@ -86,15 +109,6 @@ class Project extends Component {
 
   _error () {
     let err = this.props.project.error
-    let detailsTitle
-    let detailsBody
-
-    if (err.details) {
-      let details = _.clone(err.details).split('\n')
-
-      detailsTitle = details.shift()
-      detailsBody = details.join('\n')
-    }
 
     return (
       <div className='full-alert alert alert-danger error'>
@@ -106,14 +120,9 @@ class Project extends Component {
           <p dangerouslySetInnerHTML={{
             __html: md.render(err.message),
           }} />
-          {err.details &&
-            <pre>
-              <details>
-                <summary>{detailsTitle}</summary>
-                {detailsBody}
-              </details>
-            </pre>
-          }
+          {err.details && (
+            <ErrorDetails err={err} />
+          )}
           {err.portInUse && (
             <div>
               <hr />
