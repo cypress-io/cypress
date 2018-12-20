@@ -610,9 +610,18 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test:
+
+  mac-build-and-test:
     jobs:
-      - mac-os-build
+      - build:
+          executor: mac
+
+  linux-build-and-test:
+    jobs:
+      #
+      # Linux builds
+      #
+
       # - build
       # - lint:
       #     requires:
