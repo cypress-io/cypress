@@ -3,21 +3,26 @@ version: 2.1
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
-  docker:
-    # the Docker image with Cypress dependencies and Chrome browser
-    - image: cypress/browsers:chrome64
-      environment:
-        ## set specific timezone
-        TZ: "/usr/share/zoneinfo/America/New_York"
+  # docker:
+  #   # the Docker image with Cypress dependencies and Chrome browser
+  #   - image: cypress/browsers:chrome64
+  environment:
+    ## set specific timezone
+    TZ: "/usr/share/zoneinfo/America/New_York"
 
-        ## store artifacts here
-        CIRCLE_ARTIFACTS: /tmp/artifacts
+    ## store artifacts here
+    CIRCLE_ARTIFACTS: /tmp/artifacts
 
-        ## set so that e2e tests are consistent
-        COLUMNS: 100
-        LINES: 24
+    ## set so that e2e tests are consistent
+    COLUMNS: 100
+    LINES: 24
 
 executors:
+  # the Docker image with Cypress dependencies and Chrome browser
+  cy-doc:
+    docker:
+      - image: cypress/browsers:chrome64
+
   mac:
     macos:
       xcode: "10.1.0"
@@ -26,6 +31,11 @@ jobs:
   ## code checkout and NPM installs
   build:
     <<: *defaults
+    parameters:
+      executor:
+        type: executor
+        default: cy-doc
+    executor: <<parameters.executor>>
     steps:
       - checkout
 
@@ -188,441 +198,438 @@ jobs:
           paths:
             - cypress
 
-  lint:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: npm run lint
-      - run: npm run all lint
+  # lint:
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run: npm run lint
+  #     - run: npm run all lint
 
-  "unit-tests":
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      # make sure mocha runs
-      - run: npm run test-mocha
-      # make sure our snapshots are compared correctly
-      - run: npm run test-mocha-snapshot
-      # run unit tests from individual packages
-      - run: npm run all test -- --package cli
-      - run: npm run all test -- --package electron
-      - run: npm run all test -- --package extension
-      - run: npm run all test -- --package https-proxy
-      - run: npm run all test -- --package launcher
-      # how to pass Mocha reporter through zunder?
-      - run: npm run all test -- --package reporter
-      - run: npm run all test -- --package runner
-      - run: npm run all test -- --package socket
-      - run: npm run all test -- --package static
-      - store_test_results:
-          path: /tmp/cypress
+  # "unit-tests":
+  #   <<: *defaults
+  #   parallelism: 1
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     # make sure mocha runs
+  #     - run: npm run test-mocha
+  #     # make sure our snapshots are compared correctly
+  #     - run: npm run test-mocha-snapshot
+  #     # run unit tests from individual packages
+  #     - run: npm run all test -- --package cli
+  #     - run: npm run all test -- --package electron
+  #     - run: npm run all test -- --package extension
+  #     - run: npm run all test -- --package https-proxy
+  #     - run: npm run all test -- --package launcher
+  #     # how to pass Mocha reporter through zunder?
+  #     - run: npm run all test -- --package reporter
+  #     - run: npm run all test -- --package runner
+  #     - run: npm run all test -- --package socket
+  #     - run: npm run all test -- --package static
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-unit-tests":
-    <<: *defaults
-    parallelism: 2
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: npm run all test-unit -- --package server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-unit-tests":
+  #   <<: *defaults
+  #   parallelism: 2
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run: npm run all test-unit -- --package server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-integration-tests":
-    <<: *defaults
-    parallelism: 2
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: npm run all test-integration -- --package server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-integration-tests":
+  #   <<: *defaults
+  #   parallelism: 2
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run: npm run all test-integration -- --package server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-1":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 1
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-1":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 1
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-2":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 2
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-2":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 2
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-3":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 3
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-3":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 3
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-4":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 4
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-4":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 4
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-5":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 5
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-5":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 5
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-6":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 6
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-6":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 6
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-7":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 7
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-7":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 7
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "server-e2e-tests-8":
-      <<: *defaults
-      steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 8
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+  # "server-e2e-tests-8":
+  #     <<: *defaults
+  #     steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run test-e2e -- --chunk 8
+  #         working_directory: packages/server
+  #     - store_test_results:
+  #         path: /tmp/cypress
 
-  "driver-integration-tests-3x":
-    <<: *defaults
-    parallelism: 3
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm start
-          background: true
-          working_directory: packages/driver
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
+  # "driver-integration-tests-3x":
+  #   <<: *defaults
+  #   parallelism: 3
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm start
+  #         background: true
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: $(npm bin)/wait-on http://localhost:3500
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: |
+  #           CYPRESS_KONFIG_ENV=production \
+  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+  #           npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
+  #         working_directory: packages/driver
+  #     - store_test_results:
+  #         path: /tmp/cypress
+  #     - store_artifacts:
+  #         path: /tmp/artifacts
 
-  "desktop-gui-integration-tests-2x":
-    <<: *defaults
-    parallelism: 2
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 2x-desktop-gui
-          working_directory: packages/desktop-gui
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
+  # "desktop-gui-integration-tests-2x":
+  #   <<: *defaults
+  #   parallelism: 2
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run build-prod
+  #         working_directory: packages/desktop-gui
+  #     - run:
+  #         command: |
+  #           CYPRESS_KONFIG_ENV=production \
+  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+  #           npm run cypress:run -- --record --parallel --group 2x-desktop-gui
+  #         working_directory: packages/desktop-gui
+  #     - store_test_results:
+  #         path: /tmp/cypress
+  #     - store_artifacts:
+  #         path: /tmp/artifacts
 
-  "reporter-integration-tests":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run build-prod
-          working_directory: packages/reporter
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group reporter
-          working_directory: packages/reporter
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
+  # "reporter-integration-tests":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm run build-prod
+  #         working_directory: packages/reporter
+  #     - run:
+  #         command: |
+  #           CYPRESS_KONFIG_ENV=production \
+  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+  #           npm run cypress:run -- --record --parallel --group reporter
+  #         working_directory: packages/reporter
+  #     - store_test_results:
+  #         path: /tmp/cypress
+  #     - store_artifacts:
+  #         path: /tmp/artifacts
 
-  "run-launcher":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: node index.js
-          working_directory: packages/launcher
+  # "run-launcher":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: node index.js
+  #         working_directory: packages/launcher
 
-  "build-binary":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: $(npm bin)/print-arch
-      - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
-      - run: npm run binary-zip -- --platform linux
-      - run: ls -l *.zip
-      - run:
-          name: upload unique binary
-          command: |
-            node scripts/binary.js upload-unique-binary \
-              --file cypress.zip \
-              --version $NEXT_DEV_VERSION
-      - run: cat binary-url.json
-      - run: mkdir /tmp/urls
-      - run: cp binary-url.json /tmp/urls
-      - run: cp cypress.zip /tmp/urls
-      - run: ls /tmp/urls
-      - persist_to_workspace:
-          root: /tmp/urls
-          paths:
-            - binary-url.json
-            - cypress.zip
+  # "build-binary":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run: $(npm bin)/print-arch
+  #     - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
+  #     - run: npm run binary-zip -- --platform linux
+  #     - run: ls -l *.zip
+  #     - run:
+  #         name: upload unique binary
+  #         command: |
+  #           node scripts/binary.js upload-unique-binary \
+  #             --file cypress.zip \
+  #             --version $NEXT_DEV_VERSION
+  #     - run: cat binary-url.json
+  #     - run: mkdir /tmp/urls
+  #     - run: cp binary-url.json /tmp/urls
+  #     - run: cp cypress.zip /tmp/urls
+  #     - run: ls /tmp/urls
+  #     - persist_to_workspace:
+  #         root: /tmp/urls
+  #         paths:
+  #           - binary-url.json
+  #           - cypress.zip
 
-  "test-kitchensink-against-staging":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
-      - run:
-          name: Install prod dependencies
-          command: npm install --production
-          working_directory: /tmp/repo
-      - run:
-          name: Example server
-          command: npm start
-          working_directory: /tmp/repo
-          background: true
-      - run:
-          name: Run Kitchensink example project
-          command: |
-            CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
-            CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
-            CYPRESS_ENV=staging \
-            CYPRESS_video=false \
-            npm run cypress:run -- --project /tmp/repo --record
+  # "test-kitchensink-against-staging":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         name: Cloning test project
+  #         command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+  #     - run:
+  #         name: Install prod dependencies
+  #         command: npm install --production
+  #         working_directory: /tmp/repo
+  #     - run:
+  #         name: Example server
+  #         command: npm start
+  #         working_directory: /tmp/repo
+  #         background: true
+  #     - run:
+  #         name: Run Kitchensink example project
+  #         command: |
+  #           CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
+  #           CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
+  #           CYPRESS_ENV=staging \
+  #           CYPRESS_video=false \
+  #           npm run cypress:run -- --project /tmp/repo --record
 
-  "test-against-staging":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
-      - run:
-          name: Run test project
-          command: |
-            CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
-            CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
-            CYPRESS_ENV=staging \
-            npm run cypress:run -- --project /tmp/repo --record
+  # "test-against-staging":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         name: Cloning test project
+  #         command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
+  #     - run:
+  #         name: Run test project
+  #         command: |
+  #           CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
+  #           CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+  #           CYPRESS_ENV=staging \
+  #           npm run cypress:run -- --project /tmp/repo --record
 
-  "build-npm-package":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: bump NPM version
-          command: npm --no-git-tag-version version $NEXT_DEV_VERSION
-      - run:
-          name: build NPM package
-          working_directory: cli
-          command: npm run build
-      - run:
-          name: list NPM package contents
-          working_directory: cli/build
-          command: npm run size
-      - run:
-          name: pack NPM package
-          working_directory: cli/build
-          command: npm pack
-      - run:
-          name: list created NPM package
-          working_directory: cli/build
-          command: ls -l
-      # created file should have filename cypress-<version>.tgz
-      - run:
-          name: upload NPM package
-          command: |
-            node scripts/binary.js upload-npm-package \
-              --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
-              --version $NEXT_DEV_VERSION
-      - run: cat npm-package-url.json
-      - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
-      - run: cp npm-package-url.json /tmp/urls
-      - run: ls /tmp/urls
-      - persist_to_workspace:
-          root: /tmp/urls
-          paths:
-            - npm-package-url.json
-            - cypress.tgz
+  # "build-npm-package":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         name: bump NPM version
+  #         command: npm --no-git-tag-version version $NEXT_DEV_VERSION
+  #     - run:
+  #         name: build NPM package
+  #         working_directory: cli
+  #         command: npm run build
+  #     - run:
+  #         name: list NPM package contents
+  #         working_directory: cli/build
+  #         command: npm run size
+  #     - run:
+  #         name: pack NPM package
+  #         working_directory: cli/build
+  #         command: npm pack
+  #     - run:
+  #         name: list created NPM package
+  #         working_directory: cli/build
+  #         command: ls -l
+  #     # created file should have filename cypress-<version>.tgz
+  #     - run:
+  #         name: upload NPM package
+  #         command: |
+  #           node scripts/binary.js upload-npm-package \
+  #             --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
+  #             --version $NEXT_DEV_VERSION
+  #     - run: cat npm-package-url.json
+  #     - run: mkdir /tmp/urls
+  #     - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
+  #     - run: cp npm-package-url.json /tmp/urls
+  #     - run: ls /tmp/urls
+  #     - persist_to_workspace:
+  #         root: /tmp/urls
+  #         paths:
+  #           - npm-package-url.json
+  #           - cypress.tgz
 
-  "test-next-version":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - attach_workspace:
-          at: /tmp/urls
-      - run: ls -la /tmp/urls
-      - run: cat /tmp/urls/*.json
-      - run: mkdir /tmp/testing
-      - run:
-          name: create dummy package
-          working_directory: /tmp/testing
-          command: npm init -y
-      - run:
-          # install NPM from unique urls
-          name: Install Cypress
-          command: |
-            node scripts/test-unique-npm-and-binary.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
-              --cwd /tmp/testing
-      - run:
-          name: Verify Cypress binary
-          working_directory: /tmp/testing
-          command: $(npm bin)/cypress verify
-      - run:
-          name: Running other test projects with new NPM package and binary
-          command: |
-            node scripts/test-other-projects.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
-              --provider circle
+  # "test-next-version":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - attach_workspace:
+  #         at: /tmp/urls
+  #     - run: ls -la /tmp/urls
+  #     - run: cat /tmp/urls/*.json
+  #     - run: mkdir /tmp/testing
+  #     - run:
+  #         name: create dummy package
+  #         working_directory: /tmp/testing
+  #         command: npm init -y
+  #     - run:
+  #         # install NPM from unique urls
+  #         name: Install Cypress
+  #         command: |
+  #           node scripts/test-unique-npm-and-binary.js \
+  #             --npm /tmp/urls/npm-package-url.json \
+  #             --binary /tmp/urls/binary-url.json \
+  #             --cwd /tmp/testing
+  #     - run:
+  #         name: Verify Cypress binary
+  #         working_directory: /tmp/testing
+  #         command: $(npm bin)/cypress verify
+  #     - run:
+  #         name: Running other test projects with new NPM package and binary
+  #         command: |
+  #           node scripts/test-other-projects.js \
+  #             --npm /tmp/urls/npm-package-url.json \
+  #             --binary /tmp/urls/binary-url.json \
+  #             --provider circle
 
-  "test-next-version-locally":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - attach_workspace:
-          at: /tmp/urls
-      # make sure we have cypress.zip received
-      - run: ls -l /tmp/urls/cypress.zip
-      # build NPM package
-      - run:
-          command: npm run build
-          working_directory: cli
-      - run: mkdir test-binary
-      - run:
-          name: Create new NPM package
-          working_directory: test-binary
-          command: npm init -y
-      - run:
-          # install NPM from built NPM package folder
-          name: Install Cypress
-          working_directory: test-binary
-          # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i ../cli/build
-      - run:
-          name: Verify Cypress binary
-          working_directory: test-binary
-          command: $(npm bin)/cypress verify
+  # "test-next-version-locally":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - attach_workspace:
+  #         at: /tmp/urls
+  #     # make sure we have cypress.zip received
+  #     - run: ls -l /tmp/urls/cypress.zip
+  #     # build NPM package
+  #     - run:
+  #         command: npm run build
+  #         working_directory: cli
+  #     - run: mkdir test-binary
+  #     - run:
+  #         name: Create new NPM package
+  #         working_directory: test-binary
+  #         command: npm init -y
+  #     - run:
+  #         # install NPM from built NPM package folder
+  #         name: Install Cypress
+  #         working_directory: test-binary
+  #         # force installing the freshly built binary
+  #         command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i ../cli/build
+  #     - run:
+  #         name: Verify Cypress binary
+  #         working_directory: test-binary
+  #         command: $(npm bin)/cypress verify
 
-  # install NPM + binary zip and run against staging API
-  "test-binary-against-staging":
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - attach_workspace:
-          at: /tmp/urls
-      # make sure we have the binary
-      - run: ls -l /tmp/urls/cypress.zip
-      # make sure we have the NPM package
-      - run: ls -l /tmp/urls/cypress.tgz
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
-      - run:
-          name: Install Cypress
-          working_directory: /tmp/cypress-test-tiny
-          # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
-      - run:
-          name: Run test project
-          working_directory: /tmp/cypress-test-tiny
-          command: |
-            CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
-            CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
-            CYPRESS_ENV=staging \
-            $(npm bin)/cypress run --record
+  # # install NPM + binary zip and run against staging API
+  # "test-binary-against-staging":
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - attach_workspace:
+  #         at: /tmp/urls
+  #     # make sure we have the binary
+  #     - run: ls -l /tmp/urls/cypress.zip
+  #     # make sure we have the NPM package
+  #     - run: ls -l /tmp/urls/cypress.tgz
+  #     - run:
+  #         name: Cloning test project
+  #         command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+  #     - run:
+  #         name: Install Cypress
+  #         working_directory: /tmp/cypress-test-tiny
+  #         # force installing the freshly built binary
+  #         command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+  #     - run:
+  #         name: Run test project
+  #         working_directory: /tmp/cypress-test-tiny
+  #         command: |
+  #           CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
+  #           CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+  #           CYPRESS_ENV=staging \
+  #           $(npm bin)/cypress run --record
 
-  mac-os-build:
-    executor: mac
-    steps:
-      - run: security find-identity -p codesigning
-      - run: security list-keychains
+  # mac-os-build:
+  #   executor: mac
+  #   steps:
+  #     - run: security find-identity -p codesigning
+  #     - run: security list-keychains
 
 workflows:
-  version: 2
-
   mac-build-and-test:
     jobs:
       - build:
-          executor: mac
+          name: Linux build
 
   linux-build-and-test:
     jobs:
-      #
-      # Linux builds
-      #
+      - build:
+          executor: mac
+          name: Mac build
 
-      # - build
       # - lint:
       #     requires:
       #       - build
