@@ -8,12 +8,12 @@ dist
 dist-*
 build
 .history
-.vscode
 .publish
 _test-output
 cypress.zip
 tmp/
 .nyc_output
+.vscode/settings.json
 
 # from extension
 Cached Theme.pak

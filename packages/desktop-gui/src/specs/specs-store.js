@@ -7,8 +7,6 @@ import Spec from './spec-model'
 import Folder from './folder-model'
 
 const pathSeparatorRe = /[\\\/]/g
-const extRegex = /.*\.\w+$/
-const isFile = (maybeFile) => extRegex.test(maybeFile)
 
 export const allSpecsSpec = new Spec({
   name: 'All Specs',
@@ -64,20 +62,28 @@ export class SpecsStore {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setFilter (projectId, filter = null) {
-    localData.set(`specsFilter-${projectId}`, filter)
+  @action setFilter (project, filter = null) {
+    if (!filter) return this.clearFilter(project)
+
+    localData.set(this.getSpecsFilterId(project), filter)
 
     this.filter = filter
   }
 
-  @action clearFilter (projectId) {
-    localData.remove(`specsFilter-${projectId}`)
+  @action clearFilter (project) {
+    localData.remove(this.getSpecsFilterId(project))
 
     this.filter = null
   }
 
   isChosen (spec) {
     return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
+  }
+
+  getSpecsFilterId ({ id = '<no-id>', path = '' }) {
+    const shortenedPath = path.replace(/.*cypress/, 'cypress')
+
+    return `specsFilter-${id}-${shortenedPath}`
   }
 
   _tree (files) {
@@ -93,13 +99,15 @@ export class SpecsStore {
 
       let placeholder = root
 
-      _.each(segments, (segment) => {
+      _.each(segments, (segment, i) => {
         segmentsPassed.push(segment)
         const currentPath = path.join(...segmentsPassed)
-        const isCurrentAFile = isFile(currentPath)
+        const isCurrentAFile = i === segments.length - 1
         const props = { path: currentPath, displayName: segment }
 
-        let existing = _.find(placeholder, (file) => pathsEqual(file.path, currentPath))
+        let existing = _.find(placeholder, (file) => {
+          return pathsEqual(file.path, currentPath)
+        })
 
         if (!existing) {
           existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)

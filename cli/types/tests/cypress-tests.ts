@@ -5,8 +5,16 @@ namespace CypressLodashTests {
   })
 }
 
+namespace CypressMomentTests {
+  Cypress.moment() // $ExpectType Moment
+  Cypress.moment('1982-08-23') // $ExpectType Moment
+  Cypress.moment(Date()) // $ExpectType Moment
+  Cypress.moment(Date()).format() // $ExpectType string
+  Cypress.moment().startOf('week') // $ExpectType Moment
+}
+
 namespace CypressJqueryTests {
-  Cypress.$ // $ExpectType JQueryStatic<HTMLElement>
+  Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
   Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
 }
@@ -21,8 +29,6 @@ namespace CypressConfigTests {
   Cypress.config('baseUrl', null) // $ExpectType void
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
 }
-
-Cypress.moment()
 
 namespace CypressEnvTests {
   // Just making sure these are valid - no real type safety
@@ -218,3 +224,15 @@ namespace CypressFilterTests {
       return true
     })
 }
+
+cy.screenshot('example-name')
+cy.screenshot('example', {log: false})
+cy.screenshot({log: false})
+cy.screenshot({
+  log: true,
+  blackout: []
+})
+cy.screenshot('example', {
+  log: true,
+  blackout: []
+})

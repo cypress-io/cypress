@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../dom")
@@ -320,7 +319,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return if endEarly
 
         if $dom.isElement(el)
-          el = $(el)
+          el = $dom.wrap(el)
 
         callback = ->
           ret = fn.call(ctx, el, index, subject)

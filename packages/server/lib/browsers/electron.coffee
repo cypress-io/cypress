@@ -9,6 +9,16 @@ plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
+tryToCall = (win, method) ->
+  try
+    if not win.isDestroyed()
+      if _.isString(method)
+        win[method]()
+      else
+        method()
+  catch err
+    debug("got error calling window method:", err.stack)
+
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
     _this = @
@@ -31,7 +41,8 @@ module.exports = {
         devTools: "isBrowserDevToolsOpen"
       }
       onFocus: ->
-        menu.set({withDevTools: true})
+        if options.show
+          menu.set({withDevTools: true})
       onNewWindow: (e, url) ->
         _win = @
 
@@ -73,7 +84,8 @@ module.exports = {
     @_launch(win, url, options)
 
   _launch: (win, url, options) ->
-    menu.set({withDevTools: true})
+    if options.show
+      menu.set({withDevTools: true})
 
     Promise
     .try =>
@@ -122,10 +134,12 @@ module.exports = {
     return "persist:interactive"
 
   _clearCache: (webContents) ->
+    debug("clearing cache")
     new Promise (resolve) ->
       webContents.session.clearCache(resolve)
 
   _setUserAgent: (webContents, userAgent) ->
+    debug("setting user agent to:", userAgent)
     ## set both because why not
     webContents.setUserAgent(userAgent)
     webContents.session.setUserAgent(userAgent)
@@ -143,7 +157,6 @@ module.exports = {
 
     savedState(projectRoot, isTextTerminal)
     .then (state) ->
-      debug("got saved state")
       state.get()
     .then (state) =>
       debug("received saved state %o", state)
@@ -173,17 +186,16 @@ module.exports = {
 
       @_render(url, projectRoot, options)
       .then (win) =>
-        debug("rendered electron window")
-
         ## cause the webview to receive focus so that
         ## native browser focus + blur events fire correctly
         ## https://github.com/cypress-io/cypress/issues/1939
-        win.focusOnWebView()
+        tryToCall(win, "focusOnWebView")
 
         a = Windows.automation(win)
 
         invoke = (method, data) =>
-          a[method](data)
+          tryToCall win, ->
+            a[method](data)
 
         automation.use({
           onRequest: (message, data) ->
@@ -206,24 +218,16 @@ module.exports = {
                 throw new Error("No automation handler registered for: '#{message}'")
         })
 
-        call = (method) ->
-          return ->
-            if not win.isDestroyed()
-              win[method]()
-
         events = new EE
 
         win.once "closed", ->
           debug("closed event fired")
 
-          call("removeAllListeners")
           events.emit("exit")
-
-        debug("electron window configuration complete")
 
         return _.extend events, {
           browserWindow:      win
-          kill:               call("close")
-          removeAllListeners: call("removeAllListeners")
+          kill:               -> tryToCall(win, "close")
+          removeAllListeners: -> tryToCall(win, "removeAllListeners")
         }
 }

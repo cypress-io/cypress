@@ -12,7 +12,6 @@ Promise          = require("bluebird")
 path             = require("path")
 cache            = require("../lib/cache")
 appData          = require("../lib/util/app_data")
-agent            = require("superagent")
 
 require("chai")
 .use(require("@cypress/sinon-chai"))

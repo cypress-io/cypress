@@ -9,13 +9,18 @@ export default class Suite extends Runnable {
   @computed get state () {
     if (this._anyChildrenFailed) {
       return 'failed'
-    } else if (this._allChildrenPending) {
-      return 'pending'
-    } else if (this._allChildrenPassedOrPending) {
-      return 'passed'
-    } else {
-      return 'processing'
     }
+
+    if (this._allChildrenPending) {
+      return 'pending'
+    }
+
+    if (this._allChildrenPassedOrPending) {
+      return 'passed'
+    }
+
+    return 'processing'
+
   }
 
   @computed get _childStates () {
@@ -23,7 +28,9 @@ export default class Suite extends Runnable {
   }
 
   @computed get _anyChildrenFailed () {
-    return _.some(this._childStates, (state) => state === 'failed')
+    return _.some(this._childStates, (state) => {
+      return state === 'failed'
+    })
   }
 
   @computed get _allChildrenPassedOrPending () {
@@ -34,6 +41,8 @@ export default class Suite extends Runnable {
 
   @computed get _allChildrenPending () {
     return !!this._childStates.length
-            && _.every(this._childStates, (state) => state === 'pending')
+            && _.every(this._childStates, (state) => {
+              return state === 'pending'
+            })
   }
 }

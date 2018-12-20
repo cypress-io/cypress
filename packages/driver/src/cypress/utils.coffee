@@ -3,6 +3,7 @@ _ = require("lodash")
 moment = require("moment")
 Promise = require("bluebird")
 
+$jquery = require("../dom/jquery")
 $Location = require("./location")
 $errorMessages = require("./error_messages")
 
@@ -30,6 +31,27 @@ module.exports = {
 
   logInfo: (msgs...) ->
     console.info(msgs...)
+
+  unwrapFirst: (val) ->
+    ## this method returns the first item in an array
+    ## and if its still a jquery object, then we return
+    ## the first() jquery element
+    item = [].concat(val)[0]
+
+    if $jquery.isJquery(item)
+      return item.first()
+
+    return item
+
+  switchCase: (value, casesObj, defaultKey = "default") ->
+    if _.has(casesObj, value)
+      return _.result(casesObj, value)
+
+    if _.has(casesObj, defaultKey)
+      return _.result(casesObj, defaultKey)
+
+    keys = _.keys(casesObj)
+    throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
 
   appendErrMsg: (err, message) ->
     ## preserve stack

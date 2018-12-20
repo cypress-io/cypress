@@ -18,9 +18,9 @@ const format = (durationInMs, padMinutes = true) => {
 
   if (totalMinSec === '00:00') {
     return `${duration.milliseconds()}ms`
-  } else {
-    return totalMinSec
   }
+
+  return totalMinSec
 }
 
 module.exports = {
