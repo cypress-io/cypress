@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 defaults: &defaults
   parallelism: 1
@@ -16,6 +16,11 @@ defaults: &defaults
         ## set so that e2e tests are consistent
         COLUMNS: 100
         LINES: 24
+
+executors:
+  mac:
+    macos:
+      xcode: "10.1.0"
 
 jobs:
   ## code checkout and NPM installs
@@ -598,9 +603,7 @@ jobs:
             $(npm bin)/cypress run --record
 
   mac-os-build:
-    executor:
-      macos:
-        xcode: "10.1.0"
+    executor: mac
     steps:
       - run: security find-identity -p codesigning
       - run: security list-keychains
