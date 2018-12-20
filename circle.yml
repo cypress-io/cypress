@@ -619,12 +619,12 @@ jobs:
   #     - run: security list-keychains
 
 workflows:
-  mac-build-and-test:
+  linux:
     jobs:
       - build:
           name: Linux build
 
-  linux-build-and-test:
+  mac:
     jobs:
       - build:
           executor: mac
