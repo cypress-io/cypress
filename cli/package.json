@@ -48,7 +48,7 @@
     "@types/lodash": "4.14.87",
     "@types/minimatch": "3.0.3",
     "@types/mocha": "2.2.44",
-    "@types/sinon": "7.0.0",
+    "@types/sinon": "4.0.0",
     "@types/sinon-chai": "2.7.29",
     "bluebird": "3.5.0",
     "cachedir": "1.3.0",
@@ -96,7 +96,7 @@
     "nyc": "13.0.0",
     "proxyquire": "2.0.1",
     "shelljs": "0.7.8",
-    "sinon": "7.2.2",
+    "sinon": "5.0.7",
     "snap-shot-it": "^5.0.0"
   },
   "files": [
