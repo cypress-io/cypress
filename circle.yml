@@ -3,9 +3,11 @@ version: 2.1
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
-  # docker:
-  #   # the Docker image with Cypress dependencies and Chrome browser
-  #   - image: cypress/browsers:chrome64
+  parameters:
+    executor:
+      type: executor
+      default: cy-doc
+  executor: <<parameters.executor>>
   environment:
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
@@ -23,6 +25,7 @@ executors:
     docker:
       - image: cypress/browsers:chrome64
 
+  # executor to run on Mac OS
   mac:
     macos:
       xcode: "10.1.0"
@@ -31,11 +34,6 @@ jobs:
   ## code checkout and NPM installs
   build:
     <<: *defaults
-    parameters:
-      executor:
-        type: executor
-        default: cy-doc
-    executor: <<parameters.executor>>
     steps:
       - checkout
 
@@ -192,13 +190,13 @@ jobs:
           paths:
             - cypress
 
-  # lint:
-  #   <<: *defaults
-  #   steps:
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run: npm run lint
-  #     - run: npm run all lint
+  lint:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: npm run lint
+      - run: npm run all lint
 
   # "unit-tests":
   #   <<: *defaults
@@ -617,16 +615,20 @@ workflows:
     jobs:
       - build:
           name: Linux build
-
+      - lint:
+          name: Linux lint
+          requires:
+            - "Linux build"
   mac:
     jobs:
       - build:
           executor: mac
           name: Mac build
-
-      # - lint:
-      #     requires:
-      #       - build
+      - lint:
+          executor: mac
+          name: Mac lint
+          requires:
+            - "Mac build"
       # # unit, integration and e2e tests
       # - unit-tests:
       #     requires:
