@@ -24,11 +24,15 @@ executors:
   cy-doc:
     docker:
       - image: cypress/browsers:chrome64
+    environment:
+      PLATFORM: linux
 
   # executor to run on Mac OS
   mac:
     macos:
       xcode: "10.1.0"
+    environment:
+      PLATFORM: mac
 
 jobs:
   ## code checkout and NPM installs
@@ -402,14 +406,14 @@ jobs:
           command: node index.js
           working_directory: packages/launcher
 
-  "build-binary":
+  build-binary:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
-      - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
-      - run: npm run binary-zip -- --platform linux
+      - run: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
+      - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
       - run:
           name: upload unique binary
@@ -689,6 +693,7 @@ workflows:
             branches:
               only:
                 - develop
+                - build-osx-on-circle-2958
           requires:
             - build
       - test-next-version:
@@ -724,5 +729,15 @@ workflows:
       - lint:
           name: Mac lint
           executor: mac
+          requires:
+            - Mac build
+      # maybe run unit tests?
+      - build-binary:
+          name: Mac binary
+          filters:
+            branches:
+              only:
+                - develop
+                - build-osx-on-circle-2958
           requires:
             - Mac build
