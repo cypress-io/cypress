@@ -128,14 +128,14 @@ describe "lib/plugins/index", ->
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
       it "calls onError when ipc sends error", ->
         @ipc.on.withArgs("error").yield(@err)
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
   context "#register", ->
     it "registers callback for event", ->
