@@ -461,16 +461,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       #{chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")}
       """
     when "ERROR_READING_FILE"
+      filePath = "`#{arg1}`"
+      err = "`#{arg2}`"
       """
-      Error reading from: #{chalk.blue(arg1)}
+      Error reading from: #{chalk.blue(filePath)}
 
-      #{chalk.yellow(arg2)}
+      #{chalk.yellow(err)}
       """
     when "ERROR_WRITING_FILE"
+      filePath = "`#{arg1}`"
+      err = "`#{arg2}`"
       """
-      Error writing to: #{chalk.blue(arg1)}
+      Error writing to: #{chalk.blue(filePath)}
 
-      #{chalk.yellow(arg2)}
+      #{chalk.yellow(err)}
       """
     when "NO_SPECS_FOUND"
       ## no glob provided, searched all specs
@@ -557,11 +561,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       return {msg: msg, details: arg2}
     when "PLUGINS_ERROR"
-      """
+      msg = """
       The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
-
-      #{chalk.yellow(arg1)}
       """.trim()
+      return {msg: msg, details: arg1}
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -595,7 +598,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED"
       """
-      In Cypress v3.0.0 we removed the configuration option: #{chalk.yellow('screenshotOnHeadlessFailure')}
+      In Cypress v3.0.0 we removed the configuration option #{chalk.yellow('\`screenshotOnHeadlessFailure\`')}
 
       You now configure this behavior in your test code.
 
