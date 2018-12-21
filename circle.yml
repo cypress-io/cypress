@@ -611,8 +611,12 @@ jobs:
   mac-os-build:
     executor: mac
     steps:
-      - run: security find-identity -v -p codesigning
-      - run: security list-keychains
+      - run:
+          name: Show keychains
+          command: security list-keychains
+      - run:
+          name: Find code signing identity
+          command: security find-identity -v -p codesigning
 
 workflows:
   linux:
@@ -721,32 +725,34 @@ workflows:
             - build-npm-package
             - build-binary
 
-  mac:
-    jobs:
-      - build:
-          name: Mac build
-          executor: mac
-      - lint:
-          name: Mac lint
-          executor: mac
-          requires:
-            - Mac build
-      # maybe run unit tests?
-      - mac-os-build:
-          filters:
-            branches:
-              only:
-                - develop
-                - build-osx-on-circle-2958
+  # disable Mac build until we can figure CircleCI v2 story
+  # for code signing the built binary
+  # https://github.com/cypress-io/cypress/issues/2958
 
-      - build-binary:
-          name: Mac binary
-          executor: mac
-          filters:
-            branches:
-              only:
-                - develop
-                - build-osx-on-circle-2958
-          requires:
-            - Mac build
-            - mac-os-build
+  # mac:
+  #   jobs:
+  #     - build:
+  #         name: Mac build
+  #         executor: mac
+  #     - lint:
+  #         name: Mac lint
+  #         executor: mac
+  #         requires:
+  #           - Mac build
+  #     # maybe run unit tests?
+  #     - mac-os-build:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+
+  #     - build-binary:
+  #         name: Mac binary
+  #         executor: mac
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - Mac build
+  #           - mac-os-build
