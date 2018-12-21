@@ -23,7 +23,7 @@
     "decaffeinate-bulk": "bulk-decaffeinate",
     "check-deps": "node ./scripts/check-deps.js --verbose",
     "check-deps-pre": "node ./scripts/check-deps.js --verbose --prescript",
-    "prebuild": "npm run check-deps-pre",
+    "prebuild": "npm run check-deps-pre && npm run all prebuild",
     "build": "npm run all build",
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
@@ -52,7 +52,9 @@
     "test-scripts": "mocha --reporter spec scripts/unit/*spec.js",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
-    "check-node-version": "node scripts/check-node-version.js"
+    "check-node-version": "node scripts/check-node-version.js",
+    "check-terminal": "node scripts/check-terminal.js",
+    "effective:circle:config": "circleci config process circle.yml | sed /^#/d"
   },
   "lint-staged": {
     "*.js": [
