@@ -608,11 +608,11 @@ jobs:
             CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
 
-  # mac-os-build:
-  #   executor: mac
-  #   steps:
-  #     - run: security find-identity -p codesigning
-  #     - run: security list-keychains
+  mac-os-build:
+    executor: mac
+    steps:
+      - run: security find-identity -v -p codesigning
+      - run: security list-keychains
 
 workflows:
   linux:
@@ -732,6 +732,13 @@ workflows:
           requires:
             - Mac build
       # maybe run unit tests?
+      - mac-os-build:
+          filters:
+            branches:
+              only:
+                - develop
+                - build-osx-on-circle-2958
+
       - build-binary:
           name: Mac binary
           executor: mac
@@ -742,3 +749,4 @@ workflows:
                 - build-osx-on-circle-2958
           requires:
             - Mac build
+            - mac-os-build
