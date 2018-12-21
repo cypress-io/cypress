@@ -53,6 +53,7 @@
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
     "check-node-version": "node scripts/check-node-version.js",
+    "check-terminal": "node scripts/check-terminal.js",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d"
   },
   "lint-staged": {
