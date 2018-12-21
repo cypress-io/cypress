@@ -10,13 +10,8 @@ const nodeVersionNeeded = nodeVersionNeededString.split('.')
 
 const nodeVersion = process.versions.node.split('.')
 
-const isMac = process.platform === 'darwin'
-const isCircleCI = process.env.CIRCLECI === 'true'
-
-const isAllowedNodeMismatch = isMac && isCircleCI
-
 // check just major version for now
-if (nodeVersionNeeded[0] !== nodeVersion[0] && !isAllowedNodeMismatch) {
+if (nodeVersionNeeded[0] !== nodeVersion[0]) {
   /* eslint-disable no-console */
   console.error('🛑 .node-version specified %s', nodeVersionNeededString)
   console.error('but current Node is %s', process.versions.node)

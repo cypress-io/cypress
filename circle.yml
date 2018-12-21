@@ -30,7 +30,7 @@ executors:
   # executor to run on Mac OS
   mac:
     macos:
-      xcode: "10.1.0"
+      xcode: "9.2.0"
     environment:
       PLATFORM: mac
 
