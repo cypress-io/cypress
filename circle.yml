@@ -30,7 +30,7 @@ executors:
   # executor to run on Mac OS
   mac:
     macos:
-      xcode: "9.2.0"
+      xcode: "9.1.0"
     environment:
       PLATFORM: mac
 
@@ -40,7 +40,6 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-
       - run:
           name: Print working folder
           command: echo $PWD
