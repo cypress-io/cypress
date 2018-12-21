@@ -23,7 +23,7 @@
     "decaffeinate-bulk": "bulk-decaffeinate",
     "check-deps": "node ./scripts/check-deps.js --verbose",
     "check-deps-pre": "node ./scripts/check-deps.js --verbose --prescript",
-    "prebuild": "npm run check-deps-pre",
+    "prebuild": "npm run check-deps-pre && npm run all prebuild",
     "build": "npm run all build",
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",

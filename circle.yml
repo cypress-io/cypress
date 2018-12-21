@@ -185,7 +185,8 @@ jobs:
         ## we update stop-only
     #   - run: npm run stop-only
       ## now go build all of subpackages
-      - run: npm run build
+      - run: npm run prebuild -- --serial
+      - run: npm run build -- --serial
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
