@@ -734,6 +734,7 @@ workflows:
       # maybe run unit tests?
       - build-binary:
           name: Mac binary
+          executor: mac
           filters:
             branches:
               only:
