@@ -139,6 +139,15 @@ create = (state) ->
       simulate()
 
   interceptFocus = (el, contentWindow, focusOption) ->
+    ## normally programmatic focus calls cause "primed" focus/blur
+    ## events if the window is not in focus
+    ## so we fire fake events to act as if the window
+    ## is in focus. The primed events will fire when the user returns however
+    ## actAsIfWindowHasFocus is true by default
+    if (state('actAsIfWindowHasFocus'))
+      fireFocus(el)
+      return
+      
     ## if our document does not have focus
     ## then that means that we need to attempt to
     ## bring our window into focus, and then figure
