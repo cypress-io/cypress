@@ -164,6 +164,26 @@ describe "src/dom/coordinates", ->
       '
       .appendTo $ 'body'
 
-      obj = Cypress.dom.getElementCoordinatesByPosition(cy.$$("#multiple"), 'center').fromViewport
+      $el = cy.$$("#multiple")
+      el = $el[0]
 
-      expect({x: obj.x, y: obj.y}).to.be.close({x:122, y:152})
+      cy.stub(el, 'getClientRects', ->
+        [
+          {
+          top: 100
+          left: 100
+          width: 50
+          height: 40
+          },
+          {
+          top: 200
+          left: 50
+          width: 10
+          height: 10
+          }
+      ]
+
+      ).as 'getClientRects'
+      obj = Cypress.dom.getElementCoordinatesByPosition($el, 'center').fromViewport
+
+      expect({x: obj.x, y: obj.y}).to.deep.eq({x:125, y:120})
