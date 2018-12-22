@@ -20,7 +20,7 @@ const getElementPositioning = ($el) => {
   // This should be the same as using getBoundingClientRect()
   // for elements with a single rect
   // const rect = el.getBoundingClientRect()
-  const rect = el.getClientRects()[0]
+  const rect = el.getClientRects()[0] || el.getBoundingClientRect()
 
   const center = getCenterCoordinates(rect)
 
