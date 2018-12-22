@@ -155,7 +155,7 @@ describe "src/dom/coordinates", ->
         expect(obj.x).to.eq(159)
         expect(obj.y).to.eq(124)
 
-  context "span spanning multiple lines", ->
+  context.only "span spanning multiple lines", ->
     it 'gets first dom rect in multiline text', ->
       $ '
       <div style="width:150px; margin-top:100px">
@@ -166,4 +166,4 @@ describe "src/dom/coordinates", ->
 
       obj = Cypress.dom.getElementCoordinatesByPosition(cy.$$("#multiple"), 'center').fromViewport
 
-      expect({x: obj.x, y: obj.y}).to.deep.eq({x:122, y:152})
+      expect({x: obj.x, y: obj.y}).to.be.close({x:122, y:152})
