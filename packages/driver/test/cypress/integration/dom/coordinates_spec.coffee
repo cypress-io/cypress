@@ -155,7 +155,7 @@ describe "src/dom/coordinates", ->
         expect(obj.x).to.eq(159)
         expect(obj.y).to.eq(124)
 
-  context.only "span spanning multiple lines", ->
+  context "span spanning multiple lines", ->
     it 'gets first dom rect in multiline text', ->
       $ '
       <div style="width:150px; margin-top:100px">
