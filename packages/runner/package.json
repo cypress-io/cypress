@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
-    "prebuild": "npm run check-deps-pre rebuild-node-sass",
+    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
     "build": "node ./scripts/build-dev.js",
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "node ./scripts/build-prod.js",
@@ -46,6 +46,6 @@
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.2.0",
-    "zunder": "6.2.0"
+    "zunder": "6.2.1"
   }
 }
