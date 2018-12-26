@@ -89,7 +89,7 @@ beforeEach(function () {
 })
 
 afterEach(function () {
+  mockfs.restore()
   process.env = _.clone(env)
   sinon.restore()
-  mockfs.restore()
 })
