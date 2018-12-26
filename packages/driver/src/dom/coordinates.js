@@ -5,13 +5,22 @@ const getElementAtPointFromViewport = (doc, x, y) => {
 }
 
 const getElementPositioning = ($el) => {
+  /**
+   * @type {HTMLElement}
+   */
   const el = $el[0]
 
   const win = $window.getWindowByElement(el)
 
   // properties except for width / height
   // are relative to the top left of the viewport
-  const rect = el.getBoundingClientRect()
+
+  // we use the first of getClientRects in order to account for inline elements
+  // that span multiple lines. Which would cause us to click in the center and thus miss
+  // This should be the same as using getBoundingClientRect()
+  // for elements with a single rect
+  // const rect = el.getBoundingClientRect()
+  const rect = el.getClientRects()[0] || el.getBoundingClientRect()
 
   const center = getCenterCoordinates(rect)
 
