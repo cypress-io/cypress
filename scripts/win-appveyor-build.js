@@ -17,6 +17,7 @@ shell.set('-e') // any error is fatal
 
 const isRightBranch = () => {
   const branch = process.env.APPVEYOR_REPO_BRANCH
+
   return branch === 'develop'
 }
 
@@ -49,9 +50,11 @@ shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
 // make sure we are not including dev dependencies accidentally
 // TODO how to get the server package folder?
 const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
+
 shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
-shell.exec('npm ls --prod --depth 0 || true', {cwd: serverPackageFolder})
-const result = shell.exec('npm ls --dev --depth 0 || true', {cwd: serverPackageFolder})
+shell.exec('npm ls --prod --depth 0 || true', { cwd: serverPackageFolder })
+const result = shell.exec('npm ls --dev --depth 0 || true', { cwd: serverPackageFolder })
+
 if (result.stdout.includes('nodemon')) {
   console.error('Hmm, server package includes dev dependency "nodemon"')
   console.error('which means somehow we are including dev dependencies in the output bundle')
