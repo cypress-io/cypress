@@ -1879,6 +1879,9 @@ declare namespace Cypress {
     env: object
   }
 
+  /**
+   * Full set of possible options for cy.request call
+   */
   interface RequestOptions extends Loggable, Timeoutable {
     auth: object
     body: RequestBody
@@ -1888,7 +1891,7 @@ declare namespace Cypress {
     gzip: boolean
     headers: object
     method: HttpMethod
-    qs: string
+    qs: object
     url: string
   }
 
@@ -1954,6 +1957,10 @@ declare namespace Cypress {
     interval: number
   }
 
+  /**
+   * Setting default options for cy.server()
+   * @see https://on.cypress.io/server
+   */
   interface ServerOptions {
     delay: number
     method: HttpMethod
@@ -1966,7 +1973,7 @@ declare namespace Cypress {
     enable: boolean
     force404: boolean
     urlMatchingOptions: object
-    whitelist(...args: any[]): void
+    whitelist(xhr: Request): void
   }
 
   interface SetCookieOptions extends Loggable, Timeoutable {
