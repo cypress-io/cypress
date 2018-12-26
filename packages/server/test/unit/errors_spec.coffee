@@ -39,7 +39,7 @@ describe "lib/errors", ->
       err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh")
       errors.log(err).then =>
         expect(@log).to.be.calledWithMatch("foo/bar/baz")
-        expect(@log).to.be.calledWithMatch("details huh")
+        expect(@log).to.be.calledWithMatch("\n", "details huh")
 
     it "logs err.stack in development", ->
       process.env.CYPRESS_ENV = "development"
