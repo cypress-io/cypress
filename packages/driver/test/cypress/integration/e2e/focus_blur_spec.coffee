@@ -137,20 +137,24 @@ describe 'polyfill programmatic blur events', ->
   oldFocus = window.top.HTMLElement.prototype.focus
   oldBlur = window.top.HTMLElement.prototype.blur
   oldHasFocus = window.top.document.hasFocus
-
+  oldActiveElement = null
   beforeEach ->
+    oldActiveElement = Object.getOwnPropertyDescriptor(window.Document.prototype, 'activeElement')
+
     ## simulate window being out of focus by overwriting
     ## the focus/blur methods on HTMLElement
     window.top.document.hasFocus = -> false
     window.top.HTMLElement.prototype.focus = ->
     window.top.HTMLElement.prototype.blur = ->
+    
 
   afterEach ->
+    Object.defineProperty(window.Document.prototype, 'activeElement', oldActiveElement)
     window.top.HTMLElement.prototype.focus = oldFocus
     window.top.HTMLElement.prototype.blur = oldBlur
     window.top.document.hasFocus = oldHasFocus
     
-  it 'polyfills programmatic blur events when window is out of focus', ->
+  it 'simulated events when window is out of focus when .focus called', ->
     cy
     .visit("http://localhost:3500/fixtures/active-elements.html")
     .then ->
@@ -168,32 +172,72 @@ describe 'polyfill programmatic blur events', ->
           events.push(e.originalEvent)
 
       $one.get(0).focus()
-      ## a hack here becuase we nuked the real .blur
+      ## a hack here becuase we nuked the real .focus
+      Object.defineProperty(cy.state('document'), 'activeElement', {
+      get: ->
+        return $one.get(0)
+      })
+      $two.get(0).focus()
+
+      cy.log(events).then ->
+        expect(_.toPlainObject(events[0])).to.include({
+          type: "focus"
+          isTrusted: false
+          target: $one.get(0)
+        })
+
+        expect(_.toPlainObject(events[1])).to.include({
+          type: "blur"
+          isTrusted: false
+          target: $one.get(0)
+        })
+
+        expect(_.toPlainObject(events[2])).to.include({
+          type: "focus"
+          isTrusted: false
+          target: $two.get(0)
+        })
+
+    
+  it 'simulated events when window is out of focus when .blur called', ->
+    cy
+    .visit("http://localhost:3500/fixtures/active-elements.html")
+    .then ->
+      events = []
+
+      ## programmatically focus the first, then second input element
+      $one = cy.$$("#one")
+      $two = cy.$$("#two")
+
+      ["focus", "blur"].forEach (evt) ->
+        $one.on evt, (e) ->
+          events.push(e.originalEvent)
+
+        $two.on evt, (e) ->
+          events.push(e.originalEvent)
+
+      $one.get(0).focus()
+      ## a hack here becuase we nuked the real .focus
       Object.defineProperty(cy.state('document'), 'activeElement', {
         get: ->
           return $one.get(0)
       })
-      $two.get(0).focus()
+      $one.get(0).blur()
 
-      expect(events).to.have.length(3)
 
-      expect(_.toPlainObject(events[0])).to.include({
-        type: "focus"
-        isTrusted: false
-        target: $one.get(0)
-      })
+      cy.log(events).then ->
 
-      expect(_.toPlainObject(events[1])).to.include({
-        type: "blur"
-        isTrusted: false
-        target: $one.get(0)
-      })
+        expect(_.toPlainObject(events[0])).to.include({
+          type: "focus"
+          isTrusted: false
+          target: $one.get(0)
+        })
 
-      expect(_.toPlainObject(events[2])).to.include({
-        type: "focus"
-        isTrusted: false
-        target: $two.get(0)
-      })
+        expect(_.toPlainObject(events[1])).to.include({
+          type: "blur"
+          isTrusted: false
+          target: $one.get(0)
+        })
 
 
   describe "when cy.state('actAsIfWindowHasFocus') = false", ->
@@ -343,5 +387,3 @@ it 'not perform actionability if already focused inside contenteditable', ->
     sel.removeAllRanges()
     sel.addRange(range)
   cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
-
-
