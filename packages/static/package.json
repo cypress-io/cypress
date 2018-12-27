@@ -19,6 +19,6 @@
   ],
   "devDependencies": {
     "@cypress/icons": "0.5.4",
-    "gulp": "^3.9.1"
+    "gulp": "3.9.1"
   }
 }

@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
-    "bin-up": "^1.1.0",
-    "chai": "^3.5.0",
-    "cross-env": "^5.0.5"
+    "bin-up": "1.1.0",
+    "chai": "3.5.0",
+    "cross-env": "5.2.0"
   }
 }
