@@ -10,8 +10,16 @@
     "automerge": false
   },
   "rangeStrategy": "pin",
+  "packageRules": [
+    {
+      "packageNames": [
+        "node"
+      ],
+      "enabled": false
+    }
+  ],
   "separateMultipleMajor": true,
-  "labels": ["type: dependencies"],
+  "labels": ["type: dependencies", "renovate"],
   "commitMessage": "{{semanticPrefix}}Update {{depName}} to {{newVersion}} 🌟",
   "prTitle": "{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}} 🌟",
   "prHourlyLimit": 1,
