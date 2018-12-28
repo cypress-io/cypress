@@ -1,138 +1,114 @@
-const $Keyboard = require('./keyboard')
-const $dom = require('../dom')
+Promise = require("bluebird")
 
-const { stopPropagation } = window.MouseEvent.prototype
+$Cypress = require("../cypress")
+$Keyboard = require("./keyboard")
+$dom = require("../dom")
+
+stopPropagation = window.MouseEvent.prototype.stopPropagation
 
 module.exports = {
-  mouseDown ($elToClick, fromViewport) {
-    const el = $elToClick.get(0)
+  mouseDown: ($elToClick, fromViewport) ->
+    el = $elToClick.get(0)
 
-    const win = $dom.getWindowByElement(el)
+    win = $dom.getWindowByElement(el)
 
-    const mdownEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true,
-      cancelable: true,
-      view: win,
-      clientX: fromViewport.x,
-      clientY: fromViewport.y,
-      buttons: 1,
-      detail: 1,
+    mdownEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true
+      cancelable: true
+      view: win
+      clientX: fromViewport.x
+      clientY: fromViewport.y
+      buttons: 1
+      detail: 1
     })
 
-    const mdownEvt = new window.MouseEvent('mousedown', mdownEvtProps)
+    mdownEvt = new window.MouseEvent "mousedown", mdownEvtProps
 
-    //# ensure this property exists on older chromium versions
-    if (mdownEvt.buttons == null) {
-      mdownEvt.buttons = 1
+    ## ensure this property exists on older chromium versions
+    mdownEvt.buttons ?= 1
+
+    mdownEvt.stopPropagation = ->
+      @_hasStoppedPropagation = true
+      stopPropagation.apply(@, arguments)
+
+    cancelled = !el.dispatchEvent(mdownEvt)
+
+    props = {
+      preventedDefault: cancelled
+      stoppedPropagation: !!mdownEvt._hasStoppedPropagation
     }
 
-    mdownEvt.stopPropagation = function (...args) {
-      this._hasStoppedPropagation = true
+    modifiers = $Keyboard.activeModifiers()
+    props.modifiers = modifiers.join(", ") if modifiers.length
+    props
 
-      return stopPropagation.apply(this, args)
-    }
+  mouseUp: ($elToClick, fromViewport) ->
+    el = $elToClick.get(0)
 
-    const cancelled = !el.dispatchEvent(mdownEvt)
+    win = $dom.getWindowByElement(el)
 
-    const props = {
-      preventedDefault: cancelled,
-      stoppedPropagation: !!mdownEvt._hasStoppedPropagation,
-    }
-
-    const modifiers = $Keyboard.activeModifiers()
-
-    if (modifiers.length) {
-      props.modifiers = modifiers.join(', ')
-    }
-
-    return props
-  },
-
-  mouseUp ($elToClick, fromViewport) {
-    const el = $elToClick.get(0)
-
-    const win = $dom.getWindowByElement(el)
-
-    const mupEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true,
-      cancelable: true,
-      view: win,
-      clientX: fromViewport.x,
-      clientY: fromViewport.y,
-      buttons: 0,
-      detail: 1,
+    mupEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true
+      cancelable: true
+      view: win
+      clientX: fromViewport.x
+      clientY: fromViewport.y
+      buttons: 0
+      detail: 1
     })
 
-    const mupEvt = new MouseEvent('mouseup', mupEvtProps)
+    mupEvt = new MouseEvent "mouseup", mupEvtProps
 
-    //# ensure this property exists on older chromium versions
-    if (mupEvt.buttons == null) {
-      mupEvt.buttons = 0
+    ## ensure this property exists on older chromium versions
+    mupEvt.buttons ?= 0
+
+    mupEvt.stopPropagation = ->
+      @_hasStoppedPropagation = true
+      stopPropagation.apply(@, arguments)
+
+    cancelled = !el.dispatchEvent(mupEvt)
+
+    props = {
+      preventedDefault: cancelled
+      stoppedPropagation: !!mupEvt._hasStoppedPropagation
     }
 
-    mupEvt.stopPropagation = function (...args) {
-      this._hasStoppedPropagation = true
+    modifiers = $Keyboard.activeModifiers()
+    props.modifiers = modifiers.join(", ") if modifiers.length
+    props
 
-      return stopPropagation.apply(this, args)
-    }
+  click: ($elToClick, fromViewport) ->
+    el = $elToClick.get(0)
 
-    const cancelled = !el.dispatchEvent(mupEvt)
+    win = $dom.getWindowByElement(el)
 
-    const props = {
-      preventedDefault: cancelled,
-      stoppedPropagation: !!mupEvt._hasStoppedPropagation,
-    }
-
-    const modifiers = $Keyboard.activeModifiers()
-
-    if (modifiers.length) {
-      props.modifiers = modifiers.join(', ')
-    }
-
-    return props
-  },
-
-  click ($elToClick, fromViewport) {
-    const el = $elToClick.get(0)
-
-    const win = $dom.getWindowByElement(el)
-
-    const clickEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true,
-      cancelable: true,
-      view: win,
-      clientX: fromViewport.x,
-      clientY: fromViewport.y,
-      buttons: 0,
-      detail: 1,
+    clickEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true
+      cancelable: true
+      view: win
+      clientX: fromViewport.x
+      clientY: fromViewport.y
+      buttons: 0
+      detail: 1
     })
 
-    const clickEvt = new MouseEvent('click', clickEvtProps)
+    clickEvt = new MouseEvent "click", clickEvtProps
 
-    //# ensure this property exists on older chromium versions
-    if (clickEvt.buttons == null) {
-      clickEvt.buttons = 0
+    ## ensure this property exists on older chromium versions
+    clickEvt.buttons ?= 0
+
+    clickEvt.stopPropagation = ->
+      @_hasStoppedPropagation = true
+      stopPropagation.apply(@, arguments)
+
+    cancelled = !el.dispatchEvent(clickEvt)
+
+    props = {
+      preventedDefault: cancelled
+      stoppedPropagation: !!clickEvt._hasStoppedPropagation
     }
 
-    clickEvt.stopPropagation = function (...args) {
-      this._hasStoppedPropagation = true
-
-      return stopPropagation.apply(this, args)
-    }
-
-    const cancelled = !el.dispatchEvent(clickEvt)
-
-    const props = {
-      preventedDefault: cancelled,
-      stoppedPropagation: !!clickEvt._hasStoppedPropagation,
-    }
-
-    const modifiers = $Keyboard.activeModifiers()
-
-    if (modifiers.length) {
-      props.modifiers = modifiers.join(', ')
-    }
-
-    return props
-  },
+    modifiers = $Keyboard.activeModifiers()
+    props.modifiers = modifiers.join(", ") if modifiers.length
+    props
 }
