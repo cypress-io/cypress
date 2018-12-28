@@ -24,7 +24,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.2.0",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.26.0",
     "@cypress/react-tooltip": "^0.2.2",
