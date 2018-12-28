@@ -19,6 +19,7 @@ try
   app = require("electron").app
   app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
   app.commandLine.appendSwitch("ignore-certificate-errors", true)
+  app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required") ## Autoplay policy that does not require any user gesture.
 
   if os.platform() is "linux"
     app.disableHardwareAcceleration()

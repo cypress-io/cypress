@@ -23,6 +23,7 @@ defaultArgs = [
   "--no-default-browser-check"
   "--no-first-run"
   "--noerrdialogs"
+  "--autoplay-policy=no-user-gesture-required" ## Autoplay policy that does not require any user gesture.
   "--enable-fixed-layout"
   "--disable-popup-blocking"
   "--disable-password-generation"
