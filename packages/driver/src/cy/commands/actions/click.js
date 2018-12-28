@@ -1,16 +1,4 @@
-/* eslint-disable
-    no-cond-assign,
-    no-unused-vars,
-    one-var,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -28,7 +16,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     //# TODO handle pointer-events: none
     //# http://caniuse.com/#feat=pointer-events
 
-      let position, x;
+      let position
+      let x
 
       ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
 
@@ -54,14 +43,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      const win = state('window')
-
-      const click = (el, index) => {
+      const click = (el) => {
         let deltaOptions
         const $el = $dom.wrap(el)
 
         const domEvents = {}
-        const $previouslyFocusedEl = null
 
         if (options.log) {
         //# figure out the options which actually change the behavior of clicks
@@ -178,9 +164,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           //# automatically shift the focus to the element
           //# without firing the focus event
             const $previouslyFocused = cy.getFocused()
+            const ElNeedingForceFocus = cy.needsForceFocus()
 
-            if (el = cy.needsForceFocus()) {
-              cy.fireFocus(el)
+            if (ElNeedingForceFocus) {
+              cy.fireFocus(ElNeedingForceFocus)
             }
 
             el = $elToClick.get(0)
@@ -265,7 +252,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       const dblclicks = []
 
-      const dblclick = (el, index) => {
+      const dblclick = (el) => {
         let log
         const $el = $dom.wrap(el)
 
