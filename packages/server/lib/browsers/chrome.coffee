@@ -42,6 +42,10 @@ defaultArgs = [
   "--disable-infobars"
   "--disable-device-discovery-notifications"
 
+  ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
+  ## https://github.com/cypress-io/cypress/issues/1872
+  "--proxy-bypass-list=<-loopback>"
+
   ## http://www.chromium.org/Home/chromium-security/site-isolation
   ## https://github.com/cypress-io/cypress/issues/1951
   "--disable-site-isolation-trials"
