@@ -47,7 +47,7 @@ it "blur the activeElement when clicking the body", ->
 
     doc = cy.state("document")
 
-    hasFocus = top.document.hasFocus()
+    hasFocus = doc.hasFocus()
 
     ## programmatically focus the first, then second input element
     $body = cy.$$("body")
@@ -67,70 +67,48 @@ it "blur the activeElement when clicking the body", ->
     cy
     .log('top.document.hasFocus()', hasFocus)
     .then ->
-      if hasFocus
-        ## if we currently have focus it means
-        ## that the browser should fire the
-        ## native event immediately
-        expect(cy.state("needsForceFocus")).to.be.undefined
-        expect(events).to.have.length(3)
+      ## if we currently have focus it means
+      ## that the browser should fire the
+      ## native event immediately
+      expect(cy.state("needsForceFocus")).to.be.undefined
+      expect(events).to.have.length(3)
 
-        expect(_.toPlainObject(events[0])).to.include({
-          type: "focus"
-          isTrusted: true
-          target: $one.get(0)
-        })
+      expect(_.toPlainObject(events[0])).to.include({
+        type: "focus"
+        isTrusted: true
+        target: $one.get(0)
+      })
 
-        expect(_.toPlainObject(events[1])).to.include({
-          type: "blur"
-          isTrusted: true
-          target: $one.get(0)
-        })
+      expect(_.toPlainObject(events[1])).to.include({
+        type: "blur"
+        isTrusted: true
+        target: $one.get(0)
+      })
 
-        expect(_.toPlainObject(events[2])).to.include({
-          type: "focus"
-          isTrusted: true
-          target: $two.get(0)
-        })
-      else
-        expect(cy.state("needsForceFocus")).to.eq($two.get(0))
-        expect(events).to.be.empty
+      expect(_.toPlainObject(events[2])).to.include({
+        type: "focus"
+        isTrusted: true
+        target: $two.get(0)
+      })
 
-        expect(cy.getFocused().get(0)).to.eq($two.get(0))
+    cy
+    .get("body").click()
+    .then ->
+      expect(doc.activeElement).to.eq($body.get(0))
 
-      cy
-      .get("body").click()
-      .then ->
-        expect(doc.activeElement).to.eq($body.get(0))
+    cy
+    .log('top.document.hasFocus()', hasFocus)
+    .then ->
+      ## if we had focus then no additional
+      ## focus event is necessary
+      expect(events).to.have.length(4)
 
-        cy
-        .log('top.document.hasFocus()', hasFocus)
-        .then ->
-          if hasFocus
-            ## if we had focus then no additional
-            ## focus event is necessary
-            expect(events).to.have.length(4)
+      expect(_.toPlainObject(events[3])).to.include({
+        type: "blur"
+        isTrusted: true
+        target: $two.get(0)
+      })
 
-            expect(_.toPlainObject(events[3])).to.include({
-              type: "blur"
-              isTrusted: true
-              target: $two.get(0)
-            })
-          else
-            expect(cy.state("needsForceFocus")).to.be.null
-
-            ## we polyfill the focus event manually
-            expect(events).to.have.length(2)
-
-            expect(_.toPlainObject(events[0])).to.include({
-              type: "focus"
-              isTrusted: false
-              target: $two.get(0)
-            })
-            expect(_.toPlainObject(events[1])).to.include({
-              type: "blur"
-              isTrusted: false
-              target: $two.get(0)
-            })
 
 describe 'polyfill programmatic blur events', ->
   ## restore these props for the rest of the tests
@@ -154,6 +132,7 @@ describe 'polyfill programmatic blur events', ->
     window.top.HTMLElement.prototype.blur = oldBlur
     window.top.document.hasFocus = oldHasFocus
     
+  ## https://github.com/cypress-io/cypress/issues/1486
   it 'simulated events when window is out of focus when .focus called', ->
     cy
     .visit("http://localhost:3500/fixtures/active-elements.html")
@@ -198,7 +177,7 @@ describe 'polyfill programmatic blur events', ->
           target: $two.get(0)
         })
 
-    
+  ## https://github.com/cypress-io/cypress/issues/1176
   it 'simulated events when window is out of focus when .blur called', ->
     cy
     .visit("http://localhost:3500/fixtures/active-elements.html")
@@ -243,9 +222,8 @@ describe 'polyfill programmatic blur events', ->
   describe "when cy.state('actAsIfWindowHasFocus') = false", ->
     beforeEach ->
       cy.state('actAsIfWindowHasFocus', false)
-    
-    
-    it 'sends programmatic blur when delayed due to window being out of focus', ->
+     
+    it 'sends delayed blur when programmatically invoked during action commands', ->
       cy
       .visit("http://localhost:3500/fixtures/active-elements.html")
       .then ->
@@ -334,56 +312,55 @@ describe 'polyfill programmatic blur events', ->
           expect(events[0].isTrusted).to.be.false
 
 
+## https://github.com/cypress-io/cypress/issues/3001
+describe 'skip actionability if already focused', ->
+  it 'inside input', ->
+    cy
+    .visit("http://localhost:3500/fixtures/active-elements.html")
+    .then ->
 
-it 'not perform actionability if already focused inside input', ->
-  cy
-  .visit("http://localhost:3500/fixtures/active-elements.html")
-  .then ->
+      cy.$$('body').append(Cypress.$('
+      <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+      <input type="text" id="foo">
+      '))
+      win = cy.state('window')
+      doc = window.document
+      cy.$$('#foo').focus()
+    cy.focused().type('new text').should('have.prop', 'value', 'new text')
 
-    cy.$$('body').append(Cypress.$('
-    <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
-    <input type="text" id="foo">
-    '))
-    win = cy.state('window')
-    doc = window.document
-    cy.$$('#foo').focus()
-  cy.focused().type('new text').should('have.prop', 'value', 'new text')
+  it 'inside textarea', ->
+    cy
+    .visit("http://localhost:3500/fixtures/active-elements.html")
+    .then ->
 
-        
-it 'not perform actionability if already focused inside textarea', ->
-  cy
-  .visit("http://localhost:3500/fixtures/active-elements.html")
-  .then ->
+      cy.$$('body').append(Cypress.$('
+      <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+      <textarea id="foo"></textarea>
+      '))
+      win = cy.state('window')
+      doc = window.document
+      cy.$$('#foo').focus()
+    cy.focused().type('new text').should('have.prop', 'value', 'new text')
 
-    cy.$$('body').append(Cypress.$('
-    <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
-    <textarea id="foo"></textarea>
-    '))
-    win = cy.state('window')
-    doc = window.document
-    cy.$$('#foo').focus()
-  cy.focused().type('new text').should('have.prop', 'value', 'new text')
+  it 'inside contenteditable', ->
+    cy
+    .visit("http://localhost:3500/fixtures/active-elements.html")
+    .then ->
 
-        
-it 'not perform actionability if already focused inside contenteditable', ->
-  cy
-  .visit("http://localhost:3500/fixtures/active-elements.html")
-  .then ->
-
-    cy.$$('body').append(Cypress.$('
-    <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
-    <div id="foo" contenteditable>
-      <div>foo</div><div>bar</div><div>baz</div>
-    </div>
-    '))
-    win = cy.state('window')
-    doc = window.document
-    cy.$$('#foo').focus()
-    inner = cy.$$('div:contains(bar):last')
-    console.log(inner)
-    range = doc.createRange()
-    range.selectNodeContents(inner[0])
-    sel = win.getSelection()
-    sel.removeAllRanges()
-    sel.addRange(range)
-  cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
+      cy.$$('body').append(Cypress.$('
+      <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+      <div id="foo" contenteditable>
+        <div>foo</div><div>bar</div><div>baz</div>
+      </div>
+      '))
+      win = cy.state('window')
+      doc = window.document
+      cy.$$('#foo').focus()
+      inner = cy.$$('div:contains(bar):last')
+      console.log(inner)
+      range = doc.createRange()
+      range.selectNodeContents(inner[0])
+      sel = win.getSelection()
+      sel.removeAllRanges()
+      sel.addRange(range)
+    cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
