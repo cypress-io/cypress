@@ -608,6 +608,35 @@ jobs:
             CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
 
+  "test-binary-against-kitchensink":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: /tmp/urls
+      - run:
+          name: Cloning kitchensink project
+          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
+      - run:
+          command: npm install
+          working_directory: /tmp/kitchensink
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/kitchensink
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run build
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm start
+          background: true
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run e2e
+
   mac-os-build:
     executor: mac
     steps:
@@ -697,7 +726,6 @@ workflows:
             branches:
               only:
                 - develop
-                - build-osx-on-circle-2958
           requires:
             - build
       - test-next-version:
@@ -717,6 +745,14 @@ workflows:
             - build-npm-package
             - build-binary
       - test-binary-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build-npm-package
+            - build-binary
+      - test-binary-against-kitchensink:
           filters:
             branches:
               only:
