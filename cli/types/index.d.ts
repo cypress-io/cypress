@@ -3933,10 +3933,9 @@ declare namespace Cypress {
     left: number
   }
 
-  // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
+  // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
-  // TODO - remove this if possible. Seems a recent change to TypeScript broke this. Possibly https://github.com/Microsoft/TypeScript/pull/17912
-  type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>> // tslint:disable-line
+  type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 }
 
 /**
