@@ -719,7 +719,6 @@ workflows:
             branches:
               only:
                 - develop
-                - better-test-binary-against-kitchensink-3024
           requires:
             - build
       - build-binary:
@@ -727,7 +726,6 @@ workflows:
             branches:
               only:
                 - develop
-                - better-test-binary-against-kitchensink-3024
           requires:
             - build
       - test-next-version:
@@ -759,7 +757,6 @@ workflows:
             branches:
               only:
                 - develop
-                - better-test-binary-against-kitchensink-3024
           requires:
             - build-npm-package
             - build-binary
