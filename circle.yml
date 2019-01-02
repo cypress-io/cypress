@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:chrome67
+      - image: cypress/browsers:chrome64
     environment:
       PLATFORM: linux
 
@@ -619,7 +619,7 @@ jobs:
           name: Cloning kitchensink project
           command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
       - run:
-          command: npm ci
+          command: npm install
           working_directory: /tmp/kitchensink
       - run:
           name: Install Cypress
