@@ -71,7 +71,7 @@
     "express-session": "^1.14.1",
     "express-useragent": "^1.0.4",
     "https-proxy-agent": "^1.0.0",
-    "inquirer": "3.0.6",
+    "inquirer": "3.3.0",
     "istanbul": "^0.4.2",
     "mocked-env": "1.2.4",
     "mockery": "^1.4.0",
