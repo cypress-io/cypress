@@ -359,6 +359,9 @@ class $Cypress
       when "cy:scrolled"
         @emit("scrolled", args...)
 
+      when "cy:mouse:move"
+        @emit("mouse:move", args...)
+
       when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)
 

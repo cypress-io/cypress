@@ -4,7 +4,6 @@
     no-cond-assign,
     no-const-assign,
     no-dupe-keys,
-    no-undef,
     one-var,
     prefer-rest-params,
 */
@@ -253,7 +252,7 @@ const setNativeProp = function (obj, prop, val) {
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
 
-    throw new Error(`attempted to use a native setter prop called: ${fn}. Available props are: ${fns}`)
+    throw new Error(`attempted to use a native setter prop called: ${prop}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)
@@ -354,6 +353,33 @@ const isScrollOrAuto = (prop) => {
 
 const isAncestor = ($el, $maybeAncestor) => {
   return $el.parents().index($maybeAncestor) >= 0
+}
+
+const getFirstCommonAncestor = (el1, el2) => {
+  const el1Ancestors = [el1].concat(getAllParents(el1))
+  let curEl = el2
+
+  while (curEl) {
+    if (el1Ancestors.indexOf(curEl) !== -1) {
+      return curEl
+    }
+
+    curEl = el2.parentNode
+  }
+
+  return curEl
+}
+
+const getAllParents = (el) => {
+  let curEl = el.parentNode
+  const allParents = []
+
+  while (curEl) {
+    allParents.push(curEl)
+    curEl = curEl.parentNode
+  }
+
+  return allParents
 }
 
 const isSelector = ($el, selector) => {
@@ -769,6 +795,8 @@ module.exports = {
   getContainsSelector,
 
   getFirstDeepestElement,
+
+  getFirstCommonAncestor,
 
   getFirstFixedOrStickyPositionParent,
 

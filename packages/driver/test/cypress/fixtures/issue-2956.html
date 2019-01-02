@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+
+  <script
+    type="text/javascript"
+    
+  ></script>
+
+
+	<style id="compiled-css" type="text/css">
+
+div {
+  display: block;
+  -webkit-transition: opacity 1s, background-color 0.5s;
+  transition: opacity 1s, background-color 0.5s;
+}
+
+.square {
+  width: 100px;
+  height: 100px;
+}
+
+.red {
+  background-color: red;
+}
+
+.blue {
+  background-color: blue;
+  opacity: 0;
+	display: none;
+  height: 50px;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.active {
+  opacity: 1;
+	display: inherit;
+}
+
+button {
+  display: inherit;
+  position: relative;
+  margin: auto;
+  top: 15px;
+}
+  </style>
+
+
+  <!-- TODO: Missing CoffeeScript 2 -->
+
+  <script type="text/javascript">
+
+
+    window.onload=function(){
+      
+var outer = document.getElementById('outer'),
+inner = document.getElementById('inner'),
+btn = document.getElementById('btn');
+
+function activate() {
+  inner.classList.add('active');
+}
+
+function deactivate() {
+  inner.classList.remove('active');
+}
+
+function color() {
+	if (outer.classList.contains('yellow')) {
+  	outer.classList.remove('yellow');
+  } else {
+  	outer.classList.add('yellow');
+  };
+}
+
+btn.addEventListener("click", color, false);
+outer.addEventListener("mouseenter", activate, false);
+outer.addEventListener("mouseleave", deactivate, false);
+
+}
+
+</script>
+
+</head>
+<body>
+    <div id="outer" class="red square">
+  <div id="inner" class="blue square">
+    <button id="btn">CLICK</button>
+  </div>
+</div>
+
+</body>
+</html>
