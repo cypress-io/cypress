@@ -1872,6 +1872,27 @@ describe "src/cy/commands/xhr", ->
           expect(log.get("state")).to.eq("failed")
           expect(xhr.aborted).to.be.true
 
+    it "aborts xhrs even when responseType  not '' or 'text'", ->
+      # THIS TEST CRASHES CYPRESS
+      log = null
+
+      cy.on "log:changed", (attrs, l) =>
+        if attrs.name is "xhr"
+          log = l
+
+      cy
+      .window()
+      .then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.responseType = 'arraybuffer'
+        xhr.open("GET", "/timeout?ms=1000")
+        xhr.send()
+        xhr.abort()
+
+        cy.wrap(null).should ->
+          expect(log.get("state")).to.eq("failed")
+          expect(xhr.aborted).to.be.true
+
     ## https://github.com/cypress-io/cypress/issues/1652
     it "does not set aborted on XHR's that have completed by have had .abort() called", ->
       log = null
