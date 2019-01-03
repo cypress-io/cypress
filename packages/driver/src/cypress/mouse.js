@@ -229,7 +229,8 @@ const $Mouse = {
     const el = $elToClick.get(0)
     const _activeModifiers = $Keyboard.activeModifiers()
     const modifiers = _activeModifiers.length ? _activeModifiers.join(', ') : null
-
+    
+    const { x, y } = fromViewport
     const defaultOptions = $Keyboard.mixinModifiers({
       clientX: x,
       clientY: y,
@@ -239,9 +240,6 @@ const $Mouse = {
       which: 1,
       buttons: 1,
     })
-
-    // const mouseNeedsMove = !(fromViewport.x === this.mouseState.x && fromViewport.y === this.mouseState.y)
-    const { x, y } = fromViewport
 
     this._moveMouse(el, { x, y })
 
