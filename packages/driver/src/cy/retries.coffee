@@ -49,6 +49,8 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
           finishAssertions(assertions)
 
         getErrMessage = (err) ->
+          ## TODO: remove this debugging code
+          if err.stack then console.log(err.stack.split('\n').slice(0,5).join('\n'))
           switch
             when err and err.displayMessage
               err.displayMessage
