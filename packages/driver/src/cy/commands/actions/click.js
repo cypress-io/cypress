@@ -66,20 +66,15 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         const afterMouseDown = function ($elToClick, coords) {
-        //# we need to use both of these
+          //# we need to use both of these
           let consoleObj
           const { fromWindow, fromViewport } = coords
 
           //# handle mouse events removing DOM elements
           //# https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
-          if ($dom.isAttached($elToClick)) {
-            domEvents.mouseUp = $Mouse.mouseUp($elToClick, fromViewport)
-          }
-
-          if ($dom.isAttached($elToClick)) {
-            domEvents.click = $Mouse.click($elToClick, fromViewport)
-          }
+          domEvents.mouseUp = $dom.isAttached($elToClick) && $Mouse.mouseUp($elToClick, fromViewport, domEvents.mouseDown)
+          domEvents.click = $dom.isAttached($elToClick) && $Mouse.click($elToClick, fromViewport)
 
           if (options._log) {
             consoleObj = options._log.invoke('consoleProps')
@@ -99,22 +94,44 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             }
 
             consoleObj.groups = function () {
-              const groups = [{
-                name: 'MouseDown',
-                items: _.pick(domEvents.mouseDown, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-              }]
+              const groups = []
 
-              if (domEvents.mouseUp) {
-                groups.push({
-                  name: 'MouseUp',
-                  items: _.pick(domEvents.mouseUp, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                })
+              if (domEvents.mouseDown) {
+                if (domEvents.mouseDown.pointerdownProps) {
+                  groups.push({
+                    name: 'PointerDown',
+                    items: _.pick(domEvents.mouseDown.pointerdownProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                  })
+                }
+
+                if (domEvents.mouseDown.mousedownProps) {
+                  groups.push({
+                    name: 'MouseDown',
+                    items: _.pick(domEvents.mouseDown.mousedownProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                  })
+                }
               }
 
-              if (domEvents.click) {
+              if (domEvents.mouseUp) {
+                if (domEvents.mouseUp.pointerupProps) {
+                  groups.push({
+                    name: 'PointerUp',
+                    items: _.pick(domEvents.mouseUp.pointerupProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                  })
+                }
+
+                if (domEvents.mouseUp.mouseupProps) {
+                  groups.push({
+                    name: 'MouseUp',
+                    items: _.pick(domEvents.mouseUp.mouseupProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                  })
+                }
+              }
+
+              if (click) {
                 groups.push({
                   name: 'Click',
-                  items: _.pick(domEvents.click, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                  items: _.pick(click, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
                 })
               }
 
@@ -178,7 +195,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             //# our element to be removed from the DOM
             //# just resolve after mouse down and dont
             //# send a focus event
-            if (domEvents.mouseDown.preventedDefault || !$dom.isAttached($elToClick)) {
+            if (domEvents.mouseDown.pointerdownProps.preventedDefault || domEvents.mouseDown.mousedownProps.preventedDefault || !$dom.isAttached($elToClick)) {
               return afterMouseDown($elToClick, coords)
             }
 
