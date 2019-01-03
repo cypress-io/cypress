@@ -6,64 +6,80 @@ const _ = require('lodash')
 
 const { stopPropagation } = window.MouseEvent.prototype
 
-/**
- *
- * @param {HTMLElement} el
- * @param {MouseEventInit} evtOptions
- */
-const sendMouseenter = (el, evtOptions) => {
-  const mouseenter = new MouseEvent('mouseenter', evtOptions)
+const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, constructor) => {
+  evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
+  const evt = new constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
 
-  el.dispatchEvent(mouseenter)
+  if (bubbles) {
+    evt.stopPropagation = function (...args) {
+      this._hasStoppedPropagation = true
 
-}
+      return stopPropagation.apply(this, ...args)
+    }
+  }
 
-/**
- *
- * @param {HTMLElement} el
- * @param {MouseEventInit} evtOptions
- */
-const sendMouseover = (el, evtOptions) => {
-  const mouseover = new MouseEvent('mouseover', evtOptions)
+  const preventedDefault = !el.dispatchEvent(evt)
 
-  el.dispatchEvent(mouseover)
+  return {
+    stoppedPropagation: !!evt._hasStoppedPropagation,
+    preventedDefault,
+  }
 
 }
 
-/**
- *
- * @param {HTMLElement} el
- * @param {MouseEventInit} evtOptions
- */
-const sendMouseout = (el, evtOptions) => {
-  const mouseout = new MouseEvent('mouseout', evtOptions)
+const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
+  const constructor = el.ownerDocument.defaultView.PointerEvent
 
-  el.dispatchEvent(mouseout)
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
+}
+const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
+  const constructor = el.ownerDocument.defaultView.MouseEvent
 
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
 }
 
-/**
- *
- * @param {HTMLElement} el
- * @param {MouseEventInit} evtOptions
- */
-const sendMouseleave = (el, evtOptions) => {
-  const mouseleave = new MouseEvent('mouseleave', evtOptions)
-
-  el.dispatchEvent(mouseleave)
-
+const sendPointerup = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
+}
+const sendPointerdown = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerdown', true, true)
+}
+const sendPointermove = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointermove', true, true)
+}
+const sendPointerover = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerover', true, true)
+}
+const sendPointerenter = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerenter', false, false)
+}
+const sendPointerleave = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerleave', false, false)
+}
+const sendPointerout = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerout', true, true)
 }
 
-/**
- *
- * @param {HTMLElement} el
- * @param {MouseEventInit} evtOptions
- */
+const sendMouseup = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
+}
+const sendMousedown = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mousedown', true, true)
+}
 const sendMousemove = (el, evtOptions) => {
-  const mousemove = new MouseEvent('mousemove', evtOptions)
-
-  el.dispatchEvent(mousemove)
-
+  return sendMouseEvent(el, evtOptions, 'mousemove', true, true)
+}
+const sendMouseover = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseover', true, true)
+}
+const sendMouseenter = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseenter', false, false)
+}
+const sendMouseleave = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseleave', false, false)
+}
+const sendMouseout = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseout', true, true)
 }
 
 const $Mouse = {
@@ -88,10 +104,23 @@ const $Mouse = {
     const defaultOptions = $Keyboard.mixinModifiers({
       clientX: x,
       clientY: y,
+      x,
+      y,
       button: 0,
       which: 1,
       buttons: 1,
     })
+
+    let pointerout = null
+    let pointerleave = null
+    let pointerover = null
+    let pointerenter = null
+    let mouseout = null
+    let mouseleave = null
+    let mouseover = null
+    let mouseenter = null
+    let pointermove = null
+    let mousemove = null
 
     const lastHoveredElAttached = this.lastHoveredEl && $elements.isAttached($(el))
 
@@ -107,7 +136,12 @@ const $Mouse = {
     }
 
     if (hoveredElChanged && this.lastHoveredEl) {
-      sendMouseout(this.lastHoveredEl, _.extend({}, defaultOptions, { relatedTarget: el }))
+      pointerout = () => {
+        sendPointerout(this.lastHoveredEl, _.extend({}, defaultOptions, { relatedTarget: el }))
+      }
+      mouseout = () => {
+        sendMouseout(this.lastHoveredEl, _.extend({}, defaultOptions, { relatedTarget: el }))
+      }
 
       let curParent = this.lastHoveredEl
 
@@ -118,9 +152,16 @@ const $Mouse = {
         curParent = curParent.parentNode
       }
 
-      elsToSendMouseleave.forEach((elToSend) => {
-        sendMouseleave(elToSend, _.extend({}, defaultOptions, { relatedTarget: el }))
-      })
+      pointerleave = () => {
+        elsToSendMouseleave.forEach((elToSend) => {
+          sendPointerleave(elToSend, _.extend({}, defaultOptions, { relatedTarget: el }))
+        })
+      }
+      mouseleave = () => {
+        elsToSendMouseleave.forEach((elToSend) => {
+          sendMouseleave(elToSend, _.extend({}, defaultOptions, { relatedTarget: el }))
+        })
+      }
 
     }
 
@@ -130,85 +171,107 @@ const $Mouse = {
 
     if (hoveredElChanged) {
       if (el && $elements.isAttached($(el))) {
-        sendMouseover(el, _.extend({}, defaultOptions, { relatedTarget: this.lastHoveredEl }))
+
+        mouseover = () => {
+          sendMouseover(el, _.extend({}, defaultOptions, { relatedTarget: this.lastHoveredEl }))
+        }
+        pointerover = () => {
+          sendPointerover(el, _.extend({}, defaultOptions, { relatedTarget: this.lastHoveredEl }))
+        }
 
         let curParent = el
         const elsToSendMouseenter = []
 
-        while (curParent && curParent !== commonAncestor) {
+        while (curParent && curParent.ownerDocument && curParent !== commonAncestor) {
           elsToSendMouseenter.push(curParent)
           curParent = curParent.parentNode
         }
 
-        _.reverse(elsToSendMouseenter).forEach((elToSend) => {
-          sendMouseenter(elToSend, _.extend({}, defaultOptions, { relatedTarget: this.lastHoveredEl }))
-        })
+        elsToSendMouseenter.reverse()
+
+        pointerenter = () => {
+          return elsToSendMouseenter.forEach((elToSend) => {
+            sendPointerenter(elToSend, _.extend({}, defaultOptions, { relatedTarget: this.lastHoveredEl }))
+          })
+        }
+        mouseenter = () => {
+          return elsToSendMouseenter.forEach((elToSend) => {
+            sendMouseenter(elToSend, _.extend({}, defaultOptions, { relatedTarget: this.lastHoveredEl }))
+          })
+        }
       }
 
-      this.lastHoveredEl = $elements.isAttached($(el)) ? el : null
     }
 
     // if (!Cypress.config('mousemoveBeforeMouseover') && el) {
-    sendMousemove(el, defaultOptions)
+    pointermove = () => {
+      sendPointermove(el, defaultOptions)
+    }
+    mousemove = () => {
+      sendMousemove(el, defaultOptions)
+    }
+    pointerout && pointerout()
+    pointerleave && pointerleave()
+    pointerover && pointerover()
+    pointerenter && pointerenter()
+    mouseout && mouseout()
+    mouseleave && mouseleave()
+    mouseover && mouseover()
+    mouseenter && mouseenter()
+    this.lastHoveredEl = $elements.isAttached($(el)) ? el : null
+    pointermove && pointermove()
+    mousemove && mousemove()
     // }
 
   },
 
   mouseDown ($elToClick, fromViewport) {
     const el = $elToClick.get(0)
+    const _activeModifiers = $Keyboard.activeModifiers()
+    const modifiers = _activeModifiers.length ? _activeModifiers.join(', ') : null
 
-    const win = $dom.getWindowByElement(el)
-
-    // const mouseNeedsMove = !(fromViewport.x === this.mouseState.x && fromViewport.y === this.mouseState.y)
-    this._moveMouse(el, { x: fromViewport.x, y: fromViewport.y })
-
-    const mdownEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true,
-      cancelable: true,
-      view: win,
-      clientX: fromViewport.x,
-      clientY: fromViewport.y,
+    const defaultOptions = $Keyboard.mixinModifiers({
+      clientX: x,
+      clientY: y,
+      x,
+      y,
+      button: 0,
+      which: 1,
       buttons: 1,
-      detail: 1,
     })
 
-    const mdownEvt = new window.MouseEvent('mousedown', mdownEvtProps)
+    // const mouseNeedsMove = !(fromViewport.x === this.mouseState.x && fromViewport.y === this.mouseState.y)
+    const { x, y } = fromViewport
 
-    // ensure this property exists on older chromium versions
-    if (mdownEvt.buttons == null) {
-      mdownEvt.buttons = 1
+    this._moveMouse(el, { x, y })
+
+    const pointerdownProps = sendPointerdown(el, defaultOptions)
+
+    if (pointerdownProps.preventedDefault) {
+      return {
+        pointerdownProps,
+        modifiers,
+      }
     }
 
-    mdownEvt.stopPropagation = function (...args) {
-      this._hasStoppedPropagation = true
+    const mousedownProps = sendMousedown(el, defaultOptions)
 
-      return stopPropagation.apply(this, args)
+    return {
+      pointerdownProps,
+      mousedownProps,
+      modifiers,
     }
 
-    const cancelled = !el.dispatchEvent(mdownEvt)
-
-    const props = {
-      preventedDefault: cancelled,
-      stoppedPropagation: !!mdownEvt._hasStoppedPropagation,
-    }
-
-    const modifiers = $Keyboard.activeModifiers()
-
-    if (modifiers.length) {
-      props.modifiers = modifiers.join(', ')
-    }
-
-    return props
   },
 
-  mouseUp ($elToClick, fromViewport) {
+  mouseUp ($elToClick, fromViewport, { pointerdownProps }) {
     const el = $elToClick.get(0)
-
     const win = $dom.getWindowByElement(el)
 
-    const mupEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true,
-      cancelable: true,
+    const _activeModifiers = $Keyboard.activeModifiers()
+    const modifiers = _activeModifiers.length ? _activeModifiers.join(', ') : null
+
+    const defaultOptions = $Keyboard.mixinModifiers({
       view: win,
       clientX: fromViewport.x,
       clientY: fromViewport.y,
@@ -216,33 +279,22 @@ const $Mouse = {
       detail: 1,
     })
 
-    const mupEvt = new MouseEvent('mouseup', mupEvtProps)
+    const pointerupProps = sendPointerup(el, defaultOptions)
 
-    //# ensure this property exists on older chromium versions
-    if (mupEvt.buttons == null) {
-      mupEvt.buttons = 0
+    if (pointerdownProps.preventedDefault) {
+      return {
+        pointerupProps,
+        modifiers,
+      }
     }
 
-    mupEvt.stopPropagation = function (...args) {
-      this._hasStoppedPropagation = true
+    const mouseupProps = sendMouseup(el, defaultOptions)
 
-      return stopPropagation.apply(this, args)
+    return {
+      pointerupProps,
+      mouseupProps,
+      modifiers,
     }
-
-    const cancelled = !el.dispatchEvent(mupEvt)
-
-    const props = {
-      preventedDefault: cancelled,
-      stoppedPropagation: !!mupEvt._hasStoppedPropagation,
-    }
-
-    const modifiers = $Keyboard.activeModifiers()
-
-    if (modifiers.length) {
-      props.modifiers = modifiers.join(', ')
-    }
-
-    return props
   },
 
   click ($elToClick, fromViewport) {
