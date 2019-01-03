@@ -31,7 +31,9 @@ nope = -> return null
 isAbortedThroughUnload = (xhr) ->
   xhr.readyState is 4 and
     xhr.status is 0 and
-      xhr.responseText is ""
+      ## TODO: How do we want to handle other responseTypes?
+      xhr.responseType is "" or xhr.responseType is "text" and
+        xhr.responseText is ""
 
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
