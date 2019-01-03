@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $jquery = require('./jquery')
 const $window = require('./window')
 const $document = require('./document')
@@ -23,11 +16,11 @@ const isDom = (obj) => {
   return isElement(obj) || isWindow(obj) || isDocument(obj)
 }
 
-//# we are exposing these publicly to be used
-//# by our own internal code, but also for
-//# our users. They can use them for debugging
-//# purposes or for overriding. Everything else
-//# can be tucked away behind these interfaces.
+// we are exposing these publicly to be used
+// by our own internal code, but also for
+// our users. They can use them for debugging
+// purposes or for overriding. Everything else
+// can be tucked away behind these interfaces.
 module.exports = {
   wrap,
 
