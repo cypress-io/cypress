@@ -412,6 +412,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
+      - run: ./scripts/set-mac-codesign.sh
       - run: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
@@ -637,16 +638,6 @@ jobs:
           working_directory: /tmp/kitchensink
           command: npm run e2e
 
-  mac-os-build:
-    executor: mac
-    steps:
-      - run:
-          name: Show keychains
-          command: security list-keychains
-      - run:
-          name: Find code signing identity
-          command: security find-identity -v -p codesigning
-
 workflows:
   linux:
     jobs:
@@ -765,30 +756,27 @@ workflows:
   # for code signing the built binary
   # https://github.com/cypress-io/cypress/issues/2958
 
-  # mac:
-  #   jobs:
-  #     - build:
-  #         name: Mac build
-  #         executor: mac
-  #     - lint:
-  #         name: Mac lint
-  #         executor: mac
-  #         requires:
-  #           - Mac build
-  #     # maybe run unit tests?
-  #     - mac-os-build:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
+  mac:
+    jobs:
+      - build:
+          name: Mac build
+          executor: mac
+      - lint:
+          name: Mac lint
+          executor: mac
+          requires:
+            - Mac build
 
-  #     - build-binary:
-  #         name: Mac binary
-  #         executor: mac
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - Mac build
-  #           - mac-os-build
+      # maybe run unit tests?
+
+      - build-binary:
+          name: Mac binary
+          executor: mac
+          context: org-global
+          filters:
+            branches:
+              only:
+                - develop
+                - sign-mac-app-on-circle-ci-2958
+          requires:
+            - Mac build
