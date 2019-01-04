@@ -1,9 +1,5 @@
 /* eslint-disable
     no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
-    no-irregular-whitespace,
-    one-var,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -110,11 +106,11 @@ const elHasPositionRelative = ($el) => {
 }
 
 const elHasClippableOverflow = function ($el) {
-  let needle, needle1, needle2
+  const o = $el.css('overflow')
+  const oy = $el.css('overflow-y')
+  const ox = $el.css('overflow-x')
 
-  return (needle = $el.css('overflow'), OVERFLOW_PROPS.includes(needle)) ||
-  (needle1 = $el.css('overflow-y'), OVERFLOW_PROPS.includes(needle1)) ||
-  (needle2 = $el.css('overflow-x'), OVERFLOW_PROPS.includes(needle2))
+  return OVERFLOW_PROPS.includes(o) || OVERFLOW_PROPS.includes(oy) || OVERFLOW_PROPS.includes(ox)
 }
 
 const canClipContent = function ($el, $ancestor) {
@@ -136,22 +132,22 @@ const canClipContent = function ($el, $ancestor) {
 }
 
 const elIsFixed = function ($el) {
-  let $stickyOrFixedEl
+  const $stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)
 
-  if ($stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)) {
+  if ($stickyOrFixedEl) {
     return $stickyOrFixedEl.css('position') === 'fixed'
   }
 }
 
 const elAtCenterPoint = function ($el) {
-  let el
+  const doc = $document.getDocumentFromElement($el.get(0))
   const elProps = $coordinates.getElementPositioning($el)
 
   const { topCenter, leftCenter } = elProps.fromViewport
 
-  const doc = $document.getDocumentFromElement($el.get(0))
+  const el = $coordinates.getElementAtPointFromViewport(doc, leftCenter, topCenter)
 
-  if (el = $coordinates.getElementAtPointFromViewport(doc, leftCenter, topCenter)) {
+  if (el) {
     return $jquery.wrap(el)
   }
 }
@@ -210,7 +206,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor) {
       ((elProps.fromWindow.left + elProps.width) < ancestorProps.fromWindow.left) ||
 
       //# target el is under the ancestor's visible area
-      (elProps.fromWindow.top > (ancestorProps.height + ancestorProps.fromWindow.top)) ||
+      (elProps.fromWindow.top > (ancestorProps.height + ancestorProps.fromWindow.top)) ||
 
       //# target el is above the ancestor's visible area
       ((elProps.fromWindow.top + elProps.height) < ancestorProps.fromWindow.top)
@@ -308,7 +304,10 @@ const getReasonIsHidden = function ($el) {
   //# is hidden when its fixed position and its
   //# either being covered or there is no el
 
+  let width
+  let height
   let $parent
+  let parentNode
   const node = $elements.stringify($el, 'short')
 
   //# returns the reason in human terms why an element is considered not visible
@@ -317,7 +316,7 @@ const getReasonIsHidden = function ($el) {
       return `This element '${node}' is not visible because it has CSS property: 'display: none'`
 
     case !($parent = parentHasDisplayNone($el.parent())):
-      const parentNode = $elements.stringify($parent, 'short')
+      parentNode = $elements.stringify($parent, 'short')
 
       return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'display: none'`
 
@@ -330,8 +329,8 @@ const getReasonIsHidden = function ($el) {
       return `This element '${node}' is not visible because it has CSS property: 'visibility: hidden'`
 
     case !elHasNoOffsetWidthOrHeight($el):
-      const width = elOffsetWidth($el)
-      const height = elOffsetHeight($el)
+      width = elOffsetWidth($el)
+      height = elOffsetHeight($el)
 
       return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
 
