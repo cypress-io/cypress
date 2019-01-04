@@ -412,7 +412,10 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
-      - run: sudo ./scripts/set-mac-codesign.sh
+      - run:
+          name: Set up code sign (if on Mac)
+          context: org-global
+          command: sudo ./scripts/set-mac-codesign.sh
       - run: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
