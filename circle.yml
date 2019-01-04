@@ -408,6 +408,7 @@ jobs:
 
   build-binary:
     <<: *defaults
+    shell: /bin/bash --login
     steps:
       - attach_workspace:
           at: ~/
