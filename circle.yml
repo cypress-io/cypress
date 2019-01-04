@@ -414,8 +414,8 @@ jobs:
       - run: $(npm bin)/print-arch
       - run:
           name: Set up code sign (if on Mac)
-          context: org-global
-          command: sudo ./scripts/set-mac-codesign.sh
+          # when running with sudo we need to pass environment variables with -E
+          command: sudo -E ./scripts/set-mac-codesign.sh
       - run: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
@@ -642,118 +642,118 @@ jobs:
           command: npm run e2e
 
 workflows:
-  linux:
-    jobs:
-      - build
-      - lint:
-          name: Linux lint
-          requires:
-            - build
-      # unit, integration and e2e tests
-      - unit-tests:
-          requires:
-            - build
-      - server-unit-tests:
-          requires:
-            - build
-      - server-integration-tests:
-          requires:
-            - build
-      - server-e2e-tests-1:
-          requires:
-            - build
-      - server-e2e-tests-2:
-          requires:
-            - build
-      - server-e2e-tests-3:
-          requires:
-            - build
-      - server-e2e-tests-4:
-          requires:
-            - build
-      - server-e2e-tests-5:
-          requires:
-            - build
-      - server-e2e-tests-6:
-          requires:
-            - build
-      - server-e2e-tests-7:
-          requires:
-            - build
-      - server-e2e-tests-8:
-          requires:
-            - build
-      - driver-integration-tests-3x:
-          requires:
-            - build
-      - desktop-gui-integration-tests-2x:
-          requires:
-            - build
-      - run-launcher:
-          requires:
-            - build
-      # various testing scenarios, like building full binary
-      # and testing it on a real project
-      - test-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - test-kitchensink-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-npm-package:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-binary:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - test-next-version:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-next-version-locally:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-binary-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-binary-against-kitchensink:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
+  # linux:
+  #   jobs:
+  #     - build
+  #     - lint:
+  #         name: Linux lint
+  #         requires:
+  #           - build
+  #     # unit, integration and e2e tests
+  #     - unit-tests:
+  #         requires:
+  #           - build
+  #     - server-unit-tests:
+  #         requires:
+  #           - build
+  #     - server-integration-tests:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-1:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-2:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-3:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-4:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-5:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-6:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-7:
+  #         requires:
+  #           - build
+  #     - server-e2e-tests-8:
+  #         requires:
+  #           - build
+  #     - driver-integration-tests-3x:
+  #         requires:
+  #           - build
+  #     - desktop-gui-integration-tests-2x:
+  #         requires:
+  #           - build
+  #     - run-launcher:
+  #         requires:
+  #           - build
+  #     # various testing scenarios, like building full binary
+  #     # and testing it on a real project
+  #     - test-against-staging:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build
+  #     - test-kitchensink-against-staging:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build
+  #     - build-npm-package:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build
+  #     - build-binary:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build
+  #     - test-next-version:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build-npm-package
+  #           - build-binary
+  #     - test-next-version-locally:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build-npm-package
+  #           - build-binary
+  #     - test-binary-against-staging:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build-npm-package
+  #           - build-binary
+  #     - test-binary-against-kitchensink:
+  #         filters:
+  #           branches:
+  #             only:
+  #               - develop
+  #         requires:
+  #           - build-npm-package
+  #           - build-binary
 
   # disable Mac build until we can figure CircleCI v2 story
   # for code signing the built binary

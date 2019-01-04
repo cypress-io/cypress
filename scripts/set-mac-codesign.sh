@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set e+x
+set -e
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
 
@@ -20,7 +18,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 
   echo $Certificates | base64 -D -o Certificates.p12
-  security import ./Certificates.p12 -P $P12_PASSWORD
+  sudo -E security import ./Certificates.p12 -P $P12_PASSWORD
 
   # check
   security list-keychains
