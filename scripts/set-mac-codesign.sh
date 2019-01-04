@@ -10,6 +10,15 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   echo "should be run with sudo"
   echo ""
 
+  if [ -z "$Certificates" ]; then
+    echo "Need to provide environment variable Certificates"
+    exit 1
+  fi
+  if [ -z "$P12_PASSWORD" ]; then
+    echo "Need to provide environment variable P12_PASSWORD"
+    exit 1
+  fi
+
   echo $Certificates | base64 -D -o Certificates.p12
   security import ./Certificates.p12 -P $P12_PASSWORD
 
