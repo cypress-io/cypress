@@ -412,7 +412,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
-      - run: ./scripts/set-mac-codesign.sh
+      - run: sudo ./scripts/set-mac-codesign.sh
       - run: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
