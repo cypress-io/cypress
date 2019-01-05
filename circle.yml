@@ -421,6 +421,8 @@ jobs:
           # when running with sudo we need to pass environment variables with -E
           # command: sudo -E ./scripts/set-mac-codesign.sh
           command: |
+            set -e
+
             if [[ "$OSTYPE" == "darwin"* ]]; then
               echo "This shell scripts imports Mac code sign profile from environment variable"
               echo "Assumes the certificate is base64 encoded as environment variable Certificates"
@@ -439,6 +441,9 @@ jobs:
 
               echo $Certificates | base64 -D -o Certificates.p12
               sudo -E security import ./Certificates.p12 -P $P12_PASSWORD
+
+              # we don't need the certificate file anymore
+              rm Certificates.p12
 
               # check
               security list-keychains
