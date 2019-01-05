@@ -35,7 +35,7 @@ executors:
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      xcode: "9.0.1"
+      xcode: "10.1.0"
     environment:
       PLATFORM: mac
 
@@ -443,6 +443,11 @@ jobs:
 
               echo "Creating keychain"
               security create-keychain -p default MyKeychain.keychain
+
+              echo "unlocking keychain"
+              security set-keychain-settings MyKeychain.keychain
+              security unlock-keychain -p default MyKeychain.keychain
+
               echo "Importing certificates"
               security import ./Certificates.p12 -t agg -k MyKeychain.keychain -A -P $P12_PASSWORD -T "/usr/bin/codesign"
 
@@ -456,15 +461,9 @@ jobs:
 
               echo "setting default keychain"
               security default-keychain -s MyKeychain.keychain
-              echo "unlocking keychain"
-              security unlock-keychain -p default MyKeychain.keychain
 
               echo "finding identity"
               security find-identity -v -p codesigning
-
-              echo "unlocking keychain"
-              security set-keychain-settings MyKeychain.keychain
-              security unlock-keychain -p default MyKeychain.keychain
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
