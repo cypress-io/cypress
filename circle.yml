@@ -448,6 +448,9 @@ jobs:
               # check
               security list-keychains
               security find-identity -v -p codesigning
+
+              # unlock keychain
+              sudo -E security unlock-keychain -p default /Users/distiller/Library/Keychains/login.keychain-db
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
