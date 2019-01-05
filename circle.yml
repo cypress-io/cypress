@@ -440,13 +440,24 @@ jobs:
               fi
 
               echo $Certificates | base64 -D -o Certificates.p12
-              sudo -E security import ./Certificates.p12 -P $P12_PASSWORD
+
+              echo "Creating keychain"
+              security create-keychain -p default MyKeychain.keychain
+              echo "Importing certificates"
+              security import ./Certificates.p12 -t agg -k MyKeychain.keychain -A -P $P12_PASSWORD
 
               # we don't need the certificate file anymore
               rm Certificates.p12
 
               # check
-              security list-keychains
+              security list-keychains -s MyKeychain.keychain
+
+              echo "setting default keychain"
+              security default-keychain -s MyKeychain.keychain
+              echo "unlocking keychain"
+              security unlock-keychain -p default MyKeychain.keychain
+
+              echo "finding identity"
               security find-identity -v -p codesigning
 
               # unlock keychain
