@@ -263,6 +263,7 @@ buildCypressApp = (platform, version, options = {}) ->
     sign({
       app: appFolder
       platform
+      keychain: "MyKeychain.keychain"
       verbose: true
     })
 
