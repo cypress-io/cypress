@@ -444,7 +444,7 @@ jobs:
               echo "Creating keychain"
               security create-keychain -p default MyKeychain.keychain
               echo "Importing certificates"
-              security import ./Certificates.p12 -t agg -k MyKeychain.keychain -A -P $P12_PASSWORD
+              security import ./Certificates.p12 -t agg -k MyKeychain.keychain -A -P $P12_PASSWORD -T "/usr/bin/codesign"
 
               # we don't need the certificate file anymore
               rm Certificates.p12
