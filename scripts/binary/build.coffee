@@ -33,7 +33,9 @@ sign  = Promise.promisify(signOsxApp)
 fs = Promise.promisifyAll(fse)
 
 logger = (msg, platform) ->
-  console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
+  time = new Date()
+  timeStamp = time.toLocaleTimeString()
+  console.log(timeStamp, chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
 
 logBuiltAllPackages = () ->
   console.log("built all packages")
@@ -129,7 +131,7 @@ buildCypressApp = (platform, version, options = {}) ->
         packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-ia32")
 
   createRootPackage = ->
-    log("#createRootPackage", platform, version)
+    log("#createRootPackage #{platform} #{version}")
 
     fs.outputJsonAsync(distDir("package.json"), {
       name: "cypress"
@@ -257,7 +259,7 @@ buildCypressApp = (platform, version, options = {}) ->
       return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
-    log("#codeSign", appFolder)
+    log("#codeSign #{appFolder}")
     sign({
       app: appFolder
       platform
@@ -268,7 +270,7 @@ buildCypressApp = (platform, version, options = {}) ->
     if (platform != "darwin") then return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
-    log("#verifyAppCanOpen", appFolder)
+    log("#verifyAppCanOpen #{appFolder}")
     new Promise (resolve, reject) =>
       args = ["-a", "-vvvv", appFolder]
       debug("cmd: spctl #{args.join(' ')}")
