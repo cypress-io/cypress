@@ -57,7 +57,8 @@ jobs:
       - run:
           name: print NPM version
           command: npm -v
-      - run: npm run check-node-version
+      # skip Node version while trying to code sign on Mac Circle
+      # - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
