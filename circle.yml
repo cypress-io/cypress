@@ -31,6 +31,8 @@ executors:
       PLATFORM: linux
 
   # executor to run on Mac OS
+  # https://circleci.com/docs/2.0/executor-types/#using-macos
+  # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
       xcode: "9.0.1"
@@ -413,16 +415,19 @@ jobs:
     <<: *defaults
     shell: /bin/bash --login
     steps:
+      # can we import Mac profile for signing right away?
+      - run:
+          name: Set up code sign (if on Mac)
+          # when running with sudo we need to pass environment variables with -E
+          command: sudo -E ./scripts/set-mac-codesign.sh
+
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
       - run:
           environment:
             DEBUG: electron-osx-sign*
-          name: Set up code sign (if on Mac)
-          # when running with sudo we need to pass environment variables with -E
-          command: sudo -E ./scripts/set-mac-codesign.sh
-      - run: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
+          command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
       - run:
