@@ -450,7 +450,9 @@ jobs:
               rm Certificates.p12
 
               # check
-              security list-keychains -s MyKeychain.keychain
+              echo "appending new keychain to the list"
+              security list-keychains -d user -s MyKeychain.keychain $(security list-keychains -d user | sed s/\"//g)
+              security list-keychains
 
               echo "setting default keychain"
               security default-keychain -s MyKeychain.keychain
