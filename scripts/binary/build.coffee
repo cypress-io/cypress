@@ -35,7 +35,7 @@ fs = Promise.promisifyAll(fse)
 logger = (msg, platform) ->
   time = new Date()
   timeStamp = time.toLocaleTimeString()
-  console.log(timeStamp, chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
+  console.log(timeStamp, chalk.yellow(msg), chalk.blue(platform))
 
 logBuiltAllPackages = () ->
   console.log("built all packages")

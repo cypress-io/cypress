@@ -460,8 +460,9 @@ jobs:
               echo "finding identity"
               security find-identity -v -p codesigning
 
-              # unlock keychain
-              sudo -E security unlock-keychain -p default /Users/distiller/Library/Keychains/login.keychain-db
+              echo "unlocking keychain"
+              security set-keychain-settings MyKeychain.keychain
+              security unlock-keychain -p default MyKeychain.keychain
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
