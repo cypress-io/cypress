@@ -450,7 +450,13 @@ jobs:
               security unlock-keychain -p default MyKeychain.keychain
 
               echo "Importing certificates"
-              security import ./Certificates.p12 -t agg -k MyKeychain.keychain -A -P $P12_PASSWORD -T "/usr/bin/codesign"
+              # see security import --help
+              # -A allows every app to access the certificate
+              # -T "path" allows only app at path to access the certificate
+              # -x private keys should not be extractable after import
+              # security import ./Certificates.p12 -k MyKeychain.keychain -A -P $P12_PASSWORD
+              # security import ./Certificates.p12 -t agg -k MyKeychain.keychain -P $P12_PASSWORD -T /usr/bin/codesign
+              security import ./Certificates.p12 -x -t agg -k MyKeychain.keychain -A -P $P12_PASSWORD
 
               # we don't need the certificate file anymore
               rm Certificates.p12
@@ -465,6 +471,9 @@ jobs:
 
               echo "finding identity"
               security find-identity -v -p codesigning
+
+              # if need to delete the new keychain
+              # security delete-keychain MyKeychain.keychain
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
