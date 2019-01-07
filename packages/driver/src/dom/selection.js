@@ -362,6 +362,35 @@ const _moveCursorUpOrDown = function (el, up) {
   }
 }
 
+const moveCursorToStart = (el) => {
+  return _moveCursorToStartOrEnd(el, true)
+}
+
+const moveCursorToEnd = (el) => {
+  return _moveCursorToStartOrEnd(el, false)
+}
+
+const _moveCursorToStartOrEnd = function (el, start) {
+  if ($elements.isTextarea(el) || $elements.isInput(el)) {
+    const { start, end } = getSelectionBounds(el)
+    const returnValue = start ? 0 : $elements.getNativeProp(el, 'value').length
+
+    if (start !== end) {
+      return _collapseInputOrTextArea(el, returnValue)
+    }
+
+    //# Don't worry about moving past the end of the string
+    //# nothing will happen and there is no error.
+    return setSelectionRange(el, returnValue, returnValue)
+  }
+
+  if ($elements.isContentEditable(el)) {
+    const selection = _getSelectionByEl(el)
+
+    return $elements.callNativeMethod(selection, 'modify', 'move', start ? 'backward' : 'forward', 'paragraphboundary')
+  }
+}
+
 const isCollapsed = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     const { start, end } = getSelectionBounds(el)
@@ -579,6 +608,8 @@ module.exports = {
   moveCursorRight,
   moveCursorUp,
   moveCursorDown,
+  moveCursorToStart,
+  moveCursorToEnd,
   replaceSelectionContents,
   isCollapsed,
   interceptSelect,
