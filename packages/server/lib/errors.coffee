@@ -563,6 +563,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg1)}
       """.trim()
+    when "BACKGROUND_RENAMED_EVENTS"
+      """
+      The following background #{if arg1.events.length > 1 then "events have" else "event has"} been renamed.
+
+      Please update them in your background file and try again.
+
+      #{_.map(arg1.events, ({ oldEvent, newEvent }) -> "'#{oldEvent}' has been renamed to '#{newEvent}'").join("\n")}
+
+      Background file location: #{arg1.backgroundFile}
+      """
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -663,6 +673,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "DUPLICATE_TASK_KEY"
       """
       Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
+      """
+    when "BACKGROUND_DRIVER_EVENT_ERROR"
+      """
+      An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1.event)}' event.
+
+      This error is being ignored because the event cannot affect the results of the run.
+
+      The error we received was:
+
+      #{chalk.yellow(arg1.error)}
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """

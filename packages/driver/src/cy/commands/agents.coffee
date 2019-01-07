@@ -119,7 +119,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   ## before each of our tests we always want
   ## to reset the counts + the sandbox
-  Cypress.on("test:before:run", resetAndSetSandbox)
+  Cypress.on("test:start", resetAndSetSandbox)
 
   wrap = (ctx, type, agent, obj, method, count) ->
     if not count

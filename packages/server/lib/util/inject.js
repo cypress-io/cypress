@@ -1,18 +1,18 @@
 const { oneLine } = require('common-tags')
 
 module.exports = {
-  partial (domain) {
+  partial ({ domainName }) {
     return oneLine`
       <script type='text/javascript'>
-        document.domain = '${domain}';
+        document.domain = '${domainName}';
       </script>
     `
   },
 
-  full (domain) {
+  full ({ domainName, url, headers, statusCode }) {
     return oneLine`
       <script type='text/javascript'>
-        document.domain = '${domain}';
+        document.domain = '${domainName}';
 
         var Cypress = window.Cypress = parent.Cypress;
 
@@ -20,7 +20,7 @@ module.exports = {
           throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing!. This should never happen and likely is a bug. Please open an issue!');
         };
 
-        Cypress.action('app:window:before:load', window);
+        Cypress.action('app:page:start', { win: window, url: '${url}', statusCode: ${statusCode}, headers: ${JSON.stringify(headers)} });
       </script>
     `
   },

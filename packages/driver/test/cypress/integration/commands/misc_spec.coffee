@@ -77,7 +77,7 @@ describe "src/cy/commands/misc", ->
           $("<li class='appended'>appended</li>").appendTo cy.$$("#list")
         , 50
 
-      cy.on "command:retry", _.after(2, _.once(append))
+      cy.on "internal:commandRetry", _.after(2, _.once(append))
 
       cy.get("#list").then ($ul) ->
 
@@ -127,7 +127,7 @@ describe "src/cy/commands/misc", ->
 
     describe "errors", ->
       it "throws when wrapping an array of windows", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "cy.scrollTo() failed because it requires a DOM element."
           expect(err.message).to.include "[<window>]"
           expect(err.message).to.include "All 2 subject validations failed on this subject."
@@ -137,7 +137,7 @@ describe "src/cy/commands/misc", ->
           cy.wrap([win]).scrollTo("bottom")
 
       it "throws when wrapping an array of documents", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "cy.screenshot() failed because it requires a DOM element."
           expect(err.message).to.include "[<document>]"
           expect(err.message).to.include "All 3 subject validations failed on this subject."

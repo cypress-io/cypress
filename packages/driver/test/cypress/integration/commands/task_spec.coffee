@@ -102,7 +102,7 @@ describe "src/cy/commands/task", ->
         return null
 
       it "throws when task is absent", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -114,7 +114,7 @@ describe "src/cy/commands/task", ->
         cy.task()
 
       it "throws when task isn't a string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -126,7 +126,7 @@ describe "src/cy/commands/task", ->
         cy.task(3)
 
       it "throws when task is an empty string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -140,7 +140,7 @@ describe "src/cy/commands/task", ->
       it "throws when the task errors", (done) ->
         Cypress.backend.rejects(new Error("task failed"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -154,7 +154,7 @@ describe "src/cy/commands/task", ->
         cy.task("foo")
 
       it "throws when task is not registered", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -169,7 +169,7 @@ describe "src/cy/commands/task", ->
       it "throws after timing out", (done) ->
         Cypress.backend.resolves(Promise.delay(250))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -183,7 +183,7 @@ describe "src/cy/commands/task", ->
       it "logs once on error", (done) ->
         Cypress.backend.rejects(new Error("task failed"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -199,14 +199,14 @@ describe "src/cy/commands/task", ->
 
         Cypress.backend.rejects(err)
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.task('wait') timed out after waiting 100ms.")
           done()
 
         cy.task("wait", null, { timeout: 100 })
 
       it "can really time out", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.task('wait') timed out after waiting 100ms.")
           done()
 

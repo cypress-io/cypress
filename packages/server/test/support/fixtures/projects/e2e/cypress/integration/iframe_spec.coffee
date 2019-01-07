@@ -2,7 +2,7 @@ count  = 0
 action = Cypress.action
 
 Cypress.action = (str) ->
-  if str is "app:window:before:load"
+  if str is "app:page:start"
     count += 1
 
   action.apply(@, arguments)
@@ -14,7 +14,7 @@ ensureWeCanTalkToTheIframe = ($iframe) ->
 
   expect($iframe.get(0).contentWindow.foo).to.eq("bar")
 
-  ## onBeforeLoad should only be called once
+  ## onStart should only be called once
   ## on the initial visit and not for the iframe
   ##
   ## the reason this number is still 1 instead of 2

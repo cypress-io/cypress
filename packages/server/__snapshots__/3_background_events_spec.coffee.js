@@ -308,7 +308,7 @@ exports['e2e background events handles absolute path to backgroundFile 1'] = `
 
 `
 
-exports['e2e background events calls after:screenshot for cy.screenshot() and failure screenshots 1'] = `
+exports['e2e background events calls screenshot for cy.screenshot() and failure screenshots 1'] = `
 
 ====================================================================================================
 

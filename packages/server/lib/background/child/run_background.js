@@ -1,6 +1,8 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:background:child')
 const Promise = require('bluebird')
+
+const driverEvents = require('./driver_events')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
@@ -62,6 +64,8 @@ const load = (ipc, config, backgroundFile) => {
   register('_get:task:body', () => {})
   register('_get:task:keys', () => {})
 
+  register('driver:event', () => {})
+
   Promise
   .try(() => {
     return background(register, config)
@@ -78,20 +82,24 @@ const execute = (ipc, event, ids, args = []) => {
   debug(`execute background event: ${event} (%o)`, ids)
 
   switch (event) {
-    case 'after:screenshot':
+    case 'screenshot':
       util.wrapChildPromise(ipc, invoke, ids, args)
 
       return
-    case 'file:preprocessor':
+    case 'browser:filePreprocessor':
       preprocessor.wrap(ipc, invoke, ids, args)
 
       return
-    case 'before:browser:launch':
+    case 'browser:launch':
       util.wrapChildPromise(ipc, invoke, ids, args)
 
       return
     case 'task':
       task.wrap(ipc, registeredEvents, ids, args)
+
+      return
+    case 'driver:event':
+      driverEvents.execute(ipc, registeredEvents, ids, args)
 
       return
     case '_get:task:keys':

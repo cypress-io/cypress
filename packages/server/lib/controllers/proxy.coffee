@@ -175,7 +175,15 @@ module.exports = {
       ## bypass the stream buffer and pipe this back
       if wantsInjection
         rewrite = (body) ->
-          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          rewriter.html(body.toString("utf8"), {
+            domainName: remoteState.domainName
+            url: remoteUrl
+            headers
+            statusCode
+          }, {
+            wantsInjection
+            wantsSecurityRemoved
+          })
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using

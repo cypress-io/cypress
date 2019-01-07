@@ -40,6 +40,11 @@ removeWhitespace = (c) ->
   c = str.lines(c).join(" ")
   c
 
+dateRegex = /\w{3}, \d{1,2} \w{3} \d{4} \d{1,2}\:\d{2}\:\d{2} \w{1,5}/ig
+dateReplacement = "Thu, 1 Jan 1970 00:00:00 GMT"
+replaceDates = (c) ->
+  c.replace(dateRegex, dateReplacement)
+
 browserifyFile = (filePath) ->
   streamToPromise(
     browserify(filePath)
@@ -1895,7 +1900,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = removeWhitespace(replaceDates(res.body))
           expect(body).to.eq contents
 
       it "injects even when head tag is missing", ->
@@ -2135,8 +2140,8 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
-            expect(body).to.eq contents
+            body = removeWhitespace(replaceDates(res.body))
+            expect(body).to.eq(contents.replace("<url here>", "https://localhost:8443/"))
 
       it "injects into https://www.google.com", ->
         @setup("https://www.google.com")
@@ -2196,8 +2201,8 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
-            expect(body).to.eq contents.replace("localhost", "foobar.com")
+            body = removeWhitespace(replaceDates(res.body))
+            expect(body).to.eq(contents.replace("localhost", "foobar.com").replace("<url here>", "https://www.foobar.com:8443/index.html"))
 
       it "continues to inject on the same https superdomain but different subdomain", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
@@ -2215,8 +2220,8 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
-            expect(body).to.eq contents.replace("localhost", "foobar.com")
+            body = removeWhitespace(replaceDates(res.body))
+            expect(body).to.eq(contents.replace("localhost", "foobar.com").replace("<url here>", "https://docs.foobar.com:8443/index.html"))
 
       it "injects document.domain on https requests to same superdomain but different subdomain", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")

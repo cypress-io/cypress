@@ -33,7 +33,7 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
     3) "before all" hook for "t10a"
 
   s5a
-    ✓ fires all test:after:run events
+    ✓ fires all test:end events
 
 
   5 passing

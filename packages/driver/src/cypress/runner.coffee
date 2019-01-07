@@ -10,8 +10,8 @@ mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
 HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
-TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
-TEST_AFTER_RUN_EVENT = "runner:test:after:run"
+TEST_RUN_START_EVENT = "runner:test:start"
+TEST_RUN_END_EVENT = "runner:test:end"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
@@ -77,18 +77,18 @@ fired = (event, runnable) ->
 
 testBeforeRunAsync = (test, Cypress) ->
   Promise.try ->
-    if not fired("runner:test:before:run:async", test)
-      fire("runner:test:before:run:async", test, Cypress)
+    if not fired("runner:test:start:async", test)
+      fire("runner:test:start:async", test, Cypress)
 
 runnableAfterRunAsync = (runnable, Cypress) ->
   Promise.try ->
-    if not fired("runner:runnable:after:run:async", runnable)
-      fire("runner:runnable:after:run:async", runnable, Cypress)
+    if not fired("runner:after:runnable:run:async", runnable)
+      fire("runner:after:runnable:run:async", runnable, Cypress)
 
 testAfterRun = (test, Cypress) ->
-  if not fired(TEST_AFTER_RUN_EVENT, test)
+  if not fired(TEST_RUN_END_EVENT, test)
     setWallClockDuration(test)
-    fire(TEST_AFTER_RUN_EVENT, test, Cypress)
+    fire(TEST_RUN_END_EVENT, test, Cypress)
 
     ## perf loop only through
     ## a tests OWN properties and not
@@ -266,7 +266,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
   return if not _runner.hook
 
   ## monkey patch the hook event so we can wrap
-  ## 'test:after:run' around all of
+  ## 'test:end' around all of
   ## the hooks surrounding a test runnable
   _runnerHook = _runner.hook
 
@@ -442,7 +442,7 @@ afterEachFailed = (Cypress, test, err) ->
   test.state = "failed"
   test.err = wrapErr(err)
 
-  Cypress.action("runner:test:end", wrap(test))
+  Cypress.action("runner:mocha:test:end", wrap(test))
 
 hookFailed = (hook, err, hookName, getTestById, getTest) ->
   ## finds the test by returning the first test from
@@ -460,16 +460,16 @@ hookFailed = (hook, err, hookName, getTestById, getTest) ->
     ## when would the hook not be emitted at this point?
     test.alreadyEmittedMocha = true
   else
-    Cypress.action("runner:test:end", wrap(test))
+    Cypress.action("runner:mocha:test:end", wrap(test))
 
 _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId) ->
   _runner.on "start", ->
-    Cypress.action("runner:start", {
+    Cypress.action("runner:mocha:start", {
       start: new Date()
     })
 
   _runner.on "end", ->
-    Cypress.action("runner:end", {
+    Cypress.action("runner:mocha:end", {
       end: new Date()
     })
 
@@ -478,7 +478,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.started[suite.id] = true
 
-    Cypress.action("runner:suite:start", wrap(suite))
+    Cypress.action("runner:mocha:suite:start", wrap(suite))
 
   _runner.on "suite end", (suite) ->
     ## cleanup our suite + its hooks
@@ -489,7 +489,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.ended[suite.id] = true
 
-    Cypress.action("runner:suite:end", wrap(suite))
+    Cypress.action("runner:mocha:suite:end", wrap(suite))
 
   _runner.on "hook", (hook) ->
     hook.hookId ?= getHookId()
@@ -511,14 +511,14 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
     hook.ctx.currentTest = test
 
     ## make sure we set this test as the current now
-    ## else its possible that our TEST_AFTER_RUN_EVENT
+    ## else its possible that our TEST_RUN_END_EVENT
     ## will never fire if this failed in a before hook
     setTest(test)
 
-    Cypress.action("runner:hook:start", wrap(hook))
+    Cypress.action("runner:mocha:hook:start", wrap(hook))
 
   _runner.on "hook end", (hook) ->
-    Cypress.action("runner:hook:end", wrap(hook))
+    Cypress.action("runner:mocha:hook:end", wrap(hook))
 
   _runner.on "test", (test) ->
     setTest(test)
@@ -527,17 +527,17 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.started[test.id] = true
 
-    Cypress.action("runner:test:start", wrap(test))
+    Cypress.action("runner:mocha:test:start", wrap(test))
 
   _runner.on "test end", (test) ->
     return if _emissions.ended[test.id]
 
     _emissions.ended[test.id] = true
 
-    Cypress.action("runner:test:end", wrap(test))
+    Cypress.action("runner:mocha:test:end", wrap(test))
 
   _runner.on "pass", (test) ->
-    Cypress.action("runner:pass", wrap(test))
+    Cypress.action("runner:mocha:pass", wrap(test))
 
   ## if a test is pending mocha will only
   ## emit the pending event instead of the test
@@ -546,8 +546,8 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
     ## do nothing if our test is skipped
     return if test._ALREADY_RAN
 
-    if not fired(TEST_BEFORE_RUN_EVENT, test)
-      fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+    if not fired(TEST_RUN_START_EVENT, test)
+      fire(TEST_RUN_START_EVENT, test, Cypress)
 
     test.state = "pending"
 
@@ -555,17 +555,17 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## do not double emit this event
       test.alreadyEmittedMocha = true
 
-      Cypress.action("runner:pending", wrap(test))
+      Cypress.action("runner:mocha:pending", wrap(test))
 
     @emit("test", test)
 
     ## if this is not the last test amongst its siblings
-    ## then go ahead and fire its test:after:run event
+    ## then go ahead and fire its test:end event
     ## else this will not get called
     tests = getAllSiblingTests(test.parent, getTestById)
 
     if _.last(tests) isnt test
-      fire(TEST_AFTER_RUN_EVENT, test, Cypress)
+      fire(TEST_RUN_END_EVENT, test, Cypress)
 
   _runner.on "fail", (runnable, err) ->
     isHook = runnable.type is "hook"
@@ -592,19 +592,19 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## do not double emit this event
       runnable.alreadyEmittedMocha = true
 
-      Cypress.action("runner:fail", wrap(runnable), runnable.err)
+      Cypress.action("runner:mocha:fail", wrap(runnable), runnable.err)
 
     ## if we've already fired the test after run event
     ## it means that this runnable likely failed due to
     ## a double done(err) callback, and we need to fire
     ## this again!
-    if fired(TEST_AFTER_RUN_EVENT, runnable)
-      fire(TEST_AFTER_RUN_EVENT, runnable, Cypress)
+    if fired(TEST_RUN_END_EVENT, runnable)
+      fire(TEST_RUN_END_EVENT, runnable, Cypress)
 
     if isHook
       ## if a hook fails (such as a before) then the test will never
       ## get run and we'll need to make sure we set the test so that
-      ## the TEST_AFTER_RUN_EVENT fires correctly
+      ## the TEST_RUN_END_EVENT fires correctly
       hookFailed(runnable, runnable.err, hookName, getTestById, getTest)
 
 create = (specWindow, mocha, Cypress, cy) ->
@@ -753,7 +753,7 @@ create = (specWindow, mocha, Cypress, cy) ->
 
       ## closure for calculating the actual
       ## runtime of a runnables fn exection duration
-      ## and also the run of the runnable:after:run:async event
+      ## and also the run of the after:runnable:run:async event
       wallClockStartedAt = null
       wallClockEnd = null
       fnDurationStart = null
@@ -779,8 +779,8 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## that means that we need to reset the previous state
       ## of cy - since we now have a new 'test' and all of the
       ## associated _runnables will share this state
-      if not fired(TEST_BEFORE_RUN_EVENT, test)
-        fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+      if not fired(TEST_RUN_START_EVENT, test)
+        fire(TEST_RUN_START_EVENT, test, Cypress)
 
       ## extract out the next(fn) which mocha uses to
       ## move to the next runnable - this will be our async seam
@@ -867,7 +867,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## whenever any runnable is about to run
       ## we figure out what test its associated to
       ## if its a hook, and then we fire the
-      ## test:before:run:async action if its not
+      ## test:start:async action if its not
       ## been fired before for this test
       testBeforeRunAsync(test, Cypress)
       .catch (err) ->

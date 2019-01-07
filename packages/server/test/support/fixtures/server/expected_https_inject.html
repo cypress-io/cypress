@@ -7,5 +7,5 @@
           throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing!. This should never happen and likely is a bug. Please open an issue!');
         };
 
-      Cypress.action('app:window:before:load', window);
+      Cypress.action('app:page:start', { win: window, url: '<url here>', statusCode: 200, headers: {"content-type":"text/html","date":"Thu, 1 Jan 1970 00:00:00 GMT","connection":"close","transfer-encoding":"chunked"} });
     </script></head><body>https server</body></html>

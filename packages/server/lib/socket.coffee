@@ -15,16 +15,17 @@ fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
 preprocessor  = require("./background/preprocessor")
+driverEvents  = require("./background/driver_events")
 
 runnerEvents = [
   "reporter:restart:test:run"
   "runnables:ready"
   "run:start"
-  "test:before:run:async"
+  "test:start:async"
   "reporter:log:add"
   "reporter:log:state:changed"
   "paused"
-  "test:after:hooks"
+  "after:test:hooks"
   "run:end"
 ]
 
@@ -308,6 +309,8 @@ class Socket
               exec.run(config.projectRoot, args[0])
             when "task"
               task.run(config.backgroundFile, args[0])
+            when "driver:event"
+              driverEvents.execute(args...)
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"

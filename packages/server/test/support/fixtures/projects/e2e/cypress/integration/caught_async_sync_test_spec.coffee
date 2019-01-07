@@ -14,7 +14,7 @@ describe "foo", ->
       foo.bar()
 
   it "quux2 fails", (done) ->
-    cy.on "fail", ->
+    cy.on "test:fail", ->
       foo.bar()
 
     ## commands caught never calling done
@@ -23,7 +23,7 @@ describe "foo", ->
       foo.bar()
 
   it "quux3 passes", (done) ->
-    cy.on "fail", ->
+    cy.on "test:fail", ->
       done()
 
     ## commands caught with a fail handler
@@ -32,7 +32,7 @@ describe "foo", ->
       foo.bar()
 
   it "quux4 passes", ->
-    cy.on "fail", ->
+    cy.on "test:fail", ->
 
     ## commands caught with a fail handler
     ## and no done callback will pass if
@@ -41,13 +41,13 @@ describe "foo", ->
       foo.bar()
 
   it "quux5 passes", ->
-    cy.on "fail", ->
+    cy.on "test:fail", ->
 
     ## no commands fail handler should pass
     foo.bar()
 
   it "quux6 passes", (done) ->
-    cy.on "fail", ->
+    cy.on "test:fail", ->
       done()
 
     ## no commands fail async handler should pass

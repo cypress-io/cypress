@@ -1,6 +1,6 @@
 pending = []
 
-Cypress.on "test:after:run", (test) ->
+Cypress.on "test:end", (test) ->
   if test.state is "pending"
     pending.push(test)
 

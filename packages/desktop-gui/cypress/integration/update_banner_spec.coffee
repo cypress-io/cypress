@@ -12,7 +12,7 @@ describe "Update Banner", ->
     cy.fixture("specs").as("specs")
 
     cy.visitIndex({
-      onBeforeLoad: (win) ->
+      onStart: (win) ->
         cy.spy(win, "setInterval")
     }).then (win) ->
       { @start, @ipc } = win.App

@@ -47,11 +47,11 @@ export default {
       }
     }))
 
-    runner.on('test:before:run:async', action('test:before:run:async', (runnable) => {
+    runner.on('test:start:async', action('test:start:async', (runnable) => {
       runnablesStore.runnableStarted(runnable)
     }))
 
-    runner.on('test:after:run', action('test:after:run', (runnable) => {
+    runner.on('test:end', action('test:end', (runnable) => {
       runnablesStore.runnableFinished(runnable)
       statsStore.incrementCount(runnable.state)
     }))

@@ -21,7 +21,7 @@ describe "return values", ->
       done()
 
   it "throws when returning a non promise and invoking cy commands", (done) ->
-    cy.on "fail", (err) ->
+    cy.on "test:fail", (err) ->
       expect(err.message).to.include("> foo")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
 
@@ -32,7 +32,7 @@ describe "return values", ->
     return "foo"
 
   it "stringifies function bodies", (done) ->
-    cy.on "fail", (err) ->
+    cy.on "test:fail", (err) ->
       expect(err.message).to.include("> function () {")
       expect(err.message).to.include("return \"foo\";")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
@@ -55,7 +55,7 @@ describe "return values", ->
     cy.foo()
 
   it "throws when returning a non promise and invoking cy commands from a custom command", (done) ->
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(@logs.length).to.eq(1)
@@ -75,7 +75,7 @@ describe "return values", ->
     cy.foo()
 
   it "stringifies function return values", (done) ->
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(@logs.length).to.eq(1)

@@ -1,12 +1,6 @@
 ### Is this a Feature or Bug?
 
-<!-- 
-Is this a question? Do not open an issue. Please ask in our chat https://gitter.im/cypress-io/cypress
-
-Want something newly documented? Please open an issue in the respective repo: 
-- docs: https://github.com/cypress-io/cypress-documentation 
-- example recipes: https://github.com/cypress-io/cypress-example-recipes
--->
+<!-- Is this a question? Don't open an issue. Ask in our chat https://gitter.im/cypress-io/cypress-->
 
 ### Current behavior:
 
@@ -14,11 +8,11 @@ Want something newly documented? Please open an issue in the respective repo:
 
 ### Desired behavior:
 
-<!-- A clear and concise description of what you want to happen -->
+<!-- A clear concise description of what you want to happen -->
 
-### Steps to reproduce:
+### Steps to reproduce: (app code and test code)
 
-<!-- Issues without reproducible steps might get closed. *Tip* You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then tell us the repo/branch to try. -->
+<!-- Issues without reproducible steps will get closed. You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then tell us the repo/branch to try. -->
 
 ### Versions
 
