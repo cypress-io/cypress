@@ -431,6 +431,8 @@ jobs:
                   echo "with password for unlocking certificate .p12 file"
                 exit 1
               fi
+            else
+              echo "Not Mac platform, skipping code sign setup"
             fi
 
       - attach_workspace:

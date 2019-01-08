@@ -13,8 +13,8 @@ gulpTypeScript = require("gulp-typescript")
 pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
+execa = require("execa")
 electron = require("@packages/electron")
-signOsxApp = require("electron-osx-sign")
 debug = require("debug")("cypress:binary")
 R = require("ramda")
 la = require("lazy-ass")
@@ -29,7 +29,6 @@ linkPackages = require('../link-packages')
 
 rootPackage = require("@packages/root")
 
-sign  = Promise.promisify(signOsxApp)
 fs = Promise.promisifyAll(fse)
 
 logger = (msg, platform) ->
@@ -260,11 +259,7 @@ buildCypressApp = (platform, version, options = {}) ->
 
     appFolder = meta.zipDir(platform)
     log("#codeSign #{appFolder}")
-    sign({
-      app: appFolder
-      platform
-      verbose: true
-    })
+    execa('build', ["--prepackaged", appFolder])
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()
