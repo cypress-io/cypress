@@ -416,66 +416,21 @@ jobs:
     <<: *defaults
     shell: /bin/bash --login
     steps:
-      # can we import Mac profile for signing right away?
       - run:
-          name: Set up code sign (if on Mac)
-          # when running with sudo we need to pass environment variables with -E
-          # command: sudo -E ./scripts/set-mac-codesign.sh
+          name: Check environment variables before code sign (if on Mac)
           command: |
             set -e
-
             if [[ "$OSTYPE" == "darwin"* ]]; then
-              echo "This shell scripts imports Mac code sign profile from environment variable"
-              echo "Assumes the certificate is base64 encoded as environment variable Certificates"
-              echo "and its password is in environment variable P12_PASSWORD"
-              echo "should be run with sudo"
-              echo ""
-
-              if [ -z "$Certificates" ]; then
-                echo "Need to provide environment variable Certificates"
+              if [ -z "$CSC_LINK" ]; then
+                echo "Need to provide environment variable CSC_LINK"
+                  echo "with base64 encoded certificate .p12 file"
                 exit 1
               fi
-              if [ -z "$P12_PASSWORD" ]; then
-                echo "Need to provide environment variable P12_PASSWORD"
+              if [ -z "$CSC_KEY_PASSWORD" ]; then
+                echo "Need to provide environment variable CSC_KEY_PASSWORD"
+                  echo "with password for unlocking certificate .p12 file"
                 exit 1
               fi
-
-              echo $Certificates | base64 -D -o Certificates.p12
-
-              echo "Creating keychain"
-              security create-keychain -p default MyKeychain.keychain
-
-              echo "unlocking keychain"
-              security set-keychain-settings MyKeychain.keychain
-              security unlock-keychain -p default MyKeychain.keychain
-
-              echo "Importing certificates"
-              # see security import --help
-              # -A allows every app to access the certificate
-              # -T "path" allows only app at path to access the certificate
-              # -x private keys should not be extractable after import
-              # security import ./Certificates.p12 -k MyKeychain.keychain -A -P $P12_PASSWORD
-              # security import ./Certificates.p12 -t agg -k MyKeychain.keychain -P $P12_PASSWORD -T /usr/bin/codesign
-              security import ./Certificates.p12 -x -t agg -k MyKeychain.keychain -A -P $P12_PASSWORD
-
-              # we don't need the certificate file anymore
-              rm Certificates.p12
-
-              # check
-              echo "appending new keychain to the list"
-              security list-keychains -d user -s MyKeychain.keychain $(security list-keychains -d user | sed s/\"//g)
-              security list-keychains
-
-              echo "setting default keychain"
-              security default-keychain -s MyKeychain.keychain
-
-              echo "finding identity"
-              security find-identity -v -p codesigning
-
-              # if need to delete the new keychain
-              # security delete-keychain MyKeychain.keychain
-            else
-              echo "Not Mac platform, skipping code sign setup"
             fi
 
       - attach_workspace:
