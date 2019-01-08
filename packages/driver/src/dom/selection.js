@@ -379,8 +379,6 @@ const _moveCursorToStartOrEnd = function (el, start) {
       return _collapseInputOrTextArea(el, returnValue)
     }
 
-    //# Don't worry about moving past the end of the string
-    //# nothing will happen and there is no error.
     return setSelectionRange(el, returnValue, returnValue)
   }
 
