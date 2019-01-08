@@ -8,6 +8,7 @@ import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
 import appStore from '../lib/app-store'
 import viewStore from '../lib/view-store'
+import ipc from '../lib/ipc'
 
 import Settings from '../settings/settings'
 import OnBoarding from './onboarding'
@@ -15,7 +16,10 @@ import ProjectNav from '../project-nav/project-nav'
 import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
 
-const md = new Markdown({ html: true })
+const md = new Markdown({
+  html: true,
+  linkify: true,
+})
 
 const ErrorDetails = observer(({ err }) => {
   let details = _.clone(err.details).split('\n')
@@ -58,6 +62,14 @@ class Project extends Component {
     projectsApi.closeProject(this.props.project)
   }
 
+  componentDidUpdate () {
+    const errorUrls = document.querySelectorAll('.alert-content a')
+
+    errorUrls.forEach((el) => {
+      el.addEventListener('click', this._externalOpen)
+    })
+  }
+
   render () {
     if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
 
@@ -73,6 +85,12 @@ class Project extends Component {
         <OnBoarding project={this.props.project}/>
       </div>
     )
+  }
+
+  _externalOpen (e) {
+    e.preventDefault()
+
+    return ipc.externalOpen(e.target.href)
   }
 
   _currentView () {

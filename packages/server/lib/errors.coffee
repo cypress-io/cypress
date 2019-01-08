@@ -4,6 +4,7 @@ chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
 pluralize = require("pluralize")
+removeMd = require("remove-markdown")
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -604,12 +605,12 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Example:
 
-        ```
-        // cypress/support/index.js
-        Cypress.Screenshot.defaults({
-          screenshotOnRunFailure: false
-        })
-        ```
+      ```
+      // cypress/support/index.js
+      Cypress.Screenshot.defaults({
+        screenshotOnRunFailure: false
+      })
+      ```
 
       Learn more at https://on.cypress.io/screenshot-api
       """
@@ -763,7 +764,7 @@ clone = (err, options = {}) ->
 
 log = (err, color = "red") ->
   Promise.try ->
-    console.log chalk[color](err.message)
+    console.log chalk[color](removeMd(err.message))
     if err.details
       console.log("\n", chalk["yellow"](err.details))
 

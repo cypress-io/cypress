@@ -15,6 +15,7 @@ describe "Project", ->
       cy.stub(@ipc, "closeProject").resolves()
       cy.stub(@ipc, "onConfigChanged")
       cy.stub(@ipc, "onProjectWarning")
+      cy.stub(@ipc, "externalOpen")
 
       @getProjectStatus = @util.deferred()
       cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
@@ -214,6 +215,16 @@ describe "Project", ->
         .get(".error")
         .contains("ReferenceError: alsdkjf is not defined")
         .get("summary").should("not.exist")
+
+    it "opens links outside of electron", ->
+      @err.message = "Error: read some docs at [http://example.com](http://example.com)"
+
+      @ipc.openProject.rejects(@err)
+      @start()
+      cy
+        .get(".alert-content a").contains("http://example.com").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("http://example.com/")
+
 
   describe "polling", ->
     beforeEach ->
