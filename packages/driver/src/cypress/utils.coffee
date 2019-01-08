@@ -39,7 +39,8 @@ module.exports = {
     item = [].concat(val)[0]
 
     if $jquery.isJquery(item)
-      return item.first()
+      if item.first
+        return item.first()
 
     return item
 
