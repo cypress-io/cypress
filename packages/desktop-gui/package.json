@@ -27,7 +27,7 @@
     "@babel/plugin-proposal-object-rest-spread": "7.2.0",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.31.2",
-    "@cypress/react-tooltip": "^0.2.2",
+    "@cypress/react-tooltip": "^0.4.0",
     "@cypress/releaser": "0.1.12",
     "bin-up": "^1.0.0",
     "bluebird": "^3.4.0",
