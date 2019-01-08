@@ -27,9 +27,16 @@ context('Assertions', () => {
     it('expect - make an assertion about a specified subject', () => {
       // We can use Chai's BDD style assertions
       expect(true).to.be.true
+      const o = { foo: 'bar' }
+      expect(o).to.equal(o)
+      expect(o).to.deep.equal({ foo: 'bar' })
+    })
 
+    it('pass your own callback function to should()', () => {
       // Pass a function to should that can have any number
       // of explicit assertions within it.
+      // The ".should(cb)" function will be retried
+      // automatically until it passes all your explicit assertions or times out.
       cy.get('.assertions-p').find('p')
       .should(($p) => {
         // return an array of texts from all of the p's
@@ -51,6 +58,39 @@ context('Assertions', () => {
           'And even more text from third p',
         ])
       })
+    })
+
+    it('finds element by class name regex', () => {
+      cy.get('.docs-header').find('div')
+        // .should(cb) callback function will be retried
+        .should(($div) => {
+          expect($div).to.have.length(1)
+
+          const className = $div[0].className
+
+          expect(className).to.match(/heading-/)
+        })
+        // .then(cb) callback is not retried,
+        // it either passes or fails
+        .then(($div) => {
+          expect($div).to.have.text('Introduction')
+        })
+    })
+
+    it('can throw any error', () => {
+      cy.get('.docs-header').find('div')
+        .should(($div) => {
+          if ($div.length !== 1) {
+            // you can throw your own errors
+            throw new Error('Did not find 1 element')
+          }
+
+          const className = $div[0].className
+
+          if (!className.match(/heading-/)) {
+            throw new Error(`Could not find class "heading-" in ${className}`)
+          }
+        })
     })
 
     it('assert - assert shape of an object', () => {
