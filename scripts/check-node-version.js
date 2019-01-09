@@ -2,9 +2,7 @@
 
 // on CircleCI Mac machine, we need to use on of the laer executors
 // that already has Node 10 / 11
-const isMac = () => {
-  return process.platform === 'darwin'
-}
+const isMac = () => process.platform === 'darwin'
 
 if (isMac()) {
   // eslint-disable-next-line no-console
