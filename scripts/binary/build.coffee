@@ -259,7 +259,7 @@ buildCypressApp = (platform, version, options = {}) ->
 
     appFolder = meta.zipDir(platform)
     log("#codeSign #{appFolder}")
-    execa('build', ["--prepackaged", appFolder])
+    execa('build', ["--publish", "never", "--prepackaged", appFolder])
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()
