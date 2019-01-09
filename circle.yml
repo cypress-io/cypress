@@ -19,9 +19,6 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
-    # for signing Mac binary ?
-    FASTLANE_LANE: all
-
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -57,8 +54,7 @@ jobs:
       - run:
           name: print NPM version
           command: npm -v
-      # skip Node version while trying to code sign on Mac Circle
-      # - run: npm run check-node-version
+      - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
