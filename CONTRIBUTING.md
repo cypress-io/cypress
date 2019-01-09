@@ -33,6 +33,7 @@ Thanks for taking the time to contribute! :smile:
   - [Branches](#branches)
   - [Pull Requests](#pull-requests)
   - [Testing](#testing)
+  - [Dependencies](#dependencies)
 - [Deployment](#deployment)
 
 ## CI status
@@ -337,6 +338,10 @@ The repository is setup with two main (protected) branches.
 This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
 
 To run local tests, consult the `README.md` of each package.
+
+### Dependencies
+
+We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our dependencies. The bot keeps chugging using settings in [renovate.json](renovate.json) to open PRs and if they pass merge patches. Minor and major updates require manual merge.
 
 ## Deployment
 

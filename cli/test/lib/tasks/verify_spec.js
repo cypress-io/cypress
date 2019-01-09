@@ -44,12 +44,12 @@ context('lib/tasks/verify', () => {
     }
 
     os.platform.returns('darwin')
+    os.release.returns('0.0.0')
 
     sinon.stub(util, 'getCacheDir').returns(cacheDir)
     sinon.stub(util, 'isCi').returns(false)
     sinon.stub(util, 'pkgVersion').returns(packageVersion)
     sinon.stub(util, 'exec')
-
 
     sinon.stub(xvfb, 'start').resolves()
     sinon.stub(xvfb, 'stop').resolves()
@@ -70,6 +70,7 @@ context('lib/tasks/verify', () => {
 
   it('logs error and exits when no version of Cypress is installed', () => {
     mockfs({})
+
     return verify.start()
     .then(() => {
       throw new Error('should have caught error')
@@ -91,6 +92,7 @@ context('lib/tasks/verify', () => {
       executable: mockfs.file({ mode: 0777 }),
       packageVersion,
     })
+
     return verify.start()
     .then(() => {
       // nothing should have been logged to stdout
@@ -166,12 +168,18 @@ context('lib/tasks/verify', () => {
       })
 
       return verify.start({ force: true })
-      .then(() => { throw new Error('Should have thrown') })
+      .then(() => {
+        throw new Error('Should have thrown')
+      })
       .catch((err) => {
         logger.error(err)
       })
-      .then(() => fs.pathExistsAsync(binaryStatePath))
-      .then((exists) => expect(exists).to.eq(false))
+      .then(() => {
+        return fs.pathExistsAsync(binaryStatePath)
+      })
+      .then((exists) => {
+        return expect(exists).to.eq(false)
+      })
       .then(() => {
         return snapshot(
           'fails verifying Cypress',
@@ -190,6 +198,7 @@ context('lib/tasks/verify', () => {
         222
         after that more text
       `
+
       util.exec.withArgs(executablePath).resolves({
         stdout: stdoutWithDebugOutput,
       })
@@ -219,8 +228,11 @@ context('lib/tasks/verify', () => {
       executable: false,
       packageVersion,
     })
+
     return verify.start()
-    .then(() => { throw new Error('Should have thrown') })
+    .then(() => {
+      throw new Error('Should have thrown')
+    })
     .catch((err) => {
       stdout = Stdout.capture()
       logger.error(err)
@@ -239,8 +251,11 @@ context('lib/tasks/verify', () => {
       executable: mockfs.file({ mode: 0666 }),
       packageVersion,
     })
+
     return verify.start()
-    .then(() => { throw new Error('Should have thrown') })
+    .then(() => {
+      throw new Error('Should have thrown')
+    })
     .catch((err) => {
       stdout = Stdout.capture()
       logger.error(err)
@@ -258,6 +273,7 @@ context('lib/tasks/verify', () => {
       executable: mockfs.file({ mode: 0777 }),
       packageVersion,
     })
+
     return verify.start()
     .then(() => {
       return snapshot(
@@ -273,6 +289,7 @@ context('lib/tasks/verify', () => {
       executable: mockfs.file({ mode: 0777 }),
       packageVersion: '7.8.9',
     })
+
     return verify.start()
     .then(() => {
       return snapshot(
@@ -333,10 +350,13 @@ context('lib/tasks/verify', () => {
     })
 
     return verify.start()
-    .then(() => { throw new Error('Should have thrown') })
+    .then(() => {
+      throw new Error('Should have thrown')
+    })
     .catch((err) => {
       stdout = Stdout.capture()
       logger.error(err)
+
       return snapshot(
         'fails with no stderr',
         normalize(stdout.toString())
@@ -370,8 +390,10 @@ context('lib/tasks/verify', () => {
 
     it('logs error and exits when starting xvfb fails', () => {
       const err = new Error('test without xvfb')
+
       err.stack = 'xvfb? no dice'
       xvfb.start.rejects(err)
+
       return verify.start()
       .catch((err) => {
         expect(xvfb.stop).to.be.calledOnce
@@ -408,8 +430,11 @@ context('lib/tasks/verify', () => {
 
     it('logs error when binary not found', () => {
       mockfs({})
+
       return verify.start()
-      .then(() => { throw new Error('Should have thrown') })
+      .then(() => {
+        throw new Error('Should have thrown')
+      })
       .catch((err) => {
         logger.error(err)
         snapshot(
@@ -437,6 +462,7 @@ context('lib/tasks/verify', () => {
         '--smoke-test',
         '--ping=222',
       ]).resolves(spawnedProcess)
+
       return verify.start()
       .then(() => {
         expect(util.exec.firstCall.args[0]).to.equal(realEnvBinaryPath)
@@ -444,20 +470,24 @@ context('lib/tasks/verify', () => {
       })
     })
 
+    ;['darwin', 'linux', 'win32'].forEach((platform) => {
+      return it('can log error to user', () => {
+        process.env.CYPRESS_RUN_BINARY = '/custom/'
+        os.platform.returns(platform)
 
-    ;['darwin', 'linux', 'win32'].forEach((platform) => it('can log error to user', () => {
-      process.env.CYPRESS_RUN_BINARY = '/custom/'
-      os.platform.returns(platform)
-      return verify.start()
-      .then(() => { throw new Error('Should have thrown') })
-      .catch((err) => {
-        logger.error(err)
-        snapshot(
-          `${platform}: error when invalid CYPRESS_RUN_BINARY`,
-          normalize(stdout.toString())
-        )
+        return verify.start()
+        .then(() => {
+          throw new Error('Should have thrown')
+        })
+        .catch((err) => {
+          logger.error(err)
+          snapshot(
+            `${platform}: error when invalid CYPRESS_RUN_BINARY`,
+            normalize(stdout.toString())
+          )
+        })
       })
-    }))
+    })
   })
 })
 
@@ -484,6 +514,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
       mode: 0777,
     })
   }
+
   return mockfs(mockFiles)
 }
 
