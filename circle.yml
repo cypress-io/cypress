@@ -830,4 +830,4 @@ workflows:
                 - sign-mac-app-on-circle-ci-2958
           requires:
             - Mac NPM package
-            - Mac build
+            - Mac binary
