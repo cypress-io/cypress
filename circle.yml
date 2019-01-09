@@ -439,7 +439,7 @@ jobs:
       - run: $(npm bin)/print-arch
       - run:
           environment:
-            DEBUG: electron-osx-sign*
+            DEBUG: electron-builder,electron-osx-sign*
           command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip

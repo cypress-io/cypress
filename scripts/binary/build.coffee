@@ -19,7 +19,6 @@ debug = require("debug")("cypress:binary")
 R = require("ramda")
 la = require("lazy-ass")
 check = require("check-more-types")
-execa = require("execa")
 
 meta = require("./meta")
 smoke = require("./smoke")
@@ -259,7 +258,7 @@ buildCypressApp = (platform, version, options = {}) ->
 
     appFolder = meta.zipDir(platform)
     log("#codeSign #{appFolder}")
-    execa('build', ["--publish", "never", "--prepackaged", appFolder])
+    execa('build', ["--publish", "never", "--prepackaged", appFolder], {stdio: "inherit"})
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()
@@ -277,22 +276,22 @@ buildCypressApp = (platform, version, options = {}) ->
           reject new Error("Verifying App via GateKeeper failed")
 
   Promise.resolve()
-  .then(checkPlatform)
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(npmInstallPackages)
-  .then(createRootPackage)
-  .then(copyPackageProxies(distDir))
-  .then(convertCoffeeToJs)
-  .then(removeTypeScript)
-  .then(cleanJs)
-  .then(testVersion(distDir))
-  .then(elBuilder) # should we delete everything in the buildDir()?
-  .then(removeDevElectronApp)
-  .then(copyPackageProxies(buildAppDir))
-  .then(testVersion(buildAppDir))
-  .then(runSmokeTests)
+  # .then(checkPlatform)
+  # .then(cleanupPlatform)
+  # .then(buildPackages)
+  # .then(copyPackages)
+  # .then(npmInstallPackages)
+  # .then(createRootPackage)
+  # .then(copyPackageProxies(distDir))
+  # .then(convertCoffeeToJs)
+  # .then(removeTypeScript)
+  # .then(cleanJs)
+  # .then(testVersion(distDir))
+  # .then(elBuilder) # should we delete everything in the buildDir()?
+  # .then(removeDevElectronApp)
+  # .then(copyPackageProxies(buildAppDir))
+  # .then(testVersion(buildAppDir))
+  # .then(runSmokeTests)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
   .return({
