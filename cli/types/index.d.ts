@@ -3663,7 +3663,6 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
-
   /**
    * Page details included with actions like 'page:start'
    */
