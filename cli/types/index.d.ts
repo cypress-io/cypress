@@ -1329,19 +1329,37 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
@@ -1350,7 +1368,16 @@ declare namespace Cypress {
      *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
      *    cy.location().then((loc) => {})   // Yields location object as first arg
      */
-    then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
+    then(fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     * @example
+     *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
+     *    cy.location().then((loc) => {})   // Yields location object as first arg
+     */
+    then(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
 
     /**
      * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).
