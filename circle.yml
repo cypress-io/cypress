@@ -797,6 +797,17 @@ workflows:
 
       # maybe run unit tests?
 
+      - build-npm-package:
+          name: Mac NPM package
+          executor: mac
+          filters:
+            branches:
+              only:
+                - develop
+                - sign-mac-app-on-circle-ci-2958
+          requires:
+            - Mac build
+
       - build-binary:
           name: Mac binary
           executor: mac
@@ -807,4 +818,16 @@ workflows:
                 - develop
                 - sign-mac-app-on-circle-ci-2958
           requires:
+            - Mac build
+
+      - test-binary-against-kitchensink:
+          name: Test Mac binary against kitchensink
+          executor: mac
+          filters:
+            branches:
+              only:
+                - develop
+                - sign-mac-app-on-circle-ci-2958
+          requires:
+            - Mac NPM package
             - Mac build
