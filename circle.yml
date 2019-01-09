@@ -664,6 +664,11 @@ jobs:
 
 workflows:
   linux:
+    # we can limit how this workflow is triggered
+    filters:
+      branches:
+        ignore:
+          - sign-mac-app-on-circle-ci-2958
     jobs:
       - build
       - lint:
@@ -808,6 +813,7 @@ workflows:
             branches:
               only:
                 - develop
+                - sign-mac-app-on-circle-ci-2958
           requires:
             - Mac build
 
