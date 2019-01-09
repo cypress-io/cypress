@@ -667,123 +667,120 @@ jobs:
           command: npm run e2e
 
 workflows:
-  # linux:
-  #   jobs:
-  #     - build
-  #     - lint:
-  #         name: Linux lint
-  #         requires:
-  #           - build
-  #     # unit, integration and e2e tests
-  #     - unit-tests:
-  #         requires:
-  #           - build
-  #     - server-unit-tests:
-  #         requires:
-  #           - build
-  #     - server-integration-tests:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-1:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-2:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-3:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-4:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-5:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-6:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-7:
-  #         requires:
-  #           - build
-  #     - server-e2e-tests-8:
-  #         requires:
-  #           - build
-  #     - driver-integration-tests-3x:
-  #         requires:
-  #           - build
-  #     - desktop-gui-integration-tests-2x:
-  #         requires:
-  #           - build
-  #     - run-launcher:
-  #         requires:
-  #           - build
-  #     # various testing scenarios, like building full binary
-  #     # and testing it on a real project
-  #     - test-against-staging:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build
-  #     - test-kitchensink-against-staging:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build
-  #     - build-npm-package:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build
-  #     - build-binary:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build
-  #     - test-next-version:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build-npm-package
-  #           - build-binary
-  #     - test-next-version-locally:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build-npm-package
-  #           - build-binary
-  #     - test-binary-against-staging:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build-npm-package
-  #           - build-binary
-  #     - test-binary-against-kitchensink:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - build-npm-package
-  #           - build-binary
+  linux:
+    jobs:
+      - build
+      - lint:
+          name: Linux lint
+          requires:
+            - build
+      # unit, integration and e2e tests
+      - unit-tests:
+          requires:
+            - build
+      - server-unit-tests:
+          requires:
+            - build
+      - server-integration-tests:
+          requires:
+            - build
+      - server-e2e-tests-1:
+          requires:
+            - build
+      - server-e2e-tests-2:
+          requires:
+            - build
+      - server-e2e-tests-3:
+          requires:
+            - build
+      - server-e2e-tests-4:
+          requires:
+            - build
+      - server-e2e-tests-5:
+          requires:
+            - build
+      - server-e2e-tests-6:
+          requires:
+            - build
+      - server-e2e-tests-7:
+          requires:
+            - build
+      - server-e2e-tests-8:
+          requires:
+            - build
+      - driver-integration-tests-3x:
+          requires:
+            - build
+      - desktop-gui-integration-tests-2x:
+          requires:
+            - build
+      - run-launcher:
+          requires:
+            - build
+      # various testing scenarios, like building full binary
+      # and testing it on a real project
+      - test-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build
+      - test-kitchensink-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build
+      - build-npm-package:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build
+      - build-binary:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build
+      - test-next-version:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build-npm-package
+            - build-binary
+      - test-next-version-locally:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build-npm-package
+            - build-binary
+      - test-binary-against-staging:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build-npm-package
+            - build-binary
+      - test-binary-against-kitchensink:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build-npm-package
+            - build-binary
 
-  # disable Mac build until we can figure CircleCI v2 story
-  # for code signing the built binary
-  # https://github.com/cypress-io/cypress/issues/2958
-
+  # Mac pipeline
   mac:
     jobs:
       - build:
@@ -804,7 +801,6 @@ workflows:
             branches:
               only:
                 - develop
-                - sign-mac-app-on-circle-ci-2958
           requires:
             - Mac build
 
@@ -816,7 +812,6 @@ workflows:
             branches:
               only:
                 - develop
-                - sign-mac-app-on-circle-ci-2958
           requires:
             - Mac build
 
@@ -827,7 +822,17 @@ workflows:
             branches:
               only:
                 - develop
-                - sign-mac-app-on-circle-ci-2958
+          requires:
+            - Mac NPM package
+            - Mac binary
+
+      - test-binary-against-staging:
+          name: Test Mac binary against staging
+          executor: mac
+          filters:
+            branches:
+              only:
+                - develop
           requires:
             - Mac NPM package
             - Mac binary
