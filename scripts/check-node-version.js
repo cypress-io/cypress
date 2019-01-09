@@ -3,7 +3,7 @@
 // on CircleCI Mac machine, we need to use on of the laer executors
 // that already has Node 10 / 11
 const isMac = () => {
-  return process.platform === 'platform'
+  return process.platform === 'darwin'
 }
 
 if (isMac()) {
