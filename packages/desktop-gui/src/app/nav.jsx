@@ -25,24 +25,14 @@ export default class Nav extends Component {
           </ul>
           <ul className='nav navbar-nav navbar-right'>
             <li>
-              <Tooltip
-                title='Support'
-                placement='bottom'
-                className='cy-tooltip'>
-                <a onClick={this._openSupport} href='#'>
-                  <i className='fa fa-question-circle'></i>{' '}
-                </a>
-              </Tooltip>
+              <a onClick={this._openSupport} href='#'>
+                <i className='fa fa-question-circle'></i> Support
+              </a>
             </li>
             <li>
-              <Tooltip
-                title='Docs'
-                placement='bottom'
-                className='cy-tooltip'>
-                <a onClick={this._openDocs} href='#'>
-                  <i className='fa fa-graduation-cap'></i>{' '}
-                </a>
-              </Tooltip>
+              <a onClick={this._openDocs} href='#'>
+                <i className='fa fa-graduation-cap'></i> Docs
+              </a>
             </li>
             {this._userStateButton()}
           </ul>
