@@ -15,6 +15,8 @@ if (!fn) {
   console.error('Invalid deploy command %s 🚫', command)
 }
 
+// TODO allow passing CLI arguments to each command
+
 fn()
 .then(() => {
   return console.log('✅ %s completed', command)
