@@ -417,6 +417,14 @@ jobs:
     steps:
       - run:
           name: Check environment variables before code sign (if on Mac)
+          # NOTE
+          # our Mac code sign works via electron-builder
+          # by default, electron-builder will NOT sign app built in a pull request
+          # even our internal one (!)
+          # Usually this is not a problem, since we only build and test binary
+          # built on "develop" and "master" branches
+          # but if you need to really build and sign a Mac binary in a PR
+          # set variable CSC_FOR_PULL_REQUEST=true
           command: |
             set -e
             if [[ "$OSTYPE" == "darwin"* ]]; then
