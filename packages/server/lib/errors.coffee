@@ -4,7 +4,6 @@ chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
 pluralize = require("pluralize")
-removeMd = require("remove-markdown")
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -764,7 +763,7 @@ clone = (err, options = {}) ->
 
 log = (err, color = "red") ->
   Promise.try ->
-    console.log chalk[color](removeMd(err.message))
+    console.log chalk[color](err.message)
     if err.details
       console.log("\n", chalk["yellow"](err.details))
 

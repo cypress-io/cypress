@@ -169,7 +169,6 @@
     "pumpify": "1.5.1",
     "ramda": "0.24.1",
     "randomstring": "1.1.5",
-    "remove-markdown": "^0.3.0",
     "replacestream": "4.0.3",
     "request": "2.88.0",
     "request-promise": "4.1.1",

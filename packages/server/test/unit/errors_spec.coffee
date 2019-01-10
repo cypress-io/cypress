@@ -35,12 +35,6 @@ describe "lib/errors", ->
       errors.log(err).then =>
         expect(@log).to.be.calledWithMatch("foo/bar/baz")
 
-    it "strips markdown from err.message", ->
-      err = errors.get("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED")
-      errors.log(err).then =>
-        expect(@log).to.be.calledWithMatch('Cypress.Screenshot.defaults({')
-        expect(@log).to.not.be.calledWithMatch('```')
-
     it "logs err.details", ->
       err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh")
       errors.log(err).then =>
