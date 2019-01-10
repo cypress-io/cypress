@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import Tooltip from '@cypress/react-tooltip'
 
 import appStore from '../lib/app-store'
 import authApi from '../auth/auth-api'
