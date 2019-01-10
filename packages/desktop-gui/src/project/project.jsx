@@ -1,8 +1,6 @@
-import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
-import Markdown from 'markdown-it'
 
 import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
@@ -15,34 +13,7 @@ import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
-
-const md = new Markdown({
-  html: true,
-  linkify: true,
-})
-
-const ErrorDetails = observer(({ err }) => {
-  let details = _.clone(err.details).split('\n')
-  const detailsTitle = details.shift()
-  const detailsBody = details.join('\n')
-
-  if (detailsBody) {
-    return (
-      <pre>
-        <details>
-          <summary>{detailsTitle}</summary>
-          {detailsBody}
-        </details>
-      </pre>
-    )
-  }
-
-  return (
-    <pre>
-      {detailsTitle}
-    </pre>
-  )
-})
+import ErrorMessage from './error-message'
 
 @observer
 class Project extends Component {
@@ -73,7 +44,7 @@ class Project extends Component {
   render () {
     if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (this.props.project.error) return this._error()
+    if (this.props.project.error) return <ErrorMessage error={this.props.project.error} onTryAgain={this._reopenProject}/>
 
     return (
       <div>
@@ -120,40 +91,6 @@ class Project extends Component {
         }} />
         <button className='btn btn-link close' onClick={this._removeWarning}>
           <i className='fa fa-remove' />
-        </button>
-      </div>
-    )
-  }
-
-  _error () {
-    let err = this.props.project.error
-
-    return (
-      <div className='full-alert alert alert-danger error'>
-        <p className='header'>
-          <i className='fa fa-warning'></i>{' '}
-          <strong>{err.title || 'Can\'t start server'}</strong>
-        </p>
-        <span className='alert-content'>
-          <p dangerouslySetInnerHTML={{
-            __html: md.render(err.message),
-          }} />
-          {err.details && (
-            <ErrorDetails err={err} />
-          )}
-          {err.portInUse && (
-            <div>
-              <hr />
-              <p>To fix, stop the other running process or change the port in cypress.json</p>
-            </div>
-          )}
-        </span>
-        <button
-          className='btn btn-default btn-sm'
-          onClick={this._reopenProject}
-        >
-          <i className='fa fa-refresh'></i>{' '}
-          Try Again
         </button>
       </div>
     )
