@@ -814,7 +814,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - mac-sign-2
         requires:
           - Mac build
 
@@ -840,7 +839,7 @@ mac-workflow: &mac-workflow
           - Mac NPM package
           - Mac binary
 workflows:
-  # linux:
-  #   <<: *linux-workflow
+  linux:
+    <<: *linux-workflow
   mac:
     <<: *mac-workflow
