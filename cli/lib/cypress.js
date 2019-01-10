@@ -21,21 +21,17 @@ const cypressModuleApi = {
     return tmp.fileAsync()
     .then((outputPath) => {
       options.outputPath = outputPath
-
       return run.start(options)
-      .then((failedTests) => {
+    }).then((failedTests) => {
         return fs.readJsonAsync(outputPath, { throws: false })
-        .then((output) => {
-          if (!output) {
-            return {
-              failures: failedTests,
-              message: 'Could not find Cypress test run results',
-            }
+    }).then((output) => {
+        if (!output) {
+          return {
+            failures: failedTests,
+            message: 'Could not find Cypress test run results',
           }
-
-          return output
-        })
-      })
+        }
+        return output
     })
   },
 }
