@@ -107,4 +107,20 @@ describe('Hook model', () => {
       expect(hook.commandMatchingErr({ displayMessage: 'matching error message' })).to.be.undefined
     })
   })
+
+  context('#aliasesWithDuplicates', () => {
+    it('returns aliases that appear multiple times', () => {
+      hook.addCommand({ isMatchingEvent: () => {
+        return false
+      }, alias: 'foo' })
+      hook.addCommand({ isMatchingEvent: () => {
+        return false
+      }, alias: 'bar' })
+      hook.addCommand({ isMatchingEvent: () => {
+        return false
+      }, alias: 'foo' })
+
+      expect(hook.aliasesWithDuplicates).to.deep.equal(['foo'])
+    })
+  })
 })

@@ -14,10 +14,12 @@ export default class Hook {
   }
 
   @computed get aliasesWithDuplicates () {
-    return this.commands.map((command) => {
-      if (command.alias && command.hasDuplicates) {
-        return command.alias
-      }
+    const aliases = this.commands.map((command) => {
+      return command.alias
+    })
+
+    return aliases.filter((alias, i) => {
+      return aliases.indexOf(alias) === i && aliases.lastIndexOf(alias) !== i
     })
   }
 
