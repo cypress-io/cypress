@@ -16,11 +16,20 @@ describe "src/cy/commands/assertions", ->
     $(doc.body).empty().html(@body)
 
 
-  # describe.only 'diff format', () =>
-  #   it 'reorders keys in a diff', =>
-  #     expect({z: {a: 'a', b:'b', c:'d'}, a: 'a', b: 'b', c: 'c' }).to.deep.eq({c:'c', b:'b', z: {b: 'b', c: 'c'}})
-      
 
+  describe.only 'diff format', () =>
+    it 'reorders keys in a diff', =>
+      # expect({z: {a: 'a', b:'b', c:'d'}, a: 'a', b: 'b', c: 'c' }).to.deep.eq({c:'c', b:'b', z: {b: 'b', c: 'c'}})
+      obj1 = Array(500).fill().map (x, i) =>
+        if i % 200 is 0 then 'good' else i
+      obj2 = Array(500).fill().map (x, i) =>
+        if i % 200 is 0 then 'bad' else i
+      # str1 = "foo ".repeat(500) + 'good' + "bar ".repeat(500)
+      # str2 = "foo ".repeat(500)+ 'bad' + "bar ".repeat(500)
+
+      # expect(str2).to.deep.eq(str1)
+      expect(JSON.parse(JSON.stringify(obj2))).to.deep.eq(JSON.parse(JSON.stringify(obj1)))
+     
 
   context "#should", ->
     beforeEach ->
