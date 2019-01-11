@@ -15,6 +15,13 @@ describe "src/cy/commands/assertions", ->
 
     $(doc.body).empty().html(@body)
 
+
+  # describe.only 'diff format', () =>
+  #   it 'reorders keys in a diff', =>
+  #     expect({z: {a: 'a', b:'b', c:'d'}, a: 'a', b: 'b', c: 'c' }).to.deep.eq({c:'c', b:'b', z: {b: 'b', c: 'c'}})
+      
+
+
   context "#should", ->
     beforeEach ->
       @logs = []
@@ -1791,3 +1798,4 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.have.css("foo")
+
