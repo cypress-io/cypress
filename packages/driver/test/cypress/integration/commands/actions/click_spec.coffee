@@ -420,6 +420,10 @@ describe "src/cy/commands/actions/click", ->
         expect(onClick).to.be.calledOnce
 
     describe "actionability", ->
+
+      it 'can click on inline elements that wrap lines', ->
+        cy.get('#overflow-link').find('.wrapped').click()
+
       it "can click elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").click()
 

@@ -30,6 +30,13 @@ cy.visit('https://www.acme.com/', {
   }
 })
 
+const serverOptions: Partial<Cypress.ServerOptions> = {
+  delay: 100,
+  whitelist: () => true
+}
+
+cy.server(serverOptions)
+
 Cypress.spec.name // $ExpectType string
 Cypress.spec.relative // $ExpectType string | null
 Cypress.spec.absolute // $ExpectType string | null
@@ -53,6 +60,15 @@ cy.request({
   url: "http://localhost:3000/myressource",
   method: "POST",
   body: {}
+})
+
+// specify query parameters
+// https://github.com/cypress-io/cypress/issues/2305
+cy.request({
+  url: "http://localhost:3000/myressource",
+  qs: {
+    param: 'someValue'
+  }
 })
 
 // if you want a separate variable, you need specify its type
