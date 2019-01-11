@@ -143,16 +143,18 @@ class Command extends Component {
               {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
-              <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates}/>
               <Tooltip placement='top' title={visibleMessage(model)}>
                 <i className='command-invisible fa fa-eye-slash'></i>
               </Tooltip>
               <Tooltip placement='top' title={`${model.numElements} matched elements`}>
                 <span className='num-elements'>{model.numElements}</span>
               </Tooltip>
-              <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`}>
-                <span className='num-duplicates'>{model.numDuplicates}</span>
-              </Tooltip>
+              <span className='alias-container'>
+                <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`}>
+                  <span className='num-duplicates'>{model.numDuplicates}</span>
+                </Tooltip>
+              </span>
             </span>
           </div>
         </FlashOnClick>

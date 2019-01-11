@@ -104,10 +104,6 @@
       box-shadow: 0 1px 2px #ccc inset;
     }
 
-    .command-alias-container {
-      padding: 5px;
-    }
-
     .command-alias {
       border-radius: 10px;
       color: #777888;
@@ -129,6 +125,16 @@
 
       &.show-count {
         border-radius: 10px 0 0 10px;
+      }
+    }
+
+    // ensures alias & number of duplicates don't break if reporter
+    // width is narrow
+    .alias-container {
+      white-space: nowrap;
+
+      > {
+        display: inline-block;
       }
     }
 
@@ -234,6 +240,7 @@
 
   .command-message-text {
     display: block;
+    flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
   }
