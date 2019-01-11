@@ -149,20 +149,22 @@ const preprocessor = (options = {}) => {
       latestBundle = createDeferred()
       bundles[filePath] = latestBundle.promise.tap(() => {
         log('- compile finished for', filePath)
-        // when the bundling is finished, we call `util.fileUpdated`
-        // to let Cypress know to re-run the spec
+        // when the bundling is finished, emit 'rerun' to let Cypress
+        // know to rerun the spec
         file.emit('rerun')
       })
     }
 
-    if (compiler.hooks) {
-      compiler.hooks.compile.tap(plugin, onCompile)
-    } else {
-      compiler.plugin('compile', onCompile)
-    }
-
+    // when we should watch, we hook into the 'compile' hook so we know when
+    // to rerun the tests
     if (file.shouldWatch) {
       log('watching')
+
+      if (compiler.hooks) {
+        compiler.hooks.compile.tap(plugin, onCompile)
+      } else {
+        compiler.plugin('compile', onCompile)
+      }
     }
 
     const bundler = file.shouldWatch ? compiler.watch(watchOptions, handle) : compiler.run(handle)
