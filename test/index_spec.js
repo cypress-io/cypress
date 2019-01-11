@@ -142,10 +142,20 @@ describe('webpack preprocessor', function () {
         })
       })
 
-      it('emits `rerun` when there is an update', function () {
+      it('emits "rerun" when shouldWatch is true and there is an update', function () {
+        this.file.shouldWatch = true
+        this.compilerApi.watch.yields(null, this.statsApi)
         this.compilerApi.plugin.withArgs('compile').yields()
         return this.run().then(() => {
           expect(this.file.emit).to.be.calledWith('rerun')
+        })
+      })
+
+      it('does not emit "rerun" when shouldWatch is false', function () {
+        this.file.shouldWatch = false
+        this.compilerApi.plugin.withArgs('compile').yields()
+        return this.run().then(() => {
+          expect(this.file.emit).not.to.be.calledWith('rerun')
         })
       })
 
