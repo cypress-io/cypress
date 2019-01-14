@@ -1,3 +1,5 @@
+## Unit tests in ../../test/unit/browsers/chrome_spec
+
 _         = require("lodash")
 os        = require("os")
 path      = require("path")
