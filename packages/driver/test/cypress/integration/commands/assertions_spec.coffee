@@ -648,7 +648,7 @@ describe "src/cy/commands/assertions", ->
         expect('a').to.eq('b')
       catch err
 
-    it "consoleProps error diffs are succinct", () ->
+    it "consoleProps error diffs are succinct", (done) ->
       obj1 = Array(500).fill().map((x, i) ->
         if i % 100 is 0
           return 'good'
@@ -659,17 +659,17 @@ describe "src/cy/commands/assertions", ->
           return 'bad'
         return i
       )
-      # cy.on "log:added", (attrs, log) =>
-      #   if attrs.name is "assert"
-      #     { consoleProps } = attrs
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
           
-      #     cy.removeAllListeners("log:added")
+          cy.removeAllListeners("log:added")
 
-      #     expect(consoleProps.Diff.split('\n')).to.have.length.lt(60)
-      #     done()
-      # try
-      expect(obj2).to.eq(obj1)
-      # catch err
+          expect(consoleProps.Diff.split('\n')).to.have.length.lt(60)
+          done()
+      try
+        expect(obj2).to.eq(obj1)
+      catch err
 
     it "consoleProps error diffs are logged properly", (done) ->
       obj1 = 'good'
