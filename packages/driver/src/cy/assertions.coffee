@@ -407,9 +407,12 @@ create = (state, queue, retryFn) ->
         _.extend obj, {
           Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
         }
-        _.extend obj, {
-          Diff: diff
-        }
+
+        if diff
+          _.extend obj, {
+            Diff: diff
+          }
+
         return obj
     ## think about completely gutting the whole object toString
     ## which chai does by default, its so ugly and worthless

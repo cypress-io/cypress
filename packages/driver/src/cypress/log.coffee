@@ -412,7 +412,7 @@ Log = (state, config, obj) ->
           ## we actually want to append it AFTER
           ## the Error property, so we delete the diff
           ## from the object and add it back on as a property
-          if { Diff } = consoleObj
+          if Diff = consoleObj.Diff
             delete consoleObj.Diff
             consoleObj.Diff = Diff
 
