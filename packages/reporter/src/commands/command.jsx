@@ -64,7 +64,7 @@ const Aliases = observer(({ model, aliasesWithDuplicates }) => {
     <span>
       {_.map([].concat(model.alias), (alias) => (
         <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`}>
-          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': model.aliasType === 'route' ? shouldShowCount(aliasesWithDuplicates, alias) : false })}>{alias}</span>
+          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': (model.aliasType === 'route' && !model.event) ? shouldShowCount(aliasesWithDuplicates, alias) : false })}>{alias}</span>
         </Tooltip>
       ))}
     </span>
