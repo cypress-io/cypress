@@ -1,0 +1,47 @@
+<html>
+<head>
+  <style>
+    /* #container {
+      margin: 0px auto;
+      width: 500px;
+      height: 375px;
+      border: 10px #333 solid;
+    }
+
+    #videoElement {
+      width: 500px;
+      height: 375px;
+      background-color: #666;
+    }
+
+    #statusElement {
+      padding-top: 20px;
+    } */
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <video autoplay="true" id="videoElement"></video>
+    <div id="statusElement">Status</div>
+  </div>
+  <script>
+    var video = document.querySelector('#videoElement');
+    var statusElement = document.querySelector('#statusElement');
+
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+          statusElement.innerHTML = '<span>Webcam Success!</span>';
+          console.info('Webcam Success!');
+        })
+        .catch(function (err) {
+          statusElement.innerHTML = '<span>Webcam Error!</span>';
+          console.error('Webcam Error!');
+        });
+    }
+  </script>
+</body>
+
+</html>
