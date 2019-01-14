@@ -37,6 +37,7 @@
     "compression": "^1.1.0",
     "cors": "^2.7.1",
     "debug": "^2.6.8",
+    "diff": "^4.0.1",
     "errorhandler": "^1.1.1",
     "eventemitter2": "^4.1.2",
     "express": "^4.12.3",

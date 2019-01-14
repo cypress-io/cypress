@@ -1,6 +1,8 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
+logger = require('../../../../../runner/src/lib/logger')
+
 helpers = require("../../support/helpers")
 
 describe "src/cy/commands/assertions", ->
@@ -625,6 +627,90 @@ describe "src/cy/commands/assertions", ->
         try
           expect(true).to.be.false
         catch err
+
+    it "consoleProps for errors with diffs", (done) ->
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(_.keys(consoleProps)).to.deep.eq([
+            "Command"
+            "actual"
+            "expected"
+            "Message"
+            "Error"
+            "Diff"
+          ])
+          done()
+      try
+        expect('a').to.eq('b')
+      catch err
+
+    it "consoleProps error diffs are succinct", () ->
+      obj1 = Array(500).fill().map((x, i) ->
+        if i % 100 is 0
+          return 'good'
+        return i
+      )
+      obj2 = Array(500).fill().map((x, i) ->
+        if i % 100 is 0
+          return 'bad'
+        return i
+      )
+      # cy.on "log:added", (attrs, log) =>
+      #   if attrs.name is "assert"
+      #     { consoleProps } = attrs
+          
+      #     cy.removeAllListeners("log:added")
+
+      #     expect(consoleProps.Diff.split('\n')).to.have.length.lt(60)
+      #     done()
+      # try
+      expect(obj2).to.eq(obj1)
+      # catch err
+
+    it "consoleProps error diffs are logged properly", (done) ->
+      obj1 = 'good'
+      obj2 = 'bad'
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(logger._formatConsoleDiff(consoleProps.Diff)).to.deep.eq([
+            " %c\n   -bad %c\n   +good %c\n   ",
+            "color:red",
+            "color:green",
+            ""
+          ])
+          done()
+      try
+        expect(obj2).to.eq(obj1)
+      catch err
+
+    ## could use snapshot here
+    it "consoleProps error diffs are logged properly and escaped", (done) ->
+      obj1 = '%cfo%co%c'
+      obj2 = '%%cf%coo%c'
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(logger._formatConsoleDiff(consoleProps.Diff)).to.deep.eq([
+            " %c\n   -%%%%cf%%coo%%c %c\n   +%%cfo%%co%%c %c\n   ",
+            "color:red",
+            "color:green",
+            ""
+          ])
+          done()
+      try
+        expect(obj2).to.eq(obj1)
+      catch err
 
     describe "#patchAssert", ->
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
@@ -1791,3 +1877,4 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.have.css("foo")
+
