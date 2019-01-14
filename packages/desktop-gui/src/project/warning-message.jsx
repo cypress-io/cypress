@@ -33,7 +33,7 @@ class WarningMessage extends Component {
 
     return (
       <div className='alert alert-warning'>
-        <p>
+        <p className='header'>
           <i className='fa fa-warning'></i>{' '}
           <strong>Warning</strong>
         </p>

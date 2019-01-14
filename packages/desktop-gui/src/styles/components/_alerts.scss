@@ -15,6 +15,10 @@
     }
   }
 
+  .header {
+    margin-bottom: 10px;
+  }
+
   &.alert-dismissable .close, &.alert-dismissible .close {
     position: absolute;
     top: 10px;
@@ -38,10 +42,6 @@
   text-align: center;
   padding: 20px;
   margin: 80px 60px 60px;
-
-  .header {
-    margin-bottom: 10px;
-  }
 
   .alert-content {
     text-align: left;
@@ -77,6 +77,11 @@
 .project-content .alert-warning {
   position: relative;
   border-bottom: 1px solid #ddd;
+
+  code, pre {
+    color: #8a6d3b;
+    border: none;
+  }
 }
 
 .project-content .alert-warning,
