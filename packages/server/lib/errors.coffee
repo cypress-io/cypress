@@ -515,8 +515,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       https://on.cypress.io/renderer-process-crashed
       """
-    when "NO_CURRENTLY_OPEN_PROJECT"
-      "Can't find open project."
     when "AUTOMATION_SERVER_DISCONNECTED"
       "The automation client disconnected. Cannot continue running tests."
     when "SUPPORT_FILE_NOT_FOUND"
