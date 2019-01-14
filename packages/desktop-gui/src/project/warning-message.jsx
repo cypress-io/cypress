@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import Markdown from 'markdown-it'
 
 import ipc from '../lib/ipc'
-
-import Markdown from 'markdown-it'
 
 const md = new Markdown({
   html: true,
