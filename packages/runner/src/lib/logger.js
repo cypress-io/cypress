@@ -198,6 +198,6 @@ export default {
     return table
   },
 
-  // expose for testing
+  // expose for testing in driver/assertions_spec
   _formatConsoleDiff,
 }
