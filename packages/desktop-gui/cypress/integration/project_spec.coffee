@@ -14,8 +14,6 @@ describe "Project", ->
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "closeProject").resolves()
       cy.stub(@ipc, "onConfigChanged")
-      cy.stub(@ipc, "onProjectWarning")
-      cy.stub(@ipc, "externalOpen")
 
       @getProjectStatus = @util.deferred()
       cy.stub(@ipc, "getProjectStatus").returns(@getProjectStatus.promise)
@@ -49,33 +47,6 @@ describe "Project", ->
         expect(@ipc.closeProject).to.be.called
         expect(@ipc.openProject).to.be.called
         cy.shouldBeOnProjectSpecs()
-
-  describe "warnings", ->
-    beforeEach ->
-      @start()
-      cy.shouldBeOnProjectSpecs().then =>
-        @ipc.onProjectWarning.yield(null, {type: "NOT_GOOD_BUT_NOT_TOO_BAD", name: "Fairly serious warning", message: "Some warning\nmessage"})
-
-    it "shows warning", ->
-      cy.get(".alert-warning")
-        .should("be.visible")
-        .should("contain", "Some warning")
-
-    it "can dismiss the warning", ->
-      cy.get(".alert-warning button").click()
-      cy.get(".alert-warning").should("not.exist")
-
-    it "stays dismissed after receiving same warning again", ->
-      cy.get(".alert-warning button").click()
-      cy.get(".alert-warning").should("not.exist").then =>
-        @ipc.onProjectWarning.yield(null, {type: "NOT_GOOD_BUT_NOT_TOO_BAD", name: "Fairly serious warning", message: "Some warning\nmessage"})
-      cy.get(".alert-warning").should("not.exist")
-
-    it "shows new, different warning after dismissing old warning", ->
-      cy.get(".alert-warning button").click()
-      cy.get(".alert-warning").should("not.exist").then =>
-        @ipc.onProjectWarning.yield(null, {type: "PRETTY_BAD_WARNING", name: "Totally serious warning", message: "Some warning\nmessage"})
-      cy.get(".alert-warning").should("be.visible")
 
   describe "polling", ->
     beforeEach ->
