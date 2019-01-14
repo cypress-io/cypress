@@ -60,7 +60,7 @@ module.exports = {
       return true
     }
 
-    return errMsg(key, value, 'a fully qualified URL (starting with http:// or https://)')
+    return errMsg(key, value, 'a fully qualified URL (starting with `http://` or `https://`)')
 
   },
 

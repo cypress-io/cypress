@@ -453,7 +453,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "CANNOT_CREATE_PROJECT_TOKEN"
       "Can't create project's secret key."
     when "PORT_IN_USE_SHORT"
-      "Port '#{arg1}' is already in use."
+      "Port #{arg1} is already in use."
     when "PORT_IN_USE_LONG"
       """
       Can't run project because port is currently in use: #{chalk.blue(arg1)}
@@ -585,8 +585,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Fix the error in your code and re-run your tests.
       """
     when "SETTINGS_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
       """
-      We found an invalid value in the file: '#{chalk.blue(arg1)}'
+      We found an invalid value in the file: #{chalk.blue(filePath)}
 
       #{chalk.yellow(arg2)}
       """
@@ -631,9 +632,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_CONNECT_BASE_URL_WARNING"
       """
-      Cypress could not verify that the server set as your 'baseUrl' is running: #{arg1}
+      Cypress could not verify that the server set as your `baseUrl` is running: #{arg1}
 
-      Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
       """
     when "INVALID_REPORTER_NAME"
       """

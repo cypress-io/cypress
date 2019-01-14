@@ -1,7 +1,7 @@
 describe "ErrorMessage", ->
   beforeEach ->
     @err = {
-      message: "Port '2020' is already in use."
+      message: "Port 2020 is already in use."
       name: "Error"
       port: 2020
       portInUse: true

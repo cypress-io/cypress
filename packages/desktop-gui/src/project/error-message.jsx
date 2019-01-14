@@ -71,7 +71,7 @@ class ErrorMessage extends Component {
           {err.portInUse && (
             <div>
               <hr />
-              <p>To fix, stop the other running process or change the port in cypress.json</p>
+              <p>To fix, stop the other running process or change the port in <code>cypress.json</code></p>
             </div>
           )}
         </span>
