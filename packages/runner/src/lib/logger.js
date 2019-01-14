@@ -37,6 +37,7 @@ const _logCSS = (line, css) => {
   return cleanseArg(line, css)
 }
 
+// this is tested in driver/assertions_spec
 const _formatConsoleDiff = (diff) => {
   let indent = '\n   '
 
