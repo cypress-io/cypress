@@ -743,9 +743,12 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('scrolls the window past a fixed position element when being covered', () => {
+        const spy = cy.spy(_.noop).as('mousedown')
+
         $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
         .appendTo(cy.$$('#fixed-nav-test'))
+        .mousedown(spy)
 
         $('<nav>nav on button</nav>').css({
           position: 'fixed',
@@ -762,11 +765,16 @@ describe('src/cy/commands/actions/click', function () {
           return scrolled.push(type)
         })
 
-        return cy.get('#button-covered-in-nav').click().then(() => {
+        return cy.get('#button-covered-in-nav').click()
+        .then(() => {
           // - element scrollIntoView
           // - element scrollIntoView (retry animation coords)
           // - window
-          return expect(scrolled).to.deep.eq(['element', 'element', 'window'])
+          expect(scrolled).to.deep.eq(['element', 'element', 'window'])
+          expect(spy.args[0][0]).to.deep.include({
+            clientX: 60,
+            clientY: 68,
+          })
         }
         )
       })
