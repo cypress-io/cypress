@@ -32,7 +32,7 @@ isAbortedThroughUnload = (xhr) ->
   xhr.readyState is 4 and
     xhr.status is 0 and
       ## TODO: How do we want to handle other responseTypes?
-      xhr.responseType is "" or xhr.responseType is "text" and
+      (xhr.responseType is "" or xhr.responseType is "text") and
         xhr.responseText is ""
 
 warnOnStubDeprecation = (obj, type) ->
