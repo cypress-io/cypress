@@ -564,6 +564,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## for this, and so we need to resolve onLoad immediately
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
+          if current.hash is remote.hash
+            return Promise.resolve()
+
           return changeIframeSrc(remote.href, "hashchange")
           .then(onLoad)
 

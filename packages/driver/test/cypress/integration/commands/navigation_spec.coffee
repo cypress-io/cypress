@@ -440,6 +440,11 @@ describe "src/cy/commands/navigation", ->
         .visit("http://localhost:3500/fixtures/generic.html")
         .visit("http://localhost:3500/fixtures/dimensions.html")
 
+    it "can visit the same page with hashes", ->
+      cy
+        .visit("http://localhost:3500/fixtures/generic.html#foo")
+        .visit("http://localhost:3500/fixtures/generic.html#foo")
+
     it "resolves the subject to the remote iframe window", ->
       cy.visit("/fixtures/jquery.html").then (win) ->
         expect(win).to.eq cy.state("$autIframe").prop("contentWindow")
