@@ -370,10 +370,10 @@ const moveCursorToEnd = (el) => {
   return _moveCursorToStartOrEnd(el, false)
 }
 
-const _moveCursorToStartOrEnd = function (el, start) {
+const _moveCursorToStartOrEnd = function (el, toStart) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     const { start, end } = getSelectionBounds(el)
-    const returnValue = start ? 0 : $elements.getNativeProp(el, 'value').length
+    const returnValue = toStart ? 0 : $elements.getNativeProp(el, 'value').length
 
     if (start !== end) {
       return _collapseInputOrTextArea(el, returnValue)
@@ -385,7 +385,7 @@ const _moveCursorToStartOrEnd = function (el, start) {
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(selection, 'modify', 'move', start ? 'backward' : 'forward', 'paragraphboundary')
+    return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'paragraphboundary')
   }
 }
 
