@@ -362,15 +362,15 @@ const _moveCursorUpOrDown = function (el, up) {
   }
 }
 
-const moveCursorToStart = (el) => {
-  return _moveCursorToStartOrEnd(el, true)
+const moveCursorToLineStart = (el) => {
+  return _moveCursorToLineStartOrEnd(el, true)
 }
 
-const moveCursorToEnd = (el) => {
-  return _moveCursorToStartOrEnd(el, false)
+const moveCursorToLineEnd = (el) => {
+  return _moveCursorToLineStartOrEnd(el, false)
 }
 
-const _moveCursorToStartOrEnd = function (el, toStart) {
+const _moveCursorToLineStartOrEnd = function (el, toStart) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     const { start, end } = getSelectionBounds(el)
     const returnValue = toStart ? 0 : $elements.getNativeProp(el, 'value').length
@@ -385,7 +385,7 @@ const _moveCursorToStartOrEnd = function (el, toStart) {
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'paragraphboundary')
+    return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'lineboundary')
   }
 }
 
@@ -606,8 +606,8 @@ module.exports = {
   moveCursorRight,
   moveCursorUp,
   moveCursorDown,
-  moveCursorToStart,
-  moveCursorToEnd,
+  moveCursorToLineStart,
+  moveCursorToLineEnd,
   replaceSelectionContents,
   isCollapsed,
   interceptSelect,

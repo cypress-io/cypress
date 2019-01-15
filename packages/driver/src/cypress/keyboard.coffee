@@ -225,7 +225,7 @@ $Keyboard = {
       options.input     = false
       options.setKey    = "{home}"
       @ensureKey el, null, options, ->
-        $selection.moveCursorToStart(el)
+        $selection.moveCursorToLineStart(el)
 
     ## charCode = 35
     ## no keyPress
@@ -238,7 +238,7 @@ $Keyboard = {
       options.input     = false
       options.setKey    = "{end}"
       @ensureKey el, null, options, ->
-        $selection.moveCursorToEnd(el)
+        $selection.moveCursorToLineEnd(el)
   }
 
   modifierChars: {
