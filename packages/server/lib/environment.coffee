@@ -19,6 +19,8 @@ try
   app = require("electron").app
   app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
   app.commandLine.appendSwitch("ignore-certificate-errors", true)
+  app.commandLine.appendSwitch("use-fake-ui-for-media-stream")
+  app.commandLine.appendSwitch("use-fake-device-for-media-stream")
 
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
