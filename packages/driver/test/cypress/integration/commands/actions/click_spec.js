@@ -577,10 +577,7 @@ describe('src/cy/commands/actions/click', function () {
 
         const $body = cy.$$('body')
 
-        $body.css({
-          padding: 0,
-          margin: 0,
-        }).children().remove()
+        $body.children().remove()
 
         const $wrap = $('<div></div>')
         .attr('id', 'flex-wrap')
