@@ -66,7 +66,7 @@ class SpecsList extends Component {
             this._clearFilter()
             this.filterRef.current.focus()
           }} className='btn btn-link'>
-            Clear search
+            <i className='fa fa-times'/> Clear search
           </a>
         </div>
       )
