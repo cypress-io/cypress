@@ -23,7 +23,6 @@ defaultArgs = [
   "--no-default-browser-check"
   "--no-first-run"
   "--noerrdialogs"
-  "--autoplay-policy=no-user-gesture-required" ## Autoplay policy that does not require any user gesture.
   "--enable-fixed-layout"
   "--disable-popup-blocking"
   "--disable-password-generation"
@@ -42,6 +41,9 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
   "--disable-device-discovery-notifications"
+
+  ## https://github.com/cypress-io/cypress/issues/2376
+  "--autoplay-policy=no-user-gesture-required" 
 
   ## http://www.chromium.org/Home/chromium-security/site-isolation
   ## https://github.com/cypress-io/cypress/issues/1951
