@@ -496,6 +496,18 @@ describe('<Command />', () => {
       expect(component).not.to.have.className('command-is-duplicate')
     })
 
+    it('num duplicates renders with has-alias class if command is an alias', () => {
+      const component = shallow(<Command model={model({ alias: 'foo' })} />)
+
+      expect(component.find('.num-duplicates')).to.have.className('has-alias')
+    })
+
+    it('num duplicates renders without has-alias class if command is not an alias', () => {
+      const component = shallow(<Command model={model()} />)
+
+      expect(component.find('.num-duplicates')).not.to.have.className('has-alias')
+    })
+
     it('displays number of duplicates', () => {
       const component = shallow(<Command model={model({ hasDuplicates: true, numDuplicates: 5 })} />)
 
