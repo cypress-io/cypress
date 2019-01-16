@@ -11,6 +11,7 @@ utils     = require("./utils")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
+MIN_CHROME_VERSION_WITH_LOOPBACK_PROXY_BYPASS_RULE = 72
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -41,10 +42,6 @@ defaultArgs = [
   "--enable-automation"
   "--disable-infobars"
   "--disable-device-discovery-notifications"
-
-  ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
-  ## https://github.com/cypress-io/cypress/issues/1872
-  "--proxy-bypass-list=<-loopback>"
 
   ## http://www.chromium.org/Home/chromium-security/site-isolation
   ## https://github.com/cypress-io/cypress/issues/1951
@@ -151,6 +148,11 @@ module.exports = {
     if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
        args.push("--disable-blink-features=RootLayerScrolling")
 
+    ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
+    ## https://github.com/cypress-io/cypress/issues/1872
+    if majorVersion >= MIN_CHROME_VERSION_WITH_LOOPBACK_PROXY_BYPASS_RULE
+      args.push("--proxy-bypass-list=<-loopback>")
+  
     args
 
   open: (browserName, url, options = {}, automation) ->
