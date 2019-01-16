@@ -14,13 +14,25 @@ export default class Hook {
   }
 
   @computed get aliasesWithDuplicates () {
+    // Consecutive duplicates only appear once in command array, but hasDuplicates is true
+    // Non-consecutive duplicates appear multiple times in command array, but hasDuplicates is false
+    // This returns aliases that have consecutive or non-consecutive duplicates
+    let consecutiveDuplicateAliases = []
     const aliases = this.commands.map((command) => {
-      return command.alias
+      if (command.alias) {
+        if (command.hasDuplicates) {
+          consecutiveDuplicateAliases.push(command.alias)
+        }
+
+        return command.alias
+      }
     })
 
-    return aliases.filter((alias, i) => {
+    const nonConsecutiveDuplicateAliases = aliases.filter((alias, i) => {
       return aliases.indexOf(alias) === i && aliases.lastIndexOf(alias) !== i
     })
+
+    return consecutiveDuplicateAliases.concat(nonConsecutiveDuplicateAliases)
   }
 
   addCommand (command) {
