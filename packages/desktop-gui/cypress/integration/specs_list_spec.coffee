@@ -91,8 +91,7 @@ describe "Specs List", ->
       cy.get(".modal").contains("cypress/integration").click().then =>
         expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
 
-  # .only comment
-  describe.only "lists specs", ->
+  describe "lists specs", ->
     context "Windows paths", ->
       beforeEach ->
         @ipc.getSpecs.yields(null, @specsWindows)
