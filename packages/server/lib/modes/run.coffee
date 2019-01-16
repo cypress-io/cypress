@@ -355,7 +355,6 @@ openProjectCreate = (projectRoot, socketId, options) ->
     onError: (err) ->
       console.log("")
       console.log(err.stack)
-      console.log(chalk.yellow(err.details))
       openProject.emit("exitEarlyWithErr", err.message)
   })
   .catch {portInUse: true}, (err) ->
