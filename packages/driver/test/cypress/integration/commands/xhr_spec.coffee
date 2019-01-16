@@ -1858,7 +1858,8 @@ describe "src/cy/commands/xhr", ->
 
       cy.on "log:changed", (attrs, l) =>
         if attrs.name is "xhr"
-          log = l
+          if not log
+            log = l
 
       cy
       .window()
@@ -1878,7 +1879,8 @@ describe "src/cy/commands/xhr", ->
 
       cy.on "log:changed", (attrs, l) =>
         if attrs.name is "xhr"
-          log = l
+          if not log
+            log = l
       
       cy
       .window()
@@ -1899,7 +1901,8 @@ describe "src/cy/commands/xhr", ->
 
       cy.on "log:changed", (attrs, l) =>
         if attrs.name is "xhr"
-          log = l
+          if not log
+            log = l
 
       cy
       .window()
