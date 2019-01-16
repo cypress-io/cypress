@@ -196,6 +196,15 @@ describe "driver/src/cypress/cy", ->
         cy.wrap("foo")
         cy.c()
 
+      it "fails when calling child command before parent with arguments", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include("Oops, it looks like you are trying to call a child command before running a parent command")
+          expect(err.message).to.include("cy.c(\"bar\")")
+          done()
+
+        cy.wrap("foo")
+        cy.c("bar")
+
       it "fails when previous subject becomes detached", (done) ->
         cy.$$("button:first").click ->
           $(@).remove()

@@ -126,6 +126,7 @@ npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 - Update the `manifest.json` for download server `npm run binary-release -- --version 1.0.5`
 - Push out the updated changes to the manifest for `on.cypress.io` if needed.
 - Push out an updated kitchen sink if needed.
+- Close the release in Zenhub.
 - Bump `version` in `package.json` from `develop` branch and then merge into `master`.
 
 Take a break, you deserve it! :sunglasses:

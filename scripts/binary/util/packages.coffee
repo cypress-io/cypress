@@ -10,23 +10,26 @@ check = require("check-more-types")
 execa = require("execa")
 R = require("ramda")
 os = require("os")
+prettyMs = require("pretty-ms")
+pluralize = require('pluralize')
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
 
 DEFAULT_PATHS = "package.json".split(" ")
 
-pathToPackageJson = (pkg) ->
-  path.join(pkg, "package.json")
+pathToPackageJson = (packageFolder) ->
+  la(check.unemptyString(packageFolder), "expected package path", packageFolder)
+  path.join(packageFolder, "package.json")
 
-npmRun = (args, cwd) ->
+npmRun = (args, cwd, env = {}) ->
   command = "npm " + args.join(" ")
   console.log(command)
   if cwd
     console.log("in folder:", cwd)
 
   la(check.maybe.string(cwd), "invalid CWD string", cwd)
-  execa("npm", args, { stdio: "inherit", cwd })
+  execa("npm", args, { stdio: "inherit", cwd, env })
   # if everything is ok, resolve with nothing
   .then R.always(undefined)
   .catch (result) ->
@@ -93,27 +96,41 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   la(check.unemptyString(packageToInstall), "missing package to install")
   npmRun(["install", "--force", packageToInstall], packagePath)
 
-npmInstallAll = (pathToPackages) ->
-  ## 1,060,495,784 bytes (1.54 GB on disk) for 179,156 items
-  ## 313,416,512 bytes (376.6 MB on disk) for 23,576 items
+removeDevDependencies = (packageFolder) ->
+  packagePath = pathToPackageJson(packageFolder)
+  console.log("removing devDependencies from %s", packagePath)
 
+  fs.readJsonAsync(packagePath)
+  .then (json) ->
+    delete json.devDependencies
+    fs.writeJsonAsync(packagePath, json, {spaces: 2})
+
+retryGlobbing = (pathToPackages, delay = 1000) ->
+  retryGlob = ->
+    glob(pathToPackages)
+    .catch {code: "EMFILE"}, ->
+      ## wait, then retry
+      Promise
+      .delay(delay)
+      .then(retryGlob)
+
+  retryGlob()
+
+# installs all packages given a wildcard
+# pathToPackages would be something like "C:\projects\cypress\dist\win32\packages\*"
+npmInstallAll = (pathToPackages) ->
   console.log("npmInstallAll packages in #{pathToPackages}")
 
   started = new Date()
 
-  retryGlobbing = ->
-    glob(pathToPackages)
-    .catch {code: "EMFILE"}, ->
-      ## wait 1 second then retry
-      Promise
-      .delay(1000)
-      .then(retryGlobbing)
-
-
   retryNpmInstall = (pkg) ->
-    console.log("installing", pkg)
-    npmInstall = _.partial(npmRun, ["install", "--production", "--quiet"])
-    npmInstall(pkg)
+    console.log("installing %s", pkg)
+    console.log("NODE_ENV is %s", process.env.NODE_ENV)
+
+    # force installing only PRODUCTION dependencies
+    # https://docs.npmjs.com/cli/install
+    npmInstall = _.partial(npmRun, ["install", "--only=production", "--quiet"])
+    npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
       Promise
       .delay(1000)
@@ -123,12 +140,19 @@ npmInstallAll = (pathToPackages) ->
       console.log(err, err.code)
       throw err
 
-  ## prunes out all of the devDependencies
-  ## from what was copied
-  retryGlobbing()
-  .mapSeries(retryNpmInstall)
+  printFolders = (folders) ->
+    console.log("found %s", pluralize("folder", folders.length, true))
+
+  ## only installs production dependencies
+  retryGlobbing(pathToPackages)
+  .tap(printFolders)
+  .mapSeries (packageFolder) ->
+    removeDevDependencies(packageFolder)
+    .then ->
+      retryNpmInstall(packageFolder)
   .then ->
-    console.log("Finished NPM Installing", new Date() - started)
+    end = new Date()
+    console.log("Finished NPM Installing", prettyMs(end - started))
 
 removePackageJson = (filename) ->
   if filename.endsWith("/package.json") then path.dirname(filename) else filename

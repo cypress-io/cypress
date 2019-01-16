@@ -68,7 +68,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   $$ = (selector, context) ->
     context ?= state("document")
-    new $.fn.init(selector, context)
+    $dom.query(selector, context)
 
   queue = $CommandQueue.create()
 
@@ -291,15 +291,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     .then (subject) ->
       state("commandIntermediateValue", undefined)
 
+      ## we may be given a regular array here so
+      ## we need to re-wrap the array in jquery
+      ## if that's the case if the first item
+      ## in this subject is a jquery element.
+      ## we want to do this because in 3.1.2 there
+      ## was a regression when wrapping an array of elements
+      firstSubject = $utils.unwrapFirst(subject)
+
       ## if ret is a DOM element and its not an instance of our own jQuery
-      if subject and $dom.isElement(subject) and not $utils.isInstanceOf(subject, $)
+      if subject and $dom.isElement(firstSubject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
         ## TODO: enable turning this off
         ## wrapSubjectsInJquery: false
         ## which will just pass subjects downstream
         ## without modifying them
-        subject = $(subject)
+        subject = $dom.wrap(subject)
 
       command.set({ subject: subject })
 
@@ -458,10 +466,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
       if prevSubject and ("optional" not in [].concat(prevSubject))
+        stringifiedArg = $utils.stringifyActual(args[0])
         $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
           args: {
             cmd:  name
-            args: $utils.stringifyActual(args[0])
+            args: if _.isString(args[0]) then "\"#{stringifiedArg}\"" else stringifiedArg
           }
         })
 

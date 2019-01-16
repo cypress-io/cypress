@@ -63,15 +63,31 @@ describe "lib/exceptions", ->
             at bar /Users/ruby/dev/bar.js:92
           """
         }
+        @windowsError = {
+          name: "Path not found: \\Users\\ruby\\dev\\"
+          message: "Could not find \\Users\\ruby\\dev\\foo.js"
+          stack: """
+            Error at \\Users\\ruby\\dev\\index.js:102
+            at foo \\Users\\ruby\\dev\\foo.js:4
+            at bar \\Users\\ruby\\dev\\bar.js:92
+          """
+        }
 
       it "strips paths from name, leaving file name and line number", ->
         expect(exception.getErr(@err).name).to.equal("Path not found: <stripped-path>")
+        expect(exception.getErr(@windowsError).name).to.equal("Path not found: <stripped-path>")
 
       it "strips paths from message, leaving file name and line number", ->
         expect(exception.getErr(@err).message).to.equal("Could not find <stripped-path>foo.js")
+        expect(exception.getErr(@windowsError).message).to.equal("Could not find <stripped-path>foo.js")
 
       it "strips paths from stack, leaving file name and line number", ->
         expect(exception.getErr(@err).stack).to.equal("""
+          Error at <stripped-path>index.js:102
+          at foo <stripped-path>foo.js:4
+          at bar <stripped-path>bar.js:92
+        """)
+        expect(exception.getErr(@windowsError).stack).to.equal("""
           Error at <stripped-path>index.js:102
           at foo <stripped-path>foo.js:4
           at bar <stripped-path>bar.js:92
