@@ -38,6 +38,7 @@
     "pretest": "npm run lint && npm run all lint && npm run test-scripts",
     "precommit": "npm run warn-only && lint-staged",
     "precommit-lint": "eslint --fix",
+    "prepush": "npm run stop-only",
     "stop-only": "stop-only --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
     "warn-only": "stop-only --warn --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
     "bump": "node ./scripts/binary.js bump",
