@@ -122,8 +122,8 @@ describe('lib/exec/spawn', function () {
 
     it('rejects with error from spawn', function () {
       const msg = 'the error message'
-      this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
 
+      this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
 
       return spawn.start('--foo')
       .then(() => {
@@ -178,6 +178,26 @@ describe('lib/exec/spawn', function () {
           FORCE_STDIN_TTY: '1',
           FORCE_STDOUT_TTY: '1',
         })
+      })
+    })
+
+    it('sets windowsHide:false property in windows', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      os.platform.returns('win32')
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.false
+      })
+    })
+
+    it('does not set windowsHide property when in darwin', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.undefined
       })
     })
 
@@ -326,7 +346,9 @@ describe('lib/exec/spawn', function () {
         const fn = () => {
           called = true
           const err = new Error()
+
           err.code = 'EPIPE'
+
           return process.stdin.emit('error', err)
         }
 
@@ -342,7 +364,9 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         const fn = () => {
           const err = new Error('wattttt')
+
           err.code = 'FAILWHALE'
+
           return process.stdin.emit('error', err)
         }
 
