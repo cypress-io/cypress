@@ -14,14 +14,16 @@ describe('errors', function () {
   })
 
   describe('individual', () => {
-    it('has the following errors', () =>
-      snapshot(Object.keys(errors))
+    it('has the following errors', () => {
+      return snapshot(Object.keys(errors))
+    }
     )
   })
 
   context('.errors.formErrorText', function () {
-    it('returns fully formed text message', () =>
-      snapshot(formErrorText(missingXvfb))
+    it('returns fully formed text message', () => {
+      return snapshot(formErrorText(missingXvfb))
+    }
     )
   })
 })

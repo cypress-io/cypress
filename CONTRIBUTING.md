@@ -33,6 +33,7 @@ Thanks for taking the time to contribute! :smile:
   - [Branches](#branches)
   - [Pull Requests](#pull-requests)
   - [Testing](#testing)
+  - [Dependencies](#dependencies)
 - [Deployment](#deployment)
 
 ## CI status
@@ -186,7 +187,11 @@ This outputs a lot of debugging lines. To focus on an individual module, run wit
 
 When running `npm start` this routes through the CLI and eventually calls `npm run dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
 
-If you want to bypass the CLI entirely, you can use the `npm run dev` task and pass arguments directly.
+If you want to bypass the CLI entirely, you can use the `npm run dev` task and pass arguments directly. For example to headlessly run a project in a given folder, while trying to record to the Dashboard
+
+```text
+npm run dev -- --run-project /project/folder --record --key <key>
+```
 
 #### Tasks
 
@@ -333,6 +338,10 @@ The repository is setup with two main (protected) branches.
 This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
 
 To run local tests, consult the `README.md` of each package.
+
+### Dependencies
+
+We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our dependencies. The bot keeps chugging using settings in [renovate.json](renovate.json) to open PRs and if they pass merge patches. Minor and major updates require manual merge.
 
 ## Deployment
 

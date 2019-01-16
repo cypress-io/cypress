@@ -21,6 +21,7 @@ delete process.env.CYPRESS_INSTALL_BINARY
 delete process.env.CYPRESS_CACHE_FOLDER
 delete process.env.CYPRESS_BINARY_VERSION
 delete process.env.CYPRESS_SKIP_BINARY_INSTALL
+delete process.env.CYPRESS_DOWNLOAD_MIRROR
 delete process.env.DISPLAY
 
 // enable running specs with --silent w/out affecting logging in tests
@@ -42,7 +43,9 @@ function throwIfFnNotStubbed (stub, method) {
     err.stack = _
     .chain(err.stack)
     .split('\n')
-    .reject((str) => _.includes(str, 'sinon'))
+    .reject((str) => {
+      return _.includes(str, 'sinon')
+    })
     .join('\n')
     .value()
 
@@ -51,6 +54,7 @@ function throwIfFnNotStubbed (stub, method) {
 }
 
 const $stub = sinon.stub
+
 sinon.stub = function (obj, method) {
   /* eslint-disable prefer-rest-params */
   const stub = $stub.apply(this, arguments)
@@ -85,7 +89,7 @@ beforeEach(function () {
 })
 
 afterEach(function () {
+  mockfs.restore()
   process.env = _.clone(env)
   sinon.restore()
-  mockfs.restore()
 })
