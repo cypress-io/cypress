@@ -246,8 +246,13 @@ const create = (state) => {
 
     },
 
-    mouseUp ($elToClick, fromViewport, { pointerdownProps }) {
-      const el = $elToClick.get(0)
+    /**
+     * @param {HTMLElement} el
+     * @param {Window} win
+     * @param {{x:number,y:number}} fromViewport
+     * @param {boolean} force
+     */
+    mouseUp (el, fromViewport, { pointerdownProps }, force) {
       const win = $dom.getWindowByElement(el)
 
       const _activeModifiers = $Keyboard.getActiveModifiers(state)
@@ -270,7 +275,13 @@ const create = (state) => {
         }
       }
 
-      const mouseupProps = sendMouseup(el, defaultOptions)
+      // if (!force) {
+      // const elAtCoords = win.document.elementFromPoint(fromViewport.x, fromViewport.y)
+
+      // if (elAtCoords !== el) debugger
+      // }
+
+      const mouseupProps = $elements.isAttached(el) && sendMouseup(el, defaultOptions)
 
       return {
         pointerupProps,

@@ -1,6 +1,5 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
-Keyboard = Cypress.Keyboard
 Promise = Cypress.Promise
 $selection = require("../../../../../src/dom/selection")
 
@@ -1784,24 +1783,19 @@ describe "src/cy/commands/actions/type", ->
         afterEach ->
           @$input.off("keydown")
 
-        it "sends keydown event for new modifiers", (done) ->
-          event = null
-          @$input.on "keydown", (e)->
-            event = e
+        it "sends keydown event for new modifiers", ->
+          spy = cy.spy().as("keydown")
+          @$input.on "keydown", spy
 
           cy.get("input:text:first").type("{shift}").then ->
-            expect(event.shiftKey).to.be.true
-            expect(event.which).to.equal(16)
-            done()
+            expect(spy).to.be.calledWithMatch({which: 16})
 
-        it "does not send keydown event for already activated modifiers", (done) ->
-          triggered = false
-          @$input.on "keydown", (e)->
-            triggered = true if e.which is 18 or e.which is 17
+        it "does not send keydown event for already activated modifiers", () ->
+          spy = cy.spy().as('keydown')
+          @$input.on "keydown", spy
 
           cy.get("input:text:first").type("{cmd}{alt}").then ->
-            expect(triggered).to.be.false
-            done()
+            expect(spy).to.not.be.called
 
     describe "case-insensitivity", ->
 
@@ -2580,7 +2574,7 @@ describe "src/cy/commands/actions/type", ->
           expect(lastLog.get("message")).to.eq "foo, {force: true, timeout: 1000}"
           expect(lastLog.invoke("consoleProps").Options).to.deep.eq {force: true, timeout: 1000}
 
-      context "#consoleProps", ->
+      context.only "#consoleProps", ->
         it "has all of the regular options", ->
           cy.get("input:first").type("foobar").then ($input) ->
             { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
@@ -2612,8 +2606,7 @@ describe "src/cy/commands/actions/type", ->
               10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, modifiers: "alt, meta"}
             }
 
-            for i in [1..10]
-              expect(table.data[i]).to.deep.eq(expectedTable[i])
+            expect(table.data).to.deep.eq(expectedTable)
 
             # table.data.forEach (item, i) ->
             #   expect(item).to.deep.eq(expectedTable[i])
@@ -2752,7 +2745,7 @@ describe "src/cy/commands/actions/type", ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq 2
 
-          allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(", ")
+          allChars = _.keys(cy.internal.keyboard.specialChars).concat(_.keys(cy.internal.keyboard.modifierChars)).join(", ")
 
           expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
           done()

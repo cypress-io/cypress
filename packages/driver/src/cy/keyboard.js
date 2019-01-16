@@ -363,8 +363,9 @@ const create = function (state) {
     typeChars (el, chars, options) {
       options = _.clone(options)
 
+      // switch(false) executes blocks whose case === false
       switch (false) {
-        case kb.isSpecialChar(chars):
+        case !kb.isSpecialChar(chars):
           return Promise
           .resolve(kb.handleSpecialChars(el, chars, options))
           .delay(options.delay)
@@ -604,7 +605,11 @@ const create = function (state) {
         return
       }
 
-      getActiveModifiers(state)[modifier] = true
+      const _activeModifiers = getActiveModifiers(state)
+
+      _activeModifiers[modifier] = true
+
+      state('keyboardModifiers', _activeModifiers)
 
       return kb.simulateModifier(el, 'keydown', modifier, options)
     },
@@ -637,9 +642,13 @@ const create = function (state) {
         }
       }
     },
+    mixinModifiers,
+    modifiersToString,
+    getActiveModifiers,
+    modifierChars,
   }
 
   return kb
 }
 
-module.exports = { create, mixinModifiers, modifiersToString, getActiveModifiers }
+module.exports = { create, mixinModifiers, getActiveModifiers, modifierChars, modifiersToString }

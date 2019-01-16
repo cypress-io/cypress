@@ -16,7 +16,7 @@ $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cypress/keyboard")
+$Keyboard = require("./cy/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
@@ -358,9 +358,6 @@ class $Cypress
 
       when "cy:scrolled"
         @emit("scrolled", args...)
-
-      when "cy:mouse:move"
-        @emit("mouse:move", args...)
 
       when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)

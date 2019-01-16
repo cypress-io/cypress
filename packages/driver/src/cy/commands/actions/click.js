@@ -1,9 +1,6 @@
 
 const _ = require('lodash')
 const Promise = require('bluebird')
-
-const $Mouse = require('../../../cypress/mouse')
-
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
 const $elements = require('../../../dom/elements')
@@ -11,6 +8,8 @@ const $selection = require('../../../dom/selection')
 const $actionability = require('../../actionability')
 
 module.exports = (Commands, Cypress, cy, state, config) => {
+  const mouse = cy.internal.mouse
+
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {
     //# TODO handle pointer-events: none
@@ -73,8 +72,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           //# handle mouse events removing DOM elements
           //# https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
-          domEvents.mouseUp = $dom.isAttached($elToClick) && $Mouse.mouseUp($elToClick, fromViewport, domEvents.mouseDown)
-          domEvents.click = $dom.isAttached($elToClick) && $Mouse.click($elToClick, fromViewport)
+          domEvents.mouseUp = $dom.isAttached($elToClick) && mouse.mouseUp($elToClick.get(0), fromViewport, domEvents.mouseDown, options.force)
+          domEvents.click = $dom.isAttached($elToClick) && mouse.click($elToClick, fromViewport)
 
           if (options._log) {
             consoleObj = options._log.invoke('consoleProps')
@@ -128,10 +127,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                 }
               }
 
-              if (click) {
+              if (domEvents.click) {
                 groups.push({
                   name: 'Click',
-                  items: _.pick(click, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                  items: _.pick(domEvents.click, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
                 })
               }
 
@@ -189,7 +188,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
             el = $elToClick.get(0)
 
-            domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
+            domEvents.mouseDown = mouse.mouseDown($elToClick, coords.fromViewport)
 
             //# if mousedown was cancelled then or caused
             //# our element to be removed from the DOM

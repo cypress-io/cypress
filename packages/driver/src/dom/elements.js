@@ -177,6 +177,8 @@ const nativeGetters = {
   selectionStart: _getSelectionStart,
   selectionEnd: _getSelectionEnd,
   type: _getType,
+  activeElement: descriptor('Document', 'activeElement').get,
+  body: descriptor('Document', 'body').get,
 }
 
 const nativeSetters = {
@@ -364,7 +366,7 @@ const getFirstCommonAncestor = (el1, el2) => {
       return curEl
     }
 
-    curEl = el2.parentNode
+    curEl = curEl.parentNode
   }
 
   return curEl
@@ -549,6 +551,14 @@ const getFirstFocusableEl = ($el) => {
   }
 
   return getFirstFocusableEl($el.parent())
+}
+
+const getActiveElByDocument = (doc) => {
+  const activeEl = getNativeProp(doc, 'activeElement')
+
+  if (activeEl) return activeEl
+
+  return getNativeProp(doc, 'body')
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
@@ -791,6 +801,8 @@ module.exports = {
   getElements,
 
   getFirstFocusableEl,
+
+  getActiveElByDocument,
 
   getContainsSelector,
 
