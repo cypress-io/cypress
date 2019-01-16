@@ -140,12 +140,17 @@
 
     .num-duplicates,
     .command-alias-count {
-      border-radius: 0 10px 10px 0;
+      border-radius: 5px;
       color: #777;
       font-size: 90%;
       font-style: normal;
       line-height: 1;
       margin-left: 0;
+    }
+
+    .num-duplicates.has-alias,
+    .command-alias-count {
+      border-radius: 0 10px 10px 0;
       padding: 0px 6px 1px 4px;
     }
 
