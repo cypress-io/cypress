@@ -1329,19 +1329,37 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
@@ -1350,7 +1368,16 @@ declare namespace Cypress {
      *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
      *    cy.location().then((loc) => {})   // Yields location object as first arg
      */
-    then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
+    then(fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     * @example
+     *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
+     *    cy.location().then((loc) => {})   // Yields location object as first arg
+     */
+    then(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
 
     /**
      * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).
@@ -3933,10 +3960,9 @@ declare namespace Cypress {
     left: number
   }
 
-  // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
+  // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
-  // TODO - remove this if possible. Seems a recent change to TypeScript broke this. Possibly https://github.com/Microsoft/TypeScript/pull/17912
-  type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>> // tslint:disable-line
+  type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 }
 
 /**

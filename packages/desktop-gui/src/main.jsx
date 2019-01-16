@@ -1,4 +1,4 @@
-import { useStrict, toJS } from 'mobx'
+import { configure as configureMobx, toJS } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 
@@ -8,7 +8,7 @@ import momentOverrides from './lib/configure-moment'
 
 import App from './app/app'
 
-useStrict(true)
+configureMobx({ enforceActions: 'observed' })
 
 handleGlobalErrors()
 momentOverrides()
