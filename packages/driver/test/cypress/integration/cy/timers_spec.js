@@ -78,11 +78,13 @@ describe('driver/src/cy/timers', () => {
     .log('requestAnimationFrame should be called')
     .window()
     .then((win) => {
-      win.setBar = () => {
+      const rafStub = cy
+      .stub()
+      .callsFake(() => {
         win.bar = 'bar'
-      }
+      })
 
-      const id1 = win.requestAnimationFrame(win.setBar, 1)
+      const id1 = win.requestAnimationFrame(rafStub, 'foo', 'bar', 'baz')
 
       // the timer id is 1 by default since
       // timers increment and always start at 0
@@ -92,9 +94,14 @@ describe('driver/src/cy/timers', () => {
       .window().its('bar').should('eq', 'bar')
       .log('requestAnimationFrame should not be called')
       .then(() => {
+        // requestAnimationFrame should have passed through
+        // its high res timestamp from performance.now()
+        expect(rafStub).to.be.calledWithMatch(Number)
+        expect(rafStub.firstCall.args.length).to.eq(1)
+
         win.bar = null
 
-        const id2 = win.requestAnimationFrame(win.setBar, 2)
+        const id2 = win.requestAnimationFrame(rafStub)
 
         expect(id2).to.eq(2)
 
@@ -104,6 +111,60 @@ describe('driver/src/cy/timers', () => {
       })
       .wait(100)
       .window().its('bar').should('be.null')
+    })
+  })
+
+  it('delays calls to requestAnimationFrame when paused', () => {
+    cy
+    .window()
+    .then((win) => {
+      win.bar = null
+
+      const rafStub = cy
+      .stub()
+      .callsFake(() => {
+        win.bar = 'bar'
+      })
+
+      // prevent timers from firing, add to queue
+      cy.pauseTimers(true)
+
+      const id1 = win.requestAnimationFrame(rafStub)
+
+      expect(id1).to.eq(1)
+
+      cy
+      .wait(100)
+      .log('requestAnimationFrame should NOT have fired when paused')
+      .window().its('bar').should('be.null')
+      .log('requestAnimationFrame should now fire when unpaused')
+      .then(() => {
+        // now go ahead and run all the queued timers
+        cy.pauseTimers(false)
+
+        expect(win.bar).to.eq('bar')
+
+        // requestAnimationFrame should have passed through
+        // its high res timestamp from performance.now()
+        expect(rafStub).to.be.calledWithMatch(Number)
+      })
+      .then(() => {
+        win.bar = 'foo'
+
+        cy.pauseTimers(true)
+
+        const id2 = win.requestAnimationFrame(rafStub)
+
+        expect(id2).to.eq(2)
+
+        const ret = win.cancelAnimationFrame(id2)
+
+        expect(ret).to.be.undefined
+
+        cy.pauseTimers(false)
+      })
+      .wait(100)
+      .window().its('bar').should('eq', 'foo')
     })
   })
 
@@ -201,18 +262,45 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
-  it('can use string code as timer function', () => {
-    cy
-    .window()
-    .then((win) => {
-      win.stub = cy.stub()
-
-      win.setTimeout('this.stub()', 1)
-
+  describe('accepts different types of timer function', () => {
+    it('string', () => {
       cy
-      .wait(10)
-      .then(() => {
-        expect(win.stub).to.be.called
+      .window()
+      .then((win) => {
+        win.stub = cy.stub()
+
+        win.setTimeout('this.stub()', 1)
+
+        cy
+        .wait(10)
+        .then(() => {
+          expect(win.stub).to.be.called
+        })
+      })
+    })
+
+    const codes = [
+      ['undefined', undefined],
+      ['boolean', true],
+      ['number', 42],
+      ['array', []],
+      ['object', {}],
+    ]
+
+    codes.forEach(([name, value]) => {
+      it(name, () => {
+        cy
+        .window()
+        .then((win) => {
+          win.eval = cy.stub()
+          win.setTimeout(value, 1)
+
+          cy
+          .wait(10)
+          .then(() => {
+            expect(win.eval).to.be.called
+          })
+        })
       })
     })
   })
@@ -270,7 +358,6 @@ describe('driver/src/cy/timers', () => {
         expect(cancelAfter3Calls).to.be.calledThrice
       })
     })
-
 
     //
     // setInterval(cb, 100)

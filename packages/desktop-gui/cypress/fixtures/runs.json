@@ -4,20 +4,22 @@
     "ci": {
       "buildNumber": "140",
       "provider": "circle",
+      "pullRequestId": "797",
+      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/jekyl/jekyl_blog/140"
     },
+    "ciBuildId": "circle-6443",
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
       "branch": "search-todos",
       "message": "remove listings from search results on clear",
-      "pullRequestId": "797",
-      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "sha": "f4b728bfcc61a1ea23d0f1ced676719550daae27",
       "url": "https://github.com/jekyl/jekyl_blog/commit/f4b728bfcc61a1ea23d0f1ced676719550daae27"
     },
     "completedAt": null,
     "createdAt": "2016-05-13T02:35:12.748Z",
+    "customCiBuildId": false,
     "cypressVersion": "2.1.0",
     "totalDuration": null,
     "totalFailed": 0,
@@ -138,9 +140,11 @@
   {
     "buildNumber": 1892,
     "ci": null,
+    "ciBuildId": null,
     "commit": null,
     "completedAt": "2016-05-13T02:30:26.000Z",
     "createdAt": "2016-12-19T14:59:59.328Z",
+    "customCiBuildId": false,
     "cypressVersion": "2.1.0",
     "totalDuration": 16000,
     "totalFailed": 14,
@@ -244,20 +248,23 @@
     "ci": {
       "buildNumber": "1780",
       "provider": "circle",
+      "pullRequestId": "797",
+      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/jane-lane/webAppOnline/1780"
     },
+    "ciBuildId": "circle-job-123",
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
       "branch": "search-todos",
       "message": "regex remove whitespace",
-      "pullRequestId": "797",
-      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
+      
       "sha": "19550dacc61a1ea23d0f1ced676719550daae27",
       "url": "https://github.com/jane-lane/webAppOnline/commit/19550dacc61a1ea23d0f1ced676719550daae27"
     },
     "completedAt": "2016-05-13T02:30:26.000Z",
     "createdAt": "2016-03-21T02:35:12.748Z",
+    "customCiBuildId": true,
     "cypressVersion": "2.1.0",
     "totalDuration": 1424424,
     "totalFailed": 0,
@@ -286,20 +293,22 @@
     "ci": {
       "buildNumber": "140",
       "provider": "circle",
+      "pullRequestId": "797",
+      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
     },
+    "ciBuildId": "circle-6441",
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
       "branch": "search-todos",
       "message": "remove listings from search results on clear",
-      "pullRequestId": "797",
-      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "sha": "f4b728bfcc61a1ea23d0f1ced676719550daae27",
       "url": "https://github.com/jekyl/jekyl_blog/commit/f4b728bfcc61a1ea23d0f1ced676719550daae27"
     },
     "completedAt": null,
     "createdAt": "2016-05-13T02:14:12.748Z",
+    "customCiBuildId": false,
     "cypressVersion": "2.1.0",
     "totalDuration": 0,
     "totalFailed": 0,
@@ -366,20 +375,22 @@
     "ci": {
       "buildNumber": "720",
       "provider": "circle",
+      "pullRequestId": "797",
+      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
     },
+    "ciBuildId": "circle-6440",
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
       "branch": "search-todos",
       "message": "remove listings from search results on clear",
-      "pullRequestId": "797",
-      "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "sha": "daae27cc61a1ea23d0f1ced676719550daae27",
       "url": "https://github.com/jane-lane/management-app/commit/daae27cc61a1ea23d0f1ced676719550daae27"
     },
     "completedAt": "2016-05-13T02:35:12.748Z",
     "createdAt": "2015-08-21T02:35:12.748Z",
+    "customCiBuildId": false,
     "cypressVersion": "2.1.0",
     "totalDuration": 1424424,
     "totalFailed": 0,

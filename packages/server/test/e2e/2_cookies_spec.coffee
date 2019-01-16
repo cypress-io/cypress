@@ -53,6 +53,18 @@ onServer = (app) ->
 
     res.send("<html></html>")
 
+  app.get "/cookieWithNoName", (req, res) ->
+    res.header("Set-Cookie",
+      "=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=/"
+    )
+
+    res.send("<html></html>")
+
+  app.get "/invalidCookies", (req, res) ->
+    res.header("Set-Cookie", "foo=bar; domain=nope.not.this.one")
+
+    res.send("<html></html>")
+
 describe "e2e cookies", ->
   e2e.setup({
     servers: [{

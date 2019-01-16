@@ -74,6 +74,9 @@ describe "cookies", ->
     it "should be only two left now", ->
       cy.getCookies().should("have.length", 2)
 
+    it "handles undefined cookies", ->
+      cy.visit("http://localhost:2121/cookieWithNoName")
+
   context "without whitelist", ->
     before ->
       Cypress.Cookies.defaults({
@@ -129,3 +132,6 @@ describe "cookies", ->
 
         .visit("https://localhost:2323/expirationMaxAge")
         .getCookies().should("be.empty")
+
+    it "issue: #2724 does not fail on invalid cookies", ->
+      cy.request('https://localhost:2323/invalidCookies')
