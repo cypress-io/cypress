@@ -240,7 +240,7 @@ describe "Specs List", ->
           cy.get(".outer-files-container").should("not.exist")
           cy.get(".empty-well").should("have.text", 'No specs match your search: "foobarbaz"')
 
-        it.only "clears and focuses the filter field when clear search is clicked", ->
+        it "clears and focuses the filter field when clear search is clicked", ->
           cy.get(".filter").clear().type("foobarbaz")
           cy.get(".btn").contains("Clear search").click()
           cy.focused().should("have.id", "filter")
