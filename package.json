@@ -36,7 +36,7 @@
     "lint-coffee": "coffeelint scripts/**/*.coffee",
     "lint": "npm run lint-js && npm run lint-coffee",
     "pretest": "npm run lint && npm run all lint && npm run test-scripts",
-    "precommit": "lint-staged && npm run stop-only",
+    "precommit": "npm run stop-only && lint-staged",
     "precommit-lint": "eslint --fix",
     "stop-only": "stop-only --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
     "warn-only": "stop-only --warn packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
