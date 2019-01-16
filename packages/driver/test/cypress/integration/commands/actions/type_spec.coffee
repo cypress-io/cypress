@@ -2574,7 +2574,7 @@ describe "src/cy/commands/actions/type", ->
           expect(lastLog.get("message")).to.eq "foo, {force: true, timeout: 1000}"
           expect(lastLog.invoke("consoleProps").Options).to.deep.eq {force: true, timeout: 1000}
 
-      context.only "#consoleProps", ->
+      context "#consoleProps", ->
         it "has all of the regular options", ->
           cy.get("input:first").type("foobar").then ($input) ->
             { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
