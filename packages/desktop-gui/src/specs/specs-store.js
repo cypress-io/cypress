@@ -7,8 +7,6 @@ import Spec from './spec-model'
 import Folder from './folder-model'
 
 const pathSeparatorRe = /[\\\/]/g
-const extRegex = /.*\.\w+$/
-const isFile = (maybeFile) => extRegex.test(maybeFile)
 
 export const allSpecsSpec = new Spec({
   name: 'All Specs',
@@ -84,6 +82,7 @@ export class SpecsStore {
 
   getSpecsFilterId ({ id = '<no-id>', path = '' }) {
     const shortenedPath = path.replace(/.*cypress/, 'cypress')
+
     return `specsFilter-${id}-${shortenedPath}`
   }
 
@@ -100,13 +99,15 @@ export class SpecsStore {
 
       let placeholder = root
 
-      _.each(segments, (segment) => {
+      _.each(segments, (segment, i) => {
         segmentsPassed.push(segment)
         const currentPath = path.join(...segmentsPassed)
-        const isCurrentAFile = isFile(currentPath)
+        const isCurrentAFile = i === segments.length - 1
         const props = { path: currentPath, displayName: segment }
 
-        let existing = _.find(placeholder, (file) => pathsEqual(file.path, currentPath))
+        let existing = _.find(placeholder, (file) => {
+          return pathsEqual(file.path, currentPath)
+        })
 
         if (!existing) {
           existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)

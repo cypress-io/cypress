@@ -216,6 +216,22 @@ context('Actions', () => {
       .should('be.visible')
   })
 
+  it('.trigger() - trigger an event on a DOM element', () => {
+    // https://on.cypress.io/trigger
+
+    // To interact with a range input (slider)
+    // we need to set its value & trigger the
+    // event to signal it changed
+
+    // Here, we invoke jQuery's val() method to set
+    // the value and trigger the 'change' event
+    cy.get('.trigger-input-range')
+      .invoke('val', 25)
+      .trigger('change')
+      .get('input[type=range]').siblings('p')
+      .should('have.text', '25')
+  })
+
   it('cy.scrollTo() - scroll the window or element to a position', () => {
 
     // https://on.cypress.io/scrollTo
@@ -252,21 +268,5 @@ context('Actions', () => {
 
     // control the duration of the scroll (in ms)
     cy.get('#scrollable-both').scrollTo('center', { duration: 2000 })
-  })
-
-  it('.trigger() - trigger an event on a DOM element', () => {
-    // https://on.cypress.io/trigger
-
-    // To interact with a range input (slider)
-    // we need to set its value & trigger the
-    // event to signal it changed
-
-    // Here, we invoke jQuery's val() method to set
-    // the value and trigger the 'change' event
-    cy.get('.trigger-input-range')
-      .invoke('val', 25)
-      .trigger('change')
-      .get('input[type=range]').siblings('p')
-      .should('have.text', '25')
   })
 })

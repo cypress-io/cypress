@@ -1,31 +1,17 @@
-Cypress.Cookies.defaults({
-  whitelist: "foo1"
-})
-
-context "cookies", ->
+describe "cookies", ->
   beforeEach ->
     cy.wrap({foo: "bar"})
 
-  it "can get all cookies", ->
-    cy
-      .clearCookie("foo1")
-      .setCookie("foo", "bar").then (c) ->
-        expect(c.domain).to.eq("localhost")
-        expect(c.httpOnly).to.eq(false)
-        expect(c.name).to.eq("foo")
-        expect(c.value).to.eq("bar")
-        expect(c.path).to.eq("/")
-        expect(c.secure).to.eq(false)
-        expect(c.expiry).to.be.a("number")
+  context "with whitelist", ->
+    before ->
+      Cypress.Cookies.defaults({
+        whitelist: "foo1"
+      })
 
-        expect(c).to.have.keys(
-          "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-        )
-      .getCookies()
-        .should("have.length", 1)
-        .then (cookies) ->
-          c = cookies[0]
-
+    it "can get all cookies", ->
+      cy
+        .clearCookie("foo1")
+        .setCookie("foo", "bar").then (c) ->
           expect(c.domain).to.eq("localhost")
           expect(c.httpOnly).to.eq(false)
           expect(c.name).to.eq("foo")
@@ -37,68 +23,115 @@ context "cookies", ->
           expect(c).to.have.keys(
             "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
           )
-      .clearCookies()
-        .should("be.null")
-      .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
-      .getCookie("wtf").then (c) ->
-        expect(c.domain).to.eq("localhost")
-        expect(c.httpOnly).to.eq(true)
-        expect(c.name).to.eq("wtf")
-        expect(c.value).to.eq("bob")
-        expect(c.path).to.eq("/foo")
-        expect(c.secure).to.eq(true)
-        expect(c.expiry).to.be.a("number")
+        .getCookies()
+          .should("have.length", 1)
+          .then (cookies) ->
+            c = cookies[0]
 
-        expect(c).to.have.keys(
-          "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-        )
-      .clearCookie("wtf")
-        .should("be.null")
-      .getCookie("doesNotExist")
-        .should("be.null")
-      .document()
-        .its("cookie")
-        .should("be.empty")
+            expect(c.domain).to.eq("localhost")
+            expect(c.httpOnly).to.eq(false)
+            expect(c.name).to.eq("foo")
+            expect(c.value).to.eq("bar")
+            expect(c.path).to.eq("/")
+            expect(c.secure).to.eq(false)
+            expect(c.expiry).to.be.a("number")
 
-  it "resets cookies between tests correctly", ->
-    Cypress.Cookies.preserveOnce("foo2")
+            expect(c).to.have.keys(
+              "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
+            )
+        .clearCookies()
+          .should("be.null")
+        .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
+        .getCookie("wtf").then (c) ->
+          expect(c.domain).to.eq("localhost")
+          expect(c.httpOnly).to.eq(true)
+          expect(c.name).to.eq("wtf")
+          expect(c.value).to.eq("bob")
+          expect(c.path).to.eq("/foo")
+          expect(c.secure).to.eq(true)
+          expect(c.expiry).to.be.a("number")
 
-    for i in [1..100]
-      do (i) ->
-        cy.setCookie("foo" + i, "#{i}")
+          expect(c).to.have.keys(
+            "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
+          )
+        .clearCookie("wtf")
+          .should("be.null")
+        .getCookie("doesNotExist")
+          .should("be.null")
+        .document()
+          .its("cookie")
+          .should("be.empty")
 
-    cy.getCookies().should("have.length", 100)
+    it "resets cookies between tests correctly", ->
+      Cypress.Cookies.preserveOnce("foo2")
 
-  it "should be only two left now", ->
-    cy.getCookies().should("have.length", 2)
+      for i in [1..100]
+        do (i) ->
+          cy.setCookie("foo" + i, "#{i}")
 
-  it "sends cookies to localhost:2121", ->
-    cy
-      .clearCookies()
-      .setCookie("asdf", "jkl")
-      .request("http://localhost:2121/foo")
-        .its("body").should("deep.eq", {foo1: "1", asdf: "jkl"})
+      cy.getCookies().should("have.length", 100)
 
-  it "handles expired cookies", ->
-    cy
-      .visit("http://localhost:2121/set")
-      .getCookie("shouldExpire").should("exist")
-      .visit("http://localhost:2121/expirationMaxAge")
-      .getCookie("shouldExpire").should("not.exist")
-      .visit("http://localhost:2121/set")
-      .getCookie("shouldExpire").should("exist")
-      .visit("http://localhost:2121/expirationExpires")
-      .getCookie("shouldExpire").should("not.exist")
+    it "should be only two left now", ->
+      cy.getCookies().should("have.length", 2)
 
-  it "issue: #224 sets expired cookies between redirects", ->
-    cy
-      .visit("http://localhost:2121/set")
-      .getCookie("shouldExpire").should("exist")
-      .visit("http://localhost:2121/expirationRedirect")
-      .url().should("include", "/logout")
-      .getCookie("shouldExpire").should("not.exist")
+    it "handles undefined cookies", ->
+      cy.visit("http://localhost:2121/cookieWithNoName")
 
-      .visit("http://localhost:2121/set")
-      .getCookie("shouldExpire").should("exist")
-      .request("http://localhost:2121/expirationRedirect")
-      .getCookie("shouldExpire").should("not.exist")
+  context "without whitelist", ->
+    before ->
+      Cypress.Cookies.defaults({
+        whitelist: []
+      })
+
+    it "sends cookies to localhost:2121", ->
+      cy
+        .clearCookies()
+        .setCookie("asdf", "jkl")
+        .request("http://localhost:2121/requestCookies")
+          .its("body").should("deep.eq", { asdf: "jkl" })
+
+    it "handles expired cookies secure", ->
+      cy
+        .visit("http://localhost:2121/set")
+        .getCookie("shouldExpire").should("exist")
+        .visit("http://localhost:2121/expirationMaxAge")
+        .getCookie("shouldExpire").should("not.exist")
+        .visit("http://localhost:2121/set")
+        .getCookie("shouldExpire").should("exist")
+        .visit("http://localhost:2121/expirationExpires")
+        .getCookie("shouldExpire").should("not.exist")
+
+    it "issue: #224 sets expired cookies between redirects", ->
+      cy
+        .visit("http://localhost:2121/set")
+        .getCookie("shouldExpire").should("exist")
+        .visit("http://localhost:2121/expirationRedirect")
+        .url().should("include", "/logout")
+        .getCookie("shouldExpire").should("not.exist")
+
+        .visit("http://localhost:2121/set")
+        .getCookie("shouldExpire").should("exist")
+        .request("http://localhost:2121/expirationRedirect")
+        .getCookie("shouldExpire").should("not.exist")
+
+    it "issue: #1321 failing to set or parse cookie", ->
+      ## this is happening because the original cookie was set
+      ## with a secure flag, and then expired without the secure
+      ## flag.
+      cy
+        .visit("https://localhost:2323/setOneHourFromNowAndSecure")
+        .getCookies().should("have.length", 1)
+
+        ## secure cookies should have been attached
+        .request("https://localhost:2323/requestCookies")
+          .its("body").should("deep.eq", { shouldExpire: "oneHour" })
+
+        ## secure cookies should not have been attached
+        .request("http://localhost:2121/requestCookies")
+          .its("body").should("deep.eq", {})
+
+        .visit("https://localhost:2323/expirationMaxAge")
+        .getCookies().should("be.empty")
+
+    it "issue: #2724 does not fail on invalid cookies", ->
+      cy.request('https://localhost:2323/invalidCookies')

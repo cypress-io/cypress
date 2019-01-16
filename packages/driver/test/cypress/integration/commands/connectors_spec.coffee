@@ -526,7 +526,7 @@ describe "src/cy/commands/connectors", ->
 
         it "throws without a subject", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include("cy.invoke(queue)")
+            expect(err.message).to.include("cy.invoke(\"queue\")")
             expect(err.message).to.include("child command before running a parent command")
             done()
 
@@ -728,7 +728,7 @@ describe "src/cy/commands/connectors", ->
 
         it "throws without a subject", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include("cy.its(wat)")
+            expect(err.message).to.include("cy.its(\"wat\")")
             expect(err.message).to.include("child command before running a parent command")
             done()
 
