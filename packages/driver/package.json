@@ -16,6 +16,9 @@
   "files": [
     "lib"
   ],
+  "dependencies": {
+    "diff": "^4.0.1"
+  },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
@@ -37,7 +40,6 @@
     "compression": "^1.1.0",
     "cors": "^2.7.1",
     "debug": "^2.6.8",
-    "diff": "^4.0.1",
     "errorhandler": "^1.1.1",
     "eventemitter2": "^4.1.2",
     "express": "^4.12.3",
