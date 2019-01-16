@@ -238,7 +238,7 @@ describe "Specs List", ->
         it "shows empty message if no results", ->
           cy.get(".filter").clear().type("foobarbaz")
           cy.get(".outer-files-container").should("not.exist")
-          cy.get(".empty-well").should("have.text", 'No specs match your search: "foobarbaz"')
+          cy.get(".empty-well").should("contain", 'No specs match your search: "foobarbaz"')
 
         it "clears and focuses the filter field when clear search is clicked", ->
           cy.get(".filter").clear().type("foobarbaz")
