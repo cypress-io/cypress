@@ -29,7 +29,7 @@
     "mocha": "^3.0.2"
   },
   "dependencies": {
-    "@cypress/icons": "0.6.0",
+    "@cypress/icons": "0.7.0",
     "bluebird": "3.5.3",
     "debug": "3.2.6",
     "electron-packager": "9.0.1",
