@@ -371,18 +371,7 @@ const moveCursorToLineEnd = (el) => {
 }
 
 const _moveCursorToLineStartOrEnd = function (el, toStart) {
-  if ($elements.isTextarea(el) || $elements.isInput(el)) {
-    const { start, end } = getSelectionBounds(el)
-    const returnValue = toStart ? 0 : $elements.getNativeProp(el, 'value').length
-
-    if (start !== end) {
-      return _collapseInputOrTextArea(el, returnValue)
-    }
-
-    return setSelectionRange(el, returnValue, returnValue)
-  }
-
-  if ($elements.isContentEditable(el)) {
+  if ($elements.isContentEditable(el) || $elements.isInput(el) || $elements.isTextarea(el)) {
     const selection = _getSelectionByEl(el)
 
     return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'lineboundary')
