@@ -21,6 +21,7 @@ REQUEST_DEFAULTS = {
   json: null
   form: null
   gzip: true
+  timeout: null
   followRedirect: true
 }
 
