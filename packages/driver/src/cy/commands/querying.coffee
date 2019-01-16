@@ -45,38 +45,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       getFocused = ->
-        try
-          forceFocusedEl = cy.state("forceFocusedEl")
-          if forceFocusedEl
-            if $dom.isAttached(forceFocusedEl)
-              el = forceFocusedEl
-            else
-              cy.state("forceFocusedEl", null)
-          else
-            el = cy.state("document").activeElement
-
-          ## return null if we have an el but
-          ## the el is body or the el is currently the
-          ## blacklist focused el
-          if el and el isnt cy.state("blacklistFocusedEl")
-            el = $dom.wrap(el)
-
-            if el.is("body")
-              log(null)
-              return null
-
-            log(el)
-            return el
-          else
-            log(null)
-            return null
-
-        catch
-          log(null)
-          return null
+        focused = cy.getFocused()
+        log(focused)
+        
+        return focused
 
       do resolveFocused = (failedByNonAssertion = false) ->
-        Promise.try(getFocused)
+        Promise
+        .try(getFocused)
         .then ($el) ->
           if options.verify is false
             return $el
@@ -120,9 +96,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         obj = {}
 
         if aliasType is "dom"
-          _.extend obj,
+          _.extend(obj, {
             $el: value
             numRetries: options._retries
+          })
 
         obj.consoleProps = ->
           key = if aliasObj then "Alias" else "Selector"
@@ -130,17 +107,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           switch aliasType
             when "dom"
-              _.extend consoleProps,
+              _.extend(consoleProps, {
                 Yielded: $dom.getElements(value)
                 Elements: value?.length
+              })
 
             when "primitive"
-              _.extend consoleProps,
+              _.extend(consoleProps, {
                 Yielded: value
+              })
 
             when "route"
-              _.extend consoleProps,
+              _.extend(consoleProps, {
                 Yielded: value
+              })
 
           return consoleProps
 
@@ -203,7 +183,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             else
               ## log as primitive
               log(subject, "primitive")
-              return subject
+
+              do verifyAssertions = =>
+                cy.verifyUpcomingAssertions(subject, options, {
+                  ensureExistenceFor: false
+                  onRetry: verifyAssertions
+                })
 
       start("dom")
 

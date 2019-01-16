@@ -6,116 +6,96 @@ import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
-import specsStore from './specs-store'
+import specsStore, { allSpecsSpec } from './specs-store'
 
 @observer
-class Specs extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      search: '',
-    }
-  }
+class SpecsList extends Component {
   render () {
     if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (!specsStore.specs.length) return this._empty()
-
-    let allActiveClass = specsStore.allSpecsChosen ? 'active' : ''
-
-    const shouldShowClearSearch = this.state.search !== ''
+    if (!specsStore.filter && !specsStore.specs.length) return this._empty()
 
     return (
       <div id='tests-list-page'>
         <header>
-          <div className="search">
-            <label htmlFor="search-input">
-              <i className="fa fa-search"></i>
+          <div className={cs('search', {
+            'show-clear-filter': !!specsStore.filter,
+          })}>
+            <label htmlFor='filter'>
+              <i className='fa fa-search'></i>
             </label>
             <input
-              id="search-input"
-              type="text"
-              placeholder="Search..."
-              value={this.state.search}
-              onChange={this.updateSearchTerms.bind(this)}
-              onKeyUp={this.executeSearchAction.bind(this)} />
-            {
-              shouldShowClearSearch
-                ? <a id="clear" className="fa fa-times" onClick={this.clearSearch.bind(this)}/>
-                : null
-            }
+              id='filter'
+              className='filter'
+              placeholder='Search...'
+              value={specsStore.filter || ''}
+              onChange={this._updateFilter}
+              onKeyUp={this._executeFilterAction}
+            />
+            <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
           </div>
-          <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-default ${allActiveClass}`}>
-            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.allSpecsChosen)}`}></i>{' '}
-          Run All Tests
+          <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: specsStore.isChosen(allSpecsSpec) })}>
+            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
+            {allSpecsSpec.displayName}
           </a>
         </header>
-        <ul className='outer-files-container list-as-table'>
-          {_.map(specsStore.specs, (spec) => this._specItem(spec))}
-        </ul>
+        {this._specsList()}
       </div>
     )
   }
 
-  clearSearch () {
-    this.setState((state) => ({
-      ...state,
-      search: '',
-    }))
-  }
-
-  updateSearchTerms (e) {
-    e.preventDefault()
-
-    const target = e.target
-    const value = target.value
-
-    this.setState((state) => {
-      return {
-        ...state,
-        search: value,
-      }
-    })
-  }
-
-  executeSearchAction (e) {
-    if (e.key === 'Escape') {
-      this.clearSearch()
+  _specsList () {
+    if (specsStore.filter && !specsStore.specs.length) {
+      return (
+        <div className='empty-well'>
+          No files match the filter '{specsStore.filter}'
+        </div>
+      )
     }
+
+    return (
+      <ul className='outer-files-container list-as-table'>
+        {_.map(specsStore.specs, (spec) => this._specItem(spec))}
+      </ul>
+    )
   }
 
   _specItem (spec) {
-    if (spec.hasChildren()) {
-      return this._folderContent(spec)
-    } else {
-      return this._specContent(spec)
-    }
+    return spec.hasChildren ? this._folderContent(spec) : this._specContent(spec)
   }
 
   _allSpecsIcon (allSpecsChosen) {
-    if (allSpecsChosen) {
-      return 'fa-dot-circle-o green'
-    } else {
-      return 'fa-play'
-    }
+    return allSpecsChosen ? 'fa-dot-circle-o green' : 'fa-play'
   }
 
   _specIcon (isChosen) {
-    if (isChosen) {
-      return 'fa-dot-circle-o green'
-    } else {
-      return 'fa-file-code-o'
+    return isChosen ? 'fa-dot-circle-o green' : 'fa-file-code-o'
+  }
+
+  _clearFilter = () => {
+    const { id, path } = this.props.project
+
+    specsStore.clearFilter({ id, path })
+  }
+
+  _updateFilter = (e) => {
+    const { id, path } = this.props.project
+
+    specsStore.setFilter({ id, path }, e.target.value)
+  }
+
+  _executeFilterAction = (e) => {
+    if (e.key === 'Escape') {
+      this._clearFilter()
     }
   }
 
-  _selectSpec (specPath, e) {
+  _selectSpec (spec, e) {
     e.preventDefault()
 
-    specsStore.setChosenSpec(specPath)
+    const { project } = this.props
 
-    let project = this.props.project
-
-    projectsApi.runSpec(project, specPath, project.chosenBrowser.name)
+    return projectsApi.runSpec(project, spec, project.chosenBrowser)
   }
 
   _selectSpecFolder (specFolderPath, e) {
@@ -139,7 +119,7 @@ class Specs extends Component {
             isExpanded ?
               <div>
                 <ul className='list-as-table'>
-                  {_.map(spec.children.specs, (spec) => this._specItem(spec))}
+                  {_.map(spec.children, (spec) => this._specItem(spec))}
                 </ul>
               </div> :
               null
@@ -150,15 +130,12 @@ class Specs extends Component {
   }
 
   _specContent (spec) {
-    const isChosen = specsStore.isChosenSpec(spec)
-    if (!spec.displayName.toLowerCase().includes(this.state.search.toLowerCase())) return null
-
     return (
       <li key={spec.path} className='file'>
-        <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={cs({ active: isChosen })}>
+        <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
           <div>
             <div>
-              <i className={`fa fa-fw ${this._specIcon(isChosen)}`}></i>
+              <i className={`fa fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
               {spec.displayName}
             </div>
           </div>
@@ -199,4 +176,4 @@ class Specs extends Component {
   }
 }
 
-export default Specs
+export default SpecsList

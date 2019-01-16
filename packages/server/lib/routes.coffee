@@ -16,7 +16,7 @@ proxy       = require("./controllers/proxy")
 driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
 
-module.exports = (app, config, request, getRemoteState, project) ->
+module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
@@ -64,12 +64,18 @@ module.exports = (app, config, request, getRemoteState, project) ->
   ## and any other __cypress namespaced files so that the runner does
   ## not have to be aware of anything
   la(check.unemptyString(config.clientRoute), "missing client route in config", config)
+
   app.get config.clientRoute, (req, res) ->
     debug("Serving Cypress front-end by requested URL:", req.url)
-    runner.serve(req, res, config, getRemoteState)
+
+    runner.serve(req, res, {
+      config,
+      project,
+      getRemoteState,
+    })
 
   app.all "*", (req, res, next) ->
-    proxy.handle(req, res, config, getRemoteState, request)
+    proxy.handle(req, res, config, getRemoteState, request, nodeProxy)
 
   ## when we experience uncaught errors
   ## during routing just log them out to

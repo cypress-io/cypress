@@ -15,7 +15,7 @@ const AnError = observer(({ error }) => (
       }
     </h2>
     {error.callout && <pre>{error.callout}</pre>}
-    <div dangerouslySetInnerHTML={{ __html: md.render(error.message) }} />
+    <div className='error-message' dangerouslySetInnerHTML={{ __html: md.render(error.message) }} />
   </div>
 ))
 

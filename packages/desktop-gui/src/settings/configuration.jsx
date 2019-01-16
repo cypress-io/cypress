@@ -11,19 +11,32 @@ const display = (obj) => {
 
   return _.map(obj, (value, key) => {
     const hasComma = lastKey !== key
+
     if (value.from == null) {
-      return displayNested(key, value, hasComma)
-    } else if (_.isObject(value.value)) {
-      return displayObject(key, value, hasComma)
-    } else {
-      return getSpan(key, value, hasComma)
+      return displayNestedObj(key, value, hasComma)
     }
+
+    if (value.isArray) {
+      return getSpan(key, value, hasComma, true)
+    }
+
+    if (_.isObject(value.value)) {
+      const realValue = value.value.toJS ? value.value.toJS() : value.value
+
+      if (_.isArray(realValue)) {
+        return displayArray(key, value, hasComma)
+      }
+
+      return displayObject(key, value, hasComma)
+    }
+
+    return getSpan(key, value, hasComma)
   })
 }
 
-const displayNested = (key, value, hasComma) => (
+const displayNestedObj = (key, value, hasComma) => (
   <span key={key}>
-    <span className='nested'>
+    <span className='nested nested-obj'>
       <span className='key'>{key}</span>
       <span className='colon'>:</span>{' '}
       {'{'}
@@ -34,6 +47,27 @@ const displayNested = (key, value, hasComma) => (
   </span>
 )
 
+const displayNestedArr = (key, value, hasComma) => (
+  <span key={key}>
+    <span className='nested nested-arr'>
+      <span className='key'>{key}</span>
+      <span className='colon'>:</span>{' '}
+      {'['}
+      {display(value)}
+    </span>
+    <span className='line'>{']'}{getComma(hasComma)}</span>
+    <br />
+  </span>
+)
+
+const displayArray = (key, nestedArr, hasComma) => {
+  const arr = _.map(nestedArr.value, (value) => {
+    return { value, from: nestedArr.from, isArray: true }
+  })
+
+  return displayNestedArr(key, arr, hasComma)
+}
+
 const displayObject = (key, nestedObj, hasComma) => {
   const obj = _.reduce(nestedObj.value, (obj, value, key) => {
     return _.extend(obj, {
@@ -41,14 +75,14 @@ const displayObject = (key, nestedObj, hasComma) => {
     })
   }, {})
 
-  return displayNested(key, obj, hasComma)
+  return displayNestedObj(key, obj, hasComma)
 }
 
-const getSpan = (key, obj, hasComma) => {
+const getSpan = (key, obj, hasComma, isArray) => {
   return (
     <div key={key} className='line'>
-      <span className='key'>{key}</span>
-      <span className='colon'>:</span>{' '}
+      {getKey(key, isArray)}
+      {getColon(isArray)}
       <Tooltip title={obj.from || ''} placement='right' className='cy-tooltip'>
         <span className={obj.from}>
           {getString(obj.value)}
@@ -59,6 +93,14 @@ const getSpan = (key, obj, hasComma) => {
       {getComma(hasComma)}
     </div>
   )
+}
+
+const getKey = (key, isArray) => {
+  return isArray ? '' : <span className='key'>{key}</span>
+}
+
+const getColon = (isArray) => {
+  return isArray ? '' : <span className="colon">:{' '}</span>
 }
 
 const getString = (val) => {

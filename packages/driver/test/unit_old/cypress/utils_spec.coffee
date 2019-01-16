@@ -115,6 +115,7 @@ describe "$Cypress.utils API", ->
       it "null", ->
         expect(@str(null)).to.eq "null"
 
+      ## QUESTION: is this really the behavior we want? wouldn't 'undefined' be better?
       it "undefined", ->
         expect(@str(undefined)).to.eq ""
 

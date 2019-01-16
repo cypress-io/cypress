@@ -1,103 +1,126 @@
 _         = require("lodash")
-fs        = require("fs-extra")
 Promise   = require("bluebird")
 path      = require("path")
 cypressEx = require("@packages/example")
-glob      = require("glob")
-cwd       = require("./cwd")
 log       = require("debug")("cypress:server:scaffold")
-{ propEq, complement, equals, compose, head, isEmpty, always } = require("ramda")
+fs        = require("./util/fs")
+glob      = require("./util/glob")
+cwd       = require("./cwd")
+debug     = require("debug")("cypress:server:scaffold")
+{ equals, head, isEmpty, always } = require("ramda")
 { isDefault } = require("./util/config")
 
-glob = Promise.promisify(glob)
-fs = Promise.promisifyAll(fs)
+exampleFolderName = cypressEx.getFolderName()
+getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 
-INTEGRATION_EXAMPLE_SPEC = cypressEx.getPathToExample()
-INTEGRATION_EXAMPLE_NAME = path.basename(INTEGRATION_EXAMPLE_SPEC)
+getPathFromIntegrationFolder = (file) ->
+  file.substring(file.indexOf("integration/") + "integration/".length)
 
-## we are assuming example spec is a single file for now
-numberOfExampleSpecs = 1
+isDifferentNumberOfFiles = (files, exampleSpecs) ->
+  files.length isnt exampleSpecs.length
 
-# a few utility functions for quickly comparing list of files
-# to number of expected example files
-isOneFile = propEq('length', numberOfExampleSpecs)
-isNotOneFile = complement(isOneFile)
-isFileNameDefault = compose(
-  equals(INTEGRATION_EXAMPLE_NAME),
-  path.basename
-)
+getExampleSpecs = ->
+  getExampleSpecsFullPaths
+  .then (fullPaths) ->
+    ## short paths relative to integration folder (i.e. examples/actions.spec.js)
+    shortPaths = _.map fullPaths, (file) ->
+      getPathFromIntegrationFolder(file)
 
-# TODO why isn't R.complement(isFileNameDefault) working?!
-isFileNameChanged = (filename) -> !isFileNameDefault(filename)
+    ## index for quick lookup and for getting full path from short path
+    index = _.transform(shortPaths, (memo, spec, i) ->
+      memo[spec] = fullPaths[i]
+    , {})
 
-integrationExampleSize = ->
-  fs
-  .statAsync(INTEGRATION_EXAMPLE_SPEC)
-  .get("size")
+    { fullPaths, shortPaths, index }
+
+getIndexedExample = (file, index) ->
+  index[getPathFromIntegrationFolder(file)]
+
+filesNamesAreDifferent = (files, index) ->
+  _.some files, (file) ->
+    not getIndexedExample(file, index)
+
+getFileSize = (file) ->
+  fs.statAsync(file).get("size")
+
+filesSizesAreSame = (files, index) ->
+  Promise.join(
+    Promise.all(_.map(files, getFileSize)),
+    Promise.all(_.map(files, (file) -> getFileSize(getIndexedExample(file, index))))
+  )
+  .spread (fileSizes, originalFileSizes) ->
+    _.every fileSizes, (size, i) ->
+      size is originalFileSizes[i]
 
 isNewProject = (integrationFolder) ->
   ## logic to determine if new project
   ## 1. there are no files in 'integrationFolder'
-  ## 2. there is only 1 file in 'integrationFolder'
-  ## 3. the file is called 'example_spec.js'
-  ## 4. the bytes of the file match lib/scaffold/example_spec.js
-  getCurrentSize = (file) ->
-    fs
-    .statAsync(file)
-    .get("size")
+  ## 2. there is a different number of files in 'integrationFolder'
+  ## 3. the files are named the same as the example files
+  ## 4. the bytes of the files match the example files
 
-  glob("**/*", { cwd: integrationFolder, realpath: true })
+  debug("determine if new project by globbing files in %o", { integrationFolder })
+  ## checks for file up to 3 levels deep
+  glob("{*,*/*,*/*/*}", { cwd: integrationFolder, realpath: true, nodir: true })
   .then (files) ->
-    log "found #{files.length} files in folder #{integrationFolder}"
+    debug("found #{files.length} files in folder #{integrationFolder}")
+    debug("determine if we should scaffold:")
+
     ## TODO: add tests for this
+    debug("- empty?", isEmpty(files))
     return true if isEmpty(files) # 1
 
-    return false if isNotOneFile(files) # 2
+    getExampleSpecs()
+    .then (exampleSpecs) ->
+      numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
+      debug("- different number of files?", numFilesDifferent)
+      return false if numFilesDifferent # 2
 
-    exampleSpec = head(files)
-    log "Checking spec filename if default #{exampleSpec}"
+      filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
+      debug("- different file names?", filesNamesDifferent)
+      return false if filesNamesDifferent # 3
 
-    return false if isFileNameChanged(exampleSpec) # 3
-
-    log "Checking spec file size #{exampleSpec}"
-    # 4
-    Promise.join(
-      getCurrentSize(exampleSpec),
-      integrationExampleSize(),
-      equals
-    )
+      filesSizesAreSame(files, exampleSpecs.index)
+  .then (sameSizes) ->
+    debug("- same sizes?", sameSizes)
+    sameSizes
 
 module.exports = {
   isNewProject
 
+  integrationExampleName: -> exampleFolderName
+
   integration: (folder, config) ->
-    log("integration folder #{folder}")
+    debug("integration folder #{folder}")
 
     ## skip if user has explicitly set integrationFolder
     return Promise.resolve() if not isDefault(config, "integrationFolder")
 
     @verifyScaffolding folder, =>
-      log("copying examples into #{folder}")
-      @_copy(INTEGRATION_EXAMPLE_SPEC, folder, config)
+      debug("copying examples into #{folder}")
+      getExampleSpecs()
+      .then ({ fullPaths }) =>
+        Promise.all _.map fullPaths, (file) =>
+          @_copy(file, path.join(folder, exampleFolderName), config)
 
   fixture: (folder, config) ->
-    log("fixture folder #{folder}")
+    debug("fixture folder #{folder}")
 
     ## skip if user has explicitly set fixturesFolder
     return Promise.resolve() if not config.fixturesFolder or not isDefault(config, "fixturesFolder")
 
     @verifyScaffolding folder, =>
-      log("copying example.json into #{folder}")
+      debug("copying example.json into #{folder}")
       @_copy("fixtures/example.json", folder, config)
 
   support: (folder, config) ->
-    log("support folder #{folder}, support file #{config.supportFile}")
+    debug("support folder #{folder}, support file #{config.supportFile}")
 
     ## skip if user has explicitly set supportFile
     return Promise.resolve() if not config.supportFile or not isDefault(config, "supportFile")
 
     @verifyScaffolding(folder, =>
-      log("copying commands.js and index.js to #{folder}")
+      debug("copying commands.js and index.js to #{folder}")
       Promise.join(
         @_copy("support/commands.js", folder, config)
         @_copy("support/index.js", folder, config)
@@ -105,14 +128,14 @@ module.exports = {
     )
 
   plugins: (folder, config) ->
-    log("plugins folder #{folder}")
+    debug("plugins folder #{folder}")
 
     ## skip if user has explicitly set pluginsFile
     if not config.pluginsFile or not isDefault(config, "pluginsFile")
       return Promise.resolve()
 
     @verifyScaffolding folder, =>
-      log("copying index.js into #{folder}")
+      debug("copying index.js into #{folder}")
       @_copy("plugins/index.js", folder, config)
 
   _copy: (file, folder, config) ->
@@ -121,12 +144,8 @@ module.exports = {
     dest = path.join(folder, path.basename(file))
 
     @_assertInFileTree(dest, config)
-
-    fs.copyAsync(src, dest)
-
-  integrationExampleSize
-
-  integrationExampleName: always(INTEGRATION_EXAMPLE_NAME)
+    .then ->
+      fs.copyAsync(src, dest)
 
   verifyScaffolding: (folder, fn) ->
     ## we want to build out the folder + and example files
@@ -140,13 +159,13 @@ module.exports = {
     ## this is ideal because users who are upgrading to newer cypress version
     ## will still get the files scaffolded but existing users won't be
     ## annoyed by new example files coming into their projects unnecessarily
-    # console.log('-- verify', folder)
-    log "verify scaffolding in #{folder}"
+    # console.debug('-- verify', folder)
+    debug("verify scaffolding in #{folder}")
     fs.statAsync(folder)
     .then ->
-      log("folder #{folder} already exists")
+      debug("folder #{folder} already exists")
     .catch =>
-      log("missing folder #{folder}")
+      debug("missing folder #{folder}")
       fn.call(@)
 
   fileTree: (config = {}) ->
@@ -157,29 +176,30 @@ module.exports = {
     getFilePath = (dir, name) ->
       path.relative(config.projectRoot, path.join(dir, name))
 
-    files = [
-      getFilePath(config.integrationFolder, "example_spec.js")
-    ]
+    getExampleSpecs()
+    .then (specs) =>
+      files = _.map specs.shortPaths, (file) ->
+        getFilePath(config.integrationFolder, file)
 
-    if config.fixturesFolder
-      files = files.concat([
-        getFilePath(config.fixturesFolder, "example.json")
-      ])
+      if config.fixturesFolder
+        files = files.concat([
+          getFilePath(config.fixturesFolder, "example.json")
+        ])
 
-    if config.supportFolder and config.supportFile isnt false
-      files = files.concat([
-        getFilePath(config.supportFolder, "commands.js")
-        getFilePath(config.supportFolder, "index.js")
-      ])
+      if config.supportFolder and config.supportFile isnt false
+        files = files.concat([
+          getFilePath(config.supportFolder, "commands.js")
+          getFilePath(config.supportFolder, "index.js")
+        ])
 
-    if config.pluginsFile
-      files = files.concat([
-        getFilePath(path.dirname(config.pluginsFile), "index.js")
-      ])
+      if config.pluginsFile
+        files = files.concat([
+          getFilePath(path.dirname(config.pluginsFile), "index.js")
+        ])
 
-    log("scaffolded files %j", files)
+      debug("scaffolded files %j", files)
 
-    return @_fileListToTree(files)
+      return @_fileListToTree(files)
 
   _fileListToTree: (files) ->
     ## turns a list of file paths into a tree-like structure where
@@ -205,8 +225,10 @@ module.exports = {
   _assertInFileTree: (filePath, config) ->
     relativeFilePath = path.relative(config.projectRoot, filePath)
 
-    if not @_inFileTree(@fileTree(config), relativeFilePath)
-      throw new Error("You attempted to scaffold a file, '#{relativeFilePath}', that's not in the scaffolded file tree. This is because you added, removed, or changed a scaffolded file. Make sure to update scaffold#fileTree to match your changes.")
+    @fileTree(config)
+    .then (fileTree) =>
+      if not @_inFileTree(fileTree, relativeFilePath)
+        throw new Error("You attempted to scaffold a file, '#{relativeFilePath}', that's not in the scaffolded file tree. This is because you added, removed, or changed a scaffolded file. Make sure to update scaffold#fileTree to match your changes.")
 
   _inFileTree: (fileTree, filePath) ->
     branch = fileTree

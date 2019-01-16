@@ -17,15 +17,15 @@ connect     = require("../util/connect")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
-  debug("got request for event:", type, arg)
+  debug("got request for event: %s, %o", type, arg)
 
   sendResponse = (data = {}) ->
     try
-      debug("sending ipc data", {type: type, data: data})
+      debug("sending ipc data %o", {type: type, data: data})
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    debug("send error:", err)
+    debug("send error: %o", err)
     sendResponse({id: id, __error: errors.clone(err, {html: true})})
 
   send = (data) ->
@@ -101,9 +101,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "launch:browser"
-      # headless.createWindows(arg, true)
       openProject.launch(arg.browser, arg.spec, {
-        projectPath: options.projectPath
+        projectRoot: options.projectRoot
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->
@@ -112,7 +111,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "window:open"
-      Windows.open(options.projectPath, arg)
+      Windows.open(options.projectRoot, arg)
       .then(send)
       .catch(sendErr)
 

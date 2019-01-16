@@ -4,7 +4,7 @@ import localData from '../lib/local-data'
 class AppStore {
   @observable cypressEnv
   @observable os
-  @observable projectPath = null
+  @observable projectRoot = null
   @observable newVersion
   @observable version
   @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
@@ -19,7 +19,7 @@ class AppStore {
   }
 
   @computed get isGlobalMode () {
-    return !this.projectPath
+    return !this.projectRoot
   }
 
   @computed get updateAvailable () {
@@ -28,8 +28,11 @@ class AppStore {
 
   @action set (props) {
     if (props.cypressEnv != null) this.cypressEnv = props.cypressEnv
+
     if (props.os != null) this.os = props.os
-    if (props.projectPath != null) this.projectPath = props.projectPath
+
+    if (props.projectRoot != null) this.projectRoot = props.projectRoot
+
     if (props.version != null) this.version = this.newVersion = props.version
   }
 

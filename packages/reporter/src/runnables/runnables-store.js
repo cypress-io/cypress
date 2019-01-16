@@ -39,6 +39,7 @@ class RunnablesStore {
     this.isReady = true
 
     const numTests = _.keys(this._tests).length
+
     this.hasTests = numTests > 0
     this.hasSingleTest = numTests === 1
 
@@ -52,7 +53,9 @@ class RunnablesStore {
   }
 
   _createRunnables (type, runnables, level) {
-    return _.map(runnables, (runnableProps) => this._createRunnable(type, runnableProps, level))
+    return _.map(runnables, (runnableProps) => {
+      return this._createRunnable(type, runnableProps, level)
+    })
   }
 
   _createRunnable (type, props, level) {
@@ -61,13 +64,16 @@ class RunnablesStore {
 
   _createSuite (props, level) {
     const suite = new Suite(props, level)
+
     this._runnablesQueue.push(suite)
     suite.children = this._createRunnableChildren(props, ++level)
+
     return suite
   }
 
   _createTest (props, level) {
     const test = new Test(props, level)
+
     this._runnablesQueue.push(test)
     this._tests[test.id] = test
 
@@ -84,8 +90,10 @@ class RunnablesStore {
   _startRendering (index = 0) {
     requestAnimationFrame(action('start:rendering', () => {
       const runnable = this._runnablesQueue[index]
+
       if (!runnable) {
         this._finishedInitialRendering()
+
         return
       }
 
@@ -114,15 +122,21 @@ class RunnablesStore {
   }
 
   updateTest (props, cb) {
-    this._withTest(props.id, (test) => test.update(props, cb))
+    this._withTest(props.id, (test) => {
+      return test.update(props, cb)
+    })
   }
 
   runnableStarted ({ id }) {
-    this._withTest(id, (test) => test.start())
+    this._withTest(id, (test) => {
+      return test.start()
+    })
   }
 
   runnableFinished (props) {
-    this._withTest(props.id, (test) => test.finish(props))
+    this._withTest(props.id, (test) => {
+      return test.finish(props)
+    })
   }
 
   testById (id) {
@@ -133,20 +147,29 @@ class RunnablesStore {
     switch (log.instrument) {
       case 'command': {
         const command = new Command(log)
+
         this._logs[log.id] = command
-        this._withTest(log.testId, (test) => test.addCommand(command, log.hookName))
+        this._withTest(log.testId, (test) => {
+          return test.addCommand(command, log.hookName)
+        })
         break
       }
       case 'agent': {
         const agent = new Agent(log)
+
         this._logs[log.id] = agent
-        this._withTest(log.testId, (test) => test.addAgent(agent))
+        this._withTest(log.testId, (test) => {
+          return test.addAgent(agent)
+        })
         break
       }
       case 'route': {
         const route = new Route(log)
+
         this._logs[log.id] = route
-        this._withTest(log.testId, (test) => test.addRoute(route))
+        this._withTest(log.testId, (test) => {
+          return test.addRoute(route)
+        })
         break
       }
       default:
@@ -158,6 +181,7 @@ class RunnablesStore {
     // we get events for suites and tests, but only tests change during a run,
     // so if the id isn't found in this._tests, we ignore it b/c it's a suite
     const test = this._tests[id]
+
     if (test) cb(test)
   }
 
@@ -181,4 +205,5 @@ class RunnablesStore {
 }
 
 export { RunnablesStore }
+
 export default new RunnablesStore({ appState, scroller })

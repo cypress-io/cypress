@@ -161,19 +161,27 @@ class RunsList extends Component {
         return this._projectNotSetup()
 
       // the project is invalid
-      } else if (errors.isNotFound(this.runsStore.error)) {
+      }
+
+      if (errors.isNotFound(this.runsStore.error)) {
         return this._projectNotSetup(false)
 
       // they have been logged out
-      } else if (errors.isUnauthenticated(this.runsStore.error)) {
+      }
+
+      if (errors.isUnauthenticated(this.runsStore.error)) {
         return this._loginMessage()
 
       // they are not authorized to see runs
-      } else if (errors.isUnauthorized(this.runsStore.error)) {
+      }
+
+      if (errors.isUnauthorized(this.runsStore.error)) {
         return this._permissionMessage()
 
       // other error, but only show if we don't already have runs
-      } else if (!this.runsStore.isLoaded) {
+      }
+
+      if (!this.runsStore.isLoaded) {
         return <ErrorMessage error={this.runsStore.error} />
       }
     }
@@ -189,9 +197,10 @@ class RunsList extends Component {
         return this._projectNotSetup()
 
       // OR they have setup CI
-      } else {
-        return this._empty()
       }
+
+      return this._empty()
+
     }
     //--------End Run States----------//
 
@@ -200,12 +209,6 @@ class RunsList extends Component {
       <div className='runs'>
         <header>
           <h5>Runs
-            <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
-            See All <i className='fa fa-external-link'></i>
-            </a>
-
-          </h5>
-          <div>
             {this._lastUpdated()}
             <button
               className='btn btn-link btn-sm'
@@ -214,6 +217,11 @@ class RunsList extends Component {
             >
               <i className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
+          </h5>
+          <div>
+            <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
+              See all runs <i className='fa fa-external-link'></i>
+            </a>
           </div>
         </header>
         <ul className='runs-container list-as-table'>
@@ -264,7 +272,7 @@ class RunsList extends Component {
   _loginMessage () {
     return (
       <div className='empty empty-log-in'>
-        <h4>Log In to View Runs</h4>
+        <h4>Log in to view runs</h4>
         <p>
           After logging in, you will see recorded runs here and on the <a href='#' onClick={this._visitDashboard}>Cypress Dashboard Service</a>.
         </p>
@@ -377,8 +385,8 @@ class RunsList extends Component {
     ipc.externalOpen('https://on.cypress.io/what-is-a-project-id')
   }
 
-  _openRun = (runId) => {
-    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${runId}`)
+  _openRun = (buildNumber) => {
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${buildNumber}`)
   }
 
   _openAPIHelp () {

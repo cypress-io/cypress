@@ -41,6 +41,16 @@ describe "src/cy/commands/aliasing", ->
       cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
 
+    it "retries primitives and assertions", ->
+      obj = {}
+
+      cy.on "command:retry", _.after 2, ->
+        obj.foo = "bar"
+
+      cy.wrap(obj).as("obj")
+
+      cy.get("@obj").should("deep.eq", { foo: "bar" })
+
     context "DOM subjects", ->
       it "assigns the remote jquery instance", ->
         obj = {}
@@ -93,7 +103,7 @@ describe "src/cy/commands/aliasing", ->
       it "throws as a parent command", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include("before running a parent command")
-          expect(err.message).to.include("cy.as(foo)")
+          expect(err.message).to.include("cy.as(\"foo\")")
           done()
 
         cy.as("foo")
@@ -112,6 +122,17 @@ describe "src/cy/commands/aliasing", ->
           done()
 
         cy.get("div:first").as("")
+
+      it "throws on alias starting with @ char", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "'@myAlias' cannot be named starting with the '@' symbol. Try renaming the alias to 'myAlias', or something else that does not start with the '@' symbol."
+          done()
+
+        cy.get("div:first").as("@myAlias")
+
+      it "does not throw on alias with @ char in non-starting position", () ->
+        cy.get("div:first").as("my@Alias")
+        cy.get("@my@Alias")
 
       _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
         it "throws on a blacklisted word: #{blacklist}", (done) ->

@@ -1,11 +1,12 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $Mouse = require("../../../cypress/mouse")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$elements = require("../../../dom/elements")
+$selection = require("../../../dom/selection")
 $actionability = require("../../actionability")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -40,7 +41,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       win = state("window")
 
       click = (el, index) =>
-        $el = $(el)
+        $el = $dom.wrap(el)
 
         domEvents = {}
         $previouslyFocusedEl = null
@@ -58,22 +59,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         if options.errorOnSelect and $el.is("select")
           $utils.throwErrByPath "click.on_select_element", { onFail: options._log }
-
-        ## in order to simulate actual user behavior we need to do the following:
-        ## 1. take our element and figure out its center coordinate
-        ## 2. check to figure out the element listed at those coordinates
-        ## 3. if this element is ourself or our descendants, click whatever was returned
-        ## 4. else throw an error because something is covering us up
-        getFirstFocusableEl = ($el) ->
-          return $el if $dom.isFocusable($el)
-
-          parent = $el.parent()
-
-          ## if we have no parent then just return
-          ## the window since that can receive focus
-          return $(win) if not parent.length
-
-          getFirstFocusableEl($el.parent())
 
         afterMouseDown = ($elToClick, coords) ->
           ## we need to use both of these
@@ -144,29 +129,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## chaining thenable promises
           .return(null)
 
-        shouldFireFocusEvent = ($focused, $elToFocus) ->
-          ## if we dont have a focused element
-          ## we know we want to fire a focus event
-          return true if not $focused
-
-          ## if we didnt have a previously focused el
-          ## then always return true
-          return true if not $previouslyFocusedEl
-
-          ## if we are attemping to focus a differnet element
-          ## than the one we currently have, we know we want
-          ## to fire a focus event
-          return true if $focused.get(0) isnt $elToFocus.get(0)
-
-          ## if our focused element isnt the same as the previously
-          ## focused el then what probably happened is our mouse
-          ## down event caused our element to receive focuse
-          ## without the browser sending the focus event
-          ## which happens when the window isnt in focus
-          return true if $previouslyFocusedEl.get(0) isnt $focused.get(0)
-
-          return false
-
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
@@ -181,45 +143,49 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick, coords) ->
-            ## TODO: get focused through a callback here
-            cy.now("focused", {log: false, verify: false})
-            .then ($focused) ->
-              ## record the previously focused element before
-              ## issuing the mousedown because browsers may
-              ## automatically shift the focus to the element
-              ## without firing the focus event
-              $previouslyFocusedEl = $focused
+            ## record the previously focused element before
+            ## issuing the mousedown because browsers may
+            ## automatically shift the focus to the element
+            ## without firing the focus event
+            $previouslyFocused = cy.getFocused()
 
-              domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
+            if el = cy.needsForceFocus()
+              cy.fireFocus(el)
 
-              ## if mousedown was cancelled then or caused
-              ## our element to be removed from the DOM
-              ## just resolve after mouse down and dont
-              ## send a focus event
-              if domEvents.mouseDown.preventedDefault or not $dom.isAttached($elToClick)
-                afterMouseDown($elToClick, coords)
-              else
-                ## retrieve the first focusable $el in our parent chain
-                $elToFocus = getFirstFocusableEl($elToClick)
+            el = $elToClick.get(0)
 
-                cy.now("focused", {log: false, verify: false})
-                .then ($focused) =>
-                  if shouldFireFocusEvent($focused, $elToFocus)
-                    ## if our mousedown went through and
-                    ## we are focusing a different element
-                    ## dispatch any primed change events
-                    ## we have to do this because our blur
-                    ## method might not get triggered if
-                    ## our window is in focus since the
-                    ## browser may fire blur events naturally
-                    $actionability.dispatchPrimedChangeEvents(state)
+            domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
 
-                    ## send in a focus event!
-                    cy.now("focus", $elToFocus, {$el: $elToFocus, error: false, verify: false, log: false})
-                    .then ->
-                      afterMouseDown($elToClick, coords)
-                  else
-                    afterMouseDown($elToClick, coords)
+            ## if mousedown was cancelled then or caused
+            ## our element to be removed from the DOM
+            ## just resolve after mouse down and dont
+            ## send a focus event
+            if domEvents.mouseDown.preventedDefault or not $dom.isAttached($elToClick)
+              afterMouseDown($elToClick, coords)
+            else
+              if $elements.isInput(el) or $elements.isTextarea(el) or $elements.isContentEditable(el)
+                if !$elements.isNeedSingleValueChangeInputElement(el)
+                  $selection.moveSelectionToEnd(el)
+
+              ## retrieve the first focusable $el in our parent chain
+              $elToFocus = $elements.getFirstFocusableEl($elToClick)
+
+              if cy.needsFocus($elToFocus, $previouslyFocused)
+                cy.fireFocus($elToFocus.get(0))
+
+                ## if we are currently trying to focus
+                ## the body then calling body.focus()
+                ## is a noop, and it will not blur the
+                ## current element, which is all so wrong
+                if $elToFocus.is("body")
+                  $focused = cy.getFocused()
+
+                  ## if the current focused element hasn't changed
+                  ## then blur manually
+                  if $elements.isSame($focused, $previouslyFocused)
+                    cy.fireBlur($focused.get(0))
+
+              afterMouseDown($elToClick, coords)
         })
         .catch (err) ->
           ## snapshot only on click failure
@@ -250,7 +216,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       dblclicks = []
 
       dblclick = (el, index) =>
-        $el = $(el)
+        $el = $dom.wrap(el)
 
         ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from

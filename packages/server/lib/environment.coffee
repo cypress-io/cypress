@@ -1,5 +1,5 @@
 require("./util/http_overrides")
-require("./fs_warn")(require("fs-extra"))
+require("./util/fs")
 
 os      = require("os")
 cwd     = require("./cwd")
@@ -31,12 +31,15 @@ try
 ## or development as default
 env = process.env["CYPRESS_ENV"] or= pkg.env ? "development"
 
-Promise.config({
+config = {
   ## uses cancellation for automation timeouts
   cancellation: true
+}
 
+if env is "dev"
   ## enable long stack traces in dev
-  longStackTraces: env is "development"
-})
+  config.longStackTraces = true
+
+Promise.config(config)
 
 module.exports = env

@@ -19,6 +19,7 @@ export default class AutIframe {
       id: `Your App: '${this.config.projectName}'`,
       class: 'aut-iframe',
     })
+
     return this.$iframe
   }
 
@@ -59,7 +60,9 @@ export default class AutIframe {
       }
     }, {})
     const $body = contents.find('body')
+
     $body.find('script,link[rel="stylesheet"],style').remove()
+
     return {
       body: $body.detach(),
       htmlAttrs,
@@ -72,6 +75,7 @@ export default class AutIframe {
     const contents = this._contents()
 
     const $html = contents.find('html')
+
     this._replaceHtmlAttrs($html, htmlAttrs)
 
     this._replaceHeadStyles(headStyles)
@@ -86,7 +90,10 @@ export default class AutIframe {
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
     // remove all attributes
-    const oldAttrs = _.map($html[0].attributes, (attr) => attr.name)
+    const oldAttrs = _.map($html[0].attributes, (attr) => {
+      return attr.name
+    })
+
     _.each(oldAttrs, (attr) => {
       $html.removeAttr(attr)
     })
@@ -128,6 +135,7 @@ export default class AutIframe {
       // no existing style at this index, so no more styles at all in
       // the head, so just append it
       $head.append(linkTag)
+
       return
     }
 
@@ -138,6 +146,7 @@ export default class AutIframe {
 
   _replaceStyle ($head, existingStyle, style) {
     const styleTag = this._styleTag(style)
+
     if (existingStyle) {
       $(existingStyle).replaceWith(styleTag)
     } else {
@@ -190,6 +199,7 @@ export default class AutIframe {
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
       const dimensions = dom.getOuterSize(el)
+
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0 || el.css('display') === 'none') return
 
@@ -209,6 +219,7 @@ export default class AutIframe {
 
   toggleSelectorPlayground = (isEnabled) => {
     const $body = this._body()
+
     if (!$body) return
 
     const clearHighlight = this._clearHighlight.bind(this, false)
@@ -233,18 +244,21 @@ export default class AutIframe {
 
   _onSelectorMouseMove = (e) => {
     const $body = this._body()
+
     if (!$body) return
 
     let el = e.target
     let $el = $(el)
 
     const $ancestorHighlight = $el.closest('.__cypress-selector-playground')
+
     if ($ancestorHighlight.length) {
       $el = $ancestorHighlight
     }
 
     if ($ancestorHighlight.length || $el.hasClass('__cypress-selector-playground')) {
       const $highlight = $el
+
       $highlight.css('display', 'none')
       el = this._document().elementFromPoint(e.clientX, e.clientY)
       $el = $(el)
@@ -255,7 +269,9 @@ export default class AutIframe {
 
     this._highlightedEl = el
 
-    const selector = dom.getBestSelector(el)
+    const Cypress = eventManager.getCypress()
+
+    const selector = Cypress.SelectorPlayground.getSelector($el)
 
     dom.addOrUpdateSelectorPlaygroundHighlight({
       $el,
@@ -272,6 +288,7 @@ export default class AutIframe {
 
   _clearHighlight = () => {
     const $body = this._body()
+
     if (!$body) return
 
     dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
@@ -283,6 +300,7 @@ export default class AutIframe {
   toggleSelectorHighlight (isShowingHighlight) {
     if (!isShowingHighlight) {
       this._clearHighlight()
+
       return
     }
 
@@ -343,5 +361,39 @@ export default class AutIframe {
       Elements: $el.length,
       Yielded: Cypress.dom.getElements($el),
     })
+  }
+
+  beforeScreenshot = (config) => {
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (config.disableTimersAndAnimations) {
+        dom.addCssAnimationDisabler(this._body())
+      }
+
+      _.each(config.blackout, (selector) => {
+        dom.addBlackout(this._body(), selector)
+      })
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-disable no-console */
+    }
+  }
+
+  afterScreenshot = (config) => {
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (config.disableTimersAndAnimations) {
+        dom.removeCssAnimationDisabler(this._body())
+      }
+
+      dom.removeBlackouts(this._body())
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-disable no-console */
+    }
   }
 }

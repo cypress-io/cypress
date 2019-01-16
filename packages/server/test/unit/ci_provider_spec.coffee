@@ -1,241 +1,676 @@
+R = require("ramda")
+mockedEnv = require("mocked-env")
 require("../spec_helper")
 
 ciProvider = require("#{root}lib/util/ci_provider")
 
+expectsName = (name) ->
+  expect(ciProvider.provider(), "CI providers detected name").to.eq(name)
+
+expectsCiParams = (params) ->
+  expect(ciProvider.ciParams(), "CI providers detected CI params").to.deep.eq(params)
+
+expectsCommitParams = (params) ->
+  expect(ciProvider.commitParams(), "CI providers detected commit params").to.deep.eq(params)
+
+expectsCommitDefaults = (existing, expected) ->
+  expect(expected).to.be.an("object")
+  expect(ciProvider.commitDefaults(existing), "CI providers default git params").to.deep.eq(expected)
+
 describe "lib/util/ci_provider", ->
-  beforeEach ->
-    @env = JSON.stringify(process.env)
-
-    process.env = {}
-
-    @expects = (obj) ->
-      expect(ciProvider.name()).to.eq(obj.name)
-      expect(ciProvider.buildNum()).to.eq(obj.buildNum)
-      expect(ciProvider.params()).to.deep.eq(obj.params)
+  resetEnv = null
 
   afterEach ->
-    ## restore the env
-    process.env = JSON.parse(@env)
+    # we need to reset environment
+    # to avoid affecting tests in other suites
+    resetEnv?()
 
-  context "grou-id", ->
-    describe "circle", ->
-      beforeEach ->
-        process.env.CIRCLECI = true
-        process.env.CIRCLE_BUILD_URL = "circle build url"
-        process.env.CIRCLE_BUILD_NUM = "4"
+  it "null when unknown", ->
+    resetEnv = mockedEnv({}, {clear: true})
 
-      it "grabs workflow id as group id", ->
-        id = "1234-group-id"
-        process.env.CIRCLE_WORKFLOW_ID = id
-        expect(ciProvider.groupId()).to.equal(id)
+    expectsName(null)
+    expectsCiParams(null)
+    expectsCommitParams(null)
 
-      it "no group id without workflow id", ->
-        expect(ciProvider.groupId()).to.be.null
+  it "does not extract from commit environment variables yet", ->
+    # see fallback environment variables
+    # https://github.com/cypress-io/commit-info#fallback-environment-variables
+    # BUT those defaults are NOT used by "ci_provider"
+    # instead they are used in the "record" module
+    # this test just confirms that these defaults are not considered
+    env = {
+      COMMIT_INFO_BRANCH: "my-branch-221",
+      COMMIT_INFO_MESSAGE: "best commit ever",
+      COMMIT_INFO_EMAIL: "user@company.com",
+      COMMIT_INFO_AUTHOR: "Agent Smith",
+      COMMIT_INFO_SHA: "0123456",
+      COMMIT_INFO_REMOTE: "remote repo"
+    }
+    resetEnv = mockedEnv(env, {clear: true})
 
-
-  it "returns 'unknown' when not found", ->
-    process.env = {}
-
-    @expects({
-      name: "unknown"
-      buildNum: null
-      params: null
-    })
+    expectsName(null) # we don't know CI
+    expectsCiParams(null) # we don't know CI params
+    expectsCommitParams(null) # we don't know CI-specific params
 
   it "appveyor", ->
-    process.env.APPVEYOR = true
-    process.env.APPVEYOR_ACCOUNT_NAME = "account"
-    process.env.APPVEYOR_PROJECT_SLUG = "project"
-    process.env.APPVEYOR_BUILD_VERSION = "1.0.1"
-    process.env.APPVEYOR_BUILD_NUMBER = "1"
+    resetEnv = mockedEnv({
+      APPVEYOR: "true"
 
-    @expects({
-      name: "appveyor"
-      buildNum: "1"
-      params: {
-        accountName: "account"
-        projectSlug: "project"
-        buildVersion: "1.0.1"
-      }
+      APPVEYOR_JOB_ID: "appveyorJobId2"
+      APPVEYOR_ACCOUNT_NAME: "appveyorAccountName"
+      APPVEYOR_PROJECT_SLUG: "appveyorProjectSlug"
+      APPVEYOR_BUILD_VERSION: "appveyorBuildVersion"
+      APPVEYOR_BUILD_NUMBER: "appveyorBuildNumber"
+      APPVEYOR_PULL_REQUEST_NUMBER: "appveyorPullRequestNumber"
+      APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH: "appveyorPullRequestHeadRepoBranch"
+
+      APPVEYOR_REPO_COMMIT: "repoCommit"
+      APPVEYOR_REPO_COMMIT_MESSAGE: "repoCommitMessage"
+      APPVEYOR_REPO_BRANCH: "repoBranch"
+      APPVEYOR_REPO_COMMIT_AUTHOR: "repoCommitAuthor"
+      APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL: "repoCommitAuthorEmail"
+    }, {clear: true})
+
+    expectsName("appveyor")
+    expectsCiParams({
+      appveyorJobId: "appveyorJobId2"
+      appveyorAccountName: "appveyorAccountName"
+      appveyorProjectSlug: "appveyorProjectSlug"
+      appveyorBuildNumber: "appveyorBuildNumber"
+      appveyorBuildVersion: "appveyorBuildVersion"
+      appveyorPullRequestNumber: "appveyorPullRequestNumber"
+      appveyorPullRequestHeadRepoBranch: "appveyorPullRequestHeadRepoBranch"
+    })
+    expectsCommitParams({
+      sha: "repoCommit"
+      branch: "repoBranch"
+      message: "repoCommitMessage"
+      authorName: "repoCommitAuthor"
+      authorEmail: "repoCommitAuthorEmail"
+    })
+
+    resetEnv()
+
+    resetEnv = mockedEnv({
+      APPVEYOR: "true"
+      APPVEYOR_REPO_COMMIT_MESSAGE: "repoCommitMessage"
+      APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED: "repoCommitMessageExtended"
+    }, {clear: true})
+
+    expectsCommitParams({
+      message: "repoCommitMessage\nrepoCommitMessageExtended"
     })
 
   it "bamboo", ->
-    process.env.bamboo_planKey = true
+    resetEnv = mockedEnv({
+      "bamboo.buildNumber": "123"
 
-    @expects({
-      name: "bamboo"
-      buildNum: null
-      params: null
+      "bamboo.resultsUrl": "bamboo.resultsUrl"
+      "bamboo.buildResultsUrl": "bamboo.buildResultsUrl"
+      "bamboo.planRepository.repositoryUrl": "bamboo.planRepository.repositoryUrl"
+
+      "bamboo.planRepository.branch": "bamboo.planRepository.branch"
+    }, {clear: true})
+
+    expectsName("bamboo")
+    expectsCiParams({
+      bambooResultsUrl: "bamboo.resultsUrl"
+      bambooBuildNumber: "123"
+      bambooBuildResultsUrl: "bamboo.buildResultsUrl"
+      bambooPlanRepositoryRepositoryUrl: "bamboo.planRepository.repositoryUrl"
+    })
+    expectsCommitParams({
+      branch: "bamboo.planRepository.branch"
+    })
+
+  it "bitbucket", ->
+    resetEnv = mockedEnv({
+      CI: "1"
+
+      # build information
+      BITBUCKET_BUILD_NUMBER: "bitbucketBuildNumber"
+      BITBUCKET_REPO_OWNER: "bitbucketRepoOwner"
+      BITBUCKET_REPO_SLUG: "bitbucketRepoSlug"
+
+      # git information
+      BITBUCKET_COMMIT: "bitbucketCommit"
+      BITBUCKET_BRANCH: "bitbucketBranch"
+    }, {clear: true})
+
+    expectsName("bitbucket")
+    expectsCiParams({
+      bitbucketBuildNumber: "bitbucketBuildNumber"
+      bitbucketRepoOwner: "bitbucketRepoOwner"
+      bitbucketRepoSlug: "bitbucketRepoSlug"
+    })
+    expectsCommitParams({
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
+    expectsCommitDefaults({
+      sha: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "bitbucketCommit"
+      branch: "gitFoundBranch"
     })
 
   it "buildkite", ->
-    process.env.BUILDKITE = true
+    resetEnv = mockedEnv({
+      BUILDKITE: "true"
 
-    @expects({
-      name: "buildkite",
-      buildNum: null
-      params: null
+      BUILDKITE_REPO: "buildkiteRepo"
+      BUILDKITE_JOB_ID: "buildkiteJobId"
+      BUILDKITE_SOURCE: "buildkiteSource"
+      BUILDKITE_BUILD_ID: "buildkiteBuildId"
+      BUILDKITE_BUILD_URL: "buildkiteBuildUrl"
+      BUILDKITE_BUILD_NUMBER: "buildkiteBuildNumber"
+      BUILDKITE_PULL_REQUEST: "buildkitePullRequest"
+      BUILDKITE_PULL_REQUEST_REPO: "buildkitePullRequestRepo"
+      BUILDKITE_PULL_REQUEST_BASE_BRANCH: "buildkitePullRequestBaseBranch"
+
+      BUILDKITE_COMMIT: "buildKiteCommit"
+      BUILDKITE_BRANCH: "buildKiteBranch"
+      BUILDKITE_MESSAGE: "buildKiteMessage"
+      BUILDKITE_BUILD_CREATOR: "buildKiteBuildCreator"
+      BUILDKITE_BUILD_CREATOR_EMAIL: "buildKiteCreatorEmail"
+      BUILDKITE_PIPELINE_DEFAULT_BRANCH: "buildkitePipelineDefaultBranch"
+    }, {clear: true})
+
+    expectsName("buildkite")
+    expectsCiParams({
+      buildkiteRepo: "buildkiteRepo"
+      buildkiteJobId: "buildkiteJobId"
+      buildkiteSource: "buildkiteSource"
+      buildkiteBuildId: "buildkiteBuildId"
+      buildkiteBuildUrl: "buildkiteBuildUrl"
+      buildkiteBuildNumber: "buildkiteBuildNumber"
+      buildkitePullRequest: "buildkitePullRequest"
+      buildkitePullRequestRepo: "buildkitePullRequestRepo"
+      buildkitePullRequestBaseBranch: "buildkitePullRequestBaseBranch"
+    })
+    expectsCommitParams({
+      sha: "buildKiteCommit"
+      branch: "buildKiteBranch"
+      message: "buildKiteMessage"
+      authorName: "buildKiteBuildCreator"
+      authorEmail: "buildKiteCreatorEmail"
+      remoteOrigin: "buildkiteRepo"
+      defaultBranch: "buildkitePipelineDefaultBranch"
+    })
+
+    # in this test only interested in branch and sha for example
+    expectsCommitDefaults({
+      sha: null,
+      branch: null
+    }, {
+      sha: "buildKiteCommit",
+      branch: "buildKiteBranch"
     })
 
   it "circle", ->
-    process.env.CIRCLECI = true
-    process.env.CIRCLE_BUILD_URL = "circle build url"
-    process.env.CIRCLE_BUILD_NUM = "4"
+    resetEnv = mockedEnv({
+      CIRCLECI: "true"
 
-    @expects({
-      name: "circle",
-      buildNum: "4"
-      params: {
-        buildUrl: "circle build url"
-      }
+      CIRCLE_JOB: "circleJob"
+      CIRCLE_BUILD_NUM: "circleBuildNum"
+      CIRCLE_BUILD_URL: "circleBuildUrl"
+      CIRCLE_PR_NUMBER: "circlePrNumber"
+      CIRCLE_PR_REPONAME: "circlePrReponame"
+      CIRCLE_PR_USERNAME: "circlePrUsername"
+      CIRCLE_COMPARE_URL: "circleCompareUrl"
+      CIRCLE_WORKFLOW_ID: "circleWorkflowId"
+      CIRCLE_PULL_REQUEST: "circlePullRequest"
+      CIRCLE_REPOSITORY_URL: "circleRepositoryUrl"
+      CI_PULL_REQUEST: "ciPullRequest"
+
+      CIRCLE_SHA1: "circleSha"
+      CIRCLE_BRANCH: "circleBranch"
+      CIRCLE_USERNAME: "circleUsername"
+    }, {clear: true})
+
+    expectsName("circle")
+    expectsCiParams({
+      circleJob: "circleJob"
+      circleBuildNum: "circleBuildNum"
+      circleBuildUrl: "circleBuildUrl"
+      circlePrNumber: "circlePrNumber"
+      circlePrReponame: "circlePrReponame"
+      circlePrUsername: "circlePrUsername"
+      circleCompareUrl: "circleCompareUrl"
+      circleWorkflowId: "circleWorkflowId"
+      circlePullRequest: "circlePullRequest"
+      circleRepositoryUrl: "circleRepositoryUrl"
+      ciPullRequest: "ciPullRequest"
+    })
+    expectsCommitParams({
+      sha: "circleSha"
+      branch: "circleBranch"
+      authorName: "circleUsername"
     })
 
-  it "codeship", ->
-    process.env.CI_NAME = "codeship"
-    process.env.CI_BUILD_URL = "codeship build url"
-    process.env.CI_BUILD_NUMBER = "5"
+  it "codeshipBasic", ->
+    resetEnv = mockedEnv({
+      CODESHIP: "TRUE"
+      CI_NAME: "codeship"
 
-    @expects({
-      name: "codeship",
-      buildNum: "5"
-      params: {
-        buildUrl: "codeship build url"
-      }
+      CI_BUILD_ID: "ciBuildId"
+      CI_REPO_NAME: "ciRepoName"
+      CI_BUILD_URL: "ciBuildUrl"
+      CI_PROJECT_ID: "ciProjectId"
+      CI_BUILD_NUMBER: "ciBuildNumber"
+      CI_PULL_REQUEST: "ciPullRequest"
+
+      CI_COMMIT_ID: "ciCommitId"
+      CI_BRANCH: "ciBranch"
+      CI_COMMIT_MESSAGE: "ciCommitMessage"
+      CI_COMMITTER_NAME: "ciCommitterName"
+      CI_COMMITTER_EMAIL: "ciCommitterEmail"
+    }, {clear: true})
+
+    expectsName("codeshipBasic")
+    expectsCiParams({
+      ciBuildId: "ciBuildId"
+      ciRepoName: "ciRepoName"
+      ciBuildUrl: "ciBuildUrl"
+      ciProjectId: "ciProjectId"
+      ciBuildNumber: "ciBuildNumber"
+      ciPullRequest: "ciPullRequest"
+    })
+    expectsCommitParams({
+      sha: "ciCommitId"
+      branch: "ciBranch"
+      message: "ciCommitMessage"
+      authorName: "ciCommitterName"
+      authorEmail: "ciCommitterEmail"
+    })
+
+  it "codeshipPro", ->
+    resetEnv = mockedEnv({
+      CI_NAME: "codeship"
+
+      CI_BUILD_ID: "ciBuildId"
+      CI_REPO_NAME: "ciRepoName"
+      CI_PROJECT_ID: "ciProjectId"
+
+      CI_COMMIT_ID: "ciCommitId"
+      CI_BRANCH: "ciBranch"
+      CI_COMMIT_MESSAGE: "ciCommitMessage"
+      CI_COMMITTER_NAME: "ciCommitterName"
+      CI_COMMITTER_EMAIL: "ciCommitterEmail"
+    }, {clear: true})
+
+    expectsName("codeshipPro")
+    expectsCiParams({
+      ciBuildId: "ciBuildId"
+      ciRepoName: "ciRepoName"
+      ciProjectId: "ciProjectId"
+    })
+    expectsCommitParams({
+      sha: "ciCommitId"
+      branch: "ciBranch"
+      message: "ciCommitMessage"
+      authorName: "ciCommitterName"
+      authorEmail: "ciCommitterEmail"
     })
 
   it "drone", ->
-    process.env.DRONE = true
+    resetEnv = mockedEnv({
+      DRONE: "true"
 
-    @expects({
-      name: "drone",
-      buildNum: null
-      params: null
+      DRONE_JOB_NUMBER: "droneJobNumber"
+      DRONE_BUILD_LINK: "droneBuildLink"
+      DRONE_BUILD_NUMBER: "droneBuildNumber"
+      DRONE_PULL_REQUEST: "dronePullRequest"
+
+      DRONE_COMMIT_SHA: "droneCommitSha"
+      DRONE_COMMIT_BRANCH: "droneCommitBranch"
+      DRONE_COMMIT_MESSAGE: "droneCommitMessage"
+      DRONE_COMMIT_AUTHOR: "droneCommitAuthor"
+      DRONE_COMMIT_AUTHOR_EMAIL: "droneCommitAuthorEmail"
+      DRONE_REPO_BRANCH: "droneRepoBranch"
+    }, {clear: true})
+
+    expectsName("drone")
+    expectsCiParams({
+      droneJobNumber: "droneJobNumber"
+      droneBuildLink: "droneBuildLink"
+      droneBuildNumber: "droneBuildNumber"
+      dronePullRequest: "dronePullRequest"
+    })
+    expectsCommitParams({
+      sha: "droneCommitSha"
+      branch: "droneCommitBranch"
+      message: "droneCommitMessage"
+      authorName: "droneCommitAuthor"
+      authorEmail: "droneCommitAuthorEmail"
+      defaultBranch: "droneRepoBranch"
     })
 
-  it "gitlab via GITLAB_CI", ->
-    process.env.GITLAB_CI = true
-    process.env.CI_BUILD_ID = "7"
-    process.env.CI_PROJECT_URL = "http://gitlab.com/foo/bar"
+  it "gitlab", ->
+    resetEnv = mockedEnv({
+      GITLAB_CI: "true"
 
-    @expects({
-      name: "gitlab",
-      buildNum: "7"
-      params: {
-        buildId: "7"
-        projectUrl: "http://gitlab.com/foo/bar"
-      }
+      # Gitlab has job id and build id as synonyms
+      CI_BUILD_ID: "ciJobId"
+      CI_JOB_ID: "ciJobId"
+      CI_JOB_URL: "ciJobUrl"
+
+      CI_PIPELINE_ID: "ciPipelineId"
+      CI_PIPELINE_URL: "ciPipelineUrl"
+
+      GITLAB_HOST: "gitlabHost"
+      CI_PROJECT_ID: "ciProjectId"
+      CI_PROJECT_URL: "ciProjectUrl"
+      CI_REPOSITORY_URL: "ciRepositoryUrl"
+      CI_ENVIRONMENT_URL: "ciEnvironmentUrl"
+
+      CI_COMMIT_SHA: "ciCommitSha"
+      CI_COMMIT_REF_NAME: "ciCommitRefName"
+      CI_COMMIT_MESSAGE: "ciCommitMessage"
+      GITLAB_USER_NAME: "gitlabUserName"
+      GITLAB_USER_EMAIL: "gitlabUserEmail"
+    }, {clear: true})
+
+    expectsName("gitlab")
+    expectsCiParams({
+      ciJobId: "ciJobId"
+      ciJobUrl: "ciJobUrl"
+      ciBuildId: "ciJobId"
+      ciPipelineId: "ciPipelineId"
+      ciPipelineUrl: "ciPipelineUrl"
+      gitlabHost: "gitlabHost"
+      ciProjectId: "ciProjectId"
+      ciProjectUrl: "ciProjectUrl"
+      ciRepositoryUrl: "ciRepositoryUrl"
+      ciEnvironmentUrl: "ciEnvironmentUrl"
+    })
+    expectsCommitParams({
+      sha: "ciCommitSha"
+      branch: "ciCommitRefName"
+      message: "ciCommitMessage"
+      authorName: "gitlabUserName"
+      authorEmail: "gitlabUserEmail"
     })
 
-  it "gitlab via CI_SERVER_NAME", ->
-    process.env.CI_SERVER_NAME = "GitLab CI"
-    process.env.CI_BUILD_ID = "7"
-    process.env.CI_PROJECT_URL = "http://gitlab.com/foo/bar"
+    resetEnv = mockedEnv({
+      CI_SERVER_NAME: "GitLab CI"
+    }, {clear: true})
 
-    @expects({
-      name: "gitlab"
-      buildNum: "7"
-      params: {
-        buildId: "7"
-        projectUrl: "http://gitlab.com/foo/bar"
-      }
-    })
+    expectsName("gitlab")
 
-  it "hudson", ->
-    process.env.HUDSON_URL = true
+    resetEnv = mockedEnv({
+      CI_SERVER_NAME: "GitLab"
+    }, {clear: true})
 
-    @expects({
-      name: "hudson",
-      buildNum: null
-      params: null
-    })
+    expectsName("gitlab")
 
   it "jenkins", ->
-    process.env.JENKINS_URL = true
-    process.env.BUILD_URL = "jenkins build url"
-    process.env.BUILD_NUMBER = "9"
+    resetEnv = mockedEnv({
+      JENKINS_URL: "true"
 
-    @expects({
-      name: "jenkins",
-      buildNum: "9"
-      params: {
-        buildUrl: "jenkins build url"
-      }
+      BUILD_ID: "buildId"
+      BUILD_URL: "buildUrl"
+      BUILD_NUMBER: "buildNumber"
+      ghprbPullId: "gbprbPullId"
+
+      GIT_COMMIT: "gitCommit"
+      GIT_BRANCH: "gitBranch"
+    }, {clear: true})
+
+    expectsName("jenkins")
+    expectsCiParams({
+      buildId: "buildId"
+      buildUrl: "buildUrl"
+      buildNumber: "buildNumber"
+      ghprbPullId: "gbprbPullId"
+    })
+    expectsCommitParams({
+      sha: "gitCommit"
+      branch: "gitBranch"
     })
 
-  it "semaphore", ->
-    process.env.SEMAPHORE = true
+    resetEnv = mockedEnv({
+      JENKINS_HOME: "/path/to/jenkins"
+    }, {clear: true})
+    expectsName("jenkins")
 
-    @expects({
-      name: "semaphore"
-      buildNum: null
-      params: null
+    resetEnv = mockedEnv({
+      JENKINS_VERSION: "1.2.3"
+    }, {clear: true})
+    expectsName("jenkins")
+
+    resetEnv = mockedEnv({
+      HUDSON_HOME: "/path/to/jenkins"
+    }, {clear: true})
+    expectsName("jenkins")
+
+    resetEnv = mockedEnv({
+      HUDSON_URL: "true"
+    }, {clear: true})
+    expectsName("jenkins")
+
+  it "semaphore", ->
+    resetEnv = mockedEnv({
+      SEMAPHORE: "true"
+
+      SEMAPHORE_BRANCH_ID: "semaphoreBranchId"
+      SEMAPHORE_BUILD_NUMBER: "semaphoreBuildNumber"
+      SEMAPHORE_CURRENT_JOB: "semaphoreCurrentJob"
+      SEMAPHORE_CURRENT_THREAD: "semaphoreCurrentThread"
+      SEMAPHORE_EXECUTABLE_UUID: "semaphoreExecutableUuid"
+      SEMAPHORE_JOB_COUNT: "semaphoreJobCount"
+      SEMAPHORE_JOB_UUID: "semaphoreJobUuid"
+      SEMAPHORE_PLATFORM: "semaphorePlatform"
+      SEMAPHORE_PROJECT_DIR: "semaphoreProjectDir"
+      SEMAPHORE_PROJECT_HASH_ID: "semaphoreProjectHashId"
+      SEMAPHORE_PROJECT_NAME: "semaphoreProjectName"
+      SEMAPHORE_PROJECT_UUID: "semaphoreProjectUuid"
+      SEMAPHORE_REPO_SLUG: "semaphoreRepoSlug"
+      SEMAPHORE_TRIGGER_SOURCE: "semaphoreTriggerSource"
+      PULL_REQUEST_NUMBER: "pullRequestNumber"
+
+      REVISION: "revision"
+      BRANCH_NAME: "branchName"
+    }, {clear: true})
+
+    expectsName("semaphore")
+    expectsCiParams({
+      pullRequestNumber: "pullRequestNumber"
+      semaphoreBranchId: "semaphoreBranchId"
+      semaphoreBuildNumber: "semaphoreBuildNumber"
+      semaphoreCurrentJob: "semaphoreCurrentJob"
+      semaphoreCurrentThread: "semaphoreCurrentThread"
+      semaphoreExecutableUuid: "semaphoreExecutableUuid"
+      semaphoreJobCount: "semaphoreJobCount"
+      semaphoreJobUuid: "semaphoreJobUuid"
+      semaphorePlatform: "semaphorePlatform"
+      semaphoreProjectDir: "semaphoreProjectDir"
+      semaphoreProjectHashId: "semaphoreProjectHashId"
+      semaphoreProjectName: "semaphoreProjectName"
+      semaphoreProjectUuid: "semaphoreProjectUuid"
+      semaphoreRepoSlug: "semaphoreRepoSlug"
+      semaphoreTriggerSource: "semaphoreTriggerSource"
+    })
+    expectsCommitParams({
+      sha: "revision"
+      branch: "branchName"
     })
 
   it "shippable", ->
-    process.env.SHIPPABLE = true
+    resetEnv = mockedEnv({
+      SHIPPABLE: "true"
 
-    @expects({
-      name: "shippable"
-      buildNum: null
-      params: null
+      # build environment variables
+      SHIPPABLE_BUILD_ID: "buildId"
+      SHIPPABLE_BUILD_NUMBER: "buildNumber"
+      SHIPPABLE_COMMIT_RANGE: "commitRange"
+      SHIPPABLE_CONTAINER_NAME: "containerName"
+      SHIPPABLE_JOB_ID: "jobId"
+      SHIPPABLE_JOB_NUMBER: "jobNumber"
+      SHIPPABLE_REPO_SLUG: "repoSlug"
+
+      # additional information
+      IS_FORK: "isFork"
+      IS_GIT_TAG: "isGitTag"
+      IS_PRERELEASE: "isPrerelease"
+      IS_RELEASE: "isRelease"
+      REPOSITORY_URL: "repositoryUrl"
+      REPO_FULL_NAME: "repoFullName"
+      REPO_NAME: "repoName"
+      BUILD_URL: "buildUrl"
+
+      # pull request variables
+      BASE_BRANCH: "baseBranch"
+      HEAD_BRANCH: "headBranch"
+      IS_PULL_REQUEST: "isPullRequest"
+      PULL_REQUEST: "pullRequest"
+      PULL_REQUEST_BASE_BRANCH: "pullRequestBaseBranch"
+      PULL_REQUEST_REPO_FULL_NAME: "pullRequestRepoFullName"
+
+      # git information
+      COMMIT: "commit"
+      BRANCH: "branch"
+      COMMITTER: "committer"
+      COMMIT_MESSAGE: "commitMessage"
+    }, {clear: true})
+
+    expectsName("shippable")
+    expectsCiParams({
+      # build information
+      shippableBuildId: "buildId"
+      shippableBuildNumber: "buildNumber"
+      shippableCommitRange: "commitRange"
+      shippableContainerName: "containerName"
+      shippableJobId: "jobId"
+      shippableJobNumber: "jobNumber"
+      shippableRepoSlug: "repoSlug"
+      # additional information
+      isFork: "isFork"
+      isGitTag: "isGitTag"
+      isPrerelease: "isPrerelease"
+      isRelease: "isRelease"
+      repositoryUrl: "repositoryUrl"
+      repoFullName: "repoFullName"
+      repoName: "repoName"
+      buildUrl: "buildUrl"
+      # pull request information
+      baseBranch: "baseBranch"
+      headBranch: "headBranch"
+      isPullRequest: "isPullRequest"
+      pullRequest: "pullRequest"
+      pullRequestBaseBranch: "pullRequestBaseBranch"
+      pullRequestRepoFullName: "pullRequestRepoFullName"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      message: "commitMessage"
+      authorName: "committer"
     })
 
   it "snap", ->
-    process.env.SNAP_CI = true
+    resetEnv = mockedEnv({
+      SNAP_CI: "true"
+    }, {clear: true})
 
-    @expects({
-      name: "snap"
-      buildNum: null
-      params: null
-    })
+    expectsName("snap")
+    expectsCiParams(null)
+    expectsCommitParams(null)
 
   it "teamcity", ->
-    process.env.TEAMCITY_VERSION = true
+    resetEnv = mockedEnv({
+      TEAMCITY_VERSION: "true"
+    }, {clear: true})
 
-    @expects({
-      name: "teamcity"
-      buildNum: null
-      params: null
-    })
+    expectsName("teamcity")
+    expectsCiParams(null)
+    expectsCommitParams(null)
 
   it "teamfoundation", ->
-    process.env.TF_BUILD = true
+    resetEnv = mockedEnv({
+      TF_BUILD: "true"
 
-    @expects({
-      name: "teamfoundation"
-      buildNum: null
-      params: null
+      BUILD_BUILDID: "buildId"
+      BUILD_BUILDNUMBER: "buildNumber"
+      BUILD_CONTAINERID: "containerId"
+
+      BUILD_SOURCEVERSION: "commit"
+      BUILD_SOURCEBRANCHNAME: "branch"
+      BUILD_SOURCEVERSIONMESSAGE: "message"
+      BUILD_SOURCEVERSIONAUTHOR: "name"
+    }, {clear: true})
+
+    expectsName("teamfoundation")
+    expectsCiParams({
+      buildBuildid: "buildId"
+      buildBuildnumber: "buildNumber"
+      buildContainerid: "containerId"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      message: "message"
+      authorName: "name"
     })
 
   it "travis", ->
-    process.env.TRAVIS = true
-    process.env.TRAVIS_BUILD_ID = "id-123"
-    process.env.TRAVIS_BUILD_NUMBER = "15"
-    process.env.TRAVIS_REPO_SLUG = "travis-repo-slug"
+    resetEnv = mockedEnv({
+      TRAVIS: "true"
 
-    @expects({
-      name: "travis",
-      buildNum: "15"
-      params: {
-        buildId: "id-123"
-        repoSlug: "travis-repo-slug"
-      }
+      TRAVIS_JOB_ID: "travisJobId"
+      TRAVIS_BUILD_ID: "travisBuildId"
+      TRAVIS_REPO_SLUG: "travisRepoSlug"
+      TRAVIS_JOB_NUMBER: "travisJobNumber"
+      TRAVIS_EVENT_TYPE: "travisEventType"
+      TRAVIS_COMMIT_RANGE: "travisCommitRange"
+      TRAVIS_BUILD_NUMBER: "travisBuildNumber"
+      TRAVIS_PULL_REQUEST: "travisPullRequest"
+      TRAVIS_PULL_REQUEST_BRANCH: "travisPullRequestBranch"
+
+      TRAVIS_COMMIT: "travisCommit"
+      TRAVIS_BRANCH: "travisBranch"
+      TRAVIS_COMMIT_MESSAGE: "travisCommitMessage"
+    }, {clear: true})
+
+    expectsName("travis")
+    expectsCiParams({
+      travisJobId: "travisJobId"
+      travisBuildId: "travisBuildId"
+      travisRepoSlug: "travisRepoSlug"
+      travisJobNumber: "travisJobNumber"
+      travisEventType: "travisEventType"
+      travisCommitRange: "travisCommitRange"
+      travisBuildNumber: "travisBuildNumber"
+      travisPullRequest: "travisPullRequest"
+      travisPullRequestBranch: "travisPullRequestBranch"
+    })
+    expectsCommitParams({
+      sha: "travisCommit"
+      branch: "travisPullRequestBranch"
+      message: "travisCommitMessage"
+    })
+
+    resetEnv = mockedEnv({
+      TRAVIS: "true"
+      TRAVIS_BRANCH: "travisBranch"
+    }, {clear: true})
+
+    expectsCommitParams({
+      branch: "travisBranch"
     })
 
   it "wercker", ->
-    process.env.WERCKER = true
+    resetEnv = mockedEnv({
+      WERCKER: "true"
+    }, {clear: true})
 
-    @expects({
-      name: "wercker"
-      buildNum: null
-      params: null
-    })
+    expectsName("wercker")
+    expectsCiParams(null)
+    expectsCommitParams(null)
 
-  it "wercker", ->
-    process.env.WERCKER_MAIN_PIPELINE_STARTED = true
+    resetEnv = mockedEnv({
+      WERCKER_MAIN_PIPELINE_STARTED: "true"
+    }, {clear: true})
 
-    @expects({
-      name: "wercker"
-      buildNum: null
-      params: null
-    })
+    expectsName("wercker")

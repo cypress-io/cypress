@@ -62,4 +62,5 @@ const Routes = observer(({ model }) => (
 ))
 
 export { Route, RoutesList }
+
 export default Routes

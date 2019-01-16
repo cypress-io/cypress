@@ -16,13 +16,13 @@ pkg           = require("@packages/root")
 describe "lib/exceptions", ->
   context ".getAuthToken", ->
     it "returns authToken from cache", ->
-      @sandbox.stub(user, "get").resolves({authToken: "auth-token-123"})
+      sinon.stub(user, "get").resolves({authToken: "auth-token-123"})
 
       exception.getAuthToken().then (authToken) ->
         expect(authToken).to.eq("auth-token-123")
 
     it "returns undefined if no authToken", ->
-      @sandbox.stub(user, "get").resolves({})
+      sinon.stub(user, "get").resolves({})
 
       exception.getAuthToken().then (authToken) ->
         expect(authToken).to.be.undinefed
@@ -63,15 +63,31 @@ describe "lib/exceptions", ->
             at bar /Users/ruby/dev/bar.js:92
           """
         }
+        @windowsError = {
+          name: "Path not found: \\Users\\ruby\\dev\\"
+          message: "Could not find \\Users\\ruby\\dev\\foo.js"
+          stack: """
+            Error at \\Users\\ruby\\dev\\index.js:102
+            at foo \\Users\\ruby\\dev\\foo.js:4
+            at bar \\Users\\ruby\\dev\\bar.js:92
+          """
+        }
 
       it "strips paths from name, leaving file name and line number", ->
         expect(exception.getErr(@err).name).to.equal("Path not found: <stripped-path>")
+        expect(exception.getErr(@windowsError).name).to.equal("Path not found: <stripped-path>")
 
       it "strips paths from message, leaving file name and line number", ->
         expect(exception.getErr(@err).message).to.equal("Could not find <stripped-path>foo.js")
+        expect(exception.getErr(@windowsError).message).to.equal("Could not find <stripped-path>foo.js")
 
       it "strips paths from stack, leaving file name and line number", ->
         expect(exception.getErr(@err).stack).to.equal("""
+          Error at <stripped-path>index.js:102
+          at foo <stripped-path>foo.js:4
+          at bar <stripped-path>bar.js:92
+        """)
+        expect(exception.getErr(@windowsError).stack).to.equal("""
           Error at <stripped-path>index.js:102
           at foo <stripped-path>foo.js:4
           at bar <stripped-path>bar.js:92
@@ -82,14 +98,14 @@ describe "lib/exceptions", ->
 
   context ".getVersion", ->
     it "returns version from package.json", ->
-      @sandbox.stub(pkg, "version", "0.1.2")
+      sinon.stub(pkg, "version").value("0.1.2")
       expect(exception.getVersion()).to.eq("0.1.2")
 
   context ".getBody", ->
     beforeEach ->
       @err = new Error()
-      @sandbox.stub(pkg, "version", "0.1.2")
-      @sandbox.stub(system, "info").resolves({
+      sinon.stub(pkg, "version").value("0.1.2")
+      sinon.stub(system, "info").resolves({
         system: "info"
       })
 
@@ -125,14 +141,14 @@ describe "lib/exceptions", ->
 
         @err = {name: "ReferenceError", message: "undefined is not a function", stack: "asfd"}
 
-        @sandbox.stub(exception, "getBody").resolves({
+        sinon.stub(exception, "getBody").resolves({
           err: @err
           version: "0.1.2"
         })
 
-        @sandbox.stub(exception, "getAuthToken").resolves("auth-token-123")
+        sinon.stub(exception, "getAuthToken").resolves("auth-token-123")
 
-        @sandbox.stub(api, "createRaygunException")
+        sinon.stub(api, "createRaygunException")
 
       it "sends body + authToken to api.createRaygunException", ->
         api.createRaygunException.resolves()

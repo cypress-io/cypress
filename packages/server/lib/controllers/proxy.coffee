@@ -10,11 +10,17 @@ cors          = require("../util/cors")
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
+conditional   = require("../util/conditional_stream")
 networkFailures = require("../util/network_failures")
 
 redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
+
+zlibOptions = {
+  flush: zlib.Z_SYNC_FLUSH
+  finishFlush: zlib.Z_SYNC_FLUSH
+}
 
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
@@ -32,13 +38,13 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request) ->
+  handle: (req, res, config, getRemoteState, request, nodeProxy) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
       url: req.url
       proxiedUrl: req.proxiedUrl
-      cookies: req.cookies
+      headers: req.headers
       remoteState
     })
 
@@ -67,7 +73,21 @@ module.exports = {
         ## and set a custom header
         res.set("x-cypress-matched-blacklisted-host", matched)
 
+        debug("blacklisting request %o", {
+          url: req.proxiedUrl
+          matched: matched
+        })
+
         return res.status(503).end()
+
+    # if req.headers.accept is "text/event-stream"
+    #   return nodeProxy.web(req, res, {
+    #     secure: false
+    #     ignorePath: true
+    #     target: req.proxiedUrl
+    #     timeout: 0
+    #     proxyTimeout: 0
+    #   })
 
     thr = through (d) -> @queue(d)
 
@@ -83,12 +103,14 @@ module.exports = {
     isInitial = req.cookies["__cypress.initial"] is "true"
 
     wantsInjection = null
+    wantsSecurityRemoved = null
+    isEventStream = req.headers.accept is "text/event-stream"
 
-    resContentTypeIsHtml = (respHeaders) ->
+    resContentTypeIs = (respHeaders, str) ->
       contentType = respHeaders["content-type"]
 
-      ## make sure the response includes text/html
-      contentType and contentType.includes("text/html")
+      ## make sure the response includes string type
+      contentType and contentType.includes(str)
 
     reqAcceptsHtml = ->
       ## don't inject if this is an XHR from jquery
@@ -123,7 +145,7 @@ module.exports = {
     getErrorHtml = (err, filePath) =>
       status = err.status ? 500
 
-      debug("request failed %o", { url: remoteUrl, status: status, err: err.message })
+      debug("request failed %o", { url: remoteUrl, status: status, error: err.stack })
 
       urlStr = filePath ? remoteUrl
 
@@ -136,23 +158,33 @@ module.exports = {
       ## turn off __cypress.initial by setting false here
       setCookies(false, wantsInjection)
 
-      debug("received request response for #{remoteUrl} %o", { headers })
+      encoding = headers["content-encoding"]
+
+      isGzipped = encoding and encoding.includes("gzip")
+
+      debug("received response for %o", {
+        url: remoteUrl
+        headers,
+        statusCode,
+        isGzipped
+        wantsInjection,
+        wantsSecurityRemoved,
+      })
 
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
-      if not wantsInjection
-        str.pipe(thr)
-      else
-        rewrite = (body) =>
-          rewriter.html(body.toString(), remoteState.domainName, wantsInjection)
+      if wantsInjection
+        rewrite = (body) ->
+          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
 
-        injection = concat (body) =>
-          encoding = headers["content-encoding"]
-
+        ## TODO: we can probably move this to the new
+        ## replacestream rewriter instead of using
+        ## a buffer
+        injection = concat (body) ->
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
-          if encoding and encoding.includes("gzip")
-            zlib.gunzipAsync(body)
+          if isGzipped
+            zlib.gunzipAsync(body, zlibOptions)
             .then(rewrite)
             .then(zlib.gzipAsync)
             .then(thr.end)
@@ -161,8 +193,58 @@ module.exports = {
             thr.end rewrite(body)
 
         str.pipe(injection)
+      else
+        ## only rewrite if we should
+        if wantsSecurityRemoved
+          gunzip = zlib.createGunzip(zlibOptions)
+          gunzip.setEncoding("utf8")
+
+          onError = (err) ->
+            debug("failed to proxy response %o", {
+              url: remoteUrl
+              headers
+              statusCode
+              isGzipped
+              wantsInjection
+              wantsSecurityRemoved
+              err
+            })
+
+            if not res.headersSent
+              res
+              .set({
+                "X-Cypress-Proxy-Error-Message": err.message
+                "X-Cypress-Proxy-Error-Stack": JSON.stringify(err.stack)
+              })
+              .status(502)
+
+            return thr.end()
+
+          ## only unzip when it is already gzipped
+          return str
+          .pipe(conditional(isGzipped, gunzip))
+          .on("error", onError)
+          .pipe(rewriter.security())
+          .on("error", onError)
+          .pipe(conditional(isGzipped, zlib.createGzip()))
+          .on("error", onError)
+          .pipe(thr)
+          .on("error", onError)
+
+        return str.pipe(thr)
 
     endWithResponseErr = (err) ->
+      ## TODO: add debug logs here that the request
+      ## failed, including the original url, the error
+      ## and whether or not the res headers were sent
+
+      ## if this is an event stream just destroy
+      ## the socket without sending a response
+      ## which matches how it works without a proxy
+      ## in the middle
+      if isEventStream
+        return req.socket.destroy()
+
       ## use res.statusCode if we have one
       ## in the case of an ESOCKETTIMEDOUT
       ## and we have the incomingRes headers
@@ -190,7 +272,7 @@ module.exports = {
       {headers, statusCode} = incomingRes
 
       wantsInjection ?= do ->
-        return false if not resContentTypeIsHtml(headers)
+        return false if not resContentTypeIs(headers, "text/html")
 
         return false if not resMatchesOriginPolicy(headers)
 
@@ -199,6 +281,14 @@ module.exports = {
         return false if not reqAcceptsHtml()
 
         return "partial"
+
+      wantsSecurityRemoved = do ->
+        ## we want to remove security IF we're doing a full injection
+        ## on the response or its a request for any javascript script tag
+        config.modifyObstructiveCode and (
+          (wantsInjection is "full") or
+            resContentTypeIs(headers, "application/javascript")
+        )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
 
@@ -250,6 +340,9 @@ module.exports = {
       # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
       opts = {followRedirect: false, strictSSL: false}
 
+      if isEventStream
+        opts.timeout = null
+
       ## strip unsupported accept-encoding headers
       encodings = accept.parser(req.headers["accept-encoding"]) ? []
 
@@ -266,12 +359,29 @@ module.exports = {
       else
         opts.url = remoteUrl
 
+      ## if we have auth headers and this request matches our origin policy
+      if (a = remoteState.auth) and resMatchesOriginPolicy()
+        ## and no existing Authentication headers
+        if not req.headers["authorization"]
+          base64 = Buffer.from(a.username + ":" + a.password).toString("base64")
+          req.headers["authorization"] = "Basic #{base64}"
+
       rq = request.create(opts)
 
       rq.on("error", endWithResponseErr)
 
       rq.on "response", (incomingRes) ->
         onResponse(rq, incomingRes)
+
+      ## if our original request has been
+      ## aborted, then ensure we forward
+      ## this onto the proxied request
+      ## https://github.com/cypress-io/cypress/issues/2612
+      ## this can happen on permanent connections
+      ## like SSE, but also on any regular ol'
+      ## http request
+      req.on "aborted", ->
+        rq.abort()
 
       ## proxy the request body, content-type, headers
       ## to the new rq

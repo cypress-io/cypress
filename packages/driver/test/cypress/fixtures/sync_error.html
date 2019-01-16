@@ -12,7 +12,7 @@
     <script type="text/javascript" src="/node_modules/sinon/dist/sinon.js"></script>
     <script type='text/javascript'>
       var Cypress = parent.Cypress;
-      if (!Cypress){
+      if (!Cypress) {
         throw new Error('Cypress must exist in the parent window!');
       };
       Cypress.onBeforeLoad(window);

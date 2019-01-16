@@ -2,6 +2,7 @@
 require('@packages/coffee/register')
 
 const command = process.argv[2]
+
 if (!command) {
   console.error('Missing deploy command ⛔️')
   process.exit(1)
@@ -9,12 +10,17 @@ if (!command) {
 
 const commands = require('./binary/index')
 const fn = commands[command]
+
 if (!fn) {
   console.error('Invalid deploy command %s 🚫', command)
 }
 
+// TODO allow passing CLI arguments to each command
+
 fn()
-.then(() => console.log('✅ %s completed', command))
+.then(() => {
+  return console.log('✅ %s completed', command)
+})
 .catch((err) => {
   console.error('🔥 deploy error')
   console.error(err)

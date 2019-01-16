@@ -1,9 +1,9 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$elements = require("../../../dom/elements")
 
 checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## we're not handling conversion of values to strings
@@ -46,12 +46,22 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## in the values array?
   ## or values array is empty
   elHasMatchingValue = ($el) ->
-    values.length is 0 or $el.val() in values
+    value = $elements.getNativeProp($el.get(0), "value")
+    values.length is 0 or value in values
 
   ## blow up if any member of the subject
   ## isnt a checkbox or radio
   checkOrUncheckEl = (el, index) =>
-    $el = $(el)
+    $el = $dom.wrap(el)
+
+    if not isAcceptableElement($el)
+      node   = $dom.stringify($el)
+      word   = $utils.plural(options.$el, "contains", "is")
+      phrase = if type is "check" then " and :radio" else ""
+      $utils.throwErrByPath "check_uncheck.invalid_element", {
+        onFail: options._log
+        args: { node, word, phrase, cmd: type }
+      }
 
     isElActionable = elHasMatchingValue($el)
 
@@ -78,21 +88,14 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
 
       options._log.snapshot("before", {next: "after"})
 
-      if not isAcceptableElement($el)
-        node   = $dom.stringify($el)
-        word   = $utils.plural(options.$el, "contains", "is")
-        phrase = if type is "check" then " and :radio" else ""
-        $utils.throwErrByPath "check_uncheck.invalid_element", {
-          onFail: options._log
-          args: { node, word, phrase, cmd: type }
-        }
 
       ## if the checkbox was already checked
       ## then notify the user of this note
       ## and bail
       if isNoop($el)
-        ## still ensure visibility even if the command is noop
-        cy.ensureVisibility($el, options._log)
+        if !options.force
+          ## still ensure visibility even if the command is noop
+          cy.ensureVisibility($el, options._log)
         if options._log
           inputType = if $el.is(":radio") then "radio" else "checkbox"
           consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."

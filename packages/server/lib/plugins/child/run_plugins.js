@@ -1,18 +1,20 @@
-const log = require('debug')('cypress:server:plugins:child')
+const _ = require('lodash')
+const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
+const task = require('./task')
 const util = require('../util')
 
-const callbacks = {}
+const registeredEvents = {}
 
-const invoke = (callbackId, args = []) => {
-  const callback = callbacks[callbackId]
-  if (!callback) {
-    sendError(new Error(`No callback registered for callback id ${callbackId}`))
+const invoke = (eventId, args = []) => {
+  const event = registeredEvents[eventId]
+  if (!event) {
+    sendError(new Error(`No handler registered for event id ${eventId}`))
     return
   }
 
-  return callback(...args)
+  return event.handler(...args)
 }
 
 const sendError = (ipc, err) => {
@@ -22,24 +24,38 @@ const sendError = (ipc, err) => {
 let plugins
 
 const load = (ipc, config, pluginsFile) => {
-  log('run plugins function')
+  debug('run plugins function')
 
-  let callbackIdCount = 0
+  let eventIdCount = 0
   const registrations = []
 
   // we track the register calls and then send them all at once
   // to the parent process
-  const register = (event, fn) => {
-    const callbackId = callbackIdCount++
-    callbacks[callbackId] = fn
+  const register = (event, handler) => {
+    if (event === 'task') {
+      const existingEventId = _.findKey(registeredEvents, { event: 'task' })
+      if (existingEventId) {
+        handler = task.merge(registeredEvents[existingEventId].handler, handler)
+        registeredEvents[existingEventId] = { event, handler }
+        debug('extend task events with id', existingEventId)
+        return
+      }
+    }
 
-    log('register event', event, 'with id', callbackId)
+    const eventId = eventIdCount++
+    registeredEvents[eventId] = { event, handler }
+
+    debug('register event', event, 'with id', eventId)
 
     registrations.push({
       event,
-      callbackId,
+      eventId,
     })
   }
+
+  // events used for parent/child communication
+  register('_get:task:body', () => {})
+  register('_get:task:keys', () => {})
 
   Promise
   .try(() => {
@@ -54,48 +70,60 @@ const load = (ipc, config, pluginsFile) => {
 }
 
 const execute = (ipc, event, ids, args = []) => {
-  log('execute plugin with id', ids.invocationId)
+  debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
+    case 'after:screenshot':
+      util.wrapChildPromise(ipc, invoke, ids, args)
+      return
     case 'file:preprocessor':
       preprocessor.wrap(ipc, invoke, ids, args)
       return
     case 'before:browser:launch':
       util.wrapChildPromise(ipc, invoke, ids, args)
       return
+    case 'task':
+      task.wrap(ipc, registeredEvents, ids, args)
+      return
+    case '_get:task:keys':
+      task.getKeys(ipc, registeredEvents, ids)
+      return
+    case '_get:task:body':
+      task.getBody(ipc, registeredEvents, ids, args)
+      return
     default:
-      log('unexpected execute message:', event, args)
+      debug('unexpected execute message:', event, args)
       return
   }
 }
 
 module.exports = (ipc, pluginsFile) => {
-  log('pluginsFile:', pluginsFile)
+  debug('pluginsFile:', pluginsFile)
 
   process.on('uncaughtException', (err) => {
-    log('uncaught exception:', util.serializeError(err))
+    debug('uncaught exception:', util.serializeError(err))
     ipc.send('error', util.serializeError(err))
     return false
   })
 
   process.on('unhandledRejection', (event) => {
     const err = (event && event.reason) || event
-    log('unhandled rejection:', util.serializeError(err))
+    debug('unhandled rejection:', util.serializeError(err))
     ipc.send('error', util.serializeError(err))
     return false
   })
 
   try {
-    log('require pluginsFile')
+    debug('require pluginsFile')
     plugins = require(pluginsFile)
   } catch (err) {
-    log('failed to require pluginsFile:\n%s', err.stack)
+    debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
     return
   }
 
   if (typeof plugins !== 'function') {
-    log('not a function')
+    debug('not a function')
     ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
     return
   }

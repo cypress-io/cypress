@@ -62,6 +62,7 @@ export default class State {
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
       return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
+
     return 1
   }
 
@@ -88,33 +89,37 @@ export default class State {
 
     if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
       return { state: 'stationary' }
-    } else {
-      return {
-        state: 'attached',
-        styles: {
-          top: (actualHeight + this.headerHeight + nudge),
-        },
-      }
     }
+
+    return {
+      state: 'attached',
+      styles: {
+        top: (actualHeight + this.headerHeight + nudge),
+      },
+    }
+
   }
 
   @action setIsLoading (isLoading) {
     this.isLoading = isLoading
   }
 
-  updateDimensions (width, height) {
+  @action updateDimensions (width, height) {
     this.width = width
     this.height = height
   }
 
   @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
     if (windowWidth != null) this.windowWidth = windowWidth
+
     if (windowHeight != null) this.windowHeight = windowHeight
+
     if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
+
     if (headerHeight != null) this.headerHeight = headerHeight
   }
 
-  clearMessage () {
+  @action clearMessage () {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
@@ -128,7 +133,7 @@ export default class State {
     }
   }
 
-  resetUrl () {
+  @action resetUrl () {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl

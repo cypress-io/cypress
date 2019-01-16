@@ -17,14 +17,6 @@ car = null
 
 # all the projects to trigger / run / change environment variables for
 _PROVIDERS = {
-  buildkite: {
-    main: "cypress-io/cypress"
-    others: [
-      "cypress-io/cypress-test-tiny"
-      "cypress-io/cypress-test-example-repos"
-    ]
-  }
-
   appVeyor: {
     main: "cypress-io/cypress"
     others: [
@@ -173,7 +165,7 @@ module.exports = {
       console.log("setting environment variables in", project)
       car.updateProjectEnv(project, provider, {
         CYPRESS_NPM_PACKAGE_NAME: nameOrUrl,
-        CYPRESS_BINARY_VERSION: binaryVersionOrUrl
+        CYPRESS_INSTALL_BINARY: binaryVersionOrUrl
       })
     awaitEachProjectAndProvider(PROJECTS, updateProject, projectFilter)
     .then R.always(result)

@@ -15,13 +15,19 @@ module.exports = {
 
     requests = {}
 
-    middleware = {
-      onPush: null
-      onBeforeRequest: null
-      onRequest: null
-      onResponse: null
-      onAfterResponse: null
-    }
+    middleware = null
+
+    reset = ->
+      middleware = {
+        onPush: null
+        onBeforeRequest: null
+        onRequest: null
+        onResponse: null
+        onAfterResponse: null
+      }
+
+    ## set the middleware
+    reset()
 
     cookies    = Cookies(cyNamespace, cookieNamespace)
     screenshot = Screenshot(screenshotsFolder)
@@ -92,6 +98,21 @@ module.exports = {
     return {
       _requests: requests
 
+      reset: ->
+        ## TODO: there's gotta be a better
+        ## way to manage this state. i don't
+        ## like automation being a singleton
+        ## that's kept around between browsers
+        ## opening and closing
+        { onPush } = middleware
+
+        reset()
+
+        middleware.onPush = onPush
+        middleware
+
+      get: -> middleware
+
       use: (middlewares = {}) ->
         _.extend(middleware, middlewares)
 
@@ -109,9 +130,8 @@ module.exports = {
         invokeAsync("onBeforeRequest", message, data)
         .then ->
           normalize(message, data, automate)
-        .then (resp) ->
+        .tap (resp) ->
           invokeAsync("onAfterResponse", message, data, resp)
-          .return(resp)
 
       response: (id, resp) ->
         if request = requests[id]

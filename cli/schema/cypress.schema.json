@@ -104,22 +104,17 @@
       "default": "cypress/videos",
       "description": "Path to folder where videos will be saved after a headless or CI run"
     },
-    "screenshotOnHeadlessFailure": {
-      "type": "boolean",
-      "default": true,
-      "description": "Whether Cypress will automatically take a screenshot when a test fails when running tests headlessly or in CI."
-    },
-    "trashAssetsBeforeHeadlessRuns": {
+    "trashAssetsBeforeRuns": {
       "type": "boolean",
       "default": true,
       "description": "Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs."
     },
     "videoCompression":	{
-      "type": "number",
+      "type": ["number", "boolean"],
       "default": 32,
       "description": "The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size)."
     },
-    "videoRecording": {
+    "video": {
       "type": "boolean",
       "default": true,
       "description": "Whether Cypress will record a video of the test run when running headlessly."
@@ -146,6 +141,11 @@
       },
       "default": null,
       "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blacklistHosts"
+    },
+    "modifyObstructiveCode": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will search for and replace obstructive JS code found in .js or .html files that prevents Cypress from working. Please read the notes for more information on this setting. https://on.cypress.io/configuration#modifyObstructiveCode"
     },
     "viewportHeight":	{
       "type": "number",

@@ -49,11 +49,20 @@ describe "src/cy/commands/actions/trigger", ->
         .then (win) ->
           $win = $(win)
 
-          $win.on "mouseover", ->
-            done(new Error("should not have bubbled up to window listener"))
+          $win.on "keydown", (e) ->
+            evt = JSON.stringify(e.originalEvent, [
+              "bubbles", "cancelable", "isTrusted", "type", "clientX", "clientY"
+            ])
 
-          cy.get("#button").trigger("mouseover", {bubbles: false}).then ->
-            $win.off "mouseover"
+            done(new Error("event should not have bubbled up to window listener: #{evt}"))
+
+          cy
+          .get("#button")
+          .trigger("keydown", {
+            bubbles: false
+          })
+          .then ->
+            $win.off "keydown"
 
             done()
 
@@ -593,7 +602,7 @@ describe "src/cy/commands/actions/trigger", ->
 
       it "throws when eventName is not a string", ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 14 elements."
+          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 15 elements."
           done()
 
         cy.get("button:first").trigger("cy.trigger() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")

@@ -16,53 +16,21 @@ describe "src/cy/commands/querying", ->
 
   context "#focused", ->
     it "returns the activeElement", ->
-      button = cy.$$("#button")
-      button.get(0).focus()
+      $button = cy.$$("#button")
+      $button.get(0).focus()
+      
+      expect(cy.state("document").activeElement).to.eq($button.get(0))
 
       cy.focused().then ($focused) ->
-        expect($focused.get(0)).to.eq(button.get(0))
+        expect($focused.get(0)).to.eq($button.get(0))
 
     it "returns null if no activeElement", ->
-      button = cy.$$("#button")
-      button.get(0).focus()
-      button.get(0).blur()
+      $button = cy.$$("#button")
+      $button.get(0).focus()
+      $button.get(0).blur()
 
       cy.focused().should('not.exist').then ($focused) ->
         expect($focused).to.be.null
-
-    it "uses forceFocusedEl if set", ->
-      input = cy.$$("input:first")
-      cy.state("forceFocusedEl", input.get(0))
-
-      cy.focused().then ($focused) ->
-        expect($focused.get(0)).to.eq input.get(0)
-
-    it "does not use forceFocusedEl if that el is not in the document", ->
-      input = cy.$$("input:first")
-
-      cy
-        .get("input:first").focus().focused().then ->
-          input.remove()
-        .focused().should("not.exist").then ($el) ->
-          expect($el).to.be.null
-
-    it "nulls forceFocusedEl if that el is not in the document", ->
-      input = cy.$$("input:first")
-
-      cy
-        .get("input:first").focus().focused().then ->
-          input.remove()
-        .focused().should("not.exist").then ($el) ->
-          expect(cy.state("forceFocusedEl")).to.be.null
-
-    it "refuses to use blacklistFocusedEl", ->
-      input = cy.$$("input:first")
-      cy.state("blacklistFocusedEl", input.get(0))
-
-      cy
-        .get("input:first").focus()
-        .focused().should("not.exist").then ($focused) ->
-          expect($focused).to.be.null
 
     describe "assertion verification", ->
       beforeEach ->
@@ -88,9 +56,8 @@ describe "src/cy/commands/querying", ->
         $input = cy.$$("input:first")
 
         cy.on "command:retry", _.after 2, ->
-          cy.state("forceFocusedEl", $input.get(0))
-
           $input.val("1234")
+          $input.get(0).focus()
 
         cy.focused().should("have.value", "1234").then ->
           lastLog = @lastLog
@@ -183,8 +150,7 @@ describe "src/cy/commands/querying", ->
         cy.focused()
 
       it "fails waiting for the focused element not to exist", (done) ->
-        input = cy.$$("input:first")
-        cy.state("forceFocusedEl", input.get(0))
+        cy.$$("input:first").focus()
 
         cy.on "fail", (err) =>
           expect(err.message).to.include "Expected <input#input> not to exist in the DOM, but it was continuously found."
@@ -193,8 +159,7 @@ describe "src/cy/commands/querying", ->
         cy.focused().should("not.exist")
 
       it "eventually fails the assertion", (done) ->
-        input = cy.$$("input:first")
-        cy.state("forceFocusedEl", input.get(0))
+        cy.$$("input:first").focus()
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -477,7 +442,7 @@ describe "src/cy/commands/querying", ->
       cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
 
-    it "FLAKY retries finding elements until something is found", ->
+    it.skip "FLAKY retries finding elements until something is found", ->
       missingEl = $("<div />", id: "missing-el")
 
       ## wait until we're ALMOST about to time out before
@@ -564,6 +529,9 @@ describe "src/cy/commands/querying", ->
           .get("@foo").should("contain", "asdf")
 
     describe "should('exist')", ->
+      beforeEach ->
+        Cypress.config("defaultCommandTimeout", 1000)
+
       it "waits until button exists", ->
         cy.on "command:retry", _.after 3, =>
           cy.$$("body").append $("<div id='missing-el'>missing el</div>")
@@ -766,7 +734,7 @@ describe "src/cy/commands/querying", ->
           .visit("http://localhost:3500/fixtures/jquery.html")
           .server()
           .route(/users/, {}).as("getUsers")
-          .window().then (win) ->
+          .window().then { timeout: 2000 }, (win) ->
             win.$.get("/users")
           .get("@getUsers").then ->
             expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
@@ -856,7 +824,7 @@ describe "src/cy/commands/querying", ->
           .server()
           .route(/users/, {}).as("getUsers")
           .visit("http://localhost:3500/fixtures/jquery.html")
-          .window().then (win) ->
+          .window().then { timeout: 2000 }, (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
@@ -867,7 +835,7 @@ describe "src/cy/commands/querying", ->
 
     describe "alias references", ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 200)
+        Cypress.config("defaultCommandTimeout", 100)
 
       it "can get alias primitives", ->
         cy
@@ -910,7 +878,7 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .visit("http://localhost:3500/fixtures/jquery.html")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               win.$.get("/users")
             .get("@getUsers").then (xhr) ->
               expect(xhr.url).to.include "/users"
@@ -928,7 +896,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -943,7 +911,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -956,7 +924,7 @@ describe "src/cy/commands/querying", ->
             .visit("http://localhost:3500/fixtures/jquery.html")
             .server()
             .route(/users/, {}).as("getUsers")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -969,7 +937,7 @@ describe "src/cy/commands/querying", ->
             .server()
             .route(/users/, {}).as("getUsers")
             .visit("http://localhost:3500/fixtures/jquery.html")
-            .window().then (win) ->
+            .window().then { timeout: 2000 }, (win) ->
               Promise.all([
                 win.$.get("/users", {num: 1})
                 win.$.get("/users", {num: 2})
@@ -1419,10 +1387,16 @@ describe "src/cy/commands/querying", ->
 
     describe "special characters", ->
       _.each "' \" [ ] { } . @ # $ % ^ & * ( ) , ; :".split(" "), (char) ->
-        it "finds content with character: #{char}", ->
+        it "finds content by string with character: #{char}", ->
           span = $("<span>special char #{char} content</span>").appendTo cy.$$("body")
 
           cy.contains("span", char).then ($span) ->
+            expect($span.get(0)).to.eq span.get(0)
+
+        it "finds content by regex with character: #{char}", ->
+          span = $("<span>special char #{char} content</span>").appendTo cy.$$("body")
+
+          cy.contains("span", new RegExp(_.escapeRegExp(char))).then ($span) ->
             expect($span.get(0)).to.eq span.get(0)
 
     describe ".log", ->

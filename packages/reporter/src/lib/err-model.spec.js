@@ -4,11 +4,13 @@ describe('Err model', () => {
   context('.displayMessage', () => {
     it('returns combo of name and message', () => {
       const err = new Err({ name: 'BadError', message: 'Something went wrong' })
+
       expect(err.displayMessage).to.equal('BadError: Something went wrong')
     })
 
     it('returns empty string if no name or message', () => {
       const err = new Err()
+
       expect(err.displayMessage).to.equal('')
     })
   })
@@ -16,22 +18,26 @@ describe('Err model', () => {
   context('.isCommandErr', () => {
     it('returns true if an AssertionError', () => {
       const err = new Err({ name: 'AssertionError', message: 'Something went wrong' })
+
       expect(err.isCommandErr).to.be.true
     })
 
     it('returns true if an CypressError', () => {
       const err = new Err({ name: 'CypressError', message: 'Something went wrong' })
+
       expect(err.isCommandErr).to.be.true
     })
 
     it('returns false otherwise', () => {
       const err = new Err({ name: 'BadError', message: 'Something went wrong' })
+
       expect(err.isCommandErr).to.be.false
     })
   })
 
   context('#update', () => {
     let err
+
     beforeEach(() => {
       err = new Err({ name: 'BadError', message: 'Something went wrong' })
     })
@@ -41,29 +47,14 @@ describe('Err model', () => {
       expect(err.name).to.equal('OtherError')
     })
 
-    it('does not update name if not specified', () => {
-      err.update({})
-      expect(err.name).to.equal('BadError')
-    })
-
     it('updates message if specified', () => {
       err.update({ message: 'Another thing went wrong' })
       expect(err.message).to.equal('Another thing went wrong')
     })
 
-    it('does not update message if not specified', () => {
-      err.update({})
-      expect(err.message).to.equal('Something went wrong')
-    })
-
     it('updates stack if specified', () => {
       err.update({ stack: 'the stack (path/to/file.js 45:203)' })
       expect(err.stack).to.equal('the stack (path/to/file.js 45:203)')
-    })
-
-    it('does not update stack if not specified', () => {
-      err.update({})
-      expect(err.stack).to.equal('')
     })
 
     it('does nothing if props is undefined', () => {

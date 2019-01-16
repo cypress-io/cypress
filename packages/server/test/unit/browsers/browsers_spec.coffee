@@ -6,25 +6,33 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
-  context ".getByName", ->
+  context ".ensureAndGetByName", ->
     it "returns browser by name", ->
-      @sandbox.stub(utils, "getBrowsers").resolves([
+      sinon.stub(utils, "getBrowsers").resolves([
         { name: "foo" }
         { name: "bar" }
       ])
 
-      browsers.getByName("foo").then (browser) ->
+      browsers.ensureAndGetByName("foo")
+      .then (browser) ->
         expect(browser).to.deep.eq({ name: "foo" })
+
+    it "throws when no browser can be found", ->
+      browsers.ensureAndGetByName("browserNotGonnaBeFound")
+      .then ->
+        throw new Error("should have failed")
+      .catch (err) ->
+        expect(err.type).to.eq("BROWSER_NOT_FOUND")
 
   context ".open", ->
     # it "calls onBrowserClose callback on close", ->
-    #   onBrowserClose = @sandbox.stub()
+    #   onBrowserClose = sinon.stub()
     #   browsers.launch("electron", @url, {onBrowserClose}).then ->
     #     Windows.create.lastCall.args[0].onClose()
     #     expect(onBrowserClose).to.be.called
     #
     # it "calls onBrowserOpen callback", ->
-    #    onBrowserOpen = @sandbox.stub()
+    #    onBrowserOpen = sinon.stub()
     #    browsers.launch("electron", @url, {onBrowserOpen}).then =>
     #      expect(onBrowserOpen).to.be.called
     #

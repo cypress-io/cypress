@@ -5,48 +5,75 @@ const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
-const info = require(`${lib}/tasks/info`)
+const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('snap-shot-it')
 const execa = require('execa-wrap')
-const path = require('path')
 
 describe('cli', function () {
   require('mocha-banner').register()
 
   beforeEach(function () {
     logger.reset()
-    this.sandbox.stub(process, 'exit')
-    this.sandbox.stub(util, 'exit')
-    this.sandbox.stub(util, 'logErrorExit1')
-    this.exec = (args) => cli.init(`node test ${args}`.split(' '))
+    sinon.stub(process, 'exit')
+    sinon.stub(util, 'exit')
+    sinon.stub(util, 'logErrorExit1')
+    this.exec = (args) => {
+      return cli.init(`node test ${args}`.split(' '))
+    }
+  })
+
+  context('unknown option', () => {
+    // note it shows help for that specific command
+    it('shows help', () => {
+      return execa('bin/cypress', ['open', '--foo']).then((result) => {
+        snapshot('shows help for open --foo', result)
+      })
+    }
+    )
+
+    it('shows help for run command', () => {
+      return execa('bin/cypress', ['run', '--foo']).then((result) => {
+        snapshot('shows help for run --foo', result)
+      })
+    }
+    )
   })
 
   context('help command', () => {
-    it('shows help', () =>
-      execa('bin/cypress', ['help']).then(snapshot)
+    it('shows help', () => {
+      return execa('bin/cypress', ['help']).then(snapshot)
+    }
     )
 
-    it('shows help for -h', () =>
-      execa('bin/cypress', ['-h']).then(snapshot)
+    it('shows help for -h', () => {
+      return execa('bin/cypress', ['-h']).then(snapshot)
+    }
     )
 
-    it('shows help for --help', () =>
-      execa('bin/cypress', ['--help']).then(snapshot)
+    it('shows help for --help', () => {
+      return execa('bin/cypress', ['--help']).then(snapshot)
+    }
     )
   })
 
   context('unknown command', () => {
-    it('shows usage and exits', () =>
-      execa('bin/cypress', ['foo']).then(snapshot)
+    it('shows usage and exits', () => {
+      return execa('bin/cypress', ['foo']).then(snapshot)
+    }
     )
   })
 
   context('cypress version', function () {
+    const binaryDir = '/binary/dir'
+
+    beforeEach(function () {
+      sinon.stub(state, 'getBinaryDir').returns(binaryDir)
+    })
     it('reports package version', function (done) {
-      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').withArgs(binaryDir).resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -56,8 +83,8 @@ describe('cli', function () {
     })
 
     it('reports package and binary message', function (done) {
-      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves('X.Y.Z')
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -67,8 +94,8 @@ describe('cli', function () {
     })
 
     it('handles non-existent binary version', function (done) {
-      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -78,8 +105,8 @@ describe('cli', function () {
     })
 
     it('handles non-existent binary --version', function (done) {
-      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('--version')
       process.exit.callsFake(() => {
@@ -89,8 +116,8 @@ describe('cli', function () {
     })
 
     it('handles non-existent binary -v', function (done) {
-      this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-      this.sandbox.stub(info, 'getInstalledVersion').resolves(null)
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('-v')
       process.exit.callsFake(() => {
@@ -102,7 +129,8 @@ describe('cli', function () {
 
   context('cypress run', function () {
     beforeEach(function () {
-      this.sandbox.stub(run, 'start').resolves(0)
+      sinon.stub(run, 'start').resolves(0)
+      util.exit.withArgs(0)
     })
 
     it('calls run.start with options + exits with code', function (done) {
@@ -117,6 +145,7 @@ describe('cli', function () {
 
     it('run.start with options + catches errors', function (done) {
       const err = new Error('foo')
+
       run.start.rejects(err)
       this.exec('run')
 
@@ -124,21 +153,6 @@ describe('cli', function () {
         expect(e).to.eq(err)
         done()
       })
-    })
-
-    it('calls run without group flag', function () {
-      this.exec('run')
-      expect(run.start).to.be.calledWith({})
-    })
-
-    it('calls run with group flag', function () {
-      this.exec('run --group')
-      expect(run.start).to.be.calledWith({ group: true })
-    })
-
-    it('calls run with groupId', function () {
-      this.exec('run --group-id foo')
-      expect(run.start).to.be.calledWith({ groupId: 'foo' })
     })
 
     it('calls run with port', function () {
@@ -182,10 +196,8 @@ describe('cli', function () {
     })
 
     it('calls run with relative --project folder', function () {
-      this.sandbox.stub(path, 'resolve')
-      .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
       this.exec('run --project foo/bar')
-      expect(run.start).to.be.calledWith({ project: '/mock/absolute/foo/bar' })
+      expect(run.start).to.be.calledWith({ project: 'foo/bar' })
     })
 
     it('calls run with absolute --project folder', function () {
@@ -197,18 +209,36 @@ describe('cli', function () {
       this.exec('run --headed')
       expect(run.start).to.be.calledWith({ headed: true })
     })
+
+    it('calls run with --no-exit', function () {
+      this.exec('run --no-exit')
+      expect(run.start).to.be.calledWith({ exit: false })
+    })
+
+    it('calls run with --parallel', function () {
+      this.exec('run --parallel')
+      expect(run.start).to.be.calledWith({ parallel: true })
+    })
+
+    it('calls runs with --ci-build-id', function () {
+      this.exec('run --ci-build-id 123')
+      expect(run.start).to.be.calledWith({ ciBuildId: '123' })
+    })
+
+    it('calls runs with --group', function () {
+      this.exec('run --group staging')
+      expect(run.start).to.be.calledWith({ group: 'staging' })
+    })
   })
 
   context('cypress open', function () {
     beforeEach(function () {
-      this.sandbox.stub(open, 'start').resolves(0)
+      sinon.stub(open, 'start').resolves(0)
     })
 
     it('calls open.start with relative --project folder', function () {
-      this.sandbox.stub(path, 'resolve')
-      .withArgs('foo/bar').returns('/mock/absolute/foo/bar')
       this.exec('open --project foo/bar')
-      expect(open.start).to.be.calledWith({ project: '/mock/absolute/foo/bar' })
+      expect(open.start).to.be.calledWith({ project: 'foo/bar' })
     })
 
     it('calls open.start with absolute --project folder', function () {
@@ -217,13 +247,13 @@ describe('cli', function () {
     })
 
     it('calls open.start with options', function () {
-      // this.sandbox.stub(open, 'start').resolves()
+      // sinon.stub(open, 'start').resolves()
       this.exec('open --port 7878')
       expect(open.start).to.be.calledWith({ port: '7878' })
     })
 
     it('calls open.start with global', function () {
-      // this.sandbox.stub(open, 'start').resolves()
+      // sinon.stub(open, 'start').resolves()
       this.exec('open --port 7878 --global')
       expect(open.start).to.be.calledWith({ port: '7878', global: true })
     })
@@ -241,17 +271,22 @@ describe('cli', function () {
     })
   })
 
-
-  it('install calls install.start with force: true', function () {
-    this.sandbox.stub(install, 'start').resolves()
+  it('install calls install.start without forcing', function () {
+    sinon.stub(install, 'start').resolves()
     this.exec('install')
+    expect(install.start).not.to.be.calledWith({ force: true })
+  })
+
+  it('install calls install.start with force: true when passed', function () {
+    sinon.stub(install, 'start').resolves()
+    this.exec('install --force')
     expect(install.start).to.be.calledWith({ force: true })
   })
 
   it('install calls install.start + catches errors', function (done) {
     const err = new Error('foo')
 
-    this.sandbox.stub(install, 'start').rejects(err)
+    sinon.stub(install, 'start').rejects(err)
     this.exec('install')
 
     util.logErrorExit1.callsFake((e) => {
@@ -259,22 +294,24 @@ describe('cli', function () {
       done()
     })
   })
+  context('cypress verify', function () {
 
-  it('verify calls verify.start with force: true', function () {
-    this.sandbox.stub(verify, 'start').resolves()
-    this.exec('verify')
-    expect(verify.start).to.be.calledWith({ force: true, welcomeMessage: false })
-  })
+    it('verify calls verify.start with force: true', function () {
+      sinon.stub(verify, 'start').resolves()
+      this.exec('verify')
+      expect(verify.start).to.be.calledWith({ force: true, welcomeMessage: false })
+    })
 
-  it('verify calls verify.start + catches errors', function (done) {
-    const err = new Error('foo')
+    it('verify calls verify.start + catches errors', function (done) {
+      const err = new Error('foo')
 
-    this.sandbox.stub(verify, 'start').rejects(err)
-    this.exec('verify')
+      sinon.stub(verify, 'start').rejects(err)
+      this.exec('verify')
 
-    util.logErrorExit1.callsFake((e) => {
-      expect(e).to.eq(err)
-      done()
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
     })
   })
 })
