@@ -116,10 +116,12 @@ declare namespace Cypress {
      * Cypress version string. i.e. "1.1.2"
      * @see https://on.cypress.io/version
      * @example
-     *    expect(Cypress.version).to.be.a('string')
-     *    if (Cypress.version === '1.2.0') {
-     *       // test something specific
-     *    }
+    ```
+    expect(Cypress.version).to.be.a('string')
+    if (Cypress.version === '1.2.0') {
+      // test something specific
+    }
+    ```
      */
     version: string
 
@@ -143,6 +145,15 @@ declare namespace Cypress {
 
     /**
      * Currently executing spec file.
+     * @example
+    ```
+    Cypress.spec
+    // {
+    //  name: "config_passing_spec.coffee",
+    //  relative: "cypress/integration/config_passing_spec.coffee",
+    //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+    // }
+    ```
      */
     spec: {
       name: string // "config_passing_spec.coffee"
