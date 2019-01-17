@@ -1544,9 +1544,12 @@ declare namespace Cypress {
     visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
 
     /**
-     * Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
+     * Wait for a number of milliseconds.
+     * You almost never need to wait for an arbitrary period of time.
+     * There are always better ways to express this in Cypress, see the documentation.
      *
      * @see https://on.cypress.io/wait
+     * @param {number} ms - Milliseconds to wait.
      * @example
      *    cy.wait(1000) // wait for 1 second
      */
@@ -1555,12 +1558,44 @@ declare namespace Cypress {
      * Wait for a specific XHR to respond.
      *
      * @see https://on.cypress.io/wait
+     * @param {string} alias - Name of the alias to wait for.
+     *
+    ```
+    // Wait for the route aliased as 'getAccount' to respond
+    // without changing or stubbing its response
+    cy.server()
+    cy.route('/accounts/*').as('getAccount')
+    cy.visit('/accounts/123')
+    cy.wait('@getAccount').then((xhr) => {
+      // we can now access the low level xhr
+      // that contains the request body,
+      // response body, status, etc
+    })
+    ```
      */
     wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
     /**
      * Wait for list of XHR requests to complete.
      *
      * @see https://on.cypress.io/wait
+     * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
+     *
+    ```
+    // wait for 3 XHR requests to complete
+    cy.server()
+    cy.route('users/*').as('getUsers')
+    cy.route('activities/*').as('getActivities')
+    cy.route('comments/*').as('getComments')
+    cy.visit('/dashboard')
+
+    cy.wait(['@getUsers', '@getActivities', '@getComments'])
+      .then((xhrs) => {
+        // xhrs will now be an array of matching XHR's
+        // xhrs[0] <-- getUsers
+        // xhrs[1] <-- getActivities
+        // xhrs[2] <-- getComments
+      })
+    ```
      */
     wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
@@ -1569,11 +1604,13 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/window
      * @example
-     *    cy.visit('http://localhost:8080/app')
-     *    cy.window().then(function(win){
-     *      // win is the remote window
-     *      // of the page at: http://localhost:8080/app
-     *    })
+    ```
+    cy.visit('http://localhost:8080/app')
+    cy.window().then(function(win){
+      // win is the remote window
+      // of the page at: http://localhost:8080/app
+    })
+    ```
      */
     window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
 
@@ -1582,14 +1619,15 @@ declare namespace Cypress {
      * Useful when working within a particular group of elements such as a `<form>`.
      * @see https://on.cypress.io/within
      * @example
-     *    cy.get('form').within(($form) => {
-     *      // cy.get() will only search for elements within form,
-     *      // not within the entire document
-     *      cy.get('input[name="username"]').type('john')
-     *      cy.get('input[name="password"]').type('password')
-     *      cy.root().submit()
-     *    })
-     *
+    ```
+    cy.get('form').within(($form) => {
+      // cy.get() will only search for elements within form,
+      // not within the entire document
+      cy.get('input[name="username"]').type('john')
+      cy.get('input[name="password"]').type('password')
+      cy.root().submit()
+    })
+    ```
      */
     within(fn: (currentSubject: Subject) => void): Chainable<Subject>
     /**
@@ -1604,10 +1642,13 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/wrap
      * @example
-     *    cy.get('form').within(($form) => {
-     *       // more commands
-     *       cy.wrap($form).should('have.class', 'form-container')
-     *    })
+    ```
+    // wraps DOM element
+    cy.get('form').within(($form) => {
+      // more commands
+      cy.wrap($form).should('have.class', 'form-container')
+    })
+    ```
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
@@ -1615,9 +1656,11 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/wrap
      * @example
-     *    cy.wrap(new Promise((resolve, reject) => {
-     *      setTimeout(resolve, 1000);
-     *    }).then(result => {})
+    ```
+    cy.wrap(new Promise((resolve, reject) => {
+      setTimeout(resolve, 1000);
+    }).then(result => {})
+    ```
      */
     wrap<F extends Promise<S>, S>(promise: F, options?: Partial<Loggable & Timeoutable>): Chainable<S>
     /**
@@ -1625,10 +1668,12 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/wrap
      * @example
-     *    // Make assertions about object
-     *    cy.wrap({ amount: 10 })
-     *      .should('have.property', 'amount')
-     *      .and('eq', 10)
+    ```
+    // Make assertions about object
+    cy.wrap({ amount: 10 })
+      .should('have.property', 'amount')
+      .and('eq', 10)
+    ```
      */
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
@@ -1636,6 +1681,12 @@ declare namespace Cypress {
      * Write to a file with the specified contents.
      *
      * @see https://on.cypress.io/writefile
+    ```
+    cy.writeFile('path/to/message.txt', 'Hello World')
+      .then((text) => {
+        expect(text).to.equal('Hello World') // true
+      })
+    ```
      */
     writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
     /**
