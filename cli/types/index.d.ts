@@ -156,11 +156,45 @@ declare namespace Cypress {
     browser: Browser
 
     /**
+     * Returns all configuration objects.
      * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config()
+    // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
+    ```
      */
     config(): ConfigOptions
+    /**
+     * Returns one configuration value.
+     * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config('pageLoadTimeout')
+    // 60000
+    ```
+     */
     config<K extends keyof ConfigOptions>(key: K): ConfigOptions[K]
+    /**
+     * Sets one configuration value.
+     * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config('viewportWidth', 800)
+    ```
+     */
     config<K extends keyof ConfigOptions>(key: K, value: ConfigOptions[K]): void
+    /**
+     * Sets multiple configuration values at once.
+     * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config({
+      defaultCommandTimeout: 10000,
+      viewportHeight: 900
+    })
+    ```
+     */
     config(Object: Partial<ConfigOptions>): void
 
     // no real way to type without generics
@@ -277,16 +311,20 @@ declare namespace Cypress {
      * @see https://on.cypress.io/variables-and-aliases
      * @see https://on.cypress.io/get
      * @example
-     *    // Get the aliased ‘todos’ elements
-     *    cy.get('ul#todos').as('todos')
-     *    //...hack hack hack...
-     *    // later retrieve the todos
-     *    cy.get('@todos')
+    ```
+    // Get the aliased ‘todos’ elements
+    cy.get('ul#todos').as('todos')
+    //...hack hack hack...
+    // later retrieve the todos
+    cy.get('@todos')
+    ```
      */
     as(alias: string): Chainable<Subject>
 
     /**
-     * Blur a focused element. This element must currently be in focus. If you want to ensure an element is focused before blurring, try using .focus() before .blur().
+     * Blur a focused element. This element must currently be in focus.
+     * If you want to ensure an element is focused before blurring,
+     * try using .focus() before .blur().
      *
      * @see https://on.cypress.io/blur
      */
@@ -3767,26 +3805,28 @@ declare namespace Cypress {
      * Fires when an uncaught exception occurs in your application.
      * Cypress will fail the test when this fires.
      * Return `false` from this event and Cypress will not fail the test. Also useful for debugging purposes because the actual `error` instance is provided to you.
-     * @example
-     * // likely want to do this in a support file
-     * // so it's applied to all spec files
-     * // cypress/support/index.js
-     *
-     * Cypress.on('uncaught:exception', (err, runnable) => {
-     *   // returning false here prevents Cypress from
-     *   // failing the test
-     *   return false
-     * })
-     * // stub "window.alert" in a single test
-     * it('shows alert', () => {
-     *    const stub = cy.stub()
-     *    cy.on('window:alert', stub)
-     *    // trigger application code that calls alert(...)
-     *    .then(() => {
-     *      expect(stub).to.have.been.calledOnce
-     *    })
-     * })
      * @see https://on.cypress.io/catalog-of-events#App-Events
+     * @example
+    ```
+      // likely want to do this in a support file
+      // so it's applied to all spec files
+      // cypress/support/index.js
+
+      Cypress.on('uncaught:exception', (err, runnable) => {
+        // returning false here prevents Cypress from
+        // failing the test
+        return false
+      })
+      // stub "window.alert" in a single test
+      it('shows alert', () => {
+        const stub = cy.stub()
+        cy.on('window:alert', stub)
+        // trigger application code that calls alert(...)
+        .then(() => {
+          expect(stub).to.have.been.calledOnce
+        })
+      })
+    ```
      */
     (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
     /**
@@ -3794,23 +3834,28 @@ declare namespace Cypress {
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      * @example
-     *    cy.on('window:confirm', (str) => {
-     *      console.log(str)
-     *      return false // simulate "Cancel"
-     *    })
+    ```
+    cy.on('window:confirm', (str) => {
+      console.log(str)
+      return false // simulate "Cancel"
+    })
+    ```
      */
     (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
      * @example
-     *    const stub = cy.stub()
-     *    cy.on('window:alert', stub)
-     *    // assume the button calls window.alert()
-     *    cy.get('.my-button').click()
-     *    .then(() => {
-     *      expect(stub).to.have.been.calledOnce
-     *    })
+    ```
+    const stub = cy.stub()
+    cy.on('window:alert', stub)
+    // assume the button calls window.alert()
+    cy.get('.my-button')
+      .click()
+      .then(() => {
+        expect(stub).to.have.been.calledOnce
+      })
+    ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
