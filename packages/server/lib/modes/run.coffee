@@ -355,7 +355,8 @@ openProjectCreate = (projectRoot, socketId, options) ->
     onError: (err) ->
       console.log("")
       if err.details
-        console.log(err.message, '\n')
+        console.log(err.message)
+        console.log("")
         console.log(chalk.yellow(err.details))
       else
         console.log(err.stack)
