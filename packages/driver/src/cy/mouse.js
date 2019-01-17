@@ -218,7 +218,7 @@ const create = (state) => {
       }, _activeModifiers)
 
       // TODO: pointer events should have fractional coordinates, not rounded
-      const pointerdownProps = sendPointerdown(
+      let pointerdownProps = sendPointerdown(
         el,
         _.extend({}, defaultOptions, {
           pressure: 0.5,
@@ -229,19 +229,25 @@ const create = (state) => {
         })
       )
 
+      if (modifiers) {
+        pointerdownProps = _.extend(pointerdownProps, { modifiers })
+      }
+
       if (pointerdownProps.preventedDefault) {
         return {
           pointerdownProps,
-          modifiers,
         }
       }
 
-      const mousedownProps = sendMousedown(el, defaultOptions)
+      let mousedownProps = sendMousedown(el, defaultOptions)
+
+      if (modifiers) {
+        mousedownProps = _.extend(mousedownProps, { modifiers })
+      }
 
       return {
         pointerdownProps,
         mousedownProps,
-        modifiers,
       }
 
     },
@@ -266,28 +272,37 @@ const create = (state) => {
         detail: 1,
       }, _activeModifiers)
 
-      const pointerupProps = sendPointerup(el, defaultOptions)
+      let pointerupProps = sendPointerup(el, defaultOptions)
+
+      if (modifiers) {
+        pointerupProps = _.extend(pointerupProps, { modifiers })
+      }
 
       if (pointerdownProps.preventedDefault) {
         return {
           pointerupProps,
-          modifiers,
         }
       }
 
-      // if (!force) {
-      // const elAtCoords = win.document.elementFromPoint(fromViewport.x, fromViewport.y)
+      if (!force) {
+        const elAtCoords = win.document.elementFromPoint(fromViewport.x, fromViewport.y)
 
-      // if (elAtCoords !== el) debugger
-      // }
+        if (elAtCoords !== el) {
+          el = elAtCoords
+        }
+      }
 
-      const mouseupProps = $elements.isAttached(el) && sendMouseup(el, defaultOptions)
+      let mouseupProps = $elements.isAttached(el) && sendMouseup(el, defaultOptions)
+
+      if (modifiers) {
+        mouseupProps.modifiers = modifiers
+      }
 
       return {
         pointerupProps,
         mouseupProps,
-        modifiers,
       }
+
     },
 
     click ($elToClick, fromViewport) {
@@ -295,6 +310,7 @@ const create = (state) => {
 
       const win = $dom.getWindowByElement(el)
       const _activeModifiers = $Keyboard.getActiveModifiers(state)
+      const modifiers = $Keyboard.modifiersToString(_activeModifiers)
       const clickEvtProps = $Keyboard.mixinModifiers({
         view: win,
         clientX: fromViewport.x,
@@ -304,12 +320,16 @@ const create = (state) => {
         composed: true,
       }, _activeModifiers)
 
-      const clickProps = sendClick(el, clickEvtProps)
+      let clickProps = sendClick(el, clickEvtProps)
 
       //# ensure this property exists on older chromium versions
       // if (clickEvt.buttons == null) {
       //   clickEvt.buttons = 0
       // }
+
+      if (modifiers) {
+        clickProps = _.extend(clickProps, { modifiers })
+      }
 
       return clickProps
     },
