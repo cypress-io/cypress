@@ -355,19 +355,29 @@ declare namespace Cypress {
      * to clear localStorage inside a single test. Yields `localStorage` object.
      *
      * @see https://on.cypress.io/clearlocalstorage
+     * @param {string} [key] - name of a particular item to remove (optional).
      * @example
-     *    cy.clearLocalStorage().should(ls => {
-     *      expect(ls.getItem('prop1')).to.be.null
-     *    })
+      ```
+      // removes all local storage keys
+      cy.clearLocalStorage()
+        .should(ls => {
+          expect(ls.getItem('prop1')).to.be.null
+        })
+      // removes item "todos"
+      cy.clearLocalStorage("todos")
+      ```
      */
     clearLocalStorage(key?: string): Chainable<Storage>
     /**
      * Clear keys in local storage that match given regular expression.
      *
      * @see https://on.cypress.io/clearlocalstorage
+     * @param {RegExp} re - regular expression to match.
      * @example
-     *    // Clear all local storage matching /app-/
-     *    cy.clearLocalStorage(/app-/)
+    ```
+    // Clear all local storage matching /app-/
+    cy.clearLocalStorage(/app-/)
+    ```
      */
     clearLocalStorage(re: RegExp): Chainable<Storage>
 
@@ -384,7 +394,8 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific corner / side.
      *
-     * @param {String} position The position where the click should be issued. The `center` position is the default position.
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').click('topRight')
@@ -397,9 +408,11 @@ declare namespace Cypress {
      * @param {number} y The distance in pixels from the element’s top to issue the click.
      * @see https://on.cypress.io/click
      * @example
-     *    // The click below will be issued inside of the element
-     *    // (15px from the left and 40px from the top).
-     *    cy.get('button').click(15, 40)
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').click(15, 40)
+    ```
      */
     click(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
