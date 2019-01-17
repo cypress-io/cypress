@@ -1220,6 +1220,7 @@ describe "src/cy/commands/navigation", ->
 
         cy.visit("https://google.com/foo")
 
+      ## https://github.com/cypress-io/cypress/issues/3101
       [{
         contentType: 'application/json', 
         pathName: 'json-content-type'
