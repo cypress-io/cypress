@@ -4078,16 +4078,20 @@ declare namespace Cypress {
  * Global variables `cy` added by Cypress with all API commands.
  * @see https://on.cypress.io/api
  * @example
- *    cy.get('button').click()
- *    cy.get('.result').contains('Expected text')
+```
+cy.get('button').click()
+cy.get('.result').contains('Expected text')
+```
  */
 declare const cy: Cypress.Chainable<undefined>
 /**
  * Global variable `Cypress` holds common utilities and constants.
  * @see https://on.cypress.io/api
  * @example
- *    Cypress.config("pageLoadTimeout") // => 60000
- *    Cypress.version // => "1.4.0"
- *    Cypress._ // => Lodash _
+```
+Cypress.config("pageLoadTimeout") // => 60000
+Cypress.version // => "1.4.0"
+Cypress._ // => Lodash _
+```
  */
 declare const Cypress: Cypress.Cypress
