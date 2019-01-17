@@ -5,7 +5,7 @@ module.exports = {
     try {
       return contentType.parse(res).type
     } catch (err) {
-      return null
+      return res.headers['content-type']
     }
   },
 
