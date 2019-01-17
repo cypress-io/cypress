@@ -565,6 +565,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
           if current.hash is remote.hash
+            consoleProps["Note"] = "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+
             return Promise.resolve()
 
           return changeIframeSrc(remote.href, "hashchange")

@@ -833,6 +833,15 @@ describe "src/cy/commands/navigation", ->
             "http://localhost:3500/foo -> 1 -> 2"
           )
 
+      it "displays note in consoleProps when visiting the same page with a hash", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo")
+          .visit("http://localhost:3500/fixtures/generic.html#foo")
+          .then ->
+            expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+              "Command": "visit"
+              "Note": "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+          })
+
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)
