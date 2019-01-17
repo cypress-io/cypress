@@ -14,6 +14,7 @@ describe "src/cy/commands/request", ->
 
         @expectOptionsToBe = (opts) ->
           options = backend.firstCall.args[1]
+          debugger
 
           _.each options, (value, key) ->
             expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")

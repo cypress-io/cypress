@@ -74,8 +74,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           o.body   = args[2]
 
       _.defaults(options, {
-        log: true
-        timeout: config("responseTimeout")
+        log: true,
         failOnStatusCode: true
       }, REQUEST_DEFAULTS)
 
