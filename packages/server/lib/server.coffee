@@ -70,6 +70,10 @@ class Server
 
     ## set the cypress config from the cypress.json file
     app.set("view engine", "html")
+
+    ## if this is not set, Express will serve $projectDir/views/layout.html if it exists, instead of Cypress
+    app.set("views", "__CY_THIS_DIR_WILL_NEVER_EXIST")
+
     app.engine("html",     hbs.__express)
 
     ## handle the proxied url in case
