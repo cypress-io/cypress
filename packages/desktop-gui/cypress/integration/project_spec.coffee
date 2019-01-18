@@ -45,8 +45,8 @@ describe "Project", ->
     it "re-opens project if config changes", ->
       cy.shouldBeOnProjectSpecs().then =>
         @ipc.onConfigChanged.yield()
-        expect(@ipc.closeProject).to.be.called
-        expect(@ipc.openProject).to.be.called
+        cy.wrap(@ipc.closeProject).should("be.called")
+        cy.wrap(@ipc.openProject).should("be.called")
         cy.shouldBeOnProjectSpecs()
 
   describe "warnings", ->

@@ -266,12 +266,10 @@ describe "Specs List", ->
         @openProject.resolve(@config)
         cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
-      it "closes then launches browser on click of file", ->
+      it "launches browser on click of file", ->
         cy.get("@firstSpec")
           .click()
           .then ->
-            expect(@ipc.closeBrowser).to.be.called
-
             launchArgs = @ipc.launchBrowser.lastCall.args
 
             expect(launchArgs[0].browser.name).to.equal("chrome")
@@ -315,9 +313,9 @@ describe "Specs List", ->
           cy.get("@deepSpec").should("have.class", "active")
 
     context "switching specs", ->
-
       beforeEach ->
         @ipc.getSpecs.yields(null, @specs)
+        @ipc.launchBrowser.resolves()
         @openProject.resolve(@config)
         cy
           .get(".file").contains("a", "app_spec.coffee").as("firstSpec")
