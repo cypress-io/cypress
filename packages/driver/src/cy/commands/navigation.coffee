@@ -564,6 +564,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## for this, and so we need to resolve onLoad immediately
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
+          ## https://github.com/cypress-io/cypress/issues/1311
           if current.hash is remote.hash
             consoleProps["Note"] = "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
 

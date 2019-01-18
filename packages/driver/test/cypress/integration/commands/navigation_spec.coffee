@@ -440,6 +440,7 @@ describe "src/cy/commands/navigation", ->
         .visit("http://localhost:3500/fixtures/generic.html")
         .visit("http://localhost:3500/fixtures/dimensions.html")
 
+    ## https://github.com/cypress-io/cypress/issues/1311
     it "can visit the same page with hashes", ->
       cy
         .visit("http://localhost:3500/fixtures/generic.html#foo")
