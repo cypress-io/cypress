@@ -440,12 +440,6 @@ describe "src/cy/commands/navigation", ->
         .visit("http://localhost:3500/fixtures/generic.html")
         .visit("http://localhost:3500/fixtures/dimensions.html")
 
-    ## https://github.com/cypress-io/cypress/issues/1311
-    it "can visit the same page with hashes", ->
-      cy
-        .visit("http://localhost:3500/fixtures/generic.html#foo")
-        .visit("http://localhost:3500/fixtures/generic.html#foo")
-
     it "resolves the subject to the remote iframe window", ->
       cy.visit("/fixtures/jquery.html").then (win) ->
         expect(win).to.eq cy.state("$autIframe").prop("contentWindow")
@@ -572,6 +566,15 @@ describe "src/cy/commands/navigation", ->
               "http://localhost:3500/fixtures/dimensions.html#bar"
               "http://localhost:3500/fixtures/dimensions.html"
             ])
+
+    ## https://github.com/cypress-io/cypress/issues/1311
+    it "doesn't invoke onLoad callback when visiting the same URL with hashes", ->
+      cy
+        .visit("http://localhost:3500/fixtures/generic.html#foo")
+        .visit("http://localhost:3500/fixtures/generic.html#foo", {
+          onLoad: () ->
+            throw new Error("should not have called onLoad")
+        })
 
     describe "when origins don't match", ->
       beforeEach ->
@@ -731,6 +734,21 @@ describe "src/cy/commands/navigation", ->
             name: "visit"
             message: "http://localhost:3500/fixtures/generic.html"
             url: "http://localhost:3500/fixtures/generic.html"
+          }
+
+          lastLog = @lastLog
+
+          _.each obj, (value, key) =>
+            expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
+      it "logs obj once complete when onLoad is not called", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo")
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo").then ->
+          obj = {
+            state: "passed"
+            name: "visit"
+            message: "http://localhost:3500/fixtures/generic.html#foo"
+            url: "http://localhost:3500/fixtures/generic.html#foo"
           }
 
           lastLog = @lastLog
