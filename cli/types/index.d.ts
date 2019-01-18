@@ -116,12 +116,12 @@ declare namespace Cypress {
      * Cypress version string. i.e. "1.1.2"
      * @see https://on.cypress.io/version
      * @example
-    ```
-    expect(Cypress.version).to.be.a('string')
-    if (Cypress.version === '1.2.0') {
-      // test something specific
-    }
-    ```
+      ```
+      expect(Cypress.version).to.be.a('string')
+      if (Cypress.version === '1.2.0') {
+        // test something specific
+      }
+      ```
      */
     version: string
 
