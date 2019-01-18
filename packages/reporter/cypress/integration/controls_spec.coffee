@@ -2,7 +2,7 @@
 
 describe "controls", ->
   beforeEach ->
-    cy.fixture("runnables").as("runnables")
+    cy.fixture("controls_runnables").as("runnables")
 
     @runner = new EventEmitter()
 
