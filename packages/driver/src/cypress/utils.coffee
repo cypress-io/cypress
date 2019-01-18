@@ -149,7 +149,6 @@ module.exports = {
 
 
   findParent: (el, fn) ->
-    debugger
     prevEl = el
     curEl = el.parentElement
     retEl = null

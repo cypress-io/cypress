@@ -189,9 +189,9 @@ module.exports = {
 
         #{obj.element}
 
-        has style 'pointer-events:none'#{if obj.elementInherited then ", inherited from this element:"}
+        has style 'pointer-events:none'#{if obj.elementInherited then ", inherited from this element:" else ""}
 
-        #{if obj.elementInherited then obj.elementInherited}
+        #{if obj.elementInherited then obj.elementInherited else ""}
       
       """
     disabled: """
