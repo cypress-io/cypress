@@ -241,10 +241,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       if noArgsAreAFunction(args)
         Cypress.once("command:enqueued", commandEnqueued)
 
-      lastArgIndex = args.length - 1
-      if _.isPlainObject(args[lastArgIndex])
-        args[lastArgIndex] = _.clone(args[lastArgIndex])
-
       ## run the command's fn with runnable's context
       try
         ret = command.get("fn").apply(state("ctx"), args)
