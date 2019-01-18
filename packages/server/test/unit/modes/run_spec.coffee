@@ -589,14 +589,14 @@ describe "lib/modes/run", ->
           project: @projectInstance
         })
 
-    it "passes headed to openProject.launch", ->
+    it "passes headed to openProject.launchBrowser", ->
       browser = { name: "electron" }
 
       browsers.ensureAndGetByName.resolves(browser)
 
       runMode.run({ headed: true })
       .then ->
-        expect(openProject.launch).to.be.calledWithMatch(
+        expect(openProject.launchBrowser).to.be.calledWithMatch(
           browser,
           {
             name: "foo_spec.js"

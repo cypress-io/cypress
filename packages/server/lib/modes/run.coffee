@@ -580,7 +580,7 @@ module.exports = {
 
     browserOpts.projectRoot = projectRoot
 
-    openProject.launch(browser, spec, browserOpts)
+    openProject.launchBrowser(browser, spec, browserOpts)
 
   listenForProjectEnd: (project, exit) ->
     new Promise (resolve) ->

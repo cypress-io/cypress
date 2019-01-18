@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
 import authStore from '../auth/auth-store'
@@ -13,6 +12,7 @@ import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
 
 import ErrorMessage from './error-message'
+import Loader from '../lib/loader'
 import LoginForm from '../auth/login-form'
 import Run from './runs-list-item'
 import PermissionMessage from './permission-message'
@@ -126,7 +126,7 @@ class RunsList extends Component {
 
     // pinging api server to see if we can show anything
     if (this.state.isLoading) {
-      return <Loader color='#888' scale={0.5}/>
+      return <Loader fullscreen>Loading runs...</Loader>
     }
 
     // no connection to api server, can't load any runs

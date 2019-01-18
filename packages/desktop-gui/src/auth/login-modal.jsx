@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import BootstrapModal from 'react-bootstrap-modal'
-import Loader from 'react-loader'
 
+import Loader from '../lib/loader'
 import LoginForm from './login-form'
 import authStore from './auth-store'
 import ipc from '../lib/ipc'
@@ -51,7 +51,7 @@ class LoginContent extends Component {
       return (
         <div className='modal-body login'>
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-          <Loader color='#888' scale={0.5}/>
+          <Loader />
         </div>
       )
     }

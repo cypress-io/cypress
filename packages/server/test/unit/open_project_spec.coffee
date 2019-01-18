@@ -32,13 +32,13 @@ describe "lib/open_project", ->
       @browser = { name: "chrome" }
 
     it "tells preprocessor to remove file on browser close", ->
-      openProject.launch(@browser, @spec)
+      openProject.launchBrowser(@browser, @spec)
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(preprocessor.removeFile).to.be.calledWith("path/to/spec")
 
     it "does not tell preprocessor to remove file if no spec", ->
-      openProject.launch(@browser, {})
+      openProject.launchBrowser(@browser, {})
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(preprocessor.removeFile).not.to.be.called
@@ -46,13 +46,13 @@ describe "lib/open_project", ->
     it "runs original onBrowserClose callback on browser close", ->
       onBrowserClose = sinon.stub()
       options = { onBrowserClose }
-      openProject.launch(@browser, @spec, options)
+      openProject.launchBrowser(@browser, @spec, options)
       .then ->
         browsers.open.lastCall.args[1].onBrowserClose()
         expect(onBrowserClose).to.be.called
 
     it "calls project.reset on launch", ->
-      openProject.launch(@browser, @spec)
+      openProject.launchBrowser(@browser, @spec)
       .then ->
         expect(Project.prototype.reset).to.be.called
 
@@ -60,7 +60,7 @@ describe "lib/open_project", ->
       expect(@browser.isHeaded).to.be.undefined
       expect(@browser.isHeadless).to.be.undefined
 
-      openProject.launch(@browser, @spec)
+      openProject.launchBrowser(@browser, @spec)
       .then =>
         expect(@browser.isHeaded).to.be.true
         expect(@browser.isHeadless).to.be.false

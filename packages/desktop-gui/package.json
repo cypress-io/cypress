@@ -49,7 +49,6 @@
     "rebuild-node-sass": "1.1.0",
     "react-bootstrap-modal": "4.2.0",
     "react-dom": "^16.7.0",
-    "react-loader": "^2.4.5",
     "zunder": "6.3.2"
   }
 }

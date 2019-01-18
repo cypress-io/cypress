@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
-import Loader from 'react-loader'
 
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
@@ -12,6 +11,7 @@ import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
 
+import Loader from '../lib/loader'
 import LoginForm from '../auth/login-form'
 
 @observer
@@ -125,7 +125,7 @@ class SetupProject extends Component {
     return (
       <div className='setup-project-modal modal-body os-dialog'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <Loader color='#888' scale={0.5} />
+        <Loader />
       </div>
     )
   }

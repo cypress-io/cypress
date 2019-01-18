@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import Loader from 'react-loader'
 
 import appApi from '../lib/app-api'
 import C from '../lib/constants'
@@ -12,6 +11,7 @@ import viewStore from '../lib/view-store'
 
 import Intro from './intro'
 import Layout from './layout'
+import Loader from '../lib/loader'
 import Project from '../project/project'
 
 @observer
@@ -30,7 +30,7 @@ class App extends Component {
   render () {
     switch (viewStore.currentView.name) {
       case C.LOADING:
-        return <Loader color='#888' scale={0.5} />
+        return <Loader fullscreen />
       case C.INTRO:
         return (
           <Layout>

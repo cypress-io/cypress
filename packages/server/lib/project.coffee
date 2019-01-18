@@ -27,13 +27,14 @@ preprocessor = require("./background/preprocessor")
 fs          = require("./util/fs")
 settings    = require("./util/settings")
 specsUtil   = require("./util/specs")
+serverEvents = require("./background/server_events")
 
 localCwd = cwd()
 
 multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
 class Project extends EE
-  constructor: (projectRoot) ->
+  constructor: (projectRoot, options = {}) ->
     if not (@ instanceof Project)
       return new Project(projectRoot)
 
@@ -51,6 +52,7 @@ class Project extends EE
     @server      = null
     @memoryCheck = null
     @automation  = null
+    @isTextTerminal = options.isTextTerminal
 
     debug("Project created %s", @projectRoot)
 
@@ -120,6 +122,9 @@ class Project extends EE
             @checkSupportFile(cfg)
             @watchBackgroundFile(cfg, options)
           )
+        .then =>
+          if not @isTextTerminal
+            serverEvents.execute("run:start")
 
     # return our project instance
     .return(@)
@@ -138,6 +143,9 @@ class Project extends EE
         browsers.close()
         options.onError(err)
     })
+    .catch (err) ->
+      browsers.close()
+      throw err
 
   getRuns: ->
     Promise.all([
@@ -171,6 +179,9 @@ class Project extends EE
     )
     .then ->
       process.chdir(localCwd)
+    .then =>
+      if not @isTextTerminal
+        serverEvents.execute("run:end")
 
   checkSupportFile: (cfg) ->
     if supportFile = cfg.supportFile

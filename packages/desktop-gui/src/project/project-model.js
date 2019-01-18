@@ -33,6 +33,11 @@ export default class Project {
   static INVALID = 'INVALID'
   static UNAUTHORIZED = 'UNAUTHORIZED'
 
+  static BROWSER_OPENING = 'BROWSER_OPENING'
+  static BROWSER_OPEN = 'BROWSER_OPEN'
+  static BROWSER_CLOSING = 'BROWSER_CLOSING'
+  static BROWSER_CLOSED = 'BROWSER_CLOSED'
+
   // persisted with api
   @observable id
   @observable name
@@ -47,10 +52,11 @@ export default class Project {
   // local state
   @observable isChosen = false
   @observable isLoading = false
+  @observable isClosing = false
   @observable isNew = false
   @observable browsers = []
   @observable onBoardingModalOpen = false
-  @observable browserState = 'closed'
+  @observable browserState = Project.BROWSER_CLOSED
   @observable resolvedConfig
   @observable error
   @observable warning
@@ -133,6 +139,10 @@ export default class Project {
     this.isLoading = isLoading
   }
 
+  @action setClosing (isClosing) {
+    this.isClosing = isClosing
+  }
+
   @action openModal () {
     this.onBoardingModalOpen = true
   }
@@ -141,16 +151,8 @@ export default class Project {
     this.onBoardingModalOpen = false
   }
 
-  @action browserOpening () {
-    this.browserState = 'opening'
-  }
-
-  @action browserOpened () {
-    this.browserState = 'opened'
-  }
-
-  @action browserClosed () {
-    this.browserState = 'closed'
+  @action setBrowserState (browserState) {
+    this.browserState = browserState
   }
 
   @action setBrowsers (browsers = []) {
@@ -229,6 +231,10 @@ export default class Project {
 
   clientDetails () {
     return _.pick(this, 'id', 'path')
+  }
+
+  isBrowserState (...browserStates) {
+    return _.includes(browserStates, this.browserState)
   }
 
   serialize () {
