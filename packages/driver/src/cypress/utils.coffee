@@ -147,6 +147,20 @@ module.exports = {
     .join('\n\n')
     .value()
 
+
+  findParent: (el, fn) ->
+    debugger
+    prevEl = el
+    curEl = el.parentElement
+    retEl = null
+    while (curEl)
+      break if retEl = fn(curEl, prevEl)
+      prevEl = curEl
+      curEl = curEl.parentElement
+    
+    retEl or el
+
+
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'
     ## property so we have to normalize that

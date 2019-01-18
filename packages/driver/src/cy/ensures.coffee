@@ -208,6 +208,30 @@ create = (state, expect) ->
 
     cy.ensureExistence($el)
 
+  ensurePointerEvents = ($el, onFail) ->
+    cmd = state("current").get("name")
+    el = $el[0]
+    win = $dom.getWindowByElement(el)
+    pointerEvents = win.getComputedStyle(el).pointerEvents
+    if pointerEvents is 'none'
+      elInherited = $utils.findParent el, (el, prevEl) ->
+        if win.getComputedStyle(el).pointerEvents isnt 'none'
+          return prevEl
+      
+
+
+      element = $dom.stringify(el)
+      elementInherited = (el isnt elInherited) && $dom.stringify(elInherited)
+
+      $utils.throwErrByPath("dom.pointer_events_none", {
+        onFail
+        args: {
+          cmd
+          element
+          elementInherited
+        }
+      })
+
   ensureDescendents = ($el1, $el2, onFail) ->
     cmd = state("current").get("name")
 
@@ -262,6 +286,8 @@ create = (state, expect) ->
     ensureWindow
 
     ensureDocument
+
+    ensurePointerEvents
 
     ensureElementIsNotAnimating
 

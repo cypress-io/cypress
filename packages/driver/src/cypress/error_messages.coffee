@@ -183,6 +183,17 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
       """
+    pointer_events_none: (obj) ->
+      """
+        #{cmd(obj.cmd)} failed because this element:
+
+        #{obj.element}
+
+        has style 'pointer-events:none'#{if obj.elementInherited then ", inherited from this element:"}
+
+        #{if obj.elementInherited then obj.elementInherited}
+      
+      """
     disabled: """
       #{cmd('{{cmd}}')} failed because this element is disabled:
 

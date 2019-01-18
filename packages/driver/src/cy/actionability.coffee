@@ -50,6 +50,7 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
     ## with at these coordinates
     $elAtCoords = getElementAtPointFromViewport(fromViewport)
 
+    cy.ensurePointerEvents($el, log)
     cy.ensureDescendents($el, $elAtCoords, log)
 
     return $elAtCoords

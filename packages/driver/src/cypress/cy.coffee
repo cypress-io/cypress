@@ -650,6 +650,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureAttached: ensures.ensureAttached
     ensureExistence: ensures.ensureExistence
     ensureElExistence: ensures.ensureElExistence
+    ensurePointerEvents: ensures.ensurePointerEvents
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
     ensureReceivability: ensures.ensureReceivability
