@@ -568,13 +568,17 @@ describe "src/cy/commands/navigation", ->
             ])
 
     ## https://github.com/cypress-io/cypress/issues/1311
-    it "doesn't invoke onLoad callback when visiting the same URL with hashes", ->
+    it "window immediately resolves and doesn't reload when visiting the same URL with hashes", ->
+      onLoad = cy.stub()
+
       cy
-        .visit("http://localhost:3500/fixtures/generic.html#foo")
+        .visit("http://localhost:3500/fixtures/generic.html#foo").then (win) ->
+          win.foo = 'bar'
         .visit("http://localhost:3500/fixtures/generic.html#foo", {
-          onLoad: () ->
-            throw new Error("should not have called onLoad")
-        })
+          onLoad: onLoad
+        }).then (win) ->
+          expect(win.bar).to.not.exist
+          expect(onLoad).not.to.have.been.called
 
     describe "when origins don't match", ->
       beforeEach ->

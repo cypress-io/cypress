@@ -519,11 +519,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ({skipOnLoad}) ->
+      onLoad = ({runOnLoadCallback}) ->
         ## reset window on load
         win = state("window")
 
-        if not skipOnLoad
+        ## the onLoad callback should only be skipped if specified
+        if runOnLoadCallback isnt false
           options.onLoad?.call(runnable.ctx, win)
 
         options._log.set({url: url}) if options._log
@@ -569,7 +570,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           if current.hash is remote.hash
             consoleProps["Note"] = "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
 
-            return Promise.resolve().then(onLoad({skipOnLoad: true}))
+            return onLoad({runOnLoadCallback: false})
 
           return changeIframeSrc(remote.href, "hashchange")
           .then(onLoad)
