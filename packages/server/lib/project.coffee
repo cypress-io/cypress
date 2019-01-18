@@ -36,7 +36,7 @@ multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 class Project extends EE
   constructor: (projectRoot, options = {}) ->
     if not (@ instanceof Project)
-      return new Project(projectRoot)
+      return new Project(projectRoot, options)
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
