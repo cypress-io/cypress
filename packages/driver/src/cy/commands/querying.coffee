@@ -84,7 +84,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log ?= Cypress.log
           message: selector
-          referencesAlias: aliasObj?.alias
+          referencesAlias: if aliasObj?.alias then {name: aliasObj.alias}
           aliasType: aliasType
           consoleProps: -> consoleProps
 
