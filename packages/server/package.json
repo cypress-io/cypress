@@ -136,6 +136,7 @@
     "glob": "7.1.2",
     "graceful-fs": "4.1.15",
     "gulp-util": "3.0.8",
+    "hbs": "^4.0.1",
     "http-accept": "0.1.6",
     "http-proxy": "1.17.0",
     "http-status-codes": "1.3.0",

@@ -1,5 +1,6 @@
 _            = require("lodash")
 exphbs          = require("express-handlebars")
+hbs          = require('hbs')
 url          = require("url")
 http         = require("http")
 cookie       = require("cookie")
@@ -71,13 +72,10 @@ class Server
     ## set the cypress config from the cypress.json file
     app.set("view engine", "html")
 
-    ## since we use absolute paths, configure express-handlebars to not automatically find layouts
-    ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine "html", exphbs {
-      defaultLayout: false
-      layoutsDir: []
-      partialsDir: []
-    }
+    ## if this is not set, Express will serve $projectDir/views/layout.html if it exists, instead of Cypress
+    #app.set("views", "__CY_THIS_DIR_WILL_NEVER_EXIST")
+
+    app.engine "html", hbs.__express
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
