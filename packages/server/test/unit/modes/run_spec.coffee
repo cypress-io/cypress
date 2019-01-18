@@ -134,7 +134,7 @@ describe "lib/modes/run", ->
 
   context ".launchBrowser", ->
     beforeEach ->
-      @launch = sinon.stub(openProject, "launch")
+      @launch = sinon.stub(openProject, "launchBrowser")
       sinon.stub(runMode, "getElectronProps").returns({foo: "bar"})
       sinon.stub(runMode, "screenshotMetadata").returns({a: "a"})
 
@@ -479,7 +479,7 @@ describe "lib/modes/run", ->
       })
       sinon.spy(runMode,  "waitForBrowserToConnect")
       sinon.stub(videoCapture, "start").resolves()
-      sinon.stub(openProject, "launch").resolves()
+      sinon.stub(openProject, "launchBrowser").resolves()
       sinon.stub(openProject, "getProject").resolves(@projectInstance)
       sinon.spy(errors, "warning")
       sinon.stub(config, "get").resolves({
@@ -547,7 +547,7 @@ describe "lib/modes/run", ->
       })
       sinon.spy(runMode,  "waitForBrowserToConnect")
       sinon.spy(runMode,  "runSpecs")
-      sinon.stub(openProject, "launch").resolves()
+      sinon.stub(openProject, "launchBrowser").resolves()
       sinon.stub(openProject, "getProject").resolves(@projectInstance)
       sinon.stub(specsUtil, "find").resolves([
         {

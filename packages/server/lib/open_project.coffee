@@ -28,8 +28,9 @@ create = ->
 
   specEnd = ->
     Promise.try ->
-      if not openProject.isTextTerminal
-        serverEvents.execute("spec:end", openProject?.spec)
+      return if not openProject? or openProject.isTextTerminal
+
+      serverEvents.execute("spec:end", openProject?.spec)
 
   return {
     reset: tryToCall("reset")
