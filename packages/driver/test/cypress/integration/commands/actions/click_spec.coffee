@@ -131,32 +131,25 @@ describe "src/cy/commands/actions/click", ->
       cy.get("#button").click().then ->
         expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
 
-    describe.only 'pointer-events:none', ->
+    describe 'pointer-events:none', ->
       beforeEach ->
         cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:aliceblue;"></div>').appendTo cy.$$('#dom')
         ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none"></div>').appendTo(cy.$$('#dom'))
         cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:grey;"></div>').appendTo ptrNone
-        return
       it 'element behind pointer-events:none should still get click', ->
-        cy.get('#ptr').click()
-        # should pass with flying colors
-        return
+        cy.get('#ptr').click() # should pass with flying colors
       it 'should error with message about pointer-events', ->
-        # cy.once 'fail', (err) ->
-        #   expect(err.message).to.contain 'has style \'pointer-events:none\''
-        #   expect(err.message).to.not.contain 'inherited from'
-        #   return
+        cy.once 'fail', (err) ->
+          expect(err.message).to.contain 'has style \'pointer-events:none\''
+          expect(err.message).to.not.contain 'inherited from'
+          
         cy.get('#ptrNone').click {timeout: 300}
-        return
       it 'should error with message about pointer-events and include inheritance', ->
-        # cy.once 'fail', (err) ->
-        #   expect(err.message).to.contain 'has style \'pointer-events:none\', inherited from this element:'
-        #   expect(err.message).to.contain '<div id="ptrNone"'
-        #   return
-        cy.get('#ptrNoneChild').click {timeout: 300}
-        return
-      return
+        cy.once 'fail', (err) ->
+          expect(err.message).to.contain 'has style \'pointer-events:none\', inherited from this element:'
+          expect(err.message).to.contain '<div id="ptrNone"'
 
+        cy.get('#ptrNoneChild').click {timeout: 300}
 
     it "records correct clientX when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
