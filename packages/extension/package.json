@@ -27,7 +27,7 @@
     "theme"
   ],
   "devDependencies": {
-    "@cypress/core-socket": "0.1.0",
+    "@cypress/core-socket": "0.2.1",
     "@cypress/icons": "0.7.0",
     "@cypress/releaser": "0.1.12",
     "bin-up": "^1.1.0",
