@@ -29,7 +29,7 @@
   "devDependencies": {
     "@cypress/core-socket": "0.1.0",
     "@cypress/icons": "0.7.0",
-    "@cypress/releaser": "0.1.12",
+    "@cypress/releaser": "0.2.2",
     "bin-up": "^1.1.0",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",

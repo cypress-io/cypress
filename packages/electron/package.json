@@ -24,7 +24,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/releaser": "0.1.12",
+    "@cypress/releaser": "0.2.2",
     "chai": "^3.5.0",
     "mocha": "^3.0.2"
   },

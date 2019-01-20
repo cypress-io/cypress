@@ -27,7 +27,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "7.2.0",
     "@cypress/react-tooltip": "0.4.0",
-    "@cypress/releaser": "0.1.12",
+    "@cypress/releaser": "0.2.2",
     "bin-up": "1.1.0",
     "chai": "3.5.0",
     "chai-enzyme": "1.0.0-beta.1",
