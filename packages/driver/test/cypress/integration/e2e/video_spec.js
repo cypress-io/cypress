@@ -1,4 +1,5 @@
 describe('video', () => {
+  // https://github.com/cypress-io/cypress/issues/2376
   it('play does not throw error on autoplay', () => {
     cy.visit('/fixtures/video.html')
     cy.get('video').then(($video) => {
