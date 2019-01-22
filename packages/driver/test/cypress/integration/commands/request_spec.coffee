@@ -6,7 +6,7 @@ describe "src/cy/commands/request", ->
     beforeEach ->
       cy.stub(Cypress, "backend").callThrough()
 
-    describe "argument signature", ->
+    describe.only "argument signature", ->
       beforeEach ->
         backend = Cypress.backend
         .withArgs("http:request")
@@ -14,7 +14,6 @@ describe "src/cy/commands/request", ->
 
         @expectOptionsToBe = (opts) ->
           options = backend.firstCall.args[1]
-          debugger
 
           _.each options, (value, key) ->
             expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
@@ -28,6 +27,7 @@ describe "src/cy/commands/request", ->
             method: "GET"
             gzip: true
             followRedirect: true
+            timeout: 30000
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -49,6 +49,7 @@ describe "src/cy/commands/request", ->
             headers: {
               "x-token": "abc123"
             }
+            timeout: 30000
           })
 
       it "accepts string url", ->
@@ -58,6 +59,7 @@ describe "src/cy/commands/request", ->
             method: "GET"
             gzip: true
             followRedirect: true
+            timeout: 30000
           })
 
       it "accepts method + url", ->
@@ -67,6 +69,7 @@ describe "src/cy/commands/request", ->
             method: "DELETE"
             gzip: true
             followRedirect: true
+            timeout: 30000
           })
 
       it "accepts method + url + body", ->
@@ -78,6 +81,7 @@ describe "src/cy/commands/request", ->
             json: true
             gzip: true
             followRedirect: true
+            timeout: 30000
           })
 
       it "accepts url + body", ->
@@ -89,6 +93,7 @@ describe "src/cy/commands/request", ->
             json: true
             gzip: true
             followRedirect: true
+            timeout: 30000
           })
 
       it "accepts url + string body", ->
@@ -99,6 +104,7 @@ describe "src/cy/commands/request", ->
             body: "foo"
             gzip: true
             followRedirect: true
+            timeout: 30000
           })
 
       context "method normalization", ->
@@ -109,6 +115,7 @@ describe "src/cy/commands/request", ->
               method: "POST"
               gzip: true
               followRedirect: true
+              timeout: 30000
             })
 
       context "url normalization", ->
@@ -121,6 +128,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: 30000
             })
 
         it "uses localhost urls", ->
@@ -130,6 +138,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: 30000
             })
 
         it "uses wwww urls", ->
@@ -139,6 +148,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: 30000
             })
 
         it "prefixes with baseUrl when origin is empty", ->
@@ -151,6 +161,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: 30000
             })
 
         it "prefixes with baseUrl over current origin", ->
@@ -163,6 +174,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: 30000
             })
 
       context "gzip", ->
@@ -176,6 +188,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: false
               followRedirect: true
+              timeout: 30000
             })
 
       context "auth", ->
@@ -196,6 +209,7 @@ describe "src/cy/commands/request", ->
                 user: "brian"
                 pass: "password"
               }
+              timeout: 30000
             })
 
       context "followRedirect", ->
@@ -207,6 +221,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: 30000
             })
 
         it "can be set to false", ->
@@ -220,6 +235,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: false
+              timeout: 30000
             })
 
         it "normalizes followRedirects -> followRedirect", ->
@@ -233,6 +249,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: false
+              timeout: 30000
             })
 
       context "qs", ->
@@ -250,6 +267,7 @@ describe "src/cy/commands/request", ->
               gzip: true
               followRedirect: true
               qs: {foo: "bar"}
+              timeout: 30000
             })
 
       context "form", ->
@@ -269,6 +287,7 @@ describe "src/cy/commands/request", ->
               form: true
               followRedirect: true
               body: {foo: "bar"}
+              timeout: 30000
             })
 
         it "accepts a string for body", ->
@@ -285,6 +304,7 @@ describe "src/cy/commands/request", ->
               form: true
               followRedirect: true
               body: "foo=bar&baz=quux"
+              timeout: 30000
             })
 
     describe "failOnStatus", ->
