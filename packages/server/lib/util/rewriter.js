@@ -11,6 +11,7 @@
 const inject = require('./inject')
 const security = require('./security')
 
+const doctypeRe = /(<\!doctype.*?>)/i
 const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
@@ -44,6 +45,10 @@ const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRem
 
     case !htmlRe.test(html):
       return replace(htmlRe, `$1 <head> ${htmlToInject} </head>`)
+
+    case !doctypeRe.test(html):
+      // if only <!DOCTYPE> content, inject <head> after doctype
+      return `${html}<head> ${htmlToInject} </head>`
 
     default:
       return `<head> ${htmlToInject} </head>${html}`
