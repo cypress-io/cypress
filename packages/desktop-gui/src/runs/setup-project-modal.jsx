@@ -62,7 +62,7 @@ class SetupProject extends Component {
   _poll () {
     if (orgsApi.isPolling()) return
 
-    orgsApi.getOrgs()
+    orgsApi.getOrgs(true)
     orgsApi.pollOrgs()
   }
 
@@ -75,8 +75,8 @@ class SetupProject extends Component {
       return this._loginMessage()
     }
 
-    if (!orgsStore.isLoaded) {
-      this._loading()
+    if (orgsStore.isLoading) {
+      return this._loading()
     }
 
     return (
@@ -141,7 +141,7 @@ class SetupProject extends Component {
         </div>
         <div>
           <input
-            autoFocus='true'
+            autoFocus={true}
             ref='projectName'
             type='text'
             className='form-control'

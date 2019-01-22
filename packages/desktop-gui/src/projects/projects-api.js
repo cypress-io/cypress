@@ -215,7 +215,7 @@ const openProject = (project) => {
     specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))
     project.setLoading(false)
     appStore.setUiBlocked(false)
-    specsStore.loading(true)
+    specsStore.setLoading(true)
 
     getSpecs(setProjectError)
 

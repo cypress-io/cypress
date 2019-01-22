@@ -187,7 +187,9 @@ class RunsList extends Component {
     }
 
     // OR the runs are loading for the first time
-    if (this.runsStore.isLoading && !this.runsStore.isLoaded) return <Loader color='#888' scale={0.5}/>
+    if (this.runsStore.isLoading && !this.runsStore.isLoaded) {
+      return <Loader fullscreen>Loading runs...</Loader>
+    }
 
     // OR there are no runs to show
     if (!this.runsStore.runs.length) {

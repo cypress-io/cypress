@@ -49,6 +49,16 @@ describe "Project", ->
         cy.wrap(@ipc.openProject).should("be.called")
         cy.shouldBeOnProjectSpecs()
 
+  describe "opening", ->
+    beforeEach ->
+      @openProject = @util.deferred()
+      @ipc.openProject.returns(@openProject.promise)
+      @start()
+
+    it "shows loader", ->
+      cy.get(".loader")
+      cy.contains("Opening project...")
+
   describe "warnings", ->
     beforeEach ->
       @start()

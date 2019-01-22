@@ -3,7 +3,11 @@ import orgsStore from './organizations-store'
 
 let pollId
 
-const getOrgs = () => {
+const getOrgs = (firstLoad = false) => {
+  if (firstLoad) {
+    orgsStore.setLoading(true)
+  }
+
   ipc.getOrgs()
   .then((orgs = []) => {
     orgsStore.setOrgs(orgs)
@@ -15,6 +19,9 @@ const getOrgs = () => {
     orgsStore.setError(err)
 
     return null
+  })
+  .finally(() => {
+    orgsStore.setLoading(false)
   })
 
   return null
