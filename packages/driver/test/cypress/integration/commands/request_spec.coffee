@@ -6,7 +6,7 @@ describe "src/cy/commands/request", ->
     beforeEach ->
       cy.stub(Cypress, "backend").callThrough()
 
-    describe.only "argument signature", ->
+    describe "argument signature", ->
       beforeEach ->
         backend = Cypress.backend
         .withArgs("http:request")
@@ -50,6 +50,16 @@ describe "src/cy/commands/request", ->
               "x-token": "abc123"
             }
             timeout: 30000
+          })
+
+      it "accepts object with url + timeout", ->
+        cy.request({url: "http://localhost:8000/foo", timeout: 60000}).then ->
+          @expectOptionsToBe({
+            url: "http://localhost:8000/foo"
+            method: "GET"
+            gzip: true
+            followRedirect: true
+            timeout: 60000
           })
 
       it "accepts string url", ->
