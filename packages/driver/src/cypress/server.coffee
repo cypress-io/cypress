@@ -26,13 +26,18 @@ normalize = (val) ->
 
 nope = -> return null
 
+responseTypeIsTextOrEmptyString = (responseType) ->
+  responseType is "" or responseType is "text"
+
 ## when the browser naturally cancels/aborts
 ## an XHR because the window is unloading
 isAbortedThroughUnload = (xhr) ->
   xhr.readyState is 4 and
     xhr.status is 0 and
+      ## responseText may be undefined on some responseTypes
+      ## https://github.com/cypress-io/cypress/issues/3008
       ## TODO: How do we want to handle other responseTypes?
-      (xhr.responseType is "" or xhr.responseType is "text") and
+      (responseTypeIsTextOrEmptyString(xhr.responseType)) and
         xhr.responseText is ""
 
 warnOnStubDeprecation = (obj, type) ->
