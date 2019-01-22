@@ -12,7 +12,6 @@ import Loader from '../lib/loader'
 @observer
 class SpecsList extends Component {
   render () {
-    console.log('render specs list', specsStore.isLoading)
     if (specsStore.isLoading) return <Loader fullscreen>Loading specs...</Loader>
 
     if (!specsStore.filter && !specsStore.specs.length) return this._empty()
