@@ -440,6 +440,10 @@ describe "src/cy/commands/navigation", ->
         .visit("http://localhost:3500/fixtures/generic.html")
         .visit("http://localhost:3500/fixtures/dimensions.html")
 
+    it "can visit pages with older jQuery version", ->
+      cy
+        .visit("http://localhost:3500/fixtures/jquery-2.2.4.html")
+
     it "resolves the subject to the remote iframe window", ->
       cy.visit("/fixtures/jquery.html").then (win) ->
         expect(win).to.eq cy.state("$autIframe").prop("contentWindow")
