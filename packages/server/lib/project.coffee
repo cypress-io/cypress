@@ -138,12 +138,13 @@ class Project extends EE
 
     background.init(cfg, {
       onError: (err) ->
-        debug('got background error', err.stack)
+        debug("background unexpected error:", err.stack)
 
         browsers.close()
         options.onError(err)
     })
     .catch (err) ->
+      debug("background init error:", err.stack)
       browsers.close()
       throw err
 

@@ -30,10 +30,13 @@ create = ->
     Promise.try ->
       return if not openProject? or openProject.isTextTerminal
 
-      serverEvents.execute("spec:end", openProject?.spec)
+      serverEvents.execute("spec:end", openProject.spec)
 
   return {
     reset: tryToCall("reset")
+
+    ## for testing purposes
+    __reset: reset
 
     getConfig: tryToCall("getConfig")
 

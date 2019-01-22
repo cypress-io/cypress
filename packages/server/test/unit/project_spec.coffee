@@ -18,6 +18,8 @@ preprocessor = require("#{root}lib/background/preprocessor")
 background   = require("#{root}lib/background")
 fs           = require("#{root}lib/util/fs")
 settings     = require("#{root}lib/util/settings")
+serverEvents = require("#{root}lib/background/server_events")
+browsers     = require("#{root}lib/browsers")
 
 describe "lib/project", ->
   beforeEach ->
@@ -211,6 +213,38 @@ describe "lib/project", ->
         expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
 
+    it "executes 'run:start' event if in interactive mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = false
+
+      @project.open({}).then ->
+        expect(serverEvents.execute).to.be.calledWith("run:start")
+
+    it "does not execute 'run:start' event if in run mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = true
+
+      @project.open({}).then ->
+        expect(serverEvents.execute).not.to.be.called
+
+    it "closes the browser and re-throws the error when the background fails to initialize", ->
+      sinon.stub(browsers, "close")
+      background.init.rejects(new Error("foo"))
+
+      @project.open({}).catch (err) ->
+        expect(browsers.close).to.be.called
+        expect(err.message).to.include("foo")
+
+    it "closes the browser and calls options.onError when the background has unexpected error", ->
+      sinon.stub(browsers, "close")
+
+      onError = sinon.spy()
+      @project.open({ onError }).then ->
+        err = {}
+        background.init.lastCall.args[1].onError(err)
+        expect(browsers.close).to.be.called
+        expect(onError).to.be.calledWith(err)
+
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
         expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
@@ -244,6 +278,20 @@ describe "lib/project", ->
 
     it "can close when server + watchers arent open", ->
       @project.close()
+
+    it "executes 'run:end' event if in interactive mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = false
+
+      @project.close().then ->
+        expect(serverEvents.execute).to.be.calledWith("run:end")
+
+    it "does not execute 'run:end' event if in run mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = true
+
+      @project.close().then ->
+        expect(serverEvents.execute).not.to.be.called
 
   context "#reset", ->
     beforeEach ->

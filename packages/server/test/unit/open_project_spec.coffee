@@ -4,6 +4,7 @@ browsers = require("#{root}lib/browsers")
 Project = require("#{root}lib/project")
 openProject = require("#{root}lib/open_project")
 preprocessor = require("#{root}lib/background/preprocessor")
+serverEvents = require("#{root}lib/background/server_events")
 
 describe "lib/open_project", ->
   beforeEach ->
@@ -11,6 +12,8 @@ describe "lib/open_project", ->
       reset: sinon.stub()
       use: sinon.stub()
     }
+    @spec = { absolute: "path/to/spec" }
+    @browser = { name: "chrome" }
 
     sinon.stub(browsers, "get").resolves()
     sinon.stub(browsers, "open")
@@ -23,14 +26,7 @@ describe "lib/open_project", ->
 
     openProject.create("/project/root")
 
-  context "#launch", ->
-    beforeEach ->
-      @spec = {
-        absolute: "path/to/spec"
-      }
-
-      @browser = { name: "chrome" }
-
+  context "#launchBrowser", ->
     it "tells preprocessor to remove file on browser close", ->
       openProject.launchBrowser(@browser, @spec)
       .then ->
@@ -64,3 +60,63 @@ describe "lib/open_project", ->
       .then =>
         expect(@browser.isHeaded).to.be.true
         expect(@browser.isHeadless).to.be.false
+
+    it "executes 'spec:start' event if in interactive mode", ->
+      openProject.create("/project/root", {}, { isTextTerminal: false })
+      sinon.stub(serverEvents, "execute")
+
+      openProject.launchBrowser(@browser, @spec).then ->
+        expect(serverEvents.execute).to.be.calledWith("spec:start")
+
+    it "does not execute 'spec:start' event if in run mode", ->
+      openProject.create("/project/root", {}, { isTextTerminal: true })
+      sinon.stub(serverEvents, "execute")
+
+      openProject.launchBrowser(@browser, @spec).then ->
+        expect(serverEvents.execute).not.to.be.called
+
+  context "#closeBrowser", ->
+    beforeEach ->
+      sinon.stub(browsers, "close").resolves()
+
+    it "closes the browser", ->
+      openProject.closeBrowser().then ->
+        expect(browsers.close).to.be.called
+
+    it "executes 'spec:end' event the spec if in interactive mode", ->
+      openProject.create("/project/root", {}, { isTextTerminal: false })
+      sinon.stub(serverEvents, "execute")
+
+      openProject.launchBrowser(@browser, @spec)
+      .then ->
+        openProject.closeBrowser()
+      .then =>
+        expect(serverEvents.execute).to.be.calledWith("spec:end", @spec)
+
+    it "does not execute 'spec:end' event if project not open", ->
+      openProject.__reset()
+      sinon.stub(serverEvents, "execute")
+
+      openProject.closeBrowser().then ->
+        expect(serverEvents.execute).not.to.be.called
+
+    it "does not execute 'spec:end' event if in run mode", ->
+      openProject.create("/project/root", {}, { isTextTerminal: true })
+      sinon.stub(serverEvents, "execute")
+
+      openProject.closeBrowser().then ->
+        expect(serverEvents.execute).not.to.be.called
+
+  context.only "#close", ->
+    it "closes the project if it is open", ->
+      project = openProject.getProject()
+      sinon.stub(project, "close")
+      openProject.close().then ->
+        expect(project.close).to.be.called
+
+    it "does not close the project if it is not open", ->
+      project = openProject.getProject()
+      sinon.stub(project, "close")
+      openProject.__reset()
+      openProject.close().then ->
+        expect(project.close).not.to.be.called
