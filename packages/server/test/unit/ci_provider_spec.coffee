@@ -14,6 +14,7 @@ expectsCommitParams = (params) ->
   expect(ciProvider.commitParams(), "CI providers detected commit params").to.deep.eq(params)
 
 expectsCommitDefaults = (existing, expected) ->
+  expect(expected).to.be.an("object")
   expect(ciProvider.commitDefaults(existing), "CI providers default git params").to.deep.eq(expected)
 
 describe "lib/util/ci_provider", ->
@@ -196,6 +197,15 @@ describe "lib/util/ci_provider", ->
       authorEmail: "buildKiteCreatorEmail"
       remoteOrigin: "buildkiteRepo"
       defaultBranch: "buildkitePipelineDefaultBranch"
+    })
+
+    # in this test only interested in branch and sha for example
+    expectsCommitDefaults({
+      sha: null,
+      branch: null
+    }, {
+      sha: "buildKiteCommit",
+      branch: "buildKiteBranch"
     })
 
   it "circle", ->

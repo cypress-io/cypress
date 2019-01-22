@@ -65,6 +65,13 @@ niv.install("react-dom@15.6.1")
       .set("WWW-Authenticate", "Basic")
       .sendStatus(401)
 
+  app.get '/json-content-type', (req, res) ->
+    res.send({})
+
+  app.get '/invalid-content-type', (req, res) ->
+    res.setHeader('Content-Type', 'text/html; charset=utf-8,text/html')
+    res.end("<html><head><title>Test</title></head><body><center>Hello</center></body></html>")
+
   app.get "/status-404", (req, res) ->
     res
     .status(404)

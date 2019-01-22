@@ -11,7 +11,7 @@ utils     = require("./utils")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
-MIN_CHROME_VERSION_WITH_LOOPBACK_PROXY_BYPASS_RULE = 72
+CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -150,7 +150,7 @@ module.exports = {
 
     ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     ## https://github.com/cypress-io/cypress/issues/1872
-    if majorVersion >= MIN_CHROME_VERSION_WITH_LOOPBACK_PROXY_BYPASS_RULE
+    if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
       args.push("--proxy-bypass-list=<-loopback>")
   
     args

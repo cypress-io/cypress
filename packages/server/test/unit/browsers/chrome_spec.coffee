@@ -144,7 +144,7 @@ describe "lib/browsers/chrome", ->
     it "adds <-loopback> proxy bypass rule in version 72+", ->
       arg = "--proxy-bypass-list=<-loopback>"
 
-      disabledRootLayerScrolling = (version, bool) ->
+      chromeVersionHasLoopback = (version, bool) ->
         args = chrome._getArgs({
           browser: {
             majorVersion: version
@@ -156,7 +156,7 @@ describe "lib/browsers/chrome", ->
         else
           expect(args).not.to.include(arg)
 
-      disabledRootLayerScrolling("71", false)
-      disabledRootLayerScrolling("72", true)
-      disabledRootLayerScrolling("73", true)
+      chromeVersionHasLoopback("71", false)
+      chromeVersionHasLoopback("72", true)
+      chromeVersionHasLoopback("73", true)
 

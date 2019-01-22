@@ -55,7 +55,7 @@
     "npm-install-version": "^6.0.2",
     "parse-domain": "2.0.0",
     "setimmediate": "^1.0.2",
-    "sinon": "3.2.0",
+    "sinon": "3.3.0",
     "text-mask-addons": "^3.7.2",
     "underscore": "^1.8.3",
     "underscore.string": "3.3.4",
