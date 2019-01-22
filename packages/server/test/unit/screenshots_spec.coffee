@@ -393,7 +393,7 @@ describe "lib/screenshots", ->
         dimensions = sizeOf(buf)
 
         screenshots.save(
-          { name: "foo bar\\baz%/my-$screenshot", specName: "foo.spec.js", testFailure: false },
+          { name: "foo bar\\baz/my-screenshot", specName: "foo.spec.js", testFailure: false },
           details,
           @config.screenshotsFolder
         )
@@ -409,7 +409,7 @@ describe "lib/screenshots", ->
             pixelRatio: 2
             path: path.normalize(result.path)
             size: 284
-            name: "foo bar\\baz%/my-$screenshot"
+            name: "foo bar\\baz/my-screenshot"
             specName: "foo.spec.js"
             testFailure: false
             takenAt: "1234-date"
@@ -470,25 +470,37 @@ describe "lib/screenshots", ->
   context ".getPath", ->
     it "concats spec name, screenshotsFolder, and name", ->
       screenshots.getPath({
-        specName: "examples$/user/list.js"
+        specName: "examples/user/list.js"
         titles: ["bar", "baz"]
-        name: "quux/lorem*"
+        name: "quux/lorem"
       }, "png", "path/to/screenshots")
       .then (p) ->
         expect(p).to.eq(
-          "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
+          "path/to/screenshots/examples/user/list.js/quux/lorem.png"
         )
 
     it "concats spec name, screenshotsFolder, and titles", ->
       screenshots.getPath({
-        specName: "examples$/user/list.js"
-        titles: ["bar", "baz^"]
+        specName: "examples/user/list.js"
+        titles: ["bar", "baz"]
         takenPaths: ["a"]
         testFailure: true
       }, "png", "path/to/screenshots")
       .then (p) ->
         expect(p).to.eq(
-          "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
+          "path/to/screenshots/examples/user/list.js/bar -- baz (failed).png"
+        )
+
+    it "sanitizes file paths", ->
+      screenshots.getPath({
+        specName: "examples$/user/list.js"
+        titles: ["bar*", "baz..", "語言"]
+        takenPaths: ["a"]
+        testFailure: true
+      }, "png", "path/to/screenshots")
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png"
         )
 
   context ".afterScreenshot", ->

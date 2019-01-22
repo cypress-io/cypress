@@ -78,8 +78,8 @@ describe "e2e screenshots", ->
       screenshot5 = screenshot("taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png")
       screenshot6 = screenshot("taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png")
       screenshot7 = screenshot("taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png")
-      screenshot8 = screenshot("taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure.png")
-      screenshot9 = screenshot("taking screenshots -- ensures unique paths when theres a non-named screenshot and a failure (failed).png")
+      screenshot8 = screenshot("taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure.png")
+      screenshot9 = screenshot("taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure (failed).png")
 
       Promise.all([
         fs.statAsync(screenshot1).get("size")
