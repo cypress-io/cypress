@@ -68,15 +68,23 @@ prepareObjsForDiff = (err) ->
 
 objToString = Object.prototype.toString
 
-_sameType = (a, b) ->
+_isSameType = (a, b) ->
   return objToString.call(a) is objToString.call(b)
 
-showDiff = (err) ->
+_hasExpectedValue = (err) ->
+  err && err.expected isnt undefined
+
+_assertionHasShowDiff = (err) ->
+  err && err.showDiff isnt false
+
+_isExpectedActualSameType = (err) ->
+  _isSameType(err.actual, err.expected)
+
+shouldShowDiff = (err) ->
   return (
-    err &&
-    err.showDiff isnt false &&
-    _sameType(err.actual, err.expected) &&
-    err.expected isnt undefined
+    _assertionHasShowDiff(err) &&
+    _hasExpectedValue(err) &&
+    _isExpectedActualSameType(err)
   )
 
 create = (state, queue, retryFn) ->
@@ -352,7 +360,7 @@ create = (state, queue, retryFn) ->
 
     obj = parseValueActualAndExpected(value, actual, expected)
     
-    if showDiff(error)
+    if shouldShowDiff(error)
       diffObjs = prepareObjsForDiff(obj)
       diff = JsDiff.createPatch('string', diffObjs.actual, diffObjs.expected)
 

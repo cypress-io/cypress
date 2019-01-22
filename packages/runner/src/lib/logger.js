@@ -20,13 +20,13 @@ const _joinLogArgs = (args1, args2) => {
   return toRet
 }
 
-// Fixes cases when string to style includes a "%c"
-const cleanseArg = (line, css) => {
-  let escapedLine = line.replace(/%%/g, '%%%')
+// Fixes cases when string to style includes an escape character
+const _escapeConsoleString = (line) => {
 
-  escapedLine = `%c${escapedLine.replace(/%c/g, '%%c')}`
+  // spacial sequences include '%c', '%f', '%d', etc
+  // can be escaped by doubling the amount of "%"
+  return line.replace(/(%+)(c|f|o|O|d|i|s)/g, '$1$1$2')
 
-  return [escapedLine, css]
 }
 
 const _logColor = (line, color) => {
@@ -34,7 +34,11 @@ const _logColor = (line, color) => {
 }
 
 const _logCSS = (line, css) => {
-  return cleanseArg(line, css)
+  return [`%c${_escapeConsoleString(line)}`, css]
+}
+
+const _formatDiffHeader = () => {
+  return ['Diff: ', _logColor('+ expected', 'green'), _logColor('- actual', 'red')].reduce(_joinLogArgs)
 }
 
 // this is tested in driver/assertions_spec
@@ -99,9 +103,9 @@ export default {
     this._logTable(consoleProps)
   },
 
-  collapsedLog (name, consoleProps) {
-    console.groupCollapsed(...['Diff ', _logColor('+ expected', 'green'), _logColor('- actual', 'red')].reduce(_joinLogArgs))
-    this.log(...consoleProps)
+  collapsedLog (headerArgs, logArgs) {
+    console.groupCollapsed(...headerArgs)
+    this.log(...logArgs)
     console.groupEnd()
   },
 
@@ -116,12 +120,14 @@ export default {
       if (_.includes(key, 'Diff')) {
         const logArgs = _joinLogArgs([''], _formatConsoleDiff(value))
 
-        this.collapsedLog(key, logArgs)
+        this.collapsedLog(_formatDiffHeader(), logArgs)
 
         return
       }
 
-      this.log(..._logCSS(key, 'font-weight: bold').concat([value]))
+      const logArgs = [..._logCSS(key, 'font-weight: bold'), value]
+
+      this.log(...logArgs)
     })
   },
 
@@ -200,4 +206,6 @@ export default {
 
   // expose for testing in driver/assertions_spec
   _formatConsoleDiff,
+  _joinLogArgs,
+  _escapeConsoleString,
 }
