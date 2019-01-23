@@ -19,6 +19,8 @@ try
   app = require("electron").app
   app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
   app.commandLine.appendSwitch("ignore-certificate-errors", true)
+  ## https://github.com/cypress-io/cypress/issues/2376
+  app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
 
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
