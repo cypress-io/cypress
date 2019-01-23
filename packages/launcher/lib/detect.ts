@@ -5,7 +5,7 @@ import { log } from './log'
 import { Browser, NotInstalledError } from './types'
 import { browsers } from './browsers'
 import * as Bluebird from 'bluebird'
-import { merge, pick, tap, uniqBy, prop } from 'ramda'
+import { merge, pick, tap, uniqBy, props } from 'ramda'
 import * as _ from 'lodash'
 import * as os from 'os'
 
@@ -75,9 +75,9 @@ function checkOneBrowser(browser: Browser) {
 /** returns list of detected browsers */
 function detectBrowsers(): Bluebird<Browser[]> {
   // we can detect same browser under different aliases
-  // tell them apart by the full version property
+  // tell them apart by the name and the version property
   // @ts-ignore
-  const removeDuplicates = uniqBy(prop('version'))
+  const removeDuplicates = uniqBy(props(['name', 'version']))
   return Bluebird.mapSeries(browsers, checkOneBrowser)
     .then(_.compact)
     .then(removeDuplicates) as Bluebird<Browser[]>
