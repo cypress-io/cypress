@@ -1,5 +1,6 @@
 import {detectBrowserLinux} from '../../../lib/linux'
 import { log } from '../../log'
+import { Promise } from 'bluebird'
 const detect = require('../../../lib/detect').default
 const execa = require('execa')
 const sinon = require("sinon")
@@ -29,17 +30,17 @@ describe('linux browser detection', () => {
   beforeEach(function stubShell () {
     const shell = sinon.stub(execa, 'shell')
     shell.withArgs('test-browser --version')
-      .returns(Promise.resolve({
+      .resolves({
         stdout: 'test-browser v100.1.2.3'
-      }))
+      })
     shell.withArgs('foo-browser --version')
-      .returns(Promise.resolve({
+      .resolves({
         stdout: 'foo-browser v100.1.2.3'
-      }))
+      })
     shell.withArgs('foo-bar-browser --version')
-      .returns(Promise.resolve({
+      .resolves({
         stdout: 'foo-browser v100.1.2.3'
-      }))
+      })
   })
 
   afterEach(() => {
@@ -61,7 +62,7 @@ describe('linux browser detection', () => {
   // despite using detect(), this test is in linux/spec instead of detect_spec because it is 
   // testing side effects that occur within the Linux-specific detectBrowserLinux function
   // https://github.com/cypress-io/cypress/issues/1400
-  it('properly eliminates duplicates', (done) => {
+  it('properly eliminates duplicates', () => {
     const expected = [
       {
         name: 'test-browser-name',
@@ -77,11 +78,9 @@ describe('linux browser detection', () => {
       }
     ]
     
-    detect(goalBrowsers).then(browsers => {
-      log('Browsers:', browsers)
-      log('Expected browsers:', expected)
-      expect(browsers).to.have.deep.members(expected)
-      done()
+    return detect(goalBrowsers).then(browsers => {
+      log('Browsers:', browsers, 'Expected browsers:', expected)
+      expect(browsers).to.deep.equal(expected)
     })
   })
 })

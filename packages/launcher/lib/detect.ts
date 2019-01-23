@@ -77,7 +77,9 @@ function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<Browser[]> {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
   // @ts-ignore
-  if (!goalBrowsers) goalBrowsers = browsers
+  if (!goalBrowsers) {
+    goalBrowsers = browsers
+  }
   const removeDuplicates = uniqBy(props(['name', 'version']))
   return Bluebird.mapSeries(goalBrowsers, checkOneBrowser)
     .then(_.compact)
