@@ -1,3 +1,5 @@
+## Unit tests in ../../test/unit/browsers/chrome_spec
+
 _         = require("lodash")
 os        = require("os")
 path      = require("path")
@@ -66,6 +68,11 @@ defaultArgs = [
   "--disable-client-side-phishing-detection"
   "--disable-component-update"
   "--disable-default-apps"
+
+  ## These flags are for webcam/WebRTC testing
+  ## https://github.com/cypress-io/cypress/issues/2704
+  "--use-fake-ui-for-media-stream"
+  "--use-fake-device-for-media-stream"
 ]
 
 pluginsBeforeBrowserLaunch = (browser, args) ->

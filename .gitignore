@@ -25,6 +25,9 @@ packages/https-proxy/ca/
 # from desktop-gui
 packages/desktop-gui/src/jsconfig.json
 
+# from driver
+packages/driver/test/cypress/videos
+
 # from example
 packages/example/app
 packages/example/build
