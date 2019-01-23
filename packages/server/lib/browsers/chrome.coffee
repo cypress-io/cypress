@@ -44,6 +44,9 @@ defaultArgs = [
   "--disable-infobars"
   "--disable-device-discovery-notifications"
 
+  ## https://github.com/cypress-io/cypress/issues/2376
+  "--autoplay-policy=no-user-gesture-required" 
+
   ## http://www.chromium.org/Home/chromium-security/site-isolation
   ## https://github.com/cypress-io/cypress/issues/1951
   "--disable-site-isolation-trials"

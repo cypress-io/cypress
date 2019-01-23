@@ -99,7 +99,7 @@
   "dependencies": {
     "@cypress/browserify-preprocessor": "1.1.2",
     "@cypress/commit-info": "2.1.1",
-    "@cypress/icons": "0.5.4",
+    "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@ffmpeg-installer/ffmpeg": "1.0.15",
     "ansi_up": "1.3.0",

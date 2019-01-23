@@ -354,7 +354,12 @@ openProjectCreate = (projectRoot, socketId, options) ->
     isTextTerminal: options.isTextTerminal
     onError: (err) ->
       console.log("")
-      console.log(err.stack)
+      if err.details
+        console.log(err.message)
+        console.log("")
+        console.log(chalk.yellow(err.details))
+      else
+        console.log(err.stack)
       openProject.emit("exitEarlyWithErr", err.message)
   })
   .catch {portInUse: true}, (err) ->

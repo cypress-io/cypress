@@ -36,6 +36,9 @@ packages/example/cypress/videos
 packages/example/cypress/fixtures/profile.json
 packages/example/cypress/fixtures/users.json
 
+# from driver
+packages/driver/test/cypress/videos
+
 # from server
 packages/server/.cy
 packages/server/.projects
@@ -48,4 +51,5 @@ cli/build
 # Building app binary
 scripts/support
 package-lock.json
+yarn.lock
 binary-url.json
