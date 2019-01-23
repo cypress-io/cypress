@@ -8,6 +8,7 @@ import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
+import projectsApi from '../projects/projects-api'
 
 import Dropdown from '../dropdown/dropdown'
 
@@ -51,7 +52,7 @@ export default class Nav extends Component {
     // global mode, on project page
     if (appStore.isGlobalMode && project) {
       return (
-        <Link to={routes.intro()}>
+        <Link to={routes.intro()} onClick={this._unloadProject}>
           <i className='fa fa-chevron-left'></i> Back
         </Link>
       )
@@ -122,10 +123,14 @@ export default class Nav extends Component {
 
   }
 
-  _select = (item) => {
+  _select (item) {
     if (item.id === 'logout') {
       authApi.logOut()
     }
+  }
+
+  _unloadProject () {
+    return projectsApi.closeProject(viewStore.currentView.project)
   }
 
   _showLogin () {

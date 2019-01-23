@@ -24,7 +24,9 @@ konfig   = require("#{root}../lib/konfig")
 describe "lib/gui/events", ->
   beforeEach ->
     @send    = sinon.spy()
-    @options = {}
+    @options = {
+      projectRoot: "/path/to/project/root"
+    }
     @cookies = sinon.stub({
       get: ->
       set: ->
@@ -683,3 +685,28 @@ describe "lib/gui/events", ->
           expect(err.name).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.message).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.apiUrl).to.equal(konfig("api_url"))
+
+    describe "launch:browser", ->
+      beforeEach ->
+        @result = {}
+        @optoins = { browser: "chrome", spec: "/path/to/spec.js" }
+        sinon.stub(openProject, "launchBrowser").resolves(@result)
+
+      it "launches the browser", ->
+        @handleEvent("launch:browser", @options)
+        .then (assert) =>
+          expect(openProject.launchBrowser).to.be.calledWith(@options.browser, @options.spec)
+          expect(openProject.launchBrowser.lastCall.args[2].projectRoot).to.equal(@options.projectRoot)
+          assert.sendCalledWith(@result)
+
+      it "emits 'browser:close' onBrowserClose", (done) ->
+        @handleEvent("launch:browser", @options)
+        .then (assert) =>
+          @bus.on "browser:close", -> done()
+          openProject.launchBrowser.lastCall.args[2].onBrowserClose()
+
+    describe "await:browser:close", ->
+      it "calls openProject.specEnd", ->
+        sinon.stub(openProject, "specEnd").resolves()
+        @handleEvent("await:browser:close").then ->
+          expect(openProject.specEnd).to.be.called

@@ -112,10 +112,15 @@ module.exports = {
 
   execute: (event, args...) ->
     debug("execute background event '#{event}' with args: %o %o %o", args...)
-    registeredEvents[event](args...)
+
+    if backgroundProcess
+      registeredEvents[event](args...)
+    else
+      debug("background process killed - don't execute")
 
   ## for testing purposes
   _reset: ->
+    backgroundProcess = null
     registeredEvents = {}
     handlers = []
 }

@@ -42,12 +42,6 @@ baseEmitter = new EE()
 fileObjects = {}
 fileProcessors = {}
 
-setDefaultPreprocessor = ->
-  debug("set default preprocessor")
-
-  browserify = require("@cypress/browserify-preprocessor")
-  background.register("browser:filePreprocessor", browserify())
-
 background.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
     debug("ipc preprocessor:rerun event")
@@ -94,15 +88,17 @@ module.exports = {
         debug("base emitter native close event")
         fileObject.emit("close")
  
-    if not background.isRegistered("browser:filePreprocessor")
-      setDefaultPreprocessor(config)
-
     if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
       debug("headless and already processed")
       return fileProcessor
 
     preprocessor = fileProcessors[filePath] = Promise.try ->
-      background.execute("browser:filePreprocessor", fileObject)
+      if background.isRegistered("browser:filePreprocessor")
+        background.execute("browser:filePreprocessor", fileObject)
+      else
+        debug("execute default preprocessor")
+        browserify = require("@cypress/browserify-preprocessor")
+        browserify()(fileObject)
 
     return preprocessor
 

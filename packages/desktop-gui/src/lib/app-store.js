@@ -9,6 +9,7 @@ class AppStore {
   @observable version
   @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
   @observable error
+  @observable isUiBlocked = false
 
   @computed get displayVersion () {
     return this.isDev ? `${this.version} (dev)` : this.version
@@ -47,6 +48,10 @@ class AppStore {
 
   @action setError (err) {
     this.error = err
+  }
+
+  @action setUiBlocked (isUiBlocked) {
+    this.isUiBlocked = isUiBlocked
   }
 }
 

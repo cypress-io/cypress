@@ -15,9 +15,11 @@ env = require("#{root}../lib/util/env")
 random = require("#{root}../lib/util/random")
 system = require("#{root}../lib/util/system")
 specsUtil = require("#{root}../lib/util/specs")
+background = require("#{root}../lib/background")
 
 describe "lib/modes/run", ->
   beforeEach ->
+    sinon.stub(background, "execute").resolves()
     @projectInstance = Project("/_test-output/path/to/project")
 
   context ".getProjectId", ->
@@ -132,7 +134,7 @@ describe "lib/modes/run", ->
 
   context ".launchBrowser", ->
     beforeEach ->
-      @launch = sinon.stub(openProject, "launch")
+      @launch = sinon.stub(openProject, "launchBrowser")
       sinon.stub(runMode, "getElectronProps").returns({foo: "bar"})
       sinon.stub(runMode, "screenshotMetadata").returns({a: "a"})
 
@@ -477,7 +479,7 @@ describe "lib/modes/run", ->
       })
       sinon.spy(runMode,  "waitForBrowserToConnect")
       sinon.stub(videoCapture, "start").resolves()
-      sinon.stub(openProject, "launch").resolves()
+      sinon.stub(openProject, "launchBrowser").resolves()
       sinon.stub(openProject, "getProject").resolves(@projectInstance)
       sinon.spy(errors, "warning")
       sinon.stub(config, "get").resolves({
@@ -545,7 +547,7 @@ describe "lib/modes/run", ->
       })
       sinon.spy(runMode,  "waitForBrowserToConnect")
       sinon.spy(runMode,  "runSpecs")
-      sinon.stub(openProject, "launch").resolves()
+      sinon.stub(openProject, "launchBrowser").resolves()
       sinon.stub(openProject, "getProject").resolves(@projectInstance)
       sinon.stub(specsUtil, "find").resolves([
         {
@@ -587,14 +589,14 @@ describe "lib/modes/run", ->
           project: @projectInstance
         })
 
-    it "passes headed to openProject.launch", ->
+    it "passes headed to openProject.launchBrowser", ->
       browser = { name: "electron" }
 
       browsers.ensureAndGetByName.resolves(browser)
 
       runMode.run({ headed: true })
       .then ->
-        expect(openProject.launch).to.be.calledWithMatch(
+        expect(openProject.launchBrowser).to.be.calledWithMatch(
           browser,
           {
             name: "foo_spec.js"

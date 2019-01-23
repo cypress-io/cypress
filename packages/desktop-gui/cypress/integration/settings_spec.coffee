@@ -197,16 +197,23 @@ describe "Settings", ->
       newConfig.browsers = @browsers
       @openProject.resolve(newConfig)
 
-      @goToSettings()
-      cy.contains("Configuration").click()
+      @goToSettings().then =>
+        @openProject2ndCall = @util.deferred()
+        @ipc.openProject.onCall(1).returns(@openProject2ndCall.promise)
+        @ipc.onConfigChanged.yield()
 
-    it "displays updated config", ->
-      newConfig = @util.deepClone(@config)
-      newConfig.resolved.baseUrl.value = "http://localhost:7777"
-      @ipc.openProject.onCall(1).resolves(newConfig)
-      @ipc.onConfigChanged.yield()
+    it "re-opens the project", ->
+      cy.wrap(@ipc.openProject).should("be.calledTwice")
 
-      cy.contains("http://localhost:7777")
+    describe "when project re-opens", ->
+      beforeEach ->
+        newConfig = @util.deepClone(@config)
+        newConfig.resolved.baseUrl.value = "http://localhost:7777"
+        @openProject2ndCall.resolve(newConfig)
+
+      it "displays updated config", ->
+        cy.contains("Configuration").click()
+        cy.contains("http://localhost:7777")
 
   describe "errors", ->
     beforeEach ->

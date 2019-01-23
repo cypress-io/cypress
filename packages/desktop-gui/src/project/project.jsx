@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 
 import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
 import appStore from '../lib/app-store'
 import viewStore from '../lib/view-store'
 
+import Loader from '../lib/loader'
 import Settings from '../settings/settings'
 import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
@@ -18,8 +18,6 @@ class Project extends Component {
   componentDidMount () {
     const { project } = this.props
 
-    project.setLoading(true)
-
     document.title = appStore.isGlobalMode ? project.displayName : project.path
 
     projectsApi.openProject(project)
@@ -27,23 +25,25 @@ class Project extends Component {
 
   componentWillUnmount () {
     document.title = 'Cypress'
-
-    projectsApi.closeProject(this.props.project)
   }
 
   render () {
-    if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
+    const { project } = this.props
 
-    if (this.props.project.error) return this._error()
+    if (project.isLoading) return <Loader fullscreen>Opening project...</Loader>
+
+    if (project.isClosing) return <Loader fullscreen>Closing project...</Loader>
+
+    if (project.error) return this._error()
 
     return (
       <div>
-        <ProjectNav project={this.props.project}/>
+        <ProjectNav project={project}/>
         <div className='project-content'>
           {this._warning()}
           {this._currentView()}
         </div>
-        <OnBoarding project={this.props.project}/>
+        <OnBoarding project={project}/>
       </div>
     )
   }

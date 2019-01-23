@@ -14,8 +14,8 @@ describe "Project Nav", ->
       cy.stub(@ipc, "getRuns").resolves(@runs)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "getRecordKeys").resolves([])
-      cy.stub(@ipc, "launchBrowser")
       cy.stub(@ipc, "closeBrowser").resolves(null)
+      cy.stub(@ipc, "onBrowserClose")
       cy.stub(@ipc, "pingApiServer").resolves()
       cy.stub(@ipc, "closeProject")
       cy.stub(@ipc, "externalOpen")
@@ -25,6 +25,9 @@ describe "Project Nav", ->
 
       @openProject = @util.deferred()
       cy.stub(@ipc, "openProject").returns(@openProject.promise)
+
+      @launchBrowser = @util.deferred()
+      cy.stub(@ipc, "launchBrowser").returns(@launchBrowser.promise)
 
       start()
 
@@ -134,8 +137,8 @@ describe "Project Nav", ->
 
       context "browser opened after choosing spec", ->
         beforeEach ->
-          @ipc.launchBrowser.yields(null, {browserOpened: true})
           cy.contains(".file", "app_spec").click()
+          @launchBrowser.resolve()
 
         it "displays browser icon as opened", ->
           cy.get(".browsers-list>a").first().find("i")
@@ -150,25 +153,41 @@ describe "Project Nav", ->
 
         describe "stop browser", ->
           beforeEach ->
+            @closeBrowser = @util.deferred()
+            @ipc.closeBrowser.returns(@closeBrowser.promise)
+
             cy.get(".close-browser").click()
 
-          it "calls close:browser on click of stop button", ->
+          it "calls ipc close:browser", ->
             expect(@ipc.closeBrowser).to.be.called
 
-          it "hides close button on click of stop", ->
+          it "hides close button", ->
             cy.get(".close-browser").should("not.exist")
 
-          it "re-enables browser dropdown", ->
-            cy.get(".browsers-list>a").first()
-              .should("not.have.class", "disabled")
+          it "blocks the UI and shows closing loader while browser is closing", ->
+            cy.get(".ui-blocker")
+            cy.get(".browsers-list").find(".fa-refresh.fa-spin")
+            cy.contains("Closing Chrome 50")
 
-          it "displays default browser icon", ->
-            cy.get(".browsers-list>a").first()
-              .find(".fa-chrome")
+          describe "when browser is finished closing", ->
+            beforeEach ->
+              @closeBrowser.resolve()
+
+            it "re-enables browser dropdown", ->
+              cy.get(".browsers-list>a").first()
+                .should("not.have.class", "disabled")
+
+            it "displays default browser icon", ->
+              cy.get(".browsers-list>a").first()
+                .find(".fa-chrome")
+
+            it "unblocks the UI", ->
+              cy.get(".ui-blocker").should("not.exist")
 
         describe "browser is closed manually", ->
           beforeEach ->
-            @ipc.launchBrowser.yield(null, {browserClosed: true})
+            cy.stub(@ipc, "awaitBrowserClose").resolves()
+            @ipc.onBrowserClose.yield()
 
           it "hides close browser button", ->
             cy.get(".close-browser").should("not.be.visible")

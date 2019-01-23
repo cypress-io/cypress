@@ -1,13 +1,15 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import ipc from '../lib/ipc'
-import localData from '../lib/local-data'
+import appStore from '../lib/app-store'
 import viewStore from '../lib/view-store'
-import projectsStore from '../projects/projects-store'
+import projectsStore from './projects-store'
 import specsStore from '../specs/specs-store'
 
+import ipc from '../lib/ipc'
+import localData from '../lib/local-data'
 import { getSpecs } from '../specs/specs-api'
+import Project from '../project/project-model'
 
 const saveToLocalStorage = () => {
   localData.set('projects', projectsStore.serializeProjects())
@@ -52,7 +54,6 @@ const addProject = (path) => {
 
   return ipc.addProject(path)
   .then((details) => {
-    project.setLoading(false)
     project.update(details)
     saveToLocalStorage()
   })
@@ -63,44 +64,76 @@ const addProject = (path) => {
   .return(project)
 }
 
-const runSpec = (project, spec, browser) => {
-  specsStore.setChosenSpec(spec)
-  project.setChosenBrowser(browser)
+const listenForBrowserClose = (project) => {
+  ipc.onBrowserClose(() => {
+    specsStore.setChosenSpec(null)
 
-  const launchBrowser = () => {
-    project.browserOpening()
+    appStore.setUiBlocked(true)
+    project.setBrowserState(Project.BROWSER_CLOSING)
 
-    ipc.launchBrowser({ browser, spec: spec.file }, (err, data = {}) => {
-      if (data.browserOpened) {
-        project.browserOpened()
-      }
-
-      if (data.browserClosed) {
-        project.browserClosed()
-
-        specsStore.setChosenSpec(null)
-
-        ipc.offLaunchBrowser()
-      }
+    ipc.awaitBrowserClose()
+    .catch((err) => {
+      project.setError(err)
     })
-  }
-
-  return closeBrowser(null, spec)
-  .then(launchBrowser)
+    .finally(() => {
+      project.setBrowserState(Project.BROWSER_CLOSED)
+      appStore.setUiBlocked(false)
+      ipc.offOnBrowserClose()
+    })
+  })
 }
 
-const closeBrowser = (project, spec) => {
-  if (!spec) {
-    specsStore.setChosenSpec(null)
+const launchBrowser = (project, spec, browser) => {
+  appStore.setUiBlocked(true)
+  project.setBrowserState(Project.BROWSER_OPENING)
+
+  listenForBrowserClose(project)
+
+  return ipc.launchBrowser({ browser, spec })
+  .then(() => {
+    project.setBrowserState(Project.BROWSER_OPEN)
+  })
+  .catch((err) => {
+    ipc.offBrowserClosed()
+    project.setBrowserState(Project.BROWSER_CLOSED)
+
+    project.setError(err)
+  })
+  .finally(() => {
+    appStore.setUiBlocked(false)
+  })
+}
+
+const runSpec = (project, spec, browser) => {
+  return closeBrowser(project)
+  .then(() => {
+    specsStore.setChosenSpec(spec)
+    project.setChosenBrowser(browser)
+
+    return launchBrowser(project, spec.file, browser)
+  })
+}
+
+const closeBrowser = (project) => {
+  ipc.offOnBrowserClose()
+
+  specsStore.setChosenSpec(null)
+
+  if (project.isBrowserState(Project.BROWSER_CLOSING, Project.BROWSER_CLOSED)) {
+    return Promise.resolve()
   }
 
-  if (project) {
-    project.browserClosed()
-  }
-
-  ipc.offLaunchBrowser()
+  appStore.setUiBlocked(true)
+  project.setBrowserState(Project.BROWSER_CLOSING)
 
   return ipc.closeBrowser()
+  .catch((err) => {
+    project.setError(err)
+  })
+  .finally(() => {
+    project.setBrowserState(Project.BROWSER_CLOSED)
+    appStore.setUiBlocked(false)
+  })
 }
 
 let projectPollingId
@@ -114,17 +147,21 @@ const closeProject = (project) => {
   ipc.offOnProjectWarning()
   ipc.offOnConfigChanged()
 
-  return Promise.join(
-    closeBrowser(project),
-    ipc.closeProject()
-  )
+  return closeBrowser(project)
+  .then(() => {
+    appStore.setUiBlocked(true)
+    project.setClosing(true)
+
+    return ipc.closeProject()
+  })
+  .finally(() => {
+    project.setClosing(false)
+    appStore.setUiBlocked(false)
+  })
 }
 
 const openProject = (project) => {
-  specsStore.loading(true)
-
   const setProjectError = (err) => {
-    project.setLoading(false)
     project.setError(err)
   }
 
@@ -167,6 +204,9 @@ const openProject = (project) => {
     project.setWarning(warning)
   })
 
+  appStore.setUiBlocked(true)
+  project.setLoading(true)
+
   return ipc.openProject(project.path)
   .then((config = {}) => {
     updateConfig(config)
@@ -174,6 +214,9 @@ const openProject = (project) => {
 
     specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))
     project.setLoading(false)
+    appStore.setUiBlocked(false)
+    specsStore.setLoading(true)
+
     getSpecs(setProjectError)
 
     projectPollingId = setInterval(updateProjectStatus, 10000)
@@ -181,6 +224,10 @@ const openProject = (project) => {
     return updateProjectStatus()
   })
   .catch(setProjectError)
+  .finally(() => {
+    project.setLoading(false)
+    appStore.setUiBlocked(false)
+  })
 }
 
 const reopenProject = (project) => {

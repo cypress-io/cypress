@@ -3,6 +3,7 @@ const debug = require('debug')('cypress:server:background:child')
 const Promise = require('bluebird')
 
 const driverEvents = require('./driver_events')
+const serverEvents = require('./server_events')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
@@ -65,6 +66,7 @@ const load = (ipc, config, backgroundFile) => {
   register('_get:task:keys', () => {})
 
   register('driver:event', () => {})
+  register('server:event', () => {})
 
   Promise
   .try(() => {
@@ -100,6 +102,10 @@ const execute = (ipc, event, ids, args = []) => {
       return
     case 'driver:event':
       driverEvents.execute(ipc, registeredEvents, ids, args)
+
+      return
+    case 'server:event':
+      serverEvents.wrap(ipc, registeredEvents, ids, args)
 
       return
     case '_get:task:keys':

@@ -661,6 +661,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "BACKGROUND_SERVER_EVENT_ERROR"
+      """
+      An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1)}' event.
+
+      The error we received was:
+
+      #{chalk.yellow(arg2)}
+      """
     when "REPATHED_BACKGROUND_FILE"
       """
       The "plugins file" has been renamed to the "background file" and has a new default path.

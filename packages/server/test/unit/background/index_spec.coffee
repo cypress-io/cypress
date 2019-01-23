@@ -172,6 +172,7 @@ describe "lib/background/index", ->
   context "#register", ->
     it "registers callback for event", ->
       foo = sinon.spy()
+      background.init({ backgroundFile: "background-file" })
       background.register("foo", foo)
       background.execute("foo")
       expect(foo).to.be.called
@@ -191,8 +192,15 @@ describe "lib/background/index", ->
       expect(background.isRegistered("foo")).to.be.false
 
   context "#execute", ->
-    it "calls the callback registered for the event", ->
+    it "calls the callback registered for the event if background process has been initialized", ->
       foo = sinon.spy()
+      background.init({ backgroundFile: "background-file" })
       background.register("foo", foo)
       background.execute("foo", "arg1", "arg2")
       expect(foo).to.be.calledWith("arg1", "arg2")
+
+    it "does not call the callback if background process has been initialized", ->
+      foo = sinon.spy()
+      background.register("foo", foo)
+      background.execute("foo", "arg1", "arg2")
+      expect(foo).not.to.be.called

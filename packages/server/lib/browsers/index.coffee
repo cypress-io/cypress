@@ -110,9 +110,6 @@ module.exports = {
         ## give a little padding around
         ## the browser opening
         Promise.delay(1000)
-        .then ->
-          options.onBrowserOpen()
-
-          return instance
+        .return(instance)
 
 }

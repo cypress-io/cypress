@@ -9,12 +9,6 @@ class ViewStore {
     name: C.LOADING,
   }
 
-  @action showLoading () {
-    this.currentView = {
-      name: C.LOADING,
-    }
-  }
-
   @action showApp () {
     if (appStore.projectRoot) {
       this.showProjectSpecs(projectsStore.getProjectByPath(appStore.projectRoot))

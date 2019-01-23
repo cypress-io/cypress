@@ -2,16 +2,17 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allSpecsSpec } from './specs-store'
 
+import Loader from '../lib/loader'
+
 @observer
 class SpecsList extends Component {
   render () {
-    if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
+    if (specsStore.isLoading) return <Loader fullscreen>Loading specs...</Loader>
 
     if (!specsStore.filter && !specsStore.specs.length) return this._empty()
 
