@@ -17,7 +17,7 @@ const errors = require('../errors')
 //#  - return a error message if it fails validation
 
 const errMsg = (key, value, type) => {
-  return `Expected '${key}' to be ${type}. Instead the value was: ${JSON.stringify(value)}`
+  return `Expected \`${key}\` to be ${type}. Instead the value was: \`${JSON.stringify(value)}\``
 }
 
 const isFullyQualifiedUrl = (value) => {
@@ -60,7 +60,7 @@ module.exports = {
       return true
     }
 
-    return errMsg(key, value, 'a fully qualified URL (starting with http:// or https://)')
+    return errMsg(key, value, 'a fully qualified URL (starting with `http://` or `https://`)')
 
   },
 
