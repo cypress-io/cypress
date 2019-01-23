@@ -9,7 +9,7 @@ describe "e2e issue 2891", ->
   it "passes", ->
     e2e.exec(@, {
       project: Fixtures.projectPath("default-layout")
-      spec: "default_layout_spec.coffee"
+      spec: "default_layout_spec.js"
       snapshot: true
       expectedExitCode: 0
     })
