@@ -374,6 +374,8 @@ const _moveCursorToLineStartOrEnd = function (el, toStart) {
   if ($elements.isContentEditable(el) || $elements.isInput(el) || $elements.isTextarea(el)) {
     const selection = _getSelectionByEl(el)
 
+    // the selection.modify API is non-standard, may work differently in other browsers, and is not in IE11.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Selection/modify
     return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'lineboundary')
   }
 }
