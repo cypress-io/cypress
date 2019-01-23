@@ -73,11 +73,11 @@ class Server
 
     ## since we use absolute paths, configure express-handlebars to not automatically find layouts
     ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine "html", exphbs {
+    app.engine("html", exphbs({
       defaultLayout: false
       layoutsDir: []
       partialsDir: []
-    }
+    }))
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
