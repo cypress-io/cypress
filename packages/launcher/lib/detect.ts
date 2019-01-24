@@ -14,7 +14,11 @@ import { log } from './log'
 import { Browser, NotInstalledError } from './types'
 import { detectBrowserWindows } from './windows'
 
+<<<<<<< HEAD
 const setMajorVersion = (browser: FoundBrowser) => {
+=======
+const setMajorVersion = (browser: Browser) => {
+>>>>>>> ffef0bd4a... Stronger typing, clearer variable names
   if (browser.version) {
     browser.majorVersion = browser.version.split('.')[0]
     log(
