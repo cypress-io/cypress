@@ -54,6 +54,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:config:changed"
       onBus("config:changed")
 
+    when "on:plugins:changed"
+      onBus("plugins:changed")
+
     when "on:project:error"
       onBus("project:error")
 
@@ -183,7 +186,12 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "open:project"
       onSettingsChanged = ->
+        ## add filename here
         bus.emit("config:changed")
+
+      onPluginsChanged = ->
+        ## add filename here
+        bus.emit("plugins:changed")
 
       onSpecChanged = (spec) ->
         bus.emit("spec:changed", spec)
@@ -203,6 +211,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onFocusTests: onFocusTests
         onSpecChanged: onSpecChanged
         onSettingsChanged: onSettingsChanged
+        onPluginsChanged: onPluginsChanged
         onError: onError
         onWarning: onWarning
       })

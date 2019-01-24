@@ -395,21 +395,13 @@ describe "lib/project", ->
         expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
     it "calls plugins.init when file changes", ->
-      @project.watchPluginsFile(@config).then =>
-        @project.watchers.watchTree.firstCall.args[1].onChange()
-        expect(plugins.init).to.be.calledWith(@config)
+      options = { onPluginsChanged: sinon.stub() }
 
-    it "handles errors from calling plugins.init", (done) ->
-      error = {name: "foo", message: "foo"}
-      plugins.init.rejects(error)
-      @project.watchPluginsFile(@config, {
-        onError: (err) ->
-          expect(err).to.eql(error)
-          done()
-      })
-      .then =>
+      @project.watchPluginsFile(@config, options).then =>
         @project.watchers.watchTree.firstCall.args[1].onChange()
-      return
+
+        ## TODO expect to be called with file path
+        expect(options.onPluginsChanged).to.be.called
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->

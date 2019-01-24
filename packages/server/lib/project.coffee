@@ -193,12 +193,7 @@ class Project extends EE
       debug("watch plugins file")
       @watchers.watchTree(cfg.pluginsFile, {
         onChange: =>
-          ## TODO: completely re-open project instead?
-          debug("plugins file changed")
-          ## re-init plugins after a change
-          @_initPlugins(cfg, options)
-          .catch (err) ->
-            options.onError(err)
+          options.onPluginsChanged()
       })
 
   watchSettings: (onSettingsChanged) ->
@@ -217,6 +212,7 @@ class Project extends EE
 
         ## call our callback function
         ## when settings change!
+        ## TODO: pass the file path to the config:change event
         onSettingsChanged.call(@)
     }
 

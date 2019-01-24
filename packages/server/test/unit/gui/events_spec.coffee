@@ -450,6 +450,17 @@ describe "lib/gui/events", ->
           open.lastCall.args[0].onSettingsChanged()
           assert.sendCalledWith(undefined)
 
+      it "sends 'plugins:changed' onPluginsChanged", ->
+        open = sinon.stub(Project.prototype, "open")
+        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
+
+        @handleEvent("open:project", "/_test-output/path/to/project")
+        .then =>
+          @handleEvent("on:plugins:changed")
+        .then (assert) =>
+          open.lastCall.args[0].onPluginsChanged()
+          assert.sendCalledWith(undefined)
+
       it "sends 'spec:changed' onSpecChanged", ->
         open = sinon.stub(Project.prototype, "open")
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})

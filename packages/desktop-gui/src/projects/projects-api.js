@@ -155,8 +155,22 @@ const openProject = (project) => {
     specsStore.setChosenSpecByRelativePath(relativeSpecPath)
   })
 
-  ipc.onConfigChanged(() => {
-    reopenProject(project)
+  ipc.onConfigChanged((filename) => {
+    // TODO decide if making this "fake" error is reasonable
+    project.setWarning({
+      isCypressErr: true,
+      type: 'CONFIGURATION_CHANGED',
+      message: `This file was changed: \`${filename}\`\nPlease restart Cypress for changes to take effect.`,
+    })
+  })
+
+  ipc.onPluginsChanged((filename) => {
+    // TODO decide if making this "fake" error is reasonable
+    project.setWarning({
+      isCypressErr: true,
+      type: 'CONFIGURATION_CHANGED',
+      message: `This file was changed: \`${filename}\`\nPlease restart Cypress for changes to take effect.`,
+    })
   })
 
   ipc.onProjectError((__, error) => {
