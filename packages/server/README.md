@@ -15,7 +15,7 @@ The server is the heart of the Cypress application. All of this code represents 
 
 The [driver](../driver) and the server are the two most complex packages of Cypress.
 
-## Install
+## Installing
 
 The server's dependencies can be installed with:
 
@@ -24,7 +24,7 @@ cd packages/server
 npm install
 ```
 
-## Development
+## Developing
 
 To run Cypress:
 

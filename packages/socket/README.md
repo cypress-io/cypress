@@ -2,7 +2,16 @@
 
 This is a shared lib for holding both the `socket.io` server and client.
 
-## Usage
+## Installing
+
+The sockets's dependencies can be installed with:
+
+```bash
+cd packages/socket
+npm install
+```
+
+## Using
 
 ```javascript
 const socket = require("packages/socket")
@@ -35,15 +44,6 @@ client.on("disconnect", function(){})
 // path usage
 socket.getPathToClientSource()
 // returns your/path/to/node_modules/socket.io-client/socket.io.js0
-```
-
-## Install
-
-The sockets's dependencies can be installed with:
-
-```bash
-cd packages/socket
-npm install
 ```
 
 ## Testing
