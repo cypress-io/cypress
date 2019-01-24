@@ -52,6 +52,6 @@ function getLinuxBrowser(
     .catch(returnError)
 }
 
-export function detectBrowserLinux(browser: Browser) {
+export function detectBrowserLinux(browser: Browser & { binary: string }) {
   return getLinuxBrowser(browser.name, browser.binary, browser.versionRegex)
 }
