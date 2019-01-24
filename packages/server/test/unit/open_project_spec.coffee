@@ -107,7 +107,7 @@ describe "lib/open_project", ->
       openProject.closeBrowser().then ->
         expect(serverEvents.execute).not.to.be.called
 
-  context.only "#close", ->
+  context "#close", ->
     it "closes the project if it is open", ->
       project = openProject.getProject()
       sinon.stub(project, "close")
