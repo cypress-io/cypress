@@ -1,5 +1,5 @@
 import { findApp } from './util'
-import { Browser } from '../types'
+import { FoundBrowser, Browser } from '../types'
 import { detectBrowserLinux } from '../linux'
 import { log } from '../log'
 import { merge, partial } from 'ramda'
@@ -30,7 +30,7 @@ const browsers: Detectors = {
   chromium: detectChromium
 }
 
-export function detectBrowserDarwin(browser: Browser) {
+export function detectBrowserDarwin(browser: Browser): Promise<FoundBrowser> {
   let fn = browsers[browser.name]
 
   if (!fn) {
