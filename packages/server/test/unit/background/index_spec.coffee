@@ -67,7 +67,7 @@ describe "lib/background/index", ->
       background.init({ backgroundFile: "background-file" })
       .catch (err) =>
         expect(err.message).to.include("background event has been renamed")
-        expect(err.message).to.include("'file:preprocessor' has been renamed to 'browser:filePreprocessor'")
+        expect(err.message).to.include("`file:preprocessor` has been renamed to `browser:filePreprocessor`")
         expect(err.message).to.include("Background file location:")
 
     it "errors once when multiple renamed events are registered", ->
@@ -84,9 +84,9 @@ describe "lib/background/index", ->
       background.init({ backgroundFile: "background-file" })
       .catch (err) =>
         expect(err.message).to.include("background events have been renamed")
-        expect(err.message).to.include("'file:preprocessor' has been renamed to 'browser:filePreprocessor'")
-        expect(err.message).to.include("'after:screenshot' has been renamed to 'screenshot'")
-        expect(err.message).to.include("'before:browser:launch' has been renamed to 'browser:launch'")
+        expect(err.message).to.include("`file:preprocessor` has been renamed to `browser:filePreprocessor`")
+        expect(err.message).to.include("`after:screenshot` has been renamed to `screenshot`")
+        expect(err.message).to.include("`before:browser:launch` has been renamed to `browser:launch`")
         expect(err.message).to.include("Background file location:")
 
     describe "loaded message", ->
@@ -122,8 +122,7 @@ describe "lib/background/index", ->
           .catch (err) =>
             expect(err.message).to.contain("The background file is missing or invalid")
             expect(err.message).to.contain("path/to/backgroundFile.js")
-            expect(err.message).to.contain("The following error was thrown")
-            expect(err.message).to.contain("error message stack")
+            expect(err.details).to.contain("error message stack")
 
       context "BACKGROUND_FUNCTION_ERROR", ->
         beforeEach ->
@@ -134,8 +133,7 @@ describe "lib/background/index", ->
           .catch (err) =>
             expect(err.message).to.contain("The function exported by the background file threw an error.")
             expect(err.message).to.contain("path/to/backgroundFile.js")
-            expect(err.message).to.contain("The following error was thrown:")
-            expect(err.message).to.contain("error message stack")
+            expect(err.details).to.contain("error message stack")
 
     describe "error message", ->
       beforeEach ->
@@ -160,14 +158,14 @@ describe "lib/background/index", ->
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running background plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin in the background process")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
       it "calls onError when ipc sends error", ->
         @ipc.on.withArgs("error").yield(@err)
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running background plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin in the background process")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
   context "#register", ->
     it "registers callback for event", ->

@@ -557,7 +557,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       We invoked the function exported by `#{arg1}`, but it threw an error.
       """
 
-      return {msg: msg, details: arg1}
+      return {msg: msg, details: arg2}
 
     when "BACKGROUND_ERROR"
       msg = """
