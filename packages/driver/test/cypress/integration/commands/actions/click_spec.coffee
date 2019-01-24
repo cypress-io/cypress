@@ -419,6 +419,16 @@ describe "src/cy/commands/actions/click", ->
       cy.get("#canvas").click().then ->
         expect(onClick).to.be.calledOnce
 
+    describe "html attributes", ->
+      afterEach ->
+        cy.get("html").then ($html) -> 
+          $html.css("scrollBehavior", "inherit")
+
+      it "can click elements in html with 'scroll-behavior: smooth'", ->
+        cy.get("html").then ($html) -> 
+          $html.css("scrollBehavior", "smooth")
+        cy.get("#table tr:first").click()
+
     describe "actionability", ->
 
       it 'can click on inline elements that wrap lines', ->
