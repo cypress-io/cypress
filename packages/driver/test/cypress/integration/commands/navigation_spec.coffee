@@ -569,16 +569,16 @@ describe "src/cy/commands/navigation", ->
 
     ## https://github.com/cypress-io/cypress/issues/1311
     it "window immediately resolves and doesn't reload when visiting the same URL with hashes", ->
-      onLoad = cy.stub()
+      onReady = cy.stub()
 
       cy
         .visit("http://localhost:3500/fixtures/generic.html#foo").then (win) ->
           win.foo = 'bar'
         .visit("http://localhost:3500/fixtures/generic.html#foo", {
-          onLoad: onLoad
+          onReady: onReady
         }).then (win) ->
           expect(win.bar).to.not.exist
-          expect(onLoad).not.to.have.been.called
+          expect(onReady).not.to.have.been.called
 
     describe "when origins don't match", ->
       beforeEach ->
@@ -862,7 +862,7 @@ describe "src/cy/commands/navigation", ->
           .then ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq({
               "Command": "visit"
-              "Note": "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+              "Note": "Because this visit was to the same hash, the page did not reload and the onStart and onReady callbacks did not fire."
           })
 
     describe "errors", ->
