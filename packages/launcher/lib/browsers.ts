@@ -23,7 +23,7 @@ export const browsers: Browser[] = [
     displayName: 'Chrome',
     versionRegex: /Google Chrome (\S+)/,
     profile: true,
-    binary: 'google-chrome'
+    binary: ['google-chrome', 'chrome', 'google-chrome-stable']
   },
   {
     name: 'chromium',
