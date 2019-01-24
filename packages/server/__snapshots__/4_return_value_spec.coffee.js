@@ -124,7 +124,7 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
 
   - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands and return a different value (failed).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands in custom command and returning different value (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when not invoking commands invoking done callback and returning a promise (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when not invoking commands, invoking done callback, and returning a promise (failed).png (1280x720)
 
 
   (Video)
