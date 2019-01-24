@@ -1,5 +1,10 @@
 import * as Bluebird from 'bluebird'
+<<<<<<< HEAD
 import * as _ from 'lodash'
+=======
+import { merge, pick, tap, uniqBy, props } from 'ramda'
+import { extend, compact, flatten } from 'lodash'
+>>>>>>> adding multiple possible binary names for linux
 import * as os from 'os'
 import { merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
@@ -86,8 +91,22 @@ function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<Browser[]> {
   // and we can pick "name" and "version" fields from each object
   // @ts-ignore
   const removeDuplicates = uniqBy(props(['name', 'version']))
+
+  goalBrowsers = flatten(
+    goalBrowsers.map((browser: Browser) => {
+      if (Array.isArray(browser.binary)) {
+        // if there are multiple valid binaries for a browser,
+        // try to find each one
+        return browser.binary.map((binary: string) =>
+          extend({}, browser, { binary })
+        )
+      }
+      return [browser]
+    })
+  )
+
   return Bluebird.mapSeries(goalBrowsers, checkOneBrowser)
-    .then(_.compact)
+    .then(compact)
     .then(removeDuplicates) as Bluebird<Browser[]>
 }
 

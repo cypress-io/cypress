@@ -30,7 +30,7 @@ export const browsers: Browser[] = [
     displayName: 'Chromium',
     versionRegex: /Chromium (\S+)/,
     profile: true,
-    binary: 'chromium-browser'
+    binary: ['chromium-browser', 'chromium']
   },
   {
     name: 'canary',
