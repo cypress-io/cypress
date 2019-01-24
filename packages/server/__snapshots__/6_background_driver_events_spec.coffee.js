@@ -52,19 +52,9 @@ internal:commandRetry: get expected '#non-existent' to exist in the DOM
   1) fails to get
 test:end: fails to get
 
-Error: The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
+The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
 Error: Error thrown in promise from "test:end". Should be ignored.
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
     at stack trace line
     at stack trace line
     at stack trace line
