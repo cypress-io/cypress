@@ -43,6 +43,10 @@ const errors = {
   isUnknown (err) {
     return _.get(err, 'type') === 'UNKNOWN'
   },
+
+  isConfigurationChanged (err) {
+    return _.get(err, 'type') === 'CONFIGURATION_CHANGED'
+  },
 }
 
 export default errors

@@ -80,3 +80,29 @@ describe "WarningMessage", ->
       .click()
       .then ->
         expect(@ipc.externalOpen).not.to.be.called
+
+  describe "for error type CONFIGURATION_CHANGED", ->
+    beforeEach ->
+      configWarningObj = {
+        type: "CONFIGURATION_CHANGED",
+        name: "Configuration changed",
+        message: "This file was changed: `cypress.json`\nPlease restart Cypress for changes to take effect."
+      }
+
+      cy.shouldBeOnProjectSpecs().then =>
+        @ipc.onProjectWarning.yield(null, configWarningObj)
+
+    it "renders configuration change message with the correct file name", ->
+      cy
+        .contains(".alert-warning", "This file was changed: cypress.json")
+        .contains(".alert-warning", "Please restart Cypress for changes to take effect.")
+
+    it "is not dismissable", ->
+      cy.get(".alert-warning .close").should("not.exist")
+
+    it "can reload the project", ->
+      cy.contains(".alert-warning strong", "Restart")
+        .click()
+        .should =>
+          expect(@ipc.closeProject).to.be.called
+          expect(@ipc.openProject).to.be.called

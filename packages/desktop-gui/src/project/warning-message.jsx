@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
 
+import errors from '../lib/errors'
 import ipc from '../lib/ipc'
 
 const md = new Markdown({
@@ -28,7 +29,22 @@ class WarningMessage extends Component {
   }
 
   render () {
-    const warningText = this.props.warning.message.split('\n').join('<br />')
+    const warning = this.props.warning
+    const warningText = warning.message.split('\n').join('<br />')
+
+    if (errors.isConfigurationChanged(warning)) {
+      return (
+        <div className='alert alert-warning'>
+          <div ref={(node) => this.warningMessageNode = node} dangerouslySetInnerHTML={{
+            __html: md.render(warningText),
+          }}></div>
+          <strong onClick={this.props.onRestart}>
+            <i className='fa fa-refresh'></i>{' '}
+            Restart
+          </strong>
+        </div>
+      )
+    }
 
     return (
       <div className='alert alert-warning'>
