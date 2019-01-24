@@ -1,5 +1,10 @@
 import * as Bluebird from 'bluebird'
+<<<<<<< HEAD
 import * as _ from 'lodash'
+=======
+import { merge, pick, tap, uniqBy, props, flatten } from 'ramda'
+import { extend, compact } from 'lodash'
+>>>>>>> cleanup
 import * as os from 'os'
 import { merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
@@ -44,7 +49,21 @@ function lookup(
   return detector(browser)
 }
 
-function checkOneBrowser(browser: Browser) {
+/**
+ * Try to detect a single browser definition, which may dispatch multiple `checkOneBrowser` calls,
+ * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
+ * we don't use the `binary` field on Windows.
+ */
+function checkBrowser(browser: Browser) {
+  if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
+    return Bluebird.mapSeries(browser.binary, (binary: string) => {
+      return checkOneBrowser(extend({}, browser, { binary }))
+    })
+  }
+  return checkOneBrowser(browser)
+}
+
+function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
   const platform = os.platform()
   const pickBrowserProps = pick([
     'name',
@@ -89,21 +108,8 @@ function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<Browser[]> {
   // and we can pick "name" and "version" fields from each object
   // @ts-ignore
   const removeDuplicates = uniqBy(props(['name', 'version']))
-
-  goalBrowsers = flatten(
-    goalBrowsers.map((browser: Browser) => {
-      if (Array.isArray(browser.binary)) {
-        // if there are multiple valid binaries for a browser,
-        // try to find each one
-        return browser.binary.map((binary: string) =>
-          extend({}, browser, { binary })
-        )
-      }
-      return [browser]
-    })
-  )
-
-  return Bluebird.mapSeries(goalBrowsers, checkOneBrowser)
+  return Bluebird.mapSeries(goalBrowsers, checkBrowser)
+    .then(flatten)
     .then(compact)
     .then(removeDuplicates) as Bluebird<Browser[]>
 }
