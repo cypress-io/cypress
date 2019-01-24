@@ -148,6 +148,8 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       assert(
         @,
         "focus",
+        ## we don't use :focus becuase jquery will return null when window is not focused
+        ## we grab document from the element to be sure we are in the proper frame
         wrap(@).is($(wrap(@)[0].ownerDocument.activeElement)),
         'expected #{this} to be #{exp}',
         'expected #{this} to not be #{exp}',
