@@ -2,27 +2,27 @@ import { detectBrowserLinux } from './linux'
 import { detectBrowserDarwin } from './darwin'
 import { detectBrowserWindows } from './windows'
 import { log } from './log'
-import { Browser, NotInstalledError } from './types'
+import { Browser, NotInstalledError, FoundBrowser } from './types'
 import { browsers } from './browsers'
 import * as Bluebird from 'bluebird'
 import { merge, pick, tap, uniqBy, props } from 'ramda'
 import { extend, compact, flatten } from 'lodash'
 import * as os from 'os'
 
-const setMajorVersion = (obj: Browser) => {
-  if (obj.version) {
-    obj.majorVersion = obj.version.split('.')[0]
+const setMajorVersion = (browser: Browser) => {
+  if (browser.version) {
+    browser.majorVersion = browser.version.split('.')[0]
     log(
       'browser %s version %s major version %s',
-      obj.name,
-      obj.version,
-      obj.majorVersion
+      browser.name,
+      browser.version,
+      browser.majorVersion
     )
   }
-  return obj
+  return browser
 }
 
-type BrowserDetector = (browser: Browser) => Promise<Object>
+type BrowserDetector = (browser: Browser) => Promise<FoundBrowser>
 type Detectors = {
   [index: string]: BrowserDetector
 }
@@ -32,13 +32,16 @@ const detectors: Detectors = {
   win32: detectBrowserWindows
 }
 
-function lookup(platform: NodeJS.Platform, obj: Browser): Promise<Object> {
-  log('looking up %s on %s platform', obj.name, platform)
+function lookup(
+  platform: NodeJS.Platform,
+  browser: Browser
+): Promise<FoundBrowser> {
+  log('looking up %s on %s platform', browser.name, platform)
   const detector = detectors[platform]
   if (!detector) {
-    throw new Error(`Cannot lookup browser ${obj.name} on ${platform}`)
+    throw new Error(`Cannot lookup browser ${browser.name} on ${platform}`)
   }
-  return detector(obj)
+  return detector(browser)
 }
 
 function checkOneBrowser(browser: Browser) {
