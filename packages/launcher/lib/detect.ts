@@ -6,7 +6,7 @@ import { Browser, NotInstalledError } from './types'
 import { browsers } from './browsers'
 import * as Bluebird from 'bluebird'
 import { merge, pick, tap, uniqBy, props } from 'ramda'
-import * as _ from 'lodash'
+import { extend, compact, flatten } from 'lodash'
 import * as os from 'os'
 
 const setMajorVersion = (obj: Browser) => {
@@ -81,8 +81,22 @@ function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<Browser[]> {
     goalBrowsers = browsers
   }
   const removeDuplicates = uniqBy(props(['name', 'version']))
+
+  goalBrowsers = flatten(
+    goalBrowsers.map((browser: Browser) => {
+      if (Array.isArray(browser.binary)) {
+        // if there are multiple valid binaries for a browser,
+        // try to find each one
+        return browser.binary.map((binary: string) =>
+          extend({}, browser, { binary })
+        )
+      }
+      return [browser]
+    })
+  )
+
   return Bluebird.mapSeries(goalBrowsers, checkOneBrowser)
-    .then(_.compact)
+    .then(compact)
     .then(removeDuplicates) as Bluebird<Browser[]>
 }
 
