@@ -8,7 +8,7 @@ The runner is the minimal "chrome" around the user's app and has the following r
 - Managing the viewport size and scale
 - Showing the currently active URL
 
-## Install
+## Installing
 
 The runner's dependencies can be installed with:
 
@@ -17,7 +17,7 @@ cd packages/runner
 npm install
 ```
 
-## Development
+## Developing
 
 ### Watching
 
@@ -32,15 +32,15 @@ This watches and compiles all changes as you make them.
 npm run watch
 ```
 
-### One Time Build
+## Building
 
-#### For development
+### For development
 
 ```bash
 npm run build
 ```
 
-#### For production
+### For production
 
 ```bash
 npm run build-prod

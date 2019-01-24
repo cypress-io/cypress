@@ -183,9 +183,7 @@ jobs:
           paths:
             - packages/ts/node_modules
 
-        ## TODO: this needs to be reenabled when
-        ## we update stop-only
-    #   - run: npm run stop-only
+      - run: npm run stop-only
       ## now go build all of subpackages
       - run: npm run prebuild -- --serial
       - run: npm run build -- --serial

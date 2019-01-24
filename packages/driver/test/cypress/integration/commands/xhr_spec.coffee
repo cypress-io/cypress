@@ -1858,12 +1858,35 @@ describe "src/cy/commands/xhr", ->
 
       cy.on "log:changed", (attrs, l) =>
         if attrs.name is "xhr"
-          log = l
+          if not log
+            log = l
 
       cy
       .window()
       .then (win) ->
         xhr = new win.XMLHttpRequest()
+        xhr.open("GET", "/timeout?ms=999")
+        xhr.send()
+        xhr.abort()
+
+        cy.wrap(null).should ->
+          expect(log.get("state")).to.eq("failed")
+          expect(xhr.aborted).to.be.true
+
+    ## https://github.com/cypress-io/cypress/issues/3008      
+    it "aborts xhrs even when responseType  not '' or 'text'", ->
+      log = null
+
+      cy.on "log:changed", (attrs, l) =>
+        if attrs.name is "xhr"
+          if not log
+            log = l
+      
+      cy
+      .window()
+      .then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.responseType = 'arraybuffer'
         xhr.open("GET", "/timeout?ms=1000")
         xhr.send()
         xhr.abort()
@@ -1878,7 +1901,8 @@ describe "src/cy/commands/xhr", ->
 
       cy.on "log:changed", (attrs, l) =>
         if attrs.name is "xhr"
-          log = l
+          if not log
+            log = l
 
       cy
       .window()
@@ -1891,7 +1915,7 @@ describe "src/cy/commands/xhr", ->
             xhr.foo = "bar"
             resolve(xhr)
           xhr.send()
-      .then (xhr) ->
+      .should (xhr) ->
         ## ensure this is set to prevent accidental
         ## race conditions down the road if something
         ## goes wrong

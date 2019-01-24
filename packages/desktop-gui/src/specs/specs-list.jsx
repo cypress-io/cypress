@@ -2,6 +2,7 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
@@ -11,6 +12,11 @@ import Loader from '../lib/loader'
 
 @observer
 class SpecsList extends Component {
+  constructor (props) {
+    super(props)
+    this.filterRef = React.createRef()
+  }
+
   render () {
     if (specsStore.isLoading) return <Loader fullscreen>Loading specs...</Loader>
 
@@ -30,10 +36,16 @@ class SpecsList extends Component {
               className='filter'
               placeholder='Search...'
               value={specsStore.filter || ''}
+              ref={this.filterRef}
               onChange={this._updateFilter}
               onKeyUp={this._executeFilterAction}
             />
-            <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
+            <Tooltip
+              title='Clear search'
+              className='browser-info-tooltip cy-tooltip'
+            >
+              <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
+            </Tooltip>
           </div>
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: specsStore.isChosen(allSpecsSpec) })}>
             <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
@@ -49,7 +61,14 @@ class SpecsList extends Component {
     if (specsStore.filter && !specsStore.specs.length) {
       return (
         <div className='empty-well'>
-          No files match the filter '{specsStore.filter}'
+          No specs match your search: "<strong>{specsStore.filter}</strong>"
+          <br/>
+          <a onClick={() => {
+            this._clearFilter()
+            this.filterRef.current.focus()
+          }} className='btn btn-link'>
+            <i className='fa fa-times'/> Clear search
+          </a>
         </div>
       )
     }

@@ -16,19 +16,9 @@ exports['e2e background events fails 1'] = `
                                                                                                     
   Running: app_spec.coffee...                                                              (1 of 1) 
 
-Error: The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
+The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
 Error: Async error from background file
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
     at stack trace line
     at stack trace line
     at stack trace line

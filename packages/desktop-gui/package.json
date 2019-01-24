@@ -38,6 +38,7 @@
     "human-interval": "^0.1.6",
     "istanbul": "^0.4.5",
     "lodash": "4.17.11",
+    "markdown-it": "8.4.2",
     "md5": "^2.2.1",
     "mobx": "^5.8.0",
     "mobx-react": "^5.4.3",

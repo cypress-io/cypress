@@ -235,7 +235,7 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             isOkStatusCode: false
             isHtml: false
-            contentType: null
+            contentType: undefined
             url: "http://localhost:2000/does-not-exist"
             originalUrl: "/does-not-exist"
             filePath: Fixtures.projectPath("no-server/dev/does-not-exist")
@@ -488,7 +488,7 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             isOkStatusCode: false
             isHtml: false
-            contentType: null
+            contentType: undefined
             url: "http://espn.com/"
             originalUrl: "http://espn.com/"
             status: 404

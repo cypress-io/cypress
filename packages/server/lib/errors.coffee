@@ -453,7 +453,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "CANNOT_CREATE_PROJECT_TOKEN"
       "Can't create project's secret key."
     when "PORT_IN_USE_SHORT"
-      "Port '#{arg1}' is already in use."
+      "Port #{arg1} is already in use."
     when "PORT_IN_USE_LONG"
       """
       Can't run project because port is currently in use: #{chalk.blue(arg1)}
@@ -461,16 +461,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       #{chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")}
       """
     when "ERROR_READING_FILE"
+      filePath = "`#{arg1}`"
+      err = "`#{arg2}`"
       """
-      Error reading from: #{chalk.blue(arg1)}
+      Error reading from: #{chalk.blue(filePath)}
 
-      #{chalk.yellow(arg2)}
+      #{chalk.yellow(err)}
       """
     when "ERROR_WRITING_FILE"
+      filePath = "`#{arg1}`"
+      err = "`#{arg2}`"
       """
-      Error writing to: #{chalk.blue(arg1)}
+      Error writing to: #{chalk.blue(filePath)}
 
-      #{chalk.yellow(arg2)}
+      #{chalk.yellow(err)}
       """
     when "NO_SPECS_FOUND"
       ## no glob provided, searched all specs
@@ -511,67 +515,65 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       https://on.cypress.io/renderer-process-crashed
       """
-    when "NO_CURRENTLY_OPEN_PROJECT"
-      "Can't find open project."
     when "AUTOMATION_SERVER_DISCONNECTED"
       "The automation client disconnected. Cannot continue running tests."
     when "SUPPORT_FILE_NOT_FOUND"
       """
       The support file is missing or invalid.
 
-      Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file or, if you're using a preprocessor plugin, it must be supported by that plugin.
+      Your `supportFile` is set to `#{arg1}`, but either the file is missing or it's invalid. The `supportFile` must be a `.js` or `.coffee` file or, if you're using a preprocessor plugin, it must be supported by that plugin.
 
-      Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
+      Correct your `cypress.json`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
     when "BACKGROUND_FILE_ERROR"
-      """
+      msg = """
       The background file is missing or invalid.
 
-      Your backgroundFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The backgroundFile must be a .js or .coffee file.
+      Your `backgroundFile` is set to `#{arg1}`, but either the file is missing, it contains a syntax error, or threw an error when required. The `backgroundFile` must be a `.js` or `.coffee` file.
 
-      Please fix this, or set 'backgroundFile' to 'false' if a background file is not necessary for your project.
-
-      #{if arg2 then "The following error was thrown:" else ""}
-
-      #{if arg2 then chalk.yellow(arg2) else ""}
-      """.trim()
-    when "BACKGROUND_DIDNT_EXPORT_FUNCTION"
+      Please fix this, or set `backgroundFile` to `false` if a background file is not necessary for your project.
       """
-      The backgroundFile must export a function.
 
-      We loaded the backgroundFile from: #{arg1}
+      if arg2
+        return {msg: msg, details: arg2}
+
+      return msg
+    when "BACKGROUND_DIDNT_EXPORT_FUNCTION"
+      msg = """
+      The `backgroundFile` must export a function.
+
+      We loaded the `backgroundFile` from: `#{arg1}`
 
       It exported:
+      """
 
-      #{JSON.stringify(arg2)}
-      """
+      return {msg: msg, details: JSON.stringify(arg2)}
     when "BACKGROUND_FUNCTION_ERROR"
-      """
+      msg = """
       The function exported by the background file threw an error.
 
-      We invoked the function exported by '#{arg1}', but it threw an error.
-
-      The following error was thrown:
-
-      #{chalk.yellow(arg2)}
-      """.trim()
-    when "BACKGROUND_ERROR"
+      We invoked the function exported by `#{arg1}`, but it threw an error.
       """
-      The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
-      #{chalk.yellow(arg1)}
-      """.trim()
+      return {msg: msg, details: arg1}
+
+    when "BACKGROUND_ERROR"
+      msg = """
+      The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
+      """
+
+      return {msg: msg, details: arg1}
     when "BACKGROUND_RENAMED_EVENTS"
       """
       The following background #{if arg1.events.length > 1 then "events have" else "event has"} been renamed.
 
       Please update them in your background file and try again.
 
-      #{_.map(arg1.events, ({ oldEvent, newEvent }) -> "'#{oldEvent}' has been renamed to '#{newEvent}'").join("\n")}
+      #{_.map(arg1.events, ({ oldEvent, newEvent }) -> "`#{oldEvent}` has been renamed to `#{newEvent}`").join("\n")}
 
-      Background file location: #{arg1.backgroundFile}
+      Background file location: `#{arg1.backgroundFile}`
       """
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
@@ -593,8 +595,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Fix the error in your code and re-run your tests.
       """
     when "SETTINGS_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
       """
-      We found an invalid value in the file: '#{chalk.blue(arg1)}'
+      We found an invalid value in the file: #{chalk.blue(filePath)}
 
       #{chalk.yellow(arg2)}
       """
@@ -606,18 +609,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED"
       """
-      In Cypress v3.0.0 we removed the configuration option: #{chalk.yellow('screenshotOnHeadlessFailure')}
+      In Cypress v3.0.0 we removed the configuration option #{chalk.yellow('\`screenshotOnHeadlessFailure\`')}
 
       You now configure this behavior in your test code.
 
       Example:
 
-        // cypress/support/index.js
-        Cypress.Screenshot.defaults({
-          screenshotOnRunFailure: false
-        })
+      ```
+      // cypress/support/index.js
+      Cypress.Screenshot.defaults({
+        screenshotOnRunFailure: false
+      })
+      ```
 
-      https://on.cypress.io/screenshot-api
+      Learn more at https://on.cypress.io/screenshot-api
       """
     when "RENAMED_CONFIG_OPTION"
       """
@@ -627,19 +632,19 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_CONNECT_BASE_URL"
       """
-      Cypress could not verify that the server set as your 'baseUrl' is running:
+      Cypress could not verify that the server set as your `baseUrl` is running:
 
         > #{chalk.blue(arg1)}
 
-      Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
 
       Please start this server and then run Cypress again.
       """
     when "CANNOT_CONNECT_BASE_URL_WARNING"
       """
-      Cypress could not verify that the server set as your 'baseUrl' is running: #{arg1}
+      Cypress could not verify that the server set as your `baseUrl` is running: #{arg1}
 
-      Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
       """
     when "INVALID_REPORTER_NAME"
       """
@@ -751,10 +756,18 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
+
+  if _.isObject(msg)
+    details = msg.details
+    msg = msg.msg
+
   msg = trimMultipleNewLines(msg)
+
   err = new Error(msg)
   err.isCypressErr = true
   err.type = type
+  err.details = details
+
   err
 
 warning = (type, arg1, arg2) ->
@@ -789,6 +802,8 @@ clone = (err, options = {}) ->
 log = (err, color = "red") ->
   Promise.try ->
     console.log chalk[color](err.message)
+    if err.details
+      console.log("\n", chalk["yellow"](err.details))
 
     ## bail if this error came from known
     ## list of Cypress errors

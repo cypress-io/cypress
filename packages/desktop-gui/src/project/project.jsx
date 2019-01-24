@@ -5,6 +5,7 @@ import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
 import appStore from '../lib/app-store'
 import viewStore from '../lib/view-store'
+import ipc from '../lib/ipc'
 
 import Loader from '../lib/loader'
 import Settings from '../settings/settings'
@@ -12,6 +13,8 @@ import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
+import ErrorMessage from './error-message'
+import WarningMessage from './warning-message'
 
 @observer
 class Project extends Component {
@@ -34,18 +37,28 @@ class Project extends Component {
 
     if (project.isClosing) return <Loader fullscreen>Closing project...</Loader>
 
-    if (project.error) return this._error()
+    if (project.error) return <ErrorMessage error={this.props.project.error} onTryAgain={this._reopenProject}/>
+
+    const { warning } = project
 
     return (
       <div>
         <ProjectNav project={project}/>
         <div className='project-content'>
-          {this._warning()}
+          {warning &&
+            <WarningMessage warning={warning} onClearWarning={this._removeWarning}/>
+          }
           {this._currentView()}
         </div>
         <OnBoarding project={project}/>
       </div>
     )
+  }
+
+  _externalOpen (e) {
+    e.preventDefault()
+
+    return ipc.externalOpen(e.target.href)
   }
 
   _currentView () {
@@ -57,56 +70,6 @@ class Project extends Component {
       default:
         return <SpecsList project={this.props.project} />
     }
-  }
-
-  _warning () {
-    const { warning } = this.props.project
-
-    if (!warning) return null
-
-    return (
-      <div className='alert alert-warning'>
-        <p>
-          <i className='fa fa-warning'></i>{' '}
-          <strong>Warning</strong>
-        </p>
-        <p dangerouslySetInnerHTML={{
-          __html: warning.message.split('\n').join('<br />'),
-        }} />
-        <button className='btn btn-link close' onClick={this._removeWarning}>
-          <i className='fa fa-remove' />
-        </button>
-      </div>
-    )
-  }
-
-  _error () {
-    let err = this.props.project.error
-
-    return (
-      <div className='full-alert alert alert-danger error'>
-        <p>
-          <i className='fa fa-warning'></i>{' '}
-          <strong>{err.title || 'Can\'t start server'}</strong>
-        </p>
-        <p dangerouslySetInnerHTML={{
-          __html: err.message.split('\n').join('<br />'),
-        }} />
-        {err.portInUse && (
-          <div>
-            <hr />
-            <p>To fix, stop the other running process or change the port in cypress.json</p>
-          </div>
-        )}
-        <button
-          className='btn btn-default btn-sm'
-          onClick={this._reopenProject}
-        >
-          <i className='fa fa-refresh'></i>{' '}
-          Try Again
-        </button>
-      </div>
-    )
   }
 
   _removeWarning = () => {
