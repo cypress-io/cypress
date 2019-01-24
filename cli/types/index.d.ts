@@ -3500,6 +3500,24 @@ declare namespace Cypress {
      */
     (chainer: 'contain', value: string): Chainable<Subject>
     /**
+     * Assert that at least one element of the selection is focused, using `document.activeElement`.
+     * @example
+     *    cy.get('#result').should('have.focus')
+     *    cy.get('#result').should('be.focused')
+     * @see http://chaijs.com/plugins/chai-jquery/#containtext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.focus'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is focused, using `document.activeElement`.
+     * @example
+     *    cy.get('#result').should('be.focused')
+     *    cy.get('#result').should('have.focus') 
+     * @see http://chaijs.com/plugins/chai-jquery/#containtext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.focused'): Chainable<Subject>
+    /**
      * Assert that the selection is not empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
      *    cy.get('#result').should('exist')
@@ -3655,6 +3673,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.be.visible'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not focused, using `document.activeElement`.
+     * @example
+     *    cy.get('#result').should('not.have.focus')
+     *    cy.get('#result').should('not.be.focused')
+     * @see http://chaijs.com/plugins/chai-jquery/#containtext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.focus'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is not focused, using `document.activeElement`.
+     * @example
+     *    cy.get('#result').should('not.be.focused')
+     *    cy.get('#result').should('not.have.focus')
+     * @see http://chaijs.com/plugins/chai-jquery/#containtext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.focused'): Chainable<Subject>
     /**
      * Assert that the selection does not contain the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
      * @example
