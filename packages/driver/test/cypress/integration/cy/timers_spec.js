@@ -387,12 +387,17 @@ describe('driver/src/cy/timers', () => {
     .then((win) => {
       const stub1 = cy.stub()
 
-      win.setTimeout(stub1, 400)
+      // we're setting setTimeout to 500ms because
+      // there were times where the driver's webserver
+      // was sending bytes after 200ms (TTFB) that caused
+      // this test to be flaky.
+      win.setTimeout(stub1, 500)
 
+      // force the window to sync reload
       win.location.reload()
 
       cy
-      .wait(600)
+      .wait(800)
       .then(() => {
         expect(stub1).not.to.be.called
       })
