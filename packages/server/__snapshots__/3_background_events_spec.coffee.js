@@ -40,6 +40,21 @@ Error: Async error from background file
   └───────────────────────────────┘
 
 
+The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
+
+Error: Async error from background file
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+
   (Video)
 
   - Started processing:   Compressing to 32 CRF
