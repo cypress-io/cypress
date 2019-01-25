@@ -408,6 +408,14 @@ Log = (state, config, obj) ->
             Error: _this.getError(err)
           })
 
+          ## HACK: if we have a diff then
+          ## we actually want to append it AFTER
+          ## the Error property, so we delete the diff
+          ## from the object and add it back on as a property
+          if Diff = consoleObj.Diff
+            delete consoleObj.Diff
+            consoleObj.Diff = Diff
+
         ## add note if no snapshot exists on command instruments
         if _this.get("instrument") is "command" and not _this.get("snapshots")
           consoleObj.Snapshot = "The snapshot is missing. Displaying current state of the DOM."

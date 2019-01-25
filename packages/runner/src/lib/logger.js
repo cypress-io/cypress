@@ -2,6 +2,86 @@
 
 import _ from 'lodash'
 
+const _joinLogArgs = (args1, args2) => {
+
+  if (!_.isArray(args1)) {
+    return _joinLogArgs(_logCSS(args1, ''), args2)
+  }
+
+  if (!_.isArray(args2)) {
+    return _joinLogArgs(args1, _logCSS(args2, ''))
+  }
+
+  const ret1 = `${args1[0]} ${args2[0]}`
+  const ret2 = args1.slice(1).concat(args2.slice(1))
+
+  const toRet = [ret1].concat(ret2)
+
+  return toRet
+}
+
+// Fixes cases when string to style includes an escape character
+const _escapeConsoleString = (line) => {
+
+  // spacial sequences include '%c', '%f', '%d', etc
+  // can be escaped by doubling the amount of "%"
+  return line.replace(/(%+)(c|f|o|O|d|i|s)/g, '$1$1$2')
+
+}
+
+const _logColor = (line, color) => {
+  return _logCSS(line, `color:${color}`)
+}
+
+const _logCSS = (line, css) => {
+  return [`%c${_escapeConsoleString(line)}`, css]
+}
+
+const _formatDiffHeader = () => {
+  return ['Diff: ', _logColor('+ expected', 'green'), _logColor('- actual', 'red')].reduce(_joinLogArgs)
+}
+
+// this is tested in driver/assertions_spec
+const _formatConsoleDiff = (diff) => {
+  let indent = '\n   '
+
+  function cleanUp (line) {
+    if (line[0] === '+') {
+      return _logColor(`${indent + line}`, 'green')
+    }
+
+    if (line[0] === '-') {
+      return _logColor(`${indent + line}`, 'red')
+    }
+
+    if (line.match(/@@/)) {
+      return _logCSS('\n ...', 'font-weight:bold')
+    }
+
+    if (line.match(/\\ No newline/)) {
+      return '\n'
+    }
+
+    return indent + line
+  }
+  function notBlank (line) {
+    return typeof line !== 'undefined' && line !== '\n'
+  }
+
+  let lines = diff.split('\n').splice(5)
+
+  return (
+    [].concat(
+      lines
+      .map(cleanUp)
+      .filter(notBlank)
+    )
+    .reduce((diffA, diffB) => {
+      return _joinLogArgs(diffA, diffB)
+    }, [''])
+  )
+}
+
 export default {
   log (...args) {
     console.log(...args)
@@ -23,6 +103,12 @@ export default {
     this._logTable(consoleProps)
   },
 
+  collapsedLog (headerArgs, logArgs) {
+    console.groupCollapsed(...headerArgs)
+    this.log(...logArgs)
+    console.groupEnd()
+  },
+
   _logValues (consoleProps) {
     const formattedLog = this._formatted(_.omit(consoleProps, 'groups', 'table'))
 
@@ -31,7 +117,17 @@ export default {
       // _.trim([]) returns '' but we want to log empty arrays, so account for that
       if (_.trim(value) === '' && !_.isArray(value)) return
 
-      this.log(`%c${key}`, 'font-weight: bold', value)
+      if (_.includes(key, 'Diff')) {
+        const logArgs = _joinLogArgs([''], _formatConsoleDiff(value))
+
+        this.collapsedLog(_formatDiffHeader(), logArgs)
+
+        return
+      }
+
+      const logArgs = [..._logCSS(key, 'font-weight: bold'), value]
+
+      this.log(...logArgs)
     })
   },
 
@@ -107,4 +203,9 @@ export default {
 
     return table
   },
+
+  // expose for testing in driver/assertions_spec
+  _formatConsoleDiff,
+  _joinLogArgs,
+  _escapeConsoleString,
 }

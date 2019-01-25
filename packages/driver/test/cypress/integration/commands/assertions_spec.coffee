@@ -1,6 +1,8 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
+logger = require('../../../../../runner/src/lib/logger')
+
 helpers = require("../../support/helpers")
 
 describe "src/cy/commands/assertions", ->
@@ -625,6 +627,243 @@ describe "src/cy/commands/assertions", ->
         try
           expect(true).to.be.false
         catch err
+
+    it "consoleProps for errors with diffs", (done) ->
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(_.keys(consoleProps)).to.deep.eq([
+            "Command"
+            "actual"
+            "expected"
+            "Message"
+            "Error"
+            "Diff"
+          ])
+          done()
+      try
+        expect('a').to.eq('b')
+      catch err
+
+    it "consoleProps error diffs are succinct", (done) ->
+      obj1 = Array(500).fill().map((x, i) ->
+        if i % 100 is 0
+          return 'good'
+        return i
+      )
+      obj2 = Array(500).fill().map((x, i) ->
+        if i % 100 is 0
+          return 'bad'
+        return i
+      )
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+          
+          cy.removeAllListeners("log:added")
+
+          expect(consoleProps.Diff.split('\n')).to.have.length.lt(60)
+          done()
+      try
+        expect(obj2).to.eq(obj1)
+      catch err
+
+    it "consoleProps error diffs are logged properly", (done) ->
+      obj1 = 'good'
+      obj2 = 'bad'
+      cy.once "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(logger._formatConsoleDiff(consoleProps.Diff)).to.deep.eq([
+            " %c\n   -bad %c\n   +good %c\n   ",
+            "color:red",
+            "color:green",
+            ""
+          ])
+          done()
+      expect(obj2).to.eq(obj1)
+
+    ## TODO: use snapshot here
+    it "consoleProps errors with diffs are logged properly and escaped", (done) ->
+      stub = cy.spy().as('console')
+      cy.stub(console, 'log').callsFake(stub)
+      cy.stub(console, 'groupCollapsed').callsFake(stub)
+      obj1 = ['%cfo%co%c', '%%cf%coo%%%c']
+      obj2 = ['%cfo%co%c', '%%cf%coo%%c']
+
+      cy.once "log:added", (attrs, log) =>
+        { consoleProps } = attrs
+        logger._logValues(consoleProps)
+        expect(stub.args).to.deep.eq([
+          [
+            "%cCommand:  ",
+            "font-weight: bold",
+            "assert"
+          ],
+          [
+            "%cActual:   ",
+            "font-weight: bold",
+            [
+              "%cfo%co%c",
+              "%%cf%coo%%c"
+            ]
+          ],
+          [
+            "%cExpected: ",
+            "font-weight: bold",
+            [
+              "%cfo%co%c",
+              "%%cf%coo%%%c"
+            ]
+          ],
+          [
+            "%cMessage:  ",
+            "font-weight: bold",
+            "expected [ %cfo%co%c, %%cf%coo%%c ] to equal [ %cfo%co%c, %%cf%coo%%%c ]"
+          ],
+          [
+            "%cError:    ",
+            "font-weight: bold",
+            "AssertionError: expected [ '%cfo%co%c', '%%cf%coo%%c' ] to equal [ '%cfo%co%c', '%%cf%coo%%%c' ]"
+          ],
+          [
+            "%cDiff:  %c+ expected %c- actual",
+            "",
+            "color:green",
+            "color:red"
+          ],
+          [
+            "  %c\n    [ %c\n      \"%%cfo%%co%%c\" %c\n   -  \"%%%%cf%%coo%%%%c\" %c\n   +  \"%%%%cf%%coo%%%%%%c\" %c\n    ] %c\n   ",
+            "",
+            "",
+            "color:red",
+            "color:green",
+            "",
+            ""
+          ]
+        ])
+        done()
+
+      expect(obj2).to.eq(obj1)
+    
+    ## TODO: use a snapshot here
+    it "consoleProps errors without diffs are logged properly", (done) ->
+      stub = cy.stub(console, 'log').as('conosle.log')
+      
+      obj1 = {a:'a'}
+      obj2 = 'a'
+
+      cy.once "log:added", (attrs, log) =>
+        { consoleProps } = attrs
+        
+        logger._logValues(consoleProps)
+        expect(stub.args).to.deep.eq([
+          [
+            "%cCommand:  ",
+            "font-weight: bold",
+            "assert"
+          ],
+          [
+            "%cActual:   ",
+            "font-weight: bold",
+            "a"
+          ],
+          [
+            "%cExpected: ",
+            "font-weight: bold",
+            {
+              "a": "a"
+            }
+          ],
+          [
+            "%cMessage:  ",
+            "font-weight: bold",
+            "expected a to equal { a: a }"
+          ],
+          [
+            "%cError:    ",
+            "font-weight: bold",
+            "AssertionError: expected 'a' to equal { a: 'a' }"
+          ]
+        ])
+        done()
+  
+      expect(obj2).to.eq(obj1)
+    
+    ## TODO: use a snapshot here
+    it "consoleProps without errors are logged properly", (done) ->
+      stub = cy.stub(console, 'log').as('conosle.log')
+      
+      obj1 = {a:'a'}
+      obj2 = {a:'a'}
+
+      cy.once "log:added", (attrs, log) =>
+        { consoleProps } = attrs
+        
+        logger._logValues(consoleProps)
+
+        expect(stub.args).to.deep.eq([
+          [
+            "%cCommand:  ",
+            "font-weight: bold",
+            "assert"
+          ],
+          [
+            "%cActual:   ",
+            "font-weight: bold",
+            {
+              "a": "a"
+            }
+          ],
+          [
+            "%cExpected: ",
+            "font-weight: bold",
+            {
+              "a": "a"
+            }
+          ],
+          [
+            "%cMessage:  ",
+            "font-weight: bold",
+            "expected { a: a } to deeply equal { a: a }"
+          ]
+        ])
+        done()
+  
+      expect(obj2).to.deep.eq(obj1)
+    
+    describe "packages/runner/lib/logger", ->
+      it "_joinLogArgs with two styles", ->
+        ret = logger._joinLogArgs(['%cfoo', 'blue'], ['%cbar', 'red'])
+        expect(ret).to.deep.eq(['%cfoo %cbar', 'blue', 'red'])
+      it "_joinLogArgs with one style", ->
+        ret = logger._joinLogArgs(['%cfoo', 'blue'], 'bar')
+        expect(ret).to.deep.eq(['%cfoo %cbar', 'blue', ''])
+      it "_joinLogArgs with no styles", ->
+        ret = logger._joinLogArgs('foo', 'bar')
+        expect(ret).to.deep.eq(['%cfoo %cbar', '', ''])
+      it "_joinLogArgs with no styles", ->
+        ret = logger._joinLogArgs([''], 'bar')
+        expect(ret).to.deep.eq([' %cbar', ''])
+      it "_escapeConsoleString", ->
+        ret = logger._escapeConsoleString('%cfoo')
+        expect(ret).to.eq('%%cfoo')
+        ret = logger._escapeConsoleString('%%cfoo')
+        expect(ret).to.eq('%%%%cfoo')
+        ret = logger._escapeConsoleString('%%%cfoo')
+        expect(ret).to.eq('%%%%%%cfoo')
+        ret = logger._escapeConsoleString('%ffoo')
+        expect(ret).to.eq('%%ffoo')
+        ret = logger._escapeConsoleString('foo%%cfoo')
+        expect(ret).to.eq('foo%%%%cfoo')
+        ret = logger._escapeConsoleString('%%bar')
+        expect(ret).to.eq('%%bar')
 
     describe "#patchAssert", ->
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
@@ -1791,3 +2030,4 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.have.css("foo")
+
