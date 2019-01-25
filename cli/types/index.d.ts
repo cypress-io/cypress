@@ -3512,7 +3512,7 @@ declare namespace Cypress {
      * Assert that at least one element of the selection is focused, using `document.activeElement`.
      * @example
      *    cy.get('#result').should('be.focused')
-     *    cy.get('#result').should('have.focus') 
+     *    cy.get('#result').should('have.focus')
      * @see http://chaijs.com/plugins/chai-jquery/#containtext
      * @see https://on.cypress.io/assertions
      */
