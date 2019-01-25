@@ -285,7 +285,7 @@ describe "Set Up Project", ->
           })
 
         it "closes modal", ->
-          cy.get(".modal").should("not.be.visible")
+          cy.get(".modal").should("not.exist")
 
         it "updates localStorage projects cache", ->
           expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
