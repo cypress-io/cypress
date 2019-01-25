@@ -1507,11 +1507,11 @@ describe "src/cy/commands/assertions", ->
         l4 = @logs[3]
 
         expect(l1.get("message")).to.eq(
-          "expected **<div#div>** to not be **focused**"
+          "expected **<div#div>** not to be **focused**"
         )
 
         expect(l2.get("message")).to.eq(
-          "expected **<div#div>** to not be **focused**"
+          "expected **<div#div>** not to be **focused**"
         )
 
         expect(l3.get("message")).to.eq(
@@ -1536,7 +1536,7 @@ describe "src/cy/commands/assertions", ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(1)
             expect(@logs[0].get("error").message).to.contain(
-              "expected {} to not be 'focused'"
+              "expected {} not to be 'focused'"
             )
             expect(err.message).to.include("> focus")
             expect(err.message).to.include("> {}")

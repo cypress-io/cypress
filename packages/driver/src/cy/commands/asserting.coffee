@@ -120,7 +120,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## want to auto-fail on those
       if not exp.isCheckingExistence and $dom.isElement(subject)
         cy.ensureAttached(subject, "should")
-
+        
       _.reduce chainers, (memo, value) =>
         if value not of memo
           err = $utils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
