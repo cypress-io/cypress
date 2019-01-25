@@ -73,11 +73,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           o.url    = args[1]
           o.body   = args[2]
 
-      _.defaults(options, {
+      _.defaults(options, REQUEST_DEFAULTS, {
         log: true,
-        timeout: config("responseTimeout"),
         failOnStatusCode: true
-      }, REQUEST_DEFAULTS)
+      })
+
+      ## if timeout is not supplied, use the configured default
+      options.timeout ||= config("responseTimeout")
 
       options.method = options.method.toUpperCase()
 

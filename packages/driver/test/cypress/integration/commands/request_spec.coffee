@@ -1,10 +1,12 @@
 _ = Cypress._
 Promise = Cypress.Promise
+RESPONSE_TIMEOUT = 22222
 
 describe "src/cy/commands/request", ->
   context "#request", ->
     beforeEach ->
       cy.stub(Cypress, "backend").callThrough()
+      Cypress.config("responseTimeout", RESPONSE_TIMEOUT)
 
     describe "argument signature", ->
       beforeEach ->
@@ -27,7 +29,7 @@ describe "src/cy/commands/request", ->
             method: "GET"
             gzip: true
             followRedirect: true
-            timeout: 30000
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -49,17 +51,17 @@ describe "src/cy/commands/request", ->
             headers: {
               "x-token": "abc123"
             }
-            timeout: 30000
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts object with url + timeout", ->
-        cy.request({url: "http://localhost:8000/foo", timeout: 60000}).then ->
+        cy.request({url: "http://localhost:8000/foo", timeout: 23456}).then ->
           @expectOptionsToBe({
             url: "http://localhost:8000/foo"
             method: "GET"
             gzip: true
             followRedirect: true
-            timeout: 60000
+            timeout: 23456
           })
 
       it "accepts string url", ->
@@ -69,7 +71,7 @@ describe "src/cy/commands/request", ->
             method: "GET"
             gzip: true
             followRedirect: true
-            timeout: 30000
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url", ->
@@ -79,7 +81,7 @@ describe "src/cy/commands/request", ->
             method: "DELETE"
             gzip: true
             followRedirect: true
-            timeout: 30000
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url + body", ->
@@ -91,7 +93,7 @@ describe "src/cy/commands/request", ->
             json: true
             gzip: true
             followRedirect: true
-            timeout: 30000
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + body", ->
@@ -103,7 +105,7 @@ describe "src/cy/commands/request", ->
             json: true
             gzip: true
             followRedirect: true
-            timeout: 30000
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + string body", ->
@@ -114,7 +116,7 @@ describe "src/cy/commands/request", ->
             body: "foo"
             gzip: true
             followRedirect: true
-            timeout: 30000
+            timeout: RESPONSE_TIMEOUT
           })
 
       context "method normalization", ->
@@ -125,7 +127,7 @@ describe "src/cy/commands/request", ->
               method: "POST"
               gzip: true
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "url normalization", ->
@@ -138,7 +140,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "uses localhost urls", ->
@@ -148,7 +150,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "uses wwww urls", ->
@@ -158,7 +160,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl when origin is empty", ->
@@ -171,7 +173,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl over current origin", ->
@@ -184,7 +186,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "gzip", ->
@@ -198,7 +200,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: false
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "auth", ->
@@ -219,7 +221,7 @@ describe "src/cy/commands/request", ->
                 user: "brian"
                 pass: "password"
               }
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "followRedirect", ->
@@ -231,7 +233,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "can be set to false", ->
@@ -245,7 +247,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: false
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "normalizes followRedirects -> followRedirect", ->
@@ -259,7 +261,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: false
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "qs", ->
@@ -277,7 +279,7 @@ describe "src/cy/commands/request", ->
               gzip: true
               followRedirect: true
               qs: {foo: "bar"}
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "form", ->
@@ -297,7 +299,7 @@ describe "src/cy/commands/request", ->
               form: true
               followRedirect: true
               body: {foo: "bar"}
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "accepts a string for body", ->
@@ -314,7 +316,7 @@ describe "src/cy/commands/request", ->
               form: true
               followRedirect: true
               body: "foo=bar&baz=quux"
-              timeout: 30000
+              timeout: RESPONSE_TIMEOUT
             })
 
     describe "failOnStatus", ->
