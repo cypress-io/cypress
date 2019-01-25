@@ -387,12 +387,12 @@ describe('driver/src/cy/timers', () => {
     .then((win) => {
       const stub1 = cy.stub()
 
-      win.setTimeout(stub1, 200)
+      win.setTimeout(stub1, 400)
 
       win.location.reload()
 
       cy
-      .wait(400)
+      .wait(600)
       .then(() => {
         expect(stub1).not.to.be.called
       })
