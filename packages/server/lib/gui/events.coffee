@@ -185,13 +185,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      onSettingsChanged = ->
-        ## add filename here
-        bus.emit("config:changed")
+      onSettingsChanged = (filePath) ->
+        bus.emit("config:changed", filePath)
 
-      onPluginsChanged = ->
-        ## add filename here
-        bus.emit("plugins:changed")
+      onPluginsChanged = (filePath) ->
+        bus.emit("plugins:changed", filePath)
 
       onSpecChanged = (spec) ->
         bus.emit("spec:changed", spec)

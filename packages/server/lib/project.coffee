@@ -192,8 +192,8 @@ class Project extends EE
 
       debug("watch plugins file")
       @watchers.watchTree(cfg.pluginsFile, {
-        onChange: =>
-          options.onPluginsChanged()
+        onChange: ()  =>
+          options.onPluginsChanged(cfg.pluginsFile)
       })
 
   watchSettings: (onSettingsChanged) ->
@@ -212,8 +212,7 @@ class Project extends EE
 
         ## call our callback function
         ## when settings change!
-        ## TODO: pass the file path to the config:change event
-        onSettingsChanged.call(@)
+        onSettingsChanged.call(@, filePath)
     }
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)

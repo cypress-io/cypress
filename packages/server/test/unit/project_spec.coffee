@@ -310,14 +310,16 @@ describe "lib/project", ->
       expect(@watch).to.be.calledWith("/path/to/cypress.json")
       expect(@watch).to.be.calledWith("/path/to/cypress.env.json")
 
-    it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
+    it "sets onChange event when {changeEvents: true}", () ->
+      options = {onSettingsChanged: sinon.spy()}
+      @project.watchSettingsAndStartWebsockets(options)
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
 
       expect(obj.onChange).to.be.a("function")
-      obj.onChange()
+      obj.onChange('fake/file/path')
+      expect(options.onSettingsChanged).to.be.calledWith('fake/file/path')
 
     it "does not call watch when {changeEvents: false}", ->
       @project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined})
@@ -394,14 +396,13 @@ describe "lib/project", ->
         expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
         expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
-    it "calls plugins.init when file changes", ->
+    it "calls onPluginsChanged with file path when file changes", ->
       options = { onPluginsChanged: sinon.stub() }
 
       @project.watchPluginsFile(@config, options).then =>
-        @project.watchers.watchTree.firstCall.args[1].onChange()
+        @project.watchers.watchTree.firstCall.args[1].onChange(@config.pluginsFile)
 
-        ## TODO expect to be called with file path
-        expect(options.onPluginsChanged).to.be.called
+        expect(options.onPluginsChanged).to.be.calledWith(@config.pluginsFile)
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
