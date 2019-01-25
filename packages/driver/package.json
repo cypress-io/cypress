@@ -16,9 +16,6 @@
   "files": [
     "lib"
   ],
-  "dependencies": {
-    "diff": "4.0.1"
-  },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
