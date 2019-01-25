@@ -10,23 +10,45 @@ The reporter shows the running results of the tests. It includes the following:
 - Control for toggling auto-scrolling
 - Controls for various states (running, paused, stopped, etc.)
 - A command log, showing:
-  * suites
-  * tests
-  * hooks
-  * commands and assertions with detailed information
-  * any failures/errors
+  - suites
+  - tests
+  - hooks
+  - commands and assertions with detailed information
+  - any failures/errors
 - Toggle-able auto-scrolling of command log
 
-## Install
+## Installing
 
-The reporters's dependencies can be installed with:
+The reporter's dependencies can be installed with:
 
 ```bash
 cd packages/reporter
 npm install
 ```
 
-## Development
+The reporter may also require that dependencies by installed at the root of this repository:
+
+```bash
+npm install
+```
+
+## Building
+
+### For development
+
+```bash
+npm run build
+```
+
+### For production
+
+```bash
+npm run build-prod
+```
+
+## Developing
+
+To see the reporter render, see [Developing the driver](../driver/README.md#Developing).
 
 ### Watching
 
@@ -38,21 +60,9 @@ npm install
 npm run watch
 ```
 
-### One Time Building
-
-#### For development
-
-```bash
-npm run build
-```
-
-#### For production
-
-```bash
-npm run build-prod
-```
-
 ## Testing
+
+Run enzyme component tests found in `*.spec` files in `src`:
 
 ```bash
 npm test

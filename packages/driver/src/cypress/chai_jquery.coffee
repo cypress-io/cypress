@@ -24,7 +24,8 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       try
         ## always fail the assertion
         ## if we aren't a DOM like object
-        ctx.assert(false, args...)
+        ## depends on "negate" flag
+        ctx.assert(!!ctx.__flags.negate, args...)
       catch err
         callbacks.onInvalid(method, ctx._obj)
 
@@ -133,6 +134,31 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       value,
       actual
     )
+  
+  focusedAssertion = (val) ->
+    return ->
+      assertDom(
+        @,
+        "focus",
+        'expected #{this} to be #{exp}'
+        'expected #{this} to not be #{exp}',
+        'focused'
+      )
+      
+      assert(
+        @,
+        "focus",
+        ## we don't use :focus becuase jquery will return null when window is not focused
+        ## we grab document from the element to be sure we are in the proper frame
+        wrap(@).is($(wrap(@)[0].ownerDocument.activeElement)),
+        'expected #{this} to be #{exp}',
+        'expected #{this} to not be #{exp}',
+        "focused"
+      )
+    
+  chai.Assertion.overwriteProperty "focus", focusedAssertion
+
+  chai.Assertion.overwriteProperty "focused", focusedAssertion
 
   chai.Assertion.addMethod "descendants", (selector) ->
     assert(

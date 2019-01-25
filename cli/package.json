@@ -80,7 +80,6 @@
     "yauzl": "2.8.0"
   },
   "devDependencies": {
-    "@cypress/releaser": "0.2.2",
     "@cypress/sinon-chai": "1.0.0",
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",

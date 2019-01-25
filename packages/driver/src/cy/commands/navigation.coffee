@@ -519,11 +519,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ->
+      onLoad = ({runOnLoadCallback}) ->
         ## reset window on load
         win = state("window")
 
-        options.onLoad?.call(runnable.ctx, win)
+        ## the onLoad callback should only be skipped if specified
+        if runOnLoadCallback isnt false
+          options.onLoad?.call(runnable.ctx, win)
 
         options._log.set({url: url}) if options._log
 
@@ -564,6 +566,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## for this, and so we need to resolve onLoad immediately
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
+          ## https://github.com/cypress-io/cypress/issues/1311
+          if current.hash is remote.hash
+            consoleProps["Note"] = "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+
+            return onLoad({runOnLoadCallback: false})
+
           return changeIframeSrc(remote.href, "hashchange")
           .then(onLoad)
 

@@ -25,6 +25,9 @@ packages/https-proxy/ca/
 # from desktop-gui
 packages/desktop-gui/src/jsconfig.json
 
+# from driver
+packages/driver/test/cypress/videos
+
 # from example
 packages/example/app
 packages/example/build
@@ -32,6 +35,9 @@ packages/example/cypress/screenshots
 packages/example/cypress/videos
 packages/example/cypress/fixtures/profile.json
 packages/example/cypress/fixtures/users.json
+
+# from driver
+packages/driver/test/cypress/videos
 
 # from server
 packages/server/.cy
