@@ -1531,6 +1531,11 @@ describe "src/cy/commands/assertions", ->
         cy.get('#div').should('not.be.focused')
         cy.get('#div').should('not.have.focus')
 
+      it "works with multiple elements", ->
+        cy.get('div:last').focus()
+        cy.get('div').should('have.focus')
+        cy.get('div:last').blur()
+        cy.get('div').should('not.have.focus')
 
       it "throws when obj is not DOM", (done) ->
           cy.on "fail", (err) =>
