@@ -190,4 +190,12 @@ describe('app state', () => {
       expect(instance.pinnedSnapshotId).to.be.null
     })
   })
+
+  context('#configurationFilePathChanged', () => {
+    it('sets configurationFilePathChanged to null', () => {
+      const instance = new AppState()
+
+      expect(instance.configurationFilePathChanged).to.be.null
+    })
+  })
 })

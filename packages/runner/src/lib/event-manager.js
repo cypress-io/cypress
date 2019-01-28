@@ -53,6 +53,10 @@ const eventManager = {
       window.location.href = url
     })
 
+    channel.on('config:changed', (filePath) => {
+      reporterBus.emit('config:changed', filePath)
+    })
+
     channel.on('automation:push:message', (msg, data = {}) => {
       if (!Cypress) return
 

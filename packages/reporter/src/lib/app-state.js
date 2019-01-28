@@ -6,6 +6,7 @@ const defaults = {
   isRunning: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
+  configurationFilePathChanged: null,
 }
 
 class AppState {
@@ -14,6 +15,7 @@ class AppState {
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
+  @observable configurationFilePathChanged = defaults.configurationFilePathChanged
 
   isStopped = false
   _resetAutoScrollingEnabledTo = true

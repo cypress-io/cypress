@@ -194,6 +194,11 @@ describe('events', () => {
       runner.on.withArgs('reporter:snapshot:unpinned').callArgWith(1)
       expect(appState.pinnedSnapshotId).to.be.null
     })
+
+    it('sets configurationFilePathChanged on the app state on config:changed', () => {
+      runner.on.withArgs('config:changed').callArgWith(1, 'fake/file/path')
+      expect(appState.configurationFilePathChanged).to.equal('fake/file/path')
+    })
   })
 
   context('from local bus', () => {

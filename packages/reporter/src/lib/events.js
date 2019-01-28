@@ -81,6 +81,10 @@ export default {
       appState.pinnedSnapshotId = null
     }))
 
+    runner.on('config:changed', action('config:changed', (filePath) => {
+      appState.configurationFilePathChanged = filePath
+    }))
+
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()
