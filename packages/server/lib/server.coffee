@@ -637,8 +637,8 @@ class Server
   onTestFileChange: (filePath) ->
     @_socket and @_socket.onTestFileChange(filePath)
 
-  onRequest: (fn) ->
-    @_middleware = fn
+  onConfigurationChange: (filePath) ->
+    @_socket and @_socket.onConfigurationChange(filePath)
 
   onNextRequest: (fn) ->
     @onRequest =>

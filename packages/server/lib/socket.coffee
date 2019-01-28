@@ -350,6 +350,9 @@ class Socket
   changeToUrl: (url) ->
     @toRunner("change:to:url", url)
 
+  onConfigurationChange: (fileName) ->
+    @toRunner("config:changed", fileName)
+
   close: ->
     preprocessor.emitter.removeListener("file:updated", @onTestFileChange)
     @io?.close()

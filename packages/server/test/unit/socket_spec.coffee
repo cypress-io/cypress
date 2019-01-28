@@ -506,3 +506,11 @@ describe "lib/socket", ->
         it "does not emit if stat throws", ->
           @socket.onTestFileChange("foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
+
+      describe "#onConfigurationChange", ->
+        it "emits 'config:changed' event to runner with file name", ->
+          @socket.toRunner = sinon.stub()
+
+          @socket.onConfigurationChange("fake/file/path")
+
+          expect(@socket.toRunner).to.have.been.calledWith("config:changed", "fake/file/path")

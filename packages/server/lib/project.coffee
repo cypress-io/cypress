@@ -193,6 +193,9 @@ class Project extends EE
       debug("watch plugins file")
       @watchers.watchTree(cfg.pluginsFile, {
         onChange: ()  =>
+          ## emit the change to the runner
+          @server.onConfigurationChange(cfg.pluginsFile)
+
           options.onPluginsChanged(cfg.pluginsFile)
       })
 
@@ -209,6 +212,9 @@ class Project extends EE
         ## a project id less than 1 second ago
         return if @generatedProjectIdTimestamp and
           (new Date - @generatedProjectIdTimestamp) < 1000
+
+        ## emit the change to the runner
+        @server.onConfigurationChange(filePath)
 
         ## call our callback function
         ## when settings change!

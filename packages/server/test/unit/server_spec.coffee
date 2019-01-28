@@ -332,3 +332,16 @@ describe "lib/server", ->
         props: null
         visiting: undefined
       })
+
+  context "#onConfigurationChange", ->
+    it "calls this._socket.onConfigurationChange with file path", ->
+      socket = sinon.stub({
+        onConfigurationChange: ->
+        close: ->
+      })
+
+      @server._socket = socket
+
+      @server.onConfigurationChange("fake/file/path")
+
+      expect(socket.onConfigurationChange).to.have.been.calledWith("fake/file/path")

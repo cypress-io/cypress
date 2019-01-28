@@ -299,7 +299,10 @@ describe "lib/project", ->
   context "#watchSettings", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
-      @project.server = {startWebsockets: ->}
+      @project.server = {
+        startWebsockets: ->,
+        onConfigurationChange: sinon.stub()
+      }
       sinon.stub(settings, "pathToCypressJson").returns("/path/to/cypress.json")
       sinon.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
       @watch = sinon.stub(@project.watchers, "watch")
@@ -320,6 +323,7 @@ describe "lib/project", ->
       expect(obj.onChange).to.be.a("function")
       obj.onChange('fake/file/path')
       expect(options.onSettingsChanged).to.be.calledWith('fake/file/path')
+      expect(@project.server.onConfigurationChange).to.be.calledWith('fake/file/path')
 
     it "does not call watch when {changeEvents: false}", ->
       @project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined})
@@ -375,6 +379,7 @@ describe "lib/project", ->
       sinon.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
       @project.watchers = { watchTree: sinon.spy() }
+      @project.server = { onConfigurationChange: sinon.stub() }
       sinon.stub(plugins, "init").resolves()
       @config = {
         pluginsFile: "/path/to/plugins-file"
@@ -396,13 +401,14 @@ describe "lib/project", ->
         expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
         expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
-    it "calls onPluginsChanged with file path when file changes", ->
+    it "calls onPluginsChanged and onConfigurationChange with file path when file changes", ->
       options = { onPluginsChanged: sinon.stub() }
 
       @project.watchPluginsFile(@config, options).then =>
         @project.watchers.watchTree.firstCall.args[1].onChange(@config.pluginsFile)
 
         expect(options.onPluginsChanged).to.be.calledWith(@config.pluginsFile)
+        expect(@project.server.onConfigurationChange).to.be.calledWith(@config.pluginsFile)
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
