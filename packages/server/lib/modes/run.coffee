@@ -821,10 +821,12 @@ module.exports = {
 
     { isHeadless, isHeaded } = browser
 
+    browserName = browser.name
+
     debug("about to run spec %o", {
       spec
       isHeadless
-      browser
+      browserName
     })
 
     screenshots = []
@@ -836,11 +838,11 @@ module.exports = {
     ## to gracefully handle this in promise land
 
     ## if we've been told to record and we're not spawning a headed browser
-    browserCanBeRecorded = (browser) ->
-      browser.name is "electron" and isHeadless
+    browserCanBeRecorded = (name) ->
+      name is "electron" and isHeadless
 
     if video
-      if browserCanBeRecorded(browser)
+      if browserCanBeRecorded(browserName)
         if not videosFolder
           throw new Error("Missing videoFolder for recording")
 
@@ -851,10 +853,10 @@ module.exports = {
       else
         console.log("")
 
-        if browser.name is "electron" and isHeaded
+        if browserName is "electron" and isHeaded
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
+          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -916,6 +918,8 @@ module.exports = {
 
     { projectRoot, record, key, ciBuildId, parallel, group } = options
 
+    browserName = options.browser
+
     ## alias and coerce to null
     specPattern = options.spec ? null
 
@@ -937,7 +941,7 @@ module.exports = {
 
       Promise.all([
         system.info(),
-        browsers.ensureAndGetByPredicate(_.pick(options.browser, 'name', 'version')),
+        browsers.ensureAndGetByName(browserName),
         @findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles()

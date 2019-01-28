@@ -40,6 +40,11 @@ getBrowser = (name) ->
 find = (browser, browsers = []) ->
   _.find(browsers, { name: browser })
 
+ensureAndGetByName = (name) ->
+  utils.getBrowsers()
+  .then (browsers = []) ->
+    find(name, browsers) or throwBrowserNotFound(name, browsers)
+
 ensureAndGetByPredicate = (predicate) ->
   utils.getBrowsers()
   .then (browsers = []) ->
@@ -53,6 +58,8 @@ process.once "exit", kill
 
 module.exports = {
   find
+
+  ensureAndGetByName
 
   ensureAndGetByPredicate
 
