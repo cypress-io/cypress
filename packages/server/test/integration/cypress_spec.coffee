@@ -787,7 +787,7 @@ describe "lib/cypress", ->
           .then =>
             args = browserUtils.launch.firstCall.args
 
-            expect(args[0]).to.eq(_.find(TYPICAL_BROWSERS, { name: 'chrome' }))
+            expect(args[0]).to.eq(_.find(TYPICAL_BROWSERS, { name: "chrome" }))
 
             browserArgs = args[2]
 
