@@ -37,30 +37,18 @@ getBrowser = (name) ->
     else
       require("./chrome")
 
-find = (browser, browsers = []) ->
-  _.find(browsers, { name: browser })
-
-ensureAndGetByName = (name) ->
-  utils.getBrowsers()
-  .then (browsers = []) ->
-    find(name, browsers) or throwBrowserNotFound(name, browsers)
-
 ensureAndGetByPredicate = (predicate) ->
   utils.getBrowsers()
   .then (browsers = []) ->
-    _.find(browsers, predicate) or throwBrowserNotFound(name, browsers)
+    _.find(browsers, predicate) or throwBrowserNotFound(predicate, browsers)
 
 throwBrowserNotFound = (browser, browsers = []) ->
   names = _.map(browsers, "name").join(", ")
-  errors.throw("BROWSER_NOT_FOUND", browser, names)
+  errors.throw("BROWSER_NOT_FOUND", browser.name, names)
 
 process.once "exit", kill
 
 module.exports = {
-  find
-
-  ensureAndGetByName
-
   ensureAndGetByPredicate
 
   throwBrowserNotFound

@@ -59,7 +59,7 @@ export function launch(
 ) {
   log('launching browser %o to open %s', browser, url)
 
-  const predicate = pick(browser, 'name', 'path', 'version')
+  const predicate = pick(browser, ['name', 'path', 'version'])
   if (browsers && !find(browsers, predicate)) {
     throw browserNotFoundErr(browsers, browser)
   }
