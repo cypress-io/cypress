@@ -32,11 +32,10 @@ cleanup = ->
 
 getBrowser = (name) ->
   switch name
-    ## normalize all the chrome* browsers
-    when "chrome", "chromium", "canary"
-      require("./chrome")
     when "electron"
       require("./electron")
+    else
+      require("./chrome")
 
 find = (browser, browsers = []) ->
   _.find(browsers, { name: browser })
