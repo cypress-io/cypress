@@ -569,13 +569,53 @@ describe "lib/util/ci_provider", ->
       authorName: "committer"
     })
 
-  it "snap", ->
+  it "goCD", ->
     resetEnv = mockedEnv({
-      SNAP_CI: "true"
+      GO_CD: "true"
+            
+      GO_SERVER_URL: "goServerUrl",
+      GO_ENVIRONMENT_NAME: "goEnvironmentName",
+      GO_PIPELINE_NAME: "goPipelineName",
+      GO_PIPELINE_COUNTER: "goPipelineCounter",
+      GO_PIPELINE_LABEL: "goPipelineLabel",
+      GO_STAGE_NAME: "goStageName",
+      GO_STAGE_COUNTER: "goStageCounter",
+      GO_JOB_NAME: "goJobName",
+      GO_TRIGGER_USER: "goTriggerUser",
+      "GO_DEPENDENCY_LABEL_${pipeline_name}": "goDependencyLabelUpstream",
+      "GO_DEPENDENCY_LOCATOR_${pipeline_name}": "goDependencyLocatorUpstream",
+      GO_REVISION: "goRevision",
+      "GO_REVISION_${material_name}": "goRevisionMaterial",
+      GO_TO_REVISION: "goToRevision",
+      "GO_TO_REVISION_${material_name}": "goToRevisionMaterial",
+      GO_FROM_REVISION: "goFromRevision",
+      "GO_FROM_REVISION_${material_name}": "goFromRevisionMaterial",
+      GO_MATERIAL_HAS_CHANGED: "goMaterialHasChanged",
+      "GO_MATERIAL_${material_name}_HAS_CHANGED": "goMaterialMaterialNameHasChanged"
     }, {clear: true})
 
-    expectsName("snap")
-    expectsCiParams(null)
+    expectsName("goCD")
+    expectsCiParams({
+      goServerUrl: "goServerUrl",
+      goEnvironmentName: "goEnvironmentName",
+      goPipelineName: "goPipelineName",
+      goPipelineCounter: "goPipelineCounter",
+      goPipelineLabel: "goPipelineLabel",
+      goStageName: "goStageName",
+      goStageCounter: "goStageCounter",
+      goJobName: "goJobName",
+      goTriggerUser: "goTriggerUser",
+      goDependencyLabelUpstream: "goDependencyLabelUpstream",
+      goDependencyLocatorUpstream: "goDependencyLocatorUpstream",
+      goRevision: "goRevision",
+      goRevisionMaterial: "goRevisionMaterial",
+      goToRevision: "goToRevision",
+      goToRevisionMaterial: "goToRevisionMaterial",
+      goFromRevision: "goFromRevision",
+      goFromRevisionMaterial: "goFromRevisionMaterial",
+      goMaterialHasChanged: "goMaterialHasChanged",
+      goMaterialMaterialNameHasChanged: "goMaterialMaterialNameHasChanged"
+    })
     expectsCommitParams(null)
 
   it "teamcity", ->

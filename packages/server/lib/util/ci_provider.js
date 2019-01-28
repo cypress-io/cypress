@@ -61,7 +61,7 @@ const CI_PROVIDERS = {
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
   'shippable': 'SHIPPABLE',
-  'snap': 'SNAP_CI',
+  'goCD': 'GO_CD',
   'teamcity': 'TEAMCITY_VERSION',
   'teamfoundation': 'TF_BUILD',
   'travis': 'TRAVIS',
@@ -222,7 +222,27 @@ const _providerCiParams = () => {
       'PULL_REQUEST_BASE_BRANCH', // Name of the branch that the pull request will be merged into. It should be the same as BASE_BRANCH.
       'PULL_REQUEST_REPO_FULL_NAME', // Full name of the repository from where the pull request originated.
     ]),
-    snap: null,
+    goCD: extract([
+      'GO_SERVER_URL',
+      'GO_ENVIRONMENT_NAME',
+      'GO_PIPELINE_NAME',
+      'GO_PIPELINE_COUNTER',
+      'GO_PIPELINE_LABEL',
+      'GO_STAGE_NAME',
+      'GO_STAGE_COUNTER',
+      'GO_JOB_NAME',
+      'GO_TRIGGER_USER',
+      'GO_DEPENDENCY_LABEL_${pipeline_name}',
+      'GO_DEPENDENCY_LOCATOR_${pipeline_name}',
+      'GO_REVISION',
+      'GO_REVISION_${material_name}',
+      'GO_TO_REVISION',
+      'GO_TO_REVISION_${material_name}',
+      'GO_FROM_REVISION',
+      'GO_FROM_REVISION_${material_name}',
+      'GO_MATERIAL_HAS_CHANGED',
+      'GO_MATERIAL_${material_name}_HAS_CHANGED'
+    ]),
     teamcity: null,
     teamfoundation: extract([
       'BUILD_BUILDID',

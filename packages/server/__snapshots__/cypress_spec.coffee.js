@@ -70,6 +70,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - jenkins
 - semaphore
 - shippable
+- goCD
 - teamfoundation
 - travis
 
@@ -99,6 +100,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - jenkins
 - semaphore
 - shippable
+- goCD
 - teamfoundation
 - travis
 
@@ -129,6 +131,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - jenkins
 - semaphore
 - shippable
+- goCD
 - teamfoundation
 - travis
 
