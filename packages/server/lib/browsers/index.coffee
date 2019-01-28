@@ -67,7 +67,7 @@ module.exports = {
 
   close: kill
 
-  open: (name, options = {}, automation) ->
+  open: (browser, options = {}, automation) ->
     kill(true)
     .then ->
       _.defaults(options, {
@@ -75,15 +75,15 @@ module.exports = {
         onBrowserClose: ->
       })
 
-      if not browser = getBrowser(name)
-        return throwBrowserNotFound(name, options.browsers)
+      if not browserHelper = getBrowser(browser.name)
+        return throwBrowserNotFound(browser.name, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
-      debug("opening browser %s", name)
+      debug("opening browser %o", browser)
 
-      browser.open(name, url, options, automation)
+      browserHelper.open(browser, url, options, automation)
       .then (i) ->
         debug("browser opened")
         ## TODO: bind to process.exit here

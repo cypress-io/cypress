@@ -1,5 +1,5 @@
 import { log } from './log'
-import { find, map } from 'lodash'
+import { find, map, pick } from 'lodash'
 import * as cp from 'child_process'
 import { Browser, FoundBrowser, BrowserNotFoundError } from './types'
 
@@ -52,7 +52,8 @@ export function launch(
 ) {
   log('launching browser %o to open %s', browser, url)
 
-  if (browsers && !find(browsers, browser)) {
+  const predicate = pick(browser, 'name', 'path', 'version')
+  if (browsers && !find(browsers, predicate)) {
     throw browserNotFoundErr(browsers, browser)
   }
 

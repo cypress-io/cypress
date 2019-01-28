@@ -43,12 +43,9 @@ create = ->
     getProject: -> openProject
 
     launch: (browser, spec, options = {}) ->
-      debugger
       debug("resetting project state, preparing to launch browser")
 
       la(_.isPlainObject(browser), "expected browser object:", browser)
-
-      browserName = browser.name
 
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
@@ -107,12 +104,12 @@ create = ->
 
           do relaunchBrowser = ->
             debug(
-              "launching browser: %s, spec: %s",
-              browserName,
+              "launching browser: %o, spec: %s",
+              browser,
               spec.relative
             )
 
-            browsers.open(browserName, options, automation)
+            browsers.open(browser, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
