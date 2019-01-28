@@ -917,7 +917,6 @@ module.exports = {
     { projectRoot, record, key, ciBuildId, parallel, group } = options
 
     browserName = options.browser
-    browser = browsers.ensureAndGetByPredicate({ name: browserName })
 
     ## alias and coerce to null
     specPattern = options.spec ? null
@@ -940,7 +939,7 @@ module.exports = {
 
       Promise.all([
         system.info(),
-        browser,
+        browsers.ensureAndGetByPredicate({ name: browserName }),
         @findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles()
