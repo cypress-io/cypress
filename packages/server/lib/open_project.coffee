@@ -43,6 +43,7 @@ create = ->
     getProject: -> openProject
 
     launch: (browser, spec, options = {}) ->
+      debugger
       debug("resetting project state, preparing to launch browser")
 
       la(_.isPlainObject(browser), "expected browser object:", browser)

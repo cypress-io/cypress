@@ -165,7 +165,7 @@ module.exports = {
   
     args
 
-  open: (browserName, url, options = {}, automation) ->
+  open: (browser, url, options = {}, automation) ->
     { isTextTerminal } = options
 
     Promise
@@ -204,5 +204,5 @@ module.exports = {
 
         debug("launch in chrome: %s, %s", url, args)
 
-        utils.launch(browserName, url, args)
+        utils.launch(browser, url, args)
 }
