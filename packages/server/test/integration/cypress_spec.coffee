@@ -1078,7 +1078,7 @@ describe "lib/cypress", ->
         osVersion: "v1"
       })
 
-      sinon.stub(browsers, "ensureAndGetByName").returns({
+      sinon.stub(browsers, "ensureAndGetByPredicate").returns({
         version: "59.1.2.3"
         displayName: "Electron"
       })
