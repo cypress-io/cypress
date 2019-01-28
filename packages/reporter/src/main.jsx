@@ -12,6 +12,7 @@ import runnablesStore from './runnables/runnables-store'
 import scroller from './lib/scroller'
 import statsStore from './header/stats-store'
 
+import Banner from './banner/banner'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
 
@@ -59,9 +60,14 @@ class Reporter extends Component {
   render () {
     const { appState } = this.props
 
+    // { appState.configurationFilePathChanged &&
+    // <Banner filePath={appState.configurationFilePathChanged} />
+    // }
+
     return (
       <div className={cs('reporter', { 'is-running': appState.isRunning })}>
         <Header appState={appState} statsStore={this.props.statsStore} />
+        <Banner filePath="/Users/lilaconlee/cypress/debug/test/cypress.json" />
         <Runnables
           appState={appState}
           error={this.props.error}

@@ -6,6 +6,7 @@ import sinon from 'sinon'
 import { Reporter } from './main'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
+import Banner from './banner/banner'
 
 const runnablesStore = {}
 const scroller = {}
@@ -93,5 +94,24 @@ describe('<Reporter />', () => {
     expect(component.find(Runnables)).to.have.prop('error', error)
     expect(component.find(Runnables)).to.have.prop('runnablesStore', runnablesStore)
     expect(component.find(Runnables)).to.have.prop('specPath', 'the spec path')
+  })
+
+  describe('Banner', () => {
+    it('renders without banner if appState.configurationFilePathChanged does not exist', () => {
+      const component = shallow(<Reporter {...getProps()} />)
+
+      expect(component.find(Banner)).to.not.exist
+    })
+
+    it('renders with banner if appState.configurationFilePathChanged exists', () => {
+      const component = shallow(<Reporter {...getProps({
+        appState: {
+          configurationFilePathChanged: 'fake/file/path',
+          setAutoScrolling: () => {},
+        },
+      })} />)
+
+      expect(component.find(Banner)).to.exist
+    })
   })
 })
