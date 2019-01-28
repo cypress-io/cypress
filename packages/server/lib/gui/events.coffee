@@ -101,11 +101,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "launch:browser"
-      debugger
       openProject.launch(arg.browser, arg.spec, {
         projectRoot: options.projectRoot
         onBrowserOpen: ->
-          debugger
           send({browserOpened: true})
         onBrowserClose: ->
           send({browserClosed: true})
