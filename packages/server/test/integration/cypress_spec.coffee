@@ -71,9 +71,7 @@ TYPICAL_BROWSERS = [
 ELECTRON_BROWSER = {
   name: "electron"
   displayName: "Electron"
-  version: "59.1.2.3"
   path: ""
-  majorVersion: "59"
 }
 
 previousCwd = process.cwd()
@@ -1081,8 +1079,8 @@ describe "lib/cypress", ->
       })
 
       sinon.stub(browsers, "ensureAndGetByName").returns({
-        version: ELECTRON_BROWSER.version
-        displayName: ELECTRON_BROWSER.displayName
+        version: "59.1.2.3"
+        displayName: "Electron"
       })
 
       err = new Error()
