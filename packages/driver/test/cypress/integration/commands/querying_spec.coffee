@@ -144,7 +144,7 @@ describe "src/cy/commands/querying", ->
         button.get(0).blur()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected to find element: 'focused', but never found it."
+          expect(err.message).to.include "Expected to find an element with focus, but never found it."
           done()
 
         cy.focused()
