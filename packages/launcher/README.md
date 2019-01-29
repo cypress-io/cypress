@@ -2,7 +2,7 @@
 
 This package finds and launches browsers for each operating system.
 
-## Install
+## Installing
 
 The launcher's dependencies can be installed with:
 
@@ -11,9 +11,21 @@ cd packages/launcher
 npm install
 ```
 
-## Development
+## Developing
 
-The TypeScript source files are in `lib` folder.
+The TypeScript source files are in [`lib`](/lib) folder.
+
+To see browsers detected on your machine, just run: 
+
+```bash
+node index.js
+```
+
+## Testing
+
+```bash
+npm run test
+```
 
 ## Debugging
 
@@ -24,12 +36,3 @@ to output debug log messages. To turn on, use
 DEBUG=cypress:launcher npm test
 ```
 
-## Demo
-
-To see browsers detected on your machine, just run `node index.js`
-
-## Testing
-
-```bash
-npm run test
-```

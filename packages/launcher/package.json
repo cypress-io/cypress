@@ -25,7 +25,6 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/releaser": "0.1.12",
     "@types/bluebird": "3.5.21",
     "@types/chai": "^3.5.2",
     "@types/debug": "0.0.31",
@@ -39,7 +38,7 @@
     "chai": "^3.5.0",
     "prettier": "^1.7.0",
     "shelljs": "^0.7.8",
-    "sinon": "^1.17.3",
+    "sinon": "^2.4.1",
     "sinon-chai": "^2.8.0",
     "tslint": "5.8.0",
     "tslint-config-standard": "7.0.0",

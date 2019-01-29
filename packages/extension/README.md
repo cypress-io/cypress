@@ -2,7 +2,7 @@
 
 This is the Chrome Extension responsible for automating Chrome
 
-## Install
+## Installing
 
 The extension's dependencies can be installed with:
 
@@ -19,7 +19,7 @@ npm install
 npm run watch
 ```
 
-### One Time Building
+## Building
 
 ```bash
 npm run build

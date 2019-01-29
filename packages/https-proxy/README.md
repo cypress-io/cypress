@@ -4,7 +4,7 @@ This package is responsible for acting as a CA authority and generating dynamic 
 
 This package enables Cypress to inspect and modify bytes coming in and out of the browser.
 
-## Install
+## Installing
 
 The proxy's dependencies can be installed with:
 

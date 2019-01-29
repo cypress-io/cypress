@@ -1,6 +1,6 @@
 const detect = require('../../lib/detect').default
-const log = require('debug')('cypress:launcher:test')
 const os = require('os')
+import { log } from '../log'
 import {project} from 'ramda'
 
 const isWindows = () =>
