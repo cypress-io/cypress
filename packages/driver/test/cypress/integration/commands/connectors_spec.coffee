@@ -765,33 +765,6 @@ describe "src/cy/commands/connectors", ->
 
           cy.wrap(obj).its('foo').should('eq', true)
 
-        it "cy.wrap(undefined) should retry", () ->
-          spy = cy.spy()
-
-          cy.wrap().should ->
-            spy()
-            expect(spy).to.be.calledTwice
-
-          cy.wrap(undefined).should ->
-            spy()
-            expect(spy.callCount).to.eq(4)
-
-        it "cy.then does not verify upcoming assertions", ->
-          cy.timeout(4000)
-          # obj = {foo: "bar"}
-
-          cy.wrap({foo:"bar"}).then (obj) ->
-            setTimeout ->
-              obj.foo = "baz"
-            , 1000
-
-            return obj
-          # cy.wrap(obj)
-          .then (obj) ->
-            cy.wrap(obj).should (obj) ->
-              console.log(obj)
-              expect(obj).to.deep.eq({foo: "baz"})
-
         it "can handle getter that throws", (done) ->
           spy = cy.spy((err)=>
             # throw new Error('sdf')

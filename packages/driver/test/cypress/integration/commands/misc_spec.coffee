@@ -69,6 +69,17 @@ describe "src/cy/commands/misc", ->
       cy.wrap({}).then (subject) ->
         expect(subject).to.deep.eq {}
 
+    it "cy.wrap(undefined) should retry", () ->
+      spy = cy.spy()
+
+      cy.wrap().should ->
+        spy()
+        expect(spy).to.be.calledTwice
+
+      cy.wrap(undefined).should ->
+        spy()
+        expect(spy.callCount).to.eq(4)
+
     it "can wrap jquery objects and continue to chain", ->
       @remoteWindow.$.fn.foo = "foo"
 
