@@ -371,7 +371,7 @@ createAndOpenProject = (socketId, options) ->
   { projectRoot, projectId } = options
 
   Project
-  .ensureExists(projectRoot)
+  .ensureExists(projectRoot, options)
   .then ->
     ## open this project without
     ## adding it to the global cache

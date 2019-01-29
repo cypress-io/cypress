@@ -108,7 +108,7 @@ module.exports = {
   },
 
   id (projectRoot) {
-    const file = this._pathToFile(projectRoot, 'cypress.json')
+    const file = this.pathToCypressJson(projectRoot)
 
     return fs.readJsonAsync(file)
     .get('projectId')
@@ -118,7 +118,7 @@ module.exports = {
   },
 
   exists (projectRoot) {
-    const file = this._pathToFile(projectRoot, 'cypress.json')
+    const file = this.pathToCypressJson(projectRoot)
 
     //# first check if cypress.json exists
     return fs.statAsync(file)
@@ -143,7 +143,7 @@ module.exports = {
   },
 
   read (projectRoot) {
-    const file = this._pathToFile(projectRoot, 'cypress.json')
+    const file = this.pathToCypressJson(projectRoot)
 
     return fs.readJsonAsync(file)
     .catch({ code: 'ENOENT' }, () => {
@@ -190,14 +190,14 @@ module.exports = {
     .then((settings) => {
       _.extend(settings, obj)
 
-      const file = this._pathToFile(projectRoot, 'cypress.json')
+      const file = this.pathToCypressJson(projectRoot)
 
       return this._write(file, settings)
     })
   },
 
   remove (projectRoot) {
-    return fs.unlinkSync(this._pathToFile(projectRoot, 'cypress.json'))
+    return fs.unlinkSync(this.pathToCypressJson(projectRoot))
   },
 
   pathToCypressJson (projectRoot) {
