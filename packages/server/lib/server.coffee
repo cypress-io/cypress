@@ -640,6 +640,9 @@ class Server
   onConfigurationChange: (filePath) ->
     @_socket and @_socket.onConfigurationChange(filePath)
 
+  onRequest: (filePath) ->
+    @_middleware = fn
+
   onNextRequest: (fn) ->
     @onRequest =>
       fn.apply(@, arguments)
