@@ -41,12 +41,10 @@ describe "Project", ->
         @getProjectStatus.reject({name: "", message: "", statusCode: 401})
       cy.shouldBeLoggedOut()
 
-    it "re-opens project if config changes", ->
+    it "shows warning if config changes", ->
       cy.shouldBeOnProjectSpecs().then =>
-        @ipc.onConfigChanged.yield()
-        expect(@ipc.closeProject).to.be.called
-        expect(@ipc.openProject).to.be.called
-        cy.shouldBeOnProjectSpecs()
+        @ipc.onConfigChanged.yield({}, "/path/to/file")
+        cy.contains("This file was changed: /path/to/file")
 
   describe "polling", ->
     beforeEach ->
