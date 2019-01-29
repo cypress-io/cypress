@@ -4,27 +4,18 @@
     no-unused-vars,
     one-var,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
 const coerce = require('./coerce')
 const config = require('../config')
-const cwd = require('../cwd')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.+)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk'.split(' ')
+const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk configFile'.split(' ')
 
 // returns true if the given string has double quote character "
 // only at the last position.
@@ -53,7 +44,7 @@ const normalizeBackslashes = function (options) {
   //# backslash at the end
   //# https://github.com/cypress-io/cypress/issues/535
   // these properties are paths and likely to have backslash on Windows
-  const pathProperties = ['runProject', 'project', 'appPath', 'execPath']
+  const pathProperties = ['runProject', 'project', 'appPath', 'execPath', 'configFile']
 
   pathProperties.forEach((property) => {
     if (options[property]) {
@@ -158,6 +149,7 @@ module.exports = {
 
     const alias = {
       'app-path': 'appPath',
+      'config-file': 'configFile',
       'exec-path': 'execPath',
       'api-key': 'apiKey',
       'smoke-test': 'smokeTest',

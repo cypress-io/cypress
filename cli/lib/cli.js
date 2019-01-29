@@ -26,7 +26,7 @@ const coerceFalse = (arg) => {
 const parseOpts = (opts) => {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-    'port', 'env', 'cypressVersion', 'config', 'record', 'key',
+    'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'configFile',
     'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
     'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId'
   )
@@ -56,6 +56,7 @@ const descriptions = {
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
   global: 'force Cypress into global mode as if its globally installed',
+  configFile: 'path to a config file to override the default cypress.json. set to "false" to skip specifying a config file.',
   version: 'prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
   dev: 'runs cypress in development and bypasses binary check',
@@ -136,6 +137,7 @@ module.exports = {
     .option('-p, --port <port>', text('port'))
     .option('-e, --env <env>', text('env'))
     .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
     .option('-b, --browser <browser-name>', text('browser'))
     .option('-P, --project <project-path>', text('project'))
     .option('--parallel', text('parallel'))
@@ -158,6 +160,7 @@ module.exports = {
     .option('-p, --port <port>', text('port'))
     .option('-e, --env <env>', text('env'))
     .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('-P, --project <project path>', text('project'))
     .option('--global', text('global'))

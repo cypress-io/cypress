@@ -26,6 +26,10 @@ const processRunOptions = (options = {}) => {
     args.push('--config', options.config)
   }
 
+  if (options.configFile) {
+    args.push('--config-file', options.configFile)
+  }
+
   if (options.port) {
     args.push('--port', options.port)
   }
