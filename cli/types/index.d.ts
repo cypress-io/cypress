@@ -3813,6 +3813,13 @@ declare namespace Cypress {
     headers?: { [key: string]: string }
   }
 
+  /**
+   * Error augmented with source property to indicate its origin
+   */
+  interface PageError extends Error {
+    source: 'onerror' | 'onunhandledrejection'
+  }
+
   // for just a few events like "page:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -3833,7 +3840,7 @@ declare namespace Cypress {
       // so it's applied to all spec files
       // cypress/support/index.js
 
-      Cypress.on('uncaught:exception', (err, runnable) => {
+      Cypress.on('page:error', (err, runnable) => {
         // returning false here prevents Cypress from
         // failing the test
         return false
@@ -3849,7 +3856,7 @@ declare namespace Cypress {
       })
     ```
      */
-    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
+    (action: 'page:error', fn: (error: PageError, runnable: Mocha.IRunnable) => false | void): void
     /**
      * Fires when your app calls the global `window.confirm()` method.
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.

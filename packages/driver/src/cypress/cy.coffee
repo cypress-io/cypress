@@ -105,11 +105,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   contentWindowListeners = (contentWindow) ->
     $Listeners.bindTo(contentWindow, {
-      onError: ->
+      onError: (type, args...) ->
         ## use a function callback here instead of direct
         ## reference so our users can override this function
         ## if need be
-        cy.onUncaughtException.apply(cy, arguments)
+        cy.onPageError.apply(cy, type, args)
       onSubmit: (e) ->
         Cypress.action("app:form:submitted", e)
       onBeforeUnload: (e) ->
@@ -927,18 +927,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## else pass the error along
       return err
 
-    onUncaughtException: ->
+    onPageError: (type, args...) ->
       runnable = state("runnable")
 
       ## don't do anything if we don't have a current runnable
       return if not runnable
 
       ## create the special uncaught exception err
-      err = errors.createUncaughtException("app", arguments)
+      err = errors.createUncaughtException("app", args)
 
-      results = Cypress.action("app:uncaught:exception", err, runnable)
+      results = Cypress.action("app:page:error", err, runnable)
 
-      ## dont do anything if any of our uncaught:exception
+      ## don't do anything if any of our page:error
       ## listeners returned false
       return if _.some(results, returnedFalse)
 

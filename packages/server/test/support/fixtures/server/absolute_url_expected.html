@@ -10,7 +10,7 @@
       };
 
       window.onerror = function(){
-        Cypress.onUncaughtException.apply(Cypress, arguments);
+        Cypress.onPageError.apply(Cypress, 'onerror', arguments);
       }
     </script>
     <script type='text/javascript'>

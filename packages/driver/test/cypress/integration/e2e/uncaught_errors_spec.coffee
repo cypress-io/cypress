@@ -34,7 +34,7 @@ describe "uncaught errors", ->
   it "can turn off uncaught exception handling via cy", ->
     r = cy.state("runnable")
 
-    cy.on "uncaught:exception", (err, runnable) ->
+    cy.on "page:error", (err, runnable) ->
       expect(err.name).to.eq("Uncaught ReferenceError")
       expect(err.message).to.include("foo is not defined")
       expect(err.message).to.include("This error originated from your application code, not from Cypress.")
@@ -48,7 +48,7 @@ describe "uncaught errors", ->
   it "can turn off uncaught exception handling via Cypress", ->
     r = cy.state("runnable")
 
-    Cypress.once "uncaught:exception", (err, runnable) ->
+    Cypress.once "page:error", (err, runnable) ->
       expect(err.message).to.include("foo is not defined")
       expect(runnable is r).to.be.true
 
@@ -59,7 +59,7 @@ describe "uncaught errors", ->
   it "logs click error once", (done) ->
     uncaught = false
 
-    cy.on "uncaught:exception", ->
+    cy.on "page:error", ->
       uncaught = true
 
       return true
@@ -85,7 +85,7 @@ describe "uncaught errors", ->
   it "logs error on page load when new page has uncaught exception", (done) ->
     uncaught = false
 
-    cy.on "uncaught:exception", ->
+    cy.on "page:error", ->
       uncaught = true
 
       return true

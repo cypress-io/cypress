@@ -212,25 +212,25 @@ cy
   })
 
 namespace CypressOnTests {
-  Cypress.on('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
+  Cypress.on('page:error', (error, runnable) => {
+    error // $ExpectType PageError
     runnable // $ExpectType IRunnable
   })
 
-  cy.on('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
+  cy.on('page:error', (error, runnable) => {
+    error // $ExpectType PageError
     runnable // $ExpectType IRunnable
   })
 }
 
 namespace CypressOffTests {
-  Cypress.off('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
+  Cypress.off('page:error', (error, runnable) => {
+    error // $ExpectType PageError
     runnable // $ExpectType IRunnable
   })
 
-  cy.off('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
+  cy.off('page:error', (error, runnable) => {
+    error // $ExpectType PageError
     runnable // $ExpectType IRunnable
   })
 }

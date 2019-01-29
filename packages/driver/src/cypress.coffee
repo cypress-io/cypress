@@ -394,8 +394,8 @@ class $Cypress
       when "cy:scrolled"
         @emit("internal:scrolled", args...)
 
-      when "app:uncaught:exception"
-        @emitMap("uncaught:exception", args...)
+      when "app:page:error"
+        @emitMap("page:error", args...)
 
       when "app:page:alert"
         @emit("page:alert", args[0])

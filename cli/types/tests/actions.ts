@@ -1,5 +1,5 @@
-Cypress.on('uncaught:exception', (error, runnable) => {
-  error // $ExpectType Error
+Cypress.on('page:error', (error, runnable) => {
+  error // $ExpectType PageError
   runnable // $ExpectType IRunnable
 })
 
