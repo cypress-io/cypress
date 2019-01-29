@@ -109,7 +109,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## use a function callback here instead of direct
         ## reference so our users can override this function
         ## if need be
-        cy.onPageError.apply(cy, type, args)
+        cy.onPageError.apply(cy, [type].concat(args))
       onSubmit: (e) ->
         Cypress.action("app:form:submitted", e)
       onBeforeUnload: (e) ->
