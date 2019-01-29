@@ -300,5 +300,10 @@ describe('events', () => {
         autoScrollingEnabled: false,
       })
     })
+
+    it('emits reload:configuration on reload:configuration', () => {
+      events.emit('reload:configuration')
+      expect(runner.emit).to.have.been.calledWith('reload:configuration')
+    })
   })
 })

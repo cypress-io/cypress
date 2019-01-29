@@ -147,6 +147,10 @@ export default {
         autoScrollingEnabled: appState.autoScrollingEnabled,
       })
     })
+
+    localBus.on('reload:configuration', action('reload:configuration', () => {
+      runner.emit('reload:configuration')
+    }))
   },
 
   emit (event, ...args) {

@@ -1,20 +1,22 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 
-const Banner = observer(({ filePath }) => (
-  <div className='banner'>
-    <div className='text-container'>
-      <div>
-        <p>You need to restart Cypress after updating configuration files.</p>
-        <p>Changes found in: <code>{ filePath }</code></p>
-      </div>
-      <br />
-      <strong>
-        <i className='fa fa-refresh'></i>{' '}
+const Banner = observer(({ events, filePath }) => {
+  const emit = (event) => events.emit(event)
+
+  return (
+    <div className='banner'>
+      <div className='text-container'>
+        <p>This file was changed: <code>{ filePath }</code></p>
+        <p>Please restart Cypress for changes to take effect.</p>
+        <br />
+        <button className='restart' onClick={emit('reload:configuration')}>
+          <i className='fa fa-refresh'></i>{' '}
         Restart
-      </strong>
+        </button>
+      </div>
     </div>
-  </div>
-))
+  )
+})
 
 export default Banner

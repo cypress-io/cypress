@@ -382,6 +382,12 @@ describe "lib/socket", ->
           expect(@options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 })
           done()
 
+    context "on(reload:configuration)", ->
+      it "calls onConfigurationReload", (done) ->
+        @client.emit "reload:configuration", =>
+          expect(@options.onConfigurationReload).to.be.called
+          done()
+
   context "unit", ->
     beforeEach ->
       @mockClient = sinon.stub({

@@ -1,13 +1,15 @@
 import { shallow } from 'enzyme'
 import React from 'react'
+import sinon from 'sinon'
 
 import Banner from './banner'
 
 describe('<Banner />', () => {
+  const eventsStub = { emit: sinon.spy() }
   let component
 
   beforeEach(() => {
-    component = shallow(<Banner filePath="fake/file/path" />)
+    component = shallow(<Banner events={eventsStub} filePath="fake/file/path" />)
   })
 
   it('contains configuration changed message', () => {
@@ -15,7 +17,11 @@ describe('<Banner />', () => {
     expect(component.find('code')).to.have.text('fake/file/path')
   })
 
-  // TODO add back in once functionality exists
-  it.skip('can reload the project', () => {
+  it('emits reload configuration event when restart button is clicked', () => {
+    const restart = component.find('.restart')
+
+    expect(restart).to.exist
+    restart.simulate('click')
+    expect(eventsStub.emit).to.have.been.calledWith('reload:configuration')
   })
 })
