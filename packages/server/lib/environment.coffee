@@ -19,10 +19,6 @@ try
   app = require("electron").app
   app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
   app.commandLine.appendSwitch("ignore-certificate-errors", true)
-  ## this should really only be necessary when 
-  ## running Chromium versions >= 72
-  ## https://github.com/cypress-io/cypress/issues/1872
-  app.commandLine.appendSwitch("proxy-bypass-list", "<-loopback>")
 
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
