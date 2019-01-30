@@ -19,7 +19,7 @@ module.exports = {
       args.push('--config', options.config)
     }
 
-    if (options.configFile) {
+    if (options.configFile !== undefined) {
       args.push('--config-file', options.configFile)
     }
 
