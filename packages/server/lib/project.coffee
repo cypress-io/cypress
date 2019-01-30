@@ -127,7 +127,7 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  _initPlugins: (cfg) ->
+  _initPlugins: (cfg, options) ->
     ## only init plugins with the
     ## whitelisted config values to
     ## prevent tampering with the
@@ -139,7 +139,7 @@ class Project extends EE
         debug('got plugins error', err.stack)
 
         browsers.close()
-        @options.onError(err)
+        options.onError(err)
     })
 
   getRuns: ->
@@ -199,7 +199,7 @@ class Project extends EE
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
           ## re-init plugins after a change
-          @_initPlugins(cfg)
+          @_initPlugins(cfg, @options)
           .catch (err) ->
             @options.onError(err)
       })
