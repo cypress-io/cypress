@@ -107,8 +107,12 @@ module.exports = {
       , _.cloneDeep(obj))
   },
 
-  id (projectRoot) {
-    const file = this.pathToCypressJson(projectRoot)
+  configFile (options = {}) {
+    return options.configFile || 'cypress.json'
+  },
+
+  id (projectRoot, options = {}) {
+    const file = this.pathToCypressJson(projectRoot, options)
 
     return fs.readJsonAsync(file)
     .get('projectId')
@@ -117,11 +121,20 @@ module.exports = {
     })
   },
 
-  exists (projectRoot) {
-    const file = this.pathToCypressJson(projectRoot)
+  exists (projectRoot, options = {}) {
+    const file = this.pathToCypressJson(projectRoot, options)
 
     //# first check if cypress.json exists
-    return fs.statAsync(file)
+    return (
+      () => {
+        if (options.configFile === false) {
+          return Promise.resolve(true)
+        }
+
+        return fs.statAsync(file)
+
+      }
+    )()
     .then(() =>
     //# if it does also check that the projectRoot
     //# directory is writable
@@ -142,8 +155,12 @@ module.exports = {
     })
   },
 
-  read (projectRoot) {
-    const file = this.pathToCypressJson(projectRoot)
+  read (projectRoot, options = {}) {
+    if (options.configFile === false) {
+      return Promise.resolve({})
+    }
+
+    const file = this.pathToCypressJson(projectRoot, options)
 
     return fs.readJsonAsync(file)
     .catch({ code: 'ENOENT' }, () => {
@@ -185,23 +202,27 @@ module.exports = {
     })
   },
 
-  write (projectRoot, obj = {}) {
+  write (projectRoot, obj = {}, options = {}) {
+    if (options.configFile === false) {
+      return Promise.resolve({})
+    }
+
     return this.read(projectRoot)
     .then((settings) => {
       _.extend(settings, obj)
 
-      const file = this.pathToCypressJson(projectRoot)
+      const file = this.pathToCypressJson(projectRoot, options)
 
       return this._write(file, settings)
     })
   },
 
-  remove (projectRoot) {
-    return fs.unlinkSync(this.pathToCypressJson(projectRoot))
+  remove (projectRoot, options = {}) {
+    return fs.unlinkSync(this.pathToCypressJson(projectRoot, options))
   },
 
-  pathToCypressJson (projectRoot) {
-    return this._pathToFile(projectRoot, 'cypress.json')
+  pathToCypressJson (projectRoot, options = {}) {
+    return this._pathToFile(projectRoot, this.configFile(options))
   },
 
   pathToCypressEnvJson (projectRoot) {
