@@ -45,6 +45,12 @@ const isHidden = function (el, name) {
 
   const $el = $jquery.wrap(el)
 
+  // we check to make sure element is attached. An element that is
+  // detached will have 0x0 size, so this provides a more specific
+  // reason than the 0x0 message.
+  // we don't need this because a detached el will have no height or width
+  // $elements.isDetached($el)
+
   //# in Cypress-land we consider the element hidden if
   //# either its offsetHeight or offsetWidth is 0 because
   //# it is impossible for the user to interact with this element
@@ -312,6 +318,10 @@ const getReasonIsHidden = function ($el) {
 
   //# returns the reason in human terms why an element is considered not visible
   switch (false) {
+
+    case !$elements.isDetached($el):
+      return `This element '${node}' is not visible becuase it has become detached from the DOM. It's possible the element has been removed and a new element has been put in its place.`
+
     case !elHasDisplayNone($el):
       return `This element '${node}' is not visible because it has CSS property: 'display: none'`
 

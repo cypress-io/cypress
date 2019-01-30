@@ -8,7 +8,7 @@ $utils = require("../../cypress/utils")
 bRe            = /(\*\*)(.+)(\*\*)/
 bTagOpen       = /\*\*/g
 bTagClosed     = /\*\*/g
-reExistence    = /exist/
+reExistence    = /exist|visible/
 reEventually   = /^eventually/
 reHaveLength   = /length/
 

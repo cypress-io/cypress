@@ -33,7 +33,7 @@ describe "Project Nav", ->
       @openProject.resolve(@config)
 
     it "displays projects nav", ->
-      cy.get(".empty").should("not.exist")
+      cy.get(".empty").should("not.be.visible")
       cy.get(".navbar-default")
 
     it "displays 'Tests' nav as active", ->
@@ -171,7 +171,7 @@ describe "Project Nav", ->
             @ipc.launchBrowser.yield(null, {browserClosed: true})
 
           it "hides close browser button", ->
-            cy.get(".close-browser").should("not.exist")
+            cy.get(".close-browser").should("not.be.visible")
 
           it "re-enables browser dropdown", ->
             cy.get(".browsers-list>a").first()
@@ -220,7 +220,7 @@ describe "Project Nav", ->
 
       it "displays no dropdown btn", ->
         cy.get(".browsers-list")
-          .find(".dropdown-toggle").should("not.exist")
+          .find(".dropdown-toggle").should("not.be.visible")
 
     describe "browser with info", ->
       beforeEach ->

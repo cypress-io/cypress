@@ -79,7 +79,7 @@ describe "Specs List", ->
 
     it "can dismiss the modal", ->
       cy.contains("OK, got it!").click()
-      cy.get(".modal").should("not.exist")
+      cy.get(".modal").should("not.be.visible")
         .then ->
           expect(@ipc.onboardingClosed).to.be.called
 
