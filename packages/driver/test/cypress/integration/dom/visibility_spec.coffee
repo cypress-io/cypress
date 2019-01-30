@@ -25,12 +25,6 @@ describe "src/cypress/dom/visibility", ->
 
       expect(fn).to.throw("Cypress.dom.isVisible() must be passed a basic DOM element.")
 
-    it "returns false for element not attached", ->
-      fn = ->
-        $dom.isVisible(cy.$$('<div>foo bar baz</div>'))
-
-      expect(fn()).to.eq(false)
-
   context "#isScrollable", ->
     beforeEach ->
       @add = (el) =>
@@ -122,7 +116,6 @@ describe "src/cypress/dom/visibility", ->
       @$visHidden  = add "<ul style='visibility: hidden;'></ul>"
       @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>parent visibility: hidden</button></div>"
       @$displayNone = add "<button style='display: none'>display: none</button>"
-      @$isDetached = $ "<div class='detached'> I'm not attached </div>"
       @$btnOpacity = add "<button style='opacity: 0'>opacity: 0</button>"
       @$divNoWidth = add "<div style='width: 0; height: 100px;'>width: 0</div>"
       @$divNoHeight = add "<div style='width: 50px; height: 0px;'>height: 0</div>"
@@ -496,9 +489,6 @@ describe "src/cypress/dom/visibility", ->
       beforeEach ->
         @reasonIs = ($el, str) ->
           expect($dom.getReasonIsHidden($el)).to.eq(str)
-
-      it "is detached from the dom", ->
-        @reasonIs @$isDetached, "This element '<div.detached>' is not visible becuase it has become detached from the DOM. It's possible the element has been removed and a new element has been put in its place."
 
       it "has 'display: none'", ->
         @reasonIs @$displayNone, "This element '<button>' is not visible because it has CSS property: 'display: none'"
