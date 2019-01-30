@@ -187,7 +187,7 @@ module.exports = {
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.read(projectRoot, options).then(validateFile("cypress.json"))
       settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
