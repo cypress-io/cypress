@@ -74,7 +74,7 @@ class Project extends EE
 
       @memoryCheck = setInterval(logMemory, 1000)
 
-    @getConfig()
+    @getConfig(options)
     .tap (cfg) =>
       process.chdir(@projectRoot)
 
@@ -314,7 +314,9 @@ class Project extends EE
   ## returns project config (user settings + defaults + cypress.json)
   ## with additional object "state" which are transient things like
   ## window width and height, DevTools open or not, etc.
-  getConfig: () =>
+  getConfig: (options={}) =>
+    options ?= @options
+
     if @cfg
       return Promise.resolve(@cfg)
 
@@ -332,7 +334,7 @@ class Project extends EE
         scaffoldDebug("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
 
-    config.get(@projectRoot, @options)
+    config.get(@projectRoot, options)
     .then (cfg) => @_setSavedState(cfg)
     .tap(setNewProject)
 
