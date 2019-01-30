@@ -65,13 +65,16 @@ class Project extends EE
       onSettingsChanged: false
     }
 
+    debug("project options %o", options)
+    @options = options
+
     if process.env.CYPRESS_MEMORY
       logMemory = ->
         console.log("memory info", process.memoryUsage())
 
       @memoryCheck = setInterval(logMemory, 1000)
 
-    @getConfig(options)
+    @getConfig()
     .tap (cfg) =>
       process.chdir(@projectRoot)
 
@@ -112,19 +115,19 @@ class Project extends EE
           @saveState(state)
 
         Promise.join(
-          @watchSettingsAndStartWebsockets(options, cfg)
+          @watchSettingsAndStartWebsockets(cfg)
           @scaffold(cfg)
         )
         .then =>
           Promise.join(
             @checkSupportFile(cfg)
-            @watchPluginsFile(cfg, options)
+            @watchPluginsFile(cfg)
           )
 
     # return our project instance
     .return(@)
 
-  _initPlugins: (cfg, options) ->
+  _initPlugins: (cfg) ->
     ## only init plugins with the
     ## whitelisted config values to
     ## prevent tampering with the
@@ -136,7 +139,7 @@ class Project extends EE
         debug('got plugins error', err.stack)
 
         browsers.close()
-        options.onError(err)
+        @options.onError(err)
     })
 
   getRuns: ->
@@ -179,7 +182,7 @@ class Project extends EE
         if not found
           errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
 
-  watchPluginsFile: (cfg, options) ->
+  watchPluginsFile: (cfg) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
     if not cfg.pluginsFile
       return Promise.resolve()
@@ -196,9 +199,9 @@ class Project extends EE
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
           ## re-init plugins after a change
-          @_initPlugins(cfg, options)
+          @_initPlugins(cfg)
           .catch (err) ->
-            options.onError(err)
+            @options.onError(err)
       })
 
   watchSettings: (onSettingsChanged) ->
@@ -220,11 +223,13 @@ class Project extends EE
         onSettingsChanged.call(@)
     }
 
-    @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
+    if @options.configFile != false
+      @watchers.watch(settings.pathToCypressJson(@projectRoot, @options), obj)
+
     @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
-    @watchSettings(options.onSettingsChanged)
+  watchSettingsAndStartWebsockets: (cfg = {}) ->
+    @watchSettings(@options.onSettingsChanged)
 
     { reporter, projectRoot } = cfg
 
@@ -251,13 +256,13 @@ class Project extends EE
     @automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
     @server.startWebsockets(@automation, cfg, {
-      onReloadBrowser: options.onReloadBrowser
+      onReloadBrowser: @options.onReloadBrowser
 
-      onFocusTests: options.onFocusTests
+      onFocusTests: @options.onFocusTests
 
-      onSpecChanged: options.onSpecChanged
+      onSpecChanged: @options.onSpecChanged
 
-      onSavedStateChanged: options.onSavedStateChanged
+      onSavedStateChanged: @options.onSavedStateChanged
 
       onConnect: (id) =>
         @emit("socket:connected", id)
@@ -309,7 +314,7 @@ class Project extends EE
   ## returns project config (user settings + defaults + cypress.json)
   ## with additional object "state" which are transient things like
   ## window width and height, DevTools open or not, etc.
-  getConfig: (options = {}) =>
+  getConfig: () =>
     if @cfg
       return Promise.resolve(@cfg)
 
@@ -327,7 +332,7 @@ class Project extends EE
         scaffoldDebug("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
 
-    config.get(@projectRoot, options)
+    config.get(@projectRoot, @options)
     .then (cfg) => @_setSavedState(cfg)
     .tap(setNewProject)
 
@@ -434,7 +439,7 @@ class Project extends EE
   getProjectId: ->
     @verifyExistence()
     .then =>
-      settings.read(@projectRoot)
+      settings.read(@projectRoot, @options)
     .then (settings) =>
       if settings and id = settings.projectId
         return id
@@ -484,7 +489,7 @@ class Project extends EE
     .map (projectRoot) ->
       Promise.props({
         path: projectRoot
-        id: settings.id(projectRoot)
+        id: settings.id(projectRoot, @options)
       })
 
   @_mergeDetails = (clientProject, project) ->
@@ -563,9 +568,9 @@ class Project extends EE
   @id = (path) ->
     Project(path).getProjectId()
 
-  @ensureExists = (path, options) ->
-    ## do we have a cypress.json for this project?
-    options.configFile == false || settings.exists(path)
+  @ensureExists = (path) ->
+    ## is there a configFile? is the root writable?
+    settings.exists(path, @options)
 
   @config = (path) ->
     Project(path).getConfig()
