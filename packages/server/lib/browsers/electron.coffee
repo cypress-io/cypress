@@ -148,6 +148,10 @@ module.exports = {
     new Promise (resolve) ->
       webContents.session.setProxy({
         proxyRules: proxyServer
+        ## this should really only be necessary when 
+        ## running Chromium versions >= 72
+        ## https://github.com/cypress-io/cypress/issues/1872
+        proxyBypassRules: "<-loopback>"
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
