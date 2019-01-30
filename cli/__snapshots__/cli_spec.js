@@ -16,6 +16,7 @@ exports['shows help for open --foo 1'] = `
   Opens Cypress in the interactive GUI.
 
   Options:
+<<<<<<< HEAD
     -p, --port <port>             runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>               sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>         sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
@@ -24,6 +25,18 @@ exports['shows help for open --foo 1'] = `
     --global                      force Cypress into global mode as if its globally installed
     --dev                         runs cypress in development and bypasses binary check
     -h, --help                    output usage information
+=======
+
+    -p, --port <port>                runs Cypress on a specific port. overrides any value in cypress.json.
+    -e, --env <env>                  sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
+    -c, --config <config>            sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
+    -C, --config-file <config-file>  path to a config file to override the default cypress.json. set to "false" to skip specifying a config file.
+    -d, --detached [bool]            runs Cypress application in detached mode
+    -P, --project <project path>     path to the project
+    --global                         force Cypress into global mode as if its globally installed
+    --dev                            runs cypress in development and bypasses binary check
+    -h, --help                       output usage information
+>>>>>>> cli: update help snapshots
   -------
   stderr:
   -------
@@ -59,6 +72,7 @@ exports['shows help for run --foo 1'] = `
     -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
+    -C, --config-file <config-file>            path to a config file to override the default cypress.json. set to "false" to skip specifying a config file.
     -b, --browser <browser-name>               runs Cypress in the browser with the given name. note: using an external browser will not record a video.
     -P, --project <project-path>               path to the project
     --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
