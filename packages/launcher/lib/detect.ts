@@ -1,13 +1,13 @@
-import { detectBrowserLinux } from './linux'
-import { detectBrowserDarwin } from './darwin'
-import { detectBrowserWindows } from './windows'
-import { log } from './log'
-import { Browser, NotInstalledError } from './types'
-import { browsers } from './browsers'
 import * as Bluebird from 'bluebird'
-import { merge, pick, tap, uniqBy, props } from 'ramda'
 import * as _ from 'lodash'
 import * as os from 'os'
+import { merge, pick, props, tap, uniqBy } from 'ramda'
+import { browsers } from './browsers'
+import { detectBrowserDarwin } from './darwin'
+import { detectBrowserLinux } from './linux'
+import { log } from './log'
+import { Browser, NotInstalledError } from './types'
+import { detectBrowserWindows } from './windows'
 
 const setMajorVersion = (obj: Browser) => {
   if (obj.version) {
@@ -80,6 +80,11 @@ function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<Browser[]> {
   if (!goalBrowsers) {
     goalBrowsers = browsers
   }
+
+  // for some reason the type system does not understand that after _.compact
+  // the remaining list only contains valid Browser objects
+  // and we can pick "name" and "version" fields from each object
+  // @ts-ignore
   const removeDuplicates = uniqBy(props(['name', 'version']))
   return Bluebird.mapSeries(goalBrowsers, checkOneBrowser)
     .then(_.compact)
