@@ -115,13 +115,13 @@ class Project extends EE
           @saveState(state)
 
         Promise.join(
-          @watchSettingsAndStartWebsockets(cfg)
+          @watchSettingsAndStartWebsockets(options, cfg)
           @scaffold(cfg)
         )
         .then =>
           Promise.join(
             @checkSupportFile(cfg)
-            @watchPluginsFile(cfg)
+            @watchPluginsFile(cfg, options)
           )
 
     # return our project instance
@@ -182,7 +182,7 @@ class Project extends EE
         if not found
           errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
 
-  watchPluginsFile: (cfg) ->
+  watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
     if not cfg.pluginsFile
       return Promise.resolve()
@@ -199,12 +199,12 @@ class Project extends EE
           ## TODO: completely re-open project instead?
           debug("plugins file changed")
           ## re-init plugins after a change
-          @_initPlugins(cfg, @options)
+          @_initPlugins(cfg, options)
           .catch (err) ->
-            @options.onError(err)
+            options.onError(err)
       })
 
-  watchSettings: (onSettingsChanged) ->
+  watchSettings: (onSettingsChanged, options) ->
     ## bail if we havent been told to
     ## watch anything
     return if not onSettingsChanged
@@ -223,13 +223,13 @@ class Project extends EE
         onSettingsChanged.call(@)
     }
 
-    if @options.configFile != false
-      @watchers.watch(settings.pathToCypressJson(@projectRoot, @options), obj)
+    if options.configFile != false
+      @watchers.watch(settings.pathToCypressJson(@projectRoot, options), obj)
 
     @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (cfg = {}) ->
-    @watchSettings(@options.onSettingsChanged)
+  watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
+    @watchSettings(options.onSettingsChanged, options)
 
     { reporter, projectRoot } = cfg
 
@@ -256,13 +256,13 @@ class Project extends EE
     @automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
     @server.startWebsockets(@automation, cfg, {
-      onReloadBrowser: @options.onReloadBrowser
+      onReloadBrowser: options.onReloadBrowser
 
-      onFocusTests: @options.onFocusTests
+      onFocusTests: options.onFocusTests
 
-      onSpecChanged: @options.onSpecChanged
+      onSpecChanged: options.onSpecChanged
 
-      onSavedStateChanged: @options.onSavedStateChanged
+      onSavedStateChanged: options.onSavedStateChanged
 
       onConnect: (id) =>
         @emit("socket:connected", id)
