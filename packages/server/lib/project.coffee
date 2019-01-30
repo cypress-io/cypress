@@ -570,9 +570,9 @@ class Project extends EE
   @id = (path) ->
     Project(path).getProjectId()
 
-  @ensureExists = (path) ->
+  @ensureExists = (path, options) ->
     ## is there a configFile? is the root writable?
-    settings.exists(path, @options)
+    settings.exists(path, options)
 
   @config = (path) ->
     Project(path).getConfig()
