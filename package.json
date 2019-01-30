@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
