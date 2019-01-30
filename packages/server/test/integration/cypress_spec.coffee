@@ -501,7 +501,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@idsPath}"])
       .then =>
-        @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
+        @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your `supportFile` is set to `/does/not/exist`,")
 
     it "logs error when browser cannot be found", ->
       browsers.open.restore()

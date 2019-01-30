@@ -238,7 +238,14 @@ describe "Specs List", ->
         it "shows empty message if no results", ->
           cy.get(".filter").clear().type("foobarbaz")
           cy.get(".outer-files-container").should("not.exist")
-          cy.get(".empty-well").should("have.text", "No files match the filter 'foobarbaz'")
+          cy.get(".empty-well").should("contain", 'No specs match your search: "foobarbaz"')
+
+        it "clears and focuses the filter field when clear search is clicked", ->
+          cy.get(".filter").clear().type("foobarbaz")
+          cy.get(".btn").contains("Clear search").click()
+          cy.focused().should("have.id", "filter")
+          cy.get(".outer-files-container .file")
+            .should("have.length", 7)
 
         it "saves the filter to local storage for the project", ->
           cy.window().then (win) =>

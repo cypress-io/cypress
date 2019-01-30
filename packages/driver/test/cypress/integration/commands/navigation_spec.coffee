@@ -567,6 +567,19 @@ describe "src/cy/commands/navigation", ->
               "http://localhost:3500/fixtures/dimensions.html"
             ])
 
+    ## https://github.com/cypress-io/cypress/issues/1311
+    it "window immediately resolves and doesn't reload when visiting the same URL with hashes", ->
+      onLoad = cy.stub()
+
+      cy
+        .visit("http://localhost:3500/fixtures/generic.html#foo").then (win) ->
+          win.foo = 'bar'
+        .visit("http://localhost:3500/fixtures/generic.html#foo", {
+          onLoad: onLoad
+        }).then (win) ->
+          expect(win.bar).to.not.exist
+          expect(onLoad).not.to.have.been.called
+
     describe "when origins don't match", ->
       beforeEach ->
         Cypress.emit("test:before:run", { id: 888 })
@@ -732,6 +745,21 @@ describe "src/cy/commands/navigation", ->
           _.each obj, (value, key) =>
             expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
+      it "logs obj once complete when onLoad is not called", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo")
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo").then ->
+          obj = {
+            state: "passed"
+            name: "visit"
+            message: "http://localhost:3500/fixtures/generic.html#foo"
+            url: "http://localhost:3500/fixtures/generic.html#foo"
+          }
+
+          lastLog = @lastLog
+
+          _.each obj, (value, key) =>
+            expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
       it "snapshots once", ->
         cy.visit("/fixtures/generic.html").then ->
           lastLog = @lastLog
@@ -827,6 +855,15 @@ describe "src/cy/commands/navigation", ->
           expect(lastLog.get("message")).to.eq(
             "http://localhost:3500/foo -> 1 -> 2"
           )
+
+      it "displays note in consoleProps when visiting the same page with a hash", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo")
+          .visit("http://localhost:3500/fixtures/generic.html#foo")
+          .then ->
+            expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+              "Command": "visit"
+              "Note": "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+          })
 
     describe "errors", ->
       beforeEach ->
@@ -1220,50 +1257,39 @@ describe "src/cy/commands/navigation", ->
 
         cy.visit("https://google.com/foo")
 
-      it "displays loading_invalid_content_type when isHtml is false on http requests", (done) ->
-        obj = {
-          isOkStatusCode: true
-          isHtml: false
-          contentType: "application/json"
-          originalUrl: "https://google.com/foo"
-          status: 200
-          statusText: "OK"
-        }
+      ## https://github.com/cypress-io/cypress/issues/3101
+      [{
+        contentType: 'application/json', 
+        pathName: 'json-content-type'
+      }, {
+        contentType: 'text/html; charset=utf-8,text/html',
+        pathName: 'invalid-content-type'
+      }]
+      .forEach ({contentType, pathName}) ->
+        it "displays loading_invalid_content_type when content type is #{contentType} on http requests", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
 
-        visitErrObj = _.clone(obj)
-        obj.url = obj.originalUrl
+            expect(err.message).to.include("""
+              cy.visit() failed trying to load:
 
-        cy.stub(Cypress, "backend")
-        .withArgs("resolve:url", "https://google.com/foo")
-        .resolves(obj)
+              http://localhost:3500/#{pathName}
 
-        ## dont log else we create an endless loop!
-        emit = cy.spy(Cypress, "emit").log(false)
+              The content-type of the response we received from your web server was:
 
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+                > #{contentType}
 
-          expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+              This was considered a failure because responses must have content-type: 'text/html'
 
-            https://google.com/foo
+              However, you can likely use cy.request() instead of cy.visit().
 
-            The content-type of the response we received from your web server was:
+              cy.request() will automatically get and set cookies and enable you to parse responses.
+            """)
+            expect(@logs.length).to.eq(1)
+            expect(lastLog.get("error")).to.eq(err)
+            done()
 
-              > application/json
-
-            This was considered a failure because responses must have content-type: 'text/html'
-
-            However, you can likely use cy.request() instead of cy.visit().
-
-            cy.request() will automatically get and set cookies and enable you to parse responses.
-          """)
-          expect(emit).to.be.calledWithMatch("visit:failed", obj)
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.eq(err)
-          done()
-
-        cy.visit("https://google.com/foo")
+          cy.visit("http://localhost:3500/#{pathName}")
 
       it "displays loading_invalid_content_type when isHtml is false on file requests", (done) ->
         obj = {

@@ -19,7 +19,6 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/releaser": "0.1.12",
     "bin-up": "^1.1.0",
     "chai": "^3.5.0",
     "cross-env": "^5.0.5",
@@ -33,13 +32,13 @@
     "supertest-as-promised": "^3.1.0"
   },
   "dependencies": {
-    "bluebird": "^3.4.0",
-    "debug": "^2.6.8",
-    "fs-extra": "^0.30.0",
+    "bluebird": "3.5.3",
+    "debug": "2.6.9",
+    "fs-extra": "0.30.0",
     "lodash": "4.17.11",
-    "node-forge": "^0.6.39",
-    "semaphore": "^1.0.5",
+    "node-forge": "0.6.49",
+    "semaphore": "1.1.0",
     "server-destroy-vvo": "1.0.1",
-    "ssl-root-cas": "^1.1.10"
+    "ssl-root-cas": "1.2.5"
   }
 }

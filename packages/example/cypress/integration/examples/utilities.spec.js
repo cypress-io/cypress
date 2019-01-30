@@ -7,7 +7,7 @@ context('Utilities', () => {
 
   it('Cypress._ - call a lodash method', () => {
     // https://on.cypress.io/_
-    cy.request('https://jsonplaceholder.typicode.com/users')
+    cy.request('https://jsonplaceholder.cypress.io/users')
       .then((response) => {
         let ids = Cypress._.chain(response.body).map('id').take(3).value()
 

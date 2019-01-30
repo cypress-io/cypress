@@ -49,7 +49,7 @@
     "@types/minimatch": "3.0.3",
     "@types/mocha": "2.2.44",
     "@types/sinon": "7.0.0",
-    "@types/sinon-chai": "2.7.29",
+    "@types/sinon-chai": "3.2.2",
     "bluebird": "3.5.0",
     "cachedir": "1.3.0",
     "chalk": "2.4.1",
@@ -80,7 +80,6 @@
     "yauzl": "2.8.0"
   },
   "devDependencies": {
-    "@cypress/releaser": "0.2.2",
     "@cypress/sinon-chai": "1.0.0",
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
@@ -89,8 +88,8 @@
     "chai-string": "1.4.0",
     "clear-module": "^2.1.0",
     "dependency-check": "^2.8.0",
-    "dtslint": "0.4.1",
-    "execa-wrap": "1.1.0",
+    "dtslint": "0.4.2",
+    "execa-wrap": "1.4.0",
     "mock-fs": "4.5.0",
     "nock": "^9.0.9",
     "nyc": "13.0.0",

@@ -28,9 +28,11 @@ executors:
       PLATFORM: linux
 
   # executor to run on Mac OS
+  # https://circleci.com/docs/2.0/executor-types/#using-macos
+  # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      xcode: "9.0.1"
+      xcode: "10.1.0"
     environment:
       PLATFORM: mac
 
@@ -181,9 +183,7 @@ jobs:
           paths:
             - packages/ts/node_modules
 
-        ## TODO: this needs to be reenabled when
-        ## we update stop-only
-    #   - run: npm run stop-only
+      - run: npm run stop-only
       ## now go build all of subpackages
       - run: npm run prebuild -- --serial
       - run: npm run build -- --serial
@@ -212,6 +212,8 @@ jobs:
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
+      # make sure packages with TypeScript can be transpiled to JS
+      - run: npm run all build-js
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
@@ -408,11 +410,42 @@ jobs:
 
   build-binary:
     <<: *defaults
+    shell: /bin/bash --login
     steps:
+      - run:
+          name: Check environment variables before code sign (if on Mac)
+          # NOTE
+          # our Mac code sign works via electron-builder
+          # by default, electron-builder will NOT sign app built in a pull request
+          # even our internal one (!)
+          # Usually this is not a problem, since we only build and test binary
+          # built on "develop" and "master" branches
+          # but if you need to really build and sign a Mac binary in a PR
+          # set variable CSC_FOR_PULL_REQUEST=true
+          command: |
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              if [ -z "$CSC_LINK" ]; then
+                echo "Need to provide environment variable CSC_LINK"
+                  echo "with base64 encoded certificate .p12 file"
+                exit 1
+              fi
+              if [ -z "$CSC_KEY_PASSWORD" ]; then
+                echo "Need to provide environment variable CSC_KEY_PASSWORD"
+                  echo "with password for unlocking certificate .p12 file"
+                exit 1
+              fi
+            else
+              echo "Not Mac platform, skipping code sign setup"
+            fi
+
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
-      - run: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
+      - run:
+          environment:
+            DEBUG: electron-builder,electron-osx-sign*
+          command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
       - run:
@@ -608,151 +641,205 @@ jobs:
             CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
 
-  mac-os-build:
-    executor: mac
+  "test-binary-against-kitchensink":
+    <<: *defaults
     steps:
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: /tmp/urls
       - run:
-          name: Show keychains
-          command: security list-keychains
+          name: Cloning kitchensink project
+          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
       - run:
-          name: Find code signing identity
-          command: security find-identity -v -p codesigning
+          command: npm install
+          working_directory: /tmp/kitchensink
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/kitchensink
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run build
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm start
+          background: true
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run e2e
 
+linux-workflow: &linux-workflow
+  jobs:
+    - build
+    - lint:
+        name: Linux lint
+        requires:
+          - build
+    # unit, integration and e2e tests
+    - unit-tests:
+        requires:
+          - build
+    - server-unit-tests:
+        requires:
+          - build
+    - server-integration-tests:
+        requires:
+          - build
+    - server-e2e-tests-1:
+        requires:
+          - build
+    - server-e2e-tests-2:
+        requires:
+          - build
+    - server-e2e-tests-3:
+        requires:
+          - build
+    - server-e2e-tests-4:
+        requires:
+          - build
+    - server-e2e-tests-5:
+        requires:
+          - build
+    - server-e2e-tests-6:
+        requires:
+          - build
+    - server-e2e-tests-7:
+        requires:
+          - build
+    - server-e2e-tests-8:
+        requires:
+          - build
+    - driver-integration-tests-3x:
+        requires:
+          - build
+    - desktop-gui-integration-tests-2x:
+        requires:
+          - build
+    - run-launcher:
+        requires:
+          - build
+    # various testing scenarios, like building full binary
+    # and testing it on a real project
+    - test-against-staging:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - test-kitchensink-against-staging:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - build-npm-package:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - build-binary:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - test-next-version:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-next-version-locally:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-staging:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-kitchensink:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+
+mac-workflow: &mac-workflow
+  jobs:
+    - build:
+        name: Mac build
+        executor: mac
+    - lint:
+        name: Mac lint
+        executor: mac
+        requires:
+          - Mac build
+
+    # maybe run unit tests?
+
+    - build-npm-package:
+        name: Mac NPM package
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac build
+
+    - build-binary:
+        name: Mac binary
+        executor: mac
+        context: org-global
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac build
+
+    - test-binary-against-kitchensink:
+        name: Test Mac binary against kitchensink
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac NPM package
+          - Mac binary
+
+    - test-binary-against-staging:
+        name: Test Mac binary against staging
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac NPM package
+          - Mac binary
 workflows:
   linux:
-    jobs:
-      - build
-      - lint:
-          name: Linux lint
-          requires:
-            - build
-      # unit, integration and e2e tests
-      - unit-tests:
-          requires:
-            - build
-      - server-unit-tests:
-          requires:
-            - build
-      - server-integration-tests:
-          requires:
-            - build
-      - server-e2e-tests-1:
-          requires:
-            - build
-      - server-e2e-tests-2:
-          requires:
-            - build
-      - server-e2e-tests-3:
-          requires:
-            - build
-      - server-e2e-tests-4:
-          requires:
-            - build
-      - server-e2e-tests-5:
-          requires:
-            - build
-      - server-e2e-tests-6:
-          requires:
-            - build
-      - server-e2e-tests-7:
-          requires:
-            - build
-      - server-e2e-tests-8:
-          requires:
-            - build
-      - driver-integration-tests-3x:
-          requires:
-            - build
-      - desktop-gui-integration-tests-2x:
-          requires:
-            - build
-      - run-launcher:
-          requires:
-            - build
-      # various testing scenarios, like building full binary
-      # and testing it on a real project
-      - test-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - test-kitchensink-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-npm-package:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-binary:
-          filters:
-            branches:
-              only:
-                - develop
-                - build-osx-on-circle-2958
-          requires:
-            - build
-      - test-next-version:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-next-version-locally:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-binary-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-
-  # disable Mac build until we can figure CircleCI v2 story
-  # for code signing the built binary
-  # https://github.com/cypress-io/cypress/issues/2958
-
-  # mac:
-  #   jobs:
-  #     - build:
-  #         name: Mac build
-  #         executor: mac
-  #     - lint:
-  #         name: Mac lint
-  #         executor: mac
-  #         requires:
-  #           - Mac build
-  #     # maybe run unit tests?
-  #     - mac-os-build:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-
-  #     - build-binary:
-  #         name: Mac binary
-  #         executor: mac
-  #         filters:
-  #           branches:
-  #             only:
-  #               - develop
-  #         requires:
-  #           - Mac build
-  #           - mac-os-build
+    <<: *linux-workflow
+  mac:
+    <<: *mac-workflow

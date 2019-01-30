@@ -16,19 +16,9 @@ exports['e2e plugins fails 1'] = `
                                                                                                     
   Running: app_spec.coffee...                                                              (1 of 1) 
 
-Error: The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
 Error: Async error from plugins file
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
     at stack trace line
     at stack trace line
     at stack trace line
