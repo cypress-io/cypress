@@ -351,4 +351,5 @@ describe "lib/browsers/electron", ->
       .then ->
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: "proxy rules"
+          proxyBypassRules: "<-loopback>"
         })
