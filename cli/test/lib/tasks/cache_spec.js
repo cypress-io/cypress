@@ -6,7 +6,6 @@ const fs = require(`${lib}/fs`)
 const state = require(`${lib}/tasks/state`)
 const cache = require(`${lib}/tasks/cache`)
 const stdout = require('../../support/stdout')
-const snapshot = require('snap-shot-it')
 
 describe('lib/tasks/cache', () => {
   beforeEach(() => {
@@ -25,9 +24,6 @@ describe('lib/tasks/cache', () => {
   })
 
   afterEach(() => {
-    mockfs.restore()
-    this.stdout = this.stdout.toString().split('\n').slice(0, -2).join('\n')
-    snapshot(this.stdout.toString() || '[no output]')
     stdout.restore()
   })
 
