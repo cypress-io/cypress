@@ -159,7 +159,7 @@ const openProject = (project) => {
     project.setWarning({
       isCypressErr: true,
       type: 'CONFIGURATION_CHANGED',
-      message: `This file was changed: \`${filePath}\`\nPlease restart Cypress for changes to take effect.`,
+      message: `\`${filePath}\` was modified. Restart Cypress for changes to take effect.`,
     })
   })
 
@@ -168,7 +168,7 @@ const openProject = (project) => {
     project.setWarning({
       isCypressErr: true,
       type: 'CONFIGURATION_CHANGED',
-      message: `This file was changed: \`${filePath}\`\nPlease restart Cypress for changes to take effect.`,
+      message: `\`${filePath}\` was modified. Restart Cypress for changes to take effect.`,
     })
   })
 

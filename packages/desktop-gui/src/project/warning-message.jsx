@@ -34,14 +34,14 @@ class WarningMessage extends Component {
 
     if (errors.isConfigurationChanged(warning)) {
       return (
-        <div className='alert alert-warning'>
+        <div className='alert alert-warning centered'>
           <div ref={(node) => this.warningMessageNode = node} dangerouslySetInnerHTML={{
             __html: md.render(warningText),
           }}></div>
-          <strong onClick={this.props.onRestart}>
-            <i className='fa fa-refresh'></i>{' '}
+          <button className='restart' onClick={this.props.onRestart}>
+            <i className='fa fa-refresh'></i>
             Restart
-          </strong>
+          </button>
         </div>
       )
     }

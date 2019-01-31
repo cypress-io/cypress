@@ -7,6 +7,7 @@
   padding: 15px;
 
   .text-container {
+    align-items: center;
     display: flex;
     flex-direction: column;
   }
@@ -17,7 +18,13 @@
     color: #8A6D3B;
     cursor: pointer;
     font-size: 14px;
+    margin-top: 0.6rem;
     padding: 0;
+    text-decoration: underline;
+
+    i {
+      padding-right: 0.2rem;
+    }
   }
 
   code {

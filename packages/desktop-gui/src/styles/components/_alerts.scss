@@ -81,7 +81,31 @@
 
   code, pre {
     color: #8a6d3b;
+    border: 1px solid #ddd;
+  }
+
+  &.centered {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .restart {
+    position: relative;
+    background: none;
+    text-decoration: underline;
+    padding: none;
+    font-weight: 500;
     border: none;
+    cursor: pointer;
+
+    i {
+      margin-right: 0.2rem;
+    }
   }
 }
 
