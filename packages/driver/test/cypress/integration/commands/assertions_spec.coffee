@@ -891,6 +891,14 @@ describe "src/cy/commands/assertions", ->
           .get("body")
           .get("button").should("be.visible")
 
+      it 'jquery wrapping els and selectors, not changing subject', ->
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible')
+        cy.wrap(cy.$$('<div></div>')).should('not.exist')
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible').should('exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
+
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
         cy.on "log:added", (attrs, log) ->
@@ -1593,11 +1601,11 @@ describe "src/cy/commands/assertions", ->
         l4 = @logs[3]
 
         expect(l1.get("message")).to.eq(
-          "expected **<div#div>** to not be **focused**"
+          "expected **<div#div>** not to be **focused**"
         )
 
         expect(l2.get("message")).to.eq(
-          "expected **<div#div>** to not be **focused**"
+          "expected **<div#div>** not to be **focused**"
         )
 
         expect(l3.get("message")).to.eq(
@@ -1617,19 +1625,24 @@ describe "src/cy/commands/assertions", ->
         cy.get('#div').should('not.be.focused')
         cy.get('#div').should('not.have.focus')
 
+      it "works with multiple elements", ->
+        cy.get('div:last').focus()
+        cy.get('div').should('have.focus')
+        cy.get('div:last').blur()
+        cy.get('div').should('not.have.focus')
 
       it "throws when obj is not DOM", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(1)
-            expect(@logs[0].get("error").message).to.contain(
-              "expected {} to not be 'focused'"
-            )
-            expect(err.message).to.include("> focus")
-            expect(err.message).to.include("> {}")
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.contain(
+            "expected {} to be 'focused'"
+          )
+          expect(err.message).to.include("> focus")
+          expect(err.message).to.include("> {}")
 
-            done()
+          done()
 
-          expect({}).to.not.have.focus
+        expect({}).to.have.focus
 
     context "match", ->
       beforeEach ->

@@ -320,6 +320,28 @@ const isSvg = function (el) {
   }
 }
 
+// active element is the default if its null
+// or its equal to document.body
+const activeElementIsDefault = (activeElement, body) => {
+  return (!activeElement) || (activeElement === body)
+}
+
+const isFocused = (el) => {
+  try {
+    const doc = $document.getDocumentFromElement(el)
+
+    const { activeElement, body } = doc
+
+    if (activeElementIsDefault(activeElement, body)) {
+      return false
+    }
+
+    return doc.activeElement === el
+  } catch (err) {
+    return false
+  }
+}
+
 const isElement = function (obj) {
   try {
     if ($jquery.isJquery(obj)) {
@@ -783,6 +805,8 @@ module.exports = {
   isTextarea,
 
   isType,
+
+  isFocused,
 
   isNeedSingleValueChangeInputElement,
 
