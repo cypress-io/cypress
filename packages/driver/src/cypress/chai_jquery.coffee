@@ -2,17 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 $dom = require("../dom")
 
-selectors = {
-  visible: "visible"
-  hidden: "hidden"
-  selected: "selected"
-  checked: "checked"
-  enabled: "enabled"
-  disabled: "disabled"
-  focus: "focused"
-  focused: "focused"
-}
-
+selectors = "visible hidden selected checked enabled disabled".split(" ")
 attrs = {
   attr: "attribute"
   css: "CSS property"
@@ -30,23 +20,28 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
   { inspect, flag } = chaiUtils
 
   assertDom = (ctx, method, args...) ->
-    if not $dom.isDom(ctx._obj)
+    if not ($dom.isDom(ctx._obj) or $dom.isJquery(ctx._obj))
       try
         ## always fail the assertion
         ## if we aren't a DOM like object
-        ctx.assert(false, args...)
+        ## depends on "negate" flag
+        ctx.assert(!!ctx.__flags.negate, args...)
       catch err
         callbacks.onInvalid(method, ctx._obj)
 
   assert = (ctx, method, bool, args...) ->
     assertDom(ctx, method, args...)
-
     try
       # ## reset obj to wrapped
+      orig = ctx._obj
       ctx._obj = wrap(ctx)
+
+      if ctx._obj.length is 0
+        ctx._obj = ctx._obj.selector
 
       ## apply the assertion
       ctx.assert(bool, args...)
+      ctx._obj = orig
     catch err
       ## send it up with the obj and whether it was negated
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
@@ -182,7 +177,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       else
         _super.apply(@, arguments)
 
-  _.each selectors, (selectorName, selector) ->
+  _.each selectors, (selector) ->
     chai.Assertion.addProperty selector, ->
       assert(
         @,
@@ -190,7 +185,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
         wrap(@).is(":" + selector),
         'expected #{this} to be #{exp}',
         'expected #{this} not to be #{exp}',
-        selectorName
+        selector
       )
 
   _.each attrs, (description, attr) ->

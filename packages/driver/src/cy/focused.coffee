@@ -207,12 +207,20 @@ create = (state) ->
     return false
 
   getFocused = ->
-    { activeElement } = state("document")
+    try
+      { activeElement, body } = state("document")
 
-    if $dom.isFocused(activeElement)
+      ## active element is the default if its null
+      ## or its equal to document.body
+      activeElementIsDefault = ->
+        (not activeElement) or (activeElement is body)
+
+      if activeElementIsDefault()
+        return null
+
       return $dom.wrap(activeElement)
-
-    return null
+    catch
+      return null
 
   return {
     fireBlur
