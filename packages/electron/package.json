@@ -24,8 +24,8 @@
     "lib"
   ],
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.0.2"
+    "chai": "3.5.0",
+    "mocha": "3.5.3"
   },
   "dependencies": {
     "@cypress/icons": "0.7.0",
