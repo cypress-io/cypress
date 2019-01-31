@@ -139,3 +139,24 @@ describe "lib/browsers/chrome", ->
       disabledRootLayerScrolling("66", true)
       disabledRootLayerScrolling("67", true)
       disabledRootLayerScrolling("68", false)
+
+    ## https://github.com/cypress-io/cypress/issues/1872
+    it "adds <-loopback> proxy bypass rule in version 72+", ->
+      arg = "--proxy-bypass-list=<-loopback>"
+
+      chromeVersionHasLoopback = (version, bool) ->
+        args = chrome._getArgs({
+          browser: {
+            majorVersion: version
+          }
+        })
+
+        if bool
+          expect(args).to.include(arg)
+        else
+          expect(args).not.to.include(arg)
+
+      chromeVersionHasLoopback("71", false)
+      chromeVersionHasLoopback("72", true)
+      chromeVersionHasLoopback("73", true)
+

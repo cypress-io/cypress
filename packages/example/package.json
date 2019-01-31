@@ -26,16 +26,16 @@
     "glob": "7.1.3"
   },
   "devDependencies": {
-    "bin-up": "^1.1.0",
-    "chai": "^3.5.0",
-    "cross-env": "^5.0.5",
+    "bin-up": "1.1.0",
+    "chai": "3.5.0",
+    "cross-env": "5.2.0",
     "cypress-example-kitchensink": "1.2.0",
-    "gulp": "^3.9.1",
-    "gulp-clean": "^0.3.1",
+    "gulp": "3.9.1",
+    "gulp-clean": "0.3.2",
     "gulp-gh-pages-will": "0.5.5",
-    "gulp-rev-all": "^0.8.22",
-    "mocha": "^2.4.5",
-    "run-sequence": "^1.1.5",
-    "shelljs": "^0.7.8"
+    "gulp-rev-all": "0.8.24",
+    "mocha": "2.5.3",
+    "run-sequence": "1.2.2",
+    "shelljs": "0.7.8"
   }
 }

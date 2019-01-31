@@ -13,6 +13,7 @@ utils     = require("./utils")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
+CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -157,6 +158,11 @@ module.exports = {
     if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
        args.push("--disable-blink-features=RootLayerScrolling")
 
+    ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
+    ## https://github.com/cypress-io/cypress/issues/1872
+    if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
+      args.push("--proxy-bypass-list=<-loopback>")
+  
     args
 
   open: (browserName, url, options = {}, automation) ->
