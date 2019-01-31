@@ -69,16 +69,17 @@ describe "src/cy/commands/misc", ->
       cy.wrap({}).then (subject) ->
         expect(subject).to.deep.eq {}
 
+    ## https://github.com/cypress-io/cypress/issues/3241
     it "cy.wrap(undefined) should retry", () ->
-      spy = cy.spy()
+      stub = cy.stub()
 
       cy.wrap().should ->
-        spy()
-        expect(spy).to.be.calledTwice
+        stub()
+        expect(stub).to.be.calledTwice
 
       cy.wrap(undefined).should ->
-        spy()
-        expect(spy.callCount).to.eq(4)
+        stub()
+        expect(stub.callCount).to.eq(4)
 
     it "can wrap jquery objects and continue to chain", ->
       @remoteWindow.$.fn.foo = "foo"

@@ -755,14 +755,14 @@ describe "src/cy/commands/connectors", ->
           cy.noop({}).its("foo")
 
         it "retries when yielded undefined value", ->
-          obj = {}
+          obj = {foo:''}
 
-          obj.foo = undefined
-
-          setTimeout ()->
-            obj.foo = true
-          , 10
-
+          cy.stub(obj, 'foo').get(
+            cy.stub()
+              .onCall(0).returns(undefined)
+              .onCall(1).returns(undefined)
+              .onCall(2).returns(true)
+          )
           cy.wrap(obj).its('foo').should('eq', true)
 
         it "can handle getter that throws", (done) ->
