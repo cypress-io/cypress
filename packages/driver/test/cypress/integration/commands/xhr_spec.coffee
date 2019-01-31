@@ -1915,13 +1915,16 @@ describe "src/cy/commands/xhr", ->
             xhr.foo = "bar"
             resolve(xhr)
           xhr.send()
-      .should (xhr) ->
-        ## ensure this is set to prevent accidental
-        ## race conditions down the road if something
-        ## goes wrong
-        expect(xhr.foo).to.eq("bar")
-        expect(xhr.aborted).not.to.be.true
-        expect(log.get("state")).to.eq("passed")
+      .then (xhr) ->
+        cy
+        .wrap(null)
+        .should ->
+          ## ensure this is set to prevent accidental
+          ## race conditions down the road if something
+          ## goes wrong
+          expect(xhr.foo).to.eq("bar")
+          expect(xhr.aborted).not.to.be.true
+          expect(log.get("state")).to.eq("passed")
 
   context "Cypress.on(page:end)", ->
     it "aborts all open XHR's", ->
