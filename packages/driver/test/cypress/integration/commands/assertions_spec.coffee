@@ -805,58 +805,13 @@ describe "src/cy/commands/assertions", ->
           .get("body")
           .get("button").should("be.visible")
 
-      describe "doesn't pass not.visible for non-dom", ->
-        beforeEach ->
-          Cypress.config('defaultCommandTimeout', 50)
-
-        it "undefined", (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap().should('not.be.visible')
-
-        it 'null', (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap(null).should('not.be.visible')
-
-        it '[]', (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap([]).should('not.be.visible')
-
-        it '{}', (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap({}).should('not.be.visible')
-
-        it 'jquery wrapping els and selectors, not changing subject', ->
-          cy.wrap(cy.$$('<div></div>')).should('not.be.visible')
-          cy.wrap(cy.$$('<div></div>')).should('not.exist')
-          cy.wrap(cy.$$('<div></div>')).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$('.non-existent')).should('not.be.visible')
-          cy.wrap(cy.$$('.non-existent')).should('not.exist')
-          cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
-
-        ## if this test breaks, it's ok. This behavior is no-man's-land
-        it 'jquery wrapping nonsense', ->
-          cy.wrap(cy.$$(42)).should('not.be.visible')
-          cy.wrap(cy.$$([])).should('not.exist')
-          cy.wrap(cy.$$([])).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$({})).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$(null)).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$(undefined)).should('not.be.visible').should('not.exist')
+      it 'jquery wrapping els and selectors, not changing subject', ->
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible')
+        cy.wrap(cy.$$('<div></div>')).should('not.exist')
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible').should('exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
 
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
@@ -1238,18 +1193,6 @@ describe "src/cy/commands/assertions", ->
 
         expect({}).to.be.visible
 
-      it "is not.visible when detached from the DOM", ->
-        el = cy.$$('<div class="detached-on-click">detached on click</div>').on 'click', ->
-          el.remove()
-        .appendTo(cy.$$('body'))
-
-        cy.get('.detached-on-click').click().should('not.be.visible').then ->
-          expect(getLastLog()).to.eq('expected **<div.detached-on-click>** not to be **visible**')
-
-      it "is not.visible when dom query fails", ->
-        cy.get('.non-existent-el').should('not.be.visible').then ->
-          expect(getLastLog()).to.eq('expected **.non-existent-el** not to be **visible**')
-
     context "hidden", ->
       beforeEach ->
         @$div = $("<div style='display: none'>div</div>").appendTo($("body"))
@@ -1603,30 +1546,17 @@ describe "src/cy/commands/assertions", ->
         cy.get('div').should('not.have.focus')
 
       it "throws when obj is not DOM", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(1)
-            expect(@logs[0].get("error").message).to.contain(
-              "expected {} not to be 'focused'"
-            )
-            expect(err.message).to.include("> focus")
-            expect(err.message).to.include("> {}")
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.contain(
+            "expected {} to be 'focused'"
+          )
+          expect(err.message).to.include("> focus")
+          expect(err.message).to.include("> {}")
 
-            done()
+          done()
 
-          expect({}).to.not.have.focus
-
-      it "throws when obj is not DOM 2", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(1)
-            expect(@logs[0].get("error").message).to.contain(
-              "expected {} to be 'focused'"
-            )
-            expect(err.message).to.include("> focus")
-            expect(err.message).to.include("> {}")
-
-            done()
-
-          expect({}).to.have.focus
+        expect({}).to.have.focus
 
     context "match", ->
       beforeEach ->
@@ -1947,6 +1877,3 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.have.css("foo")
-
-
-getLastLog = -> cy.state('ctx').logs.slice(-1)[0].get('message')

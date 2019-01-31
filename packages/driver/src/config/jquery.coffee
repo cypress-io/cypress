@@ -12,9 +12,9 @@ $.expr.filters.focus = $dom.isFocused
 $.expr.pseudos.focus = $dom.isFocused
 $.expr.pseudos.focused = $dom.isFocused
 $.expr.filters.visible = $dom.isVisible
-$.expr.pseudos.visible = $dom.isVisible
+# $.expr.pseudos.visible = $dom.isVisible
 $.expr.filters.hidden = $dom.isHidden
-$.expr.pseudos.hidden = $dom.isHidden
+# $.expr.pseudos.hidden = $dom.isHidden
 
 $.expr.cacheLength = 1
 

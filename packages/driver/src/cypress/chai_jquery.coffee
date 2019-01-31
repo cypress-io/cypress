@@ -30,28 +30,23 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
   { inspect, flag } = chaiUtils
 
   assertDom = (ctx, method, args...) ->
-    if not ($dom.isDom(ctx._obj) or $dom.isJquery(ctx._obj))
+    if not $dom.isDom(ctx._obj)
       try
         ## always fail the assertion
         ## if we aren't a DOM like object
-        ## depends on "negate" flag
-        ctx.assert(!!ctx.__flags.negate, args...)
+        ctx.assert(false, args...)
       catch err
         callbacks.onInvalid(method, ctx._obj)
 
   assert = (ctx, method, bool, args...) ->
     assertDom(ctx, method, args...)
+
     try
       # ## reset obj to wrapped
-      orig = ctx._obj
       ctx._obj = wrap(ctx)
-
-      if ctx._obj.length is 0
-        ctx._obj = ctx._obj.selector
 
       ## apply the assertion
       ctx.assert(bool, args...)
-      ctx._obj = orig
     catch err
       ## send it up with the obj and whether it was negated
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
