@@ -19,17 +19,17 @@
     "lib"
   ],
   "devDependencies": {
-    "bin-up": "^1.1.0",
-    "chai": "^3.5.0",
-    "cross-env": "^5.0.5",
-    "http-mitm-proxy": "^0.5.1",
-    "request": "^2.72.0",
-    "request-promise": "^3.0.0",
-    "sinon": "^1.17.4",
-    "sinon-as-promised": "^4.0.0",
-    "sinon-chai": "^2.8.0",
-    "supertest": "^1.2.0",
-    "supertest-as-promised": "^3.1.0"
+    "bin-up": "1.1.0",
+    "chai": "3.5.0",
+    "cross-env": "5.2.0",
+    "http-mitm-proxy": "0.5.3",
+    "request": "2.88.0",
+    "request-promise": "3.0.0",
+    "sinon": "1.17.7",
+    "sinon-as-promised": "4.0.3",
+    "sinon-chai": "2.14.0",
+    "supertest": "1.2.0",
+    "supertest-as-promised": "3.2.0"
   },
   "dependencies": {
     "bluebird": "3.5.3",
