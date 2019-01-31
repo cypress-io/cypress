@@ -15,7 +15,8 @@ function unknownOption (flag, type = 'option') {
   logger.error(`  error: unknown ${type}:`, flag)
   logger.error()
   this.outputHelp()
-  util.exit(1)
+  logger.error()
+  process.exit(1)
 }
 commander.Command.prototype.unknownOption = unknownOption
 
@@ -61,9 +62,9 @@ const descriptions = {
   dev: 'runs cypress in development and bypasses binary check',
   forceInstall: 'force install the Cypress binary',
   exit: 'keep the browser open after tests finish',
-  cachePath: 'print the path to the binary cache',
-  cacheList: 'list cached binary versions',
-  cacheClear: 'delete all cached binaries',
+  cachePath: 'print the cypress binary cache path',
+  cacheList: 'list the currently cached versions',
+  cacheClear: 'delete the Cypress binary cache',
   group: 'a named group for recorded runs in the Cypress dashboard',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
@@ -202,13 +203,8 @@ module.exports = {
     .option('path', text('cachePath'))
     .option('clear', text('cacheClear'))
     .action(function (opts) {
-      if (!_.isString(opts)) {
-        this.outputHelp()
-        util.exit(1)
-      }
-
       if (opts.command || !_.includes(['list', 'path', 'clear'], opts)) {
-        unknownOption.call(this, `cache ${opts}`, 'command')
+        unknownOption.call(this, `cache ${opts}`, 'sub-command')
       }
 
       cache[opts]()
