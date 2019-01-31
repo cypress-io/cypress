@@ -144,6 +144,7 @@ class Socket
       checkForAppErrors: ->
       onSavedStateChanged: ->
       onTestFileChange: ->
+      onReloadConfiguration: ->
 
     automationClient = null
 
@@ -330,6 +331,11 @@ class Socket
         options.onSavedStateChanged(state)
 
         ## we only use the 'ack' here in tests
+        cb() if cb
+
+      socket.on "reload:configuration", (cb) ->
+        options.onReloadConfiguration()
+
         cb() if cb
 
       reporterEvents.forEach (event) =>

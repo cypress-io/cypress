@@ -260,6 +260,11 @@ class Project extends EE
 
       onSavedStateChanged: options.onSavedStateChanged
 
+      onReloadConfiguration: () =>
+        browsers.close()
+        @close()
+        @open(options)
+
       onConnect: (id) =>
         @emit("socket:connected", id)
 

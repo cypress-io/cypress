@@ -42,6 +42,7 @@ describe "lib/socket", ->
       .then =>
         @options = {
           onSavedStateChanged: sinon.spy()
+          onReloadConfiguration: sinon.stub()
         }
 
         @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
@@ -385,7 +386,7 @@ describe "lib/socket", ->
     context "on(reload:configuration)", ->
       it "calls onConfigurationReload", (done) ->
         @client.emit "reload:configuration", =>
-          expect(@options.onConfigurationReload).to.be.called
+          expect(@options.onReloadConfiguration).to.be.called
           done()
 
   context "unit", ->
