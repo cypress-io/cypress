@@ -63,7 +63,9 @@ class Reporter extends Component {
     return (
       <div className={cs('reporter', { 'is-running': appState.isRunning })}>
         <Header appState={appState} statsStore={this.props.statsStore} />
-        <Banner events={this.props.events} filePath='/Users/lilaconlee/cypress/debug/test/cypress.json' />
+        {appState.configurationFilePathChanged &&
+          <Banner events={this.props.events} filePath={appState.configurationFilePathChanged} />
+        }
         <Runnables
           appState={appState}
           error={this.props.error}
