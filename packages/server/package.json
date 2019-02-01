@@ -53,7 +53,7 @@
     "@babel/preset-env": "7.2.3",
     "@babel/preset-react": "7.0.0",
     "@babel/runtime": "7.2.0",
-    "@cypress/json-schemas": "5.31.2",
+    "@cypress/json-schemas": "5.31.3",
     "@cypress/sinon-chai": "1.1.0",
     "babel-plugin-add-module-exports": "1.0.0",
     "babelify": "10.0.0",
