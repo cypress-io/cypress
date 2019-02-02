@@ -1,5 +1,5 @@
-
 const _ = require('lodash')
+const $ = require('jquery')
 const Promise = require('bluebird')
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
@@ -68,12 +68,23 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           //# we need to use both of these
           let consoleObj
           const { fromWindow, fromViewport } = coords
+          // debugger
+          const forceEl = options.force && $elToClick[0]
 
           //# handle mouse events removing DOM elements
           //# https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
-          domEvents.mouseUp = $dom.isAttached($elToClick) && mouse.mouseUp($elToClick.get(0), fromViewport, domEvents.mouseDown, options.force)
-          domEvents.click = $dom.isAttached($elToClick) && mouse.click($elToClick, fromViewport)
+          const skipMouseupEvent = domEvents.mouseClick.pointerdownProps.skipped || domEvents.mouseClick.pointerdownProps.preventedDefault
+
+          const mouseUpEvents = mouse.mouseUp(fromViewport, forceEl, skipMouseupEvent)
+
+          _.extend(domEvents.mouseClick, mouseUpEvents)
+
+          const skipClickEvent = $elements.isDetachedEl(domEvents.mouseClick.pointerdownProps.el)
+
+          const mouseClickEvents = mouse.click(fromViewport, forceEl, skipClickEvent)
+
+          _.extend(domEvents.mouseClick, mouseClickEvents)
 
           if (options._log) {
             consoleObj = options._log.invoke('consoleProps')
@@ -81,7 +92,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           const consoleProps = function () {
             consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
-              'Applied To': $dom.getElements($el),
+              'Target Element': $dom.getElements($el),
               'Elements': $el.length,
               'Coords': _.pick(fromWindow, 'x', 'y'), //# always absolute
               'Options': deltaOptions,
@@ -92,50 +103,88 @@ module.exports = (Commands, Cypress, cy, state, config) => {
               consoleObj['Actual Element Clicked'] = $dom.getElements($elToClick)
             }
 
-            consoleObj.groups = function () {
-              const groups = []
+            consoleObj.table = [
+              () => {
 
-              if (domEvents.mouseDown) {
-                if (domEvents.mouseDown.pointerdownProps) {
-                  groups.push({
-                    name: 'PointerDown',
-                    items: _.pick(domEvents.mouseDown.pointerdownProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                  })
+                return {
+                  name: 'Mouse Move Events',
+                  data: _.map(domEvents.mouseMove.events, (event) => {
+                    return _.map(event, (val, key) => {
+                      return {
+                        'Event Name': key,
+                        'Target Element': val.el,
+                        'Prevented Default?': val.preventedDefault,
+                        'Stopped Propagation?': val.stoppedPropagation,
+                      }
+                    })[0]
+                  }),
                 }
+              },
+              () => {
+                return {
+                  name: 'Mouse Click Events',
+                  data: _.map(domEvents.mouseClick, (val, key) => {
 
-                if (domEvents.mouseDown.mousedownProps) {
-                  groups.push({
-                    name: 'MouseDown',
-                    items: _.pick(domEvents.mouseDown.mousedownProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                  })
+                    if (val.skipped) {
+
+                      const reason = val.skipped
+
+                      return {
+                        'Event Name': key.slice(0, -5),
+                        'Target Element': reason,
+                        'Prevented Default?': null,
+                        'Stopped Propagation?': null,
+                      }
+                    }
+
+                    return {
+                      'Event Name': key.slice(0, -5),
+                      'Target Element': val.el,
+                      'Prevented Default?': val.preventedDefault,
+                      'Stopped Propagation?': val.stoppedPropagation,
+                    }
+                  }),
                 }
-              }
+                // if (domEvents.mouseDown) {
+                //   if (domEvents.mouseDown.pointerdownProps) {
+                //     groups.push({
+                //       name: 'PointerDown',
+                //       items: _.pick(domEvents.mouseDown.pointerdownProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                //     })
+                //   }
 
-              if (domEvents.mouseUp) {
-                if (domEvents.mouseUp.pointerupProps) {
-                  groups.push({
-                    name: 'PointerUp',
-                    items: _.pick(domEvents.mouseUp.pointerupProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                  })
-                }
+                //   if (domEvents.mouseDown.mousedownProps) {
+                //     groups.push({
+                //       name: 'MouseDown',
+                //       items: _.pick(domEvents.mouseDown.mousedownProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                //     })
+                //   }
+                // }
 
-                if (domEvents.mouseUp.mouseupProps) {
-                  groups.push({
-                    name: 'MouseUp',
-                    items: _.pick(domEvents.mouseUp.mouseupProps, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                  })
-                }
-              }
+                // if (domEvents.mouseUp) {
+                //   if (domEvents.mouseUp.pointerupProps) {
+                //     groups.push({
+                //       name: 'PointerUp',
+                //       items: _.pick(domEvents.mouseUp.pointerupProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                //     })
+                //   }
 
-              if (domEvents.click) {
-                groups.push({
-                  name: 'Click',
-                  items: _.pick(domEvents.click, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                })
-              }
+                //   if (domEvents.mouseUp.mouseupProps) {
+                //     groups.push({
+                //       name: 'MouseUp',
+                //       items: _.pick(domEvents.mouseUp.mouseupProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
+                //     })
+                //   }
+                // }
 
-              return groups
-            }
+                // if (domEvents.click) {
+                //   groups.push({
+                //     name: 'Click',
+                //     items: _.pick(domEvents.click, 'preventedDefault', 'stoppedPropagation', 'modifiers', 'el'),
+                //   })
+                // }
+              },
+            ]
 
             return consoleObj
           }
@@ -188,45 +237,62 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
             el = $elToClick.get(0)
 
-            domEvents.mouseDown = mouse.mouseDown($elToClick, coords.fromViewport)
+            const forceEl = options.force && el
 
-            //# if mousedown was cancelled then or caused
-            //# our element to be removed from the DOM
-            //# just resolve after mouse down and dont
-            //# send a focus event
-            if (domEvents.mouseDown.pointerdownProps.preventedDefault || domEvents.mouseDown.mousedownProps.preventedDefault || !$dom.isAttached($elToClick)) {
+            domEvents.mouseMove = mouse.mouseMove(coords.fromViewport, forceEl)
+
+            const afterMouseMove = () => {
+              domEvents.mouseClick = {}
+
+              const mouseDownEvents = mouse.mouseDown(coords.fromViewport, forceEl)
+
+              // add pointerdown and mousedown mouse props
+              _.extend(domEvents.mouseClick, mouseDownEvents)
+
+              // el that received pointerdown
+              const el = mouseDownEvents.pointerdownProps.el
+
+              //# if mousedown was cancelled then or caused
+              //# our element to be removed from the DOM
+              //# just resolve after mouse down and dont
+              //# send a focus event
+
+              // TODO: put this in mouse.js
+              if (mouseDownEvents.pointerdownProps.preventedDefault || mouseDownEvents.mousedownProps.preventedDefault || !$elements.isAttachedEl(el)) {
+                return afterMouseDown($elToClick, coords)
+              }
+
+              if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
+                if (!$elements.isNeedSingleValueChangeInputElement(el)) {
+                  $selection.moveSelectionToEnd(el)
+                }
+              }
+
+              //# retrieve the first focusable $el in our parent chain
+              const $elToFocus = $elements.getFirstFocusableEl($(el))
+
+              if (cy.needsFocus($elToFocus, $previouslyFocused)) {
+                cy.fireFocus($elToFocus.get(0))
+
+                //# if we are currently trying to focus
+                //# the body then calling body.focus()
+                //# is a noop, and it will not blur the
+                //# current element, which is all so wrong
+                if ($elToFocus.is('body')) {
+                  const $focused = cy.getFocused()
+
+                  //# if the current focused element hasn't changed
+                  //# then blur manually
+                  if ($elements.isSame($focused, $previouslyFocused)) {
+                    cy.fireBlur($focused.get(0))
+                  }
+                }
+              }
+
               return afterMouseDown($elToClick, coords)
             }
 
-            if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-              if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-                $selection.moveSelectionToEnd(el)
-              }
-            }
-
-            //# retrieve the first focusable $el in our parent chain
-            const $elToFocus = $elements.getFirstFocusableEl($elToClick)
-
-            if (cy.needsFocus($elToFocus, $previouslyFocused)) {
-              cy.fireFocus($elToFocus.get(0))
-
-              //# if we are currently trying to focus
-              //# the body then calling body.focus()
-              //# is a noop, and it will not blur the
-              //# current element, which is all so wrong
-              if ($elToFocus.is('body')) {
-                const $focused = cy.getFocused()
-
-                //# if the current focused element hasn't changed
-                //# then blur manually
-                if ($elements.isSame($focused, $previouslyFocused)) {
-                  cy.fireBlur($focused.get(0))
-                }
-              }
-            }
-
-            return afterMouseDown($elToClick, coords)
-
+            return afterMouseMove()
           },
         })
         .catch((err) => {
@@ -282,7 +348,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             $el,
             consoleProps () {
               return {
-                'Applied To': $dom.getElements($el),
+                'Target Element': $dom.getElements($el),
                 'Elements': $el.length,
               }
             },
@@ -325,4 +391,3 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
   })
 }
-

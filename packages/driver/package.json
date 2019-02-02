@@ -32,6 +32,7 @@
     "card": "^1.0.2",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
+    "chai-subset": "^1.6.0",
     "chokidar-cli": "^1.2.0",
     "clone": "^2.1.1",
     "compression": "^1.1.0",

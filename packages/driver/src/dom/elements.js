@@ -457,6 +457,20 @@ const isAttached = function ($el) {
   return $document.hasActiveWindow(doc) && _.every(els, isIn)
 }
 
+/**
+ * @param {HTMLElement} el
+ */
+const isDetachedEl = (el) => {
+  return !isAttachedEl(el)
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+const isAttachedEl = function (el) {
+  return isAttached($(el))
+}
+
 const isSame = function ($el1, $el2) {
   const el1 = $jquery.unwrap($el1)
   const el2 = $jquery.unwrap($el2)
@@ -785,6 +799,10 @@ module.exports = {
   isAttached,
 
   isDetached,
+
+  isAttachedEl,
+
+  isDetachedEl,
 
   isAncestor,
 

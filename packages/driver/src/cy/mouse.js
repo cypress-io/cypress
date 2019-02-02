@@ -4,9 +4,15 @@ const $ = require('jquery')
 const _ = require('lodash')
 const $Keyboard = require('./keyboard')
 
+/**
+ * @typedef Coords
+ * @property {number} x
+ * @property {number} y
+ */
+
 const getLastHoveredEl = (state) => {
   let lastHoveredEl = state('mouseLastHoveredEl')
-  const lastHoveredElAttached = lastHoveredEl && $elements.isAttached($(lastHoveredEl))
+  const lastHoveredElAttached = lastHoveredEl && $elements.isAttachedEl(lastHoveredEl)
 
   if (!lastHoveredElAttached) {
     lastHoveredEl = null
@@ -25,23 +31,39 @@ const create = (state) => {
 
   const mouse = {
 
-    _moveMouse (el, { x, y }) {
+    /**
+     * @param {Coords} coords
+     * @param {HTMLElement | false} force
+     */
+    mouseMove (coords, force = false) {
+
+      const lastHoveredEl = getLastHoveredEl(state)
+
+      const targetEl = mouse.getElAtCoordsOrForce(coords, force)
+
       // if coords are same AND we're already hovered on the element, don't send move events
-      if (_.isEqual({ x, y }, getMouseCoords(state)) && getLastHoveredEl(state) === el) return
+      if (_.isEqual(coords, getMouseCoords(state)) && lastHoveredEl === targetEl) return
 
-      state('mouseCoords', { x, y })
-      mouse._moveMouseEvents(el, { x, y })
+      const events = mouse._mouseMoveEvents(targetEl, coords)
+
+      const resultEl = mouse.getElAtCoordsOrForce(coords, force)
+
+      if (resultEl !== targetEl) {
+        mouse._mouseMoveEvents(resultEl, coords)
+      }
+
+      return { el: resultEl, fromEl: lastHoveredEl, events }
     },
 
-    moveMouseToCoords ({ x, y }) {
-      const el = state('document').elementFromPoint(x, y)
+    /**
+     * @param {HTMLElement} el
+     * @param {Coords} coords
+     */
+    _mouseMoveEvents (el, coords) {
 
-      mouse._moveMouse(el, { x, y })
-    },
-
-    _moveMouseEvents (el, { x, y }) {
-
+      // events are not fired on disabled elements, so we don't have to take that into account
       const win = $dom.getWindowByElement(el)
+      const { x, y } = coords
 
       const _activeModifiers = $Keyboard.getActiveModifiers(state)
       const defaultMouseOptions = $Keyboard.mixinModifiers({
@@ -75,16 +97,16 @@ const create = (state) => {
         isPrimary: true,
       }, _activeModifiers)
 
-      let pointerout = null
-      let pointerleave = null
-      let pointerover = null
-      let pointerenter = null
-      let mouseout = null
-      let mouseleave = null
-      let mouseover = null
-      let mouseenter = null
-      let pointermove = null
-      let mousemove = null
+      let pointerout = _.noop
+      let pointerleave = _.noop
+      let pointerover = _.noop
+      let pointerenter = _.noop
+      let mouseout = _.noop
+      let mouseleave = _.noop
+      let mouseover = _.noop
+      let mouseenter = _.noop
+      let pointermove = _.noop
+      let mousemove = _.noop
 
       const lastHoveredEl = getLastHoveredEl(state)
 
@@ -123,13 +145,13 @@ const create = (state) => {
       }
 
       if (hoveredElChanged) {
-        if (el && $elements.isAttached($(el))) {
+        if (el && $elements.isAttachedEl(el)) {
 
           mouseover = () => {
-            sendMouseover(el, _.extend({}, defaultMouseOptions, { relatedTarget: lastHoveredEl }))
+            return sendMouseover(el, _.extend({}, defaultMouseOptions, { relatedTarget: lastHoveredEl }))
           }
           pointerover = () => {
-            sendPointerover(el, _.extend({}, defaultPointerOptions, { relatedTarget: lastHoveredEl }))
+            return sendPointerover(el, _.extend({}, defaultPointerOptions, { relatedTarget: lastHoveredEl }))
           }
 
           let curParent = el
@@ -158,32 +180,73 @@ const create = (state) => {
 
       // if (!Cypress.config('mousemoveBeforeMouseover') && el) {
       pointermove = () => {
-        sendPointermove(el, defaultPointerOptions)
+        return sendPointermove(el, defaultPointerOptions)
       }
       mousemove = () => {
-        sendMousemove(el, defaultMouseOptions)
+        return sendMousemove(el, defaultMouseOptions)
       }
-      pointerout && pointerout()
-      pointerleave && pointerleave()
-      pointerover && pointerover()
-      pointerenter && pointerenter()
-      mouseout && mouseout()
-      mouseleave && mouseleave()
-      mouseover && mouseover()
-      mouseenter && mouseenter()
-      state('mouseLastHoveredEl', $elements.isAttached($(el)) ? el : null)
-      pointermove && pointermove()
-      mousemove && mousemove()
-    // }
+
+      const events = []
+
+      pointerout()
+      pointerleave()
+      events.push({ pointerover: pointerover() })
+      pointerenter()
+      mouseout()
+      mouseleave()
+      events.push({ mouseover: mouseover() })
+      mouseenter()
+      state('mouseLastHoveredEl', $elements.isAttachedEl(el) ? el : null)
+      state('mouseCoords', { x, y })
+      events.push({ pointermove: pointermove() })
+      events.push({ mousemove: mousemove() })
+
+      return events
 
     },
 
-    mouseDown ($elToClick, fromViewport) {
-      const el = $elToClick.get(0)
-      const { x, y } = fromViewport
+    /**
+     *
+     * @param {Coords} coords
+     * @param {HTMLElement} force
+     * @returns {HTMLElement}
+     */
+    getElAtCoordsOrForce ({ x, y }, force = false) {
+      if (force) {
+        return force
+      }
 
-      // debugger
-      mouse._moveMouse(el, { x, y })
+      const el = state('document').elementFromPoint(x, y)
+
+      // mouse._mouseMoveEvents(el, { x, y })
+
+      return el
+
+    },
+
+    /**
+     *
+     * @param {Coords} coords
+     * @param {HTMLElement} force
+     */
+    moveToCoordsOrForce (coords, force = false) {
+      if (force) {
+        return force
+      }
+
+      const { el } = mouse.mouseMove(coords)
+
+      return el
+    },
+
+    /**
+     * @param {Coords} coords
+     * @param {HTMLElement} force
+     */
+    mouseDown (coords, force) {
+
+      const { x, y } = coords
+      const el = mouse.moveToCoordsOrForce(coords, force)
 
       const _activeModifiers = $Keyboard.getActiveModifiers(state)
       const modifiers = $Keyboard.modifiersToString(_activeModifiers)
@@ -213,9 +276,11 @@ const create = (state) => {
         detail: 1,
         // only for events involving moving cursor
         relatedTarget: null,
-        currentTarget: el,
+        // currentTarget: el,
         view: win,
       }, _activeModifiers)
+
+      // debugger
 
       // TODO: pointer events should have fractional coordinates, not rounded
       let pointerdownProps = sendPointerdown(
@@ -233,9 +298,21 @@ const create = (state) => {
         pointerdownProps = _.extend(pointerdownProps, { modifiers })
       }
 
-      if (pointerdownProps.preventedDefault) {
+      const pointerdownPrevented = pointerdownProps.preventedDefault
+      const elIsDetached = $elements.isDetachedEl(el)
+
+      if (pointerdownPrevented || elIsDetached) {
+        let reason = 'pointerdown was cancelled'
+
+        if (elIsDetached) {
+          reason = 'Element was detached'
+        }
+
         return {
           pointerdownProps,
+          mousedownProps: {
+            skipped: formatReasonNotFired(reason),
+          },
         }
       }
 
@@ -255,12 +332,14 @@ const create = (state) => {
     /**
      * @param {HTMLElement} el
      * @param {Window} win
-     * @param {{x:number,y:number}} fromViewport
-     * @param {boolean} force
+     * @param {Coords} fromViewport
+     * @param {HTMLElement} force
      */
-    mouseUp (el, fromViewport, { pointerdownProps }, force) {
-      const win = $dom.getWindowByElement(el)
+    mouseUp (fromViewport, force, skipMouseEvent) {
 
+      // const win = $dom.getWindowByElement(el)
+
+      const win = state('window')
       const _activeModifiers = $Keyboard.getActiveModifiers(state)
       const modifiers = $Keyboard.modifiersToString(_activeModifiers)
 
@@ -272,30 +351,28 @@ const create = (state) => {
         detail: 1,
       }, _activeModifiers)
 
+      // debugger
+      const el = mouse.moveToCoordsOrForce(fromViewport, force)
+
       let pointerupProps = sendPointerup(el, defaultOptions)
 
       if (modifiers) {
         pointerupProps = _.extend(pointerupProps, { modifiers })
       }
 
-      if (pointerdownProps.preventedDefault) {
+      if (skipMouseEvent || $elements.isDetachedEl($(el))) {
         return {
           pointerupProps,
+          mouseupProps: {
+            skipped: formatReasonNotFired('Previous event cancelled'),
+          },
         }
       }
 
-      if (!force) {
-        const elAtCoords = win.document.elementFromPoint(fromViewport.x, fromViewport.y)
-
-        if (elAtCoords !== el) {
-          el = elAtCoords
-        }
-      }
-
-      let mouseupProps = $elements.isAttached(el) && sendMouseup(el, defaultOptions)
+      let mouseupProps = sendMouseup(el, defaultOptions)
 
       if (modifiers) {
-        mouseupProps.modifiers = modifiers
+        mouseupProps = _.extend(mouseupProps, { modifiers })
       }
 
       return {
@@ -305,8 +382,8 @@ const create = (state) => {
 
     },
 
-    click ($elToClick, fromViewport) {
-      const el = $elToClick.get(0)
+    click (fromViewport, force = false, skipClickEvent = false) {
+      const el = this.moveToCoordsOrForce(fromViewport, force)
 
       const win = $dom.getWindowByElement(el)
       const _activeModifiers = $Keyboard.getActiveModifiers(state)
@@ -320,9 +397,17 @@ const create = (state) => {
         composed: true,
       }, _activeModifiers)
 
+      if (skipClickEvent) {
+        return {
+          clickProps: {
+            skipped: formatReasonNotFired('Element was detached'),
+          },
+        }
+      }
+
       let clickProps = sendClick(el, clickEvtProps)
 
-      //# ensure this property exists on older chromium versions
+      //// ensure this property exists on older chromium versions
       // if (clickEvt.buttons == null) {
       //   clickEvt.buttons = 0
       // }
@@ -331,7 +416,7 @@ const create = (state) => {
         clickProps = _.extend(clickProps, { modifiers })
       }
 
-      return clickProps
+      return { clickProps }
     },
   }
 
@@ -357,6 +442,7 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
   return {
     stoppedPropagation: !!evt._hasStoppedPropagation,
     preventedDefault,
+    el,
   }
 
 }
@@ -367,6 +453,8 @@ const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable =
   return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
 }
 const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
+  // IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
+  // https://dom.spec.whatwg.org/#dom-document-createevent
   const constructor = el.ownerDocument.defaultView.MouseEvent
 
   return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
@@ -417,6 +505,10 @@ const sendMouseout = (el, evtOptions) => {
 }
 const sendClick = (el, evtOptions) => {
   return sendMouseEvent(el, evtOptions, 'click', true, true)
+}
+
+const formatReasonNotFired = (reason) => {
+  return `⚠️ not fired (${reason})`
 }
 
 const _getFromDocCoords = (x, y, win) => {

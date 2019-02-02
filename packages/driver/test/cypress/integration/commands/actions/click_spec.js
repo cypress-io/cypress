@@ -1,3 +1,5 @@
+/* eslint arrow-body-style:0 arrow-parens:0 */
+
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
@@ -6,7 +8,20 @@ const fail = function (str) {
   throw new Error(str)
 }
 
-const mouseFocusEvents = ['focus', 'focusin', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']
+const mouseClickEvents = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']
+const mouseHoverEvents = [
+  'pointerout',
+  'pointerleave',
+  'pointerover',
+  'pointerenter',
+  'mouseout',
+  'mouseleave',
+  'mouseover',
+  'mouseenter',
+  'pointermove',
+  'mousemove',
+]
+const focusEvents = ['focus', 'focusin']
 
 describe('src/cy/commands/actions/click', function () {
   before(() => {
@@ -219,7 +234,7 @@ describe('src/cy/commands/actions/click', function () {
         expect(e.defaultPrevented).to.be.true
       })
 
-      _.each(mouseFocusEvents, (event) => {
+      _.each(mouseClickEvents, (event) => {
         $btn.get(0).addEventListener(event, () => {
           events.push(event)
         })
@@ -242,7 +257,7 @@ describe('src/cy/commands/actions/click', function () {
         expect(e.defaultPrevented).to.be.true
       })
 
-      _.each(mouseFocusEvents, (event) => {
+      _.each(mouseClickEvents, (event) => {
         $btn.get(0).addEventListener(event, () => {
           events.push(event)
         })
@@ -303,22 +318,47 @@ describe('src/cy/commands/actions/click', function () {
       cy.contains('button').click()
     })
 
-    it('does not fire some events when element has been removed on pointerdown', function () {
-      const $btn = cy.$$('button:first')
+    it('events when element removed on pointerdown', function () {
+      const btn = cy.$$('button:first')
+      const div = cy.$$('div#tabindex')
 
-      $btn.on('pointerdown', function () {
+      attachFocusListeners({ btn })
+      attachMouseClickListeners({ btn, div })
+      attachMouseHoverListeners({ div })
+
+      btn.on('pointerdown', function () {
         // synchronously remove this button
-        $(this).remove()
-      })
-      const focusMouseEvents = ['focus', 'focusin', 'mousedown', 'pointerup', 'mouseup', 'click']
 
-      focusMouseEvents.forEach((eventName) => {
-        $btn.on(eventName, () => {
-          fail(`should not have gotten ${eventName}`)
-        })
+        btn.remove()
+      })
+
+      // return
+      cy.contains('button').click()
+
+      cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
+      cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
+      cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
+    })
+
+    it('events when element removed on pointerover', () => {
+      const btn = cy.$$('button:first')
+      const div = cy.$$('div#tabindex')
+
+      // attachFocusListeners({ btn })
+      attachMouseClickListeners({ btn, div })
+      attachMouseHoverListeners({ btn, div })
+
+      btn.on('pointerover', function () {
+        // synchronously remove this button
+
+        btn.remove()
       })
 
       cy.contains('button').click()
+
+      cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalled)
+      cy.getAll('btn', 'pointerdown mousedown mouseover mouseenter').each(shouldNotBeCalled)
+      cy.getAll('div', 'pointerover pointerenter pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
     })
 
     it('does not fire a click when element has been removed on mouseup', function () {
@@ -449,24 +489,23 @@ describe('src/cy/commands/actions/click', function () {
     })
 
     it('serially clicks a collection', () => {
-      let clicks = 0
+      const throttled = cy.stub().as('clickcount')
 
       // create a throttled click function
       // which proves we are clicking serially
-      const throttled = _.throttle(() => {
-        clicks += 1
-      }
-        , 5, { leading: false })
+      const handleClick = cy.stub()
+      .callsFake(_.throttle(throttled, 0, { leading: false }))
+      .as('handleClick')
 
-      const anchors = cy.$$('#sequential-clicks a')
+      const $anchors = cy.$$('#sequential-clicks a')
 
-      anchors.click(throttled)
+      $anchors.on('click', handleClick)
 
-      // make sure we're clicking multiple anchors
-      expect(anchors.length).to.be.gt(1)
+      // make sure we're clicking multiple $anchors
+      expect($anchors.length).to.be.gt(1)
 
-      cy.get('#sequential-clicks a').click({ multiple: true }).then(($anchors) => {
-        expect($anchors.length).to.eq(clicks)
+      cy.get('#sequential-clicks a').click({ multiple: true }).then(($els) => {
+        expect($els).to.have.length(throttled.callCount)
       })
     })
 
@@ -815,7 +854,7 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('scrolls the window past a fixed position element when being covered', () => {
-        const spy = cy.spy(_.noop).as('mousedown')
+        const spy = cy.spy().as('mousedown')
 
         $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
@@ -1485,7 +1524,7 @@ describe('src/cy/commands/actions/click', function () {
         cy.click()
       })
 
-      it('throws when any member of the subject isnt visible', function (done) {
+      it('*throws when any member of the subject isnt visible', function (done) {
         cy.timeout(250)
 
         cy.$$('#three-buttons button').show().last().hide()
@@ -2078,9 +2117,11 @@ describe('src/cy/commands/actions/click', function () {
           // synchronously remove this button
           $(this).remove()
         })
-
-        cy.contains('button').click().then(function () {
-          expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
+        cy.contains('button').click()
+        cy.contains('button').click()
+        cy.contains('button').click()
+        .then(function () {
+          expect(this.lastLog.invoke('consoleProps').table[1]()).to.deep.eq([
             {
               name: 'PointerDown',
               items: {
@@ -2509,3 +2550,52 @@ describe('src/cy/commands/actions/click', function () {
     })
   })
 })
+
+const attachListeners = (listenerArr) => (els) => {
+  _.each(els, (el, elName) => {
+    return listenerArr.forEach((evtName) => {
+      el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
+    })
+  }
+  )
+}
+
+const attachFocusListeners = attachListeners(focusEvents)
+const attachMouseClickListeners = attachListeners(mouseClickEvents)
+const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
+
+const getAllFn = (...aliases) => {
+  if (aliases.length > 1) {
+    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map(alias => `@${aliases[0]}:${alias}`).join(' '))
+  }
+
+  return Cypress.Promise.all(
+    aliases[0].split(' ').map((alias) => {
+      return cy.now('get', alias)
+    }))
+}
+
+Cypress.Commands.add('getAll', getAllFn)
+
+const _wrapLogFalse = obj => cy.wrap(obj, { log: false })
+const shouldBeCalled = stub => _wrapLogFalse(stub).should('be.called')
+const shouldNotBeCalled = stub => _wrapLogFalse(stub).should('not.be.called')
+
+// const getAllFn = (...aliases) => {
+//   if (aliases.length > 1) {
+//     return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map(alias => `@${aliases[0]}:${alias}`).join(' '))
+//   }
+
+//   return cy.wrap(null, {log:false}).then(() => {
+//     return Cypress.Promise.all(
+//       aliases[0].split(' ').map((alias) => {
+//         return cy.now('get', alias)
+//       }))
+//   })
+// }
+
+// // Cypress.Commands.add('getAll', getAllFn)
+
+// const shouldBeCalled = stub => cy.wrap(stub, {log:false}).should('be.called')
+// const shouldNotBeCalled = stub => cy.wrap(stub, {log:false}).should('not.be.called')
+

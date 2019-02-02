@@ -165,8 +165,6 @@ export default {
 
     if (!groups) return
 
-    delete consoleProps.groups
-
     return _.map(groups, (group) => {
       group.items = this._formatted(group.items)
 
@@ -175,6 +173,15 @@ export default {
   },
 
   _logTable (consoleProps) {
+
+    if (_.isArray(consoleProps.table)) {
+      _.each(consoleProps.table, (table) => {
+        return this._logTable({ table })
+      })
+
+      return
+    }
+
     const table = this._getTable(consoleProps)
 
     if (!table) return
@@ -189,11 +196,12 @@ export default {
   },
 
   _getTable (consoleProps) {
+
     const table = _.result(consoleProps, 'table')
 
     if (!table) return
 
-    delete consoleProps.table
+    // delete consoleProps.table
 
     return table
   },
