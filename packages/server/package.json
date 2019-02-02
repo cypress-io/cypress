@@ -90,7 +90,7 @@
     "supertest": "0.15.0",
     "supertest-as-promised": "3.2.0",
     "supertest-session": "0.0.7",
-    "through2": "0.6.3",
+    "through2": "0.6.5",
     "vagrant": "0.0.1",
     "ws": "5.2.2",
     "xvfb": "cypress-io/node-xvfb#22e3783c31d81ebe64d8c0df491ea00cdc74726a",
