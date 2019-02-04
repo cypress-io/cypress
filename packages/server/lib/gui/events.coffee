@@ -54,6 +54,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:config:changed"
       onBus("config:changed")
 
+    when "reload:configuration:requested"
+      onBus("reload:configuration:requested")
+
     when "on:plugins:changed"
       onBus("plugins:changed")
 
@@ -205,11 +208,15 @@ handleEvent = (options, bus, event, id, type, arg) ->
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
+      reloadConfigurationRequested = () ->
+        bus.emit("reload:configuration:requested")
+
       openProject.create(arg, options, {
         onFocusTests: onFocusTests
         onSpecChanged: onSpecChanged
         onSettingsChanged: onSettingsChanged
         onPluginsChanged: onPluginsChanged
+        reloadConfigurationRequested: reloadConfigurationRequested
         onError: onError
         onWarning: onWarning
       })

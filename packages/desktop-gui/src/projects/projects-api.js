@@ -180,6 +180,14 @@ const openProject = (project) => {
     project.setWarning(warning)
   })
 
+  ipc.reloadConfigurationRequested(() => {
+    const chosenSpec = specsStore.chosenSpec
+    const chosenBrowser = project.chosenBrowser
+
+    reopenProject(project)
+    runSpec(project, chosenSpec, chosenBrowser)
+  })
+
   return ipc.openProject(project.path)
   .then((config = {}) => {
     updateConfig(config)

@@ -28,6 +28,7 @@ const pathsEqual = (path1, path2) => {
 export class SpecsStore {
   @observable _files = []
   @observable chosenSpecPath
+  @observable chosenSpec
   @observable error
   @observable isLoading = false
   @observable filter
@@ -52,6 +53,7 @@ export class SpecsStore {
 
   @action setChosenSpec (spec) {
     this.chosenSpecPath = spec ? formRelativePath(spec) : null
+    this.chosenSpec = spec
   }
 
   @action setChosenSpecByRelativePath (relativePath) {

@@ -84,6 +84,8 @@ create = ->
 
           automation = openProject.getAutomation()
 
+          # TODO figure out use is undefined error
+
           ## use automation middleware if its
           ## been defined here
           if am = options.automationMiddleware
@@ -184,6 +186,9 @@ create = ->
         onReloadBrowser: (url, browser) =>
           if relaunchBrowser
             relaunchBrowser()
+
+        onReloadConfiguration: () ->
+          options.reloadConfigurationRequested?()
       })
 
       options = _.extend {}, args.config, options
