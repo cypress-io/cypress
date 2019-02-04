@@ -1,3 +1,5 @@
+_ = require("lodash")
+
 describe "Settings", ->
   beforeEach ->
     cy.fixture("user").as("user")
@@ -267,3 +269,21 @@ describe "Settings", ->
       @goToSettings()
 
       cy.contains("h5", "Record Keys").should("not.exist")
+
+  context "when configFile is false", ->
+    beforeEach ->
+      @openProject.resolve(_.assign({ configFile: false }, @config))
+      @goToSettings()
+      cy.contains("Configuration").click()
+
+    it "notes that cypress.json is disabled", ->
+      cy.contains("set from cypress.json (currently disabled by --config-file false)").should("exist")
+
+  context "when configFile is set", ->
+    beforeEach ->
+      @openProject.resolve(_.assign({ configFile: "special-cypress.json" }, @config))
+      @goToSettings()
+      cy.contains("Configuration").click()
+
+    it "notes that a custom config is in use", ->
+      cy.contains("set from custom config file special-cypress.json").should("exist")
