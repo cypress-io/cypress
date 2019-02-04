@@ -37,7 +37,7 @@
     "jsdom": "9.4.1",
     "lodash": "4.17.11",
     "mobx": "3.6.2",
-    "mobx-react": "4.2.1",
+    "mobx-react": "4.4.3",
     "prop-types": "15.6.2",
     "react": "16.7.0",
     "react-dom": "16.7.0",
