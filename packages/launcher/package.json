@@ -36,7 +36,7 @@
     "@types/ramda": "0.25.47",
     "bin-up": "1.1.0",
     "chai": "3.5.0",
-    "prettier": "1.16.3",
+    "prettier": "1.16.4",
     "shelljs": "0.7.8",
     "sinon": "2.4.1",
     "sinon-chai": "2.14.0",
