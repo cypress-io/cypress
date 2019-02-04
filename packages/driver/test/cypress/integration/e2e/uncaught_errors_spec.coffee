@@ -11,7 +11,7 @@ describe "uncaught errors", ->
     return null
 
   context "window.onerror page:error", ->
-    it.only "logs visit failure once", (done) ->
+    it "logs visit failure once", (done) ->
       r = cy.state("runnable")
 
       cy.on "test:fail", (err) =>
