@@ -104,7 +104,8 @@ defaults = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
-  pluginsFile:                    "cypress/plugins"
+  pluginsFile:                   "cypress/plugins"
+  configFile:                    "cypress.json"
 
   ## deprecated
   javascripts:                   []
@@ -116,6 +117,7 @@ validationRules = {
   blacklistHosts: v.isStringOrArrayOfStrings
   modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
+  configFile: v.isStringOrFalse
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject
   execTimeout: v.isNumber
@@ -218,7 +220,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
+    _.extend config, _.pick(options, "configFile", "morgan", "isTextTerminal", "socketId", "report", "browsers")
 
     _
     .chain(@whitelist(options))
