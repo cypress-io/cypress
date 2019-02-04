@@ -1,17 +1,12 @@
 import * as Bluebird from 'bluebird'
-<<<<<<< HEAD
-import * as _ from 'lodash'
-=======
-import { merge, pick, tap, uniqBy, props, flatten } from 'ramda'
 import { extend, compact } from 'lodash'
->>>>>>> cleanup
 import * as os from 'os'
-import { merge, pick, props, tap, uniqBy } from 'ramda'
+import { merge, pick, props, tap, uniqBy, flatten } from 'ramda'
 import { browsers } from './browsers'
 import { detectBrowserDarwin } from './darwin'
 import { detectBrowserLinux } from './linux'
 import { log } from './log'
-import { Browser, NotInstalledError } from './types'
+import { FoundBrowser, Browser, NotInstalledError } from './types'
 import { detectBrowserWindows } from './windows'
 
 const setMajorVersion = (browser: FoundBrowser) => {
@@ -54,15 +49,13 @@ function lookup(
  * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
  * we don't use the `binary` field on Windows.
  */
-function checkBrowser(
-  browser: Browser
-): Promise<boolean | FoundBrowser | (boolean | FoundBrowser)[]> {
+function checkBrowser(browser: Browser): Promise<(boolean | FoundBrowser)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.mapSeries(browser.binary, (binary: string) => {
       return checkOneBrowser(extend({}, browser, { binary }))
     })
   }
-  return checkOneBrowser(browser)
+  return Bluebird.mapSeries([browser], checkOneBrowser)
 }
 
 function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
@@ -100,20 +93,19 @@ function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
 function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
-  // @ts-ignore
   if (!goalBrowsers) {
     goalBrowsers = browsers
   }
 
-  // for some reason the type system does not understand that after _.compact
-  // the remaining list only contains valid Browser objects
-  // and we can pick "name" and "version" fields from each object
-  // @ts-ignore
-  const removeDuplicates = uniqBy(props(['name', 'version']))
+  const removeDuplicates = uniqBy((browser: FoundBrowser) =>
+    props(['name', 'version'], browser)
+  )
+  const compactFalse = (browsers: any[]) => compact(browsers) as FoundBrowser[]
+
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
     .then(flatten)
-    .then(compact)
-    .then(removeDuplicates) as Bluebird<FoundBrowser[]>
+    .then(compactFalse)
+    .then(removeDuplicates)
 }
 
 export default detectBrowsers
