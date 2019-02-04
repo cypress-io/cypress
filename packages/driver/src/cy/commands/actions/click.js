@@ -103,9 +103,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
               consoleObj['Actual Element Clicked'] = $dom.getElements($elToClick)
             }
 
-            consoleObj.table = [
-              () => {
-
+            consoleObj.table = _.extend((consoleObj.table || {}), {
+              1: () => {
                 return {
                   name: 'Mouse Move Events',
                   data: _.map(domEvents.mouseMove.events, (event) => {
@@ -121,7 +120,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                   }),
                 }
               },
-              () => {
+              2: () => {
                 return {
                   name: 'Mouse Click Events',
                   data: _.map(domEvents.mouseClick, (val, key) => {
@@ -148,46 +147,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                     }
                   }),
                 }
-                // if (domEvents.mouseDown) {
-                //   if (domEvents.mouseDown.pointerdownProps) {
-                //     groups.push({
-                //       name: 'PointerDown',
-                //       items: _.pick(domEvents.mouseDown.pointerdownProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                //     })
-                //   }
-
-                //   if (domEvents.mouseDown.mousedownProps) {
-                //     groups.push({
-                //       name: 'MouseDown',
-                //       items: _.pick(domEvents.mouseDown.mousedownProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                //     })
-                //   }
-                // }
-
-                // if (domEvents.mouseUp) {
-                //   if (domEvents.mouseUp.pointerupProps) {
-                //     groups.push({
-                //       name: 'PointerUp',
-                //       items: _.pick(domEvents.mouseUp.pointerupProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                //     })
-                //   }
-
-                //   if (domEvents.mouseUp.mouseupProps) {
-                //     groups.push({
-                //       name: 'MouseUp',
-                //       items: _.pick(domEvents.mouseUp.mouseupProps, 'el', 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                //     })
-                //   }
-                // }
-
-                // if (domEvents.click) {
-                //   groups.push({
-                //     name: 'Click',
-                //     items: _.pick(domEvents.click, 'preventedDefault', 'stoppedPropagation', 'modifiers', 'el'),
-                //   })
-                // }
               },
-            ]
+            })
 
             return consoleObj
           }

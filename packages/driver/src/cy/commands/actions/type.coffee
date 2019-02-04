@@ -69,11 +69,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             "Typed":      chars
             "Applied To": $dom.getElements(options.$el)
             "Options":    deltaOptions
-            "table": ->
-              {
-                name: "Key Events Table"
-                data: getTableData()
-                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
+            "table": {
+              3: ->
+                {
+                  name: "Keyboard Events"
+                  data: getTableData()
+                  columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
+                }
               }
             }
           }

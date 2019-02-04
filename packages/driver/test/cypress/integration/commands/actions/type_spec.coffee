@@ -2586,13 +2586,14 @@ describe "src/cy/commands/actions/type", ->
             expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
 
         it "has a table of keys", ->
-          cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->
-            table = @lastLog.invoke("consoleProps").table()
+          cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}")
+          .then ->
+            table = @lastLog.invoke("consoleProps").table[3]()
             console.table(table.data, table.columns)
             expect(table.columns).to.deep.eq [
               "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"
             ]
-            expect(table.name).to.eq "Key Events Table"
+            expect(table.name).to.eq "Keyboard Events"
             expectedTable = {
               1: {typed: "<meta>", which: 91, keydown: true, modifiers: "meta"}
               2: {typed: "<alt>", which: 18, keydown: true, modifiers: "alt, meta"}
@@ -2615,7 +2616,7 @@ describe "src/cy/commands/actions/type", ->
 
         it "has no modifiers when there are none activated", ->
           cy.get(":text:first").type("f").then ->
-            table = @lastLog.invoke("consoleProps").table()
+            table = @lastLog.invoke("consoleProps").table[3]()
             expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
             }
@@ -2624,7 +2625,7 @@ describe "src/cy/commands/actions/type", ->
           cy.$$(":text:first").keydown -> return false
 
           cy.get(":text:first").type("f").then ->
-            table = @lastLog.invoke("consoleProps").table()
+            table = @lastLog.invoke("consoleProps").table[3]()
             console.table(table.data, table.columns)
             expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}

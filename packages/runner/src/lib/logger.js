@@ -174,7 +174,7 @@ export default {
 
   _logTable (consoleProps) {
 
-    if (_.isArray(consoleProps.table)) {
+    if (!_.isFunction(consoleProps.table) && _.isObject(consoleProps.table)) {
       _.each(consoleProps.table, (table) => {
         return this._logTable({ table })
       })
