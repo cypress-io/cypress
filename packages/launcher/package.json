@@ -40,8 +40,8 @@
     "shelljs": "0.7.8",
     "sinon": "2.4.1",
     "sinon-chai": "2.14.0",
-    "tslint": "5.8.0",
-    "tslint-config-standard": "7.0.0",
+    "tslint": "5.12.1",
+    "tslint-config-standard": "7.1.0",
     "typescript": "2.9.2"
   },
   "dependencies": {
