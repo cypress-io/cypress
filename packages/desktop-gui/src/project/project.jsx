@@ -37,7 +37,7 @@ class Project extends Component {
   render () {
     if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (this.props.project.error) return <ErrorMessage error={this.props.project.error} onTryAgain={this._reopenProject}/>
+    if (this.props.project.error) return <ErrorMessage onTryAgain={this._reopenProject} project={this.props.project}/>
 
     const { warning } = this.props.project
 

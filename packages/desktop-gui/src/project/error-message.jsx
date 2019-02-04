@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
 import ipc from '../lib/ipc'
+import { configFileFormatted } from '../lib/config-file-formatted'
 
 import Markdown from 'markdown-it'
 
@@ -53,7 +54,7 @@ class ErrorMessage extends Component {
   }
 
   render () {
-    let err = this.props.error
+    let err = this.props.project.error
 
     return (
       <div className='full-alert alert alert-danger error'>
@@ -71,7 +72,7 @@ class ErrorMessage extends Component {
           {err.portInUse && (
             <div>
               <hr />
-              <p>To fix, stop the other running process or change the port in <code>cypress.json</code></p>
+              <p>To fix, stop the other running process or change the port in {configFileFormatted(this.props.project.configFile)}</p>
             </div>
           )}
         </span>

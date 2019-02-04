@@ -3,6 +3,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
+import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
 const display = (obj) => {
@@ -130,11 +131,11 @@ const Configuration = observer(({ project }) => (
         </tr>
         <tr className='config-keys'>
           <td><span className='config'>config</span></td>
-          <td>set from cypress.json</td>
+          <td>set from {configFileFormatted(project.configFile)}</td>
         </tr>
         <tr className='config-keys'>
           <td><span className='envFile'>envFile</span></td>
-          <td>set from cypress.env.json</td>
+          <td>set from <code>cypress.env.json</code></td>
         </tr>
         <tr className='config-keys'>
           <td><span className='env'>env</span></td>

@@ -140,8 +140,11 @@ const openProject = (project) => {
   }
 
   const updateConfig = (config) => {
-    project.update({ id: config.projectId })
-    project.update({ name: config.projectName })
+    project.update({
+      id: config.projectId,
+      name: config.projectName,
+      configFile: config.configFile,
+    })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
