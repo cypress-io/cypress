@@ -240,10 +240,10 @@ const eventManager = {
       reporterBus.emit('reporter:internal:log', displayProps)
     })
 
-    Cypress.on('log:changed', (log) => {
+    Cypress.on('internal:logChange', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
 
-      reporterBus.emit('reporter:log:state:changed', displayProps)
+      reporterBus.emit('reporter:internal:logChange', displayProps)
     })
 
     Cypress.on('before:screenshot', (config, cb) => {

@@ -336,10 +336,10 @@ class $Cypress
 
         @emit("internal:log", args...)
 
-      when "command:log:changed"
+      when "command:internal:logChange"
         @runner.addLog(args[0], @config("isInteractive"))
 
-        @emit("log:changed", args...)
+        @emit("internal:logChange", args...)
 
       when "cy:test:fail"
         ## comes from cypress errors fail()

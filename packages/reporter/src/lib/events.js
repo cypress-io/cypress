@@ -22,7 +22,7 @@ export default {
       runnablesStore.addLog(log)
     }))
 
-    runner.on('reporter:log:state:changed', action('log:change', (log) => {
+    runner.on('reporter:internal:logChange', action('log:change', (log) => {
       runnablesStore.updateLog(log)
     }))
 

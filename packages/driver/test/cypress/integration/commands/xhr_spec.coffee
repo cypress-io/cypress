@@ -1856,7 +1856,7 @@ describe "src/cy/commands/xhr", ->
     it "aborts xhrs currently in flight", ->
       log = null
 
-      cy.on "log:changed", (attrs, l) =>
+      cy.on "internal:logChange", (attrs, l) =>
         if attrs.name is "xhr"
           if not log
             log = l
@@ -1877,7 +1877,7 @@ describe "src/cy/commands/xhr", ->
     it "aborts xhrs even when responseType  not '' or 'text'", ->
       log = null
 
-      cy.on "log:changed", (attrs, l) =>
+      cy.on "internal:logChange", (attrs, l) =>
         if attrs.name is "xhr"
           if not log
             log = l
@@ -1899,7 +1899,7 @@ describe "src/cy/commands/xhr", ->
     it "does not set aborted on XHR's that have completed by have had .abort() called", ->
       log = null
 
-      cy.on "log:changed", (attrs, l) =>
+      cy.on "internal:logChange", (attrs, l) =>
         if attrs.name is "xhr"
           if not log
             log = l

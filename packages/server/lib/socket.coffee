@@ -23,7 +23,7 @@ runnerEvents = [
   "run:start"
   "test:start:async"
   "reporter:internal:log"
-  "reporter:log:state:changed"
+  "reporter:internal:logChange"
   "paused"
   "after:test:hooks"
   "run:end"

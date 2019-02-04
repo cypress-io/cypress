@@ -462,9 +462,9 @@ create = (Cypress, cy, state, config) ->
     $Events.extend(log)
 
     triggerStateChanged = ->
-      trigger(log, "command:log:changed")
+      trigger(log, "command:internal:logChange")
 
-    ## only fire the log:state:changed event
+    ## only fire the internal:logChange event
     ## as fast as every 4ms
     log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
 

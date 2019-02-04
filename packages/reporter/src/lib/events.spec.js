@@ -83,8 +83,8 @@ describe('events', () => {
       expect(runnablesStore.addLog).to.have.been.calledWith('the log')
     })
 
-    it('updates log on reporter:log:state:changed', () => {
-      runner.on.withArgs('reporter:log:state:changed').callArgWith(1, 'the updated log')
+    it('updates log on reporter:internal:logChange', () => {
+      runner.on.withArgs('reporter:internal:logChange').callArgWith(1, 'the updated log')
       expect(runnablesStore.updateLog).to.have.been.calledWith('the updated log')
     })
 

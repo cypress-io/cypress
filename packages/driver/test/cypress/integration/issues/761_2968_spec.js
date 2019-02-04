@@ -57,7 +57,7 @@ describe('issue #2968 - unloaded xhrs do not need to be aborted', () => {
 
     const stub = cy.stub()
 
-    cy.on('log:changed', (attrs, l) => {
+    cy.on('internal:logChange', (attrs, l) => {
       if (attrs.name === 'xhr') {
         log = l
       }
