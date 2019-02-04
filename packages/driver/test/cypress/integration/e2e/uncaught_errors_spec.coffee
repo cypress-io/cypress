@@ -10,103 +10,267 @@ describe "uncaught errors", ->
 
     return null
 
-  it "logs visit failure once", (done) ->
-    r = cy.state("runnable")
+  context "window.onerror page:error", ->
+    it.only "logs visit failure once", (done) ->
+      r = cy.state("runnable")
 
-    cy.on "test:fail", (err) =>
-      lastLog = @lastLog
+      cy.on "test:fail", (err) =>
+        lastLog = @lastLog
 
-      expect(@logs.length).to.eq(1)
+        expect(@logs.length).to.eq(1)
 
-      ## this runnable should not have a timer
-      expect(r.timer).not.to.be.ok
+        ## this runnable should not have a timer
+        expect(r.timer).not.to.be.ok
 
-      done()
+        done()
 
-      ## and still not have a timer
-      expect(r.timer).not.to.be.ok
+        ## and still not have a timer
+        expect(r.timer).not.to.be.ok
 
-    ## when this beforeEach hook fails
-    ## it will skip invoking the test
-    ## but run the other suite
-    cy.visit("/fixtures/visit_error.html")
+      ## when this beforeEach hook fails
+      ## it will skip invoking the test
+      ## but run the other suite
+      cy.visit("/fixtures/visit_error.html")
 
-  it "can turn off uncaught exception handling via cy", ->
-    r = cy.state("runnable")
+    it "receives error and runnable via cy", ->
+      r = cy.state("runnable")
 
-    cy.on "page:error", (err, runnable) ->
-      expect(err.name).to.eq("Uncaught ReferenceError")
-      expect(err.message).to.include("foo is not defined")
-      expect(err.message).to.include("This error originated from your application code, not from Cypress.")
-      expect(err.message).to.include("https://on.cypress.io/uncaught-exception-from-application")
-      expect(runnable is r).to.be.true
+      cy.on "page:error", (err, runnable) ->
+        expect(err.name).to.eq("Uncaught ReferenceError")
+        expect(err.message).to.include("foo is not defined")
+        expect(err.message).to.include("This error originated from your application code, not from Cypress.")
+        expect(err.message).to.include("https://on.cypress.io/uncaught-exception-from-application")
+        expect(runnable is r).to.be.true
 
-      return false
+        return false
 
-    cy.visit("/fixtures/visit_error.html")
+      cy.visit("/fixtures/visit_error.html")
 
-  it "can turn off uncaught exception handling via Cypress", ->
-    r = cy.state("runnable")
+    it "can turn off uncaught exception handling via cy", ->
+      r = cy.state("runnable")
 
-    Cypress.once "page:error", (err, runnable) ->
-      expect(err.message).to.include("foo is not defined")
-      expect(runnable is r).to.be.true
+      cy.on "page:error", (err, runnable) ->
+        return false
 
-      return false
+      cy.visit("/fixtures/visit_error.html")
 
-    cy.visit("/fixtures/visit_error.html")
+    it "receives error and runnable via Cypress", ->
+      r = cy.state("runnable")
 
-  it "logs click error once", (done) ->
-    uncaught = false
+      Cypress.once "page:error", (err, runnable) ->
+        expect(err.name).to.eq("Uncaught ReferenceError")
+        expect(err.message).to.include("foo is not defined")
+        expect(err.message).to.include("This error originated from your application code, not from Cypress.")
+        expect(err.message).to.include("https://on.cypress.io/uncaught-exception-from-application")
+        expect(runnable is r).to.be.true
 
-    cy.on "page:error", ->
-      uncaught = true
+        return false
 
-      return true
+      cy.visit("/fixtures/visit_error.html")
 
-    cy.on "test:fail", (err) =>
-      lastLog = @lastLog
+    it "can turn off uncaught exception handling via Cypress", ->
+      r = cy.state("runnable")
 
-      expect(@logs.length).to.eq(4)
-      expect(uncaught).to.be.true
-      expect(err.message).to.include("uncaught click error")
-      expect(lastLog.get("name")).to.eq("click")
-      expect(lastLog.get("error")).to.eq(err)
+      Cypress.once "page:error", (err, runnable) ->
+        expect(err.message).to.include("foo is not defined")
+        expect(runnable is r).to.be.true
 
-      done()
+        return false
 
-    cy
-      .visit("/fixtures/jquery.html")
-      .window().then (win) ->
-        win.$("button:first").on "click", ->
-          throw new Error("uncaught click error")
-      .get("button:first").click()
+      cy.visit("/fixtures/visit_error.html")
 
-  it "logs error on page load when new page has uncaught exception", (done) ->
-    uncaught = false
+    it "includes error origin", ->
+      r = cy.state("runnable")
 
-    cy.on "page:error", ->
-      uncaught = true
+      cy.on "page:error", (err, runnable) ->
+        expect(err.origin).to.eq("onerror")
 
-      return true
+        return false
 
-    cy.on "test:fail", (err) =>
-      click = _.find @logs, (log) ->
-        log.get("name") is "click"
+      cy.visit("/fixtures/visit_error.html")
 
-      ## visit, window, contains, click, page loading, new url
-      expect(@logs.length).to.eq(6)
-      expect(uncaught).to.be.true
-      expect(err.message).to.include("foo is not defined")
-      expect(click.get("name")).to.eq("click")
-      expect(click.get("error")).to.eq(err)
+    it "logs click error once", (done) ->
+      uncaught = false
 
-      done()
+      cy.on "page:error", ->
+        uncaught = true
 
-    cy
-      .visit("/fixtures/jquery.html")
-      .window().then (win) ->
-        win.$("<a href='/fixtures/visit_error.html'>visit</a>")
-        .appendTo(win.document.body)
+        return true
 
-      .contains("visit").click()
+      cy.on "test:fail", (err) =>
+        lastLog = @lastLog
+
+        expect(@logs.length).to.eq(4)
+        expect(uncaught).to.be.true
+        expect(err.message).to.include("uncaught click error")
+        expect(lastLog.get("name")).to.eq("click")
+        expect(lastLog.get("error")).to.eq(err)
+
+        done()
+
+      cy
+        .visit("/fixtures/jquery.html")
+        .window().then (win) ->
+          win.$("button:first").on "click", ->
+            throw new Error("uncaught click error")
+        .get("button:first").click()
+
+    it "logs error on page load when new page has uncaught exception", (done) ->
+      uncaught = false
+
+      cy.on "page:error", ->
+        uncaught = true
+
+        return true
+
+      cy.on "test:fail", (err) =>
+        click = _.find @logs, (log) ->
+          log.get("name") is "click"
+
+        ## visit, window, contains, click, page loading, new url
+        expect(@logs.length).to.eq(6)
+        expect(uncaught).to.be.true
+        expect(err.message).to.include("foo is not defined")
+        expect(click.get("name")).to.eq("click")
+        expect(click.get("error")).to.eq(err)
+
+        done()
+
+      cy
+        .visit("/fixtures/jquery.html")
+        .window().then (win) ->
+          win.$("<a href='/fixtures/visit_error.html'>visit</a>")
+          .appendTo(win.document.body)
+
+        .contains("visit").click()
+
+  context "window.onunhandledrejection page:error", ->
+    it "logs visit failure once", (done) ->
+      r = cy.state("runnable")
+
+      cy.on "test:fail", (err) =>
+        lastLog = @lastLog
+
+        expect(@logs.length).to.eq(1)
+
+        ## this runnable should not have a timer
+        expect(r.timer).not.to.be.ok
+
+        done()
+
+        ## and still not have a timer
+        expect(r.timer).not.to.be.ok
+
+      ## when this beforeEach hook fails
+      ## it will skip invoking the test
+      ## but run the other suite
+      cy.visit("/fixtures/unhandled_rejection.html")
+
+    it "receives error and runnable via cy", ->
+      r = cy.state("runnable")
+
+      cy.on "page:error", (err, runnable) ->
+        expect(err.name).to.eq("Uncaught ReferenceError")
+        expect(err.message).to.include("foo is not defined")
+        expect(err.message).to.include("This error originated from your application code, not from Cypress.")
+        expect(err.message).to.include("https://on.cypress.io/uncaught-exception-from-application")
+        expect(runnable).to.equal(r)
+
+        return false
+
+      cy.visit("/fixtures/unhandled_rejection.html")
+
+    it "can turn off uncaught exception handling via cy", ->
+      r = cy.state("runnable")
+
+      cy.on "page:error", (err, runnable) ->
+        return false
+
+      cy.visit("/fixtures/unhandled_rejection.html")
+
+    it "receives error and runnable via Cypress", ->
+      r = cy.state("runnable")
+
+      Cypress.once "page:error", (err, runnable) ->
+        expect(err.name).to.eq("Uncaught ReferenceError")
+        expect(err.message).to.include("foo is not defined")
+        expect(err.message).to.include("This error originated from your application code, not from Cypress.")
+        expect(err.message).to.include("https://on.cypress.io/uncaught-exception-from-application")
+        expect(runnable).to.equal(r)
+
+        return false
+
+      cy.visit("/fixtures/unhandled_rejection.html")
+
+    it "can turn off uncaught exception handling via Cypress", ->
+      r = cy.state("runnable")
+
+      Cypress.once "page:error", (err, runnable) ->
+        return false
+
+      cy.visit("/fixtures/unhandled_rejection.html")
+
+    it "includes error origin", ->
+      r = cy.state("runnable")
+
+      cy.on "page:error", (err, runnable) ->
+        expect(err.origin).to.eq("onunhandledrejection")
+
+        return false
+
+      cy.visit("/fixtures/unhandled_rejection.html")
+
+    it "logs click error once", (done) ->
+      uncaught = false
+
+      cy.on "page:error", ->
+        uncaught = true
+
+        return true
+
+      cy.on "test:fail", (err) =>
+        lastLog = @lastLog
+
+        expect(@logs.length).to.eq(4)
+        expect(uncaught).to.be.true
+        expect(err.message).to.include("uncaught click error")
+        expect(lastLog.get("name")).to.eq("click")
+        expect(lastLog.get("error")).to.eq(err)
+
+        done()
+
+      cy
+        .visit("/fixtures/jquery.html")
+        .window().then (win) ->
+          win.$("button:first").on "click", ->
+            throw new Error("uncaught click error")
+        .get("button:first").click()
+
+    it "logs error on page load when new page has uncaught exception", (done) ->
+      uncaught = false
+
+      cy.on "page:error", ->
+        uncaught = true
+
+        return true
+
+      cy.on "test:fail", (err) =>
+        click = _.find @logs, (log) ->
+          log.get("name") is "click"
+
+        ## visit, window, contains, click, page loading, new url
+        expect(@logs.length).to.eq(6)
+        expect(uncaught).to.be.true
+        expect(err.message).to.include("foo is not defined")
+        expect(click.get("name")).to.eq("click")
+        expect(click.get("error")).to.eq(err)
+
+        done()
+
+      cy
+        .visit("/fixtures/jquery.html")
+        .window().then (win) ->
+          win.$("<a href='/fixtures/unhandled_rejection.html'>visit</a>")
+          .appendTo(win.document.body)
+
+        .contains("visit").click()

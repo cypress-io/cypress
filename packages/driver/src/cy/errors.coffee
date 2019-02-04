@@ -26,8 +26,33 @@ create = (state, config, log) ->
           obj
     })
 
-  createUncaughtException = (type, args) ->
-    [msg, source, lineno, colno, err] = args
+  isErrorLike = (maybeErr = {}) ->
+    maybeErr.message and maybeErr.stack
+
+  normalizeUncaughtException = (origin, args) ->
+    switch origin
+      when "onerror"
+        [msg, source, lineno, colno, err] = args
+        ## older browsers don't have the 5th argument, so create our own err
+        err ?= new Error($utils.errMessageByPath("uncaught.error", { msg, source, lineno }))
+      when "onunhandledrejection"
+        [msg, source, lineno, colno] = []
+        err = switch 
+          when isErrorLike(args[0])
+            args[0]
+          when isErrorLike(args[0]?.reason)
+            args[0].reason
+          when _.isString(args[0])
+            msg = args[0]
+            null
+          when _.isString(args[0]?.reason)
+            msg = args[0].reason
+            null
+
+    return { msg, source, lineno, colno, err }
+
+  createUncaughtException = (type, origin, args) ->
+    { msg, source, lineno, colno, err } = normalizeUncaughtException(origin, args)
     type = err?.from or type
 
     current = state("current")
@@ -37,14 +62,8 @@ create = (state, config, log) ->
     if crossOriginScriptRe.test(msg)
       msg = $utils.errMessageByPath("uncaught.cross_origin_script")
 
-    createErrFromMsg = ->
-      new Error $utils.errMessageByPath("uncaught.error", { msg, source, lineno })
-
-    ## if we have the 5th argument it means we're in a super
-    ## modern browser making this super simple to work with.
-    err ?= createErrFromMsg()
-
     err.name = "Uncaught " + err.name
+    err.origin = origin
 
     suffixMsg = switch type
       when "app" then "uncaught.fromApp"

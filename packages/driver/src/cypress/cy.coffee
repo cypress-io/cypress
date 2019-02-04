@@ -914,7 +914,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     onSpecWindowUncaughtException: (args...) ->
       ## create the special uncaught exception err
-      err = errors.createUncaughtException("spec", args)
+      err = errors.createUncaughtException("spec", "onerror", args)
 
       if runnable = state("runnable")
         ## we're using an explicit done callback here
@@ -927,14 +927,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## else pass the error along
       return err
 
-    onPageError: (type, args...) ->
+    onPageError: (origin, args...) ->
       runnable = state("runnable")
 
       ## don't do anything if we don't have a current runnable
       return if not runnable
 
       ## create the special uncaught exception err
-      err = errors.createUncaughtException("app", args)
+      err = errors.createUncaughtException("app", origin, args)
 
       results = Cypress.action("app:page:error", err, runnable)
 
