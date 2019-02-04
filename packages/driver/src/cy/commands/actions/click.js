@@ -92,7 +92,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           const consoleProps = function () {
             consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
-              'Target Element': $dom.getElements($el),
+              'Applied To': $dom.getElements($el),
               'Elements': $el.length,
               'Coords': _.pick(fromWindow, 'x', 'y'), //# always absolute
               'Options': deltaOptions,
@@ -115,6 +115,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                         'Target Element': val.el,
                         'Prevented Default?': val.preventedDefault,
                         'Stopped Propagation?': val.stoppedPropagation,
+                        'Modifiers': val.modifiers ? val.modifiers : null,
                       }
                     })[0]
                   }),
@@ -134,6 +135,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                         'Target Element': reason,
                         'Prevented Default?': null,
                         'Stopped Propagation?': null,
+                        'Modifiers': null,
                       }
                     }
 
@@ -142,6 +144,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                       'Target Element': val.el,
                       'Prevented Default?': val.preventedDefault,
                       'Stopped Propagation?': val.stoppedPropagation,
+                      'Modifiers': val.modifiers ? val.modifiers : null,
                     }
                   }),
                 }
@@ -348,7 +351,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             $el,
             consoleProps () {
               return {
-                'Target Element': $dom.getElements($el),
+                'Applied To': $dom.getElements($el),
                 'Elements': $el.length,
               }
             },
@@ -391,3 +394,4 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
   })
 }
+
