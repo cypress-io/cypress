@@ -20,3 +20,10 @@ exports['exec run .processRunOptions does not remove --record option when using 
   "--browser",
   "test browser"
 ]
+
+exports['exec run .processRunOptions passes --config-file false option 1'] = [
+  "--run-project",
+  null,
+  "--config-file",
+  false
+]
