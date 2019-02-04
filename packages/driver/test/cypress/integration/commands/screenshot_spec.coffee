@@ -604,7 +604,7 @@ describe "src/cy/commands/screenshot", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "screenshot"
             @lastLog = log
             @logs.push(log)
@@ -700,7 +700,7 @@ describe "src/cy/commands/screenshot", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves(@serverResult)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "screenshot"
             @lastLog = log
 

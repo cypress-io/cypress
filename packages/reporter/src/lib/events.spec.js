@@ -78,8 +78,8 @@ describe('events', () => {
       expect(runnablesStore.setRunnables).to.have.been.calledWith('root runnable')
     })
 
-    it('adds log on reporter:log:add', () => {
-      runner.on.withArgs('reporter:log:add').callArgWith(1, 'the log')
+    it('adds log on reporter:internal:log', () => {
+      runner.on.withArgs('reporter:internal:log').callArgWith(1, 'the log')
       expect(runnablesStore.addLog).to.have.been.calledWith('the log')
     })
 

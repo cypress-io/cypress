@@ -97,7 +97,7 @@ describe "src/cy/commands/cookies", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "getCookies"
             @lastLog = log
             @logs.push(log)
@@ -141,7 +141,7 @@ describe "src/cy/commands/cookies", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "getCookies"
             @lastLog = log
 
@@ -239,7 +239,7 @@ describe "src/cy/commands/cookies", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "getCookie"
             @lastLog = log
             @logs.push(log)
@@ -294,7 +294,7 @@ describe "src/cy/commands/cookies", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "getCookie"
             @lastLog = log
 
@@ -417,7 +417,7 @@ describe "src/cy/commands/cookies", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "setCookie"
             @lastLog = log
             @logs.push(log)
@@ -482,7 +482,7 @@ describe "src/cy/commands/cookies", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "setCookie"
             @lastLog = log
 
@@ -572,7 +572,7 @@ describe "src/cy/commands/cookies", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "clearCookie"
             @lastLog = log
             @logs.push(log)
@@ -626,7 +626,7 @@ describe "src/cy/commands/cookies", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "clearCookie"
             @lastLog = log
 
@@ -798,7 +798,7 @@ describe "src/cy/commands/cookies", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "clearCookies"
             @lastLog = log
             @logs.push(log)
@@ -865,7 +865,7 @@ describe "src/cy/commands/cookies", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "clearCookies"
             @lastLog = log
 
@@ -911,7 +911,7 @@ describe "src/cy/commands/cookies", ->
 
     describe ".log with no cookies returned", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "clearCookies"
             @lastLog = log
 
@@ -929,7 +929,7 @@ describe "src/cy/commands/cookies", ->
 
     describe ".log when no cookies were cleared", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "clearCookies"
             @lastLog = log
 

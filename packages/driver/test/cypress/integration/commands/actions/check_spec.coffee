@@ -159,7 +159,7 @@ describe "src/cy/commands/actions/check", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -208,7 +208,7 @@ describe "src/cy/commands/actions/check", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -335,7 +335,7 @@ describe "src/cy/commands/actions/check", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -343,7 +343,7 @@ describe "src/cy/commands/actions/check", ->
       it "logs immediately before resolving", (done) ->
         chk = $(":checkbox:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "check"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq chk.get(0)
@@ -374,7 +374,7 @@ describe "src/cy/commands/actions/check", ->
         logs = []
         checks = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           checks.push(log) if log.get("name") is "check"
 
@@ -386,7 +386,7 @@ describe "src/cy/commands/actions/check", ->
         logs = []
         radios = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           radios.push(log) if log.get("name") is "check"
 
@@ -398,7 +398,7 @@ describe "src/cy/commands/actions/check", ->
         logs = []
         checks = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           checks.push(log) if log.get("name") is "check"
 
@@ -410,7 +410,7 @@ describe "src/cy/commands/actions/check", ->
         logs = []
         radios = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           radios.push(log) if log.get("name") is "check"
 
@@ -603,7 +603,7 @@ describe "src/cy/commands/actions/check", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -637,7 +637,7 @@ describe "src/cy/commands/actions/check", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -756,7 +756,7 @@ describe "src/cy/commands/actions/check", ->
       beforeEach ->
         $("[name=colors][value=blue]").prop("checked", true)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -764,7 +764,7 @@ describe "src/cy/commands/actions/check", ->
       it "logs immediately before resolving", (done) ->
         chk = $(":checkbox:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "uncheck"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq chk.get(0)
@@ -795,7 +795,7 @@ describe "src/cy/commands/actions/check", ->
         logs = []
         unchecks = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           unchecks.push(log) if log.get("name") is "uncheck"
 
@@ -807,7 +807,7 @@ describe "src/cy/commands/actions/check", ->
         logs = []
         unchecks = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           unchecks.push(log) if log.get("name") is "uncheck"
 

@@ -155,7 +155,7 @@ describe "src/cy/commands/actions/focus", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -178,7 +178,7 @@ describe "src/cy/commands/actions/focus", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "focus"
             @lastLog = log
             @logs.push(log)
@@ -195,7 +195,7 @@ describe "src/cy/commands/actions/focus", ->
         ## chain will get cancelled before it gets attached
         ## (besides the code will continue to run and create
         ## side effects)
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "focus"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $input.get(0)
@@ -236,7 +236,7 @@ describe "src/cy/commands/actions/focus", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -506,7 +506,7 @@ describe "src/cy/commands/actions/focus", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -529,7 +529,7 @@ describe "src/cy/commands/actions/focus", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "blur"
             @lastLog = log
             @logs.push(log)
@@ -541,7 +541,7 @@ describe "src/cy/commands/actions/focus", ->
 
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "blur"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -588,7 +588,7 @@ describe "src/cy/commands/actions/focus", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 

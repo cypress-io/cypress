@@ -446,7 +446,7 @@ create = (Cypress, cy, state, config) ->
   triggerLog = (log) ->
     log._hasInitiallyLogged = true
 
-    trigger(log, "command:log:added")
+    trigger(log, "command:internal:log")
 
   addToLogs = (log) ->
     id = log.get("id")

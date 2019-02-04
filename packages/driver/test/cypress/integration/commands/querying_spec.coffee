@@ -34,7 +34,7 @@ describe "src/cy/commands/querying", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -70,7 +70,7 @@ describe "src/cy/commands/querying", ->
       beforeEach ->
         cy.$$("input:first").get(0).focus()
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "focused"
             @lastLog = log
 
@@ -132,7 +132,7 @@ describe "src/cy/commands/querying", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -278,7 +278,7 @@ describe "src/cy/commands/querying", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "within"
             @lastLog = log
             @logs.push(log)
@@ -292,7 +292,7 @@ describe "src/cy/commands/querying", ->
       it "logs immediately before resolving", (done) ->
         div = cy.$$("div:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "within"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -315,7 +315,7 @@ describe "src/cy/commands/querying", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -382,7 +382,7 @@ describe "src/cy/commands/querying", ->
         beforeEach ->
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "root"
               @lastLog = log
               @logs.push(log)
@@ -394,7 +394,7 @@ describe "src/cy/commands/querying", ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "root"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -701,7 +701,7 @@ describe "src/cy/commands/querying", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "get"
             @lastLog = log
             @logs.push(log)
@@ -744,7 +744,7 @@ describe "src/cy/commands/querying", ->
             }
 
       it "logs primitive aliases", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "get"
             expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
               referencesAlias: {name: "f"}
@@ -757,7 +757,7 @@ describe "src/cy/commands/querying", ->
           .get("@f")
 
       it "logs immediately before resolving", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "get"
             expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
               state: "pending"
@@ -991,7 +991,7 @@ describe "src/cy/commands/querying", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "get"
             @lastLog = log
             @logs.push(log)
@@ -1403,7 +1403,7 @@ describe "src/cy/commands/querying", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "contains"
             @lastLog = log
 
@@ -1412,7 +1412,7 @@ describe "src/cy/commands/querying", ->
         return null
 
       it "logs immediately before resolving", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "contains"
             expect(log.pick("state", "type")).to.deep.eq {
               state: "pending"
@@ -1481,7 +1481,7 @@ describe "src/cy/commands/querying", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "contains"
             @lastLog = log
             @logs.push(log)

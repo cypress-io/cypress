@@ -331,10 +331,10 @@ class $Cypress
       when "cy:after:all:screenshots"
         @emit("after:all:screenshots", args...)
 
-      when "command:log:added"
+      when "command:internal:log"
         @runner.addLog(args[0], @config("isInteractive"))
 
-        @emit("log:added", args...)
+        @emit("internal:log", args...)
 
       when "command:log:changed"
         @runner.addLog(args[0], @config("isInteractive"))

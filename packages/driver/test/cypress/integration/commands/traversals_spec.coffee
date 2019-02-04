@@ -107,13 +107,13 @@ describe "src/cy/commands/traversals", ->
 
       describe ".log", ->
         beforeEach ->
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
 
           return null
 
         it "logs immediately before resolving", (done) ->
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             if log.get("name") is name
               expect(log.pick("state")).to.deep.eq {
                 state: "pending"
@@ -211,7 +211,7 @@ describe "src/cy/commands/traversals", ->
   it "does not log using first w/options", ->
     logs = []
 
-    cy.on "log:added", (attrs, log) ->
+    cy.on "internal:log", (attrs, log) ->
       if attrs.name isnt "assert"
         logs.push(log)
 
@@ -225,7 +225,7 @@ describe "src/cy/commands/traversals", ->
 
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
 
       return null

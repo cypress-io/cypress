@@ -234,10 +234,10 @@ const eventManager = {
       })
     })
 
-    Cypress.on('log:added', (log) => {
+    Cypress.on('internal:log', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
 
-      reporterBus.emit('reporter:log:add', displayProps)
+      reporterBus.emit('reporter:internal:log', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {

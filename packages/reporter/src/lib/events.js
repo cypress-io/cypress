@@ -18,11 +18,11 @@ export default {
       runnablesStore.setRunnables(rootRunnable)
     }))
 
-    runner.on('reporter:log:add', action('log:add', (log) => {
+    runner.on('reporter:internal:log', action('log:add', (log) => {
       runnablesStore.addLog(log)
     }))
 
-    runner.on('reporter:log:state:changed', action('log:update', (log) => {
+    runner.on('reporter:log:state:changed', action('log:change', (log) => {
       runnablesStore.updateLog(log)
     }))
 

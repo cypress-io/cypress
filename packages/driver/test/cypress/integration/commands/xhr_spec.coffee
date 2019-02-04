@@ -612,7 +612,7 @@ describe "src/cy/commands/xhr", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "xhr"
             @lastLog = log
             @logs.push(log)
@@ -771,7 +771,7 @@ describe "src/cy/commands/xhr", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "xhr"
             @lastLog = log
             @logs.push(log)
@@ -897,7 +897,7 @@ describe "src/cy/commands/xhr", ->
         beforeEach ->
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "xhr"
               @lastLog = log
               @logs.push(log)
@@ -1396,7 +1396,7 @@ describe "src/cy/commands/xhr", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1509,7 +1509,7 @@ describe "src/cy/commands/xhr", ->
           _this.Cypress.trigger.restore()
           orig.call(@, err)
 
-        cy.on "log:added", (attrs, @log) =>
+        cy.on "internal:log", (attrs, @log) =>
           logs.push @log
 
         cy.on "test:fail", (err) =>
@@ -1570,7 +1570,7 @@ describe "src/cy/commands/xhr", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.instrument is "route"
             @lastLog = log
             @logs.push(log)
@@ -1635,7 +1635,7 @@ describe "src/cy/commands/xhr", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "xhr"
           @lastLog = log
           @logs.push(log)
@@ -1765,7 +1765,7 @@ describe "src/cy/commands/xhr", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "xhr"
           @lastLog = log
           @logs.push(log)

@@ -106,7 +106,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -175,7 +175,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "reload"
             @lastLog = log
 
@@ -293,7 +293,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "go"
             @lastLog = log
             @logs.push(log)
@@ -359,7 +359,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "go"
             @lastLog = log
 
@@ -695,7 +695,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "visit"
             @lastLog = log
 
@@ -718,8 +718,8 @@ describe "src/cy/commands/navigation", ->
       it "logs immediately before resolving", ->
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
-          cy.removeAllListeners("log:added")
+        cy.on "internal:log", (attrs, log) ->
+          cy.removeAllListeners("internal:log")
 
           expect(log.pick("name", "message")).to.deep.eq {
             name: "visit"
@@ -871,7 +871,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "visit"
             @lastLog = log
             @logs.push(log)
@@ -1472,7 +1472,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1605,7 +1605,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "page load"
           @lastLog = log
 
@@ -1729,7 +1729,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "new url"
           @lastLog = log
 
@@ -2010,7 +2010,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "form sub"
           @lastLog = log
 

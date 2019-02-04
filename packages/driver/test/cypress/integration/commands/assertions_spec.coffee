@@ -19,7 +19,7 @@ describe "src/cy/commands/assertions", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
         @lastLog = log
 
@@ -196,7 +196,7 @@ describe "src/cy/commands/assertions", ->
       it "resolves all 3 assertions", (done) ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "assert"
             logs.push(log)
 
@@ -476,7 +476,7 @@ describe "src/cy/commands/assertions", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
 
         if attrs.name is "assert"
@@ -494,9 +494,9 @@ describe "src/cy/commands/assertions", ->
       cy.noop({}).should("have.property", "foo")
 
     it "ends and snapshots immediately and sets child", (done) ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
 
           expect(log.get("ended")).to.be.true
           expect(log.get("state")).to.eq("passed")
@@ -510,9 +510,9 @@ describe "src/cy/commands/assertions", ->
         expect(cy.state("subject")).to.match "body"
 
     it "sets type to child when subject matches", (done) ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
           expect(log.get("type")).to.eq "child"
           done()
 
@@ -520,9 +520,9 @@ describe "src/cy/commands/assertions", ->
         expect("foo").to.eq("foo")
 
     it "sets type to child current command had arguments but does not match subject", (done) ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
           expect(log.get("type")).to.eq "child"
           done()
 
@@ -530,9 +530,9 @@ describe "src/cy/commands/assertions", ->
         expect($body.length).to.eq(1)
 
     it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
           expect(log.get("type")).to.eq "parent"
           done()
 
@@ -540,9 +540,9 @@ describe "src/cy/commands/assertions", ->
         expect(true).to.be.true
 
     it "removes rest of line when passing assertion includes ', but' for jQuery subjects", (done) ->
-      cy.on "log:added", (attrs, log) ->
+      cy.on "internal:log", (attrs, log) ->
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
           expect(log.get("message")).to.eq "expected **<a>** to have attribute **href** with the value **#**"
           done()
 
@@ -550,9 +550,9 @@ describe "src/cy/commands/assertions", ->
         expect($a).to.have.attr "href", "#"
 
     it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
-      cy.on "log:added", (attrs, log) ->
+      cy.on "internal:log", (attrs, log) ->
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
 
           expect(log.get("message")).to.eq "expected **<a>** to have attribute **href** with the value **asdf**, but the value was **#**"
           done()
@@ -563,9 +563,9 @@ describe "src/cy/commands/assertions", ->
         catch
 
     it "does not replace 'button' with 'andton'", (done) ->
-      cy.on "log:added", (attrs, log) ->
+      cy.on "internal:log", (attrs, log) ->
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
 
           expect(log.get("message")).to.eq "expected **<button>** to be **visible**"
           done()
@@ -574,9 +574,9 @@ describe "src/cy/commands/assertions", ->
         expect($button).to.be.visible
 
     it "#consoleProps for regular objects", (done) ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
 
           expect(log.invoke("consoleProps")).to.deep.eq {
             Command: "assert"
@@ -591,9 +591,9 @@ describe "src/cy/commands/assertions", ->
         expect(1).to.eq 1
 
     it "#consoleProps for DOM objects", (done) ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
 
           expect(log.invoke("consoleProps")).to.deep.eq {
             Command: "assert"
@@ -608,9 +608,9 @@ describe "src/cy/commands/assertions", ->
           expect($body).to.have.property("length")
 
     it "#consoleProps for errors", (done) ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "assert"
-          cy.removeAllListeners("log:added")
+          cy.removeAllListeners("internal:log")
 
           expect(log.invoke("consoleProps")).to.deep.eq {
             Command: "assert"
@@ -628,9 +628,9 @@ describe "src/cy/commands/assertions", ->
 
     describe "#patchAssert", ->
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "assert"
-            cy.removeAllListeners("log:added")
+            cy.removeAllListeners("internal:log")
 
             expect(log.get("message")).to.eq "expected **foo** to equal **foo**"
             done()
@@ -647,9 +647,9 @@ describe "src/cy/commands/assertions", ->
 
       describe "jQuery elements", ->
         it "sets _obj to selector", (done) ->
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "assert"
-              cy.removeAllListeners("log:added")
+              cy.removeAllListeners("internal:log")
 
               expect(log.get("message")).to.eq "expected **<body>** to exist in the DOM"
               done()
@@ -658,9 +658,9 @@ describe "src/cy/commands/assertions", ->
             expect($body).to.exist
 
         it "matches empty string attributes", (done) ->
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "assert"
-              cy.removeAllListeners("log:added")
+              cy.removeAllListeners("internal:log")
 
               expect(log.get("message")).to.eq "expected **<input>** to have attribute **value** with the value **''**"
               done()
@@ -671,9 +671,9 @@ describe "src/cy/commands/assertions", ->
 
         describe "without selector", ->
           it "exists", (done) ->
-            cy.on "log:added", (attrs, log) =>
+            cy.on "internal:log", (attrs, log) =>
               if attrs.name is "assert"
-                cy.removeAllListeners("log:added")
+                cy.removeAllListeners("internal:log")
 
                 expect(log.get("message")).to.eq "expected **<div>** to exist in the DOM"
                 done()
@@ -686,9 +686,9 @@ describe "src/cy/commands/assertions", ->
               expect($div).to.exist
 
           it "uses element name", (done) ->
-            cy.on "log:added", (attrs, log) =>
+            cy.on "internal:log", (attrs, log) =>
               if attrs.name is "assert"
-                cy.removeAllListeners("log:added")
+                cy.removeAllListeners("internal:log")
 
                 expect(log.get("message")).to.eq "expected **<input>** to match **input**"
                 done()
@@ -701,9 +701,9 @@ describe "src/cy/commands/assertions", ->
 
         describe "property assertions", ->
           it "has property", (done) ->
-            cy.on "log:added", (attrs, log) ->
+            cy.on "internal:log", (attrs, log) ->
               if attrs.name is "assert"
-                cy.removeAllListeners("log:added")
+                cy.removeAllListeners("internal:log")
 
                 expect(log.get("message")).to.eq "expected **<button>** to have property **length**"
                 done()
@@ -721,7 +721,7 @@ describe "src/cy/commands/assertions", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
 
       return null
@@ -783,9 +783,9 @@ describe "src/cy/commands/assertions", ->
 
     describe "#exist", ->
       it "uses $el.selector in expectation", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "assert"
-            cy.removeAllListeners("log:added")
+            cy.removeAllListeners("internal:log")
 
             expect(log.get("message")).to.eq("expected **#does-not-exist** not to exist in the DOM")
             done()
@@ -794,9 +794,9 @@ describe "src/cy/commands/assertions", ->
 
     describe "#be.visible", ->
       it "sets type to child", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "assert"
-            cy.removeAllListeners("log:added")
+            cy.removeAllListeners("internal:log")
 
             expect(log.get("type")).to.eq("child")
             done()
@@ -807,9 +807,9 @@ describe "src/cy/commands/assertions", ->
 
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "assert"
-            cy.removeAllListeners("log:added")
+            cy.removeAllListeners("internal:log")
 
             expect(log.get("message")).to.eq("expected **<button>** to have a length of **1**")
             done()
@@ -817,9 +817,9 @@ describe "src/cy/commands/assertions", ->
         cy.get("button:first").should("have.length", 1)
 
       it "formats error _obj with cypress", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "assert"
-            cy.removeAllListeners("log:added")
+            cy.removeAllListeners("internal:log")
 
             expect(log.get("_error").message).to.eq("expected '<body>' to have a length of 2 but got 1")
             done()
@@ -846,7 +846,7 @@ describe "src/cy/commands/assertions", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
 
       return null

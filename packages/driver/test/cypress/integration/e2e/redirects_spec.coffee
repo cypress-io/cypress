@@ -2,7 +2,7 @@ describe "redirection", ->
   beforeEach ->
     @logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @logs.push(log)
 
     return null

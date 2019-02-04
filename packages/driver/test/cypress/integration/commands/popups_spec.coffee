@@ -5,7 +5,7 @@ describe "src/cy/commands/popups", ->
 
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "alert"
           @logs.push(log)
 
@@ -32,7 +32,7 @@ describe "src/cy/commands/popups", ->
 
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "confirm"
           @logs.push(log)
 

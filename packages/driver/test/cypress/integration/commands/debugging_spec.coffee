@@ -28,7 +28,7 @@ describe "src/cy/commands/debugging", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "debug"
             @lastLog = log
 
@@ -42,7 +42,7 @@ describe "src/cy/commands/debugging", ->
 
   context "#pause", ->
     beforeEach ->
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "pause"
           @lastLog = log
 

@@ -14,7 +14,7 @@ addLog = (runner, log) ->
     url: "http://example.com"
   }
 
-  runner.emit("reporter:log:add", _.extend(defaultLog, log))
+  runner.emit("reporter:internal:log", _.extend(defaultLog, log))
 
 describe "aliases", ->
   beforeEach ->

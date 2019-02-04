@@ -84,7 +84,7 @@ describe "src/cy/commands/files", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -102,7 +102,7 @@ describe "src/cy/commands/files", ->
       it "logs immediately before resolving", ->
         Cypress.backend.resolves(okResponse)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "readFile"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("foo.json")
@@ -116,7 +116,7 @@ describe "src/cy/commands/files", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "readFile"
             @lastLog = log
             @logs.push(log)
@@ -339,7 +339,7 @@ describe "src/cy/commands/files", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -357,7 +357,7 @@ describe "src/cy/commands/files", ->
       it "logs immediately before resolving", ->
         Cypress.backend.resolves(okResponse)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "writeFile"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("foo.txt", "contents")
@@ -371,7 +371,7 @@ describe "src/cy/commands/files", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "writeFile"
             @lastLog = log
             @logs.push(log)
