@@ -39,7 +39,7 @@
     "prettier": "1.16.4",
     "shelljs": "0.7.8",
     "sinon": "2.4.1",
-    "sinon-chai": "2.14.0",
+    "sinon-chai": "3.3.0",
     "tslint": "5.12.1",
     "tslint-config-standard": "7.1.0",
     "typescript": "2.9.2"
