@@ -39,7 +39,7 @@
   "types": "types",
   "dependencies": {
     "@cypress/listr-verbose-renderer": "0.4.1",
-    "@cypress/xvfb": "1.2.3",
+    "@cypress/xvfb": "1.2.4",
     "@types/blob-util": "1.3.3",
     "@types/bluebird": "3.5.18",
     "@types/chai": "4.0.8",
