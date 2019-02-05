@@ -8,13 +8,14 @@ exports['e2e background events fails 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: app_spec.coffee...                                                              (1 of 1) 
+
+
 
 The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
@@ -38,21 +39,6 @@ Error: Async error from background file
   │ Duration:     X seconds       │
   │ Spec Ran:     app_spec.coffee │
   └───────────────────────────────┘
-
-
-The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
-
-Error: Async error from background file
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
 
   (Video)
