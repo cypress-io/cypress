@@ -35,7 +35,7 @@
     "enzyme": "3.8.0",
     "enzyme-adapter-react-16": "1.9.0",
     "font-awesome": "4.7.0",
-    "jsdom": "9.4.1",
+    "jsdom": "9.12.0",
     "lodash": "4.17.11",
     "markdown-it": "6.1.1",
     "mobx": "3.6.2",
