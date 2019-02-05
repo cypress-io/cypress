@@ -100,7 +100,7 @@ function getWindowsBrowser(name: string): Promise<FoundBrowser> {
             name,
             version,
             path: exePath
-          }
+          } as FoundBrowser
         })
     })
     .catch(() => {
