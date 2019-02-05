@@ -188,7 +188,7 @@ create = ->
             relaunchBrowser()
 
         onReloadConfiguration: () ->
-          options.reloadConfigurationRequested?()
+          options.onReloadConfigurationRequested?()
       })
 
       options = _.extend {}, args.config, options

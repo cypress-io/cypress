@@ -180,7 +180,7 @@ const openProject = (project) => {
     project.setWarning(warning)
   })
 
-  ipc.reloadConfigurationRequested(() => {
+  ipc.onReloadConfigurationRequested(() => {
     reloadConfiguration(project)
   })
 
