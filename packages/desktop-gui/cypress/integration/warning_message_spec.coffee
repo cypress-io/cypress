@@ -86,7 +86,7 @@ describe "WarningMessage", ->
       configWarningObj = {
         type: "CONFIGURATION_CHANGED",
         name: "Configuration changed",
-        message: "This file was changed: `cypress.json`\nPlease restart Cypress for changes to take effect."
+        message: "`cypress.json` was modified. Restart Cypress for changes to take effect."
       }
 
       cy.shouldBeOnProjectSpecs().then =>
@@ -94,8 +94,7 @@ describe "WarningMessage", ->
 
     it "renders configuration change message with the correct file name", ->
       cy
-        .contains(".alert-warning", "This file was changed: cypress.json")
-        .contains(".alert-warning", "Please restart Cypress for changes to take effect.")
+        .contains(".alert-warning", "cypress.json was modified. Restart Cypress for changes to take effect.")
 
     it "is not dismissable", ->
       cy.get(".alert-warning .close").should("not.exist")

@@ -44,7 +44,7 @@ describe "Project", ->
     it "shows warning if config changes", ->
       cy.shouldBeOnProjectSpecs().then =>
         @ipc.onConfigChanged.yield({}, "/path/to/file")
-        cy.contains("This file was changed: /path/to/file")
+        cy.contains("/path/to/file was modified. Restart Cypress for changes to take effect.")
 
   describe "polling", ->
     beforeEach ->

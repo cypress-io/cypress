@@ -199,7 +199,7 @@ describe "Settings", ->
       cy.contains("Restart").should("not.exist")
       cy.contains("http://localhost:7777").then =>
         @ipc.onConfigChanged.yield({}, "/path/to/file")
-      cy.contains("This file was changed: /path/to/file")
+      cy.contains("/path/to/file was modified. Restart Cypress for changes to take effect.")
 
   context "when project is not set up for CI", ->
     it "does not show ci Keys section when project has no id", ->

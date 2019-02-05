@@ -13,7 +13,7 @@ describe('<Banner />', () => {
   })
 
   it('contains configuration changed message', () => {
-    expect(component.find('p').first()).to.have.text('You need to restart Cypress after updating configuration files.')
+    expect(component.find('p').first()).to.include.text('was modified. Please restart Cypress for changes to take effect.')
     expect(component.find('code')).to.have.text('fake/file/path')
   })
 
