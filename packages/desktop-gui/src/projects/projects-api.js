@@ -181,11 +181,7 @@ const openProject = (project) => {
   })
 
   ipc.reloadConfigurationRequested(() => {
-    const chosenSpec = specsStore.chosenSpec
-
-    reopenProject(project).then(() => {
-      return runSpec(project, chosenSpec, project.chosenBrowser)
-    })
+    reloadConfiguration(project)
   })
 
   return ipc.openProject(project.path)
@@ -225,6 +221,14 @@ const updateProject = (project, projectDetails) => {
   saveToLocalStorage()
 }
 
+const reloadConfiguration = (project) => {
+  const chosenSpec = specsStore.chosenSpec
+
+  reopenProject(project).then(() => {
+    return runSpec(project, chosenSpec, project.chosenBrowser)
+  })
+}
+
 const getRecordKeys = () => {
   return ipc.getRecordKeys()
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
@@ -244,5 +248,6 @@ export default {
   updateProject,
   runSpec,
   closeBrowser,
+  reloadConfiguration,
   getRecordKeys,
 }

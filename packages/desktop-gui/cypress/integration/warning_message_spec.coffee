@@ -100,7 +100,7 @@ describe "WarningMessage", ->
       cy.get(".alert-warning .close").should("not.exist")
 
     it "can reload the project", ->
-      cy.contains(".alert-warning strong", "Restart")
+      cy.contains(".alert-warning button", "Restart")
         .click()
         .should =>
           expect(@ipc.closeProject).to.be.called
