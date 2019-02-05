@@ -112,7 +112,7 @@ module.exports = {
   },
 
   id (projectRoot, options = {}) {
-    const file = this.pathToCypressJson(projectRoot, options)
+    const file = this.pathToConfigFile(projectRoot, options)
 
     return fs.readJsonAsync(file)
     .get('projectId')
@@ -122,7 +122,7 @@ module.exports = {
   },
 
   exists (projectRoot, options = {}) {
-    const file = this.pathToCypressJson(projectRoot, options)
+    const file = this.pathToConfigFile(projectRoot, options)
 
     //# first check if cypress.json exists
     return (
@@ -160,7 +160,7 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    const file = this.pathToCypressJson(projectRoot, options)
+    const file = this.pathToConfigFile(projectRoot, options)
 
     return fs.readJsonAsync(file)
     .catch({ code: 'ENOENT' }, () => {
@@ -211,17 +211,17 @@ module.exports = {
     .then((settings) => {
       _.extend(settings, obj)
 
-      const file = this.pathToCypressJson(projectRoot, options)
+      const file = this.pathToConfigFile(projectRoot, options)
 
       return this._write(file, settings)
     })
   },
 
   remove (projectRoot, options = {}) {
-    return fs.unlinkSync(this.pathToCypressJson(projectRoot, options))
+    return fs.unlinkSync(this.pathToConfigFile(projectRoot, options))
   },
 
-  pathToCypressJson (projectRoot, options = {}) {
+  pathToConfigFile (projectRoot, options = {}) {
     return this._pathToFile(projectRoot, this.configFile(options))
   },
 

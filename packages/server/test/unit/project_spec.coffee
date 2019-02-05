@@ -300,7 +300,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
       @project.server = {startWebsockets: ->}
-      sinon.stub(settings, "pathToCypressJson").returns("/path/to/cypress.json")
+      sinon.stub(settings, "pathToConfigFile").returns("/path/to/cypress.json")
       sinon.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
       @watch = sinon.stub(@project.watchers, "watch")
 

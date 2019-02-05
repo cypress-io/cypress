@@ -56,7 +56,7 @@ const descriptions = {
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
   global: 'force Cypress into global mode as if its globally installed',
-  configFile: 'path to a config file to override the default cypress.json. set to "false" to skip specifying a config file.',
+  configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
   version: 'prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
   dev: 'runs cypress in development and bypasses binary check',

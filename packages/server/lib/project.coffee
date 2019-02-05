@@ -224,7 +224,7 @@ class Project extends EE
     }
 
     if options.configFile != false
-      @watchers.watch(settings.pathToCypressJson(@projectRoot, options), obj)
+      @watchers.watch(settings.pathToConfigFile(@projectRoot, options), obj)
 
     @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
