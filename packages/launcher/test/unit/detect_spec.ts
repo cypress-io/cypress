@@ -1,4 +1,4 @@
-const detect = require('../../lib/detect').default
+import { detect } from '../../lib/detect'
 const os = require('os')
 import { log } from '../log'
 import {project} from 'ramda'

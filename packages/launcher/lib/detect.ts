@@ -90,7 +90,7 @@ function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
 }
 
 /** returns list of detected browsers */
-function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> {
+export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
   if (!goalBrowsers) {
@@ -107,5 +107,3 @@ function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> {
     .then(compactFalse)
     .then(removeDuplicates)
 }
-
-export default detectBrowsers

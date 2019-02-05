@@ -1,3 +1,4 @@
+_        = require('lodash')
 path     = require("path")
 Promise  = require("bluebird")
 launcher = require("@packages/launcher")
@@ -75,7 +76,9 @@ module.exports = {
 
   removeOldProfiles
 
-  getBrowsers: ->
+  getBrowserByPath: launcher.detectByPath
+
+  getBrowsers: () ->
     ## TODO: accept an options object which
     ## turns off getting electron browser?
     launcher.detect()
@@ -93,6 +96,5 @@ module.exports = {
       })
 
   launch: (browser, url, args) ->
-    launcher()
-    .call("launch", browser, url, args)
+    launcher.launch(browser, url, args)
 }

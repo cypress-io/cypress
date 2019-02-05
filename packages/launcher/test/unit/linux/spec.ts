@@ -1,6 +1,6 @@
 import {detectBrowserLinux} from '../../../lib/linux'
 import { log } from '../../log'
-const detect = require('../../../lib/detect').default
+import { detect } from '../../../lib/detect'
 const execa = require('execa')
 const sinon = require("sinon")
 
