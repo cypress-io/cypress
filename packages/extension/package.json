@@ -40,7 +40,7 @@
     "gulp-rename": "1.4.0",
     "run-sequence": "1.2.2",
     "sinon": "1.17.7",
-    "sinon-chai": "2.14.0",
+    "sinon-chai": "3.3.0",
     "vinyl-source-stream": "1.1.2"
   },
   "dependencies": {

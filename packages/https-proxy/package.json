@@ -27,7 +27,7 @@
     "request-promise": "3.0.0",
     "sinon": "1.17.7",
     "sinon-as-promised": "4.0.3",
-    "sinon-chai": "2.14.0",
+    "sinon-chai": "3.3.0",
     "supertest": "1.2.0",
     "supertest-as-promised": "3.2.0"
   },
