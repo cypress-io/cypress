@@ -92,7 +92,7 @@
     "execa-wrap": "1.4.0",
     "mock-fs": "4.5.0",
     "nock": "9.6.1",
-    "nyc": "13.1.0",
+    "nyc": "13.2.0",
     "proxyquire": "2.0.1",
     "shelljs": "0.7.8",
     "sinon": "7.2.2",
