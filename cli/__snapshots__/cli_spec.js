@@ -30,7 +30,7 @@ exports['shows help for open --foo 1'] = `
     -p, --port <port>                runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>                  sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>            sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
-    -C, --config-file <config-file>  path to a config file to override the default cypress.json. set to "false" to skip specifying a config file.
+    -C, --config-file <config-file>  path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.
     -d, --detached [bool]            runs Cypress application in detached mode
     -P, --project <project path>     path to the project
     --global                         force Cypress into global mode as if its globally installed
@@ -72,7 +72,7 @@ exports['shows help for run --foo 1'] = `
     -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
-    -C, --config-file <config-file>            path to a config file to override the default cypress.json. set to "false" to skip specifying a config file.
+    -C, --config-file <config-file>            path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.
     -b, --browser <browser-name>               runs Cypress in the browser with the given name. note: using an external browser will not record a video.
     -P, --project <project-path>               path to the project
     --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
