@@ -51,11 +51,11 @@ function lookup(
  */
 function checkBrowser(browser: Browser): Promise<(boolean | FoundBrowser)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
-    return Bluebird.mapSeries(browser.binary, (binary: string) => {
+    return Bluebird.map(browser.binary, (binary: string) => {
       return checkOneBrowser(extend({}, browser, { binary }))
     })
   }
-  return Bluebird.mapSeries([browser], checkOneBrowser)
+  return Bluebird.map([browser], checkOneBrowser)
 }
 
 function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
