@@ -182,10 +182,10 @@ const openProject = (project) => {
 
   ipc.reloadConfigurationRequested(() => {
     const chosenSpec = specsStore.chosenSpec
-    const chosenBrowser = project.chosenBrowser
 
-    reopenProject(project)
-    runSpec(project, chosenSpec, chosenBrowser)
+    reopenProject(project).then(() => {
+      return runSpec(project, chosenSpec, project.chosenBrowser)
+    })
   })
 
   return ipc.openProject(project.path)
