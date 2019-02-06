@@ -1,27 +1,22 @@
-import {detectBrowserLinux} from '../../../lib/linux'
+import * as linuxHelper from '../../../lib/linux'
 import { log } from '../../log'
-import { detect } from '../../../lib/detect'
+import { detect, detectByPath } from '../../../lib/detect'
+import { ExportDeclaration } from 'decaffeinate-coffeescript/lib/coffee-script/nodes';
 const execa = require('execa')
-const sinon = require("sinon")
+const sinon = require('sinon')
 
 const goalBrowsers = [
   {
     name: 'test-browser-name',
-    versionRegex: /v(\S+)$/,
+    versionRegex: /test-browser v(\S+)$/,
     profile: true,
     binary: 'test-browser'
   },
   {
     name: 'foo-browser',
-    versionRegex: /v(\S+)$/,
+    versionRegex: /foo-browser v(\S+)$/,
     profile: true,
-    binary: 'foo-browser'
-  },
-  {
-    name: 'foo-browser',
-    versionRegex: /v(\S+)$/,
-    profile: true,
-    binary: 'foo-bar-browser'
+    binary: ['foo-browser', 'foo-bar-browser']
   }
 ]
 
@@ -40,6 +35,16 @@ describe('linux browser detection', () => {
       .resolves({
         stdout: 'foo-browser v100.1.2.3'
       })
+    shell.withArgs('/foo/bar/browser --version')
+      .resolves({
+        stdout: 'foo-browser v9001.1.2.3'
+      })
+    shell.withArgs('/not/a/browser --version')
+      .resolves({
+        stdout: 'not a browser version string'
+      })
+    shell.withArgs('/not/a/real/path --version')
+      .rejects()
   })
 
   afterEach(() => {
@@ -55,11 +60,11 @@ describe('linux browser detection', () => {
         version: '100.1.2.3'
       })
     }
-    return detectBrowserLinux(goal).then(checkBrowser)
+    return linuxHelper.detect(goal).then(checkBrowser)
   })
 
   // despite using detect(), this test is in linux/spec instead of detect_spec because it is 
-  // testing side effects that occur within the Linux-specific detectBrowserLinux function
+  // testing side effects that occur within the Linux-specific detect function
   // https://github.com/cypress-io/cypress/issues/1400
   it('properly eliminates duplicates', () => {
     const expected = [
@@ -107,6 +112,42 @@ describe('linux browser detection', () => {
       log('Browsers: %o', browsers)
       log('Expected browsers: %o', expected)
       expect(browsers).to.deep.equal(expected)
+    })
+  })
+
+  describe('detectByPath', () => {
+    it('detects by path', () => {
+      return detectByPath('/foo/bar/browser', goalBrowsers)
+      .then(browser => {
+        return expect(browser).to.deep.equal(
+          Object.assign({
+            version: '9001.1.2.3',
+            majorVersion: '9001',
+            path: '/foo/bar/browser'
+          }, goalBrowsers.find(gb => gb.name === 'foo-browser'))
+        )
+      })
+    })
+
+    it('rejects when there was no matching versionRegex', () => {
+      return detectByPath('/not/a/browser', goalBrowsers)
+      .then(browser => {
+        throw Error('Should not find a browser')
+      })
+      .catch(err => {
+        expect(err.notDetectedAtPath).to.be.true
+      })
+    })
+
+
+    it('rejects when there was an error executing the command', () => {
+      return detectByPath('/not/a/real/path', goalBrowsers)
+      .then(browser => {
+        throw Error('Should not find a browser')
+      })
+      .catch(err => {
+        expect(err.notDetectedAtPath).to.be.true
+      })
     })
   })
 })
