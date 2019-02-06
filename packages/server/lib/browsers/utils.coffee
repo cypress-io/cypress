@@ -75,6 +75,10 @@ module.exports = {
 
   removeOldProfiles
 
+  getBrowserByPath: launcher.detectByPath
+
+  launch: launcher.launch
+
   getBrowsers: ->
     ## TODO: accept an options object which
     ## turns off getting electron browser?
@@ -91,7 +95,4 @@ module.exports = {
         majorVersion: version.split(".")[0]
         info: "Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
       })
-
-  launch: (browser, url, args) ->
-    launcher.launch(browser, url, args)
 }

@@ -939,7 +939,7 @@ module.exports = {
 
       Promise.all([
         system.info(),
-        browsers.ensureAndGetByPredicate({ name: browserName }),
+        browsers.ensureAndGetByNameOrPath(browserName),
         @findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles()

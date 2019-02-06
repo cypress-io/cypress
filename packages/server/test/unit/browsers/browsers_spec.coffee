@@ -6,23 +6,19 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
-  context ".ensureAndGetByPredicate", ->
+  context ".ensureAndGetByNameOrPath", ->
     it "returns browser by name", ->
       sinon.stub(utils, "getBrowsers").resolves([
         { name: "foo" }
         { name: "bar" }
       ])
 
-      browsers.ensureAndGetByPredicate({
-        name: "foo"
-      })
+      browsers.ensureAndGetByNameOrPath("foo")
       .then (browser) ->
         expect(browser).to.deep.eq({ name: "foo" })
 
     it "throws when no browser can be found", ->
-      browsers.ensureAndGetByPredicate({
-        name: "browserNotGonnaBeFound"
-      })
+      browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound")
       .then ->
         throw new Error("should have failed")
       .catch (err) ->

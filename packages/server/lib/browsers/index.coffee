@@ -37,21 +37,35 @@ getBrowser = (name) ->
     else
       require("./chrome")
 
-ensureAndGetByPredicate = (predicate) ->
-  utils.getBrowsers()
-  .then (browsers = []) ->
-    _.find(browsers, predicate) or throwBrowserNotFound(predicate, browsers)
+isValidPathToBrowser = (str) ->
+  path.basename(str) isnt str
 
-throwBrowserNotFound = (browser, browsers = []) ->
+ensureAndGetByNameOrPath = (nameOrPath) ->
+  utils.getBrowsers(nameOrPath)
+  .then (browsers = []) ->
+    ## try to find the browser by name
+    if browser = _.find(browsers, { name: nameOrPath })
+      ## short circuit if found
+      return browser
+
+    ## did the user give a bad name, or is this actually a path?
+    if isValidPathToBrowser(nameOrPath)
+      ## looks like a path - try to resolve it to a FoundBrowser 
+      return utils.getBrowserByPath(nameOrPath)
+      .catch (err) ->
+        errors.throw("BROWSER_NOT_FOUND_BY_PATH", nameOrPath, err.message)
+    
+    ## not a path, not found by name
+    throwBrowserNotFound(nameOrPath, browsers)
+
+throwBrowserNotFound = (browserName, browsers = []) ->
   names = _.map(browsers, "name").join(", ")
-  errors.throw("BROWSER_NOT_FOUND", browser.name, names)
+  errors.throw("BROWSER_NOT_FOUND_BY_NAME", browserName, names)
 
 process.once "exit", kill
 
 module.exports = {
-  ensureAndGetByPredicate
-
-  throwBrowserNotFound
+  ensureAndGetByNameOrPath
 
   removeOldProfiles: utils.removeOldProfiles
 
