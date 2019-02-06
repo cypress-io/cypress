@@ -799,7 +799,7 @@ describe "src/cy/commands/actions/click", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -1094,7 +1094,7 @@ describe "src/cy/commands/actions/click", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1331,7 +1331,7 @@ describe "src/cy/commands/actions/click", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1340,7 +1340,7 @@ describe "src/cy/commands/actions/click", ->
       it "logs immediately before resolving", (done) ->
         button = cy.$$("button:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "click"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq button.get(0)
@@ -1374,7 +1374,7 @@ describe "src/cy/commands/actions/click", ->
         button = -> $("<button class='clicks'>click</button>")
         cy.$$("body").append(button()).append(button())
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "click"
             clicks.push(log)
 
@@ -1386,7 +1386,7 @@ describe "src/cy/commands/actions/click", ->
       it "logs only 1 click event", ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "click"
             logs.push(log)
 
@@ -1404,7 +1404,7 @@ describe "src/cy/commands/actions/click", ->
       it "ends", ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "click"
             logs.push(log)
 
@@ -1756,7 +1756,7 @@ describe "src/cy/commands/actions/click", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1818,7 +1818,7 @@ describe "src/cy/commands/actions/click", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1827,7 +1827,7 @@ describe "src/cy/commands/actions/click", ->
       it "logs immediately before resolving", (done) ->
         $button = cy.$$("button:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "dblclick"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $button.get(0)
@@ -1849,7 +1849,7 @@ describe "src/cy/commands/actions/click", ->
         $button = -> $("<button class='dblclicks'>dblclick</button")
         cy.$$("body").append($button()).append($button())
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "dblclick"
             dblclicks.push(log)
 
@@ -1861,7 +1861,7 @@ describe "src/cy/commands/actions/click", ->
       it "logs only 1 dblclick event", ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "dblclick"
             logs.push(log)
 
@@ -1869,7 +1869,7 @@ describe "src/cy/commands/actions/click", ->
           expect(logs.length).to.eq(1)
 
       it "#consoleProps", ->
-        cy.on "log:added", (attrs, @log) =>
+        cy.on "internal:log", (attrs, @log) =>
 
         cy.get("button").first().dblclick().then ($button) ->
           lastLog = @lastLog

@@ -141,7 +141,7 @@ describe "src/cy/commands/angular", ->
         beforeEach ->
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "assert"
               @lastLog = log
               @logs.push(log)

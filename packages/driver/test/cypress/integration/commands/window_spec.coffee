@@ -17,7 +17,7 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -83,7 +83,7 @@ describe "src/cy/commands/window", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -94,7 +94,7 @@ describe "src/cy/commands/window", ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "window"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("snapshot")).not.to.be.ok
@@ -159,7 +159,7 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -225,7 +225,7 @@ describe "src/cy/commands/window", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -236,7 +236,7 @@ describe "src/cy/commands/window", ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "document"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("snapshots")).not.to.be.ok
@@ -254,7 +254,7 @@ describe "src/cy/commands/window", ->
       it "can be aliased", ->
         logs = []
 
-        cy.on "log:added", (attrs, @log) =>
+        cy.on "internal:log", (attrs, @log) =>
           logs.push(@log)
 
         cy
@@ -363,7 +363,7 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -392,7 +392,7 @@ describe "src/cy/commands/window", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
           if log.get("name") is "get"
@@ -407,7 +407,7 @@ describe "src/cy/commands/window", ->
       it "logs immediately before resolving", (done) ->
         input = cy.$$(":text:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "title"
             expect(log.get("state")).to.eq("pending")
             done()
@@ -587,7 +587,7 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -659,7 +659,7 @@ describe "src/cy/commands/window", ->
         it "throws when passed the invalid: '#{val}' as width", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             logs.push(log)
 
           cy.on "test:fail", (err) =>
@@ -673,7 +673,7 @@ describe "src/cy/commands/window", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 

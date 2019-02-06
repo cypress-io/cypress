@@ -116,7 +116,7 @@ describe "src/cy/commands/clock", ->
     context "options", ->
       beforeEach ->
         @logged = false
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "clock"
             @logged = true
 
@@ -166,7 +166,7 @@ describe "src/cy/commands/clock", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           name = log.get("name")
           if name in ["clock", "tick", "restore"]
             @logs.push(log)
@@ -243,7 +243,7 @@ describe "src/cy/commands/clock", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if log.get("name") is "tick"
           @logs.push(log)
 

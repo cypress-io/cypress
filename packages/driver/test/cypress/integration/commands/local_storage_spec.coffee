@@ -45,7 +45,7 @@ describe "src/cy/commands/local_storage", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null

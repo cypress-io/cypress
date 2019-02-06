@@ -108,7 +108,7 @@ describe "src/cy/commands/agents", ->
         @agentLogs = []
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.instrument is "agent"
             @agentLogs.push(log)
 
@@ -203,7 +203,7 @@ describe "src/cy/commands/agents", ->
     describe ".as", ->
       beforeEach ->
         @logs = []
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @logs.push(log)
 
         @stub = cy.stub().as("myStub")
@@ -261,7 +261,7 @@ describe "src/cy/commands/agents", ->
         @agentLogs = []
         @stubLogs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.instrument is "agent"
             @agentLogs.push(log)
 
@@ -328,7 +328,7 @@ describe "src/cy/commands/agents", ->
 
         context "in assertion", ->
           beforeEach ->
-            cy.on "log:added", (attrs, log) =>
+            cy.on "internal:log", (attrs, log) =>
               @lastLog = log
 
             return null
@@ -400,7 +400,7 @@ describe "src/cy/commands/agents", ->
   context ".spy(obj, 'method')", ->
     beforeEach ->
       @logs = []
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
 
       @originalCalled = false
@@ -426,7 +426,7 @@ describe "src/cy/commands/agents", ->
       ## same as cy.stub(), so just some smoke tests here
       beforeEach ->
         @logs = []
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @logs.push(log)
 
         @spy = cy.spy().as("mySpy")

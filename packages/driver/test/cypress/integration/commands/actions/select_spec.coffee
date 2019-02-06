@@ -139,7 +139,7 @@ describe "src/cy/commands/actions/select", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -196,7 +196,7 @@ describe "src/cy/commands/actions/select", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -316,7 +316,7 @@ describe "src/cy/commands/actions/select", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -381,7 +381,7 @@ describe "src/cy/commands/actions/select", ->
       it "logs only one select event", ->
         types = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "select"
             types.push(log)
 

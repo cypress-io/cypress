@@ -460,7 +460,7 @@ describe "src/cy/commands/actions/trigger", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 100)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -594,7 +594,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -717,7 +717,7 @@ describe "src/cy/commands/actions/trigger", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -725,7 +725,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "logs immediately before resolving", (done) ->
         button = cy.$$("button:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "trigger"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq button.get(0)
@@ -755,7 +755,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "logs only 1 event", ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "trigger"
             logs.push(log)
 

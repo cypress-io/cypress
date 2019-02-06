@@ -49,7 +49,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when promise timeout", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             logs.push(log)
 
           cy.on "test:fail", (err) =>
@@ -172,7 +172,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
@@ -253,7 +253,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
@@ -423,7 +423,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
@@ -508,7 +508,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
@@ -662,14 +662,14 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
           return null
 
         it "logs immediately before resolving", (done) ->
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             if log.get("name") is "its"
               expect(log.get("state")).to.eq("pending")
               expect(log.get("message")).to.eq ".foo"
@@ -718,7 +718,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "its"
               @lastLog = log
 
@@ -923,7 +923,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
@@ -942,7 +942,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when not passed a callback function", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             logs.push(log)
 
           cy.on "test:fail", (err) =>

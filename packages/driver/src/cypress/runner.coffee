@@ -1024,7 +1024,7 @@ create = (specWindow, mocha, Cypress, cy) ->
         _testsQueue.push(test)
 
       if existing = _logsById[attrs.id]
-        ## because log:state:changed may
+        ## because internal:logChange may
         ## fire at a later time, its possible
         ## we've already cleaned up these attrs
         ## and in that case we don't want to do

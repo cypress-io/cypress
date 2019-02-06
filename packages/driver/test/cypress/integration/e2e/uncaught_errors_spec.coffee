@@ -4,7 +4,7 @@ describe "uncaught errors", ->
   beforeEach ->
     @logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @lastLog = log
       @logs.push(log)
 

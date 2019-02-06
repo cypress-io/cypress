@@ -60,11 +60,11 @@ Cypress.on('internal:commandRetry', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('log:added', (log, interactive: boolean) => {
+Cypress.on('internal:log', (log, interactive: boolean) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('log:changed', (log, interactive: boolean) => {
+Cypress.on('internal:logChange', (log, interactive: boolean) => {
   log // $ExpectTyped any
 })
 

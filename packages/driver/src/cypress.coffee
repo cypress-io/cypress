@@ -331,15 +331,15 @@ class $Cypress
       when "cy:after:all:screenshots"
         @emit("after:all:screenshots", args...)
 
-      when "command:log:added"
+      when "command:internal:log"
         @runner.addLog(args[0], @config("isInteractive"))
 
-        @emit("log:added", args...)
+        @emit("internal:log", args...)
 
-      when "command:log:changed"
+      when "command:internal:logChange"
         @runner.addLog(args[0], @config("isInteractive"))
 
-        @emit("log:changed", args...)
+        @emit("internal:logChange", args...)
 
       when "cy:test:fail"
         ## comes from cypress errors fail()

@@ -1,6 +1,6 @@
 logs = []
 
-Cypress.on "log:added", (attrs, log) ->
+Cypress.on "internal:log", (attrs, log) ->
   logs.push(log)
 
 describe "viewport", ->

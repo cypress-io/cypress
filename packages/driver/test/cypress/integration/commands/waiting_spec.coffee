@@ -693,7 +693,7 @@ describe "src/cy/commands/waiting", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -707,7 +707,7 @@ describe "src/cy/commands/waiting", ->
 
       describe "number argument", ->
         it "does not immediately end", ->
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             if attrs.name is "wait"
               expect(log.get("state")).not.to.eq "passed"
 
@@ -717,7 +717,7 @@ describe "src/cy/commands/waiting", ->
             expect(lastLog.get("state")).to.eq "passed"
 
         it "does not immediately snapshot", ->
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             if attrs.name is "wait"
               expect(log.get("snapshots")).not.to.be.ok
 

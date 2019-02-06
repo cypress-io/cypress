@@ -29,15 +29,15 @@ describe "src/cy/commands/misc", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "logs immediately", (done) ->
-        cy.on "log:added", (attrs, log) =>
-          cy.removeAllListeners("log:added")
+        cy.on "internal:log", (attrs, log) =>
+          cy.removeAllListeners("internal:log")
 
           expect(log.get("message")).to.eq "foo, {foo: bar}"
           expect(log.get("name")).to.eq "log"
@@ -150,15 +150,15 @@ describe "src/cy/commands/misc", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "logs immediately", (done) ->
-        cy.on "log:added", (attrs, log) =>
-          cy.removeAllListeners("log:added")
+        cy.on "internal:log", (attrs, log) =>
+          cy.removeAllListeners("internal:log")
 
           expect(log.get("message")).to.eq "{}"
           expect(log.get("name")).to.eq "wrap"

@@ -400,7 +400,7 @@ describe "src/cy/commands/request", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "request"
             @lastLog = log
 
@@ -422,7 +422,7 @@ describe "src/cy/commands/request", ->
         .withArgs("http:request")
         .resolves({isOkStatusCode: true, status: 200})
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "request"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -576,7 +576,7 @@ describe "src/cy/commands/request", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "request"
             @lastLog = log
             @logs.push(log)
