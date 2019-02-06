@@ -22,7 +22,7 @@ describe "lib/browsers/index", ->
       .then ->
         throw new Error("should have failed")
       .catch (err) ->
-        expect(err.type).to.eq("BROWSER_NOT_FOUND")
+        expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
 
   context ".open", ->
     # it "calls onBrowserClose callback on close", ->

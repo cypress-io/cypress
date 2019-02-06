@@ -514,7 +514,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@idsPath}", "--browser=foo"])
       .then =>
-        @expectExitWithErr("BROWSER_NOT_FOUND")
+        @expectExitWithErr("BROWSER_NOT_FOUND_BY_NAME")
 
         ## get all the error args
         argsSet = errors.log.args
