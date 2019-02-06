@@ -163,15 +163,6 @@ const openProject = (project) => {
     })
   })
 
-  ipc.onPluginsChanged((__, filePath) => {
-    // TODO decide if making this "fake" error is reasonable
-    project.setWarning({
-      isCypressErr: true,
-      type: 'CONFIGURATION_CHANGED',
-      message: `\`${filePath}\` was modified. Restart Cypress for changes to take effect.`,
-    })
-  })
-
   ipc.onProjectError((__, error) => {
     project.setError(error)
   })

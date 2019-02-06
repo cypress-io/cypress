@@ -188,11 +188,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      onSettingsChanged = (filePath) ->
+      onConfigurationChanged = (filePath) ->
         bus.emit("config:changed", filePath)
-
-      onPluginsChanged = (filePath) ->
-        bus.emit("plugins:changed", filePath)
 
       onSpecChanged = (spec) ->
         bus.emit("spec:changed", spec)
@@ -214,8 +211,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       openProject.create(arg, options, {
         onFocusTests: onFocusTests
         onSpecChanged: onSpecChanged
-        onSettingsChanged: onSettingsChanged
-        onPluginsChanged: onPluginsChanged
+        onSettingsChanged: onConfigurationChanged
+        onPluginsChanged: onConfigurationChanged
         onReloadConfigurationRequested: onReloadConfigurationRequested
         onError: onError
         onWarning: onWarning
