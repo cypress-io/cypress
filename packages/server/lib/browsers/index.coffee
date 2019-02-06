@@ -40,18 +40,24 @@ getBrowser = (name) ->
 isValidPathToBrowser = (str) ->
   path.basename(str) isnt str
 
-ensureAndGetByNameOrPath = (nameOrPath) ->
+ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
   utils.getBrowsers(nameOrPath)
   .then (browsers = []) ->
     ## try to find the browser by name
     if browser = _.find(browsers, { name: nameOrPath })
       ## short circuit if found
+      if returnAll
+        return browsers
       return browser
 
     ## did the user give a bad name, or is this actually a path?
     if isValidPathToBrowser(nameOrPath)
       ## looks like a path - try to resolve it to a FoundBrowser 
       return utils.getBrowserByPath(nameOrPath)
+      .then (browser) ->
+        if returnAll
+          return [browser].concat(browsers)
+        return browser
       .catch (err) ->
         errors.throw("BROWSER_NOT_FOUND_BY_PATH", nameOrPath, err.message)
     

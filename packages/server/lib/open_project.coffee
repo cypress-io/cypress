@@ -186,15 +186,11 @@ create = ->
 
       options = _.extend {}, args.config, options
 
-      browsers.get()
-      .then (b = []) ->
-        options.browsers = b
+      ## open the project and return
+      ## the config for the project instance
+      debug("opening project %s", path)
 
-        ## open the project and return
-        ## the config for the project instance
-        debug("opening project %s", path)
-
-        openProject.open(options)
+      openProject.open(options)
       .return(@)
   }
 

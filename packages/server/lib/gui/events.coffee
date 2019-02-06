@@ -14,6 +14,7 @@ Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
 connect     = require("../util/connect")
+browsers    = require("../browsers")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
@@ -199,16 +200,20 @@ handleEvent = (options, bus, event, id, type, arg) ->
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
-      openProject.create(arg, options, {
-        onFocusTests: onFocusTests
-        onSpecChanged: onSpecChanged
-        onSettingsChanged: onSettingsChanged
-        onError: onError
-        onWarning: onWarning
-      })
-      .call("getConfig")
-      .then(send)
-      .catch(sendErr)
+      (if options.browser then browsers.ensureAndGetByNameOrPath(options.browser, true) else browsers.get())
+      .then (browserList = []) ->
+        options.config.browsers = browserList
+      .then ->
+        openProject.create(arg, options, {
+          onFocusTests: onFocusTests
+          onSpecChanged: onSpecChanged
+          onSettingsChanged: onSettingsChanged
+          onError: onError
+          onWarning: onWarning
+        })
+        .call("getConfig")
+        .then(send)
+        .catch(sendErr)
 
     when "close:project"
       openProject.close()
