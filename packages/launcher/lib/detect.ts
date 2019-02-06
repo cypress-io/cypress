@@ -6,8 +6,14 @@ import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
 import * as linuxHelper from './linux'
 import { log } from './log'
-import { FoundBrowser, Browser, NotInstalledError } from './types'
+import {
+  FoundBrowser,
+  Browser,
+  NotInstalledError,
+  NotDetectedAtPathError
+} from './types'
 import * as windowsHelper from './windows'
+import { notDetectedAtPathErr } from './errors'
 
 const setMajorVersion = (browser: FoundBrowser) => {
   if (browser.version) {
@@ -127,20 +133,36 @@ export const detectByPath = (
 
   const helper = getHelper()
 
-  const detectBrowserByVersionString = (version: string) => {
+  const detectBrowserByVersionString = (stdout: string): FoundBrowser => {
     const browser = find(goalBrowsers, (goalBrowser: Browser) => {
-      return goalBrowser.versionRegex.test(version)
+      return goalBrowser.versionRegex.test(stdout)
     })
 
     if (!browser) {
-      throw new Error('TODO replace this with a real error')
+      throw notDetectedAtPathErr(path, stdout)
     }
 
-    // TODO hydrate the FoundBrowser a bit with version and all that
+    const regexExec = browser.versionRegex.exec(stdout) as Array<string>
+
+    return extend({}, browser, {
+      path,
+      version: regexExec[1],
+      majorVersion: regexExec[1].split('.', 2)[0]
+    })
+  }
+
+  const createFoundBrowser = (browser: Browser) => {
+    return extend({}, browser, { path })
   }
 
   return helper
     .getVersionString(path)
     .then(detectBrowserByVersionString)
-    .then(setMajorVersion)
+    .then(createFoundBrowser)
+    .catch((err: NotDetectedAtPathError) => {
+      if (err.notDetectedAtPath) {
+        throw err
+      }
+      throw notDetectedAtPathErr(path, err.message)
+    }) as Bluebird<FoundBrowser>
 }

@@ -1,3 +1,6 @@
+import { ChildProcess } from 'child_process'
+import * as Bluebird from 'bluebird'
+
 export type BrowserName = 'chrome' | 'chromium' | 'canary' | string
 
 export type PlatformName = 'darwin' | 'linux' | 'win32'
@@ -25,10 +28,21 @@ export type FoundBrowser = Browser & {
   name: string
   path: string
   version: string
-  majorVersion: string
+  majorVersion?: string
   page?: string
 }
 
 // all common type definition for this module
 
 export type NotInstalledError = Error & { notInstalled: boolean }
+
+export type NotDetectedAtPathError = Error & { notDetectedAtPath: boolean }
+
+export type LauncherApi = {
+  detect: (goalBrowsers?: Browser[]) => Bluebird<FoundBrowser[]>
+  detectByPath: (
+    path: string,
+    goalBrowsers?: Browser[]
+  ) => Promise<FoundBrowser>
+  launch: (browser: FoundBrowser, url: string, args: string[]) => ChildProcess
+}
