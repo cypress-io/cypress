@@ -23,7 +23,7 @@ const setMajorVersion = (browser: FoundBrowser) => {
 }
 
 type PlatformHelper = {
-  detect: (browser: Browser) => Promise<FoundBrowser>,
+  detect: (browser: Browser) => Promise<FoundBrowser>
   getVersionString: (path: string) => Promise<string>
 }
 
@@ -117,7 +117,10 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
     .then(removeDuplicates)
 }
 
-export const detectByPath = (path: string, goalBrowsers?: Browser[]): Bluebird<FoundBrowser> => {
+export const detectByPath = (
+  path: string,
+  goalBrowsers?: Browser[]
+): Bluebird<FoundBrowser> => {
   if (!goalBrowsers) {
     goalBrowsers = browsers
   }
@@ -132,11 +135,12 @@ export const detectByPath = (path: string, goalBrowsers?: Browser[]): Bluebird<F
     if (!browser) {
       throw new Error('TODO replace this with a real error')
     }
-    
+
     // TODO hydrate the FoundBrowser a bit with version and all that
   }
 
-  return helper.getVersionString(path)
+  return helper
+    .getVersionString(path)
     .then(detectBrowserByVersionString)
     .then(setMajorVersion)
 }

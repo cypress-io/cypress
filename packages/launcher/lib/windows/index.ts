@@ -1,18 +1,11 @@
 import { log } from '../log'
-import { FoundBrowser, Browser, NotInstalledError } from '../types'
+import { FoundBrowser, Browser } from '../types'
+import { notInstalledErr } from '../errors'
 import * as execa from 'execa'
 import { normalize, join } from 'path'
 import { trim, tap } from 'ramda'
 import { pathExists } from 'fs-extra'
 import { homedir } from 'os'
-
-const notInstalledErr = (name: string) => {
-  const err: NotInstalledError = new Error(
-    `Browser not installed: ${name}`
-  ) as NotInstalledError
-  err.notInstalled = true
-  return err
-}
 
 function formFullAppPath(name: string) {
   const prefix = 'C:/Program Files (x86)/Google/Chrome/Application'

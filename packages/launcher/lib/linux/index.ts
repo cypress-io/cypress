@@ -1,15 +1,8 @@
 import { log } from '../log'
 import { trim, tap } from 'ramda'
-import { FoundBrowser, Browser, NotInstalledError } from '../types'
+import { FoundBrowser, Browser } from '../types'
+import { notInstalledErr } from '../errors'
 import * as execa from 'execa'
-
-const notInstalledErr = (name: string) => {
-  const err: NotInstalledError = new Error(
-    `Browser not installed: ${name}`
-  ) as NotInstalledError
-  err.notInstalled = true
-  return err
-}
 
 function getLinuxBrowser(
   name: string,
