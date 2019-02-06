@@ -180,7 +180,7 @@ class Project extends EE
       fs.pathExists(supportFile)
       .then (found) =>
         if not found
-          errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
+          errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile, settings.configFile(cfg))
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
@@ -446,7 +446,7 @@ class Project extends EE
       if settings and id = settings.projectId
         return id
 
-      errors.throw("NO_PROJECT_ID", @projectRoot)
+      errors.throw("NO_PROJECT_ID", settings.configFile(@options), @projectRoot)
 
   verifyExistence: ->
     fs

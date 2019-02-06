@@ -370,7 +370,7 @@ module.exports = {
         return fs.pathExists(obj.supportFile)
         .then (found) ->
           if not found
-            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
+            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile, obj.configFile || defaults.configFile)
           debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
       debug("support file %s does not exist", sf)
@@ -391,7 +391,7 @@ module.exports = {
       else
         debug("support file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
+        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || defaults.configFile)
     )
     .then ->
       if obj.supportFile

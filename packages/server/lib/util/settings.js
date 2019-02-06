@@ -78,7 +78,7 @@ module.exports = {
   },
 
   _logReadErr (file, err) {
-    return this._err('ERROR_READING_FILE', file, err)
+    errors.throw('ERROR_READING_FILE', file, err)
   },
 
   _logWriteErr (file, err) {
@@ -144,7 +144,7 @@ module.exports = {
       //# cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
-      return this._err('PROJECT_DOES_NOT_EXIST', projectRoot, err)
+      return this._err('PROJECT_DOES_NOT_EXIST', this.configFile(options), projectRoot)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
         throw err

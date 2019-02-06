@@ -26,6 +26,7 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
+settings   = require("../util/settings")
 
 color = (val, c) ->
   chalk[c](val)
@@ -930,12 +931,14 @@ module.exports = {
     ## and open up the project
     createAndOpenProject(socketId, options)
     .then ({ project, projectId, config }) =>
+      debug('project created and opened with config %o', config)
+
       ## if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
       recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
 
       if record
-        recordMode.throwIfNoProjectId(projectId)
+        recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
         recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
         recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
 
