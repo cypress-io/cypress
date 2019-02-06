@@ -1,6 +1,6 @@
 import { findApp } from './util'
 import { FoundBrowser, Browser } from '../types'
-import { detectBrowserLinux } from '../linux'
+import * as linuxHelper from '../linux'
 import { log } from '../log'
 import { merge, partial } from 'ramda'
 
@@ -30,13 +30,17 @@ const browsers: Detectors = {
   chromium: detectChromium
 }
 
-export function detectBrowserDarwin(browser: Browser): Promise<FoundBrowser> {
+export function getVersionString(path: string) {
+  return linuxHelper.getVersionString(path)
+}
+
+export function detect(browser: Browser): Promise<FoundBrowser> {
   let fn = browsers[browser.name]
 
   if (!fn) {
     // ok, maybe it is custom alias?
     log('detecting custom browser %s on darwin', browser.name)
-    return detectBrowserLinux(browser)
+    return linuxHelper.detect(browser)
   }
 
   return fn()
@@ -44,6 +48,6 @@ export function detectBrowserDarwin(browser: Browser): Promise<FoundBrowser> {
     .catch(() => {
       log('could not detect %s using traditional Mac methods', browser.name)
       log('trying linux search')
-      return detectBrowserLinux(browser)
+      return linuxHelper.detect(browser)
     })
 }

@@ -1,13 +1,13 @@
 import * as Bluebird from 'bluebird'
-import { extend, compact } from 'lodash'
+import { extend, compact, find } from 'lodash'
 import * as os from 'os'
 import { merge, pick, props, tap, uniqBy, flatten } from 'ramda'
 import { browsers } from './browsers'
-import { detectBrowserDarwin } from './darwin'
-import { detectBrowserLinux } from './linux'
+import * as darwinHelper from './darwin'
+import * as linuxHelper from './linux'
 import { log } from './log'
 import { FoundBrowser, Browser, NotInstalledError } from './types'
-import { detectBrowserWindows } from './windows'
+import * as windowsHelper from './windows'
 
 const setMajorVersion = (browser: FoundBrowser) => {
   if (browser.version) {
@@ -22,14 +22,23 @@ const setMajorVersion = (browser: FoundBrowser) => {
   return browser
 }
 
-type BrowserDetector = (browser: Browser) => Promise<FoundBrowser>
-type Detectors = {
-  [index: string]: BrowserDetector
+type PlatformHelper = {
+  detect: (browser: Browser) => Promise<FoundBrowser>,
+  getVersionString: (path: string) => Promise<string>
 }
-const detectors: Detectors = {
-  darwin: detectBrowserDarwin,
-  linux: detectBrowserLinux,
-  win32: detectBrowserWindows
+
+type Helpers = {
+  [index: string]: PlatformHelper
+}
+
+const helpers: Helpers = {
+  darwin: darwinHelper,
+  linux: linuxHelper,
+  win32: windowsHelper
+}
+
+function getHelper(platform?: NodeJS.Platform): PlatformHelper {
+  return helpers[platform || os.platform()]
 }
 
 function lookup(
@@ -37,11 +46,11 @@ function lookup(
   browser: Browser
 ): Promise<FoundBrowser> {
   log('looking up %s on %s platform', browser.name, platform)
-  const detector = detectors[platform]
-  if (!detector) {
+  const helper = getHelper(platform)
+  if (!helper) {
     throw new Error(`Cannot lookup browser ${browser.name} on ${platform}`)
   }
-  return detector(browser)
+  return helper.detect(browser)
 }
 
 /**
@@ -106,4 +115,28 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
     .then(flatten)
     .then(compactFalse)
     .then(removeDuplicates)
+}
+
+export const detectByPath = (path: string, goalBrowsers?: Browser[]): Bluebird<FoundBrowser> => {
+  if (!goalBrowsers) {
+    goalBrowsers = browsers
+  }
+
+  const helper = getHelper()
+
+  const detectBrowserByVersionString = (version: string) => {
+    const browser = find(goalBrowsers, (goalBrowser: Browser) => {
+      return goalBrowser.versionRegex.test(version)
+    })
+
+    if (!browser) {
+      throw new Error('TODO replace this with a real error')
+    }
+    
+    // TODO hydrate the FoundBrowser a bit with version and all that
+  }
+
+  return helper.getVersionString(path)
+    .then(detectBrowserByVersionString)
+    .then(setMajorVersion)
 }

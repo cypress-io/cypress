@@ -1,7 +1,8 @@
 import { launch } from './browsers'
-import { detect } from './detect'
+import { detect, detectByPath } from './detect'
 
 module.exports = {
   detect,
+  detectByPath,
   launch
 }

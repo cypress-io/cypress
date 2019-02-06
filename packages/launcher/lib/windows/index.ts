@@ -70,28 +70,15 @@ function getWindowsBrowser(name: string): Promise<FoundBrowser> {
   const exePath = formFullAppPathFn(name)
   log('exe path %s', exePath)
 
-  const doubleEscape = (s: string) => s.replace(/\\/g, '\\\\')
-
   return pathExists(exePath)
     .then(exists => {
       log('found %s ?', exePath, exists)
+
       if (!exists) {
         throw notInstalledErr(`Browser ${name} file not found at ${exePath}`)
       }
-      // on Windows using "--version" seems to always start the full
-      // browser, no matter what one does.
-      // @ts-ignore
-      const args: [string] = [
-        'datafile',
-        'where',
-        `name="${doubleEscape(exePath)}"`,
-        'get',
-        'Version',
-        '/value'
-      ]
-      return execa('wmic', args)
-        .then(result => result.stdout)
-        .then(trim)
+
+      return getVersionString(exePath)
         .then(tap(log))
         .then(getVersion)
         .then((version: string) => {
@@ -108,6 +95,26 @@ function getWindowsBrowser(name: string): Promise<FoundBrowser> {
     })
 }
 
-export function detectBrowserWindows(browser: Browser) {
+export function getVersionString(path: string) {
+  const doubleEscape = (s: string) => s.replace(/\\/g, '\\\\')
+
+  // on Windows using "--version" seems to always start the full
+  // browser, no matter what one does.
+
+  const args = [
+    'datafile',
+    'where',
+    `name="${doubleEscape(path)}"`,
+    'get',
+    'Version',
+    '/value'
+  ]
+
+  return execa('wmic', args)
+    .then(result => result.stdout)
+    .then(trim)
+}
+
+export function detect(browser: Browser) {
   return getWindowsBrowser(browser.name)
 }
