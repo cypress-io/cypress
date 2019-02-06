@@ -4,6 +4,7 @@ import Markdown from 'markdown-it'
 
 import errors from '../lib/errors'
 import ipc from '../lib/ipc'
+import projectsApi from '../lib/projects-api'
 
 const md = new Markdown({
   html: true,
@@ -38,7 +39,7 @@ class WarningMessage extends Component {
           <div ref={(node) => this.warningMessageNode = node} dangerouslySetInnerHTML={{
             __html: md.render(warningText),
           }}></div>
-          <button className='restart' onClick={this.props.onRestart}>
+          <button className='restart' onClick={projectsApi.onConfigurationReloadRequested}>
             <i className='fa fa-refresh'></i>
             Restart
           </button>

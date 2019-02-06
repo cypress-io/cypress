@@ -46,7 +46,7 @@ class Project extends Component {
         <ProjectNav project={this.props.project}/>
         <div className='project-content'>
           {warning &&
-            <WarningMessage warning={warning} onClearWarning={this._removeWarning} onRestart={this._reloadConfiguration}/>
+            <WarningMessage warning={warning} onClearWarning={this._removeWarning} />
           }
           {this._currentView()}
         </div>
@@ -78,10 +78,6 @@ class Project extends Component {
 
   _reopenProject = () => {
     projectsApi.reopenProject(this.props.project)
-  }
-
-  _reloadConfiguration = () => {
-    projectsApi.reloadConfiguration(this.props.project)
   }
 }
 
