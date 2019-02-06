@@ -46,7 +46,7 @@ class Project extends Component {
         <ProjectNav project={this.props.project}/>
         <div className='project-content'>
           {warning &&
-            <WarningMessage warning={warning} onClearWarning={this._removeWarning} />
+            <WarningMessage warning={warning} onClearWarning={this._removeWarning} project={this.props.project}/>
           }
           {this._currentView()}
         </div>

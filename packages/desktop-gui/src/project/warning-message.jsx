@@ -4,7 +4,7 @@ import Markdown from 'markdown-it'
 
 import errors from '../lib/errors'
 import ipc from '../lib/ipc'
-import projectsApi from '../lib/projects-api'
+import projectsApi from '../projects/projects-api'
 
 const md = new Markdown({
   html: true,
@@ -32,6 +32,7 @@ class WarningMessage extends Component {
   render () {
     const warning = this.props.warning
     const warningText = warning.message.split('\n').join('<br />')
+    const reloadConfiguration = () => () => projectsApi.reloadConfiguration(this.props.project)
 
     if (errors.isConfigurationChanged(warning)) {
       return (
@@ -39,7 +40,7 @@ class WarningMessage extends Component {
           <div ref={(node) => this.warningMessageNode = node} dangerouslySetInnerHTML={{
             __html: md.render(warningText),
           }}></div>
-          <button className='restart' onClick={projectsApi.onConfigurationReloadRequested}>
+          <button className='restart' onClick={reloadConfiguration()}>
             <i className='fa fa-refresh'></i>
             Restart
           </button>
