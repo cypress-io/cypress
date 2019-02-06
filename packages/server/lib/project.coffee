@@ -442,8 +442,8 @@ class Project extends EE
     @verifyExistence()
     .then =>
       settings.read(@projectRoot, @options)
-    .then (settings) =>
-      if settings and id = settings.projectId
+    .then (readSettings) =>
+      if readSettings and id = readSettings.projectId
         return id
 
       errors.throw("NO_PROJECT_ID", settings.configFile(@options), @projectRoot)
