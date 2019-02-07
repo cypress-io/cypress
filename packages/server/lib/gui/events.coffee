@@ -201,8 +201,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
       (if options.browser then browsers.ensureAndGetByNameOrPath(options.browser, true) else browsers.get())
-      .then (browserList = []) ->
-        options.config.browsers = browserList
+      .then (browsers = []) ->
+        options.config = _.assign(options.config, { browsers })
       .then ->
         openProject.create(arg, options, {
           onFocusTests: onFocusTests

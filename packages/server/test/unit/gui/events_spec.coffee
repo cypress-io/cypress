@@ -320,7 +320,7 @@ describe "lib/gui/events", ->
 
       it "works even after project is opened (issue #227)", ->
         sinon.stub(open, "opn").resolves("okay")
-        sinon.stub(Project.prototype, "open")
+        sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -413,7 +413,7 @@ describe "lib/gui/events", ->
         openProject.close()
 
       it "open project + returns config", ->
-        sinon.stub(Project.prototype, "open")
+        sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -429,7 +429,7 @@ describe "lib/gui/events", ->
           assert.sendErrCalledWith(err)
 
       it "sends 'focus:tests' onFocusTests", ->
-        open = sinon.stub(Project.prototype, "open")
+        open = sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -440,7 +440,7 @@ describe "lib/gui/events", ->
           assert.sendCalledWith(undefined)
 
       it "sends 'config:changed' onSettingsChanged", ->
-        open = sinon.stub(Project.prototype, "open")
+        open = sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -451,7 +451,7 @@ describe "lib/gui/events", ->
           assert.sendCalledWith(undefined)
 
       it "sends 'spec:changed' onSpecChanged", ->
-        open = sinon.stub(Project.prototype, "open")
+        open = sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -462,7 +462,7 @@ describe "lib/gui/events", ->
           assert.sendCalledWith("/path/to/spec.coffee")
 
       it "sends 'project:warning' onWarning", ->
-        open = sinon.stub(Project.prototype, "open")
+        open = sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -473,7 +473,7 @@ describe "lib/gui/events", ->
           assert.sendCalledWith({name: "foo", message: "foo"})
 
       it "sends 'project:error' onError", ->
-        open = sinon.stub(Project.prototype, "open")
+        open = sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -495,7 +495,7 @@ describe "lib/gui/events", ->
 
       it "closes down open project and returns null", ->
         sinon.stub(Project.prototype, "getConfig").resolves({})
-        sinon.stub(Project.prototype, "open").withArgs({sync: true}).resolves()
+        sinon.stub(Project.prototype, "open").resolves()
 
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
