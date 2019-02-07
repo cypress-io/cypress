@@ -43,8 +43,9 @@ isValidPathToBrowser = (str) ->
 ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
   utils.getBrowsers(nameOrPath)
   .then (browsers = []) ->
-    ## try to find the browser by name
-    if browser = _.find(browsers, { name: nameOrPath })
+    ## try to find the browser by name with the highest version property
+    sortedBrowsers = _.sortBy(browsers, ['version'])
+    if browser = _.findLast(sortedBrowsers, { name: nameOrPath })
       ## short circuit if found
       if returnAll
         return browsers
