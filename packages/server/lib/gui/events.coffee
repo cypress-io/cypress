@@ -211,9 +211,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
           onError: onError
           onWarning: onWarning
         })
-        .call("getConfig")
-        .then(send)
-        .catch(sendErr)
+      .call("getConfig")
+      .then(send)
+      .catch(sendErr)
 
     when "close:project"
       openProject.close()
