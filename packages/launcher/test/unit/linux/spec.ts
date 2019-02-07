@@ -7,12 +7,14 @@ const sinon = require('sinon')
 
 const goalBrowsers = [
   {
+    displayName: 'Test Browser',
     name: 'test-browser-name',
     versionRegex: /test-browser v(\S+)$/,
     profile: true,
     binary: 'test-browser'
   },
   {
+    displayName: 'Foo Browser',
     name: 'foo-browser',
     versionRegex: /foo-browser v(\S+)$/,
     profile: true,
@@ -69,12 +71,14 @@ describe('linux browser detection', () => {
   it('properly eliminates duplicates', () => {
     const expected = [
       {
+        displayName: 'Test Browser',
         name: 'test-browser-name',
         version: '100.1.2.3',
         path: 'test-browser',
         majorVersion: '100'
       },
       {
+        displayName: 'Foo Browser',
         name: 'foo-browser',
         version: '100.1.2.3',
         path: 'foo-browser',
@@ -120,11 +124,12 @@ describe('linux browser detection', () => {
       return detectByPath('/foo/bar/browser', goalBrowsers)
       .then(browser => {
         return expect(browser).to.deep.equal(
-          Object.assign({
+          Object.assign({}, goalBrowsers.find(gb => gb.name === 'foo-browser'), {
+            displayName: 'Custom Foo Browser',
             version: '9001.1.2.3',
             majorVersion: '9001',
             path: '/foo/bar/browser'
-          }, goalBrowsers.find(gb => gb.name === 'foo-browser'))
+          })
         )
       })
     })
