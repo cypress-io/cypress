@@ -462,7 +462,7 @@ describe('mouse state', () => {
           expect(spy).to.be.calledOnce
         })
 
-        cy.get('input:first').click().should('have.focus')
+        cy.get('input:first').click().should('not.have.focus')
 
         cy.getAll('@input:mouseover @input:mouseout').each((spy) => {
           expect(spy).to.be.calledOnce

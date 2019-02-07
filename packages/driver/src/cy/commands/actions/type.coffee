@@ -70,6 +70,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             "Applied To": $dom.getElements(options.$el)
             "Options":    deltaOptions
             "table": {
+              ## mouse events tables will take up slots 1 and 2 if they're present
+              ## this preserves the order of the tables
               3: ->
                 {
                   name: "Keyboard Events"
