@@ -23,6 +23,34 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
+const parseRunOpts = (fnArgs, args) => {
+  const opts = fnArgs.pop()
+
+  if (fnArgs.length && opts.spec) {
+    // varargs in commander.js don't work as expected
+    // https://github.com/tj/commander.js/issues/913
+    // this will parse space-delimited spec names after --spec spec1
+
+    const maybeSpecs = fnArgs
+    const argIndex = _.indexOf(args, '--spec') + 2
+    let i = 0
+    let extraSpecs = []
+
+    while (maybeSpecs[i] === args[argIndex + i] && i < args.length - argIndex) {
+      // this is a spec
+      extraSpecs.push(maybeSpecs[i])
+      i++
+    }
+
+    if (extraSpecs.length) {
+      // TODO warn the user that they're using a shell expansion/we want them to use commas
+      opts.spec = [opts.spec].concat(extraSpecs).join(',')
+    }
+  }
+
+  return parseOpts(opts)
+}
+
 const parseOpts = (opts) => {
   opts = _.pick(opts,
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
@@ -130,7 +158,7 @@ module.exports = {
     .option('--record [bool]', text('record'), coerceFalse)
     .option('--headed', text('headed'))
     .option('-k, --key <record-key>', text('key'))
-    .option('-s, --spec <spec> [otherSpecs...]', text('spec'))
+    .option('-s, --spec <spec>', text('spec'))
     .option('-r, --reporter <reporter>', text('reporter'))
     .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
     .option('-p, --port <port>', text('port'))
@@ -143,10 +171,10 @@ module.exports = {
     .option('--ci-build-id <id>', text('ciBuildId'))
     .option('--no-exit', text('exit'))
     .option('--dev', text('dev'), coerceFalse)
-    .action((opts) => {
+    .action((...fnArgs) => {
       debug('running Cypress')
       require('./exec/run')
-      .start(parseOpts(opts))
+      .start(parseRunOpts(fnArgs, args))
       .then(util.exit)
       .catch(util.logErrorExit1)
     })
@@ -223,8 +251,6 @@ module.exports = {
       program.help()
       // exits
     }
-
-    // Deprecated Catches
 
     const firstCommand = args[2]
 

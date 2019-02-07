@@ -18,6 +18,7 @@ describe('exec run', function () {
       const args = run.processRunOptions({
         browser: 'test browser',
       })
+
       snapshot(args)
     })
 
@@ -25,6 +26,7 @@ describe('exec run', function () {
       const args = run.processRunOptions({
         record: 'my record id',
       })
+
       snapshot(args)
     })
 
@@ -33,6 +35,7 @@ describe('exec run', function () {
         record: 'foo',
         browser: 'test browser',
       })
+
       snapshot(args)
     })
   })
@@ -100,16 +103,6 @@ describe('exec run', function () {
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'])
-      })
-    })
-
-    it('spawns with space-delimited --spec transformed correctly', function () {
-      return run.start({
-        spec: 'foo',
-        otherSpecs: ['bang', 'fizzle']
-      })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--spec', 'foo,bang,fizzle'])
       })
     })
   })
