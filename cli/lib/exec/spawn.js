@@ -55,7 +55,7 @@ module.exports = {
     debug('needs XVFB?', needsXvfb)
 
     // always push cwd into the args
-    args = [].concat(args, '--cwd', process.cwd())
+    args = [].concat('--cwd', process.cwd(), args)
 
     _.defaults(options, {
       env: process.env,

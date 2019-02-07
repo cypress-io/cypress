@@ -102,5 +102,15 @@ describe('exec run', function () {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'])
       })
     })
+
+    it('spawns with space-delimited --spec transformed correctly', function () {
+      return run.start({
+        spec: 'foo',
+        otherSpecs: ['bang', 'fizzle']
+      })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--spec', 'foo,bang,fizzle'])
+      })
+    })
   })
 })

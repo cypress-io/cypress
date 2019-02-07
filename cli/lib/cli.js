@@ -130,7 +130,7 @@ module.exports = {
     .option('--record [bool]', text('record'), coerceFalse)
     .option('--headed', text('headed'))
     .option('-k, --key <record-key>', text('key'))
-    .option('-s, --spec <spec>', text('spec'))
+    .option('-s, --spec <spec> [otherSpecs...]', text('spec'))
     .option('-r, --reporter <reporter>', text('reporter'))
     .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
     .option('-p, --port <port>', text('port'))

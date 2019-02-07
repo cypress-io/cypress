@@ -32,6 +32,11 @@ const processRunOptions = (options = {}) => {
 
   // if we have specific spec(s) push that into the args
   if (options.spec) {
+    if (options.otherSpecs) {
+      options.spec = [options.spec].concat(options.otherSpecs).join(',')
+      // TODO warn the user they're not passing a pattern
+    }
+
     args.push('--spec', options.spec)
   }
 
@@ -99,6 +104,8 @@ module.exports = {
   processRunOptions,
   // resolves with the number of failed tests
   start (options = {}) {
+    debug('run mode started with options %o', options)
+
     _.defaults(options, {
       key: null,
       spec: null,
