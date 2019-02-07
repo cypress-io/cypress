@@ -331,6 +331,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
+        ## if the subject is already the focused element, start typing
+        ## we handle contenteditable children by getting the host contenteditable,
+        ## and seeing if that is focused
+        ## Checking first if element is focusable accounts for focusable els inside
+        ## of contenteditables
+        $focused = cy.getFocused()
+        $focused = $focused && $focused[0]
+
+        if $elements.isFocusable(options.$el)
+          elToCheckCurrentlyFocused = options.$el[0]
+        else if $elements.isContentEditable(options.$el[0])
+          elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
+        
+        if elToCheckCurrentlyFocused && elToCheckCurrentlyFocused is $focused
+          return type()
+
         $actionability.verify(cy, options.$el, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)

@@ -2110,6 +2110,31 @@ describe "src/cy/commands/actions/type", ->
 
       it "respects being formatted by input event handlers"
 
+      it "accurately returns host contenteditable attr", ->
+        hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=true attr", ->
+        hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"\" attr", ->
+        hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+      
+      it "accurately returns host contenteditable=\"foo\" attr", ->
+        hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+   
+      it.only "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
+        hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+
       it "can arrow from maxlength", ->
         cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}')
         cy.window().then (win) ->

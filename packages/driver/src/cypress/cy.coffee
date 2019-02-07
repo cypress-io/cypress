@@ -52,6 +52,9 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
+setActAsIfWindowHasFocus = (state) ->
+  state("actAsIfWindowHasFocus", true)
+
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
@@ -157,6 +160,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.HTMLElement.prototype.blur = ->
+        focused.interceptBlur(this)
 
       contentWindow.HTMLInputElement.prototype.select = ->
         $selection.interceptSelect.call(this)
@@ -668,6 +674,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
+      setActAsIfWindowHasFocus(state)
 
       ## dont need to worry about a try/catch here
       ## because this is during initialize and its
@@ -736,6 +743,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         window: s.window
         document: s.document
         $autIframe: s.$autIframe
+        actAsIfWindowHasFocus: s.actAsIfWindowHasFocus
       }
 
       ## reset state back to empty object
