@@ -8,10 +8,6 @@ $dom = require("../dom")
 
 ## see difference between 'filters' and 'pseudos'
 ## https://api.jquery.com/filter/ and https://api.jquery.com/category/selectors/
-
-# debugger
-
-
 $.expr.filters.focus = $dom.isFocused
 $.expr.pseudos.focus = $dom.isFocused
 $.expr.pseudos.focused = $dom.isFocused

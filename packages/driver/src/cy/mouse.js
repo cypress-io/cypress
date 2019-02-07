@@ -266,12 +266,12 @@ const create = (state, focused) => {
       const defaultOptions = $Keyboard.mixinModifiers({
         clientX: x,
         clientY: y,
-        screenX: x,
-        screenY: y,
         pageX: fromDocCoords.x,
         pageY: fromDocCoords.y,
         layerX: fromDocCoords.x,
         layerY: fromDocCoords.y,
+        screenX: fromDocCoords.x,
+        screenY: fromDocCoords.y,
         x,
         y,
         button: 0,
@@ -431,8 +431,6 @@ const create = (state, focused) => {
         view: win,
         clientX: fromViewport.x,
         clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
         buttons: 0,
         detail: 1,
       }, _activeModifiers)
@@ -491,8 +489,6 @@ const create = (state, focused) => {
         view: win,
         clientX: fromViewport.x,
         clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
         buttons: 0,
         detail: 1,
         composed: true,
@@ -522,36 +518,6 @@ const create = (state, focused) => {
       return { clickProps }
     },
 
-    _contextmenuEvent (fromViewport, force, mouseEvtOptionsExtend) {
-      const el = mouse.moveToCoordsOrForce(fromViewport, force)
-
-      const win = $dom.getWindowByElement(el)
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const modifiers = $Keyboard.modifiersToString(_activeModifiers)
-      const defaultOptions = $Keyboard.mixinModifiers({
-        view: win,
-        clientX: fromViewport.x,
-        clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
-        composed: true,
-        button: 2,
-        buttons: 2,
-        detail: 0,
-        which: 3,
-      }, _activeModifiers)
-
-      const mouseEvtOptions = _.extend({}, defaultOptions, mouseEvtOptionsExtend)
-
-      let contextmenuProps = sendContextmenu(el, mouseEvtOptions)
-
-      if (modifiers) {
-        contextmenuProps = _.extend(contextmenuProps, { modifiers })
-      }
-
-      return { contextmenuProps }
-    },
-
     dblclick (fromViewport, force = false) {
       const click = (clickNum) => {
         const clickEvents = mouse.mouseClick(fromViewport, force, {}, { detail: clickNum })
@@ -571,8 +537,6 @@ const create = (state, focused) => {
         view: win,
         clientX: fromViewport.x,
         clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
         buttons: 0,
         detail: 2,
         composed: true,
@@ -585,31 +549,6 @@ const create = (state, focused) => {
       }
 
       return { clickEvents1, clickEvents2, dblclickProps }
-    },
-
-    rightClick (fromViewport, forceEl) {
-
-      const pointerEvtOptionsExtend = {
-        button: 2,
-        buttons: 2,
-        which: 3,
-      }
-      const mouseEvtOptionsExtend = {
-        button: 2,
-        buttons: 2,
-        which: 3,
-      }
-
-      const mouseDownEvents = mouse.mouseDown(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
-
-      const contextmenuEvent = mouse._contextmenuEvent(fromViewport, forceEl)
-
-      const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
-
-      const mouseUpEvents = mouse.mouseUp(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
-
-      return _.extend({}, mouseDownEvents, mouseUpEvents, contextmenuEvent)
-
     },
   }
 
@@ -701,9 +640,6 @@ const sendClick = (el, evtOptions) => {
 }
 const sendDblclick = (el, evtOptions) => {
   return sendMouseEvent(el, evtOptions, 'dblclick', true, true)
-}
-const sendContextmenu = (el, evtOptions) => {
-  return sendMouseEvent(el, evtOptions, 'contextmenu', true, true)
 }
 
 const formatReasonNotFired = (reason) => {
