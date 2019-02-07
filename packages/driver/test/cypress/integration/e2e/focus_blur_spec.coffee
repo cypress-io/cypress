@@ -37,6 +37,10 @@
 
 { _ } = Cypress
 
+chaiSubset = require('chai-subset')
+
+chai.use(chaiSubset)
+
 it "blur the activeElement when clicking the body", ->
   cy
   .visit("http://localhost:3500/fixtures/active-elements.html")
@@ -137,18 +141,17 @@ describe 'polyfill programmatic blur events', ->
     cy
     .visit("http://localhost:3500/fixtures/active-elements.html")
     .then ->
-      events = []
 
       ## programmatically focus the first, then second input element
       $one = cy.$$("#one")
       $two = cy.$$("#two")
 
-      ["focus", "blur"].forEach (evt) ->
-        $one.on evt, (e) ->
-          events.push(e.originalEvent)
+      stub = cy.stub().as('focus/blur event').callsFake(()=>Cypress.log({}))
 
-        $two.on evt, (e) ->
-          events.push(e.originalEvent)
+      ["focus", "blur"].forEach (evt) ->
+        $one.on evt, stub
+
+        $two.on evt, stub
 
       $one.get(0).focus()
       ## a hack here becuase we nuked the real .focus
@@ -156,24 +159,23 @@ describe 'polyfill programmatic blur events', ->
       get: ->
         return $one.get(0)
       })
+
       $two.get(0).focus()
+      # cy.get('#two').click()
 
-      cy.log(events).then ->
-        expect(_.toPlainObject(events[0])).to.include({
+      cy.then ->
+        expect(_.toPlainObject(stub.getCall(0).args[0])).to.containSubset({
           type: "focus"
-          isTrusted: false
           target: $one.get(0)
         })
 
-        expect(_.toPlainObject(events[1])).to.include({
+        expect(_.toPlainObject(stub.getCall(1).args[0])).to.containSubset({
           type: "blur"
-          isTrusted: false
           target: $one.get(0)
         })
 
-        expect(_.toPlainObject(events[2])).to.include({
+        expect(_.toPlainObject(stub.getCall(2).args[0])).to.containSubset({
           type: "focus"
-          isTrusted: false
           target: $two.get(0)
         })
 
@@ -182,18 +184,15 @@ describe 'polyfill programmatic blur events', ->
     cy
     .visit("http://localhost:3500/fixtures/active-elements.html")
     .then ->
-      events = []
-
       ## programmatically focus the first, then second input element
       $one = cy.$$("#one")
       $two = cy.$$("#two")
 
-      ["focus", "blur"].forEach (evt) ->
-        $one.on evt, (e) ->
-          events.push(e.originalEvent)
+      stub = cy.stub().as('focus/blur event')
 
-        $two.on evt, (e) ->
-          events.push(e.originalEvent)
+      ["focus", "blur"].forEach (evt) ->
+        $one.on evt, stub
+        $two.on evt, stub
 
       $one.get(0).focus()
       ## a hack here becuase we nuked the real .focus
@@ -201,20 +200,18 @@ describe 'polyfill programmatic blur events', ->
         get: ->
           return $one.get(0)
       })
+
       $one.get(0).blur()
 
+      cy.then ->
 
-      cy.log(events).then ->
-
-        expect(_.toPlainObject(events[0])).to.include({
+        expect(_.toPlainObject(stub.getCall(0).args[0])).to.containSubset({
           type: "focus"
-          isTrusted: false
           target: $one.get(0)
         })
 
-        expect(_.toPlainObject(events[1])).to.include({
+        expect(_.toPlainObject(stub.getCall(1).args[0])).to.containSubset({
           type: "blur"
-          isTrusted: false
           target: $one.get(0)
         })
 

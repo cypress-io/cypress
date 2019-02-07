@@ -1,4 +1,4 @@
-$ = Cypress.$.bind(Cypress)
+$ = Cypress.$
 _ = Cypress._
 
 logger = require('../../../../../runner/src/lib/logger')
@@ -1643,6 +1643,18 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.have.focus
+
+      it.only "calls into custom focus pseudos", ->
+        $.support.matchesSelector = false
+        cy.$$('button:first').focus()
+        stub = cy.spy(()=>debugger).as('focus')
+        $.expr.pseudos.focus = stub
+        $.expr.filters.focus = stub
+        $.expr[':'].focus = stub
+        expect(cy.$$('button:first')).to.have.focus
+        # cy.get('button:first').should('have.focus')
+        #   .then ->
+        #     expect(stub).to.be.called
 
     context "match", ->
       beforeEach ->

@@ -132,6 +132,8 @@ create = (state) ->
     focusEvt = new FocusEvent "focus", {
       view: win
       relatedTarget: null
+      isTrusted: false
+
     }
 
     ## not fired in the correct order per w3c spec
