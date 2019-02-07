@@ -145,20 +145,16 @@ export const detectByPath = (
     const regexExec = browser.versionRegex.exec(stdout) as Array<string>
 
     return extend({}, browser, {
+      displayName: `Custom ${browser.displayName}`,
       path,
       version: regexExec[1],
       majorVersion: regexExec[1].split('.', 2)[0]
     })
   }
 
-  const createFoundBrowser = (browser: Browser) => {
-    return extend({}, browser, { path })
-  }
-
   return helper
     .getVersionString(path)
     .then(detectBrowserByVersionString)
-    .then(createFoundBrowser)
     .catch((err: NotDetectedAtPathError) => {
       if (err.notDetectedAtPath) {
         throw err
