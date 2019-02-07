@@ -288,14 +288,15 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
 
-    it('causes focusable elements to receive focus', (done) => {
-      const $text = cy.$$(':text:first')
+    it('cause s focusable elements to receive focus', () => {
 
-      $text.focus(() => {
-        done()
-      })
+      const el = cy.$$('button:first')
 
-      cy.get(':text:first').click()
+      attachFocusListeners({ el })
+
+      cy.get(':text:first').click().should('have.focus')
+
+      cy.getAll('el', 'focus focusin').each(shouldBeCalledOnce)
     })
 
     it('does not fire a focus, mouseup, or click event when element has been removed on mousedown', function () {
@@ -2315,14 +2316,8 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
 
-    it('causes focusable elements to receive focus', (done) => {
-      const $text = cy.$$(':text:first')
-
-      $text.focus(() => {
-        done()
-      })
-
-      cy.get(':text:first').dblclick()
+    it('causes focusable elements to receive focus', () => {
+      cy.get(':text:first').dblclick().should('have.focus')
     })
 
     it('silences errors on unfocusable elements', () => {
@@ -2833,6 +2828,154 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
   })
+
+  context('#rightClick', () => {
+
+    it('can rightclick', () => {
+      const el = cy.$$('button:first')
+
+      attachMouseClickListeners({ el })
+      attachFocusListeners({ el })
+      attachContextmenuListeners({ el })
+
+      cy.get('button:first').rightClick().should('have.focus')
+
+      cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
+      cy.getAll('el', 'click').each(shouldNotBeCalled)
+
+      cy.getAll('el', 'pointerdown mousedown pointerup mouseup').each(stub => {
+        expect(stub.firstCall.args[0]).to.containSubset({
+          button: 2,
+          buttons: 2,
+          which: 3,
+        })
+      })
+
+      cy.getAll('el', 'contextmenu').each(stub => {
+        expect(stub.firstCall.args[0]).to.containSubset({
+          altKey: false,
+          bubbles: true,
+          target: el.get(0),
+          button: 2,
+          buttons: 2,
+          cancelable: true,
+          data: undefined,
+          detail: 0,
+          eventPhase: 2,
+          handleObj: { type: 'contextmenu', origType: 'contextmenu', data: undefined },
+          relatedTarget: null,
+          shiftKey: false,
+          type: 'contextmenu',
+          view: cy.state('window'),
+          which: 3,
+        })
+      })
+    })
+
+    it('can rightclick disabled', () => {
+      const el = cy.$$('input:first')
+
+      el.get(0).disabled = true
+
+      attachMouseClickListeners({ el })
+      attachFocusListeners({ el })
+      attachContextmenuListeners({ el })
+
+      cy.get('input:first').rightClick({ force: true })
+
+      cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
+      cy.getAll('el', 'pointerdown pointerup').each(shouldBeCalled)
+    })
+
+    it('rightclick cancel contextmenu', () => {
+      const el = cy.$$('button:first')
+
+      // canceling contextmenu prevents the native contextmenu
+      // likely we want to call attention to this, since we cannot
+      // reproduce the native contextmenu
+      el.on('contextmenu', () => false)
+
+      attachMouseClickListeners({ el })
+      attachFocusListeners({ el })
+      attachContextmenuListeners({ el })
+
+      cy.get('button:first').rightClick()
+
+      cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
+      cy.getAll('el', 'click').each(shouldNotBeCalled)
+    })
+
+    it('rightclick cancel mousedown', () => {
+      const el = cy.$$('button:first')
+
+      el.on('mousedown', () => false)
+
+      attachMouseClickListeners({ el })
+      attachFocusListeners({ el })
+      attachContextmenuListeners({ el })
+
+      cy.get('button:first').rightClick()
+
+      cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
+      cy.getAll('el', 'click').each(shouldNotBeCalled)
+
+    })
+
+    it('rightclick cancel pointerdown', () => {
+      const el = cy.$$('button:first')
+
+      el.on('pointerdown', () => false)
+
+      attachMouseClickListeners({ el })
+      attachFocusListeners({ el })
+      attachContextmenuListeners({ el })
+
+      cy.get('button:first').rightClick()
+
+      cy.getAll('el', 'pointerdown pointerup contextmenu').each(shouldBeCalled)
+      cy.getAll('el', 'mousedown mouseup').each(shouldNotBeCalled)
+
+    })
+
+    it('rightclick remove el on pointerdown', () => {
+      const el = cy.$$('button:first')
+
+      el.on('pointerdown', () => el.get(0).remove())
+
+      attachMouseClickListeners({ el })
+      attachFocusListeners({ el })
+      attachContextmenuListeners({ el })
+
+      cy.get('button:first').rightClick()
+
+      cy.getAll('el', 'pointerdown').each(shouldBeCalled)
+      cy.getAll('el', 'mousedown mouseup contextmenu pointerup').each(shouldNotBeCalled)
+
+    })
+
+    it('rightclick remove el on mouseover', () => {
+      const el = cy.$$('button:first')
+      const div = cy.$$('div#tabindex')
+
+      // canceling contextmenu prevents the native contextmenu
+      // likely we want to call attention to this, since we cannot
+      // reproduce the native contextmenu
+      // el.on('contextmenu', () => false)
+
+      el.on('mouseover', () => el.get(0).remove())
+
+      attachMouseClickListeners({ el, div })
+      attachFocusListeners({ el, div })
+      attachContextmenuListeners({ el, div })
+
+      cy.get('button:first').rightClick()
+
+      cy.getAll('el', 'pointerdown pointerup contextmenu').each(shouldBeCalled)
+      cy.getAll('el', 'pointerdown mousedown pointerup mouseup contextmenu').each(shouldNotBeCalled)
+
+    })
+
+  })
 })
 
 const attachListeners = (listenerArr) => (els) => {
@@ -2848,6 +2991,7 @@ const attachFocusListeners = attachListeners(focusEvents)
 const attachMouseClickListeners = attachListeners(mouseClickEvents)
 const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
 const attachMouseDblclickListeners = attachListeners(['dblclick'])
+const attachContextmenuListeners = attachListeners(['contextmenu'])
 
 const getAllFn = (...aliases) => {
   if (aliases.length > 1) {
