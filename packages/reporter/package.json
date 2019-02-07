@@ -44,7 +44,7 @@
     "react": "16.7.0",
     "react-dom": "16.7.0",
     "rebuild-node-sass": "1.1.0",
-    "sinon": "7.0.0",
+    "sinon": "7.2.3",
     "sinon-chai": "3.3.0",
     "zunder": "6.3.2"
   }
