@@ -492,7 +492,7 @@ module.exports = {
 
       You may need to restructure some of your test code to avoid this problem.
 
-      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your configuration file.
 
       https://on.cypress.io/cross-origin-violation
 
@@ -502,7 +502,7 @@ module.exports = {
 
       Your page did not fire its 'load' event within '{{ms}}ms'.
 
-      You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+      You can try increasing the 'pageLoadTimeout' value in your configuration file to wait longer.
 
       Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
@@ -610,7 +610,7 @@ module.exports = {
       No response was received within the timeout.
       """
     url_missing: "#{cmd('request')} requires a url. You did not provide a url."
-    url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
+    url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in your configuration file. Neither of those values were present."
     url_wrong_type: "#{cmd('request')} requires the url to be a string."
 
   route:
