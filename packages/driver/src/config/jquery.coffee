@@ -11,16 +11,34 @@ $dom = require("../dom")
 ## is(:focus).
 ## see https://github.com/jquery/sizzle/wiki#sizzlematchesselector-domelement-element-string-selector-
 
-oldMatches = $.find.matchesSelector
+## this is to help to interpretor make optimizations around try/catch
+tryCatchFinally = ({tryFn, catchFn, finallyFn}) ->
+  try
+    tryFn()
+  catch e
+    catchFn(e)
+  finally
+    finallyFn()
+
+matchesSelector = $.find.matchesSelector
 $.find.matchesSelector = (elem, expr) ->
-  forceCustomSelector = expr && expr.indexOf && (expr.indexOf(':focus') isnt -1)
-  if forceCustomSelector
-    backup = $.find.support.matchesSelector
+  isUsingFocus = _.includes(expr, ':focus')
+  if isUsingFocus
+    supportMatchesSelector = $.find.support.matchesSelector
     $.find.support.matchesSelector = false
-  ret = oldMatches.apply(@, arguments)
-  if forceCustomSelector
-    $.find.support.matchesSelector = backup
-  return ret
+
+  args = arguments
+  _this = @
+
+  return tryCatchFinally({
+    tryFn: ->
+      matchesSelector.apply(_this, args)
+    catchFn: (e) ->
+      throw e
+    finallyFn: ->
+      if isUsingFocus
+        $.find.support.matchesSelector = supportMatchesSelector
+  })
 
 
 ## see difference between 'filters' and 'pseudos'
