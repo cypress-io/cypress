@@ -241,12 +241,15 @@ describe('cli', () => {
     it('calls run with space-separated --specs', () => {
       this.exec('run --spec a b c d e f g')
       expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g' })
-      this.exec('run --dev baz --spec foo bar baz -P ./')
+      this.exec('run --dev bang --spec foo bar baz -P ./')
       expect(run.start).to.be.calledWithMatch({ spec: 'foo,bar,baz' })
     })
 
-    it('warns with space-separated --specs', () => {
-      return execa('bin/cypress', 'run --spec a b c d e f g'.split(' ')).then(snapshot)
+    it('warns with space-separated --specs', (done) => {
+      sinon.spy(logger, 'warn')
+      this.exec('run --spec a b c d e f g --dev')
+      snapshot(logger.warn.getCall(0).args[0])
+      done()
     })
   })
 
