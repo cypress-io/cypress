@@ -320,3 +320,45 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
   -------
   
 `
+
+exports['cli cypress run warns with space-separated --specs 1'] = `
+
+  command: bin/cypress run --spec a b c d e f g
+  code: 1
+  failed: true
+  killed: false
+  signal: null
+  timedOut: false
+
+  stdout:
+  -------
+  ⚠ Warning: It looks like you're passing --spec a space-separated list of files:
+
+  "a b c d e f g"
+
+  This will work, but it's not recommended.
+
+  The most common cause of this warning is using an unescaped glob pattern. If you are
+  trying to pass a glob pattern, escape it using quotes:
+    cypress run --spec "**/*.spec.js"
+
+  If you are trying to pass multiple spec filenames, separate them by commas instead:
+    cypress run --spec spec1,spec2,spec3
+
+  No version of Cypress is installed in: /home/flotwig/.cache/Cypress/0.0.0/Cypress
+
+  Please reinstall Cypress by running: cypress install
+  ----------
+
+  Cypress executable not found at: /home/flotwig/.cache/Cypress/0.0.0/Cypress/Cypress
+  ----------
+
+  Platform: linux (Ubuntu Linux - 18.10)
+  Cypress Version: 0.0.0
+  -------
+  stderr:
+  -------
+  
+  -------
+  
+`
