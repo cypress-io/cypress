@@ -405,6 +405,7 @@ describe "lib/gui/events", ->
       beforeEach ->
         sinon.stub(extension, "setHostAndPath").resolves()
         sinon.stub(browsers, "get").resolves([])
+        sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves([{foo: 'bar'}])
         sinon.stub(Project.prototype, "close").resolves()
 
       afterEach ->
@@ -482,6 +483,32 @@ describe "lib/gui/events", ->
         .then (assert) =>
           open.lastCall.args[0].onError({name: "foo", message: "foo"})
           assert.sendCalledWith({name: "foo", message: "foo"})
+
+      it "calls browsers.get when no browser specified", ->
+        @handleEvent("open:project", "/_test-output/path/to/project").then ->
+          expect(browsers.ensureAndGetByNameOrPath).to.not.be.called
+          expect(browsers.get).to.be.calledOnce
+
+      it "calls browsers.ensureAndGetByNameOrPath when browser specified", ->
+        sinon.stub(openProject, "create").resolves()
+        @options.browser = "/usr/bin/baz-browser"
+
+        @handleEvent("open:project", "/_test-output/path/to/project").then ->
+          expect(browsers.ensureAndGetByNameOrPath).to.be.calledOnce
+          expect(browsers.get).to.not.be.called
+          expect(openProject.create).to.be.calledWithMatch(
+            "/_test-output/path/to/project",
+            {
+              browser: "/usr/bin/baz-browser",
+              config: {
+                browsers: [
+                  {
+                    foo: "bar"
+                  }
+                ]
+              }
+            }
+          )
 
     describe "close:project", ->
       beforeEach ->
