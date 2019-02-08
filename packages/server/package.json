@@ -117,7 +117,7 @@
     "compression": "1.7.2",
     "concat-stream": "1.6.2",
     "content-type": "1.0.4",
-    "cookie": "0.2.4",
+    "cookie": "0.3.1",
     "cookie-parser": "1.4.3",
     "data-uri-to-buffer": "0.0.4",
     "debug": "2.6.9",
