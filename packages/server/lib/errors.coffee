@@ -94,9 +94,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       The supplied browser path could not be resolved to a known browser.
 
-      Supplied path: '#{arg1}'
+      Error:
 
-      Error: #{arg2}
+      #{arg1}
       """
     when "CANNOT_RECORD_VIDEO_HEADED"
       """

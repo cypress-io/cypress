@@ -53,15 +53,15 @@ ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
 
     ## did the user give a bad name, or is this actually a path?
     if isValidPathToBrowser(nameOrPath)
-      ## looks like a path - try to resolve it to a FoundBrowser 
+      ## looks like a path - try to resolve it to a FoundBrowser
       return utils.getBrowserByPath(nameOrPath)
       .then (browser) ->
         if returnAll
           return [browser].concat(browsers)
         return browser
       .catch (err) ->
-        errors.throw("BROWSER_NOT_FOUND_BY_PATH", nameOrPath, err.message)
-    
+        errors.throw("BROWSER_NOT_FOUND_BY_PATH", err.message)
+
     ## not a path, not found by name
     throwBrowserNotFound(nameOrPath, browsers)
 
