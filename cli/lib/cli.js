@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const commander = require('commander')
-const { oneLine } = require('common-tags')
+const { oneLine, stripIndent } = require('common-tags')
+const logSymbols = require('log-symbols')
 const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
@@ -23,28 +24,42 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const parseRunOpts = (fnArgs, args) => {
+const spaceDelimitedSpecsMsg = (files) => {
+  logger.warn(stripIndent`
+    ${logSymbols.warning} Warning: It looks like you're passing --spec a space-separated list of files:
+
+    "${files.join(' ')}"
+
+    This will work, but it's not recommended.
+
+    The most common cause of this warning is using an unescaped glob pattern. If you are
+    trying to pass a glob pattern, escape it using quotes:
+      cypress run --spec "**/*.spec.js"
+
+    If you are trying to pass multiple spec filenames, separate them by commas instead:
+      cypress run --spec spec1,spec2,spec3
+  `)
+}
+
+const parseVariableOpts = (fnArgs, args) => {
   const opts = fnArgs.pop()
 
   if (fnArgs.length && opts.spec) {
-    // varargs in commander.js don't work as expected
-    // https://github.com/tj/commander.js/issues/913
-    // this will parse space-delimited spec names after --spec spec1
+    // this will capture space-delimited specs after --spec spec1 but before the next option
 
-    const maybeSpecs = fnArgs
     const argIndex = _.indexOf(args, '--spec') + 2
-    let i = 0
-    let extraSpecs = []
+    const nextOptOffset = _.findIndex(_.slice(args, argIndex), (arg) => {
+      return _.startsWith(arg, '--')
+    })
+    const endIndex = nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
 
-    while (maybeSpecs[i] === args[argIndex + i] && i < args.length - argIndex) {
-      // this is a spec
-      extraSpecs.push(maybeSpecs[i])
-      i++
-    }
+    const maybeSpecs = _.slice(args, argIndex, endIndex)
+    const extraSpecs = _.intersection(maybeSpecs, fnArgs)
 
     if (extraSpecs.length) {
-      // TODO warn the user that they're using a shell expansion/we want them to use commas
-      opts.spec = [opts.spec].concat(extraSpecs).join(',')
+      opts.spec = [opts.spec].concat(extraSpecs)
+      spaceDelimitedSpecsMsg(opts.spec)
+      opts.spec = opts.spec.join(',')
     }
   }
 
@@ -174,7 +189,7 @@ module.exports = {
     .action((...fnArgs) => {
       debug('running Cypress')
       require('./exec/run')
-      .start(parseRunOpts(fnArgs, args))
+      .start(parseVariableOpts(fnArgs, args))
       .then(util.exit)
       .catch(util.logErrorExit1)
     })
