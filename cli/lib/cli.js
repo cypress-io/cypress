@@ -25,6 +25,7 @@ const coerceFalse = (arg) => {
 }
 
 const spaceDelimitedSpecsMsg = (files) => {
+  logger.log()
   logger.warn(stripIndent`
     ${logSymbols.warning} Warning: It looks like you're passing --spec a space-separated list of files:
 
@@ -39,6 +40,7 @@ const spaceDelimitedSpecsMsg = (files) => {
     If you are trying to pass multiple spec filenames, separate them by commas instead:
       cypress run --spec spec1,spec2,spec3
   `)
+  logger.log()
 }
 
 const parseVariableOpts = (fnArgs, args) => {

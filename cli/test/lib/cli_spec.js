@@ -240,7 +240,7 @@ describe('cli', () => {
 
     it('calls with space-separated --specs', () => {
       this.exec('run --spec a b c d e f g')
-      expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g'})
+      expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g' })
     })
 
     it('warns with space-separated --specs', () => {
