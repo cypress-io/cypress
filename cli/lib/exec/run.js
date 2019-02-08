@@ -99,8 +99,6 @@ module.exports = {
   processRunOptions,
   // resolves with the number of failed tests
   start (options = {}) {
-    debug('run mode started with options %o', options)
-
     _.defaults(options, {
       key: null,
       spec: null,
