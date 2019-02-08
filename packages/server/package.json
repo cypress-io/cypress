@@ -122,7 +122,7 @@
     "data-uri-to-buffer": "0.0.4",
     "debug": "2.6.9",
     "dependency-tree": "6.4.0",
-    "electron-context-menu": "0.8.0",
+    "electron-context-menu": "0.11.0",
     "electron-positioner": "3.0.0",
     "errorhandler": "1.1.1",
     "evil-dns": "0.2.0",
