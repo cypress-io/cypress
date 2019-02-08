@@ -484,12 +484,12 @@ describe "lib/gui/events", ->
           open.lastCall.args[0].onError({name: "foo", message: "foo"})
           assert.sendCalledWith({name: "foo", message: "foo"})
 
-      it "calls browsers.get when no browser specified", ->
+      it.skip "calls browsers.get when no browser specified", ->
         @handleEvent("open:project", "/_test-output/path/to/project").then ->
           expect(browsers.ensureAndGetByNameOrPath).to.not.be.called
           expect(browsers.get).to.be.calledOnce
 
-      it "calls browsers.ensureAndGetByNameOrPath when browser specified", ->
+      it.skip "calls browsers.ensureAndGetByNameOrPath when browser specified", ->
         sinon.stub(openProject, "create").resolves()
         @options.browser = "/usr/bin/baz-browser"
 
