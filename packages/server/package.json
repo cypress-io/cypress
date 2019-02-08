@@ -114,7 +114,7 @@
     "cli-table2": "0.2.0",
     "color-string": "1.5.3",
     "common-tags": "1.8.0",
-    "compression": "1.7.2",
+    "compression": "1.7.3",
     "concat-stream": "1.6.2",
     "content-type": "1.0.4",
     "cookie": "0.3.1",
