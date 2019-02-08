@@ -148,6 +148,10 @@
     position: relative;
     left: -15px;
 
+    &:focus {
+      outline: 0;
+    }
+
     .arrow {
       @extend .#{$fa-css-prefix};
       @extend .#{$fa-css-prefix}-caret-right;
