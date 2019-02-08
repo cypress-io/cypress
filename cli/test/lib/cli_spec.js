@@ -228,19 +228,21 @@ describe('cli', () => {
       expect(run.start).to.be.calledWith({ parallel: true })
     })
 
-    it('calls runs with --ci-build-id', () => {
+    it('calls run with --ci-build-id', () => {
       this.exec('run --ci-build-id 123')
       expect(run.start).to.be.calledWith({ ciBuildId: '123' })
     })
 
-    it('calls runs with --group', () => {
+    it('calls run with --group', () => {
       this.exec('run --group staging')
       expect(run.start).to.be.calledWith({ group: 'staging' })
     })
 
-    it('calls with space-separated --specs', () => {
+    it('calls run with space-separated --specs', () => {
       this.exec('run --spec a b c d e f g')
       expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g' })
+      this.exec('run --dev baz --spec foo bar baz -P ./')
+      expect(run.start).to.be.calledWithMatch({ spec: 'foo,bar,baz' })
     })
 
     it('warns with space-separated --specs', () => {
