@@ -2,6 +2,7 @@ const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
+const fs = require('fs')
 
 module.exports = (on) => {
   // save some time by only reading the originals once
@@ -90,6 +91,11 @@ module.exports = (on) => {
 
         return null
       })
+    },
+    'modify:cypress:json' () {
+      fs.writeFileSync('./cypress.json', '{}')
+
+      return null
     },
   })
 }

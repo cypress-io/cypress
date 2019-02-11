@@ -349,6 +349,7 @@ openProjectCreate = (projectRoot, socketId, options) ->
   ## - YES display reporter results (via mocha reporter)
   openProject.create(projectRoot, options, {
     socketId
+    onSettingsChanged: if options.simulateOpenMode then () -> else false
     morgan:       false
     report:       true
     isTextTerminal: options.isTextTerminal

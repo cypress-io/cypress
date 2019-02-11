@@ -282,6 +282,9 @@ module.exports = {
     if options.inspectBrk
       args.push("--inspect-brk")
 
+    if options.simulateOpenMode
+      args.push("--simulate-open-mode")
+
     return args
 
   start: (ctx, options = {}) ->
