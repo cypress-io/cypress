@@ -13,7 +13,7 @@ const includeTypes = [
   'sinon-chai',
   'chai',
   'chai-jquery',
-  'jquery'
+  'jquery',
 ]
 
 module.exports = { includeTypes }
