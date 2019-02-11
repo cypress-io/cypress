@@ -439,7 +439,7 @@ describe "lib/gui/events", ->
           open.lastCall.args[0].onFocusTests()
           assert.sendCalledWith(undefined)
 
-      it "sends 'config:changed' onSettingsChanged", ->
+      it "sends 'config:changed' from onSettingsChanged", ->
         open = sinon.stub(Project.prototype, "open")
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
@@ -450,13 +450,13 @@ describe "lib/gui/events", ->
           open.lastCall.args[0].onSettingsChanged()
           assert.sendCalledWith(undefined)
 
-      it "sends 'plugins:changed' onPluginsChanged", ->
+      it "sends 'config:changed' from onPluginsChanged", ->
         open = sinon.stub(Project.prototype, "open")
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
-          @handleEvent("on:plugins:changed")
+          @handleEvent("on:config:changed")
         .then (assert) =>
           open.lastCall.args[0].onPluginsChanged()
           assert.sendCalledWith(undefined)
