@@ -6,6 +6,7 @@ import { Browser, FoundBrowser } from './types'
 export const browsers: Browser[] = [
   {
     name: 'chrome',
+    family: 'chrome',
     displayName: 'Chrome',
     versionRegex: /Google Chrome (\S+)/,
     profile: true,
@@ -13,6 +14,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'chromium',
+    family: 'chrome',
     displayName: 'Chromium',
     versionRegex: /Chromium (\S+)/,
     profile: true,
@@ -20,6 +22,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'canary',
+    family: 'chrome',
     displayName: 'Canary',
     versionRegex: /Google Chrome Canary (\S+)/,
     profile: true,

@@ -30,11 +30,11 @@ kill = (unbind) ->
 cleanup = ->
   instance = null
 
-getBrowser = (name) ->
-  switch name
+getBrowserLauncherByFamily = (family) ->
+  switch family
     when "electron"
       require("./electron")
-    else
+    when "chrome"
       require("./chrome")
 
 ensureAndGetByPredicate = (predicate) ->
@@ -69,15 +69,15 @@ module.exports = {
         onBrowserClose: ->
       })
 
-      if not browserHelper = getBrowser(browser.name)
-        return throwBrowserNotFound(browser.name, options.browsers)
+      if not browserLauncher = getBrowserLauncherByFamily(browser.family)
+        return throwBrowserNotFound(browser, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
       debug("opening browser %o", browser)
 
-      browserHelper.open(browser, url, options, automation)
+      browserLauncher.open(browser, url, options, automation)
       .then (i) ->
         debug("browser opened")
         ## TODO: bind to process.exit here

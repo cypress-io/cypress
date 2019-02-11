@@ -10,7 +10,7 @@ PATH_TO_BROWSERS = appData.path("browsers")
 getBrowserPath = (browser) ->
   path.join(
     PATH_TO_BROWSERS,
-    "#{browser.name}-#{browser.version}"
+    "#{browser.name}"
   )
 
 copyExtension = (src, dest) ->
@@ -85,6 +85,7 @@ module.exports = {
       ## the internal version of Electron, which won't be detected by `launcher`
       browsers.concat({
         name: "electron"
+        family: "electron"
         displayName: "Electron"
         version: version
         path: ""
@@ -92,6 +93,5 @@ module.exports = {
         info: "Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
       })
 
-  launch: (browser, url, args) ->
-    launcher.launch(browser, url, args)
+  launch: launcher.launch
 }
