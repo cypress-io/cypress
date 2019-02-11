@@ -12,6 +12,7 @@
 /// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./moment.d.ts" />
 /// <reference path="./lodash/index.d.ts" />
+/// <reference types="./sinon" />
 
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
@@ -19,7 +20,6 @@
 /// <reference types="mocha" />
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
-/// <reference types="sinon" />
 /// <reference types="sinon-chai" />
 
 // Cypress adds chai expect and assert to global

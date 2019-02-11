@@ -49,6 +49,8 @@ packages/server/test/support/fixtures/server/libs
 cli/types/blob-util
 cli/types/lodash
 cli/types/minimatch
+cli/types/sinon
+# ignore CLI output build folder
 cli/build
 
 # Building app binary
