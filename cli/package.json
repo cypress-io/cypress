@@ -63,7 +63,7 @@
     "fs-extra": "4.0.1",
     "getos": "3.1.0",
     "glob": "7.1.2",
-    "is-ci": "1.0.10",
+    "is-ci": "1.2.1",
     "is-installed-globally": "0.1.0",
     "lazy-ass": "1.6.0",
     "listr": "0.12.0",
