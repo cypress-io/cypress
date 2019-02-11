@@ -46,6 +46,7 @@ packages/server/support
 packages/server/test/support/fixtures/server/libs
 
 # CLI tool
+cli/types/lodash
 cli/build
 
 # Building app binary

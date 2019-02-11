@@ -11,11 +11,11 @@
 /// <reference path="./bluebird.d.ts" />
 /// <reference path="./minimatch.d.ts" />
 /// <reference path="./moment.d.ts" />
+/// <reference path="./lodash/index.d.ts" />
 
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
-/// <reference types="lodash" />
 /// <reference types="mocha" />
 /// <reference types="moment" />
 /// <reference types="sinon" />
