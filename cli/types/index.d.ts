@@ -8,7 +8,7 @@
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
-/// <reference path="./bluebird.d.ts" />
+/// <reference path="./cy-bluebird.d.ts" />
 /// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./moment.d.ts" />
 /// <reference path="./lodash/index.d.ts" />

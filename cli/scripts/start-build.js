@@ -15,6 +15,7 @@ shell.cp('.release.json', 'build/.release.json')
 shell.cp('-R', 'types/*.ts', 'build/types/')
 // copies 3rd party typescript definitions
 shell.cp('-R', 'types/blob-util', 'build/types')
+shell.cp('-R', 'types/bluebird', 'build/types')
 shell.cp('-R', 'types/lodash', 'build/types')
 shell.cp('-R', 'types/minimatch', 'build/types')
 shell.cp('-R', 'types/sinon', 'build/types')
