@@ -11,14 +11,14 @@
 /// <reference path="./cy-bluebird.d.ts" />
 /// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-chai.d.ts" />
 /// <reference path="./lodash/index.d.ts" />
 /// <reference path="./sinon/index.d.ts" />
 /// <reference path="./sinon-chai/index.d.ts" />
 /// <reference path="./mocha/index.d.ts" />
 /// <reference path="./jquery/index.d.ts" />
+/// <reference path="./chai-jquery/index.d.ts" />
 
-/// <reference types="chai" />
-/// <reference types="chai-jquery" />
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
