@@ -12,8 +12,8 @@
 /// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./moment.d.ts" />
 /// <reference path="./lodash/index.d.ts" />
-/// <reference path="./sinon" />
-/// <reference path="./sinon-chai" />
+/// <reference path="./sinon/index.d.ts" />
+/// <reference path="./sinon-chai/index.d.ts" />
 
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
@@ -4082,7 +4082,7 @@ declare namespace Cypress {
   }
 
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
-  type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
+  type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 }
 

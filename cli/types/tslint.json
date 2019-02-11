@@ -29,7 +29,8 @@
       "./blob-util/*",
       "./lodash/**/*",
       "./minimatch/*",
-      "./sinon/**/*"
+      "./sinon/**/*",
+      "./sinon-chai/*"
     ]
   }
 }
