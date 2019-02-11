@@ -10,6 +10,7 @@ shell.set('-e') // any error is fatal
 shell.cp('-R', 'node_modules/@types/blob-util', 'types')
 shell.cp('-R', 'node_modules/@types/bluebird', 'types')
 shell.cp('-R', 'node_modules/@types/lodash', 'types')
+shell.cp('-R', 'node_modules/@types/mocha', 'types')
 shell.cp('-R', 'node_modules/@types/minimatch', 'types')
 shell.cp('-R', 'node_modules/@types/sinon', 'types')
 shell.cp('-R', 'node_modules/@types/sinon-chai', 'types')

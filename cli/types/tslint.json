@@ -29,6 +29,7 @@
       "./blob-util/*",
       "./bluebird/*",
       "./lodash/**/*",
+      "./mocha/*",
       "./minimatch/*",
       "./sinon/**/*",
       "./sinon-chai/*"
