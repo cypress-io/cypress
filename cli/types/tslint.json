@@ -25,7 +25,8 @@
   },
   "linterOptions": {
     "exclude": [
-      // Lodash types are 3rd party and don't follow our rules
+      // Lodash types and other external types are 3rd party and don't follow our rules
+      "./blob-util/*",
       "./lodash/**/*"
     ]
   }

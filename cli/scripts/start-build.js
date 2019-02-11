@@ -11,7 +11,10 @@ shell.mkdir('-p', 'build/types')
 shell.cp('bin/cypress', 'build/bin/cypress')
 shell.cp('NPM_README.md', 'build/README.md')
 shell.cp('.release.json', 'build/.release.json')
+// copies our typescript definitions
 shell.cp('-R', 'types/*.ts', 'build/types/')
+// copies 3rd party typescript definitions
+shell.cp('-R', 'types/blob-util', 'build/types')
 shell.cp('-R', 'types/lodash', 'build/types')
 
 shell.exec('babel lib -d build/lib')

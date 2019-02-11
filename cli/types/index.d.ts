@@ -7,7 +7,7 @@
 // TypeScript Version: 2.8
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference path="./blob-util.d.ts" />
+/// <reference path="./cy-blob-util.d.ts" />
 /// <reference path="./bluebird.d.ts" />
 /// <reference path="./minimatch.d.ts" />
 /// <reference path="./moment.d.ts" />
@@ -17,6 +17,7 @@
 /// <reference types="chai-jquery" />
 /// <reference types="jquery" />
 /// <reference types="mocha" />
+// "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
