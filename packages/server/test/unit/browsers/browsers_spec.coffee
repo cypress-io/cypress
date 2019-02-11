@@ -29,6 +29,17 @@ describe "lib/browsers/index", ->
         expect(err.type).to.eq("BROWSER_NOT_FOUND")
 
   context ".open", ->
+    it "throws an error if browser family doesn't exist", ->
+      browsers.open({
+        name: 'foo-bad-bang'
+        family: 'foo-bad'
+      }, {
+        browsers: []
+      }).then ->
+        throw new Error("should've failed")
+      .catch (err) ->
+        expect(err.type).to.eq("BROWSER_NOT_FOUND")
+
     # it "calls onBrowserClose callback on close", ->
     #   onBrowserClose = sinon.stub()
     #   browsers.launch("electron", @url, {onBrowserClose}).then ->
