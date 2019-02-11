@@ -9,7 +9,7 @@
 
 /// <reference path="./cy-blob-util.d.ts" />
 /// <reference path="./bluebird.d.ts" />
-/// <reference path="./minimatch.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./moment.d.ts" />
 /// <reference path="./lodash/index.d.ts" />
 

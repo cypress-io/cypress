@@ -45,7 +45,6 @@
     "@types/chai": "4.0.8",
     "@types/chai-jquery": "1.1.35",
     "@types/jquery": "3.3.6",
-    "@types/minimatch": "3.0.3",
     "@types/mocha": "2.2.44",
     "@types/sinon": "7.0.0",
     "@types/sinon-chai": "3.2.2",
@@ -81,6 +80,7 @@
   "devDependencies": {
     "@types/blob-util": "1.3.3",
     "@types/lodash": "4.14.120",
+    "@types/minimatch": "3.0.3",
     "@cypress/sinon-chai": "1.0.0",
     "babel-cli": "6.26.0",
     "babel-preset-es2015": "6.24.1",
