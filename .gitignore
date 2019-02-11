@@ -50,6 +50,7 @@ cli/types/blob-util
 cli/types/lodash
 cli/types/minimatch
 cli/types/sinon
+cli/types/sinon-chai
 # ignore CLI output build folder
 cli/build
 
