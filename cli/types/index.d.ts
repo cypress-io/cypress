@@ -15,10 +15,10 @@
 /// <reference path="./sinon/index.d.ts" />
 /// <reference path="./sinon-chai/index.d.ts" />
 /// <reference path="./mocha/index.d.ts" />
+/// <reference types="./jquery/index.d.ts" />
 
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
-/// <reference types="jquery" />
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 

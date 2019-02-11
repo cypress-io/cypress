@@ -48,6 +48,7 @@ packages/server/test/support/fixtures/server/libs
 # CLI tool
 cli/types/blob-util
 cli/types/bluebird
+cli/types/jquery
 cli/types/lodash
 cli/types/mocha
 cli/types/minimatch
