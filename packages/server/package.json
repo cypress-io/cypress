@@ -157,7 +157,7 @@
     "mocha": "2.4.5",
     "mocha-junit-reporter": "1.17.0",
     "moment": "2.24.0",
-    "morgan": "1.3.0",
+    "morgan": "1.9.1",
     "node-machine-id": "1.1.10",
     "node-uuid": "1.4.1",
     "node-webkit-updater": "cypress-io/node-webkit-updater#e74623726f381487f543e373e71515177a32daeb",
