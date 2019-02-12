@@ -118,6 +118,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not $Location.isFullyQualifiedUrl(options.url)
         $utils.throwErrByPath("request.url_invalid")
 
+      ## if a user has `x-www-form-urlencoded` content-type set with an object body, they meant to do this
+      ## https://github.com/cypress-io/cypress/issues/2923
+      if _.isObject(options.body) and not options.json and 'content-type' == _.toLower(_.findKey(options.headers, (v) -> v == 'application/x-www-form-urlencoded'))
+        options.form = true
+
       ## only set json to true if form isnt true
       ## and we have a valid object for body
       if options.form isnt true and isValidJsonObj(options.body)

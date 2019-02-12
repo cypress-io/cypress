@@ -319,6 +319,28 @@ describe "src/cy/commands/request", ->
               timeout: RESPONSE_TIMEOUT
             })
 
+        ## https://github.com/cypress-io/cypress/issues/2923
+        it "application/x-www-form-urlencoded w/ an object body uses form: true", ->
+          cy.request({
+            url: "http://localhost:8888"
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            }
+            body: { foo: "bar" }
+          }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
+              form: true
+              followRedirect: true
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+              }
+              body: { foo: "bar" }
+              timeout: RESPONSE_TIMEOUT
+            })
+
     describe "failOnStatus", ->
       it "is deprecated but does not fail even on 500 when failOnStatus=false", ->
         warning = cy.spy(Cypress.utils, "warning")
