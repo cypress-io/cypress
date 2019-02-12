@@ -70,7 +70,7 @@
     "lodash": "4.17.11",
     "log-symbols": "2.2.0",
     "minimist": "1.2.0",
-    "moment": "2.22.2",
+    "moment": "2.24.0",
     "ramda": "0.24.1",
     "request": "2.87.0",
     "request-progress": "0.3.1",
