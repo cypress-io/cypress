@@ -48,10 +48,10 @@ const normalizeBackslash = function (s) {
 }
 
 const normalizeBackslashes = function (options) {
-  //# remove stray double quote from runProject and other path properties
-  //# due to bug in NPM passing arguments with
-  //# backslash at the end
-  //# https://github.com/cypress-io/cypress/issues/535
+  // remove stray double quote from runProject and other path properties
+  // due to bug in NPM passing arguments with
+  // backslash at the end
+  // https://github.com/cypress-io/cypress/issues/535
   // these properties are paths and likely to have backslash on Windows
   const pathProperties = ['runProject', 'project', 'appPath', 'execPath']
 
@@ -83,14 +83,14 @@ const strToArray = function (str) {
 }
 
 const commasToPipes = (match, p1, p2, p3) =>
-//# swap out comma's for bars
+// swap out comma's for bars
 {
   return match.split(',').join('|')
 }
 
 const pipesToCommas = (str) =>
-//# convert foo=bar|version=1.2.3 to
-//# foo=bar,version=1.2.3
+// convert foo=bar|version=1.2.3 to
+// foo=bar,version=1.2.3
 {
   return str.split('|').join(',')
 }
@@ -104,39 +104,39 @@ const tryJSONParse = function (str) {
 }
 
 const JSONOrCoerce = function (str) {
-  //# valid JSON? horray
+  // valid JSON? horray
   let parsed
 
   if (parsed = tryJSONParse(str)) {
     return parsed
   }
 
-  //# convert bars back to commas
+  // convert bars back to commas
   str = pipesToCommas(str)
 
-  //# try to parse again?
+  // try to parse again?
   if (parsed = tryJSONParse(str)) {
     return parsed
   }
 
-  //# nupe :-(
+  // nupe :-(
   return coerce(str)
 }
 
 const sanitizeAndConvertNestedArgs = function (str) {
-  //# if this is valid JSON then just
-  //# parse it and call it a day
+  // if this is valid JSON then just
+  // parse it and call it a day
   let parsed
 
   if (parsed = tryJSONParse(str)) {
     return parsed
   }
 
-  //# invalid JSON, so assume mixed usage
-  //# first find foo={a:b,b:c} and bar=[1,2,3]
-  //# syntax and turn those into
-  //# foo: a:b|b:c
-  //# bar: 1|2|3
+  // invalid JSON, so assume mixed usage
+  // first find foo={a:b,b:c} and bar=[1,2,3]
+  // syntax and turn those into
+  // foo: a:b|b:c
+  // bar: 1|2|3
 
   return _
   .chain(str)
@@ -175,8 +175,8 @@ module.exports = {
       'simulate-open-mode': 'simulateOpenMode',
     }
 
-    //# takes an array of args and converts
-    //# to an object
+    // takes an array of args and converts
+    // to an object
     let options = minimist(argv, {
       alias,
     })
@@ -186,10 +186,10 @@ module.exports = {
     options = _
     .chain(options)
     .defaults(whitelisted)
-    .omit(_.keys(alias)) //# remove aliases
+    .omit(_.keys(alias)) // remove aliases
     .defaults({
-      //# set in case we
-      //# bypassed the cli
+      // set in case we
+      // bypassed the cli
       cwd: process.cwd(),
     })
     .mapValues(coerce)
@@ -197,14 +197,14 @@ module.exports = {
 
     debug('argv parsed: %o', options)
 
-    //# if we are updating we may have to pluck out the
-    //# appPath + execPath from the options._ because
-    //# in previous versions up until 0.14.0 these args
-    //# were not passed as dashes and instead were just
-    //# regular arguments
+    // if we are updating we may have to pluck out the
+    // appPath + execPath from the options._ because
+    // in previous versions up until 0.14.0 these args
+    // were not passed as dashes and instead were just
+    // regular arguments
     if (options.updating && !options.appPath) {
-      //# take the last two arguments that were unknown
-      //# and apply them to both appPath + execPath
+      // take the last two arguments that were unknown
+      // and apply them to both appPath + execPath
       [options.appPath, options.execPath] = options._.slice(-2)
     }
 
@@ -225,38 +225,38 @@ module.exports = {
     }
 
     if (c = options.config) {
-      //# convert config to an object
-      //# annd store the config
+      // convert config to an object
+      // annd store the config
       options.config = sanitizeAndConvertNestedArgs(c)
     }
 
-    //# get a list of the available config keys
+    // get a list of the available config keys
     const configKeys = config.getConfigKeys()
 
-    //# and if any of our options match this
+    // and if any of our options match this
     const configValues = _.pick(options, configKeys)
 
-    //# then set them on config
-    //# this solves situations where we accept
-    //# root level arguments which also can
-    //# be set in configuration
+    // then set them on config
+    // this solves situations where we accept
+    // root level arguments which also can
+    // be set in configuration
     if (options.config == null) {
       options.config = {}
     }
 
     _.extend(options.config, configValues)
 
-    //# remove them from the root options object
+    // remove them from the root options object
     options = _.omit(options, configKeys)
 
     options = normalizeBackslashes(options)
 
-    //# normalize project to projectRoot
+    // normalize project to projectRoot
     if (p = options.project || options.runProject) {
       options.projectRoot = path.resolve(options.cwd, p)
     }
 
-    //# normalize output path from previous current working directory
+    // normalize output path from previous current working directory
     if (op = options.outputPath) {
       options.outputPath = path.resolve(options.cwd, op)
     }
@@ -275,10 +275,11 @@ module.exports = {
   },
 
   toArray (obj = {}) {
-    //# goes in reverse, takes an object
-    //# and converts to an array by picking
-    //# only the whitelisted properties and
-    //# mapping them to include the argument
+    // goes in reverse, takes an object
+    // and converts to an array by picking
+    // only the whitelisted properties and
+    // mapping them to include the argument
+
     return _
     .chain(obj)
     .pick(...whitelist)
