@@ -2,6 +2,8 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $dom = require("../../../dom")
+$elements = require("../../../dom/elements")
+$document = require("../../../dom/document")
 $utils = require("../../../cypress/utils")
 $actionability = require("../../actionability")
 
@@ -85,11 +87,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 coords: fromWindow
               })
 
+            docCoords = $elements.getFromDocCoords(fromViewport.x, fromViewport.y, $document.getWindowByElement($elToClick.get(0)))
+
             eventOptions = _.extend({
               clientX: fromViewport.x
               clientY: fromViewport.y
-              pageX: fromWindow.x
-              pageY: fromWindow.y
+              screenX: fromViewport.x
+              screenY: fromViewport.y
+              pageX: docCoords.x
+              pageY: docCoords.y
             }, eventOptions)
 
             dispatch($elToClick.get(0), eventName, eventOptions)

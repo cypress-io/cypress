@@ -1645,16 +1645,12 @@ describe "src/cy/commands/assertions", ->
         expect({}).to.have.focus
 
       it.only "calls into custom focus pseudos", ->
-        $.support.matchesSelector = false
         cy.$$('button:first').focus()
-        stub = cy.spy(()=>debugger).as('focus')
-        $.expr.pseudos.focus = stub
-        $.expr.filters.focus = stub
-        $.expr[':'].focus = stub
+        stub = cy.spy($.expr.pseudos, 'focus').as('focus')
         expect(cy.$$('button:first')).to.have.focus
-        # cy.get('button:first').should('have.focus')
-        #   .then ->
-        #     expect(stub).to.be.called
+        cy.get('button:first').should('have.focus')
+          .then ->
+            expect(stub).to.be.calledTwice
 
     context "match", ->
       beforeEach ->

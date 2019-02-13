@@ -32,6 +32,21 @@ const create = (state, focused) => {
 
   const mouse = {
 
+    _getDefaultMouseOptions (x, y, win) {
+      const _activeModifiers = $Keyboard.getActiveModifiers(state)
+      const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
+      const coordsEventOptions = toCoordsEventOptions(x, y, win)
+
+      return _.extend({
+        view: win,
+        // allow propagation out of root of shadow-dom
+        // https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
+        composed: true,
+        // only for events involving moving cursor
+        relatedTarget: null,
+      }, modifiersEventOptions, coordsEventOptions)
+    },
+
     /**
      * @param {Coords} coords
      * @param {HTMLElement | false} force
@@ -68,37 +83,21 @@ const create = (state, focused) => {
       const win = $dom.getWindowByElement(el)
       const { x, y } = coords
 
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const defaultMouseOptions = $Keyboard.mixinModifiers({
-        clientX: x,
-        clientY: y,
-        screenX: x,
-        screenY: y,
-        x,
-        y,
+      const defaultOptions = mouse._getDefaultMouseOptions(x, y, win)
+      const defaultMouseOptions = _.extend({}, defaultOptions, {
         button: 0,
         which: 0,
         buttons: 0,
-        composed: true,
-        view: win,
-      }, _activeModifiers)
+      })
 
-      const defaultPointerOptions = $Keyboard.mixinModifiers({
-        clientX: x,
-        clientY: y,
-        screenX: x,
-        screenY: y,
-        x,
-        y,
+      const defaultPointerOptions = _.extend({}, defaultOptions, {
         button: -1,
         which: 0,
         buttons: 0,
-        composed: true,
-        view: win,
         pointerId: 1,
         pointerType: 'mouse',
         isPrimary: true,
-      }, _activeModifiers)
+      })
 
       const notFired = () => {
         return {
@@ -256,62 +255,34 @@ const create = (state, focused) => {
       const { x, y } = coords
       const el = mouse.moveToCoordsOrForce(coords, force)
 
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const modifiers = $Keyboard.modifiersToString(_activeModifiers)
-
       const win = $dom.getWindowByElement(el)
 
-      // these are the coords from the document, ignoring scroll position
-      const fromDocCoords = _getFromDocCoords(x, y, win)
-      const defaultOptions = $Keyboard.mixinModifiers({
-        clientX: x,
-        clientY: y,
-        screenX: x,
-        screenY: y,
-        pageX: fromDocCoords.x,
-        pageY: fromDocCoords.y,
-        layerX: fromDocCoords.x,
-        layerY: fromDocCoords.y,
-        x,
-        y,
+      const defaultOptions = mouse._getDefaultMouseOptions(x, y, win)
+
+      const pointerEvtOptions = _.extend({}, defaultOptions, {
         button: 0,
         which: 1,
-        // allow propagation out of root of shadow-dom
-        // https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
-        composed: true,
         buttons: 1,
-        // number of clicks in succession
-        detail: 1,
-        // only for events involving moving cursor
+        detail: 0,
+        pressure: 0.5,
+        pointerType: 'mouse',
+        pointerId: 1,
+        isPrimary: true,
         relatedTarget: null,
-        // currentTarget: el,
-        view: win,
-      }, _activeModifiers)
+      }, pointerEvtOptionsExtend)
 
-      // debugger
-
-      const pointerEvtOptions = _.extend(
-        {},
-        defaultOptions, {
-          pressure: 0.5,
-          pointerType: 'mouse',
-          pointerId: 1,
-          isPrimary: true,
-          detail: 0,
-        }, pointerEvtOptionsExtend
-      )
-
-      const mouseEvtOptions = _.extend({}, defaultOptions, mouseEvtOptionsExtend)
+      const mouseEvtOptions = _.extend({}, defaultOptions, {
+        button: 0,
+        which: 1,
+        buttons: 1,
+        detail: 1,
+      }, mouseEvtOptionsExtend)
 
       // TODO: pointer events should have fractional coordinates, not rounded
       let pointerdownProps = sendPointerdown(
         el,
         pointerEvtOptions
       )
-
-      if (modifiers) {
-        pointerdownProps = _.extend(pointerdownProps, { modifiers })
-      }
 
       const pointerdownPrevented = pointerdownProps.preventedDefault
       const elIsDetached = $elements.isDetachedEl(el)
@@ -332,10 +303,6 @@ const create = (state, focused) => {
       }
 
       let mousedownProps = sendMousedown(el, mouseEvtOptions)
-
-      if (modifiers) {
-        mousedownProps = _.extend(mousedownProps, { modifiers })
-      }
 
       return {
         pointerdownProps,
@@ -421,43 +388,27 @@ const create = (state, focused) => {
      */
     _mouseUpEvents (fromViewport, force, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
 
-      // const win = $dom.getWindowByElement(el)
-
       const win = state('window')
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const modifiers = $Keyboard.modifiersToString(_activeModifiers)
 
-      let defaultOptions = $Keyboard.mixinModifiers({
-        view: win,
-        clientX: fromViewport.x,
-        clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
+      let defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
+
+      const pointerEvtOptions = _.extend({}, defaultOptions, {
+        buttons: 0,
+        pressure: 0.5,
+        pointerType: 'mouse',
+        pointerId: 1,
+        isPrimary: true,
+        detail: 0,
+      }, pointerEvtOptionsExtend)
+
+      let mouseEvtOptions = _.extend({}, defaultOptions, {
         buttons: 0,
         detail: 1,
-      }, _activeModifiers)
+      }, mouseEvtOptionsExtend)
 
-      const pointerEvtOptions = _.extend(
-        {},
-        defaultOptions, {
-          pressure: 0.5,
-          pointerType: 'mouse',
-          pointerId: 1,
-          isPrimary: true,
-          detail: 0,
-        }, pointerEvtOptionsExtend
-      )
-
-      let mouseEvtOptions = _.extend({}, defaultOptions, mouseEvtOptionsExtend)
-
-      // debugger
       const el = mouse.moveToCoordsOrForce(fromViewport, force)
 
       let pointerupProps = sendPointerup(el, pointerEvtOptions)
-
-      if (modifiers) {
-        pointerupProps = _.extend(pointerupProps, { modifiers })
-      }
 
       if (skipMouseEvent || $elements.isDetachedEl($(el))) {
         return {
@@ -470,10 +421,6 @@ const create = (state, focused) => {
 
       let mouseupProps = sendMouseup(el, mouseEvtOptions)
 
-      if (modifiers) {
-        mouseupProps = _.extend(mouseupProps, { modifiers })
-      }
-
       return {
         pointerupProps,
         mouseupProps,
@@ -485,20 +432,13 @@ const create = (state, focused) => {
       const el = mouse.moveToCoordsOrForce(fromViewport, force)
 
       const win = $dom.getWindowByElement(el)
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const modifiers = $Keyboard.modifiersToString(_activeModifiers)
-      const defaultOptions = $Keyboard.mixinModifiers({
-        view: win,
-        clientX: fromViewport.x,
-        clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
+
+      const defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
+
+      const clickEventOptions = _.extend({}, defaultOptions, {
         buttons: 0,
         detail: 1,
-        composed: true,
-      }, _activeModifiers)
-
-      const mouseEvtOptions = _.extend({}, defaultOptions, mouseEvtOptionsExtend)
+      }, mouseEvtOptionsExtend)
 
       if (skipClickEvent) {
         return {
@@ -508,16 +448,7 @@ const create = (state, focused) => {
         }
       }
 
-      let clickProps = sendClick(el, mouseEvtOptions)
-
-      //// ensure this property exists on older chromium versions
-      // if (clickEvt.buttons == null) {
-      //   clickEvt.buttons = 0
-      // }
-
-      if (modifiers) {
-        clickProps = _.extend(clickProps, { modifiers })
-      }
+      let clickProps = sendClick(el, clickEventOptions)
 
       return { clickProps }
     },
@@ -526,33 +457,21 @@ const create = (state, focused) => {
       const el = mouse.moveToCoordsOrForce(fromViewport, force)
 
       const win = $dom.getWindowByElement(el)
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const modifiers = $Keyboard.modifiersToString(_activeModifiers)
-      const defaultOptions = $Keyboard.mixinModifiers({
-        view: win,
-        clientX: fromViewport.x,
-        clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
-        composed: true,
+      const defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
+
+      const mouseEvtOptions = _.extend({}, defaultOptions, {
         button: 2,
         buttons: 2,
         detail: 0,
         which: 3,
-      }, _activeModifiers)
-
-      const mouseEvtOptions = _.extend({}, defaultOptions, mouseEvtOptionsExtend)
+      }, mouseEvtOptionsExtend)
 
       let contextmenuProps = sendContextmenu(el, mouseEvtOptions)
-
-      if (modifiers) {
-        contextmenuProps = _.extend(contextmenuProps, { modifiers })
-      }
 
       return { contextmenuProps }
     },
 
-    dblclick (fromViewport, force = false) {
+    dblclick (fromViewport, force = false, mouseEvtOptionsExtend = {}) {
       const click = (clickNum) => {
         const clickEvents = mouse.mouseClick(fromViewport, force, {}, { detail: clickNum })
 
@@ -564,30 +483,18 @@ const create = (state, focused) => {
 
       const el = mouse.moveToCoordsOrForce(fromViewport, force)
       const win = $dom.getWindowByElement(el)
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const modifiers = $Keyboard.modifiersToString(_activeModifiers)
 
-      const dblclickEvtProps = $Keyboard.mixinModifiers({
-        view: win,
-        clientX: fromViewport.x,
-        clientY: fromViewport.y,
-        screenX: fromViewport.x,
-        screenY: fromViewport.y,
+      const dblclickEvtProps = _.extend(mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win), {
         buttons: 0,
         detail: 2,
-        composed: true,
-      }, _activeModifiers)
+      }, mouseEvtOptionsExtend)
 
       let dblclickProps = sendDblclick(el, dblclickEvtProps)
-
-      if (modifiers) {
-        dblclickProps = _.extend(dblclickProps, { modifiers })
-      }
 
       return { clickEvents1, clickEvents2, dblclickProps }
     },
 
-    rightClick (fromViewport, forceEl) {
+    rightclick (fromViewport, forceEl) {
 
       const pointerEvtOptionsExtend = {
         button: 2,
@@ -608,7 +515,9 @@ const create = (state, focused) => {
 
       const mouseUpEvents = mouse.mouseUp(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      return _.extend({}, mouseDownEvents, mouseUpEvents, contextmenuEvent)
+      const clickEvents = _.extend({}, mouseDownEvents, mouseUpEvents)
+
+      return _.extend({}, { clickEvents, contextmenuEvent })
 
     },
   }
@@ -620,6 +529,9 @@ const { stopPropagation } = window.MouseEvent.prototype
 
 const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, constructor) => {
   evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
+  const _eventModifiers = $Keyboard.fromModifierEventOptions(evtOptions)
+  const modifiers = $Keyboard.modifiersToString(_eventModifiers)
+
   const evt = new constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
 
   if (bubbles) {
@@ -636,6 +548,7 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
     stoppedPropagation: !!evt._hasStoppedPropagation,
     preventedDefault,
     el,
+    modifiers,
   }
 
 }
@@ -710,10 +623,22 @@ const formatReasonNotFired = (reason) => {
   return `⚠️ not fired (${reason})`
 }
 
-const _getFromDocCoords = (x, y, win) => {
+const toCoordsEventOptions = (x, y, win) => {
+
+  // these are the coords from the document, ignoring scroll position
+  const fromDocCoords = $elements.getFromDocCoords(x, y, win)
+
   return {
-    x: win.scrollX + x,
-    y: win.scrollY + y,
+    clientX: x,
+    clientY: y,
+    screenX: x,
+    screenY: y,
+    x,
+    y,
+    pageX: fromDocCoords.x,
+    pageY: fromDocCoords.y,
+    layerX: fromDocCoords.x,
+    layerY: fromDocCoords.y,
   }
 }
 

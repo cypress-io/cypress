@@ -110,12 +110,25 @@ const isModifier = (chars) => {
   return !!modifierChars[chars]
 }
 
-const mixinModifiers = (event, modifiers) => {
-  return _.extend(event, {
+const toModifiersEventOptions = (modifiers) => {
+  return {
     altKey: modifiers.alt,
     ctrlKey: modifiers.ctrl,
     metaKey: modifiers.meta,
     shiftKey: modifiers.shift,
+  }
+}
+
+const fromModifierEventOptions = (eventOptions) => {
+  // debugger
+  return _.pickBy({
+    alt: eventOptions.altKey,
+    ctrl: eventOptions.ctrlKey,
+    meta: eventOptions.metaKey,
+    shift: eventOptions.shiftKey,
+
+  }, (x) => {
+    return !!x
   })
 }
 
@@ -461,7 +474,7 @@ const create = function (state) {
           location: 0,
           repeat: false,
         })
-        mixinModifiers(event, getActiveModifiers(state))
+        _.extend(event, toModifiersEventOptions(getActiveModifiers(state)))
       }
 
       if (keys) {
@@ -642,7 +655,7 @@ const create = function (state) {
         }
       }
     },
-    mixinModifiers,
+    toModifiersEventOptions,
     modifiersToString,
     getActiveModifiers,
     modifierChars,
@@ -651,4 +664,4 @@ const create = function (state) {
   return kb
 }
 
-module.exports = { create, mixinModifiers, getActiveModifiers, modifierChars, modifiersToString }
+module.exports = { create, toModifiersEventOptions, getActiveModifiers, modifierChars, modifiersToString, fromModifierEventOptions }

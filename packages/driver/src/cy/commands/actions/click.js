@@ -113,7 +113,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }
 
           return Promise
-          .delay($actionability.delay, 'dblclick')
+          .delay($actionability.delay, 'click')
           .then(() => {
             //# display the red dot at these coords
             if (options._log) {
@@ -292,7 +292,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }
 
           return Promise
-          .delay($actionability.delay, 'click')
+          .delay($actionability.delay, 'dblclick')
           .then(() => {
             //# display the red dot at these coords
             if (options._log) {
@@ -367,7 +367,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       })
     },
 
-    rightClick (subject, positionOrX, y, options = {}) {
+    rightclick (subject, positionOrX, y, options = {}) {
 
       let position
       let x
@@ -392,11 +392,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       //# and we did not pass the multiple flag
       if ((options.multiple === false) && (options.$el.length > 1)) {
         $utils.throwErrByPath('click.multiple_elements', {
-          args: { cmd: 'rightClick', num: options.$el.length },
+          args: { cmd: 'rightclick', num: options.$el.length },
         })
       }
 
-      const rightClick = (el) => {
+      const rightclick = (el) => {
         let deltaOptions
         const $el = $dom.wrap(el)
 
@@ -413,13 +413,13 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         if (options.errorOnSelect && $el.is('select')) {
-          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'rightClick' }, onFail: options._log })
+          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'rightclick' }, onFail: options._log })
         }
 
         //# we want to add this delay delta to our
         //# runnables timeout so we prevent it from
         //# timing out from multiple clicks
-        cy.timeout($actionability.delay, true, 'rightClick')
+        cy.timeout($actionability.delay, true, 'rightclick')
 
         const createLog = (domEvents, fromWindowCoords) => {
           let consoleObj
@@ -450,13 +450,13 @@ module.exports = (Commands, Cypress, cy, state, config) => {
               2: () => {
                 return {
                   name: 'Mouse Click Events',
-                  data: formatMouseEvents(domEvents.clickEvents[0], formatMouseEvents),
+                  data: formatMouseEvents(domEvents.clickEvents, formatMouseEvents),
                 }
               },
               3: () => {
                 return {
                   name: 'Contextmenu Event',
-                  data: formatMouseEvents({ contextmenuProps: domEvents.contextmenuProps }),
+                  data: formatMouseEvents(domEvents.contextmenuEvent),
                 }
               },
             })
@@ -465,7 +465,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }
 
           return Promise
-          .delay($actionability.delay, 'rightClick')
+          .delay($actionability.delay, 'rightclick')
           .then(() => {
             //# display the red dot at these coords
             if (options._log) {
@@ -500,12 +500,12 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             const { fromWindow, fromViewport } = coords
             const forceEl = options.force && $elToClick.get(0)
             const moveEvents = mouse.mouseMove(fromViewport, forceEl)
-            const { clickEvents, contextmenuProps } = mouse.rightClick(fromViewport, forceEl)
+            const { clickEvents, contextmenuEvent } = mouse.rightclick(fromViewport, forceEl)
 
             return createLog({
               moveEvents,
               clickEvents,
-              contextmenuProps,
+              contextmenuEvent,
             }, fromWindow)
           },
         })
@@ -524,7 +524,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       return Promise
-      .each(options.$el.toArray(), rightClick)
+      .each(options.$el.toArray(), rightclick)
       .then(() => {
         let verifyAssertions
 
@@ -558,7 +558,7 @@ const formatMoveEventsTable = (events) => {
           'Target Element': reason,
           'Prevented Default?': null,
           'Stopped Propagation?': null,
-        // 'Modifiers': null,
+          // 'Modifiers': null,
         }
       }
 
@@ -567,7 +567,7 @@ const formatMoveEventsTable = (events) => {
         'Target Element': val.el,
         'Prevented Default?': val.preventedDefault,
         'Stopped Propagation?': val.stoppedPropagation,
-      // 'Modifiers': val.modifiers ? val.modifiers : null,
+        // 'Modifiers': val.modifiers ? val.modifiers : null,
       }
     }),
   }

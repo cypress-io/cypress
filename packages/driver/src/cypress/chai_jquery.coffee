@@ -184,7 +184,6 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
   _.each selectors, (selectorName, selector) ->
     chai.Assertion.addProperty selector, ->
-      $.support.matchesSelector = false
       assert(
         @,
         selector,

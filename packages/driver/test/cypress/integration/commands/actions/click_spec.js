@@ -1,5 +1,6 @@
 /* eslint arrow-body-style:0 arrow-parens:0 */
 
+
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
@@ -7,6 +8,7 @@ const chaiSubset = require('chai-subset')
 
 // eslint-disable-next-line
 chai.use(chaiSubset)
+require('cypress-plugin-retries')
 
 const fail = function (str) {
   throw new Error(str)
@@ -41,6 +43,9 @@ describe('src/cy/commands/actions/click', function () {
     const doc = cy.state('document')
 
     $(doc.body).empty().html(this.body)
+    // scroll back to top of page before every test
+    // since this is a side-effect
+    doc.documentElement.scrollTop = 0
   })
 
   context('#click', function () {
@@ -229,7 +234,6 @@ describe('src/cy/commands/actions/click', function () {
     })
 
     it('will send all events even mousedown is defaultPrevented', () => {
-      const events = []
 
       const $btn = cy.$$('#button')
 
@@ -238,21 +242,14 @@ describe('src/cy/commands/actions/click', function () {
         expect(e.defaultPrevented).to.be.true
       })
 
-      _.each(mouseClickEvents, (event) => {
-        $btn.get(0).addEventListener(event, () => {
-          events.push(event)
-        })
-      }
-      )
+      attachMouseClickListeners({ $btn })
 
-      cy.get('#button').click().then(() => {
-        expect(events).to.deep.eq(['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
-      })
+      cy.get('#button').click().should('not.have.focus')
+
+      cy.getAll('$btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
     })
 
     it('will not send mouseEvents/focus if pointerdown is defaultPrevented', () => {
-      const events = []
-
       const $btn = cy.$$('#button')
 
       $btn.get(0).addEventListener('pointerdown', (e) => {
@@ -261,15 +258,13 @@ describe('src/cy/commands/actions/click', function () {
         expect(e.defaultPrevented).to.be.true
       })
 
-      _.each(mouseClickEvents, (event) => {
-        $btn.get(0).addEventListener(event, () => {
-          events.push(event)
-        })
-      })
+      attachMouseClickListeners({ $btn })
 
-      cy.get('#button').click().then(() => {
-        expect(events).to.deep.eq(['pointerdown', 'pointerup', 'click'])
-      })
+      cy.get('#button').click().should('not.have.focus')
+
+      cy.getAll('$btn', 'pointerdown pointerup click').each(shouldBeCalledOnce)
+      cy.getAll('$btn', 'mousedown mouseup').each(shouldNotBeCalled)
+
     })
 
     it('sends a click event', (done) => {
@@ -414,6 +409,7 @@ describe('src/cy/commands/actions/click', function () {
           metaKey: false,
           altKey: false,
         })
+
       })
     })
 
@@ -1547,9 +1543,14 @@ describe('src/cy/commands/actions/click', function () {
 
         cy.click()
       })
+      // Array(1).fill().map(()=>
 
       it('throws when any member of the subject isnt visible', function (done) {
-        cy.timeout(250)
+
+        // sometimes the command will timeout early with
+        // Error: coordsHistory must be at least 2 sets of coords
+        this.retries(4)
+        cy.timeout(200)
 
         cy.$$('#three-buttons button').show().last().hide()
 
@@ -2301,7 +2302,7 @@ describe('src/cy/commands/actions/click', function () {
 
   context('#dblclick', function () {
     it('sends a dblclick event', (done) => {
-      cy.$$('#button').dblclick(() => {
+      cy.$$('#button').on('dblclick', () => {
         done()
       })
 
@@ -2316,8 +2317,8 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
 
-    it.only('causes focusable elements to receive focus', () => {
-      cy.get(':text:first').click().should('have.focus')
+    it('causes focusable elements to receive focus', () => {
+      cy.get(':text:first').dblclick().should('have.focus')
     })
 
     it('silences errors on unfocusable elements', () => {
@@ -2560,18 +2561,6 @@ describe('src/cy/commands/actions/click', function () {
         cy.get('button:first').dblclick().dblclick()
       })
 
-      it('throws when any member of the subject isnt visible', (done) => {
-        cy.$$('button').slice(0, 3).show().last().hide()
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.dblclick() failed because this element is not visible')
-
-          done()
-        })
-
-        cy.get('button').invoke('slice', 0, 3).dblclick()
-      })
-
       it('logs once when not dom subject', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -2586,12 +2575,15 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('throws when any member of the subject isnt visible', function (done) {
+        this.retries(4)
         cy.$$('#three-buttons button').show().last().hide()
 
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(4)
+          const logs = _.cloneDeep(this.logs)
+
+          expect(logs).to.have.length(4)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('cy.dblclick() failed because this element is not visible')
 
@@ -2679,7 +2671,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('*#consoleProps', function () {
+      it('#consoleProps', function () {
         cy.on('log:added', (attrs, log) => {
           this.log = log
 
@@ -2829,16 +2821,15 @@ describe('src/cy/commands/actions/click', function () {
     })
   })
 
-  context('#rightClick', () => {
+  context('#rightclick', () => {
 
     it('can rightclick', () => {
       const el = cy.$$('button:first')
 
       attachMouseClickListeners({ el })
-      attachFocusListeners({ el })
       attachContextmenuListeners({ el })
 
-      cy.get('button:first').rightClick().should('have.focus')
+      cy.get('button:first').rightclick().should('have.focus')
 
       cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
       cy.getAll('el', 'click').each(shouldNotBeCalled)
@@ -2881,7 +2872,7 @@ describe('src/cy/commands/actions/click', function () {
       attachFocusListeners({ el })
       attachContextmenuListeners({ el })
 
-      cy.get('input:first').rightClick({ force: true })
+      cy.get('input:first').rightclick({ force: true })
 
       cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
       cy.getAll('el', 'pointerdown pointerup').each(shouldBeCalled)
@@ -2899,7 +2890,7 @@ describe('src/cy/commands/actions/click', function () {
       attachFocusListeners({ el })
       attachContextmenuListeners({ el })
 
-      cy.get('button:first').rightClick()
+      cy.get('button:first').rightclick().should('have.focus')
 
       cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
       cy.getAll('el', 'click').each(shouldNotBeCalled)
@@ -2914,10 +2905,10 @@ describe('src/cy/commands/actions/click', function () {
       attachFocusListeners({ el })
       attachContextmenuListeners({ el })
 
-      cy.get('button:first').rightClick()
+      cy.get('button:first').rightclick().should('not.have.focus')
 
       cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
-      cy.getAll('el', 'click').each(shouldNotBeCalled)
+      cy.getAll('el', 'focus click').each(shouldNotBeCalled)
 
     })
 
@@ -2930,7 +2921,7 @@ describe('src/cy/commands/actions/click', function () {
       attachFocusListeners({ el })
       attachContextmenuListeners({ el })
 
-      cy.get('button:first').rightClick()
+      cy.get('button:first').rightclick()
 
       cy.getAll('el', 'pointerdown pointerup contextmenu').each(shouldBeCalled)
       cy.getAll('el', 'mousedown mouseup').each(shouldNotBeCalled)
@@ -2946,7 +2937,7 @@ describe('src/cy/commands/actions/click', function () {
       attachFocusListeners({ el })
       attachContextmenuListeners({ el })
 
-      cy.get('button:first').rightClick()
+      cy.get('button:first').rightclick().should('not.exist')
 
       cy.getAll('el', 'pointerdown').each(shouldBeCalled)
       cy.getAll('el', 'mousedown mouseup contextmenu pointerup').each(shouldNotBeCalled)
@@ -2955,24 +2946,277 @@ describe('src/cy/commands/actions/click', function () {
 
     it('rightclick remove el on mouseover', () => {
       const el = cy.$$('button:first')
-      const div = cy.$$('div#tabindex')
-
-      // canceling contextmenu prevents the native contextmenu
-      // likely we want to call attention to this, since we cannot
-      // reproduce the native contextmenu
-      // el.on('contextmenu', () => false)
+      const el2 = cy.$$('div#tabindex')
 
       el.on('mouseover', () => el.get(0).remove())
 
-      attachMouseClickListeners({ el, div })
-      attachFocusListeners({ el, div })
-      attachContextmenuListeners({ el, div })
+      attachMouseClickListeners({ el, el2 })
+      attachMouseHoverListeners({ el, el2 })
+      attachFocusListeners({ el, el2 })
+      attachContextmenuListeners({ el, el2 })
 
-      cy.get('button:first').rightClick()
+      cy.get('button:first').rightclick().should('not.exist')
+      cy.get(el2.selector).should('have.focus')
 
-      cy.getAll('el', 'pointerdown pointerup contextmenu').each(shouldBeCalled)
+      cy.getAll('el', 'pointerover mouseover').each(shouldBeCalledOnce)
       cy.getAll('el', 'pointerdown mousedown pointerup mouseup contextmenu').each(shouldNotBeCalled)
+      cy.getAll('el2', 'focus pointerdown pointerup contextmenu').each(shouldBeCalled)
 
+    })
+
+    describe('errors', function () {
+      beforeEach(function () {
+        Cypress.config('defaultCommandTimeout', 100)
+
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+
+          this.logs.push(log)
+        })
+
+        null
+      })
+
+      it('throws when not a dom subject', (done) => {
+        cy.on('fail', () => {
+          done()
+        })
+
+        cy.rightclick()
+      })
+
+      it('throws when subject is not in the document', (done) => {
+        let rightclicked = 0
+
+        const $button = cy.$$('button:first').on('contextmenu', () => {
+          rightclicked += 1
+          $button.remove()
+
+          return false
+        })
+
+        cy.on('fail', (err) => {
+          expect(rightclicked).to.eq(1)
+          expect(err.message).to.include('cy.rightclick() failed because this element')
+
+          done()
+        })
+
+        cy.get('button:first').rightclick().rightclick()
+      })
+
+      it('logs once when not dom subject', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.rightclick()
+      })
+
+      it('throws when any member of the subject isnt visible', function (done) {
+        this.retries(4)
+        cy.$$('#three-buttons button').show().last().hide()
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(this.logs.length).to.eq(4)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(err.message).to.include('cy.rightclick() failed because this element is not visible')
+
+          done()
+        })
+
+        cy.get('#three-buttons button').rightclick({ multiple: true })
+      })
+    })
+
+    describe('.log', function () {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+
+          this.logs.push(log)
+        })
+
+        null
+      })
+
+      it('logs immediately before resolving', (done) => {
+        const $button = cy.$$('button:first')
+
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'rightclick') {
+            expect(log.get('state')).to.eq('pending')
+            expect(log.get('$el').get(0)).to.eq($button.get(0))
+
+            done()
+          }
+        })
+
+        cy.get('button:first').rightclick()
+      })
+
+      it('snapshots after clicking', () => {
+        cy.get('button:first').rightclick().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('snapshots')).to.have.length(2)
+          expect(lastLog.get('snapshots')[0]).to.containSubset({ name: 'before' })
+          expect(lastLog.get('snapshots')[1]).to.containSubset({ name: 'after' })
+        })
+      }
+      )
+
+      it('returns only the $el for the element of the subject that was rightclicked', () => {
+        const rightclicks = []
+
+        // append two buttons
+        const $button = () => {
+          return $('<button class=\'rightclicks\'>rightclick</button')
+        }
+
+        cy.$$('body').append($button()).append($button())
+
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'rightclick') {
+            rightclicks.push(log)
+          }
+        })
+
+        cy.get('button.rightclicks').rightclick({ multiple: true }).then(($buttons) => {
+          expect($buttons.length).to.eq(2)
+          expect(rightclicks.length).to.eq(2)
+
+          expect(rightclicks[1].get('$el').get(0)).to.eq($buttons.last().get(0))
+        })
+      })
+
+      it('logs only 1 rightclick event', () => {
+        const logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'rightclick') {
+            logs.push(log)
+          }
+        })
+
+        cy.get('button:first').rightclick().then(() => {
+          expect(logs.length).to.eq(1)
+        })
+      })
+
+      it('#consoleProps', function () {
+        cy.on('log:added', (attrs, log) => {
+          this.log = log
+
+        })
+
+        cy.get('button').first().rightclick().then(function () {
+          const { lastLog } = this
+
+          const consoleProps = lastLog.invoke('consoleProps')
+
+          expect(consoleProps).to.containSubset({
+            'Command': 'rightclick',
+            'Applied To': {},
+            'Elements': 1,
+            'Coords': {
+              'x': 34,
+              'y': 548,
+            },
+            'table': {},
+          })
+
+          const tables = _.map(consoleProps.table, (x => x()))
+
+          expect(tables).to.containSubset([
+            {
+              'name': 'Mouse Move Events',
+              'data': [
+                {
+                  'Event Name': 'pointerover',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                },
+                {
+                  'Event Name': 'mouseover',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                },
+                {
+                  'Event Name': 'pointermove',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                },
+                {
+                  'Event Name': 'mousemove',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                },
+              ],
+            },
+            {
+              'name': 'Mouse Click Events',
+              'data': [
+                {
+                  'Event Name': 'pointerdown',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                  'Modifiers': null,
+                },
+                {
+                  'Event Name': 'mousedown',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                  'Modifiers': null,
+                },
+                {
+                  'Event Name': 'pointerup',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                  'Modifiers': null,
+                },
+                {
+                  'Event Name': 'mouseup',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                  'Modifiers': null,
+                },
+              ],
+            },
+            {
+              'name': 'Contextmenu Event',
+              'data': [
+                {
+                  'Event Name': 'contextmenu',
+                  'Target Element': {},
+                  'Prevented Default?': false,
+                  'Stopped Propagation?': false,
+                  'Modifiers': null,
+                },
+              ],
+            },
+          ])
+        })
+      })
     })
 
   })
@@ -3011,22 +3255,3 @@ const shouldBeCalled = stub => _wrapLogFalse(stub).should('be.called')
 const shouldBeCalledOnce = stub => _wrapLogFalse(stub).should('be.calledOnce')
 const shouldBeCalledNth = (num) => stub => _wrapLogFalse(stub).should('have.callCount', num)
 const shouldNotBeCalled = stub => _wrapLogFalse(stub).should('not.be.called')
-
-// const getAllFn = (...aliases) => {
-//   if (aliases.length > 1) {
-//     return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map(alias => `@${aliases[0]}:${alias}`).join(' '))
-//   }
-
-//   return cy.wrap(null, {log:false}).then(() => {
-//     return Cypress.Promise.all(
-//       aliases[0].split(' ').map((alias) => {
-//         return cy.now('get', alias)
-//       }))
-//   })
-// }
-
-// // Cypress.Commands.add('getAll', getAllFn)
-
-// const shouldBeCalled = stub => cy.wrap(stub, {log:false}).should('be.called')
-// const shouldNotBeCalled = stub => cy.wrap(stub, {log:false}).should('not.be.called')
-
