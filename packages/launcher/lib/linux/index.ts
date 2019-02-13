@@ -8,7 +8,7 @@ const notInstalledErr = (name: string) => {
     `Browser not installed: ${name}`
   ) as NotInstalledError
   err.notInstalled = true
-  throw err
+  return err
 }
 
 function getLinuxBrowser(
@@ -26,12 +26,16 @@ function getLinuxBrowser(
       stdout,
       versionRegex
     )
-    return notInstalledErr(binary)
+    throw notInstalledErr(binary)
   }
 
-  const returnError = (err: Error) => {
-    log('Could not detect browser %s', err.message)
-    return notInstalledErr(binary)
+  const logAndThrowError = (err: Error) => {
+    log(
+      'Received error detecting browser binary: "%s" with error:',
+      binary,
+      err.message
+    )
+    throw notInstalledErr(binary)
   }
 
   const cmd = `${binary} --version`
@@ -47,11 +51,15 @@ function getLinuxBrowser(
         name,
         version,
         path: binary
-      }
+      } as FoundBrowser
     })
-    .catch(returnError)
+    .catch(logAndThrowError)
 }
 
 export function detectBrowserLinux(browser: Browser) {
-  return getLinuxBrowser(browser.name, browser.binary, browser.versionRegex)
+  return getLinuxBrowser(
+    browser.name,
+    browser.binary as string,
+    browser.versionRegex
+  )
 }
