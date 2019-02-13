@@ -1644,7 +1644,7 @@ describe "src/cy/commands/assertions", ->
 
         expect({}).to.have.focus
 
-      it.only "calls into custom focus pseudos", ->
+      it "calls into custom focus pseudos", ->
         cy.$$('button:first').focus()
         stub = cy.spy($.expr.pseudos, 'focus').as('focus')
         expect(cy.$$('button:first')).to.have.focus

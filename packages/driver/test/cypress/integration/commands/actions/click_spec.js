@@ -1,6 +1,5 @@
 /* eslint arrow-body-style:0 arrow-parens:0 */
 
-
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress

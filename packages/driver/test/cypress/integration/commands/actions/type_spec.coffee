@@ -2130,7 +2130,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get('#ce-inner1').then ($el) ->
           expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
    
-      it.only "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
+      it "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
         hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
         cy.get('#ce-inner1').then ($el) ->
           expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
