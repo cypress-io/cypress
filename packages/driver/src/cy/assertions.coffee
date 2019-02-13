@@ -62,26 +62,31 @@ prepareObjsForDiff = (err) ->
   if _.isString(err.actual) || _.isString(err.expected)
     return err
   ret = {}
+  ## mochaUtils.stringify is an intelligent JSON.stringify
+  ## resolves circular references, turns null to [null], etc.
   ret.actual = mochaUtils.stringify(err.actual)
   ret.expected = mochaUtils.stringify(err.expected)
   return ret
 
+## Detect object class e.g. [object Date], [object Null]
+## https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString#Using_toString()_to_detect_object_class
 objToString = Object.prototype.toString
 
 _isSameType = (a, b) ->
   return objToString.call(a) is objToString.call(b)
 
 _hasExpectedValue = (err) ->
-  err && err.expected isnt undefined
+  err.expected isnt undefined
 
 _assertionHasShowDiff = (err) ->
-  err && err.showDiff isnt false
+  err.showDiff isnt false
 
 _isExpectedActualSameType = (err) ->
   _isSameType(err.actual, err.expected)
 
 shouldShowDiff = (err) ->
   return (
+    err &&
     _assertionHasShowDiff(err) &&
     _hasExpectedValue(err) &&
     _isExpectedActualSameType(err)
