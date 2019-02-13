@@ -1,6 +1,6 @@
 e2e = require("../support/helpers/e2e")
 
-describe "e2e window.open", ->
+describe.skip "e2e window.open", ->
   e2e.setup()
 
   ## skipping this for now due to
