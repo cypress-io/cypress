@@ -49,18 +49,21 @@ formStatePath = require("#{root}lib/util/saved_state").formStatePath
 TYPICAL_BROWSERS = [
   {
     name: 'chrome',
+    family: 'chrome',
     displayName: 'Chrome',
     version: '60.0.3112.101',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     majorVersion: '60'
   }, {
     name: 'chromium',
+    family: 'chrome',
     displayName: 'Chromium',
     version: '49.0.2609.0',
     path: '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
     majorVersion: '49'
   }, {
     name: 'canary',
+    family: 'chrome',
     displayName: 'Canary',
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
@@ -70,6 +73,7 @@ TYPICAL_BROWSERS = [
 
 ELECTRON_BROWSER = {
   name: "electron"
+  family: "electron"
   displayName: "Electron"
   path: ""
 }

@@ -1,7 +1,6 @@
 import * as linuxHelper from '../../../lib/linux'
 import { log } from '../../log'
 import { detect, detectByPath } from '../../../lib/detect'
-import { ExportDeclaration } from 'decaffeinate-coffeescript/lib/coffee-script/nodes';
 const execa = require('execa')
 const sinon = require('sinon')
 
@@ -65,7 +64,7 @@ describe('linux browser detection', () => {
     return linuxHelper.detect(goal).then(checkBrowser)
   })
 
-  // despite using detect(), this test is in linux/spec instead of detect_spec because it is 
+  // despite using detect(), this test is in linux/spec instead of detect_spec because it is
   // testing side effects that occur within the Linux-specific detect function
   // https://github.com/cypress-io/cypress/issues/1400
   it('properly eliminates duplicates', () => {
@@ -85,7 +84,7 @@ describe('linux browser detection', () => {
         majorVersion: '100'
       }
     ]
-    
+
     return detect(goalBrowsers).then(browsers => {
       log('Browsers: %o', browsers)
       log('Expected browsers: %o', expected)

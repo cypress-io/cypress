@@ -10,7 +10,7 @@ PATH_TO_BROWSERS = appData.path("browsers")
 getBrowserPath = (browser) ->
   path.join(
     PATH_TO_BROWSERS,
-    "#{browser.name}-#{browser.version}"
+    "#{browser.name}"
   )
 
 copyExtension = (src, dest) ->
@@ -89,6 +89,7 @@ module.exports = {
       ## the internal version of Electron, which won't be detected by `launcher`
       browsers.concat({
         name: "electron"
+        family: "electron"
         displayName: "Electron"
         version: version
         path: ""

@@ -1,6 +1,7 @@
 exports['browsers returns the expected list of browsers 1'] = [
   {
     "name": "chrome",
+    "family": "chrome",
     "displayName": "Chrome",
     "versionRegex": {},
     "profile": true,
@@ -12,6 +13,7 @@ exports['browsers returns the expected list of browsers 1'] = [
   },
   {
     "name": "chromium",
+    "family": "chrome",
     "displayName": "Chromium",
     "versionRegex": {},
     "profile": true,
@@ -22,6 +24,7 @@ exports['browsers returns the expected list of browsers 1'] = [
   },
   {
     "name": "canary",
+    "family": "chrome",
     "displayName": "Canary",
     "versionRegex": {},
     "profile": true,

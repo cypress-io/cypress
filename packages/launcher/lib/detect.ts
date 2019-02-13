@@ -77,6 +77,7 @@ function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
   const platform = os.platform()
   const pickBrowserProps = pick([
     'name',
+    'family',
     'displayName',
     'type',
     'version',
