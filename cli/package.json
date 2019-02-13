@@ -72,7 +72,7 @@
     "minimist": "1.2.0",
     "moment": "2.24.0",
     "ramda": "0.24.1",
-    "request": "2.87.0",
+    "request": "2.88.0",
     "request-progress": "0.3.1",
     "supports-color": "5.1.0",
     "tmp": "0.0.31",
