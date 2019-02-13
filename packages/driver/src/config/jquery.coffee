@@ -1,5 +1,6 @@
 $ = require("jquery")
 require("jquery.scrollto")
+_ = require('lodash')
 
 $dom = require("../dom")
 
