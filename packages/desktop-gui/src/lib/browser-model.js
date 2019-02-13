@@ -3,6 +3,7 @@ import { computed, observable } from 'mobx'
 export default class Browser {
   @observable displayName
   @observable name
+  @observable family
   @observable version
   @observable path
   @observable majorVersion
@@ -12,6 +13,7 @@ export default class Browser {
   constructor (browser) {
     this.displayName = browser.displayName
     this.name = browser.name
+    this.family = browser.family
     this.version = browser.version
     this.path = browser.path
     this.majorVersion = browser.majorVersion
