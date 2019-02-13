@@ -2,6 +2,7 @@ _             = require("lodash")
 path          = require("path")
 debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
+shell         = require("electron").shell
 socketIo      = require("@packages/socket")
 fs            = require("./util/fs")
 open          = require("./util/open")
@@ -330,6 +331,9 @@ class Socket
 
         ## we only use the 'ack' here in tests
         cb() if cb
+
+      socket.on "external:open", (url) ->
+        shell.openExternal(url)
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
