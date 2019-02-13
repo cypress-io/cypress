@@ -19,7 +19,6 @@ module.exports = {
       args.push('--config', options.config)
     }
 
-
     if (options.browser) {
       args.push('--browser', options.browser)
     }
