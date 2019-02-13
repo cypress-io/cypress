@@ -3862,7 +3862,7 @@ declare namespace Cypress {
     })
     ```
      */
-    (action: 'page:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
+    (action: 'page:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
@@ -3879,7 +3879,7 @@ declare namespace Cypress {
     ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'page:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
+    (action: 'page:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onStart` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -4091,7 +4091,7 @@ declare namespace Cypress {
   }
 
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
-  type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
+  type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 }
 

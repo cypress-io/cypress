@@ -45,14 +45,20 @@ Cypress.browser // $ExpectType Browser
 
 // stubbing window.alert type on "Cypress" should
 // work with plain function or with a Sinon stub
-Cypress.on('page:alert', () => {})
+Cypress.on('page:alert', () => { })
+Cypress.on('page:alert', cy.spy())
 Cypress.on('page:alert', cy.stub())
 // same for a single test
-cy.on('page:alert', () => {})
+cy.on('page:alert', () => { })
+cy.on('page:alert', cy.spy())
 cy.on('page:alert', cy.stub())
 
-// page:confirm stubbing
-cy.on('page:confirm', () => {})
+// window:confirm stubbing
+Cypress.on('page:confirm', () => { })
+Cypress.on('page:confirm', cy.spy())
+Cypress.on('page:confirm', cy.stub())
+cy.on('page:confirm', () => { })
+cy.on('page:confirm', cy.spy())
 cy.on('page:confirm', cy.stub())
 
 // specifying HTTP method directly in the options object
@@ -90,6 +96,6 @@ const opts2 = {
 cy.request(opts2)
 
 const obj = {
-  foo: () => {}
+  foo: () => { }
 }
 cy.spy(obj, 'foo').as('my-spy')
