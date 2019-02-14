@@ -45,7 +45,7 @@
     "@types/chai": "4.0.8",
     "@types/chai-jquery": "1.1.35",
     "@types/jquery": "3.3.6",
-    "@types/lodash": "4.14.120",
+    "@types/lodash": "4.14.121",
     "@types/minimatch": "3.0.3",
     "@types/mocha": "2.2.44",
     "@types/sinon": "7.0.0",
@@ -74,7 +74,7 @@
     "ramda": "0.24.1",
     "request": "2.88.0",
     "request-progress": "0.4.0",
-    "supports-color": "5.1.0",
+    "supports-color": "5.5.0",
     "tmp": "0.0.31",
     "url": "0.11.0",
     "yauzl": "2.8.0"

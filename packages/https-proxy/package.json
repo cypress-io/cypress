@@ -24,7 +24,7 @@
     "cross-env": "5.2.0",
     "http-mitm-proxy": "0.5.3",
     "request": "2.88.0",
-    "request-promise": "3.0.0",
+    "request-promise": "4.2.2",
     "sinon": "1.17.7",
     "sinon-as-promised": "4.0.3",
     "sinon-chai": "3.3.0",
@@ -39,6 +39,6 @@
     "node-forge": "0.6.49",
     "semaphore": "1.1.0",
     "server-destroy-vvo": "1.0.1",
-    "ssl-root-cas": "1.2.5"
+    "ssl-root-cas": "1.3.1"
   }
 }
