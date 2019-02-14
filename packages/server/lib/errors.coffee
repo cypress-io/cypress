@@ -91,13 +91,12 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Available browsers found are: #{arg2}
       """
     when "BROWSER_NOT_FOUND_BY_PATH"
-      """
-      We could not identify a known browser at the path you provided: "#{arg1}"
+      msg = """
+      We could not identify a known browser at the path you provided: `#{arg1}`
 
       The output from the command we ran was:
-
-      #{arg2}
       """
+      return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
       Warning: Cypress can only record videos when running headlessly.
