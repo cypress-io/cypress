@@ -1,7 +1,6 @@
 import {detectBrowserLinux} from '../../../lib/linux'
 import { log } from '../../log'
-import { Promise } from 'bluebird'
-const detect = require('../../../lib/detect').default
+import { detect } from '../../../lib/detect'
 const execa = require('execa')
 const sinon = require("sinon")
 
@@ -79,7 +78,34 @@ describe('linux browser detection', () => {
     ]
     
     return detect(goalBrowsers).then(browsers => {
-      log('Browsers:', browsers, 'Expected browsers:', expected)
+      log('Browsers: %o', browsers)
+      log('Expected browsers: %o', expected)
+      expect(browsers).to.deep.equal(expected)
+    })
+  })
+
+  it('considers multiple binary names', () => {
+    const goalBrowsers = [
+      {
+        name: 'foo-browser',
+        versionRegex: /v(\S+)$/,
+        profile: true,
+        binary: ['foo-browser', 'foo-bar-browser']
+      }
+    ]
+
+    const expected = [
+      {
+        name: 'foo-browser',
+        version: '100.1.2.3',
+        path: 'foo-browser',
+        majorVersion: '100'
+      }
+    ]
+
+    return detect(goalBrowsers).then(browsers => {
+      log('Browsers: %o', browsers)
+      log('Expected browsers: %o', expected)
       expect(browsers).to.deep.equal(expected)
     })
   })

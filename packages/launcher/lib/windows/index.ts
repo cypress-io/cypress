@@ -53,10 +53,7 @@ const formPaths: WindowsBrowserPaths = {
   chromium: formChromiumAppPath
 }
 
-function getWindowsBrowser(
-  name: string,
-  binary: string
-): Promise<FoundBrowser> {
+function getWindowsBrowser(name: string): Promise<FoundBrowser> {
   const getVersion = (stdout: string): string => {
     // result from wmic datafile
     // "Version=61.0.3163.100"
@@ -66,7 +63,7 @@ function getWindowsBrowser(
       return m[1]
     }
     log('Could not extract version from %s using regex %s', stdout, wmicVersion)
-    throw notInstalledErr(binary)
+    throw notInstalledErr(name)
   }
 
   const formFullAppPathFn: any = formPaths[name] || formFullAppPath
@@ -103,7 +100,7 @@ function getWindowsBrowser(
             name,
             version,
             path: exePath
-          }
+          } as FoundBrowser
         })
     })
     .catch(() => {
@@ -112,5 +109,5 @@ function getWindowsBrowser(
 }
 
 export function detectBrowserWindows(browser: Browser) {
-  return getWindowsBrowser(browser.name, browser.binary)
+  return getWindowsBrowser(browser.name)
 }
