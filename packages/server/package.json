@@ -76,7 +76,6 @@
     "mocked-env": "1.2.4",
     "mockery": "1.7.0",
     "nock": "9.6.1",
-    "nodemon": "1.18.9",
     "npm-install-version": "6.0.2",
     "obfuscator": "0.5.4",
     "plist": "1.2.0",
