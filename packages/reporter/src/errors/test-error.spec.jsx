@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import React from 'react'
-import { mount, shallow } from 'enzyme'
+import { mount } from 'enzyme'
 import sinon from 'sinon'
 
 import TestError from './test-error'
@@ -41,17 +41,6 @@ describe('<TestError />', () => {
       const component = mount(<TestError model={model({ err: { displayMessage: '**markdown**' } })} />)
 
       expect(component.find('.test-error').prop('dangerouslySetInnerHTML').__html).to.include('<strong>markdown</strong>')
-    })
-
-    it('emits external:open and prevents default when link in error message is clicked', () => {
-      const events = eventsStub()
-      const url = 'http://example.com'
-      const component = shallow(<TestError model={model({ err: { displayMessage: url } })} events={events} />)
-      const e = { preventDefault: sinon.spy() }
-
-      // component.find('a').simulate('click', e)
-      // expect(events.emit).to.have.been.calledWith('external:open', url)
-      // expect(e.preventDefault).to.have.been.called
     })
   })
 })

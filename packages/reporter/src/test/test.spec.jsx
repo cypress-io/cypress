@@ -14,10 +14,6 @@ const appStateStub = (props) => {
   }, props)
 }
 
-const eventsStub = () => ({
-  emit: sinon.spy(),
-})
-
 const model = (props) => {
   return _.extend({
     commands: [],
