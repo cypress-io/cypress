@@ -171,7 +171,7 @@
     "replacestream": "4.0.3",
     "request": "2.88.0",
     "request-promise": "4.2.2",
-    "return-deep-diff": "0.2.9",
+    "return-deep-diff": "0.3.0",
     "sanitize-filename": "1.6.1",
     "semver": "5.6.0",
     "send": "0.16.2",
