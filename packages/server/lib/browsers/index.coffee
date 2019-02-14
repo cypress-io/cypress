@@ -30,32 +30,26 @@ kill = (unbind) ->
 cleanup = ->
   instance = null
 
-getBrowser = (name) ->
-  switch name
-    ## normalize all the chrome* browsers
-    when "chrome", "chromium", "canary"
-      require("./chrome")
+getBrowserLauncherByFamily = (family) ->
+  switch family
     when "electron"
       require("./electron")
+    when "chrome"
+      require("./chrome")
 
-find = (browser, browsers = []) ->
-  _.find(browsers, { name: browser })
-
-ensureAndGetByName = (name) ->
+ensureAndGetByPredicate = (predicate) ->
   utils.getBrowsers()
   .then (browsers = []) ->
-    find(name, browsers) or throwBrowserNotFound(name, browsers)
+    _.find(browsers, predicate) or throwBrowserNotFound(predicate, browsers)
 
 throwBrowserNotFound = (browser, browsers = []) ->
   names = _.map(browsers, "name").join(", ")
-  errors.throw("BROWSER_NOT_FOUND", browser, names)
+  errors.throw("BROWSER_NOT_FOUND", browser.name, names)
 
 process.once "exit", kill
 
 module.exports = {
-  find
-
-  ensureAndGetByName
+  ensureAndGetByPredicate
 
   throwBrowserNotFound
 
@@ -67,7 +61,7 @@ module.exports = {
 
   close: kill
 
-  open: (name, options = {}, automation) ->
+  open: (browser, options = {}, automation) ->
     kill(true)
     .then ->
       _.defaults(options, {
@@ -75,15 +69,15 @@ module.exports = {
         onBrowserClose: ->
       })
 
-      if not browser = getBrowser(name)
-        return throwBrowserNotFound(name, options.browsers)
+      if not browserLauncher = getBrowserLauncherByFamily(browser.family)
+        return throwBrowserNotFound(browser, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
-      debug("opening browser %s", name)
+      debug("opening browser %o", browser)
 
-      browser.open(name, url, options, automation)
+      browserLauncher.open(browser, url, options, automation)
       .then (i) ->
         debug("browser opened")
         ## TODO: bind to process.exit here
