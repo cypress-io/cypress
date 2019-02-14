@@ -7,6 +7,12 @@ profileCleaner = require("../util/profile_cleaner")
 
 PATH_TO_BROWSERS = appData.path("browsers")
 
+getBrowserPath = (browser) ->
+  path.join(
+    PATH_TO_BROWSERS,
+    "#{browser.name}"
+  )
+
 copyExtension = (src, dest) ->
   fs.copyAsync(src, dest)
 
@@ -16,22 +22,21 @@ getPartition = (isTextTerminal) ->
 
   return "interactive"
 
-getProfileDir = (browserName, isTextTerminal) ->
+getProfileDir = (browser, isTextTerminal) ->
   path.join(
-    PATH_TO_BROWSERS,
-    browserName,
+    getBrowserPath(browser)
     getPartition(isTextTerminal),
   )
 
-getExtensionDir = (browserName, isTextTerminal) ->
+getExtensionDir = (browser, isTextTerminal) ->
   path.join(
-    getProfileDir(browserName, isTextTerminal),
+    getProfileDir(browser, isTextTerminal),
     "CypressExtension"
   )
 
-ensureCleanCache = (browserName, isTextTerminal) ->
+ensureCleanCache = (browser, isTextTerminal) ->
   p = path.join(
-    getProfileDir(browserName, isTextTerminal),
+    getProfileDir(browser, isTextTerminal),
     "CypressCache"
   )
 
@@ -77,8 +82,10 @@ module.exports = {
     .then (browsers = []) ->
       version = process.versions.chrome or ""
 
+      ## the internal version of Electron, which won't be detected by `launcher`
       browsers.concat({
         name: "electron"
+        family: "electron"
         displayName: "Electron"
         version: version
         path: ""
@@ -86,7 +93,5 @@ module.exports = {
         info: "Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
       })
 
-  launch: (name, url, args) ->
-    launcher()
-    .call("launch", name, url, args)
+  launch: launcher.launch
 }
