@@ -200,7 +200,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
-      (if options.browser then browsers.ensureAndGetByNameOrPath(options.browser, true) else browsers.get())
+      browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
         options.config = _.assign(options.config, { browsers })
       .then ->

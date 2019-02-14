@@ -82,6 +82,11 @@ module.exports = {
 
   close: kill
 
+  getAllBrowsersWith: (nameOrPath) ->
+    if nameOrPath
+      return ensureAndGetByNameOrPath(nameOrPath, true)
+    utils.getBrowsers()
+
   open: (browser, options = {}, automation) ->
     kill(true)
     .then ->
