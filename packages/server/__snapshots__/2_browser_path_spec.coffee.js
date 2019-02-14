@@ -1,5 +1,5 @@
 exports['e2e launching browsers by path fails with bad browser path 1'] = `
-We could not identify a known browser at the path you provided: `/this/aint/gonna/be/found`
+We could not identify a known browser at the path you provided: \`/this/aint/gonna/be/found\`
 
 The output from the command we ran was:
 
@@ -24,8 +24,8 @@ exports['e2e launching browsers by path works with an installed browser path 1']
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: simple_spec.coffee...                                                           (1 of 1) 
+
+  Running: simple_spec.coffee...                                                           (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -59,11 +59,11 @@ A video will not be recorded when using this browser.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    All specs passed!                           XX:XX        1        1        -        -        -
 
 
 `
