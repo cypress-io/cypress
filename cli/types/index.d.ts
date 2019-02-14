@@ -24,6 +24,7 @@
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
+declare const chai: Chai.ChaiStatic
 
 declare namespace Cypress {
   type FileContents = string | any[] | object

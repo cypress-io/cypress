@@ -351,7 +351,6 @@ create = (state, queue, retryFn) ->
       message = message.replace(stackTracesRe, "\n")
 
     obj = parseValueActualAndExpected(value, actual, expected)
-    
     if showDiff(error)
       diffObjs = prepareObjsForDiff(obj)
       diff = JsDiff.createPatch('string', diffObjs.actual, diffObjs.expected)

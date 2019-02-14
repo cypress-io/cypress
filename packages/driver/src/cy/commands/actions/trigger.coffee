@@ -3,7 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $elements = require("../../../dom/elements")
-$document = require("../../../dom/document")
+$window = require("../../../dom/window")
 $utils = require("../../../cypress/utils")
 $actionability = require("../../actionability")
 
@@ -87,7 +87,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 coords: fromWindow
               })
 
-            docCoords = $elements.getFromDocCoords(fromViewport.x, fromViewport.y, $document.getWindowByElement($elToClick.get(0)))
+            docCoords = $elements.getFromDocCoords(fromViewport.x, fromViewport.y, $window.getWindowByElement($elToClick.get(0)))
 
             eventOptions = _.extend({
               clientX: fromViewport.x

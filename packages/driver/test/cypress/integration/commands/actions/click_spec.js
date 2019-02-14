@@ -6,6 +6,8 @@ const { Promise } = Cypress
 const chaiSubset = require('chai-subset')
 
 // eslint-disable-next-line
+const {m} = require('../../../support/matchers')
+
 chai.use(chaiSubset)
 require('cypress-plugin-retries')
 
@@ -872,7 +874,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('scrolls the window past a fixed position element when being covered', () => {
+      it.only('scrolls the window past a fixed position element when being covered', () => {
         const spy = cy.spy().as('mousedown')
 
         $('<button>button covered</button>')
@@ -900,9 +902,9 @@ describe('src/cy/commands/actions/click', function () {
           // - element scrollIntoView
           // - element scrollIntoView (retry animation coords)
           // - window
-          expect(scrolled).to.deep.eq(['element', 'element', 'window'])
-          expect(spy.args[0][0]).to.deep.include({
-            clientX: 60,
+          expect(scrolled).to.matchEql(['element', 'element', 'window'])
+          expect(spy.args[0][0]).to.matchEql({
+            clientX: m.closeTo(60, 2),
             clientY: 68,
           })
         }
