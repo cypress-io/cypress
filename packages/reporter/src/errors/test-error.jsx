@@ -13,6 +13,14 @@ const formattedMessage = (message) => {
 class TestError extends Component {
   _onErrorClick = (e) => {
     e.stopPropagation()
+
+    if (e.target.tagName === 'A' && e.target.href) {
+      e.preventDefault()
+      this.props.events.emit('external:open', e.target.href)
+
+      return
+    }
+
     this.props.events.emit('show:error', this.props.model.id)
   }
 
