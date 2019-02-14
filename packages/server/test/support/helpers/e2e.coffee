@@ -40,12 +40,12 @@ availableBrowsersRe = /(Available browsers found are: )(.+)/g
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
 
-replaceBrowserName = (str, key, customPath, browserName, version, headless, whitespace) ->
+replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
   lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, "length", 0), whitespace.length])
 
   ## this ensures we add whitespace so the border is not shifted
-  key + customPath + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
+  key + customBrowserPath + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
 replaceDurationSeconds = (str, p1, p2, p3, p4) ->
   ## get the padding for the existing duration
@@ -315,11 +315,11 @@ module.exports = {
         ## if we have browser in the stdout make
         ## sure its legit
         if matches = browserNameVersionRe.exec(stdout)
-          [str, key, customPath, browserName, version, headless] = matches
+          [str, key, customBrowserPath, browserName, version, headless] = matches
 
           browser = options.browser
 
-          if browser and not customPath
+          if browser and not customBrowserPath
             expect(_.capitalize(browser)).to.eq(browserName)
 
           expect(parseFloat(version)).to.be.a.number
