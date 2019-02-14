@@ -404,8 +404,11 @@ describe "lib/gui/events", ->
     describe "open:project", ->
       beforeEach ->
         sinon.stub(extension, "setHostAndPath").resolves()
-        sinon.stub(browsers, "get").resolves([])
-        sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves([{foo: 'bar'}])
+        # sinon.stub(browsers, "get").resolves([])
+        # sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves([{foo: 'bar'}])
+        sinon.stub(browsers, "getAllBrowsersWith")
+        browsers.getAllBrowsersWith.resolves([])
+        browsers.getAllBrowsersWith.withArgs("/usr/bin/baz-browser").resolves([{foo: 'bar'}])
         @open = sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "close").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
@@ -468,18 +471,16 @@ describe "lib/gui/events", ->
           @open.lastCall.args[0].onError({name: "foo", message: "foo"})
           assert.sendCalledWith({name: "foo", message: "foo"})
 
-      it "calls browsers.get when no browser specified", ->
+      it "calls browsers.getAllBrowsersWith with no args when no browser specified", ->
         @handleEvent("open:project", "/_test-output/path/to/project").then ->
-          expect(browsers.ensureAndGetByNameOrPath).to.not.be.called
-          expect(browsers.get).to.be.calledOnce
+          expect(browsers.getAllBrowsersWith).to.be.calledWith()
 
-      it "calls browsers.ensureAndGetByNameOrPath when browser specified", ->
+      it "calls browsers.getAllBrowsersWith with browser when browser specified", ->
         sinon.stub(openProject, "create").resolves()
         @options.browser = "/usr/bin/baz-browser"
 
-        @handleEvent("open:project", "/_test-output/path/to/project").then ->
-          expect(browsers.ensureAndGetByNameOrPath).to.be.calledOnce
-          expect(browsers.get).to.not.be.called
+        @handleEvent("open:project", "/_test-output/path/to/project").then =>
+          expect(browsers.getAllBrowsersWith).to.be.calledWith(@options.browser)
           expect(openProject.create).to.be.calledWithMatch(
             "/_test-output/path/to/project",
             {
