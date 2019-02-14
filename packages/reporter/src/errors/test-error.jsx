@@ -6,6 +6,23 @@ const md = new Markdown({
   linkify: true,
 })
 
+const baseSchemas = ['http:', 'ftp:', '//', 'mailto:']
+const httpsValidate = md.linkify.__schemas__['http:'].validate
+
+baseSchemas.forEach((schema) => {
+  md.linkify.add(schema, null)
+})
+
+md.linkify.add('https:', {
+  validate (text, pos, self) {
+    if (!text.match(/on.cypress.io/)) {
+      return
+    }
+
+    return httpsValidate(text, pos, self)
+  },
+})
+
 const formattedMessage = (message) => {
   return message ? md.renderInline(message) : ''
 }
