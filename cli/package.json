@@ -75,7 +75,7 @@
     "request": "2.88.0",
     "request-progress": "0.4.0",
     "supports-color": "5.5.0",
-    "tmp": "0.0.31",
+    "tmp": "0.0.33",
     "url": "0.11.0",
     "yauzl": "2.8.0"
   },
