@@ -60,7 +60,7 @@ exports['shows help for run --foo 1'] = `
     -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
-    -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path. note: using an external browser will not record a video.
+    -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
     -P, --project <project-path>               path to the project
     --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
     --group <name>                             a named group for recorded runs in the Cypress dashboard
