@@ -174,7 +174,7 @@
     "return-deep-diff": "0.2.9",
     "sanitize-filename": "1.6.1",
     "semver": "5.6.0",
-    "send": "0.14.2",
+    "send": "0.16.2",
     "server-destroy": "1.0.1",
     "shell-env": "0.3.0",
     "signal-exit": "3.0.2",
