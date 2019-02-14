@@ -140,7 +140,7 @@ export const detectByPath = (
     })
 
     if (!browser) {
-      throw notDetectedAtPathErr(path, stdout)
+      throw notDetectedAtPathErr(stdout)
     }
 
     const regexExec = browser.versionRegex.exec(stdout) as Array<string>
@@ -161,6 +161,6 @@ export const detectByPath = (
       if (err.notDetectedAtPath) {
         throw err
       }
-      throw notDetectedAtPathErr(path, err.message)
+      throw notDetectedAtPathErr(err.message)
     }) as Bluebird<FoundBrowser>
 }

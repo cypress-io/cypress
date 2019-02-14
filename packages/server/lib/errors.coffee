@@ -92,11 +92,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "BROWSER_NOT_FOUND_BY_PATH"
       """
-      The supplied browser path could not be resolved to a known browser.
+      We could not identify a known browser at the path you provided: "#{arg1}"
 
-      Error:
+      The output from the command we ran was:
 
-      #{arg1}
+      #{arg2}
       """
     when "CANNOT_RECORD_VIDEO_HEADED"
       """

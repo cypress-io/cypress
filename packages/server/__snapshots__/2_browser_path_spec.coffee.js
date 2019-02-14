@@ -1,9 +1,7 @@
 exports['e2e launching browsers by path fails with bad browser path 1'] = `
-The supplied browser path could not be resolved to a known browser.
+We could not identify a known browser at the path you provided: "/this/aint/gonna/be/found"
 
-Error:
-
-The version string from "/this/aint/gonna/be/found --version" does not match any known browser. The output was:
+The output from the command we ran was:
 
 Command failed: /bin/sh -c /this/aint/gonna/be/found --version
 /bin/sh: 1: /this/aint/gonna/be/found: not found
