@@ -4083,6 +4083,10 @@ declare namespace Cypress {
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
+
+interface cy extends Cypress.Chainable<undefined> {}
+
 }
 
 /**
@@ -4094,7 +4098,7 @@ cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
-declare const cy: Cypress.Chainable<undefined>
+declare const cy: Cypress.cy
 /**
  * Global variable `Cypress` holds common utilities and constants.
  * @see https://on.cypress.io/api
