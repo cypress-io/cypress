@@ -77,7 +77,7 @@
     "supports-color": "5.5.0",
     "tmp": "0.0.33",
     "url": "0.11.0",
-    "yauzl": "2.8.0"
+    "yauzl": "2.10.0"
   },
   "devDependencies": {
     "@cypress/sinon-chai": "1.0.0",
