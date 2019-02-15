@@ -690,7 +690,12 @@ describe "src/cy/commands/querying", ->
             expect($buttons.length).to.eq length
 
     describe "assertion verification", ->
+      beforeEach () ->
+        Cypress.config("defaultCommandTimeout", 1000)
+      
       it "automatically retries", ->
+        cy.log(Cypress.config("defaultCommandTimeout"))
+        Cypress.currentTest.retries(4)
         cy.on "command:retry", _.after 2, ->
           cy.$$("button:first").attr("data-foo", "bar")
 
