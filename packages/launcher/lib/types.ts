@@ -31,6 +31,8 @@ export type FoundBrowser = Browser & {
   path: string
   version: string
   majorVersion?: string
+  /** user-supplied browser? */
+  custom?: boolean
   /** optional info that will be shown in the GUI */
   info?: string
 }

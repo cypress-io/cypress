@@ -81,7 +81,8 @@ function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
     'displayName',
     'type',
     'version',
-    'path'
+    'path',
+    'custom'
   ])
 
   const logBrowser = (props: any) => {
@@ -148,6 +149,7 @@ export const detectByPath = (
     return extend({}, browser, {
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
+      custom: true,
       path,
       version: regexExec[1],
       majorVersion: regexExec[1].split('.', 2)[0]
