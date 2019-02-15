@@ -2,6 +2,8 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
+require('cypress-plugin-retries')
+
 describe "src/cy/commands/querying", ->
   before ->
     cy
@@ -442,7 +444,10 @@ describe "src/cy/commands/querying", ->
       cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
 
-    it.skip "FLAKY retries finding elements until something is found", ->
+    it "FLAKY retries finding elements until something is found", ->
+
+      Cypress.currentTest.retries(5)
+
       missingEl = $("<div />", id: "missing-el")
 
       ## wait until we're ALMOST about to time out before
@@ -485,6 +490,8 @@ describe "src/cy/commands/querying", ->
           expect(cy.timeout()).to.eq(100)
 
     it "cancels existing promises", (done) ->
+      Cypress.currentTest.retries(4)
+
       cy.stub(Cypress.runner, "stop")
 
       retrys = 0

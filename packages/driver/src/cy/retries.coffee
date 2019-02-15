@@ -6,8 +6,6 @@ $utils = require("../cypress/utils")
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
     retry: (fn, options, log) ->
-      if options.error
-        console.log(options.error)  
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
@@ -51,8 +49,6 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
           finishAssertions(assertions)
 
         getErrMessage = (err) ->
-          ## TODO: remove this debugging code
-          if err.stack then console.log(err.stack.split('\n').slice(0,5).join('\n'))
           switch
             when err and err.displayMessage
               err.displayMessage
