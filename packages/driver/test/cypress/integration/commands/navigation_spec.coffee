@@ -588,19 +588,19 @@ describe "src/cy/commands/navigation", ->
             bar: "baz"
           }
         })
-        cy.contains('it worked!').contains('{"bar":"baz"}')
+        cy.contains("it worked!").contains("{\"bar\":\"baz\"}")
 
       it "with any string body and headers", ->
         cy.visit("http://localhost:3500/post-only", {
           method: "POST",
           headers: {
-            'content-type': 'application/json'
+            "content-type": "application/json"
           }
           body: JSON.stringify({
             bar: "baz"
           })
         })
-        cy.contains('it worked!').contains('{"bar":"baz"}')
+        cy.contains("it worked!").contains("{\"bar\":\"baz\"}")
 
     describe "when origins don't match", ->
       beforeEach ->
