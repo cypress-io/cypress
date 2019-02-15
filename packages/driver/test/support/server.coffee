@@ -73,7 +73,7 @@ niv.install("react-dom@15.6.1")
     res.end("<html><head><title>Test</title></head><body><center>Hello</center></body></html>")
 
   app.post '/post-only', (req, res) ->
-    res.send('<html><body>it worked!</body></html>')
+    res.send("<html><body>it worked!<br>request body:<br>#{JSON.stringify(req.body)}</body></html>")
 
   app.get "/status-404", (req, res) ->
     res

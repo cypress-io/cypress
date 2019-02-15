@@ -458,14 +458,19 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
-        options = _.assign(options, {
+        # if they're POSTing an object, querystringify their POST body
+        if options.method == 'POST' and _.isObject(options.body)
+          options.form = options.body
+          delete options.body
+
+        _.assign(options, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
           gzip: false
           url: urlFile ? urlStr ? options.url
-          headers: {
+          headers: _.assign(options.headers, {
             accept: "text/html,*/*"
-          }
+          })
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
@@ -478,6 +483,8 @@ class Server
 
             return true
         })
+
+        debug('sending request with options %o', options)
 
         request.sendStream(headers, automationRequest, options)
         .then(handleReqStream)

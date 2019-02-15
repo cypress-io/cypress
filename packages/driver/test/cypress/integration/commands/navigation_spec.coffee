@@ -580,11 +580,27 @@ describe "src/cy/commands/navigation", ->
           expect(win.bar).to.not.exist
           expect(onLoad).not.to.have.been.called
 
-    it.only "can send a POST request", ->
-      cy.visit("http://localhost:3500/post-only", {
-        method: "POST"
-      })
-      cy.contains('it worked!')
+    describe "can send a POST request", ->
+      it "automatically urlencoded using an object body", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST",
+          body: {
+            bar: "baz"
+          }
+        })
+        cy.contains('it worked!').contains('{"bar":"baz"}')
+
+      it "with any string body and headers", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST",
+          headers: {
+            'content-type': 'application/json'
+          }
+          body: JSON.stringify({
+            bar: "baz"
+          })
+        })
+        cy.contains('it worked!').contains('{"bar":"baz"}')
 
     describe "when origins don't match", ->
       beforeEach ->
