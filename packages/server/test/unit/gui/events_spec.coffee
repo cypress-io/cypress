@@ -404,8 +404,6 @@ describe "lib/gui/events", ->
     describe "open:project", ->
       beforeEach ->
         sinon.stub(extension, "setHostAndPath").resolves()
-        # sinon.stub(browsers, "get").resolves([])
-        # sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves([{foo: 'bar'}])
         sinon.stub(browsers, "getAllBrowsersWith")
         browsers.getAllBrowsersWith.resolves([])
         browsers.getAllBrowsersWith.withArgs("/usr/bin/baz-browser").resolves([{foo: 'bar'}])
