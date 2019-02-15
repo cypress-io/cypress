@@ -458,12 +458,11 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
-        request.sendStream(headers, automationRequest, {
+        options = _.assign(options, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
-          auth: options.auth
           gzip: false
-          url: urlFile ? urlStr
+          url: urlFile ? urlStr ? options.url
           headers: {
             accept: "text/html,*/*"
           }
@@ -479,6 +478,8 @@ class Server
 
             return true
         })
+
+        request.sendStream(headers, automationRequest, options)
         .then(handleReqStream)
         .catch(error)
 

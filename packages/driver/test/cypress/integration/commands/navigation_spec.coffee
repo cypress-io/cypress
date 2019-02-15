@@ -580,6 +580,12 @@ describe "src/cy/commands/navigation", ->
           expect(win.bar).to.not.exist
           expect(onLoad).not.to.have.been.called
 
+    it.only "can send a POST request", ->
+      cy.visit("http://localhost:3500/post-only", {
+        method: "POST"
+      })
+      cy.contains('it worked!')
+
     describe "when origins don't match", ->
       beforeEach ->
         Cypress.emit("test:before:run", { id: 888 })
@@ -1259,7 +1265,7 @@ describe "src/cy/commands/navigation", ->
 
       ## https://github.com/cypress-io/cypress/issues/3101
       [{
-        contentType: 'application/json', 
+        contentType: 'application/json',
         pathName: 'json-content-type'
       }, {
         contentType: 'text/html; charset=utf-8,text/html',
