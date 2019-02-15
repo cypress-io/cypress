@@ -126,6 +126,7 @@ describe('linux browser detection', () => {
           Object.assign({}, goalBrowsers.find(gb => gb.name === 'foo-browser'), {
             displayName: 'Custom Foo Browser',
             info: 'Loaded from /foo/bar/browser',
+            custom: true,
             version: '9001.1.2.3',
             majorVersion: '9001',
             path: '/foo/bar/browser'

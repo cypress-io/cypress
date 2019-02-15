@@ -150,8 +150,8 @@ describe "Project Nav", ->
 
         it "sends the required parameters to launch a browser", ->
           browserArg = @ipc.launchBrowser.getCall(0).args[0].browser
-          expect(browserArg).to.have.all.keys([
-            "family", "name", "path", "version", "majorVersion", "displayName", "info", "isChosen"
+          expect(browserArg).to.have.keys([
+            "family", "name", "path", "version", "majorVersion", "displayName", "info", "isChosen", "custom"
           ])
           expect(browserArg.path).to.include('/')
           expect(browserArg.family).to.equal('chrome')
