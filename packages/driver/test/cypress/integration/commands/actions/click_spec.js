@@ -5,10 +5,11 @@ const { _ } = Cypress
 const { Promise } = Cypress
 const chaiSubset = require('chai-subset')
 
-// eslint-disable-next-line
-const {m} = require('../../../support/matchers')
+const { m } = require('../../../support/matchers')
 
+// eslint-disable-next-line
 chai.use(chaiSubset)
+
 require('cypress-plugin-retries')
 
 const fail = function (str) {
@@ -874,7 +875,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it.only('scrolls the window past a fixed position element when being covered', () => {
+      it('scrolls the window past a fixed position element when being covered', () => {
         const spy = cy.spy().as('mousedown')
 
         $('<button>button covered</button>')
