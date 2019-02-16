@@ -1,6 +1,6 @@
 _          = require("lodash")
 pkg        = require("@packages/root")
-uuid       = require("uuid")
+uuid       = require("node-uuid")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
