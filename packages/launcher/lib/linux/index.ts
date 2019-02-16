@@ -1,15 +1,8 @@
 import { log } from '../log'
 import { trim, tap } from 'ramda'
-import { FoundBrowser, Browser, NotInstalledError } from '../types'
+import { FoundBrowser, Browser } from '../types'
+import { notInstalledErr } from '../errors'
 import * as execa from 'execa'
-
-const notInstalledErr = (name: string) => {
-  const err: NotInstalledError = new Error(
-    `Browser not installed: ${name}`
-  ) as NotInstalledError
-  err.notInstalled = true
-  return err
-}
 
 function getLinuxBrowser(
   name: string,
@@ -38,12 +31,7 @@ function getLinuxBrowser(
     throw notInstalledErr(binary)
   }
 
-  const cmd = `${binary} --version`
-  log('looking using command "%s"', cmd)
-  return execa
-    .shell(cmd)
-    .then(result => result.stdout)
-    .then(trim)
+  return getVersionString(binary)
     .then(tap(log))
     .then(getVersion)
     .then((version: string) => {
@@ -56,7 +44,16 @@ function getLinuxBrowser(
     .catch(logAndThrowError)
 }
 
-export function detectBrowserLinux(browser: Browser) {
+export function getVersionString(path: string) {
+  const cmd = `${path} --version`
+  log('finding version string using command "%s"', cmd)
+  return execa
+    .shell(cmd)
+    .then(result => result.stdout)
+    .then(trim)
+}
+
+export function detect(browser: Browser) {
   return getLinuxBrowser(
     browser.name,
     browser.binary as string,

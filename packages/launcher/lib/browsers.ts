@@ -33,7 +33,7 @@ export const browsers: Browser[] = [
 /** starts a found browser and opens URL if given one */
 export function launch(
   browser: FoundBrowser,
-  url?: string,
+  url: string,
   args: string[] = []
 ) {
   log('launching browser %o to open %s', browser, url)
