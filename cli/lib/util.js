@@ -159,7 +159,7 @@ const util = {
 
   setTaskTitle (task, title, renderer) {
     // only update the renderer title when not running in CI
-    if (renderer === 'default') {
+    if (renderer === 'default' && task.title !== title) {
       task.title = title
     }
   },
