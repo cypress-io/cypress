@@ -1,11 +1,10 @@
 import { Transpiled } from '../../src/transpiled.jsx'
 import React from 'react'
-import { mount } from '../../lib'
 
 /* eslint-env mocha */
 describe('Transpiled', () => {
   it('counts clicks', () => {
-    mount(<Transpiled />)
+    cy.mount(<Transpiled />)
     cy.contains('count: 0')
       .click()
       .contains('count: 1')
@@ -14,7 +13,7 @@ describe('Transpiled', () => {
   })
 
   it('counts clicks 2', () => {
-    mount(<Transpiled />)
+    cy.mount(<Transpiled />)
     cy.contains('count: 0')
       .click()
       .contains('count: 1')
@@ -23,9 +22,9 @@ describe('Transpiled', () => {
   })
 })
 
-describe('Counter mounted before each test', () => {
+describe('Counter cy.mounted before each test', () => {
   beforeEach(() => {
-    mount(<Transpiled />)
+    cy.mount(<Transpiled />)
   })
 
   it('goes to 3', () => {
@@ -41,7 +40,8 @@ describe('Counter mounted before each test', () => {
       .click()
       .click()
       .click()
-    Cypress.component().its('state')
+    cy.get('@Component')
+      .its('state')
       .should('deep.equal', {count: 3})
   })
 })

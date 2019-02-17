@@ -28,18 +28,18 @@ npm install --save-dev cypress cypress-react-unit-test
 // import the component you want to test
 import { HelloState } from '../../src/hello-x.jsx'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
 describe('HelloState component', () => {
   it('works', () => {
     // mount the component under test
-    mount(<HelloState />)
+    cy.mount(<HelloState />)
     // start testing!
     cy.contains('Hello Spider-man!')
-    // mounted component is returned from Cypress.component()
-    Cypress.component().invoke('setState', {name: 'React'})
-    Cypress.component().its('state').should('deep.equal', {
-      name: 'React'
-    })
+    // mounted component is aliased as @Component
+    cy.get('@Component')
+      .invoke('setState', { name: 'React' })
+    cy.get('@Component')
+      .its('state')
+      .should('deep.equal', { name: 'React' })
     // check if GUI has rerendered
     cy.contains('Hello React!')
   })
@@ -115,6 +115,7 @@ All components are in [src](src) folder. All tests are in [cypress/integration](
 * [counter-spec.js](cypress/integration/counter-spec.js) clicks on the component and confirms the result
 * [stateless-spec.js](cypress/integration/stateless-spec.js) shows testing a stateless component from [stateless.jsx](src/stateless.jsx)
 * [transpiled-spec.js](cypress/integration/stateless-spec.js) shows testing a component with class properties syntax from [transpiled.jsx](src/stateless.jsx)
+* [error-boundary-spec.js](cypress/integration/error-boundary-spec.js) shows testing a component acting as an error boundary from [error-boundary.jsx](src/error-boundary.jsx)
 * [users-spec.js](cypress/integration/users-spec.js) shows how to observe XHR requests, mock server responses for component [users.jsx](src/users.jsx)
 * [alert-spec.js](cypress/integration/alert-spec.js) shows how to spy on `window.alert` calls from your component [stateless-alert.jsx](src/stateless-alert.jsx)
 

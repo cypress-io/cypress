@@ -1,11 +1,10 @@
 import { Counter } from '../../src/counter.jsx'
 import React from 'react'
-import { mount } from '../../lib'
 
 /* eslint-env mocha */
 describe('Counter', () => {
   it('counts clicks', () => {
-    mount(<Counter />)
+    cy.mount(<Counter />)
     cy.contains('count: 0')
       .click()
       .contains('count: 1')
@@ -14,7 +13,7 @@ describe('Counter', () => {
   })
 
   it('counts clicks 2', () => {
-    mount(<Counter />)
+    cy.mount(<Counter />)
     cy.contains('count: 0')
       .click()
       .contains('count: 1')
@@ -23,9 +22,9 @@ describe('Counter', () => {
   })
 })
 
-describe('Counter mounted before each test', () => {
+describe('Counter cy.mounted before each test', () => {
   beforeEach(() => {
-    mount(<Counter />)
+    cy.mount(<Counter />)
   })
 
   it('goes to 3', () => {
@@ -41,7 +40,8 @@ describe('Counter mounted before each test', () => {
       .click()
       .click()
       .click()
-    Cypress.component().its('state')
+    cy.get('@Component')
+      .its('state')
       .should('deep.equal', {count: 3})
   })
 })
