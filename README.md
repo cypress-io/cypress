@@ -128,7 +128,6 @@ All components are in [src](src) folder. All tests are in [cypress/integration](
 Same feature for unit testing components from other framesworks using Cypress
 
 * [cypress-vue-unit-test](https://github.com/bahmutov/cypress-vue-unit-test)
-* [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test)
 * [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 * [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
 * [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
