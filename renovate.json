@@ -8,10 +8,7 @@
   "major": {
     "automerge": false
   },
-  "minor": {
-    "automerge": false
-  },
-  "prConcurrentLimit": 3,
+  "prConcurrentLimit": 10,
   "prHourlyLimit": 2,
   "schedule": [
     "after 10pm and before 5am on every weekday",
