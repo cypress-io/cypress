@@ -1,13 +1,12 @@
 import HelloWorld from '../../src/stateless-alert.jsx'
 import React from 'react'
-import { mount } from '../../lib'
 
 /* eslint-env mocha */
 describe('Stateless alert', () => {
   beforeEach(() => {
     const spy = cy.spy().as('alert')
     cy.on('window:alert', spy)
-    mount(<HelloWorld name='Alert' />)
+    cy.mount(<HelloWorld name='Alert' />)
   })
 
   it('shows link', () => {

@@ -6,8 +6,8 @@ const webpackOptions = {
         test: /\.(js|jsx|mjs)$/,
         loader: 'babel-loader',
         options: {
-          presets: ['es2015', 'react'],
-          plugins: ['transform-class-properties'],
+          presets: ['@babel/preset-env', '@babel/preset-react'],
+          plugins: ['@babel/plugin-proposal-class-properties'],
         },
       }
     ]
