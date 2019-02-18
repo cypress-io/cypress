@@ -2,16 +2,26 @@
 // but for now have to document methods in both places
 // like this: import {mount} from './index'
 
+interface ReactModule {
+  name: string
+  type: string
+  location: string
+  source: string
+}
+
 declare namespace Cypress {
   interface Cypress {
     stylesCache: any
     React: string
     ReactDOM: string
     Styles: string
+    modules: ReactModule[]
   }
+
   // NOTE: By default, avoiding React.Component/Element typings
   // for many cases, we don't want to import @types/react
-  interface Chainable<Subject = any> {
+  interface Chainable<Subject> {
+    state: (key) => any,
     injectReactDOM: () => Chainable<void>
     copyComponentStyles: (component: Symbol) => Chainable<void>
     /**
