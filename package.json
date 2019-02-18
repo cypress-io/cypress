@@ -17,6 +17,7 @@
     "dist",
     "lib"
   ],
+  "types": "lib",
   "keywords": [
     "react",
     "cypress",

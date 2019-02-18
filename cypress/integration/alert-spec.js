@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/// <reference types="../support" />
+/// <reference types="../../lib" />
 import HelloWorld from '../../src/stateless-alert.jsx'
 import React from 'react'
 

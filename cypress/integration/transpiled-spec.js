@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/// <reference types="../support" />
+/// <reference types="../../lib" />
 import { Transpiled } from '../../src/transpiled.jsx'
 import React from 'react'
 

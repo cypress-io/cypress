@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/// <reference types="../support" />
+/// <reference types="../../lib" />
 import { Users } from '../../src/users.jsx'
 import React from 'react'
 

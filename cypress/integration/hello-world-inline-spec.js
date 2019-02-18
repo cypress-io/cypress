@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/// <reference types="../support" />
+/// <reference types="../../lib" />
 import React from 'react'
 const HelloWorld = () => <p>Hello World!</p>
 describe('HelloWorld component', () => {

@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/// <reference types="../support" />
+/// <reference types="../../lib" />
 import { HelloX, HelloState } from '../../src/hello-x.jsx'
 import React from 'react'
 

@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/// <reference types="../support" />
+/// <reference types="../../lib" />
 import { Counter } from '../../src/counter.jsx'
 import React from 'react'
 
