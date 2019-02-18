@@ -101,9 +101,23 @@ Cypress.Commands.add('copyComponentStyles', component => {
 export const mount = (jsx, alias) => {
   // Get the display name property via the component constructor
   const displayname = alias || jsx.type.prototype.constructor.name
+
+  let cmd
+
   cy.injectReactDOM()
-    .log(`ReactDOM.render(<${displayname} ... />)`, jsx.props)
     .window({ log: false })
+    .then(() => {
+      cmd = Cypress.log({
+        name: 'mount',
+        // @ts-ignore
+        message: [`ReactDOM.render(<${displayname} ... />)`],
+        consoleProps () {
+          return {
+            props: jsx.props
+          }
+        }
+      })
+    })
     .then(setXMLHttpRequest)
     .then(setAlert)
     .then(win => {
@@ -116,6 +130,9 @@ export const mount = (jsx, alias) => {
       cy.wrap(component, { log: false }).as(displayname)
     })
   cy.copyComponentStyles(jsx)
+    .then(() => {
+      cmd.snapshot().end()
+    })
 }
 
 Cypress.Commands.add('mount', mount)
@@ -174,8 +191,7 @@ before(() => {
   cy.log('Initializing UMD module cache').then(() => {
     for (const module of moduleNames) {
       let { name, type, location } = module
-      cy.log(`Loading ${name} via ${type}`)
-        .readFile(location)
+      cy.readFile(location, {log:false})
         .then(source => Cypress.modules.push({ name, type, location, source }))
     }
   })
