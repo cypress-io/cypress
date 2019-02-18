@@ -29,25 +29,23 @@ import { stylesCache, setXMLHttpRequest, setAlert } from '../../lib'
     @function   cy.injectReactDOM
 **/
 Cypress.Commands.add('injectReactDOM', () => {
-  return cy
-    .log('Injecting ReactDOM for Unit Testing')
-    .then(() => {
-      // Generate inline script tags for UMD modules
-      const scripts = Cypress.modules
-        .map(module => `<script>${module.source}</script>`)
-        .join('')
-      // include React and ReactDOM to force DOM to register all DOM event listeners
-      // otherwise the component will NOT be able to dispatch any events
-      // when it runs the second time
-      // https://github.com/bahmutov/cypress-react-unit-test/issues/3
-      var html = `<body>
+  return cy.log('Injecting ReactDOM for Unit Testing').then(() => {
+    // Generate inline script tags for UMD modules
+    const scripts = Cypress.modules
+      .map(module => `<script>${module.source}</script>`)
+      .join('')
+    // include React and ReactDOM to force DOM to register all DOM event listeners
+    // otherwise the component will NOT be able to dispatch any events
+    // when it runs the second time
+    // https://github.com/bahmutov/cypress-react-unit-test/issues/3
+    var html = `<body>
           <div id="cypress-jsdom"></div>
           ${scripts}
         </body>`
-      const document = cy.state('document')
-      document.write(html)
-      document.close()
-    })
+    const document = cy.state('document')
+    document.write(html)
+    document.close()
+  })
 })
 
 cy.stylesCache = stylesCache
@@ -55,7 +53,7 @@ cy.stylesCache = stylesCache
     @function   cy.copyComponentStyles
     @param      {Object}  component
 **/
-Cypress.Commands.add('copyComponentStyles', (component) => {
+Cypress.Commands.add('copyComponentStyles', component => {
   // need to find same component when component is recompiled
   // by the JSX preprocessor. Thus have to use something else,
   // like component name
@@ -84,20 +82,31 @@ Cypress.Commands.add('copyComponentStyles', (component) => {
   styles.forEach(function (style) {
     head.appendChild(style)
   })
-  return
 })
 
-/** Mount a React component in a blank document; register it as an alias
-    To access: use an alias, e.g.cy.get('@Component').its('state').should(...)
-    @function   cy.mount
-    @param      {Object}  jsx
-    @param      {string}  [Component]   alias
-**/
-Cypress.Commands.add('mount', (jsx, alias) => {
-  // Get the displayname property via the component constructor
+/**
+ * Mount a React component in a blank document; register it as an alias
+ * To access: use an alias or original component reference
+ *  @function   cy.mount
+ *  @param      {Object}  jsx - component to mount
+ *  @param      {string}  [Component] - alias to use later
+ *  @example
+ ```
+ import Hello from './hello.jsx'
+ // mount and access by alias
+ cy.mount(<Hello />, 'Hello')
+ // using default alias
+ cy.get('@Component')
+ // using specified alias
+ cy.get('@Hello').its('state').should(...)
+ // using original component
+ cy.get(Hello)
+ ```
+ **/
+export const mount = (jsx, alias) => {
+  // Get the display name property via the component constructor
   const displayname = alias || jsx.type.prototype.constructor.name
-  cy
-    .injectReactDOM()
+  cy.injectReactDOM()
     .log(`ReactDOM.render(<${displayname} ... />)`, jsx.props)
     .window({ log: false })
     .then(setXMLHttpRequest)
@@ -105,11 +114,16 @@ Cypress.Commands.add('mount', (jsx, alias) => {
     .then(win => {
       const { ReactDOM } = win
       const document = cy.state('document')
-      const component = ReactDOM.render(jsx, document.getElementById('cypress-jsdom'))
+      const component = ReactDOM.render(
+        jsx,
+        document.getElementById('cypress-jsdom')
+      )
       cy.wrap(component, { log: false }).as(displayname)
     })
   cy.copyComponentStyles(jsx)
-})
+}
+
+Cypress.Commands.add('mount', mount)
 
 /** Get one or more DOM elements by selector or alias.
     Features extended support for JSX and React.Component
@@ -124,7 +138,10 @@ Cypress.Commands.overwrite('get', (originalFn, selector, options) => {
   switch (typeof selector) {
     case 'object':
       // If attempting to use JSX as a selector, reference the displayname
-      if (selector.$$typeof && selector.$$typeof.toString().startsWith('Symbol(react')) {
+      if (
+        selector.$$typeof &&
+        selector.$$typeof.toString().startsWith('Symbol(react')
+      ) {
         const displayname = selector.type.prototype.constructor.name
         return originalFn(`@${displayname}`, options)
       }
