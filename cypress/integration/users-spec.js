@@ -1,3 +1,4 @@
+/// <reference types="cypress" />
 import { Users } from '../../src/users.jsx'
 import React from 'react'
 
@@ -6,7 +7,8 @@ context('Users', () => {
   describe('Component', () => {
     it('fetches 3 users from remote API', () => {
       cy.mount(<Users />)
-      cy.get('li').should('have.length', 3)
+      // fetching users can take a while
+      cy.get('li', { timeout: 20000 }).should('have.length', 3)
     })
   })
 
@@ -17,30 +19,35 @@ context('Users', () => {
       // preventing race conditions where you wait on untouched routes
     })
 
-
     it('can inspect real data in XHR', () => {
       cy.route('/users?_limit=3').as('users')
       cy.mount(<Users />)
-      cy.wait('@users').its('response.body').should('have.length', 3)
+      cy.wait('@users')
+        .its('response.body')
+        .should('have.length', 3)
     })
 
     it('can display mock XHR response', () => {
-      const users = [{id: 1, name: 'foo'}]
+      const users = [{ id: 1, name: 'foo' }]
       cy.route('GET', '/users?_limit=3', users).as('users')
       cy.mount(<Users />)
-      cy.get('li').should('have.length', 1)
-        .first().contains('foo')
+      cy.get('li')
+        .should('have.length', 1)
+        .first()
+        .contains('foo')
     })
 
     it('can inspect mocked XHR', () => {
-      const users = [{id: 1, name: 'foo'}]
+      const users = [{ id: 1, name: 'foo' }]
       cy.route('GET', '/users?_limit=3', users).as('users')
       cy.mount(<Users />)
-      cy.wait('@users').its('response.body').should('deep.equal', users)
+      cy.wait('@users')
+        .its('response.body')
+        .should('deep.equal', users)
     })
 
     it('can delay and wait on XHR', () => {
-      const users = [{id: 1, name: 'foo'}]
+      const users = [{ id: 1, name: 'foo' }]
       cy.route({
         method: 'GET',
         url: '/users?_limit=3',
