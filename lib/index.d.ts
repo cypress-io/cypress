@@ -1,6 +1,6 @@
-// I hope to get types and docs from functions imported from ./commands one day
+// I hope to get types and docs from functions imported from ./index one day
 // but for now have to document methods in both places
-// like this: import {mount} from './commands'
+// like this: import {mount} from './index'
 
 declare namespace Cypress {
   interface Cypress {
