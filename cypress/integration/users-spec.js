@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+/// <reference types="../support" />
 import { Users } from '../../src/users.jsx'
 import React from 'react'
 
