@@ -3,13 +3,11 @@
     "config:base"
   ],
   "automerge": true,
-  "commitMessage": "{{semanticPrefix}}Update {{depName}} to {{newVersion}} 🌟",
-  "prTitle": "{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}} 🌟",
   "major": {
     "automerge": false
   },
   "prConcurrentLimit": 10,
-  "prHourlyLimit": 2,
+  "prHourlyLimit": 10,
   "schedule": [
     "after 10pm and before 5am on every weekday",
     "every weekend"
