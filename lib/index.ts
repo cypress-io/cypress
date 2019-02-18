@@ -51,11 +51,16 @@ Cypress.Commands.add('copyComponentStyles', component => {
   // need to find same component when component is recompiled
   // by the JSX preprocessor. Thus have to use something else,
   // like component name
+  const parentDocument = window.parent.document
+  // @ts-ignore
+  const specDocument = parentDocument.querySelector('iframe.spec-iframe').contentDocument
+  // @ts-ignore
+  const appDocument = parentDocument.querySelector('iframe.aut-iframe').contentDocument
+
   const hash = component.type.name
-  const document = cy.state('document')
-  let styles = document.querySelectorAll('head style')
+  let styles = specDocument.querySelectorAll('head style')
   if (styles.length) {
-    cy.log('injected %d styles', styles.length)
+    cy.log(`injected ${styles.length} style(s)`)
     Cypress.stylesCache.set(hash, styles)
   } else {
     cy.log('No styles injected for this component, checking cache')
@@ -68,14 +73,7 @@ Cypress.Commands.add('copyComponentStyles', component => {
   if (!styles) {
     return
   }
-  const parentDocument = window.parent.document
-  // hmm, is this really project name?
-  // @ts-ignore
-  const projectName = Cypress.config('projectName')
-  const appIframeId = "Your App: '" + projectName + "'"
-  const appIframe = parentDocument.getElementById(appIframeId)
-  // @ts-ignore
-  var head = appIframe.contentDocument.querySelector('head')
+  const head = appDocument.querySelector('head')
   styles.forEach(function (style) {
     head.appendChild(style)
   })
