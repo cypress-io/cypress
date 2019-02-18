@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+/// <reference types="../support" />
 import { ErrorBoundary } from '../../src/error-boundary.jsx'
 import React from 'react'
 
@@ -16,8 +18,7 @@ describe('Error Boundary', () => {
         <ChildWithoutError />
       </ErrorBoundary>
     )
-    cy.get('h1')
-      .should('have.text', 'Normal Child')
+    cy.get('h1').should('have.text', 'Normal Child')
     cy.get(ErrorBoundary)
       .its('state.error')
       .should('not.exist')
@@ -29,10 +30,8 @@ describe('Error Boundary', () => {
         <ChildWithError />
       </ErrorBoundary>
     )
-    cy.get('header h1')
-      .should('contain', 'Something went wrong.')
-    cy.get('header h3')
-      .should('contain', 'failed to load')
+    cy.get('header h1').should('contain', 'Something went wrong.')
+    cy.get('header h3').should('contain', 'failed to load')
     cy.get(ErrorBoundary)
       .its('state.error.message')
       .should('equal', errorMessage)

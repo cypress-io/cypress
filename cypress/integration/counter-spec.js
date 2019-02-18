@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+/// <reference types="../support" />
 import { Counter } from '../../src/counter.jsx'
 import React from 'react'
 
@@ -42,6 +44,6 @@ describe('Counter cy.mounted before each test', () => {
       .click()
     cy.get(Counter)
       .its('state')
-      .should('deep.equal', {count: 3})
+      .should('deep.equal', { count: 3 })
   })
 })
