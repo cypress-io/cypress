@@ -37,6 +37,7 @@
     "clone": "^2.1.1",
     "compression": "^1.1.0",
     "cors": "^2.7.1",
+    "cypress-plugin-retries": "^1.2.0",
     "debug": "^2.6.8",
     "diff": "^4.0.1",
     "errorhandler": "^1.1.1",
@@ -65,8 +66,5 @@
     "vanilla-text-mask": "^5.1.1",
     "wait-on": "^2.0.2",
     "zone.js": "^0.8.18"
-  },
-  "dependencies": {
-    "cypress-plugin-retries": "^1.2.0"
   }
 }

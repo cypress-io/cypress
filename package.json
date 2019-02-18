@@ -82,7 +82,6 @@
     "commit-message-install": "^1.10.0",
     "common-tags": "^1.8.0",
     "console.table": "^0.9.1",
-    "cypress-plugin-retries": "^1.1.0",
     "debug": "3.1.0",
     "decaffeinate": "^4.8.8",
     "del": "^3.0.0",
