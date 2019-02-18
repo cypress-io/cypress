@@ -7,7 +7,8 @@ config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
 specsUtil = require("./util/specs")
-preprocessor = require("./plugins/preprocessor")
+preprocessor = require("./background/preprocessor")
+serverEvents = require("./background/server_events")
 
 create = ->
   openProject     = null
@@ -25,8 +26,17 @@ create = ->
       else
         Promise.resolve(null)
 
+  specEnd = ->
+    Promise.try ->
+      return if not openProject? or openProject.isTextTerminal
+
+      serverEvents.execute("spec:end", openProject.spec)
+
   return {
     reset: tryToCall("reset")
+
+    ## for testing purposes
+    __reset: reset
 
     getConfig: tryToCall("getConfig")
 
@@ -40,9 +50,11 @@ create = ->
 
     emit: tryToCall("emit")
 
+    specEnd
+
     getProject: -> openProject
 
-    launch: (browser, spec, options = {}) ->
+    launchBrowser: (browser, spec, options = {}) ->
       debug("resetting project state, preparing to launch browser")
 
       la(_.isPlainObject(browser), "expected browser object:", browser)
@@ -111,7 +123,11 @@ create = ->
               spec.relative
             )
 
-            browsers.open(browserName, options, automation)
+            Promise.try ->
+              if not openProject.isTextTerminal
+                serverEvents.execute("spec:start", spec)
+            .then ->
+              browsers.open(browserName, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -159,26 +175,22 @@ create = ->
 
     closeBrowser: ->
       browsers.close()
-
-    closeOpenProjectAndBrowsers: ->
-      Promise.all([
-        @closeBrowser()
-        openProject.close() if openProject
-      ])
       .then ->
-        reset()
-
-        return null
+        specEnd()
 
     close:  ->
       debug("closing opened project")
 
       @clearSpecInterval()
-      @closeOpenProjectAndBrowsers()
+
+      Promise.try ->
+        openProject.close() if openProject
+      .then ->
+        reset()
 
     create: (path, args = {}, options = {}) ->
       ## store the currently open project
-      openProject = Project(path)
+      openProject = Project(path, options)
 
       _.defaults(options, {
         onReloadBrowser: (url, browser) =>

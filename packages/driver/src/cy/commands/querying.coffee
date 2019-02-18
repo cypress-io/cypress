@@ -17,7 +17,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   restoreContains()
 
   ## restore before each test and whenever we stop
-  Cypress.on("test:before:run", restoreContains)
+  Cypress.on("test:start", restoreContains)
   Cypress.on("stop", restoreContains)
 
   Commands.addAll({
@@ -47,7 +47,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getFocused = ->
         focused = cy.getFocused()
         log(focused)
-        
+
         return focused
 
       do resolveFocused = (failedByNonAssertion = false) ->
@@ -84,7 +84,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log ?= Cypress.log
           message: selector
-          referencesAlias: aliasObj?.alias
+          referencesAlias: if aliasObj?.alias then {name: aliasObj.alias}
           aliasType: aliasType
           consoleProps: -> consoleProps
 
@@ -416,7 +416,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       fn.call(ctx, subject)
 
       cleanup = ->
-        cy.removeListener("command:start", setWithinSubject)
+        cy.removeListener("internal:commandStart", setWithinSubject)
 
       ## we need a mechanism to know when we should remove
       ## our withinSubject so we dont accidentally keep it
@@ -443,11 +443,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if next is defined then we know we'll eventually
       ## unbind these listeners
       if next
-        cy.on("command:start", setWithinSubject)
+        cy.on("internal:commandStart", setWithinSubject)
       else
         ## remove our listener if we happen to reach the end
         ## event which will finalize cleanup if there was no next obj
-        cy.once "command:queue:before:end", ->
+        cy.once "before:command:queue:end", ->
           cleanup()
 
           cy.state("withinSubject", null)

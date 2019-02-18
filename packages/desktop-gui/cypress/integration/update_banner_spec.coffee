@@ -12,12 +12,13 @@ describe "Update Banner", ->
     cy.fixture("specs").as("specs")
 
     cy.visitIndex({
-      onBeforeLoad: (win) ->
+      onStart: (win) ->
         cy.spy(win, "setInterval")
     }).then (win) ->
       { @start, @ipc } = win.App
 
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
+      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "windowOpen")
       cy.stub(@ipc, "externalOpen")
 
@@ -98,7 +99,6 @@ describe "Update Banner", ->
   describe "in specs list", ->
     beforeEach ->
       cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectRoot: "/foo/bar"})
-      cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       @start()
       @updaterCheck.resolve(NEW_VERSION)

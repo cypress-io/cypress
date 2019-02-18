@@ -60,7 +60,7 @@ cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
 
 aboutBlank = (win) ->
   new Promise (resolve) ->
-    cy.once("window:load", resolve)
+    cy.once("page:ready", resolve)
 
     $utils.locHref("about:blank", win)
 
@@ -82,7 +82,7 @@ navigationChanged = (Cypress, cy, state, source, arg) ->
   return if url is previousUrl
 
   ## else notify the world and log this event
-  Cypress.action("cy:url:changed", url)
+  Cypress.action("cy:page:url:changed", url)
 
   urls.push(url)
 
@@ -211,7 +211,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
   loading = ->
     new Promise (resolve, reject) ->
-      cy.once "window:load", ->
+      cy.once "page:ready", ->
         cy.state("onPageLoadErr", null)
 
         options._log.set("message", "--page loaded--").snapshot().end()
@@ -236,7 +236,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
-  Cypress.on("test:before:run", reset)
+  Cypress.on("test:start", reset)
 
   Cypress.on "stability:changed", (bool, event) ->
     ## only send up page loading events when we're
@@ -284,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  Cypress.on "window:before:load", (contentWindow) ->
+  Cypress.on "page:start", ({ win }) ->
     ## TODO: just use a closure here
     current = state("current")
 
@@ -295,7 +295,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     return if not runnable
 
     options = _.last(current.get("args"))
-    options?.onBeforeLoad?.call(runnable.ctx, contentWindow)
+    options?.onStart?.call(runnable.ctx, win)
 
   Commands.addAll({
     reload: (args...) ->
@@ -346,14 +346,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             options._log.snapshot("before", {next: "after"})
 
+          onPageReady = ({ win }) ->
+            resolve(win)
+
           cleanup = ->
             knownCommandCausedInstability = false
 
-            cy.removeListener("window:load", resolve)
+            cy.removeListener("page:ready", onPageReady)
 
           knownCommandCausedInstability = true
 
-          cy.once("window:load", resolve)
+          cy.once("page:ready", onPageReady)
 
           $utils.locReload(forceReload, state("window"))
 
@@ -396,14 +399,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## clear the current timeout
             cy.clearTimeout()
 
-            cy.once("window:before:unload", beforeUnload)
+            cy.once("before:window:unload", beforeUnload)
 
             didLoad = new Promise (resolve) ->
               cleanup = ->
-                cy.removeListener("window:load", resolve)
-                cy.removeListener("window:before:unload", beforeUnload)
+                cy.removeListener("page:ready", resolve)
+                cy.removeListener("before:window:unload", beforeUnload)
 
-              cy.once("window:load", resolve)
+              cy.once("page:ready", resolve)
 
             knownCommandCausedInstability = true
 
@@ -459,13 +462,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
+      if options.onBeforeLoad
+        $utils.throwErrByPath("visit.renamed_callback", {
+          args: {
+            oldName: "onBeforeLoad"
+            newName: "onStart"
+          }
+        })
+
+      if options.onLoad
+        $utils.throwErrByPath("visit.renamed_callback", {
+          args: {
+            oldName: "onLoad"
+            newName: "onReady"
+          }
+        })
+
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
         log: true
         timeout: config("pageLoadTimeout")
-        onBeforeLoad: ->
-        onLoad: ->
+        onStart: ->
+        onReady: ->
       })
 
       consoleProps = {}
@@ -519,13 +538,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ({runOnLoadCallback}) ->
+      onReady = ({runOnReadyCallback}) ->
         ## reset window on load
         win = state("window")
 
-        ## the onLoad callback should only be skipped if specified
-        if runOnLoadCallback isnt false
-          options.onLoad?.call(runnable.ctx, win)
+        ## the onReady callback should only be skipped if specified
+        if runOnReadyCallback isnt false
+          options.onReady?.call(runnable.ctx, win)
 
         options._log.set({url: url}) if options._log
 
@@ -563,17 +582,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## if all that is changing is the hash then we know
         ## the browser won't actually make a new http request
-        ## for this, and so we need to resolve onLoad immediately
+        ## for this, and so we need to resolve onReady immediately
         ## and bypass the actual visit resolution stuff
         if bothUrlsMatchAndRemoteHasHash(current, remote)
           ## https://github.com/cypress-io/cypress/issues/1311
           if current.hash is remote.hash
-            consoleProps["Note"] = "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+            consoleProps["Note"] = "Because this visit was to the same hash, the page did not reload and the onStart and onReady callbacks did not fire."
 
-            return onLoad({runOnLoadCallback: false})
+            return onReady({runOnReadyCallback: false})
 
           return changeIframeSrc(remote.href, "hashchange")
-          .then(onLoad)
+          .then(onReady)
 
         if existingHash
           ## strip out the existing hash if we have one
@@ -619,8 +638,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             url = $Location.fullyQualifyUrl(url)
 
-            changeIframeSrc(url, "window:load")
-            .then(onLoad)
+            changeIframeSrc(url, "page:ready")
+            .then(onReady)
           else
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop

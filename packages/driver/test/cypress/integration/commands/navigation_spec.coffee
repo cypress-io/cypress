@@ -57,15 +57,15 @@ describe "src/cy/commands/navigation", ->
 
             expect(win).to.eq(cy.state("window"))
 
-    it "removes window:load listeners", ->
-      listeners = cy.listeners("window:load")
+    it "removes page:ready listeners", ->
+      listeners = cy.listeners("page:ready")
 
-      winLoad = cy.spy(cy, "once").withArgs("window:load")
+      winLoad = cy.spy(cy, "once").withArgs("page:ready")
 
       cy.reload().then ->
         expect(winLoad).to.be.calledOnce
 
-        expect(cy.listeners("window:load")).to.deep.eq(listeners)
+        expect(cy.listeners("page:ready")).to.deep.eq(listeners)
 
     ## TODO: fix this
     it.skip "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
@@ -82,8 +82,8 @@ describe "src/cy/commands/navigation", ->
       stub3 = cy.stub()
 
       cy.on("stability:changed", stub1)
-      cy.on("window:before:unload", stub2)
-      cy.on("window:unload", stub3)
+      cy.on("before:window:unload", stub2)
+      cy.on("page:end", stub3)
 
       cy.reload().then ->
         expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
@@ -106,35 +106,35 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "logs once on failure", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           done()
 
         cy.reload(Infinity)
 
       it "throws passing more than 2 args", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
         cy.reload(1, 2, 3)
 
       it "throws passing 2 invalid arguments", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
         cy.reload(true, 1)
 
       it "throws passing 1 invalid argument", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
           done()
 
@@ -160,11 +160,11 @@ describe "src/cy/commands/navigation", ->
             ## while we're still unstable, which will result in
             ## properties on the window being inaccessible
             ## since we only visit once at the beginning of these tests
-            cy.on "window:load", ->
+            cy.on "page:ready", ->
               expect(expected).to.be.true
               done()
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expected = true
 
               expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
@@ -175,7 +175,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "reload"
             @lastLog = log
 
@@ -201,7 +201,7 @@ describe "src/cy/commands/navigation", ->
 
         cy
           .window().then (win) ->
-            cy.on "window:before:unload", =>
+            cy.on "before:window:unload", =>
               lastLog = @lastLog
 
               beforeunload = true
@@ -245,20 +245,20 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/jquery.html")
         .then ->
-          winLoadListeners = cy.listeners("window:load")
-          beforeWinUnloadListeners = cy.listeners("window:before:unload")
+          winLoadListeners = cy.listeners("page:ready")
+          beforeWinUnloadListeners = cy.listeners("before:window:unload")
 
           cyOn = cy.spy(cy, "once")
 
-          winLoad = cyOn.withArgs("window:load")
-          beforeWinUnload = cyOn.withArgs("window:before:unload")
+          winLoad = cyOn.withArgs("page:ready")
+          beforeWinUnload = cyOn.withArgs("before:window:unload")
 
           cy.go("back").then ->
             expect(winLoad).to.be.calledOnce
             expect(beforeWinUnload).to.be.calledOnce
 
-            expect(cy.listeners("window:load")).to.deep.eq(winLoadListeners)
-            expect(cy.listeners("window:before:unload")).to.deep.eq(beforeWinUnloadListeners)
+            expect(cy.listeners("page:ready")).to.deep.eq(winLoadListeners)
+            expect(cy.listeners("before:window:unload")).to.deep.eq(beforeWinUnloadListeners)
 
     it "fires stability:changed and window events events", ->
       stub1= cy.stub()
@@ -269,8 +269,8 @@ describe "src/cy/commands/navigation", ->
         .visit("/fixtures/jquery.html")
         .then ->
           cy.on("stability:changed", stub1)
-          cy.on("window:before:unload", stub2)
-          cy.on("window:unload", stub3)
+          cy.on("before:window:unload", stub2)
+          cy.on("page:end", stub3)
         .go("back").then ->
           expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
           expect(stub1.secondCall).to.be.calledWith(true, "load")
@@ -293,7 +293,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "go"
             @lastLog = log
             @logs.push(log)
@@ -302,21 +302,21 @@ describe "src/cy/commands/navigation", ->
 
       _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
         it "throws on: '#{val}'", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.eq("cy.go() accepts only a string or number argument")
             done()
 
           cy.go(val)
 
       it "throws on invalid string", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.go() accepts either 'forward' or 'back'. You passed: 'foo'")
           done()
 
         cy.go("foo")
 
       it "throws on zero", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq("cy.go() cannot accept '0'. The number must be greater or less than '0'.")
           done()
 
@@ -334,11 +334,11 @@ describe "src/cy/commands/navigation", ->
             ## while we're still unstable, which will result in
             ## properties on the window being inaccessible
             ## since we only visit once at the beginning of these tests
-            cy.on "window:load", ->
+            cy.on "page:ready", ->
               expect(expected).to.be.true
               done()
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expected = true
 
               expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
@@ -346,7 +346,7 @@ describe "src/cy/commands/navigation", ->
             cy.go("back", {timeout: 1})
 
       it "only logs once on error", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error")).to.eq(err)
           done()
@@ -359,7 +359,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "go"
             @lastLog = log
 
@@ -395,7 +395,7 @@ describe "src/cy/commands/navigation", ->
         cy
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
-            cy.on "window:before:unload", =>
+            cy.on "before:window:unload", =>
               lastLog = @lastLog
 
               beforeunload = true
@@ -423,16 +423,16 @@ describe "src/cy/commands/navigation", ->
       cy.visit("/fixtures/jquery.html").then ->
         expect(timeout).to.be.calledWith(4567)
 
-    it "removes window:load listeners", ->
-      listeners = cy.listeners("window:load")
+    it "removes page:ready listeners", ->
+      listeners = cy.listeners("page:ready")
 
-      winLoad = cy.spy(cy, "once").withArgs("window:load")
+      winLoad = cy.spy(cy, "once").withArgs("page:ready")
 
       cy.visit("/fixtures/generic.html").then ->
         ## once for about:blank, once for $iframe src
         expect(winLoad).to.be.calledTwice
 
-        expect(cy.listeners("window:load")).to.deep.eq(listeners)
+        expect(cy.listeners("page:ready")).to.deep.eq(listeners)
 
     it "can visit pages on the same originPolicy", ->
       cy
@@ -449,11 +449,11 @@ describe "src/cy/commands/navigation", ->
         src = cy.state("$autIframe").attr("src")
         expect(src).to.eq "http://localhost:3500/fixtures/jquery.html"
 
-    it "invokes onLoad callback", (done) ->
+    it "invokes onReady callback", (done) ->
       ctx = @
 
       cy.visit("/fixtures/jquery.html", {
-        onLoad: (contentWindow) ->
+        onReady: (contentWindow) ->
           thisValue = @ is ctx
 
           expect(thisValue).be.true
@@ -461,11 +461,11 @@ describe "src/cy/commands/navigation", ->
           done()
       })
 
-    it "invokes onBeforeLoad callback with cy context", (done) ->
+    it "invokes onStart callback with cy context", (done) ->
       ctx = @
 
       cy.visit("/fixtures/jquery.html", {
-        onBeforeLoad: (contentWindow) ->
+        onStart: (contentWindow) ->
           thisValue = @ is ctx
 
           expect(thisValue).be.true
@@ -474,7 +474,7 @@ describe "src/cy/commands/navigation", ->
           done()
       })
 
-    it "does not error without an onBeforeLoad callback", ->
+    it "does not error without an onStart callback", ->
       cy.visit("/fixtures/jquery.html").then ->
         prev = cy.state("current").get("prev")
         expect(prev.get("args")).to.have.length(1)
@@ -539,7 +539,7 @@ describe "src/cy/commands/navigation", ->
         count = 0
         urls = []
 
-        cy.on "window:load", ->
+        cy.on "page:ready", ->
           urls.push cy.state("window").location.href
 
           count += 1
@@ -569,20 +569,20 @@ describe "src/cy/commands/navigation", ->
 
     ## https://github.com/cypress-io/cypress/issues/1311
     it "window immediately resolves and doesn't reload when visiting the same URL with hashes", ->
-      onLoad = cy.stub()
+      onReady = cy.stub()
 
       cy
         .visit("http://localhost:3500/fixtures/generic.html#foo").then (win) ->
           win.foo = 'bar'
         .visit("http://localhost:3500/fixtures/generic.html#foo", {
-          onLoad: onLoad
+          onReady: onReady
         }).then (win) ->
           expect(win.bar).to.not.exist
-          expect(onLoad).not.to.have.been.called
+          expect(onReady).not.to.have.been.called
 
     describe "when origins don't match", ->
       beforeEach ->
-        Cypress.emit("test:before:run", { id: 888 })
+        Cypress.emit("test:start", { id: 888 })
 
         cy.stub(Cypress, "getEmissions").returns([])
         cy.stub(Cypress, "getTestsState").returns([])
@@ -695,7 +695,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "visit"
             @lastLog = log
 
@@ -718,8 +718,8 @@ describe "src/cy/commands/navigation", ->
       it "logs immediately before resolving", ->
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
-          cy.removeAllListeners("log:added")
+        cy.on "internal:log", (attrs, log) ->
+          cy.removeAllListeners("internal:log")
 
           expect(log.pick("name", "message")).to.deep.eq {
             name: "visit"
@@ -862,7 +862,7 @@ describe "src/cy/commands/navigation", ->
           .then ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq({
               "Command": "visit"
-              "Note": "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+              "Note": "Because this visit was to the same hash, the page did not reload and the onStart and onReady callbacks did not fire."
           })
 
     describe "errors", ->
@@ -871,7 +871,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "visit"
             @lastLog = log
             @logs.push(log)
@@ -883,7 +883,7 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .rejects(new Error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(lastLog.get("state")).to.eq "failed"
@@ -897,14 +897,14 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .rejects(new Error)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           done()
 
         cy.visit("/fixtures/generic.html")
 
       it "logs once on timeout error", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -928,19 +928,65 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .callsFake(fn)
 
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.visit("/", {timeout: 20})
 
       it "throws when url isnt a string", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
           done()
 
         cy.visit()
 
+      it "throws when onBeforeLoad callback is used", (done) ->
+        cy.on "test:fail", (err) ->
+          expect(err.message).to.eq """
+            The 'onBeforeLoad' callback for cy.visit() has been renamed to 'onStart'.
+
+            Please change:
+
+              cy.visit({
+                onBeforeLoad () {}
+              })
+
+            to:
+
+              cy.visit({
+                onStart () {}
+              })
+          """
+          done()
+
+        cy.visit("/fixtures/dom.html", {
+          onBeforeLoad: ->
+        })
+
+      it "throws when onLoad callback is used", (done) ->
+        cy.on "test:fail", (err) ->
+          expect(err.message).to.eq """
+            The 'onLoad' callback for cy.visit() has been renamed to 'onReady'.
+
+            Please change:
+
+              cy.visit({
+                onLoad () {}
+              })
+
+            to:
+
+              cy.visit({
+                onReady () {}
+              })
+          """
+          done()
+
+        cy.visit("/fixtures/dom.html", {
+          onLoad: ->
+        })
+
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -953,7 +999,7 @@ describe "src/cy/commands/navigation", ->
           .visit("http://localhost:3501/fixtures/generic.html")
 
       it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -966,7 +1012,7 @@ describe "src/cy/commands/navigation", ->
           .visit("https://localhost:3500/fixtures/generic.html")
 
       it "throws when attempting to visit a 2nd domain on different host", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -1001,7 +1047,7 @@ describe "src/cy/commands/navigation", ->
         cy.stub(Cypress.utils, "locExisting")
         .returns(one)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
@@ -1016,7 +1062,7 @@ describe "src/cy/commands/navigation", ->
       it "does not call resolve:url when throws attemping to visit a 2nd domain", (done) ->
         backend = cy.spy(Cypress, "backend")
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/fixtures/generic.html")
           expect(backend).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500/fixtures/generic.html")
           done()
@@ -1035,7 +1081,7 @@ describe "src/cy/commands/navigation", ->
         .withArgs("resolve:url")
         .rejects(err1)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1087,7 +1133,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1134,7 +1180,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1182,7 +1228,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1229,7 +1275,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1259,7 +1305,7 @@ describe "src/cy/commands/navigation", ->
 
       ## https://github.com/cypress-io/cypress/issues/3101
       [{
-        contentType: 'application/json', 
+        contentType: 'application/json',
         pathName: 'json-content-type'
       }, {
         contentType: 'text/html; charset=utf-8,text/html',
@@ -1267,7 +1313,7 @@ describe "src/cy/commands/navigation", ->
       }]
       .forEach ({contentType, pathName}) ->
         it "displays loading_invalid_content_type when content type is #{contentType} on http requests", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include("""
@@ -1312,7 +1358,7 @@ describe "src/cy/commands/navigation", ->
         ## dont log else we create an endless loop!
         emit = cy.spy(Cypress, "emit").log(false)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("""
@@ -1345,7 +1391,7 @@ describe "src/cy/commands/navigation", ->
 
       expected = false
 
-      cy.on "window:before:unload", ->
+      cy.on "before:window:unload", ->
         expected = true
         expect(Cookie.get("__cypress.initial")).to.eq("true")
 
@@ -1354,12 +1400,12 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/form.html")
         .then ->
-          cy.once "window:unload", ->
+          cy.once "page:end", ->
             expect(cy.state("onPageLoadErr")).to.be.a("function")
 
           null
         .get("a:first").click().then ->
-          listeners = cy.listeners("window:load")
+          listeners = cy.listeners("page:ready")
 
           ## everything should have unbound properly
           expect(listeners.length).to.eq(0)
@@ -1380,7 +1426,7 @@ describe "src/cy/commands/navigation", ->
         timeout = cy.spy(cy, "timeout")
 
         ## we are unstable at this point
-        cy.on "window:before:unload", ->
+        cy.on "before:window:unload", ->
           cy.whenStable ->
             expect(timeout).not.to.be.called
             done()
@@ -1389,7 +1435,7 @@ describe "src/cy/commands/navigation", ->
 
     it "does not time out current commands until stability is reached", ->
       ## on the first retry cause a page load event synchronously
-      cy.on "command:retry", (options) ->
+      cy.on "internal:commandRetry", (options) ->
         switch options._retries
           when 1
             win = cy.state("window")
@@ -1426,7 +1472,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1435,7 +1481,7 @@ describe "src/cy/commands/navigation", ->
       it "can time out", (done) ->
         thenCalled = false
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           ## visit, window, page loading
@@ -1474,8 +1520,8 @@ describe "src/cy/commands/navigation", ->
           _.find @logs, (log) ->
             log.get("name") is name
 
-        cy.on "fail", (err) ->
-          cy.on "command:retry", ->
+        cy.on "test:fail", (err) ->
+          cy.on "internal:commandRetry", ->
             throw new Error("should not have retried twice")
 
           expect(err.message).to.include("Expected to find element")
@@ -1493,7 +1539,7 @@ describe "src/cy/commands/navigation", ->
         start = null
 
         ## on the first retry cause a page load event synchronously
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           switch options._retries
             when 1
               ## hold a ref to this
@@ -1529,7 +1575,7 @@ describe "src/cy/commands/navigation", ->
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
       it "captures cross origin failures", (done) ->
-        cy.once "fail", (err) =>
+        cy.once "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -1559,7 +1605,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "page load"
           @lastLog = log
 
@@ -1572,7 +1618,7 @@ describe "src/cy/commands/navigation", ->
 
       cy
         .visit("/timeout?ms=10", {
-          onBeforeLoad: ->
+          onStart: ->
             expect(emit).to.be.calledOnce
             expect(emit.firstCall).to.be.calledWith("page:loading", true)
         })
@@ -1587,7 +1633,7 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/generic.html")
         .then ->
-          cy.once "window:unload", ->
+          cy.once "page:end", ->
             expected = true
             expect(emit.callCount).to.eq(3)
             expect(emit.thirdCall).to.be.calledWith("page:loading", true)
@@ -1608,13 +1654,13 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/generic.html")
         .then ->
-          cy.once "window:before:unload", =>
+          cy.once "before:window:unload", =>
             expected = true
 
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
         .get("#dimensions").click()
         .then ->
@@ -1633,13 +1679,13 @@ describe "src/cy/commands/navigation", ->
         .then ->
           $input = cy.$$("form#click-me input[type=submit]")
 
-          cy.once "window:before:unload", =>
+          cy.once "before:window:unload", =>
             expected = true
 
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
           cy
             .get("form#click-me")
@@ -1664,11 +1710,11 @@ describe "src/cy/commands/navigation", ->
       cy
       .visit("/fixtures/generic.html")
       .then (win) ->
-        cy.on "window:load", ->
+        cy.on "page:ready", ->
           cy.on "command:queue:end", ->
             done()
 
-        cy.on "command:queue:before:end", ->
+        cy.on "before:command:queue:end", ->
           ## force us to become unstable immediately
           ## else the beforeunload event fires at the end
           ## of the tick which is too late
@@ -1679,11 +1725,11 @@ describe "src/cy/commands/navigation", ->
 
         null
 
-  context "#url:changed", ->
+  context "#page:url:changed", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "new url"
           @lastLog = log
 
@@ -1692,8 +1738,8 @@ describe "src/cy/commands/navigation", ->
       return null
 
     describe "page navigation", ->
-      it "emits url:changed event on initial visit", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed event on initial visit", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1701,12 +1747,12 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledOnce
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
-      it "emits url:changed on 2nd visit to different page", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed on 2nd visit to different page", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1715,17 +1761,17 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledTwice
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/jquery.html"
             )
 
-      it "does not emit url:changed twice on visit to the same page", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "does not emit page:url:changed twice on visit to the same page", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1734,18 +1780,18 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledOnce
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
-      it "does not log url:changed event on visit", ->
+      it "does not log page:url:changed event on visit", ->
         cy
           .visit("/fixtures/generic.html")
           .then ->
             expect(@lastLog).not.to.exist
 
-      it "emits url:changed event on page navigation", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed event on page navigation", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
           .visit("/fixtures/generic.html")
@@ -1754,16 +1800,16 @@ describe "src/cy/commands/navigation", ->
             expect(emit).to.be.calledTwice
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/dimensions.html"
             )
 
-      it "logs url:changed event on page navigation", ->
+      it "logs page:url:changed event on page navigation", ->
         cy
           .visit("/fixtures/generic.html")
           .get("#dimensions").click()
@@ -1781,7 +1827,7 @@ describe "src/cy/commands/navigation", ->
             })
 
     describe "hashchange events", ->
-      it "emits url:changed event", ->
+      it "emits page:url:changed event", ->
         emit = cy.spy(Cypress, "emit").log(false)
 
         cy
@@ -1789,12 +1835,12 @@ describe "src/cy/commands/navigation", ->
           .get("#hashchange").click()
           .then ->
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html#hashchange"
             )
 
-      it "emits url:changed event as navigation events occur", ->
-        emit = cy.spy(Cypress, "emit").log(false).withArgs("url:changed")
+      it "emits page:url:changed event as navigation events occur", ->
+        emit = cy.spy(Cypress, "emit").log(false).withArgs("page:url:changed")
 
         cy
         .visit("/fixtures/generic.html")
@@ -1813,22 +1859,22 @@ describe "src/cy/commands/navigation", ->
             expect(emit.callCount).to.eq(4)
 
             expect(emit.firstCall).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit.secondCall).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html#hashchange"
             )
 
             expect(emit.thirdCall).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html"
             )
 
             expect(emit.getCall(3)).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/generic.html#hashchange"
             )
 
@@ -1857,7 +1903,7 @@ describe "src/cy/commands/navigation", ->
                 "Args": ohc
               })
 
-      it "logs url:changed event as navigation events occur", ->
+      it "logs page:url:changed event as navigation events occur", ->
         cy
         .visit("/fixtures/generic.html")
         .get("#hashchange").click()
@@ -1887,7 +1933,7 @@ describe "src/cy/commands/navigation", ->
           )
 
     describe "history.pushState", ->
-      it "emits url:changed event", ->
+      it "emits page:url:changed event", ->
         emit = cy.spy(Cypress, "emit").log(false)
 
         cy
@@ -1896,7 +1942,7 @@ describe "src/cy/commands/navigation", ->
             win.history.pushState({foo: "bar"}, null, "pushState.html")
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/pushState.html"
             )
 
@@ -1924,7 +1970,7 @@ describe "src/cy/commands/navigation", ->
             })
 
     describe "history.replaceState", ->
-      it "emits url:changed event", ->
+      it "emits page:url:changed event", ->
         emit = cy.spy(Cypress, "emit").log(false)
 
         cy
@@ -1933,7 +1979,7 @@ describe "src/cy/commands/navigation", ->
             win.history.replaceState({foo: "bar"}, null, "replaceState.html")
 
             expect(emit).to.be.calledWith(
-              "url:changed"
+              "page:url:changed"
               "http://localhost:3500/fixtures/replaceState.html"
             )
 
@@ -1964,7 +2010,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "form sub"
           @lastLog = log
 

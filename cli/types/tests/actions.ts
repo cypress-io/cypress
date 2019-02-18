@@ -3,77 +3,77 @@ Cypress.on('uncaught:exception', (error, runnable) => {
   runnable // $ExpectType IRunnable
 })
 
-Cypress.on('window:confirm', (text) => {
+Cypress.on('page:confirm', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('window:alert', (text) => {
+Cypress.on('page:alert', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('window:before:load', (win) => {
-  win // $ExpectType Window
+Cypress.on('page:start', (details) => {
+  details // $ExpectType PageDetails
 })
 
-Cypress.on('window:load', (win) => {
-  win // $ExpectType Window
+Cypress.on('page:ready', (details) => {
+  details // $ExpectType PageDetails
 })
 
-Cypress.on('window:before:unload', (event) => {
+Cypress.on('page:end', (details) => {
+  details // $ExpectType PageDetails
+})
+
+Cypress.on('before:window:unload', (event) => {
   event // $ExpectType BeforeUnloadEvent
 })
 
-Cypress.on('window:unload', (event) => {
-  event // $ExpectType Event
-})
-
-Cypress.on('url:changed', (url) => {
+Cypress.on('page:url:changed', (url) => {
   url // $ExpectType string
 })
 
-Cypress.on('fail', (error, mocha) => {
+Cypress.on('test:fail', (error, mocha) => {
   error // $ExpectType Error
   mocha // $ExpectType IRunnable
 })
 
-Cypress.on('viewport:changed', (viewport) => {
+Cypress.on('viewport:change', (viewport) => {
   viewport // $ExpectType Viewport
 })
 
-Cypress.on('scrolled', ($el) => {
+Cypress.on('internal:scrolled', ($el) => {
   $el // $ExpectType JQuery<HTMLElement>
 })
 
-Cypress.on('command:enqueued', (command) => {
+Cypress.on('internal:commandEnqueue', (command) => {
   command // $ExpectType EnqueuedCommand
 })
 
-Cypress.on('command:start', (command) => {
+Cypress.on('internal:commandStart', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('command:end', (command) => {
+Cypress.on('internal:commandEnd', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('command:retry', (command) => {
+Cypress.on('internal:commandRetry', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('log:added', (log, interactive: boolean) => {
+Cypress.on('internal:log', (log, interactive: boolean) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('log:changed', (log, interactive: boolean) => {
+Cypress.on('internal:logChange', (log, interactive: boolean) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('test:before:run', (attributes , test) => {
+Cypress.on('test:start', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })
 
-Cypress.on('test:after:run', (attributes , test) => {
+Cypress.on('test:end', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
 })

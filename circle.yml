@@ -212,6 +212,8 @@ jobs:
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
+      # make sure packages with TypeScript can be transpiled to JS
+      - run: npm run all build-js
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
@@ -713,6 +715,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - desktop-gui-integration-tests-2x:
+        requires:
+          - build
+    - reporter-integration-tests:
         requires:
           - build
     - run-launcher:

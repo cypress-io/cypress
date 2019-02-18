@@ -1,1 +1,1 @@
-throw new Error("error thrown by pluginsFile")
+throw new Error("error thrown by backgroundFile")

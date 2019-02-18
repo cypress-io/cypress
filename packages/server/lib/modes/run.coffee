@@ -26,6 +26,7 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
+serverEvents = require("../background/server_events")
 
 color = (val, c) ->
   chalk[c](val)
@@ -584,7 +585,7 @@ module.exports = {
 
     browserOpts.projectRoot = projectRoot
 
-    openProject.launch(browser, spec, browserOpts)
+    openProject.launchBrowser(browser, spec, browserOpts)
 
   listenForProjectEnd: (project, exit) ->
     new Promise (resolve) ->
@@ -746,9 +747,11 @@ module.exports = {
     }
 
   runSpecs: (options = {}) ->
+    ## TODO: add ciGroupId to these options and pass to 'run:start' event
     { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
 
     isHeadless = browser.name is "electron" and not headed
+    cypressVersion = pkg.version
 
     browser.isHeadless = isHeadless
     browser.isHeaded = not isHeadless
@@ -757,21 +760,21 @@ module.exports = {
       startedTestsAt: null
       endedTestsAt: null
       totalDuration: null
-      totalSuites: null,
-      totalTests: null,
-      totalFailed: null,
-      totalPassed: null,
-      totalPending: null,
-      totalSkipped: null,
-      runs: null,
-      browserPath: browser.path,
-      browserName: browser.name,
-      browserVersion: browser.version,
-      osName: sys.osName,
-      osVersion: sys.osVersion,
-      cypressVersion: pkg.version,
-      runUrl: runUrl,
-      config,
+      totalSuites: null
+      totalTests: null
+      totalFailed: null
+      totalPassed: null
+      totalPending: null
+      totalSkipped: null
+      runs: null
+      browserPath: browser.path
+      browserName: browser.name
+      browserVersion: browser.version
+      osName: sys.osName
+      osVersion: sys.osVersion
+      cypressVersion: pkg.version
+      runUrl: runUrl
+      config
     }
 
     displayRunStarting({
@@ -790,15 +793,31 @@ module.exports = {
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
+        serverEvents.execute("spec:end", spec, results)
 
-    iterateThroughSpecs({
-      specs
-      config
-      parallel
-      runEachSpec
-      afterSpecRun
-      beforeSpecRun
-    })
+    Promise.try ->
+      runDetails = {
+        config
+        browser
+        system: sys
+        cypressVersion
+        specs
+        specPattern
+        runUrl
+        parallel
+        group
+      }
+
+      serverEvents.execute("run:start", runDetails)
+    .then ->
+      iterateThroughSpecs({
+        specs
+        config
+        parallel
+        runEachSpec
+        afterSpecRun
+        beforeSpecRun
+      })
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
@@ -813,7 +832,10 @@ module.exports = {
 
       debug("final results of all runs: %o", results)
 
-      writeOutput(outputPath, results)
+      Promise.try ->
+        serverEvents.execute("run:end", results)
+      .then ->
+        writeOutput(outputPath, results)
       .return(results)
 
   runSpec: (spec = {}, options = {}, estimated) ->
@@ -831,34 +853,36 @@ module.exports = {
 
     screenshots = []
 
+    browserCanBeRecorded = (name) ->
+      name is "electron" and isHeadless
+
+    if video and browserCanBeRecorded(browserName)
+      if not videosFolder
+        throw new Error("Missing videoFolder for recording")
+
+      name  = path.join(videosFolder, spec.name + ".mp4")
+      cname = path.join(videosFolder, spec.name + "-compressed.mp4")
+
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
 
-    ## if we've been told to record and we're not spawning a headed browser
-    browserCanBeRecorded = (name) ->
-      name is "electron" and isHeadless
-
-    if video
-      if browserCanBeRecorded(browserName)
-        if not videosFolder
-          throw new Error("Missing videoFolder for recording")
-
-        name  = path.join(videosFolder, spec.name + ".mp4")
-        cname = path.join(videosFolder, spec.name + "-compressed.mp4")
-
-        recording = @createRecording(name)
-      else
-        console.log("")
-
-        if browserName is "electron" and isHeaded
-          errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+    Promise.try ->
+      serverEvents.execute("spec:start", spec)
+    .then =>
+      if video
+        if browserCanBeRecorded(browserName)
+          @createRecording(name)
         else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
+          console.log("")
 
-    Promise.resolve(recording)
+          if browserName is "electron" and isHeaded
+            errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+          else
+            errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
+
     .then (props = {}) =>
       ## extract the started + ended promises from recording
       {start, end, write} = props

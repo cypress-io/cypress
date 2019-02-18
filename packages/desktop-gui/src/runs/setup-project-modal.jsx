@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
-import Loader from 'react-loader'
 
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
@@ -12,6 +11,7 @@ import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
 
+import Loader from '../lib/loader'
 import LoginForm from '../auth/login-form'
 
 @observer
@@ -62,7 +62,7 @@ class SetupProject extends Component {
   _poll () {
     if (orgsApi.isPolling()) return
 
-    orgsApi.getOrgs()
+    orgsApi.getOrgs(true)
     orgsApi.pollOrgs()
   }
 
@@ -75,8 +75,8 @@ class SetupProject extends Component {
       return this._loginMessage()
     }
 
-    if (!orgsStore.isLoaded) {
-      this._loading()
+    if (orgsStore.isLoading) {
+      return this._loading()
     }
 
     return (
@@ -125,7 +125,7 @@ class SetupProject extends Component {
     return (
       <div className='setup-project-modal modal-body os-dialog'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <Loader color='#888' scale={0.5} />
+        <Loader />
       </div>
     )
   }
@@ -141,7 +141,7 @@ class SetupProject extends Component {
         </div>
         <div>
           <input
-            autoFocus='true'
+            autoFocus={true}
             ref='projectName'
             type='text'
             className='form-control'

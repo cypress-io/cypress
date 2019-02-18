@@ -31,7 +31,7 @@ describe "visits", ->
 
       {origin} = Cypress.Location.create(window.location.href)
 
-      cy.on "window:load", ->
+      cy.on "page:ready", ->
         urls.push cy.getRemoteLocation("href")
 
         count += 1

@@ -140,7 +140,7 @@ describe "src/cy/commands/actions/submit", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -167,24 +167,24 @@ describe "src/cy/commands/actions/submit", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "is a child command", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.submit()
 
       it "throws when non dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.noop({}).submit()
 
       it "throws when subject isnt a form", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -202,7 +202,7 @@ describe "src/cy/commands/actions/submit", ->
           form.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(submitted).to.eq 1
           expect(err.message).to.include "cy.submit() failed because this element"
           done()
@@ -215,14 +215,14 @@ describe "src/cy/commands/actions/submit", ->
         ## make sure we have more than 1 form.
         expect(forms.length).to.be.gt(1)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "cy.submit() can only be called on a single form. Your subject contained #{forms.length} form elements."
           done()
 
         cy.get("form").submit()
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -234,7 +234,7 @@ describe "src/cy/commands/actions/submit", ->
       it "eventually fails the assertion", (done) ->
         cy.$$("form:first").submit -> return false
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -250,7 +250,7 @@ describe "src/cy/commands/actions/submit", ->
       it "does not log an additional log on failure", (done) ->
         cy.$$("form:first").submit -> return false
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
@@ -258,7 +258,7 @@ describe "src/cy/commands/actions/submit", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "submit"
             @lastLog = log
 
@@ -267,7 +267,7 @@ describe "src/cy/commands/actions/submit", ->
       it "logs immediately before resolving", ->
         $form = cy.$$("form:first")
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "submit"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $form.get(0)

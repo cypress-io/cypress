@@ -55,7 +55,7 @@ describe "src/cy/commands/clock", ->
       cy.clock().then (clock) ->
         r = cy.spy(clock, "restore")
 
-        Cypress.emit("test:before:run", {})
+        Cypress.emit("test:start", {})
 
         expect(r).to.be.called
 
@@ -74,21 +74,21 @@ describe "src/cy/commands/clock", ->
 
     context "errors", ->
       it "throws if now is not a number (or options object)", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.clock() only accepts a number or an options object for its first argument. You passed: \"250\"")
           done()
 
         cy.clock("250")
 
       it "throws if methods is not an array (or options object)", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.clock() only accepts an array of function names or an options object for its second argument. You passed: \"setTimeout\"")
           done()
 
         cy.clock(0, "setTimeout")
 
       it "throws if methods is not an array of strings (or options object)", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.clock() only accepts an array of function names or an options object for its second argument. You passed: [42]")
           done()
 
@@ -116,7 +116,7 @@ describe "src/cy/commands/clock", ->
     context "options", ->
       beforeEach ->
         @logged = false
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "clock"
             @logged = true
 
@@ -152,7 +152,7 @@ describe "src/cy/commands/clock", ->
           }
         }
         cy.clock(null, ["setTimeout"]).then (clock) =>
-          Cypress.emit("window:before:load", newWindow)
+          Cypress.emit("page:start", { win: newWindow })
           onSetTimeout = cy.spy()
           newWindow.setTimeout(onSetTimeout)
           clock.tick()
@@ -166,7 +166,7 @@ describe "src/cy/commands/clock", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           name = log.get("name")
           if name in ["clock", "tick", "restore"]
             @logs.push(log)
@@ -195,7 +195,7 @@ describe "src/cy/commands/clock", ->
 
       it "does not log when auto-restored", (done) ->
         cy.clock().then =>
-          Cypress.emit("test:before:run", {})
+          Cypress.emit("test:start", {})
           expect(@logs.length).to.equal(1)
           done()
 
@@ -243,7 +243,7 @@ describe "src/cy/commands/clock", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if log.get("name") is "tick"
           @logs.push(log)
 
@@ -273,14 +273,14 @@ describe "src/cy/commands/clock", ->
 
     context "errors", ->
       it "throws if there is not a clock", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("cy.tick() cannot be called without first calling cy.clock()")
           done()
 
         cy.tick()
 
       it "throws if ms is not undefined or a number", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.equal("clock.tick()/cy.tick() only accept a number as their argument. You passed: \"100\"")
           done()
 

@@ -31,7 +31,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## currentViewport could already be set due to previous runs
   currentViewport ?= defaultViewport
 
-  Cypress.on "test:before:run:async", ->
+  Cypress.on "test:start:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
     ## need to restore prior to running the next test
@@ -57,7 +57,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## force our UI to change to the viewport and wait for it
       ## to be updated
-      Cypress.action "cy:viewport:changed", viewport, ->
+      Cypress.action "cy:viewport:change", viewport, ->
         resolve(viewport)
 
   Commands.addAll({

@@ -46,12 +46,12 @@ describe "promises", ->
   it "throws when returning a promise from a custom command", (done) ->
     logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @lastLog = log
 
       logs.push(log)
 
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(logs.length).to.eq(1)
@@ -75,12 +75,12 @@ describe "promises", ->
   it "throws when instantiating a promise from a custom command", (done) ->
     logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @lastLog = log
 
       logs.push(log)
 
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(logs.length).to.eq(1)
@@ -106,7 +106,7 @@ describe "promises", ->
 
     cy.foo()
 
-  it "can return a promise that throws on its own without warning", (done) ->
+  it "can return a promise that throws on its own without warning", ->
     Cypress.Promise
     .delay(10)
     .then ->
@@ -116,10 +116,9 @@ describe "promises", ->
 
       throw new Error("foo")
     .catch ->
-      done()
 
   it "can still fail cypress commands", (done) ->
-    cy.on "fail", (err) ->
+    cy.on "test:fail", (err) ->
       expect(err.message).to.eq("foo")
       done()
 
@@ -128,3 +127,4 @@ describe "promises", ->
     .then ->
       cy.wrap({}).then ->
         throw new Error("foo")
+    return

@@ -1,6 +1,5 @@
 _             = require("lodash")
 path          = require("path")
-uuid          = require("node-uuid")
 debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
@@ -14,17 +13,18 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
-preprocessor  = require("./plugins/preprocessor")
+preprocessor  = require("./background/preprocessor")
+driverEvents  = require("./background/driver_events")
 
 runnerEvents = [
   "reporter:restart:test:run"
   "runnables:ready"
   "run:start"
-  "test:before:run:async"
-  "reporter:log:add"
-  "reporter:log:state:changed"
+  "test:start:async"
+  "reporter:internal:log"
+  "reporter:internal:logChange"
   "paused"
-  "test:after:hooks"
+  "after:test:hooks"
   "run:end"
 ]
 
@@ -307,7 +307,9 @@ class Socket
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
-              task.run(config.pluginsFile, args[0])
+              task.run(config.backgroundFile, args[0])
+            when "driver:event"
+              driverEvents.execute(args...)
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"

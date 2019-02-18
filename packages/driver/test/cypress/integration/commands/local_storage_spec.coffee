@@ -27,17 +27,17 @@ describe "src/cy/commands/local_storage", ->
       cy.clearLocalStorage().then (remote) ->
         expect(remote).to.eq ls
 
-    describe "test:before:run", ->
+    describe "test:start", ->
       it "clears localStorage before each test run", ->
         clear = cy.spy Cypress.LocalStorage, "clear"
 
-        Cypress.emit("test:before:run", {})
+        Cypress.emit("test:start", {})
 
         expect(clear).to.be.calledWith []
 
     describe "errors", ->
       it "throws when being passed a non string or regexp", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.clearLocalStorage() must be called with either a string or regular expression."
           done()
 
@@ -45,7 +45,7 @@ describe "src/cy/commands/local_storage", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null

@@ -4,6 +4,7 @@ import Tooltip from '@cypress/react-tooltip'
 import Dropdown from '../dropdown/dropdown'
 
 import projectsApi from '../projects/projects-api'
+import Project from '../project/project-model'
 
 @observer
 export default class Browsers extends Component {
@@ -17,7 +18,7 @@ export default class Browsers extends Component {
         {this._closeBrowserBtn()}
         <Dropdown
           className='browsers-list'
-          disabled={project.browserState === 'opened' || project.browserState === 'opening'}
+          disabled={project.isBrowserState(Project.BROWSER_OPENING, Project.BROWSER_OPEN, Project.BROWSER_CLOSING)}
           chosen={project.chosenBrowser}
           others={project.otherBrowsers}
           onSelect={this._onSelect}
@@ -30,16 +31,16 @@ export default class Browsers extends Component {
   }
 
   _closeBrowserBtn () {
-    if (this.props.project.browserState === 'opened') {
-      return (
-        <li className='close-browser'>
-          <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
-            <i className='fa fa-fw fa-times'></i>
-            Stop
-          </button>
-        </li>
-      )
-    }
+    if (!this.props.project.isBrowserState(Project.BROWSER_OPEN)) return null
+
+    return (
+      <li className='close-browser'>
+        <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
+          <i className='fa fa-fw fa-times'></i>
+          Stop
+        </button>
+      </li>
+    )
   }
 
   _closeBrowser = (e) => {
@@ -56,12 +57,15 @@ export default class Browsers extends Component {
     let icon
     let prefixText
 
-    if (project.browserState === 'opening') {
+    if (project.isBrowserState(Project.BROWSER_OPENING)) {
       icon = 'refresh fa-spin'
       prefixText = 'Opening'
-    } else if (project.browserState === 'opened') {
+    } else if (project.isBrowserState(Project.BROWSER_OPEN)) {
       icon = 'check-circle-o green'
       prefixText = 'Running'
+    } else if (project.isBrowserState(Project.BROWSER_CLOSING)) {
+      icon = 'refresh fa-spin'
+      prefixText = 'Closing'
     } else {
       icon = browser.icon
       prefixText = ''

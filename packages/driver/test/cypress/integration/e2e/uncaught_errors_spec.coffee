@@ -4,7 +4,7 @@ describe "uncaught errors", ->
   beforeEach ->
     @logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @lastLog = log
       @logs.push(log)
 
@@ -13,7 +13,7 @@ describe "uncaught errors", ->
   it "logs visit failure once", (done) ->
     r = cy.state("runnable")
 
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(@logs.length).to.eq(1)
@@ -64,7 +64,7 @@ describe "uncaught errors", ->
 
       return true
 
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(@logs.length).to.eq(4)
@@ -90,7 +90,7 @@ describe "uncaught errors", ->
 
       return true
 
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       click = _.find @logs, (log) ->
         log.get("name") is "click"
 

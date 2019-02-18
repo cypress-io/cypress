@@ -99,7 +99,7 @@ describe "src/cy/commands/actions/select", ->
       select  = $("<select />").attr("id", "select-covered-in-span").prependTo(cy.$$("body"))
       span = $("<span>span on select</span>").css(position: "absolute", left: select.offset().left, top: select.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-      cy.on "command:retry", (options) ->
+      cy.on "internal:commandRetry", (options) ->
         expect(options.timeout).to.eq 1000
         expect(options.interval).to.eq 60
         done()
@@ -116,7 +116,7 @@ describe "src/cy/commands/actions/select", ->
     it "retries until <option> can be selected", ->
       option = cy.$$("<option>foo</option>")
 
-      cy.on "command:retry", _.once =>
+      cy.on "internal:commandRetry", _.once =>
         cy.$$("select:first").append option
 
       cy.get("select:first").select("foo")
@@ -124,7 +124,7 @@ describe "src/cy/commands/actions/select", ->
     it "retries until <select> is no longer disabled", ->
       select = cy.$$("select[name=disabled]")
 
-      cy.on "command:retry", _.once =>
+      cy.on "internal:commandRetry", _.once =>
         select.prop("disabled", false)
 
       cy.get("select[name=disabled]").select("foo")
@@ -132,14 +132,14 @@ describe "src/cy/commands/actions/select", ->
     it "retries until <options> are no longer disabled", ->
       select = cy.$$("select[name=opt-disabled]")
 
-      cy.on "command:retry", _.once =>
+      cy.on "internal:commandRetry", _.once =>
         select.find("option").prop("disabled", false)
 
       cy.get("select[name=opt-disabled]").select("bar")
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -196,14 +196,14 @@ describe "src/cy/commands/actions/select", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.noop({}).select("foo")
 
@@ -214,7 +214,7 @@ describe "src/cy/commands/actions/select", ->
           selected += 1
           $select.remove()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(selected).to.eq 1
           expect(err.message).to.include "cy.select() failed because this element"
           done()
@@ -224,7 +224,7 @@ describe "src/cy/commands/actions/select", ->
       it "throws when more than 1 element in the collection", (done) ->
         num = cy.$$("select").length
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "cy.select() can only be called on a single <select>. Your subject contained #{num} elements."
           done()
 
@@ -233,21 +233,21 @@ describe "src/cy/commands/actions/select", ->
           .select("foo")
 
       it "throws on anything other than a select", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.select() can only be called on a <select>. Your subject is a: <input id=\"input\">"
           done()
 
         cy.get("input:first").select("foo")
 
       it "throws when finding duplicate values", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.select() matched more than one option by value or text: bm"
           done()
 
         cy.get("select[name=names]").select("bm")
 
       it "throws when passing an array to a non multiple select", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.select() was called with an array of arguments but does not have a 'multiple' attribute set."
           done()
 
@@ -256,35 +256,35 @@ describe "src/cy/commands/actions/select", ->
       it "throws when the subject isnt visible", (done) ->
         select = cy.$$("select:first").show().hide()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.select() failed because this element is not visible"
           done()
 
         cy.get("select:first").select("de_dust2")
 
       it "throws when value or text does not exist", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.select() failed because it could not find a single <option> with value or text matching: 'foo'")
           done()
 
         cy.get("select[name=foods]").select("foo")
 
       it "throws when the <select> itself is disabled", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.select() failed because this element is currently disabled:")
           done()
 
         cy.get("select[name=disabled]").select("foo")
 
       it "throws when options are disabled", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.select() failed because this <option> you are trying to select is currently disabled:")
           done()
 
         cy.get("select[name=opt-disabled]").select("bar")
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -298,14 +298,14 @@ describe "src/cy/commands/actions/select", ->
         cy.get("select:first").select("de_nuke").should("have.class", "selected")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
         cy.get("select:first").select("de_nuke").should("have.class", "selected")
 
       it "only logs once on failure", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## 2 logs, 1 for cy.get, 1 for cy.select
           expect(@logs.length).to.eq(2)
           done()
@@ -316,7 +316,7 @@ describe "src/cy/commands/actions/select", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -381,7 +381,7 @@ describe "src/cy/commands/actions/select", ->
       it "logs only one select event", ->
         types = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "select"
             types.push(log)
 

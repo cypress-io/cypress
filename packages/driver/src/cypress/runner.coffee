@@ -6,13 +6,12 @@ Pending = require("mocha/lib/pending")
 $Log = require("./log")
 $utils = require("./utils")
 
-defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
 
 HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
-TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
-TEST_AFTER_RUN_EVENT = "runner:test:after:run"
+TEST_RUN_START_EVENT = "runner:test:start"
+TEST_RUN_END_EVENT = "runner:test:end"
 
 ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
@@ -78,18 +77,18 @@ fired = (event, runnable) ->
 
 testBeforeRunAsync = (test, Cypress) ->
   Promise.try ->
-    if not fired("runner:test:before:run:async", test)
-      fire("runner:test:before:run:async", test, Cypress)
+    if not fired("runner:test:start:async", test)
+      fire("runner:test:start:async", test, Cypress)
 
 runnableAfterRunAsync = (runnable, Cypress) ->
   Promise.try ->
-    if not fired("runner:runnable:after:run:async", runnable)
-      fire("runner:runnable:after:run:async", runnable, Cypress)
+    if not fired("runner:after:runnable:run:async", runnable)
+      fire("runner:after:runnable:run:async", runnable, Cypress)
 
 testAfterRun = (test, Cypress) ->
-  if not fired(TEST_AFTER_RUN_EVENT, test)
+  if not fired(TEST_RUN_END_EVENT, test)
     setWallClockDuration(test)
-    fire(TEST_AFTER_RUN_EVENT, test, Cypress)
+    fire(TEST_RUN_END_EVENT, test, Cypress)
 
     ## perf loop only through
     ## a tests OWN properties and not
@@ -193,7 +192,7 @@ getAllSiblingTests = (suite, getTestById) ->
     ## iterate through each of our suites tests.
     ## this will iterate through all nested tests
     ## as well.  and then we add it only if its
-    ## in our grepp'd tests array
+    ## in our filtered tests array
     if getTestById(test.id)
       tests.push test
 
@@ -212,7 +211,7 @@ getTestFromHook = (hook, suite, getTestById) ->
     return found if found
 
   ## returns us the very first test
-  ## which is in our grepped tests array
+  ## which is in our filtered tests array
   ## based on walking down the current suite
   ## iterating through each test until it matches
   found = onFirstTest suite, (test) =>
@@ -227,11 +226,11 @@ getTestFromHook = (hook, suite, getTestById) ->
 
 ## we have to see if this is the last suite amongst
 ## its siblings.  but first we have to filter out
-## suites which dont have a grep'd test in them
+## suites which dont have a filtered test in them
 isLastSuite = (suite, tests) ->
   return false if suite.root
 
-  ## grab all of the suites from our grep'd tests
+  ## grab all of the suites from our filtered tests
   ## including all of their ancestor suites!
   suites = _.reduce tests, (memo, test) ->
     while parent = test.parent
@@ -267,7 +266,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
   return if not _runner.hook
 
   ## monkey patch the hook event so we can wrap
-  ## 'test:after:run' around all of
+  ## 'test:end' around all of
   ## the hooks surrounding a test runnable
   _runnerHook = _runner.hook
 
@@ -296,17 +295,17 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
       when "afterEach"
         t = getTest()
 
-        ## find all of the grep'd _tests which share
+        ## find all of the filtered _tests which share
         ## the same parent suite as our current _test
         tests = getAllSiblingTests(t.parent, getTestById)
 
         ## make sure this test isnt the last test overall but also
-        ## isnt the last test in our grep'd parent suite's tests array
+        ## isnt the last test in our filtered parent suite's tests array
         if @suite.root and (t isnt _.last(allTests)) and (t isnt _.last(tests))
           changeFnToRunAfterHooks()
 
       when "afterAll"
-        ## find all of the grep'd allTests which share
+        ## find all of the filtered allTests which share
         ## the same parent suite as our current _test
         if t = getTest()
           siblings = getAllSiblingTests(t.parent, getTestById)
@@ -327,17 +326,6 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
 
     _runnerHook.call(@, name, fn)
 
-matchesGrep = (runnable, grep) ->
-  ## we have optimized this iteration to the maximum.
-  ## we memoize the existential matchesGrep property
-  ## so we dont regex again needlessly when going
-  ## through tests which have already been set earlier
-  if (not runnable.matchesGrep?) or (not _.isEqual(runnable.grepRe, grep))
-    runnable.grepRe      = grep
-    runnable.matchesGrep = grep.test(runnable.fullTitle())
-
-  runnable.matchesGrep
-
 getTestResults = (tests) ->
   _.map tests, (test) ->
     obj = _.pick(test, "id", "duration", "state")
@@ -347,7 +335,12 @@ getTestResults = (tests) ->
       obj.state = "skipped"
     obj
 
-normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getTestId) ->
+hasOnly = (suite) ->
+  suite._onlyTests.length or
+  suite._onlySuites.length or
+  _.some(suite.suites, hasOnly)
+
+normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getTestId) ->
   hasTests = false
 
   ## only loop until we find the first test
@@ -361,10 +354,8 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
   ## we hand back a normalized object but also
   ## create optimized lookups for the tests without
   ## traversing through it multiple times
-  tests         = {}
-  grepIsDefault = _.isEqual(grep, defaultGrepRe)
-
-  obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
+  tests = {}
+  normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
 
   if setTestsById
     ## use callback here to hand back
@@ -375,10 +366,10 @@ normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnab
     ## same pattern here
     setTests(_.values(tests))
 
-  return obj
+  return normalizedSuite
 
-normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId) ->
-  normalizer = (runnable) =>
+normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTestId) ->
+  normalizeRunnable = (runnable) =>
     runnable.id = getTestId()
 
     ## tests have a type of 'test' whereas suites do not have a type property
@@ -402,63 +393,56 @@ normalize = (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onL
   push = (test) =>
     tests[test.id] ?= test
 
-  obj = normalizer(runnable)
+  normalizedRunnable = normalizeRunnable(runnable)
 
-  ## if we have a default grep then avoid
-  ## grepping altogether and just push
-  ## tests into the array of tests
-  if grepIsDefault
+  if runnable.type isnt "suite" or not hasOnly(runnable)
     if runnable.type is "test"
       push(runnable)
 
-    ## and recursively iterate and normalize all other _runnables
-    _.each {tests: runnable.tests, suites: runnable.suites}, (_runnables, key) =>
-      if runnable[key]
-        obj[key] = _.map _runnables, (runnable) =>
-          normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
-  else
-    ## iterate through all tests and only push them in
-    ## if they match the current grep
-    obj.tests = _.reduce runnable.tests ? [], (memo, test) =>
-      ## only push in the test if it matches
-      ## our grep
-      if matchesGrep(test, grep)
-        memo.push(normalizer(test))
-        push(test)
-      memo
-    , []
+    ## recursively iterate and normalize all other _runnables
+    _.each {tests: runnable.tests, suites: runnable.suites}, (_runnables, type) =>
+      if runnable[type]
+        normalizedRunnable[type] = _.map _runnables, (runnable) =>
+          normalize(runnable, tests, initialTests, onRunnable, onLogsById, getTestId)
 
-    ## and go through the suites
-    obj.suites = _.reduce runnable.suites ? [], (memo, suite) =>
-      ## but only add them if a single nested test
-      ## actually matches the grep
-      any = anyTestInSuite suite, (test) =>
-        matchesGrep(test, grep)
+    return normalizedRunnable
 
-      if any
-        memo.push(
-          normalize(
-            suite,
-            tests,
-            initialTests,
-            grep,
-            grepIsDefault,
-            onRunnable,
-            onLogsById,
-            getTestId
-          )
-        )
+  ## this follows how mocha filters onlys. its runner#filterOnly
+  ## is pretty much the same minus the normalization part
+  filterOnly = (normalizedSuite, suite) ->
+    if suite._onlyTests.length
+      suite.tests = suite._onlyTests
+      normalizedSuite.tests = _.map suite._onlyTests, (test) =>
+        normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById, getTestId)
+        push(normalizedTest)
+        normalizedTest
+      suite.suites = []
+      normalizedSuite.suites = []
+    else
+      suite.tests = []
+      normalizedSuite.tests = []
+      _.each suite._onlySuites, (onlySuite) ->
+        normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById, getTestId)
+        if hasOnly(onlySuite)
+          filterOnly(normalizedOnlySuite, onlySuite)
 
-      memo
-    , []
+      suite.suites = _.filter suite.suites, (childSuite) ->
+        normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById, getTestId)
+        suite._onlySuites.indexOf(childSuite) isnt -1 or filterOnly(normalizedChildSuite, childSuite)
+      normalizedSuite.suites = _.map suite.suites, (childSuite) ->
+        normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId)
 
-  return obj
+    return suite.tests.length or suite.suites.length
+
+  filterOnly(normalizedRunnable, runnable)
+
+  return normalizedRunnable
 
 afterEachFailed = (Cypress, test, err) ->
   test.state = "failed"
   test.err = wrapErr(err)
 
-  Cypress.action("runner:test:end", wrap(test))
+  Cypress.action("runner:mocha:test:end", wrap(test))
 
 hookFailed = (hook, err, hookName, getTestById, getTest) ->
   ## finds the test by returning the first test from
@@ -476,16 +460,16 @@ hookFailed = (hook, err, hookName, getTestById, getTest) ->
     ## when would the hook not be emitted at this point?
     test.alreadyEmittedMocha = true
   else
-    Cypress.action("runner:test:end", wrap(test))
+    Cypress.action("runner:mocha:test:end", wrap(test))
 
 _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId) ->
   _runner.on "start", ->
-    Cypress.action("runner:start", {
+    Cypress.action("runner:mocha:start", {
       start: new Date()
     })
 
   _runner.on "end", ->
-    Cypress.action("runner:end", {
+    Cypress.action("runner:mocha:end", {
       end: new Date()
     })
 
@@ -494,7 +478,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.started[suite.id] = true
 
-    Cypress.action("runner:suite:start", wrap(suite))
+    Cypress.action("runner:mocha:suite:start", wrap(suite))
 
   _runner.on "suite end", (suite) ->
     ## cleanup our suite + its hooks
@@ -505,7 +489,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.ended[suite.id] = true
 
-    Cypress.action("runner:suite:end", wrap(suite))
+    Cypress.action("runner:mocha:suite:end", wrap(suite))
 
   _runner.on "hook", (hook) ->
     hook.hookId ?= getHookId()
@@ -527,14 +511,14 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
     hook.ctx.currentTest = test
 
     ## make sure we set this test as the current now
-    ## else its possible that our TEST_AFTER_RUN_EVENT
+    ## else its possible that our TEST_RUN_END_EVENT
     ## will never fire if this failed in a before hook
     setTest(test)
 
-    Cypress.action("runner:hook:start", wrap(hook))
+    Cypress.action("runner:mocha:hook:start", wrap(hook))
 
   _runner.on "hook end", (hook) ->
-    Cypress.action("runner:hook:end", wrap(hook))
+    Cypress.action("runner:mocha:hook:end", wrap(hook))
 
   _runner.on "test", (test) ->
     setTest(test)
@@ -543,17 +527,17 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
     _emissions.started[test.id] = true
 
-    Cypress.action("runner:test:start", wrap(test))
+    Cypress.action("runner:mocha:test:start", wrap(test))
 
   _runner.on "test end", (test) ->
     return if _emissions.ended[test.id]
 
     _emissions.ended[test.id] = true
 
-    Cypress.action("runner:test:end", wrap(test))
+    Cypress.action("runner:mocha:test:end", wrap(test))
 
   _runner.on "pass", (test) ->
-    Cypress.action("runner:pass", wrap(test))
+    Cypress.action("runner:mocha:pass", wrap(test))
 
   ## if a test is pending mocha will only
   ## emit the pending event instead of the test
@@ -562,8 +546,8 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
     ## do nothing if our test is skipped
     return if test._ALREADY_RAN
 
-    if not fired(TEST_BEFORE_RUN_EVENT, test)
-      fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+    if not fired(TEST_RUN_START_EVENT, test)
+      fire(TEST_RUN_START_EVENT, test, Cypress)
 
     test.state = "pending"
 
@@ -571,17 +555,17 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## do not double emit this event
       test.alreadyEmittedMocha = true
 
-      Cypress.action("runner:pending", wrap(test))
+      Cypress.action("runner:mocha:pending", wrap(test))
 
     @emit("test", test)
 
     ## if this is not the last test amongst its siblings
-    ## then go ahead and fire its test:after:run event
+    ## then go ahead and fire its test:end event
     ## else this will not get called
     tests = getAllSiblingTests(test.parent, getTestById)
 
     if _.last(tests) isnt test
-      fire(TEST_AFTER_RUN_EVENT, test, Cypress)
+      fire(TEST_RUN_END_EVENT, test, Cypress)
 
   _runner.on "fail", (runnable, err) ->
     isHook = runnable.type is "hook"
@@ -608,19 +592,19 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## do not double emit this event
       runnable.alreadyEmittedMocha = true
 
-      Cypress.action("runner:fail", wrap(runnable), runnable.err)
+      Cypress.action("runner:mocha:fail", wrap(runnable), runnable.err)
 
     ## if we've already fired the test after run event
     ## it means that this runnable likely failed due to
     ## a double done(err) callback, and we need to fire
     ## this again!
-    if fired(TEST_AFTER_RUN_EVENT, runnable)
-      fire(TEST_AFTER_RUN_EVENT, runnable, Cypress)
+    if fired(TEST_RUN_END_EVENT, runnable)
+      fire(TEST_RUN_END_EVENT, runnable, Cypress)
 
     if isHook
       ## if a hook fails (such as a before) then the test will never
       ## get run and we'll need to make sure we set the test so that
-      ## the TEST_AFTER_RUN_EVENT fires correctly
+      ## the TEST_RUN_END_EVENT fires correctly
       hookFailed(runnable, runnable.err, hookName, getTestById, getTest)
 
 create = (specWindow, mocha, Cypress, cy) ->
@@ -717,23 +701,6 @@ create = (specWindow, mocha, Cypress, cy) ->
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
-    grep: (re) ->
-      if arguments.length
-        _runner._grep = re
-      else
-        ## grab grep from the mocha _runner
-        ## or just set it to all in case
-        ## there is a mocha regression
-        _runner._grep ?= defaultGrepRe
-
-    options: (options = {}) ->
-      ## TODO
-      ## need to handle
-      ## ignoreLeaks, asyncOnly, globals
-
-      if re = options.grep
-        @grep(re)
-
     normalizeAll: (tests) ->
       ## if we have an uncaught error then slice out
       ## all of the tests and suites and just generate
@@ -750,7 +717,6 @@ create = (specWindow, mocha, Cypress, cy) ->
       normalizeAll(
         _runner.suite,
         tests,
-        @grep(),
         setTestsById,
         setTests,
         onRunnable,
@@ -787,7 +753,7 @@ create = (specWindow, mocha, Cypress, cy) ->
 
       ## closure for calculating the actual
       ## runtime of a runnables fn exection duration
-      ## and also the run of the runnable:after:run:async event
+      ## and also the run of the after:runnable:run:async event
       wallClockStartedAt = null
       wallClockEnd = null
       fnDurationStart = null
@@ -813,8 +779,8 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## that means that we need to reset the previous state
       ## of cy - since we now have a new 'test' and all of the
       ## associated _runnables will share this state
-      if not fired(TEST_BEFORE_RUN_EVENT, test)
-        fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+      if not fired(TEST_RUN_START_EVENT, test)
+        fire(TEST_RUN_START_EVENT, test, Cypress)
 
       ## extract out the next(fn) which mocha uses to
       ## move to the next runnable - this will be our async seam
@@ -901,7 +867,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       ## whenever any runnable is about to run
       ## we figure out what test its associated to
       ## if its a hook, and then we fire the
-      ## test:before:run:async action if its not
+      ## test:start:async action if its not
       ## been fired before for this test
       testBeforeRunAsync(test, Cypress)
       .catch (err) ->
@@ -1058,7 +1024,7 @@ create = (specWindow, mocha, Cypress, cy) ->
         _testsQueue.push(test)
 
       if existing = _logsById[attrs.id]
-        ## because log:state:changed may
+        ## because internal:logChange may
         ## fire at a later time, its possible
         ## we've already cleaned up these attrs
         ## and in that case we don't want to do

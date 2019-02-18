@@ -223,7 +223,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     sendAsync("before:screenshot", getOptions(true))
 
   after = ->
-    send("after:screenshot", getOptions(false))
+    send("screenshot", getOptions(false))
 
     if disableTimersAndAnimations
       cy.pauseTimers(false)
@@ -276,7 +276,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
 
   ## failure screenshot when not interactive
-  Cypress.on "runnable:after:run:async", (test, runnable) ->
+  Cypress.on "after:runnable:run:async", (test, runnable) ->
     screenshotConfig = $Screenshot.getConfig()
 
     return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive") or test.err.isPending

@@ -66,7 +66,7 @@ describe "src/cy/commands/commands", ->
 
   context "errors", ->
     it "throws when cannot find command by name", (done) ->
-      cy.on "fail", (err) ->
+      cy.on "test:fail", (err) ->
         cmds = _.keys(Cypress.Chainer.prototype)
         expect(cmds.length).to.be.gt(1)
         expect(err.message).to.eq("Could not find a command for: 'fooDoesNotExist'.\n\nAvailable commands are: #{cmds.join(", ")}.\n")

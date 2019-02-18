@@ -6,13 +6,14 @@ path      = require("path")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
-plugins   = require("../plugins")
+background = require("../background")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
+CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -75,13 +76,13 @@ defaultArgs = [
   "--use-fake-device-for-media-stream"
 ]
 
-pluginsBeforeBrowserLaunch = (browser, args) ->
+backgroundBeforeBrowserLaunch = (browser, args) ->
   ## bail if we're not registered to this event
-  return args if not plugins.has("before:browser:launch")
+  return args if not background.isRegistered("browser:launch")
 
-  plugins.execute("before:browser:launch", browser, args)
+  background.execute("browser:launch", browser, args)
   .then (newArgs) ->
-    debug("got user args for 'before:browser:launch'", newArgs)
+    debug("got user args for 'browser:launch'", newArgs)
 
     ## reset args if we got 'em
     return newArgs ? args
@@ -157,6 +158,11 @@ module.exports = {
     if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
        args.push("--disable-blink-features=RootLayerScrolling")
 
+    ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
+    ## https://github.com/cypress-io/cypress/issues/1872
+    if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
+      args.push("--proxy-bypass-list=<-loopback>")
+  
     args
 
   open: (browserName, url, options = {}, automation) ->
@@ -171,7 +177,7 @@ module.exports = {
         ## before launching the browser every time
         utils.ensureCleanCache(browserName, isTextTerminal),
 
-        pluginsBeforeBrowserLaunch(options.browser, args)
+        backgroundBeforeBrowserLaunch(options.browser, args)
       ])
     .spread (cacheDir, args) =>
       Promise.all([

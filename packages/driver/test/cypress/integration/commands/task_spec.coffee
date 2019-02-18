@@ -37,7 +37,7 @@ describe "src/cy/commands/task", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -53,7 +53,7 @@ describe "src/cy/commands/task", ->
           expect(logs.length).to.eq(0)
 
       it "logs immediately before resolving", ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "task"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("foo")
@@ -94,7 +94,7 @@ describe "src/cy/commands/task", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "task"
             @lastLog = log
             @logs.push(log)
@@ -102,7 +102,7 @@ describe "src/cy/commands/task", ->
         return null
 
       it "throws when task is absent", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -114,7 +114,7 @@ describe "src/cy/commands/task", ->
         cy.task()
 
       it "throws when task isn't a string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -126,7 +126,7 @@ describe "src/cy/commands/task", ->
         cy.task(3)
 
       it "throws when task is an empty string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -140,7 +140,7 @@ describe "src/cy/commands/task", ->
       it "throws when the task errors", (done) ->
         Cypress.backend.rejects(new Error("task failed"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -153,15 +153,15 @@ describe "src/cy/commands/task", ->
 
         cy.task("foo")
 
-      it "throws when task is not registered by plugin", (done) ->
-        cy.on "fail", (err) =>
+      it "throws when task is not registered", (done) ->
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("cy.task('bar') failed with the following error:\n\nThe task 'bar' was not handled in the plugins file. The following tasks are registered: return:arg, wait, create:long:file\n\nFix this in your plugins file here:\n#{Cypress.config('pluginsFile')}\n\nhttps://on.cypress.io/api/task")
+          expect(err.message).to.eq("cy.task('bar') failed with the following error:\n\nThe task 'bar' was not handled in the background file. The following tasks are registered: return:arg, wait, create:long:file\n\nFix this in your background file here:\n#{Cypress.config('backgroundFile')}\n\nhttps://on.cypress.io/api/task")
           done()
 
         cy.task("bar")
@@ -169,7 +169,7 @@ describe "src/cy/commands/task", ->
       it "throws after timing out", (done) ->
         Cypress.backend.resolves(Promise.delay(250))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -183,7 +183,7 @@ describe "src/cy/commands/task", ->
       it "logs once on error", (done) ->
         Cypress.backend.rejects(new Error("task failed"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -199,14 +199,14 @@ describe "src/cy/commands/task", ->
 
         Cypress.backend.rejects(err)
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.task('wait') timed out after waiting 100ms.")
           done()
 
         cy.task("wait", null, { timeout: 100 })
 
       it "can really time out", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.task('wait') timed out after waiting 100ms.")
           done()
 

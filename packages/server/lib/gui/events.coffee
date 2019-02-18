@@ -60,6 +60,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:project:warning"
       onBus("project:warning")
 
+    when "on:browser:close"
+      onBus("browser:close")
+
     when "gui:error"
       logs.error(arg)
       .then(sendNull)
@@ -100,14 +103,18 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
+    when "await:browser:close"
+      openProject.specEnd()
+      .then(send)
+      .catch(sendErr)
+
     when "launch:browser"
-      openProject.launch(arg.browser, arg.spec, {
+      openProject.launchBrowser(arg.browser, arg.spec, {
         projectRoot: options.projectRoot
-        onBrowserOpen: ->
-          send({browserOpened: true})
         onBrowserClose: ->
-          send({browserClosed: true})
+          bus.emit("browser:close")
       })
+      .then(send)
       .catch(sendErr)
 
     when "window:open"

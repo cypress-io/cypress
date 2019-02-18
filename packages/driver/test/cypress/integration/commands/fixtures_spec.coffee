@@ -66,7 +66,7 @@ describe "src/cy/commands/fixtures", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "fixture"
             @lastLog = log
             @logs.push(log)
@@ -76,7 +76,7 @@ describe "src/cy/commands/fixtures", ->
       it "throws if fixturesFolder is set to false", (done) ->
         Cypress.config("fixturesFolder", false)
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -88,7 +88,7 @@ describe "src/cy/commands/fixtures", ->
         cy.fixture("foo")
 
       it "throws when fixture cannot be found without extension", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -104,7 +104,7 @@ describe "src/cy/commands/fixtures", ->
         cy.fixture("err")
 
       it "throws when fixture cannot be found with extension", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -122,7 +122,7 @@ describe "src/cy/commands/fixtures", ->
       it "throws after timing out", (done) ->
         Cypress.backend.withArgs("get:fixture").resolves(Promise.delay(1000))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -186,7 +186,7 @@ describe "src/cy/commands/fixtures", ->
               expect(obj).to.deep.eq {foo: "bar"}
 
         .then ->
-          expect(Cypress.backend).to.be.calledTwice
+          expect(Cypress.backend.withArgs("get:fixture")).to.be.calledTwice
 
       it "clones fixtures to prevent accidental mutation", ->
         cy.fixture("foo").then (obj) ->
@@ -200,4 +200,4 @@ describe "src/cy/commands/fixtures", ->
             cy.fixture("foo").then (obj3) ->
               expect(obj3).not.to.have.property("lorem")
           .then ->
-            expect(Cypress.backend).to.be.calledOnce
+            expect(Cypress.backend.withArgs("get:fixture")).to.be.calledOnce

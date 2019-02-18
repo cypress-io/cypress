@@ -105,6 +105,7 @@ module.exports = {
         command.error(err)
 
     err.onFail = onFail if onFail
+    err.from = options.from
 
     throw err
 
@@ -127,7 +128,8 @@ module.exports = {
     err
 
   errMessageByPath: (errPath, args) ->
-    if not errMessage = @getObjValueByPath($errorMessages, errPath)
+    errMessage = @getObjValueByPath($errorMessages, errPath)
+    if not errMessage?
       throw new Error "Error message path '#{errPath}' does not exist"
 
     getMsg = ->

@@ -133,13 +133,10 @@ describe "Global Mode", ->
 
     describe "going back", ->
       beforeEach ->
+        @closeProject = @util.deferred()
+        @ipc.closeProject.returns(@closeProject.promise)
+
         cy.contains("Back").click()
-
-      it "returns to intro on click of back button", ->
-        cy.shouldBeOnIntro()
-
-      it "removes project name from title", ->
-        cy.title().should("equal", "Cypress")
 
       it "removes ipc listeners", ->
         expect(@ipc.offOpenProject).to.be.called
@@ -148,3 +145,17 @@ describe "Global Mode", ->
 
       it "closes project", ->
         expect(@ipc.closeProject).to.be.called
+
+      it "shows loader", ->
+        cy.get(".loader")
+        cy.contains("Closing project...")
+
+      describe "when finished closing", ->
+        beforeEach ->
+          @closeProject.resolve()
+
+        it "goes to intro", ->
+          cy.shouldBeOnIntro()
+
+        it "removes project name from title", ->
+          cy.title().should("equal", "Cypress")

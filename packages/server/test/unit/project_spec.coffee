@@ -14,10 +14,12 @@ Server       = require("#{root}lib/server")
 Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
 savedState   = require("#{root}lib/saved_state")
-preprocessor = require("#{root}lib/plugins/preprocessor")
-plugins      = require("#{root}lib/plugins")
+preprocessor = require("#{root}lib/background/preprocessor")
+background   = require("#{root}lib/background")
 fs           = require("#{root}lib/util/fs")
 settings     = require("#{root}lib/util/settings")
+serverEvents = require("#{root}lib/background/server_events")
+browsers     = require("#{root}lib/browsers")
 
 describe "lib/project", ->
   beforeEach ->
@@ -154,9 +156,9 @@ describe "lib/project", ->
       sinon.stub(@project, "getConfig").resolves(@config)
       sinon.stub(Server.prototype, "open").resolves([])
       sinon.stub(Server.prototype, "reset")
-      sinon.stub(config, "updateWithPluginValues").returns(@config)
-      sinon.stub(scaffold, "plugins").resolves()
-      sinon.stub(plugins, "init").resolves()
+      sinon.stub(config, "updateWithBackgroundValues").returns(@config)
+      sinon.stub(scaffold, "background").resolves()
+      sinon.stub(background, "init").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -177,24 +179,24 @@ describe "lib/project", ->
       @project.open(opts).then =>
         expect(@project.getConfig).to.be.calledWith(opts)
 
-    it "initializes the plugins", ->
+    it "initializes the background", ->
       @project.open({}).then =>
-        expect(plugins.init).to.be.called
+        expect(background.init).to.be.called
 
-    it "calls support.plugins with pluginsFile directory", ->
+    it "calls support.background with backgroundFile directory", ->
       @project.open({}).then =>
-        expect(scaffold.plugins).to.be.calledWith(path.dirname(@config.pluginsFile))
+        expect(scaffold.background).to.be.calledWith(path.dirname(@config.backgroundFile))
 
-    it "calls options.onError with plugins error when there is a plugins error", ->
+    it "calls options.onError with background error when there is a background error", ->
       onError = sinon.spy()
       err = {
-        name: "plugin error name"
-        message: "plugin error message"
+        name: "background error name"
+        message: "background error message"
       }
       @project.open({ onError: onError }).then =>
-        pluginsOnError = plugins.init.lastCall.args[1].onError
-        expect(pluginsOnError).to.be.a("function")
-        pluginsOnError(err)
+        backgroundOnError = background.init.lastCall.args[1].onError
+        expect(backgroundOnError).to.be.a("function")
+        backgroundOnError(err)
         expect(onError).to.be.calledWith(err)
 
     it "updates config.state when saved state changes", ->
@@ -210,6 +212,38 @@ describe "lib/project", ->
       .then (config) =>
         expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
+
+    it "executes 'run:start' event if in interactive mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = false
+
+      @project.open({}).then ->
+        expect(serverEvents.execute).to.be.calledWith("run:start")
+
+    it "does not execute 'run:start' event if in run mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = true
+
+      @project.open({}).then ->
+        expect(serverEvents.execute).not.to.be.called
+
+    it "closes the browser and re-throws the error when the background fails to initialize", ->
+      sinon.stub(browsers, "close")
+      background.init.rejects(new Error("foo"))
+
+      @project.open({}).catch (err) ->
+        expect(browsers.close).to.be.called
+        expect(err.message).to.include("foo")
+
+    it "closes the browser and calls options.onError when the background has unexpected error", ->
+      sinon.stub(browsers, "close")
+
+      onError = sinon.spy()
+      @project.open({ onError }).then ->
+        err = {}
+        background.init.lastCall.args[1].onError(err)
+        expect(browsers.close).to.be.called
+        expect(onError).to.be.calledWith(err)
 
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
@@ -245,6 +279,20 @@ describe "lib/project", ->
     it "can close when server + watchers arent open", ->
       @project.close()
 
+    it "executes 'run:end' event if in interactive mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = false
+
+      @project.close().then ->
+        expect(serverEvents.execute).to.be.calledWith("run:end")
+
+    it "does not execute 'run:end' event if in run mode", ->
+      sinon.stub(serverEvents, "execute")
+      @project.isTextTerminal = true
+
+      @project.close().then ->
+        expect(serverEvents.execute).not.to.be.called
+
   context "#reset", ->
     beforeEach ->
       @project = Project(@pristinePath)
@@ -275,9 +323,9 @@ describe "lib/project", ->
       sinon.stub(scaffold, "integration").resolves()
       sinon.stub(scaffold, "fixture").resolves()
       sinon.stub(scaffold, "support").resolves()
-      sinon.stub(scaffold, "plugins").resolves()
+      sinon.stub(scaffold, "background").resolves()
 
-      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf", pluginsFile: "pf/index.js"}
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf", backgroundFile: "pf/index.js"}
 
     it "calls scaffold.integration with integrationFolder", ->
       @project.scaffold(@obj).then =>
@@ -291,10 +339,10 @@ describe "lib/project", ->
       @project.scaffold(@obj).then =>
         expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
 
-    it "does not call support.plugins if config.pluginsFile is falsey", ->
-      @obj.pluginsFile = false
+    it "does not call support.background if config.backgroundFile is falsey", ->
+      @obj.backgroundFile = false
       @project.scaffold(@obj).then =>
-        expect(scaffold.plugins).not.to.be.called
+        expect(scaffold.background).not.to.be.called
 
   context "#watchSettings", ->
     beforeEach ->
@@ -368,41 +416,41 @@ describe "lib/project", ->
       .catch (e) ->
         expect(e.message).to.include("The support file is missing or invalid.")
 
-  context "#watchPluginsFile", ->
+  context "#watchBackgroundFile", ->
     beforeEach ->
       sinon.stub(fs, "pathExists").resolves(true)
       @project = Project("/_test-output/path/to/project")
       @project.watchers = { watchTree: sinon.spy() }
-      sinon.stub(plugins, "init").resolves()
+      sinon.stub(background, "init").resolves()
       @config = {
-        pluginsFile: "/path/to/plugins-file"
+        backgroundFile: "/path/to/background-file"
       }
 
-    it "does nothing when {pluginsFile: false}", ->
-      @config.pluginsFile = false
-      @project.watchPluginsFile(@config).then =>
+    it "does nothing when {backgroundFile: false}", ->
+      @config.backgroundFile = false
+      @project.watchBackgroundFile(@config).then =>
         expect(@project.watchers.watchTree).not.to.be.called
 
-    it "does nothing if pluginsFile does not exist", ->
+    it "does nothing if backgroundFile does not exist", ->
       fs.pathExists.resolves(false)
-      @project.watchPluginsFile(@config).then =>
+      @project.watchBackgroundFile(@config).then =>
         expect(@project.watchers.watchTree).not.to.be.called
 
-    it "watches the pluginsFile", ->
-      @project.watchPluginsFile(@config).then =>
-        expect(@project.watchers.watchTree).to.be.calledWith(@config.pluginsFile)
+    it "watches the backgroundFile", ->
+      @project.watchBackgroundFile(@config).then =>
+        expect(@project.watchers.watchTree).to.be.calledWith(@config.backgroundFile)
         expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
         expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
-    it "calls plugins.init when file changes", ->
-      @project.watchPluginsFile(@config).then =>
+    it "calls background.init when file changes", ->
+      @project.watchBackgroundFile(@config).then =>
         @project.watchers.watchTree.firstCall.args[1].onChange()
-        expect(plugins.init).to.be.calledWith(@config)
+        expect(background.init).to.be.calledWith(@config)
 
-    it "handles errors from calling plugins.init", (done) ->
+    it "handles errors from calling background.init", (done) ->
       error = {name: "foo", message: "foo"}
-      plugins.init.rejects(error)
-      @project.watchPluginsFile(@config, {
+      background.init.rejects(error)
+      @project.watchBackgroundFile(@config, {
         onError: (err) ->
           expect(err).to.eql(error)
           done()

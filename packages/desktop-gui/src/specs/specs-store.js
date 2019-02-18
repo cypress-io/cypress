@@ -36,7 +36,7 @@ export class SpecsStore {
     return this._tree(this._files)
   }
 
-  @action loading (bool) {
+  @action setLoading (bool) {
     this.isLoading = bool
   }
 
@@ -47,7 +47,7 @@ export class SpecsStore {
       })
     }))
 
-    this.isLoading = false
+    this.setLoading(false)
   }
 
   @action setChosenSpec (spec) {

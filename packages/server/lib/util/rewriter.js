@@ -16,7 +16,9 @@ const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
 
-const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRemoved) {
+const rewriteHtml = (html, details, options) => {
+  const { wantsInjection, wantsSecurityRemoved } = options
+
   const replace = (re, str) => {
     return html.replace(re, str)
   }
@@ -24,9 +26,9 @@ const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRem
   const htmlToInject = (() => {
     switch (wantsInjection) {
       case 'full':
-        return inject.full(domainName)
+        return inject.full(details)
       case 'partial':
-        return inject.partial(domainName)
+        return inject.partial(details)
     }
   })()
 

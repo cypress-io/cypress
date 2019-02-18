@@ -41,7 +41,9 @@ describe "Projects List", ->
       @start()
 
     it "loads projects and shows loader", ->
-      cy.get(".projects-list .loader").then =>
+      cy.get(".projects-list .loader")
+      .should("have.text", "Loading projects...")
+      .then =>
         expect(@ipc.getProjects).to.be.called
 
     describe "when loaded", ->

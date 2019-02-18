@@ -48,6 +48,10 @@ describe "Set Up Project", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
 
+    it "shows loader while orgs load", ->
+      cy.get(".btn").contains("Set up project").click()
+      cy.get(".loader")
+
     describe "general behavior", ->
       beforeEach ->
         @getOrgs.resolve(@orgs)
@@ -343,6 +347,7 @@ describe "Set Up Project", ->
       beforeEach ->
         cy.stub(@ipc, "windowOpen").resolves()
         cy.stub(@ipc, "logIn").resolves(@user)
+        @getOrgs.resolve()
         cy.contains("button", "Log In with GitHub").click()
 
       it "shows setup", ->

@@ -17,7 +17,7 @@ weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:before:run", ->
+  Cypress.on "test:start", ->
     $Keyboard.resetModifiers(state("document"), state("window"))
 
   Commands.addAll({ prevSubject: "element" }, {

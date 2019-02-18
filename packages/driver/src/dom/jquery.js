@@ -24,7 +24,7 @@ const unwrap = function (obj) {
 const isJquery = (obj) => {
   // does it have the jquery property and is the
   // constructor a function?
-  return !!(obj && obj.jquery && _.isFunction(obj.constructor))
+  return _.hasIn(obj, 'jquery') && _.isFunction(obj.constructor)
 }
 
 // doing a little jiggle wiggle here

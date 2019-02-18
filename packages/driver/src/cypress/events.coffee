@@ -1,16 +1,9 @@
-# _ = require("lodash")
-# Backbone = require("backbone")
-
-## adds a custom lightweight event bus
-## to the Cypress class
-
-# splice = (index) ->
-  # @_events.splice(index, 1)
-
 _ = require("lodash")
 EE = require("eventemitter2")
 log = require("debug")("cypress:driver")
 Promise = require("bluebird")
+
+$utils = require("./utils")
 
 proxyFunctions = "emit emitThen emitMap".split(" ")
 
@@ -108,8 +101,64 @@ module.exports = {
 
         return ret
 
+    events.emitToBackend = (eventName, args...) ->
+      args = _.reject(args, _.isFunction)
+      Cypress.backend("driver:event", eventName, args...)
+
     _.extend(obj, events)
 
     ## return the events object
     return events
+
+  throwOnRenamedEvent: (eventEmitter, name) ->
+    renamedEvents = {
+      "command:end": "internal:commandEnd"
+      "command:enqueued": "internal:commandEnqueued"
+      "command:queue:before:end": "before:command:queue:end"
+      "command:retry": "internal:commandRetry"
+      "command:start": "internal:commandStart"
+      "fail": "test:fail"
+      "runnable:after:run:async": "after:runnable:run:async"
+      "scrolled": "internal:scrolled"
+      "test:after:run": "test:end"
+      "test:before:run": "test:start"
+      "test:before:run:async": "test:start:async"
+      "url:changed": "page:url:changed"
+      "viewport:changed": "viewport:change"
+      "window:alert": "page:alert"
+      "window:before:unload": "before:window:unload"
+      "window:confirm": "page:confirm"
+    }
+
+    renamedEventsWithWinChangedtoDetails = {
+      "window:before:load": "page:start"
+      "window:load": "page:ready"
+    }
+
+    methods = "addListener on once prependListener prependOnceListener".split(" ")
+
+    _.each methods, (method) ->
+      eventEmitter[method] = _.wrap eventEmitter[method], (original, eventName, listener) ->
+        if renamedEvents[eventName]
+          $utils.throwErrByPath("events.renamed_event", {
+            args: {
+              oldEvent: eventName
+              newEvent: renamedEvents[eventName]
+              object: name
+              method: method
+            }
+            from: "cypress"
+          })
+        else if renamedEventsWithWinChangedtoDetails[eventName]
+          $utils.throwErrByPath("events.renamed_event_win_to_details", {
+            args: {
+              oldEvent: eventName
+              newEvent: renamedEventsWithWinChangedtoDetails[eventName]
+              object: name
+              method: method
+            }
+            from: "cypress"
+          })
+        else
+          original.call(@, eventName, listener)
 }

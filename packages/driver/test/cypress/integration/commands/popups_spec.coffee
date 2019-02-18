@@ -5,7 +5,7 @@ describe "src/cy/commands/popups", ->
 
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "alert"
           @logs.push(log)
 
@@ -32,7 +32,7 @@ describe "src/cy/commands/popups", ->
 
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "confirm"
           @logs.push(log)
 
@@ -55,7 +55,7 @@ describe "src/cy/commands/popups", ->
         })
 
     it "can turn on and off confirmation", ->
-      cy.on "window:confirm", (str) ->
+      cy.on "page:confirm", (str) ->
         switch str
           when "foo" then false
           when "bar" then true

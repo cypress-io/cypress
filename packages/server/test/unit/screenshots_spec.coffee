@@ -11,7 +11,7 @@ config      = require("#{root}lib/config")
 screenshots = require("#{root}lib/screenshots")
 fs          = require("#{root}lib/util/fs")
 settings    = require("#{root}lib/util/settings")
-plugins     = require("#{root}lib/plugins")
+background  = require("#{root}lib/background")
 screenshotAutomation = require("#{root}lib/automation/screenshot")
 
 image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC"
@@ -530,11 +530,11 @@ describe "lib/screenshots", ->
         path: "/path/to/my-screenshot.png"
       }
 
-      sinon.stub(plugins, "has")
-      sinon.stub(plugins, "execute")
+      sinon.stub(background, "isRegistered")
+      sinon.stub(background, "execute")
 
-    it "resolves whitelisted details if no after:screenshot plugin registered", ->
-      plugins.has.returns(false)
+    it "resolves whitelisted details if no screenshot event registered", ->
+      background.isRegistered.returns(false)
 
       screenshots.afterScreenshot(@data, @details).then (result) =>
         expect(_.omit(result, "duration")).to.eql({
@@ -552,9 +552,9 @@ describe "lib/screenshots", ->
           })
         expect(result.duration).to.be.a("number")
 
-    it "executes after:screenshot plugin and merges in size, dimensions, and/or path", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves({
+    it "executes screenshot event and merges in size, dimensions, and/or path", ->
+      background.isRegistered.returns(true)
+      background.execute.resolves({
         size: 200
         dimensions: { width: 2000, height: 1320 }
         path: "/new/path/to/screenshot.png"
@@ -579,7 +579,7 @@ describe "lib/screenshots", ->
         expect(result.duration).to.be.a("number")
 
     it "ignores updates that are not an object", ->
-      plugins.execute.resolves("foo")
+      background.execute.resolves("foo")
 
       screenshots.afterScreenshot(@data, @details).then (result) =>
         expect(_.omit(result, "duration")).to.eql({

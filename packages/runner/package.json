@@ -32,19 +32,19 @@
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
     "enzyme": "3.8.0",
-    "enzyme-adapter-react-16": "1.7.1",
+    "enzyme-adapter-react-16": "1.9.1",
     "font-awesome": "4.7.0",
-    "jsdom": "9.4.1",
+    "jsdom": "9.12.0",
     "lodash": "4.17.11",
-    "mobx": "3.1.15",
-    "mobx-react": "4.2.1",
-    "prop-types": "15.6.2",
-    "react": "16.5.2",
-    "react-dom": "16.5.2",
+    "mobx": "3.6.2",
+    "mobx-react": "4.4.3",
+    "prop-types": "15.7.1",
+    "react": "16.8.1",
+    "react-dom": "16.8.1",
     "react-input-autosize": "2.2.1",
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
-    "sinon-chai": "3.2.0",
-    "zunder": "6.2.1"
+    "sinon-chai": "3.3.0",
+    "zunder": "6.3.2"
   }
 }

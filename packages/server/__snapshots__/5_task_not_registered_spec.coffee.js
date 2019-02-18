@@ -17,18 +17,18 @@ exports['e2e task fails 1'] = `
   Running: task_not_registered_spec.coffee...                                              (1 of 1) 
 
 
-  1) fails because the 'task' event is not registered in plugins file
+  1) fails because the 'task' event is not registered in background file
 
   0 passing
   1 failing
 
-  1)  fails because the 'task' event is not registered in plugins file:
+  1)  fails because the 'task' event is not registered in background file:
      CypressError: cy.task('some:task') failed with the following error:
 
-The 'task' event has not been registered in the plugins file. You must register it before using cy.task()
+The 'task' event has not been registered in the background file. You must register it before using cy.task()
 
-Fix this in your plugins file here:
-/foo/bar/.projects/task-not-registered/cypress/plugins/index.js
+Fix this in your background file here:
+/foo/bar/.projects/task-not-registered/cypress/background/index.js
 
 https://on.cypress.io/api/task
       at stack trace line
@@ -65,7 +65,7 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  - /foo/bar/.projects/task-not-registered/cypress/screenshots/task_not_registered_spec.coffee/fails because the 'task' event is not registered in plugins file (failed).png (1280x720)
+  - /foo/bar/.projects/task-not-registered/cypress/screenshots/task_not_registered_spec.coffee/fails because the 'task' event is not registered in background file (failed).png (1280x720)
 
 
   (Video)

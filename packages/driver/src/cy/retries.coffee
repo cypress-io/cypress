@@ -87,7 +87,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
       .then ->
         return if ended()
 
-        Cypress.action("cy:command:retry", options)
+        Cypress.action("cy:internal:commandRetry", options)
 
         return if ended()
 

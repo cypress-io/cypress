@@ -41,14 +41,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     remoteSubject = cy.getRemotejQueryInstance(subject)
 
     args = remoteSubject or subject
-    args = if subject?._spreadArray then args else [args]
+
+    args = if _.has(subject, '_spreadArray') then args else [args]
 
     ## name could be invoke or its!
     name = state("current").get("name")
 
     cleanup = ->
       state("onInjectCommand", undefined)
-      cy.removeListener("command:enqueued", enqueuedCommand)
+      cy.removeListener("internal:commandEnqueue", enqueuedCommand)
       return null
 
     invokedCyCommand = false
@@ -58,7 +59,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     state("onInjectCommand", returnFalseIfThenable)
 
-    cy.once("command:enqueued", enqueuedCommand)
+    cy.once("internal:commandEnqueue", enqueuedCommand)
 
     ## this code helps juggle subjects forward
     ## the same way that promises work

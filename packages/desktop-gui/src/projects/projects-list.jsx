@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 
 import projectsApi from './projects-api'
 import projectsStore from './projects-store'
 import { Link, routes } from '../lib/routing'
+import Loader from '../lib/loader'
 
 const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
   <li>
@@ -57,7 +57,7 @@ class ProjectsList extends Component {
   }
 
   _content () {
-    if (projectsStore.isLoading) return <Loader color='#888' scale={0.5}/>
+    if (projectsStore.isLoading) return <Loader>Loading projects...</Loader>
 
     return (
       <ul>

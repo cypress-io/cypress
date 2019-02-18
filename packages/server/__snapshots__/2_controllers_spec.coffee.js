@@ -1,4 +1,4 @@
-exports['e2e plugins fails when spec does not exist 1'] = `
+exports['e2e controllers fails when spec does not exist 1'] = `
 
 ====================================================================================================
 

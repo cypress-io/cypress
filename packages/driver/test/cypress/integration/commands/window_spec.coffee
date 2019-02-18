@@ -17,14 +17,14 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteWindow.foo = "bar"
 
         cy.window().should("have.property", "foo", "bar").then ->
@@ -35,10 +35,10 @@ describe "src/cy/commands/window", ->
           expect(lastLog.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteWindow.foo = "foo"
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -56,7 +56,7 @@ describe "src/cy/commands/window", ->
 
         cy.state("window", undefined)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           cy.state("window", win)
 
           lastLog = @lastLog
@@ -73,7 +73,7 @@ describe "src/cy/commands/window", ->
       it "does not log an additional log on failure", (done) ->
         @remoteWindow.foo = "foo"
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -83,7 +83,7 @@ describe "src/cy/commands/window", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -94,7 +94,7 @@ describe "src/cy/commands/window", ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "window"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("snapshot")).not.to.be.ok
@@ -123,7 +123,7 @@ describe "src/cy/commands/window", ->
             expect(@logs[0].get("aliasType")).to.eq("primitive")
 
             expect(@logs[2].get("aliasType")).to.eq("primitive")
-            expect(@logs[2].get("referencesAlias")).to.eq("win")
+            expect(@logs[2].get("referencesAlias").name).to.eq("win")
 
       it "logs obj", ->
         cy.window().then ->
@@ -159,14 +159,14 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteDocument.foo = "bar"
 
         cy.document().should("have.property", "foo", "bar").then ->
@@ -177,10 +177,10 @@ describe "src/cy/commands/window", ->
           expect(lastLog.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           @remoteDocument.foo = "foo"
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -198,7 +198,7 @@ describe "src/cy/commands/window", ->
 
         cy.state("window", undefined)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           cy.state("window", win)
 
           lastLog = @lastLog
@@ -215,7 +215,7 @@ describe "src/cy/commands/window", ->
       it "does not log an additional log on failure", (done) ->
         @remoteDocument.foo = "foo"
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -225,7 +225,7 @@ describe "src/cy/commands/window", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -236,7 +236,7 @@ describe "src/cy/commands/window", ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if attrs.name is "document"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("snapshots")).not.to.be.ok
@@ -254,7 +254,7 @@ describe "src/cy/commands/window", ->
       it "can be aliased", ->
         logs = []
 
-        cy.on "log:added", (attrs, @log) =>
+        cy.on "internal:log", (attrs, @log) =>
           logs.push(@log)
 
         cy
@@ -270,7 +270,7 @@ describe "src/cy/commands/window", ->
             expect(logs[0].get("aliasType")).to.eq("primitive")
 
             expect(logs[2].get("aliasType")).to.eq("primitive")
-            expect(logs[2].get("referencesAlias")).to.eq("doc")
+            expect(logs[2].get("referencesAlias").name).to.eq("doc")
 
       it "logs obj", ->
         cy.document().then ->
@@ -319,7 +319,7 @@ describe "src/cy/commands/window", ->
       retry = _.after 2, =>
         cy.$$("head").append $("<title>waiting on title</title>")
 
-      cy.on "command:retry", retry
+      cy.on "internal:commandRetry", retry
 
       cy.title().should("eq", "waiting on title")
 
@@ -363,7 +363,7 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -372,7 +372,7 @@ describe "src/cy/commands/window", ->
       it "throws after timing out", (done) ->
         cy.$$("title").remove()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "expected '' to equal 'asdf'"
           done()
 
@@ -381,7 +381,7 @@ describe "src/cy/commands/window", ->
       it "only logs once", (done) ->
         cy.$$("title").remove()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -392,7 +392,7 @@ describe "src/cy/commands/window", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
           if log.get("name") is "get"
@@ -407,7 +407,7 @@ describe "src/cy/commands/window", ->
       it "logs immediately before resolving", (done) ->
         input = cy.$$(":text:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "title"
             expect(log.get("state")).to.eq("pending")
             done()
@@ -440,10 +440,10 @@ describe "src/cy/commands/window", ->
           }
 
   context "#viewport", ->
-    it "triggers 'viewport:changed' event with dimensions object", ->
+    it "triggers 'viewport:change' event with dimensions object", ->
       expected = false
 
-      cy.on "viewport:changed", (viewport, fn) ->
+      cy.on "viewport:change", (viewport, fn) ->
         expected = true
         expect(viewport).to.deep.eq {viewportWidth: 800, viewportHeight: 600}
         expect(fn).to.be.a("function")
@@ -451,36 +451,36 @@ describe "src/cy/commands/window", ->
       cy.viewport(800, 600).then ->
         expect(expected).to.be.true
 
-    it "does not trigger 'viewport:changed' when changing to the default", ->
+    it "does not trigger 'viewport:change' when changing to the default", ->
       fn = ->
-        throw new Error("Should not trigger 'viewport:changed'")
+        throw new Error("Should not trigger 'viewport:change'")
 
-      Cypress.prependListener("viewport:changed", fn)
+      Cypress.prependListener("viewport:change", fn)
 
       cy.viewport(1000, 660).then ->
-        Cypress.removeListener("viewport:changed", fn)
+        Cypress.removeListener("viewport:change", fn)
 
-    it "does not trigger 'viewport:changed' when changing to the same viewport", ->
+    it "does not trigger 'viewport:change' when changing to the same viewport", ->
       triggeredOnce = false
       fn = ->
         if triggeredOnce
-          throw new Error("Should not trigger 'viewport:changed'")
+          throw new Error("Should not trigger 'viewport:change'")
         triggeredOnce = true
 
-      Cypress.prependListener("viewport:changed", fn)
+      Cypress.prependListener("viewport:change", fn)
 
       cy.viewport(800, 600)
       cy.viewport(800, 600).then ->
-        Cypress.removeListener("viewport:changed", fn)
+        Cypress.removeListener("viewport:change", fn)
 
-    it "triggers 'viewport:changed' if width changes", (done) ->
+    it "triggers 'viewport:change' if width changes", (done) ->
       finished = false
       setTimeout ->
         if not finished
-          done("Timed out before 'viewport:changed'")
+          done("Timed out before 'viewport:change'")
       , 1000
       triggeredOnce = false
-      cy.on "viewport:changed", (viewport) ->
+      cy.on "viewport:change", (viewport) ->
         if triggeredOnce
           expect(viewport).to.eql({ viewportWidth: 900, viewportHeight: 600 })
           finished = true
@@ -490,14 +490,14 @@ describe "src/cy/commands/window", ->
       cy.viewport(800, 600)
       cy.viewport(900, 600)
 
-    it "triggers 'viewport:changed' if height changes", (done) ->
+    it "triggers 'viewport:change' if height changes", (done) ->
       finished = false
       setTimeout ->
         if not finished
-          done("Timed out before 'viewport:changed'")
+          done("Timed out before 'viewport:change'")
       , 1000
       triggeredOnce = false
-      cy.on "viewport:changed", (viewport) ->
+      cy.on "viewport:change", (viewport) ->
         if triggeredOnce
           expect(viewport).to.eql({ viewportWidth: 800, viewportHeight: 700 })
           finished = true
@@ -513,7 +513,7 @@ describe "src/cy/commands/window", ->
 
     it "does not modify viewportWidth and viewportHeight in config", ->
       expected = false
-      cy.on "viewport:changed", ->
+      cy.on "viewport:change", ->
         expected = true
         expect(Cypress.config("viewportWidth")).not.to.eq(800)
         expect(Cypress.config("viewportHeight")).not.to.eq(600)
@@ -526,56 +526,56 @@ describe "src/cy/commands/window", ->
         { viewportHeight, viewportWidth } = Cypress.config()
 
         cy.viewport(500, 400).then ->
-          Cypress.action("runner:test:before:run:async", {})
+          Cypress.action("runner:test:start:async", {})
           .then ->
             expect(Cypress.config("viewportWidth")).to.eq(viewportWidth)
             expect(Cypress.config("viewportHeight")).to.eq(viewportHeight)
 
     context "presets", ->
       it "ipad-2", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 768, viewportHeight: 1024}
           done()
 
         cy.viewport("ipad-2")
 
       it "ipad-mini", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 768, viewportHeight: 1024}
           done()
 
         cy.viewport("ipad-mini")
 
       it "iphone-6+", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 736}
           done()
 
         cy.viewport("iphone-6+")
 
       it "iphone-6", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 667}
           done()
 
         cy.viewport("iphone-6")
 
       it "iphone-5", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 320, viewportHeight: 568}
           done()
 
         cy.viewport("iphone-5")
 
       it "can change the orientation to landspace", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 568, viewportHeight: 320}
           done()
 
         cy.viewport("iphone-5", "landscape")
 
       it "can change the orientation to portrait", (done) ->
-        cy.on "viewport:changed", (viewport) ->
+        cy.on "viewport:change", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 320, viewportHeight: 568}
           done()
 
@@ -587,14 +587,14 @@ describe "src/cy/commands/window", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "throws with passed invalid preset", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
           done()
@@ -602,7 +602,7 @@ describe "src/cy/commands/window", ->
         cy.viewport("foo")
 
       it "throws when passed a string as height", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() can only accept a string preset or a width and height as numbers."
           done()
@@ -610,7 +610,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(800, "600")
 
       it "throws when passed negative numbers", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
           done()
@@ -618,7 +618,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(800, -600)
 
       it "throws when passed width less than 20", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
           done()
@@ -629,7 +629,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(20, 600)
 
       it "throws when passed height greater than than 3000", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
           done()
@@ -640,7 +640,7 @@ describe "src/cy/commands/window", ->
         cy.viewport(200, 3000)
 
       it "throws when passed an empty string as width", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() cannot be passed an empty string."
           done()
@@ -648,7 +648,7 @@ describe "src/cy/commands/window", ->
         cy.viewport("")
 
       it "throws when passed an invalid orientation on a preset", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(err.message).to.eq "cy.viewport() can only accept 'landscape' or 'portrait' as valid orientations. Your orientation was: 'foobar'"
           done()
@@ -659,10 +659,10 @@ describe "src/cy/commands/window", ->
         it "throws when passed the invalid: '#{val}' as width", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             logs.push(log)
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(1)
             expect(err.message).to.eq "cy.viewport() can only accept a string preset or a width and height as numbers."
             done()
@@ -673,7 +673,7 @@ describe "src/cy/commands/window", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 

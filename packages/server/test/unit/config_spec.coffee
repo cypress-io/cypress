@@ -245,17 +245,17 @@ describe "lib/config", ->
           @setup({pageLoadTimeout: "foo"})
           @expectValidationFails("be a number")
 
-      context "pluginsFile", ->
+      context "backgroundFile", ->
         it "passes if a string", ->
-          @setup({pluginsFile: "cypress/plugins"})
+          @setup({backgroundFile: "cypress/background"})
           @expectValidationPasses()
 
         it "passes if false", ->
-          @setup({pluginsFile: false})
+          @setup({backgroundFile: false})
           @expectValidationPasses()
 
         it "fails if not a string or false", ->
-          @setup({pluginsFile: 42})
+          @setup({backgroundFile: 42})
           @expectValidationFails("be a string")
 
       context "port", ->
@@ -730,7 +730,7 @@ describe "lib/config", ->
             videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
-            pluginsFile:                { value: "cypress/plugins", from: "default" },
+            backgroundFile:                { value: "cypress/background", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
@@ -789,7 +789,7 @@ describe "lib/config", ->
             videoUploadOnPasses:        { value: true, from: "default" }
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
-            pluginsFile:                { value: "cypress/plugins", from: "default" },
+            backgroundFile:                { value: "cypress/background", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
@@ -814,9 +814,9 @@ describe "lib/config", ->
             }
           })
 
-  context ".updateWithPluginValues", ->
+  context ".updateWithBackgroundValues", ->
     it "is noop when no overrides", ->
-      expect(config.updateWithPluginValues({foo: 'bar'}, null)).to.deep.eq({
+      expect(config.updateWithBackgroundValues({foo: 'bar'}, null)).to.deep.eq({
         foo: 'bar'
       })
 
@@ -848,7 +848,7 @@ describe "lib/config", ->
         }
       }
 
-      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
+      expect(config.updateWithBackgroundValues(cfg, overrides)).to.deep.eq({
         foo: "bar"
         baz: "baz"
         lol: 1234
@@ -859,12 +859,12 @@ describe "lib/config", ->
         }
         resolved: {
           foo: { value: "bar", from: "default" }
-          baz: { value: "baz", from: "plugin" }
+          baz: { value: "baz", from: "background" }
           lol: { value: 1234,  from: "env" }
           env: {
             a: { value: "a", from: "config" }
-            b: { value: "bb", from: "plugin" }
-            c: { value: "c", from: "plugin" }
+            b: { value: "bb", from: "background" }
+            c: { value: "c", from: "background" }
           }
         }
       })
@@ -1041,56 +1041,56 @@ describe "lib/config", ->
       .catch (err) ->
         expect(err.message).to.include("The support file is missing or invalid.")
 
-  context ".setPluginsFile", ->
-    it "does nothing if pluginsFile is falsey", ->
+  context ".setBackgroundFile", ->
+    it "does nothing if backgroundFile is falsey", ->
       obj = {
         projectRoot: "/_test-output/path/to/project"
       }
-      config.setPluginsFile(obj)
+      config.setBackgroundFile(obj)
       .then (result) ->
         expect(result).to.eql(obj)
 
-    it "sets the pluginsFile to default index.js if does not exist", ->
+    it "sets the backgroundFile to default index.js if does not exist", ->
       projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/no-scaffolding")
 
       obj = {
         projectRoot: projectRoot
-        pluginsFile: "#{projectRoot}/cypress/plugins"
+        backgroundFile: "#{projectRoot}/cypress/background"
       }
 
-      config.setPluginsFile(obj)
+      config.setBackgroundFile(obj)
       .then (result) ->
         expect(result).to.eql({
           projectRoot: projectRoot
-          pluginsFile: "#{projectRoot}/cypress/plugins/index.js"
+          backgroundFile: "#{projectRoot}/cypress/background/index.js"
         })
 
-    it "set the pluginsFile to false if it does not exist, plugins folder exists, and pluginsFile is the default", ->
+    it "set the backgroundFile to false if it does not exist, background folder exists, and backgroundFile is the default", ->
       projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/empty-folders")
 
       obj = config.setAbsolutePaths({
         projectRoot: projectRoot
-        pluginsFile: "#{projectRoot}/cypress/plugins"
+        backgroundFile: "#{projectRoot}/cypress/background"
       })
 
-      config.setPluginsFile(obj)
+      config.setBackgroundFile(obj)
       .then (result) ->
         expect(result).to.eql({
           projectRoot: projectRoot
-          pluginsFile: false
+          backgroundFile: false
         })
 
-    it "throws error if pluginsFile is not default and does not exist", ->
+    it "throws error if backgroundFile is not default and does not exist", ->
       projectRoot = process.cwd()
 
       obj = {
         projectRoot: projectRoot
-        pluginsFile: "does/not/exist"
+        backgroundFile: "does/not/exist"
       }
 
-      config.setPluginsFile(obj)
+      config.setBackgroundFile(obj)
       .catch (err) ->
-        expect(err.message).to.include("The plugins file is missing or invalid.")
+        expect(err.message).to.include("The background file is missing or invalid.")
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->
@@ -1148,7 +1148,7 @@ describe "lib/config", ->
 
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
 
-    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile", "pluginsFile"].forEach (folder) ->
+    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile", "backgroundFile"].forEach (folder) ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {

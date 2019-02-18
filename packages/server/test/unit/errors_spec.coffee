@@ -36,7 +36,7 @@ describe "lib/errors", ->
         expect(@log).to.be.calledWithMatch("foo/bar/baz")
 
     it "logs err.details", ->
-      err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh")
+      err = errors.get("BACKGROUND_FUNCTION_ERROR", "foo/bar/baz", "details huh")
       errors.log(err).then =>
         expect(@log).to.be.calledWithMatch("foo/bar/baz")
         expect(@log).to.be.calledWithMatch("\n", "details huh")

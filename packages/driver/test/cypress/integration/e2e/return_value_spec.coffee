@@ -2,7 +2,7 @@ describe "return values", ->
   beforeEach ->
     @logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @lastLog = log
 
       @logs.push(log)
@@ -16,8 +16,12 @@ describe "return values", ->
 
     return undefined
 
+  it "can return cy and have done callback", (done) ->
+    cy.wrap({}).then ->
+      done()
+
   it "throws when returning a non promise and invoking cy commands", (done) ->
-    cy.on "fail", (err) ->
+    cy.on "test:fail", (err) ->
       expect(err.message).to.include("> foo")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
 
@@ -28,7 +32,7 @@ describe "return values", ->
     return "foo"
 
   it "stringifies function bodies", (done) ->
-    cy.on "fail", (err) ->
+    cy.on "test:fail", (err) ->
       expect(err.message).to.include("> function () {")
       expect(err.message).to.include("return \"foo\";")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
@@ -51,7 +55,7 @@ describe "return values", ->
     cy.foo()
 
   it "throws when returning a non promise and invoking cy commands from a custom command", (done) ->
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(@logs.length).to.eq(1)
@@ -71,7 +75,7 @@ describe "return values", ->
     cy.foo()
 
   it "stringifies function return values", (done) ->
-    cy.on "fail", (err) =>
+    cy.on "test:fail", (err) =>
       lastLog = @lastLog
 
       expect(@logs.length).to.eq(1)
@@ -91,3 +95,23 @@ describe "return values", ->
         return "bar"
 
     cy.foo()
+
+  describe "without invoking cy", ->
+    it "handles returning undefined", ->
+      return undefined
+
+    it "handles synchronously invoking and returning done callback", (done) ->
+      return done()
+
+    it "handles synchronously invoking done callback and returning undefined", (done) ->
+      done()
+      return undefined
+
+    it "handles synchronously invoking done callback and returning a value", (done) ->
+      done()
+      return "foo"
+
+    it "handles asynchronously invoking done callback", (done) ->
+      setTimeout ->
+        done()
+      return "foo"

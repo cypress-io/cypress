@@ -157,7 +157,7 @@ describe "src/cy/commands/actions/type", ->
 
         retried = false
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $txt.show()
           retried = true
 
@@ -173,7 +173,7 @@ describe "src/cy/commands/actions/type", ->
         $txt.on "click", ->
           clicks += 1
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $txt.prop("disabled", false)
           retried = true
 
@@ -184,7 +184,7 @@ describe "src/cy/commands/actions/type", ->
       it "waits until element stops animating", ->
         retries = 0
 
-        cy.on "command:retry", (obj) ->
+        cy.on "internal:commandRetry", (obj) ->
           retries += 1
 
         cy.stub(cy, "ensureElementIsNotAnimating")
@@ -1839,7 +1839,7 @@ describe "src/cy/commands/actions/type", ->
           }
           .prependTo cy.$$("body")
 
-        cy.on "command:retry", (options) ->
+        cy.on "internal:commandRetry", (options) ->
           expect(options.timeout).to.eq 1000
           expect(options.interval).to.eq 60
           done()
@@ -2267,14 +2267,14 @@ describe "src/cy/commands/actions/type", ->
         it "triggers form submit synchronously before type logs or resolves", ->
           events = []
 
-          cy.on "command:start", (cmd) ->
+          cy.on "internal:commandStart", (cmd) ->
             events.push "#{cmd.get('name')}:start"
 
           @$forms.find("#single-input").submit (e) ->
             e.preventDefault()
             events.push "submit"
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             state = log.get("state")
 
             if state is "pending"
@@ -2283,7 +2283,7 @@ describe "src/cy/commands/actions/type", ->
 
               events.push "#{log.get('name')}:log:#{state}"
 
-          cy.on "command:end", (cmd) ->
+          cy.on "internal:commandEnd", (cmd) ->
             events.push "#{cmd.get('name')}:end"
 
           cy.get("#single-input input").type("f{enter}").then ->
@@ -2450,7 +2450,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -2471,7 +2471,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -2526,7 +2526,7 @@ describe "src/cy/commands/actions/type", ->
         logs = []
         types = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           if log.get("name") is "type"
             types.push(log)
@@ -2540,7 +2540,7 @@ describe "src/cy/commands/actions/type", ->
 
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "type"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $txt.get(0)
@@ -2643,14 +2643,14 @@ describe "src/cy/commands/actions/type", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.noop({}).type("foo")
 
@@ -2661,7 +2661,7 @@ describe "src/cy/commands/actions/type", ->
           typed += 1
           input.remove()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(typed).to.eq 1
           expect(err.message).to.include "cy.type() failed because this element"
           done()
@@ -2671,7 +2671,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws when not textarea or text-like", (done) ->
         cy.get("form").type("foo")
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.type() failed because it requires a valid typeable element."
           expect(err.message).to.include "The element typed into was:"
           expect(err.message).to.include "<form id=\"by-id\">...</form>"
@@ -2684,14 +2684,14 @@ describe "src/cy/commands/actions/type", ->
             return $inputs
           .type("foo")
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "cy.type() can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "throws when the subject isnt visible", (done) ->
         input = cy.$$("input:text:first").show().hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -2704,7 +2704,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws when subject is disabled", (done) ->
         cy.$$("input:text:first").prop("disabled", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("cy.type() failed because this element is disabled:\n")
@@ -2715,7 +2715,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws when submitting within nested forms"
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -2740,7 +2740,7 @@ describe "src/cy/commands/actions/type", ->
         })
         .prependTo(cy.$$("body"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.include "cy.type() failed because this element"
           expect(err.message).to.include "is being covered by another element"
@@ -2749,7 +2749,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("#input-covered-in-span").type("foo")
 
       it "throws when special characters dont exist", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq 2
 
           allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(", ")
@@ -2760,7 +2760,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get(":text:first").type("foo{bar}")
 
       it "throws when attemping to type tab", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq 2
           expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command cy.tab(), which is not ready yet, but when it is done that's what you'll use."
           done()
@@ -2768,7 +2768,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get(":text:first").type("foo{tab}")
 
       it "throws on an empty string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq 2
           expect(err.message).to.eq "cy.type() cannot accept an empty String. You need to actually type something."
           done()
@@ -2790,10 +2790,10 @@ describe "src/cy/commands/actions/type", ->
         it "throws when trying to type: #{val}", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             logs.push(log)
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq 2
             expect(err.message).to.eq "cy.type() can only accept a String or Number. You passed in: '#{val}'"
             done()
@@ -2811,7 +2811,7 @@ describe "src/cy/commands/actions/type", ->
         cy.$$(":text:first").on "keydown", ->
           keydowns += 1
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(keydowns).to.eq(0)
           expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n")
           done()
@@ -2819,7 +2819,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get(":text:first").type("foo")
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -2833,7 +2833,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("input:first").type("f").should("have.class", "typed")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
@@ -2841,7 +2841,7 @@ describe "src/cy/commands/actions/type", ->
 
       context "[type=date]", ->
         it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989")
             done()
@@ -2849,7 +2849,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#date-without-value").type(1989)
 
         it "throws when chars is invalid format", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989")
             done()
@@ -2857,7 +2857,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#date-without-value").type("01-01-1989")
 
         it "throws when chars is invalid date", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31")
             done()
@@ -2866,7 +2866,7 @@ describe "src/cy/commands/actions/type", ->
 
       context "[type=month]", ->
         it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 6")
             done()
@@ -2874,7 +2874,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#month-without-value").type(6)
 
         it "throws when chars is invalid format", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 01/2000")
             done()
@@ -2882,7 +2882,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#month-without-value").type("01/2000")
 
         it "throws when chars is invalid month", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 1989-13")
             done()
@@ -2896,7 +2896,7 @@ describe "src/cy/commands/actions/type", ->
           .should('have.prop', 'value', '1234567890')
 
         # it "throws when chars is invalid format", (done) ->
-        #   cy.on "fail", (err) =>
+        #   cy.on "test:fail", (err) =>
         #     expect(@logs.length).to.eq(2)
         #     expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
         #     done()
@@ -2904,7 +2904,7 @@ describe "src/cy/commands/actions/type", ->
 
       context "[type=week]", ->
         it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23")
             done()
@@ -2912,7 +2912,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#week-without-value").type(23)
 
         it "throws when chars is invalid format", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
             done()
@@ -2920,7 +2920,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#week-without-value").type("2005/W18")
 
         it "throws when chars is invalid week", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.eq(2)
             expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60")
             done()
@@ -2929,7 +2929,7 @@ describe "src/cy/commands/actions/type", ->
 
       context "[type=time]", ->
         it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.equal(2)
             expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999")
             done()
@@ -2937,7 +2937,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#time-without-value").type(9999)
 
         it "throws when chars is invalid format (1:30)", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.equal(2)
             expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30")
             done()
@@ -2945,7 +2945,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#time-without-value").type("1:30")
 
         it "throws when chars is invalid format (01:30pm)", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.equal(2)
             expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm")
             done()
@@ -2953,7 +2953,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#time-without-value").type("01:30pm")
 
         it "throws when chars is invalid format (01:30:30.3333)", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.equal(2)
             expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333")
             done()
@@ -2961,7 +2961,7 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#time-without-value").type("01:30:30.3333")
 
         it "throws when chars is invalid time", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@logs.length).to.equal(2)
             expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60")
             done()
@@ -2994,7 +2994,7 @@ describe "src/cy/commands/actions/type", ->
       textarea.on "click", ->
         clicks += 1
 
-      cy.on "command:retry", _.after 3, ->
+      cy.on "internal:commandRetry", _.after 3, ->
         textarea.prop("disabled", false)
         retried = true
 
@@ -3030,7 +3030,7 @@ describe "src/cy/commands/actions/type", ->
       input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"))
       span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
 
-      cy.on "command:retry", (options) ->
+      cy.on "internal:commandRetry", (options) ->
         expect(options.timeout).to.eq 1000
         expect(options.interval).to.eq 60
         done()
@@ -3061,7 +3061,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -3094,14 +3094,14 @@ describe "src/cy/commands/actions/type", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", (err) -> done()
+        cy.on "test:fail", (err) -> done()
 
         cy.noop({}).clear()
 
@@ -3112,7 +3112,7 @@ describe "src/cy/commands/actions/type", ->
           cleared += 1
           input.remove()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(cleared).to.eq 1
           expect(err.message).to.include "cy.clear() failed because this element"
           done()
@@ -3120,7 +3120,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("input:first").clear().clear()
 
       it "throws if any subject isnt a textarea or text-like", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(3)
@@ -3134,7 +3134,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("textarea:first,form#checkboxes").clear()
 
       it "throws if any subject isnt a :text", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<div id=\"dom\">...</div>"
@@ -3144,7 +3144,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("div").clear()
 
       it "throws on an input radio", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<input type=\"radio\" name=\"gender\" value=\"male\">"
@@ -3154,7 +3154,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get(":radio").clear()
 
       it "throws on an input checkbox", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<input type=\"checkbox\" name=\"colors\" value=\"blue\">"
@@ -3166,7 +3166,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws when the subject isnt visible", (done) ->
         input = cy.$$("input:text:first").show().hide()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because this element is not visible"
           done()
 
@@ -3175,7 +3175,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws when subject is disabled", (done) ->
         cy.$$("input:text:first").prop("disabled", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("cy.clear() failed because this element is disabled:\n")
@@ -3184,7 +3184,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("input:text:first").clear()
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -3209,7 +3209,7 @@ describe "src/cy/commands/actions/type", ->
         })
         .prependTo(cy.$$("body"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.include "cy.clear() failed because this element"
           expect(err.message).to.include "is being covered by another element"
@@ -3218,7 +3218,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("#input-covered-in-span").clear()
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -3234,10 +3234,10 @@ describe "src/cy/commands/actions/type", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
@@ -3245,7 +3245,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -3255,7 +3255,7 @@ describe "src/cy/commands/actions/type", ->
 
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "clear"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $input.get(0)
@@ -3268,7 +3268,7 @@ describe "src/cy/commands/actions/type", ->
       it "ends", ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log) if log.get("name") is "clear"
 
         cy.get("input").invoke("slice", 0, 2).clear().then ->

@@ -5,7 +5,7 @@ debug         = require("debug")("cypress:server:browsers:electron")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
 appData       = require("../util/app_data")
-plugins       = require("../plugins")
+background    = require("../background")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
@@ -148,6 +148,10 @@ module.exports = {
     new Promise (resolve) ->
       webContents.session.setProxy({
         proxyRules: proxyServer
+        ## this should really only be necessary when 
+        ## running Chromium versions >= 72
+        ## https://github.com/cypress-io/cypress/issues/1872
+        proxyBypassRules: "<-loopback>"
       }, resolve)
 
   open: (browserName, url, options = {}, automation) ->
@@ -172,12 +176,12 @@ module.exports = {
       Promise
       .try =>
         ## bail if we're not registered to this event
-        return options if not plugins.has("before:browser:launch")
+        return options if not background.isRegistered("browser:launch")
 
-        plugins.execute("before:browser:launch", options.browser, options)
+        background.execute("browser:launch", options.browser, options)
         .then (newOptions) ->
           if newOptions
-            debug("received new options from plugin event %o", newOptions)
+            debug("received new options from background event %o", newOptions)
             _.extend(options, newOptions)
 
           return options

@@ -9,8 +9,9 @@ origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-debug      = require("debug")("cypress:server:config")
+debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
+util     = require("./util/config")
 
 ## cypress followed by _
 cypressEnvRe = /^(cypress_)/i
@@ -25,7 +26,7 @@ isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 folders = toWords """
-  fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
+  fileServerFolder   fixturesFolder   integrationFolder   backgroundFile
   screenshotsFolder  supportFile      supportFolder       unitFolder
   videosFolder
 """
@@ -35,7 +36,7 @@ configKeys = toWords """
   baseUrl                         fixturesFolder
   chromeWebSecurity
   modifyObstructiveCode           integrationFolder
-  env                             pluginsFile
+  env                             backgroundFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
   port                            supportFolder
@@ -58,6 +59,7 @@ breakingConfigKeys = toWords """
   videoRecording
   screenshotOnHeadlessFailure
   trashAssetsBeforeHeadlessRuns
+  pluginsFile
 """
 
 defaults = {
@@ -104,7 +106,7 @@ defaults = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
-  pluginsFile:                    "cypress/plugins"
+  backgroundFile:                "cypress/background"
 
   ## deprecated
   javascripts:                   []
@@ -125,7 +127,7 @@ validationRules = {
   integrationFolder: v.isString
   numTestsKeptInMemory: v.isNumber
   pageLoadTimeout: v.isNumber
-  pluginsFile: v.isStringOrFalse
+  backgroundFile: v.isStringOrFalse
   port: v.isNumber
   reporter: v.isString
   requestTimeout: v.isNumber
@@ -163,6 +165,8 @@ validateNoBreakingConfig = (cfg) ->
           errors.throw("RENAMED_CONFIG_OPTION", key, "trashAssetsBeforeRuns")
         when "videoRecording"
           errors.throw("RENAMED_CONFIG_OPTION", key, "video")
+        when "pluginsFile"
+          errors.throw("RENAMED_CONFIG_OPTION", key, "backgroundFile")
 
 validate = (cfg, onErr) ->
   _.each cfg, (value, key) ->
@@ -178,6 +182,24 @@ validateFile = (file) ->
   return (settings) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
+
+validateBackgroundFile = (config) ->
+  return if not util.isDefault(config, "backgroundFile")
+
+  ## if the backgroundFile is default and the file exists at the old
+  ## path (plugins/index.js), throw to let the user know to rename the file
+  oldPath = config.backgroundFile.replace(
+    "#{path.sep}background#{path.sep}index",
+    "#{path.sep}plugins#{path.sep}index"
+  )
+
+  shortOldPath = oldPath.replace("#{config.projectRoot}#{path.sep}", "")
+  shortNewPath = config.backgroundFile.replace("#{config.projectRoot}#{path.sep}", "")
+
+  fs.pathExists(oldPath)
+  .then (found) ->
+    if found
+      errors.throw("REPATHED_BACKGROUND_FILE", shortOldPath, shortNewPath)
 
 module.exports = {
   getConfigKeys: -> configKeys
@@ -268,8 +290,9 @@ module.exports = {
     validateNoBreakingConfig(config)
 
     @setSupportFileAndFolder(config)
-    .then(@setPluginsFile)
+    .then(@setBackgroundFile)
     .then(@setScaffoldPaths)
+    .tap(validateBackgroundFile)
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -278,7 +301,7 @@ module.exports = {
 
     return obj
 
-  updateWithPluginValues: (cfg, overrides = {}) ->
+  updateWithBackgroundValues: (cfg, overrides = {}) ->
     ## diff the overrides with cfg
     ## including nested objects (env)
     diffs = deepDiff(cfg, overrides, true)
@@ -293,12 +316,12 @@ module.exports = {
           ## override the resolved value
           resolvedObj[key] = {
             value: val
-            from: "plugin"
+            from: "background"
           }
 
     ## for each override go through
     ## and change the resolved values of cfg
-    ## to point to the plugin
+    ## to point to the background file
     setResolvedOn(cfg.resolved, diffs)
 
     ## merge cfg into overrides
@@ -398,54 +421,54 @@ module.exports = {
         debug("set support folder #{obj.supportFolder}")
       obj
 
-  ## set pluginsFile to an absolute path with the following rules:
-  ## - do nothing if pluginsFile is falsey
-  ## - look up the absolute path via node, so 'cypress/plugins' can resolve
-  ##   to 'cypress/plugins/index.js' or 'cypress/plugins/index.coffee'
+  ## set backgroundFile to an absolute path with the following rules:
+  ## - do nothing if backgroundFile is falsey
+  ## - look up the absolute path via node, so 'cypress/background' can resolve
+  ##   to 'cypress/background/index.js' or 'cypress/background/index.coffee'
   ## - if not found
-  ##   * and the pluginsFile is set to the default
-  ##     - and the path to the pluginsFile directory exists
-  ##       * assume the user doesn't need a pluginsFile, set it to false
+  ##   * and the backgroundFile is set to the default
+  ##     - and the path to the backgroundFile directory exists
+  ##       * assume the user doesn't need a backgroundFile, set it to false
   ##         so it's ignored down the pipeline
-  ##     - and the path to the pluginsFile directory does not exist
-  ##       * set it to cypress/plugins/index.js, it will get scaffolded
-  ##   * and the pluginsFile is NOT set to the default
+  ##     - and the path to the backgroundFile directory does not exist
+  ##       * set it to cypress/background/index.js, it will get scaffolded
+  ##   * and the backgroundFile is NOT set to the default
   ##     - throw an error, because it should be there if the user
   ##       explicitly set it
-  setPluginsFile: (obj) ->
-    return Promise.resolve(obj) if not obj.pluginsFile
+  setBackgroundFile: (obj) ->
+    return Promise.resolve(obj) if not obj.backgroundFile
 
     obj = _.clone(obj)
 
-    pluginsFile = obj.pluginsFile
+    backgroundFile = obj.backgroundFile
 
-    debug("setting plugins file #{pluginsFile}")
+    debug("setting background file #{backgroundFile}")
     debug("for project root #{obj.projectRoot}")
 
     Promise
     .try ->
       ## resolve full path with extension
-      obj.pluginsFile = require.resolve(pluginsFile)
-      debug("set pluginsFile to #{obj.pluginsFile}")
+      obj.backgroundFile = require.resolve(backgroundFile)
+      debug("set backgroundFile to #{obj.backgroundFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
-      debug("plugins file does not exist")
-      if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
-        debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
-        fs.pathExists(pluginsFile)
+      debug("background file does not exist")
+      if backgroundFile is path.resolve(obj.projectRoot, defaults.backgroundFile)
+        debug("background file is default, check if #{path.dirname(backgroundFile)} exists")
+        fs.pathExists(backgroundFile)
         .then (found) ->
           if found
-            debug("plugins folder exists, set pluginsFile to false")
+            debug("background folder exists, set backgroundFile to false")
             ## if the directory exists, set it to false so it's ignored
-            obj.pluginsFile = false
+            obj.backgroundFile = false
           else
-            debug("plugins folder does not exist, set to default index.js")
+            debug("background folder does not exist, set to default index.js")
             ## otherwise, set it up to be scaffolded later
-            obj.pluginsFile = path.join(pluginsFile, "index.js")
+            obj.backgroundFile = path.join(backgroundFile, "index.js")
           return obj
       else
-        debug("plugins file is not default")
+        debug("background file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
+        errors.throw("BACKGROUND_FILE_ERROR", path.resolve(obj.projectRoot, backgroundFile))
     .return(obj)
 
   setParentTestsPaths: (obj) ->

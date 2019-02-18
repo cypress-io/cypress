@@ -72,6 +72,7 @@ describe "Runs List", ->
     it "pings api server", ->
       expect(@ipc.pingApiServer).to.be.called
       cy.get(".loader")
+      cy.contains("Loading runs...")
 
     describe "success", ->
       beforeEach ->
@@ -425,6 +426,7 @@ describe "Runs List", ->
 
             it "shows loading spinner", ->
               cy.get(".loader")
+              cy.contains("Loading runs...")
 
             it "shows runs when getting runs succeeds", ->
               @getRuns.resolve(@runs)

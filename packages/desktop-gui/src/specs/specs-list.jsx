@@ -2,22 +2,23 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allSpecsSpec } from './specs-store'
 
+import Loader from '../lib/loader'
+
 @observer
 class SpecsList extends Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.filterRef = React.createRef()
   }
 
   render () {
-    if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
+    if (specsStore.isLoading) return <Loader fullscreen>Loading specs...</Loader>
 
     if (!specsStore.filter && !specsStore.specs.length) return this._empty()
 

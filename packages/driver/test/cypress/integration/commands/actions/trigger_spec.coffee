@@ -165,7 +165,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "does not scroll when being forced", ->
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy
@@ -187,10 +187,10 @@ describe "src/cy/commands/actions/trigger", ->
         retried = false
         tapped = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", ($el, type) ->
+        cy.on "internal:commandRetry", ($el, type) ->
           retried = true
 
         $btn.on "tap", ->
@@ -218,10 +218,10 @@ describe "src/cy/commands/actions/trigger", ->
         scrolled = []
         retried = false
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $span.hide()
           retried = true
 
@@ -271,7 +271,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").trigger("mouseover").then ->
@@ -305,7 +305,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").trigger("mouseover").then ->
@@ -359,7 +359,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         scrolled = []
 
-        cy.on "scrolled", ($el, type) ->
+        cy.on "internal:scrolled", ($el, type) ->
           scrolled.push(type)
 
         cy.get("#button-covered-in-nav").trigger("mouseover").then ->
@@ -374,7 +374,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         retried = false
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.show()
           retried = true
 
@@ -390,7 +390,7 @@ describe "src/cy/commands/actions/trigger", ->
         $btn.on "mouseover", ->
           mouseovers += 1
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           $btn.prop("disabled", false)
           retried = true
 
@@ -401,7 +401,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "waits until element stops animating", ->
         retries = 0
 
-        cy.on "command:retry", (obj) ->
+        cy.on "internal:commandRetry", (obj) ->
           retries += 1
 
         cy.stub(cy, "ensureElementIsNotAnimating")
@@ -460,7 +460,7 @@ describe "src/cy/commands/actions/trigger", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 100)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -469,7 +469,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "eventually passes the assertion", ->
         $btn = cy.$$("button:first")
 
-        cy.on "command:retry", _.once ->
+        cy.on "internal:commandRetry", _.once ->
           $btn.addClass("moused-over")
 
         cy.get("button:first").trigger("mouseover").should("have.class", "moused-over").then ->
@@ -594,28 +594,28 @@ describe "src/cy/commands/actions/trigger", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "throws when eventName is not a string", ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 15 elements."
           done()
 
         cy.get("button:first").trigger("cy.trigger() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.trigger("mouseover")
 
       it "throws when attempting to trigger multiple elements", (done) ->
         num = cy.$$("button").length
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained #{num} elements."
           done()
 
@@ -629,7 +629,7 @@ describe "src/cy/commands/actions/trigger", ->
           checkbox.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(mouseover).to.eq 1
           expect(err.message).to.include "cy.trigger() failed because this element"
           done()
@@ -637,7 +637,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get(":checkbox:first").trigger("mouseover").trigger("mouseover")
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -649,7 +649,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "throws when the subject isnt visible", (done) ->
         $btn = cy.$$("#button:first").hide()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
@@ -662,7 +662,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "throws when subject is disabled", (done) ->
         $btn = cy.$$("#button").prop("disabled", true)
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           ## get + click logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("cy.trigger() failed because this element is disabled:\n")
@@ -671,7 +671,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get("#button").trigger("mouseover")
 
       it "throws when provided invalid position", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(2)
           expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()
@@ -687,7 +687,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.$$("button:first").on "tap", ->
           clicks += 1
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.trigger() could not be issued because this element is currently animating:\n")
           done()
@@ -695,7 +695,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get("button:first").trigger("tap")
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -709,7 +709,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get("button:first").trigger("mouseover").should("have.class", "moused-over")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
@@ -717,7 +717,7 @@ describe "src/cy/commands/actions/trigger", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -725,7 +725,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "logs immediately before resolving", (done) ->
         button = cy.$$("button:first")
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "trigger"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq button.get(0)
@@ -755,7 +755,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "logs only 1 event", ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "trigger"
             logs.push(log)
 

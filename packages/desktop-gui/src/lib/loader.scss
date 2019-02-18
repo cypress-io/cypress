@@ -1,0 +1,55 @@
+.loader {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  i {
+    font-size: 1.4em;
+    margin-right: 0.5em;
+  }
+}
+
+.loader-fullscreen {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+@mixin spinner-color($color) {
+  border-top: 0.2em solid rgba($color, 0.2);
+  border-right: 0.2em solid rgba($color, 0.2);
+  border-bottom: 0.2em solid rgba($color, 0.2);
+  border-left: 0.2em solid rgba($color, 0.8);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.spinner,
+.spinner:after {
+  border-radius: 50%;
+  display: block;
+  margin-right: 1em;
+  width: 2em;
+  height: 2em;
+}
+
+.spinner {
+  font-size: 10px;
+  position: relative;
+  text-indent: -9999em;
+  @include spinner-color(#666);
+  transform: translateZ(0);
+  animation: spin 1.5s infinite linear;
+}
+
+.loader-content {
+  color: #666;
+}

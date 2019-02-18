@@ -27,14 +27,14 @@ describe "src/cy/commands/angular", ->
         it "throws when cannot find angular", (done) ->
           delete cy.state("window").angular
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 
           cy.ng("binding", "phone")
 
         it "throws when binding cannot be found", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Could not find element for binding: 'not-found'."
             done()
 
@@ -46,9 +46,9 @@ describe "src/cy/commands/angular", ->
           retry = _.after 2, =>
             Cypress.stop()
 
-          cy.on "command:retry", retry
+          cy.on "internal:commandRetry", retry
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             done(err)
 
           cy.on "stop", =>
@@ -85,7 +85,7 @@ describe "src/cy/commands/angular", ->
 
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           cy.$$("body").append(missingLi)
 
         cy.ng("repeater", "li in lis").then ($li) ->
@@ -101,7 +101,7 @@ describe "src/cy/commands/angular", ->
           cy.state("window").angular = @angular
 
         it "throws when repeater cannot be found", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Could not find element for repeater: 'not-found'.  Searched [ng-repeat*='not-found'], [ng_repeat*='not-found'], [data-ng-repeat*='not-found'], [x-ng-repeat*='not-found']."
             done()
 
@@ -113,9 +113,9 @@ describe "src/cy/commands/angular", ->
           retry = _.after 2, =>
             Cypress.stop()
 
-          cy.on "command:retry", retry
+          cy.on "internal:commandRetry", retry
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             done(err)
 
           cy.on "stop", =>
@@ -131,7 +131,7 @@ describe "src/cy/commands/angular", ->
         it "throws when cannot find angular", (done) ->
           delete cy.state("window").angular
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 
@@ -141,7 +141,7 @@ describe "src/cy/commands/angular", ->
         beforeEach ->
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "assert"
               @lastLog = log
               @logs.push(log)
@@ -181,7 +181,7 @@ describe "src/cy/commands/angular", ->
 
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
-        cy.on "command:retry", _.after 2, ->
+        cy.on "internal:commandRetry", _.after 2, ->
           cy.$$("body").append(missingInput)
 
         cy.ng("model", "missing-input").then ($input) ->
@@ -192,14 +192,14 @@ describe "src/cy/commands/angular", ->
 
         missingInput = $("<input />", "data-ng-model": "missing-input")
 
-        cy.on "command:retry", _.after 6, _.once =>
+        cy.on "internal:commandRetry", _.after 6, _.once =>
           cy.$$("body").append(missingInput)
 
         ## we want to make sure that the ng promises do not continue
         ## to retry after the first one resolves
         cy.ng("model", "missing-input")
         .then ->
-          retry.reset()
+          retry.resetHistory()
         .wait(100)
         .then ->
           expect(retry.callCount).to.eq 0
@@ -216,7 +216,7 @@ describe "src/cy/commands/angular", ->
         it "throws when model cannot be found", (done) ->
           cy.ng("model", "not-found")
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Could not find element for model: 'not-found'.  Searched [ng-model='not-found'], [ng_model='not-found'], [data-ng-model='not-found'], [x-ng-model='not-found']."
             done()
 
@@ -226,9 +226,9 @@ describe "src/cy/commands/angular", ->
           retry = _.after 2, =>
             Cypress.stop()
 
-          cy.on "command:retry", retry
+          cy.on "internal:commandRetry", retry
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             done(err)
 
           cy.on "stop", =>
@@ -244,7 +244,7 @@ describe "src/cy/commands/angular", ->
         it "throws when cannot find angular", (done) ->
           delete cy.state("window").angular
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 

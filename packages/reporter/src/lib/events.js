@@ -18,11 +18,11 @@ export default {
       runnablesStore.setRunnables(rootRunnable)
     }))
 
-    runner.on('reporter:log:add', action('log:add', (log) => {
+    runner.on('reporter:internal:log', action('log:add', (log) => {
       runnablesStore.addLog(log)
     }))
 
-    runner.on('reporter:log:state:changed', action('log:update', (log) => {
+    runner.on('reporter:internal:logChange', action('log:change', (log) => {
       runnablesStore.updateLog(log)
     }))
 
@@ -47,11 +47,11 @@ export default {
       }
     }))
 
-    runner.on('test:before:run:async', action('test:before:run:async', (runnable) => {
+    runner.on('test:start:async', action('test:start:async', (runnable) => {
       runnablesStore.runnableStarted(runnable)
     }))
 
-    runner.on('test:after:run', action('test:after:run', (runnable) => {
+    runner.on('test:end', action('test:end', (runnable) => {
       runnablesStore.runnableFinished(runnable)
       statsStore.incrementCount(runnable.state)
     }))

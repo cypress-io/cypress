@@ -1,7 +1,7 @@
 debug = require("debug")("cypress:server:controllers:spec")
 Promise = require("bluebird")
 errors = require("../errors")
-preprocessor = require("../plugins/preprocessor")
+preprocessor = require("../background/preprocessor")
 
 module.exports = {
   handle: (spec, req, res, config, next, project) ->

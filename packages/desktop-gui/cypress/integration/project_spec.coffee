@@ -44,9 +44,19 @@ describe "Project", ->
     it "re-opens project if config changes", ->
       cy.shouldBeOnProjectSpecs().then =>
         @ipc.onConfigChanged.yield()
-        expect(@ipc.closeProject).to.be.called
-        expect(@ipc.openProject).to.be.called
+        cy.wrap(@ipc.closeProject).should("be.called")
+        cy.wrap(@ipc.openProject).should("be.called")
         cy.shouldBeOnProjectSpecs()
+
+  describe "opening", ->
+    beforeEach ->
+      @openProject = @util.deferred()
+      @ipc.openProject.returns(@openProject.promise)
+      @start()
+
+    it "shows loader", ->
+      cy.get(".loader")
+      cy.contains("Opening project...")
 
   describe "polling", ->
     beforeEach ->

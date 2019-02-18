@@ -40,7 +40,7 @@ describe "src/cy/commands/connectors", ->
           Cypress.config("defaultCommandTimeout", 50)
 
         it "throws when subject isn't array-like", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(err.message).to.eq "cy.spread() requires the existing subject be array-like."
             done()
 
@@ -49,10 +49,10 @@ describe "src/cy/commands/connectors", ->
         it "throws when promise timeout", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             logs.push(log)
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(logs.length).to.eq(1)
             expect(logs[0].get("error")).to.eq(err)
             expect(err.message).to.include "cy.spread() timed out after waiting '20ms'."
@@ -172,14 +172,14 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
           return null
 
         it "throws when promise timeout", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(@logs.length).to.eq(1)
@@ -191,7 +191,7 @@ describe "src/cy/commands/connectors", ->
             new Promise (resolve, reject) ->
 
         it "throws when mixing up async + sync return values", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(@logs.length).to.eq(1)
@@ -204,18 +204,18 @@ describe "src/cy/commands/connectors", ->
 
             return "foo"
 
-        it "unbinds command:enqueued in the case of an error thrown", (done) ->
+        it "unbinds internal:commandEnqueue in the case of an error thrown", (done) ->
           listeners = []
 
-          cy.on "fail", (err) =>
-            listeners.push(cy.listeners("command:enqueued").length)
+          cy.on "test:fail", (err) =>
+            listeners.push(cy.listeners("internal:commandEnqueue").length)
 
             expect(@logs.length).to.eq(1)
             expect(listeners).to.deep.eq([1, 0])
             done()
 
           cy.then ->
-            listeners.push(cy.listeners("command:enqueued").length)
+            listeners.push(cy.listeners("internal:commandEnqueue").length)
 
             throw new Error("foo")
 
@@ -253,14 +253,14 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
           return null
 
         it "eventually passes the assertion", ->
-          cy.on "command:retry", _.after 2, =>
+          cy.on "internal:commandRetry", _.after 2, =>
             @remoteWindow.$.fn.foo = -> "foo"
 
           cy.get("div:first").invoke("foo").should("eq", "foo").then ->
@@ -271,10 +271,10 @@ describe "src/cy/commands/connectors", ->
             expect(lastLog.get("ended")).to.be.true
 
         it "eventually fails the assertion", (done) ->
-          cy.on "command:retry", _.after 2, =>
+          cy.on "internal:commandRetry", _.after 2, =>
             @remoteWindow.$.fn.foo = -> "foo"
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include(lastLog.get("error").message)
@@ -288,7 +288,7 @@ describe "src/cy/commands/connectors", ->
           cy.get("div:first").invoke("foo").should("eq", "bar")
 
         it "can still fail on invoke", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include(lastLog.get("error").message)
@@ -303,7 +303,7 @@ describe "src/cy/commands/connectors", ->
         it "does not log an additional log on failure", (done) ->
           @remoteWindow.$.fn.foo = -> "foo"
 
-          cy.on "fail", =>
+          cy.on "test:fail", =>
             expect(@logs.length).to.eq(3)
             done()
 
@@ -371,7 +371,7 @@ describe "src/cy/commands/connectors", ->
             Cypress.config("defaultCommandTimeout", 50)
 
           it "bubbles up automatically", (done) ->
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expect(err.message).to.include "fn.err failed."
               done()
 
@@ -382,7 +382,7 @@ describe "src/cy/commands/connectors", ->
               foo: "foo"
             }
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expect(err.message).to.include("Cannot call cy.invoke() because 'foo' is not a function. You probably want to use cy.its('foo')")
               done()
 
@@ -395,7 +395,7 @@ describe "src/cy/commands/connectors", ->
               }
             }
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expect(err.message).to.include("Cannot call cy.invoke() because 'foo.bar' is not a function. You probably want to use cy.its('foo.bar')")
               done()
 
@@ -423,7 +423,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
@@ -508,14 +508,14 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
           return null
 
         it "throws when property does not exist on the subject", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include "cy.invoke() errored because the property: 'foo' does not exist on your subject."
@@ -525,7 +525,7 @@ describe "src/cy/commands/connectors", ->
           cy.noop({}).invoke("foo")
 
         it "throws without a subject", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include("cy.invoke(\"queue\")")
             expect(err.message).to.include("child command before running a parent command")
             done()
@@ -533,7 +533,7 @@ describe "src/cy/commands/connectors", ->
           cy.invoke("queue")
 
         it "throws when first argument isnt a string", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
@@ -543,7 +543,7 @@ describe "src/cy/commands/connectors", ->
           cy.noop({}).invoke({})
 
         it "logs once when not dom subject", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(@logs.length).to.eq(1)
@@ -553,14 +553,14 @@ describe "src/cy/commands/connectors", ->
           cy.invoke({})
 
         it "ensures subject", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "cy.its() errored because your subject is currently: 'undefined'"
             done()
 
           cy.noop(undefined).its("attr")
 
         it "consoleProps subject", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command: "its"
               Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject."
@@ -662,14 +662,14 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
           return null
 
         it "logs immediately before resolving", (done) ->
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             if log.get("name") is "its"
               expect(log.get("state")).to.eq("pending")
               expect(log.get("message")).to.eq ".foo"
@@ -718,7 +718,7 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             if attrs.name is "its"
               @lastLog = log
 
@@ -727,7 +727,7 @@ describe "src/cy/commands/connectors", ->
           return null
 
         it "throws without a subject", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include("cy.its(\"wat\")")
             expect(err.message).to.include("child command before running a parent command")
             done()
@@ -743,7 +743,7 @@ describe "src/cy/commands/connectors", ->
 
           obj.foo.bar.baz = => "baz"
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(lastLog.get("error").message).to.include(err.message)
@@ -753,7 +753,7 @@ describe "src/cy/commands/connectors", ->
           cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
 
         it "throws when property does not exist on the subject", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include "cy.its() errored because the property: 'foo' does not exist on your subject."
@@ -763,7 +763,7 @@ describe "src/cy/commands/connectors", ->
           cy.noop({}).its("foo")
 
         it "throws when reduced property does not exist on the subject", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include "cy.its() errored because the property: 'baz' does not exist on your subject."
@@ -781,14 +781,14 @@ describe "src/cy/commands/connectors", ->
 
         [null, undefined].forEach (val) ->
           it "throws on reduced #{val} subject", (done) ->
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot access any properties such as 'toString' on a '#{val}' value.")
               done()
 
             cy.wrap({foo: val}).its("foo.toString")
 
         it "throws two args were passed as subject", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include "cy.its() only accepts a single argument."
@@ -804,7 +804,7 @@ describe "src/cy/commands/connectors", ->
           ## TODO: currently this doesn't work because
           ## null subjects immediately throw
           # it "throws on initial #{val} subject", ->
-          #   cy.on "fail", (err) ->
+          #   cy.on "test:fail", (err) ->
           #     expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot call any properties such as 'toString' on a '#{val}' value.")
           #     done()
 
@@ -923,14 +923,14 @@ describe "src/cy/commands/connectors", ->
 
           @logs = []
 
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
             @logs.push(log)
 
           return null
 
         it "can time out", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("cy.each() timed out after waiting '50ms'.\n\nYour callback function returned a promise which never resolved.")
@@ -942,10 +942,10 @@ describe "src/cy/commands/connectors", ->
         it "throws when not passed a callback function", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             logs.push(log)
 
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("cy.each() must be passed a callback function.")
@@ -954,7 +954,7 @@ describe "src/cy/commands/connectors", ->
           cy.get("ul").each({})
 
         it "throws when not passed a number", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '100'")
@@ -963,7 +963,7 @@ describe "src/cy/commands/connectors", ->
           cy.wrap(100).each ->
 
         it "throws when not passed an array like structure", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '{}'")

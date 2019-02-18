@@ -198,48 +198,48 @@ describe "lib/scaffold", ->
           snapshot(commandsContents)
           snapshot(indexContents)
 
-  context ".plugins", ->
+  context ".background", ->
     beforeEach ->
       pristinePath = Fixtures.projectPath("pristine")
 
       config.get(pristinePath).then (@cfg) =>
-        {@pluginsFile} = @cfg
-        @pluginsFolder = path.dirname(@pluginsFile)
+        {@backgroundFile} = @cfg
+        @backgroundFolder = path.dirname(@backgroundFile)
 
-    it "creates pluginsFile when pluginsFolder does not exist", ->
+    it "creates backgroundFile when backgroundFolder does not exist", ->
       ## first remove it
-      fs.removeAsync(@pluginsFolder)
+      fs.removeAsync(@backgroundFolder)
       .then =>
-        scaffold.plugins(@pluginsFolder, @cfg)
+        scaffold.background(@backgroundFolder, @cfg)
       .then =>
-        fs.readFileAsync(@pluginsFolder + "/index.js", "utf8")
+        fs.readFileAsync(@backgroundFolder + "/index.js", "utf8")
       .then (str) ->
         snapshot(str.split('`').join('<backtick>'))
 
-    it "does not create any files if pluginsFile directory already exists", ->
+    it "does not create any files if backgroundFile directory already exists", ->
       ## first remove it
-      fs.removeAsync(@pluginsFolder)
+      fs.removeAsync(@backgroundFolder)
       .then =>
-        ## create the pluginsFolder ourselves manually
-        fs.ensureDirAsync(@pluginsFolder)
+        ## create the backgroundFolder ourselves manually
+        fs.ensureDirAsync(@backgroundFolder)
       .then =>
         ## now scaffold
-        scaffold.plugins(@pluginsFolder, @cfg)
+        scaffold.background(@backgroundFolder, @cfg)
       .then =>
-        glob("**/*", {cwd: @pluginsFolder})
+        glob("**/*", {cwd: @backgroundFolder})
       .then (files) ->
         ## ensure no files exist
         expect(files.length).to.eq(0)
 
-    it "does not create any files if pluginsFile is not default", ->
-      @cfg.resolved.pluginsFile.from = "config"
+    it "does not create any files if backgroundFile is not default", ->
+      @cfg.resolved.backgroundFile.from = "config"
 
-    it "does not create any files if pluginsFile is false", ->
-      @cfg.pluginsFile = false
+    it "does not create any files if backgroundFile is false", ->
+      @cfg.backgroundFile = false
 
-      scaffold.plugins(@pluginsFile, @cfg)
+      scaffold.background(@backgroundFile, @cfg)
       .then =>
-        glob("**/*", {cwd: @pluginsFile})
+        glob("**/*", {cwd: @backgroundFile})
       .then (files) ->
         expect(files.length).to.eq(0)
 
@@ -307,7 +307,7 @@ describe "lib/scaffold", ->
     beforeEach ->
       todosPath = Fixtures.projectPath("todos")
       config.get(todosPath).then (@cfg) =>
-        @cfg.pluginsFile = path.join(@cfg.projectRoot, "cypress/plugins/index.js")
+        @cfg.backgroundFile = path.join(@cfg.projectRoot, "cypress/background/index.js")
 
     it "returns tree-like structure of scaffolded", ->
       snapshot(scaffold.fileTree(@cfg))
@@ -320,6 +320,6 @@ describe "lib/scaffold", ->
       @cfg.supportFile = false
       snapshot(scaffold.fileTree(@cfg))
 
-    it "leaves out plugins if configured to false", ->
-      @cfg.pluginsFile = false
+    it "leaves out background if configured to false", ->
+      @cfg.backgroundFile = false
       snapshot(scaffold.fileTree(@cfg))

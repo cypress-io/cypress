@@ -28,6 +28,7 @@ create = (state, config, log) ->
 
   createUncaughtException = (type, args) ->
     [msg, source, lineno, colno, err] = args
+    type = err?.from or type
 
     current = state("current")
 
@@ -48,6 +49,7 @@ create = (state, config, log) ->
     suffixMsg = switch type
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
+      when "cypress" then "uncaught.fromCypress"
 
     err = $utils.appendErrMsg(err, $utils.errMessageByPath(suffixMsg))
 

@@ -41,7 +41,7 @@ describe "src/cy/commands/exec", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -59,7 +59,7 @@ describe "src/cy/commands/exec", ->
       it "logs immediately before resolving", ->
         Cypress.backend.resolves(okResponse)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "exec"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("ls")
@@ -103,7 +103,7 @@ describe "src/cy/commands/exec", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "exec"
             @lastLog = log
             @logs.push(log)
@@ -111,7 +111,7 @@ describe "src/cy/commands/exec", ->
         return null
 
       it "throws when cmd is absent", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -123,7 +123,7 @@ describe "src/cy/commands/exec", ->
         cy.exec()
 
       it "throws when cmd isn't a string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -135,7 +135,7 @@ describe "src/cy/commands/exec", ->
         cy.exec(3)
 
       it "throws when cmd is an empty string", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -149,7 +149,7 @@ describe "src/cy/commands/exec", ->
       it "throws when the execution errors", (done) ->
         Cypress.backend.rejects(new Error("exec failed"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -164,7 +164,7 @@ describe "src/cy/commands/exec", ->
       it "throws after timing out", (done) ->
         Cypress.backend.resolves(Promise.delay(250))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -178,7 +178,7 @@ describe "src/cy/commands/exec", ->
       it "logs once on error", (done) ->
         Cypress.backend.rejects(new Error("exec failed"))
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -194,7 +194,7 @@ describe "src/cy/commands/exec", ->
 
         Cypress.backend.rejects(err)
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.exec('sleep 2') timed out after waiting 100ms.")
           done()
 
@@ -203,7 +203,7 @@ describe "src/cy/commands/exec", ->
         })
 
       it "can really time out", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("cy.exec('sleep 2') timed out after waiting 100ms.")
           done()
 
@@ -215,7 +215,7 @@ describe "src/cy/commands/exec", ->
         it "throws error that includes useful information and exit code", (done) ->
           Cypress.backend.resolves({ code: 1 })
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.contain("cy.exec('ls') failed because the command exited with a non-zero code.\n\nPass {failOnNonZeroExit: false} to ignore exit code failures.")
             expect(err.message).to.contain("Code: 1")
             done()
@@ -225,7 +225,7 @@ describe "src/cy/commands/exec", ->
         it "throws error that includes stderr if it exists and is non-empty", (done) ->
           Cypress.backend.resolves({ code: 1, stderr: "error output", stdout: "" })
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.contain("Stderr:\nerror output")
             expect(err.message).not.to.contain("Stdout")
             done()
@@ -235,7 +235,7 @@ describe "src/cy/commands/exec", ->
         it "throws error that includes stdout if it exists and is non-empty", (done) ->
           Cypress.backend.resolves({ code: 1, stderr: "", stdout: "regular output" })
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.contain("\nStdout:\nregular output")
             expect(err.message).not.to.contain("Stderr")
             done()
@@ -245,7 +245,7 @@ describe "src/cy/commands/exec", ->
         it "throws error that includes stdout and stderr if they exists and are non-empty", (done) ->
           Cypress.backend.resolves({ code: 1, stderr: "error output", stdout: "regular output" })
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.contain("\nStdout:\nregular output\nStderr:\nerror output")
             done()
 
@@ -258,7 +258,7 @@ describe "src/cy/commands/exec", ->
             stdout: "#{_.range(200).join()}stdout should be truncated"
           })
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).not.to.contain("stderr should be truncated")
             expect(err.message).not.to.contain("stdout should be truncated")
             expect(err.message).to.contain("...")
@@ -267,7 +267,7 @@ describe "src/cy/commands/exec", ->
           cy.exec("ls")
 
         it "can really fail", (done) ->
-          cy.on "fail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             { Yielded } = lastLog.invoke("consoleProps")

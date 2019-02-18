@@ -16,26 +16,27 @@ config      = require("./config")
 logger      = require("./logger")
 errors      = require("./errors")
 Server      = require("./server")
-plugins     = require("./plugins")
+background  = require("./background")
 scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 browsers    = require("./browsers")
 savedState  = require("./saved_state")
 Automation  = require("./automation")
-preprocessor = require("./plugins/preprocessor")
+preprocessor = require("./background/preprocessor")
 fs          = require("./util/fs")
 settings    = require("./util/settings")
 specsUtil   = require("./util/specs")
+serverEvents = require("./background/server_events")
 
 localCwd = cwd()
 
 multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
 class Project extends EE
-  constructor: (projectRoot) ->
+  constructor: (projectRoot, options = {}) ->
     if not (@ instanceof Project)
-      return new Project(projectRoot)
+      return new Project(projectRoot, options)
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
@@ -51,6 +52,7 @@ class Project extends EE
     @server      = null
     @memoryCheck = null
     @automation  = null
+    @isTextTerminal = options.isTextTerminal
 
     debug("Project created %s", @projectRoot)
 
@@ -75,18 +77,18 @@ class Project extends EE
     .tap (cfg) =>
       process.chdir(@projectRoot)
 
-      ## TODO: we currently always scaffold the plugins file
+      ## TODO: we currently always scaffold the background file
       ## even when headlessly or else it will cause an error when
       ## we try to load it and it's not there. We must do this here
-      ## else initialing the plugins will instantly fail.
-      if cfg.pluginsFile
-        scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
+      ## else initializing the background file will instantly fail.
+      if cfg.backgroundFile
+        scaffold.background(path.dirname(cfg.backgroundFile), cfg)
     .then (cfg) =>
-      @_initPlugins(cfg, options)
+      @_initbackground(cfg, options)
       .then (modifiedCfg) ->
-        debug("plugin config yielded:", modifiedCfg)
+        debug("background config yielded:", modifiedCfg)
 
-        return config.updateWithPluginValues(cfg, modifiedCfg)
+        return config.updateWithBackgroundValues(cfg, modifiedCfg)
     .then (cfg) =>
       @server.open(cfg, @)
       .spread (port, warning) =>
@@ -118,26 +120,33 @@ class Project extends EE
         .then =>
           Promise.join(
             @checkSupportFile(cfg)
-            @watchPluginsFile(cfg, options)
+            @watchBackgroundFile(cfg, options)
           )
+        .then =>
+          if not @isTextTerminal
+            serverEvents.execute("run:start")
 
     # return our project instance
     .return(@)
 
-  _initPlugins: (cfg, options) ->
-    ## only init plugins with the
+  _initbackground: (cfg, options) ->
+    ## only init background with the
     ## whitelisted config values to
     ## prevent tampering with the
     ## internals and breaking cypress
     cfg = config.whitelist(cfg)
 
-    plugins.init(cfg, {
+    background.init(cfg, {
       onError: (err) ->
-        debug('got plugins error', err.stack)
+        debug("background unexpected error:", err.stack)
 
         browsers.close()
         options.onError(err)
     })
+    .catch (err) ->
+      debug("background init error:", err.stack)
+      browsers.close()
+      throw err
 
   getRuns: ->
     Promise.all([
@@ -171,6 +180,9 @@ class Project extends EE
     )
     .then ->
       process.chdir(localCwd)
+    .then =>
+      if not @isTextTerminal
+        serverEvents.execute("run:end")
 
   checkSupportFile: (cfg) ->
     if supportFile = cfg.supportFile
@@ -179,24 +191,24 @@ class Project extends EE
         if not found
           errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
 
-  watchPluginsFile: (cfg, options) ->
-    debug("attempt watch plugins file: #{cfg.pluginsFile}")
-    if not cfg.pluginsFile
+  watchBackgroundFile: (cfg, options) ->
+    debug("attempt watch background file: #{cfg.backgroundFile}")
+    if not cfg.backgroundFile
       return Promise.resolve()
 
-    fs.pathExists(cfg.pluginsFile)
+    fs.pathExists(cfg.backgroundFile)
     .then (found) =>
-      debug("plugins file found? #{found}")
-      ## ignore if not found. plugins#init will throw the right error
+      debug("background file found? #{found}")
+      ## ignore if not found. background#init will throw the right error
       return if not found
 
-      debug("watch plugins file")
-      @watchers.watchTree(cfg.pluginsFile, {
+      debug("watch background file")
+      @watchers.watchTree(cfg.backgroundFile, {
         onChange: =>
           ## TODO: completely re-open project instead?
-          debug("plugins file changed")
-          ## re-init plugins after a change
-          @_initPlugins(cfg, options)
+          debug("background file changed")
+          ## re-init background after a change
+          @_initbackground(cfg, options)
           .catch (err) ->
             options.onError(err)
       })

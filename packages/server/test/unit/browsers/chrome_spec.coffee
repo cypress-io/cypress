@@ -3,7 +3,7 @@ require("../../spec_helper")
 os = require("os")
 
 extension = require("@packages/extension")
-plugins = require("#{root}../lib/plugins")
+background = require("#{root}../lib/background")
 utils = require("#{root}../lib/browsers/utils")
 chrome = require("#{root}../lib/browsers/chrome")
 
@@ -14,30 +14,30 @@ describe "lib/browsers/chrome", ->
 
       sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
-      sinon.stub(plugins, "has")
-      sinon.stub(plugins, "execute")
+      sinon.stub(background, "isRegistered")
+      sinon.stub(background, "execute")
       sinon.stub(utils, "launch")
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
 
-    it "is noop without before:browser:launch", ->
-      plugins.has.returns(false)
+    it "is noop without browser:launch", ->
+      background.isRegistered.returns(false)
 
       chrome.open("chrome", "http://", {}, {})
       .then ->
-        expect(plugins.execute).not.to.be.called
+        expect(background.execute).not.to.be.called
 
     it "is noop if newArgs are not returned", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves(null)
+      background.isRegistered.returns(true)
+      background.execute.resolves(null)
 
       chrome.open("chrome", "http://", {}, {})
       .then =>
         expect(utils.launch).to.be.calledWith("chrome", "http://", @args)
 
-    it "normalizes --load-extension if provided in plugin", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves([
+    it "normalizes --load-extension if provided in background file", ->
+      background.isRegistered.returns(true)
+      background.execute.resolves([
         "--foo=bar", "--load-extension=/foo/bar/baz.js"
       ])
 
@@ -57,9 +57,9 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
-    it "normalizes multiple extensions from plugins", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves([
+    it "normalizes multiple extensions from background", ->
+      background.isRegistered.returns(true)
+      background.execute.resolves([
         "--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"
       ])
 
@@ -139,3 +139,24 @@ describe "lib/browsers/chrome", ->
       disabledRootLayerScrolling("66", true)
       disabledRootLayerScrolling("67", true)
       disabledRootLayerScrolling("68", false)
+
+    ## https://github.com/cypress-io/cypress/issues/1872
+    it "adds <-loopback> proxy bypass rule in version 72+", ->
+      arg = "--proxy-bypass-list=<-loopback>"
+
+      chromeVersionHasLoopback = (version, bool) ->
+        args = chrome._getArgs({
+          browser: {
+            majorVersion: version
+          }
+        })
+
+        if bool
+          expect(args).to.include(arg)
+        else
+          expect(args).not.to.include(arg)
+
+      chromeVersionHasLoopback("71", false)
+      chromeVersionHasLoopback("72", true)
+      chromeVersionHasLoopback("73", true)
+

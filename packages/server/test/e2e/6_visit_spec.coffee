@@ -108,7 +108,7 @@ describe "e2e visit", ->
         expectedExitCode: 1
       })
 
-    it "calls onBeforeLoad when overwriting cy.visit", ->
+    it "calls onStart when overwriting cy.visit", ->
       e2e.exec(@, {
         spec: "issue_2196_spec.coffee"
       })

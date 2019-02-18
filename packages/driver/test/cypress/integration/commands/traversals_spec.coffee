@@ -19,7 +19,9 @@ describe "src/cy/commands/traversals", ->
   fns = [
     {find: "*"}
     {filter: ":first"}
+    {filter: (i) -> i == 0}
     {not: "div"}
+    {not: (i, e) -> e.tagName == 'div'}
     {eq: 0}
     {closest: "body"}
     "children", "first", "last", "next", "nextAll", "nextUntil", "parent", "parents", "parentsUntil", "prev", "prevAll", "prevUntil", "siblings"
@@ -43,7 +45,7 @@ describe "src/cy/commands/traversals", ->
           Cypress.config("defaultCommandTimeout", 100)
 
         it "throws when options.length isnt a number", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "You must provide a valid number to a length assertion. You passed: 'asdf'"
             done()
 
@@ -54,7 +56,7 @@ describe "src/cy/commands/traversals", ->
 
           node = dom.stringify cy.$$("#list"), "short"
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}'."
             done()
 
@@ -65,21 +67,21 @@ describe "src/cy/commands/traversals", ->
 
           node = dom.stringify cy.$$("#list"), "short"
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}'."
             done()
 
           cy.get("#list")[name](arg).should("have.length", el.length + 1)
 
         it "without a dom element", (done) ->
-          cy.on "fail", -> done()
+          cy.on "test:fail", -> done()
           cy.noop({})[name](arg)
 
         it "throws when subject is not in the document", (done) ->
-          cy.on "command:end", =>
+          cy.on "internal:commandEnd", =>
             cy.$$("#list").remove()
 
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.include "cy.#{name}() failed because this element"
             done()
 
@@ -89,7 +91,7 @@ describe "src/cy/commands/traversals", ->
           errIncludes = (el, node) =>
             node = dom.stringify cy.$$(node), "short"
 
-            cy.on "fail", (err) ->
+            cy.on "test:fail", (err) ->
               expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
               done()
 
@@ -107,13 +109,13 @@ describe "src/cy/commands/traversals", ->
 
       describe ".log", ->
         beforeEach ->
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
 
           return null
 
         it "logs immediately before resolving", (done) ->
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             if log.get("name") is name
               expect(log.pick("state")).to.deep.eq {
                 state: "pending"
@@ -137,15 +139,22 @@ describe "src/cy/commands/traversals", ->
 
         it "has a custom message", ->
           cy.get("#list")[name](arg).then ->
-            arg = if _.isUndefined(arg) then "" else arg.toString()
+            if _.isUndefined(arg) or _.isFunction(arg)
+              message = ""
+            else
+              message = arg.toString()
+
             lastLog = @lastLog
 
-            expect(lastLog.get("message")).to.eq arg
+            expect(lastLog.get("message")).to.eq message
 
         it "#consoleProps", ->
           cy.get("#list")[name](arg).then ($el) ->
             obj = {Command: name}
-            obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
+            if _.isFunction(arg)
+              obj.Selector = ""
+            else
+              obj.Selector = [].concat(arg).join(", ")
 
             yielded = Cypress.dom.getElements($el)
 
@@ -157,8 +166,14 @@ describe "src/cy/commands/traversals", ->
 
             expect(@lastLog.invoke("consoleProps")).to.deep.eq obj
 
+        it "can be turned off", ->
+          cy.get("#list")[name](arg, {log: false}).then ->
+            lastLog = @lastLog
+
+            expect(lastLog.get("name")).to.eq "get"
+
   it "eventually resolves", ->
-    cy.on "command:retry", _.after 2, ->
+    cy.on "internal:commandRetry", _.after 2, ->
       cy.$$("button:first").text("foo").addClass("bar")
 
     cy.root().find("button:first").should("have.text", "foo").and("have.class", "bar")
@@ -170,7 +185,7 @@ describe "src/cy/commands/traversals", ->
     retry = _.after 3, ->
       li.append(span)
 
-    cy.on "command:retry", retry
+    cy.on "internal:commandRetry", retry
 
     cy.get("#list li:last").find("span").then ($span) ->
       expect($span.get(0)).to.eq(span.get(0))
@@ -180,7 +195,7 @@ describe "src/cy/commands/traversals", ->
 
     length = buttons.length - 2
 
-    cy.on "command:retry", _.after 2, =>
+    cy.on "internal:commandRetry", _.after 2, =>
       buttons.last().remove()
       buttons = cy.$$("button")
 
@@ -189,20 +204,20 @@ describe "src/cy/commands/traversals", ->
       expect($buttons.length).to.eq length
 
   it "should('not.exist')", ->
-    cy.on "command:retry", _.after 3, =>
+    cy.on "internal:commandRetry", _.after 3, =>
       cy.$$("#nested-div").find("span").remove()
 
     cy.get("#nested-div").find("span").should("not.exist")
 
   it "should('exist')", ->
-    cy.on "command:retry", _.after 3, =>
+    cy.on "internal:commandRetry", _.after 3, =>
       cy.$$("#nested-div").append($("<strong />"))
 
     cy.get("#nested-div").find("strong")
 
   ## https://github.com/cypress-io/cypress/issues/38
   it "works with checkboxes", ->
-    cy.on "command:retry", _.after 2, =>
+    cy.on "internal:commandRetry", _.after 2, =>
       c = cy.$$("[name=colors]").slice(0, 2)
       c.prop("checked", true)
 
@@ -211,7 +226,7 @@ describe "src/cy/commands/traversals", ->
   it "does not log using first w/options", ->
     logs = []
 
-    cy.on "log:added", (attrs, log) ->
+    cy.on "internal:log", (attrs, log) ->
       if attrs.name isnt "assert"
         logs.push(log)
 
@@ -225,20 +240,20 @@ describe "src/cy/commands/traversals", ->
 
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
 
       return null
 
     it "errors after timing out not finding element", (done) ->
-      cy.on "fail", (err) ->
+      cy.on "test:fail", (err) ->
         expect(err.message).to.include "Expected to find element: 'span', but never found it. Queried from element: <li.item>"
         done()
 
       cy.get("#list li:last").find("span")
 
     it "throws once when incorrect sizzle selector", (done) ->
-      cy.on "fail", (err) =>
+      cy.on "test:fail", (err) =>
         expect(@logs.length).to.eq 2
         done()
 
@@ -247,7 +262,7 @@ describe "src/cy/commands/traversals", ->
     it "logs out $el when existing $el is found even on failure", (done) ->
       button = cy.$$("#button").hide()
 
-      cy.on "fail", (err) =>
+      cy.on "test:fail", (err) =>
         log = @logs[1]
 
         expect(log.get("state")).to.eq("failed")

@@ -27,14 +27,14 @@ describe "src/cy/commands/location", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, _.once =>
+        cy.on "internal:commandRetry", _.after 2, _.once =>
           win = cy.state("window")
           win.location.href = "/foo/bar/baz.html"
 
@@ -51,14 +51,14 @@ describe "src/cy/commands/location", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -72,7 +72,7 @@ describe "src/cy/commands/location", ->
         cy.url().should("eq", "not-this")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -82,7 +82,7 @@ describe "src/cy/commands/location", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -142,14 +142,14 @@ describe "src/cy/commands/location", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, =>
+        cy.on "internal:commandRetry", _.after 2, =>
           win = cy.state("window")
           win.location.hash = "users/1"
 
@@ -166,14 +166,14 @@ describe "src/cy/commands/location", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -187,7 +187,7 @@ describe "src/cy/commands/location", ->
         cy.hash().should("eq", "not-this")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -197,7 +197,7 @@ describe "src/cy/commands/location", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -261,14 +261,14 @@ describe "src/cy/commands/location", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
         return null
 
       it "eventually passes the assertion", ->
-        cy.on "command:retry", _.after 2, _.once =>
+        cy.on "internal:commandRetry", _.after 2, _.once =>
           win = cy.state("window")
           win.location.pathname = "users/1"
 
@@ -285,14 +285,14 @@ describe "src/cy/commands/location", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -308,10 +308,10 @@ describe "src/cy/commands/location", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
 
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(2)
           done()
 
@@ -321,7 +321,7 @@ describe "src/cy/commands/location", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 

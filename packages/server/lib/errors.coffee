@@ -527,42 +527,54 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
-    when "PLUGINS_FILE_ERROR"
+    when "BACKGROUND_FILE_ERROR"
       msg = """
-      The plugins file is missing or invalid.
+      The background file is missing or invalid.
 
-      Your `pluginsFile` is set to `#{arg1}`, but either the file is missing, it contains a syntax error, or threw an error when required. The `pluginsFile` must be a `.js` or `.coffee` file.
+      Your `backgroundFile` is set to `#{arg1}`, but either the file is missing, it contains a syntax error, or threw an error when required. The `backgroundFile` must be a `.js` or `.coffee` file.
 
-      Please fix this, or set `pluginsFile` to `false` if a plugins file is not necessary for your project.
-      """.trim()
+      Please fix this, or set `backgroundFile` to `false` if a background file is not necessary for your project.
+      """
 
       if arg2
         return {msg: msg, details: arg2}
 
       return msg
-    when "PLUGINS_DIDNT_EXPORT_FUNCTION"
+    when "BACKGROUND_DIDNT_EXPORT_FUNCTION"
       msg = """
-      The `pluginsFile` must export a function.
+      The `backgroundFile` must export a function.
 
-      We loaded the `pluginsFile` from: `#{arg1}`
+      We loaded the `backgroundFile` from: `#{arg1}`
 
       It exported:
       """
 
       return {msg: msg, details: JSON.stringify(arg2)}
-    when "PLUGINS_FUNCTION_ERROR"
+    when "BACKGROUND_FUNCTION_ERROR"
       msg = """
-      The function exported by the plugins file threw an error.
+      The function exported by the background file threw an error.
 
       We invoked the function exported by `#{arg1}`, but it threw an error.
-      """.trim()
+      """
 
       return {msg: msg, details: arg2}
-    when "PLUGINS_ERROR"
+
+    when "BACKGROUND_ERROR"
       msg = """
-      The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
-      """.trim()
+      The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
+      """
+
       return {msg: msg, details: arg1}
+    when "BACKGROUND_RENAMED_EVENTS"
+      """
+      The following background #{if arg1.events.length > 1 then "events have" else "event has"} been renamed.
+
+      Please update them in your background file and try again.
+
+      #{_.map(arg1.events, ({ oldEvent, newEvent }) -> "`#{oldEvent}` has been renamed to `#{newEvent}`").join("\n")}
+
+      Background file location: `#{arg1.backgroundFile}`
+      """
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -654,9 +666,36 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "BACKGROUND_SERVER_EVENT_ERROR"
+      """
+      An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1)}' event.
+
+      The error we received was:
+
+      #{chalk.yellow(arg2)}
+      """
+    when "REPATHED_BACKGROUND_FILE"
+      """
+      The "plugins file" has been renamed to the "background file" and has a new default path.
+
+      Please rename
+        #{chalk.yellow(arg1)}
+      to
+        #{chalk.blue(arg2)}
+      """
     when "DUPLICATE_TASK_KEY"
       """
       Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
+      """
+    when "BACKGROUND_DRIVER_EVENT_ERROR"
+      """
+      An error was thrown in your background file while executing the handler for the '#{chalk.blue(arg1.event)}' event.
+
+      This error is being ignored because the event cannot affect the results of the run.
+
+      The error we received was:
+
+      #{chalk.yellow(arg1.error)}
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """

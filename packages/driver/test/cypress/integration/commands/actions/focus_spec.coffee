@@ -155,7 +155,7 @@ describe "src/cy/commands/actions/focus", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -178,7 +178,7 @@ describe "src/cy/commands/actions/focus", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "focus"
             @lastLog = log
             @logs.push(log)
@@ -195,7 +195,7 @@ describe "src/cy/commands/actions/focus", ->
         ## chain will get cancelled before it gets attached
         ## (besides the code will continue to run and create
         ## side effects)
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "focus"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $input.get(0)
@@ -236,14 +236,14 @@ describe "src/cy/commands/actions/focus", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.noop({}).focus()
 
@@ -255,7 +255,7 @@ describe "src/cy/commands/actions/focus", ->
           $input.remove()
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(focused).to.eq 1
           expect(err.message).to.include "cy.focus() failed because this element"
           done()
@@ -263,7 +263,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.get("input:first").focus().focus()
 
       it "throws when not a[href],link[href],button,input,select,textarea,[tabindex]", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.focus() can only be called on a valid focusable element. Your subject is a: <form id=\"by-id\">...</form>"
           done()
 
@@ -276,12 +276,12 @@ describe "src/cy/commands/actions/focus", ->
             return $inputs
           .focus()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "cy.focus() can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -317,7 +317,7 @@ describe "src/cy/commands/actions/focus", ->
         $first.on "focus", ->
           $(@).remove()
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.blur() failed because this element"
           done()
 
@@ -337,7 +337,7 @@ describe "src/cy/commands/actions/focus", ->
             done()
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -351,7 +351,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.get(":text:first").focus().should("have.class", "focused")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
@@ -506,7 +506,7 @@ describe "src/cy/commands/actions/focus", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -529,7 +529,7 @@ describe "src/cy/commands/actions/focus", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "blur"
             @lastLog = log
             @logs.push(log)
@@ -541,7 +541,7 @@ describe "src/cy/commands/actions/focus", ->
 
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "blur"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -588,14 +588,14 @@ describe "src/cy/commands/actions/focus", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "test:fail", -> done()
 
         cy.noop({}).blur()
 
@@ -609,7 +609,7 @@ describe "src/cy/commands/actions/focus", ->
             return false
           return false
 
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(blurred).to.eq 1
           expect(err.message).to.include "cy.blur() failed because this element"
           done()
@@ -619,7 +619,7 @@ describe "src/cy/commands/actions/focus", ->
       it "throws when subject is a collection of elements", (done) ->
         num = cy.$$("textarea,:text").length
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(err.message).to.include "cy.blur() can only be called on a single element. Your subject contained #{num} elements."
           done()
 
@@ -627,14 +627,14 @@ describe "src/cy/commands/actions/focus", ->
           .get("textarea,:text").blur()
 
       it "throws when there isnt an activeElement", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.blur() can only be called when there is a currently focused element."
           done()
 
         cy.get("form:first").blur()
 
       it "throws when blur is called on a non-active element", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
           done()
 
@@ -646,7 +646,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.$$("button:first").click ->
           $(@).remove()
 
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(lastLog.get("message")).to.eq("{force: true}")
@@ -655,7 +655,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.get("button:first").click().blur({force: true})
 
       it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -665,7 +665,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.blur()
 
       it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include(lastLog.get("error").message)
@@ -679,7 +679,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.get(":text:first").focus().blur().should("have.class", "blured")
 
       it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
+        cy.on "test:fail", =>
           expect(@logs.length).to.eq(4)
           done()
 

@@ -10,9 +10,9 @@ describe "Specs List", ->
 
       cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
-      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+      cy.stub(@ipc, "getSpecs")
       cy.stub(@ipc, "closeBrowser").resolves(null)
-      cy.stub(@ipc, "launchBrowser")
+      cy.stub(@ipc, "launchBrowser").resolves()
       cy.stub(@ipc, "openFinder")
       cy.stub(@ipc, "externalOpen")
       cy.stub(@ipc, "onboardingClosed")
@@ -22,6 +22,11 @@ describe "Specs List", ->
       cy.stub(@ipc, "openProject").returns(@openProject.promise)
 
       start()
+
+  it "shows loader", ->
+    @openProject.resolve(@config)
+    cy.get(".loader")
+    cy.contains("Loading specs...")
 
   describe "no specs", ->
     beforeEach ->
@@ -47,6 +52,7 @@ describe "Specs List", ->
 
   describe "first time onboarding specs", ->
     beforeEach ->
+      @ipc.getSpecs.yields(null, @specs)
       @config.isNewProject = true
       @openProject.resolve(@config)
 
@@ -63,7 +69,7 @@ describe "Specs List", ->
           cy.contains("commands.js")
           cy.contains("defaults.js")
           cy.contains("index.js")
-        cy.contains("span", "plugins").siblings("ul").within ->
+        cy.contains("span", "background").siblings("ul").within ->
           cy.contains("index.js")
 
     it "lists folders and files alphabetically", ->
@@ -123,10 +129,11 @@ describe "Specs List", ->
           cy
             .contains(".btn", "Run all specs").click()
             .then ->
-              launchArgs = @ipc.launchBrowser.lastCall.args
+              expect(@ipc.launchBrowser).to.be.called
 
-              expect(launchArgs[0].browser.name).to.eq "chrome"
-              expect(launchArgs[0].spec.name).to.eq "All Specs"
+              launchArgs = @ipc.launchBrowser.lastCall.args[0]
+              expect(launchArgs.browser.name).to.eq "chrome"
+              expect(launchArgs.spec.name).to.eq "All Specs"
 
         describe "all specs running in browser", ->
           beforeEach ->
@@ -273,16 +280,15 @@ describe "Specs List", ->
         @openProject.resolve(@config)
         cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
-      it "closes then launches browser on click of file", ->
+      it "launches browser on click of file", ->
         cy.get("@firstSpec")
           .click()
           .then ->
-            expect(@ipc.closeBrowser).to.be.called
+            expect(@ipc.launchBrowser).to.be.called
 
-            launchArgs = @ipc.launchBrowser.lastCall.args
-
-            expect(launchArgs[0].browser.name).to.equal("chrome")
-            expect(launchArgs[0].spec.relative).to.equal("cypress/integration/app_spec.coffee")
+            launchArgs = @ipc.launchBrowser.lastCall.args[0]
+            expect(launchArgs.browser.name).to.equal("chrome")
+            expect(launchArgs.spec.relative).to.equal("cypress/integration/app_spec.coffee")
 
       it "adds 'active' class on click", ->
         cy.get("@firstSpec")
@@ -322,9 +328,9 @@ describe "Specs List", ->
           cy.get("@deepSpec").should("have.class", "active")
 
     context "switching specs", ->
-
       beforeEach ->
         @ipc.getSpecs.yields(null, @specs)
+        @ipc.launchBrowser
         @openProject.resolve(@config)
         cy
           .get(".file").contains("a", "app_spec.coffee").as("firstSpec")

@@ -84,10 +84,10 @@
       "default": "cypress/integration",
       "description": "Path to folder containing integration test files"
     },
-    "pluginsFile": {
+    "backgroundFile": {
       "type": ["string", "boolean"],
-      "default": "cypress/plugins/index.js",
-      "description": "Path to plugins file. (Pass false to disable)"
+      "default": "cypress/background/index.js",
+      "description": "Path to background file. (Pass false to disable)"
     },
     "screenshotsFolder": {
       "type": "string",

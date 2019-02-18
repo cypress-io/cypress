@@ -78,13 +78,13 @@ describe('events', () => {
       expect(runnablesStore.setRunnables).to.have.been.calledWith('root runnable')
     })
 
-    it('adds log on reporter:log:add', () => {
-      runner.on.withArgs('reporter:log:add').callArgWith(1, 'the log')
+    it('adds log on reporter:internal:log', () => {
+      runner.on.withArgs('reporter:internal:log').callArgWith(1, 'the log')
       expect(runnablesStore.addLog).to.have.been.calledWith('the log')
     })
 
-    it('updates log on reporter:log:state:changed', () => {
-      runner.on.withArgs('reporter:log:state:changed').callArgWith(1, 'the updated log')
+    it('updates log on reporter:internal:logChange', () => {
+      runner.on.withArgs('reporter:internal:logChange').callArgWith(1, 'the updated log')
       expect(runnablesStore.updateLog).to.have.been.calledWith('the updated log')
     })
 
@@ -142,18 +142,18 @@ describe('events', () => {
       expect(runnablesStore.setInitialScrollTop).to.have.been.calledWith(123)
     })
 
-    it('sends runnable started on test:before:run:async', () => {
-      runner.on.withArgs('test:before:run:async').callArgWith(1, 'the runnable')
+    it('sends runnable started on test:start:async', () => {
+      runner.on.withArgs('test:start:async').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableStarted).to.have.been.calledWith('the runnable')
     })
 
-    it('sends runnable finished on test:after:run', () => {
-      runner.on.withArgs('test:after:run').callArgWith(1, 'the runnable')
+    it('sends runnable finished on test:end', () => {
+      runner.on.withArgs('test:end').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableFinished).to.have.been.calledWith('the runnable')
     })
 
-    it('increments the stats count on test:after:run', () => {
-      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
+    it('increments the stats count on test:end', () => {
+      runner.on.withArgs('test:end').callArgWith(1, { state: 'passed' })
       expect(statsStore.incrementCount).to.have.been.calledWith('passed')
     })
 

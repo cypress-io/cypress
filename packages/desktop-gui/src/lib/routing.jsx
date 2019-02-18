@@ -1,13 +1,16 @@
 import React from 'react'
+import Promise from 'bluebird'
 
 import viewStore from './view-store'
 
 const Link = ({ children, to, onClick }) => {
   const navigate = (e) => {
     e.preventDefault()
-    if (onClick) onClick()
 
-    to.navigate()
+    Promise.try(() => onClick && onClick())
+    .then(() => {
+      to.navigate()
+    })
   }
 
   return (

@@ -127,16 +127,16 @@ module.exports = {
       )
     )
 
-  plugins: (folder, config) ->
-    debug("plugins folder #{folder}")
+  background: (folder, config) ->
+    debug("background folder #{folder}")
 
-    ## skip if user has explicitly set pluginsFile
-    if not config.pluginsFile or not isDefault(config, "pluginsFile")
+    ## skip if user has explicitly set backgroundFile
+    if not config.backgroundFile or not isDefault(config, "backgroundFile")
       return Promise.resolve()
 
     @verifyScaffolding folder, =>
       debug("copying index.js into #{folder}")
-      @_copy("plugins/index.js", folder, config)
+      @_copy("background/index.js", folder, config)
 
   _copy: (file, folder, config) ->
     ## allow file to be relative or absolute
@@ -192,9 +192,9 @@ module.exports = {
           getFilePath(config.supportFolder, "index.js")
         ])
 
-      if config.pluginsFile
+      if config.backgroundFile
         files = files.concat([
-          getFilePath(path.dirname(config.pluginsFile), "index.js")
+          getFilePath(path.dirname(config.backgroundFile), "index.js")
         ])
 
       debug("scaffolded files %j", files)

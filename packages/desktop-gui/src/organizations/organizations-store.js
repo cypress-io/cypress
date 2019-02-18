@@ -7,21 +7,19 @@ export class Orgs {
   @observable orgs = []
   @observable error = null
   @observable isLoading = false
-  @observable isLoaded = false
 
   @action setOrgs (orgs) {
     this.orgs = _.map(orgs, (org) => {
-      return (
-        new Org(org)
-      )
+      return new Org(org)
     })
-
-    this.isLoading = false
-    this.isLoaded = true
   }
 
   @action setError (err) {
     this.error = err
+  }
+
+  @action setLoading (isLoading) {
+    this.isLoading = isLoading
   }
 
   getOrgById (id) {

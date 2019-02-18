@@ -193,7 +193,7 @@ class App extends Component {
       prevAttrs = {}
     }
 
-    eventManager.on('after:screenshot', afterScreenshot)
+    eventManager.on('screenshot', afterScreenshot)
 
     eventManager.on('run:start', () => {
       if (screenshotting) {

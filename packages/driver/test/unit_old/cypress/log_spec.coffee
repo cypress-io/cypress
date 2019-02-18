@@ -51,8 +51,8 @@ describe "$Cypress.Log API", ->
       expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
-    it "#error triggers log:state:changed", (done) ->
-      @Cypress.on "log:state:changed", (attrs) ->
+    it "#error triggers internal:logChange", (done) ->
+      @Cypress.on "internal:logChange", (attrs) ->
         expect(attrs.state).to.eq "failed"
         done()
 
@@ -66,8 +66,8 @@ describe "$Cypress.Log API", ->
       @log.end()
       expect(@log.get("state")).to.eq "passed"
 
-    it "#end triggers log:state:changed", (done) ->
-      @Cypress.on "log:state:changed", (attrs) ->
+    it "#end triggers internal:logChange", (done) ->
+      @Cypress.on "internal:logChange", (attrs) ->
         expect(attrs.state).to.eq "passed"
         done()
 
@@ -77,7 +77,7 @@ describe "$Cypress.Log API", ->
 
       @log.end()
 
-    it "does not emit log:state:changed until after first log event", ->
+    it "does not emit internal:logChange until after first log event", ->
       logged  = 0
       changed = 0
 
@@ -86,7 +86,7 @@ describe "$Cypress.Log API", ->
       @Cypress.on "log", ->
         logged += 1
 
-      @Cypress.on "log:state:changed", ->
+      @Cypress.on "internal:logChange", ->
         changed += 1
 
       Promise.delay(30)
@@ -105,7 +105,7 @@ describe "$Cypress.Log API", ->
         .then =>
           expect(changed).to.eq(1)
 
-    it "only emits log:state:changed when attrs have actually changed", ->
+    it "only emits internal:logChange when attrs have actually changed", ->
       logged  = 0
       changed = 0
 
@@ -116,7 +116,7 @@ describe "$Cypress.Log API", ->
       @Cypress.on "log", ->
         logged += 1
 
-      @Cypress.on "log:state:changed", ->
+      @Cypress.on "internal:logChange", ->
         changed += 1
 
       @log.set("foo", "bar")
@@ -350,8 +350,8 @@ describe "$Cypress.Log API", ->
           state: "pending"
         }
 
-      it "triggers log:state:changed with attribues", (done) ->
-        @Cypress.on "log:state:changed", (attrs, log) =>
+      it "triggers internal:logChange with attribues", (done) ->
+        @Cypress.on "internal:logChange", (attrs, log) =>
           expect(attrs.foo).to.eq "bar"
           expect(attrs.baz).to.eq "quux"
           expect(log).to.eq(@log)
@@ -362,10 +362,10 @@ describe "$Cypress.Log API", ->
         @log._hasInitiallyLogged = true
         @log.set({foo: "bar", baz: "quux"})
 
-      it "debounces log:state:changed and only fires once", ->
+      it "debounces internal:logChange and only fires once", ->
         count = 0
 
-        @Cypress.on "log:state:changed", (attrs, log) =>
+        @Cypress.on "internal:logChange", (attrs, log) =>
           count += 1
 
           expect(attrs.foo).to.eq "quux"
@@ -617,14 +617,14 @@ describe "$Cypress.Log API", ->
           expect(warn).to.be.calledWith "Cypress Warning: Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
       describe "#log", ->
-        it "only emits log:state:changed if attrs have actually changed", (done) ->
+        it "only emits internal:logChange if attrs have actually changed", (done) ->
           logged  = 0
           changed = 0
 
           @Cypress.on "log", ->
             logged += 1
 
-          @Cypress.on "log:state:changed", ->
+          @Cypress.on "internal:logChange", ->
             changed += 1
 
           log = @Cypress.Log.log("command", {})
@@ -772,7 +772,7 @@ describe "$Cypress.Log API", ->
           beforeEach ->
             @allowErrors()
 
-            @cy.on "command:start", ->
+            @cy.on "internal:commandStart", ->
               cy.timeout(100)
 
             ## prevent accidentally adding a .then to @cy
@@ -781,7 +781,7 @@ describe "$Cypress.Log API", ->
           it "preserves errors", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               expect(@log.get("name")).to.eq "get"
               expect(@log.get("message")).to.eq "foo"
               expect(@log.get("error")).to.eq err
@@ -792,7 +792,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for parent commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "get"
                 Selector: "foo"
@@ -807,7 +807,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for dual commands as a parent", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 Error: err.toString()
@@ -820,7 +820,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for dual commands as a child", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               if @log.get("name") is "wait"
                 btns = getFirstSubjectByName.call(@, "get")
                 expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -836,7 +836,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for children commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               if @log.get("name") is "contains"
                 btns = getFirstSubjectByName.call(@, "get")
                 expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -855,7 +855,7 @@ describe "$Cypress.Log API", ->
           it "#consoleProps for nested children commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
-            @cy.on "fail", (err) =>
+            @cy.on "test:fail", (err) =>
               if @log.get("name") is "contains"
                 expect(@log.attributes.consoleProps()).to.deep.eq {
                   Command: "contains"

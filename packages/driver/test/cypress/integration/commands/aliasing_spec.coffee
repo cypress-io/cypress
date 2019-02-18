@@ -27,7 +27,7 @@ describe "src/cy/commands/aliasing", ->
 
     it "stores the lookup as an alias", ->
       cy.get("body").as("b").then ->
-        expect(cy.state("aliases").b).to.be.defined
+        expect(cy.state("aliases").b).to.exist
 
     it "stores the resulting subject as the alias", ->
       $body = cy.$$("body")
@@ -44,7 +44,7 @@ describe "src/cy/commands/aliasing", ->
     it "retries primitives and assertions", ->
       obj = {}
 
-      cy.on "command:retry", _.after 2, ->
+      cy.on "internal:commandRetry", _.after 2, ->
         obj.foo = "bar"
 
       cy.wrap(obj).as("obj")
@@ -101,7 +101,7 @@ describe "src/cy/commands/aliasing", ->
 
     describe "errors", ->
       it "throws as a parent command", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include("before running a parent command")
           expect(err.message).to.include("cy.as(\"foo\")")
           done()
@@ -110,21 +110,21 @@ describe "src/cy/commands/aliasing", ->
 
       _.each [null, undefined, {}, [], 123], (value) =>
         it "throws if when passed: #{value}", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.eq "cy.as() can only accept a string."
             done()
 
           cy.get("div:first").as(value)
 
       it "throws on blank string", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "cy.as() cannot be passed an empty string."
           done()
 
         cy.get("div:first").as("")
 
       it "throws on alias starting with @ char", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "'@myAlias' cannot be named starting with the '@' symbol. Try renaming the alias to 'myAlias', or something else that does not start with the '@' symbol."
           done()
 
@@ -136,7 +136,7 @@ describe "src/cy/commands/aliasing", ->
 
       _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
         it "throws on a blacklisted word: #{blacklist}", (done) ->
-          cy.on "fail", (err) ->
+          cy.on "test:fail", (err) ->
             expect(err.message).to.eq "cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved."
             done()
 
@@ -146,7 +146,7 @@ describe "src/cy/commands/aliasing", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -337,11 +337,11 @@ describe "src/cy/commands/aliasing", ->
         .get("input:first").as("firstInput")
         .get("div:last").as("lastDiv")
         .then ->
-          expect(cy.getAlias("@firstInput")).to.be.defined
+          expect(cy.getAlias("@firstInput")).to.exist
 
     describe "errors", ->
       it "throws when an alias cannot be found", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.include "cy.get() could not find a registered alias for: '@lastDiv'.\nAvailable aliases are: 'b, firstInput'."
           done()
 
@@ -351,7 +351,7 @@ describe "src/cy/commands/aliasing", ->
           .get("@lastDiv")
 
       it "throws when alias is missing '@' but matches an available alias", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "Invalid alias: 'getAny'.\nYou forgot the '@'. It should be written as: '@getAny'."
           done()
 

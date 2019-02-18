@@ -4,5 +4,5 @@
   "supportFile": "tests/_support/spec_helper.js",
   "port": 8888,
   "projectId": "abc123",
-  "pluginsFile": false
+  "backgroundFile": false
 }

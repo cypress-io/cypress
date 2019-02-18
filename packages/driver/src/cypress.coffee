@@ -63,6 +63,37 @@ throwPrivateCommandInterface = (method) ->
     args: { method }
   })
 
+serializeError = (err) ->
+  _.extend({}, _.pick(err, "name", "message", "stack", "displayMessage"), {
+    actual: $utils.stringify(err.actual)
+    expected: $utils.stringify(err.expected)
+  })
+
+serializeCommand = (command) ->
+  if command.attributes
+    name = command.get("name")
+    args = command.get("args")
+  else
+    name = command.name
+    args = command.args
+
+  {
+    name: name
+    args: _.reject args, (arg) -> _.isFunction(arg) or _.isObject(arg)
+  }
+
+serializeRetry = (retry) ->
+  {
+    name: retry._name
+    error: serializeError(retry.error)
+    runnable: serializeTest(retry._runnable)
+  }
+
+serializeTest = (test) ->
+  _.extend({}, _.pick(test, "async", "body", "file", "id", "pending", "sync", "timedOut", "title", "type"), {
+    parentId: test.parent.id
+  })
+
 class $Cypress
   constructor: (config = {}) ->
     @cy       = null
@@ -73,6 +104,8 @@ class $Cypress
     @_RESUMED_AT_TEST = null
 
     @events = $Events.extend(@)
+
+    $Events.throwOnRenamedEvent(@, "Cypress")
 
     @setConfig(config)
 
@@ -143,10 +176,6 @@ class $Cypress
     @action("cypress:config", config)
 
   initialize: ($autIframe) ->
-    ## push down the options
-    ## to the runner
-    @mocha.options(@runner)
-
     @cy.initialize($autIframe)
 
   run: (fn) ->
@@ -187,7 +216,7 @@ class $Cypress
       when "cypress:config"
         @emit("config", args[0])
 
-      when "runner:start"
+      when "runner:mocha:start"
         ## mocha runner has begun running the tests
         @emit("run:start")
 
@@ -196,7 +225,7 @@ class $Cypress
         if @config("isTextTerminal")
           @emit("mocha", "start", args[0])
 
-      when "runner:end"
+      when "runner:mocha:end"
         ## mocha runner has finished running the tests
 
         ## end may have been caused by an uncaught error
@@ -204,8 +233,8 @@ class $Cypress
         ##
         ## when this happens mocha aborts the entire run
         ## and does not do the usual cleanup so that means
-        ## we have to fire the test:after:hooks and
-        ## test:after:run events ourselves
+        ## we have to fire the after:test:hooks and
+        ## test:end events ourselves
         @emit("run:end")
 
         if @config("isTextTerminal")
@@ -216,46 +245,46 @@ class $Cypress
         ## is about to be invoked
         @cy.setRunnable(args...)
 
-      when "runner:suite:start"
+      when "runner:mocha:suite:start"
         ## mocha runner started processing a suite
         if @config("isTextTerminal")
           @emit("mocha", "suite", args...)
 
-      when "runner:suite:end"
+      when "runner:mocha:suite:end"
         ## mocha runner finished processing a suite
         if @config("isTextTerminal")
           @emit("mocha", "suite end", args...)
 
-      when "runner:hook:start"
+      when "runner:mocha:hook:start"
         ## mocha runner started processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "hook", args...)
 
-      when "runner:hook:end"
+      when "runner:mocha:hook:end"
         ## mocha runner finished processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "hook end", args...)
 
-      when "runner:test:start"
+      when "runner:mocha:test:start"
         ## mocha runner started processing a hook
         if @config("isTextTerminal")
           @emit("mocha", "test", args...)
 
-      when "runner:test:end"
+      when "runner:mocha:test:end"
         if @config("isTextTerminal")
           @emit("mocha", "test end", args...)
 
-      when "runner:pass"
+      when "runner:mocha:pass"
         ## mocha runner calculated a pass
         if @config("isTextTerminal")
           @emit("mocha", "pass", args...)
 
-      when "runner:pending"
+      when "runner:mocha:pending"
         ## mocha runner calculated a pending test
         if @config("isTextTerminal")
           @emit("mocha", "pending", args...)
 
-      when "runner:fail"
+      when "runner:mocha:fail"
         ## mocha runner calculated a failure
         if @config("isTextTerminal")
           @emit("mocha", "fail", args...)
@@ -263,30 +292,32 @@ class $Cypress
       when "mocha:runnable:run"
         @runner.onRunnableRun(args...)
 
-      when "runner:test:before:run"
+      when "runner:test:start"
         ## get back to a clean slate
         @cy.reset()
 
-        @emit("test:before:run", args...)
+        @emitToBackend("test:start", serializeTest(args[1]))
+        @emit("test:start", args...)
 
-      when "runner:test:before:run:async"
+      when "runner:test:start:async"
         ## TODO: handle timeouts here? or in the runner?
-        @emitThen("test:before:run:async", args...)
+        @emitThen("test:start:async", args...)
 
-      when "runner:runnable:after:run:async"
-        @emitThen("runnable:after:run:async", args...)
+      when "runner:after:runnable:run:async"
+        @emitThen("after:runnable:run:async", args...)
 
-      when "runner:test:after:run"
+      when "runner:test:end"
         @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 
         ## this event is how the reporter knows how to display
         ## stats and runnable properties such as errors
-        @emit("test:after:run", args...)
+        @emitToBackend("test:end", serializeTest(args[1]))
+        @emit("test:end", args...)
 
         if @config("isTextTerminal")
           ## needed for calculating wallClockDuration
           ## and the timings of after + afterEach hooks
-          @emit("mocha", "test:after:run", args[0])
+          @emit("mocha", "test:end", args[0])
 
       when "cy:before:all:screenshots"
         @emit("before:all:screenshots", args...)
@@ -294,25 +325,25 @@ class $Cypress
       when "cy:before:screenshot"
         @emit("before:screenshot", args...)
 
-      when "cy:after:screenshot"
-        @emit("after:screenshot", args...)
+      when "cy:screenshot"
+        @emit("screenshot", args...)
 
       when "cy:after:all:screenshots"
         @emit("after:all:screenshots", args...)
 
-      when "command:log:added"
+      when "command:internal:log"
         @runner.addLog(args[0], @config("isInteractive"))
 
-        @emit("log:added", args...)
+        @emit("internal:log", args...)
 
-      when "command:log:changed"
+      when "command:internal:logChange"
         @runner.addLog(args[0], @config("isInteractive"))
 
-        @emit("log:changed", args...)
+        @emit("internal:logChange", args...)
 
-      when "cy:fail"
+      when "cy:test:fail"
         ## comes from cypress errors fail()
-        @emitMap("fail", args...)
+        @emitMap("test:fail", args...)
 
       when "cy:stability:changed"
         @emit("stability:changed", args...)
@@ -326,29 +357,33 @@ class $Cypress
       when "cy:visit:failed"
         @emit("visit:failed", args[0])
 
-      when "cy:viewport:changed"
-        @emit("viewport:changed", args...)
+      when "cy:viewport:change"
+        @emit("viewport:change", args...)
 
-      when "cy:command:start"
-        @emit("command:start", args...)
+      when "cy:internal:commandStart"
+        @emitToBackend("internal:commandStart", serializeCommand(args[0]))
+        @emit("internal:commandStart", args...)
 
-      when "cy:command:end"
-        @emit("command:end", args...)
+      when "cy:internal:commandEnd"
+        @emitToBackend("internal:commandEnd", serializeCommand(args[0]))
+        @emit("internal:commandEnd", args...)
 
-      when "cy:command:retry"
-        @emit("command:retry", args...)
+      when "cy:internal:commandRetry"
+        @emitToBackend("internal:commandRetry", serializeRetry(args[0]))
+        @emit("internal:commandRetry", args...)
 
-      when "cy:command:enqueued"
-        @emit("command:enqueued", args[0])
+      when "cy:internal:commandEnqueue"
+        @emitToBackend("internal:commandEnqueue", serializeCommand(args[0]))
+        @emit("internal:commandEnqueue", args[0])
 
-      when "cy:command:queue:before:end"
-        @emit("command:queue:before:end")
+      when "cy:before:command:queue:end"
+        @emit("before:command:queue:end")
 
       when "cy:command:queue:end"
         @emit("command:queue:end")
 
-      when "cy:url:changed"
-        @emit("url:changed", args[0])
+      when "cy:page:url:changed"
+        @emit("page:url:changed", args[0])
 
       when "cy:next:subject:prepared"
         @emit("next:subject:prepared", args...)
@@ -357,27 +392,27 @@ class $Cypress
         @emitThen("collect:run:state")
 
       when "cy:scrolled"
-        @emit("scrolled", args...)
+        @emit("internal:scrolled", args...)
 
       when "app:uncaught:exception"
         @emitMap("uncaught:exception", args...)
 
-      when "app:window:alert"
-        @emit("window:alert", args[0])
+      when "app:page:alert"
+        @emit("page:alert", args[0])
 
-      when "app:window:confirm"
-        @emitMap("window:confirm", args[0])
+      when "app:page:confirm"
+        @emitMap("page:confirm", args[0])
 
-      when "app:window:confirmed"
-        @emit("window:confirmed", args...)
+      when "app:page:confirmed"
+        @emit("page:confirmed", args...)
 
       when "app:page:loading"
         @emit("page:loading", args[0])
 
-      when "app:window:before:load"
+      when "app:page:start"
         @cy.onBeforeAppWindowLoad(args[0])
 
-        @emit("window:before:load", args[0])
+        @emit("page:start", args[0])
 
       when "app:navigation:changed"
         @emit("navigation:changed", args...)
@@ -385,14 +420,14 @@ class $Cypress
       when "app:form:submitted"
         @emit("form:submitted", args[0])
 
-      when "app:window:load"
-        @emit("window:load", args[0])
+      when "app:page:ready"
+        @emit("page:ready", args[0])
 
-      when "app:window:before:unload"
-        @emit("window:before:unload", args[0])
+      when "app:before:window:unload"
+        @emit("before:window:unload", args[0])
 
-      when "app:window:unload"
-        @emit("window:unload", args[0])
+      when "app:page:end"
+        @emit("page:end", args[0])
 
       when "spec:script:error"
         @emit("script:error", args...)

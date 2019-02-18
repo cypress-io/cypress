@@ -1,12 +1,12 @@
 pending = []
 
-Cypress.on "test:after:run", (test) ->
+Cypress.on "test:end", (test) ->
   if test.state is "pending"
     pending.push(test)
 
 describe "src/cypress/runner", ->
   it 'handles "double quotes" in test name', (done) ->
-    cy.once "log:added", (log) ->
+    cy.once "internal:log", (log) ->
       expect(log.hookName).to.equal("test")
       done()
     cy.wrap({})

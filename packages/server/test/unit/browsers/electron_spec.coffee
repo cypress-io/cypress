@@ -6,7 +6,7 @@ la = require("lazy-ass")
 check = require("check-more-types")
 
 menu = require("#{root}../lib/gui/menu")
-plugins = require("#{root}../lib/plugins")
+background = require("#{root}../lib/background")
 Windows = require("#{root}../lib/gui/windows")
 electron = require("#{root}../lib/browsers/electron")
 savedState = require("#{root}../lib/saved_state")
@@ -40,8 +40,8 @@ describe "lib/browsers/electron", ->
   context ".open", ->
     beforeEach ->
       sinon.stub(electron, "_render").resolves(@win)
-      sinon.stub(plugins, "has")
-      sinon.stub(plugins, "execute")
+      sinon.stub(background, "isRegistered")
+      sinon.stub(background, "execute")
 
       savedState()
       .then (state) =>
@@ -79,9 +79,9 @@ describe "lib/browsers/electron", ->
         expect(@automation.use).to.be.called
         expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
 
-    it "is noop when before:browser:launch yields null", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves(null)
+    it "is noop when browser:launch yields null", ->
+      background.isRegistered.returns(true)
+      background.execute.resolves(null)
 
       electron.open("electron", @url, @options, @automation)
       .then =>
@@ -91,8 +91,8 @@ describe "lib/browsers/electron", ->
 
     ## https://github.com/cypress-io/cypress/issues/1992
     it "it merges in options without removing essential options", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves({foo: "bar"})
+      background.isRegistered.returns(true)
+      background.execute.resolves({foo: "bar"})
 
       electron.open("electron", @url, @options, @automation)
       .then =>
@@ -351,4 +351,5 @@ describe "lib/browsers/electron", ->
       .then ->
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: "proxy rules"
+          proxyBypassRules: "<-loopback>"
         })
