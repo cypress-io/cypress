@@ -1,5 +1,5 @@
 _           = require("lodash")
-uuid        = require("node-uuid")
+uuid        = require("uuid")
 Promise     = require("bluebird")
 Cookies     = require("./cookies")
 Screenshot  = require("./screenshot")
