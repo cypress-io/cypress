@@ -29,21 +29,20 @@ import { stylesCache, setXMLHttpRequest, setAlert } from '../../lib'
     @function   cy.injectReactDOM
 **/
 Cypress.Commands.add('injectReactDOM', () => {
-  var packages = {}
-  // Yeah, due to how Cy resolves promises under the hood, a closure works but an @aliased cached asset doesn't
   return cy
     .log('Injecting ReactDOM for Unit Testing')
-    .readFile('node_modules/react/umd/react.development.js', { log: false }).then(file => packages.React = file)
-    .readFile('node_modules/react-dom/umd/react-dom.development.js', { log: false }).then(file => packages.ReactDOM = file)
     .then(() => {
+      // Generate inline script tags for UMD modules
+      const scripts = Cypress.modules
+        .map(module => `<script>${module.source}</script>`)
+        .join('')
       // include React and ReactDOM to force DOM to register all DOM event listeners
       // otherwise the component will NOT be able to dispatch any events
       // when it runs the second time
       // https://github.com/bahmutov/cypress-react-unit-test/issues/3
       var html = `<body>
           <div id="cypress-jsdom"></div>
-          <script>${packages.React}</script>
-          <script>${packages.ReactDOM}</script>
+          ${scripts}
         </body>`
       const document = cy.state('document')
       document.write(html)
@@ -94,10 +93,12 @@ Cypress.Commands.add('copyComponentStyles', (component) => {
     @param      {Object}  jsx
     @param      {string}  [Component]   alias
 **/
-Cypress.Commands.add('mount', (jsx, alias = 'Component') => {
+Cypress.Commands.add('mount', (jsx, alias) => {
+  // Get the displayname property via the component constructor
+  const displayname = alias || jsx.type.prototype.constructor.name
   cy
     .injectReactDOM()
-    .log('ReactDOM.render(<' + alias + ' ... />)')
+    .log(`ReactDOM.render(<${displayname} ... />)`, jsx.props)
     .window({ log: false })
     .then(setXMLHttpRequest)
     .then(setAlert)
@@ -105,7 +106,33 @@ Cypress.Commands.add('mount', (jsx, alias = 'Component') => {
       const { ReactDOM } = win
       const document = cy.state('document')
       const component = ReactDOM.render(jsx, document.getElementById('cypress-jsdom'))
-      cy.wrap(component, { log: false }).as(alias)
+      cy.wrap(component, { log: false }).as(displayname)
     })
   cy.copyComponentStyles(jsx)
+})
+
+/** Get one or more DOM elements by selector or alias.
+    Features extended support for JSX and React.Component
+    @function   cy.get
+    @param      {string|object|function}  selector
+    @param      {object}                  options
+    @example    cy.get('@Component')
+    @example    cy.get(<Component />)
+    @example    cy.get(Component)
+**/
+Cypress.Commands.overwrite('get', (originalFn, selector, options) => {
+  switch (typeof selector) {
+    case 'object':
+      // If attempting to use JSX as a selector, reference the displayname
+      if (selector.$$typeof && selector.$$typeof.toString().startsWith('Symbol(react')) {
+        const displayname = selector.type.prototype.constructor.name
+        return originalFn(`@${displayname}`, options)
+      }
+    case 'function':
+      // If attempting to use the component name without JSX (testing in .js/.ts files)
+      const displayname = selector.prototype.constructor.name
+      return originalFn(`@${displayname}`, options)
+    default:
+      return originalFn(selector, options)
+  }
 })

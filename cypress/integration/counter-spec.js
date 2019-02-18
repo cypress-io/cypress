@@ -40,7 +40,7 @@ describe('Counter cy.mounted before each test', () => {
       .click()
       .click()
       .click()
-    cy.get('@Component')
+    cy.get(Counter)
       .its('state')
       .should('deep.equal', {count: 3})
   })

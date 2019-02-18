@@ -34,10 +34,11 @@ describe('HelloState component', () => {
     cy.mount(<HelloState />)
     // start testing!
     cy.contains('Hello Spider-man!')
-    // mounted component is aliased as @Component
-    cy.get('@Component')
+    // mounted component can be selected via its name, function, or JSX
+    // e.g. '@HelloState', HelloState, or <HelloState />
+    cy.get(HelloState)
       .invoke('setState', { name: 'React' })
-    cy.get('@Component')
+    cy.get(HelloState)
       .its('state')
       .should('deep.equal', { name: 'React' })
     // check if GUI has rerendered
