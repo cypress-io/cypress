@@ -7,7 +7,6 @@ const chaiSubset = require('chai-subset')
 
 const { m } = require('../../../support/matchers')
 
-// eslint-disable-next-line
 chai.use(chaiSubset)
 
 require('cypress-plugin-retries')
