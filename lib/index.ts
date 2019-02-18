@@ -1,13 +1,14 @@
+/// <reference path="./index.d.ts" />
+
 // having weak reference to styles prevents garbage collection
 // and "losing" styles when the next test starts
-// import { stylesCache, setXMLHttpRequest, setAlert } from './index'
-
 const stylesCache = new Map()
 
 const setXMLHttpRequest = w => {
   // by grabbing the XMLHttpRequest from app's iframe
   // and putting it here - in the test iframe
   // we suddenly get spying and stubbing 😁
+  // @ts-ignore
   window.XMLHttpRequest = w.XMLHttpRequest
   return w
 }
@@ -40,7 +41,8 @@ Cypress.Commands.add('injectReactDOM', () => {
   })
 })
 
-cy.stylesCache = stylesCache
+Cypress.stylesCache = stylesCache
+
 /** Caches styles from previously compiled components for reuse
     @function   cy.copyComponentStyles
     @param      {Object}  component
@@ -54,11 +56,11 @@ Cypress.Commands.add('copyComponentStyles', component => {
   let styles = document.querySelectorAll('head style')
   if (styles.length) {
     cy.log('injected %d styles', styles.length)
-    cy.stylesCache.set(hash, styles)
+    Cypress.stylesCache.set(hash, styles)
   } else {
     cy.log('No styles injected for this component, checking cache')
-    if (cy.stylesCache.has(hash)) {
-      styles = cy.stylesCache.get(hash)
+    if (Cypress.stylesCache.has(hash)) {
+      styles = Cypress.stylesCache.get(hash)
     } else {
       styles = null
     }
@@ -67,9 +69,12 @@ Cypress.Commands.add('copyComponentStyles', component => {
     return
   }
   const parentDocument = window.parent.document
+  // hmm, is this really project name?
+  // @ts-ignore
   const projectName = Cypress.config('projectName')
   const appIframeId = "Your App: '" + projectName + "'"
   const appIframe = parentDocument.getElementById(appIframeId)
+  // @ts-ignore
   var head = appIframe.contentDocument.querySelector('head')
   styles.forEach(function (style) {
     head.appendChild(style)

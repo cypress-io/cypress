@@ -12,6 +12,7 @@ node_js:
   - '10'
 script:
   - npm run lint
+  - npm run transpile
   - npm test -- --record
 after_success:
   - npm run semantic-release
