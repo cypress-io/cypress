@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/// <reference types="../support" />
+/// <reference types="../../lib" />
 import { ErrorBoundary } from '../../src/error-boundary.jsx'
 import React from 'react'
 
