@@ -1,3 +1,24 @@
+/*
+Before All
+- Load and cache UMD modules specified in fixtures/modules.json
+  These scripts are inlined in the document during unit tests
+  modules.json should be an array, which implicitly sets the loading order
+  Format: [{name, type, location}, ...]
+*/
+before(() => {
+  Cypress.modules = []
+  cy.log('Initializing UMD module cache')
+    .fixture('modules')
+    .then((modules = []) => {
+      for (const module of modules) {
+        let { name, type, location } = module
+        cy.log(`Loading ${name} via ${type}`)
+          .readFile(location)
+          .then(source => Cypress.modules.push({ name, type, location, source }))
+      }
+    })
+})
+
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "react",
+    "type": "file",
+    "location": "node_modules/react/umd/react.development.js"
+  },
+  {
+    "name": "react-dom",
+    "type": "file",
+    "location": "node_modules/react-dom/umd/react-dom.development.js"
+  }
+]
