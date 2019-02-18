@@ -2,5 +2,6 @@
   "viewportWidth": 300,
   "viewportHeight": 100,
   "video": false,
-  "projectId": "z9dxah"
+  "projectId": "z9dxah",
+  "ignoreTestFiles": "*.css"
 }
