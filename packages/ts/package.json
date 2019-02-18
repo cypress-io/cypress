@@ -12,9 +12,9 @@
   },
   "devDependencies": {
     "ts-node": "3.3.0",
-    "typescript": "2.5.2"
+    "typescript": "2.9.2"
   },
   "dependencies": {
-    "debug": "^2.6.8"
+    "debug": "2.6.9"
   }
 }

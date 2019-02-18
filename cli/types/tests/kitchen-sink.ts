@@ -30,6 +30,13 @@ cy.visit('https://www.acme.com/', {
   }
 })
 
+const serverOptions: Partial<Cypress.ServerOptions> = {
+  delay: 100,
+  whitelist: () => true
+}
+
+cy.server(serverOptions)
+
 Cypress.spec.name // $ExpectType string
 Cypress.spec.relative // $ExpectType string | null
 Cypress.spec.absolute // $ExpectType string | null
@@ -38,14 +45,20 @@ Cypress.browser // $ExpectType Browser
 
 // stubbing window.alert type on "Cypress" should
 // work with plain function or with a Sinon stub
-Cypress.on('window:alert', () => {})
+Cypress.on('window:alert', () => { })
+Cypress.on('window:alert', cy.spy())
 Cypress.on('window:alert', cy.stub())
 // same for a single test
-cy.on('window:alert', () => {})
+cy.on('window:alert', () => { })
+cy.on('window:alert', cy.spy())
 cy.on('window:alert', cy.stub())
 
 // window:confirm stubbing
-cy.on('window:confirm', () => {})
+Cypress.on('window:confirm', () => { })
+Cypress.on('window:confirm', cy.spy())
+Cypress.on('window:confirm', cy.stub())
+cy.on('window:confirm', () => { })
+cy.on('window:confirm', cy.spy())
 cy.on('window:confirm', cy.stub())
 
 // specifying HTTP method directly in the options object
@@ -53,6 +66,15 @@ cy.request({
   url: "http://localhost:3000/myressource",
   method: "POST",
   body: {}
+})
+
+// specify query parameters
+// https://github.com/cypress-io/cypress/issues/2305
+cy.request({
+  url: "http://localhost:3000/myressource",
+  qs: {
+    param: 'someValue'
+  }
 })
 
 // if you want a separate variable, you need specify its type
@@ -74,6 +96,6 @@ const opts2 = {
 cy.request(opts2)
 
 const obj = {
-  foo: () => {}
+  foo: () => { }
 }
 cy.spy(obj, 'foo').as('my-spy')

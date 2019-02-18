@@ -320,7 +320,7 @@ describe "lib/gui/events", ->
 
       it "works even after project is opened (issue #227)", ->
         sinon.stub(open, "opn").resolves("okay")
-        sinon.stub(Project.prototype, "open")
+        sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "/_test-output/path/to/project")
@@ -404,8 +404,12 @@ describe "lib/gui/events", ->
     describe "open:project", ->
       beforeEach ->
         sinon.stub(extension, "setHostAndPath").resolves()
-        sinon.stub(browsers, "get").resolves([])
+        sinon.stub(browsers, "getAllBrowsersWith")
+        browsers.getAllBrowsersWith.resolves([])
+        browsers.getAllBrowsersWith.withArgs("/usr/bin/baz-browser").resolves([{foo: 'bar'}])
+        @open = sinon.stub(Project.prototype, "open").resolves()
         sinon.stub(Project.prototype, "close").resolves()
+        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
       afterEach ->
         ## close down 'open' projects
@@ -413,75 +417,81 @@ describe "lib/gui/events", ->
         openProject.close()
 
       it "open project + returns config", ->
-        sinon.stub(Project.prototype, "open")
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then (assert) =>
           assert.sendCalledWith({some: "config"})
 
       it "catches errors", ->
         err = new Error("foo")
-        sinon.stub(Project.prototype, "open").rejects(err)
+        @open.rejects(err)
 
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then (assert) =>
           assert.sendErrCalledWith(err)
 
       it "sends 'focus:tests' onFocusTests", ->
-        open = sinon.stub(Project.prototype, "open")
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("on:focus:tests")
         .then (assert) =>
-          open.lastCall.args[0].onFocusTests()
+          @open.lastCall.args[0].onFocusTests()
           assert.sendCalledWith(undefined)
 
       it "sends 'config:changed' onSettingsChanged", ->
-        open = sinon.stub(Project.prototype, "open")
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("on:config:changed")
         .then (assert) =>
-          open.lastCall.args[0].onSettingsChanged()
+          @open.lastCall.args[0].onSettingsChanged()
           assert.sendCalledWith(undefined)
 
       it "sends 'spec:changed' onSpecChanged", ->
-        open = sinon.stub(Project.prototype, "open")
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("on:spec:changed")
         .then (assert) =>
-          open.lastCall.args[0].onSpecChanged("/path/to/spec.coffee")
+          @open.lastCall.args[0].onSpecChanged("/path/to/spec.coffee")
           assert.sendCalledWith("/path/to/spec.coffee")
 
       it "sends 'project:warning' onWarning", ->
-        open = sinon.stub(Project.prototype, "open")
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("on:project:warning")
         .then (assert) =>
-          open.lastCall.args[0].onWarning({name: "foo", message: "foo"})
+          @open.lastCall.args[0].onWarning({name: "foo", message: "foo"})
           assert.sendCalledWith({name: "foo", message: "foo"})
 
       it "sends 'project:error' onError", ->
-        open = sinon.stub(Project.prototype, "open")
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("on:project:error")
         .then (assert) =>
-          open.lastCall.args[0].onError({name: "foo", message: "foo"})
+          @open.lastCall.args[0].onError({name: "foo", message: "foo"})
           assert.sendCalledWith({name: "foo", message: "foo"})
+
+      it "calls browsers.getAllBrowsersWith with no args when no browser specified", ->
+        @handleEvent("open:project", "/_test-output/path/to/project").then ->
+          expect(browsers.getAllBrowsersWith).to.be.calledWith()
+
+      it "calls browsers.getAllBrowsersWith with browser when browser specified", ->
+        sinon.stub(openProject, "create").resolves()
+        @options.browser = "/usr/bin/baz-browser"
+
+        @handleEvent("open:project", "/_test-output/path/to/project").then =>
+          expect(browsers.getAllBrowsersWith).to.be.calledWith(@options.browser)
+          expect(openProject.create).to.be.calledWithMatch(
+            "/_test-output/path/to/project",
+            {
+              browser: "/usr/bin/baz-browser",
+              config: {
+                browsers: [
+                  {
+                    foo: "bar"
+                  }
+                ]
+              }
+            }
+          )
 
     describe "close:project", ->
       beforeEach ->
@@ -495,7 +505,7 @@ describe "lib/gui/events", ->
 
       it "closes down open project and returns null", ->
         sinon.stub(Project.prototype, "getConfig").resolves({})
-        sinon.stub(Project.prototype, "open").withArgs({sync: true}).resolves()
+        sinon.stub(Project.prototype, "open").resolves()
 
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>

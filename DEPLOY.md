@@ -128,5 +128,6 @@ npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 - Push out an updated kitchen sink if needed.
 - Close the release in Zenhub.
 - Bump `version` in `package.json` from `develop` branch and then merge into `master`.
+- Publish GitHub release doc using [cypress-io/set-releases](https://github.com/cypress-io/set-releases)
 
 Take a break, you deserve it! :sunglasses:

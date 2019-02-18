@@ -39,7 +39,7 @@ exports['e2e stdout displays errors from failures 1'] = `
 
 /does-not-exist.html
 
-We failed looking for this file at stack trace line
+We failed looking for this file at the path:
 
 /foo/bar/.projects/e2e/does-not-exist.html
 
@@ -69,7 +69,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 /does-not-exist.html
 
-We failed looking for this file at stack trace line
+We failed looking for this file at the path:
 
 /foo/bar/.projects/e2e/does-not-exist.html
 

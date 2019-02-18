@@ -18,19 +18,41 @@ context('Querying', () => {
     cy.get('#querying .well>button:first').should('contain', 'Button')
     //              ↲
     // Use CSS selectors just like jQuery
+
+    cy.get('[data-test-id="test-example"]').should('have.class', 'example')
+
+    // 'cy.get()' yields jQuery object, you can get its attribute
+    // by invoking `.attr()` method
+    cy.get('[data-test-id="test-example"]')
+      .invoke('attr', 'data-test-id')
+      .should('equal', 'test-example')
+
+    // or you can get element's CSS property
+    cy.get('[data-test-id="test-example"]')
+      .invoke('css', 'position')
+      .should('equal', 'static')
+
+    // or use assertions directly during 'cy.get()'
+    // https://on.cypress.io/assertions
+    cy.get('[data-test-id="test-example"]')
+      .should('have.attr', 'data-test-id', 'test-example')
+      .and('have.css', 'position', 'static')
   })
 
   it('cy.contains() - query DOM elements with matching content', () => {
     // https://on.cypress.io/contains
     cy.get('.query-list')
-      .contains('bananas').should('have.class', 'third')
+      .contains('bananas')
+      .should('have.class', 'third')
 
     // we can pass a regexp to `.contains()`
     cy.get('.query-list')
-      .contains(/^b\w+/).should('have.class', 'third')
+      .contains(/^b\w+/)
+      .should('have.class', 'third')
 
     cy.get('.query-list')
-      .contains('apples').should('have.class', 'first')
+      .contains('apples')
+      .should('have.class', 'first')
 
     // passing a selector to contains will
     // yield the selector containing the text
