@@ -22,6 +22,12 @@ Requires [Node](https://nodejs.org/en/) version 6 or above.
 npm install --save-dev cypress cypress-react-unit-test
 ```
 
+Then include this plugin from `cypress/support/index.js`
+
+```js
+import 'cypress-react-unit-test'
+```
+
 ## Use
 
 ```js
