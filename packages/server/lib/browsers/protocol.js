@@ -7,6 +7,7 @@ const net = require('net')
 function connectAsync (opts) {
   return new Promise(function (resolve, reject) {
     let socket = net.connect(opts)
+
     socket.once('connect', function () {
       socket.removeListener('error', reject)
       resolve(socket)
@@ -25,7 +26,9 @@ const getWsTargetFor = () => {
     return connectAsync({ port: '9222' }).catch(retry)
   }, { retries: 10 })
   .catch(_.noop)
-  .then(() => CRI.List())
+  .then(() => {
+    return CRI.List()
+  })
   .then((targets) => {
     // activate the first available id
 
@@ -34,7 +37,6 @@ const getWsTargetFor = () => {
     const target = _.find(targets, (t) => {
       return t.type === 'page' && t.url.startsWith('http')
     })
-
 
     return target.webSocketDebuggerUrl
   })

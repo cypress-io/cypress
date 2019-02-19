@@ -19,7 +19,7 @@ const moment = require('moment')
 const $dom = require('../../../dom')
 const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
-const $Keyboard = require('../../../cypress/keyboard')
+const $Keyboard = require('../../keyboard')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
 

@@ -85,6 +85,7 @@ const findBash = () => {
   .then(R.prop('stdout'))
 }
 
+
 const getShell = function (shell) {
   let s
 

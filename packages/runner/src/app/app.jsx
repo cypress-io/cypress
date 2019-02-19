@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import cs from 'classnames'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
@@ -52,7 +51,6 @@ class App extends Component {
           {this.props.children}
         </div>
         <Resizer
-          ref='resizer'
           style={{ left: this.props.state.absoluteReporterWidth }}
           state={this.props.state}
           onResizeStart={this._onReporterResizeStart}
@@ -70,7 +68,6 @@ class App extends Component {
   componentDidMount () {
     this._monitorWindowResize()
     this._handleScreenshots()
-    this._handleNativeEvents()
   }
 
   _monitorWindowResize () {
@@ -81,8 +78,6 @@ class App extends Component {
     const $reporterWrap = $(this.refs.reporterWrap)
 
     this._onWindowResize = () => {
-      // don't reset the state if we're firing a native event
-
       state.updateWindowDimensions({
         windowWidth: $window.width(),
         windowHeight: $window.height(),
@@ -107,42 +102,6 @@ class App extends Component {
     this.isReporterResizing = false
     this.props.eventManager.saveState({
       reporterWidth: this.props.state.reporterWidth,
-    })
-  }
-
-  _handleNativeEvents () {
-    let prevStyles
-    let nativeEventFiring = false
-
-    const { eventManager } = this.props
-
-    const iframesSizeNode = findDOMNode(this.refs.iframes.getSizeContainer())
-
-    eventManager.on('before:native:event', (coordsFromAutIframe) => {
-
-      const { x, y } = coordsFromAutIframe
-      // backup the styles
-      prevStyles = {
-        transform: iframesSizeNode.style.transform,
-        marginLeft: iframesSizeNode.style.marginLeft,
-      }
-      this.refs.resizer.refs.resizer.style.display = 'none'
-      // window.scale = frame.parentElement.style.transform.match(/scale\((.*?)\)/)[1]
-      iframesSizeNode.style.transform = `scale(1) translateY(${-y + 30}px) translateX(${-x + 30}px)`
-      iframesSizeNode.style.marginLeft = ''
-      nativeEventFiring = true
-
-    })
-
-    eventManager.on('after:native:event', () => {
-      // restore the styles
-      // iframesSizeNode.style.marginLeft = 0
-      console.log(prevStyles)
-      nativeEventFiring = false
-      this.refs.resizer.refs.resizer.style.display = ''
-      iframesSizeNode.style.transform = prevStyles.transform
-      iframesSizeNode.style.marginLeft = prevStyles.marginLeft
-      // handle transform
     })
   }
 

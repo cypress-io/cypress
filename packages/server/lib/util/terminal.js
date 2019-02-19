@@ -29,6 +29,7 @@ const getMaximumColumns = () =>
   return Math.min(MAXIMUM_SIZE, terminalSize.get().columns)
 }
 
+
 const getBordersLength = (left, right) => {
   return _
   .chain([left, right])
@@ -37,6 +38,7 @@ const getBordersLength = (left, right) => {
   .sum()
   .value()
 }
+
 
 const convertDecimalsToNumber = function (colWidths, cols) {
   let diff
@@ -77,6 +79,7 @@ const renderTables = (...tables) => {
   .join('\n')
   .value()
 }
+
 
 const getChars = function (type) {
   switch (type) {
@@ -154,6 +157,7 @@ const wrapBordersInGray = (chars) => {
 
   })
 }
+
 
 const table = function (options = {}) {
   const { colWidths, type } = options

@@ -28,6 +28,7 @@ const getOsVersion = () => {
   })
 }
 
+
 module.exports = {
   info () {
     return getOsVersion()

@@ -67,6 +67,7 @@ const formStatePath = (projectRoot) => {
   })
 }
 
+
 module.exports = {
   toHashName,
   formStatePath,

@@ -100,6 +100,12 @@ describe('<App />', () => {
   it('renders the <Iframes />', () => {
     const component = shallowRender(<App {...createProps()} />)
 
+    expect(component.find('Iframes')).to.exist
+  })
+
+  it('renders the <Message />', () => {
+    const component = shallowRender(<App {...createProps()} />)
+
     expect(component.find(Message)).to.exist
   })
 

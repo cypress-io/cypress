@@ -37,7 +37,6 @@
     "pretest-e2e-chrome": "npm run check-deps-pre",
     "pretest-cov": "npm run check-deps-pre",
     "pretest-cov-process": "npm run check-deps-pre",
-    "pretest-debug": "npm run check-deps-pre",
     "precodecov": "npm run check-deps-pre",
     "precoveralls": "npm run check-deps-pre"
   },
@@ -62,7 +61,6 @@
     "body-parser": "1.12.4",
     "chai-uuid": "^1.0.6",
     "chokidar-cli": "^1.2.0",
-    "chrome-remote-interface": "^0.26.1",
     "codecov": "^1.0.1",
     "coffee-coverage": "^1.0.1",
     "cors": "^2.8.3",
@@ -167,7 +165,6 @@
     "ospath": "1.2.2",
     "p-queue": "1.2.0",
     "parse-domain": "2.0.0",
-    "promise-retry": "^1.1.1",
     "pluralize": "3.1.0",
     "pumpify": "1.5.1",
     "ramda": "0.24.1",
