@@ -138,6 +138,12 @@ All components are in [src](src) folder. All tests are in [cypress/integration](
 
 * [bahmutov/calculator](https://github.com/bahmutov/calculator) tests multiple components: calculator App, Button, Display.
 
+## Development
+
+- run TypeScript compiler in watch mode with `npx tsc -w`
+- run Cypress with `npx cypress open` and select the spec you want to work with
+- edit `lib/index.ts` where all the magic happens
+
 ## Related tools
 
 Same feature for unit testing components from other frameworks using Cypress
