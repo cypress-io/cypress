@@ -181,6 +181,10 @@ class Server
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
+            if process.env.HTTP_PROXY
+              ## no direct connections since we can't establish a direct connection through the upstream proxy anyways
+              return false
+
             urlToCheck = "https://" + req.url
 
             isMatching = cors.urlMatchesOriginPolicyProps(urlToCheck, @_remoteProps)
