@@ -1,5 +1,7 @@
-$ = Cypress.$.bind(Cypress)
+$ = Cypress.$
 _ = Cypress._
+
+logger = require('../../../../../runner/src/lib/logger')
 
 helpers = require("../../support/helpers")
 
@@ -626,6 +628,90 @@ describe "src/cy/commands/assertions", ->
           expect(true).to.be.false
         catch err
 
+    it "consoleProps for errors with diffs", (done) ->
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(_.keys(consoleProps)).to.deep.eq([
+            "Command"
+            "actual"
+            "expected"
+            "Message"
+            "Error"
+            "Diff"
+          ])
+          done()
+      try
+        expect('a').to.eq('b')
+      catch err
+
+    it "consoleProps error diffs are succinct", (done) ->
+      obj1 = Array(500).fill().map((x, i) ->
+        if i % 100 is 0
+          return 'good'
+        return i
+      )
+      obj2 = Array(500).fill().map((x, i) ->
+        if i % 100 is 0
+          return 'bad'
+        return i
+      )
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+          
+          cy.removeAllListeners("log:added")
+
+          expect(consoleProps.Diff.split('\n')).to.have.length.lt(60)
+          done()
+      try
+        expect(obj2).to.eq(obj1)
+      catch err
+
+    it "consoleProps error diffs are logged properly", (done) ->
+      obj1 = 'good'
+      obj2 = 'bad'
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(logger._formatConsoleDiff(consoleProps.Diff)).to.deep.eq([
+            " %c\n   -bad %c\n   +good %c\n   ",
+            "color:red",
+            "color:green",
+            ""
+          ])
+          done()
+      try
+        expect(obj2).to.eq(obj1)
+      catch err
+
+    ## could use snapshot here
+    it "consoleProps error diffs are logged properly and escaped", (done) ->
+      obj1 = '%cfo%co%c'
+      obj2 = '%%cf%coo%c'
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(logger._formatConsoleDiff(consoleProps.Diff)).to.deep.eq([
+            " %c\n   -%%%%cf%%coo%%c %c\n   +%%cfo%%co%%c %c\n   ",
+            "color:red",
+            "color:green",
+            ""
+          ])
+          done()
+      try
+        expect(obj2).to.eq(obj1)
+      catch err
+
     describe "#patchAssert", ->
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
         cy.on "log:added", (attrs, log) =>
@@ -804,6 +890,14 @@ describe "src/cy/commands/assertions", ->
         cy
           .get("body")
           .get("button").should("be.visible")
+
+      it 'jquery wrapping els and selectors, not changing subject', ->
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible')
+        cy.wrap(cy.$$('<div></div>')).should('not.exist')
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible').should('exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
 
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
@@ -1472,6 +1566,92 @@ describe "src/cy/commands/assertions", ->
           "expected **<div>** not to be **empty**"
         )
 
+    context "focused", ->
+      beforeEach ->
+        @div = $("<div id='div' tabindex=0></div>").appendTo($('body'))
+        @div.is = -> throw new Error("is called")
+
+        @div2 = $("<div id='div2' tabindex=1><button>button</button></div>").appendTo($('body'))
+        @div2.is = -> throw new Error("is called")
+
+      it "focus, not focus, raw dom documents", ->
+        expect(@div).to.not.be.focused
+        expect(@div[0]).to.not.be.focused
+        @div.focus()
+        expect(@div).to.be.focused
+        expect(@div[0]).to.be.focused
+
+        @div.blur()
+        expect(@div).to.not.be.focused
+        expect(@div[0]).to.not.be.focused
+
+
+        expect(@div2).not.to.be.focused
+        expect(@div2[0]).not.to.be.focused
+        @div.focus()
+        expect(@div2).not.to.be.focused
+        @div2.focus()
+        expect(@div2).to.be.focused
+
+        expect(@logs.length).to.eq(10)
+
+        l1 = @logs[0]
+        l2 = @logs[1]
+        l3 = @logs[2]
+        l4 = @logs[3]
+
+        expect(l1.get("message")).to.eq(
+          "expected **<div#div>** not to be **focused**"
+        )
+
+        expect(l2.get("message")).to.eq(
+          "expected **<div#div>** not to be **focused**"
+        )
+
+        expect(l3.get("message")).to.eq(
+          "expected **<div#div>** to be **focused**"
+        )
+
+        expect(l4.get("message")).to.eq(
+          "expected **<div#div>** to be **focused**"
+        )
+
+      it "works with focused or focus", ->
+        expect(@div).to.not.have.focus
+        expect(@div).to.not.have.focused
+        expect(@div).to.not.be.focus
+        expect(@div).to.not.be.focused
+
+        cy.get('#div').should('not.be.focused')
+        cy.get('#div').should('not.have.focus')
+
+      it "works with multiple elements", ->
+        cy.get('div:last').focus()
+        cy.get('div').should('have.focus')
+        cy.get('div:last').blur()
+        cy.get('div').should('not.have.focus')
+
+      it "throws when obj is not DOM", (done) ->
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.contain(
+            "expected {} to be 'focused'"
+          )
+          expect(err.message).to.include("> focus")
+          expect(err.message).to.include("> {}")
+
+          done()
+
+        expect({}).to.have.focus
+
+      it "calls into custom focus pseudos", ->
+        cy.$$('button:first').focus()
+        stub = cy.spy($.expr.pseudos, 'focus').as('focus')
+        expect(cy.$$('button:first')).to.have.focus
+        cy.get('button:first').should('have.focus')
+          .then ->
+            expect(stub).to.be.calledTwice
+
     context "match", ->
       beforeEach ->
         @div = $("<div></div>")
@@ -1791,3 +1971,4 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.have.css("foo")
+

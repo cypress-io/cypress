@@ -132,3 +132,6 @@ describe "cookies", ->
 
         .visit("https://localhost:2323/expirationMaxAge")
         .getCookies().should("be.empty")
+
+    it "issue: #2724 does not fail on invalid cookies", ->
+      cy.request('https://localhost:2323/invalidCookies')

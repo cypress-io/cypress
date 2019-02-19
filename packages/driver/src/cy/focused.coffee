@@ -42,23 +42,26 @@ create = (state) ->
     ## fallback if our focus event never fires
     ## to simulate the focus + focusin
     if not hasBlurred
-      ## todo handle relatedTarget's per the spec
-      focusoutEvt = new FocusEvent "focusout", {
-        bubbles: true
-        cancelable: false
-        view: win
-        relatedTarget: null
-      }
+      simulateBlurEvent(el, win)
+  
+  simulateBlurEvent = (el, win) ->
+    ## todo handle relatedTarget's per the spec
+    focusoutEvt = new FocusEvent "focusout", {
+      bubbles: true
+      cancelable: false
+      view: win
+      relatedTarget: null
+    }
 
-      blurEvt = new FocusEvent "blur", {
-        bubble: false
-        cancelable: false
-        view: win
-        relatedTarget: null
-      }
+    blurEvt = new FocusEvent "blur", {
+      bubble: false
+      cancelable: false
+      view: win
+      relatedTarget: null
+    }
 
-      el.dispatchEvent(blurEvt)
-      el.dispatchEvent(focusoutEvt)
+    el.dispatchEvent(blurEvt)
+    el.dispatchEvent(focusoutEvt)
 
   fireFocus = (el) ->
     ## if we are focusing a different element
@@ -78,7 +81,7 @@ create = (state) ->
     hasFocused = false
 
     hasFocus = top.document.hasFocus()
-
+    
     if not hasFocus
       win.focus()
 
@@ -106,26 +109,6 @@ create = (state) ->
     ## fallback if our focus event never fires
     ## to simulate the focus + focusin
     if not hasFocused
-      simulate = ->
-        ## todo handle relatedTarget's per the spec
-        focusinEvt = new FocusEvent "focusin", {
-          bubbles: true
-          view: win
-          relatedTarget: null
-        }
-
-        focusEvt = new FocusEvent "focus", {
-          view: win
-          relatedTarget: null
-        }
-
-        ## not fired in the correct order per w3c spec
-        ## because chrome chooses to fire focus before focusin
-        ## and since we have a simulation fallback we end up
-        ## doing it how chrome does it
-        ## http://www.w3.org/TR/DOM-Level-3-Events/#h-events-focusevent-event-order
-        el.dispatchEvent(focusEvt)
-        el.dispatchEvent(focusinEvt)
 
       ## only blur if we have a focused element AND its not
       ## currently ourselves!
@@ -136,9 +119,42 @@ create = (state) ->
         if not $window.isWindow(el)
           fireBlur($focused.get(0))
 
-      simulate()
+      simulateFocusEvent(el, win)
+
+  simulateFocusEvent = (el, win) ->
+    ## todo handle relatedTarget's per the spec
+    focusinEvt = new FocusEvent "focusin", {
+      bubbles: true
+      view: win
+      relatedTarget: null
+    }
+
+    focusEvt = new FocusEvent "focus", {
+      view: win
+      relatedTarget: null
+      isTrusted: false
+
+    }
+
+    ## not fired in the correct order per w3c spec
+    ## because chrome chooses to fire focus before focusin
+    ## and since we have a simulation fallback we end up
+    ## doing it how chrome does it
+    ## http://www.w3.org/TR/DOM-Level-3-Events/#h-events-focusevent-event-order
+    el.dispatchEvent(focusEvt)
+    el.dispatchEvent(focusinEvt)
+
 
   interceptFocus = (el, contentWindow, focusOption) ->
+    ## normally programmatic focus calls cause "primed" focus/blur
+    ## events if the window is not in focus
+    ## so we fire fake events to act as if the window
+    ## is in focus. The primed events will fire when the user returns however
+    ## actAsIfWindowHasFocus is true by default
+    if (state('actAsIfWindowHasFocus'))
+      fireFocus(el)
+      return
+      
     ## if our document does not have focus
     ## then that means that we need to attempt to
     ## bring our window into focus, and then figure
@@ -171,6 +187,18 @@ create = (state) ->
         state("needsForceFocus", el)
 
     return evt
+
+  interceptBlur = (el) ->
+    ## normally programmatic focus calls cause "primed" focus/blur
+    ## events if the window is not in focus
+    ## so we fire fake events to act as if the window
+    ## is in focus. The primed events will fire when the user returns however
+    ## actAsIfWindowHasFocus is true by default
+    if (state('actAsIfWindowHasFocus'))
+      fireBlur(el)
+      return
+    
+    return $elements.callNativeMethod(el, 'blur')
 
   needsForceFocus = ->
     ## if we have a primed focus event then
@@ -207,21 +235,12 @@ create = (state) ->
     return false
 
   getFocused = ->
-    try
-    ## need to use native getters for these
-      { activeElement, body } = state("document")
+    { activeElement } = state("document")
 
-      ## active element is the default if its null
-      ## or its equal to document.body
-      activeElementIsDefault = ->
-        (not activeElement) or (activeElement is body)
-
-      if activeElementIsDefault()
-        return null
-
+    if $dom.isFocused(activeElement)
       return $dom.wrap(activeElement)
-    catch
-      return null
+
+    return null
 
   return {
     fireBlur
@@ -233,6 +252,8 @@ create = (state) ->
     getFocused
 
     interceptFocus
+
+    interceptBlur
 
     needsForceFocus
   }

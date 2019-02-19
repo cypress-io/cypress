@@ -407,14 +407,22 @@ const commitDefaults = function (existingInfo) {
   debug('git commit existing info')
   debug(existingInfo)
 
-  const commitParamsObj = commitParams() || {}
+  const providerName = provider()
+  debug('detected provider name: %s', providerName)
+
+  let commitParamsObj = commitParams()
+  if (!commitParamsObj) {
+    debug('could not get commit param object, using empty one')
+    commitParamsObj = {}
+  }
 
   debug('commit info from provider environment variables')
-  debug(commitParamsObj)
+  debug('%o', commitParamsObj)
 
-  //# based on the existingInfo properties
-  //# merge in the commitParams if null or undefined
-  //# defaulting back to null if all fails
+  // based on the existingInfo properties
+  // merge in the commitParams if null or undefined
+  // defaulting back to null if all fails
+  // NOTE: only properties defined in "existingInfo" will be returned
   const combined = _.transform(existingInfo, (memo, value, key) => {
     return memo[key] = _.defaultTo(value != null ? value : commitParamsObj[key], null)
   })

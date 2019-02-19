@@ -1,6 +1,8 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
+$dom = require("../../../../src/dom")
+
 describe "src/cy/commands/misc", ->
   before ->
     cy
@@ -92,6 +94,57 @@ describe "src/cy/commands/misc", ->
             ## must use explicit non cy.should
             ## else this test will always pass
             expect($li.length).to.eq(1)
+
+    ## TODO: fix this test in 4.0 when we refactor validating subjects
+    it.skip "throws a good error when wrapping mixed types: element + string", ->
+      cy.get("button").then ($btn) ->
+        btn = $btn.get(0)
+
+        cy.wrap([btn, "asdf"]).click()
+
+    it "can wrap an array of DOM elements and pass command validation", ->
+      cy.get("button").then ($btn) ->
+        btn = $btn.get(0)
+
+        cy.wrap([btn]).click().then ($btn) ->
+          expect($dom.isJquery($btn)).to.be.true
+
+        cy.wrap([btn, btn]).click({ multiple: true }).then ($btns) ->
+          expect($dom.isJquery($btns)).to.be.true
+
+    it "can wrap an array of window without it being altered", ->
+      cy.window().then (win) ->
+        cy.wrap([win]).then (arr) ->
+          expect(arr).to.be.an('array')
+          expect(Array.isArray(arr)).to.be.true
+
+    it "can wrap an array of document without it being altered", ->
+      cy.document().then (doc) ->
+        cy.wrap([doc]).then (arr) ->
+          expect(arr).to.be.an('array')
+          expect(Array.isArray(arr)).to.be.true
+          expect(arr[0]).to.eq(doc)
+
+    describe "errors", ->
+      it "throws when wrapping an array of windows", (done) ->
+        cy.on "fail", (err) =>
+          expect(err.message).to.include "cy.scrollTo() failed because it requires a DOM element."
+          expect(err.message).to.include "[<window>]"
+          expect(err.message).to.include "All 2 subject validations failed on this subject."
+          done()
+
+        cy.window().then (win) ->
+          cy.wrap([win]).scrollTo("bottom")
+
+      it "throws when wrapping an array of documents", (done) ->
+        cy.on "fail", (err) =>
+          expect(err.message).to.include "cy.screenshot() failed because it requires a DOM element."
+          expect(err.message).to.include "[<document>]"
+          expect(err.message).to.include "All 3 subject validations failed on this subject."
+          done()
+
+        cy.document().then (doc) ->
+          cy.wrap([doc]).screenshot()
 
     describe ".log", ->
       beforeEach ->

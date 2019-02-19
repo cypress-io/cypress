@@ -5,6 +5,14 @@ namespace CypressLodashTests {
   })
 }
 
+namespace CypressMomentTests {
+  Cypress.moment() // $ExpectType Moment
+  Cypress.moment('1982-08-23') // $ExpectType Moment
+  Cypress.moment(Date()) // $ExpectType Moment
+  Cypress.moment(Date()).format() // $ExpectType string
+  Cypress.moment().startOf('week') // $ExpectType Moment
+}
+
 namespace CypressJqueryTests {
   Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
@@ -21,8 +29,6 @@ namespace CypressConfigTests {
   Cypress.config('baseUrl', null) // $ExpectType void
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
 }
-
-Cypress.moment()
 
 namespace CypressEnvTests {
   // Just making sure these are valid - no real type safety
@@ -106,18 +112,37 @@ cy.wrap(['bar', 'baz'])
     first // $ExpectType any
   })
 
-cy.wrap({ foo: 'bar' })
-  .then(s => {
-    s // $ExpectType { foo: string; }
-    return s
+describe('then', () => {
+  it('should have the correct type signature', () => {
+    cy.wrap({ foo: 'bar' })
+      .then(s => {
+        s // $ExpectType { foo: string; }
+        return s
+      })
+      .then(s => {
+        s // $ExpectType { foo: string; }
+      })
+      .then(s => s.foo)
+      .then(s => {
+        s // $ExpectType string
+      })
   })
-  .then(s => {
-    s // $ExpectType { foo: string; }
+
+  it('should have the correct type signature with options', () => {
+    cy.wrap({ foo: 'bar' })
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType { foo: string; }
+        return s
+      })
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType { foo: string; }
+      })
+      .then({ timeout: 5000 }, s => s.foo)
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType string
+      })
   })
-  .then(s => s.foo)
-  .then(s => {
-    s // $ExpectType string
-  })
+})
 
 cy.wait(['@foo', '@bar'])
   .then(([first, second]) => {

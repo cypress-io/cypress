@@ -59,10 +59,14 @@
       "legacyDecorators": true
     }
   },
-  "overrides": {
-    "files": ["**/*.jsx"],
-    "rules": {
-      "arrow-body-style": "off",
+  "overrides": [
+    {
+      "files": [
+        "**/*.jsx"
+      ],
+      "rules": {
+        "arrow-body-style": "off"
+      }
     }
-  }
+  ]
 }

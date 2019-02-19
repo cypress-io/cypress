@@ -67,6 +67,11 @@ module.exports = {
 
         argv.unshift("--inspect-brk=#{dp}")
 
+      else
+        opts = minimist(argv)
+        if opts.inspectBrk
+          argv.unshift("--inspect-brk=5566")
+
       cp.spawn(execPath, argv, {stdio: "inherit"})
       .on "close", (code) ->
         debug("electron closing with code", code)

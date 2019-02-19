@@ -16,7 +16,7 @@ $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cypress/keyboard")
+$Keyboard = require("./cy/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
@@ -31,6 +31,14 @@ proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
   cy: "getStyles".split(" ")
 }
+
+jqueryProxyFn = ->
+  if not @cy
+    $utils.throwErrByPath("miscellaneous.no_cy")
+
+  @cy.$$.apply(@cy, arguments)
+
+_.extend(jqueryProxyFn, $)
 
 ## provide the old interface and
 ## throw a deprecation message
@@ -448,11 +456,7 @@ class $Cypress
   addUtilityCommand: (key, fn) ->
     throwPrivateCommandInterface("addUtilityCommand")
 
-  $: ->
-    if not @cy
-      $utils.throwErrByPath("miscellaneous.no_cy")
-
-    @cy.$$.apply(@cy, arguments)
+  $: jqueryProxyFn
 
   ## attach to $Cypress to access
   ## all of the constructors
@@ -482,8 +486,6 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
-
-  _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
   @create = (config) ->
     new $Cypress(config)

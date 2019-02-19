@@ -1,3 +1,5 @@
+## Unit tests in ../../test/unit/browsers/chrome_spec
+
 _         = require("lodash")
 os        = require("os")
 path      = require("path")
@@ -43,6 +45,9 @@ defaultArgs = [
   "--disable-infobars"
   "--disable-device-discovery-notifications"
 
+  ## https://github.com/cypress-io/cypress/issues/2376
+  "--autoplay-policy=no-user-gesture-required" 
+
   ## http://www.chromium.org/Home/chromium-security/site-isolation
   ## https://github.com/cypress-io/cypress/issues/1951
   "--disable-site-isolation-trials"
@@ -64,6 +69,11 @@ defaultArgs = [
   "--disable-client-side-phishing-detection"
   "--disable-component-update"
   "--disable-default-apps"
+
+  ## These flags are for webcam/WebRTC testing
+  ## https://github.com/cypress-io/cypress/issues/2704
+  "--use-fake-ui-for-media-stream"
+  "--use-fake-device-for-media-stream"
 ]
 
 pluginsBeforeBrowserLaunch = (browser, args) ->

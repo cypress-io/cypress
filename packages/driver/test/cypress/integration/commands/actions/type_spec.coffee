@@ -1,6 +1,5 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
-Keyboard = Cypress.Keyboard
 Promise = Cypress.Promise
 $selection = require("../../../../../src/dom/selection")
 
@@ -1190,22 +1189,12 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
 
-        it "fires keypress event with 219 charCode", () ->
-
-          keypress = cy.spy (e) =>
+        it "fires keypress event with 123 charCode", (done) ->
+          cy.$$(":text:first").on "keypress", (e) ->
             expect(e.charCode).to.eq 123
             expect(e.which).to.eq 123
             expect(e.keyCode).to.eq 123
-            expect(e.key).to.eq '{'
-            
-          # .onCall(1).callsFake (e) =>
-          #   expect(e.charCode).to.eq 219
-          #   expect(e.which).to.eq 219
-          #   expect(e.keyCode).to.eq 219
-            
-    
-          ## native event presses Shift before { to mimic real user
-          cy.$$(":text:first").on "keypress", keypress
+            done()
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
           .then -> expect(keypress).to.be.calledOnce
@@ -1881,24 +1870,19 @@ describe "src/cy/commands/actions/type", ->
         afterEach ->
           @$input.off("keydown")
 
-        it "sends keydown event for new modifiers", (done) ->
-          event = null
-          @$input.on "keydown", (e)->
-            event = e
+        it "sends keydown event for new modifiers", ->
+          spy = cy.spy().as("keydown")
+          @$input.on "keydown", spy
 
           cy.get("input:text:first").type("{shift}").then ->
-            expect(event.shiftKey).to.be.true
-            expect(event.which).to.equal(16)
-            done()
+            expect(spy).to.be.calledWithMatch({which: 16})
 
-        it "does not send keydown event for already activated modifiers", (done) ->
-          triggered = false
-          @$input.on "keydown", (e)->
-            triggered = true if e.which is 18 or e.which is 17
+        it "does not send keydown event for already activated modifiers", () ->
+          spy = cy.spy().as('keydown')
+          @$input.on "keydown", spy
 
           cy.get("input:text:first").type("{cmd}{alt}").then ->
-            expect(triggered).to.be.false
-            done()
+            expect(spy).to.not.be.called
 
     describe "case-insensitivity", ->
 
@@ -2212,6 +2196,31 @@ describe "src/cy/commands/actions/type", ->
     describe "caret position", ->
 
       it "respects being formatted by input event handlers"
+
+      it "accurately returns host contenteditable attr", ->
+        hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=true attr", ->
+        hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"\" attr", ->
+        hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+      
+      it "accurately returns host contenteditable=\"foo\" attr", ->
+        hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+   
+      it "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
+        hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
 
       it "can arrow from maxlength", ->
         cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}')
@@ -2692,13 +2701,14 @@ describe "src/cy/commands/actions/type", ->
             expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
 
         it "has a table of keys", ->
-          cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->
-            table = @lastLog.invoke("consoleProps").table()
+          cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}")
+          .then ->
+            table = @lastLog.invoke("consoleProps").table[3]()
             console.table(table.data, table.columns)
             expect(table.columns).to.deep.eq [
               "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"
             ]
-            expect(table.name).to.eq "Key Events Table"
+            expect(table.name).to.eq "Keyboard Events"
             expectedTable = {
               1: {typed: "<meta>", which: 91, keydown: true, modifiers: "meta"}
               2: {typed: "<alt>", which: 18, keydown: true, modifiers: "alt, meta"}
@@ -2712,8 +2722,7 @@ describe "src/cy/commands/actions/type", ->
               10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, modifiers: "alt, meta"}
             }
 
-            for i in [1..10]
-              expect(table.data[i]).to.deep.eq(expectedTable[i])
+            expect(table.data).to.deep.eq(expectedTable)
 
             # table.data.forEach (item, i) ->
             #   expect(item).to.deep.eq(expectedTable[i])
@@ -2722,7 +2731,7 @@ describe "src/cy/commands/actions/type", ->
 
         it "has no modifiers when there are none activated", ->
           cy.get(":text:first").type("f").then ->
-            table = @lastLog.invoke("consoleProps").table()
+            table = @lastLog.invoke("consoleProps").table[3]()
             expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
             }
@@ -2731,7 +2740,7 @@ describe "src/cy/commands/actions/type", ->
           cy.$$(":text:first").keydown -> return false
 
           cy.get(":text:first").type("f").then ->
-            table = @lastLog.invoke("consoleProps").table()
+            table = @lastLog.invoke("consoleProps").table[3]()
             console.table(table.data, table.columns)
             expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}
@@ -2852,7 +2861,7 @@ describe "src/cy/commands/actions/type", ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq 2
 
-          allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(", ")
+          allChars = _.keys(cy.internal.keyboard.specialChars).concat(_.keys(cy.internal.keyboard.modifierChars)).join(", ")
 
           expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
           done()
@@ -2991,7 +3000,7 @@ describe "src/cy/commands/actions/type", ->
 
       context "[type=tel]", ->
         it "can edit tel", ->
-          cy.get('input[type="tel"]')
+          cy.get('#by-name > input[type="tel"]')
           .type('1234567890')
           .should('have.prop', 'value', '1234567890')
 
@@ -3138,9 +3147,27 @@ describe "src/cy/commands/actions/type", ->
 
       cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
 
-    it "works on input[type=number]", ->
-      cy.get("#number-with-value").clear().then ($input) ->
-        expect($input.val()).to.equal("")
+    context "works on input type", ->
+      inputTypes = [
+        "date",
+        "datetime",
+        "datetime-local",
+        "email",
+        "month",
+        "number",
+        "password",
+        "search",
+        "tel",
+        "text",
+        "time",
+        "url",
+        "week"
+      ]
+
+      inputTypes.forEach (type) ->
+        it type, ->
+          cy.get("##{type}-with-value").clear().then ($input) ->
+            expect($input.val()).to.equal("")
 
     describe "assertion verification", ->
       beforeEach ->

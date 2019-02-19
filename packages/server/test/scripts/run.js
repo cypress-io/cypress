@@ -10,7 +10,7 @@ const options = minimist(process.argv.slice(2))
 
 let run = options._[0]
 
-if (run.includes('--inspect-brk')) {
+if (run && run.includes('--inspect-brk')) {
   run = options._[1]
 }
 

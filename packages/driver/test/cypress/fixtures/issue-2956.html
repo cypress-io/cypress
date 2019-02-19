@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+
+  <script
+    type="text/javascript"
+    
+  ></script>
+
+
+	<style id="compiled-css" type="text/css">
+
+div {
+  display: block;
+  -webkit-transition: opacity 1s, background-color 0.5s;
+  transition: opacity 1s, background-color 0.5s;
+}
+
+.square {
+  width: 100px;
+  height: 100px;
+}
+
+.red {
+  background-color: red;
+}
+
+.blue {
+  background-color: blue;
+  opacity: 0;
+	display: none;
+  height: 50px;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.green {
+  background-color: green;
+  margin-top: 10px;
+}
+
+.active {
+  opacity: 1;
+	display: inherit;
+}
+
+button {
+  display: inherit;
+  position: relative;
+  margin: auto;
+  top: 15px;
+}
+  </style>
+
+
+  <!-- TODO: Missing CoffeeScript 2 -->
+
+<script type="text/javascript">
+
+
+window.onload=function(){
+      
+var outer = document.getElementById('outer'),
+inner = document.getElementById('inner'),
+btn = document.getElementById('inner-btn');
+
+function activate() {
+  inner.classList.add('active');
+}
+
+function deactivate() {
+  inner.classList.remove('active');
+}
+
+function color() {
+	if (outer.classList.contains('yellow')) {
+  	outer.classList.remove('yellow');
+  } else {
+  	outer.classList.add('yellow');
+  };
+}
+
+btn.addEventListener("click", color, false);
+outer.addEventListener("mouseenter", activate, false);
+outer.addEventListener("mouseleave", deactivate, false);
+
+const sq3 = document.getElementById('sq3')
+sq3.addEventListener('pointerover', () => {
+  sq3.remove()
+})
+
+
+const sq4 = document.getElementById('sq4')
+sq4.addEventListener('pointerleave', (e) => {
+  sq4.style.position = 'absolute'
+  sq4.style.left = e.clientX - 50 + 'px'
+  sq4.style.top = e.clientY - 50 + 'px'
+  console.log(e)
+})
+const sq5 = document.getElementById('sq5')
+sq5.addEventListener('pointerdown', (e) => {
+  e.preventDefault()
+})
+
+
+}
+
+
+</script>
+
+</head>
+<body>
+    <div id="outer" class="red square">
+  <div id="inner" class="blue square">
+    <button id="inner-btn">CLICK</button>
+  </div>
+</div>
+<div class="square green">
+</div>
+
+<div id="sq3" class="square yellow">
+
+</div>
+
+<div id="sq4" class="square green"></div>
+<input id="sq5"></input>
+<input id="sq6"></input>
+
+</body>
+</html>

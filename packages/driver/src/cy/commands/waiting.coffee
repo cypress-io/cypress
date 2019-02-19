@@ -101,17 +101,19 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## but slice out the error since we may set
       ## the error related to a previous xhr
       timeout = options.timeout
+      requestTimeout = options.requestTimeout ? timeout
+      responseTimeout = options.responseTimeout ? timeout
 
       [ index, num ] = getNumRequests(state, alias)
 
       waitForRequest = ->
         options = _.omit(options, "_runnableTimeout")
-        options.timeout = timeout ? Cypress.config("requestTimeout")
+        options.timeout = requestTimeout ? Cypress.config("requestTimeout")
         checkForXhr(alias, "request", index, num, options)
 
       waitForResponse = ->
         options = _.omit(options, "_runnableTimeout")
-        options.timeout = timeout ? Cypress.config("responseTimeout")
+        options.timeout = responseTimeout ? Cypress.config("responseTimeout")
         checkForXhr(alias, "response", index, num, options)
 
       ## if we were only waiting for the request

@@ -28,16 +28,17 @@ exports['e2e cookies passes 1'] = `
       ✓ handles expired cookies secure
       ✓ issue: #224 sets expired cookies between redirects
       ✓ issue: #1321 failing to set or parse cookie
+      ✓ issue: #2724 does not fail on invalid cookies
 
 
-  8 passing
+  9 passing
 
 
   (Results)
 
   ┌───────────────────────────────────┐
-  │ Tests:        8                   │
-  │ Passing:      8                   │
+  │ Tests:        9                   │
+  │ Passing:      9                   │
   │ Failing:      0                   │
   │ Pending:      0                   │
   │ Skipped:      0                   │
@@ -61,9 +62,9 @@ exports['e2e cookies passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cookies_spec.coffee                       XX:XX        8        8        -        -        - │
+  │ ✔ cookies_spec.coffee                       XX:XX        9        9        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        8        8        -        -        -  
+    All specs passed!                           XX:XX        9        9        -        -        -  
 
 
 `

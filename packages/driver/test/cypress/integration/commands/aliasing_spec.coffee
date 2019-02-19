@@ -103,7 +103,7 @@ describe "src/cy/commands/aliasing", ->
       it "throws as a parent command", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include("before running a parent command")
-          expect(err.message).to.include("cy.as(foo)")
+          expect(err.message).to.include("cy.as(\"foo\")")
           done()
 
         cy.as("foo")

@@ -4,6 +4,8 @@ _          = require("lodash")
 os         = require("os")
 debug      = require("debug")("test")
 commitInfo = require("@cypress/commit-info")
+mockedEnv  = require("mocked-env")
+
 api        = require("#{root}../lib/api")
 errors     = require("#{root}../lib/errors")
 logger     = require("#{root}../lib/logger")
@@ -88,113 +90,165 @@ describe "lib/modes/record", ->
       # this is tested inside @cypress/commit-info
 
   context ".createRunAndRecordSpecs", ->
-    specs = [
-      { relative: "path/to/spec/a" },
-      { relative: "path/to/spec/b" }
-    ]
+    describe "fallback commit information", ->
+      resetEnv = null
 
-    beforeEach ->
-      sinon.stub(ciProvider, "provider").returns("circle")
-      sinon.stub(ciProvider, "ciParams").returns({foo: "bar"})
-
-      @commitDefaults = {
-        branch: "master",
-        author: "brian",
-        email: "brian@cypress.io",
-        message: "such hax",
-        sha: "sha-123",
-        remote: "https://github.com/foo/bar.git"
-      }
-      sinon.stub(commitInfo, "commitInfo").resolves(@commitDefaults)
-      sinon.stub(ciProvider, "commitDefaults").returns({
-        sha: @commitDefaults.sha
-        branch: @commitDefaults.branch
-        authorName: @commitDefaults.author
-        authorEmail: @commitDefaults.email
-        message: @commitDefaults.message
-        remoteOrigin: @commitDefaults.remote
-      })
-
-      sinon.stub(api, "createRun").resolves()
-
-    it "calls api.createRun with the right args", ->
-      key = "recordKey"
-      projectId = "pId123"
-      specPattern = ["spec/pattern1", "spec/pattern2"]
-      projectRoot = "project/root"
-      ciBuildId = "ciId123"
-      parallel = null
-      group = null
-      runAllSpecs = sinon.stub()
-      sys = {
-        osCpus: 1
-        osName: 2
-        osMemory: 3
-        osVersion: 4
-      }
-      browser = {
-        displayName: "chrome"
-        version: "59"
+      env = {
+        COMMIT_INFO_BRANCH: "my-branch-221",
+        COMMIT_INFO_MESSAGE: "best commit ever",
+        COMMIT_INFO_EMAIL: "user@company.com",
+        COMMIT_INFO_AUTHOR: "Agent Smith",
+        COMMIT_INFO_SHA: "0123456",
+        COMMIT_INFO_REMOTE: "remote repo"
       }
 
-      recordMode.createRunAndRecordSpecs({
-        key
-        sys
-        specs
-        group
-        browser
-        parallel
-        ciBuildId
-        projectId
-        projectRoot
-        specPattern
-        runAllSpecs
-      })
-      .then ->
-        expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
-        expect(api.createRun).to.be.calledWith({
-          group
-          parallel
-          projectId
-          ciBuildId
-          recordKey: key
-          specPattern: "spec/pattern1,spec/pattern2"
-          specs: ["path/to/spec/a", "path/to/spec/b"]
-          platform: {
-            osCpus: 1
-            osName: 2
-            osMemory: 3
-            osVersion: 4
-            browserName: "chrome"
-            browserVersion: "59"
-          }
-          ci: {
-            params: {
-              foo: "bar"
-            }
-            provider: "circle"
-          }
-          commit: {
-            authorEmail: "brian@cypress.io"
-            authorName: "brian"
-            branch: "master"
-            message: "such hax"
-            remoteOrigin: "https://github.com/foo/bar.git"
-            sha: "sha-123"
-          }
-          platform: {
-            browserName: "chrome"
-            browserVersion: "59"
-            osCpus: 1
-            osMemory: 3
-            osName: 2
-            osVersion: 4
-          }
-          projectId: "pId123"
-          recordKey: "recordKey"
-          specPattern: "spec/pattern1,spec/pattern2"
-          specs: ["path/to/spec/a", "path/to/spec/b"]
+      beforeEach ->
+        # stub git commands to return nulls
+        sinon.stub(commitInfo, "getBranch").resolves(null)
+        sinon.stub(commitInfo, "getMessage").resolves(null)
+        sinon.stub(commitInfo, "getEmail").resolves(null)
+        sinon.stub(commitInfo, "getAuthor").resolves(null)
+        sinon.stub(commitInfo, "getSha").resolves(null)
+        sinon.stub(commitInfo, "getRemoteOrigin").resolves(null)
+        # but set environment variables
+        resetEnv = mockedEnv(env, {clear: true})
+
+      afterEach ->
+        resetEnv()
+
+      it "calls api.createRun with the commit extracted from environment variables", ->
+        createRun = sinon.stub(api, "createRun").resolves()
+        runAllSpecs = sinon.stub()
+        recordMode.createRunAndRecordSpecs({
+          key: "foo",
+          sys: {},
+          browser: {},
+          runAllSpecs
         })
+        .then ->
+          expect(runAllSpecs).to.have.been.calledWith({}, false)
+          expect(createRun).to.have.been.calledOnce
+          expect(createRun.firstCall.args).to.have.length(1)
+          { commit } = createRun.firstCall.args[0]
+          debug('git is %o', commit)
+          expect(commit).to.deep.equal({
+            sha: env.COMMIT_INFO_SHA,
+            branch: env.COMMIT_INFO_BRANCH,
+            authorName: env.COMMIT_INFO_AUTHOR,
+            authorEmail: env.COMMIT_INFO_EMAIL,
+            message: env.COMMIT_INFO_MESSAGE,
+            remoteOrigin: env.COMMIT_INFO_REMOTE,
+            defaultBranch: null
+          })
+
+    describe "with CI info", ->
+      specs = [
+        { relative: "path/to/spec/a" },
+        { relative: "path/to/spec/b" }
+      ]
+
+      beforeEach ->
+        sinon.stub(ciProvider, "provider").returns("circle")
+        sinon.stub(ciProvider, "ciParams").returns({foo: "bar"})
+
+        @commitDefaults = {
+          branch: "master",
+          author: "brian",
+          email: "brian@cypress.io",
+          message: "such hax",
+          sha: "sha-123",
+          remote: "https://github.com/foo/bar.git"
+        }
+        sinon.stub(commitInfo, "commitInfo").resolves(@commitDefaults)
+        sinon.stub(ciProvider, "commitDefaults").returns({
+          sha: @commitDefaults.sha
+          branch: @commitDefaults.branch
+          authorName: @commitDefaults.author
+          authorEmail: @commitDefaults.email
+          message: @commitDefaults.message
+          remoteOrigin: @commitDefaults.remote
+        })
+
+        sinon.stub(api, "createRun").resolves()
+
+      it "calls api.createRun with the right args", ->
+        key = "recordKey"
+        projectId = "pId123"
+        specPattern = ["spec/pattern1", "spec/pattern2"]
+        projectRoot = "project/root"
+        ciBuildId = "ciId123"
+        parallel = null
+        group = null
+        runAllSpecs = sinon.stub()
+        sys = {
+          osCpus: 1
+          osName: 2
+          osMemory: 3
+          osVersion: 4
+        }
+        browser = {
+          displayName: "chrome"
+          version: "59"
+        }
+
+        recordMode.createRunAndRecordSpecs({
+          key
+          sys
+          specs
+          group
+          browser
+          parallel
+          ciBuildId
+          projectId
+          projectRoot
+          specPattern
+          runAllSpecs
+        })
+        .then ->
+          expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
+          expect(api.createRun).to.be.calledWith({
+            group
+            parallel
+            projectId
+            ciBuildId
+            recordKey: key
+            specPattern: "spec/pattern1,spec/pattern2"
+            specs: ["path/to/spec/a", "path/to/spec/b"]
+            platform: {
+              osCpus: 1
+              osName: 2
+              osMemory: 3
+              osVersion: 4
+              browserName: "chrome"
+              browserVersion: "59"
+            }
+            ci: {
+              params: {
+                foo: "bar"
+              }
+              provider: "circle"
+            }
+            commit: {
+              authorEmail: "brian@cypress.io"
+              authorName: "brian"
+              branch: "master"
+              message: "such hax"
+              remoteOrigin: "https://github.com/foo/bar.git"
+              sha: "sha-123"
+            }
+            platform: {
+              browserName: "chrome"
+              browserVersion: "59"
+              osCpus: 1
+              osMemory: 3
+              osName: 2
+              osVersion: 4
+            }
+            projectId: "pId123"
+            recordKey: "recordKey"
+            specPattern: "spec/pattern1,spec/pattern2"
+            specs: ["path/to/spec/a", "path/to/spec/b"]
+          })
 
   context ".updateInstanceStdout", ->
     beforeEach ->

@@ -27,9 +27,7 @@
     "theme"
   ],
   "devDependencies": {
-    "@cypress/core-socket": "0.1.0",
-    "@cypress/icons": "0.5.4",
-    "@cypress/releaser": "0.1.12",
+    "@cypress/icons": "0.7.0",
     "bin-up": "^1.1.0",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
@@ -46,7 +44,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "bluebird": "^3.3.5",
-    "lodash": "^4.11.2"
+    "bluebird": "3.5.3",
+    "lodash": "4.17.11"
   }
 }

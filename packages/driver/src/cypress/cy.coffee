@@ -13,6 +13,8 @@ $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
+$Mouse = require("../cy/mouse")
+$Keyboard = require("../cy/keyboard")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -50,6 +52,9 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
+setActAsIfWindowHasFocus = (state) ->
+  state("actAsIfWindowHasFocus", true)
+
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
@@ -68,7 +73,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   $$ = (selector, context) ->
     context ?= state("document")
-    new $.fn.init(selector, context)
+    $dom.query(selector, context)
 
   queue = $CommandQueue.create()
 
@@ -80,6 +85,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  keyboard = $Keyboard.create(state)
+  mouse = $Mouse.create(state, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -154,9 +161,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
 
-      ## no longer needed since we no longer keep state on cy.type
-      # contentWindow.HTMLInputElement.prototype.select = ->
-      #   $selection.interceptSelect.call(this)
+      contentWindow.HTMLElement.prototype.blur = ->
+        focused.interceptBlur(this)
 
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
@@ -292,15 +298,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     .then (subject) ->
       state("commandIntermediateValue", undefined)
 
+      ## we may be given a regular array here so
+      ## we need to re-wrap the array in jquery
+      ## if that's the case if the first item
+      ## in this subject is a jquery element.
+      ## we want to do this because in 3.1.2 there
+      ## was a regression when wrapping an array of elements
+      firstSubject = $utils.unwrapFirst(subject)
+
       ## if ret is a DOM element and its not an instance of our own jQuery
-      if subject and $dom.isElement(subject) and not $utils.isInstanceOf(subject, $)
+      if subject and $dom.isElement(firstSubject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
         ## TODO: enable turning this off
         ## wrapSubjectsInJquery: false
         ## which will just pass subjects downstream
         ## without modifying them
-        subject = $(subject)
+        subject = $dom.wrap(subject)
 
       command.set({ subject: subject })
 
@@ -459,10 +473,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
       if prevSubject and ("optional" not in [].concat(prevSubject))
+        stringifiedArg = $utils.stringifyActual(args[0])
         $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
           args: {
             cmd:  name
-            args: $utils.stringifyActual(args[0])
+            args: if _.isString(args[0]) then "\"#{stringifiedArg}\"" else stringifiedArg
           }
         })
 
@@ -622,6 +637,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
+    internal: {
+      mouse: mouse
+      keyboard: keyboard
+    }
+
     ## timer sync methods
     pauseTimers: timers.pauseTimers
 
@@ -651,6 +671,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     initialize: ($autIframe) ->
       setRemoteIframeProps($autIframe, state)
+      setActAsIfWindowHasFocus(state)
 
       ## dont need to worry about a try/catch here
       ## because this is during initialize and its
@@ -719,6 +740,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         window: s.window
         document: s.document
         $autIframe: s.$autIframe
+        actAsIfWindowHasFocus: s.actAsIfWindowHasFocus
       }
 
       ## reset state back to empty object
