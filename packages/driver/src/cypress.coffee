@@ -299,6 +299,12 @@ class $Cypress
 
       when "cy:after:all:screenshots"
         @emit("after:all:screenshots", args...)
+      
+      when "cy:before:native:event"
+        @emit("before:native:event", args...)
+      
+      when "cy:after:native:event"
+        @emit("after:native:event", args...)
 
       when "command:log:added"
         @runner.addLog(args[0], @config("isInteractive"))

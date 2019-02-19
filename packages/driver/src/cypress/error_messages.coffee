@@ -779,6 +779,7 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
+    invalid_dateTime: "Typing into a datetime input with #{cmd('type')} requires a valid datetime with the format 'yyyy-MM-ddThh:mm', for example '2017-06-01T08:30'. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
     not_on_typeable_element: """
       #{cmd('type')} failed because it requires a valid typeable element.

@@ -265,6 +265,13 @@ const eventManager = {
       localBus.emit('after:screenshot', config)
     })
 
+    Cypress.on('before:native:event', (config) => {
+      localBus.emit('before:native:event', config)
+    })
+    Cypress.on('after:native:event', (config) => {
+      localBus.emit('after:native:event', config)
+    })
+
     _.each(driverToReporterEvents, (event) => {
       Cypress.on(event, (...args) => {
         reporterBus.emit(event, ...args)

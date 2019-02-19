@@ -5,9 +5,12 @@ const $selection = require('../dom/selection')
 const $document = require('../dom/document')
 // const $Cypress = require('../cypress')
 
+const $native = require('../cypress/native_events')
+
 const isSingleDigitRe = /^\d$/
 const isStartingDigitRe = /^\d/
 const charsBetweenCurlyBracesRe = /({.+?})/
+const UsKeyboardLayout = require('../cypress/UsKeyboardLayout')
 
 // Keyboard event map
 // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
@@ -39,6 +42,25 @@ const initialModifiers = {
   ctrl: false,
   meta: false,
   shift: false,
+}
+
+/**
+   * @param {string} key
+   * @return {number}
+   */
+const getModifiersValue = (modifiers) => {
+  return [
+    modifiers.alt,
+    modifiers.ctrl,
+    modifiers.meta,
+    modifiers.shift,
+  ]
+  .map((v, i) => {
+    return v ? 1 << i : 0
+  })
+  .reduce((a, b) => {
+    return a + b
+  }, 0)
 }
 
 const keyToStandard = (key) => {
@@ -149,7 +171,7 @@ const create = function (state) {
 
   const kb = {
 
-    specialChars: {
+    specialCharsSimulated: {
       '{selectall}': $selection.selectAll,
 
       //# charCode = 46
@@ -335,19 +357,64 @@ const create = function (state) {
       return !!kb.specialChars[chars]
     },
 
+    specialChars: {
+      '{selectall}' () {
+        return $selection.selectAll()
+      },
+      '{movetostart}' () {
+        return $selection.moveSelectionToStart()
+      },
+      '{movetoend}' () {
+        return $selection.moveSelectionToEnd()
+      },
+      '{del}' () {
+        return $native.keypress(kb.getKeyInfo('Delete'))
+      },
+      '{backspace}' () {
+        return $native.keypress(kb.getKeyInfo('Backspace'))
+      },
+      '{esc}' () {
+        return $native.keypress(kb.getKeyInfo('Escape'))
+      },
+      '{{}' () {
+        return $native.keypress(kb.getKeyInfo('{'))
+      },
+      '{enter}' () {
+        return $native.keypress(kb.getKeyInfo('Enter'))
+      },
+      '{leftarrow}' () {
+        return $native.keypress(kb.getKeyInfo('ArrowLeft'))
+      },
+      '{rightarrow}' () {
+        return $native.keypress(kb.getKeyInfo('ArrowRight'))
+      },
+      '{uparrow}' () {
+        return $native.keypress(kb.getKeyInfo('ArrowUp'))
+      },
+      '{downarrow}' () {
+        return $native.keypress(kb.getKeyInfo('ArrowDown'))
+      },
+    },
+
     type (options = {}) {
       _.defaults(options, {
         delay: 10,
         onEvent () {},
         onBeforeEvent () {},
+        onFocusChange () {},
         onBeforeType () {},
+        onAfterType () {},
         onValueChange () {},
         onEnterPressed () {},
         onNoMatchingSpecialChars () {},
         onBeforeSpecialCharAction () {},
       })
 
+      /**
+     * @type {HTMLElement}
+     */
       const el = options.$el.get(0)
+      const doc = $document.getDocumentFromElement(el)
 
       const keys = options.chars.split(charsBetweenCurlyBracesRe).map((chars) => {
         if (charsBetweenCurlyBracesRe.test(chars)) {
@@ -363,12 +430,36 @@ const create = function (state) {
 
       //# should make each keystroke async to mimic
       //# how keystrokes come into javascript naturally
-      return Promise
-      .each(keys, (key) => {
+
+      let prevElement = $elements.getActiveElement(doc)
+
+      return Promise.each(keys, (key, i) => {
+        let activeEl = $elements.getActiveElement(doc)
+
+        if (activeEl !== prevElement) {
+          let charsNeedingType = options.onFocusChange(activeEl, keys.slice(i))
+
+          if (charsNeedingType) {
+            options.chars = charsNeedingType
+
+            return kb.type(options)
+          }
+        }
+
         return kb.typeChars(el, key, options)
       }).then(() => {
+        let charsNeedingType = options.onAfterType(
+          $elements.getActiveElement(doc)
+        )
+
+        if (charsNeedingType) {
+          options.chars = charsNeedingType
+
+          return kb.type(options)
+        }
+
         if (options.release !== false) {
-          return kb.resetModifiers($document.getDocumentFromElement(el))
+          return kb.resetModifiers(doc)
         }
       })
     },
@@ -376,7 +467,6 @@ const create = function (state) {
     typeChars (el, chars, options) {
       options = _.clone(options)
 
-      // switch(false) executes blocks whose case === false
       switch (false) {
         case !kb.isSpecialChar(chars):
           return Promise
@@ -389,24 +479,48 @@ const create = function (state) {
           .delay(options.delay)
 
         case !charsBetweenCurlyBracesRe.test(chars): {
-
           //# between curly braces, but not a valid special
           //# char or modifier
-          const allChars = _.keys(kb.specialChars).concat(_.keys(modifierChars)).join(', ')
+          const allChars = _.keys(kb.specialChars)
+          .concat(_.keys(kb.modifierChars))
+          .join(', ')
 
-          return Promise
-          .resolve(options.onNoMatchingSpecialChars(chars, allChars))
-          .delay(options.delay)
+          return Promise.resolve(
+            options.onNoMatchingSpecialChars(chars, allChars)
+          ).delay(options.delay)
         }
 
-        default:
-          return Promise
-          .each(chars.split(''), (char) => {
-            return Promise
-            .resolve(kb.typeKey(el, char, options))
-            .delay(options.delay)
-          })
+        default: {
+          const charsArr = chars.split('')
+          const { delay, simulated } = options
+
+          if (simulated) {
+            return Promise.each(charsArr, (char) => {
+              return Promise
+              .resolve(kb.typeKey(el, char, options))
+              .delay(delay)
+            })
+          }
+
+          if (delay) {
+            return Promise.each(charsArr, (char) => {
+              return $native.keypress(kb.getKeyInfo(char)).delay(delay)
+            })
+          }
+
+          return $native.keypressAll(kb.getKeyInfo(charsArr))
+        }
       }
+    },
+
+    expectedValueDoesNotMatchCurrentValue (expected, rng) {
+      return expected !== rng.all()
+    },
+
+    moveCaretToEnd (rng) {
+      const len = rng.length()
+
+      return rng.bounds([len, len])
     },
 
     simulateKey (el, eventType, key, options) {
@@ -414,6 +528,7 @@ const create = function (state) {
       //# in our options
 
       let charCode
+      let charCodeAt
       let keyCode
       let which
 
@@ -426,18 +541,23 @@ const create = function (state) {
       let keys = true
       let otherKeys = true
 
+      // eslint-disable-next-line no-undef
       const event = new Event(eventType, {
         bubbles: true,
         cancelable: eventType !== 'input',
       })
 
       switch (eventType) {
-        case 'keydown': case 'keyup':
-          keyCode = options.charCode != null ? options.charCode : getKeyCode(key.toUpperCase())
+        case 'keydown':
+        case 'keyup':
+          charCodeAt =
+          options.charCode != null
+            ? options.charCode
+            : getKeyCode(key.toUpperCase())
 
           charCode = 0
-          // keyCode = keyCode
-          which = keyCode
+          keyCode = charCodeAt
+          which = charCodeAt
           break
 
         case 'keypress': {
@@ -497,7 +617,7 @@ const create = function (state) {
         })
       }
 
-      const args = [options.id, key, eventType, which]
+      const args = [options.id, key, eventType, charCodeAt]
 
       //# give the driver a chance to bail on this event
       //# if we return false here
@@ -524,10 +644,13 @@ const create = function (state) {
           const { selectionStart } = el
           const valueLength = $elements.getNativeProp(el, 'value').length
           const isDigitsInText = isStartingDigitRe.test(options.chars)
-          const isValidCharacter = (key === '.') || ((key === '-') && valueLength)
+          const isValidCharacter = key === '.' || (key === '-' && valueLength)
           const { prevChar } = options
 
-          if (!isDigit && (isDigitsInText || !isValidCharacter || (selectionStart !== 0))) {
+          if (
+            !isDigit &&
+          (isDigitsInText || !isValidCharacter || selectionStart !== 0)
+          ) {
             options.prevChar = key
 
             return
@@ -535,13 +658,16 @@ const create = function (state) {
 
           //# only type '.' and '-' if it is the first symbol and there already is a value, or if
           //# '.' or '-' are appended to a digit. If not, value cannot be set.
-          if (isDigit && ((prevChar === '.') || ((prevChar === '-') && !valueLength))) {
+          if (
+            isDigit &&
+          (prevChar === '.' || (prevChar === '-' && !valueLength))
+          ) {
             options.prevChar = key
             key = prevChar + key
           }
         }
 
-        return options.updateValue(el, key)
+        return options.updateValue(el, key, options.chars)
       })
     },
 
@@ -555,7 +681,10 @@ const create = function (state) {
 
       const maybeUpdateValueAndFireInput = () => {
         //# only call this function if we haven't been told not to
-        if (fn && (options.onBeforeSpecialCharAction(options.id, options.key) !== false)) {
+        if (
+          fn &&
+        options.onBeforeSpecialCharAction(options.id, options.key) !== false
+        ) {
           let prevText
 
           if (!$elements.isContentEditable(el)) {
@@ -564,7 +693,7 @@ const create = function (state) {
 
           fn.call(this)
 
-          if ((options.prevText === null) && !$elements.isContentEditable(el)) {
+          if (options.prevText === null && !$elements.isContentEditable(el)) {
             options.prevText = prevText
             options.onValueChange(options.prevText, el)
           }
@@ -586,7 +715,7 @@ const create = function (state) {
             //# maxlength is -1 by default when omitted
             //# but could also be null or undefined :-/
             //# only cafe if we are trying to type a key
-            if (((ml === 0) || (ml > 0)) && key) {
+            if ((ml === 0 || ml > 0) && key) {
               //# check if we should update the value
               //# and fire the input event
               //# as long as we're under maxlength
@@ -606,8 +735,27 @@ const create = function (state) {
 
     handleSpecialChars (el, chars, options) {
       options.key = chars
+      const { simulated } = options
+
+      if (simulated) {
+        return kb.specialCharsSimulated[chars].call(this, el, options)
+      }
 
       return kb.specialChars[chars].call(this, el, options)
+    },
+
+    getKeyInfo (keyString) {
+      const keyInfo = UsKeyboardLayout.keyboardMappings[keyString]
+
+      if (keyInfo.key && keyInfo.key.length === 1) {
+        keyInfo.text = keyInfo.key
+      }
+
+      const _activeModifiers = getActiveModifiers(state)
+
+      _.extend(keyInfo, { modifiers: getModifiersValue(_activeModifiers) })
+
+      return keyInfo
     },
 
     handleModifier (el, chars, options) {

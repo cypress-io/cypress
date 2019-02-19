@@ -17,6 +17,7 @@
     "lib"
   ],
   "devDependencies": {
+    "@babel/polyfill": "^7.0.0",
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/underscore.inflection": "^1.0.0",
@@ -65,6 +66,7 @@
     "url-parse": "^1.1.7",
     "vanilla-text-mask": "^5.1.1",
     "wait-on": "^2.0.2",
-    "zone.js": "^0.8.18"
+    "zone.js": "^0.8.18",
+    "zunder": "^5.8.2"
   }
 }
