@@ -77,7 +77,7 @@
     "chalk": "2.4.2",
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
-    "cloudflare-cli": "2.4.0",
+    "cloudflare-cli": "3.2.1",
     "coffeelint": "1.16.2",
     "commit-message-install": "1.10.1",
     "common-tags": "1.8.0",
