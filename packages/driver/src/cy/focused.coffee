@@ -43,7 +43,7 @@ create = (state) ->
     ## to simulate the focus + focusin
     if not hasBlurred
       simulateBlurEvent(el, win)
-  
+
   simulateBlurEvent = (el, win) ->
     ## todo handle relatedTarget's per the spec
     focusoutEvt = new FocusEvent "focusout", {
@@ -81,7 +81,7 @@ create = (state) ->
     hasFocused = false
 
     hasFocus = top.document.hasFocus()
-    
+
     if not hasFocus
       win.focus()
 
@@ -142,7 +142,6 @@ create = (state) ->
     el.dispatchEvent(focusEvt)
     el.dispatchEvent(focusinEvt)
 
-
   interceptFocus = (el, contentWindow, focusOption) ->
     ## normally programmatic focus calls cause "primed" focus/blur
     ## events if the window is not in focus
@@ -152,7 +151,7 @@ create = (state) ->
     if (state('actAsIfWindowHasFocus'))
       fireFocus(el)
       return
-      
+
     ## if our document does not have focus
     ## then that means that we need to attempt to
     ## bring our window into focus, and then figure
@@ -195,7 +194,7 @@ create = (state) ->
     if (state('actAsIfWindowHasFocus'))
       fireBlur(el)
       return
-    
+
     return $elements.callNativeMethod(el, 'blur')
 
   needsForceFocus = ->

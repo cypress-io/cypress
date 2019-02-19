@@ -44,7 +44,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $el = $dom.wrap(el)
 
         domEvents = {}
-        $previouslyFocusedEl = null
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
