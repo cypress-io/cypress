@@ -1,6 +1,7 @@
 const net = require('net')
 const dns = require('dns')
 const url = require('url')
+const rp = require('request-promise')
 const Promise = require('bluebird')
 
 module.exports = {
@@ -44,6 +45,16 @@ module.exports = {
 
     if (port == null) {
       port = protocol === 'https:' ? '443' : '80'
+    }
+
+    if (process.env.HTTP_PROXY) {
+      // cannot make arbitrary connections behind a proxy, attempt HTTP/HTTPS
+      return rp(urlStr).catch(e => {
+        // we just care if it can connect, not if it's a valid resource
+        if (e.name !== 'StatusCodeError') {
+          throw e
+        }
+      })
     }
 
     return this.getAddress(port, hostname)
