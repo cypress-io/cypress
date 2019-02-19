@@ -11,6 +11,13 @@ create = (state) ->
 
     hasFocus = top.document.hasFocus()
 
+    ## if our document does not have focus
+    ## then that means that we need to attempt to
+    ## bring our window into focus, and then figure
+    ## out if the browser fires the native focus
+    ## event - and if it doesn't, to flag this
+    ## element as needing focus on the next action
+    ## command
     if not hasFocus
       win.focus()
 
@@ -82,6 +89,13 @@ create = (state) ->
 
     hasFocus = top.document.hasFocus()
 
+    ## if our document does not have focus
+    ## then that means that we need to attempt to
+    ## bring our window into focus, and then figure
+    ## out if the browser fires the native focus
+    ## event - and if it doesn't, to flag this
+    ## element as needing focus on the next action
+    ## command
     if not hasFocus
       win.focus()
 
@@ -146,56 +160,21 @@ create = (state) ->
     ## normally programmatic focus calls cause "primed" focus/blur
     ## events if the window is not in focus
     ## so we fire fake events to act as if the window
-    ## is in focus. The primed events will fire when the user returns however
-    ## actAsIfWindowHasFocus is true by default
-    if (state('actAsIfWindowHasFocus'))
-      fireFocus(el)
-      return
+    ## is always in focus
+    fireFocus(el)
 
-    ## if our document does not have focus
-    ## then that means that we need to attempt to
-    ## bring our window into focus, and then figure
-    ## out if the browser fires the native focus
-    ## event - and if it doesn't, to flag this
-    ## element as needing focus on the next action
-    ## command
-    hasFocus = top.document.hasFocus()
-
-    if not hasFocus
-      contentWindow.focus()
-
-      didReceiveFocus = false
-
-      onFocus = ->
-        didReceiveFocus = true
-
-      $elements.callNativeMethod(el, "addEventListener", "focus", onFocus)
-
-    evt = $elements.callNativeMethod(el, "focus", focusOption)
-
-    ## always unbind if added listener
-    if onFocus
-      $elements.callNativeMethod(el, "removeEventListener", "focus", onFocus)
-
-      ## if we didn't receive focus
-      if not didReceiveFocus
-        ## then store this element as needing
-        ## force'd focus later on
-        state("needsForceFocus", el)
-
-    return evt
+    ## el.focus() always returns undefined
+    return undefined
 
   interceptBlur = (el) ->
-    ## normally programmatic focus calls cause "primed" focus/blur
+    ## normally programmatic blur calls cause "primed" focus/blur
     ## events if the window is not in focus
     ## so we fire fake events to act as if the window
-    ## is in focus. The primed events will fire when the user returns however
-    ## actAsIfWindowHasFocus is true by default
-    if (state('actAsIfWindowHasFocus'))
-      fireBlur(el)
-      return
+    ## is always in focus.
+    fireBlur(el)
 
-    return $elements.callNativeMethod(el, 'blur')
+    ## el.blur() always returns undefined
+    return undefined
 
   needsForceFocus = ->
     ## if we have a primed focus event then

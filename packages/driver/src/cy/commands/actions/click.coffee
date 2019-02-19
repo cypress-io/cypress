@@ -148,9 +148,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## without firing the focus event
             $previouslyFocused = cy.getFocused()
 
-            if el = cy.needsForceFocus()
-              cy.fireFocus(el)
-
             el = $elToClick.get(0)
 
             domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)

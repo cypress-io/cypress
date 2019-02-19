@@ -340,7 +340,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           elToCheckCurrentlyFocused = options.$el[0]
         else if $elements.isContentEditable(options.$el[0])
           elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
-        
+
         if elToCheckCurrentlyFocused && elToCheckCurrentlyFocused is $focused
           return type()
 
@@ -350,9 +350,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           onReady: ($elToClick) ->
             $focused = cy.getFocused()
-
-            if el = cy.needsForceFocus()
-              cy.fireFocus(el)
 
             ## if we dont have a focused element
             ## or if we do and its not ourselves
