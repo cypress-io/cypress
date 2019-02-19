@@ -176,15 +176,6 @@ create = (state) ->
     ## el.blur() always returns undefined
     return undefined
 
-  needsForceFocus = ->
-    ## if we have a primed focus event then
-    if needsForceFocus = state("needsForceFocus")
-      ## always reset it
-      state("needsForceFocus", null)
-
-    ## and return whatever needs force focus
-    return needsForceFocus
-
   needsFocus = ($elToFocus, $previouslyFocusedEl) ->
     $focused = getFocused()
 
@@ -238,8 +229,6 @@ create = (state) ->
     interceptFocus
 
     interceptBlur
-
-    needsForceFocus
   }
 
 module.exports = {
