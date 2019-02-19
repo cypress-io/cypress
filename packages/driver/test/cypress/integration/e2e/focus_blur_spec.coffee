@@ -121,14 +121,31 @@ describe 'polyfill programmatic blur events', ->
       ## a hack here becuase we nuked the real .focus but need
       ## to mimic what the browser does when its out of focus
       Object.defineProperty(cy.state('document'), 'activeElement', {
-      get: ->
-        return $one.get(0)
+        configurable: true
+        get: ->
+          return $one.get(0)
       })
 
       ## change the focus to two, which first fires
       ## the blur event on $one, followed by a focus
       ## event on $two
       $two.get(0).focus()
+
+      Object.defineProperty(cy.state('document'), 'activeElement', {
+        configurable: true
+        get: ->
+          return $two.get(0)
+      })
+
+      expect(events).to.have.length(3)
+
+      ## call focus programmically again on the same
+      ## element, whichshould replicate the native browser's
+      ## behavior and NOT fire another focus event because this
+      ## element is already currently in focus / activeElement
+      $two.get(0).focus()
+
+      expect(events).to.have.length(3)
 
       cy.log(events).then ->
         expect(_.toPlainObject(events[0])).to.include({
@@ -156,6 +173,7 @@ describe 'polyfill programmatic blur events', ->
     .then ->
       events = []
 
+      $body = cy.$$("body")
       $one = cy.$$("#one")
       $two = cy.$$("#two")
 
@@ -175,11 +193,26 @@ describe 'polyfill programmatic blur events', ->
       ## a hack here becuase we nuked the real .focus but need
       ## to mimic what the browser does when its out of focus
       Object.defineProperty(cy.state('document'), 'activeElement', {
+        configurable: true
         get: ->
           return $one.get(0)
       })
+
       $one.get(0).blur()
 
+      ## force the browser to return body
+      Object.defineProperty(cy.state('document'), 'activeElement', {
+        get: ->
+          return $body.get(0)
+      })
+
+      ## call blur programmically again, which
+      ## should replicate the native browser's behavior
+      ## and NOT fire another blur event because this
+      ## element is NOT currently in focus / activeElement
+      $one.get(0).blur()
+
+      expect(events).to.have.length(2)
 
       cy.log(events).then ->
 
