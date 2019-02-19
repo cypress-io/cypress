@@ -22,15 +22,23 @@ Requires [Node](https://nodejs.org/en/) version 6 or above.
 npm install --save-dev cypress cypress-react-unit-test
 ```
 
-Then include this plugin from `cypress/support/index.js`
+If you need help configuring bundler, see [preprocessors info](https://gitpitch.com/cypress-io/testing-workshop-cypress?p=slides/16-preprocessors)
+
+## Use
+
+Include this plugin from `cypress/support/index.js`
 
 ```js
 import 'cypress-react-unit-test'
 ```
 
-## Use
+This adds a new command `cy.mount` that can mount a React component. It also overloads `cy.get` to accept in addition to selectors React component, returning it. See examples below.
+
+## Example
 
 ```js
+// load Cypress TypeScript definitions for IntelliSense
+/// <reference types="cypress" />
 // import the component you want to test
 import { HelloState } from '../../src/hello-x.jsx'
 import React from 'react'
