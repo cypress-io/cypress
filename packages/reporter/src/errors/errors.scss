@@ -51,4 +51,37 @@
       list-style: decimal;
     }
   }
+
+  .test-error {
+    line-height: 0;
+
+    p {
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    code {
+      font-family: $monospace;
+      font-size: 90%;
+    }
+
+    blockquote {
+      line-height: 0;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
+
+    blockquote p {
+      display: inline;
+    }
+
+    pre {
+      border: none !important;
+    }
+  }
 }
