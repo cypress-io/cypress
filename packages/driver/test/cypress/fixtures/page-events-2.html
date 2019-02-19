@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Page Events</title>
+    <title>Page Events 2</title>
   </head>
   <body>
-    <a id="external-link" href="http://example.com">Go to example.com</a>
+    <h1>Page Events 2</h1>
     <a id="resize" href="#">Trigger resize</a>
-    <a id="page-transition" href="/fixtures/page-events-2.html">Go to page-events-2.html</a>
     <script>
-      window.__foo = 'foo'
-
       document.getElementById('resize').addEventListener('click', function (e) {
         e.preventDefault()
         window.dispatchEvent(new Event('resize'))

@@ -82,7 +82,7 @@ describe "src/cy/commands/navigation", ->
       stub3 = cy.stub()
 
       cy.on("stability:changed", stub1)
-      cy.on("before:window:unload", stub2)
+      cy.on("window:beforeunload", stub2)
       cy.on("page:end", stub3)
 
       cy.reload().then ->
@@ -201,7 +201,7 @@ describe "src/cy/commands/navigation", ->
 
         cy
           .window().then (win) ->
-            cy.on "before:window:unload", =>
+            cy.on "window:beforeunload", =>
               lastLog = @lastLog
 
               beforeunload = true
@@ -246,19 +246,19 @@ describe "src/cy/commands/navigation", ->
         .visit("/fixtures/jquery.html")
         .then ->
           winLoadListeners = cy.listeners("page:ready")
-          beforeWinUnloadListeners = cy.listeners("before:window:unload")
+          beforeWinUnloadListeners = cy.listeners("window:beforeunload")
 
           cyOn = cy.spy(cy, "once")
 
           winLoad = cyOn.withArgs("page:ready")
-          beforeWinUnload = cyOn.withArgs("before:window:unload")
+          beforeWinUnload = cyOn.withArgs("window:beforeunload")
 
           cy.go("back").then ->
             expect(winLoad).to.be.calledOnce
             expect(beforeWinUnload).to.be.calledOnce
 
             expect(cy.listeners("page:ready")).to.deep.eq(winLoadListeners)
-            expect(cy.listeners("before:window:unload")).to.deep.eq(beforeWinUnloadListeners)
+            expect(cy.listeners("window:beforeunload")).to.deep.eq(beforeWinUnloadListeners)
 
     it "fires stability:changed and window events events", ->
       stub1= cy.stub()
@@ -269,7 +269,7 @@ describe "src/cy/commands/navigation", ->
         .visit("/fixtures/jquery.html")
         .then ->
           cy.on("stability:changed", stub1)
-          cy.on("before:window:unload", stub2)
+          cy.on("window:beforeunload", stub2)
           cy.on("page:end", stub3)
         .go("back").then ->
           expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
@@ -395,7 +395,7 @@ describe "src/cy/commands/navigation", ->
         cy
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
-            cy.on "before:window:unload", =>
+            cy.on "window:beforeunload", =>
               lastLog = @lastLog
 
               beforeunload = true
@@ -1391,7 +1391,7 @@ describe "src/cy/commands/navigation", ->
 
       expected = false
 
-      cy.on "before:window:unload", ->
+      cy.on "window:beforeunload", ->
         expected = true
         expect(Cookie.get("__cypress.initial")).to.eq("true")
 
@@ -1426,7 +1426,7 @@ describe "src/cy/commands/navigation", ->
         timeout = cy.spy(cy, "timeout")
 
         ## we are unstable at this point
-        cy.on "before:window:unload", ->
+        cy.on "window:beforeunload", ->
           cy.whenStable ->
             expect(timeout).not.to.be.called
             done()
@@ -1654,7 +1654,7 @@ describe "src/cy/commands/navigation", ->
       cy
         .visit("/fixtures/generic.html")
         .then ->
-          cy.once "before:window:unload", =>
+          cy.once "window:beforeunload", =>
             expected = true
 
             expect(@lastLog).to.exist
@@ -1679,7 +1679,7 @@ describe "src/cy/commands/navigation", ->
         .then ->
           $input = cy.$$("form#click-me input[type=submit]")
 
-          cy.once "before:window:unload", =>
+          cy.once "window:beforeunload", =>
             expected = true
 
             expect(@lastLog).to.exist

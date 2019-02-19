@@ -23,10 +23,6 @@ Cypress.on('page:end', (details) => {
   details // $ExpectType PageDetails
 })
 
-Cypress.on('before:window:unload', (event) => {
-  event // $ExpectType BeforeUnloadEvent
-})
-
 Cypress.on('page:url:changed', (url) => {
   url // $ExpectType string
 })
@@ -76,4 +72,12 @@ Cypress.on('test:start', (attributes , test) => {
 Cypress.on('test:end', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType ITest
+})
+
+Cypress.on('window:beforeunload', (event) => {
+  event // $ExpectType BeforeUnloadEvent
+})
+
+Cypress.on('window:resize', (event) => {
+  event // $ExpectType ResizeEvent
 })

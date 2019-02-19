@@ -399,12 +399,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## clear the current timeout
             cy.clearTimeout()
 
-            cy.once("before:window:unload", beforeUnload)
+            cy.once("window:beforeunload", beforeUnload)
 
             didLoad = new Promise (resolve) ->
               cleanup = ->
                 cy.removeListener("page:ready", resolve)
-                cy.removeListener("before:window:unload", beforeUnload)
+                cy.removeListener("window:beforeunload", beforeUnload)
 
               cy.once("page:ready", resolve)
 

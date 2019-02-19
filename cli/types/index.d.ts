@@ -3896,11 +3896,6 @@ declare namespace Cypress {
      */
     (action: 'page:end', fn: (details: PageDetails) => void): void
     /**
-     * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
-     * @see https://on.cypress.io/catalog-of-events#App-Events
-     */
-    (action: 'before:window:unload', fn: (event: BeforeUnloadEvent) => void): void
-    /**
      * Fires whenever Cypress detects that your application's URL has changed.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */

@@ -104,7 +104,7 @@ class $Cypress
     @_RESUMED_AT_TEST = null
 
     @events = $Events.extend(@)
-
+    $Events.handleWindowEvents(@, @, false)
     $Events.throwOnRenamedEvent(@, "Cypress")
 
     @setConfig(config)
@@ -423,14 +423,14 @@ class $Cypress
       when "app:page:ready"
         @emit("page:ready", args[0])
 
-      when "app:before:window:unload"
-        @emit("before:window:unload", args[0])
-
       when "app:page:end"
         @emit("page:end", args[0])
 
       when "spec:script:error"
         @emit("script:error", args...)
+
+      when "window:event"
+        @emit("window:#{args[0]}", args[1], args[2])
 
   backend: (eventName, args...) ->
     new Promise (resolve, reject) =>

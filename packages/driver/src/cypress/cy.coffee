@@ -119,8 +119,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         timers.reset()
 
-        Cypress.action("app:before:window:unload", e)
-
         ## return undefined so our beforeunload handler
         ## doesnt trigger a confirmation dialog
         return undefined
@@ -1093,7 +1091,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   specWindow.cy = cy
 
   $Events.extend(cy)
-
+  $Events.handleWindowEvents(Cypress, cy, true)
   $Events.throwOnRenamedEvent(cy, "cy")
 
   return cy

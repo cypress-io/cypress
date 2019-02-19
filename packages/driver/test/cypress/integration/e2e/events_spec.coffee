@@ -35,6 +35,113 @@ describe "events", ->
       cy.visit("/fixtures/page-events.html")
       cy.get("#external-link").click()
 
+  describe "window:* events", ->
+    context "with cy.on", ->
+      it "works before cy.visit", (done) ->
+        cy.on "window:resize", (event) ->
+          expect(event.type).to.equal("resize")
+          done()
+
+        cy.visit("/fixtures/page-events.html")
+        cy.get("#resize").click()
+
+      it "works after cy.visit", (done) ->
+        cy.visit("/fixtures/page-events.html").then ->
+          cy.on "window:resize", (event) ->
+            expect(event.type).to.equal("resize")
+            done()
+
+          cy.get("#resize").click()
+
+      describe "after page transitions", ->
+        it "rebinds for listeners bound before cy.visit", (done) ->
+          cy.on "window:resize", (event) ->
+            expect(event.type).to.equal("resize")
+            done()
+
+          cy.visit("/fixtures/page-events.html")
+          cy.get("#page-transition").click()
+          cy.contains("h1", "Page Events 2")
+          cy.get("#resize").click()
+
+        it "rebinds for listeners bound after cy.visit", (done) ->
+          cy.visit("/fixtures/page-events.html").then ->
+            cy.on "window:resize", (event) ->
+              expect(event.type).to.equal("resize")
+              done()
+
+          cy.get("#page-transition").click()
+          cy.contains("h1", "Page Events 2")
+          cy.get("#resize").click()
+
+    context "with cy.off", ->
+      it "unbinds the listener", ->
+        onResize = (event) ->
+          throw new Error("window:resize should not be called because it was unregistered with cy.off")
+        cy.on("window:resize", onResize)
+        cy.off("window:resize")
+
+        cy.visit("/fixtures/page-events.html")
+        cy.get("#resize").click()
+        cy.wait(500) ## give it time to ensure onResize handler isn't called
+
+    context "with Cypress.on", ->
+      it "works before cy.visit", (done) ->
+        onResize = (event) ->
+          expect(event.type).to.equal("resize")
+          Cypress.off("window:resize", onResize)
+          done()
+        Cypress.on("window:resize", onResize)
+
+        cy.visit("/fixtures/page-events.html")
+        cy.get("#resize").click()
+
+      it "works after cy.visit", (done) ->
+        cy.visit("/fixtures/page-events.html").then ->
+          onResize = (event) ->
+            expect(event.type).to.equal("resize")
+            Cypress.off("window:resize", onResize)
+            done()
+          Cypress.on("window:resize", onResize)
+
+          cy.get("#resize").click()
+
+      describe "after page transitions", ->
+        it "rebinds for listeners bound before cy.visit", (done) ->
+          onResize = (event) ->
+            expect(event.type).to.equal("resize")
+            Cypress.off("window:resize", onResize)
+            done()
+          Cypress.on("window:resize", onResize)
+
+          cy.visit("/fixtures/page-events.html")
+          cy.get("#page-transition").click()
+          cy.contains("h1", "Page Events 2")
+          cy.get("#resize").click()
+
+        it "rebinds for listeners bound after cy.visit", (done) ->
+          cy.visit("/fixtures/page-events.html").then ->
+            onResize = (event) ->
+              expect(event.type).to.equal("resize")
+              Cypress.off("window:resize", onResize)
+              done()
+            Cypress.on("window:resize", onResize)
+
+          cy.get("#page-transition").click()
+          cy.contains("h1", "Page Events 2")
+          cy.get("#resize").click()
+
+    context "with Cypress.off", ->
+      it "unbinds the listener", ->
+        onResize = (event) ->
+          throw new Error("window:resize should not be called because it was unregistered with cy.off")
+        Cypress.on("window:resize", onResize)
+        Cypress.off("window:resize")
+
+        cy.visit("/fixtures/page-events.html")
+        cy.get("#resize").click()
+        cy.wait(500) ## give it time to ensure onResize handler isn't called
+
   describe "renamed events", ->
     renamedEvents = {
       "command:end": "internal:commandEnd"
@@ -51,8 +158,8 @@ describe "events", ->
       "url:changed": "page:url:changed"
       "viewport:changed": "viewport:change"
       "window:alert": "page:alert"
-      "window:before:unload": "before:window:unload"
       "window:confirm": "page:confirm"
+      "window:before:unload": "window:beforeunload"
     }
 
     renamedEventsWithArgumentChange = {
