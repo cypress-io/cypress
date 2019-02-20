@@ -63,6 +63,7 @@ const util = {
     .chain({})
     .extend(util.getEnvColors())
     .extend(util.getForceTty())
+    .extend(util.getSystemProxy())
     .omitBy(_.isUndefined) // remove undefined values
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
@@ -86,6 +87,40 @@ const util = {
       DEBUG_COLORS: sc,
       MOCHA_COLORS: sc ? true : undefined,
     }
+  },
+
+  getSystemProxy () {
+    if (!_.isUndefined(process.env.HTTP_PROXY) || os.platform() !== 'win32') {
+      // they've set their own proxy, or we're on an unsupported platform
+      return
+    }
+
+    // maybe get npm config here
+
+    debug('scanning Windows registry for proxy setting')
+    const reg = require('registry-js')
+    const values = reg.enumerateValues(
+      reg.HKEY.HKEY_CURRENT_USER,
+      'Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'
+    )
+    const proxyEnabled = _.find(values, { name: 'ProxyEnable' })
+
+    if (!proxyEnabled) {
+      debug('windows proxy disabled')
+      return
+    }
+
+    if (!process.env.NO_PROXY) {
+      process.env.NO_PROXY = _.find(values, { name: 'ProxyOverride' })
+      .split(';')
+      .join(',')
+      .replace('<local>', 'localhost,127.0.0.0/8,::1')
+    }
+
+    const proxyServer = _.find(values, { name: 'ProxyServer' })
+
+    process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://${proxyServer}`
+    debug('found HTTP(S)_PROXY %s and NO_PROXY %s from registry key', proxyServer, process.env.NO_PROXY)
   },
 
   isTty (fd) {
