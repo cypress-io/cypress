@@ -77,19 +77,15 @@ describe "src/cy/commands/navigation", ->
         expect(timeout).to.be.calledWith(4567, "reload")
 
     it "fires stability:changed and window events events", ->
-      stub1 = cy.stub()
-      stub2 = cy.stub()
-      stub3 = cy.stub()
+      onStabilityChanged = cy.stub()
+      onPageEnd = cy.stub()
 
-      cy.on("stability:changed", stub1)
-      cy.on("window:beforeunload", stub2)
-      cy.on("page:end", stub3)
+      cy.on("stability:changed", onStabilityChanged)
+      cy.on("page:end", onPageEnd)
 
       cy.reload().then ->
-        expect(stub1.firstCall).to.be.calledWith(false, "beforeunload")
-        expect(stub1.secondCall).to.be.calledWith(true, "load")
-        expect(stub2).to.be.calledOnce
-        expect(stub3).to.be.calledOnce
+        expect(onStabilityChanged.secondCall).to.be.calledWith(true, "load")
+        expect(onPageEnd).to.be.calledOnce
 
     it "removes listeners", ->
       win = cy.state("window")
@@ -199,25 +195,27 @@ describe "src/cy/commands/navigation", ->
       it "logs before + after", ->
         beforeunload = false
 
-        cy
-          .window().then (win) ->
-            cy.on "window:beforeunload", =>
-              lastLog = @lastLog
+        console.log("---->")
 
-              beforeunload = true
-              expect(lastLog.get("snapshots").length).to.eq(1)
-              expect(lastLog.get("snapshots")[0].name).to.eq("before")
-              expect(lastLog.get("snapshots")[0].body).to.be.an("object")
+        cy.on "window:beforeunload", =>
+          console.log("beforeunload")
+          lastLog = @lastLog
 
-              return undefined
+          beforeunload = true
+          expect(lastLog.get("snapshots").length).to.eq(1)
+          expect(lastLog.get("snapshots")[0].name).to.eq("before")
+          expect(lastLog.get("snapshots")[0].body).to.be.an("object")
 
-          .reload().then ->
-            lastLog = @lastLog
+        console.log("reload")
+        cy.reload().then ->
+          lastLog = @lastLog
 
-            expect(beforeunload).to.be.true
-            expect(lastLog.get("snapshots").length).to.eq(2)
-            expect(lastLog.get("snapshots")[1].name).to.eq("after")
-            expect(lastLog.get("snapshots")[1].body).to.be.an("object")
+          console.log("<----")
+
+          expect(beforeunload).to.be.true
+          expect(lastLog.get("snapshots").length).to.eq(2)
+          expect(lastLog.get("snapshots")[1].name).to.eq("after")
+          expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
   context "#go", ->
     before ->

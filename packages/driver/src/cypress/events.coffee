@@ -122,7 +122,10 @@ module.exports = {
       ## any calls to Cypress.on("window:*") after page:start need to be
       ## bound now. otherwise they'll be bound when page:start is fired
       if pageStarted and pageWindow
-        pageWindow.addEventListener(eventName, listener)
+        pageWindow.addEventListener(eventName, (args...) ->
+          console.log("#{eventName} fired", args)
+          listener(args...)
+        )
 
     offWindowEvent = (eventName, listener) ->
       windowEvents = windowEvents.filter (eventProps) ->
