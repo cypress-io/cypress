@@ -10,6 +10,7 @@ const chalk = require('chalk')
 const Promise = require('bluebird')
 const cachedir = require('cachedir')
 const executable = require('executable')
+const registry = require('registry-js')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
@@ -97,18 +98,22 @@ const util = {
     if (os.platform() === 'win32') {
       const { httpProxy, noProxy } = this.getWindowsProxy()
 
-      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = httpProxy
-      if (noProxy) {
+      if (httpProxy) {
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = httpProxy
+      }
+
+      if (!process.env.NO_PROXY && noProxy) {
         process.env.NO_PROXY = noProxy
       }
     }
   },
 
   getWindowsProxy () {
+    // load the Windows proxy variables into the environment variables Cypress & dependencies expect
+
     debug('scanning Windows registry for proxy setting')
-    const reg = require('registry-js')
-    const values = reg.enumerateValues(
-      reg.HKEY.HKEY_CURRENT_USER,
+    const values = registry.enumerateValues(
+      registry.HKEY.HKEY_CURRENT_USER,
       'Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'
     )
     const proxyEnabled = _.find(values, { name: 'ProxyEnable' })
@@ -117,13 +122,13 @@ const util = {
     if (!proxyEnabled || !proxyEnabled.data || !proxyServer || !proxyServer.data) {
       debug('windows proxy disabled or no proxy defined')
 
-      return
+      return {}
     }
 
     const proxyOverride = _.find(values, { name: 'ProxyOverride' })
     let noProxy
 
-    if (!process.env.NO_PROXY && proxyOverride && proxyOverride.data) {
+    if (proxyOverride && proxyOverride.data) {
       noProxy = proxyOverride.data
       .split(';')
       .join(',')

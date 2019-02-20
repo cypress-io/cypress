@@ -5,6 +5,7 @@ const tty = require('tty')
 const snapshot = require('snap-shot-it')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
+const registry = require('registry-js')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
@@ -217,6 +218,32 @@ describe('util', () => {
         FORCE_STDERR_TTY: false,
       })
     })
+  })
+
+  context('.getWindowsProxy', () => {
+    it('returns Windows proxy info from registry', () => {
+      sinon.stub(registry, 'enumerateValues').returns([
+        { name: 'ProxyEnable', data: 1 },
+        { name: 'ProxyServer', data: 'proxy.foobaz:1234' },
+        { name: 'ProxyOverride', data: 'a.com;b.com;<local>' },
+      ])
+
+      expect(util.getWindowsProxy()).to.deep.eq({
+        httpProxy: 'http://proxy.foobaz:1234',
+        noProxy: 'a.com,b.com,localhost,127.0.0.0/8,::1',
+      })
+    })
+
+    it('returns an empty object if proxy is disabled', () => {
+      sinon.stub(registry, 'enumerateValues').returns([
+        { name: 'ProxyEnable', data: 0 },
+        { name: 'ProxyServer', data: 'proxy.foobaz:1234' },
+        { name: 'ProxyOverride', data: 'a.com;b.com;<local>' },
+      ])
+
+      expect(util.getWindowsProxy()).to.deep.eq({})
+    })
+
   })
 
   context('.exit', () => {
