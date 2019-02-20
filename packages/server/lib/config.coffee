@@ -229,6 +229,11 @@ module.exports = {
       return
     .value()
 
+    if url = config.baseUrl
+      ## always strip trailing slashes and add one to end
+      ## so http://localhost/// will be http://localhost/
+      config.baseUrl = _.trimEnd(url, "/") + "/"
+
     _.defaults(config, defaults)
 
     ## split out our own app wide env from user env variables
