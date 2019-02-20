@@ -10,18 +10,10 @@ import { indent } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
 import scroller from '../lib/scroller'
 
-import Hooks from '../hooks/hooks'
+import Attempts from '../attempts/attempts'
 import Agents from '../agents/agents'
 import Routes from '../routes/routes'
 import FlashOnClick from '../lib/flash-on-click'
-
-const NoCommands = observer(() => (
-  <ul className='hooks-container'>
-    <li className='no-commands'>
-      No commands were issued in this test.
-    </li>
-  </ul>
-))
 
 @observer
 class Test extends Component {
@@ -95,6 +87,16 @@ class Test extends Component {
 
     const { model } = this.props
 
+    const retriesCount = 3
+    const attempts = [
+      {
+        id: 1,
+      },
+      {
+        id: 2,
+      },
+    ]
+
     return (
       <div
         className='runnable-instruments collapsible-content'
@@ -105,7 +107,7 @@ class Test extends Component {
         <Agents model={model} />
         <Routes model={model} />
         <div className='runnable-commands-region'>
-          {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
+          {retriesCount ? <Attempts model={model} attempts={attempts} retriesCount={retriesCount}/> : null}
         </div>
       </div>
     )
@@ -136,7 +138,5 @@ class Test extends Component {
     this.props.events.emit('show:error', this.props.model.id)
   }
 }
-
-export { NoCommands }
 
 export default Test

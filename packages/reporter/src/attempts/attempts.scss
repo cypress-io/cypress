@@ -1,0 +1,34 @@
+.reporter .runnable.suite .attempt-name {
+    border-top: 1px solid #bbb;
+    margin: 20px 0 30px;
+    height: 0;
+    position: relative;
+
+  .attempt-tag {
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    padding: 2px 1px;
+    background-color: #fff;
+    position: absolute;
+    top: -12px;
+    right: 10px;
+
+    &:hover {
+      background-color: #bbb;
+      color: #fff;
+      i {
+        color: #fff;
+      }
+    }
+  }
+
+  .collapsible-indicator {
+    display: none;
+  }
+
+  .hook-failed-message {
+    i {
+      color: $fail;
+    }
+  }
+}
