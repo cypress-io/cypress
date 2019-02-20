@@ -87,7 +87,7 @@
     "del": "3.0.0",
     "electron-builder": "20.38.5",
     "eslint": "4.19.1",
-    "eslint-plugin-cypress": "2.2.0",
+    "eslint-plugin-cypress": "2.2.1",
     "eslint-plugin-cypress-dev": "1.1.2",
     "eslint-plugin-mocha": "4.12.1",
     "eslint-plugin-react": "7.12.4",
