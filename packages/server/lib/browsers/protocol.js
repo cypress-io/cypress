@@ -3,6 +3,7 @@ const CRI = require('chrome-remote-interface')
 const promiseRetry = require('promise-retry')
 const Promise = require('bluebird')
 const net = require('net')
+const debug = require('debug')('cypress:server:protocol')
 
 function connectAsync (opts) {
   return new Promise(function (resolve, reject) {
@@ -25,7 +26,9 @@ const getWsTargetFor = () => {
   return promiseRetry((retry) => {
     return connectAsync({ port: '9222' }).catch(retry)
   }, { retries: 10 })
-  .catch(_.noop)
+  .catch(() => {
+    debug('retry connecting to debugging port')
+  })
   .then(() => {
     return CRI.List()
   })

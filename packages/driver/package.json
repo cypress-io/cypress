@@ -35,7 +35,6 @@
     "chai-as-promised": "6.0.0",
     "chai-subset": "^1.6.0",
     "chokidar-cli": "^1.2.0",
-    "chrome-remote-interface": "^0.26.1",
     "clone": "^2.1.1",
     "compression": "^1.1.0",
     "cors": "^2.7.1",
