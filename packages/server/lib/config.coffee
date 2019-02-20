@@ -229,10 +229,6 @@ module.exports = {
       return
     .value()
 
-    if url = config.baseUrl
-      ## always strip trailing slashes
-      config.baseUrl = _.trimEnd(url, "/")
-
     _.defaults(config, defaults)
 
     ## split out our own app wide env from user env variables
