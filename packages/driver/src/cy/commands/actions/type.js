@@ -1,5 +1,6 @@
 /* eslint-disable
     brace-style,
+    no-cond-assign,
     no-unused-vars,
     one-var,
     prefer-rest-params,
@@ -12,7 +13,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const _ = require('lodash')
-const $ = require('jquery')
 const Promise = require('bluebird')
 const moment = require('moment')
 
@@ -32,6 +32,8 @@ const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
+  const { keyboard } = cy.internal
+
   function type (subject, chars, options = {}) {
     let updateTable
 
@@ -56,28 +58,25 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const table = {}
 
       const getRow = (id, key, which) => {
-        return (
-          table[id] ||
-          (function () {
-            let obj
+        return table[id] || (function () {
+          let obj
 
-            table[id] = obj = {}
-            const modifiers = $Keyboard.activeModifiers()
+          table[id] = (obj = {})
+          const modifiers = keyboard.modifiersToString(keyboard.getActiveModifiers(state))
 
-            if (modifiers.length) {
-              obj.modifiers = modifiers.join(', ')
+          if (modifiers) {
+            obj.modifiers = modifiers
+          }
+
+          if (key) {
+            obj.typed = key
+            if (which) {
+              obj.which = which
             }
+          }
 
-            if (key) {
-              obj.typed = key
-              if (which) {
-                obj.which = which
-              }
-            }
-
-            return obj
-          })()
-        )
+          return obj
+        })()
       }
 
       updateTable = function (id, key, column, which, value) {
@@ -89,15 +88,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const getTableData = () =>
       //# transform table object into object with zero based index as keys
       {
-        return _.reduce(
-          _.values(table),
-          (memo, value, index) => {
-            memo[index + 1] = value
+        return _.reduce(_.values(table), (memo, value, index) => {
+          memo[index + 1] = value
 
-            return memo
-          },
-          {}
-        )
+          return memo
+        }
+          , {})
       }
 
       options._log = Cypress.log({
@@ -105,25 +101,19 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         $el: options.$el,
         consoleProps () {
           return {
-            Typed: chars,
+            'Typed': chars,
             'Applied To': $dom.getElements(options.$el),
-            Options: deltaOptions,
-            table () {
-              return {
-                name: 'Key Events Table',
-                data: getTableData(),
-                columns: [
-                  'typed',
-                  'which',
-                  'keydown',
-                  'keypress',
-                  'textInput',
-                  'input',
-                  'keyup',
-                  'change',
-                  'modifiers',
-                ],
-              }
+            'Options': deltaOptions,
+            'table': {
+              //# mouse events tables will take up slots 1 and 2 if they're present
+              //# this preserves the order of the tables
+              3 () {
+                return {
+                  name: 'Keyboard Events',
+                  data: getTableData(),
+                  columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
+                }
+              },
             },
           }
         },
@@ -133,7 +123,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     const validateTyping = (el, chars) => {
-      const $el = $(el)
+      const $el = $dom.wrap(el)
       const numElements = $el.length
       const isBody = $el.is('body')
       const isTextLike = $dom.isTextLike($el)
@@ -145,6 +135,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         $dom.isType($el, 'datetime') || $dom.isType($el, 'datetime-local')
       const hasTabIndex = $dom.isSelector($el, '[tabindex]')
 
+      const isEmptyChars = _.isEmpty(chars)
+      const isClearChars = _.startsWith(_.lowerCase(chars), '{selectall}{del}')
       //# TODO: tabindex can't be -1
       //# TODO: can't be readonly
 
@@ -173,8 +165,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      if (chars === '') {
+      if (isEmptyChars) {
         $utils.throwErrByPath('type.empty_string', { onFail: options._log })
+      }
+
+      if (isClearChars) {
+        return '{selectall}{del}'.length
       }
 
       if (isDate) {
@@ -274,7 +270,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
     const getDefaultButtons = (form) => {
       return form.find('input, button').filter((__, el) => {
-        const $el = $(el)
+        const $el = $dom.wrap(el)
 
         return (
           ($dom.isSelector($el, 'input') && $dom.isType($el, 'submit')) ||
@@ -349,7 +345,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       const dispatchChangeEvent = function (el, id) {
-        // eslint-disable-next-line no-undef
         const change = document.createEvent('HTMLEvents')
 
         change.initEvent('change', true, false)
@@ -375,7 +370,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         return needSingleValueChange(el) || options.force
       }
 
-      return $Keyboard.type({
+      return keyboard.type({
         $el: options.$el,
         chars: charsToType,
         delay: options.delay,
@@ -532,12 +527,32 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         return type()
       }
 
+      let elToCheckCurrentlyFocused
+      //# if the subject is already the focused element, start typing
+      //# we handle contenteditable children by getting the host contenteditable,
+      //# and seeing if that is focused
+      //# Checking first if element is focusable accounts for focusable els inside
+      //# of contenteditables
+      let $focused = cy.getFocused()
+
+      $focused = $focused && $focused[0]
+
+      if ($elements.isFocusable(options.$el)) {
+        elToCheckCurrentlyFocused = options.$el[0]
+      } else if ($elements.isContentEditable(options.$el[0])) {
+        elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
+      }
+
+      if (elToCheckCurrentlyFocused && (elToCheckCurrentlyFocused === $focused)) {
+        return type()
+      }
+
       return $actionability.verify(cy, options.$el, options, {
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
 
-        onReady ($elToFocus) {
+        onReady ($elToClick) {
           const $focused = cy.getFocused()
           let el = cy.needsForceFocus()
 
@@ -550,29 +565,32 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           //# then issue the click
           if (
             !$focused ||
-            ($focused && $focused.get(0) !== $elToFocus.get(0))
+            ($focused && $focused.get(0) !== $elToClick.get(0))
           ) {
             //# click the element first to simulate focus
             //# and typical user behavior in case the window
             //# is out of focus
-            // return cy.now('click', $elToClick, {
-            //   $el: $elToClick,
-            //   log: false,
-            //   verify: false,
-            //   _log: options._log,
-            //   force: true, //# force the click, avoid waiting
-            //   timeout: options.timeout,
-            //   interval: options.interval,
-            // })
+            return cy.now('click', $elToClick, {
+              $el: $elToClick,
+              log: false,
+              verify: false,
+              _log: options._log,
+              force: true, //# force the click, avoid waiting
+              timeout: options.timeout,
+              interval: options.interval,
+            })
+            .then(() => {
 
+              return type()
+
+              // BEOW DOES NOT APPLY
             // cannot just call .focus, since children of contenteditable will not receive cursor
             // with .focus()
 
             // focusCursor calls focus on first focusable
             // then moves cursor to end if in textarea, input, or contenteditable
-            $selection.focusCursor($elToFocus[0])
-
-            return type()
+              // $selection.focusCursor($elToFocus[0])
+            })
           }
 
           return type()
@@ -612,7 +630,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     //# blow up if any member of the subject
     //# isnt a textarea or text-like
     const clear = function (el, index) {
-      const $el = $(el)
+      const $el = $dom.wrap(el)
 
       if (options.log) {
         //# figure out the options which actually change the behavior of clicks
@@ -624,8 +642,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           consoleProps () {
             return {
               'Applied To': $dom.getElements($el),
-              Elements: $el.length,
-              Options: deltaOptions,
+              'Elements': $el.length,
+              'Options': deltaOptions,
             }
           },
         })
@@ -694,10 +712,3 @@ function _getEndIndex (str, substr) {
 function _splitChars (chars, index) {
   return [chars.slice(0, index), chars.slice(index)]
 }
-
-/*
-
-12-10-1996foobar
-12-10-1996foobar
-          ^
-*/
