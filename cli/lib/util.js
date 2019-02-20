@@ -96,6 +96,7 @@ const util = {
 
     if (os.platform() === 'win32') {
       const { httpProxy, noProxy } = this.getWindowsProxy()
+
       process.env.HTTP_PROXY = process.env.HTTPS_PROXY = httpProxy
       if (noProxy) {
         process.env.NO_PROXY = noProxy
@@ -103,7 +104,7 @@ const util = {
     }
   },
 
-  getWindowsProxy() {
+  getWindowsProxy () {
     debug('scanning Windows registry for proxy setting')
     const reg = require('registry-js')
     const values = reg.enumerateValues(
@@ -115,11 +116,13 @@ const util = {
 
     if (!proxyEnabled || !proxyEnabled.data || !proxyServer || !proxyServer.data) {
       debug('windows proxy disabled or no proxy defined')
+
       return
     }
 
     const proxyOverride = _.find(values, { name: 'ProxyOverride' })
-    var noProxy
+    let noProxy
+
     if (!process.env.NO_PROXY && proxyOverride && proxyOverride.data) {
       noProxy = proxyOverride.data
       .split(';')
@@ -128,7 +131,9 @@ const util = {
     }
 
     const httpProxy = `http://${proxyServer.data}`
+
     debug('found HTTP(S)_PROXY %s and NO_PROXY %s from registry key', httpProxy, noProxy)
+
     return { httpProxy, noProxy }
   },
 
