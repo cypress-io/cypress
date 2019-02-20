@@ -1,6 +1,5 @@
 { EventEmitter } = require("events")
 
-# TODO convert to JS, idk why it wasn't working
 describe "test errors", ->
   beforeEach ->
     cy.fixture("test-error-runnables").as("runnables")
