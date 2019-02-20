@@ -4,12 +4,9 @@ Promise = require("bluebird")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
 
-## TODO
-## bTagOpen + bTagClosed
-## are duplicated in assertions.coffee
 butRe = /,? but\b/
-bTagOpen = /\*\*/g
-bTagClosed = /\*\*/g
+strongTagOpen = /<strong>/g
+strongTagClosed = /<strong\/>/g
 stackTracesRe = / at .*\n/gm
 
 IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
@@ -376,7 +373,7 @@ create = (state, queue, retryFn) ->
         _.extend obj, parseValueActualAndExpected(value, actual, expected)
 
         _.extend obj,
-          Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
+          Message: message.replace(strongTagOpen, "").replace(strongTagClosed, "")
 
     ## think about completely gutting the whole object toString
     ## which chai does by default, its so ugly and worthless

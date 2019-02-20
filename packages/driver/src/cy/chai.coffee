@@ -15,8 +15,6 @@ allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
 ## when the single quote word is the LAST word
 allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
 
-allBetweenFourStars = /\*\*.*\*\*/
-allSingleQuotes = /'/g
 allEscapedSingleQuotes = /\\'/g
 allQuoteMarkers = /__quote__/g
 allWordsBetweenCurlyBraces  = /(#{.+?})/g
@@ -67,24 +65,14 @@ chai.use (chai, u) ->
   existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
   getMessage   = chaiUtils.getMessage
 
-  removeOrKeepSingleQuotesBetweenStars = (message) ->
-    ## remove any single quotes between our **, preserving escaped quotes
-    ## and if an empty string, put the quotes back
-    message.replace allBetweenFourStars, (match) ->
-      match
-        .replace(allEscapedSingleQuotes, "__quote__") # preserve escaped quotes
-        .replace(allSingleQuotes, "")
-        .replace(allQuoteMarkers, "'") ## put escaped quotes back
-        .replace(allQuadStars, "**''**") ## fix empty strings that end up as ****
-
   replaceArgMessages = (args, str) ->
     _.reduce args, (memo, value, index) =>
       if _.isString(value)
         value = value
-          .replace(allWordsBetweenCurlyBraces,          "**$1**")
+          .replace(allWordsBetweenCurlyBraces,          "<strong>$1</strong>")
           .replace(allEscapedSingleQuotes,              "__quote__")
-          .replace(allButLastWordsBetweenSingleQuotes,  "**$1**$2")
-          .replace(allPropertyWordsBetweenSingleQuotes, "**$1**")
+          .replace(allButLastWordsBetweenSingleQuotes,  "<strong>$1</strong>$2")
+          .replace(allPropertyWordsBetweenSingleQuotes, "<strong>$1</strong>")
         memo.push value
       else
         memo.push value
@@ -258,8 +246,6 @@ chai.use (chai, u) ->
       message   = chaiUtils.getMessage(@, customArgs)
       actual    = chaiUtils.getActual(@, customArgs)
 
-      message = removeOrKeepSingleQuotesBetweenStars(message)
-
       try
         assertProto.apply(@, args)
       catch e
@@ -314,8 +300,6 @@ chai.use (chai, u) ->
 
   module.exports = {
     replaceArgMessages
-
-    removeOrKeepSingleQuotesBetweenStars
 
     setSpecWindowGlobals
 

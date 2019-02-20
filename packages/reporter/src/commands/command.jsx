@@ -11,11 +11,25 @@ import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import runnablesStore from '../runnables/runnables-store'
 
-const md = new Markdown()
+const md = new Markdown('zero')
+
+md.enable('emphasis')
 
 const displayName = (model) => model.displayName || model.name
 const nameClassName = (name) => name.replace(/(\s+)/g, '-')
-const formattedMessage = (message) => message ? md.renderInline(message) : ''
+const formattedMessage = (message) => {
+  // Remove strong tags and escape everything else
+  message = message.replace(/<strong>/g, 'CypressStrongPlaceholder')
+  .replace(/<\/strong>/g, 'CypressEndStrongPlaceholder')
+
+  message = _.escape(message)
+
+  // Replace strong tags
+  message = message.replace(/CypressStrongPlaceholder/g, '<strong>')
+  .replace(/CypressEndStrongPlaceholder/g, '</strong>')
+
+  return message
+}
 const visibleMessage = (model) => {
   if (model.visible) return ''
 

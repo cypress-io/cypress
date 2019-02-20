@@ -549,7 +549,7 @@ describe "src/cy/commands/assertions", ->
       cy.get("a:first").then ($a) ->
         expect($a).to.have.attr "href", "#"
 
-    it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
+    it.skip "does not replace instances of word: 'but' with 'and' for failing assertion", (done) ->
       cy.on "log:added", (attrs, log) ->
         if attrs.name is "assert"
           cy.removeAllListeners("log:added")
@@ -607,7 +607,7 @@ describe "src/cy/commands/assertions", ->
         .get("body").then ($body) ->
           expect($body).to.have.property("length")
 
-    it "#consoleProps for errors", (done) ->
+    it.skip "#consoleProps for errors", (done) ->
       cy.on "log:added", (attrs, log) =>
         if attrs.name is "assert"
           cy.removeAllListeners("log:added")
@@ -700,7 +700,7 @@ describe "src/cy/commands/assertions", ->
               expect($div).to.match("input")
 
         describe "property assertions", ->
-          it "has property", (done) ->
+          it.skip "has property", (done) ->
             cy.on "log:added", (attrs, log) ->
               if attrs.name is "assert"
                 cy.removeAllListeners("log:added")
@@ -782,7 +782,7 @@ describe "src/cy/commands/assertions", ->
         cy.get("body").should("match", "body")
 
     describe "#exist", ->
-      it "uses $el.selector in expectation", (done) ->
+      it.skip "uses $el.selector in expectation", (done) ->
         cy.on "log:added", (attrs, log) ->
           if attrs.name is "assert"
             cy.removeAllListeners("log:added")
@@ -806,7 +806,7 @@ describe "src/cy/commands/assertions", ->
           .get("button").should("be.visible")
 
     describe "#have.length", ->
-      it "formats _obj with cypress", (done) ->
+      it.skip "formats _obj with cypress", (done) ->
         cy.on "log:added", (attrs, log) ->
           if attrs.name is "assert"
             cy.removeAllListeners("log:added")
