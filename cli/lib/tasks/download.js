@@ -150,6 +150,9 @@ const start = ({ version, downloadDestination, progress }) => {
     } }
   }
 
+  // try to make sure proxy settings are right before downloading Cypress
+  util.loadSystemProxySettings()
+
   const url = getUrl(version)
 
   progress.throttle = 100

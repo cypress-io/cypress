@@ -63,7 +63,6 @@ const util = {
     .chain({})
     .extend(util.getEnvColors())
     .extend(util.getForceTty())
-    .extend(util.getSystemProxy())
     .omitBy(_.isUndefined) // remove undefined values
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
@@ -89,14 +88,22 @@ const util = {
     }
   },
 
-  getSystemProxy () {
-    if (!_.isUndefined(process.env.HTTP_PROXY) || os.platform() !== 'win32') {
-      // they've set their own proxy, or we're on an unsupported platform
+  loadSystemProxySettings () {
+    if (!_.isUndefined(process.env.HTTP_PROXY)) {
+      // user has set their own proxy, don't mess w/ it
       return
     }
 
-    // maybe get npm config here
+    if (os.platform() === 'win32') {
+      const { httpProxy, noProxy } = this.getWindowsProxy()
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = httpProxy
+      if (noProxy) {
+        process.env.NO_PROXY = noProxy
+      }
+    }
+  },
 
+  getWindowsProxy() {
     debug('scanning Windows registry for proxy setting')
     const reg = require('registry-js')
     const values = reg.enumerateValues(
@@ -104,23 +111,25 @@ const util = {
       'Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'
     )
     const proxyEnabled = _.find(values, { name: 'ProxyEnable' })
+    const proxyServer = _.find(values, { name: 'ProxyServer' })
 
-    if (!proxyEnabled) {
-      debug('windows proxy disabled')
+    if (!proxyEnabled || !proxyEnabled.data || !proxyServer || !proxyServer.data) {
+      debug('windows proxy disabled or no proxy defined')
       return
     }
 
-    if (!process.env.NO_PROXY) {
-      process.env.NO_PROXY = _.find(values, { name: 'ProxyOverride' })
+    const proxyOverride = _.find(values, { name: 'ProxyOverride' })
+    var noProxy
+    if (!process.env.NO_PROXY && proxyOverride && proxyOverride.data) {
+      noProxy = proxyOverride.data
       .split(';')
       .join(',')
       .replace('<local>', 'localhost,127.0.0.0/8,::1')
     }
 
-    const proxyServer = _.find(values, { name: 'ProxyServer' })
-
-    process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://${proxyServer}`
-    debug('found HTTP(S)_PROXY %s and NO_PROXY %s from registry key', proxyServer, process.env.NO_PROXY)
+    const httpProxy = `http://${proxyServer.data}`
+    debug('found HTTP(S)_PROXY %s and NO_PROXY %s from registry key', httpProxy, noProxy)
+    return { httpProxy, noProxy }
   },
 
   isTty (fd) {
