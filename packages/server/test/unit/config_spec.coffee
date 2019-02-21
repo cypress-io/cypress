@@ -792,7 +792,7 @@ describe "lib/config", ->
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "spec", from: "default" },
             reporterOptions:            { value: null, from: "default" },
-            baseUrl:                    { value: "http://localhost:8080/", from: "config" },
+            baseUrl:                    { value: "http://localhost:8080", from: "config" },
             defaultCommandTimeout:      { value: 4000, from: "default" },
             pageLoadTimeout:            { value: 60000, from: "default" },
             requestTimeout:             { value: 5000, from: "default" },
