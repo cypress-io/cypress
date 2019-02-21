@@ -456,8 +456,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
-      if options and options.url and url
-        $utils.throwErrByPath("visit.no_duplicate_url", { optionsUrl: options.url, url: url })
+      if options.url and url
+        $utils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
 
       if _.isObject(url)
         options = url

@@ -468,9 +468,9 @@ class Server
           ## rewrite these contents
           gzip: false
           url: urlFile ? urlStr ? options.url
-          headers: _.assign(options.headers, {
+          headers: _.assign({
             accept: "text/html,*/*"
-          })
+          }, options.headers)
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
