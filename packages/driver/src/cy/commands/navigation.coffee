@@ -493,7 +493,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       consoleProps = {}
 
       if options.log
+        message = url
+
+        if options.method != 'GET'
+          message = "#{options.method} #{message}"
+
         options._log = Cypress.log({
+          message: message
           consoleProps: -> consoleProps
         })
 
@@ -620,11 +626,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if url isnt originalUrl
               consoleProps["Original Url"] = originalUrl
 
-          if options.log and redirects and redirects.length
-            indicateRedirects = ->
-              [originalUrl].concat(redirects).join(" -> ")
+          if options.log
+            message = options._log.get('message')
 
-            options._log.set({message: indicateRedirects()})
+            if redirects and redirects.length
+              message = [message].concat(redirects).join(" -> ")
+
+            options._log.set({message: message})
 
           consoleProps["Resolved Url"]  = url
           consoleProps["Redirects"]     = redirects

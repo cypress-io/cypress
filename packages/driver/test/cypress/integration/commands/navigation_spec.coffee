@@ -887,6 +887,16 @@ describe "src/cy/commands/navigation", ->
             "http://localhost:3500/foo -> 1 -> 2"
           )
 
+      it "indicates POST in the message", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST"
+        }).then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("message")).to.eq(
+            "POST http://localhost:3500/post-only"
+          )
+
       it "displays note in consoleProps when visiting the same page with a hash", ->
         cy.visit("http://localhost:3500/fixtures/generic.html#foo")
           .visit("http://localhost:3500/fixtures/generic.html#foo")
