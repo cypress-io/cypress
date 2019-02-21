@@ -7,7 +7,7 @@ context('Utilities', () => {
 
   it('Cypress._ - call a lodash method', () => {
     // https://on.cypress.io/_
-    cy.request('https://jsonplaceholder.typicode.com/users')
+    cy.request('https://jsonplaceholder.cypress.io/users')
       .then((response) => {
         let ids = Cypress._.chain(response.body).map('id').take(3).value()
 
@@ -51,21 +51,21 @@ context('Utilities', () => {
     })
     expect(matching, 'matching wildcard').to.be.true
 
-    matching = Cypress.minimatch("/users/1/comments/2", "/users/*/comments", {
-      matchBase: true
+    matching = Cypress.minimatch('/users/1/comments/2', '/users/*/comments', {
+      matchBase: true,
     })
     expect(matching, 'comments').to.be.false
 
     // ** matches against all downstream path segments
-    matching = Cypress.minimatch("/foo/bar/baz/123/quux?a=b&c=2", "/foo/**", {
-      matchBase: true
+    matching = Cypress.minimatch('/foo/bar/baz/123/quux?a=b&c=2', '/foo/**', {
+      matchBase: true,
     })
     expect(matching, 'comments').to.be.true
 
     // whereas * matches only the next path segment
 
-    matching = Cypress.minimatch("/foo/bar/baz/123/quux?a=b&c=2", "/foo/*", {
-      matchBase: false
+    matching = Cypress.minimatch('/foo/bar/baz/123/quux?a=b&c=2', '/foo/*', {
+      matchBase: false,
     })
     expect(matching, 'comments').to.be.false
   })

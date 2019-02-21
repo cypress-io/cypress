@@ -2013,6 +2013,24 @@ describe "Routes", ->
           expect(res.body).to.include "<head> <script"
           expect(res.body).to.include "</head><div>hello from bar!</div>"
 
+      it "injects after DOCTYPE declaration when no other content", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<!DOCTYPE>", {
+          "Content-Type": "text/html"
+        }
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<!DOCTYPE><head> <script"
+
       it "injects superdomain even when head tag is missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
