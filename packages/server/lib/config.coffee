@@ -230,9 +230,10 @@ module.exports = {
     .value()
 
     if url = config.baseUrl
-      ## always strip trailing slashes and add one to end
+      ## replace multiple slashes at the end of string to single slash
       ## so http://localhost/// will be http://localhost/
-      config.baseUrl = _.trimEnd(url, "/") + "/"
+      ## https://regexr.com/48rvt
+      config.baseUrl = url.replace(/\/\/+$/, "/")
 
     _.defaults(config, defaults)
 
