@@ -28,6 +28,11 @@ reset = (test = {}) ->
 
   id = test.id
 
+VALID_VISIT_METHODS = ['GET', 'POST']
+
+isValidVisitMethod = (method) ->
+  _.includes(VALID_VISIT_METHODS, method)
+
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
     onFail: log
@@ -478,6 +483,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         onBeforeLoad: ->
         onLoad: ->
       })
+
+      if not isValidVisitMethod(options.method)
+        $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
 
       consoleProps = {}
 

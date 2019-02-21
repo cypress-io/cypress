@@ -979,6 +979,16 @@ describe "src/cy/commands/navigation", ->
           url: "http://foobarbaz"
         })
 
+      it "throws when method is unsupported", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() was called with an invalid method: 'FOO'"
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          method: "FOO"
+        })
+
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
