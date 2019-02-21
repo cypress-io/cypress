@@ -487,6 +487,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not isValidVisitMethod(options.method)
         $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
 
+      if not _.isObject(options.headers)
+        $utils.throwErrByPath("visit.invalid_headers")
+
       consoleProps = {}
 
       if options.log

@@ -989,6 +989,16 @@ describe "src/cy/commands/navigation", ->
           method: "FOO"
         })
 
+      it "throws when headers is not an object", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() requires the 'headers' option to be an object"
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          headers: "quux"
+        })
+
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
