@@ -260,7 +260,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "failOnStatusCode", "auth", "method", "body", "headers")
+      _.pick(options, "auth", "failOnStatusCode", "method", "body", "headers")
     )
     .then (resp = {}) ->
       switch
@@ -456,6 +456,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
+      if options and options.url and url
+        $utils.throwErrByPath("visit.no_duplicate_url", { optionsUrl: options.url, url: url })
+
+      if _.isObject(url)
+        options = url
+        url = options.url
+
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
@@ -463,6 +470,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         auth: null
         failOnStatusCode: true
         method: 'GET'
+        body: null
+        headers: {}
         log: true
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
