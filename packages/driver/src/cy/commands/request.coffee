@@ -1,10 +1,9 @@
 _ = require("lodash")
 Promise = require("bluebird")
+methods = require("methods")
 
 $utils = require("../../cypress/utils")
 $Location = require("../../cypress/location")
-
-validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
 isOptional = (memo, val, key) ->
   if _.isNull(val)
@@ -30,7 +29,7 @@ REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
 argIsHttpMethod = (str) ->
-  _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
+  _.isString(str) and _.includes(methods, str.toLowerCase())
 
 isValidJsonObj = (body) ->
   _.isObject(body) and not _.isFunction(body)
@@ -92,7 +91,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.has(options, "followRedirects")
         options.followRedirect = options.followRedirects
 
-      if not validHttpMethodsRe.test(options.method)
+      if not argIsHttpMethod(options.method)
         $utils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
