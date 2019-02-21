@@ -467,7 +467,7 @@ class Server
           ## turn off gzip since we need to eventually
           ## rewrite these contents
           gzip: false
-          url: urlFile ? urlStr ? options.url
+          url: urlFile ? urlStr
           headers: _.assign({
             accept: "text/html,*/*"
           }, options.headers)
