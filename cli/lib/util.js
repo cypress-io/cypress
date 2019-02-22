@@ -97,7 +97,7 @@ const util = {
   loadSystemProxySettings () {
     if (!_.isUndefined(process.env.HTTP_PROXY)) {
       // user has set their own proxy, don't mess w/ it
-      return '*_PROXY environment variables'
+      return 'proxy environment variables'
     }
 
     if (os.platform() === 'win32') {
