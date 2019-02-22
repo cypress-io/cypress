@@ -114,10 +114,6 @@ module.exports = {
     catch e
       err = @internalErr e
 
-    if Cypress.config("isTextTerminal")
-      # remove backticks that are converted to markdown in the GUI
-      err = err.replace(/`/g, '')
-
     @throwErr(err, options)
 
   internalErr: (err) ->
