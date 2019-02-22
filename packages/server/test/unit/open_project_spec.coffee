@@ -17,7 +17,7 @@ describe "lib/open_project", ->
 
     sinon.stub(browsers, "get").resolves()
     sinon.stub(browsers, "open")
-    sinon.stub(Project.prototype, "open")
+    sinon.stub(Project.prototype, "open").resolves()
     sinon.stub(Project.prototype, "reset").resolves()
     sinon.stub(Project.prototype, "getSpecUrl").resolves()
     sinon.stub(Project.prototype, "getConfig").resolves({})
