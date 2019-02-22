@@ -75,7 +75,11 @@ module.exports = {
         const overrides = util.getEnvOverrides()
         const node11WindowsFix = isPlatform('win32')
 
-        util.loadSystemProxySettings()
+        const proxySource = util.loadSystemProxySettings()
+
+        if (proxySource) {
+          args.push(`--proxy-source="${proxySource}"`)
+        }
 
         debug('spawning Cypress with executable: %s', executable)
         debug('spawn forcing env overrides %o', overrides)

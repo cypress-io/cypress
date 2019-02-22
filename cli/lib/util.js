@@ -89,10 +89,15 @@ const util = {
     }
   },
 
+  /**
+   * Auto-discover system proxy settings and set the correct environment vars.
+   *
+   * @returns {string} human-readable origin of the proxy settings
+   */
   loadSystemProxySettings () {
     if (!_.isUndefined(process.env.HTTP_PROXY)) {
       // user has set their own proxy, don't mess w/ it
-      return
+      return '*_PROXY environment variables'
     }
 
     if (os.platform() === 'win32') {
@@ -100,10 +105,9 @@ const util = {
 
       if (httpProxy) {
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = httpProxy
-      }
+        process.env.NO_PROXY = process.env.NO_PROXY || noProxy
 
-      if (!process.env.NO_PROXY && noProxy) {
-        process.env.NO_PROXY = noProxy
+        return 'Windows registry settings'
       }
     }
   },
