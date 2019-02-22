@@ -24,7 +24,7 @@ md.linkify.add('https:', {
 })
 
 const formattedMessage = (message) => {
-  return message ? md.render(message) : ''
+  return message ? md.renderInline(message) : ''
 }
 
 class TestError extends Component {
