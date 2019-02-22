@@ -24,7 +24,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.+)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk'.split(' ')
+const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource proxyBypassList proxyServer'.split(' ')
 
 // returns true if the given string has double quote character "
 // only at the last position.
@@ -172,6 +172,9 @@ module.exports = {
       'reporter-options': 'reporterOptions',
       'output-path': 'outputPath',
       'inspect-brk': 'inspectBrk',
+      'proxy-source': 'proxySource',
+      'proxy-bypass-list': 'proxyBypassList',
+      'proxy-server': 'proxyServer',
     }
 
     //# takes an array of args and converts
