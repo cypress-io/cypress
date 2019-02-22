@@ -54,9 +54,9 @@ module.exports = {
     type_missing: "Cypress.add(key, fn, type) must include a type!"
 
   alias:
-    invalid: "Invalid alias: `'{{name}}'`.\nYou forgot the `'@'`. It should be written as: `'@{{displayName}}'`."
-    not_registered_with_available: "#{cmd(`'{{cmd}}'`)} could not find a registered alias for: `'@{{displayName}}'`.\nAvailable aliases are: `'{{availableAliases}}'`."
-    not_registered_without_available: "#{cmd(`'{{cmd}}'`)} could not find a registered alias for: `'@{{displayName}}'`.\nYou have not aliased anything yet."
+    invalid: "Invalid alias: '{{name}}'.\nYou forgot the '@'. It should be written as: '@{{displayName}}'."
+    not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nAvailable aliases are: '{{availableAliases}}'."
+    not_registered_without_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nYou have not aliased anything yet."
 
   as:
     empty_string: "#{cmd('as')} cannot be passed an empty string."
@@ -65,7 +65,7 @@ module.exports = {
     reserved_word: "#{cmd('as')} cannot be aliased as: '{{alias}}'. This word is reserved."
 
   blur:
-    multiple_elements: "`#{cmd('blur')}` can only be called on a single element. Your subject contained {{num}} elements."
+    multiple_elements: "#{cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements."
     no_focused_element: "#{cmd('blur')} can only be called when there is a currently focused element."
     timed_out:  "#{cmd('blur')} timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
     wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: {{node}}"
@@ -102,13 +102,13 @@ module.exports = {
 
   clear:
     invalid_element: """
-      `#{cmd('clear')}` failed because it requires a valid clearable element.
+      #{cmd('clear')} failed because it requires a valid clearable element.
 
       The element cleared was:
 
-        > `{{node}}`
+        > {{node}}
 
-      Cypress considers a `'textarea'`, any `'element'` with a `'contenteditable'` attribute, or any `'input'` with a `'type'` attribute of `'text'`, `'password'`, `'email'`, `'number'`, `'date'`, `'week'`, `'month'`, `'time'`, `'datetime'`, `'datetime-local'`, `'search'`, `'url'`, or `'tel'` to be valid clearable elements.
+      Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
     """
 
   clearCookie:
@@ -118,7 +118,7 @@ module.exports = {
     invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
 
   click:
-    multiple_elements: "`#{cmd('click')}` can only be called on a single element. Your subject contained {{num}} elements. Pass `{ multiple: true }` if you want to serially click each element."
+    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
     on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
   clock:
@@ -231,13 +231,13 @@ module.exports = {
     timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting {{timeout}}ms."
 
   files:
-    unexpected_error:  """`#{cmd('{{cmd}}', '"{{file}}"')}` failed while trying to {{action}} the file at the following path:
+    unexpected_error:  """#{cmd('{{cmd}}', '"{{file}}"')} failed while trying to {{action}} the file at the following path:
 
-      > `{{filePath}}`
+      {{filePath}}
 
     The following error occurred:
 
-      > `{{error}}`
+      > "{{error}}"
     """
     existent: """#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
 
@@ -420,17 +420,16 @@ module.exports = {
 
       You wrote code that looks like this:
 
-      > `#{cmd(obj.cmd, obj.args)}`
+      #{cmd(obj.cmd, obj.args)}
 
       A child command must be chained after a parent because it operates on a previous subject.
 
       For example - if we were issuing the child command 'click'...
 
-      ```
       cy
         .get('button') // parent command must come first
         .click()       // then child command comes second
-      ```
+
       """
     no_cy: "Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call Cypress.$()"
     no_runner: "Cannot call Cypress#run without a runner instance."
@@ -848,15 +847,15 @@ module.exports = {
   visit:
     invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
     cannot_visit_2nd_domain: """
-      `#{cmd('visit')}` failed because you are attempting to visit a second unique domain.
+      #{cmd('visit')} failed because you are attempting to visit a second unique domain.
 
       You may only visit a single unique domain per test.
 
       Different subdomains are okay, but unique domains are not.
 
-      The previous domain you visited was: `'{{previousDomain}}'`
+      The previous domain you visited was: '{{previousDomain}}'
 
-      You're attempting to visit this new domain: `'{{attemptedDomain}}'`
+      You're attempting to visit this new domain: '{{attemptedDomain}}'
 
       You may need to restructure some of your code to prevent this from happening.
 
