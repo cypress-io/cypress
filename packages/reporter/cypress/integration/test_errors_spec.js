@@ -21,10 +21,9 @@ describe('test errors', () => {
     })
   })
 
-  it('renders markdown', () => {
+  it('doesn\'t renders markdown outside of links', () => {
     cy.get('.test-error')
-    .contains('strong', 'markdown')
-    .should('not.contain', '**markdown**')
+    .contains('**markdown**')
   })
 
   it('converts on.cypress.io URLs to links', () => {

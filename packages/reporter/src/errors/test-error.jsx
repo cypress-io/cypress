@@ -2,13 +2,14 @@ import React, { Component } from 'react'
 import Markdown from 'markdown-it'
 import FlashOnClick from '../lib/flash-on-click'
 
-const md = new Markdown({
+const md = new Markdown('zero', {
   linkify: true,
 })
 
 const baseSchemas = ['http:', 'ftp:', '//', 'mailto:']
 const httpsValidate = md.linkify.__schemas__['http:'].validate
 
+md.enable('linkify')
 baseSchemas.forEach((schema) => {
   md.linkify.add(schema, null)
 })
