@@ -1,8 +1,6 @@
 map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
-trim    = require("lodash/trim")
-url     = require("url")
 Promise = require("bluebird")
 
 HOST = "CHANGE_ME_HOST"
@@ -75,34 +73,6 @@ connect = (host, path, io) ->
 
 ## initially connect
 connect(HOST, PATH, global.io)
-
-connectProxy = ->
-  hostParts = url.parse(HOST)
-  proxyConfig = {
-    value: {
-      mode: "fixed_servers",
-      rules: {
-        singleProxy: {
-          scheme: trim(hostParts.protocol, ":"),
-          host: hostParts.hostname
-          port: parseInt(hostParts.port)
-        },
-        bypassList: ["<-loopback>"]
-      },
-    },
-    scope: "regular"
-  }
-
-  chrome.proxy.onProxyError.addListener (obj) ->
-    console.error('Proxy error: ', obj)
-
-  chrome.proxy.settings.set proxyConfig, () ->
-    chrome.proxy.settings.get {}, (obj) ->
-      console.log('Loaded proxy: ', obj)
-
-if global.chrome
-  do once ->
-    connectProxy()
 
 automation = {
   connect: connect

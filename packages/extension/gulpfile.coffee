@@ -36,9 +36,8 @@ gulp.task "backup", ->
 gulp.task "background", ->
   browserify({
     entries: "app/background.coffee"
-    transform: coffeeify,
+    transform: coffeeify
   })
-  .ignore("chrome")
   .bundle()
   .pipe(source("background.js"))
   .pipe(gulp.dest("dist"))
