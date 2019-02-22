@@ -3,6 +3,7 @@
   "description" : "Adds chrome.* API's for testing with Cypress",
   "permissions": [
     "cookies",
+    "proxy",
     "tabs",
     "http://*/*",
     "https://*/*",
