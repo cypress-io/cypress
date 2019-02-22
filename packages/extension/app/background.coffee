@@ -79,24 +79,29 @@ connect(HOST, PATH, global.io)
 connectProxy = ->
   hostParts = url.parse(HOST)
   proxyConfig = {
-    mode: "fixed_servers",
-    rules: {
-      singleProxy: {
-        scheme: trim(hostParts.protocol, ":"),
-        host: hostParts.hostname
-        port: hostParts.port
+    value: {
+      mode: "fixed_servers",
+      rules: {
+        singleProxy: {
+          scheme: trim(hostParts.protocol, ":"),
+          host: hostParts.hostname
+          port: parseInt(hostParts.port)
+        },
       },
     },
+    scope: "regular"
   }
 
   chrome.proxy.onProxyError.addListener (obj) ->
     console.error('Encountered a proxy error: ', obj)
 
   chrome.proxy.settings.set proxyConfig, () ->
-    chrome.proxy.settings.get (obj) ->
+    chrome.proxy.settings.get {}, (obj) ->
       console.log('PROXY SETTINGS: ', obj)
 
-connectProxy()
+if global.chrome
+  do once ->
+    connectProxy()
 
 automation = {
   connect: connect
