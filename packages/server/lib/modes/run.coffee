@@ -1,6 +1,5 @@
 _          = require("lodash")
 pkg        = require("@packages/root")
-uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
@@ -939,7 +938,7 @@ module.exports = {
 
       Promise.all([
         system.info(),
-        browsers.ensureAndGetByPredicate({ name: browserName }),
+        browsers.ensureAndGetByNameOrPath(browserName),
         @findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles()

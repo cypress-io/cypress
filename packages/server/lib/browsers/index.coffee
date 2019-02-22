@@ -37,21 +37,42 @@ getBrowserLauncherByFamily = (family) ->
     when "chrome"
       require("./chrome")
 
-ensureAndGetByPredicate = (predicate) ->
-  utils.getBrowsers()
-  .then (browsers = []) ->
-    _.find(browsers, predicate) or throwBrowserNotFound(predicate, browsers)
+isValidPathToBrowser = (str) ->
+  path.basename(str) isnt str
 
-throwBrowserNotFound = (browser, browsers = []) ->
+ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
+  utils.getBrowsers(nameOrPath)
+  .then (browsers = []) ->
+    ## try to find the browser by name with the highest version property
+    sortedBrowsers = _.sortBy(browsers, ['version'])
+    if browser = _.findLast(sortedBrowsers, { name: nameOrPath })
+      ## short circuit if found
+      if returnAll
+        return browsers
+      return browser
+
+    ## did the user give a bad name, or is this actually a path?
+    if isValidPathToBrowser(nameOrPath)
+      ## looks like a path - try to resolve it to a FoundBrowser
+      return utils.getBrowserByPath(nameOrPath)
+      .then (browser) ->
+        if returnAll
+          return [browser].concat(browsers)
+        return browser
+      .catch (err) ->
+        errors.throw("BROWSER_NOT_FOUND_BY_PATH", nameOrPath, err.message)
+
+    ## not a path, not found by name
+    throwBrowserNotFound(nameOrPath, browsers)
+
+throwBrowserNotFound = (browserName, browsers = []) ->
   names = _.map(browsers, "name").join(", ")
-  errors.throw("BROWSER_NOT_FOUND", browser.name, names)
+  errors.throw("BROWSER_NOT_FOUND_BY_NAME", browserName, names)
 
 process.once "exit", kill
 
 module.exports = {
-  ensureAndGetByPredicate
-
-  throwBrowserNotFound
+  ensureAndGetByNameOrPath
 
   removeOldProfiles: utils.removeOldProfiles
 
@@ -60,6 +81,11 @@ module.exports = {
   launch: utils.launch
 
   close: kill
+
+  getAllBrowsersWith: (nameOrPath) ->
+    if nameOrPath
+      return ensureAndGetByNameOrPath(nameOrPath, true)
+    utils.getBrowsers()
 
   open: (browser, options = {}, automation) ->
     kill(true)

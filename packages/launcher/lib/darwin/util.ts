@@ -1,5 +1,5 @@
 import { log } from '../log'
-import { NotInstalledError } from '../types'
+import { notInstalledErr } from '../errors'
 import { prop, tap } from 'ramda'
 import * as execa from 'execa'
 import * as fs from 'fs-extra'
@@ -14,10 +14,8 @@ export function parse(p: string, property: string): Promise<string> {
   const failed = (e: Error) => {
     const msg = `Info.plist not found: ${pl}
     ${e.message}`
-    const err = new Error(msg) as NotInstalledError
-    err.notInstalled = true
     log('could not read Info.plist for %s', pl)
-    throw err
+    throw notInstalledErr('', msg)
   }
 
   return fs
@@ -40,9 +38,7 @@ export function mdfind(id: string): Promise<string> {
 
   const failedToFind = () => {
     log('could not find %s', id)
-    const err = new Error(`Browser not installed: ${id}`) as NotInstalledError
-    err.notInstalled = true
-    throw err
+    throw notInstalledErr(id)
   }
 
   return execa

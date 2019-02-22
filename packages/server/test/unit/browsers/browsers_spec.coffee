@@ -6,27 +6,23 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
-  context ".ensureAndGetByPredicate", ->
+  context ".ensureAndGetByNameOrPath", ->
     it "returns browser by name", ->
       sinon.stub(utils, "getBrowsers").resolves([
         { name: "foo" }
         { name: "bar" }
       ])
 
-      browsers.ensureAndGetByPredicate({
-        name: "foo"
-      })
+      browsers.ensureAndGetByNameOrPath("foo")
       .then (browser) ->
         expect(browser).to.deep.eq({ name: "foo" })
 
     it "throws when no browser can be found", ->
-      browsers.ensureAndGetByPredicate({
-        name: "browserNotGonnaBeFound"
-      })
+      browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound")
       .then ->
         throw new Error("should have failed")
       .catch (err) ->
-        expect(err.type).to.eq("BROWSER_NOT_FOUND")
+        expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
 
   context ".open", ->
     it "throws an error if browser family doesn't exist", ->
@@ -38,7 +34,7 @@ describe "lib/browsers/index", ->
       }).then ->
         throw new Error("should've failed")
       .catch (err) ->
-        expect(err.type).to.eq("BROWSER_NOT_FOUND")
+        expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
 
     # it "calls onBrowserClose callback on close", ->
     #   onBrowserClose = sinon.stub()
