@@ -82,14 +82,21 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
-    when "BROWSER_NOT_FOUND"
+    when "BROWSER_NOT_FOUND_BY_NAME"
       """
-      Can't run because you've entered an invalid browser.
+      Can't run because you've entered an invalid browser name.
 
       Browser: '#{arg1}' was not found on your system.
 
       Available browsers found are: #{arg2}
       """
+    when "BROWSER_NOT_FOUND_BY_PATH"
+      msg = """
+      We could not identify a known browser at the path you provided: `#{arg1}`
+
+      The output from the command we ran was:
+      """
+      return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
       Warning: Cypress can only record videos when running headlessly.
