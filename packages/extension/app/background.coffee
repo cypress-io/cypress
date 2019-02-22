@@ -87,17 +87,18 @@ connectProxy = ->
           host: hostParts.hostname
           port: parseInt(hostParts.port)
         },
+        bypassList: ["<-loopback>"]
       },
     },
     scope: "regular"
   }
 
   chrome.proxy.onProxyError.addListener (obj) ->
-    console.error('Encountered a proxy error: ', obj)
+    console.error('Proxy error: ', obj)
 
   chrome.proxy.settings.set proxyConfig, () ->
     chrome.proxy.settings.get {}, (obj) ->
-      console.log('PROXY SETTINGS: ', obj)
+      console.log('Loaded proxy: ', obj)
 
 if global.chrome
   do once ->
