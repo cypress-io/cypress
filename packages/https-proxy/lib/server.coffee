@@ -19,6 +19,7 @@ sslSemaphores = {}
 class Server
   constructor: (@_ca, @_port) ->
     @_onError = null
+    @httpsAgents = {}
 
   connect: (req, socket, head, options = {}) ->
     if not head or head.length is 0
@@ -103,7 +104,10 @@ class Server
   _makeUpstreamProxyConnection: (upstreamProxy, socket, head, toPort, toHostname) ->
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
-    agent = new httpsAgent(upstreamProxy)
+    if not @httpsAgents[upstreamProxy]
+      @httpsAgents[upstreamProxy] = new httpsAgent(upstreamProxy)
+
+    agent = @httpsAgents[upstreamProxy]
     agent.callback {}, {
       port: toPort
       host: toHostname
