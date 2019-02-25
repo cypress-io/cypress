@@ -762,7 +762,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-Can't run because you've entered an invalid browser.
+Can't run because you've entered an invalid browser name.
 
 Browser: 'browserDoesNotExist' was not found on your system.
 

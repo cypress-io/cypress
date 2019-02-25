@@ -89,7 +89,7 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-server
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
@@ -167,7 +167,7 @@ jobs:
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:
@@ -183,9 +183,7 @@ jobs:
           paths:
             - packages/ts/node_modules
 
-        ## TODO: this needs to be reenabled when
-        ## we update stop-only
-    #   - run: npm run stop-only
+      - run: npm run stop-only
       ## now go build all of subpackages
       - run: npm run prebuild -- --serial
       - run: npm run build -- --serial
@@ -214,6 +212,8 @@ jobs:
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
+      # make sure packages with TypeScript can be transpiled to JS
+      - run: npm run all build-js
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
