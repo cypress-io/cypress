@@ -84,9 +84,9 @@ class UpdateBanner extends Component {
           <span>Quit this app.</span>
         </li>
         <li>
-          <span>If using npm, Run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
+          <span>If using npm, run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
           <br/>
-          <span>If using yarn, Run <code>yarn add cypress@{appStore.newVersion}</code></span>
+          <span>If using yarn, run <code>yarn add cypress@{appStore.newVersion}</code></span>
 
         </li>
         <li>
