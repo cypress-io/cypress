@@ -1939,7 +1939,7 @@ describe "src/cy/commands/xhr", ->
           expect(log.get("state")).to.eq("passed")
 
   context "Cypress.on(window:unload)", ->
-    it.only "aborts all open XHR's", ->
+    it "aborts all open XHR's", ->
       xhrs = []
 
       cy.window().then (win) ->
