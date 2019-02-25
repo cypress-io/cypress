@@ -7,21 +7,15 @@ const trimQuotes = (input) =>
 
 const ProxySettings = observer(({ app }) => {
   if (!app.proxySource) {
-    return (
-      <div>
-        <p className='text-muted'>
-          There is no active proxy configuration.
-        </p>
-      </div>
-    )
+    return null
   }
 
   const bypassProxyList = trimQuotes(app.proxyBypassList)
 
   return (
-    <div className="proxy-settings">
+    <div className='proxy-settings'>
       <p>Cypress auto-detected the following proxy settings from {trimQuotes(app.proxySource)}:</p>
-      <table className="proxy-table">
+      <table className='proxy-table'>
         <tbody>
           <tr>
             <td>Proxy server: </td>
