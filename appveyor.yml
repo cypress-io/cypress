@@ -47,7 +47,7 @@ install:
   - .\node_modules\.bin\print-arch
   # because we skipped scripts, we need to do
   # everything from "postinstall" script as commands
-  - npm run link test
+  - npm run link
   # install every package one by one
   - npm run all install -- --serial || npm run all install -- --serial
   # - npm prune
