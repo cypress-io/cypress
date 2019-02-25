@@ -1939,13 +1939,13 @@ describe "src/cy/commands/xhr", ->
           expect(log.get("state")).to.eq("passed")
 
   context "Cypress.on(window:unload)", ->
-    it "aborts all open XHR's", ->
+    it.only "aborts all open XHR's", ->
       xhrs = []
 
       cy.window().then (win) ->
         _.times 2, ->
           xhr = new win.XMLHttpRequest
-          xhr.open("GET", "/timeout?ms=5")
+          xhr.open("GET", "/timeout?ms=100")
           xhr.send()
 
           xhrs.push(xhr)
