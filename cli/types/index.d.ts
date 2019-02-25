@@ -2210,7 +2210,7 @@ declare namespace Cypress {
      *
      * @default true
      */
-    cancable: boolean
+    cancelable: boolean
   }
 
   // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
