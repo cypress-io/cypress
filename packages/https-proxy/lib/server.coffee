@@ -72,7 +72,7 @@ class Server
     .pipe(res)
 
   _needsUpstreamProxy: (hostname, port) ->
-    hostname isnt "localhost" or getProxyFromURI("https://#{hostname}:#{port}")
+    process.env.HTTP_PROXY and (hostname isnt "localhost" or getProxyFromURI("https://#{hostname}:#{port}"))
 
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
