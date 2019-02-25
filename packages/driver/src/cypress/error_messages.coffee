@@ -616,7 +616,7 @@ module.exports = {
   route:
     failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
     invalid_arguments: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
-    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
     response_invalid: "#{cmd('route')} cannot accept an undefined or null response. It must be set to something, even an empty string will work."
     url_invalid: "#{cmd('route')} was called with an invalid url. Url must be either a string or regular expression."
     url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
