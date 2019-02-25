@@ -2,11 +2,13 @@ _            = require("lodash")
 fs           = require("fs-extra")
 net          = require("net")
 url          = require("url")
+getProxyFromURI = require("request/lib/getProxyFromURI")
 https        = require("https")
+httpsAgent   = require("https-proxy-agent")
 Promise      = require("bluebird")
 semaphore    = require("semaphore")
 allowDestroy = require("server-destroy-vvo")
-log          = require("debug")("cypress:https-proxy")
+debug        = require("debug")("cypress:https-proxy")
 parse        = require("./util/parse")
 
 fs = Promise.promisifyAll(fs)
@@ -20,7 +22,7 @@ class Server
 
   connect: (req, socket, head, options = {}) ->
     if not head or head.length is 0
-      log("Writing socket connection headers for URL:", req.url)
+      debug("Writing socket connection headers for URL:", req.url)
 
       socket.once "data", (data) =>
         @connect(req, socket, data, options)
@@ -38,10 +40,9 @@ class Server
         ## if onDirectConnection return true
         ## then dont proxy, just pass this through
         if odc.call(@, req, socket, head) is true
-          log("Making direct connection to #{req.url}")
           return @_makeDirectConnection(req, socket, head)
         else
-          log("Not making direct connection to #{req.url}")
+          debug("Not making direct connection to #{req.url}")
 
       socket.pause()
 
@@ -69,13 +70,21 @@ class Server
       res.end()
     .pipe(res)
 
+  _needsUpstreamProxy: (hostname, port) ->
+    hostname isnt "localhost" or getProxyFromURI("https://#{hostname}:#{port}")
+
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
 
+    if @_needsUpstreamProxy(hostname, port)
+      upstreamProxy = process.env.HTTP_PROXY
+      return @_makeUpstreamProxyConnection(upstreamProxy, socket, head, port, hostname)
+
+    debug("Making direct connection to #{hostname}:#{port}")
     @_makeConnection(socket, head, port, hostname)
 
   _makeConnection: (socket, head, port, hostname) ->
-    cb = ->
+    onConnect = ->
       socket.pipe(conn)
       conn.pipe(socket)
       socket.emit("data", head)
@@ -83,7 +92,7 @@ class Server
       socket.resume()
 
     ## compact out hostname when undefined
-    args = _.compact([port, hostname, cb])
+    args = _.compact([port, hostname, onConnect])
 
     conn = net.connect.apply(net, args)
 
@@ -91,11 +100,31 @@ class Server
       if @_onError
         @_onError(err, socket, head, port)
 
+  _makeUpstreamProxyConnection: (upstreamProxy, socket, head, toPort, toHostname) ->
+    debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
+
+    agent = new httpsAgent(upstreamProxy)
+    agent.callback {}, {
+      port: toPort
+      host: toHostname
+    }, (err, upstreamSock) ->
+      if @_onError and err
+        return @_onError(err, socket, head, port)
+
+      upstreamSock.on "error", (err) =>
+        @_onError(err, socket, head, port)
+
+      upstreamSock.pipe(socket)
+      socket.pipe(upstreamSock)
+      socket.emit("data", head)
+
+      socket.resume()
+
   _onServerConnectData: (req, socket, head) ->
     firstBytes = head[0]
 
     makeConnection = (port) =>
-      log("Making intercepted connection to %s", port)
+      debug("Making intercepted connection to %s", port)
 
       @_makeConnection(socket, head, port)
 
@@ -168,7 +197,7 @@ class Server
         ## store the port of our current sniServer
         @_sniPort = @_sniServer.address().port
 
-        log("Created SNI HTTPS Proxy on port %s", @_sniPort)
+        debug("Created SNI HTTPS Proxy on port %s", @_sniPort)
 
         resolve()
 

@@ -35,6 +35,7 @@
     "bluebird": "3.5.3",
     "debug": "2.6.9",
     "fs-extra": "0.30.0",
+    "https-proxy-agent": "2.2.1",
     "lodash": "4.17.11",
     "node-forge": "0.6.49",
     "semaphore": "1.1.0",
