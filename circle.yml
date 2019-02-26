@@ -89,7 +89,7 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-server
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
@@ -167,7 +167,7 @@ jobs:
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:

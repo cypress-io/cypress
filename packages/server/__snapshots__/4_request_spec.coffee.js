@@ -103,7 +103,7 @@ http://localhost:16795/
 
 We attempted to make an http request to this URL but the request failed without a response.
 
-We received this error at stack trace line
+We received this error at the network level:
 
   > Error: connect ECONNREFUSED 127.0.0.1:16795
 
