@@ -90,7 +90,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='generic_styles.css' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("head"))
 
     it "provides media-less stylesheets", (done) ->
@@ -102,7 +102,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='generic_styles.css' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("head"))
 
     it "provides media=screen stylesheets", (done) ->
@@ -114,7 +114,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='generic_styles.css' media='screen' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("head"))
 
     it "provides media=all stylesheets", (done) ->
@@ -126,7 +126,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='generic_styles.css' media='all' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("head"))
 
     it "does not provide non-screen stylesheets", (done) ->
@@ -138,7 +138,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='generic_styles.css' media='print' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("head"))
 
     it "provides object with href of external stylesheets in head", (done) ->
@@ -150,7 +150,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='http://localhost:3501/fixtures/generic_styles.css' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("head"))
 
     it "provides contents of style tags in body", ->
@@ -167,7 +167,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='generic_styles.css' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("body"))
 
     it "provides object with href of external stylesheets in body", (done) ->
@@ -178,7 +178,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='http://localhost:3501/fixtures/generic_styles.css' />")
-      .load(onLoad)
+      .on("load", onLoad)
       .appendTo(cy.$$("body"))
 
     it "sets data-cypress-el attr", ->
@@ -224,7 +224,7 @@ describe "driver/src/cy/snapshot", ->
         done()
 
       $("<link rel='stylesheet' href='nested/with_paths.css' />")
-      .load(loadFn)
+      .on("load", loadFn)
       .appendTo(cy.$$("head"))
 
     context "iframes", ->
