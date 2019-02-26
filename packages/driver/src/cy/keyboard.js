@@ -591,7 +591,7 @@ const create = function (state) {
               //# and fire the input event
               //# as long as we're under maxlength
 
-              if ($elements.getNativeProp(el, 'value').length < ml) {
+              if ($element.getNativeProp(el, 'value').length < ml) {
                 maybeUpdateValueAndFireInput()
               }
             } else {
