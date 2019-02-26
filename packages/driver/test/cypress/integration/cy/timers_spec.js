@@ -42,6 +42,7 @@ describe('driver/src/cy/timers', () => {
     .log('setTimeout should call target with two parameters')
     .window()
     .then((win) => {
+      win.foo = null
       win.setFoo = (bar, baz) => {
         win.foo = bar + baz
       }
@@ -94,8 +95,8 @@ describe('driver/src/cy/timers', () => {
     .log('setInterval should call target with two parameters')
     .window()
     .then((win) => {
-      win.foo = null;
-      win.setFoo = (bar, bar) => {
+      win.foo = null
+      win.setFoo = (bar, baz) => {
         win.foo = bar + baz
       }
 
