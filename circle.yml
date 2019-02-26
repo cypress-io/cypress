@@ -159,7 +159,7 @@ jobs:
           paths:
             - packages/launcher/node_modules
       - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
             - packages/reporter/node_modules
       - save_cache:
