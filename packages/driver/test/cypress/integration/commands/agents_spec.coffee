@@ -226,8 +226,7 @@ describe "src/cy/commands/agents", ->
         expect(consoleProps["Alias"]).to.eql("myStub")
 
       it "updates the displayName of the agent", ->
-        cy.then ->
-          expect(@myStub.displayName).to.eq("myStub")
+        expect(@myStub.displayName).to.eq("myStub")
 
       it "stores the lookup as an alias", ->
         expect(cy.state("aliases").myStub).to.be.defined
@@ -236,8 +235,13 @@ describe "src/cy/commands/agents", ->
         expect(cy.state("aliases").myStub.subject).to.eq(@stub)
 
       it "assigns subject to runnable ctx", ->
-        cy.then ->
-          expect(@myStub).to.eq(@stub)
+        expect(@myStub).to.eq(@stub)
+
+      it "retries until assertions pass", ->
+        cy.on "command:retry", _.after 2, =>
+          @myStub("foo")
+        
+        cy.get("@myStub").should("be.calledWith", "foo")
 
       describe "errors", ->
         _.each [null, undefined, {}, [], 123], (value) =>

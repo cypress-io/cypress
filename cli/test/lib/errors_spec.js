@@ -9,20 +9,21 @@ describe('errors', function () {
   const { missingXvfb } = errors
 
   beforeEach(function () {
-    this.sandbox.stub(util, 'pkgVersion').returns('1.2.3')
-    this.sandbox.stub(os, 'platform').returns('test platform')
-    this.sandbox.stub(os, 'release').returns('test release')
+    sinon.stub(util, 'pkgVersion').returns('1.2.3')
+    os.platform.returns('test platform')
   })
 
   describe('individual', () => {
-    it('has the following errors', () =>
-      snapshot(Object.keys(errors))
+    it('has the following errors', () => {
+      return snapshot(Object.keys(errors))
+    }
     )
   })
 
   context('.errors.formErrorText', function () {
-    it('returns fully formed text message', () =>
-      snapshot(formErrorText(missingXvfb))
+    it('returns fully formed text message', () => {
+      return snapshot(formErrorText(missingXvfb))
+    }
     )
   })
 })

@@ -1,41 +1,28 @@
-exports['installs without existing installation 1'] = `
-Installing Cypress (version: 1.2.3)
+exports['skip installation 1'] = `
+Note: Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.
 
- ✔  Downloaded Cypress
- ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/binary/dir/
-
-You can now open Cypress by running: node_modules/.bin/cypress open
-
-https://on.cypress.io/installing-cypress
 
 `
 
 exports['specify version in env vars 1'] = `
-Forcing a binary version different than the default.
+⚠ Warning: Forcing a binary version different than the default.
 
-The CLI expected to install version: 1.2.3
+  The CLI expected to install version: 1.2.3
 
-Instead we will install version: 0.12.1
+  Instead we will install version: 0.12.1
 
-Note: there is no guarantee these versions will work properly together.
+  These versions may not work properly together.
 
 Installing Cypress (version: 0.12.1)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/binary/dir/
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
 
-`
-
-exports['version already installed 1'] = `
-Cypress 1.2.3 is already installed. Skipping installation.
-
-Pass the --force option if you'd like to reinstall anyway.
 
 `
 
@@ -44,58 +31,80 @@ Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/binary/dir/
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
+
+
+`
+
+exports['installs without existing installation 1'] = `
+Installing Cypress (version: 1.2.3)
+
+ ✔  Downloaded Cypress
+ ✔  Unzipped Cypress
+ ✔  Finished Installation   /cache/Cypress/1.2.3
+
+You can now open Cypress by running: node_modules/.bin/cypress open
+
+https://on.cypress.io/installing-cypress
+
 
 `
 
 exports['installed version does not match needed version 1'] = `
-Installed version (x.x.x) does not match needed version (1.2.3).
+
+Cypress x.x.x is installed in /cache/Cypress/1.2.3
 
 Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/binary/dir/
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
+
 
 `
 
 exports['forcing true always installs 1'] = `
+
+Cypress 1.2.3 is installed in /cache/Cypress/1.2.3
+
 Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/binary/dir/
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
 
+
 `
 
 exports['warning installing as global 1'] = `
-Installed version (x.x.x) does not match needed version (1.2.3).
+
+Cypress x.x.x is installed in /cache/Cypress/1.2.3
 
 Installing Cypress (version: 1.2.3)
 
  ✔  Downloaded Cypress
  ✔  Unzipped Cypress
- ✔  Finished Installation   /path/to/binary/dir/
+ ✔  Finished Installation   /cache/Cypress/1.2.3
 
-It looks like you've installed Cypress globally.
+⚠ Warning: It looks like you've installed Cypress globally.
 
-This will work, but it's not recommended.
+  This will work, but it's not recommended.
 
-The recommended way to install Cypress is as a devDependency per project.
+  The recommended way to install Cypress is as a devDependency per project.
 
-You should probably run these commands:
+  You should probably run these commands:
 
   - npm uninstall -g cypress
   - npm install --save-dev cypress
@@ -103,7 +112,8 @@ You should probably run these commands:
 `
 
 exports['installing in ci 1'] = `
-Installed version (x.x.x) does not match needed version (1.2.3).
+
+Cypress x.x.x is installed in /cache/Cypress/1.2.3
 
 Installing Cypress (version: 1.2.3)
 
@@ -118,8 +128,51 @@ You can now open Cypress by running: node_modules/.bin/cypress open
 
 https://on.cypress.io/installing-cypress
 
+
 `
-exports['skip installation 1'] = `
-Skipping binary installation. Env var 'CYPRESS_SKIP_BINARY_INSTALL' was found.
+
+exports['invalid cache directory 1'] = `
+Error: Cypress cannot write to the cache directory due to file permissions
+----------
+
+Failed to access /invalid/cache/dir:
+
+EACCES: permission denied, mkdir '/invalid'
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['error for removed CYPRESS_BINARY_VERSION 1'] = `
+Error: The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version 3.0.0
+
+You should set CYPRESS_INSTALL_BINARY instead.
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['silent install 1'] = `
+[no output]
+`
+
+exports['version already installed - cypress install 1'] = `
+
+Cypress 1.2.3 is installed in /cache/Cypress/1.2.3
+
+Skipping installation:
+
+  Pass the --force option if you'd like to reinstall anyway.
+
+`
+
+exports['version already installed - postInstall 1'] = `
+
+Cypress 1.2.3 is installed in /cache/Cypress/1.2.3
+
 
 `

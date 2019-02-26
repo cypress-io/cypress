@@ -1,7 +1,9 @@
 @import 'lib/variables';
 @import 'lib/mixins';
 @import 'lib/fonts';
+@import 'node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 @import 'lib/base';
-@import '!(lib)*/**/*';
+@import 'lib/shared';
+@import '!(lib)*/**/!(selector-playground.scss)';
 
 @import '../../reporter/src/main-runner';

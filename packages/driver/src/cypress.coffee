@@ -6,7 +6,6 @@ moment = require("moment")
 Promise = require("bluebird")
 sinon = require("sinon")
 lolex = require("lolex")
-bililiteRange = require("../vendor/bililiteRange")
 
 $dom = require("./dom")
 $errorMessages = require("./cypress/error_messages")
@@ -24,12 +23,22 @@ $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
+$Screenshot = require("./cypress/screenshot")
+$SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
   cy: "getStyles".split(" ")
 }
+
+jqueryProxyFn = ->
+  if not @cy
+    $utils.throwErrByPath("miscellaneous.no_cy")
+
+  @cy.$$.apply(@cy, arguments)
+
+_.extend(jqueryProxyFn, $)
 
 ## provide the old interface and
 ## throw a deprecation message
@@ -94,11 +103,13 @@ class $Cypress
     if d = config.remote?.domainName
       document.domain = d
 
-    ## Cypress package version
-    @version = config.version
-    ## a few constants describing server environment
-    @platform = config.platform
+    ## a few static props for the host OS, browser
+    ## and the current version of Cypress
     @arch = config.arch
+    @spec = config.spec
+    @version = config.version
+    @browser = config.browser
+    @platform = config.platform
 
     ## normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
@@ -119,13 +130,13 @@ class $Cypress
       longStackTraces: config.isInteractive
     })
 
-    {environmentVariables, remote} = config
+    {env, remote} = config
 
-    config = _.omit(config, "environmentVariables", "remote")
+    config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
 
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
-    @env = $SetterGetter.create(environmentVariables)
+    @env = $SetterGetter.create(env)
 
     @Cookies = $Cookies.create(config.namespace, d)
 
@@ -183,7 +194,7 @@ class $Cypress
         return if @_RESUMED_AT_TEST
 
         if @config("isTextTerminal")
-          @emit("mocha", "start")
+          @emit("mocha", "start", args[0])
 
       when "runner:end"
         ## mocha runner has finished running the tests
@@ -198,7 +209,7 @@ class $Cypress
         @emit("run:end")
 
         if @config("isTextTerminal")
-          @emit("mocha", "end")
+          @emit("mocha", "end", args[0])
 
       when "runner:set:runnable"
         ## when there is a hook / test (runnable) that
@@ -272,8 +283,22 @@ class $Cypress
         ## stats and runnable properties such as errors
         @emit("test:after:run", args...)
 
-      when "cy:test:set:state"
-        @emit("test:set:state", args...)
+        if @config("isTextTerminal")
+          ## needed for calculating wallClockDuration
+          ## and the timings of after + afterEach hooks
+          @emit("mocha", "test:after:run", args[0])
+
+      when "cy:before:all:screenshots"
+        @emit("before:all:screenshots", args...)
+
+      when "cy:before:screenshot"
+        @emit("before:screenshot", args...)
+
+      when "cy:after:screenshot"
+        @emit("after:screenshot", args...)
+
+      when "cy:after:all:screenshots"
+        @emit("after:all:screenshots", args...)
 
       when "command:log:added"
         @runner.addLog(args[0], @config("isInteractive"))
@@ -425,11 +450,7 @@ class $Cypress
   addUtilityCommand: (key, fn) ->
     throwPrivateCommandInterface("addUtilityCommand")
 
-  $: ->
-    if not @cy
-      $utils.throwErrByPath("miscellaneous.no_cy")
-
-    @cy.$$.apply(@cy, arguments)
+  $: jqueryProxyFn
 
   ## attach to $Cypress to access
   ## all of the constructors
@@ -449,6 +470,8 @@ class $Cypress
   Mocha: $Mocha
   Runner: $Runner
   Server: $Server
+  Screenshot: $Screenshot
+  SelectorPlayground: $SelectorPlayground
   utils: $utils
   _: _
   moment: moment
@@ -457,9 +480,6 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
-  bililiteRange: bililiteRange
-
-  _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
   @create = (config) ->
     new $Cypress(config)

@@ -3,6 +3,7 @@ r          = require("request")
 rp         = require("request-promise")
 url        = require("url")
 tough      = require("tough-cookie")
+debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
 statusCode = require("./util/status_code")
@@ -10,6 +11,9 @@ Cookies    = require("./automation/cookies")
 
 Cookie    = tough.Cookie
 CookieJar = tough.CookieJar
+
+## shallow clone the original
+serializableProperties = Cookie.serializableProperties.slice(0)
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -52,10 +56,23 @@ newCookieJar = ->
     _jar: j
 
     toJSON: ->
-      j.toJSON()
+      ## temporarily include the URL property
+      ## and restore afterwards. this is used to fix
+      ## https://github.com/cypress-io/cypress/issues/1321
+      Cookie.serializableProperties = serializableProperties.concat("url")
+      cookies = j.toJSON()
+      Cookie.serializableProperties = serializableProperties
+      return cookies
 
     setCookie: (cookieOrStr, uri, options) ->
-      j.setCookieSync(cookieOrStr, uri, options)
+      ## store the original URL this cookie was set on
+      if cookie = j.setCookieSync(cookieOrStr, uri, options)
+        ## only set cookie URL if it was created correctly
+        ## since servers may send invalid cookies that fail
+        ## to parse - we may get undefined here
+        cookie.url = uri
+
+      return cookie
 
     getCookieString: (uri) ->
       j.getCookieStringSync(uri, {expire: false})
@@ -138,14 +155,6 @@ module.exports = (options = {}) ->
           }
         else
           opts = strOrOpts
-
-      opts.url = url.parse(opts.url)
-
-      ## parse port into a legit number
-      ## to fix issue with request
-      ## https://github.com/cypress-io/cypress/issues/222
-      if p = opts.url.port
-        opts.url.port = _.toNumber(p)
 
       if promise
         rp(opts)
@@ -239,6 +248,8 @@ module.exports = (options = {}) ->
       Promise.try ->
         store = jar.toJSON()
 
+        debug("setting request jar cookies %o", store.cookies)
+
         ## this likely needs
         ## to be an 'each' not a map
         ## since we need to set cookies
@@ -293,6 +304,8 @@ module.exports = (options = {}) ->
           followRedirect.call(req, incomingRes)
 
       send = =>
+        debug("sending request as stream %o", _.omit(options, "jar"))
+
         str = @create(options)
         str.getJar = -> options.jar
         str

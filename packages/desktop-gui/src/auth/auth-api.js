@@ -7,6 +7,7 @@ class AuthApi {
     ipc.getCurrentUser()
     .then((user) => {
       authStore.setUser(user)
+
       // mobx can trigger a synchronous re-render, which executes
       // componentDidMount, etc in other components, making bluebird
       // think another promise was created but not returned
@@ -35,6 +36,7 @@ class AuthApi {
     })
     .then((user) => {
       authStore.setUser(user)
+
       return null
     })
     .catch({ alreadyOpen: true }, () => {})

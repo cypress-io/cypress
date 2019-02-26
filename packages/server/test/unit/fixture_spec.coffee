@@ -1,18 +1,16 @@
 require("../spec_helper")
 
-fs             = require("fs-extra")
 path           = require("path")
 Promise        = require("bluebird")
 config         = require("#{root}lib/config")
 fixture        = require("#{root}lib/fixture")
+fs             = require("#{root}lib/util/fs")
 FixturesHelper = require("#{root}/test/support/helpers/fixtures")
 os             = require("os")
 eol            = require("eol")
 
 isWindows = () ->
   os.platform() == "win32"
-
-fs = Promise.promisifyAll(fs)
 
 describe "lib/fixture", ->
   beforeEach ->

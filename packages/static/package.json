@@ -5,7 +5,12 @@
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/static needs: npm run build'",
+    "clean-deps": "rm -rf node_modules",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "prebuild": "npm run check-deps-pre",
     "build": "gulp build",
+    "pretest": "npm run check-deps-pre",
     "test": "echo 'Nothing to test yet'"
   },
   "files": [
@@ -13,7 +18,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/icons": "0.5.4",
-    "gulp": "^3.9.1"
+    "@cypress/icons": "0.7.0",
+    "gulp": "3.9.1"
   }
 }

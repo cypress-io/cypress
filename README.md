@@ -4,7 +4,7 @@
 <p align="center">
   <a href="https://on.cypress.io">Documentation</a> |
   <a href="https://on.cypress.io/changelog">Changelog</a> |
-  <a href="https://github.com/cypress-io/cypress/projects">Roadmap</a>
+  <a href="https://on.cypress.io/roadmap">Roadmap</a>
 </p>
 
 <h3 align="center">
@@ -21,6 +21,9 @@
   </a>
   <a href="https://gitter.im/cypress-io/cypress">
     <img src="https://img.shields.io/gitter/room/cypress-io/cypress.svg" alt="Gitter chat"/>
+  </a><br />
+  <a href="https://opencollective.com/cypressio">
+    <object type="image/svg+xml" data="https://opencollective.com/cypressio/tiers/corporate-backer.svg?avatarHeight=64&width=600" />
   </a>
 </p>
 
@@ -47,7 +50,8 @@ npm install cypress --save-dev
 
 ## Contributing
 
- [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/master) - `master` branch
+- [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) - `develop` branch
+- [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/master) - `master` branch
 
 Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 

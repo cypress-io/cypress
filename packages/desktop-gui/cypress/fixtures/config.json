@@ -5,18 +5,24 @@
   "browsers": [
     {
       "name": "chrome",
+      "displayName": "Chrome",
+      "family": "chrome",
       "version": "50.0.2661.86",
       "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       "majorVersion": "50"
     },
     {
       "name": "chromium",
+      "displayName": "Chromium",
+      "family": "chrome",
       "version": "49.0.2609.0",
       "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
       "majorVersion": "49"
     },
     {
       "name": "canary",
+      "displayName": "Canary",
+      "family": "chrome",
       "version": "48.0",
       "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
       "majorVersion": "48"
@@ -27,20 +33,21 @@
   "clientUrlDisplay": "http://localhost:2020",
   "commandTimeout": 4000,
   "cypressHostUrl": "http://localhost:2020",
-  "env": "development",
-  "environmentVariables": {
-    
+  "cypressEnv": "development",
+  "env": {
+
   },
+  "blacklistHosts": ["www.google-analytics.com", "hotjar.com"],
   "execTimeout": 60000,
   "fileServerFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
   "fixturesFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/fixtures",
-  "integrationExampleFile": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration/example_spec.js",
-  "integrationExampleName": "example_spec.js",
+  "integrationExamplePath": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration/examples",
+  "integrationExampleName": "examples",
   "integrationFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration",
   "isHeadless": false,
   "isNewProject": false,
   "javascripts": [
-    
+
   ],
   "morgan": true,
   "namespace": "__cypress",
@@ -66,7 +73,66 @@
           "name": "integration",
           "children": [
             {
-              "name": "example_spec.js"
+              "name": "examples",
+              "children": [
+                {
+                  "name": "actions.spec.js"
+                },
+                {
+                  "name": "aliasing.spec.js"
+                },
+                {
+                  "name": "assertions.spec.js"
+                },
+                {
+                  "name": "connectors.spec.js"
+                },
+                {
+                  "name": "cookies.spec.js"
+                },
+                {
+                  "name": "cypress_api.spec.js"
+                },
+                {
+                  "name": "files.spec.js"
+                },
+                {
+                  "name": "local_storage.spec.js"
+                },
+                {
+                  "name": "location.spec.js"
+                },
+                {
+                  "name": "misc.spec.js"
+                },
+                {
+                  "name": "navigation.spec.js"
+                },
+                {
+                  "name": "network_requests.spec.js"
+                },
+                {
+                  "name": "querying.spec.js"
+                },
+                {
+                  "name": "spies_stubs_clocks.spec.js"
+                },
+                {
+                  "name": "traversal.spec.js"
+                },
+                {
+                  "name": "utilities.spec.js"
+                },
+                {
+                  "name": "viewport.spec.js"
+                },
+                {
+                  "name": "waiting.spec.js"
+                },
+                {
+                  "name": "window.spec.js"
+                }
+              ]
             }
           ]
         },
@@ -91,6 +157,14 @@
               "name": "index.js"
             }
           ]
+        },
+        {
+          "name": "plugins",
+          "children": [
+            {
+              "name": "index.js"
+            }
+          ]
         }
       ]
     }
@@ -108,7 +182,7 @@
       "from": "default",
       "value": 4000
     },
-    "environmentVariables": {
+    "env": {
       "fileServerFolder": {
         "from": "default",
         "value": ""
@@ -185,6 +259,12 @@
     "watchForFileChanges": {
       "from": "default",
       "value": true
+    },
+    "blacklistHosts": {
+      "from": "config",
+      "value": [
+        "www.google-analytics.com", "hotjar.com"
+      ]
     },
     "hosts": {
       "from": "config",

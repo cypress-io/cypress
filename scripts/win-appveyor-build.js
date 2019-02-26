@@ -12,17 +12,22 @@ const is = require('check-more-types')
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
 
+// see what variables AppVeyor provides
 // https://www.appveyor.com/docs/environment-variables/
 
-const isRightBranch = () =>
-  process.env.APPVEYOR_REPO_BRANCH === 'develop' ||
-  process.env.APPVEYOR_REPO_BRANCH === 'win-build-shell'
+const isRightBranch = () => {
+  const branch = process.env.APPVEYOR_REPO_BRANCH
 
-const isPullRequest = () =>
-  Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
+  return branch === 'develop'
+}
 
-const shouldBuildBinary = () =>
-  isRightBranch() && !isPullRequest()
+const isPullRequest = () => {
+  return Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
+}
+
+const shouldBuildBinary = () => {
+  return isRightBranch() && !isPullRequest()
+}
 
 if (!shouldBuildBinary()) {
   console.log('should not build binary')
@@ -33,6 +38,7 @@ console.log('building Windows binary')
 
 const filename = `cypress-${process.env.NEXT_DEV_VERSION}.tgz`
 const version = process.env.NEXT_DEV_VERSION
+
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
 
 console.log('building version', version)
@@ -40,6 +46,22 @@ console.log('building version', version)
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 shell.cat('npm-package-url.json')
 shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
+
+// make sure we are not including dev dependencies accidentally
+// TODO how to get the server package folder?
+const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
+
+shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
+shell.exec('npm ls --prod --depth 0 || true', { cwd: serverPackageFolder })
+const result = shell.exec('npm ls --dev --depth 0 || true', { cwd: serverPackageFolder })
+
+if (result.stdout.includes('nodemon')) {
+  console.error('Hmm, server package includes dev dependency "coveralls"')
+  console.error('which means somehow we are including dev dependencies in the output bundle')
+  console.error('see https://github.com/cypress-io/cypress/issues/2896')
+  process.exit(1)
+}
+
 shell.exec('npm run binary-zip')
 shell.ls('-l', '*.zip')
 shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)

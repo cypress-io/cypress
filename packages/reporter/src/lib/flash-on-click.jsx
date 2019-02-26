@@ -35,7 +35,7 @@ class FlashOnClick extends Component {
     this._show = true
     setTimeout(action('hide:console:message', () => {
       this._show = false
-    }), 800)
+    }), 1500)
   }
 }
 

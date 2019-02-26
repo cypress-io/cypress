@@ -1,8 +1,7 @@
 import React from 'react'
-import RunnerWrap from '../app/runner-wrap'
 
 export default ({ onReload }) => (
-  <RunnerWrap className='automation-failure'>
+  <div className='runner automation-failure'>
     <div className='automation-message automation-disconnected'>
       <p>Whoops, the Cypress Chrome extension has disconnected.</p>
       <p className='muted'>Cypress cannot run tests without this extension.</p>
@@ -16,5 +15,5 @@ export default ({ onReload }) => (
         </a>
       </div>
     </div>
-  </RunnerWrap>
+  </div>
 )

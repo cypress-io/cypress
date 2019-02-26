@@ -35,6 +35,15 @@ describe "lib/konfig", ->
 
     expect(config).to.eq(config2)
 
+  it "does not add NODE_ENV to process env if input env did not contain one", ->
+    env = process.env["NODE_ENV"]
+    delete process.env["NODE_ENV"]
+    delete require.cache[require.resolve("#{root}lib/konfig")]
+    expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
+    config = require("#{root}lib/konfig")
+    expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
+    process.env["NODE_ENV"] = env
+
   context "development", ->
     beforeEach ->
       @setup("development")

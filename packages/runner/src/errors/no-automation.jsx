@@ -2,7 +2,6 @@ import _ from 'lodash'
 import React from 'react'
 
 import Dropdown from '../dropdown/dropdown'
-import RunnerWrap from '../app/runner-wrap'
 
 const displayName = (name) => _.capitalize(name)
 
@@ -41,9 +40,9 @@ const browser = (browser) => (
 const browserPicker = (browsers, onLaunchBrowser) => {
   const chosenBrowser = _.find(browsers, { default: true }) || browsers[0]
   const otherBrowsers = _(browsers)
-    .without(chosenBrowser)
-    .map((browser) => _.extend({}, browser, { key: browser.name + browser.version }))
-    .value()
+  .without(chosenBrowser)
+  .map((browser) => _.extend({}, browser, { key: browser.name + browser.version }))
+  .value()
 
   return (
     <div>
@@ -59,7 +58,7 @@ const browserPicker = (browsers, onLaunchBrowser) => {
 }
 
 export default ({ browsers, onLaunchBrowser }) => (
-  <RunnerWrap className='automation-failure'>
+  <div className='runner automation-failure'>
     <div className='automation-message'>
       <p>Whoops, we can't run your tests.</p>
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
@@ -69,5 +68,5 @@ export default ({ browsers, onLaunchBrowser }) => (
         </a>
       </div>
     </div>
-  </RunnerWrap>
+  </div>
 )

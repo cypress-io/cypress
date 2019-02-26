@@ -1,0 +1,176 @@
+{
+  "title": "JSON schema for https://cypress.io test runner cypress.json file. Details at https://on.cypress.io/configuration",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "baseUrl" : {
+      "type": "string",
+      "description": "Url used as prefix for cy.visit() or cy.request() command’s url. Example http://localhost:3030 or https://test.my-domain.com"
+    },
+    "env": {
+      "type": "object",
+      "description": "Any values to be set as environment variables",
+      "body": {}
+    },
+    "ignoreTestFiles": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      },
+      "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match."
+    },
+    "numTestsKeptInMemory": {
+      "type": "number",
+      "default": 50,
+      "description": "The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run."
+    },
+    "port": {
+      "type": "number",
+      "default": null,
+      "description": "Port used to host Cypress. Normally this is a randomly generated port"
+    },
+    "reporter": {
+      "type": "string",
+      "default": "spec",
+      "description": "The reporter used when running headlessly or in CI. See https://on.cypress.io/reporters"
+    },
+    "reporterOptions": {
+      "type": "object",
+      "default": null,
+      "description": "The reporter options used. Supported options depend on the reporter. See https://on.cypress.io/reporters#Reporter-Options"
+    },
+    "watchForFileChanges": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will watch and restart tests on test file changes"
+    },
+    "defaultCommandTimeout": {
+      "type": "number",
+      "default": 4000,
+      "description": "Time, in milliseconds, to wait until most DOM based commands are considered timed out"
+    },
+    "execTimeout": {
+      "type": "number",
+      "default": 60000,
+      "description": "Time, in milliseconds, to wait for a system command to finish executing during a cy.exec() command"
+    },
+    "pageLoadTimeout": {
+      "type": "number",
+      "default": 60000,
+      "description": "Time, in milliseconds, to wait for page transition events or cy.visit(), cy.go(), cy.reload() commands to fire their page load events"
+    },
+    "requestTimeout": {
+      "type": "number",
+      "default": 5000,
+      "description": "Time, in milliseconds, to wait for an XHR request to go out in a cy.wait() command"
+    },
+    "responseTimeout": {
+      "type": "number",
+      "default": 30000,
+      "description": "Time, in milliseconds, to wait until a response in a cy.request(), cy.wait(), cy.fixture(), cy.getCookie(), cy.getCookies(), cy.setCookie(), cy.clearCookie(), cy.clearCookies(), and cy.screenshot() commands"
+    },
+    "fileServerFolder":	{
+      "type": "string",
+      "default": "root project folder",
+      "description": "Path to folder where application files will attempt to be served from"
+    },
+    "fixturesFolder": {
+      "type": ["string", "boolean"],
+      "default": "cypress/fixtures",
+      "description": "Path to folder containing fixture files (Pass false to disable)"
+    },
+    "integrationFolder": {
+      "type": "string",
+      "default": "cypress/integration",
+      "description": "Path to folder containing integration test files"
+    },
+    "pluginsFile": {
+      "type": ["string", "boolean"],
+      "default": "cypress/plugins/index.js",
+      "description": "Path to plugins file. (Pass false to disable)"
+    },
+    "screenshotsFolder": {
+      "type": "string",
+      "default": "cypress/screenshots",
+      "description": "Path to folder where screenshots will be saved from cy.screenshot() command or after a headless or CI run’s test failure"
+    },
+    "supportFile": {
+      "type": ["string", "boolean"],
+      "default": "cypress/support/index.js",
+      "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)"
+    },
+    "videosFolder":	{
+      "type": "string",
+      "default": "cypress/videos",
+      "description": "Path to folder where videos will be saved after a headless or CI run"
+    },
+    "trashAssetsBeforeRuns": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs."
+    },
+    "videoCompression":	{
+      "type": ["number", "boolean"],
+      "default": 32,
+      "description": "The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size)."
+    },
+    "video": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will record a video of the test run when running headlessly."
+    },
+    "videoUploadOnPasses": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests."
+    },
+    "chromeWebSecurity": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this at https://on.cypress.io/web-security"
+    },
+    "userAgent": {
+      "type": "string",
+      "default": null,
+      "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See User-Agent MDN Documentation for example user agent values here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent"
+    },
+    "blacklistHosts": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      },
+      "default": null,
+      "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blacklistHosts"
+    },
+    "modifyObstructiveCode": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will search for and replace obstructive JS code found in .js or .html files that prevents Cypress from working. Please read the notes for more information on this setting. https://on.cypress.io/configuration#modifyObstructiveCode"
+    },
+    "viewportHeight":	{
+      "type": "number",
+      "default": 660,
+      "description": "Default height in pixels for the application under tests’ viewport (Override with cy.viewport() command)"
+    },
+    "viewportWidth": {
+      "type": "number",
+      "default": 1000,
+      "description": "Default width in pixels for the application under tests’ viewport. (Override with cy.viewport() command)"
+    },
+    "animationDistanceThreshold":	{
+      "type": "number",
+      "default": 5,
+      "description": "The distance in pixels an element must exceed over time to be considered animating"
+    },
+    "waitForAnimations": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to wait for elements to finish animating before executing commands"
+    },
+    "projectId": {
+      "type": "string",
+      "default": null,
+      "description": "A 6 character string to identify this project with Dashboard service. See https://on.cypress.io/dashboard-service#Identification"
+    }
+  }
+}

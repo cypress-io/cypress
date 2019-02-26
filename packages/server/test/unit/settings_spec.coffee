@@ -2,6 +2,7 @@ require("../spec_helper")
 
 path = require("path")
 R = require("ramda")
+fs = require("#{root}lib/util/fs")
 settings = require("#{root}lib/util/settings")
 
 projectRoot = process.cwd()
@@ -60,18 +61,18 @@ describe "lib/settings", ->
 
   context ".id", ->
     beforeEach ->
-      @projectPath = path.join(projectRoot, "_test-output/path/to/project/")
-      fs.ensureDirAsync(@projectPath)
+      @projectRoot = path.join(projectRoot, "_test-output/path/to/project/")
+      fs.ensureDirAsync(@projectRoot)
 
     afterEach ->
-      fs.removeAsync("#{@projectPath}cypress.json")
+      fs.removeAsync("#{@projectRoot}cypress.json")
 
     it "returns project id for project", ->
-      fs.writeJsonAsync("#{@projectPath}cypress.json", {
+      fs.writeJsonAsync("#{@projectRoot}cypress.json", {
         projectId: "id-123"
       })
       .then =>
-        settings.id(@projectPath)
+        settings.id(@projectRoot)
       .then (id) ->
         expect(id).to.equal("id-123")
 

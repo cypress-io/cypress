@@ -1,20 +1,19 @@
 _             = require("lodash")
-fs            = require("fs-extra")
 path          = require("path")
-uuid          = require("node-uuid")
+debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
+fs            = require("./util/fs")
 open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
+task          = require("./task")
 files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
-logger        = require("./logger")
 automation    = require("./automation")
 preprocessor  = require("./plugins/preprocessor")
-log           = require('debug')('cypress:server:socket')
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -50,26 +49,30 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket(config)
 
+    @ended = false
+
     @onTestFileChange = @onTestFileChange.bind(@)
 
     if config.watchForFileChanges
       preprocessor.emitter.on("file:updated", @onTestFileChange)
 
   onTestFileChange: (filePath) ->
-    log("test file changed: #{filePath}")
+    debug("test file changed %o", filePath)
 
     fs.statAsync(filePath)
     .then =>
       @io.emit("watched:file:changed")
     .catch ->
-      log("could not find test file that changed: #{filePath}")
+      debug("could not find test file that changed %o", filePath)
 
+  ## TODO: clean this up by sending the spec object instead of
+  ## the url path
   watchTestFileByPath: (config, originalFilePath, options) ->
     ## files are always sent as integration/foo_spec.js
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
-    log("watch test file #{originalFilePath}")
-    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
+    debug("watch test file %o", originalFilePath)
+    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration#{path.sep}", ""))
     filePath = path.relative(config.projectRoot, filePath)
 
     ## bail if this is special path like "__all"
@@ -85,9 +88,9 @@ class Socket
 
     ## store this location
     @testFilePath = filePath
-    log("will watch test file path #{filePath}")
+    debug("will watch test file path %o", filePath)
 
-    preprocessor.getFile(filePath, config, options)
+    preprocessor.getFile(filePath, config)
     ## ignore errors b/c we're just setting up the watching. errors
     ## are handled by the spec controller
     .catch ->
@@ -161,7 +164,7 @@ class Socket
       automation.request(message, data, onAutomationClientRequestCallback)
 
     @io.on "connection", (socket) =>
-      log("socket connected")
+      debug("socket connected")
 
       ## cache the headers so we can access
       ## them at any time
@@ -172,11 +175,14 @@ class Socket
 
         automationClient = socket
 
-        log("automation:client connected")
+        debug("automation:client connected")
 
         ## if our automation disconnects then we're
         ## in trouble and should probably bomb everything
         automationClient.on "disconnect", =>
+          ## if we've stopped then don't do anything
+          return if @ended
+
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
           Promise.delay(500)
           .then =>
@@ -203,7 +209,7 @@ class Socket
         socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
-        log("automation:request", message, data)
+        debug("automation:request %s %o", message, data)
 
         automationRequest(message, data)
         .then (resp) ->
@@ -279,7 +285,7 @@ class Socket
         ## cb is always the last argument
         cb = args.pop()
 
-        log("backend:request", eventName, cb, args)
+        debug("backend:request %o", { eventName, args })
 
         backendRequest = ->
           switch eventName
@@ -299,6 +305,8 @@ class Socket
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "exec"
               exec.run(config.projectRoot, args[0])
+            when "task"
+              task.run(config.pluginsFile, args[0])
             else
               throw new Error(
                 "You requested a backend event we cannot handle: #{eventName}"
@@ -332,6 +340,8 @@ class Socket
           @toReporter(event, data)
 
   end: ->
+    @ended = true
+
     ## TODO: we need an 'ack' from this end
     ## event from the other side
     @io and @io.emit("tests:finished")

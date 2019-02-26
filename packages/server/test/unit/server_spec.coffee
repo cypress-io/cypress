@@ -22,7 +22,7 @@ describe "lib/server", ->
       close: ->
       port: -> 1111
     }
-    @sandbox.stub(fileServer, "create").returns(@fileServer)
+    sinon.stub(fileServer, "create").returns(@fileServer)
 
     config.set({projectRoot: "/foo/bar/"})
     .then (cfg) =>
@@ -36,7 +36,7 @@ describe "lib/server", ->
 
   context "#createExpressApp", ->
     beforeEach ->
-      @use = @sandbox.spy(express.application, "use")
+      @use = sinon.spy(express.application, "use")
 
     it "instantiates express instance without morgan", ->
       app = @server.createExpressApp(false)
@@ -49,10 +49,10 @@ describe "lib/server", ->
 
   context "#open", ->
     beforeEach ->
-      @sandbox.stub(@server, "createServer").resolves()
+      sinon.stub(@server, "createServer").resolves()
 
     it "calls #createExpressApp with morgan", ->
-      @sandbox.spy(@server, "createExpressApp")
+      sinon.spy(@server, "createExpressApp")
 
       _.extend @config, {port: 54321, morgan: false}
 
@@ -65,8 +65,8 @@ describe "lib/server", ->
 
       obj = {}
 
-      @sandbox.stub(@server, "createRoutes")
-      @sandbox.stub(@server, "createExpressApp").returns(obj)
+      sinon.stub(@server, "createRoutes")
+      sinon.stub(@server, "createExpressApp").returns(obj)
 
       @server.open(@config)
       .then =>
@@ -75,8 +75,8 @@ describe "lib/server", ->
     it "calls #createRoutes with app + config", ->
       obj = {}
 
-      @sandbox.stub(@server, "createRoutes")
-      @sandbox.stub(@server, "createExpressApp").returns(obj)
+      sinon.stub(@server, "createRoutes")
+      sinon.stub(@server, "createExpressApp").returns(obj)
 
       @server.open(@config)
       .then =>
@@ -85,15 +85,15 @@ describe "lib/server", ->
     it "calls #createServer with port + fileServerFolder + socketIoRoute + app", ->
       obj = {}
 
-      @sandbox.stub(@server, "createRoutes")
-      @sandbox.stub(@server, "createExpressApp").returns(obj)
+      sinon.stub(@server, "createRoutes")
+      sinon.stub(@server, "createExpressApp").returns(obj)
 
       @server.open(@config)
       .then =>
         expect(@server.createServer).to.be.calledWith(obj, @config)
 
     it "calls logger.setSettings with config", ->
-      @sandbox.spy(logger, "setSettings")
+      sinon.spy(logger, "setSettings")
 
       @server.open(@config)
       .then (ret) =>
@@ -115,7 +115,7 @@ describe "lib/server", ->
         expect(port).to.eq(@port)
 
     it "resolves with warning if cannot connect to baseUrl", ->
-      @sandbox.stub(connect, "ensureUrl").rejects()
+      sinon.stub(connect, "ensureUrl").rejects()
       @server.createServer(@app, {port: @port, baseUrl: "http://localhost:#{@port}"})
       .spread (port, warning) =>
         expect(warning.type).to.eq("CANNOT_CONNECT_BASE_URL_WARNING")
@@ -134,7 +134,7 @@ describe "lib/server", ->
 
   context "#end", ->
     it "calls this._socket.end", ->
-      socket = @sandbox.stub({
+      socket = sinon.stub({
         end: ->
         close: ->
       })
@@ -149,7 +149,7 @@ describe "lib/server", ->
 
   context "#startWebsockets", ->
     beforeEach ->
-      @startListening = @sandbox.stub(Socket.prototype, "startListening")
+      @startListening = sinon.stub(Socket.prototype, "startListening")
 
     it "sets _socket and calls _socket#startListening", ->
       @server.open(@config)
@@ -160,7 +160,7 @@ describe "lib/server", ->
 
   context "#reset", ->
     beforeEach ->
-      @sandbox.stub(buffers, "reset")
+      sinon.stub(buffers, "reset")
 
     it "resets the buffers", ->
       @server.reset()
@@ -199,7 +199,7 @@ describe "lib/server", ->
         expect(logger.getSettings()).to.be.undefined
 
     it "calls close on this._socket", ->
-      @server._socket = {close: @sandbox.spy()}
+      @server._socket = {close: sinon.spy()}
 
       @server.close()
       .then =>
@@ -207,8 +207,11 @@ describe "lib/server", ->
 
   context "#proxyWebsockets", ->
     beforeEach ->
-      @proxy  = @sandbox.stub({ws: ->})
-      @socket = @sandbox.stub({end: ->})
+      @proxy  = sinon.stub({
+        ws: ->
+        on: ->
+      })
+      @socket = sinon.stub({end: ->})
       @head   = {}
 
     it "is noop if req.url startsWith socketIoRoute", ->
@@ -262,6 +265,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("https://staging.google.com/foo/bar")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "https://staging.google.com"
         strategy: "http"
         domainName: "google.com"
@@ -278,6 +282,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("http://staging.google.com/foo/bar")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "http://staging.google.com"
         strategy: "http"
         domainName: "google.com"
@@ -294,6 +299,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "http://localhost:4200"
         strategy: "http"
         domainName: "localhost"
@@ -318,6 +324,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("/index.html")
 
       expect(ret).to.deep.eq({
+        auth: undefined
         origin: "http://localhost:9999"
         strategy: "file"
         domainName: "localhost"

@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
 import cs from 'classnames'
-import { action } from 'mobx'
+import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
@@ -9,13 +9,16 @@ import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
+import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
-import eventManager from '../lib/event-manager'
-import windowUtil from '../lib/window-util'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import util from '../lib/util'
 
 @observer
 export default class Iframes extends Component {
+  _disposers = []
+
   render () {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
@@ -41,20 +44,30 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    const specPath = windowUtil.specPath()
-
     this.autIframe = new AutIframe(this.props.config)
 
-    eventManager.on('visit:failed', this.autIframe.showVisitFailure)
-    eventManager.on('script:error', this._setScriptError)
+    this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
+    this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
+    this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
+    this.props.eventManager.on('script:error', this._setScriptError)
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
-    eventManager.on('restart', () => {
-      this._run(this.props.config, specPath)
+    this.props.eventManager.on('restart', () => {
+      this._run(this.props.config)
     })
 
-    eventManager.start(this.props.config, specPath)
+    this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
+
+    this._disposers.push(autorun(() => {
+      this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
+    }))
+
+    this._disposers.push(autorun(() => {
+      this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
+    }))
+
+    this.props.eventManager.start(this.props.config)
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
@@ -63,13 +76,14 @@ export default class Iframes extends Component {
       highlightEl: this.autIframe.highlightEl,
       detachDom: () => {
         const Cypress = eventManager.getCypress()
+
         if (Cypress) {
           return this.autIframe.detachDom(Cypress)
         }
       },
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
-          eventManager={eventManager}
+          eventManager={this.props.eventManager}
           snapshotProps={snapshotProps}
           state={this.props.state}
           onToggleHighlights={this._toggleSnapshotHighlights}
@@ -78,23 +92,25 @@ export default class Iframes extends Component {
       ),
     })
     this.iframeModel.listen()
-    this._run(this.props.config, specPath)
+    this._run(this.props.config)
   }
 
   @action _setScriptError = (err) => {
     this.props.state.scriptError = err
   }
 
-  _run = (config, specPath) => {
+  _run = (config) => {
+    const specPath = util.specPath()
+
     this.props.eventManager.notifyRunningSpec(specPath)
     logger.clearLog()
     this._setScriptError(null)
 
-    eventManager.setup(config, specPath)
+    this.props.eventManager.setup(config, specPath)
 
     this._loadIframes(specPath)
     .then(($autIframe) => {
-      eventManager.initialize($autIframe, config)
+      this.props.eventManager.initialize($autIframe, config)
     })
   }
 
@@ -107,6 +123,7 @@ export default class Iframes extends Component {
 
       const $container = $(this.refs.container).empty()
       const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
+
       this.autIframe.showBlankContents()
 
       const $specIframe = $('<iframe />', {
@@ -125,6 +142,7 @@ export default class Iframes extends Component {
 
     if (this.props.state.snapshot.showingHighlights) {
       const snapshot = snapshotProps.snapshots[this.props.state.snapshot.stateIndex]
+
       this.autIframe.highlightEl(snapshot, snapshotProps)
     } else {
       this.autIframe.removeHighlights()
@@ -133,6 +151,7 @@ export default class Iframes extends Component {
 
   _changeSnapshotState = (snapshotProps, index) => {
     const snapshot = snapshotProps.snapshots[index]
+
     this.props.state.snapshot.stateIndex = index
     this.autIframe.restoreDom(snapshot)
 
@@ -151,8 +170,19 @@ export default class Iframes extends Component {
     }
   }
 
+  _printSelectorElementsToConsole = () => {
+    this.autIframe.printSelectorElementsToConsole()
+  }
+
   componentWillUnmount () {
     this.props.eventManager.notifyRunningSpec(null)
-    eventManager.stop()
+    this.props.eventManager.stop()
+    this._disposers.forEach((dispose) => {
+      dispose()
+    })
+  }
+
+  getSizeContainer () {
+    return this.refs.container
   }
 }

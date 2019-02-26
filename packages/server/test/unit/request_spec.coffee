@@ -29,7 +29,7 @@ describe "lib/request", ->
 
   context "#normalizeResponse", ->
     beforeEach ->
-      @push = @sandbox.stub()
+      @push = sinon.stub()
 
     it "sets status to statusCode and deletes statusCode", ->
       expect(request.normalizeResponse(@push, {
@@ -74,10 +74,10 @@ describe "lib/request", ->
 
   context "#send", ->
     beforeEach ->
-      @fn = @sandbox.stub()
+      @fn = sinon.stub()
 
     it "sets strictSSL=false", ->
-      init = @sandbox.spy(request.rp.Request.prototype, "init")
+      init = sinon.spy(request.rp.Request.prototype, "init")
 
       nock("http://www.github.com")
       .get("/foo")
@@ -271,6 +271,7 @@ describe "lib/request", ->
     it "sets duration on response", ->
       nock("http://localhost:8080")
       .get("/foo")
+      .delay(10)
       .reply(200, "123", {
         "Content-Type": "text/plain"
       })
@@ -496,7 +497,7 @@ describe "lib/request", ->
           expect(resp.body).to.eq("<html></html>")
 
       it "does not send body", ->
-        init = @sandbox.spy(request.rp.Request.prototype, "init")
+        init = sinon.spy(request.rp.Request.prototype, "init")
 
         body =  {
           foo: "bar"
@@ -517,7 +518,7 @@ describe "lib/request", ->
           expect(init).not.to.be.calledWithMatch({body: body})
 
       it "does not set json=true", ->
-        init = @sandbox.spy(request.rp.Request.prototype, "init")
+        init = sinon.spy(request.rp.Request.prototype, "init")
 
         request.send({}, @fn, {
           url: "http://localhost:8080/login"

@@ -1,8 +1,8 @@
 _        = require("lodash")
 Promise  = require("bluebird")
 winston  = require("winston")
-fs       = require("fs-extra")
 pkg      = require("@packages/root")
+path     = require("path")
 
 api      = require("./api")
 user     = require("./user")
@@ -11,11 +11,12 @@ system   = require("./util/system")
 
 ## strip everything but the file name to remove any sensitive
 ## data in the path
-pathRe = /'?((\/|\\|[a-z]:\\)[^\s']+)+'?/ig
+pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/ig
+pathSepRe = /[\/\\]+/
 fileNameRe = /[^\s'/]+\.\w+:?\d*$/i
 stripPath = (text) ->
   (text or "").replace pathRe, (path) ->
-    fileName = _.last(path.split("/")) or ""
+    fileName = _.last(path.split(pathSepRe)) or ""
     "<stripped-path>#{fileName}"
 
 ## POST https://api.cypress.io/exceptions

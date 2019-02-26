@@ -657,6 +657,18 @@ describe "src/cy/commands/assertions", ->
           cy.get("body").then ($body) ->
             expect($body).to.exist
 
+        it "matches empty string attributes", (done) ->
+          cy.on "log:added", (attrs, log) =>
+            if attrs.name is "assert"
+              cy.removeAllListeners("log:added")
+
+              expect(log.get("message")).to.eq "expected **<input>** to have attribute **value** with the value **''**"
+              done()
+
+          cy.$$("body").prepend $("<input value='' />")
+          cy.get("input").eq(0).then ($input) ->
+            expect($input).to.have.attr('value', '')
+
         describe "without selector", ->
           it "exists", (done) ->
             cy.on "log:added", (attrs, log) =>
@@ -741,6 +753,11 @@ describe "src/cy/commands/assertions", ->
 
       it "calls super when not DOM element", ->
         cy.noop("foobar").should("contain", "oob")
+
+      ## https://github.com/cypress-io/cypress/issues/3549
+      it "is true when DOM el and not jQuery el contains text", ->
+        cy.get("div").then ($el) ->
+          cy.wrap($el[1]).should("contain", "Nested Find")
 
       it "escapes quotes", ->
         $span = "<span id=\"escape-quotes\">shouldn't and can\"t</span>"

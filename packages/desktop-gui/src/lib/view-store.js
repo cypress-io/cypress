@@ -16,8 +16,8 @@ class ViewStore {
   }
 
   @action showApp () {
-    if (appStore.projectPath) {
-      this.showProjectSpecs(projectsStore.getProjectByPath(appStore.projectPath))
+    if (appStore.projectRoot) {
+      this.showProjectSpecs(projectsStore.getProjectByPath(appStore.projectRoot))
     } else {
       this.showIntro()
     }

@@ -1,0 +1,15 @@
+{
+  "exclude": [
+    "**/.git/**",
+    "**/.cache/**",
+    "**/.history/**",
+    "**/.projects/**",
+    "**/.publish/**",
+    "**/node_modules/**",
+    "**/app/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/dist-test/**",
+    "**/.cy/**"
+  ]
+}

@@ -1,5 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:cli')
+
+const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 
@@ -7,12 +9,13 @@ const verify = require('../tasks/verify')
 // and forms list of CLI arguments to the server
 const processRunOptions = (options = {}) => {
   debug('processing run options')
+
   const args = ['--run-project', options.project]
 
-  //// if key is set use that - else attempt to find it by env var
+  //// if key is set use that - else attempt to find it by environment variable
   if (options.key == null) {
     debug('--key is not set, looking up environment variable CYPRESS_RECORD_KEY')
-    options.key = process.env.CYPRESS_RECORD_KEY || process.env.CYPRESS_CI_KEY
+    options.key = util.getEnv('CYPRESS_RECORD_KEY') || util.getEnv('CYPRESS_CI_KEY')
   }
 
   if (options.env) {
@@ -27,7 +30,7 @@ const processRunOptions = (options = {}) => {
     args.push('--port', options.port)
   }
 
-  //// if we have a specific spec push that into the args
+  // if we have specific spec(s) push that into the args
   if (options.spec) {
     args.push('--spec', options.spec)
   }
@@ -61,6 +64,18 @@ const processRunOptions = (options = {}) => {
     args.push('--record', options.record)
   }
 
+  if (options.parallel) {
+    args.push('--parallel')
+  }
+
+  if (options.group) {
+    args.push('--group', options.group)
+  }
+
+  if (options.ciBuildId) {
+    args.push('--ci-build-id', options.ciBuildId)
+  }
+
   if (options.outputPath) {
     args.push('--output-path', options.outputPath)
   }
@@ -73,21 +88,11 @@ const processRunOptions = (options = {}) => {
     args.push('--headed', options.headed)
   }
 
-  if (options.group != null) {
-    args.push('--group', options.group)
-  }
-
-  if (options.groupId) {
-    args.push('--group-id', options.groupId)
+  if (options.exit === false) {
+    args.push('--no-exit')
   }
 
   return args
-}
-
-const run = (options) => () => {
-  const args = processRunOptions(options)
-  debug('run to spawn.start args %j', args)
-  return spawn.start(args)
 }
 
 module.exports = {
@@ -102,7 +107,21 @@ module.exports = {
       project: process.cwd(),
     })
 
+    function run () {
+      const args = processRunOptions(options)
+
+      debug('run to spawn.start args %j', args)
+
+      return spawn.start(args, {
+        dev: options.dev,
+      })
+    }
+
+    if (options.dev) {
+      return run()
+    }
+
     return verify.start()
-    .then(run(options))
+    .then(run)
   },
 }

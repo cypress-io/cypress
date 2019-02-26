@@ -35,7 +35,7 @@ describe "src/cy/commands/exec", ->
 
     it "really works", ->
       # output is trimmed
-      cy.exec("echo foo").its("stdout").should("eq", "foo")
+      cy.exec("echo foo", { timeout: 20000 }).its("stdout").should("eq", "foo")
 
     describe ".log", ->
       beforeEach ->
@@ -190,7 +190,7 @@ describe "src/cy/commands/exec", ->
 
       it "can timeout from the backend's response", (done) ->
         err = new Error("timeout")
-        err.timedout = true
+        err.timedOut = true
 
         Cypress.backend.rejects(err)
 

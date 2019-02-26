@@ -9,8 +9,8 @@ describe "lib/plugins/util", ->
   context "#wrapIpc", ->
     beforeEach ->
       @theProcess = {
-        send: @sandbox.spy()
-        on: @sandbox.stub()
+        send: sinon.spy()
+        on: sinon.stub()
       }
 
       @ipc = util.wrapIpc(@theProcess)
@@ -28,7 +28,7 @@ describe "lib/plugins/util", ->
       expect(@theProcess.send).not.to.be.called
 
     it "#on listens for process messages that match event", ->
-      handler = @sandbox.spy()
+      handler = sinon.spy()
       @ipc.on("event-name", handler)
       @theProcess.on.yield({
         event: "event-name"
@@ -37,7 +37,7 @@ describe "lib/plugins/util", ->
       expect(handler).to.be.calledWith("arg1", "arg2")
 
     it "#removeListener emoves handler", ->
-      handler = @sandbox.spy()
+      handler = sinon.spy()
       @ipc.on("event-name", handler)
       @ipc.removeListener("event-name", handler)
       @theProcess.on.yield({
@@ -49,13 +49,13 @@ describe "lib/plugins/util", ->
   context "#wrapChildPromise", ->
     beforeEach ->
       @ipc = {
-        send: @sandbox.spy()
-        on: @sandbox.stub()
-        removeListener: @sandbox.spy()
+        send: sinon.spy()
+        on: sinon.stub()
+        removeListener: sinon.spy()
       }
-      @invoke = @sandbox.stub()
+      @invoke = sinon.stub()
       @ids = {
-        callbackId: 0
+        eventId: 0
         invocationId: "00"
       }
       @args = []
@@ -72,6 +72,11 @@ describe "lib/plugins/util", ->
       @invoke.resolves("value")
       util.wrapChildPromise(@ipc, @invoke, @ids).then =>
         expect(@ipc.send).to.be.calledWith("promise:fulfilled:00", null, "value")
+
+    it "serializes undefined", ->
+      @invoke.resolves(undefined)
+      util.wrapChildPromise(@ipc, @invoke, @ids).then =>
+        expect(@ipc.send).to.be.calledWith("promise:fulfilled:00", null, "__cypress_undefined__")
 
     it "sends 'promise:fulfilled:{invocatationId}' with error when promise rejects", ->
       err = new Error("fail")
@@ -90,11 +95,11 @@ describe "lib/plugins/util", ->
   context "#wrapParentPromise", ->
     beforeEach ->
       @ipc = {
-        send: @sandbox.spy()
-        on: @sandbox.stub()
-        removeListener: @sandbox.spy()
+        send: sinon.spy()
+        on: sinon.stub()
+        removeListener: sinon.spy()
       }
-      @callback = @sandbox.spy()
+      @callback = sinon.spy()
 
     it "returns a promise", ->
       expect(util.wrapParentPromise(@ipc, 0, @callback)).to.be.an.instanceOf(Promise)
@@ -105,6 +110,13 @@ describe "lib/plugins/util", ->
       @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(null, "value")
       promise.then (value) ->
         expect(value).to.equal("value")
+
+    it "deserializes undefined", ->
+      promise = util.wrapParentPromise(@ipc, 0, @callback)
+      invocationId = @callback.lastCall.args[0]
+      @ipc.on.withArgs("promise:fulfilled:#{invocationId}").yield(null, "__cypress_undefined__")
+      promise.then (value) ->
+        expect(value).to.equal(undefined)
 
     it "rejects the promise when 'promise:fulfilled:{invocationId}' event is received with error", ->
       promise = util.wrapParentPromise(@ipc, 0, @callback)

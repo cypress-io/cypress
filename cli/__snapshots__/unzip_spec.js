@@ -9,7 +9,7 @@ https://github.com/cypress-io/cypress/issues
 Error: end of central directory record signature not found
 ----------
 
-Platform: darwin (test release)
+Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `

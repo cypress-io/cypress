@@ -12,11 +12,13 @@ const loadRuns = (runsStore) => {
   ipc.getRuns()
   .then((runs) => {
     runsStore.setRuns(runs)
+
     return null
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch((err) => {
     runsStore.setError(err)
+
     return null
   })
 

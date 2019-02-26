@@ -13,6 +13,14 @@
   .is-reporter-sized & {
     min-width: 0;
   }
+
+  .reporter {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
 }
 
 .reporter .container {
@@ -31,6 +39,16 @@
 
     background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
   }
+
+  &.screenshotting {
+    background: #fff;
+    box-shadow: none;
+    left: 0;
+
+    .aut-iframe {
+      box-shadow: none;
+    }
+  }
 }
 
 .runner-resizer {
@@ -39,4 +57,49 @@
   position: absolute;
   top: 0;
   width: 5px;
+}
+
+.screenshot-helper-pixels {
+  div {
+    height: 1px;
+    width: 1px;
+    position: fixed;
+    z-index: 10;
+  }
+
+  div:nth-child(1) {
+    background: #ccc;
+    left: 0;
+    top: 0;
+  }
+
+  div:nth-child(2) {
+    background: white;
+    left: 1px;
+    top: 0;
+  }
+
+  div:nth-child(3) {
+    background: white;
+    left: 0;
+    top: 1px;
+  }
+
+  div:nth-child(4) {
+    background: white;
+    right: 0;
+    top: 0;
+  }
+
+  div:nth-child(5) {
+    background: white;
+    bottom: 0;
+    left: 0;
+  }
+
+  div:nth-child(6) {
+    background: black;
+    bottom: 0;
+    right: 0;
+  }
 }

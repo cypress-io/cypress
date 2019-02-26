@@ -1,24 +1,39 @@
-let chai = require('chai')
-let chaiEnzyme = require('chai-enzyme')
-let jsdom = require('jsdom').jsdom
-let sinonChai = require('sinon-chai')
+const chai = require('chai')
+const JSDOM = require('jsdom').JSDOM
+const sinonChai = require('sinon-chai')
 
-let exposedProperties = ['window', 'navigator', 'document']
-
-/* global document */
 // http://airbnb.io/enzyme/docs/guides/jsdom.html
-global.document = jsdom('')
-global.window = document.defaultView
-Object.keys(document.defaultView).forEach((property) => {
-  if (typeof global[property] === 'undefined') {
-    exposedProperties.push(property)
-    global[property] = document.defaultView[property]
-  }
-})
+const jsdom = new JSDOM('<!doctype html><html><body></body></html>')
+const { window } = jsdom
+
+global.window = window
+global.document = window.document
 global.navigator = {
-  appVersion: 'node',
   userAgent: 'node.js',
 }
+global.requestAnimationFrame = function (callback) {
+  return setTimeout(callback, 0)
+}
+global.cancelAnimationFrame = function (id) {
+  clearTimeout(id)
+}
+Object.keys(window.document.defaultView).forEach((property) => {
+  if (
+    property === 'localStorage' ||
+    property === 'sessionStorage' ||
+    typeof global[property] !== 'undefined'
+  ) return
+
+  global[property] = window.document.defaultView[property]
+})
+
+// enzyme, and therefore chai-enzyme, needs to be required after
+// global.navigator is set up (https://github.com/airbnb/enzyme/issues/395)
+const enzyme = require('enzyme')
+const EnzymeAdapter = require('enzyme-adapter-react-16')
+const chaiEnzyme = require('chai-enzyme')
+
+enzyme.configure({ adapter: new EnzymeAdapter() })
 
 chai.use(chaiEnzyme())
 chai.use(sinonChai)

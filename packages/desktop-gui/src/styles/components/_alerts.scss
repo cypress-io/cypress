@@ -15,6 +15,10 @@
     }
   }
 
+  .header {
+    margin-bottom: 10px;
+  }
+
   &.alert-dismissable .close, &.alert-dismissible .close {
     position: absolute;
     top: 10px;
@@ -38,6 +42,29 @@
   text-align: center;
   padding: 20px;
   margin: 80px 60px 60px;
+
+  .alert-content {
+    text-align: left;
+  }
+
+  code, pre {
+    background-color: #f9f2f4;
+    color: #a94442;
+    border: none;
+  }
+
+  code {
+    padding: 1px 4px;
+  }
+
+  summary {
+    cursor: pointer;
+    outline: none;
+  }
+
+  summary:focus {
+    text-decoration: underline;
+  }
 }
 
 .global-error {
@@ -50,6 +77,12 @@
 
 .project-content .alert-warning {
   position: relative;
+  border-bottom: 1px solid #ddd;
+
+  code, pre {
+    color: #8a6d3b;
+    border: none;
+  }
 }
 
 .project-content .alert-warning,

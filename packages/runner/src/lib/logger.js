@@ -37,21 +37,26 @@ export default {
 
   _formatted (consoleProps) {
     const maxKeyLength = this._getMaxKeyLength(consoleProps)
+
     return _.reduce(consoleProps, (memo, value, key) => {
       const append = ': '
+
       key = _.chain(key + append).capitalize().padEnd(maxKeyLength + append.length, ' ').value()
       memo[key] = value
+
       return memo
     }, {})
   },
 
   _getMaxKeyLength (obj) {
     const lengths = _(obj).keys().map('length').value()
+
     return Math.max(...lengths)
   },
 
   _logGroups (consoleProps) {
     const groups = this._getGroups(consoleProps)
+
     _.each(groups, (group) => {
       console.groupCollapsed(group.name)
       _.each(group.items, (value, key) => {
@@ -67,17 +72,21 @@ export default {
 
   _getGroups (consoleProps) {
     const groups = _.result(consoleProps, 'groups')
+
     if (!groups) return
 
     delete consoleProps.groups
+
     return _.map(groups, (group) => {
       group.items = this._formatted(group.items)
+
       return group
     })
   },
 
   _logTable (consoleProps) {
     const table = this._getTable(consoleProps)
+
     if (!table) return
 
     if (_.isArray(table)) {
@@ -91,9 +100,11 @@ export default {
 
   _getTable (consoleProps) {
     const table = _.result(consoleProps, 'table')
+
     if (!table) return
 
     delete consoleProps.table
+
     return table
   },
 }

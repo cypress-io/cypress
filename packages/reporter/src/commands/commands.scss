@@ -53,26 +53,7 @@
 
   .command {
     cursor: pointer;
-    padding: 1px 5px;
     margin: 0;
-
-    &:hover {
-      background-color: #E0E5E7;
-      box-shadow: 0 1px 2px #ccc inset;
-    }
-
-    &:hover .command-controls i.fa-pause {
-      visibility: visible;
-    }
-
-    &.active {
-      background-color: #E1E1E1 !important;
-      box-shadow: 0 1px 6px #ccc inset;
-    }
-
-    &.highlight {
-      background-color: #FFB61C !important;
-    }
   }
 
   .command-scaled {
@@ -83,10 +64,10 @@
   .command-is-event {
     font-style: italic;
 
-    span {
+    .command-method,
+    .command-message {
       color: #9a9aaa !important;
     }
-
   }
 
   .command-type-parent {
@@ -116,6 +97,12 @@
     display: flex;
     flex-wrap: wrap;
     color: #777;
+    padding: 1px 5px;
+
+    &:hover {
+      background-color: #E0E5E7;
+      box-shadow: 0 1px 2px #ccc inset;
+    }
 
     .command-alias {
       border-radius: 10px;
@@ -166,10 +153,20 @@
     color: #565554;
   }
 
-  .command-state-pending {
+  .command-state-pending > span > .command-wrapper {
     padding-left: 3px;
     border-left: 2px solid $pending;
     background-color: lighten($pending, 40%);
+    cursor: default;
+
+    &:hover {
+      box-shadow: none;
+    }
+
+    .command-number {
+      margin-left: 5px;
+      width: 20px;
+    }
 
     .command-number,
     .command-method,
@@ -178,10 +175,14 @@
     }
   }
 
-  .command-state-failed {
+  .command-state-failed > span > .command-wrapper {
     padding-left: 3px;
     border-left: 2px solid $fail;
     background-color: lighten($fail, 30%);
+
+    &:hover {
+      background: lighten($fail, 26%);
+    }
 
     .command-number,
     .command-method,
@@ -292,7 +293,6 @@
         span {
           background-color: $fail;
           color: white;
-
         }
       }
       .command-message {
@@ -355,34 +355,20 @@
     display: inline-block;
   }
 
-  .command-num-elements {
-    border-radius: 5px;
-    color: #fff;
+  .command-has-num-elements .num-elements,
+  .num-duplicates {
     display: none;
-    font-size: 85%;
-    line-height: 1;
-    margin-left: 5px;
-    padding: 1px 4px;
-    text-align: center;
-    vertical-align: baseline;
-    white-space: nowrap;
   }
 
-  .command-has-num-elements.command-has-no-elements .command-num-elements,
-  .command-has-num-elements.command-has-multiple-elements .command-num-elements {
+  .command-has-num-elements.no-elements .num-elements,
+  .command-has-num-elements.multiple-elements .num-elements,
+  .command-has-duplicates .num-duplicates {
     display: inline;
   }
 
-  .command-name-assert.command-has-num-elements .command-num-elements {
+  .command-is-duplicate .num-duplicates,
+  .command-name-assert.command-has-num-elements .num-elements {
     display: none;
-  }
-
-  .command-has-no-elements .command-num-elements {
-    background-color: #CC4239;
-  }
-
-  .command-has-multiple-elements .command-num-elements {
-    background-color: #476fc9;
   }
 
   .command-pin {
@@ -402,6 +388,59 @@
     }
   }
 
+  .command-expander {
+    color: #bcbccc;
+    display: none;
+    text-align: right;
+    padding-right: 8px;
+    width: 25px;
+
+    i {
+      @extend .#{$fa-css-prefix}-caret-right;
+    }
+
+    &:hover {
+      color: #999;
+    }
+  }
+
+  .command-has-duplicates,
+  .command-has-duplicates:hover {
+    .command-number {
+      display: block;
+    }
+
+    .command-number {
+      display: none;
+    }
+  }
+
+  .command-has-duplicates .command-expander {
+    display: block;
+  }
+
+  .command-is-duplicate {
+    &:first-child {
+      border-top: solid 1px #e3e3e3;
+    }
+
+    .command-expander {
+      visibility: hidden;
+    }
+  }
+
+  .command-is-open {
+    .command-expander {
+      i {
+        @extend .#{$fa-css-prefix}-caret-down;
+      }
+    }
+
+    .num-duplicates {
+      display: none;
+    }
+  }
+
   .command-is-pinned,
   .command:hover {
     .command-number {
@@ -413,7 +452,34 @@
     }
   }
 
-  .command-is-pinned {
+  .command-has-duplicates:hover .duplicates .command-pin,
+  .command-has-duplicates:hover > span > .command-wrapper .command-pin {
+    display: none;
+  }
+
+  .command-has-duplicates.command-is-pinned > span > .command-wrapper,
+  .command-is-duplicate.command-is-pinned > span > .command-wrapper,
+  .command-is-duplicate > span > .command-wrapper:hover {
+    .command-expander {
+      display: none;
+    }
+
+    .command-pin {
+      display: block;
+    }
+  }
+
+  .command-state-pending > span .command-wrapper:hover {
+    .command-number {
+      display: block;
+    }
+
+    .command-pin {
+      display: none;
+    }
+  }
+
+  .command-is-pinned > span > .command-wrapper {
     background: lighten($pinned, 40%);
     border-left: 2px solid $pinned;
     padding-left: 3px;
@@ -429,17 +495,6 @@
 
     .command-pin {
       color: $pinned;
-    }
-  }
-
-  &.is-running .command,
-  .command-other-pinned {
-    .command-number {
-      display: block !important;
-    }
-
-    .command-pin {
-      display: none !important;
     }
   }
 

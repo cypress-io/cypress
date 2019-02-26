@@ -76,21 +76,25 @@ class UpdateBanner extends Component {
           </li>
         </ol>
       )
-    } else {
-      return (
-        <ol>
-          <li>
-            <span>Quit this app.</span>
-          </li>
-          <li>
-            <span>Run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
-          </li>
-          <li>
-            <span>Run <a href='#' onClick={this._openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>
-          </li>
-        </ol>
-      )
     }
+
+    return (
+      <ol>
+        <li>
+          <span>Quit this app.</span>
+        </li>
+        <li>
+          <span>If using npm, run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
+          <br/>
+          <span>If using yarn, run <code>yarn add cypress@{appStore.newVersion}</code></span>
+
+        </li>
+        <li>
+          <span>Run <a href='#' onClick={this._openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>
+        </li>
+      </ol>
+    )
+
   }
 
   _checkForUpdate () {

@@ -1,5 +1,5 @@
 _            = require("lodash")
-hbs          = require("hbs")
+exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
 cookie       = require("cookie")
@@ -11,12 +11,15 @@ httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
-log          = require("debug")("cypress:server:server")
+compression  = require("compression")
+debug        = require("debug")("cypress:server:server")
 cors         = require("./util/cors")
+uri          = require("./util/uri")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
+blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
@@ -39,9 +42,12 @@ setProxiedUrl = (req) ->
   ## and only leave the path which is
   ## how browsers would normally send
   ## use their url
-  req.proxiedUrl = req.url
+  req.proxiedUrl = uri.removeDefaultPort(req.url)
 
-  req.url = url.parse(req.url).path
+  req.url = uri.getPath(req.url)
+
+notSSE = (req, res) ->
+  req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -55,7 +61,7 @@ class Server
     @_server     = null
     @_socket     = null
     @_baseUrl    = null
-    @_wsProxy    = null
+    @_nodeProxy  = null
     @_fileServer = null
     @_httpsProxy = null
 
@@ -64,7 +70,14 @@ class Server
 
     ## set the cypress config from the cypress.json file
     app.set("view engine", "html")
-    app.engine("html",     hbs.__express)
+
+    ## since we use absolute paths, configure express-handlebars to not automatically find layouts
+    ## https://github.com/cypress-io/cypress/issues/2891
+    app.engine("html", exphbs({
+      defaultLayout: false
+      layoutsDir: []
+      partialsDir: []
+    }))
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
@@ -81,7 +94,7 @@ class Server
       next()
 
     app.use require("cookie-parser")()
-    app.use require("compression")()
+    app.use compression({filter: notSSE})
     app.use require("morgan")("dev") if morgan
 
     ## errorhandler
@@ -105,6 +118,7 @@ class Server
 
   open: (config = {}, project) ->
     la(_.isPlainObject(config), "expected plain config object", config)
+
     Promise.try =>
       ## always reset any buffers
       ## TODO: change buffers to be an instance
@@ -118,12 +132,13 @@ class Server
       ## generate our request instance
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
+      @_nodeProxy = httpProxy.createProxyServer()
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
       @createServer(app, config, @_request)
 
@@ -133,10 +148,9 @@ class Server
 
   createServer: (app, config, request) ->
     new Promise (resolve, reject) =>
-      {port, fileServerFolder, socketIoRoute, baseUrl} = config
+      {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
       @_server  = http.createServer(app)
-      @_wsProxy = httpProxy.createProxyServer()
 
       allowDestroy(@_server)
 
@@ -148,9 +162,9 @@ class Server
           reject @portInUseErr(port)
 
       onUpgrade = (req, socket, head) =>
-        log("Got UPGRADE request from %s", req.url)
+        debug("Got UPGRADE request from %s", req.url)
 
-        @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
+        @proxyWebsockets(@_nodeProxy, socketIoRoute, req, socket, head)
 
       callListeners = (req, res) =>
         listeners = @_server.listeners("request").slice(0)
@@ -163,7 +177,7 @@ class Server
           upgrade.call(@_server, req, socket, head)
 
       @_server.on "connect", (req, socket, head) =>
-        log("Got CONNECT request from %s", req.url)
+        debug("Got CONNECT request from %s", req.url)
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -173,7 +187,21 @@ class Server
 
             word = if isMatching then "does" else "does not"
 
-            log("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+            debug("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+
+            ## if we are currently matching then we're
+            ## not making a direct connection anyway
+            ## so we only need to check this if we
+            ## have blacklist hosts and are not matching.
+            ##
+            ## if we have blacklisted hosts lets
+            ## see if this matches - if so then
+            ## we cannot allow it to make a direct
+            ## connection
+            if blacklistHosts and not isMatching
+              isMatching = blacklist.matches(urlToCheck, blacklistHosts)
+
+              debug("HTTPS request #{urlToCheck} matches blacklist?", isMatching)
 
             ## make a direct connection only if
             ## our req url does not match the origin policy
@@ -222,7 +250,7 @@ class Server
           resolve([port, warning])
 
   _port: ->
-    @_server?.address()?.port
+    _.chain(@_server).invoke("address").get("port").value()
 
   _listen: (port, onError) ->
     new Promise (resolve) =>
@@ -231,7 +259,7 @@ class Server
 
         @isListening = true
 
-        log("Server listening on port %s", port)
+        debug("Server listening on port %s", port)
 
         @_server.removeListener "error", onError
 
@@ -263,6 +291,7 @@ class Server
     # }
 
     props = _.extend({},  {
+      auth:       @_remoteAuth
       props:      @_remoteProps
       origin:     @_remoteOrigin
       strategy:   @_remoteStrategy
@@ -271,7 +300,7 @@ class Server
       fileServer: @_remoteFileServer
     })
 
-    log("Getting remote state: %o", props)
+    debug("Getting remote state: %o", props)
 
     return props
 
@@ -279,6 +308,12 @@ class Server
     @_request.send(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
+    debug("resolving visit %o", {
+      url: urlStr
+      headers
+      options
+    })
+
     request = @_request
 
     handlingLocalFile = false
@@ -298,6 +333,8 @@ class Server
     ## so we are idempotant and do not make
     ## another request
     if obj = buffers.getByOriginalUrl(urlStr)
+      debug("got previous request buffer for url:", urlStr)
+
       ## reset the cookies from the existing stream's jar
       request.setJarCookies(obj.jar, automationRequest)
       .then (c) ->
@@ -312,7 +349,7 @@ class Server
 
           @_remoteVisitingUrl = true
 
-          @_onDomainSet(urlStr)
+          @_onDomainSet(urlStr, options)
 
           ## TODO: instead of joining remoteOrigin here
           ## we can simply join our fileServer origin
@@ -332,6 +369,11 @@ class Server
           pt = str
           .on("error", error)
           .on "response", (incomingRes) =>
+            debug(
+              "got resolve:url response %o",
+              _.pick(incomingRes, "headers", "statusCode")
+            )
+
             str.removeListener("error", error)
             str.on "error", (err) ->
               ## if we have listeners on our
@@ -376,10 +418,18 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
+              debug("setting details resolving url %o", details)
+
+              ## TODO: think about moving this logic back into the
+              ## frontend so that the driver can be in control of
+              ## when the server should cache the request buffer
+              ## and set the domain vs not
               if isOk and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
-                @_onDomainSet(newUrl) if not handlingLocalFile
+                @_onDomainSet(newUrl, options) if not handlingLocalFile
+
+                debug("setting buffer for url:", newUrl)
 
                 buffers.set({
                   url: newUrl
@@ -390,6 +440,8 @@ class Server
                   response: incomingRes
                 })
               else
+                ## TODO: move this logic to the driver too for
+                ## the same reasons listed above
                 restorePreviousState()
 
               resolve(details)
@@ -398,6 +450,7 @@ class Server
           .pipe(stream.PassThrough())
 
         restorePreviousState = =>
+          @_remoteAuth         = previousState.auth
           @_remoteProps        = previousState.props
           @_remoteOrigin       = previousState.origin
           @_remoteStrategy     = previousState.strategy
@@ -408,6 +461,7 @@ class Server
         request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
+          auth: options.auth
           gzip: false
           url: urlFile ? urlStr
           headers: {
@@ -428,9 +482,13 @@ class Server
         .then(handleReqStream)
         .catch(error)
 
-  _onDomainSet: (fullyQualifiedUrl) ->
-    l = (type, url) ->
-      log("Setting %s %s", type, url)
+  _onDomainSet: (fullyQualifiedUrl, options = {}) ->
+    l = (type, val) ->
+      debug("Setting", type, val)
+
+    @_remoteAuth = options.auth
+
+    l("remoteAuth", @_remoteAuth)
 
     ## if this isn't a fully qualified url
     ## or if this came to us as <root> in our tests
@@ -439,7 +497,7 @@ class Server
     if fullyQualifiedUrl is "<root>" or not fullyQualifiedRe.test(fullyQualifiedUrl)
       @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_port()}"
       @_remoteStrategy = "file"
-      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer.port()}"
+      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer?.port()}"
       @_remoteDomainName = DEFAULT_DOMAIN_NAME
       @_remoteProps = null
 
@@ -500,6 +558,32 @@ class Server
       {protocol} = url.parse(remoteOrigin)
       {hostname} = url.parse("http://#{host}")
 
+      onProxyErr = (err, req, res) ->
+        ## by default http-proxy will call socket.end
+        ## with no data, so we need to override the end
+        ## function and write our own response
+        ## https://github.com/nodejitsu/node-http-proxy/blob/master/lib/http-proxy/passes/ws-incoming.js#L159
+        end = socket.end
+        socket.end = ->
+          socket.end = end
+
+          response = [
+            "HTTP/#{req.httpVersion} 502 #{statusCode.getText(502)}"
+            "X-Cypress-Proxy-Error-Message: #{err.message}"
+            "X-Cypress-Proxy-Error-Code: #{err.code}"
+          ].join("\r\n") + "\r\n\r\n"
+
+          proxiedUrl = "#{protocol}//#{hostname}:#{port}"
+
+          debug(
+            "Got ERROR proxying websocket connection to url: '%s' received error: '%s' with code '%s'",
+            proxiedUrl,
+            err.toString()
+            err.code
+          )
+
+          socket.end(response)
+
       proxy.ws(req, socket, head, {
         secure: false
         target: {
@@ -507,7 +591,7 @@ class Server
           port: port
           protocol: protocol
         }
-      })
+      }, onProxyErr)
     else
       ## we can't do anything with this socket
       ## since we don't know how to proxy it!

@@ -44,6 +44,11 @@
             margin-left: 0%;
           }
         }
+
+        [contenteditable] p {
+          display: block
+        }
+
       </style>
 
       DOM Fixture
@@ -143,6 +148,7 @@
         <input type="checkbox" name="colors" value="blue" />
         <input type="checkbox" name="colors" value="green" />
         <input type="checkbox" name="colors" value="red" />
+        <input type="tel">
       </form>
 
       <form>
@@ -238,6 +244,7 @@
         <form id="multiple-inputs-and-button-submit">
           <input name="fname" />
           <input name="lname" />
+          <button type="button">button</button>
           <button type="submit">submit me</button>
         </form>
 
@@ -280,8 +287,16 @@
         <input id="time-with-value" type="time" value="01:23:45" />
         <input id="time-without-value" type="time" />
 
+        <input id="tel-with-value" type="tel" value="678-999-8212" />
+        <input id="text-with-value" type="text" value="foo" />
+        <input id="datetime-with-value" type="datetime" value="2018-01-01T01:00" />
+        <input id="datetime-local-with-value" type="datetime-local" value="2018-01-01T01:00" />
+        <input id="search-with-value" type="search" value="query" />
+        <input id="url-with-value" type="url" value="cool.biz" />
+
         <div contenteditable="true"></div>
         <textarea></textarea>
+        <input id="bad-type" type="asdf" />
       </div>
 
       <table id="table">
@@ -375,6 +390,20 @@
 
       <div id="invisible" style="display: none;">i am not visible</div>
 
+      <div id="svgs">
+        <svg data-cy="line" width="300" height="200">
+          <line x1="50" y1="50" x2="250" y2="150" style="stroke:red; stroke-width:20;" />
+        </svg>
+        <svg tabindex="0" data-cy="rect" width="300" height="200">
+          <rect x="50" y="50" width="200" height="100" style="fill:orange; stroke:black; stroke-width:3;" />
+        </svg>
+        <svg data-cy="circle" width="300" height="200">
+          <circle cx="150" cy="100" r="70" style="fill:lime; stroke:black; stroke-width:3;" />
+        </svg>
+      </div>
+
+      <canvas id="canvas"></canvas>
+
       <div id="contains-multiple-filter-match">
         <ul class="k-group k-treeview-lines" role="group">
           <li role="treeitem" class="k-item k-first" data-uid="82e99592-f200-4ae3-b96d-cbbd53cfd1a1">
@@ -449,6 +478,16 @@
         <li>baz</li>
         <li>quux</li>
       </ul>
+
+      <div id="overflow-link" style="width:260px"><p>
+
+        this is some text that will <span class="wrapped" style="color:rgb(0, 0, 192)">wrap to a newline</span>
+        and cause the click to miss
+        
+      </p>
+      </div>
+
+
       <div id="massively-long-div" style="height: 500px; width: 200px; background-color: gray;"></div>
       <div id="form-header-region">
         <div>

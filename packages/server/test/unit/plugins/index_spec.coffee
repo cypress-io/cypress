@@ -10,17 +10,17 @@ describe "lib/plugins/index", ->
     plugins._reset()
 
     @pluginsProcess = {
-      send: @sandbox.spy()
-      on: @sandbox.stub()
-      kill: @sandbox.spy()
+      send: sinon.spy()
+      on: sinon.stub()
+      kill: sinon.spy()
     }
-    @sandbox.stub(cp, "fork").returns(@pluginsProcess)
+    sinon.stub(cp, "fork").returns(@pluginsProcess)
 
     @ipc = {
-      send: @sandbox.spy()
-      on: @sandbox.stub()
+      send: sinon.spy()
+      on: sinon.stub()
     }
-    @sandbox.stub(util, "wrapIpc").returns(@ipc)
+    sinon.stub(util, "wrapIpc").returns(@ipc)
 
   context "#init", ->
     it "is noop if no pluginsFile", ->
@@ -33,7 +33,7 @@ describe "lib/plugins/index", ->
       expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
 
     it "calls any handlers registered with the wrapped ipc", ->
-      handler = @sandbox.spy()
+      handler = sinon.spy()
       plugins.registerHandler(handler)
       plugins.init({ pluginsFile: "cypress-plugin" })
       expect(handler).to.be.called
@@ -61,36 +61,49 @@ describe "lib/plugins/index", ->
 
     describe "loaded message", ->
       beforeEach ->
-        @ipc.on.withArgs("loaded").yields([{
+        @config = {}
+
+        @ipc.on.withArgs("loaded").yields(@config, [{
           event: "some:event"
-          callbackId: 0
+          eventId: 0
         }])
         plugins.init({ pluginsFile: "cypress-plugin" })
 
       it "sends 'execute' message when event is executed, wrapped in promise", ->
-        @sandbox.stub(util, "wrapParentPromise").resolves("value").yields("00")
+        sinon.stub(util, "wrapParentPromise").resolves("value").yields("00")
 
         plugins.execute("some:event", "foo", "bar").then (value) =>
           expect(util.wrapParentPromise).to.be.called
           expect(@ipc.send).to.be.calledWith(
             "execute",
             "some:event",
-            { callbackId: 0, invocationId: "00" }
+            { eventId: 0, invocationId: "00" }
             ["foo", "bar"]
           )
           expect(value).to.equal("value")
 
     describe "load:error message", ->
-      beforeEach ->
-        @ipc.on.withArgs("load:error").yields("PLUGINS_FILE_ERROR", "path/to/pluginsFile.js", "error message")
+      context "PLUGINS_FILE_ERROR", ->
+        beforeEach ->
+          @ipc.on.withArgs("load:error").yields("PLUGINS_FILE_ERROR", "path/to/pluginsFile.js", "error message stack")
 
-      it "rejects plugins.init", ->
-        plugins.init({ pluginsFile: "cypress-plugin" })
-        .catch (err) =>
-          expect(err.message).to.contain("The plugins file is missing or invalid")
-          expect(err.message).to.contain("path/to/pluginsFile.js")
-          expect(err.message).to.contain("The following error was thrown")
-          expect(err.message).to.contain("error message")
+        it "rejects plugins.init", ->
+          plugins.init({ pluginsFile: "cypress-plugin" })
+          .catch (err) =>
+            expect(err.message).to.contain("The plugins file is missing or invalid")
+            expect(err.message).to.contain("path/to/pluginsFile.js")
+            expect(err.details).to.contain("error message stack")
+
+      context "PLUGINS_FUNCTION_ERROR", ->
+        beforeEach ->
+          @ipc.on.withArgs("load:error").yields("PLUGINS_FUNCTION_ERROR", "path/to/pluginsFile.js", "error message stack")
+
+        it "rejects plugins.init", ->
+          plugins.init({ pluginsFile: "cypress-plugin" })
+          .catch (err) =>
+            expect(err.message).to.contain("The function exported by the plugins file threw an error.")
+            expect(err.message).to.contain("path/to/pluginsFile.js")
+            expect(err.details).to.contain("error message stack")
 
     describe "error message", ->
       beforeEach ->
@@ -98,7 +111,7 @@ describe "lib/plugins/index", ->
           name: "error name"
           message: "error message"
         }
-        @onError = @sandbox.spy()
+        @onError = sinon.spy()
         @ipc.on.withArgs("loaded").yields([])
         plugins.init({ pluginsFile: "cypress-plugin" }, { onError: @onError })
 
@@ -115,18 +128,18 @@ describe "lib/plugins/index", ->
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
       it "calls onError when ipc sends error", ->
         @ipc.on.withArgs("error").yield(@err)
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
   context "#register", ->
     it "registers callback for event", ->
-      foo = @sandbox.spy()
+      foo = sinon.spy()
       plugins.register("foo", foo)
       plugins.execute("foo")
       expect(foo).to.be.called
@@ -147,7 +160,7 @@ describe "lib/plugins/index", ->
 
   context "#execute", ->
     it "calls the callback registered for the event", ->
-      foo = @sandbox.spy()
+      foo = sinon.spy()
       plugins.register("foo", foo)
       plugins.execute("foo", "arg1", "arg2")
       expect(foo).to.be.calledWith("arg1", "arg2")

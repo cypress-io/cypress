@@ -21,7 +21,7 @@ channel.on('connect', () => {
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha'.split(' ')
-const driverTestEvents = 'test:before:run:async test:after:run test:set:state'.split(' ')
+const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
@@ -38,6 +38,10 @@ const eventManager = {
   },
 
   addGlobalListeners (state, connectionInfo) {
+    const rerun = () => {
+      return this._reRun(state)
+    }
+
     channel.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       channel.on('automation:disconnected', action('automationDisconnected', () => {
@@ -62,13 +66,14 @@ const eventManager = {
     })
 
     _.each(socketRerunEvents, (event) => {
-      channel.on(event,  this._reRun.bind(this))
+      channel.on(event, rerun)
     })
 
     reporterBus.on('runner:console:error', (testId) => {
       if (!Cypress) return
 
       const err = Cypress.getErrorByTestId(testId)
+
       if (err) {
         logger.clearLog()
         logger.logError(err.stack)
@@ -81,13 +86,14 @@ const eventManager = {
       if (!Cypress) return
 
       const consoleProps = Cypress.getConsolePropsForLogById(logId)
+
       logger.clearLog()
       logger.logFormatted(consoleProps)
     })
 
     reporterBus.on('focus:tests', this.focusTests)
 
-    reporterBus.on('runner:restart', this._reRun.bind(this))
+    reporterBus.on('runner:restart', rerun)
 
     function sendEventIfSnapshotProps (logId, event) {
       if (!Cypress) return
@@ -135,7 +141,7 @@ const eventManager = {
 
     const $window = $(window)
 
-    $window.on('hashchange', this._reRun.bind(this))
+    $window.on('hashchange', rerun)
 
     // when we actually unload then
     // nuke all of the cookies again
@@ -165,31 +171,7 @@ const eventManager = {
   },
 
   setup (config, specPath) {
-    Cypress = $Cypress.create(
-      _.pick(config,
-        'isTextTerminal',
-        'numTestsKeptInMemory',
-        'waitForAnimations',
-        'animationDistanceThreshold',
-        'defaultCommandTimeout',
-        'pageLoadTimeout',
-        'requestTimeout',
-        'responseTimeout',
-        'environmentVariables',
-        'xhrUrl',
-        'baseUrl',
-        'viewportWidth',
-        'viewportHeight',
-        'execTimeout',
-        'screenshotOnHeadlessFailure',
-        'namespace',
-        'remote',
-        'version',
-        'fixturesFolder',
-        'platform',
-        'arch'
-      )
-    )
+    Cypress = $Cypress.create(config)
 
     // expose Cypress globally
     window.Cypress = Cypress
@@ -241,21 +223,46 @@ const eventManager = {
     })
 
     _.each(driverToSocketEvents, (event) => {
-      Cypress.on(event, (...args) => channel.emit(event, ...args))
+      Cypress.on(event, (...args) => {
+        return channel.emit(event, ...args)
+      })
     })
 
-    Cypress.on('collect:run:state', () => new Promise((resolve) => {
-      reporterBus.emit('reporter:collect:run:state', resolve)
-    }))
+    Cypress.on('collect:run:state', () => {
+      return new Promise((resolve) => {
+        reporterBus.emit('reporter:collect:run:state', resolve)
+      })
+    })
 
     Cypress.on('log:added', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
+
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
+
       reporterBus.emit('reporter:log:state:changed', displayProps)
+    })
+
+    Cypress.on('before:screenshot', (config, cb) => {
+      const beforeThenCb = () => {
+        localBus.emit('before:screenshot', config)
+        cb()
+      }
+
+      const wait = !config.appOnly && config.waitForCommandSynchronization
+
+      if (!config.appOnly) {
+        reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? beforeThenCb : undefined)
+      }
+
+      if (!wait) beforeThenCb()
+    })
+
+    Cypress.on('after:screenshot', (config) => {
+      localBus.emit('after:screenshot', config)
     })
 
     _.each(driverToReporterEvents, (event) => {
@@ -278,7 +285,9 @@ const eventManager = {
     })
 
     _.each(driverToLocalEvents, (event) => {
-      Cypress.on(event, (...args) => localBus.emit(event, ...args))
+      Cypress.on(event, (...args) => {
+        return localBus.emit(event, ...args)
+      })
     })
 
     Cypress.on('script:error', (err) => {
@@ -305,8 +314,10 @@ const eventManager = {
     channel.off()
   },
 
-  _reRun () {
+  _reRun (state) {
     if (!Cypress) return
+
+    state.setIsLoading(true)
 
     // when we are re-running we first
     // need to stop cypress always
@@ -329,6 +340,10 @@ const eventManager = {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
+  },
+
+  emit (event, ...args) {
+    localBus.emit(event, ...args)
   },
 
   on (event, ...args) {

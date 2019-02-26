@@ -1,5 +1,5 @@
-var ipc = require("electron").ipcRenderer
+let ipc = require('electron').ipcRenderer
 
-process.once("loaded", function(){
+process.once('loaded', function () {
   global.ipc = ipc
 })

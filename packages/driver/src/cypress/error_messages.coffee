@@ -61,6 +61,7 @@ module.exports = {
   as:
     empty_string: "#{cmd('as')} cannot be passed an empty string."
     invalid_type: "#{cmd('as')} can only accept a string."
+    invalid_first_token: "'{{alias}}' cannot be named starting with the '@' symbol. Try renaming the alias to '{{suggestedName}}', or something else that does not start with the '@' symbol."
     reserved_word: "#{cmd('as')} cannot be aliased as: '{{alias}}'. This word is reserved."
 
   blur:
@@ -100,7 +101,15 @@ module.exports = {
     invalid_element: "#{cmd('{{cmd}}')} can only be called on :checkbox{{phrase}}. Your subject {{word}} a: {{node}}"
 
   clear:
-    invalid_element: "#{cmd('clear')} can only be called on textarea or :text. Your subject {{word}} a: {{node}}"
+    invalid_element: """
+      #{cmd('clear')} failed because it requires a valid clearable element.
+
+      The element cleared was:
+
+        > {{node}}
+
+      Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
+    """
 
   clearCookie:
     invalid_argument: "#{cmd('clearCookie')} must be passed a string argument for name."
@@ -203,9 +212,6 @@ module.exports = {
   each:
     invalid_argument: "#{cmd('each')} must be passed a callback function."
     non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: '{{subject}}'"
-
-  env:
-    variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
 
   exec:
     failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
@@ -629,16 +635,14 @@ module.exports = {
     invalid_duration: "#{cmd('scrollTo')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"
     animation_failed: "#{cmd('scrollTo')} failed."
 
-  select:
-    disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"
-    invalid_element: "#{cmd('select')} can only be called on a <select>. Your subject is a: {{node}}"
-    invalid_multiple: "#{cmd('select')} was called with an array of arguments but does not have a 'multiple' attribute set."
-    multiple_elements: "#{cmd('select')} can only be called on a single <select>. Your subject contained {{num}} elements."
-    multiple_matches: "#{cmd('select')} matched more than one option by value or text: {{value}}"
-    no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
-    option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
-
   screenshot:
+    invalid_arg: "{{cmd}}() must be called with an object. You passed: {{arg}}"
+    invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: {{arg}}"
+    invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
+    invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
+    invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
+    multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
   select:
@@ -649,6 +653,11 @@ module.exports = {
     multiple_matches: "#{cmd('select')} matched more than one option by value or text: {{value}}"
     no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
     option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
+
+  selector_playground:
+    defaults_invalid_arg: "Cypress.SelectorPlayground.defaults() must be called with an object. You passed: {{arg}}"
+    defaults_invalid_priority: "Cypress.SelectorPlayground.defaults() called with invalid 'selectorPriority' property. It must be an array. You passed: {{arg}}"
+    defaults_invalid_on_element: "Cypress.SelectorPlayground.defaults() called with invalid 'onElement' property. It must be a function. You passed: {{arg}}"
 
   server:
     invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
@@ -726,6 +735,22 @@ module.exports = {
     multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
     not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
 
+  task:
+    known_error: """#{cmd('task', '\'{{task}}\'')} failed with the following error:
+
+        {{error}}
+    """
+    failed: """#{cmd('task', '\'{{task}}\'')} failed with the following error:
+
+        > {{error}}
+    """
+    invalid_argument: "#{cmd('task')} must be passed a non-empty string as its 1st argument. You passed: '{{task}}'."
+    timed_out: "#{cmd('task', '\'{{task}}\'')} timed out after waiting {{timeout}}ms."
+    server_timed_out: """#{cmd('task', '\'{{task}}\'')} timed out after waiting {{timeout}}ms.
+
+        {{error}}
+    """
+
   tick:
     invalid_argument: "clock.tick()/#{cmd('tick')} only accept a number as their argument. You passed: {{arg}}"
     no_clock: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
@@ -754,8 +779,16 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
-    multiple_elements: "#{cmd('type')} can only be called on a single textarea or :text. Your subject contained {{num}} elements."
-    not_on_text_field: "#{cmd('type')} can only be called on textarea or :text. Your subject is a: {{node}}"
+    multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
+    not_on_typeable_element: """
+      #{cmd('type')} failed because it requires a valid typeable element.
+
+      The element typed into was:
+
+        > {{node}}
+
+      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+    """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
     wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
 
@@ -789,7 +822,7 @@ module.exports = {
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
     fromApp: """
-      This error originated from *your* application code, not from Cypress.
+      This error originated from your application code, not from Cypress.
 
       When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -799,14 +832,14 @@ module.exports = {
     """
 
     fromSpec: """
-      This error originated from *your* test code, not from Cypress.
+      This error originated from your test code, not from Cypress.
 
       When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
     """
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 200px and 3000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 3000px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"

@@ -17,14 +17,6 @@ car = null
 
 # all the projects to trigger / run / change environment variables for
 _PROVIDERS = {
-  buildkite: {
-    main: "cypress-io/cypress"
-    others: [
-      "cypress-io/cypress-test-tiny"
-      "cypress-io/cypress-test-example-repos"
-    ]
-  }
-
   appVeyor: {
     main: "cypress-io/cypress"
     others: [
@@ -36,14 +28,6 @@ _PROVIDERS = {
   circle: {
     main: "cypress-io/cypress"
     others: [
-      # "cypress-io/cypress-dashboard"
-      # "cypress-io/cypress-core-example"
-      # "cypress-io/cypress-core-desktop-gui"
-      # "cypress-io/cypress-example-kitchensink"
-      # "cypress-io/cypress-example-todomvc"
-      # "cypress-io/cypress-example-piechopper"
-      # "cypress-io/cypress-example-recipes"
-
       "cypress-io/cypress-test-tiny"
       "cypress-io/cypress-test-module-api"
       "cypress-io/cypress-test-node-versions"
@@ -52,16 +36,6 @@ _PROVIDERS = {
       "cypress-io/cypress-test-example-repos"
     ]
   }
-
-  # travis: [
-  #   # "cypress-io/cypress-dashboard"
-  #   "cypress-io/cypress-core-example"
-  #   "cypress-io/cypress-core-desktop-gui"
-  #   "cypress-io/cypress-example-kitchensink"
-  #   "cypress-io/cypress-example-todomvc"
-  #   "cypress-io/cypress-example-piechopper"
-  #   "cypress-io/cypress-example-recipes"
-  # ]
 }
 
 remapProjects = (projectsByProvider) ->
@@ -191,18 +165,21 @@ module.exports = {
       console.log("setting environment variables in", project)
       car.updateProjectEnv(project, provider, {
         CYPRESS_NPM_PACKAGE_NAME: nameOrUrl,
-        CYPRESS_BINARY_VERSION: binaryVersionOrUrl
+        CYPRESS_INSTALL_BINARY: binaryVersionOrUrl
       })
     awaitEachProjectAndProvider(PROJECTS, updateProject, projectFilter)
     .then R.always(result)
 
-  run: (message, providerName) ->
+  # triggers test projects on multiple CIs
+  # the test projects will exercise the new version of
+  # the Cypress test runner we just built
+  runTestProjects: (message, providerName, version) ->
     projectFilter = getFilterByProvider(providerName)
 
     if not message
       message =
         """
-        Testing new Cypress version
+        Testing new Cypress version #{version}
 
         """
       if process.env.CIRCLE_BUILD_URL
@@ -221,12 +198,31 @@ module.exports = {
       # make empty commit to trigger CIs
 
       parsedRepo = parse(project)
-      console.log("running project", project)
-      makeEmptyGithubCommit({
+      console.log("making commit to project", project)
+
+      defaultOptions = {
         owner: parsedRepo[0],
         repo: parsedRepo[1],
         token: creds.githubToken,
         message
-      })
+      }
+
+      if not version
+        return makeEmptyGithubCommit(defaultOptions)
+
+      # first try to commit to branch for next upcoming version
+      specificBranchOptions = {
+        owner: parsedRepo[0],
+        repo: parsedRepo[1],
+        token: creds.githubToken,
+        message,
+        branch: version
+      }
+      makeEmptyGithubCommit(specificBranchOptions)
+      .catch () ->
+        # maybe there is no branch for next version
+        # try default branch
+        makeEmptyGithubCommit(defaultOptions)
+
     awaitEachProjectAndProvider(PROJECTS, makeCommit, projectFilter)
 }

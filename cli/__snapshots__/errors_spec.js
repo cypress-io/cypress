@@ -1,11 +1,17 @@
 exports['errors individual has the following errors 1'] = [
+  "nonZeroExitCodeXvfb",
   "missingXvfb",
   "missingApp",
+  "notInstalledCI",
   "missingDependency",
   "versionMismatch",
+  "binaryNotExecutable",
   "unexpected",
   "failedDownload",
-  "failedUnzip"
+  "failedUnzip",
+  "invalidCacheDirectory",
+  "removed",
+  "CYPRESS_RUN_BINARY"
 ]
 
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `
@@ -15,11 +21,11 @@ Install XVFB and run Cypress again.
 
 Read our documentation on dependencies for more information:
 
-https://on.cypress.io/required-dependencies
+[34mhttps://on.cypress.io/required-dependencies[39m
 
-If you using Docker, we provide containers with all required dependencies installed.
+If you are using Docker, we provide containers with all required dependencies installed.
 ----------
 
-Platform: test platform (test release)
+Platform: test platform (Foo-OsVersion)
 Cypress Version: 1.2.3
 `

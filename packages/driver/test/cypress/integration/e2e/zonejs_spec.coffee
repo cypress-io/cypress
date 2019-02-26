@@ -3,7 +3,7 @@ describe "zone.js", ->
   it "can serialize XHRs without blowing out the stack", ->
     cy
     .visit("/fixtures/zonejs.html")
-    .window().then (win) ->
+    .window().then { timeout: 30000 }, (win) ->
       new Promise (resolve, reject) ->
         xhr = new win.XMLHttpRequest()
 

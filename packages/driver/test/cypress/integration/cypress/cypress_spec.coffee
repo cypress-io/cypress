@@ -1,3 +1,4 @@
+$ = Cypress.$
 Promise = Cypress.Promise
 
 describe "driver/src/cypress/index", ->
@@ -10,6 +11,22 @@ describe "driver/src/cypress/index", ->
     it "is attached but not global", ->
       expect(window.$Cypress).to.be.undefined
       expect(window.top.$Cypress).to.be.undefined
+
+  context "$", ->
+    afterEach ->
+      delete Cypress.$.expr[":"].foo
+
+    ## https://github.com/cypress-io/cypress/issues/2830
+    it "exposes expr", ->
+      expect(Cypress.$).to.have.property("expr")
+
+      Cypress.$.expr[":"].foo = (elem) ->
+        Boolean(elem.getAttribute("foo"))
+
+      $foo = $("<div foo='bar'>foo element</div>").appendTo(cy.$$("body"))
+
+      cy.get(":foo").then ($el) ->
+        expect($el.get(0)).to.eq($foo.get(0))
 
   context "#backend", ->
     it "sets __stackCleaned__ on errors", (done) ->

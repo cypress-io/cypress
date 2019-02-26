@@ -1,4 +1,4 @@
-import { computed, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import automation from './automation'
 
 const _defaults = {
@@ -14,12 +14,13 @@ const _defaults = {
 
   url: '',
   highlightUrl: false,
-  isLoading: false,
+  isLoadingUrl: false,
 }
 
 export default class State {
   defaults = _defaults
 
+  @observable isLoading = true
   @observable isRunning = false
 
   @observable messageTitle = _defaults.messageTitle
@@ -34,7 +35,7 @@ export default class State {
 
   @observable url = _defaults.url
   @observable highlightUrl = _defaults.highlightUrl
-  @observable isLoading = _defaults.isLoading
+  @observable isLoadingUrl = _defaults.isLoadingUrl
 
   @observable width = _defaults.width
   @observable height = _defaults.height
@@ -61,6 +62,7 @@ export default class State {
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
       return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
+
     return 1
   }
 
@@ -87,29 +89,37 @@ export default class State {
 
     if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
       return { state: 'stationary' }
-    } else {
-      return {
-        state: 'attached',
-        styles: {
-          top: (actualHeight + this.headerHeight + nudge),
-        },
-      }
     }
+
+    return {
+      state: 'attached',
+      styles: {
+        top: (actualHeight + this.headerHeight + nudge),
+      },
+    }
+
   }
 
-  updateDimensions (width, height) {
+  @action setIsLoading (isLoading) {
+    this.isLoading = isLoading
+  }
+
+  @action updateDimensions (width, height) {
     this.width = width
     this.height = height
   }
 
-  updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
-    this.windowWidth = windowWidth
-    this.windowHeight = windowHeight
-    this.absoluteReporterWidth = reporterWidth
-    this.headerHeight = headerHeight
+  @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+    if (windowWidth != null) this.windowWidth = windowWidth
+
+    if (windowHeight != null) this.windowHeight = windowHeight
+
+    if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
+
+    if (headerHeight != null) this.headerHeight = headerHeight
   }
 
-  clearMessage () {
+  @action clearMessage () {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
@@ -123,9 +133,9 @@ export default class State {
     }
   }
 
-  reset () {
+  @action resetUrl () {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
-    this.isLoading = _defaults.isLoading
+    this.isLoadingUrl = _defaults.isLoadingUrl
   }
 }

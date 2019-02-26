@@ -40,7 +40,7 @@ export default class ProjectNotSetup extends Component {
   _getStartedWithCI () {
     return (
       <div className='empty-no-runs'>
-        <h4>You Have No Recorded Runs</h4>
+        <h4>You have no recorded runs</h4>
         <p>Cypress can record screenshots, videos and failures when running <code>cypress run</code>.</p>
         <div className='runs-screenshots'>
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
@@ -53,7 +53,7 @@ export default class ProjectNotSetup extends Component {
           onClick={this._showSetupProjectModal}
         >
           <i className='fa fa-wrench'></i>{' '}
-          Set Up Project to Record
+          Set up project to record
         </button>
       </div>
     )
@@ -69,7 +69,7 @@ export default class ProjectNotSetup extends Component {
       <div className='empty-runs-not-displayed'>
         <h4>
           <i className='fa fa-warning errored'></i>{' '}
-          Runs Cannot Be Displayed
+          Runs cannot be displayed
         </h4>
         <p>We were unable to find an existing project matching the <code>projectId</code> in your <code>cypress.json</code>.</p>
         <p>To see runs for a current project, add the correct <code>projectId</code> to your <code>cypress.json</code></p>
@@ -79,7 +79,7 @@ export default class ProjectNotSetup extends Component {
           onClick={this._showSetupProjectModal}
         >
           <i className='fa fa-wrench'></i>{' '}
-          Set Up a New Project
+          Set up a new project
         </button>
         <p>
           <small>The new project will have no previous run data.</small>

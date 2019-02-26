@@ -12,10 +12,6 @@ server = null
 getServer = ->
   server ? unavailableErr()
 
-abort = ->
-  if server
-    server.abort()
-
 reset = ->
   if server
     server.restore()
@@ -141,7 +137,7 @@ startXhrServer = (cy, state, config) ->
           indicator ?= if /^2/.test(status) then "successful" else "bad"
 
           {
-            message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), { length: 20 })}"
+            message: "#{xhr.method} #{status} #{stripOrigin(xhr.url)}"
             indicator: indicator
           }
       })
@@ -220,13 +216,6 @@ defaults = {
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
-
-  ## if our page is going away due to
-  ## a form submit / anchor click then
-  ## we need to cancel all outstanding
-  ## XHR's so the command log displays
-  ## correctly
-  Cypress.on("window:unload", abort)
 
   Cypress.on "test:before:run", ->
     ## reset the existing server

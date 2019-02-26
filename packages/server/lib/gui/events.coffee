@@ -1,7 +1,7 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
-log         = require('debug')('cypress:server:events')
+debug       = require('debug')('cypress:server:events')
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
@@ -14,16 +14,19 @@ Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
 connect     = require("../util/connect")
+browsers    = require("../browsers")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
+  debug("got request for event: %s, %o", type, arg)
+
   sendResponse = (data = {}) ->
     try
-      log("sending ipc data", {type: type, data: data})
+      debug("sending ipc data %o", {type: type, data: data})
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    log("send error:", err)
+    debug("send error: %o", err)
     sendResponse({id: id, __error: errors.clone(err, {html: true})})
 
   send = (data) ->
@@ -99,9 +102,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "launch:browser"
-      # headless.createWindows(arg, true)
       openProject.launch(arg.browser, arg.spec, {
-        projectPath: options.projectPath
+        projectRoot: options.projectRoot
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->
@@ -110,7 +112,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "window:open"
-      Windows.open(arg)
+      Windows.open(options.projectRoot, arg)
       .then(send)
       .catch(sendErr)
 
@@ -198,13 +200,17 @@ handleEvent = (options, bus, event, id, type, arg) ->
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
-      openProject.create(arg, options, {
-        onFocusTests: onFocusTests
-        onSpecChanged: onSpecChanged
-        onSettingsChanged: onSettingsChanged
-        onError: onError
-        onWarning: onWarning
-      })
+      browsers.getAllBrowsersWith(options.browser)
+      .then (browsers = []) ->
+        options.config = _.assign(options.config, { browsers })
+      .then ->
+        openProject.create(arg, options, {
+          onFocusTests: onFocusTests
+          onSpecChanged: onSpecChanged
+          onSettingsChanged: onSettingsChanged
+          onError: onError
+          onWarning: onWarning
+        })
       .call("getConfig")
       .then(send)
       .catch(sendErr)

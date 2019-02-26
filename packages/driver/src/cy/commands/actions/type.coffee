@@ -1,9 +1,10 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 moment = require("moment")
 
 $dom = require("../../../dom")
+$elements = require("../../../dom/elements")
+$selection = require("../../../dom/selection")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 $actionability = require("../../actionability")
@@ -21,6 +22,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: "element" }, {
     type: (subject, chars, options = {}) ->
+      options = _.clone(options)
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults(options, {
@@ -61,10 +63,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             memo
           , {}
 
-        options._log = Cypress.log
+        options._log = Cypress.log {
           message: [chars, deltaOptions]
           $el: options.$el
-          consoleProps: ->
+          consoleProps: -> {
             "Typed":      chars
             "Applied To": $dom.getElements(options.$el)
             "Options":    deltaOptions
@@ -74,6 +76,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                 data: getTableData()
                 columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
               }
+            }
+          }
 
         options._log.snapshot("before", {next: "after"})
 
@@ -92,7 +96,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if not isBody and not isTextLike and not hasTabIndex
         node = $dom.stringify(options.$el)
-        $utils.throwErrByPath("type.not_on_text_field", {
+        $utils.throwErrByPath("type.not_on_typeable_element", {
           onFail: options._log
           args: { node }
         })
@@ -112,42 +116,43 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
-      if isDate and (
-        not _.isString(chars) or
-        not dateRegex.test(chars) or
-        not moment(chars).isValid()
-      )
-        $utils.throwErrByPath("type.invalid_date", {
-          onFail: options._log
-          args: { chars }
-        })
+      if !(chars == "{selectall}{del}")
+        if isDate and (
+          not _.isString(chars) or
+          not dateRegex.test(chars) or
+          not moment(chars).isValid()
+        )
+          $utils.throwErrByPath("type.invalid_date", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isMonth and (
-        not _.isString(chars) or
-        not monthRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_month", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isMonth and (
+          not _.isString(chars) or
+          not monthRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_month", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isWeek and (
-        not _.isString(chars) or
-        not weekRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_week", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isWeek and (
+          not _.isString(chars) or
+          not weekRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_week", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isTime and (
-        not _.isString(chars) or
-        not timeRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_time", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isTime and (
+          not _.isString(chars) or
+          not timeRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_time", {
+            onFail: options._log
+            args: { chars }
+          })
 
       options.chars = "" + chars
 
@@ -155,7 +160,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getDefaultButtons = (form) ->
         form.find("input, button").filter (__, el) ->
-          $el = $(el)
+          $el = $dom.wrap(el)
           ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
           ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
 
@@ -210,26 +215,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## consider changing type to a Promise and juggle logging
             cy.now("submit", form, {log: false, $el: form})
 
-        dispatchChangeEvent = (id) ->
+        dispatchChangeEvent = (el, id) ->
           change = document.createEvent("HTMLEvents")
           change.initEvent("change", true, false)
 
-          dispatched = options.$el.get(0).dispatchEvent(change)
+          dispatched = el.dispatchEvent(change)
 
           if id and updateTable
             updateTable(id, null, "change", null, dispatched)
 
-          return dispatched
-
         needSingleValueChange = ->
-          isDate or
-          isMonth or
-          isWeek or
-          isTime or
-          ($dom.isType(options.$el, "number") and _.includes(options.chars, "."))
+          return $elements.isNeedSingleValueChangeInputElement(options.$el.get(0))
 
         ## see comment in updateValue below
         typed = ""
+
+        isContentEditable = $elements.isContentEditable(options.$el.get(0))
+        isTextarea = $elements.isTextarea(options.$el.get(0))
 
         $Keyboard.type({
           $el:     options.$el
@@ -238,17 +240,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           release: options.release
           window:  win
 
-          updateValue: (rng, key) ->
+          updateValue: (el, key) ->
+            ## in these cases, the value must only be set after all
+            ## the characters are input because attemping to set
+            ## a partial/invalid value results in the value being
+            ## set to an empty string
             if needSingleValueChange()
-              ## in these cases, the value must only be set after all
-              ## the characters are input because attemping to set
-              ## a partial/invalid value results in the value being
-              ## set to an empty string
               typed += key
               if typed is options.chars
-                options.$el.val(options.chars)
+                $elements.setNativeProp(el, "value", options.chars)
             else
-              rng.text(key, "end")
+              $selection.replaceSelectionContents(el, key)
 
           onBeforeType: (totalKeys) ->
             ## for the total number of keys we're about to
@@ -277,25 +279,36 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## fires only when the 'value'
           ## of input/text/contenteditable
           ## changes
-          onTypeChange: ->
-            ## never fire any change events for contenteditable
-            return if options.$el.is("[contenteditable]")
+          onValueChange: (originalText, el) ->
+            ## contenteditable should never be called here.
+            ## only input's and textareas can have change events
+            if changeEvent = state("changeEvent")
+              if !changeEvent(null, true)
+                state("changeEvent", null)
+              return
 
-            state "changeEvent", ->
-              dispatchChangeEvent()
-              state "changeEvent", null
+            state "changeEvent", (id, readOnly) ->
+              changed = $elements.getNativeProp(el, 'value') isnt originalText
 
-          onEnterPressed: (changed, id) ->
+              if !readOnly
+                if changed
+                  dispatchChangeEvent(el, id)
+
+                state("changeEvent", null)
+
+              return changed
+
+          onEnterPressed: (id) ->
             ## dont dispatch change events or handle
             ## submit event if we've pressed enter into
             ## a textarea or contenteditable
-            return if options.$el.is("textarea,[contenteditable]")
+            return if isTextarea || isContentEditable
 
             ## if our value has changed since our
             ## element was activated we need to
             ## fire a change event immediately
-            if changed
-              dispatchChangeEvent(id)
+            if changeEvent = state("changeEvent")
+              changeEvent(id)
 
             ## handle submit event handler here
             simulateSubmitHandler()
@@ -315,32 +328,36 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
-        cy.now("focused", {log: false, verify: false})
-        .then ($focused) ->
-          $actionability.verify(cy, options.$el, options, {
-            onScroll: ($el, type) ->
-              Cypress.action("cy:scrolled", $el, type)
+        $actionability.verify(cy, options.$el, options, {
+          onScroll: ($el, type) ->
+            Cypress.action("cy:scrolled", $el, type)
 
-            onReady: ($elToClick) ->
-              ## if we dont have a focused element
-              ## or if we do and its not ourselves
-              ## then issue the click
-              if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
-                ## click the element first to simulate focus
-                ## and typical user behavior in case the window
-                ## is out of focus
-                cy.now("click", $elToClick, {
-                  $el: $elToClick
-                  log: false
-                  verify: false
-                  _log: options._log
-                  force: true ## force the click, avoid waiting
-                  timeout: options.timeout
-                  interval: options.interval
-                }).then(type)
-              else
-                ## don't click, just type
+          onReady: ($elToClick) ->
+            $focused = cy.getFocused()
+
+            if el = cy.needsForceFocus()
+              cy.fireFocus(el)
+
+            ## if we dont have a focused element
+            ## or if we do and its not ourselves
+            ## then issue the click
+            if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+              ## click the element first to simulate focus
+              ## and typical user behavior in case the window
+              ## is out of focus
+              cy.now("click", $elToClick, {
+                $el: $elToClick
+                log: false
+                verify: false
+                _log: options._log
+                force: true ## force the click, avoid waiting
+                timeout: options.timeout
+                interval: options.interval
+              })
+              .then ->
                 type()
+            else
+              type()
           })
 
       handleFocused()
@@ -361,29 +378,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             })
 
     clear: (subject, options = {}) ->
-      ## what about other types of inputs besides just text?
-      ## what about the new HTML5 ones?
       _.defaults(options, {
         log: true
         force: false
       })
 
       ## blow up if any member of the subject
-      ## isnt a textarea or :text
+      ## isnt a textarea or text-like
       clear = (el, index) ->
-        $el = $(el)
+        $el = $dom.wrap(el)
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = $utils.filterOutOptions(options)
 
-          options._log = Cypress.log
+          options._log = Cypress.log {
             message: deltaOptions
             $el: $el
-            consoleProps: ->
+            consoleProps: () -> {
               "Applied To": $dom.getElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
+              }
+          }
 
         node = $dom.stringify($el)
 

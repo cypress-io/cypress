@@ -5,9 +5,13 @@
   "main": "index.js",
   "browser": "./lib/client.js",
   "scripts": {
+    "pretest": "npm run check-deps-pre",
     "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "pretest-watch": "npm run check-deps-pre",
     "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch",
-    "clean-deps": "rm -rf node_modules"
+    "clean-deps": "rm -rf node_modules",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript"
   },
   "files": [
     "lib"
@@ -17,9 +21,8 @@
     "socket.io-client": "1.7.4"
   },
   "devDependencies": {
-    "@cypress/releaser": "0.1.12",
-    "bin-up": "^1.1.0",
-    "chai": "^3.5.0",
-    "cross-env": "^5.0.5"
+    "bin-up": "1.1.0",
+    "chai": "3.5.0",
+    "cross-env": "5.2.0"
   }
 }

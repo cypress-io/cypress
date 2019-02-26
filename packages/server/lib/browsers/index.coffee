@@ -1,13 +1,12 @@
 _             = require("lodash")
-fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
-log           = require("debug")("cypress:server:browsers")
+debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
+fs            = require("../util/fs")
 
-fs              = Promise.promisifyAll(fs)
-instance        = null
+instance = null
 
 kill = (unbind) ->
   ## cleanup our running browser
@@ -18,7 +17,12 @@ kill = (unbind) ->
     if unbind
       instance.removeAllListeners()
 
-    instance.once("exit", resolve)
+    instance.once "exit", (code, sigint) ->
+      debug("browser process killed")
+
+      resolve.apply(null, arguments)
+
+    debug("killing browser process")
 
     instance.kill()
     cleanup()
@@ -26,48 +30,82 @@ kill = (unbind) ->
 cleanup = ->
   instance = null
 
-getBrowser = (name) ->
-  switch name
-    ## normalize all the chrome* browsers
-    when "chrome", "chromium", "canary"
-      require("./chrome")
+getBrowserLauncherByFamily = (family) ->
+  switch family
     when "electron"
       require("./electron")
+    when "chrome"
+      require("./chrome")
+
+isValidPathToBrowser = (str) ->
+  path.basename(str) isnt str
+
+ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
+  utils.getBrowsers(nameOrPath)
+  .then (browsers = []) ->
+    ## try to find the browser by name with the highest version property
+    sortedBrowsers = _.sortBy(browsers, ['version'])
+    if browser = _.findLast(sortedBrowsers, { name: nameOrPath })
+      ## short circuit if found
+      if returnAll
+        return browsers
+      return browser
+
+    ## did the user give a bad name, or is this actually a path?
+    if isValidPathToBrowser(nameOrPath)
+      ## looks like a path - try to resolve it to a FoundBrowser
+      return utils.getBrowserByPath(nameOrPath)
+      .then (browser) ->
+        if returnAll
+          return [browser].concat(browsers)
+        return browser
+      .catch (err) ->
+        errors.throw("BROWSER_NOT_FOUND_BY_PATH", nameOrPath, err.message)
+
+    ## not a path, not found by name
+    throwBrowserNotFound(nameOrPath, browsers)
+
+throwBrowserNotFound = (browserName, browsers = []) ->
+  names = _.map(browsers, "name").join(", ")
+  errors.throw("BROWSER_NOT_FOUND_BY_NAME", browserName, names)
 
 process.once "exit", kill
 
 module.exports = {
+  ensureAndGetByNameOrPath
+
+  removeOldProfiles: utils.removeOldProfiles
+
   get: utils.getBrowsers
 
   launch: utils.launch
 
   close: kill
 
-  getByName: (browser) ->
+  getAllBrowsersWith: (nameOrPath) ->
+    if nameOrPath
+      return ensureAndGetByNameOrPath(nameOrPath, true)
     utils.getBrowsers()
-    .then (browsers = []) ->
-      _.find(browsers, { name: browser })
 
-  open: (name, options = {}, automation) ->
+  open: (browser, options = {}, automation) ->
     kill(true)
     .then ->
       _.defaults(options, {
-        browserArgs: []
         onBrowserOpen: ->
         onBrowserClose: ->
       })
 
-      if not browser = getBrowser(name)
-        names = _.map(options.browsers, "name").join(", ")
-        return errors.throw("BROWSER_NOT_FOUND", name, names)
+      if not browserLauncher = getBrowserLauncherByFamily(browser.family)
+        return throwBrowserNotFound(browser, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
-      log("open browser %s", name)
-      browser.open(name, url, options, automation)
+      debug("opening browser %o", browser)
+
+      browserLauncher.open(browser, url, options, automation)
       .then (i) ->
-        log("browser opened")
+        debug("browser opened")
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder
 

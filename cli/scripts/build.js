@@ -3,7 +3,8 @@ const path = require('path')
 
 const fs = require('../lib/fs')
 
-// grab the current version from the root monorepo package.json
+// grab the current version and a few other properties
+// from the root package.json
 const {
   version,
   description,
@@ -12,9 +13,10 @@ const {
   license,
   bugs,
   repository,
-  engines,
+  keywords,
 } = require('@packages/root')
 
+// the rest of properties should come from the package.json in CLI folder
 const packageJsonSrc = path.join('package.json')
 const packageJsonDest = path.join('build', 'package.json')
 
@@ -32,8 +34,8 @@ function preparePackageForNpmRelease (json) {
     license,
     bugs,
     repository,
-    engines,
-    types: 'index.d.ts', // typescript types
+    keywords,
+    types: 'types', // typescript types
     scripts: {
       postinstall: 'node index.js --exec install',
       size: 't=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";',
@@ -43,10 +45,26 @@ function preparePackageForNpmRelease (json) {
   return json
 }
 
-fs.readJsonAsync(packageJsonSrc)
-.then(preparePackageForNpmRelease)
-.then((json) => {
-  return fs.outputJsonAsync(packageJsonDest, json, {
-    spaces: 2,
+function makeUserPackageFile () {
+  return fs.readJsonAsync(packageJsonSrc)
+  .then(preparePackageForNpmRelease)
+  .then((json) => {
+    return fs.outputJsonAsync(packageJsonDest, json, {
+      spaces: 2,
+    })
+    .return(json) // returning package json object makes it easy to test
   })
-})
+}
+
+module.exports = makeUserPackageFile
+
+if (!module.parent) {
+  makeUserPackageFile()
+  .catch((err) => {
+    /* eslint-disable no-console */
+    console.error('Could not write user package file')
+    console.error(err)
+    /* eslint-enable no-console */
+    process.exit(-1)
+  })
+}

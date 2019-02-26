@@ -11,6 +11,7 @@ window.Runner = {
   start (el, config) {
     action('started', () => {
       const state = new State((config.state || {}).reporterWidth)
+
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
       render(<Container config={config} state={state} />, el)

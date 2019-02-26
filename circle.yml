@@ -1,21 +1,40 @@
-version: 2
+version: 2.1
 
 defaults: &defaults
   parallelism: 1
-  working_directory: ~/cypress-monorepo
-  docker:
-    # the Docker image with Cypress dependencies and Chrome browser
-    - image: cypress/browsers:chrome62
-      environment:
-        ## this enables colors + fixes failing unit tests
-        TERM: xterm
+  working_directory: ~/cypress
+  parameters:
+    executor:
+      type: executor
+      default: cy-doc
+  executor: <<parameters.executor>>
+  environment:
+    ## set specific timezone
+    TZ: "/usr/share/zoneinfo/America/New_York"
 
-        CIRCLE_ARTIFACTS: /tmp/artifacts ## store artifacts here
+    ## store artifacts here
+    CIRCLE_ARTIFACTS: /tmp/artifacts
 
-        npm_config_loglevel: warn
-        # even when running as non-root user
-        # need to set unsafe perm to be able to do `npm postinstall`
-        npm_config_unsafe-perm: true
+    ## set so that e2e tests are consistent
+    COLUMNS: 100
+    LINES: 24
+
+executors:
+  # the Docker image with Cypress dependencies and Chrome browser
+  cy-doc:
+    docker:
+      - image: cypress/browsers:chrome64
+    environment:
+      PLATFORM: linux
+
+  # executor to run on Mac OS
+  # https://circleci.com/docs/2.0/executor-types/#using-macos
+  # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
+  mac:
+    macos:
+      xcode: "10.1.0"
+    environment:
+      PLATFORM: mac
 
 jobs:
   ## code checkout and NPM installs
@@ -23,55 +42,60 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - run:
+          name: Print working folder
+          command: echo $PWD
+      - run:
+          name: print global NPM cache path
+          command: echo $(npm -g bin)
+      - run:
+          name: print Node version
+          command: node -v
+      - run:
+          name: print NPM version
+          command: npm -v
+      - run: npm run check-node-version
 
-      # print global NPM cache path
-      - run: echo $(npm -g bin)
-
-      ## make sure the TERM is set to 'xterm' in node
+      ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run:
-          name: Checking TERM is set
-          command: |
-            echo 'term env var is:' $TERM
-            node -e 'assert.equal(process.env.TERM, "xterm", "need TERM to be set for Docker to work")'
-            node -e 'console.log("TERM %s stdout.isTTY?", process.env.TERM, process.stdout.isTTY)'
+      - run: npm run check-terminal
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v5-{{ .Branch }}-cli-deps
+          key: v6-{{ arch }}-{{ .Branch }}-cli-deps
       - restore_cache:
-          key: v5-{{ .Branch }}-root-deps
+          key: v5-{{ arch }}-{{ .Branch }}-root-deps
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-coffee
+          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-desktop-gui
+          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-driver
+          key: v5-{{ arch }}-{{ .Branch }}-deps-driver
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-example
+          key: v5-{{ arch }}-{{ .Branch }}-deps-example
       - restore_cache:
-          key: v7-{{ .Branch }}-deps-electron
+          key: v7-{{ arch }}-{{ .Branch }}-deps-electron
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-extension
+          key: v5-{{ arch }}-{{ .Branch }}-deps-extension
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-https-proxy
+          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-launcher
+          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-reporter
+          key: v5-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-runner
+          key: v5-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-server
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-socket
+          key: v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-static
+          key: v5-{{ arch }}-{{ .Branch }}-deps-static
       - restore_cache:
-          key: v5-{{ .Branch }}-deps-ts
+          key: v5-{{ arch }}-{{ .Branch }}-deps-ts
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
@@ -93,102 +117,103 @@ jobs:
 
       # save each node_modules folder per package
       - save_cache:
-          key: v5-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
           paths:
             - cli/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
           paths:
             - node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
           paths:
             - packages/coffee/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
           paths:
             - packages/desktop-gui/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
           paths:
             - packages/driver/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
           paths:
             - packages/example/node_modules
       - save_cache:
-          key: v7-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
+          key: v7-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
           paths:
             - packages/electron/node_modules
             - ~/.cache/electron
             - ~/.electron
       - save_cache:
-          key: v5-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
           paths:
             - packages/extension/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
           paths:
             - packages/https-proxy/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
           paths:
             - packages/launcher/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
             - packages/reporter/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
           paths:
             - packages/socket/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
           paths:
             - packages/static/node_modules
       - save_cache:
-          key: v5-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
           paths:
             - packages/ts/node_modules
 
       - run: npm run stop-only
       ## now go build all of subpackages
-      - run: npm run build
+      - run: npm run prebuild -- --serial
+      - run: npm run build -- --serial
 
-      ## save entire folder as artifact for other jobs to continue
-      ## hmm, do not see a good way to cache it, since all code
-      ## might change
-      - save_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      ## save entire folder as artifact for other jobs to run without reinstalling
+      - persist_to_workspace:
+          root: ~/
           paths:
-            - /home/person/cypress-monorepo
+            - cypress
 
   lint:
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run lint
       - run: npm run all lint
 
-  "unit-tests":
+  unit-tests:
     <<: *defaults
     parallelism: 1
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
+      # make sure packages with TypeScript can be transpiled to JS
+      - run: npm run all build-js
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
@@ -201,88 +226,122 @@ jobs:
       - run: npm run all test -- --package socket
       - run: npm run all test -- --package static
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-unit-tests":
     <<: *defaults
     parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run all test-unit -- --package server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-integration-tests":
     <<: *defaults
     parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run: npm run all test-integration -- --package server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-1":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 0
+          command: npm run test-e2e -- --chunk 1
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-2":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 1
+          command: npm run test-e2e -- --chunk 2
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-3":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 2
+          command: npm run test-e2e -- --chunk 3
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-4":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 3
+          command: npm run test-e2e -- --chunk 4
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
   "server-e2e-tests-5":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
-          command: npm run test-e2e -- --parallel 5 --index 4
+          command: npm run test-e2e -- --chunk 5
           working_directory: packages/server
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
 
-  "driver-integration-tests-1":
+  "server-e2e-tests-6":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk 6
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-7":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk 7
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-e2e-tests-8":
+      <<: *defaults
+      steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk 8
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "driver-integration-tests-3x":
+    <<: *defaults
+    parallelism: 3
+    steps:
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm start
           background: true
@@ -291,158 +350,103 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          command: npm run cypress:run -- --parallel 5 --index 0
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
-  "driver-integration-tests-2":
+  "desktop-gui-integration-tests-2x":
     <<: *defaults
+    parallelism: 2
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 1
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress-monorepo
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-3":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 2
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress-monorepo
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-4":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 3
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress-monorepo
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "driver-integration-tests-5":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm start
-          working_directory: packages/driver
-          background: true
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: npm run cypress:run -- --parallel 5 --index 4
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress-monorepo
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "desktop-gui-integration-tests-1":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run build-prod
           working_directory: packages/desktop-gui
       - run:
-          command: npm run cypress:run -- --parallel 3 --index 0
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
-  "desktop-gui-integration-tests-2":
+  "reporter-integration-tests":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: npm run build-prod
-          working_directory: packages/desktop-gui
+          working_directory: packages/reporter
       - run:
-          command: npm run cypress:run -- --parallel 3 --index 1
-          working_directory: packages/desktop-gui
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group reporter
+          working_directory: packages/reporter
       - store_test_results:
-          path: /tmp/cypress-monorepo
-      - store_artifacts:
-          path: /tmp/artifacts
-
-  "desktop-gui-integration-tests-3":
-    <<: *defaults
-    steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          command: npm run build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: npm run cypress:run -- --parallel 3 --index 2
-          working_directory: packages/desktop-gui
-      - store_test_results:
-          path: /tmp/cypress-monorepo
+          path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
 
   "run-launcher":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           command: node index.js
           working_directory: packages/launcher
 
-  "build-binary":
+  build-binary:
     <<: *defaults
+    shell: /bin/bash --login
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Check environment variables before code sign (if on Mac)
+          # NOTE
+          # our Mac code sign works via electron-builder
+          # by default, electron-builder will NOT sign app built in a pull request
+          # even our internal one (!)
+          # Usually this is not a problem, since we only build and test binary
+          # built on "develop" and "master" branches
+          # but if you need to really build and sign a Mac binary in a PR
+          # set variable CSC_FOR_PULL_REQUEST=true
+          command: |
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              if [ -z "$CSC_LINK" ]; then
+                echo "Need to provide environment variable CSC_LINK"
+                  echo "with base64 encoded certificate .p12 file"
+                exit 1
+              fi
+              if [ -z "$CSC_KEY_PASSWORD" ]; then
+                echo "Need to provide environment variable CSC_KEY_PASSWORD"
+                  echo "with password for unlocking certificate .p12 file"
+                exit 1
+              fi
+            else
+              echo "Not Mac platform, skipping code sign setup"
+            fi
+
+      - attach_workspace:
+          at: ~/
       - run: $(npm bin)/print-arch
-      - run: npm run binary-build -- --platform linux --version $NEXT_DEV_VERSION
-      - run: npm run binary-zip -- --platform linux
+      - run:
+          environment:
+            DEBUG: electron-builder,electron-osx-sign*
+          command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
+      - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
       - run:
           name: upload unique binary
@@ -464,11 +468,8 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          name: Installing xvfb-maybe
-          command: npm i cypress-io/xvfb-maybe
+      - attach_workspace:
+          at: ~/
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
@@ -484,38 +485,33 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
-            CYPRESS_videoRecording=false \
-            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/repo \
-            --record
+            CYPRESS_ENV=staging \
+            CYPRESS_video=false \
+            npm run cypress:run -- --project /tmp/repo --record
 
   "test-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
-      - run:
-          name: Installing xvfb-maybe
-          command: npm i cypress-io/xvfb-maybe
+      - attach_workspace:
+          at: ~/
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
       - run:
           name: Run test project
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
-            $(npm bin)/xvfb-maybe npm start -- --run-project /tmp/repo \
-            --record
+            CYPRESS_ENV=staging \
+            npm run cypress:run -- --project /tmp/repo --record
 
   "build-npm-package":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - run:
           name: bump NPM version
           command: npm --no-git-tag-version version $NEXT_DEV_VERSION
@@ -556,8 +552,8 @@ jobs:
   "test-next-version":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la /tmp/urls
@@ -590,8 +586,8 @@ jobs:
   "test-next-version-locally":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       # make sure we have cypress.zip received
@@ -610,7 +606,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i ../cli/build
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i ../cli/build
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -620,8 +616,8 @@ jobs:
   "test-binary-against-staging":
     <<: *defaults
     steps:
-      - restore_cache:
-          key: cypress-monorepo-{{ .Branch }}-{{ .Revision }}
+      - attach_workspace:
+          at: ~/
       - attach_workspace:
           at: /tmp/urls
       # make sure we have the binary
@@ -635,124 +631,215 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_BINARY_VERSION=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
           command: |
-            CYPRESS_ENV=staging \
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
 
+  "test-binary-against-kitchensink":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: /tmp/urls
+      - run:
+          name: Cloning kitchensink project
+          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
+      - run:
+          command: npm install
+          working_directory: /tmp/kitchensink
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/kitchensink
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run build
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm start
+          background: true
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run e2e
+
+linux-workflow: &linux-workflow
+  jobs:
+    - build
+    - lint:
+        name: Linux lint
+        requires:
+          - build
+    # unit, integration and e2e tests
+    - unit-tests:
+        requires:
+          - build
+    - server-unit-tests:
+        requires:
+          - build
+    - server-integration-tests:
+        requires:
+          - build
+    - server-e2e-tests-1:
+        requires:
+          - build
+    - server-e2e-tests-2:
+        requires:
+          - build
+    - server-e2e-tests-3:
+        requires:
+          - build
+    - server-e2e-tests-4:
+        requires:
+          - build
+    - server-e2e-tests-5:
+        requires:
+          - build
+    - server-e2e-tests-6:
+        requires:
+          - build
+    - server-e2e-tests-7:
+        requires:
+          - build
+    - server-e2e-tests-8:
+        requires:
+          - build
+    - driver-integration-tests-3x:
+        requires:
+          - build
+    - desktop-gui-integration-tests-2x:
+        requires:
+          - build
+    - run-launcher:
+        requires:
+          - build
+    # various testing scenarios, like building full binary
+    # and testing it on a real project
+    - test-against-staging:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - test-kitchensink-against-staging:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - build-npm-package:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - build-binary:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build
+    - test-next-version:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-next-version-locally:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-staging:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-kitchensink:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
+
+mac-workflow: &mac-workflow
+  jobs:
+    - build:
+        name: Mac build
+        executor: mac
+    - lint:
+        name: Mac lint
+        executor: mac
+        requires:
+          - Mac build
+
+    # maybe run unit tests?
+
+    - build-npm-package:
+        name: Mac NPM package
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac build
+
+    - build-binary:
+        name: Mac binary
+        executor: mac
+        context: org-global
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac build
+
+    - test-binary-against-kitchensink:
+        name: Test Mac binary against kitchensink
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac NPM package
+          - Mac binary
+
+    - test-binary-against-staging:
+        name: Test Mac binary against staging
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac NPM package
+          - Mac binary
 workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - build
-      - lint:
-          requires:
-            - build
-      - unit-tests:
-          requires:
-            - build
-      - server-unit-tests:
-          requires:
-            - build
-      - server-integration-tests:
-          requires:
-            - build
-      - server-e2e-tests-1:
-          requires:
-            - build
-      - server-e2e-tests-2:
-          requires:
-            - build
-      - server-e2e-tests-3:
-          requires:
-            - build
-      - server-e2e-tests-4:
-          requires:
-            - build
-      - server-e2e-tests-5:
-          requires:
-            - build
-      - driver-integration-tests-1:
-          requires:
-            - build
-      - driver-integration-tests-2:
-          requires:
-            - build
-      - driver-integration-tests-3:
-          requires:
-            - build
-      - driver-integration-tests-4:
-          requires:
-            - build
-      - driver-integration-tests-5:
-          requires:
-            - build
-      - desktop-gui-integration-tests-1:
-          requires:
-            - build
-      - desktop-gui-integration-tests-2:
-          requires:
-            - build
-      - desktop-gui-integration-tests-3:
-          requires:
-            - build
-      - run-launcher:
-          requires:
-            - build
-      - test-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - test-kitchensink-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-npm-package:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - build-binary:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build
-      - test-next-version:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-next-version-locally:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
-      - test-binary-against-staging:
-          filters:
-            branches:
-              only:
-                - develop
-          requires:
-            - build-npm-package
-            - build-binary
+  linux:
+    <<: *linux-workflow
+  mac:
+    <<: *mac-workflow

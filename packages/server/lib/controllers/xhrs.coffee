@@ -47,7 +47,7 @@ module.exports = {
         if _.isObject(data)
           data = JSON.stringify(data)
 
-        chunk = new Buffer(data, encoding)
+        chunk = Buffer.from(data, encoding)
 
         headers["content-length"] = chunk.length
 

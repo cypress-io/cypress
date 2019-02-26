@@ -1,81 +1,90 @@
-const _ = require('lodash')
-const os = require('os')
-const path = require('path')
-const progress = require('request-progress')
-const Promise = require('bluebird')
-const request = require('request')
-const url = require('url')
-const debug = require('debug')('cypress:cli')
-const { stripIndent } = require('common-tags')
+const la = require('lazy-ass')
 const is = require('check-more-types')
+const os = require('os')
+const url = require('url')
+const path = require('path')
+const debug = require('debug')('cypress:cli')
+const request = require('request')
+const Promise = require('bluebird')
+const requestProgress = require('request-progress')
+const { stripIndent } = require('common-tags')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
-const info = require('./info')
 
-const baseUrl = 'https://download.cypress.io/'
+const defaultBaseUrl = 'https://download.cypress.io/'
+
+const getBaseUrl = () => {
+  if (util.getEnv('CYPRESS_DOWNLOAD_MIRROR')) {
+    let baseUrl = util.getEnv('CYPRESS_DOWNLOAD_MIRROR')
+
+    if (!baseUrl.endsWith('/')) {
+      baseUrl += '/'
+    }
+
+    return baseUrl
+  }
+
+  return defaultBaseUrl
+}
 
 const prepend = (urlPath) => {
-  const endpoint = url.resolve(baseUrl, urlPath)
+  const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
   const arch = os.arch()
+
   return `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
 const getUrl = (version) => {
   if (is.url(version)) {
     debug('version is already an url', version)
+
     return version
   }
+
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 
-const statusMessage = (err) =>
-  (err.statusCode
+const statusMessage = (err) => {
+  return (err.statusCode
     ? [err.statusCode, err.statusMessage].join(' - ')
     : err.toString())
+}
 
 const prettyDownloadErr = (err, version) => {
   const msg = stripIndent`
     URL: ${getUrl(version)}
     ${statusMessage(err)}
   `
+
   debug(msg)
 
   return throwFormErrorText(errors.failedDownload)(msg)
 }
 
-// attention:
-// when passing relative path to NPM post install hook, the current working
-// directory is set to the `node_modules/cypress` folder
-// the user is probably passing relative path with respect to root package folder
-function formAbsolutePath (filename) {
-  if (path.isAbsolute(filename)) {
-    return filename
-  }
-  return path.join(process.cwd(), '..', '..', filename)
-}
-
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = (options) => {
+const downloadFromUrl = ({ url, downloadDestination, progress }) => {
   return new Promise((resolve, reject) => {
-    const url = getUrl(options.version)
-
     debug('Downloading from', url)
-    debug('Saving file to', options.downloadDestination)
+    debug('Saving file to', downloadDestination)
+
+    let redirectVersion
 
     const req = request({
       url,
       followRedirect (response) {
         const version = response.headers['x-version']
+
+        debug('redirect version:', version)
         if (version) {
           // set the version in options if we have one.
           // this insulates us from potential redirect
           // problems where version would be set to undefined.
-          options.version = version
+          redirectVersion = version
         }
 
         // yes redirect
@@ -86,108 +95,76 @@ const downloadFromUrl = (options) => {
     // closure
     let started = null
 
-    progress(req, {
-      throttle: options.throttle,
+    requestProgress(req, {
+      throttle: progress.throttle,
     })
-      .on('response', (response) => {
-        // start counting now once we've gotten
-        // response headers
-        started = new Date()
+    .on('response', (response) => {
+      // start counting now once we've gotten
+      // response headers
+      started = new Date()
 
-        // if our status code does not start with 200
-        if (!/^2/.test(response.statusCode)) {
-          debug('response code %d', response.statusCode)
+      // if our status code does not start with 200
+      if (!/^2/.test(response.statusCode)) {
+        debug('response code %d', response.statusCode)
 
-          const err = new Error(
-            stripIndent`
+        const err = new Error(
+          stripIndent`
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
         `
-          )
+        )
 
-          reject(err)
-        }
-      })
-      .on('error', reject)
-      .on('progress', (state) => {
-        // total time we've elapsed
-        // starting on our first progress notification
-        const elapsed = new Date() - started
+        reject(err)
+      }
+    })
+    .on('error', reject)
+    .on('progress', (state) => {
+      // total time we've elapsed
+      // starting on our first progress notification
+      const elapsed = new Date() - started
 
-        const eta = util.calculateEta(state.percent, elapsed)
+      const eta = util.calculateEta(state.percent, elapsed)
 
-        // send up our percent and seconds remaining
-        options.onProgress(state.percent, util.secsRemaining(eta))
-      })
-      // save this download here
-      .pipe(fs.createWriteStream(options.downloadDestination))
-      .on('finish', () => {
-        debug('downloading finished')
+      // send up our percent and seconds remaining
+      progress.onProgress(state.percent, util.secsRemaining(eta))
+    })
+    // save this download here
+    .pipe(fs.createWriteStream(downloadDestination))
+    .on('finish', () => {
+      debug('downloading finished')
 
-        resolve({
-          filename: options.downloadDestination,
-          downloaded: true,
-        })
-      })
+      resolve(redirectVersion)
+    })
   })
 }
 
-// returns an object with zip filename
-// and a flag if the file was really downloaded
-// or not. Maybe it was already there!
-// {filename: ..., downloaded: true|false}
-const download = (options = {}) => {
-  if (!options.version) {
-    debug('empty Cypress version to download, will try latest')
-    return downloadFromUrl(options)
+const start = ({ version, downloadDestination, progress }) => {
+  if (!downloadDestination) {
+    la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
   }
 
-  debug('need to download Cypress version %s', options.version)
-  // first check the original filename
-  return fs.pathExists(options.version).then((exists) => {
-    if (exists) {
-      debug('found file right away', options.version)
-      return {
-        filename: options.version,
-        downloaded: false,
-      }
-    }
+  if (!progress) {
+    progress = { onProgress: () => {
+      return {}
+    } }
+  }
 
-    const possibleFile = formAbsolutePath(options.version)
-    debug('checking local file', possibleFile, 'cwd', process.cwd())
-    return fs.pathExists(possibleFile).then((exists) => {
-      if (exists) {
-        debug('found local file', possibleFile)
-        debug('skipping download')
-        return {
-          filename: possibleFile,
-          downloaded: false,
-        }
-      } else {
-        return downloadFromUrl(options)
-      }
-    })
+  const url = getUrl(version)
+
+  progress.throttle = 100
+
+  debug('needed Cypress version: %s', version)
+  debug(`downloading cypress.zip to "${downloadDestination}"`)
+
+  // ensure download dir exists
+  return fs.ensureDirAsync(path.dirname(downloadDestination))
+  .then(() => {
+    return downloadFromUrl({ url, downloadDestination, progress })
   })
-}
-
-const start = (options) => {
-  _.defaults(options, {
-    version: null,
-    throttle: 100,
-    onProgress: () => {},
-    downloadDestination: path.join(info.getInstallationDir(), 'cypress.zip'),
+  .catch((err) => {
+    return prettyDownloadErr(err, version)
   })
-
-  // make sure our 'dist' installation dir exists
-  return info
-    .ensureInstallationDir()
-    .then(() => {
-      return download(options)
-    })
-    .catch((err) => {
-      return prettyDownloadErr(err, options.version)
-    })
 }
 
 module.exports = {

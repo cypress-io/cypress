@@ -78,7 +78,7 @@ describe "src/cypress", ->
   describe "#env", ->
     beforeEach ->
       @Cypress.setConfig({
-        environmentVariables: {foo: "bar"}
+        env: {foo: "bar"}
       })
 
     it "acts as getter", ->
@@ -108,9 +108,9 @@ describe "src/cypress", ->
     it "instantiates Cookies", ->
       expect(@Cypress.Cookies).to.be.an("object")
 
-    it "passes config.environmentVariables", ->
+    it "passes config.env", ->
       @Cypress.setConfig({
-        environmentVariables: {foo: "bar"}
+        env: {foo: "bar"}
       })
 
       expect(@Cypress.env()).to.deep.eq({foo: "bar"})

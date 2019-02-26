@@ -13,15 +13,15 @@ Thanks for taking the time to contribute! :smile:
 
 - [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
-- Write Code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
+- Write code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
 
 ## Table of Contents
 
 - [CI Status](#ci-status)
 - [Code of Conduct](#code-of-conduct)
-- [Contributing Bug Reports & Feature Requests](#contributing-bug-reports--feature-requests)
-  - [Bug Reports](#bug-reports)
-  - [Feature Requests](#feature-requests)
+- [Opening Issues](#opening-issues)
+- [Triaging Issues](#triaging-issues)
+- [Writing Documentation](#writing-documentation)
 - [Writing Code](#writing-code)
   - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
   - [Requirements](#requirements)
@@ -29,9 +29,11 @@ Thanks for taking the time to contribute! :smile:
   - [Coding Style](#coding-style)
   - [Tests](#tests)
   - [Packages](#packages)
-- [Writing Documentation](#writing-documentation)
 - [Committing Code](#committing-code)
+  - [Branches](#branches)
   - [Pull Requests](#pull-requests)
+  - [Testing](#testing)
+  - [Dependencies](#dependencies)
 - [Deployment](#deployment)
 
 ## CI status
@@ -52,21 +54,18 @@ Build status | Description
 
 All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Contributing Bug Reports & Feature Requests
-
-### Bug Reports
-
-This article describes how to open an effective bug report so we can get your issue fixed or help you work around it.
+## Opening Issues
 
 **The most important things to do are:**
 
-- Search existing [issues](https://github.com/cypress-io/cypress/issues) for your problem
-- Check the list of common fixes below
-- Make sure we support your setup
-- Gather debugging information
-- Explain how to reproduce the issue
+- Search existing [issues](https://github.com/cypress-io/cypress/issues) for your problem.
+- Understand our [roadmap](https://on.cypress.io/roadmap).
+- Check the list of [common fixes](#common-fixes) below.
+- [Gather debugging information](#getting-more-information).
+- [Describe your problem, not your solution](#describe-problems)
+- [Explain how to reproduce the issue](#reproducibility).
 
-If you have a feature request (not a bug), see [Feature Requests](#feature-requests).
+Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
 
 ### Common Fixes
 
@@ -74,66 +73,57 @@ Before filing a bug, make sure you are up to date. Your issue may have already b
 
 [See our document on installing cypress](https://on.cypress.io/installing-cypress)
 
-### Supported Issues
+### Getting more information
 
-Before filing a bug, make sure you're filing an issue against something we support. See our [System Requirements](https://on.cypress.io/installing-cypress#system-requirements).
+For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it does not, this information can help us figure out and resolve an issue.
 
-### Getting More Information
-
-For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it doesn't, this information can help us figure out and resolve an issue.
-
-- For issues in the web browser, check the JavaScript console and your Network tab in your DevTools
+- For issues in the web browser, check the JavaScript console and your Network tab in your DevTools.
 - Click on any command in the Command Log where the failure occurred, this will log more information about the error to the JavaScript console.
-- Use Cypress' [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
-- Ask other Cypress users for help in our [gitter channel](https://gitter.im/cypress-io/cypress).
-
-### Reproducibility
-
-The most important part of your issue is instructions on how to reproduce the issue.
-- What did you do?
-- If you do it again, does it still break?
-- Does it depend on a specific order?
-
-**It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
-
-### Open an Issue
-
-If you're up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you're ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
-
-## Feature Requests
-
-Have a feature you'd like to see in Cypress? This describes how to file an effective feature request.
-
-**The most important things to do are:**
-
-- Understand our [roadmap](https://on.cypress.io/roadmap)
-- Make sure your feature makes sense in the project
-- Align your expectations around timelines and priorities
-- Describe your problem, not your solution
-
-### Understand our roadmap
-
-We have a cohesive vision for Cypress in the long term and a general [roadmap](https://on.cypress.io/roadmap) that extends into the future. While the specifics of how we get there are flexible, many milestones are well-established.
-
-Feature requests are an important part of what we plan in our roadmap, but we ultimately build only features which make sense as part of the long term plan.
-
-### Setting Expectations
-
-We have a lot of users and a small team. Even if your feature is something we're interested in and a good fit for where we want the product to go, it may take us a long time to get around to building it.
-
-If you want a concrete timeline, you can [contact us](mailto:support@cypress.io) to pay for some control over our roadmap.
+- Use Cypress [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
+- Ask other Cypress users for help in our [chat](https://on.cypress.io/chat).
 
 ### Describe Problems
 
-When you file a feature request, we need you to **describe the problem you're facing first**, not just your desired solution.
+When you file a feature request, we need you to **describe the problem you are facing first**, not just your desired solution.
 
-Often, your problem may have a lot in common with other similar problems. If we understand your use case we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
+Often, your problem may have a lot in common with other similar problems. If we understand your use case, we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
 
 Also, your proposed solution may not be compatible with the direction we want to take the product, but we may be able to come up with another solution which has approximately the same effect and does fit into the product direction.
 
-### Open an Issue
+### Reproducibility
 
-If you think your feature might be a good fit for our roadmap, has reasonable expectations about it, and has a good description of the problem you're trying to solve, you're ready to [open a feature request](https://github.com/cypress-io/cypress/issues/new).
+**It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
+
+## Triaging Issues
+
+When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we need to evaluate the issue to determine what steps should be taken next. So, when approaching new issues, there are some steps that should be taken.
+
+### 1. Is this already an open issue?
+
+Search [all issues](https://github.com/cypress-io/cypress/issues) for keywords from the issue to ensure there isn't already an issue open for this. GitHub has some [search tips](https://help.github.com/articles/searching-issues-and-pull-requests/) that may help you better find the relevant issue.
+
+### 2. Is what they are describing actually happening?
+
+The best way to determine the validity of a bug is to recreate it yourself. Follow the directions or information provided to recreate the bug that is described. Did they provide a repository that demonstrates the bug? Great - fork it and run the project and steps required. If they did not provide a repository, the best way to reproduce the issue is to have a 'sandbox' project up and running locally for Cypress. This is just a simple project with Cypress installed where you can freely edit the application under test and the tests themselves to recreate the problem.
+
+**Attempting to recreate the bug will lead to a few scenarios:**
+
+#### 1. You can not recreate the bug
+
+Leave a comment on the issue saying, "I can't reproduce this situation with the code you provided. Could you provide more information or a repository demonstrating the bug?"
+
+#### 2. You can recreate the bug
+
+Leave a comment on the issue saying "I was able to reproduce this in Cypress version x.x.x" If you know where the code is that could possibly fix this issue - link to the file or line of code from the [cypress](https://github.com/cypress-io/cypress) repo and remind the user that we are open source and that we gladly accept PRs, even if they are a work in progress.
+
+#### 3. You can tell the problem is a user error
+
+In recreating the issue, you may realize that they had a typo or used the Cypress API incorrectly, etc. Leave a comment informing the user of their error and close the issue – or ask them to close the issue if it fixes their problem.
+
+## Writing Documentation
+
+Cypress documentation lives in a separate repository with its own dependencies and build tools.
+See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -151,6 +141,7 @@ Here is a list of the core packages in this repository with a short description,
 
  Folder Name | Purpose
  ----------- | -------
+[cli](./cli) | The command-line tool that is packaged as an `npm` module.
 [coffee](./packages/coffee) | A centralized version of CoffeeScript used for other packages.
 [desktop-gui](./packages/desktop-gui) | The front-end code for the Cypress Desktop GUI.
 [driver](./packages/driver) | The code that is used to drive the behavior of the API commands.
@@ -190,10 +181,17 @@ npm run build
 npm start
 ```
 
-If there are errors building the packages, run with `DEBUG=cypress:*`
-option to see more details.
+If there are errors building the packages, prefix the commands with `DEBUG=cypress:*` to see more details.
 
-This outputs a lot of debugging lines. To focus on an individual module run with `DEBUG=cypress:launcher` for instance.
+This outputs a lot of debugging lines. To focus on an individual module, run with `DEBUG=cypress:launcher` for instance.
+
+When running `npm start` this routes through the CLI and eventually calls `npm run dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
+
+If you want to bypass the CLI entirely, you can use the `npm run dev` task and pass arguments directly. For example to headlessly run a project in a given folder, while trying to record to the Dashboard
+
+```text
+npm run dev -- --run-project /project/folder --record --key <key>
+```
 
 #### Tasks
 
@@ -313,24 +311,19 @@ npm rebuild node-sass
 
 ### Packages
 
-Generally when making contributions, you are typically making it to a small number of packages. Most of your local development work will be inside a single package at a time.
+Generally when making contributions, you are typically making them to a small number of packages. Most of your local development work will be inside a single package at a time.
 
-Each package documents how to best work with it, so simple consult the `README.md` of each package.
+Each package documents how to best work with it, so simply consult the `README.md` of each package.
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
-## Writing Documentation
-
-Cypress documentation lives in separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
-
-## Commiting Code
+## Committing Code
 
 ### Branches
 
 The repository is setup with two main (protected) branches.
 
-- `master` is the code already published in the last Cypress version
+- `master` is the code already published in the last Cypress version.
 - `develop` is the current latest "edge" code. This branch is set as the default branch, and all pull requests should be made against this branch.
 
 ### Pull Requests
@@ -345,6 +338,10 @@ The repository is setup with two main (protected) branches.
 This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
 
 To run local tests, consult the `README.md` of each package.
+
+### Dependencies
+
+We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our dependencies. The bot keeps chugging using settings in [renovate.json](renovate.json) to open PRs and if they pass merge patches. Minor and major updates require manual merge.
 
 ## Deployment
 

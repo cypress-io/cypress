@@ -50,7 +50,7 @@ const Controls = observer(({ events, appState }) => {
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
-        <Tooltip placement='bottom' title='Run All Tests'>
+        <Tooltip placement='bottom' title='Run all tests'>
           <button className='restart' onClick={emit('restart')}>
             <i className='fa fa-repeat'></i>
           </button>

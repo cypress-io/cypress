@@ -8,7 +8,7 @@ errors = require("#{root}lib/errors")
 describe "lib/user", ->
   context ".get", ->
     it "calls cache.getUser", ->
-      @sandbox.stub(cache, "getUser").resolves({name: "brian"})
+      sinon.stub(cache, "getUser").resolves({name: "brian"})
 
       user.get().then (user) ->
         expect(user).to.deep.eq({name: "brian"})
@@ -16,8 +16,8 @@ describe "lib/user", ->
   context ".logIn", ->
     it "sets user to cache + returns user", ->
       obj = {name: "brian"}
-      @sandbox.stub(api, "createSignin").withArgs("abc-123").resolves(obj)
-      @sandbox.spy(cache, "setUser")
+      sinon.stub(api, "createSignin").withArgs("abc-123").resolves(obj)
+      sinon.spy(cache, "setUser")
 
       user.logIn("abc-123").then (ret) ->
         expect(ret).to.deep.eq(obj)
@@ -25,46 +25,46 @@ describe "lib/user", ->
 
   context ".logOut", ->
     it "calls api.createSignout + removes the session from cache", ->
-      @sandbox.stub(api, "createSignout").withArgs("abc-123").resolves()
-      @sandbox.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
-      @sandbox.spy(cache, "removeUser")
+      sinon.stub(api, "createSignout").withArgs("abc-123").resolves()
+      sinon.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
+      sinon.spy(cache, "removeUser")
 
       user.logOut().then ->
         expect(cache.removeUser).to.be.calledOnce
 
     it "does not send to api.createSignout without a authToken", ->
-      @sandbox.spy(api, "createSignout")
-      @sandbox.stub(cache, "getUser").resolves({name: "brian"})
-      @sandbox.spy(cache, "removeUser")
+      sinon.spy(api, "createSignout")
+      sinon.stub(cache, "getUser").resolves({name: "brian"})
+      sinon.spy(cache, "removeUser")
 
       user.logOut().then ->
         expect(api.createSignout).not.to.be.called
         expect(cache.removeUser).to.be.calledOnce
 
     it "removes the session from cache even if api.createSignout rejects", ->
-      @sandbox.stub(api, "createSignout").withArgs("abc-123").rejects(new Error("ECONNREFUSED"))
-      @sandbox.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
-      @sandbox.spy(cache, "removeUser")
+      sinon.stub(api, "createSignout").withArgs("abc-123").rejects(new Error("ECONNREFUSED"))
+      sinon.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
+      sinon.spy(cache, "removeUser")
 
       user.logOut().catch ->
         expect(cache.removeUser).to.be.calledOnce
 
   context ".getLoginUrl", ->
     it "calls api.getLoginUrl", ->
-      @sandbox.stub(api, "getLoginUrl").resolves("https://github.com/login")
+      sinon.stub(api, "getLoginUrl").resolves("https://github.com/login")
 
       user.getLoginUrl().then (url) ->
         expect(url).to.eq("https://github.com/login")
 
   context ".ensureAuthToken", ->
     it "returns authToken", ->
-      @sandbox.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
+      sinon.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
 
       user.ensureAuthToken().then (st) ->
         expect(st).to.eq("abc-123")
 
     it "throws NOT_LOGGED_IN when no authToken, tagged as api error", ->
-      @sandbox.stub(cache, "getUser").resolves(null)
+      sinon.stub(cache, "getUser").resolves(null)
 
       user.ensureAuthToken()
       .then ->

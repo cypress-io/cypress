@@ -1,27 +1,28 @@
-import { action, observable } from 'mobx'
-import { SpecsStore } from './specs-store'
+import _ from 'lodash'
+import { computed, observable } from 'mobx'
 
 export default class Spec {
+  @observable path
   @observable name
+  @observable absolute
+  @observable displayName
+  @observable type
   @observable isChosen = false
-  @observable isExpanded = false
-  @observable children = new SpecsStore()
 
-  constructor ({ name, displayName }) {
+  constructor ({ path, name, absolute, relative, displayName, type }) {
+    this.path = path
     this.name = name
+    this.absolute = absolute
+    this.relative = relative
     this.displayName = displayName
-    this.isExpanded = true
+    this.type = type
   }
 
-  hasChildren () {
-    return this.children.specs && this.children.specs.length;
+  @computed get hasChildren () {
+    return false
   }
 
-  @action setChosen (isChosen) {
-    this.isChosen = isChosen
-  }
-
-  @action setExpanded (isExpanded) {
-    this.isExpanded = isExpanded
+  @computed get file () {
+    return _.pick(this, 'name', 'absolute', 'relative')
   }
 }

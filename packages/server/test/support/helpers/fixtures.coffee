@@ -7,8 +7,6 @@ root       = path.join(__dirname, "..", "..", "..")
 projects   = path.join(root, "test", "support", "fixtures", "projects")
 tmpDir     = path.join(root, ".projects")
 
-fs = Promise.promisifyAll(fs)
-
 module.exports =
   ## copies all of the project fixtures
   ## to the tmpDir .projects in the root

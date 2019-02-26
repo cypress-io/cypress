@@ -52,13 +52,14 @@ class Dropdown extends Component {
           {this._buttonContent()}
         </a>
       )
-    } else {
-      return (
-        <span>
-          {this._buttonContent()}
-        </span>
-      )
     }
+
+    return (
+      <span>
+        {this._buttonContent()}
+      </span>
+    )
+
   }
 
   _buttonContent () {

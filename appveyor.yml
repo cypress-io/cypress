@@ -5,9 +5,9 @@ branches:
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
-# Test against the latest version of this Node.js version
 environment:
-  nodejs_version: "6"
+  # use latest version of Node 8 with NPM 6
+  nodejs_version: "8"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
@@ -34,8 +34,7 @@ environment:
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
-  # NPM v3 has flaky permission issues on Windows
-  - npm install -g npm@5
+  - npm run check-node-version
   - npm install -g @bahmutov/print-env
   # Output useful info for debugging.
   - node --version

@@ -15,11 +15,13 @@ const renderComponent = ({ onClick = (() => {}) }) => {
 describe('<FlashOnClick />', () => {
   it('renders a tooltip with the specified message', () => {
     const component = renderComponent({})
+
     expect(component.find('Tooltip')).to.have.prop('title', 'Some message')
   })
 
   it('renders a tooltip around the content', () => {
     const component = renderComponent({})
+
     expect(component.find('Tooltip').find('.content')).to.exist
   })
 
@@ -50,8 +52,8 @@ describe('<FlashOnClick />', () => {
       expect(component.find('Tooltip')).to.have.prop('visible', true)
     })
 
-    it('hides the tooltip after 800ms', () => {
-      clock.tick(800)
+    it('hides the tooltip after 1500ms', () => {
+      clock.tick(1500)
       expect(component.update().find('Tooltip')).to.have.prop('visible', false)
     })
   })

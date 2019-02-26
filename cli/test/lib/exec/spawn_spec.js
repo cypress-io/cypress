@@ -2,29 +2,47 @@ require('../../spec_helper')
 
 const cp = require('child_process')
 const os = require('os')
+const tty = require('tty')
+const path = require('path')
+const EE = require('events')
 
-const info = require(`${lib}/tasks/info`)
+const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
 const spawn = require(`${lib}/exec/spawn`)
+const util = require(`${lib}/util.js`)
+const expect = require('chai').expect
 
-describe('exec spawn', function () {
+const cwd = process.cwd()
+
+const defaultBinaryDir = '/default/binary/dir'
+
+describe('lib/exec/spawn', function () {
   beforeEach(function () {
-    this.sandbox.stub(process, 'exit')
-    this.spawnedProcess = this.sandbox.stub({
-      on: () => {},
-      unref: () => {},
+    os.platform.returns('darwin')
+    sinon.stub(process, 'exit')
+    this.spawnedProcess = {
+      on: sinon.stub().returns(undefined),
+      unref: sinon.stub().returns(undefined),
+      stdin: {
+        on: sinon.stub().returns(undefined),
+        pipe: sinon.stub().returns(undefined),
+      },
       stdout: {
-        pipe: () => {},
+        on: sinon.stub().returns(undefined),
+        pipe: sinon.stub().returns(undefined),
       },
       stderr: {
-        pipe: () => {},
+        pipe: sinon.stub().returns(undefined),
+        on: sinon.stub().returns(undefined),
       },
-    })
-    this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
-    this.sandbox.stub(xvfb, 'start').resolves()
-    this.sandbox.stub(xvfb, 'stop').resolves()
-    this.sandbox.stub(xvfb, 'isNeeded').returns(true)
-    this.sandbox.stub(info, 'getPathToExecutable').returns('/path/to/cypress')
+    }
+    sinon.stub(process, 'stdin').value(new EE)
+    sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
+    sinon.stub(xvfb, 'start').resolves()
+    sinon.stub(xvfb, 'stop').resolves()
+    sinon.stub(xvfb, 'isNeeded').returns(false)
+    sinon.stub(state, 'getBinaryDir').returns(defaultBinaryDir)
+    sinon.stub(state, 'getPathToExecutable').withArgs(defaultBinaryDir).returns('/path/to/cypress')
   })
 
   context('.start', function () {
@@ -33,11 +51,37 @@ describe('exec spawn', function () {
 
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
-        expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', ['--foo'], { foo: 'bar' })
+        expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
+          '--foo',
+          '--cwd',
+          cwd,
+        ], {
+          foo: 'bar',
+        })
+      })
+    })
+
+    it('uses npm command when running in dev mode', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      const p = path.resolve('..', 'scripts', 'start.js')
+
+      return spawn.start('--foo', { dev: true, foo: 'bar' })
+      .then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('node', [
+          p,
+          '--foo',
+          '--cwd',
+          cwd,
+        ], {
+          foo: 'bar',
+        })
       })
     })
 
     it('starts xvfb when needed', function () {
+      xvfb.isNeeded.returns(true)
+
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       return spawn.start('--foo')
@@ -47,8 +91,6 @@ describe('exec spawn', function () {
     })
 
     it('does not start xvfb when its not needed', function () {
-      xvfb.isNeeded.returns(false)
-
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       return spawn.start('--foo')
@@ -58,6 +100,8 @@ describe('exec spawn', function () {
     })
 
     it('stops xvfb when spawn closes', function () {
+      xvfb.isNeeded.returns(true)
+
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       this.spawnedProcess.on.withArgs('close').yields()
 
@@ -78,6 +122,7 @@ describe('exec spawn', function () {
 
     it('rejects with error from spawn', function () {
       const msg = 'the error message'
+
       this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
 
       return spawn.start('--foo')
@@ -106,31 +151,226 @@ describe('exec spawn', function () {
       })
     })
 
-    it('uses inherit/inherit/ignore when not windows', function () {
-      this.sandbox.stub(os, 'platform').returns('darwin')
-
+    it('sets process.env to options.env', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      process.env.FOO = 'bar'
 
       return spawn.start()
       .then(() => {
-        expect(cp.spawn.firstCall.args[2]).to.deep.eq({
-          detached: false,
-          stdio: ['inherit', 'inherit', 'ignore'],
+        expect(cp.spawn.firstCall.args[2].env.FOO).to.eq('bar')
+      })
+    })
+
+    it('forces colors and streams when supported', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      sinon.stub(util, 'supportsColor').returns(true)
+      sinon.stub(tty, 'isatty').returns(true)
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].env).to.deep.eq({
+          FORCE_COLOR: '1',
+          DEBUG_COLORS: '1',
+          MOCHA_COLORS: '1',
+          FORCE_STDERR_TTY: '1',
+          FORCE_STDIN_TTY: '1',
+          FORCE_STDOUT_TTY: '1',
         })
       })
     })
 
-    it('uses inherit/pipe/pipe when windows', function () {
-      this.sandbox.stub(os, 'platform').returns('win32')
+    it('sets windowsHide:false property in windows', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
+      os.platform.returns('win32')
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.false
+      })
+    })
+
+    it('does not set windowsHide property when in darwin', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.undefined
+      })
+    })
+
+    it('does not force colors and streams when not supported', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      sinon.stub(util, 'supportsColor').returns(false)
+      sinon.stub(tty, 'isatty').returns(false)
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].env).to.deep.eq({
+          FORCE_COLOR: '0',
+          DEBUG_COLORS: '0',
+          FORCE_STDERR_TTY: '0',
+          FORCE_STDIN_TTY: '0',
+          FORCE_STDOUT_TTY: '0',
+        })
+      })
+    })
+
+    it('pipes when on win32', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      os.platform.returns('win32')
+      xvfb.isNeeded.returns(false)
+
+      return spawn.start()
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq('pipe')
+      })
+    })
+
+    it('inherits when on linux and xvfb isnt needed', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      os.platform.returns('linux')
+      xvfb.isNeeded.returns(false)
+
+      return spawn.start()
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq('inherit')
+      })
+    })
+
+    it('uses [inherit, inherit, pipe] when linux and xvfb is needed', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      xvfb.isNeeded.returns(true)
+      os.platform.returns('linux')
+
+      return spawn.start()
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq([
+          'inherit', 'inherit', 'pipe',
+        ])
+      })
+    })
+
+    it('uses [inherit, inherit, pipe] on darwin', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      xvfb.isNeeded.returns(false)
+      os.platform.returns('darwin')
+
+      return spawn.start()
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq([
+          'inherit', 'inherit', 'pipe',
+        ])
+      })
+    })
+
+    it('writes everything on win32', function () {
+      const buf1 = Buffer.from('asdf')
+
+      this.spawnedProcess.stdin.pipe.withArgs(process.stdin)
+      this.spawnedProcess.stdout.pipe.withArgs(process.stdout)
+
+      this.spawnedProcess.stderr.on
+      .withArgs('data')
+      .yields(buf1)
+
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      sinon.stub(process.stderr, 'write').withArgs(buf1)
+      os.platform.returns('win32')
+
+      return spawn.start()
+    })
+
+    it('does not write to process.stderr when from xlib or libudev', function () {
+      const buf1 = Buffer.from('Xlib: something foo')
+      const buf2 = Buffer.from('libudev something bar')
+      const buf3 = Buffer.from('asdf')
+
+      this.spawnedProcess.stderr.on
+      .withArgs('data')
+      .onFirstCall()
+      .yields(buf1)
+      .onSecondCall()
+      .yields(buf2)
+      .onThirdCall()
+      .yields(buf3)
+
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      sinon.stub(process.stderr, 'write').withArgs(buf3)
+      os.platform.returns('linux')
+      xvfb.isNeeded.returns(true)
+
+      return spawn.start()
+      .then(() => {
+        expect(process.stderr.write).not.to.be.calledWith(buf1)
+        expect(process.stderr.write).not.to.be.calledWith(buf2)
+      })
+    })
+
+    it('does not write to process.stderr when from high sierra warnings', function () {
+      const buf1 = Buffer.from('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
+      const buf2 = Buffer.from('asdf')
+
+      this.spawnedProcess.stderr.on
+      .withArgs('data')
+      .onFirstCall()
+      .yields(buf1)
+      .onSecondCall(buf2)
+      .yields(buf2)
+
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      sinon.stub(process.stderr, 'write').withArgs(buf2)
+      os.platform.returns('darwin')
+
+      return spawn.start()
+      .then(() => {
+        expect(process.stderr.write).not.to.be.calledWith(buf1)
+      })
+    })
+
+    it('catches process.stdin errors and returns when code=EPIPE', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       return spawn.start()
       .then(() => {
-        expect(cp.spawn.firstCall.args[2]).to.deep.eq({
-          detached: false,
-          stdio: ['inherit', 'pipe', 'pipe'],
-        })
+        let called = false
+
+        const fn = () => {
+          called = true
+          const err = new Error()
+
+          err.code = 'EPIPE'
+
+          return process.stdin.emit('error', err)
+        }
+
+        expect(fn).not.to.throw()
+        expect(called).to.be.true
+      })
+    })
+
+    it('throws process.stdin errors code!=EPIPE', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start()
+      .then(() => {
+        const fn = () => {
+          const err = new Error('wattttt')
+
+          err.code = 'FAILWHALE'
+
+          return process.stdin.emit('error', err)
+        }
+
+        expect(fn).to.throw(/wattttt/)
       })
     })
   })

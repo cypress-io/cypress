@@ -32,6 +32,7 @@ describe('Command model', () => {
 
     describe('when model is pending on initialization and LONG_RUNNING_THRESHOLD passes', () => {
       let command
+
       beforeEach(() => {
         command = new Command(model())
       })
@@ -51,6 +52,7 @@ describe('Command model', () => {
 
   describe('when model is not pending on initialization, is updated to pending, and LONG_RUNNING_THRESHOLD passes', () => {
     let command
+
     beforeEach(() => {
       command = new Command(model({ state: null }))
       clock.tick(300)

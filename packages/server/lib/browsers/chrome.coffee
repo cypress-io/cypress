@@ -1,12 +1,19 @@
+## Unit tests in ../../test/unit/browsers/chrome_spec
+
+_         = require("lodash")
 os        = require("os")
-fs        = require("fs-extra")
+path      = require("path")
 Promise   = require("bluebird")
 extension = require("@packages/extension")
-log       = require("debug")("cypress:server:browsers")
+debug     = require("debug")("cypress:server:browsers")
+plugins   = require("../plugins")
+fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 
-fs = Promise.promisifyAll(fs)
+LOAD_EXTENSION = "--load-extension="
+CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
+CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -36,10 +43,14 @@ defaultArgs = [
   "--reduce-security-for-testing"
   "--enable-automation"
   "--disable-infobars"
+  "--disable-device-discovery-notifications"
 
-  ## needed for https://github.com/cypress-io/cypress/issues/573
-  ## list of flags here: https://cs.chromium.org/chromium/src/third_party/WebKit/Source/platform/runtime_enabled_features.json5
-  "--disable-blink-features=BlockCredentialedSubresources"
+  ## https://github.com/cypress-io/cypress/issues/2376
+  "--autoplay-policy=no-user-gesture-required" 
+
+  ## http://www.chromium.org/Home/chromium-security/site-isolation
+  ## https://github.com/cypress-io/cypress/issues/1951
+  "--disable-site-isolation-trials"
 
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
@@ -47,22 +58,68 @@ defaultArgs = [
   "--disable-prompt-on-repost"
   "--disable-hang-monitor"
   "--disable-sync"
-  "--disable-background-networking"
+  ## this flag is causing throttling of XHR callbacks for
+  ## as much as 30 seconds. If you VNC in and open dev tools or
+  ## click on a button, it'll "instantly" work. with this
+  ## option enabled, it will time out some of our tests in circle
+  # "--disable-background-networking"
   "--disable-web-resources"
   "--safebrowsing-disable-auto-update"
   "--safebrowsing-disable-download-protection"
   "--disable-client-side-phishing-detection"
   "--disable-component-update"
   "--disable-default-apps"
+
+  ## These flags are for webcam/WebRTC testing
+  ## https://github.com/cypress-io/cypress/issues/2704
+  "--use-fake-ui-for-media-stream"
+  "--use-fake-device-for-media-stream"
 ]
 
+pluginsBeforeBrowserLaunch = (browser, args) ->
+  ## bail if we're not registered to this event
+  return args if not plugins.has("before:browser:launch")
+
+  plugins.execute("before:browser:launch", browser, args)
+  .then (newArgs) ->
+    debug("got user args for 'before:browser:launch'", newArgs)
+
+    ## reset args if we got 'em
+    return newArgs ? args
+
+_normalizeArgExtensions = (dest, args) ->
+  loadExtension = _.find args, (arg) ->
+    arg.includes(LOAD_EXTENSION)
+
+  if loadExtension
+    args = _.without(args, loadExtension)
+
+    ## form into array, enabling users to pass multiple extensions
+    userExtensions = loadExtension.replace(LOAD_EXTENSION, "").split(",")
+
+  extensions = [].concat(userExtensions, dest, pathToTheme)
+
+  args.push(LOAD_EXTENSION + _.compact(extensions).join(","))
+
+  args
+
+## we now store the extension in each browser profile
+_removeRootExtension = ->
+  fs
+  .removeAsync(appData.path("extensions"))
+  .catchReturn(null) ## noop if doesn't exist fails for any reason
+
 module.exports = {
-  _writeExtension: (proxyUrl, socketIoRoute) ->
+  _normalizeArgExtensions
+
+  _removeRootExtension
+
+  _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
     extension.setHostAndPath(proxyUrl, socketIoRoute)
     .then (str) ->
-      extensionDest = appData.path("extensions", "chrome")
-      extensionBg   = appData.path("extensions", "chrome", "background.js")
+      extensionDest = utils.getExtensionDir(browser, isTextTerminal)
+      extensionBg   = path.join(extensionDest, "background.js")
 
       ## copy the extension src to the extension dist
       utils.copyExtension(pathToExtension, extensionDest)
@@ -71,39 +128,80 @@ module.exports = {
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)
 
-  _getArgs: (browserArgs = []) ->
-    args = defaultArgs.concat(browserArgs)
+  _getArgs: (options = {}) ->
+    _.defaults(options, {
+      browser: {}
+    })
+
+    args = [].concat(defaultArgs)
 
     if os.platform() is "linux"
       args.push("--disable-gpu")
       args.push("--no-sandbox")
 
+    if ua = options.userAgent
+      args.push("--user-agent=#{ua}")
+
+    if ps = options.proxyServer
+      args.push("--proxy-server=#{ps}")
+
+    if options.chromeWebSecurity is false
+      args.push("--disable-web-security")
+      args.push("--allow-running-insecure-content")
+
+    ## prevent AUT shaking in 66 & 67, but flag breaks chrome in 68+
+    ## https://github.com/cypress-io/cypress/issues/2037
+    ## https://github.com/cypress-io/cypress/issues/2215
+    ## https://github.com/cypress-io/cypress/issues/2223
+    { majorVersion } = options.browser
+    if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
+       args.push("--disable-blink-features=RootLayerScrolling")
+
+    ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
+    ## https://github.com/cypress-io/cypress/issues/1872
+    if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
+      args.push("--proxy-bypass-list=<-loopback>")
+  
     args
 
-  open: (browserName, url, options = {}, automation) ->
-    args = @_getArgs(options.browserArgs)
+  open: (browser, url, options = {}, automation) ->
+    { isTextTerminal } = options
 
-    Promise.all([
-      ## ensure that we have a chrome profile dir
-      utils.ensureProfile(browserName)
+    Promise
+    .try =>
+      args = @_getArgs(options)
 
-      @_writeExtension(options.proxyUrl, options.socketIoRoute)
-    ])
-    .spread (dir, dest) ->
-      ## we now know where this extension is going
-      args.push("--load-extension=#{dest},#{pathToTheme}")
+      Promise.all([
+        ## ensure that we have a clean cache dir
+        ## before launching the browser every time
+        utils.ensureCleanCache(browser, isTextTerminal),
 
-      ## this overrides any previous user-data-dir args
-      ## by being the last one
-      args.push("--user-data-dir=#{dir}")
+        pluginsBeforeBrowserLaunch(options.browser, args)
+      ])
+    .spread (cacheDir, args) =>
+      Promise.all([
+        @_writeExtension(
+          browser,
+          isTextTerminal,
+          options.proxyUrl,
+          options.socketIoRoute
+        ),
 
-      if ps = options.proxyServer
-        args.push("--proxy-server=#{ps}")
+        _removeRootExtension(),
+      ])
+      .spread (extDest) ->
+        ## normalize the --load-extensions argument by
+        ## massaging what the user passed into our own
+        args = _normalizeArgExtensions(extDest, args)
 
-      if options.chromeWebSecurity is false
-        args.push("--disable-web-security")
-        args.push("--allow-running-insecure-content")
+        userDir = utils.getProfileDir(browser, isTextTerminal)
 
-      log("launch in chrome: %s, %s", url, args)
-      utils.launch(browserName, url, args)
+        ## this overrides any previous user-data-dir args
+        ## by being the last one
+        args.push("--user-data-dir=#{userDir}")
+        args.push("--disk-cache-dir=#{cacheDir}")
+
+        debug("launch in chrome: %s, %s", url, args)
+
+        utils.launch(browser, url, args)
 }

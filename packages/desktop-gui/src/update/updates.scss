@@ -19,11 +19,7 @@
 }
 
 html.has-updates {
-  .helper-line {
-    bottom: 55px;
-  }
-
-  .project-content {
+  .helper-line, .project-content, .intro {
     bottom: 55px;
   }
 }

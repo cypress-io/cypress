@@ -69,6 +69,27 @@ describe "src/cy/commands/xhr", ->
           expect(onreadystatechanged).to.be.true
           expect(xhr.status).to.eq(404)
 
+    it "allows multiple readystatechange calls", ->
+      responseText = null
+      responseStatuses = 0
+
+      cy
+        .server()
+        .route({ url: /longtext.txt/ }).as("getLongText")
+        .task('create:long:file')
+        .window().then (win) ->
+          xhr = new win.XMLHttpRequest()
+          xhr.onreadystatechange = ->
+            responseText = xhr.responseText
+            if xhr.readyState == 3
+              responseStatuses++
+          xhr.open("GET", "/_test-output/longtext.txt?" + Cypress._.random(0, 1e6))
+          xhr.send()
+          null
+        .wait("@getLongText").then (xhr) ->
+          expect(responseStatuses).to.be.gt(1)
+          expect(xhr.status).to.eq(200)
+
     it "works with jquery too", ->
       failed = false
       onloaded = false
@@ -842,6 +863,14 @@ describe "src/cy/commands/xhr", ->
         .route("*", {})
         .then ->
           expect(cy.state("server").getRoutes()[0].delay).to.eq(100)
+
+    it "passes event argument to xhr.onreadystatechange", (done) ->
+      cy.window().then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.onreadystatechange = (e) ->
+          expect(e).to.be.an.instanceof(win.Event)
+          done()
+        xhr.open("GET", "http://localhost:3500/")
 
     describe "errors", ->
       context "argument signature", ->
@@ -1813,6 +1842,89 @@ describe "src/cy/commands/xhr", ->
     it "has not aborted the xhrs", ->
       _.each xhrs, (xhr) ->
         expect(xhr.aborted).not.to.be.false
+
+    it "aborts xhrs that haven't been sent", ->
+      cy
+      .window()
+      .then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.open("GET", "/timeout?ms=0")
+        xhr.abort()
+
+        expect(xhr.aborted).to.be.true
+
+    it "aborts xhrs currently in flight", ->
+      log = null
+
+      cy.on "log:changed", (attrs, l) =>
+        if attrs.name is "xhr"
+          if not log
+            log = l
+
+      cy
+      .window()
+      .then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.open("GET", "/timeout?ms=999")
+        xhr.send()
+        xhr.abort()
+
+        cy.wrap(null).should ->
+          expect(log.get("state")).to.eq("failed")
+          expect(xhr.aborted).to.be.true
+
+    ## https://github.com/cypress-io/cypress/issues/3008      
+    it "aborts xhrs even when responseType  not '' or 'text'", ->
+      log = null
+
+      cy.on "log:changed", (attrs, l) =>
+        if attrs.name is "xhr"
+          if not log
+            log = l
+      
+      cy
+      .window()
+      .then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.responseType = 'arraybuffer'
+        xhr.open("GET", "/timeout?ms=1000")
+        xhr.send()
+        xhr.abort()
+
+        cy.wrap(null).should ->
+          expect(log.get("state")).to.eq("failed")
+          expect(xhr.aborted).to.be.true
+
+    ## https://github.com/cypress-io/cypress/issues/1652
+    it "does not set aborted on XHR's that have completed by have had .abort() called", ->
+      log = null
+
+      cy.on "log:changed", (attrs, l) =>
+        if attrs.name is "xhr"
+          if not log
+            log = l
+
+      cy
+      .window()
+      .then (win) ->
+        new Promise (resolve) ->
+          xhr = new win.XMLHttpRequest()
+          xhr.open("GET", "/timeout?ms=0")
+          xhr.onload = ->
+            xhr.abort()
+            xhr.foo = "bar"
+            resolve(xhr)
+          xhr.send()
+      .then (xhr) ->
+        cy
+        .wrap(null)
+        .should ->
+          ## ensure this is set to prevent accidental
+          ## race conditions down the road if something
+          ## goes wrong
+          expect(xhr.foo).to.eq("bar")
+          expect(xhr.aborted).not.to.be.true
+          expect(log.get("state")).to.eq("passed")
 
   context "Cypress.on(window:unload)", ->
     it "aborts all open XHR's", ->

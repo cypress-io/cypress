@@ -1,27 +1,37 @@
 require("../../spec_helper")
 
 _             = require("lodash")
+path          = require("path")
 Promise       = require("bluebird")
 EE            = require("events").EventEmitter
 BrowserWindow = require("electron").BrowserWindow
+cyDesktop     = require("@packages/desktop-gui")
+user          = require("#{root}../lib/user")
 Windows       = require("#{root}../lib/gui/windows")
 savedState    = require("#{root}../lib/saved_state")
 
 describe "lib/gui/windows", ->
   beforeEach ->
-    @win = new EE()
-    @win.getSize = @sandbox.stub().returns([1, 2])
-    @win.getPosition = @sandbox.stub().returns([3, 4])
-    @win.webContents = new EE()
-    @win.webContents.openDevTools = @sandbox.stub()
-    @win.isDestroyed = @sandbox.stub().returns(false)
+    Windows.reset()
 
-    @sandbox.stub(Windows, "_newBrowserWindow").returns(@win)
+    @win = new EE()
+    @win.loadURL = sinon.stub()
+    @win.destroy = sinon.stub()
+    @win.getSize = sinon.stub().returns([1, 2])
+    @win.getPosition = sinon.stub().returns([3, 4])
+    @win.webContents = new EE()
+    @win.webContents.openDevTools = sinon.stub()
+    @win.isDestroyed = sinon.stub().returns(false)
+
+    sinon.stub(Windows, "_newBrowserWindow").returns(@win)
+
+  afterEach ->
+    Windows.reset()
 
   context ".getBrowserAutomation", ->
     beforeEach ->
-      @sandbox.stub(Windows, "automation")
-      @sandbox.stub(Windows, "getByWebContents")
+      sinon.stub(Windows, "automation")
+      sinon.stub(Windows, "getByWebContents")
 
     it "gets window and passes to electron.automation", ->
       Windows.getByWebContents.withArgs("foo").returns("bar")
@@ -31,18 +41,78 @@ describe "lib/gui/windows", ->
 
   context ".getByWebContents", ->
     beforeEach ->
-      @sandbox.stub(BrowserWindow, "fromWebContents")
+      sinon.stub(BrowserWindow, "fromWebContents")
 
     it "calls BrowserWindow.fromWebContents", ->
       BrowserWindow.fromWebContents.withArgs("foo").returns("bar")
       expect(Windows.getByWebContents("foo")).to.eq("bar")
 
+  context ".open", ->
+    beforeEach ->
+      sinon.stub(Windows, "create").returns(@win)
+
+    it "sets default options", ->
+      options = {
+        type: "INDEX"
+      }
+
+      Windows.open("/path/to/project", options)
+      .then (win) ->
+        expect(options).to.deep.eq({
+          height: 500
+          width: 600
+          type: "INDEX"
+          show: true
+          url: cyDesktop.getPathToIndex()
+          webPreferences: {
+            preload: path.resolve("lib", "ipc", "ipc.js")
+          }
+        })
+
+        expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
+
+    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
+      options = {
+        type: "GITHUB_LOGIN"
+      }
+
+      url = "https://github.com/login"
+      url2 = "https://github.com?code=code123"
+
+      sinon.stub(user, "getLoginUrl").resolves(url)
+
+      sinon.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
+
+      Windows.open("/path/to/project", options)
+      .then (code) =>
+        expect(code).to.eq("code123")
+        expect(options.type).eq("GITHUB_LOGIN")
+        expect(@win.loadURL).to.be.calledWith(url)
+
+    it "resolves with code on GITHUB_LOGIN for did-get-redirect-request", ->
+      options = {
+        type: "GITHUB_LOGIN"
+      }
+
+      url = "https://github.com/login"
+      url2 = "https://github.com?code=code123"
+
+      sinon.stub(user, "getLoginUrl").resolves(url)
+
+      sinon.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
+
+      Windows.open("/path/to/project", options)
+      .then (code) =>
+        expect(code).to.eq("code123")
+        expect(options.type).eq("GITHUB_LOGIN")
+        expect(@win.loadURL).to.be.calledWith(url)
+
   context ".create", ->
     it "opens dev tools if saved state is open", ->
-      Windows.create({devTools: true})
+      Windows.create("/foo/", {devTools: true})
       expect(@win.webContents.openDevTools).to.be.called
 
-      Windows.create({})
+      Windows.create("/foo/", {})
       expect(@win.webContents.openDevTools).not.to.be.calledTwice
 
     ## TODO: test everything else going on in this method!
@@ -51,9 +121,9 @@ describe "lib/gui/windows", ->
     beforeEach ->
       savedState()
       .then (@state) =>
-        @sandbox.stub(@state, "set")
+        sinon.stub(@state, "set")
 
-        @projectPath = undefined
+        @projectRoot = undefined
         @keys = {
           width: "theWidth"
           height: "someHeight"
@@ -65,9 +135,9 @@ describe "lib/gui/windows", ->
     it "saves size and position when window resizes, debounced", ->
       ## tried using useFakeTimers here, but it didn't work for some
       ## reason, so this is the next best thing
-      @sandbox.stub(_, "debounce").returnsArg(0)
+      sinon.stub(_, "debounce").returnsArg(0)
 
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, false, @win, @keys)
       @win.emit("resize")
 
       expect(_.debounce).to.be.called
@@ -85,7 +155,7 @@ describe "lib/gui/windows", ->
     it "returns if window isDestroyed on resize", ->
       @win.isDestroyed.returns(true)
 
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, false, @win, @keys)
       @win.emit("resize")
 
       Promise
@@ -96,8 +166,8 @@ describe "lib/gui/windows", ->
     it "saves position when window moves, debounced", ->
       ## tried using useFakeTimers here, but it didn't work for some
       ## reason, so this is the next best thing
-      @sandbox.stub(_, "debounce").returnsArg(0)
-      Windows.trackState(@projectPath, @win, @keys)
+      sinon.stub(_, "debounce").returnsArg(0)
+      Windows.trackState(@projectRoot, false, @win, @keys)
       @win.emit("moved")
 
       Promise
@@ -111,7 +181,7 @@ describe "lib/gui/windows", ->
     it "returns if window isDestroyed on moved", ->
       @win.isDestroyed.returns(true)
 
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, false, @win, @keys)
       @win.emit("moved")
 
       Promise
@@ -120,7 +190,7 @@ describe "lib/gui/windows", ->
         expect(@state.set).not.to.be.called
 
     it "saves dev tools state when opened", ->
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, false, @win, @keys)
       @win.webContents.emit("devtools-opened")
 
       Promise
@@ -129,7 +199,7 @@ describe "lib/gui/windows", ->
         expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
 
     it "saves dev tools state when closed", ->
-      Windows.trackState(@projectPath, @win, @keys)
+      Windows.trackState(@projectRoot, false, @win, @keys)
       @win.webContents.emit("devtools-closed")
 
       Promise
@@ -140,9 +210,9 @@ describe "lib/gui/windows", ->
   context ".automation", ->
     beforeEach ->
       @cookies = {
-        set:    @sandbox.stub()
-        get:    @sandbox.stub()
-        remove: @sandbox.stub()
+        set:    sinon.stub()
+        get:    sinon.stub()
+        remove: sinon.stub()
       }
 
       @win = {

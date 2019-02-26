@@ -20,7 +20,7 @@ class App extends Component {
     appApi.listenForMenuClicks()
 
     ipc.getOptions().then((options = {}) => {
-      appStore.set(_.pick(options, 'env', 'os', 'projectPath', 'version'))
+      appStore.set(_.pick(options, 'cypressEnv', 'os', 'projectRoot', 'version'))
       viewStore.showApp()
     })
 

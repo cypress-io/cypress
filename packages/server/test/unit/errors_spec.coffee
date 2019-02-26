@@ -8,7 +8,7 @@ logger = require("#{root}lib/logger")
 describe "lib/errors", ->
   beforeEach ->
     @env = process.env.CYPRESS_ENV
-    @log = @sandbox.stub(console, "log")
+    @log = sinon.stub(console, "log")
 
   afterEach ->
     process.env.CYPRESS_ENV = @env
@@ -35,6 +35,12 @@ describe "lib/errors", ->
       errors.log(err).then =>
         expect(@log).to.be.calledWithMatch("foo/bar/baz")
 
+    it "logs err.details", ->
+      err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh")
+      errors.log(err).then =>
+        expect(@log).to.be.calledWithMatch("foo/bar/baz")
+        expect(@log).to.be.calledWithMatch("\n", "details huh")
+
     it "logs err.stack in development", ->
       process.env.CYPRESS_ENV = "development"
 
@@ -43,7 +49,7 @@ describe "lib/errors", ->
         expect(@log).to.be.calledWith(chalk.red(foo.stack))
 
     it "calls logger.createException", ->
-      @sandbox.stub(logger, "createException").resolves()
+      sinon.stub(logger, "createException").resolves()
 
       process.env.CYPRESS_ENV = "production"
 
