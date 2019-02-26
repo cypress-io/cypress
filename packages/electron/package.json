@@ -1,7 +1,7 @@
 {
   "name": "@packages/electron",
   "version": "0.0.0",
-  "electronVersion": "4.0.5",
+  "electronVersion": "2.0.0",
   "private": true,
   "main": "index.js",
   "scripts": {
