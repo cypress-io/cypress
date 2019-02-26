@@ -2,7 +2,6 @@ _            = require("lodash")
 fs           = require("fs-extra")
 net          = require("net")
 url          = require("url")
-getProxyFromURI = require("request/lib/getProxyFromURI")
 https        = require("https")
 httpsAgent   = require("https-proxy-agent")
 Promise      = require("bluebird")
@@ -72,10 +71,12 @@ class Server
     .pipe(res)
 
   _needsUpstreamProxy: (hostname, port) ->
-    process.env.HTTP_PROXY and (hostname isnt "localhost" or getProxyFromURI("https://#{hostname}:#{port}"))
+    process.env.HTTP_PROXY
 
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
+
+    debug(process.env.HTTP_PROXY)
 
     if @_needsUpstreamProxy(hostname, port)
       upstreamProxy = process.env.HTTP_PROXY

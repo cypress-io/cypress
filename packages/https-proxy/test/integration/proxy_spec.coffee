@@ -2,10 +2,10 @@ require("../spec_helper")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+debugProxy  = require("debugging-proxy")
 path        = require("path")
 Promise     = require("bluebird")
 proxy       = require("../helpers/proxy")
-mitmProxy   = require("../helpers/mitm")
 httpServer  = require("../helpers/http_server")
 httpsServer = require("../helpers/https_server")
 
@@ -13,8 +13,6 @@ describe "Proxy", ->
   beforeEach ->
     Promise.join(
       httpServer.start()
-
-      # mitmProxy.start()
 
       httpsServer.start(8443)
 
@@ -139,3 +137,26 @@ describe "Proxy", ->
           url: "https://localhost:8443/"
           proxy: "http://localhost:3333"
         })
+
+  context "with an upstream proxy", ->
+    beforeEach ->
+      @httpProxy = process.env.HTTP_PROXY
+      process.env.HTTP_PROXY = "http://localhost:9001"
+
+      @upstream = new debugProxy()
+
+      @sandbox.spy(@upstream, "proxySslConnectionToDomain")
+      @upstream.start(9001)
+
+    it "passes a request to an https server through the upstream", ->
+      request({
+        strictSSL: false
+        url: "https://localhost:8444/"
+        proxy: "http://localhost:3333"
+      }).then (res) =>
+        expect(@upstream.proxySslConnectionToDomain).to.have.been.calledWith("localhost", 8444)
+        expect(res).to.contain("https server")
+
+    afterEach ->
+      @upstream.stop()
+      process.env.HTTP_PROXY = @httpProxy
