@@ -10,7 +10,7 @@ module.exports = {
 
     const invoke = () => {
       if (event && _.isFunction(event.handler)) {
-        event.handler(...args)
+        return event.handler(...args)
       }
     }
 
