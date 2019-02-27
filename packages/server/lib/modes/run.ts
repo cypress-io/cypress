@@ -15,52 +15,57 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require('lodash')
-const pkg = require('@packages/root')
-const path = require('path')
-const chalk = require('chalk')
-const human = require('human-interval')
-const debug = require('debug')('cypress:server:run')
-const Promise = require('bluebird')
-const logSymbols = require('log-symbols')
+import _ from 'lodash'
+import pkg from '@packages/root'
+import path from 'path'
+import chalk, { Chalk } from 'chalk'
+import human from 'human-interval'
+import debugLib from 'debug'
+import Promise from 'bluebird'
+import logSymbols from 'log-symbols'
+import { FoundBrowser } from '@packages/launcher'
 
-const recordMode = require('./record')
-const errors = require('../errors')
-const Project = require('../project')
-const Reporter = require('../reporter')
-const browsers = require('../browsers')
-const openProject = require('../open_project')
-const videoCapture = require('../video_capture')
-const Windows = require('../gui/windows')
-const fs = require('../util/fs')
-const env = require('../util/env')
-const trash = require('../util/trash')
-const random = require('../util/random')
-const system = require('../util/system')
-const duration = require('../util/duration')
-const terminal = require('../util/terminal')
-const specsUtil = require('../util/specs')
-const humanTime = require('../util/human_time')
-const electronApp = require('../util/electron_app')
+import recordMode from './record.coffee'
+import errors from '../errors.coffee'
+import Project from '../project.coffee'
+import Reporter from '../reporter.coffee'
+import browsers from '../browsers.coffee'
+import openProject from '../open_project.coffee'
+import videoCapture from '../video_capture.coffee'
+import fs from '../util/fs'
+import env from '../util/env'
+import trash from '../util/trash'
+import random from '../util/random'
+import system from '../util/system'
+import duration from '../util/duration'
+import terminal from '../util/terminal'
+import specsUtil from '../util/specs'
+import humanTime from '../util/human_time'
+import electronApp from '../util/electron_app'
+import { OptionsArgv } from '../util/args'
 
-const color = (val, c) => {
-  return chalk[c](val)
+interface ChosenBrowser extends FoundBrowser {
+  isHeadless: boolean
+  isHeaded: boolean
 }
 
-const gray = (val) => {
-  return color(val, 'gray')
+const debug = debugLib('cypress:server:run')
+
+const color = (val: any, c: Chalk) => {
+  return c(val)
+}
+const gray = (val: string) => {
+  return chalk.gray(val)
 }
 
-const colorIf = function (val, c) {
+const colorIf = function(val: number | string, c: Chalk) {
   if (val === 0) {
-    val = '-'
-    c = 'gray'
+    return gray('-')
   }
-
   return color(val, c)
 }
 
-const getSymbol = function (num) {
+const getSymbol = function(num: number) {
   if (num) {
     return logSymbols.error
   }
@@ -68,9 +73,8 @@ const getSymbol = function (num) {
   return logSymbols.success
 }
 
-const formatBrowser = (browser) =>
 //# todo finish browser
-{
+const formatBrowser = (browser: ChosenBrowser) => {
   return _.compact([
     browser.displayName,
     browser.majorVersion,
@@ -78,13 +82,13 @@ const formatBrowser = (browser) =>
   ]).join(' ')
 }
 
-const formatFooterSummary = function (results) {
+const formatFooterSummary = function(results) {
   const { totalFailed, runs } = results
 
   //# pass or fail color
   const c = totalFailed ? 'red' : 'green'
 
-  const phrase = (function () {
+  const phrase = (function() {
     //# if we have any specs failing...
     if (!totalFailed) {
       return 'All specs passed!'
@@ -101,23 +105,19 @@ const formatFooterSummary = function (results) {
   return [
     color(phrase, c),
     gray(duration.format(results.totalDuration)),
-    colorIf(results.totalTests, 'reset'),
-    colorIf(results.totalPassed, 'green'),
-    colorIf(totalFailed, 'red'),
-    colorIf(results.totalPending, 'cyan'),
-    colorIf(results.totalSkipped, 'blue'),
+    colorIf(results.totalTests, chalk.reset),
+    colorIf(results.totalPassed, chalk.green),
+    colorIf(totalFailed, chalk.red),
+    colorIf(results.totalPending, chalk.cyan),
+    colorIf(results.totalSkipped, chalk.blue),
   ]
 }
 
-const formatSpecSummary = (name, failures) => {
-  return [
-    getSymbol(failures),
-    color(name, 'reset'),
-  ]
-  .join(' ')
+const formatSpecSummary = (name: string, failureCount: number) => {
+  return [getSymbol(failureCount), color(name, chalk.reset)].join(' ')
 }
 
-const formatRecordParams = function (runUrl, parallel, group) {
+const formatRecordParams = function(runUrl, parallel, group) {
   if (runUrl) {
     if (!group) {
       group = false
@@ -127,13 +127,13 @@ const formatRecordParams = function (runUrl, parallel, group) {
   }
 }
 
-const formatSpecPattern = function (specPattern) {
+const formatSpecPattern = function(specPattern) {
   if (specPattern) {
     return specPattern.join(', ')
   }
 }
 
-const formatSpecs = function (specs) {
+const formatSpecs = function(specs) {
   const names = _.map(specs, 'name')
 
   //# 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
@@ -142,11 +142,10 @@ const formatSpecs = function (specs) {
     gray('('),
     gray(names.join(', ')),
     gray(')'),
-  ]
-  .join('')
+  ].join('')
 }
 
-const displayRunStarting = function (options = {}) {
+const displayRunStarting = function(options = {}) {
   const { specs, specPattern, browser, runUrl, parallel, group } = options
 
   console.log('')
@@ -166,8 +165,7 @@ const displayRunStarting = function (options = {}) {
     type: 'outsideBorder',
   })
 
-  const data = _
-  .chain([
+  const data = _.chain([
     [gray('Cypress:'), pkg.version],
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Specs:'), formatSpecs(specs)],
@@ -175,8 +173,8 @@ const displayRunStarting = function (options = {}) {
     [gray('Params:'), formatRecordParams(runUrl, parallel, group)],
     [gray('Run URL:'), runUrl],
   ])
-  .filter(_.property(1))
-  .value()
+    .filter(_.property(1))
+    .value()
 
   table.push(...data)
 
@@ -185,7 +183,7 @@ const displayRunStarting = function (options = {}) {
   return console.log('')
 }
 
-const displaySpecHeader = function (name, curr, total, estimated) {
+const displaySpecHeader = function(name, curr, total, estimated) {
   console.log('')
 
   const PADDING = 2
@@ -200,10 +198,7 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   })
 
   table.push(['', ''])
-  table.push([
-    `Running: ${gray(`${name}...`)}`,
-    gray(`(${curr} of ${total})`),
-  ])
+  table.push([`Running: ${gray(`${name}...`)}`, gray(`(${curr} of ${total})`)])
 
   console.log(table.toString())
 
@@ -214,7 +209,7 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   }
 }
 
-const collectTestResults = (obj = {}, estimated) => {
+export const collectTestResults = (obj = {}, estimated) => {
   return {
     name: _.get(obj, 'spec.name'),
     tests: _.get(obj, 'stats.tests'),
@@ -230,7 +225,7 @@ const collectTestResults = (obj = {}, estimated) => {
 }
 
 const renderSummaryTable = (runUrl) => {
-  return function (results) {
+  return function(results) {
     const { runs } = results
 
     console.log('')
@@ -244,8 +239,24 @@ const renderSummaryTable = (runUrl) => {
     })
 
     if (runs && runs.length) {
-      const head = ['  Spec', '', 'Tests', 'Passing', 'Failing', 'Pending', 'Skipped']
-      const colAligns = ['left', 'right', 'right', 'right', 'right', 'right', 'right']
+      const head = [
+        '  Spec',
+        '',
+        'Tests',
+        'Passing',
+        'Failing',
+        'Pending',
+        'Skipped',
+      ]
+      const colAligns = [
+        'left',
+        'right',
+        'right',
+        'right',
+        'right',
+        'right',
+        'right',
+      ]
       const colWidths = [39, 11, 10, 10, 10, 10, 10]
 
       const table1 = terminal.table({
@@ -278,12 +289,12 @@ const renderSummaryTable = (runUrl) => {
 
         return table2.push([
           formatSpecSummary(spec.name, stats.failures),
-          color(ms, 'gray'),
-          colorIf(stats.tests, 'reset'),
-          colorIf(stats.passes, 'green'),
-          colorIf(stats.failures, 'red'),
-          colorIf(stats.pending, 'cyan'),
-          colorIf(stats.skipped, 'blue'),
+          color(ms, chalk.gray),
+          colorIf(stats.tests, chalk.reset),
+          colorIf(stats.passes, chalk.green),
+          colorIf(stats.failures, chalk.red),
+          colorIf(stats.pending, chalk.cyan),
+          colorIf(stats.skipped, chalk.blue),
         ])
       })
 
@@ -314,52 +325,65 @@ const renderSummaryTable = (runUrl) => {
   }
 }
 
-const iterateThroughSpecs = function (options = {}) {
-  const { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+const iterateThroughSpecs = function(options = {}) {
+  const {
+    specs,
+    runEachSpec,
+    parallel,
+    beforeSpecRun,
+    afterSpecRun,
+    config,
+  } = options
 
   const serial = () => {
     return Promise.mapSeries(specs, runEachSpec)
   }
 
   const serialWithRecord = () => {
-    return Promise
-    .mapSeries(specs, (spec, index, length) => {
+    return Promise.mapSeries(specs, (spec, index, length) => {
       return beforeSpecRun(spec)
-      .then(({ estimated }) => {
-        return runEachSpec(spec, index, length, estimated)
-      }).tap((results) => {
-        return afterSpecRun(spec, results, config)
-      })
-    }
-    )
+        .then(({ estimated }) => {
+          return runEachSpec(spec, index, length, estimated)
+        })
+        .tap((results) => {
+          return afterSpecRun(spec, results, config)
+        })
+    })
   }
 
   const parallelWithRecord = (runs) => {
-    return beforeSpecRun()
-    .then(({ spec, claimedInstances, totalInstances, estimated }) => {
-    //# no more specs to run?
-      if (!spec) {
-      //# then we're done!
-        return runs
+    return beforeSpecRun().then(
+      ({ spec, claimedInstances, totalInstances, estimated }) => {
+        //# no more specs to run?
+        if (!spec) {
+          //# then we're done!
+          return runs
+        }
+
+        //# find the actual spec object amongst
+        //# our specs array since the API sends us
+        //# the relative name
+        spec = _.find(specs, { relative: spec })
+
+        return runEachSpec(
+          spec,
+          claimedInstances - 1,
+          totalInstances,
+          estimated
+        )
+          .tap((results) => {
+            runs.push(results)
+
+            return afterSpecRun(spec, results, config)
+          })
+          .then(() =>
+            //# recurse
+            {
+              return parallelWithRecord(runs)
+            }
+          )
       }
-
-      //# find the actual spec object amongst
-      //# our specs array since the API sends us
-      //# the relative name
-      spec = _.find(specs, { relative: spec })
-
-      return runEachSpec(spec, claimedInstances - 1, totalInstances, estimated)
-      .tap((results) => {
-        runs.push(results)
-
-        return afterSpecRun(spec, results, config)
-      }).then(() =>
-      //# recurse
-      {
-        return parallelWithRecord(runs)
-      }
-      )
-    })
+    )
   }
 
   switch (false) {
@@ -377,7 +401,7 @@ const iterateThroughSpecs = function (options = {}) {
   }
 }
 
-const getProjectId = function (project, id) {
+export const getProjectId = function(project, id) {
   if (id == null) {
     id = env.get('CYPRESS_PROJECT_ID')
   }
@@ -387,28 +411,29 @@ const getProjectId = function (project, id) {
     return Promise.resolve(id)
   }
 
-  return project
-  .getProjectId()
-  .catch(() =>
-  //# no id no problem
-  {
-    return null
-  }
+  return project.getProjectId().catch(() =>
+    //# no id no problem
+    {
+      return null
+    }
   )
 }
 
 const reduceRuns = (runs, prop) => {
-  return _.reduce(runs, (memo, run) => {
-    return memo += _.get(run, prop)
-  }
-    , 0)
+  return _.reduce(
+    runs,
+    (memo, run) => {
+      return (memo += _.get(run, prop))
+    },
+    0
+  )
 }
 
 const getRun = (run, prop) => {
   return _.get(run, prop)
 }
 
-const writeOutput = (outputPath, results) => {
+export const writeOutput = (outputPath, results) => {
   return Promise.try(() => {
     if (!outputPath) {
       return
@@ -420,71 +445,72 @@ const writeOutput = (outputPath, results) => {
   })
 }
 
-const openProjectCreate = (projectRoot, socketId, options) =>
-//# now open the project to boot the server
-//# putting our web client app in headless mode
-//# - NO  display server logs (via morgan)
-//# - YES display reporter results (via mocha reporter)
-{
-  return openProject.create(projectRoot, options, {
-    socketId,
-    morgan: false,
-    report: true,
-    isTextTerminal: options.isTextTerminal,
-    onError (err) {
-      console.log('')
-      if (err.details) {
-        console.log(err.message)
-        console.log('')
-        console.log(chalk.yellow(err.details))
-      } else {
-        console.log(err.stack)
-      }
-
-      return openProject.emit('exitEarlyWithErr', err.message)
-    },
-  })
-  .catch({ portInUse: true }, (err) =>
-  //# TODO: this needs to move to emit exitEarly
-  //# so we record the failure in CI
+export const openProjectCreate = (projectRoot, socketId, options) =>
+  //# now open the project to boot the server
+  //# putting our web client app in headless mode
+  //# - NO  display server logs (via morgan)
+  //# - YES display reporter results (via mocha reporter)
   {
-    return errors.throw('PORT_IN_USE_LONG', err.port)
-  }
-  )
-}
+    return openProject
+      .create(projectRoot, options, {
+        socketId,
+        morgan: false,
+        report: true,
+        isTextTerminal: options.isTextTerminal,
+        onError(err) {
+          console.log('')
+          if (err.details) {
+            console.log(err.message)
+            console.log('')
+            console.log(chalk.yellow(err.details))
+          } else {
+            console.log(err.stack)
+          }
 
-const createAndOpenProject = function (socketId, options) {
+          return openProject.emit('exitEarlyWithErr', err.message)
+        },
+      })
+      .catch({ portInUse: true }, (err) =>
+        //# TODO: this needs to move to emit exitEarly
+        //# so we record the failure in CI
+        {
+          return errors.throw('PORT_IN_USE_LONG', err.port)
+        }
+      )
+  }
+
+const createAndOpenProject = function(socketId, options) {
   const { projectRoot, projectId } = options
 
-  return Project
-  .ensureExists(projectRoot)
-  .then(() =>
-  //# open this project without
-  //# adding it to the global cache
-  {
-    return openProjectCreate(projectRoot, socketId, options)
-    .call('getProject')
-  }).then((project) => {
-    return Promise.props({
-      project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
+  return Project.ensureExists(projectRoot)
+    .then(() =>
+      //# open this project without
+      //# adding it to the global cache
+      {
+        return openProjectCreate(projectRoot, socketId, options).call(
+          'getProject'
+        )
+      }
+    )
+    .then((project) => {
+      return Promise.props({
+        project,
+        config: project.getConfig(),
+        projectId: getProjectId(project, projectId),
+      })
     })
-  }
-  )
 }
 
 const removeOldProfiles = () => {
-  return browsers.removeOldProfiles()
-  .catch((err) =>
-  //# dont make removing old browsers profiles break the build
-  {
-    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
-  }
+  return browsers.removeOldProfiles().catch((err) =>
+    //# dont make removing old browsers profiles break the build
+    {
+      return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
+    }
   )
 }
 
-const trashAssets = function (config = {}) {
+const trashAssets = function(config = {}) {
   if (config.trashAssetsBeforeRuns !== true) {
     return Promise.resolve()
   }
@@ -492,54 +518,44 @@ const trashAssets = function (config = {}) {
   return Promise.join(
     trash.folder(config.videosFolder),
     trash.folder(config.screenshotsFolder)
-  )
-  .catch((err) =>
-  //# dont make trashing assets fail the build
-  {
-    return errors.warning('CANNOT_TRASH_ASSETS', err.stack)
-  }
+  ).catch((err) =>
+    //# dont make trashing assets fail the build
+    {
+      return errors.warning('CANNOT_TRASH_ASSETS', err.stack)
+    }
   )
 }
 
 module.exports = {
-  collectTestResults,
-
-  getProjectId,
-
-  writeOutput,
-
   openProjectCreate,
 
-  createRecording (name) {
+  createRecording(name) {
     const outputDir = path.dirname(name)
 
-    return fs
-    .ensureDirAsync(outputDir)
-    .then(() => {
+    return fs.ensureDirAsync(outputDir).then(() => {
       return videoCapture.start(name, {
-        onError (err) {
-        //# catch video recording failures and log them out
-        //# but don't let this affect the run at all
+        onError(err) {
+          //# catch video recording failures and log them out
+          //# but don't let this affect the run at all
           return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
         },
       })
-    }
-    )
+    })
   },
 
-  getElectronProps (isHeaded, project, write) {
+  getElectronProps(isHeaded, project, write) {
     const obj = {
       width: 1280,
       height: 720,
       show: isHeaded,
-      onCrashed () {
+      onCrashed() {
         const err = errors.get('RENDERER_CRASHED')
 
         errors.log(err)
 
         return project.emit('exitEarlyWithErr', err.message)
       },
-      onNewWindow (e, url, frameName, disposition, options) {
+      onNewWindow(e, url, frameName, disposition, options) {
         options.show = false
       },
     }
@@ -554,7 +570,7 @@ module.exports = {
     return obj
   },
 
-  displayResults (obj = {}, estimated) {
+  displayResults(obj = {}, estimated) {
     const results = collectTestResults(obj, estimated)
 
     const c = results.failures ? 'red' : 'green'
@@ -581,13 +597,13 @@ module.exports = {
       estimated ? ['Estimated:', results.estimated] : undefined,
       ['Spec Ran:', results.name],
     ])
-    .compact()
-    .map((arr) => {
-      const [key, val] = arr
+      .compact()
+      .map((arr) => {
+        const [key, val] = arr
 
-      return [color(key, 'gray'), color(val, c)]
-    })
-    .value()
+        return [color(key, 'gray'), color(val, c)]
+      })
+      .value()
 
     table.push(...data)
 
@@ -597,14 +613,14 @@ module.exports = {
     return console.log('')
   },
 
-  displayScreenshots (screenshots = []) {
+  displayScreenshots(screenshots = []) {
     console.log('')
 
     terminal.header('Screenshots', { color: ['yellow'] })
 
     console.log('')
 
-    const format = function (s) {
+    const format = function(s) {
       const dimensions = gray(`(${s.width}x${s.height})`)
 
       return `  - ${s.path} ${dimensions}`
@@ -617,77 +633,86 @@ module.exports = {
     return console.log('')
   },
 
-  postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo) {
-    debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
+  postProcessRecording(end, name, cname, videoCompression, shouldUploadVideo) {
+    debug('ending the video recording %o', {
+      name,
+      videoCompression,
+      shouldUploadVideo,
+    })
 
     //# once this ended promises resolves
     //# then begin processing the file
     return end()
-    .then(() => {
-      //# dont process anything if videoCompress is off
-      //# or we've been told not to upload the video
-      if ((videoCompression === false) || (shouldUploadVideo === false)) {
-        return
-      }
-
-      console.log('')
-
-      terminal.header('Video', {
-        color: ['cyan'],
-      })
-
-      console.log('')
-
-      console.log(
-        gray('  - Started processing:  '),
-        chalk.cyan(`Compressing to ${videoCompression} CRF`)
-      )
-
-      const started = new Date
-      let progress = Date.now()
-      const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
-
-      const onProgress = function (float) {
-        switch (false) {
-          case float !== 1:
-            const finished = new Date - started
-            const dur = `(${humanTime.long(finished)})`
-
-            console.log(
-              gray('  - Finished processing: '),
-              chalk.cyan(name),
-              gray(dur)
-            )
-
-            return console.log('')
-
-          case (new Date - progress) <= throttle:
-            //# bump up the progress so we dont
-            //# continuously get notifications
-            progress += throttle
-            const percentage = `${Math.ceil(float * 100)}%`
-
-            return console.log('  - Compression progress: ', chalk.cyan(percentage))
+      .then(() => {
+        //# dont process anything if videoCompress is off
+        //# or we've been told not to upload the video
+        if (videoCompression === false || shouldUploadVideo === false) {
+          return
         }
-      }
 
-      // bar.tickTotal(float)
+        console.log('')
 
-      return videoCapture.process(name, cname, videoCompression, onProgress)
-    }).catch({ recordingVideoFailed: true }, (err) => {
-      //# dont do anything if this error occured because
-      //# recording the video had already failed
+        terminal.header('Video', {
+          color: ['cyan'],
+        })
 
-    }).catch((err) =>
-    //# log that post processing was attempted
-    //# but failed and dont let this change the run exit code
-    {
-      return errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
-    }
-    )
+        console.log('')
+
+        console.log(
+          gray('  - Started processing:  '),
+          chalk.cyan(`Compressing to ${videoCompression} CRF`)
+        )
+
+        const started = new Date()
+        let progress = Date.now()
+        const throttle =
+          env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
+
+        const onProgress = function(float) {
+          switch (false) {
+            case float !== 1:
+              const finished = new Date() - started
+              const dur = `(${humanTime.long(finished)})`
+
+              console.log(
+                gray('  - Finished processing: '),
+                chalk.cyan(name),
+                gray(dur)
+              )
+
+              return console.log('')
+
+            case new Date() - progress <= throttle:
+              //# bump up the progress so we dont
+              //# continuously get notifications
+              progress += throttle
+              const percentage = `${Math.ceil(float * 100)}%`
+
+              return console.log(
+                '  - Compression progress: ',
+                chalk.cyan(percentage)
+              )
+          }
+        }
+
+        // bar.tickTotal(float)
+
+        return videoCapture.process(name, cname, videoCompression, onProgress)
+      })
+      .catch({ recordingVideoFailed: true }, (err) => {
+        //# dont do anything if this error occured because
+        //# recording the video had already failed
+      })
+      .catch((err) =>
+        //# log that post processing was attempted
+        //# but failed and dont let this change the run exit code
+        {
+          return errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+        }
+      )
   },
 
-  launchBrowser (options = {}) {
+  launchBrowser(options = {}) {
     const { browser, spec, write, project, screenshots, projectRoot } = options
 
     const browserOpts = (() => {
@@ -701,7 +726,7 @@ module.exports = {
 
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) => {
-        if ((message === 'take:screenshot') && resp) {
+        if (message === 'take:screenshot' && resp) {
           screenshots.push(this.screenshotMetadata(data, resp))
         }
 
@@ -714,7 +739,7 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  listenForProjectEnd (project, exit) {
+  listenForProjectEnd(project, exit) {
     return new Promise((resolve) => {
       if (exit === false) {
         resolve = (arg) => {
@@ -722,7 +747,7 @@ module.exports = {
         }
       }
 
-      const onEarlyExit = function (errMsg) {
+      const onEarlyExit = function(errMsg) {
         //# probably should say we ended
         //# early too: (Ended Early: true)
         //# in the stats
@@ -736,8 +761,8 @@ module.exports = {
             suites: 0,
             skipped: 0,
             wallClockDuration: 0,
-            wallClockStartedAt: (new Date()).toJSON(),
-            wallClockEndedAt: (new Date()).toJSON(),
+            wallClockStartedAt: new Date().toJSON(),
+            wallClockEndedAt: new Date().toJSON(),
           },
         }
 
@@ -756,7 +781,7 @@ module.exports = {
     })
   },
 
-  waitForBrowserToConnect (options = {}) {
+  waitForBrowserToConnect(options = {}) {
     let waitForBrowserToConnect
     const { project, socketId, timeout } = options
 
@@ -767,41 +792,42 @@ module.exports = {
         this.waitForSocketConnection(project, socketId),
         this.launchBrowser(options)
       )
-      .timeout(timeout != null ? timeout : 30000)
-      .catch(Promise.TimeoutError, (err) => {
-        attempts += 1
+        .timeout(timeout != null ? timeout : 30000)
+        .catch(Promise.TimeoutError, (err) => {
+          attempts += 1
 
-        console.log('')
+          console.log('')
 
-        //# always first close the open browsers
-        //# before retrying or dieing
-        return openProject.closeBrowser()
-        .then(() => {
-          switch (attempts) {
-            //# try again up to 3 attempts
-            case 1: case 2:
-              const word = attempts === 1 ? 'Retrying...' : 'Retrying again...'
+          //# always first close the open browsers
+          //# before retrying or dieing
+          return openProject.closeBrowser().then(() => {
+            switch (attempts) {
+              //# try again up to 3 attempts
+              case 1:
+              case 2:
+                const word =
+                  attempts === 1 ? 'Retrying...' : 'Retrying again...'
 
-              errors.warning('TESTS_DID_NOT_START_RETRYING', word)
+                errors.warning('TESTS_DID_NOT_START_RETRYING', word)
 
-              return waitForBrowserToConnect()
+                return waitForBrowserToConnect()
 
-            default:
-              err = errors.get('TESTS_DID_NOT_START_FAILED')
-              errors.log(err)
+              default:
+                err = errors.get('TESTS_DID_NOT_START_FAILED')
+                errors.log(err)
 
-              return project.emit('exitEarlyWithErr', err.message)
-          }
+                return project.emit('exitEarlyWithErr', err.message)
+            }
+          })
         })
-      })
     })()
   },
 
-  waitForSocketConnection (project, id) {
+  waitForSocketConnection(project, id) {
     debug('waiting for socket connection... %o', { id })
 
     return new Promise((resolve, reject) => {
-      const fn = function (socketId) {
+      const fn = function(socketId) {
         debug('got socket connection %o', { id: socketId })
 
         if (socketId === id) {
@@ -819,11 +845,22 @@ module.exports = {
     })
   },
 
-  waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+  waitForTestsToFinishRunning(options = {}) {
+    const {
+      project,
+      screenshots,
+      started,
+      end,
+      name,
+      cname,
+      videoCompression,
+      videoUploadOnPasses,
+      exit,
+      spec,
+      estimated,
+    } = options
 
-    return this.listenForProjectEnd(project, exit)
-    .then((obj) => {
+    return this.listenForProjectEnd(project, exit).then((obj) => {
       _.defaults(obj, {
         error: null,
         hooks: null,
@@ -867,7 +904,9 @@ module.exports = {
 
       //# we should upload the video if we upload on passes (by default)
       //# or if we have any failures and have started the video
-      const suv = Boolean((videoUploadOnPasses === true) || (started && hasFailingTests))
+      const suv = Boolean(
+        videoUploadOnPasses === true || (started && hasFailingTests)
+      )
 
       obj.shouldUploadVideo = suv
 
@@ -876,21 +915,24 @@ module.exports = {
       //# always close the browser now as opposed to letting
       //# it exit naturally with the parent process due to
       //# electron bug in windows
-      return openProject.closeBrowser()
-      .then(() => {
+      return openProject.closeBrowser().then(() => {
         if (end) {
-          return this.postProcessRecording(end, name, cname, videoCompression, suv)
-          .then(finish)
+          return this.postProcessRecording(
+            end,
+            name,
+            cname,
+            videoCompression,
+            suv
+          ).then(finish)
           //# TODO: add a catch here
         }
 
         return finish()
-
       })
     })
   },
 
-  screenshotMetadata (data, resp) {
+  screenshotMetadata(data, resp) {
     return {
       screenshotId: random.id(),
       name: data.name != null ? data.name : null,
@@ -902,10 +944,23 @@ module.exports = {
     }
   },
 
-  runSpecs (options = {}) {
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
+  runSpecs(options = {}) {
+    const {
+      config,
+      browser,
+      sys,
+      headed,
+      outputPath,
+      specs,
+      specPattern,
+      beforeSpecRun,
+      afterSpecRun,
+      runUrl,
+      parallel,
+      group,
+    } = options
 
-    const isHeadless = (browser.name === 'electron') && !headed
+    const isHeadless = browser.name === 'electron' && !headed
 
     browser.isHeadless = isHeadless
     browser.isHeaded = !isHeadless
@@ -944,10 +999,10 @@ module.exports = {
       displaySpecHeader(spec.name, index + 1, length, estimated)
 
       return this.runSpec(spec, options, estimated)
-      .get('results')
-      .tap((results) => {
-        return debug('spec results %o', results)
-      })
+        .get('results')
+        .tap((results) => {
+          return debug('spec results %o', results)
+        })
     }
 
     return iterateThroughSpecs({
@@ -957,12 +1012,17 @@ module.exports = {
       runEachSpec,
       afterSpecRun,
       beforeSpecRun,
-    })
-    .then((runs = []) => {
+    }).then((runs = []) => {
       let end, start
 
-      results.startedTestsAt = (start = getRun(_.first(runs), 'stats.wallClockStartedAt'))
-      results.endedTestsAt = (end = getRun(_.last(runs), 'stats.wallClockEndedAt'))
+      results.startedTestsAt = start = getRun(
+        _.first(runs),
+        'stats.wallClockStartedAt'
+      )
+      results.endedTestsAt = end = getRun(
+        _.last(runs),
+        'stats.wallClockEndedAt'
+      )
       results.totalDuration = reduceRuns(runs, 'stats.wallClockDuration')
       results.totalSuites = reduceRuns(runs, 'stats.suites')
       results.totalTests = reduceRuns(runs, 'stats.tests')
@@ -974,12 +1034,11 @@ module.exports = {
 
       debug('final results of all runs: %o', results)
 
-      return writeOutput(outputPath, results)
-      .return(results)
+      return writeOutput(outputPath, results).return(results)
     })
   },
 
-  runSpec (spec = {}, options = {}, estimated) {
+  runSpec(spec = {}, options = {}, estimated) {
     let cname, name, recording
     const { project, browser, video, videosFolder } = options
 
@@ -1001,7 +1060,7 @@ module.exports = {
 
     //# if we've been told to record and we're not spawning a headed browser
     const browserCanBeRecorded = (browser) => {
-      return (browser.name === 'electron') && isHeadless
+      return browser.name === 'electron' && isHeadless
     }
 
     if (video) {
@@ -1017,7 +1076,7 @@ module.exports = {
       } else {
         console.log('')
 
-        if ((browser.name === 'electron') && isHeaded) {
+        if (browser.name === 'electron' && isHeaded) {
           errors.warning('CANNOT_RECORD_VIDEO_HEADED')
         } else {
           errors.warning('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER', browser.name)
@@ -1025,15 +1084,13 @@ module.exports = {
       }
     }
 
-    return Promise.resolve(recording)
-    .then((props = {}) => {
+    return Promise.resolve(recording).then((props = {}) => {
       //# extract the started + ended promises from recording
       const { start, end, write } = props
 
       //# make sure we start the recording first
       //# before doing anything
-      return Promise.resolve(start)
-      .then((started) => {
+      return Promise.resolve(start).then((started) => {
         return Promise.props({
           results: this.waitForTestsToFinishRunning({
             end,
@@ -1064,14 +1121,13 @@ module.exports = {
     })
   },
 
-  findSpecs (config, specPattern) {
-    return specsUtil.find(config, specPattern)
-    .tap((specs = []) => {
+  findSpecs(config, specPattern) {
+    return specsUtil.find(config, specPattern).tap((specs = []) => {
       if (debug.enabled) {
         const names = _.map(specs, 'name')
 
         return debug(
-          'found \'%d\' specs using spec pattern \'%s\': %o',
+          "found '%d' specs using spec pattern '%s': %o",
           names.length,
           specPattern,
           names
@@ -1079,34 +1135,40 @@ module.exports = {
       }
     })
   },
+}
 
-  ready (options = {}) {
-    debug('run mode ready with options %o', options)
+export function ready(optionsArgv: OptionsArgv) {
+  debug('run mode ready with options %o', optionsArgv)
 
-    _.defaults(options, {
-      isTextTerminal: true,
-      browser: 'electron',
-    })
+  const options = _.defaults(optionsArgv, {
+    isTextTerminal: true,
+    browser: 'electron',
+  })
 
-    const socketId = random.id()
+  const socketId = random.id()
 
-    const { projectRoot, record, key, ciBuildId, parallel, group } = options
+  const { projectRoot, record, key, ciBuildId, parallel, group } = options
 
-    const browserName = options.browser
+  const browserName = options.browser
 
-    //# alias and coerce to null
-    let specPattern = options.spec != null ? options.spec : null
+  //# alias and coerce to null
+  let specPattern = options.spec != null ? options.spec : null
 
-    //# warn if we're using deprecated --ci flag
-    recordMode.warnIfCiFlag(options.ci)
+  //# warn if we're using deprecated --ci flag
+  recordMode.warnIfCiFlag(options.ci)
 
-    //# ensure the project exists
-    //# and open up the project
-    return createAndOpenProject(socketId, options)
-    .then(({ project, projectId, config }) => {
+  //# ensure the project exists
+  //# and open up the project
+  return createAndOpenProject(socketId, options).then(
+    ({ project, projectId, config }) => {
       //# if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
+      recordMode.throwIfRecordParamsWithoutRecording(
+        record,
+        ciBuildId,
+        parallel,
+        group
+      )
 
       if (record) {
         recordMode.throwIfNoProjectId(projectId)
@@ -1120,18 +1182,23 @@ module.exports = {
         this.findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles(),
-      ])
-      .spread((sys = {}, browser = {}, specs = []) => {
+      ]).spread((sys = {}, browser = {}, specs = []) => {
         //# return only what is return to the specPattern
         if (specPattern) {
-          specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+          specPattern = specsUtil.getPatternRelativeToProjectRoot(
+            specPattern,
+            projectRoot
+          )
         }
 
         if (!specs.length) {
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
         }
 
-        const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) => {
+        const runAllSpecs = (
+          { beforeSpecRun, afterSpecRun, runUrl },
+          parallelOverride = parallel
+        ) => {
           return this.runSpecs({
             beforeSpecRun,
             afterSpecRun,
@@ -1153,8 +1220,7 @@ module.exports = {
             exit: options.exit,
             headed: options.headed,
             outputPath: options.outputPath,
-          })
-          .tap(renderSummaryTable(runUrl))
+          }).tap(renderSummaryTable(runUrl))
         }
 
         if (record) {
@@ -1178,17 +1244,13 @@ module.exports = {
 
         //# not recording, can't be parallel
         return runAllSpecs({}, false)
-
       })
-    })
-  },
+    }
+  )
+}
 
-  run (options) {
-    return electronApp
-    .ready()
-    .then(() => {
-      return this.ready(options)
-    })
-  },
-
+export function run(options: OptionsArgv) {
+  return electronApp.ready().then(() => {
+    return ready(options)
+  })
 }

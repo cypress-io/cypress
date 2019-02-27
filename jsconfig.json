@@ -11,5 +11,8 @@
     "**/dist/**",
     "**/dist-test/**",
     "**/.cy/**"
-  ]
+  ],
+  "compilerOptions": {
+    "resolveJsonModule": true
+  }
 }

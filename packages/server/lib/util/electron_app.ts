@@ -1,4 +1,6 @@
-const scale = () => {
+import Promise from 'bluebird'
+
+export const scale = () => {
   try {
     const { app } = require('electron')
 
@@ -8,8 +10,7 @@ const scale = () => {
   }
 }
 
-const ready = () => {
-  const Promise = require('bluebird')
+export const ready = () => {
   const { app } = require('electron')
 
   const waitForReady = () => {
@@ -18,14 +19,5 @@ const ready = () => {
     })
   }
 
-  return Promise.any([
-    waitForReady(),
-    Promise.delay(500),
-  ])
-}
-
-module.exports = {
-  scale,
-
-  ready,
+  return Promise.any([waitForReady(), Promise.delay(500)])
 }

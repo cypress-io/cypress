@@ -12,55 +12,55 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import _ from "lodash"
-import path from "path"
-import debugLib from "debug"
-import minimist from "minimist"
-import coerce from "./coerce"
-import config from "../config.coffee"
+import _ from 'lodash'
+import path from 'path'
+import debugLib from 'debug'
+import minimist from 'minimist'
+import coerce from './coerce'
+import config from '../config.coffee'
 
-const debug = debugLib("cypress:server:args")
+const debug = debugLib('cypress:server:args')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.+)/
 
 const whitelist: Array<keyof OptionsArgv> = [
-  "cwd",
-  "appPath",
-  "execPath",
-  "apiKey",
-  "smokeTest",
-  "getKey",
-  "generateKey",
-  "runProject",
-  "project",
-  "spec",
-  "reporter",
-  "reporterOptions",
-  "port",
-  "env",
-  "ci",
-  "record",
-  "updating",
-  "ping",
-  "key",
+  'cwd',
+  'appPath',
+  'execPath',
+  'apiKey',
+  'smokeTest',
+  'getKey',
+  'generateKey',
+  'runProject',
+  'project',
+  'spec',
+  'reporter',
+  'reporterOptions',
+  'port',
+  'env',
+  'ci',
+  'record',
+  'updating',
+  'ping',
+  'key',
   // "logs",
-  "clearLogs",
-  "returnPkg",
-  "version",
-  "mode",
-  "headed",
-  "config",
-  "exit",
-  "exitWithCode",
-  "browser",
-  "runMode",
-  "outputPath",
-  "parallel",
-  "ciBuildId",
-  "group",
-  "inspectBrk",
+  'clearLogs',
+  'returnPkg',
+  'version',
+  'mode',
+  'headed',
+  'config',
+  'exit',
+  'exitWithCode',
+  'browser',
+  'runMode',
+  'outputPath',
+  'parallel',
+  'ciBuildId',
+  'group',
+  'inspectBrk',
 ]
 
 // returns true if the given string has double quote character "
@@ -89,7 +89,7 @@ const normalizeBackslashes = function(options: Record<string, string>) {
   //# backslash at the end
   //# https://github.com/cypress-io/cypress/issues/535
   // these properties are paths and likely to have backslash on Windows
-  const pathProperties = ["runProject", "project", "appPath", "execPath"]
+  const pathProperties = ['runProject', 'project', 'appPath', 'execPath']
 
   pathProperties.forEach((property) => {
     if (options[property]) {
@@ -115,18 +115,18 @@ const strToArray = function(str: string): string[] {
     return parsed
   }
 
-  return str.split(",")
+  return str.split(',')
 }
 
 //# swap out comma's for bars
 const commasToPipes = (match: string) => {
-  return match.split(",").join("|")
+  return match.split(',').join('|')
 }
 
 //# convert foo=bar|version=1.2.3 to
 //# foo=bar,version=1.2.3
 const pipesToCommas = (str: string) => {
-  return str.split("|").join(",")
+  return str.split('|').join(',')
 }
 
 const tryJSONParse = function(str: any) {
@@ -175,7 +175,7 @@ const sanitizeAndConvertNestedArgs = function(str: string): object {
   return _.chain(str)
     .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
     .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-    .split(",")
+    .split(',')
     .map((pair) => {
       return pair.split(everythingAfterFirstEqualRe)
     })
@@ -185,19 +185,22 @@ const sanitizeAndConvertNestedArgs = function(str: string): object {
 }
 
 export type OptionsMode =
-  | "version"
-  | "smokeTest"
-  | "returnPkg"
-  | "logs"
-  | "clearLogs"
-  | "getKey"
-  | "generateKey"
-  | "exitWithCode"
-  | "run"
-  | "interactive"
-  | "openProject"
+  | 'version'
+  | 'smokeTest'
+  | 'returnPkg'
+  | 'logs'
+  | 'clearLogs'
+  | 'getKey'
+  | 'generateKey'
+  | 'exitWithCode'
+  | 'run'
+  | 'interactive'
+  | 'openProject'
+
+export type RunMode = 'record' | 'run' | 'interactive'
 
 export interface OptionsArgv {
+  cwd: string
   appPath?: string
   execPath?: string
   apiKey?: string
@@ -213,7 +216,6 @@ export interface OptionsArgv {
   reporterOptions?: object
   outputPath?: string
   inspectBrk?: string
-  cwd: string
   project?: string
   spec?: string
   reporter?: string
@@ -243,24 +245,24 @@ export interface OptionsArgv {
 export const toObject = (argv: string[]): OptionsArgv => {
   let c, envs, op, p, ro, spec
 
-  debug("argv array: %o", argv)
+  debug('argv array: %o', argv)
 
   const alias: Record<string, keyof OptionsArgv> = {
-    "app-path": "appPath",
-    "exec-path": "execPath",
-    "api-key": "apiKey",
-    "smoke-test": "smokeTest",
-    "get-key": "getKey",
-    "new-key": "generateKey",
-    "clear-logs": "clearLogs",
-    "run-project": "runProject",
-    "return-pkg": "returnPkg",
-    "run-mode": "isTextTerminal",
-    "ci-build-id": "ciBuildId",
-    "exit-with-code": "exitWithCode",
-    "reporter-options": "reporterOptions",
-    "output-path": "outputPath",
-    "inspect-brk": "inspectBrk",
+    'app-path': 'appPath',
+    'exec-path': 'execPath',
+    'api-key': 'apiKey',
+    'smoke-test': 'smokeTest',
+    'get-key': 'getKey',
+    'new-key': 'generateKey',
+    'clear-logs': 'clearLogs',
+    'run-project': 'runProject',
+    'return-pkg': 'returnPkg',
+    'run-mode': 'isTextTerminal',
+    'ci-build-id': 'ciBuildId',
+    'exit-with-code': 'exitWithCode',
+    'reporter-options': 'reporterOptions',
+    'output-path': 'outputPath',
+    'inspect-brk': 'inspectBrk',
   }
 
   //# takes an array of args and converts
@@ -282,7 +284,7 @@ export const toObject = (argv: string[]): OptionsArgv => {
     .mapValues(coerce)
     .value() as any
 
-  debug("argv parsed: %o", options)
+  debug('argv parsed: %o', options)
 
   if ((spec = options.spec)) {
     const resolvePath = (p: string) => {
@@ -345,7 +347,7 @@ export const toObject = (argv: string[]): OptionsArgv => {
     options.pong = options.ping
   }
 
-  debug("argv options: %o", options)
+  debug('argv options: %o', options)
 
   return options as OptionsArgv
 }

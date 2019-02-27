@@ -14,7 +14,7 @@ const {
   bugs,
   repository,
   keywords,
-} = require('@packages/root')
+} = require('../../packages/root')
 
 // the rest of properties should come from the package.json in CLI folder
 const packageJsonSrc = path.join('package.json')

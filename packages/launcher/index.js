@@ -6,39 +6,42 @@ if (process.env.CYPRESS_ENV !== 'production') {
   require('@packages/ts/register')
 }
 
+/**
+ * @var {import('lib')}
+ */
 const launcher = require('./lib/launcher')
 
 module.exports = launcher
 
-if (!module.parent) {
-  const Bluebird = require('bluebird')
+// if (!module.parent) {
+//   const Bluebird = require('bluebird')
 
-  // quick way to check if TS is working
-  /* eslint-disable no-console */
-  console.log('Launcher project exports')
-  console.log(launcher)
-  console.log('⛔️ please use it as a module, not from CLI')
+//   // quick way to check if TS is working
+//   /* eslint-disable no-console */
+//   console.log('Launcher project exports')
+//   console.log(launcher)
+//   console.log('⛔️ please use it as a module, not from CLI')
 
-  if (process.argv.length > 2) {
-    const filenames = process.argv.slice(2)
+//   if (process.argv.length > 2) {
+//     const filenames = process.argv.slice(2)
 
-    Bluebird.each(filenames, (filename) => {
-      launcher.detectByPath(filename)
-      .then((foundBrowser) => {
-        console.log(` 👍 Found "${filename}":`, foundBrowser)
-      })
-      .catch((err) => {
-        console.log(` 👎 Couldn't find "${filename}:`, err.message)
-      })
-    })
-  } else {
-    const pluralize = require('pluralize')
+//     Bluebird.each(filenames, (filename) => {
+//       launcher.detectByPath(filename)
+//       .then((foundBrowser) => {
+//         console.log(` 👍 Found "${filename}":`, foundBrowser)
+//       })
+//       .catch((err) => {
+//         console.log(` 👎 Couldn't find "${filename}:`, err.message)
+//       })
+//     })
+//   } else {
+//     const pluralize = require('pluralize')
 
-    launcher.detect().then((browsers) => {
-      console.log('detected %s', pluralize('browser', browsers.length, true))
-      console.log(browsers)
-    }, console.error)
-  }
+//     launcher.detect().then((browsers) => {
+//       console.log('detected %s', pluralize('browser', browsers.length, true))
+//       console.log(browsers)
+//     }, console.error)
+//   }
 
-  /* eslint-enable no-console */
-}
+//   /* eslint-enable no-console */
+// }

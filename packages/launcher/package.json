@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
-  "types": "../ts/index.d.ts",
+  "types": "lib/launcher.ts",
   "scripts": {
     "pretest": "npm run check-deps-pre && npm run lint",
     "test": "npm run unit",

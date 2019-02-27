@@ -79,8 +79,17 @@ function runElectron(mode: OptionsMode, options: OptionsArgv) {
     if (isCurrentlyRunningElectron()) {
       //# just run the gui code directly here
       //# and pass our options directly to main
-      const modes = require('./modes') as typeof import('./modes.coffee').default
-      return modes(mode, options)
+      if (mode === 'run') {
+        const {
+          modeDispatch,
+        } = require('./modes/run') as typeof import('./modes/run')
+        return modeDispatch(mode, options)
+      }
+      if (mode === 'interactive') {
+        const interactiveDispatch = require('./modes/interactive.coffee') as typeof import('./modes/interactive.coffee').default
+        return interactiveDispatch(mode, options)
+      }
+      throw new Error(`Mode not supported: ${mode}`)
     }
 
     return new Promise((resolve) => {

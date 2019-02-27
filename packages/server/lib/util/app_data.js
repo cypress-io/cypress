@@ -12,7 +12,7 @@ const Promise = require('bluebird')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const log = require('debug')('cypress:server:appdata')
-const pkg = require('@packages/root')
+const pkg = require('../../../root')
 const fs = require('../util/fs')
 const cwd = require('../cwd')
 

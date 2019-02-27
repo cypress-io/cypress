@@ -5,7 +5,7 @@
 
 declare module 'plist' {
   interface Plist {
-    parse: (s:string) => any
+    parse: (s: string) => any
   }
   const plist: Plist
   export = plist

@@ -30,7 +30,7 @@ function deleteOutputFolder () {
   .catch(_.noop)
 }
 
-function proxyModule (name, pathToMain, pathToBrowser) {
+function proxyModule (name, pathToMain, pathToBrowser, maybeTypes) {
   la(is.unemptyString(name), 'missing name')
   la(is.unemptyString(pathToMain), 'missing path to main', pathToMain)
   la(isRelative(pathToMain), 'path to main should be relative', pathToMain)
@@ -40,6 +40,10 @@ function proxyModule (name, pathToMain, pathToBrowser) {
     version: '0.0.0',
     description: `fake proxy module ${name}`,
     main: pathToMain,
+  }
+
+  if (maybeTypes) {
+    pkg.types = maybeTypes
   }
 
   if (pathToBrowser) {
@@ -89,7 +93,7 @@ function makeProxies () {
 
     // for browserify, some packages use "browser" field
     // need to pass it as well
-    let relativePathToBrowser
+    let relativePathToBrowser, relativePathToTypes
 
     if (is.unemptyString(json.browser)) {
       debug('package has browser field %s', json.browser)
@@ -99,7 +103,15 @@ function makeProxies () {
       debug('relative path to browser', relativePathToBrowser)
     }
 
-    const proxy = proxyModule(json.name, relativePathToMain, relativePathToBrowser)
+    if (is.unemptyString(json.types)) {
+      debug('package has types field %s', json.types)
+      relativePathToTypes = path.relative(destinationFolder,
+        path.resolve(dirname, json.types)
+      )
+      debug('relative path to types', relativePathToTypes)
+    }
+
+    const proxy = proxyModule(json.name, relativePathToMain, relativePathToBrowser, relativePathToTypes)
 
     console.log(path.dirname(destPackageFilename), '->', relativePathToMain)
 
