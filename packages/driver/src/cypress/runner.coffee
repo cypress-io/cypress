@@ -600,6 +600,10 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
         })
       )
 
+    ## escape markdown for the reporter
+    if err.name.match(/AssertionError/)
+      err.message = $utils.escapeErrorMarkdown(err.message)
+
     ## always set runnable err so we can tap into
     ## taking a screenshot on error
     runnable.err = wrapErr(err)

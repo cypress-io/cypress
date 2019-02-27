@@ -9,7 +9,7 @@ const md = new Markdown('zero', {
 const baseSchemas = ['http:', 'ftp:', '//', 'mailto:']
 const httpsValidate = md.linkify.__schemas__['http:'].validate
 
-md.enable('linkify')
+md.enable(['linkify', 'backticks', 'escape'])
 baseSchemas.forEach((schema) => {
   md.linkify.add(schema, null)
 })
