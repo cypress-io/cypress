@@ -316,7 +316,7 @@ describe "lib/fixture", ->
       .catch (err) =>
         p = @fixturesFolder + "/does-not-exist"
         expect(err.message).to.include "A fixture could not be found in your project at the path:"
-        expect(err.message).to.include p
+        expect(err.message).to.include "/does-not-exist"
 
   context "new lines", ->
     it "does not remove trailing new lines on .txt", ->
