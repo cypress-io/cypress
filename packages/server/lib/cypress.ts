@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("./environment")
+require('./environment')
 
 //# we are not requiring everything up front
 //# to optimize how quickly electron boots while
@@ -22,18 +22,18 @@ require("./environment")
 //# essentially do it all again when we boot the correct
 //# mode.
 
-import _ from "lodash"
-import Promise from "bluebird"
-import debugLib from "debug"
-import { OptionsMode, OptionsArgv } from "./util/args"
+import _ from 'lodash'
+import Promise from 'bluebird'
+import debugLib from 'debug'
+import { OptionsMode, OptionsArgv } from './util/args'
 
-const debug = debugLib("cypress:server:cypress")
+const debug = debugLib('cypress:server:cypress')
 
 const exit = function(code = 0) {
   //# TODO: we shouldn't have to do this
   //# but cannot figure out how null is
   //# being passed into exit
-  debug("about to exit with code", code)
+  debug('about to exit with code', code)
 
   return process.exit(code)
 }
@@ -46,9 +46,9 @@ const exitErr = function(err: Error) {
   //# log errors to the console
   //# and potentially raygun
   //# and exit with 1
-  debug("exiting with err", err)
+  debug('exiting with err', err)
 
-  return require("./errors")
+  return require('./errors')
     .log(err)
     .then(() => {
       return exit(1)
@@ -79,22 +79,23 @@ function runElectron(mode: OptionsMode, options: OptionsArgv) {
     if (isCurrentlyRunningElectron()) {
       //# just run the gui code directly here
       //# and pass our options directly to main
-      return require("./modes")(mode, options)
+      const modes = require('./modes') as typeof import('./modes.coffee').default
+      return modes(mode, options)
     }
 
     return new Promise((resolve) => {
-      const cypressElectron = require("@packages/electron")
+      const cypressElectron = require('@packages/electron')
       const fn = function(code: number) {
         //# juggle up the totalFailed since our outer
         //# promise is expecting this object structure
-        debug("electron finished with", code)
+        debug('electron finished with', code)
 
         return resolve({ totalFailed: code })
       }
 
       return cypressElectron.open(
-        ".",
-        require("./util/args").toArray(options),
+        '.',
+        require('./util/args').toArray(options),
         fn
       )
     })
@@ -104,13 +105,13 @@ function runElectron(mode: OptionsMode, options: OptionsArgv) {
 function openProject(options: OptionsArgv) {
   //# this code actually starts a project
   //# and is spawned from nodemon
-  return require("./open_project").open(options.project, options)
+  return require('./open_project').open(options.project, options)
 }
 
 export function start(argv: string[] = []) {
-  debug("starting cypress with argv %o", argv)
+  debug('starting cypress with argv %o', argv)
 
-  const argsUtil = require("./util/args") as typeof import("./util/args")
+  const argsUtil = require('./util/args') as typeof import('./util/args')
 
   const options = argsUtil.toObject(argv)
 
@@ -119,11 +120,11 @@ export function start(argv: string[] = []) {
     // to force retina screens to not
     // upsample their images when offscreen
     // rendering
-    const electronAppUtil = require("./util/electron_app") as typeof import("./util/electron_app")
+    const electronAppUtil = require('./util/electron_app') as typeof import('./util/electron_app')
     electronAppUtil.scale()
   }
 
-  const appDataUtil = require("./util/app_data") as typeof import("./util/app_data")
+  const appDataUtil = require('./util/app_data') as typeof import('./util/app_data')
 
   //# make sure we have the appData folder
   return appDataUtil.ensure().then(() => {
@@ -133,37 +134,37 @@ export function start(argv: string[] = []) {
     const mode = (() => {
       switch (false) {
         case !options.version:
-          return "version"
+          return 'version'
 
         case !options.smokeTest:
-          return "smokeTest"
+          return 'smokeTest'
 
         case !options.returnPkg:
-          return "returnPkg"
+          return 'returnPkg'
 
         // case !options.logs:
         //   return "logs"
 
         case !options.clearLogs:
-          return "clearLogs"
+          return 'clearLogs'
 
         case !options.getKey:
-          return "getKey"
+          return 'getKey'
 
         case !options.generateKey:
-          return "generateKey"
+          return 'generateKey'
 
         case options.exitWithCode == null:
-          return "exitWithCode"
+          return 'exitWithCode'
 
         case !options.runProject:
           //# go into headless mode when running
           //# until completion + exit
-          return "run"
+          return 'run'
 
         default:
           //# set the default mode as interactive
-          return options.mode || "interactive"
+          return options.mode || 'interactive'
       }
     })()
 
@@ -172,51 +173,51 @@ export function start(argv: string[] = []) {
 }
 
 function startInMode(mode: OptionsMode, options: OptionsArgv) {
-  debug("starting in mode %s", mode)
+  debug('starting in mode %s', mode)
 
   switch (mode) {
-    case "version":
-      return require("./modes/pkg")(options)
-        .get("version")
+    case 'version':
+      return require('./modes/pkg')(options)
+        .get('version')
         .then((version: string) => {
           return console.log(version)
         })
         .then(exit0)
         .catch(exitErr)
 
-    case "smokeTest":
-      return require("./modes/smoke_test")(options)
+    case 'smokeTest':
+      return require('./modes/smoke_test')(options)
         .then((pong: string) => {
           return console.log(pong)
         })
         .then(exit0)
         .catch(exitErr)
 
-    case "returnPkg":
-      return require("./modes/pkg")(options)
+    case 'returnPkg':
+      return require('./modes/pkg')(options)
         .then((pkg: object) => {
           return console.log(JSON.stringify(pkg))
         })
         .then(exit0)
         .catch(exitErr)
 
-    case "logs":
+    case 'logs':
       //# print the logs + exit
-      return require("./gui/logs")
+      return require('./gui/logs')
         .print()
         .then(exit0)
         .catch(exitErr)
 
-    case "clearLogs":
+    case 'clearLogs':
       //# clear the logs + exit
-      return require("./gui/logs")
+      return require('./gui/logs')
         .clear()
         .then(exit0)
         .catch(exitErr)
 
-    case "getKey":
+    case 'getKey':
       //# print the key + exit
-      return require("./project")
+      return require('./project')
         .getSecretKeyByPath(options.projectRoot)
         .then((key: string) => {
           return console.log(key)
@@ -224,9 +225,9 @@ function startInMode(mode: OptionsMode, options: OptionsArgv) {
         .then(exit0)
         .catch(exitErr)
 
-    case "generateKey":
+    case 'generateKey':
       //# generate + print the key + exit
-      return require("./project")
+      return require('./project')
         .generateSecretKeyByPath(options.projectRoot)
         .then((key: string) => {
           return console.log(key)
@@ -234,23 +235,23 @@ function startInMode(mode: OptionsMode, options: OptionsArgv) {
         .then(exit0)
         .catch(exitErr)
 
-    case "exitWithCode":
-      return require("./modes/exit")(options)
+    case 'exitWithCode':
+      return require('./modes/exit')(options)
         .then(exit)
         .catch(exitErr)
 
-    case "run":
+    case 'run':
       //# run headlessly and exit
       //# with num of totalFailed
       return runElectron(mode, options)
-        .get("totalFailed")
+        .get('totalFailed')
         .then(exit)
         .catch(exitErr)
 
-    case "interactive":
+    case 'interactive':
       return runElectron(mode, options)
 
-    case "openProject":
+    case 'openProject':
       //# open + start the project
       return openProject(options)
 
