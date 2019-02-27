@@ -19,7 +19,9 @@ describe "src/cy/commands/traversals", ->
   fns = [
     {find: "*"}
     {filter: ":first"}
+    {filter: (i) -> i == 0}
     {not: "div"}
+    {not: (i, e) -> e.tagName == 'div'}
     {eq: 0}
     {closest: "body"}
     "children", "first", "last", "next", "nextAll", "nextUntil", "parent", "parents", "parentsUntil", "prev", "prevAll", "prevUntil", "siblings"
@@ -107,13 +109,13 @@ describe "src/cy/commands/traversals", ->
 
       describe ".log", ->
         beforeEach ->
-          cy.on "log:added", (attrs, log) =>
+          cy.on "internal:log", (attrs, log) =>
             @lastLog = log
 
           return null
 
         it "logs immediately before resolving", (done) ->
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             if log.get("name") is name
               expect(log.pick("state")).to.deep.eq {
                 state: "pending"
@@ -137,15 +139,22 @@ describe "src/cy/commands/traversals", ->
 
         it "has a custom message", ->
           cy.get("#list")[name](arg).then ->
-            arg = if _.isUndefined(arg) then "" else arg.toString()
+            if _.isUndefined(arg) or _.isFunction(arg)
+              message = ""
+            else
+              message = arg.toString()
+
             lastLog = @lastLog
 
-            expect(lastLog.get("message")).to.eq arg
+            expect(lastLog.get("message")).to.eq message
 
         it "#consoleProps", ->
           cy.get("#list")[name](arg).then ($el) ->
             obj = {Command: name}
-            obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
+            if _.isFunction(arg)
+              obj.Selector = ""
+            else
+              obj.Selector = [].concat(arg).join(", ")
 
             yielded = Cypress.dom.getElements($el)
 
@@ -156,6 +165,12 @@ describe "src/cy/commands/traversals", ->
             }
 
             expect(@lastLog.invoke("consoleProps")).to.deep.eq obj
+
+        it "can be turned off", ->
+          cy.get("#list")[name](arg, {log: false}).then ->
+            lastLog = @lastLog
+
+            expect(lastLog.get("name")).to.eq "get"
 
   it "eventually resolves", ->
     cy.on "internal:commandRetry", _.after 2, ->
@@ -211,7 +226,7 @@ describe "src/cy/commands/traversals", ->
   it "does not log using first w/options", ->
     logs = []
 
-    cy.on "log:added", (attrs, log) ->
+    cy.on "internal:log", (attrs, log) ->
       if attrs.name isnt "assert"
         logs.push(log)
 
@@ -225,7 +240,7 @@ describe "src/cy/commands/traversals", ->
 
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         @logs.push(log)
 
       return null

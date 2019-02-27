@@ -106,7 +106,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -175,7 +175,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "reload"
             @lastLog = log
 
@@ -293,7 +293,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "go"
             @lastLog = log
             @logs.push(log)
@@ -359,7 +359,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "go"
             @lastLog = log
 
@@ -580,6 +580,37 @@ describe "src/cy/commands/navigation", ->
           expect(win.bar).to.not.exist
           expect(onReady).not.to.have.been.called
 
+    it "can send headers", ->
+      cy.visit({
+        url: "http://localhost:3500/dump-headers",
+        headers: {
+          "x-foo-baz": "bar-quux"
+        }
+      })
+      cy.contains('"x-foo-baz":"bar-quux"')
+
+    describe "can send a POST request", ->
+      it "automatically urlencoded using an object body", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST",
+          body: {
+            bar: "baz"
+          }
+        })
+        cy.contains("it worked!").contains("{\"bar\":\"baz\"}")
+
+      it "with any string body and headers", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          }
+          body: JSON.stringify({
+            bar: "baz"
+          })
+        })
+        cy.contains("it worked!").contains("{\"bar\":\"baz\"}")
+
     describe "when origins don't match", ->
       beforeEach ->
         Cypress.emit("test:start", { id: 888 })
@@ -695,7 +726,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "visit"
             @lastLog = log
 
@@ -718,8 +749,8 @@ describe "src/cy/commands/navigation", ->
       it "logs immediately before resolving", ->
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
-          cy.removeAllListeners("log:added")
+        cy.on "internal:log", (attrs, log) ->
+          cy.removeAllListeners("internal:log")
 
           expect(log.pick("name", "message")).to.deep.eq {
             name: "visit"
@@ -856,6 +887,16 @@ describe "src/cy/commands/navigation", ->
             "http://localhost:3500/foo -> 1 -> 2"
           )
 
+      it "indicates POST in the message", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST"
+        }).then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("message")).to.eq(
+            "POST http://localhost:3500/post-only"
+          )
+
       it "displays note in consoleProps when visiting the same page with a hash", ->
         cy.visit("http://localhost:3500/fixtures/generic.html#foo")
           .visit("http://localhost:3500/fixtures/generic.html#foo")
@@ -871,7 +912,7 @@ describe "src/cy/commands/navigation", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "visit"
             @lastLog = log
             @logs.push(log)
@@ -934,7 +975,7 @@ describe "src/cy/commands/navigation", ->
 
       it "throws when url isnt a string", (done) ->
         cy.on "test:fail", (err) ->
-          expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
+          expect(err.message).to.eq "cy.visit() must be called with a URL or an options object containing a URL as its 1st argument"
           done()
 
         cy.visit()
@@ -983,6 +1024,35 @@ describe "src/cy/commands/navigation", ->
 
         cy.visit("/fixtures/dom.html", {
           onLoad: ->
+        })
+
+      it "throws when url is specified twice", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() must be called with only one URL. You specified two URLs"
+          done()
+
+        cy.visit("http://foobarbaz", {
+          url: "http://foobarbaz"
+        })
+
+      it "throws when method is unsupported", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() was called with an invalid method: 'FOO'"
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          method: "FOO"
+        })
+
+      it "throws when headers is not an object", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() requires the 'headers' option to be an object"
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          headers: "quux"
         })
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
@@ -1472,7 +1542,7 @@ describe "src/cy/commands/navigation", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -1605,7 +1675,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "page load"
           @lastLog = log
 
@@ -1729,7 +1799,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "new url"
           @lastLog = log
 
@@ -2010,7 +2080,7 @@ describe "src/cy/commands/navigation", ->
     beforeEach ->
       @logs = []
 
-      cy.on "log:added", (attrs, log) =>
+      cy.on "internal:log", (attrs, log) =>
         if attrs.name is "form sub"
           @lastLog = log
 

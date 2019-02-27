@@ -1588,9 +1588,14 @@ declare namespace Cypress {
      * @example
      *    cy.visit('http://localhost:3000')
      *    cy.visit('/somewhere') // opens ${baseUrl}/somewhere
+     *    cy.visit({
+     *      url: 'http://google.com',
+     *      method: 'POST'
+     *    })
      *
      */
     visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
+    visit(options: Partial<VisitOptions> & { url: string }): Chainable<Window>
 
     /**
      * Wait for a number of milliseconds.
@@ -2210,7 +2215,7 @@ declare namespace Cypress {
      *
      * @default true
      */
-    cancable: boolean
+    cancelable: boolean
   }
 
   // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
@@ -3862,7 +3867,7 @@ declare namespace Cypress {
     })
     ```
      */
-    (action: 'page:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
+    (action: 'page:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
@@ -3879,7 +3884,7 @@ declare namespace Cypress {
     ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'page:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
+    (action: 'page:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onStart` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -3944,12 +3949,12 @@ declare namespace Cypress {
      * Fires whenever a command emits this event so it can be displayed in the Command Log. Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:added', fn: (log: any, interactive: boolean) => void): void
+    (action: 'internal:log', fn: (log: any, interactive: boolean) => void): void
     /**
      * Fires whenever a command's attributes changes. This event is debounced to prevent it from firing too quickly and too often. Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:changed', fn: (log: any, interactive: boolean) => void): void
+    (action: 'internal:logChange', fn: (log: any, interactive: boolean) => void): void
     /**
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -4091,7 +4096,7 @@ declare namespace Cypress {
   }
 
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
-  type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
+  type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 }
 

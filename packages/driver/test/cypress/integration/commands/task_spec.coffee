@@ -37,7 +37,7 @@ describe "src/cy/commands/task", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -53,7 +53,7 @@ describe "src/cy/commands/task", ->
           expect(logs.length).to.eq(0)
 
       it "logs immediately before resolving", ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "task"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("foo")
@@ -94,7 +94,7 @@ describe "src/cy/commands/task", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "task"
             @lastLog = log
             @logs.push(log)

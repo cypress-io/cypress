@@ -41,7 +41,7 @@ describe "src/cy/commands/exec", ->
       beforeEach ->
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -59,7 +59,7 @@ describe "src/cy/commands/exec", ->
       it "logs immediately before resolving", ->
         Cypress.backend.resolves(okResponse)
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "exec"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("ls")
@@ -103,7 +103,7 @@ describe "src/cy/commands/exec", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "exec"
             @lastLog = log
             @logs.push(log)

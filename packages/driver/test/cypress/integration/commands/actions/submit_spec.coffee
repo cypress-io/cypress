@@ -140,7 +140,7 @@ describe "src/cy/commands/actions/submit", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -167,7 +167,7 @@ describe "src/cy/commands/actions/submit", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -258,7 +258,7 @@ describe "src/cy/commands/actions/submit", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "submit"
             @lastLog = log
 
@@ -267,7 +267,7 @@ describe "src/cy/commands/actions/submit", ->
       it "logs immediately before resolving", ->
         $form = cy.$$("form:first")
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "submit"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $form.get(0)

@@ -66,7 +66,7 @@ describe "src/cy/commands/fixtures", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if attrs.name is "fixture"
             @lastLog = log
             @logs.push(log)

@@ -2274,7 +2274,7 @@ describe "src/cy/commands/actions/type", ->
             e.preventDefault()
             events.push "submit"
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             state = log.get("state")
 
             if state is "pending"
@@ -2450,7 +2450,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -2471,7 +2471,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -2526,7 +2526,7 @@ describe "src/cy/commands/actions/type", ->
         logs = []
         types = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
           if log.get("name") is "type"
             types.push(log)
@@ -2540,7 +2540,7 @@ describe "src/cy/commands/actions/type", ->
 
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "type"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $txt.get(0)
@@ -2643,7 +2643,7 @@ describe "src/cy/commands/actions/type", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -2790,7 +2790,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when trying to type: #{val}", (done) ->
           logs = []
 
-          cy.on "log:added", (attrs, log) ->
+          cy.on "internal:log", (attrs, log) ->
             logs.push(log)
 
           cy.on "test:fail", (err) =>
@@ -3061,7 +3061,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           if log.get("name") is "assert"
             @lastLog = log
 
@@ -3094,7 +3094,7 @@ describe "src/cy/commands/actions/type", ->
 
         @logs = []
 
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
           @logs.push(log)
 
@@ -3234,7 +3234,7 @@ describe "src/cy/commands/actions/type", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log)
 
         cy.on "test:fail", =>
@@ -3245,7 +3245,7 @@ describe "src/cy/commands/actions/type", ->
 
     describe ".log", ->
       beforeEach ->
-        cy.on "log:added", (attrs, log) =>
+        cy.on "internal:log", (attrs, log) =>
           @lastLog = log
 
         return null
@@ -3255,7 +3255,7 @@ describe "src/cy/commands/actions/type", ->
 
         expected = false
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           if log.get("name") is "clear"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq $input.get(0)
@@ -3268,7 +3268,7 @@ describe "src/cy/commands/actions/type", ->
       it "ends", ->
         logs = []
 
-        cy.on "log:added", (attrs, log) ->
+        cy.on "internal:log", (attrs, log) ->
           logs.push(log) if log.get("name") is "clear"
 
         cy.get("input").invoke("slice", 0, 2).clear().then ->

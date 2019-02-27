@@ -87,7 +87,8 @@ describe "Update Banner", ->
 
     it "modal has info about updating package.json", ->
       cy.get(".modal").contains("npm install --save-dev cypress@#{NEW_VERSION}")
-
+      cy.get(".modal").contains("yarn add cypress@#{NEW_VERSION}")
+    
     it "links to 'open' doc on click of open command", ->
       cy.get(".modal").contains("cypress open").click().then =>
         expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/how-to-open-cypress")

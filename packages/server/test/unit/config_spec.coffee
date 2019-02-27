@@ -509,9 +509,34 @@ describe "lib/config", ->
     it "namespace=__cypress", ->
       @defaults "namespace", "__cypress"
 
+    it "baseUrl=http://localhost:8000/app/", ->
+      @defaults "baseUrl", "http://localhost:8000/app/", {
+        baseUrl: "http://localhost:8000/app///"
+      }
+
+    it "baseUrl=http://localhost:8000/app/", ->
+      @defaults "baseUrl", "http://localhost:8000/app/", {
+        baseUrl: "http://localhost:8000/app//"
+      }
+
     it "baseUrl=http://localhost:8000/app", ->
       @defaults "baseUrl", "http://localhost:8000/app", {
-        baseUrl: "http://localhost:8000/app//"
+        baseUrl: "http://localhost:8000/app"
+      }
+
+    it "baseUrl=http://localhost:8000/", ->
+      @defaults "baseUrl", "http://localhost:8000/", {
+        baseUrl: "http://localhost:8000//"
+      }
+
+    it "baseUrl=http://localhost:8000/", ->
+      @defaults "baseUrl", "http://localhost:8000/", {
+        baseUrl: "http://localhost:8000/"
+      }
+
+    it "baseUrl=http://localhost:8000", ->
+      @defaults "baseUrl", "http://localhost:8000", {
+        baseUrl: "http://localhost:8000"
       }
 
     it "javascripts=[]", ->

@@ -46,7 +46,7 @@ describe "promises", ->
   it "throws when returning a promise from a custom command", (done) ->
     logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @lastLog = log
 
       logs.push(log)
@@ -75,7 +75,7 @@ describe "promises", ->
   it "throws when instantiating a promise from a custom command", (done) ->
     logs = []
 
-    cy.on "log:added", (attrs, log) =>
+    cy.on "internal:log", (attrs, log) =>
       @lastLog = log
 
       logs.push(log)
