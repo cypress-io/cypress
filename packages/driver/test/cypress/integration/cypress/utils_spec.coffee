@@ -58,3 +58,18 @@ describe "driver/src/cypress/utils", ->
       expect(err2.message).to.eq("\n\nbar")
 
       expect(err2.stack).to.eq("Error: \n\nbar\n" + stack)
+
+  context ".escapeErrorMarkdown", ->
+    it "accepts non-strings", ->
+      text = 3
+      expect($utils.escapeErrorMarkdown(text)).to.equal(3)
+
+    it "does not escape in text terminal mode", ->
+      Cypress.config("isInteractive", false)
+
+      md = "`foo`"
+      expect($utils.escapeErrorMarkdown(md)).to.equal("`foo`")
+
+    it "escapes backticks", ->
+      md = "`foo`"
+      expect($utils.escapeErrorMarkdown(md)).to.equal("\\`foo\\`")

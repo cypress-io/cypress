@@ -130,12 +130,14 @@ module.exports = {
     if not errMessage = @getObjValueByPath($errorMessages, errPath)
       throw new Error "Error message path '#{errPath}' does not exist"
 
+    escapeErrorMarkdown = @escapeErrorMarkdown
+
     getMsg = ->
       if _.isFunction(errMessage)
         errMessage(args)
       else
         _.reduce args, (message, argValue, argKey) ->
-          message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
+          message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), escapeErrorMarkdown(argValue))
         , errMessage
 
     ## normalize two or more new lines
@@ -263,6 +265,14 @@ module.exports = {
     ## convert to str and escape any single
     ## or double quotes
     ("" + text).replace(quotesRe, "\\$1")
+
+  escapeErrorMarkdown: (text) ->
+    ## don't escape if text is not a string or not in interactive mode
+    if !_.isString(text) or !Cypress.config("isInteractive")
+      return text
+
+    ## escape markdown syntax supported by reporter
+    text.replace(/`/g, "\\`")
 
   normalizeNumber: (num) ->
     parsed = Number(num)
