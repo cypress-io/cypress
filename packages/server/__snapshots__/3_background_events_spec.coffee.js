@@ -7,13 +7,15 @@ exports['e2e background events fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Specs:      1 found (background_async_error_spec.js)                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running: background_async_error_spec.js...                                               (1 of 1) 
+
+
 
 The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
@@ -26,19 +28,17 @@ Error: Async error from background file
 
   (Results)
 
-  ┌───────────────────────────────┐
-  │ Tests:        0               │
-  │ Passing:      0               │
-  │ Failing:      1               │
-  │ Pending:      0               │
-  │ Skipped:      0               │
-  │ Screenshots:  0               │
-  │ Video:        true            │
-  │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
-  └───────────────────────────────┘
-
-
+  ┌──────────────────────────────────────────────┐
+  │ Tests:        0                              │
+  │ Passing:      0                              │
+  │ Failing:      1                              │
+  │ Pending:      0                              │
+  │ Skipped:      0                              │
+  │ Screenshots:  0                              │
+  │ Video:        true                           │
+  │ Duration:     X seconds                      │
+  │ Spec Ran:     background_async_error_spec.js │
+  └──────────────────────────────────────────────┘
 
 
   (Video)
@@ -54,7 +54,7 @@ Error: Async error from background file
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
+  │ ✖ background_async_error_spec.js            XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
