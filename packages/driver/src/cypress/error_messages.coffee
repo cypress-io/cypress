@@ -884,7 +884,15 @@ module.exports = {
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
   visit:
-    invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
+    invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
+    invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
+    invalid_headers: "#{cmd('visit')} requires the 'headers' option to be an object."
+    no_duplicate_url: """
+      #{cmd('visit')} must be called with only one URL. You specified two URLs:
+
+      URL from the `options` object: {{optionsUrl}}
+      URL from the `url` parameter: {{url}}
+    """
     cannot_visit_2nd_domain: """
       #{cmd('visit')} failed because you are attempting to visit a second unique domain.
 
