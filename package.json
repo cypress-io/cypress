@@ -63,6 +63,10 @@
     ]
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.26",
+    "@types/node": "^8.2.1",
+    "@types/minimist": "^1.2.0",
+    "@types/debug": "^4.1.2",
     "@types/lodash": "^4.14.121",
     "@cypress/bumpercar": "1.4.0",
     "@cypress/env-or-json-file": "^2.0.0",
