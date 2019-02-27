@@ -94,7 +94,7 @@
     "execa": "0.8.0",
     "execa-wrap": "1.4.0",
     "filesize": "3.6.1",
-    "find-package-json": "1.1.0",
+    "find-package-json": "1.2.0",
     "fs-extra": "7.0.1",
     "gift": "0.10.2",
     "gulp": "3.9.1",
@@ -132,7 +132,6 @@
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
     "typescript": "2.9.2",
-    "vagrant": "0.0.1",
     "vinyl-paths": "2.1.0"
   },
   "author": "Brian Mann",
