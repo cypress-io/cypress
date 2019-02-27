@@ -15,8 +15,6 @@ exports['e2e background events fails 1'] = `
                                                                                                     
   Running: app_spec.coffee...                                                              (1 of 1) 
 
-
-
 The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
 Error: Async error from background file
@@ -39,6 +37,8 @@ Error: Async error from background file
   │ Duration:     X seconds       │
   │ Spec Ran:     app_spec.coffee │
   └───────────────────────────────┘
+
+
 
 
   (Video)
