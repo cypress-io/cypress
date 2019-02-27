@@ -57,7 +57,8 @@ module.exports = {
       glob(pattern, { nosort: true }).bind(@)
       .then (matches) ->
         if matches.length == 0
-          errors.throw("FIXTURE_NOT_FOUND", p)
+          relativePath = path.relative('.', p)
+          errors.throw("FIXTURE_NOT_FOUND", relativePath, extensions)
 
         debug("fixture matches found, using the first", matches)
 

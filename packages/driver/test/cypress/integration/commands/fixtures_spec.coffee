@@ -100,7 +100,7 @@ describe "src/cy/commands/fixtures", ->
           expect(lastLog.get("name")).to.eq "fixture"
           expect(lastLog.get("message")).to.eq "err"
 
-          expect(err.message).to.include "A fixture with a supported file extension does not exist"
+          expect(err.message).to.include "A fixture could not be found in your project at the path:"
           expect(err.message).to.include "cypress/fixtures/err"
           done()
 
@@ -116,7 +116,7 @@ describe "src/cy/commands/fixtures", ->
           expect(lastLog.get("name")).to.eq "fixture"
           expect(lastLog.get("message")).to.eq "err.txt"
 
-          expect(err.message).to.include "A fixture with a supported file extension does not exist"
+          expect(err.message).to.include "A fixture could not be found in your project at the path:"
           expect(err.message).to.include "cypress/fixtures/err.txt"
           done()
 

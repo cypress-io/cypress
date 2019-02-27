@@ -332,7 +332,7 @@ describe "lib/socket", ->
 
       it "errors when fixtures fails", (done) ->
         cb = (resp) ->
-          expect(resp.error.message).to.include "A fixture with a supported file extension does not exist"
+          expect(resp.error.message).to.include "A fixture could not be found in your project at the path:"
           expect(resp.error.message).to.include "does-not-exist.txt"
           done()
 
