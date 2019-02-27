@@ -1027,7 +1027,7 @@ describe "src/cy/commands/navigation", ->
         })
 
       it "throws when url is specified twice", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.contain "cy.visit() must be called with only one URL. You specified two URLs"
           done()
 
@@ -1036,7 +1036,7 @@ describe "src/cy/commands/navigation", ->
         })
 
       it "throws when method is unsupported", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.contain "cy.visit() was called with an invalid method: 'FOO'"
           done()
 
@@ -1046,7 +1046,7 @@ describe "src/cy/commands/navigation", ->
         })
 
       it "throws when headers is not an object", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.contain "cy.visit() requires the 'headers' option to be an object"
           done()
 
