@@ -12,48 +12,84 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require('lodash')
-const path = require('path')
-const debug = require('debug')('cypress:server:args')
-const minimist = require('minimist')
-const coerce = require('./coerce')
-const config = require('../config')
-const cwd = require('../cwd')
+import _ from "lodash"
+import path from "path"
+import debugLib from "debug"
+import minimist from "minimist"
+import coerce from "./coerce"
+import config from "../config.coffee"
+
+const debug = debugLib("cypress:server:args")
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.+)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk'.split(' ')
+const whitelist: Array<keyof OptionsArgv> = [
+  "cwd",
+  "appPath",
+  "execPath",
+  "apiKey",
+  "smokeTest",
+  "getKey",
+  "generateKey",
+  "runProject",
+  "project",
+  "spec",
+  "reporter",
+  "reporterOptions",
+  "port",
+  "env",
+  "ci",
+  "record",
+  "updating",
+  "ping",
+  "key",
+  // "logs",
+  "clearLogs",
+  "returnPkg",
+  "version",
+  "mode",
+  "headed",
+  "config",
+  "exit",
+  "exitWithCode",
+  "browser",
+  "runMode",
+  "outputPath",
+  "parallel",
+  "ciBuildId",
+  "group",
+  "inspectBrk",
+]
 
 // returns true if the given string has double quote character "
 // only at the last position.
-const hasStrayEndQuote = function (s) {
+const hasStrayEndQuote = function(s: string) {
   const quoteAt = s.indexOf('"')
 
-  return quoteAt === (s.length - 1)
+  return quoteAt === s.length - 1
 }
 
-const removeLastCharacter = (s) => {
+const removeLastCharacter = (s: string) => {
   return s.substr(0, s.length - 1)
 }
 
-const normalizeBackslash = function (s) {
+const normalizeBackslash = function(s: string) {
   if (hasStrayEndQuote(s)) {
     return removeLastCharacter(s)
   }
 
   return s
-
 }
 
-const normalizeBackslashes = function (options) {
+const normalizeBackslashes = function(options: Record<string, string>) {
   //# remove stray double quote from runProject and other path properties
   //# due to bug in NPM passing arguments with
   //# backslash at the end
   //# https://github.com/cypress-io/cypress/issues/535
   // these properties are paths and likely to have backslash on Windows
-  const pathProperties = ['runProject', 'project', 'appPath', 'execPath']
+  const pathProperties = ["runProject", "project", "appPath", "execPath"]
 
   pathProperties.forEach((property) => {
     if (options[property]) {
@@ -64,7 +100,7 @@ const normalizeBackslashes = function (options) {
   return options
 }
 
-const stringify = function (val) {
+const stringify = function(val: any) {
   if (_.isObject(val)) {
     return JSON.stringify(val)
   }
@@ -72,30 +108,28 @@ const stringify = function (val) {
   return val
 }
 
-const strToArray = function (str) {
+const strToArray = function(str: string): string[] {
   let parsed
 
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
-  return [].concat(str.split(','))
+  return str.split(",")
 }
 
-const commasToPipes = (match, p1, p2, p3) =>
 //# swap out comma's for bars
-{
-  return match.split(',').join('|')
+const commasToPipes = (match: string) => {
+  return match.split(",").join("|")
 }
 
-const pipesToCommas = (str) =>
 //# convert foo=bar|version=1.2.3 to
 //# foo=bar,version=1.2.3
-{
-  return str.split('|').join(',')
+const pipesToCommas = (str: string) => {
+  return str.split("|").join(",")
 }
 
-const tryJSONParse = function (str) {
+const tryJSONParse = function(str: any) {
   try {
     return JSON.parse(str)
   } catch (err) {
@@ -103,11 +137,11 @@ const tryJSONParse = function (str) {
   }
 }
 
-const JSONOrCoerce = function (str) {
+const JSONOrCoerce = function(str: string) {
   //# valid JSON? horray
   let parsed
 
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
@@ -115,7 +149,7 @@ const JSONOrCoerce = function (str) {
   str = pipesToCommas(str)
 
   //# try to parse again?
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
@@ -123,12 +157,12 @@ const JSONOrCoerce = function (str) {
   return coerce(str)
 }
 
-const sanitizeAndConvertNestedArgs = function (str) {
+const sanitizeAndConvertNestedArgs = function(str: string): object {
   //# if this is valid JSON then just
   //# parse it and call it a day
   let parsed
 
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
@@ -138,52 +172,106 @@ const sanitizeAndConvertNestedArgs = function (str) {
   //# foo: a:b|b:c
   //# bar: 1|2|3
 
-  return _
-  .chain(str)
-  .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
-  .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-  .split(',')
-  .map((pair) => {
-    return pair.split(everythingAfterFirstEqualRe)
-  }).fromPairs()
-  .mapValues(JSONOrCoerce)
-  .value()
+  return _.chain(str)
+    .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
+    .replace(nestedArraysInSquareBracketsRe, commasToPipes)
+    .split(",")
+    .map((pair) => {
+      return pair.split(everythingAfterFirstEqualRe)
+    })
+    .fromPairs()
+    .mapValues(JSONOrCoerce)
+    .value()
 }
 
-module.exports = {
-  toObject (argv) {
-    let c, envs, op, p, ro, spec
+export type OptionsMode =
+  | "version"
+  | "smokeTest"
+  | "returnPkg"
+  | "logs"
+  | "clearLogs"
+  | "getKey"
+  | "generateKey"
+  | "exitWithCode"
+  | "run"
+  | "interactive"
+  | "openProject"
 
-    debug('argv array: %o', argv)
+export interface OptionsArgv {
+  appPath?: string
+  execPath?: string
+  apiKey?: string
+  smokeTest?: boolean
+  getKey?: boolean
+  generateKey?: boolean
+  clearLogs?: boolean
+  runProject?: string
+  returnPkg?: boolean
+  isTextTerminal?: boolean
+  ciBuildId?: string
+  exitWithCode?: number
+  reporterOptions?: object
+  outputPath?: string
+  inspectBrk?: string
+  cwd: string
+  project?: string
+  spec?: string
+  reporter?: string
+  port?: number
+  env?: object
+  ci?: boolean
+  record?: boolean
+  updating?: boolean
+  ping?: string
+  key?: string
+  // logs?: string;
+  version?: string
+  mode?: OptionsMode
+  headed?: boolean
+  config?: object
+  /**
+   * Whether or not to exit in run mode when it finishes running
+   */
+  exit?: boolean
+  browser?: string
+  runMode?: string
+  parallel?: boolean
+  group?: string
+  projectRoot?: string
+}
 
-    const alias = {
-      'app-path': 'appPath',
-      'exec-path': 'execPath',
-      'api-key': 'apiKey',
-      'smoke-test': 'smokeTest',
-      'get-key': 'getKey',
-      'new-key': 'generateKey',
-      'clear-logs': 'clearLogs',
-      'run-project': 'runProject',
-      'return-pkg': 'returnPkg',
-      'run-mode': 'isTextTerminal',
-      'ci-build-id': 'ciBuildId',
-      'exit-with-code': 'exitWithCode',
-      'reporter-options': 'reporterOptions',
-      'output-path': 'outputPath',
-      'inspect-brk': 'inspectBrk',
-    }
+export const toObject = (argv: string[]): OptionsArgv => {
+  let c, envs, op, p, ro, spec
 
-    //# takes an array of args and converts
-    //# to an object
-    let options = minimist(argv, {
-      alias,
-    })
+  debug("argv array: %o", argv)
 
-    const whitelisted = _.pick(argv, whitelist)
+  const alias: Record<string, keyof OptionsArgv> = {
+    "app-path": "appPath",
+    "exec-path": "execPath",
+    "api-key": "apiKey",
+    "smoke-test": "smokeTest",
+    "get-key": "getKey",
+    "new-key": "generateKey",
+    "clear-logs": "clearLogs",
+    "run-project": "runProject",
+    "return-pkg": "returnPkg",
+    "run-mode": "isTextTerminal",
+    "ci-build-id": "ciBuildId",
+    "exit-with-code": "exitWithCode",
+    "reporter-options": "reporterOptions",
+    "output-path": "outputPath",
+    "inspect-brk": "inspectBrk",
+  }
 
-    options = _
-    .chain(options)
+  //# takes an array of args and converts
+  //# to an object
+  let minimistOptions = minimist(argv, {
+    alias,
+  })
+
+  const whitelisted = _.pick(argv, whitelist)
+
+  let options: Record<string, any> = _.chain(minimistOptions)
     .defaults(whitelisted)
     .omit(_.keys(alias)) //# remove aliases
     .defaults({
@@ -192,98 +280,86 @@ module.exports = {
       cwd: process.cwd(),
     })
     .mapValues(coerce)
-    .value()
+    .value() as any
 
-    debug('argv parsed: %o', options)
+  debug("argv parsed: %o", options)
 
-    //# if we are updating we may have to pluck out the
-    //# appPath + execPath from the options._ because
-    //# in previous versions up until 0.14.0 these args
-    //# were not passed as dashes and instead were just
-    //# regular arguments
-    if (options.updating && !options.appPath) {
-      //# take the last two arguments that were unknown
-      //# and apply them to both appPath + execPath
-      [options.appPath, options.execPath] = options._.slice(-2)
+  if ((spec = options.spec)) {
+    const resolvePath = (p: string) => {
+      return path.resolve(options.cwd, p)
     }
 
-    if (spec = options.spec) {
-      const resolvePath = (p) => {
-        return path.resolve(options.cwd, p)
-      }
+    options.spec = strToArray(spec).map(resolvePath)
+  }
 
-      options.spec = strToArray(spec).map(resolvePath)
-    }
+  if ((envs = options.env)) {
+    options.env = sanitizeAndConvertNestedArgs(envs as any)
+  }
 
-    if (envs = options.env) {
-      options.env = sanitizeAndConvertNestedArgs(envs)
-    }
+  if ((ro = options.reporterOptions)) {
+    options.reporterOptions = sanitizeAndConvertNestedArgs(ro)
+  }
 
-    if (ro = options.reporterOptions) {
-      options.reporterOptions = sanitizeAndConvertNestedArgs(ro)
-    }
+  if ((c = options.config)) {
+    //# convert config to an object
+    //# annd store the config
+    options.config = sanitizeAndConvertNestedArgs(c)
+  }
 
-    if (c = options.config) {
-      //# convert config to an object
-      //# annd store the config
-      options.config = sanitizeAndConvertNestedArgs(c)
-    }
+  //# get a list of the available config keys
+  const configKeys = config.getConfigKeys()
 
-    //# get a list of the available config keys
-    const configKeys = config.getConfigKeys()
+  //# and if any of our options match this
+  const configValues = _.pick(options, configKeys)
 
-    //# and if any of our options match this
-    const configValues = _.pick(options, configKeys)
+  //# then set them on config
+  //# this solves situations where we accept
+  //# root level arguments which also can
+  //# be set in configuration
+  if (options.config == null) {
+    options.config = {}
+  }
 
-    //# then set them on config
-    //# this solves situations where we accept
-    //# root level arguments which also can
-    //# be set in configuration
-    if (options.config == null) {
-      options.config = {}
-    }
+  _.extend(options.config, configValues)
 
-    _.extend(options.config, configValues)
+  //# remove them from the root options object
+  options = _.omit(options, configKeys)
 
-    //# remove them from the root options object
-    options = _.omit(options, configKeys)
+  options = normalizeBackslashes(options)
 
-    options = normalizeBackslashes(options)
+  //# normalize project to projectRoot
+  if ((p = options.project || options.runProject)) {
+    options.projectRoot = path.resolve(options.cwd, p)
+  }
 
-    //# normalize project to projectRoot
-    if (p = options.project || options.runProject) {
-      options.projectRoot = path.resolve(options.cwd, p)
-    }
+  //# normalize output path from previous current working directory
+  if ((op = options.outputPath)) {
+    options.outputPath = path.resolve(options.cwd, op)
+  }
 
-    //# normalize output path from previous current working directory
-    if (op = options.outputPath) {
-      options.outputPath = path.resolve(options.cwd, op)
-    }
+  if (options.runProject) {
+    options.run = true
+  }
 
-    if (options.runProject) {
-      options.run = true
-    }
+  if (options.smokeTest) {
+    options.pong = options.ping
+  }
 
-    if (options.smokeTest) {
-      options.pong = options.ping
-    }
+  debug("argv options: %o", options)
 
-    debug('argv options: %o', options)
+  return options as OptionsArgv
+}
 
-    return options
-  },
-
-  toArray (obj = {}) {
-    //# goes in reverse, takes an object
-    //# and converts to an array by picking
-    //# only the whitelisted properties and
-    //# mapping them to include the argument
-    return _
-    .chain(obj)
+export const toArray = (obj = {}) => {
+  //# goes in reverse, takes an object
+  //# and converts to an array by picking
+  //# only the whitelisted properties and
+  //# mapping them to include the argument
+  return _.chain(obj)
     .pick(...whitelist)
     .mapValues((val, key) => {
       return `--${key}=${stringify(val)}`
-    }).values()
+    })
+    .values()
     .value()
-  },
 }

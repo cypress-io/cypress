@@ -39,6 +39,9 @@ const isProduction = () => {
 }
 
 module.exports = {
+  /**
+   * @return {Promise}
+   */
   ensure () {
     const ensure = () => {
       return this.removeSymlink()
