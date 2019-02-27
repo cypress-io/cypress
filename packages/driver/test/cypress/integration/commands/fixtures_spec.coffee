@@ -45,6 +45,9 @@ describe "src/cy/commands/fixtures", ->
     it "really works", ->
       cy.fixture("example").should("deep.eq", { example: true })
 
+    it "can read a fixture without extension with multiple dots in the name", ->
+      cy.fixture("foo.bar.baz").should("deep.eq", { quux: "quuz" })
+
     it "looks for csv without extension", ->
       cy.fixture("comma-separated").should "equal", """
         One,Two,Three
@@ -97,7 +100,7 @@ describe "src/cy/commands/fixtures", ->
           expect(lastLog.get("name")).to.eq "fixture"
           expect(lastLog.get("message")).to.eq "err"
 
-          expect(err.message).to.include "No fixture file found with an acceptable extension. Searched in:"
+          expect(err.message).to.include "A fixture with a supported file extension does not exist"
           expect(err.message).to.include "cypress/fixtures/err"
           done()
 
@@ -113,7 +116,7 @@ describe "src/cy/commands/fixtures", ->
           expect(lastLog.get("name")).to.eq "fixture"
           expect(lastLog.get("message")).to.eq "err.txt"
 
-          expect(err.message).to.include "No fixture exists at:"
+          expect(err.message).to.include "A fixture with a supported file extension does not exist"
           expect(err.message).to.include "cypress/fixtures/err.txt"
           done()
 
