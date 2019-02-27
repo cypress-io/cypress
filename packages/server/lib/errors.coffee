@@ -721,6 +721,12 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.link}
       """
+    when "FIXTURE_NOT_FOUND"
+      """
+        A fixture with a supported file extension does not exist at the supplied path:
+
+        #{arg1}
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
