@@ -1,3 +1,5 @@
+## tests in driver/test/cypress/integration/commands/assertions_spec.coffee
+
 _ = require("lodash")
 $ = require("jquery")
 chai = require("chai")
@@ -142,6 +144,11 @@ chai.use (chai, u) ->
         escText = $utils.escapeQuotes(text)
 
         selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
+
+        ## the assert checks below only work if $dom.isJquery(obj)
+        ## https://github.com/cypress-io/cypress/issues/3549
+        if not ($dom.isJquery(obj)) 
+          obj = $(obj)
 
         @assert(
           obj.is(selector) or !!obj.find(selector).length
