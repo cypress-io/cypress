@@ -48,6 +48,9 @@ packages/server/test/support/fixtures/server/libs
 # CLI tool
 cli/build
 
+# this is auto-generated
+cli/types/window-actions.d.ts
+
 # Building app binary
 scripts/support
 package-lock.json

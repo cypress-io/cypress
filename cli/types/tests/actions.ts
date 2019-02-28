@@ -75,9 +75,9 @@ Cypress.on('test:end', (attributes , test) => {
 })
 
 Cypress.on('window:beforeunload', (event) => {
-  event // $ExpectType BeforeUnloadEvent
+  event // $ExpectType Event
 })
 
 Cypress.on('window:resize', (event) => {
-  event // $ExpectType ResizeEvent
+  event // $ExpectType Event
 })

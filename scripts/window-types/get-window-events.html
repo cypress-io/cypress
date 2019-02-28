@@ -1,0 +1,10 @@
+<script>
+  const events = []
+  for (let prop in window) {
+    if (prop.startsWith('on')) {
+      events.push(prop.replace(/^on/, ''))
+    }
+  }
+
+  window.ipcRenderer.send('window:events', events)
+</script>

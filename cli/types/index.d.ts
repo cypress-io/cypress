@@ -11,6 +11,7 @@
 /// <reference path="./bluebird.d.ts" />
 /// <reference path="./minimatch.d.ts" />
 /// <reference path="./moment.d.ts" />
+/// <reference path="./window-actions.d.ts" />
 
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
@@ -3826,7 +3827,7 @@ declare namespace Cypress {
    * These are the most useful events for you to listen to.
    * @see https://on.cypress.io/catalog-of-events#App-Events
    */
-  interface Actions {
+  interface Actions extends WindowActions {
     /**
      * Fires when an uncaught exception occurs in your application.
      * Cypress will fail the test when this fires.
