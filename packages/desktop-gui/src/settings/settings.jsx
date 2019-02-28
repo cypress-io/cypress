@@ -12,6 +12,7 @@ const Settings = observer(({ project, app }) => (
   <div className={cs('settings', {
     'show-project-id': !!project.id,
     'show-record-key': project.isSetupForRecording,
+    'show-proxy-settings': !!app.proxySource,
   })}>
     <div className='settings-wrapper'>
       <Collapse>
@@ -24,7 +25,7 @@ const Settings = observer(({ project, app }) => (
         <Panel header='Record Key' key='record-key' className='form-horizontal settings-record-key'>
           <RecordKey project={project} />
         </Panel>
-        <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal proxy-settings'>
+        <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
           <ProxySettings app={app} />
         </Panel>
       </Collapse>
