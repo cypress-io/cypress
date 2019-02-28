@@ -51,8 +51,11 @@ internal:commandStart: get #non-existent
 internal:commandRetry: get expected '#non-existent' to exist in the DOM
   1) fails to get
 test:end: fails to get
+An error was thrown in your background file while executing the handler for the 'test:end' event.
 
-The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
+This error is being ignored because the event cannot affect the results of the run.
+
+The error we received was:
 
 Error: Error thrown in promise from "test:end". Should be ignored.
     at stack trace line
@@ -72,26 +75,6 @@ Error: Error thrown in promise from "test:end". Should be ignored.
     at stack trace line
     at stack trace line
     at stack trace line
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────┐
-  │ Tests:        0                                    │
-  │ Passing:      0                                    │
-  │ Failing:      1                                    │
-  │ Pending:      0                                    │
-  │ Skipped:      0                                    │
-  │ Screenshots:  1                                    │
-  │ Video:        true                                 │
-  │ Duration:     X seconds                            │
-  │ Spec Ran:     background_driver_events_spec.coffee │
-  └────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  - /foo/bar/.projects/background-driver-events/cypress/screenshots/background_driver_events_spec.coffee/fails to get (failed).png (1280x720)
 
 
   0 passing
@@ -117,6 +100,26 @@ Error: Error thrown in promise from "test:end". Should be ignored.
 
 
 
+  (Results)
+
+  ┌────────────────────────────────────────────────────┐
+  │ Tests:        1                                    │
+  │ Passing:      0                                    │
+  │ Failing:      1                                    │
+  │ Pending:      0                                    │
+  │ Skipped:      0                                    │
+  │ Screenshots:  1                                    │
+  │ Video:        true                                 │
+  │ Duration:     X seconds                            │
+  │ Spec Ran:     background_driver_events_spec.coffee │
+  └────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/background-driver-events/cypress/screenshots/background_driver_events_spec.coffee/fails to get (failed).png (1280x720)
+
+
   (Video)
 
   - Started processing:   Compressing to 32 CRF
@@ -130,9 +133,9 @@ Error: Error thrown in promise from "test:end". Should be ignored.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ background_driver_events_spec.coffee      XX:XX        -        -        1        -        - │
+  │ ✖ background_driver_events_spec.coffee      XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 
 `
