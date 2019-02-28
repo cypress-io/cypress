@@ -723,15 +723,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FIXTURE_NOT_FOUND"
       """
-      A fixture could not be found in your project at the path:
+      A fixture file could not be found at any of the following paths:
 
-      #{arg1}
+       > #{arg1}
+       > #{arg1}{{extension}}
 
-      Cypress also tried and failed to find your fixture with any of these file extensions added:
+      Cypress tried using these file extensions for your fixture:
 
-      #{arg2.join(', ')}
+       > #{arg2.join(', ')}
 
-      Check that your fixture path is correct.
+      Provide a path to an existing fixture file.
       """
 
 get = (type, arg1, arg2) ->

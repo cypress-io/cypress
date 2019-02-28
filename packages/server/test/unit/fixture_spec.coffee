@@ -32,7 +32,7 @@ describe "lib/fixture", ->
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) =>
-        expect(err.message).to.include "A fixture could not be found in your project at the path:"
+        expect(err.message).to.include "A fixture file could not be found"
         expect(err.message).to.include p
 
   context "unicode escape syntax", ->
@@ -315,7 +315,7 @@ describe "lib/fixture", ->
         throw new Error("should have failed but did not")
       .catch (err) =>
         p = @fixturesFolder + "/does-not-exist"
-        expect(err.message).to.include "A fixture could not be found in your project at the path:"
+        expect(err.message).to.include "A fixture file could not be found"
         expect(err.message).to.include "/does-not-exist"
 
   context "new lines", ->
