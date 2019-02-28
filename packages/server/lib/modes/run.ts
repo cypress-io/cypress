@@ -24,10 +24,11 @@ import debugLib from 'debug'
 import Promise from 'bluebird'
 import logSymbols from 'log-symbols'
 import { FoundBrowser } from '@packages/launcher'
+import Bluebird from 'bluebird'
 
 import recordMode from './record.coffee'
 import errors from '../errors.coffee'
-import Project from '../project.coffee'
+import { Project } from '../project'
 import Reporter from '../reporter.coffee'
 import browsers from '../browsers.coffee'
 import openProject from '../open_project.coffee'
@@ -336,11 +337,11 @@ const iterateThroughSpecs = function(options = {}) {
   } = options
 
   const serial = () => {
-    return Promise.mapSeries(specs, runEachSpec)
+    return Bluebird.mapSeries(specs, runEachSpec)
   }
 
   const serialWithRecord = () => {
-    return Promise.mapSeries(specs, (spec, index, length) => {
+    return Bluebird.mapSeries(specs, (spec, index, length) => {
       return beforeSpecRun(spec)
         .then(({ estimated }) => {
           return runEachSpec(spec, index, length, estimated)
@@ -401,21 +402,17 @@ const iterateThroughSpecs = function(options = {}) {
   }
 }
 
-export const getProjectId = function(project) {
+export const getProjectId = Bluebird.method((project: Project) => {
   const id = env.get('CYPRESS_PROJECT_ID')
 
   //# if we have an ID just use it
   if (id) {
-    return Promise.resolve(id)
+    return id
   }
 
-  return project.getProjectId().catch(() =>
-    //# no id no problem
-    {
-      return null
-    }
-  )
-}
+  //# no id no problem
+  return project.getProjectId().catchReturn(null)
+})
 
 const reduceRuns = (runs, prop) => {
   return _.reduce(
@@ -432,7 +429,7 @@ const getRun = (run, prop) => {
 }
 
 export const writeOutput = (outputPath, results) => {
-  return Promise.try(() => {
+  return Bluebird.try(() => {
     if (!outputPath) {
       return
     }
@@ -491,7 +488,7 @@ const createAndOpenProject = function(socketId: string, options: OptionsArgv) {
       }
     )
     .then((project) => {
-      return Promise.props({
+      return Bluebird.props({
         project,
         config: project.getConfig(),
         projectId: getProjectId(project),
@@ -510,10 +507,10 @@ const removeOldProfiles = () => {
 
 const trashAssets = function(config = {}) {
   if (config.trashAssetsBeforeRuns !== true) {
-    return Promise.resolve()
+    return Bluebird.resolve()
   }
 
-  return Promise.join(
+  return Bluebird.join(
     trash.folder(config.videosFolder),
     trash.folder(config.screenshotsFolder)
   ).catch((err) =>
@@ -786,12 +783,12 @@ module.exports = {
     let attempts = 0
 
     return (waitForBrowserToConnect = () => {
-      return Promise.join(
+      return Bluebird.join(
         this.waitForSocketConnection(project, socketId),
         this.launchBrowser(options)
       )
         .timeout(timeout != null ? timeout : 30000)
-        .catch(Promise.TimeoutError, (err) => {
+        .catch(Bluebird.TimeoutError, (err) => {
           attempts += 1
 
           console.log('')
@@ -1082,14 +1079,14 @@ module.exports = {
       }
     }
 
-    return Promise.resolve(recording).then((props = {}) => {
+    return Bluebird.resolve(recording).then((props = {}) => {
       //# extract the started + ended promises from recording
       const { start, end, write } = props
 
       //# make sure we start the recording first
       //# before doing anything
-      return Promise.resolve(start).then((started) => {
-        return Promise.props({
+      return Bluebird.resolve(start).then((started) => {
+        return Bluebird.props({
           results: this.waitForTestsToFinishRunning({
             end,
             name,
@@ -1174,7 +1171,7 @@ export function ready(optionsArgv: OptionsArgv) {
         recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
       }
 
-      return Promise.all([
+      return Bluebird.all([
         system.info(),
         browsers.ensureAndGetByNameOrPath(browserName),
         this.findSpecs(config, specPattern),

@@ -4,7 +4,7 @@ debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
 files     = require("./controllers/files")
 config    = require("./config")
-Project   = require("./project")
+{Project}   = require("./project")
 browsers  = require("./browsers")
 specsUtil = require("./util/specs")
 preprocessor = require("./plugins/preprocessor")
@@ -176,7 +176,7 @@ create = ->
 
     create: (path, args = {}, options = {}) ->
       ## store the currently open project
-      openProject = Project(path)
+      openProject = new Project(path)
 
       _.defaults(options, {
         onReloadBrowser: (url, browser) =>
