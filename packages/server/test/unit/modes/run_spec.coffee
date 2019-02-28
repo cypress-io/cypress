@@ -533,7 +533,7 @@ describe "lib/modes/run", ->
       sinon.stub(random, "id").returns(1234)
       sinon.stub(openProject, "create").resolves(openProject)
       sinon.stub(system, "info").resolves({ osName: "osFoo", osVersion: "fooVersion" })
-      sinon.stub(browsers, "ensureAndGetByName").resolves({
+      sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves({
         name: "fooBrowser",
         path: "path/to/browser"
         version: "777"
@@ -590,7 +590,7 @@ describe "lib/modes/run", ->
     it "passes headed to openProject.launch", ->
       browser = { name: "electron" }
 
-      browsers.ensureAndGetByName.resolves(browser)
+      browsers.ensureAndGetByNameOrPath.resolves(browser)
 
       runMode.run({ headed: true })
       .then ->

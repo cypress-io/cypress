@@ -21,6 +21,12 @@ To see browsers detected on your machine, just run:
 node index.js
 ```
 
+You can supply a list of binaries to test if they're browsers or not. Try running:
+
+```bash
+node index.js /bin/bash /usr/bin/chromium-browser
+```
+
 ## Testing
 
 ```bash

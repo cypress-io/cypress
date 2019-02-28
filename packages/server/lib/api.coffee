@@ -7,7 +7,6 @@ errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 humanInterval = require("human-interval")
 pkg        = require("@packages/root")
-browsers   = require("./browsers")
 routes     = require("./util/routes")
 system     = require("./util/system")
 
