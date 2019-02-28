@@ -22,15 +22,7 @@ class AuthApi {
   }
 
   login () {
-    return ipc.windowOpen({
-      position: 'center',
-      focus: true,
-      width: 1000,
-      height: 635,
-      preload: false,
-      title: 'Login',
-      type: 'GITHUB_LOGIN',
-    })
+    return ipc.beginAuth({ provider: 'github' })
     .then((code) => {
       return ipc.logIn(code)
     })
