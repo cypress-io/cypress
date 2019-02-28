@@ -32,6 +32,30 @@ firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
 
+authWithElectron = (win) ->
+  urlChanged = (url, resolve) ->
+    parsed = uri.parse(url, true)
+
+    if code = parsed.query.code
+      ## there is a bug with electron
+      ## crashing when attemping to
+      ## destroy this window synchronously
+      _.defer -> win.destroy()
+
+      resolve(code)
+
+  new Promise (resolve, reject) ->
+    win.once "closed", ->
+      err = new Error("Window closed by user")
+      err.windowClosed = true
+      reject(err)
+
+    win.webContents.on "will-navigate", (e, url) ->
+      urlChanged(url, resolve)
+
+    win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
+      urlChanged(newUrl, resolve)
+
 module.exports = {
   reset: ->
     windows = {}
@@ -248,17 +272,6 @@ module.exports = {
       }
     })
 
-    urlChanged = (url, resolve) ->
-      parsed = uri.parse(url, true)
-
-      if code = parsed.query.code
-        ## there is a bug with electron
-        ## crashing when attemping to
-        ## destroy this window synchronously
-        _.defer -> win.destroy()
-
-        resolve(code)
-
     # if args.transparent and args.show
     #   {width, height} = args
 
@@ -297,17 +310,7 @@ module.exports = {
       recentlyCreatedWindow = false
 
       if options.type is "GITHUB_LOGIN"
-        new Promise (resolve, reject) ->
-          win.once "closed", ->
-            err = new Error("Window closed by user")
-            err.windowClosed = true
-            reject(err)
-
-          win.webContents.on "will-navigate", (e, url) ->
-            urlChanged(url, resolve)
-
-          win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
-            urlChanged(newUrl, resolve)
+        authWithElectron(win)
       else
         return win
 
