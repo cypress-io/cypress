@@ -19,6 +19,9 @@ const hasActiveWindow = (doc) => {
   return !!doc.defaultView
 }
 
+/**
+ * @returns {HTMLDocument}
+ */
 const getDocumentFromElement = (el) => {
   if (isDocument(el)) {
     return el

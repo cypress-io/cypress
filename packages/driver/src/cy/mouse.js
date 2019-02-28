@@ -324,12 +324,6 @@ const create = (state, focused) => {
         return mouseDownEvents
       }
 
-      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-          $selection.moveSelectionToEnd(el)
-        }
-      }
-
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
@@ -348,6 +342,14 @@ const create = (state, focused) => {
           if ($elements.isSame($focused, $previouslyFocused)) {
             focused.fireBlur($focused.get(0))
           }
+        }
+      }
+
+      const successfulFocus = $elements.isSame($elToFocus, focused.getFocused())
+
+      if (successfulFocus && $elements.isTextEditableEl($elToFocus.get(0))) {
+        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
+          $selection.moveSelectionToEnd()
         }
       }
 

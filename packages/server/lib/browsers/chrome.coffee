@@ -203,7 +203,6 @@ module.exports = {
         
         utils.launch(browserName, url, args)
         .tap ->
-          console.log('fasdfasdf')
           ## TODO: pass in the port
           protocol.getWsTargetFor()
           .then (wsUrl) ->

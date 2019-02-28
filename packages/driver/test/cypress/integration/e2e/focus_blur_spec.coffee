@@ -79,19 +79,19 @@ it "blur the activeElement when clicking the body", ->
 
       expect(_.toPlainObject(events[0])).to.include({
         type: "focus"
-        isTrusted: true
+        isTrusted: hasFocus
         target: $one.get(0)
       })
 
       expect(_.toPlainObject(events[1])).to.include({
         type: "blur"
-        isTrusted: true
+        isTrusted: hasFocus
         target: $one.get(0)
       })
 
       expect(_.toPlainObject(events[2])).to.include({
         type: "focus"
-        isTrusted: true
+        isTrusted: hasFocus
         target: $two.get(0)
       })
 
@@ -109,7 +109,7 @@ it "blur the activeElement when clicking the body", ->
 
       expect(_.toPlainObject(events[3])).to.include({
         type: "blur"
-        isTrusted: true
+        isTrusted: hasFocus
         target: $two.get(0)
       })
 
