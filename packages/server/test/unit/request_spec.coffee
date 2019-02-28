@@ -558,7 +558,7 @@ describe "lib/request", ->
         .then ->
           throw new Error("should have failed")
         .catch (err) ->
-          expect(err.message).to.eq "TypeError [ERR_INVALID_CHAR]: Invalid character in header content [\"x-text\"]"
+          expect(err.message).to.eq "TypeError: The header content contains invalid characters"
 
       it "handles weird content in the body just fine", ->
         request.send({}, @fn, {
