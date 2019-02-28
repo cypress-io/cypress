@@ -13,7 +13,7 @@
     "pretest": "npm run check-deps-pre",
     "test": "npm run test-unit",
     "pretest-unit": "npm run check-deps-pre",
-    "test-unit": "npm run dtslint && npm run unit",
+    "test-unit": "npm run unit",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
     "check-deps": "node ../scripts/check-deps.js --verbose",
