@@ -61,12 +61,8 @@ exports['shows help for run --foo 1'] = `
     -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
-<<<<<<< HEAD
     -C, --config-file <config-file>            path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.
-    -b, --browser <browser-name>               runs Cypress in the browser with the given name. note: using an external browser will not record a video.
-=======
     -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
->>>>>>> origin/develop
     -P, --project <project-path>               path to the project
     --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
     --group <name>                             a named group for recorded runs in the Cypress dashboard
@@ -77,9 +73,9 @@ exports['shows help for run --foo 1'] = `
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
 
 exports['cli help command shows help 1'] = `
@@ -110,9 +106,9 @@ exports['cli help command shows help 1'] = `
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
 
 exports['cli help command shows help for -h 1'] = `
@@ -143,9 +139,9 @@ exports['cli help command shows help for -h 1'] = `
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
 
 exports['cli help command shows help for --help 1'] = `
@@ -176,9 +172,9 @@ exports['cli help command shows help for --help 1'] = `
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
 
 exports['cli unknown command shows usage and exits 1'] = `
@@ -210,9 +206,9 @@ exports['cli unknown command shows usage and exits 1'] = `
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
 
 exports['cli version and binary version 1'] = `
@@ -265,9 +261,9 @@ exports['cli unknown option shows help for cache command - unknown option --foo 
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
 
 exports['cli unknown option shows help for cache command - unknown sub-command foo 1'] = `
@@ -295,9 +291,9 @@ exports['cli unknown option shows help for cache command - unknown sub-command f
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
 
 exports['cli unknown option shows help for cache command - no sub-command 1'] = `
@@ -323,7 +319,7 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
   -------
   stderr:
   -------
-
+  
   -------
-
+  
 `
