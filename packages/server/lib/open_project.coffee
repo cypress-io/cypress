@@ -59,8 +59,6 @@ create = ->
 
       la(_.isPlainObject(browser), "expected browser object:", browser)
 
-      browserName = browser.name
-
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
       @reset()
@@ -118,8 +116,8 @@ create = ->
 
           do relaunchBrowser = ->
             debug(
-              "launching browser: %s, spec: %s",
-              browserName,
+              "launching browser: %o, spec: %s",
+              browser,
               spec.relative
             )
 
@@ -127,7 +125,7 @@ create = ->
               if not openProject.isTextTerminal
                 serverEvents.execute("spec:start", spec)
             .then ->
-              browsers.open(browserName, options, automation)
+              browsers.open(browser, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -200,15 +198,11 @@ create = ->
 
       options = _.extend {}, args.config, options
 
-      browsers.get()
-      .then (b = []) ->
-        options.browsers = b
+      ## open the project and return
+      ## the config for the project instance
+      debug("opening project %s", path)
 
-        ## open the project and return
-        ## the config for the project instance
-        debug("opening project %s", path)
-
-        openProject.open(options)
+      openProject.open(options)
       .return(@)
   }
 

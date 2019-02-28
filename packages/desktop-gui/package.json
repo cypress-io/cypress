@@ -30,7 +30,7 @@
     "@cypress/react-tooltip": "0.4.0",
     "bin-up": "1.1.0",
     "bluebird": "3.5.3",
-    "bootstrap-sass": "3.4.0",
+    "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "font-awesome": "4.7.0",
@@ -44,12 +44,12 @@
     "mobx-react": "5.4.3",
     "mobx-react-devtools": "6.0.3",
     "moment": "2.24.0",
-    "prop-types": "15.7.1",
+    "prop-types": "15.7.2",
     "rc-collapse": "1.11.1",
-    "react": "16.8.1",
+    "react": "16.8.3",
     "rebuild-node-sass": "1.1.0",
     "react-bootstrap-modal": "4.2.0",
-    "react-dom": "16.8.1",
+    "react-dom": "16.8.3",
     "zunder": "6.3.2"
   }
 }

@@ -20,7 +20,8 @@ exports['shows help for open --foo 1'] = `
     -e, --env <env>               sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>         sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
     -d, --detached [bool]         runs Cypress application in detached mode
-    -P, --project <project path>  path to the project
+    -b, --browser <browser-path>  path to a custom browser to be added to the list of available browsers in Cypress
+    -P, --project <project-path>  path to the project
     --global                      force Cypress into global mode as if its globally installed
     --dev                         runs cypress in development and bypasses binary check
     -h, --help                    output usage information
@@ -59,7 +60,7 @@ exports['shows help for run --foo 1'] = `
     -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
-    -b, --browser <browser-name>               runs Cypress in the browser with the given name. note: using an external browser will not record a video.
+    -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
     -P, --project <project-path>               path to the project
     --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
     --group <name>                             a named group for recorded runs in the Cypress dashboard

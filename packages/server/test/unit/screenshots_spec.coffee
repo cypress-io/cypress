@@ -408,7 +408,7 @@ describe "lib/screenshots", ->
             multipart: false
             pixelRatio: 2
             path: path.normalize(result.path)
-            size: 284
+            size: 272
             name: "foo bar\\baz/my-screenshot"
             specName: "foo.spec.js"
             testFailure: false
