@@ -65,6 +65,7 @@
   "devDependencies": {
     "@types/bluebird": "^3.5.26",
     "@types/node": "^8.2.1",
+    "@types/randomstring": "^1.1.6",
     "@types/minimist": "^1.2.0",
     "@types/debug": "^4.1.2",
     "@types/lodash": "^4.14.121",

@@ -35,7 +35,7 @@ import videoCapture from '../video_capture.coffee'
 import fs from '../util/fs'
 import env from '../util/env'
 import trash from '../util/trash'
-import random from '../util/random'
+import * as random from '../util/random'
 import system from '../util/system'
 import duration from '../util/duration'
 import terminal from '../util/terminal'
@@ -401,10 +401,8 @@ const iterateThroughSpecs = function(options = {}) {
   }
 }
 
-export const getProjectId = function(project, id) {
-  if (id == null) {
-    id = env.get('CYPRESS_PROJECT_ID')
-  }
+export const getProjectId = function(project) {
+  const id = env.get('CYPRESS_PROJECT_ID')
 
   //# if we have an ID just use it
   if (id) {
@@ -479,8 +477,8 @@ export const openProjectCreate = (projectRoot, socketId, options) =>
       )
   }
 
-const createAndOpenProject = function(socketId, options) {
-  const { projectRoot, projectId } = options
+const createAndOpenProject = function(socketId: string, options: OptionsArgv) {
+  const { projectRoot } = options
 
   return Project.ensureExists(projectRoot)
     .then(() =>
@@ -496,7 +494,7 @@ const createAndOpenProject = function(socketId, options) {
       return Promise.props({
         project,
         config: project.getConfig(),
-        projectId: getProjectId(project, projectId),
+        projectId: getProjectId(project),
       })
     })
 }
@@ -934,7 +932,7 @@ module.exports = {
 
   screenshotMetadata(data, resp) {
     return {
-      screenshotId: random.id(),
+      screenshotId: random.randomId(),
       name: data.name != null ? data.name : null,
       testId: data.testId,
       takenAt: resp.takenAt,
@@ -1145,7 +1143,7 @@ export function ready(optionsArgv: OptionsArgv) {
     browser: 'electron',
   })
 
-  const socketId = random.id()
+  const socketId = random.randomId()
 
   const { projectRoot, record, key, ciBuildId, parallel, group } = options
 

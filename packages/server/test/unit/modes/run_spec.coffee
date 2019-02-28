@@ -21,11 +21,6 @@ describe "lib/modes/run", ->
     @projectInstance = Project("/_test-output/path/to/project")
 
   context ".getProjectId", ->
-    it "resolves if id", ->
-      runMode.getProjectId("project", "id123")
-      .then (ret) ->
-        expect(ret).to.eq("id123")
-
     it "resolves if CYPRESS_PROJECT_ID set", ->
       sinon.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns("envId123")
 

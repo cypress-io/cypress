@@ -10,7 +10,7 @@ import {
   FoundBrowser,
   Browser,
   NotInstalledError,
-  NotDetectedAtPathError
+  NotDetectedAtPathError,
 } from './types'
 import * as windowsHelper from './windows'
 import { notDetectedAtPathErr } from './errors'
@@ -40,7 +40,7 @@ type Helpers = {
 const helpers: Helpers = {
   darwin: darwinHelper,
   linux: linuxHelper,
-  win32: windowsHelper
+  win32: windowsHelper,
 }
 
 function getHelper(platform?: NodeJS.Platform): PlatformHelper {
@@ -82,7 +82,7 @@ function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
     'type',
     'version',
     'path',
-    'custom'
+    'custom',
   ])
 
   const logBrowser = (props: any) => {
@@ -152,7 +152,7 @@ export const detectByPath = (
       custom: true,
       path,
       version: regexExec[1],
-      majorVersion: regexExec[1].split('.', 2)[0]
+      majorVersion: regexExec[1].split('.', 2)[0],
     })
   }
 
