@@ -1588,9 +1588,14 @@ declare namespace Cypress {
      * @example
      *    cy.visit('http://localhost:3000')
      *    cy.visit('/somewhere') // opens ${baseUrl}/somewhere
+     *    cy.visit({
+     *      url: 'http://google.com',
+     *      method: 'POST'
+     *    })
      *
      */
     visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
+    visit(options: Partial<VisitOptions> & { url: string }): Chainable<Window>
 
     /**
      * Wait for a number of milliseconds.
