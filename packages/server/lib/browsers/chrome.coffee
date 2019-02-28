@@ -46,7 +46,7 @@ defaultArgs = [
   "--disable-device-discovery-notifications"
 
   ## https://github.com/cypress-io/cypress/issues/2376
-  "--autoplay-policy=no-user-gesture-required" 
+  "--autoplay-policy=no-user-gesture-required"
 
   ## http://www.chromium.org/Home/chromium-security/site-isolation
   ## https://github.com/cypress-io/cypress/issues/1951
@@ -109,6 +109,21 @@ _removeRootExtension = ->
   .removeAsync(appData.path("extensions"))
   .catchReturn(null) ## noop if doesn't exist fails for any reason
 
+## https://github.com/cypress-io/cypress/issues/2048
+_disableRestorePagesPrompt = (userDir) ->
+  prefsPath = path.join(userDir, "Default", "Preferences")
+
+  fs.readJson(prefsPath)
+  .then (preferences) ->
+    if profile = preferences.profile
+      if profile["exit_type"] != "Normal" or profile["exited_cleanly"] isnt true
+        debug("cleaning up unclean exit status")
+
+        profile["exit_type"] = "Normal"
+        profile["exited_cleanly"] = true
+
+        fs.writeJson(prefsPath, preferences)
+
 module.exports = {
   _normalizeArgExtensions
 
@@ -161,11 +176,13 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/1872
     if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
       args.push("--proxy-bypass-list=<-loopback>")
-  
+
     args
 
   open: (browser, url, options = {}, automation) ->
     { isTextTerminal } = options
+
+    userDir = utils.getProfileDir(browser, isTextTerminal)
 
     Promise
     .try =>
@@ -186,15 +203,13 @@ module.exports = {
           options.proxyUrl,
           options.socketIoRoute
         ),
-
         _removeRootExtension(),
+        _disableRestorePagesPrompt(userDir),
       ])
       .spread (extDest) ->
         ## normalize the --load-extensions argument by
         ## massaging what the user passed into our own
         args = _normalizeArgExtensions(extDest, args)
-
-        userDir = utils.getProfileDir(browser, isTextTerminal)
 
         ## this overrides any previous user-data-dir args
         ## by being the last one
