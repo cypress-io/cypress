@@ -45,7 +45,7 @@
     "standard": "12.0.1",
     "style-loader": "0.23.1",
     "typescript": "3.3.3333",
-    "webpack": "4.29.5"
+    "webpack": "4.29.6"
   },
   "standard": {
     "globals": [
