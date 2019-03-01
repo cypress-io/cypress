@@ -427,13 +427,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_RECORD_KEY_NOT_VALID"
       """
-      We failed trying to authenticate this project: #{chalk.blue(arg2)}
-
-      Your Record Key is invalid: #{chalk.yellow(arg1)}
+      Your Record Key #{chalk.yellow(arg1)} is not valid with this project: #{chalk.blue(arg2)}
 
       It may have been recently revoked by you or another user.
 
-      Please log into the Dashboard to see the updated token.
+      Please log into the Dashboard to see the valid record keys.
 
       https://on.cypress.io/dashboard/projects/#{arg2}
       """
