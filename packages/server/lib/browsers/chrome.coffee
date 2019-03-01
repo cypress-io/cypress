@@ -123,7 +123,7 @@ _disableRestorePagesPrompt = (userDir) ->
         profile["exited_cleanly"] = true
 
         fs.writeJson(prefsPath, preferences)
-  .catchReturn(null)
+  .catch ->
 
 module.exports = {
   _normalizeArgExtensions
