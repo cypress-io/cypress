@@ -1,11 +1,8 @@
-const Bluebird = require('bluebird')
 const express = require('express')
 const { shell } = require('electron')
 
 const windows = require('./windows')
 const user = require('../user')
-
-const openExternal = Bluebird.promisify(shell.openExternal)
 
 let app
 let server
@@ -61,7 +58,7 @@ const launchNativeAuth = (url) => {
   return new Promise((resolve) => {
     // launch an express server to listen for the auth redirect
     launchServer(resolve)
-    openExternal(url)
+    shell.openExternal(url)
   })
 }
 
