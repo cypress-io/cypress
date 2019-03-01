@@ -80,7 +80,7 @@ class Server
 
     if @_needsUpstreamProxy(hostname, port)
       upstreamProxy = process.env.HTTP_PROXY
-      return @_makeUpstreamProxyConnection(upstreamProxy, socket, head, port, hostname)
+      return @_makeUpstreamProxyConnection(upstreamProxy, req, socket, head, port, hostname)
 
     debug("Making direct connection to #{hostname}:#{port}")
     @_makeConnection(socket, head, port, hostname)
@@ -102,22 +102,22 @@ class Server
       if @_onError
         @_onError(err, socket, head, port)
 
-  _makeUpstreamProxyConnection: (upstreamProxy, socket, head, toPort, toHostname) ->
+  _makeUpstreamProxyConnection: (upstreamProxy, req, socket, head, toPort, toHostname) ->
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
     if not @httpsAgents[upstreamProxy]
       @httpsAgents[upstreamProxy] = new httpsAgent(upstreamProxy)
 
     agent = @httpsAgents[upstreamProxy]
-    agent.callback {}, {
+    agent.callback req, {
       port: toPort
       host: toHostname
     }, (err, upstreamSock) ->
-      if @_onError and err
-        return @_onError(err, socket, head, port)
-
-      upstreamSock.on "error", (err) =>
-        @_onError(err, socket, head, port)
+      if @_onError
+        if err
+          return @_onError(err, socket, head, port)
+        upstreamSock.on "error", (err) =>
+          @_onError(err, socket, head, port)
 
       upstreamSock.pipe(socket)
       socket.pipe(upstreamSock)
