@@ -763,6 +763,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - move-ts-types-to-dev-dependencies-3371
         requires:
           - build
     - build-binary:
