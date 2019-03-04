@@ -152,7 +152,7 @@ const start = ({ version, downloadDestination, progress }) => {
   }
 
   // try to make sure proxy settings are right before downloading Cypress
-  const proxy = util.getSystemProxySettings()
+  const proxy = util.loadSystemProxySettings()
 
   const url = getUrl(version)
 
