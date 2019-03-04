@@ -84,7 +84,7 @@ function runElectron(mode: OptionsMode, options: OptionsArgv) {
         return modeDispatch(mode, options)
       }
       if (mode === 'interactive') {
-        const interactiveDispatch = require('./modes/interactive.coffee') as typeof import('./modes/interactive.coffee').default
+        const interactiveDispatch = require('./modes/interactive.coffee')
         return interactiveDispatch(mode, options)
       }
       throw new Error(`Mode not supported: ${mode}`)
