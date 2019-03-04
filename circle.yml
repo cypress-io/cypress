@@ -65,7 +65,7 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-cli-deps
+          key: v7-{{ arch }}-{{ .Branch }}-cli-deps
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-root-deps
       - restore_cache:
@@ -117,7 +117,7 @@ jobs:
 
       # save each node_modules folder per package
       - save_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v7-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
           paths:
             - cli/node_modules
       - save_cache:
