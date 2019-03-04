@@ -3,7 +3,7 @@ fs           = require("fs-extra")
 net          = require("net")
 url          = require("url")
 https        = require("https")
-httpsAgent   = require("https-proxy-agent")
+HttpsAgent   = require("https-proxy-agent")
 Promise      = require("bluebird")
 semaphore    = require("semaphore")
 allowDestroy = require("server-destroy-vvo")
@@ -71,12 +71,11 @@ class Server
     .pipe(res)
 
   _needsUpstreamProxy: (hostname, port) ->
+    ## todo: use getProxyFromURI here
     process.env.HTTP_PROXY
 
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
-
-    debug(process.env.HTTP_PROXY)
 
     if @_needsUpstreamProxy(hostname, port)
       upstreamProxy = process.env.HTTP_PROXY
@@ -105,14 +104,8 @@ class Server
   _makeUpstreamProxyConnection: (upstreamProxy, req, socket, head, toPort, toHostname) ->
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
-    if not @httpsAgents[upstreamProxy]
-      @httpsAgents[upstreamProxy] = new httpsAgent(upstreamProxy)
-
-    agent = @httpsAgents[upstreamProxy]
-    agent.callback req, {
-      port: toPort
-      host: toHostname
-    }, (err, upstreamSock) ->
+    ## todo: improve error handling in case upstream is unreachable
+    onUpstreamSock = (err, upstreamSock) ->
       if @_onError
         if err
           return @_onError(err, socket, head, port)
@@ -124,6 +117,15 @@ class Server
       socket.emit("data", head)
 
       socket.resume()
+
+    if not @httpsAgents[upstreamProxy]
+      @httpsAgents[upstreamProxy] = new HttpsAgent(upstreamProxy)
+
+    agent = @httpsAgents[upstreamProxy]
+    agent.callback req, {
+      port: toPort
+      host: toHostname
+    }, onUpstreamSock.bind(@)
 
   _onServerConnectData: (req, socket, head) ->
     firstBytes = head[0]
