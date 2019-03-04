@@ -238,6 +238,9 @@ jobs:
           command: ls -la types
           working_directory: cli
       - run:
+          command: ls -la chai
+          working_directory: cli/types
+      - run:
           command: npm run dtslint
           working_directory: cli
 
