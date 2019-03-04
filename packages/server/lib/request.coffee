@@ -132,7 +132,9 @@ createCookieString = (c) ->
 module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
-    # forever: true
+    ## re-use all HTTP/HTTPS connections if possible
+    ## https://github.com/cypress-io/cypress/issues/3192
+    forever: true
   }
 
   r  = r.defaults(defaults)
