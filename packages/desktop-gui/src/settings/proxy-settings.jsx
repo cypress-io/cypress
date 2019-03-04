@@ -5,17 +5,32 @@ import React from 'react'
 const trimQuotes = (input) =>
   trim(input, '"')
 
-const ProxySettings = observer(({ app }) => {
-  if (!app.proxySource) {
-    return null
+const getProxySourceName = (proxySource) => {
+  if (proxySource === 'win32') {
+    return 'Windows system settings'
   }
 
-  const bypassProxyList = trimQuotes(app.proxyBypassList)
+  return 'environment variables'
+}
+
+const ProxySettings = observer(({ app }) => {
+  if (!app.proxyServer) {
+    return (
+      <div>
+        <p className='text-muted'>
+          There is no active proxy configuration.
+        </p>
+      </div>
+    )
+  }
+
+  const proxyBypassList = trimQuotes(app.proxyBypassList)
+  const proxySource = getProxySourceName(trimQuotes(app.proxySource))
 
   return (
-    <div className='proxy-settings'>
-      <p>Cypress auto-detected the following proxy settings from {trimQuotes(app.proxySource)}:</p>
-      <table className='proxy-table'>
+    <div className="proxy-settings">
+      <p>Cypress auto-detected the following proxy settings from {proxySource}:</p>
+      <table className="proxy-table">
         <tbody>
           <tr>
             <td>Proxy server: </td>
@@ -28,7 +43,7 @@ const ProxySettings = observer(({ app }) => {
           <tr>
             <td>Proxy exceptions: </td>
             <td>
-              {bypassProxyList ? <code>{bypassProxyList.split(';').join(', ')}</code> : <span className='no-bypass'>none</span>}
+              {proxyBypassList ? <code>{proxyBypassList.split(',').join(', ')}</code> : <span className='no-bypass'>none</span>}
             </td>
           </tr>
         </tbody>

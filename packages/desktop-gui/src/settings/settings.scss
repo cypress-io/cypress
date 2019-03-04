@@ -1,13 +1,11 @@
 .settings {
   .settings-project-id,
-  .settings-record-key,
-  .settings-proxy {
+  .settings-record-key {
     display: none;
   }
 
   &.show-project-id .settings-project-id,
-  &.show-record-key .settings-record-key,
-  &.show-proxy-settings .settings-proxy {
+  &.show-record-key .settings-record-key {
     display: block;
   }
 

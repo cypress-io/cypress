@@ -12,7 +12,6 @@ const Settings = observer(({ project, app }) => (
   <div className={cs('settings', {
     'show-project-id': !!project.id,
     'show-record-key': project.isSetupForRecording,
-    'show-proxy-settings': !!app.proxySource,
   })}>
     <div className='settings-wrapper'>
       <Collapse>
