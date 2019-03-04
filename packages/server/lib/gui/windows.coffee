@@ -32,6 +32,16 @@ firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
 
+setWindowProxy = (win) ->
+  if not process.env.HTTP_PROXY
+    return Promise.resolve()
+
+  setProxy = Promise.promisify(win.webContents.session.setProxy)
+  setProxy({
+      proxyRules: process.env.HTTP_PROXY
+      proxyBypassRules: process.env.NO_PROXY
+  })
+
 module.exports = {
   reset: ->
     windows = {}
@@ -280,9 +290,11 @@ module.exports = {
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
-    Promise
-    .resolve(options.url)
-    .then (url) ->
+    Promise.all([
+      Promise.resolve(options.url),
+      setWindowProxy(win)
+    ])
+    .spread (url) ->
       # if width and height
       #   ## width and height are truthy when
       #   ## transparent: true is sent

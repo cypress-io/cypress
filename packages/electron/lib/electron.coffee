@@ -70,14 +70,6 @@ module.exports = {
         if opts.inspectBrk
           argv.unshift("--inspect-brk=5566")
 
-      if proxyServer = process.env.HTTP_PROXY
-        ## need to use the environment proxy in Electron so the embedded GitHub login will work
-        argv.push("--proxy-server=#{proxyServer}")
-
-      if proxyBypassList = process.env.NO_PROXY
-        proxyBypassList = proxyBypassList.split(',').join(';')
-        argv.push("--proxy-bypass-list=#{proxyBypassList}")
-
       debug("spawning %s with args", execPath, argv)
 
       cp.spawn(execPath, argv, {stdio: "inherit"})
