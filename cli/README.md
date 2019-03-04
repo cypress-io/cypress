@@ -2,6 +2,10 @@
 
 This folder is used to build Cypress NPM module.
 
+## Building
+
+See `scripts/build.js`. Note that the built NPM package will include [NPM_README.md](NPM_README.md) as its public README file.
+
 ## Testing
 
 To build and test an NPM package:
