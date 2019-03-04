@@ -9,7 +9,7 @@ shell.set('-e') // any error is fatal
 
 // we include the TypeScript definitions for the bundled 3rd party tools
 // thus we need to copy them from "dev" dependencies into our types folder
-includeTypes.forEach((folder) => {
+includeTypes.forEach(folder => {
   const source = join('node_modules', '@types', folder)
 
   shell.cp('-R', source, 'types')
@@ -38,5 +38,12 @@ shell.sed(
   '-i',
   '<reference types="sinon" />',
   '<reference types="../sinon" />',
+  join('types', 'sinon-chai', 'index.d.ts')
+)
+// also use relative import for sinon-chai
+shell.sed(
+  '-i',
+  "from 'sinon';",
+  "from '../sinon';",
   join('types', 'sinon-chai', 'index.d.ts')
 )
