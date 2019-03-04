@@ -97,12 +97,12 @@ const util = {
     }
 
     if (os.platform() === 'win32') {
-      const { httpProxy, noProxy } = getWindowsProxy()
+      const proxy = getWindowsProxy()
 
-      if (httpProxy) {
+      if (proxy) {
         // environment variables are the only way to make request lib use NO_PROXY
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = httpProxy
-        process.env.NO_PROXY = process.env.NO_PROXY || noProxy
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxy.httpProxy
+        process.env.NO_PROXY = process.env.NO_PROXY || proxy.noProxy
       }
 
       return 'win32'
