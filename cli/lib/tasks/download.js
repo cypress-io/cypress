@@ -67,7 +67,7 @@ const prettyDownloadErr = (err, version) => {
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = ({ url, downloadDestination, progress }) => {
+const downloadFromUrl = ({ url, downloadDestination, progress, proxy }) => {
   return new Promise((resolve, reject) => {
     debug('Downloading from', url)
     debug('Saving file to', downloadDestination)
@@ -76,6 +76,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
 
     const req = request({
       url,
+      proxy: proxy && proxy.httpProxy,
       followRedirect (response) {
         const version = response.headers['x-version']
 
@@ -151,7 +152,7 @@ const start = ({ version, downloadDestination, progress }) => {
   }
 
   // try to make sure proxy settings are right before downloading Cypress
-  util.loadSystemProxySettings()
+  const proxy = util.getSystemProxySettings()
 
   const url = getUrl(version)
 
@@ -163,7 +164,7 @@ const start = ({ version, downloadDestination, progress }) => {
   // ensure download dir exists
   return fs.ensureDirAsync(path.dirname(downloadDestination))
   .then(() => {
-    return downloadFromUrl({ url, downloadDestination, progress })
+    return downloadFromUrl({ url, downloadDestination, progress, proxy })
   })
   .catch((err) => {
     return prettyDownloadErr(err, version)

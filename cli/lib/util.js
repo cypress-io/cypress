@@ -9,8 +9,8 @@ const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const cachedir = require('cachedir')
+const getWindowsProxy = require('get-windows-proxy')
 const executable = require('executable')
-const registry = require('registry-js')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
@@ -89,61 +89,24 @@ const util = {
     }
   },
 
-  /**
-   * Auto-discover system proxy settings and set the correct environment vars.
-   *
-   * @returns {string} human-readable origin of the proxy settings
-   */
   loadSystemProxySettings () {
+    // load user's OS-specific proxy settings in to environment vars
     if (!_.isUndefined(process.env.HTTP_PROXY)) {
-      // user has set their own proxy, don't mess w/ it
-      return 'proxy environment variables'
+      // user has set proxy explicitly in environment vars, don't mess with it
+      return
     }
 
     if (os.platform() === 'win32') {
-      const { httpProxy, noProxy } = this.getWindowsProxy()
+      const { httpProxy, noProxy } = getWindowsProxy()
 
       if (httpProxy) {
+        // environment variables are the only way to make request lib use NO_PROXY
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = httpProxy
         process.env.NO_PROXY = process.env.NO_PROXY || noProxy
-
-        return 'Windows registry settings'
       }
+
+      return 'win32'
     }
-  },
-
-  getWindowsProxy () {
-    // load the Windows proxy variables into the environment variables Cypress & dependencies expect
-
-    debug('scanning Windows registry for proxy setting')
-    const values = registry.enumerateValues(
-      registry.HKEY.HKEY_CURRENT_USER,
-      'Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'
-    )
-    const proxyEnabled = _.find(values, { name: 'ProxyEnable' })
-    const proxyServer = _.find(values, { name: 'ProxyServer' })
-
-    if (!proxyEnabled || !proxyEnabled.data || !proxyServer || !proxyServer.data) {
-      debug('windows proxy disabled or no proxy defined')
-
-      return {}
-    }
-
-    const proxyOverride = _.find(values, { name: 'ProxyOverride' })
-    let noProxy
-
-    if (proxyOverride && proxyOverride.data) {
-      noProxy = proxyOverride.data
-      .split(';')
-      .join(',')
-      .replace('<local>', 'localhost,127.0.0.0/8,::1')
-    }
-
-    const httpProxy = `http://${proxyServer.data}`
-
-    debug('found HTTP(S)_PROXY %s and NO_PROXY %s from registry key', httpProxy, noProxy)
-
-    return { httpProxy, noProxy }
   },
 
   isTty (fd) {
