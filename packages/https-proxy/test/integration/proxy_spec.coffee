@@ -2,7 +2,7 @@ require("../spec_helper")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-debugProxy  = require("debugging-proxy")
+DebugProxy  = require("debugging-proxy")
 path        = require("path")
 Promise     = require("bluebird")
 proxy       = require("../helpers/proxy")
@@ -143,7 +143,7 @@ describe "Proxy", ->
       @httpProxy = process.env.HTTP_PROXY
       process.env.HTTP_PROXY = "http://localhost:9001"
 
-      @upstream = new debugProxy()
+      @upstream = new DebugProxy()
 
       @sandbox.spy(@upstream, "proxySslConnectionToDomain")
       @upstream.start(9001)
