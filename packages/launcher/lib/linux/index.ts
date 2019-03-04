@@ -7,7 +7,7 @@ import * as execa from 'execa'
 function getLinuxBrowser(
   name: string,
   binary: string,
-  versionRegex: RegExp
+  versionRegex: RegExp,
 ): Promise<FoundBrowser> {
   const getVersion = (stdout: string) => {
     const m = versionRegex.exec(stdout)
@@ -17,7 +17,7 @@ function getLinuxBrowser(
     log(
       'Could not extract version from %s using regex %s',
       stdout,
-      versionRegex
+      versionRegex,
     )
     throw notInstalledErr(binary)
   }
@@ -26,7 +26,7 @@ function getLinuxBrowser(
     log(
       'Received error detecting browser binary: "%s" with error:',
       binary,
-      err.message
+      err.message,
     )
     throw notInstalledErr(binary)
   }
@@ -38,7 +38,7 @@ function getLinuxBrowser(
       return {
         name,
         version,
-        path: binary
+        path: binary,
       } as FoundBrowser
     })
     .catch(logAndThrowError)
@@ -49,7 +49,7 @@ export function getVersionString(path: string) {
   log('finding version string using command "%s"', cmd)
   return execa
     .shell(cmd)
-    .then(result => result.stdout)
+    .then((result) => result.stdout)
     .then(trim)
 }
 
@@ -57,6 +57,6 @@ export function detect(browser: Browser) {
   return getLinuxBrowser(
     browser.name,
     browser.binary as string,
-    browser.versionRegex
+    browser.versionRegex,
   )
 }

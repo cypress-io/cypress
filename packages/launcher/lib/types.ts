@@ -20,7 +20,7 @@ export type Browser = {
   versionRegex: RegExp
   profile: boolean
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
-  binary: string | string[]
+  binary: string | string[],
 }
 
 /**
@@ -34,7 +34,7 @@ export type FoundBrowser = Browser & {
   /** user-supplied browser? */
   custom?: boolean
   /** optional info that will be shown in the GUI */
-  info?: string
+  info?: string,
 }
 
 // all common type definition for this module
@@ -47,7 +47,7 @@ export type LauncherApi = {
   detect: (goalBrowsers?: Browser[]) => Bluebird<FoundBrowser[]>
   detectByPath: (
     path: string,
-    goalBrowsers?: Browser[]
+    goalBrowsers?: Browser[],
   ) => Promise<FoundBrowser>
-  launch: (browser: FoundBrowser, url: string, args: string[]) => ChildProcess
+  launch: (browser: FoundBrowser, url: string, args: string[]) => ChildProcess,
 }

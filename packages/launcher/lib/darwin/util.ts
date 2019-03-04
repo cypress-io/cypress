@@ -43,14 +43,14 @@ export function mdfind(id: string): Promise<string> {
 
   return execa
     .shell(cmd)
-    .then(result => result.stdout)
+    .then((result) => result.stdout)
     .then(tap(logFound))
     .catch(failedToFind)
 }
 
 export type AppInfo = {
   path: string
-  version: string
+  version: string,
 }
 
 function formApplicationPath(executable: string) {
@@ -64,15 +64,15 @@ function formApplicationPath(executable: string) {
 export function findApp(
   executable: string,
   appId: string,
-  versionProperty: string
+  versionProperty: string,
 ): Promise<AppInfo> {
   log('looking for app %s id %s', executable, appId)
 
   const findVersion = (foundPath: string) =>
-    parse(foundPath, versionProperty).then(version => {
+    parse(foundPath, versionProperty).then((version) => {
       return {
         path: path.join(foundPath, executable),
-        version
+        version,
       }
     })
 

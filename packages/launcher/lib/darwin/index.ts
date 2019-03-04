@@ -7,27 +7,27 @@ import { merge, partial } from 'ramda'
 const detectCanary = partial(findApp, [
   'Contents/MacOS/Google Chrome Canary',
   'com.google.Chrome.canary',
-  'KSVersion'
+  'KSVersion',
 ])
 const detectChrome = partial(findApp, [
   'Contents/MacOS/Google Chrome',
   'com.google.Chrome',
-  'KSVersion'
+  'KSVersion',
 ])
 const detectChromium = partial(findApp, [
   'Contents/MacOS/Chromium',
   'org.chromium.Chromium',
-  'CFBundleShortVersionString'
+  'CFBundleShortVersionString',
 ])
 
 type Detectors = {
-  [index: string]: Function
+  [index: string]: Function,
 }
 
 const browsers: Detectors = {
   chrome: detectChrome,
   canary: detectCanary,
-  chromium: detectChromium
+  chromium: detectChromium,
 }
 
 export function getVersionString(path: string) {

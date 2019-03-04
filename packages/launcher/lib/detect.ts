@@ -22,7 +22,7 @@ const setMajorVersion = (browser: FoundBrowser) => {
       'browser %s version %s major version %s',
       browser.name,
       browser.version,
-      browser.majorVersion
+      browser.majorVersion,
     )
   }
   return browser
@@ -30,11 +30,11 @@ const setMajorVersion = (browser: FoundBrowser) => {
 
 type PlatformHelper = {
   detect: (browser: Browser) => Promise<FoundBrowser>
-  getVersionString: (path: string) => Promise<string>
+  getVersionString: (path: string) => Promise<string>,
 }
 
 type Helpers = {
-  [index: string]: PlatformHelper
+  [index: string]: PlatformHelper,
 }
 
 const helpers: Helpers = {
@@ -49,7 +49,7 @@ function getHelper(platform?: NodeJS.Platform): PlatformHelper {
 
 function lookup(
   platform: NodeJS.Platform,
-  browser: Browser
+  browser: Browser,
 ): Promise<FoundBrowser> {
   log('looking up %s on %s platform', browser.name, platform)
   const helper = getHelper(platform)
@@ -115,7 +115,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   }
 
   const removeDuplicates = uniqBy((browser: FoundBrowser) =>
-    props(['name', 'version'], browser)
+    props(['name', 'version'], browser),
   )
   const compactFalse = (browsers: any[]) => compact(browsers) as FoundBrowser[]
 
@@ -127,7 +127,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 
 export const detectByPath = (
   path: string,
-  goalBrowsers?: Browser[]
+  goalBrowsers?: Browser[],
 ): Bluebird<FoundBrowser> => {
   if (!goalBrowsers) {
     goalBrowsers = browsers

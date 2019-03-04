@@ -26,7 +26,7 @@ function formChromeCanaryAppPath() {
     'Google',
     'Chrome SxS',
     'Application',
-    'chrome.exe'
+    'chrome.exe',
   )
   return normalize(exe)
 }
@@ -43,7 +43,7 @@ interface WindowsBrowserPaths {
 const formPaths: WindowsBrowserPaths = {
   chrome: formFullAppPath,
   canary: formChromeCanaryAppPath,
-  chromium: formChromiumAppPath
+  chromium: formChromiumAppPath,
 }
 
 function getWindowsBrowser(name: string): Promise<FoundBrowser> {
@@ -64,7 +64,7 @@ function getWindowsBrowser(name: string): Promise<FoundBrowser> {
   log('exe path %s', exePath)
 
   return pathExists(exePath)
-    .then(exists => {
+    .then((exists) => {
       log('found %s ?', exePath, exists)
 
       if (!exists) {
@@ -79,7 +79,7 @@ function getWindowsBrowser(name: string): Promise<FoundBrowser> {
           return {
             name,
             version,
-            path: exePath
+            path: exePath,
           } as FoundBrowser
         })
     })
@@ -100,11 +100,11 @@ export function getVersionString(path: string) {
     `name="${doubleEscape(path)}"`,
     'get',
     'Version',
-    '/value'
+    '/value',
   ]
 
   return execa('wmic', args)
-    .then(result => result.stdout)
+    .then((result) => result.stdout)
     .then(trim)
 }
 

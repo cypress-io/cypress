@@ -2,7 +2,7 @@ import { NotInstalledError, NotDetectedAtPathError } from './types'
 
 export const notInstalledErr = (name: string, message?: string) => {
   const err = new Error(
-    message || `Browser not installed: ${name}`
+    message || `Browser not installed: ${name}`,
   ) as NotInstalledError
   err.notInstalled = true
   return err

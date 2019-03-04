@@ -93,7 +93,8 @@ function makeProxies () {
 
     // for browserify, some packages use "browser" field
     // need to pass it as well
-    let relativePathToBrowser, relativePathToTypes
+    let relativePathToBrowser
+    let relativePathToTypes
 
     if (is.unemptyString(json.browser)) {
       debug('package has browser field %s', json.browser)
