@@ -9,8 +9,8 @@
 
 /// <reference path="./cy-blob-util.d.ts" />
 /// <reference path="./cy-bluebird.d.ts" />
-/// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./cy-chai.d.ts" />
 /// <reference path="./lodash/index.d.ts" />
 /// <reference path="./sinon/index.d.ts" />
@@ -94,7 +94,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: Mimimatch.MimimatchStatic
+    minimatch: typeof Minimatch.minimatch
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
