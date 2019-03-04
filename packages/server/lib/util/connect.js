@@ -49,12 +49,8 @@ module.exports = {
 
     if (process.env.HTTP_PROXY) {
       // cannot make arbitrary connections behind a proxy, attempt HTTP/HTTPS
-      return rp(urlStr).catch(e => {
-        // we just care if it can connect, not if it's a valid resource
-        if (e.name !== 'StatusCodeError') {
-          throw e
-        }
-      })
+      return rp(urlStr)
+      .catch({ name: 'StatusCodeError' }, () => {}) // we just care if it can connect, not if it's a valid resource
     }
 
     return this.getAddress(port, hostname)
