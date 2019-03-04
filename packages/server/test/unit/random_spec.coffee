@@ -1,7 +1,7 @@
 require("../spec_helper")
 
 randomstring = require("randomstring")
-random = require("#{root}lib/util/random")
+{ randomId } = require("#{root}lib/util/random")
 
 context ".id", ->
   it "returns random.generate string", ->

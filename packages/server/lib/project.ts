@@ -33,13 +33,13 @@ import config from './config.coffee'
 import logger from './logger.coffee'
 import errors from './errors.coffee'
 import Server from './server.coffee'
-import plugins from './plugins.coffee'
+import plugins from './plugins/index.coffee'
 import scaffold from './scaffold.coffee'
 import Watchers from './watchers.coffee'
 import Reporter from './reporter.coffee'
-import browsers from './browsers.coffee'
+import browsers from './browsers/index.coffee'
 import savedState from './saved_state.coffee'
-import Automation from './automation.coffee'
+import Automation from './automation/index.coffee'
 import preprocessor from './plugins/preprocessor.coffee'
 import fs from './util/fs'
 import settings from './util/settings'
@@ -78,7 +78,7 @@ export class Project extends EE {
 
   open(options = {}) {
     debug('opening project instance %s', this.projectRoot)
-    this.server = Server()
+    const server = (this.server = Server())
 
     _.defaults(options, {
       report: false,
@@ -115,7 +115,7 @@ export class Project extends EE {
         })
       })
       .then((cfg) => {
-        return this.server.open(cfg, this).spread((port, warning) => {
+        return server.open(cfg, this).spread((port, warning) => {
           //# if we didnt have a cfg.port
           //# then get the port once we
           //# open the server
@@ -394,7 +394,7 @@ export class Project extends EE {
   //# returns project config (user settings + defaults + cypress.json)
   //# with additional object "state" which are transient things like
   //# window width and height, DevTools open or not, etc.
-  getConfig = (options = {}) => {
+  getConfig(options = {}) {
     if (this.cfg) {
       return Promise.resolve(this.cfg)
     }

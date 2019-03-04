@@ -80,9 +80,7 @@ function runElectron(mode: OptionsMode, options: OptionsArgv) {
       //# just run the gui code directly here
       //# and pass our options directly to main
       if (mode === 'run') {
-        const {
-          modeDispatch,
-        } = require('./modes/run') as typeof import('./modes/run')
+        const { modeDispatch } = require('./modes') as typeof import('./modes')
         return modeDispatch(mode, options)
       }
       if (mode === 'interactive') {

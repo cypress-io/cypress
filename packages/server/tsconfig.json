@@ -17,7 +17,7 @@
     /* Generates corresponding '.map' file. */
     "sourceMap": true,
     /* Import emit helpers from 'tslib'. */
-    "importHelpers": true,
+    // "importHelpers": true,
     // "downlevelIteration": true,            /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */
     // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
     /* Strict Type-Checking Options */

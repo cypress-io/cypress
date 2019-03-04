@@ -767,7 +767,10 @@ clone = (err, options = {}) ->
 
 log = (err, color = "red") ->
   Promise.try ->
-    console.log chalk[color](err.message)
+    if typeof color is 'function'
+      console.log(color(memo))
+    else
+      console.log chalk[color](err.message)
     if err.details
       console.log("\n", chalk["yellow"](err.details))
 

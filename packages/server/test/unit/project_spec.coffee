@@ -11,7 +11,7 @@ errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
 Server       = require("#{root}lib/server")
-Project      = require("#{root}lib/project")
+{ Project }  = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
 savedState   = require("#{root}lib/saved_state")
 preprocessor = require("#{root}lib/plugins/preprocessor")
@@ -32,18 +32,18 @@ describe "lib/project", ->
 
       config.set({projectName: "project", projectRoot: "/foo/bar"})
       .then (@config) =>
-        @project = Project(@todosPath)
+        @project = new Project(@todosPath)
 
   afterEach ->
     Fixtures.remove()
     @project?.close()
 
   it "requires a projectRoot", ->
-    fn = -> Project()
+    fn = -> new Project()
     expect(fn).to.throw "Instantiating lib/project requires a projectRoot!"
 
   it "always resolves the projectRoot to be absolute", ->
-    p = Project("../foo/bar")
+    p = new Project("../foo/bar")
     expect(p.projectRoot).not.to.eq("../foo/bar")
     expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
 
@@ -225,7 +225,7 @@ describe "lib/project", ->
 
   context "#close", ->
     beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
 
       sinon.stub(@project, "getConfig").resolves(@config)
       sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
@@ -247,7 +247,7 @@ describe "lib/project", ->
 
   context "#reset", ->
     beforeEach ->
-      @project = Project(@pristinePath)
+      @project = new Project(@pristinePath)
       @project.automation = { reset: sinon.stub() }
       @project.server = { reset: sinon.stub() }
 
@@ -259,7 +259,7 @@ describe "lib/project", ->
 
   context "#getRuns", ->
     beforeEach ->
-      @project = Project(@todosPath)
+      @project = new Project(@todosPath)
       sinon.stub(settings, "read").resolves({projectId: "id-123"})
       sinon.stub(api, "getProjectRuns").resolves('runs')
       sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
@@ -271,7 +271,7 @@ describe "lib/project", ->
 
   context "#scaffold", ->
     beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
       sinon.stub(scaffold, "integration").resolves()
       sinon.stub(scaffold, "fixture").resolves()
       sinon.stub(scaffold, "support").resolves()
@@ -298,7 +298,7 @@ describe "lib/project", ->
 
   context "#watchSettings", ->
     beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
       @project.server = {startWebsockets: ->}
       sinon.stub(settings, "pathToCypressJson").returns("/path/to/cypress.json")
       sinon.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
@@ -349,7 +349,7 @@ describe "lib/project", ->
   context "#checkSupportFile", ->
     beforeEach ->
       sinon.stub(fs, "pathExists").resolves(true)
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
       @project.server = {onTestFileChange: sinon.spy()}
       sinon.stub(preprocessor, "getFile").resolves()
       @config = {
@@ -371,7 +371,7 @@ describe "lib/project", ->
   context "#watchPluginsFile", ->
     beforeEach ->
       sinon.stub(fs, "pathExists").resolves(true)
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
       @project.watchers = { watchTree: sinon.spy() }
       sinon.stub(plugins, "init").resolves()
       @config = {
@@ -413,7 +413,7 @@ describe "lib/project", ->
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
       @project.watchers = {}
       @project.server = sinon.stub({startWebsockets: ->})
       sinon.stub(@project, "watchSettings")
@@ -437,7 +437,7 @@ describe "lib/project", ->
 
   context "#getProjectId", ->
     beforeEach ->
-      @project         = Project("/_test-output/path/to/project")
+      @project         = new Project("/_test-output/path/to/project")
       @verifyExistence = sinon.stub(Project.prototype, "verifyExistence").resolves()
 
     it "calls verifyExistence", ->
@@ -478,7 +478,7 @@ describe "lib/project", ->
 
   context "#writeProjectId", ->
     beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
 
       sinon.stub(settings, "write")
         .withArgs(@project.projectRoot, {projectId: "id-123"})
@@ -494,7 +494,7 @@ describe "lib/project", ->
 
   context "#getSpecUrl", ->
     beforeEach ->
-      @project2 = Project(@idsPath)
+      @project2 = new Project(@idsPath)
 
       settings.write(@idsPath, {port: 2020})
 
@@ -550,7 +550,7 @@ describe "lib/project", ->
 
   context "#createCiProject", ->
     beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+      @project = new Project("/_test-output/path/to/project")
       @newProject = { id: "project-id-123" }
 
       sinon.stub(@project, "writeProjectId").resolves("project-id-123")
@@ -575,7 +575,7 @@ describe "lib/project", ->
   context "#getRecordKeys", ->
     beforeEach ->
       @recordKeys = []
-      @project = Project(@pristinePath)
+      @project = new Project(@pristinePath)
       sinon.stub(settings, "read").resolves({projectId: "id-123"})
       sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
       sinon.stub(api, "getProjectRecordKeys").resolves(@recordKeys)
@@ -590,7 +590,7 @@ describe "lib/project", ->
 
   context "#requestAccess", ->
     beforeEach ->
-      @project = Project(@pristinePath)
+      @project = new Project(@pristinePath)
       sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
       sinon.stub(api, "requestAccess").resolves("response")
 

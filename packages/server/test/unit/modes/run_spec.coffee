@@ -5,7 +5,7 @@ electron = require("electron")
 user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
 config   = require("#{root}../lib/config")
-Project  = require("#{root}../lib/project")
+{ Project } = require("#{root}../lib/project")
 browsers   = require("#{root}../lib/browsers")
 Reporter = require("#{root}../lib/reporter")
 runMode = require("#{root}../lib/modes/run")
@@ -18,7 +18,7 @@ specsUtil = require("#{root}../lib/util/specs")
 
 describe "lib/modes/run", ->
   beforeEach ->
-    @projectInstance = Project("/_test-output/path/to/project")
+    @projectInstance = new Project("/_test-output/path/to/project")
 
   context ".getProjectId", ->
     it "resolves if CYPRESS_PROJECT_ID set", ->

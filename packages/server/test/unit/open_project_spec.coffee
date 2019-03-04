@@ -1,7 +1,7 @@
 require("../spec_helper")
 
 browsers = require("#{root}lib/browsers")
-Project = require("#{root}lib/project")
+{ Project } = require("#{root}lib/project")
 openProject = require("#{root}lib/open_project")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 
