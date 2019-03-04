@@ -48,3 +48,9 @@ shell.sed(
   '<reference path="../chai/index.d.ts" />',
   join('types', 'sinon-chai', 'index.d.ts')
 )
+shell.sed(
+  '-i',
+  '<reference types="sinon" />',
+  '<reference types="../sinon" />',
+  join('types', 'sinon-chai', 'index.d.ts')
+)
