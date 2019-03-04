@@ -63,7 +63,7 @@ declare global {
   }
 }
 
-function isCurrentlyRunningElectron() {
+export function isCurrentlyRunningElectron() {
   return !!(process.versions && process.versions.electron)
 }
 

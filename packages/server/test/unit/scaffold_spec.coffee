@@ -5,7 +5,7 @@ Promise    = require("bluebird")
 cypressEx  = require("@packages/example")
 snapshot   = require("snap-shot-it")
 config     = require("#{root}lib/config")
-Project    = require("#{root}lib/project")
+{Project}  = require("#{root}lib/project")
 scaffold   = require("#{root}lib/scaffold")
 fs         = require("#{root}lib/util/fs")
 glob       = require("#{root}lib/util/glob")
@@ -32,7 +32,7 @@ describe "lib/scaffold", ->
 
     it "is false when files.length isnt 1", ->
       id = =>
-        @ids = Project(@idsPath)
+        @ids = new Project(@idsPath)
         @ids.getConfig()
         .then (cfg) =>
           @ids.scaffold(cfg).return(cfg)
@@ -42,7 +42,7 @@ describe "lib/scaffold", ->
           expect(ret).to.be.false
 
       todo = =>
-        @todos = Project(@todosPath)
+        @todos = new Project(@todosPath)
         @todos.getConfig()
         .then (cfg) =>
           @todos.scaffold(cfg).return(cfg)
@@ -55,7 +55,7 @@ describe "lib/scaffold", ->
 
     it "is true when files, name + bytes match to scaffold", ->
       ## TODO this test really can move to scaffold
-      pristine = Project(@pristinePath)
+      pristine = new Project(@pristinePath)
       pristine.getConfig()
       .then (cfg) ->
         pristine.scaffold(cfg).return(cfg)
@@ -66,7 +66,7 @@ describe "lib/scaffold", ->
 
     it "is false when bytes dont match scaffold", ->
       ## TODO this test really can move to scaffold
-      pristine = Project(@pristinePath)
+      pristine = new Project(@pristinePath)
       pristine.getConfig()
       .then (cfg) ->
         pristine.scaffold(cfg).return(cfg)

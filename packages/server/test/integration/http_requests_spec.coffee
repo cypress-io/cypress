@@ -20,7 +20,7 @@ SseStream     = require('ssestream')
 EventSource   = require("eventsource")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
-Project       = require("#{root}lib/project")
+{Project}     = require("#{root}lib/project")
 Watchers      = require("#{root}lib/watchers")
 errors        = require("#{root}lib/errors")
 files         = require("#{root}lib/controllers/files")
@@ -107,7 +107,7 @@ describe "Routes", ->
           rp(options)
 
         open = =>
-          project = Project("/path/to/project")
+          project = new Project("/path/to/project")
 
           Promise.all([
             ## open our https server

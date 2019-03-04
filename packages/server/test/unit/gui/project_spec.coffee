@@ -3,7 +3,7 @@
 # extension = require("@packages/extension")
 # Fixtures = require("../../support/helpers/fixtures")
 # project  = require("#{root}../lib/open_project")
-# Project  = require("#{root}../lib/project")
+# {Project} = require("#{root}../lib/project")
 # launcher = require("#{root}../lib/launcher")
 #
 # describe "lib/open_projects", ->
