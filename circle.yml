@@ -235,6 +235,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
+          command: ls -la types
+          working_directory: cli
+      - run:
           command: npm run dtslint
           working_directory: cli
 
@@ -529,6 +532,9 @@ jobs:
           name: build NPM package
           working_directory: cli
           command: npm run build
+      - run:
+          command: ls -la types
+          working_directory: cli/build
       - run:
           name: list NPM package contents
           working_directory: cli/build

@@ -103,6 +103,6 @@
     "bin",
     "lib",
     "index.js",
-    "types/*.d.ts"
+    "types/**/*.d.ts"
   ]
 }
