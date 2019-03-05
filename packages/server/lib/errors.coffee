@@ -728,7 +728,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
        > #{arg1}
        > #{arg1}{{extension}}
 
-      Cypress tried using these file extensions for your fixture:
+      Cypress looked for these file extensions at the provided path:
 
        > #{arg2.join(', ')}
 
