@@ -438,7 +438,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         }
 
         break
-    }
+      }
       default: break
     }
 
@@ -932,6 +932,45 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
+  const getDefaultRetries = () => {
+    return Cypress.env('RETRIES')
+  }
+
+  const onNextError = (runnable, next, err) => {
+
+    const r = runnable
+    const isHook = r.type === 'hook'
+    const test = r.ctx.currentTest || r
+    const isBeforeHook = isHook && r.hookName.match(/before/)
+
+    const fail = function () {
+      return next.call(this, err)
+    }
+    const noFail = function () {
+      test.err = null
+
+      return next.call(this)
+    }
+
+    if (err) {
+      if (test._retries === -1) {
+        test._retries = getDefaultRetries()
+      }
+
+      if (isBeforeHook && test._currentRetry < test._retries) {
+        test.trueFn = test.fn
+        test.fn = function () {
+          throw err
+        }
+
+        return noFail()
+      }
+    }
+
+    return fail()
+
+  }
+
   return {
     grep (re) {
       if (arguments.length) {
@@ -1059,9 +1098,28 @@ const create = function (specWindow, mocha, Cypress, cy) {
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 
+      const isHook = runnable.type === 'hook'
+      const isAfterAllHook = isHook && runnable.hookName.match(/after all/)
+
       //# extract out the next(fn) which mocha uses to
       //# move to the next runnable - this will be our async seam
+      // const _next = args[0]
       const _next = args[0]
+
+      if (isAfterAllHook) {
+        if (test.state !== 'failed') {
+          test.err = null
+          test.state = 'passed'
+        }
+      }
+
+      if (
+        isHook &&
+        test.trueFn &&
+        !isAfterAllHook
+      ) {
+        return _next.call(this)
+      }
 
       const next = function (err) {
         //# now set the duration of the after runnable run async event
@@ -1095,6 +1153,10 @@ const create = function (specWindow, mocha, Cypress, cy) {
             })
             break
           default: break
+        }
+
+        if (err) {
+          return onNextError(runnable, _next, err)
         }
 
         return _next(err)
