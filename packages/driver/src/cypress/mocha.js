@@ -1,17 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require('lodash')
 const $utils = require('./utils')
 
 //# in the browser mocha is coming back
@@ -122,10 +108,9 @@ const restoreRunnableRun = () => {
   return Runnable.prototype.run = runnableRun
 }
 
-const patchRunnerFail = () =>
 //# matching the current Runner.prototype.fail except
 //# changing the logic for determing whether this is a valid err
-{
+const patchRunnerFail = () => {
   return Runner.prototype.fail = function (runnable, err) {
   //# if this isnt a correct error object then just bail
   //# and call the original function
@@ -151,9 +136,9 @@ const patchRunnableRun = (Cypress) => {
 }
 
 const patchRunnableClearTimeout = () => {
-  return Runnable.prototype.clearTimeout = function () {
+  return Runnable.prototype.clearTimeout = function (...args) {
   //# call the original
-    runnableClearTimeout.apply(this, arguments)
+    runnableClearTimeout.apply(this, args)
 
     this.timer = null
   }

@@ -1,17 +1,3 @@
-/* eslint-disable
-    brace-style,
-    default-case,
-    no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
-    no-undef,
-    no-unused-vars,
-    no-var,
-    one-var,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -186,12 +172,11 @@ const reduceProps = (obj, props) => {
     , {})
 }
 
-const wrap = (runnable) =>
 //# we need to optimize wrap by converting
 //# tests to an id-based object which prevents
 //# us from recursively iterating through every
 //# parent since we could just return the found test
-{
+const wrap = (runnable) => {
   return reduceProps(runnable, RUNNABLE_PROPS)
 }
 
@@ -220,7 +205,6 @@ const forceGc = function (obj) {
   //# references to ctx, and removes callback
   //# functions for closures
   for (let key of Object.keys(obj.ctx || {})) {
-    const value = obj.ctx[key]
 
     obj.ctx[key] = undefined
   }
@@ -265,8 +249,10 @@ const onFirstTest = function (suite, fn) {
     }
   }
 
-  for (suite of suite.suites) {
-    if (test = onFirstTest(suite, fn)) {
+  for (const suite of suite.suites) {
+    const test = onFirstTest(suite, fn)
+
+    if (test) {
       return test
     }
   }
@@ -290,14 +276,16 @@ const getAllSiblingTests = function (suite, getTestById) {
 
 const getTestFromHook = function (hook, suite, getTestById) {
   //# if theres already a currentTest use that
-  let found, test
+  const test = hook != null ? hook.ctx.currentTest : undefined
 
-  if (test = hook != null ? hook.ctx.currentTest : undefined) {
+  if (test) {
     return test
   }
 
   //# if we have a hook id then attempt
   //# to find the test by its id
+  let found
+
   if (hook != null ? hook.id : undefined) {
     found = onFirstTest(suite, (test) => {
       return hook.id === test.id
@@ -323,7 +311,7 @@ const getTestFromHook = function (hook, suite, getTestById) {
   //# have one last final fallback where
   //# we just return true on the very first
   //# test (used in testing)
-  return onFirstTest(suite, (test) => {
+  return onFirstTest(suite, () => {
     return true
   })
 }
@@ -388,11 +376,11 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
   const _runnerHook = _runner.hook
 
   _runner.hook = function (name, fn) {
-    const hooks = this.suite[`_${name}`]
+    // const hooks = this.suite[`_${name}`]
 
     const allTests = getTests()
 
-    const changeFnToRunAfterHooks = function () {
+    const changeFnToRunAfterHooks = function (...args) {
       const originalFn = fn
 
       const test = getTest()
@@ -403,12 +391,12 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         testAfterRun(test, Cypress)
 
         //# and now invoke next(err)
-        return originalFn(...arguments)
+        return originalFn(...args)
       }
     }
 
     switch (name) {
-      case 'afterEach':
+      case 'afterEach': {
         const t = getTest()
 
         //# find all of the grep'd _tests which share
@@ -423,10 +411,14 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
 
         break
 
-      case 'afterAll':
+      }
+
+      case 'afterAll': {
         //# find all of the grep'd allTests which share
         //# the same parent suite as our current _test
-        if (t = getTest()) {
+        const t = getTest()
+
+        if (t) {
           const siblings = getAllSiblingTests(t.parent, getTestById)
 
           //# 1. if we're the very last test in the entire allTests
@@ -446,6 +438,8 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         }
 
         break
+    }
+      default: break
     }
 
     return _runnerHook.call(this, name, fn)
@@ -483,7 +477,7 @@ const normalizeAll = function (suite, initialTests = {}, grep, setTestsById, set
   let hasTests = false
 
   //# only loop until we find the first test
-  onFirstTest(suite, (test) => {
+  onFirstTest(suite, () => {
     return hasTests = true
   })
 
@@ -517,7 +511,6 @@ const normalizeAll = function (suite, initialTests = {}, grep, setTestsById, set
 
 const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId) {
   const normalizer = (runnable) => {
-    let i
 
     runnable.id = getTestId()
 
@@ -532,7 +525,9 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
 
     //# if we have a runnable in the initial state
     //# then merge in existing properties into the runnable
-    if (i = initialTests[runnable.id]) {
+    const i = initialTests[runnable.id]
+
+    if (i) {
       _.each(RUNNABLE_LOGS, (type) => {
         return _.each(i[type], onLogsById)
       })
@@ -613,14 +608,14 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
   return obj
 }
 
-const afterEachFailed = function (Cypress, test, err) {
-  test.state = 'failed'
-  test.err = wrapErr(err)
+// const afterEachFailed = function (Cypress, test, err) {
+//   test.state = 'failed'
+//   test.err = wrapErr(err)
 
-  return Cypress.action('runner:test:end', wrap(test))
-}
+//   return Cypress.action('runner:test:end', wrap(test))
+// }
 
-const hookFailed = function (hook, err, hookName, getTestById, getTest) {
+const hookFailed = function (hook, err, hookName, getTestById, getTest, Cypress) {
   //# finds the test by returning the first test from
   //# the parent or looping through the suites until
   //# it finds the first test
@@ -819,7 +814,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       //# if a hook fails (such as a before) then the test will never
       //# get run and we'll need to make sure we set the test so that
       //# the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, hookName, getTestById, getTest)
+      return hookFailed(runnable, runnable.err, hookName, getTestById, getTest, Cypress)
     }
   })
 }
@@ -833,8 +828,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   _runner.suite = mocha.getRootSuite()
 
-  specWindow.onerror = function () {
-    let err = cy.onSpecWindowUncaughtException(...arguments)
+  specWindow.onerror = function (...args) {
+    let err = cy.onSpecWindowUncaughtException(...args)
 
     //# err will not be returned if cy can associate this
     //# uncaught exception to an existing runnable
@@ -889,9 +884,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
   }
   let _startTime = null
 
-  const getTestId = () =>
   //# increment the id counter
-  {
+  const getTestId = () => {
     return `r${_id += 1}`
   }
 
@@ -955,9 +949,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
       //# need to handle
       //# ignoreLeaks, asyncOnly, globals
 
-      let re
+      const re = options.grep
 
-      if (re = options.grep) {
+      if (re) {
         return this.grep(re)
       }
     },
@@ -1010,11 +1004,12 @@ const create = function (specWindow, mocha, Cypress, cy) {
     },
 
     onRunnableRun (runnableRun, runnable, args) {
-      let lifecycleStart, test
 
       if (!runnable.id) {
         throw new Error('runnable must have an id', runnable.id)
       }
+
+      let test
 
       switch (runnable.type) {
         case 'hook':
@@ -1024,6 +1019,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
         case 'test':
           test = runnable
           break
+
+        default: break
       }
 
       //# closure for calculating the actual
@@ -1035,6 +1032,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
       let fnDurationEnd = null
       let afterFnDurationStart = null
       let afterFnDurationEnd = null
+      let lifecycleStart
 
       //# when this is a hook, capture the real start
       //# date so we can calculate our test's duration
@@ -1096,6 +1094,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
               afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
             })
             break
+          default: break
         }
 
         return _next(err)
@@ -1196,7 +1195,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
     },
 
     countByTestState (tests, state) {
-      const count = _.filter(tests, (test, key) => {
+      const count = _.filter(tests, (test) => {
         return test.state === state
       })
 
@@ -1223,16 +1222,16 @@ const create = function (specWindow, mocha, Cypress, cy) {
       //# search through all of the tests
       //# until we find the current test
       //# and break then
-      for (var test of _tests) {
+      for (let test of _tests) {
         if (test.id === id) {
           break
         } else {
           test = wrapAll(test)
 
           _.each(RUNNABLE_LOGS, (type) => {
-            let logs
+            const logs = test[type]
 
-            if (logs = test[type]) {
+            if (logs) {
               test[type] = _.map(logs, $Log.toSerializedJSON)
             }
           })
@@ -1268,25 +1267,25 @@ const create = function (specWindow, mocha, Cypress, cy) {
     getDisplayPropsForLog: $Log.getDisplayProps,
 
     getConsolePropsForLogById (logId) {
-      let attrs
+      const attrs = _logsById[logId]
 
-      if (attrs = _logsById[logId]) {
+      if (attrs) {
         return $Log.getConsoleProps(attrs)
       }
     },
 
     getSnapshotPropsForLogById (logId) {
-      let attrs
+      const attrs = _logsById[logId]
 
-      if (attrs = _logsById[logId]) {
+      if (attrs) {
         return $Log.getSnapshotProps(attrs)
       }
     },
 
     getErrorByTestId (testId) {
-      let test
+      const test = getTestById(testId)
 
-      if (test = getTestById(testId)) {
+      if (test) {
         return wrapErr(test.err)
       }
     },
@@ -1336,7 +1335,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       //# we dont need to hold a log reference
       //# to anything in memory when we're headless
       //# because you cannot inspect any logs
-      let existing
 
       if (!isInteractive) {
         return
@@ -1357,7 +1355,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
         _testsQueue.push(test)
       }
 
-      if (existing = _logsById[attrs.id]) {
+      const existing = _logsById[attrs.id]
+
+      if (existing) {
         //# because log:state:changed may
         //# fire at a later time, its possible
         //# we've already cleaned up these attrs
@@ -1375,7 +1375,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
       const { testId, instrument } = attrs
 
-      if (test = getTestById(testId)) {
+      test = getTestById(testId)
+      if (test) {
         //# pluralize the instrument
         //# as a property on the runnable
         let name
