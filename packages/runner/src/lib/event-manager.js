@@ -11,7 +11,7 @@ import $Cypress, { $ } from '@packages/driver'
 
 const channel = io.connect({
   path: '/__socket.io',
-  transports: ['websocket']
+  transports: ['websocket'],
 })
 
 channel.on('connect', () => {
@@ -47,7 +47,7 @@ const eventManager = {
     channel.emit(
       'is:automation:client:connected',
       connectionInfo,
-      action('automationEnsured', isConnected => {
+      action('automationEnsured', (isConnected) => {
         state.automation = isConnected
           ? automation.CONNECTED
           : automation.MISSING
@@ -60,7 +60,7 @@ const eventManager = {
       })
     )
 
-    channel.on('change:to:url', url => {
+    channel.on('change:to:url', (url) => {
       window.location.href = url
     })
 
@@ -82,7 +82,7 @@ const eventManager = {
             if (_.isFunction(fn) && _.isString(data.responseId)) {
               // eslint-disable-next-line no-console
               console.log('it is a function, using Promise.then')
-              Promise.resolve(fn(arg0)).then(result => {
+              Promise.resolve(fn(arg0)).then((result) => {
                 // eslint-disable-next-line no-console
                 console.log('got result back from function', data.responseId)
                 Cypress.backend(data.responseId, result)
@@ -96,11 +96,11 @@ const eventManager = {
       }
     })
 
-    _.each(socketRerunEvents, event => {
+    _.each(socketRerunEvents, (event) => {
       channel.on(event, rerun)
     })
 
-    reporterBus.on('runner:console:error', testId => {
+    reporterBus.on('runner:console:error', (testId) => {
       if (!Cypress) return
 
       const err = Cypress.getErrorByTestId(testId)
@@ -112,7 +112,7 @@ const eventManager = {
       }
     })
 
-    reporterBus.on('runner:console:log', logId => {
+    reporterBus.on('runner:console:log', (logId) => {
       if (!Cypress) return
 
       const consoleProps = Cypress.getConsolePropsForLogById(logId)
@@ -134,13 +134,13 @@ const eventManager = {
       }
     }
 
-    reporterBus.on('runner:show:snapshot', logId => {
+    reporterBus.on('runner:show:snapshot', (logId) => {
       sendEventIfSnapshotProps(logId, 'show:snapshot')
     })
 
     reporterBus.on('runner:hide:snapshot', this._hideSnapshot.bind(this))
 
-    reporterBus.on('runner:pin:snapshot', logId => {
+    reporterBus.on('runner:pin:snapshot', (logId) => {
       sendEventIfSnapshotProps(logId, 'pin:snapshot')
     })
 
@@ -164,7 +164,7 @@ const eventManager = {
       Cypress.stop()
     })
 
-    reporterBus.on('save:state', state => {
+    reporterBus.on('save:state', (state) => {
       this.saveState(state)
     })
 
@@ -251,24 +251,24 @@ const eventManager = {
       channel.emit('client:request', msg, data, cb)
     })
 
-    _.each(driverToSocketEvents, event => {
+    _.each(driverToSocketEvents, (event) => {
       Cypress.on(event, (...args) => channel.emit(event, ...args))
     })
 
     Cypress.on(
       'collect:run:state',
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           reporterBus.emit('reporter:collect:run:state', resolve)
         })
     )
 
-    Cypress.on('log:added', log => {
+    Cypress.on('log:added', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
-    Cypress.on('log:changed', log => {
+    Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
@@ -290,34 +290,34 @@ const eventManager = {
       if (!wait) beforeThenCb()
     })
 
-    Cypress.on('after:screenshot', config => {
+    Cypress.on('after:screenshot', (config) => {
       localBus.emit('after:screenshot', config)
     })
 
-    _.each(driverToReporterEvents, event => {
+    _.each(driverToReporterEvents, (event) => {
       Cypress.on(event, (...args) => {
         reporterBus.emit(event, ...args)
       })
     })
 
-    _.each(driverTestEvents, event => {
+    _.each(driverTestEvents, (event) => {
       Cypress.on(event, (test, cb) => {
         reporterBus.emit(event, test, cb)
       })
     })
 
-    _.each(driverToLocalAndReporterEvents, event => {
+    _.each(driverToLocalAndReporterEvents, (event) => {
       Cypress.on(event, (...args) => {
         localBus.emit(event, ...args)
         reporterBus.emit(event, ...args)
       })
     })
 
-    _.each(driverToLocalEvents, event => {
+    _.each(driverToLocalEvents, (event) => {
       Cypress.on(event, (...args) => localBus.emit(event, ...args))
     })
 
-    Cypress.on('script:error', err => {
+    Cypress.on('script:error', (err) => {
       Cypress.stop()
       localBus.emit('script:error', err)
     })
@@ -332,7 +332,7 @@ const eventManager = {
       numFailed: state.failed,
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
-      scrollTop: state.scrollTop
+      scrollTop: state.scrollTop,
     })
   },
 
@@ -362,7 +362,7 @@ const eventManager = {
   },
 
   _restart () {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
@@ -423,7 +423,7 @@ const eventManager = {
 
   saveState (state) {
     channel.emit('save:app:state', state)
-  }
+  },
 }
 
 export default eventManager
