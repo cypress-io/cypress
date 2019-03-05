@@ -22,6 +22,7 @@ ${eventsString}
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log('Failed to write window-events.d.ts:', err.stack)
+    process.exit(1)
   }
 
   process.exit(0)
