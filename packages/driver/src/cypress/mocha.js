@@ -1,203 +1,230 @@
-_ = require("lodash")
-$utils = require("./utils")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const $utils = require("./utils");
 
-## in the browser mocha is coming back
-## as window
-mocha = require("mocha")
+//# in the browser mocha is coming back
+//# as window
+const mocha = require("mocha");
 
-Mocha = mocha.Mocha ? mocha
-Test = Mocha.Test
-Runner = Mocha.Runner
-Runnable = Mocha.Runnable
+const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha;
+const { Test } = Mocha;
+const { Runner } = Mocha;
+const { Runnable } = Mocha;
 
-runnerRun            = Runner::run
-runnerFail           = Runner::fail
-runnableRun          = Runnable::run
-runnableClearTimeout = Runnable::clearTimeout
-runnableResetTimeout = Runnable::resetTimeout
+const runnerRun            = Runner.prototype.run;
+const runnerFail           = Runner.prototype.fail;
+const runnableRun          = Runnable.prototype.run;
+const runnableClearTimeout = Runnable.prototype.clearTimeout;
+const runnableResetTimeout = Runnable.prototype.resetTimeout;
 
-## don't let mocha polute the global namespace
-delete window.mocha
-delete window.Mocha
+//# don't let mocha polute the global namespace
+delete window.mocha;
+delete window.Mocha;
 
-ui = (specWindow, _mocha) ->
-  ## Override mocha.ui so that the pre-require event is emitted
-  ## with the iframe's `window` reference, rather than the parent's.
-  _mocha.ui = (name) ->
-    @_ui = Mocha.interfaces[name]
+const ui = function(specWindow, _mocha) {
+  //# Override mocha.ui so that the pre-require event is emitted
+  //# with the iframe's `window` reference, rather than the parent's.
+  _mocha.ui = function(name) {
+    this._ui = Mocha.interfaces[name];
 
-    if not @_ui
-      $utils.throwErrByPath("mocha.invalid_interface", { args: { name } })
+    if (!this._ui) {
+      $utils.throwErrByPath("mocha.invalid_interface", { args: { name } });
+    }
 
-    @_ui = @_ui(@suite)
+    this._ui = this._ui(this.suite);
 
-    ## this causes the mocha globals in the spec window to be defined
-    ## such as describe, it, before, beforeEach, etc
-    @suite.emit("pre-require", specWindow, null, @)
+    //# this causes the mocha globals in the spec window to be defined
+    //# such as describe, it, before, beforeEach, etc
+    this.suite.emit("pre-require", specWindow, null, this);
 
-    return @
+    return this;
+  };
 
-  _mocha.ui("bdd")
+  return _mocha.ui("bdd");
+};
 
-set = (specWindow, _mocha) ->
-  ## Mocha is usually defined in the spec when used normally
-  ## in the browser or node, so we add it as a global
-  ## for our users too
-  M = specWindow.Mocha = Mocha
-  m = specWindow.mocha = _mocha
+const set = function(specWindow, _mocha) {
+  //# Mocha is usually defined in the spec when used normally
+  //# in the browser or node, so we add it as a global
+  //# for our users too
+  const M = (specWindow.Mocha = Mocha);
+  const m = (specWindow.mocha = _mocha);
 
-  ## also attach the Mocha class
-  ## to the mocha instance for clarity
-  m.Mocha = M
+  //# also attach the Mocha class
+  //# to the mocha instance for clarity
+  m.Mocha = M;
 
-  ## this needs to be part of the configuration of cypress.json
-  ## we can't just forcibly use bdd
-  ui(specWindow, _mocha)
+  //# this needs to be part of the configuration of cypress.json
+  //# we can't just forcibly use bdd
+  return ui(specWindow, _mocha);
+};
 
-globals = (specWindow, reporter) ->
-  reporter ?= ->
+const globals = function(specWindow, reporter) {
+  if (reporter == null) { reporter = function() {}; }
 
-  _mocha = new Mocha({
-    reporter: reporter
+  const _mocha = new Mocha({
+    reporter,
     enableTimeouts: false
-  })
+  });
 
-  ## set mocha props on the specWindow
-  set(specWindow, _mocha)
+  //# set mocha props on the specWindow
+  set(specWindow, _mocha);
 
-  ## return the newly created mocha instance
-  return _mocha
+  //# return the newly created mocha instance
+  return _mocha;
+};
 
-getRunner = (_mocha) ->
-  Runner::run = ->
-    ## reset our runner#run function
-    ## so the next time we call it
-    ## its normal again!
-    restoreRunnerRun()
+const getRunner = function(_mocha) {
+  Runner.prototype.run = function() {
+    //# reset our runner#run function
+    //# so the next time we call it
+    //# its normal again!
+    restoreRunnerRun();
 
-    ## return the runner instance
-    return @
+    //# return the runner instance
+    return this;
+  };
 
-  _mocha.run()
+  return _mocha.run();
+};
 
-restoreRunnableClearTimeout = ->
-  Runnable::clearTimeout = runnableClearTimeout
+const restoreRunnableClearTimeout = () => Runnable.prototype.clearTimeout = runnableClearTimeout;
 
-restoreRunnableResetTimeout = ->
-  Runnable::resetTimeout = runnableResetTimeout
+const restoreRunnableResetTimeout = () => Runnable.prototype.resetTimeout = runnableResetTimeout;
 
-restoreRunnerRun = ->
-  Runner::run = runnerRun
+var restoreRunnerRun = () => Runner.prototype.run = runnerRun;
 
-restoreRunnerFail = ->
-  Runner::fail = runnerFail
+const restoreRunnerFail = () => Runner.prototype.fail = runnerFail;
 
-restoreRunnableRun = ->
-  Runnable::run = runnableRun
+const restoreRunnableRun = () => Runnable.prototype.run = runnableRun;
 
-patchRunnerFail = ->
-  ## matching the current Runner.prototype.fail except
-  ## changing the logic for determing whether this is a valid err
-  Runner::fail = (runnable, err) ->
-    ## if this isnt a correct error object then just bail
-    ## and call the original function
-    if Object.prototype.toString.call(err) isnt "[object Error]"
-      return runnerFail.call(@, runnable, err)
+const patchRunnerFail = () =>
+  //# matching the current Runner.prototype.fail except
+  //# changing the logic for determing whether this is a valid err
+  Runner.prototype.fail = function(runnable, err) {
+    //# if this isnt a correct error object then just bail
+    //# and call the original function
+    if (Object.prototype.toString.call(err) !== "[object Error]") {
+      return runnerFail.call(this, runnable, err);
+    }
 
-    ## else replicate the normal mocha functionality
-    ++@failures
+    //# else replicate the normal mocha functionality
+    ++this.failures;
 
-    runnable.state = "failed"
+    runnable.state = "failed";
 
-    @emit("fail", runnable, err)
+    return this.emit("fail", runnable, err);
+  }
+;
 
-patchRunnableRun = (Cypress) ->
-  Runnable::run = (args...) ->
-    runnable = @
+const patchRunnableRun = Cypress =>
+  Runnable.prototype.run = function(...args) {
+    const runnable = this;
 
-    Cypress.action("mocha:runnable:run", runnableRun, runnable, args)
+    return Cypress.action("mocha:runnable:run", runnableRun, runnable, args);
+  }
+;
 
-patchRunnableClearTimeout = ->
-  Runnable::clearTimeout = ->
-    ## call the original
-    runnableClearTimeout.apply(@, arguments)
+const patchRunnableClearTimeout = () =>
+  Runnable.prototype.clearTimeout = function() {
+    //# call the original
+    runnableClearTimeout.apply(this, arguments);
 
-    ## nuke the timer property
-    ## for testing purposes
-    @timer = null
+    //# nuke the timer property
+    //# for testing purposes
+    return this.timer = null;
+  }
+;
 
-patchRunnableResetTimeout = ->
-  Runnable::resetTimeout = ->
-    runnable = @
+const patchRunnableResetTimeout = () =>
+  Runnable.prototype.resetTimeout = function() {
+    const runnable = this;
 
-    ms = @timeout() or 1e9
+    const ms = this.timeout() || 1e9;
 
-    @clearTimeout()
+    this.clearTimeout();
 
-    getErrPath = ->
-      ## we've yield an explicit done callback
-      if runnable.async
-        "mocha.async_timed_out"
-      else
-        ## TODO: improve this error message. It's not that
-        ## a command necessarily timed out - in fact this is
-        ## a mocha timeout, and a command likely *didn't*
-        ## time out correctly, so we received this message instead.
-        "mocha.timed_out"
+    const getErrPath = function() {
+      //# we've yield an explicit done callback
+      if (runnable.async) {
+        return "mocha.async_timed_out";
+      } else {
+        //# TODO: improve this error message. It's not that
+        //# a command necessarily timed out - in fact this is
+        //# a mocha timeout, and a command likely *didn't*
+        //# time out correctly, so we received this message instead.
+        return "mocha.timed_out";
+      }
+    };
 
-    @timer = setTimeout ->
-      errMessage = $utils.errMessageByPath(getErrPath(), { ms })
-      runnable.callback new Error(errMessage)
-      runnable.timedOut = true
-    , ms
+    return this.timer = setTimeout(function() {
+      const errMessage = $utils.errMessageByPath(getErrPath(), { ms });
+      runnable.callback(new Error(errMessage));
+      return runnable.timedOut = true;
+    }
+    , ms);
+  }
+;
 
-restore = ->
-  restoreRunnerRun()
-  restoreRunnerFail()
-  restoreRunnableRun()
-  restoreRunnableClearTimeout()
-  restoreRunnableResetTimeout()
+const restore = function() {
+  restoreRunnerRun();
+  restoreRunnerFail();
+  restoreRunnableRun();
+  restoreRunnableClearTimeout();
+  return restoreRunnableResetTimeout();
+};
 
-override = (Cypress) ->
-  patchRunnerFail()
-  patchRunnableRun(Cypress)
-  patchRunnableClearTimeout()
-  patchRunnableResetTimeout()
+const override = function(Cypress) {
+  patchRunnerFail();
+  patchRunnableRun(Cypress);
+  patchRunnableClearTimeout();
+  return patchRunnableResetTimeout();
+};
 
-create = (specWindow, Cypress, reporter) ->
-  restore()
+const create = function(specWindow, Cypress, reporter) {
+  restore();
 
-  override(Cypress)
+  override(Cypress);
 
-  ## generate the mocha + Mocha globals
-  ## on the specWindow, and get the new
-  ## _mocha instance
-  _mocha = globals(specWindow, reporter)
+  //# generate the mocha + Mocha globals
+  //# on the specWindow, and get the new
+  //# _mocha instance
+  const _mocha = globals(specWindow, reporter);
 
-  _runner = getRunner(_mocha)
+  const _runner = getRunner(_mocha);
 
   return {
-    _mocha
+    _mocha,
 
-    createRootTest: (title, fn) ->
-      r = new Test(title, fn)
-      _runner.suite.addTest(r)
-      r
+    createRootTest(title, fn) {
+      const r = new Test(title, fn);
+      _runner.suite.addTest(r);
+      return r;
+    },
 
-    getRunner: ->
-      _runner
+    getRunner() {
+      return _runner;
+    },
 
-    getRootSuite: ->
-      _mocha.suite
+    getRootSuite() {
+      return _mocha.suite;
+    },
 
-    options: (runner) ->
-      runner.options(_mocha.options)
-  }
+    options(runner) {
+      return runner.options(_mocha.options);
+    }
+  };
+};
 
 module.exports = {
-  restore
+  restore,
 
-  globals
+  globals,
 
   create
-}
+};
