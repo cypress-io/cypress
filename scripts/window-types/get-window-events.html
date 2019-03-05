@@ -1,7 +1,7 @@
 <script>
   const events = []
   for (let prop in window) {
-    if (prop.startsWith('on')) {
+    if (prop.startsWith('on') && !prop.startsWith('onwebkit')) {
       events.push(prop.replace(/^on/, ''))
     }
   }
