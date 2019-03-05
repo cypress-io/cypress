@@ -23,7 +23,7 @@
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
     "test-cov": "nyc npm run unit",
     "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
-    "lint": "bin-up eslint --fix *.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
+    "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "dtslint": "dtslint types",
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
