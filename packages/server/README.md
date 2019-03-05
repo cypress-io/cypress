@@ -71,3 +71,5 @@ To run an individual e2e test:
 ## runs tests that match "base_url"
 npm run test-e2e -- --spec base_url
 ```
+
+To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use
