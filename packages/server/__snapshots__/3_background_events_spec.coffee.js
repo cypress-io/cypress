@@ -15,8 +15,6 @@ exports['e2e background events fails 1'] = `
                                                                                                     
   Running: background_async_error_spec.js...                                               (1 of 1) 
 
-
-
 The following error was thrown by a plugin in the background process. We've stopped running your tests because the background process crashed.
 
 Error: Async error from background file
