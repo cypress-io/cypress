@@ -46,6 +46,17 @@ packages/server/support
 packages/server/test/support/fixtures/server/libs
 
 # CLI tool
+cli/types/blob-util
+cli/types/bluebird
+cli/types/chai
+cli/types/chai-jquery
+cli/types/jquery
+cli/types/lodash
+cli/types/mocha
+cli/types/minimatch
+cli/types/sinon
+cli/types/sinon-chai
+# ignore CLI output build folder
 cli/build
 
 # Building app binary
