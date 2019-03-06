@@ -112,7 +112,6 @@ class Server
   _makeUpstreamProxyConnection: (upstreamProxy, req, socket, head, toPort, toHostname) ->
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
-    ## todo: improve error handling in case upstream is unreachable
     onUpstreamSock = (err, upstreamSock) ->
       if @_onError
         if err
@@ -121,7 +120,7 @@ class Server
           @_onError(err, socket, head, port)
 
       if not upstreamSock
-        ## couldn't establish a proxy connection
+        ## couldn't establish a proxy connection, fail gracefully
         socket.resume()
         return socket.destroy()
 
