@@ -16,7 +16,7 @@ const NoCommands = observer(() => (
 const AttemptHeader = ({ attempt, retriesCount }) => (
   <span className='attempt-tag'>
     <i className='fa-sort fa fa-fw'></i>
-    {attempt.id}/{retriesCount} 
+    Attempt {attempt.id}
     <span className='hook-failed-message'>
       <i className='fa-close fa fa-fw'></i>
     </span>
