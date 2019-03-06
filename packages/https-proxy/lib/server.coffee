@@ -15,12 +15,20 @@ fs = Promise.promisifyAll(fs)
 sslServers    = {}
 sslSemaphores = {}
 
+## https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_record
+SSL_RECORD_TYPES = [
+  22 ## Handshake
+  128 ## unknown type
+  0 ## unknown type
+]
+
 class Server
   constructor: (@_ca, @_port) ->
     @_onError = null
-    @httpsAgents = {}
 
   connect: (req, socket, head, options = {}) ->
+    #debug('head is length: %s with content: %s', head.length, head.toString())
+
     if not head or head.length is 0
       debug("Writing socket connection headers for URL:", req.url)
 
@@ -72,7 +80,7 @@ class Server
 
   _needsUpstreamProxy: (hostname, port) ->
     ## todo: use getProxyFromURI here
-    process.env.HTTP_PROXY
+    process.env.HTTP_PROXY and hostname isnt "localhost"
 
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
@@ -112,16 +120,19 @@ class Server
         upstreamSock.on "error", (err) =>
           @_onError(err, socket, head, port)
 
+      if not upstreamSock
+        ## couldn't establish a proxy connection
+        socket.resume()
+        return socket.destroy()
+
       upstreamSock.pipe(socket)
       socket.pipe(upstreamSock)
       socket.emit("data", head)
 
       socket.resume()
 
-    if not @httpsAgents[upstreamProxy]
-      @httpsAgents[upstreamProxy] = new HttpsAgent(upstreamProxy)
+    agent = new HttpsAgent(upstreamProxy)
 
-    agent = @httpsAgents[upstreamProxy]
     agent.callback req, {
       port: toPort
       host: toHostname
@@ -135,12 +146,13 @@ class Server
 
       @_makeConnection(socket, head, port)
 
-    if firstBytes is 0x16 or firstBytes is 0x80 or firstBytes is 0x00
+    if firstBytes in SSL_RECORD_TYPES
       {hostname} = url.parse("http://#{req.url}")
 
       if sslServer = sslServers[hostname]
         return makeConnection(sslServer.port)
 
+      ## only be creating one SSL server per hostname at once
       if not sem = sslSemaphores[hostname]
         sem = sslSemaphores[hostname] = semaphore(1)
 
