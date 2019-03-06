@@ -130,7 +130,7 @@
     "find-process": "1.2.1",
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "4.0.3",
-    "get-windows-proxy": "^0.0.0-development",
+    "get-windows-proxy": "1.0.0",
     "getos": "2.8.4",
     "glob": "7.1.3",
     "graceful-fs": "4.1.15",
