@@ -1,7 +1,6 @@
 // Shim definition to export a namespace. Cypress is actually a global module
 // so import/export isn't allowed there. We import here and define a global module
-// tslint:disable-next-line:no-implicit-dependencies
-import * as chai from 'chai'
+/// <reference path="./chai/index.d.ts" />
 
 export = Chai
 export as namespace Chai
