@@ -4,4 +4,4 @@
 @import 'lib/fonts';
 @import 'lib/base';
 @import 'lib/tooltip';
-@import '!(lib)*/**/*';
+@import './!(lib)*/**/*';

@@ -1,33 +1,75 @@
-.reporter .runnable.suite .attempt-name {
-    border-top: 1px solid #dcdcdc;
-    margin: 20px 0 30px;
-    height: 0;
-    position: relative;
+.reporter {
+  .attempt-item {
+    margin-bottom: 7px;
 
-  .attempt-tag {
-    border: 1px solid #d5d5d5;
-    border-radius: 10px;
-    box-shadow: 0 1px 1px 0 rgba(0,0,0,0.20);
-    padding: 2px 5px;
-    background-color: #fff;
-    position: absolute;
-    top: -12px;
-    right: 10px;
-    font-size: 11px;
+    > .collapsible {
+      position: relative;
 
-    &:hover {
-      background-color: #e8e8e8;
+      &:before {
+        border-left: 1px solid #dcdcdc;
+        content: '';
+        left: 5px;
+        position: absolute;
+        top: 22px;
+        height: 15px;
+      }
+
+      &.is-open:before {
+        display: none;
+      }
     }
   }
 
-  .collapsible-indicator {
-    display: none;
-  }
+  .attempt-name {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    width: 100%;
 
-  .hook-failed-message {
-    i {
-      color: $fail;
-      font-size: 13px;
+    &:before {
+      border-top: 1px solid #dcdcdc;
+      content: '';
+      left: 15px;
+      position: absolute;
+      right: 0;
+      top: 13px;
+    }
+
+    &:after {
+      color: #a2a2a2;
+      content: '•';
+      left: 3px;
+      position: absolute;
+      top: 6px;
+    }
+
+    .attempt-tag {
+      border: 1px solid #d5d5d5;
+      border-radius: 7px;
+      box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.20);
+      font-size: 11px;
+      margin-right: 20px;
+      padding: 2px 5px;
+      position: relative;
+      background-color: #fff;
+
+      &:hover {
+        background-color: #e8e8e8;
+      }
+    }
+
+    .collapsible-indicator,
+    .collapsible-more {
+      display: none;
+    }
+
+    .attempt-status-indicator {
+      margin-left: 3px;
+
+      i {
+        color: $fail;
+        font-size: 13px;
+      }
     }
   }
 }

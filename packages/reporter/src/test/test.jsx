@@ -11,8 +11,6 @@ import runnablesStore from '../runnables/runnables-store'
 import scroller from '../lib/scroller'
 
 import Attempts from '../attempts/attempts'
-import Agents from '../agents/agents'
-import Routes from '../routes/routes'
 import FlashOnClick from '../lib/flash-on-click'
 
 @observer
@@ -87,13 +85,10 @@ class Test extends Component {
 
     const { model } = this.props
 
-    const retriesCount = 3
     const attempts = [
       {
-        id: 1,
       },
       {
-        id: 2,
       },
     ]
 
@@ -104,11 +99,7 @@ class Test extends Component {
           e.stopPropagation()
         }}
       >
-        <Agents model={model} />
-        <Routes model={model} />
-        <div className='runnable-commands-region'>
-          {retriesCount ? <Attempts model={model} attempts={attempts} retriesCount={retriesCount}/> : null}
-        </div>
+        <Attempts model={model} attempts={attempts} />
       </div>
     )
   }
