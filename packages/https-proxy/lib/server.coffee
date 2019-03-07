@@ -2,6 +2,7 @@ _            = require("lodash")
 fs           = require("fs-extra")
 net          = require("net")
 url          = require("url")
+getProxyForUrl = require("proxy-from-env").getProxyForUrl
 https        = require("https")
 HttpsAgent   = require("https-proxy-agent")
 Promise      = require("bluebird")
@@ -18,8 +19,7 @@ sslSemaphores = {}
 ## https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_record
 SSL_RECORD_TYPES = [
   22 ## Handshake
-  128 ## unknown type
-  0 ## unknown type
+  128, 0 ## TODO: what do these unknown types mean?
 ]
 
 class Server
@@ -27,8 +27,6 @@ class Server
     @_onError = null
 
   connect: (req, socket, head, options = {}) ->
-    #debug('head is length: %s with content: %s', head.length, head.toString())
-
     if not head or head.length is 0
       debug("Writing socket connection headers for URL:", req.url)
 
@@ -78,15 +76,13 @@ class Server
       res.end()
     .pipe(res)
 
-  _needsUpstreamProxy: (hostname, port) ->
-    ## todo: use getProxyFromURI here
-    process.env.HTTP_PROXY and hostname isnt "localhost"
+  _upstreamProxyForHostPort: (hostname, port) ->
+    getProxyForUrl("https://#{hostname}:#{port}")
 
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
 
-    if @_needsUpstreamProxy(hostname, port)
-      upstreamProxy = process.env.HTTP_PROXY
+    if upstreamProxy = @_upstreamProxyForHostPort(hostname, port)
       return @_makeUpstreamProxyConnection(upstreamProxy, req, socket, head, port, hostname)
 
     debug("Making direct connection to #{hostname}:#{port}")
