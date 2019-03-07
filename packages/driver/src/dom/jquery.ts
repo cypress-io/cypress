@@ -1,12 +1,13 @@
-const $ = require('jquery')
-const _ = require('lodash')
+import $ from 'jquery'
+import _ from 'lodash'
 
 // wrap the object in jquery
-const wrap = (obj) => {
+const wrap = <T>(obj:T) => {
   return $(obj)
 }
 
-const query = (selector, context) => {
+const query = (selector, context): JQuery<HTMLElement> => {
+  // @ts-ignore
   return new $.fn.init(selector, context)
 }
 
@@ -29,7 +30,7 @@ const isJquery = (obj) => {
 
 // doing a little jiggle wiggle here
 // to avoid circular dependencies
-module.exports = {
+export {
   wrap,
 
   query,

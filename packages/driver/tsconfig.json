@@ -12,7 +12,7 @@
     "noImplicitThis": false,
     "strictFunctionTypes": true,
     "preserveWatchOutput": true,
-    "checkJs": true,                       /* Report errors in .js files. */
+    // "checkJs": true,                       /* Report errors in .js files. */
     // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
     /* Generates corresponding '.d.ts' file. */
     // "declaration": true,

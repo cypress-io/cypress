@@ -2813,6 +2813,16 @@ describe "src/cy/commands/actions/type", ->
           expect(err.message).to.include "Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements."
           done()
 
+      it "throws when text-like but disabled", (done) ->
+        cy.$$('input:first').on('keydown', ->
+          @attr('disabled', true)
+        )
+        cy.get("input:first").type("foo")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.type() failed because it targeted a disabled element "
+          done()
+
       it "throws when subject is a collection of elements", (done) ->
         cy.get("textarea,:text").then ($inputs) ->
             @num = $inputs.length

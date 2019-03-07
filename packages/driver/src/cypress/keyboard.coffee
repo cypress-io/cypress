@@ -148,12 +148,12 @@ $Keyboard = {
     ## charCode = 13
     ## yes keyPress
     ## no textInput
-    ## no input
+    ## input if textarea/contenteditable
     ## yes change (if input is different from last change event)
     "{enter}": (el, options) ->
       options.charCode  = 13
       options.textInput = false
-      options.input     = false
+      options.input     = 
       options.setKey    = "{enter}"
       @ensureKey el, "\n", options, ->
         $selection.replaceSelectionContents(el, "\n")

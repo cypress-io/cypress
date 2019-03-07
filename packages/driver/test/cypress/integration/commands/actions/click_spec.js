@@ -50,26 +50,6 @@ describe('src/cy/commands/actions/click', function () {
   })
 
   context('#click', function () {
-    it('foobar', () => {
-      cy.$$('<h2>a</h2>').appendTo(cy.$$('body'))
-      const ooo = cy.$$('<h2>d</h2>').appendTo(cy.$$('body'))
-
-      cy.$$('<h2>c</h2>').appendTo(cy.$$('body'))
-      setTimeout(() => ooo.innerText = 'b', 2000)
-      cy.get('h2')
-      .should(($els) => $els.fn = () => {
-        $els.toArray().map(el => el.innerText)
-      })
-      .invoke('fn')
-      .should(headers => {
-        const sortedHeaders = headers.concat().sort()
-
-        expect(headers).deep.eq(sortedHeaders)
-      })
-
-      // const elsToInnerText = ($els)
-    })
-
     it('receives native click event', (done) => {
       const $btn = cy.$$('#button')
 
@@ -255,7 +235,6 @@ describe('src/cy/commands/actions/click', function () {
     })
 
     it('will send all events even mousedown is defaultPrevented', () => {
-
       const $btn = cy.$$('#button')
 
       $btn.get(0).addEventListener('mousedown', (e) => {
@@ -414,7 +393,7 @@ describe('src/cy/commands/actions/click', function () {
       cy.contains('button').click()
     })
 
-    it('sends modifiers', () => {
+    it.only('sends modifiers', () => {
 
       const btn = cy.$$('button:first')
 

@@ -258,22 +258,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## for the delay being added to each keystroke
             cy.timeout((totalKeys * options.delay), true, "type")
 
-          onBeforeSpecialCharAction: (id, key) ->
-            ## don't apply any special char actions such as
-            ## inserting new lines on {enter} or moving the
-            ## caret / range on left or right movements
-            if isTypeableButNotAnInput
-              return false
-
-          onBeforeEvent: (id, key, column, which) ->
-            ## if we are an element which isnt text like but we have
-            ## a tabindex then it can receive keyboard events but
-            ## should not fire input or textInput and should not fire
-            ## change events
-            if column in inputEvents and isTypeableButNotAnInput
-              return false
-
-          onEvent: (id, key, column, which, value) ->
+          onEvent: (key, column, which, value) ->
             updateTable.apply(null, arguments) if updateTable
 
           ## fires only when the 'value'

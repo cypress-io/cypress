@@ -1,4 +1,4 @@
-require('@babel/polyfill')
+// require('@babel/polyfill')
 const _ = require('lodash')
 const CRI = require('chrome-remote-interface')
 const Promise = require('bluebird')

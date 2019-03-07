@@ -16,9 +16,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-
 import _ from 'lodash'
-import { ThrowStatement } from 'babel-types';
+import { ThrowStatement } from 'babel-types'
 import $ from 'jquery'
 import $jquery from './jquery'
 import $window from './window'
@@ -27,7 +26,19 @@ import $utils from '../cypress/utils.coffee'
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
-const focusable = 'body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]'
+const focusable = [
+'a[href]',
+'area[href]',
+'input:not([disabled])',
+'select:not([disabled])',
+'textarea:not([disabled])',
+'button:not([disabled])',
+'iframe',
+'[tabindex]',
+'[contentEditable]',
+]
+
+//'body,a[href],button,select,[tabindex],input,textarea,[contenteditable]'
 
 const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
@@ -52,13 +63,11 @@ declare global {
   }
 }
 
-
-
 // rules for native methods and props
 // if a setter or getter or function then add a native method
 // if a traversal, don't
 
-const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype']>(klass:T, prop:K) => {
+const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype']>(klass: T, prop: K) => {
   const descriptor = Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
   if (descriptor === undefined) {
@@ -67,7 +76,7 @@ const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype
   return descriptor
 }
 
-const _getValue = function () {
+const _getValue = function() {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'value').get
   }
@@ -88,7 +97,7 @@ const _getValue = function () {
   return descriptor('HTMLOptionElement', 'value').get
 }
 
-const _setValue = function () {
+const _setValue = function() {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'value').set
   }
@@ -109,7 +118,7 @@ const _setValue = function () {
   return descriptor('HTMLOptionElement', 'value').set
 }
 
-const _getSelectionStart = function () {
+const _getSelectionStart = function() {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'selectionStart').get
   }
@@ -120,7 +129,7 @@ const _getSelectionStart = function () {
   throw new Error('this should never happen, cannot get selectionStart')
 }
 
-const _getSelectionEnd = function () {
+const _getSelectionEnd = function() {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'selectionEnd').get
   }
@@ -129,10 +138,9 @@ const _getSelectionEnd = function () {
     return descriptor('HTMLTextAreaElement', 'selectionEnd').get
   }
   throw new Error('this should never happen, cannot get selectionEnd')
-
 }
 
-const _nativeFocus = function () {
+const _nativeFocus = function() {
   if ($window.isWindow(this)) {
     return window.focus
   }
@@ -144,7 +152,7 @@ const _nativeFocus = function () {
   return window.HTMLElement.prototype.focus
 }
 
-const _nativeBlur = function () {
+const _nativeBlur = function() {
   if ($window.isWindow(this)) {
     return window.blur
   }
@@ -156,7 +164,7 @@ const _nativeBlur = function () {
   return window.HTMLElement.prototype.blur
 }
 
-const _nativeSetSelectionRange = function () {
+const _nativeSetSelectionRange = function() {
   if (isInput(this)) {
     return window.HTMLInputElement.prototype.setSelectionRange
   }
@@ -165,7 +173,7 @@ const _nativeSetSelectionRange = function () {
   return window.HTMLTextAreaElement.prototype.setSelectionRange
 }
 
-const _nativeSelect = function () {
+const _nativeSelect = function() {
   if (isInput(this)) {
     return window.HTMLInputElement.prototype.select
   }
@@ -174,7 +182,7 @@ const _nativeSelect = function () {
   return window.HTMLTextAreaElement.prototype.select
 }
 
-const _isContentEditable = function () {
+const _isContentEditable = function() {
   if (isSvg(this)) {
     return false
   }
@@ -182,7 +190,7 @@ const _isContentEditable = function () {
   return descriptor('HTMLElement', 'isContentEditable').get
 }
 
-const _setType = function () {
+const _setType = function() {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'type').set
   }
@@ -191,10 +199,9 @@ const _setType = function () {
     return descriptor('HTMLButtonElement', 'type').set
   }
   throw new Error('this should never happen, cannot set type')
-
 }
 
-const _getType = function () {
+const _getType = function() {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'type').get
   }
@@ -203,7 +210,6 @@ const _getType = function () {
     return descriptor('HTMLButtonElement', 'type').get
   }
   throw new Error('this should never happen, cannot get type')
-
 }
 
 const nativeGetters = {
@@ -246,7 +252,7 @@ const tryCallNativeMethod = (obj, fn, ...args) => {
   }
 }
 
-const callNativeMethod = function (obj, fn, ...args) {
+const callNativeMethod = function(obj, fn, ...args) {
   const nativeFn = nativeMethods[fn]
 
   if (!nativeFn) {
@@ -266,9 +272,8 @@ const callNativeMethod = function (obj, fn, ...args) {
 
 // const b = getNativeProp({foo:{hello:'world'}}, 'foo')
 
-const getNativeProp = function<T, K extends keyof T>(obj:T, prop:K): T[K] {
+const getNativeProp = function<T, K extends keyof T>(obj: T, prop: K): T[K] {
   const nativeProp = nativeGetters[prop as string]
-
   if (!nativeProp) {
     const props = _.keys(nativeGetters).join(', ')
 
@@ -286,9 +291,7 @@ const getNativeProp = function<T, K extends keyof T>(obj:T, prop:K): T[K] {
   return retProp
 }
 
-
-
-const setNativeProp = function <T, K extends keyof T>(obj:T, prop:K, val) {
+const setNativeProp = function<T, K extends keyof T>(obj: T, prop: K, val) {
   const nativeProp = nativeSetters[prop as string]
 
   if (!nativeProp) {
@@ -306,21 +309,16 @@ const setNativeProp = function <T, K extends keyof T>(obj:T, prop:K, val) {
   return retProp
 }
 
-
 export interface HTMLSingleValueChangeInputElement extends HTMLInputElement {
-  type: 'date'|'time'|'week'|'month'
+  type: 'date' | 'time' | 'week' | 'month'
 }
 
-const isNeedSingleValueChangeInputElement = (el:HTMLElement): el is HTMLSingleValueChangeInputElement  => {
+const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleValueChangeInputElement => {
   if (!isInput(el)) {
     return false
   }
 
   return inputTypeNeedSingleValueChangeRe.test(el.type)
-}
-
-const isTextEditableEl = (el) => {
-  return isInput(el) || isTextarea(el) || isContentEditable(el)
 }
 
 const canSetSelectionRangeElement = (el): el is HTMLElementCanSetSelectionRange => {
@@ -337,7 +335,7 @@ const getTagName = (el) => {
 // should be true for elements:
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
-const isContentEditable = (el:HTMLElement): el is HTMLContentEditableElement => {
+const isContentEditable = (el: HTMLElement): el is HTMLContentEditableElement => {
   return getNativeProp(el, 'isContentEditable')
 }
 
@@ -361,7 +359,7 @@ const isBody = (el): el is HTMLBodyElement => {
   return getTagName(el) === 'body'
 }
 
-const isSvg = function (el): el is SVGElement {
+const isSvg = function(el): el is SVGElement {
   try {
     return 'ownerSVGElement' in el
   } catch (error) {
@@ -372,7 +370,7 @@ const isSvg = function (el): el is SVGElement {
 // active element is the default if its null
 // or its equal to document.body
 const activeElementIsDefault = (activeElement, body) => {
-  return (!activeElement) || (activeElement === body)
+  return !activeElement || activeElement === body
 }
 
 const isFocused = (el) => {
@@ -391,7 +389,7 @@ const isFocused = (el) => {
   }
 }
 
-const getFocusedByDocument = (doc:Document):Element|null => {
+const getFocusedByDocument = (doc: Document): Element | null => {
   const activeElement = getNativeProp(doc, 'activeElement')
 
   if (isFocused(activeElement)) {
@@ -400,7 +398,7 @@ const getFocusedByDocument = (doc:Document):Element|null => {
   return null
 }
 
-const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
+const isElement = function(obj): obj is HTMLElement | JQuery<HTMLElement> {
   try {
     if ($jquery.isJquery(obj)) {
       obj = obj[0]
@@ -412,11 +410,12 @@ const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
   }
 }
 
-const isFocusable = ($el) => {
-  return $el.is(focusable)
+// focusable elements can also recieve keyboard events
+const isFocusable = ($el: JQuery<Element>) => {
+  return _.some(focusable, sel => $el.is(sel))
 }
 
-const isType = function (el:HTMLInputElement| HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
+const isType = function(el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
   el = ([] as HTMLInputElement[]).concat($jquery.unwrap(el))[0]
 
   // NOTE: use DOMElement.type instead of getAttribute('type') since
@@ -431,7 +430,7 @@ const isType = function (el:HTMLInputElement| HTMLInputElement[] | JQuery<HTMLIn
 }
 
 const isScrollOrAuto = (prop) => {
-  return (prop === 'scroll') || (prop === 'auto')
+  return prop === 'scroll' || prop === 'auto'
 }
 
 const isAncestor = ($el, $maybeAncestor) => {
@@ -453,9 +452,9 @@ const getFirstCommonAncestor = (el1, el2) => {
   return curEl
 }
 
-const getAllParents = (el:HTMLElement) => {
+const getAllParents = (el: HTMLElement) => {
   let curEl = el.parentElement
-  const allParents:HTMLElement[] = []
+  const allParents: HTMLElement[] = []
 
   while (curEl) {
     allParents.push(curEl)
@@ -465,7 +464,7 @@ const getAllParents = (el:HTMLElement) => {
   return allParents
 }
 
-const isSelector = ($el, selector) => {
+const isSelector = ($el: JQuery<HTMLElement>, selector) => {
   return $el.is(selector)
 }
 
@@ -473,7 +472,7 @@ const isDetached = ($el) => {
   return !isAttached($el)
 }
 
-const isAttached = function ($el) {
+const isAttached = function($el) {
   // if we're being given window
   // then these are automaticallyed attached
   if ($window.isWindow($el)) {
@@ -506,7 +505,7 @@ const isAttached = function ($el) {
   // is technically bound to a differnet document
   // but c'mon
   const isIn = (el) => {
-    return $.contains(doc as unknown as Element, el)
+    return $.contains((doc as unknown) as Element, el)
   }
 
   // make sure the document is currently
@@ -526,11 +525,11 @@ const isDetachedEl = (el) => {
 /**
  * @param {HTMLElement} el
  */
-const isAttachedEl = function (el) {
+const isAttachedEl = function(el) {
   return isAttached($(el))
 }
 
-const isSame = function ($el1, $el2) {
+const isSame = function($el1, $el2) {
   const el1 = $jquery.unwrap($el1)
   const el2 = $jquery.unwrap($el2)
 
@@ -540,20 +539,21 @@ const isSame = function ($el1, $el2) {
 export interface HTMLContentEditableElement extends HTMLElement {}
 
 export interface HTMLTextLikeInputElement extends HTMLElement {
-  type: 'text' |
-    'password' |
-    'email' |
-    'number' |
-    'date' |
-    'week' |
-    'month' |
-    'time' |
-    'datetime' |
-    'datetime-local' |
-    'search' |
-    'url' |
-    'tel'
-  setSelectionRange : HTMLInputElement['setSelectionRange'] | ThrowStatement
+  type:
+    | 'text'
+    | 'password'
+    | 'email'
+    | 'number'
+    | 'date'
+    | 'week'
+    | 'month'
+    | 'time'
+    | 'datetime'
+    | 'datetime-local'
+    | 'search'
+    | 'url'
+    | 'tel'
+  setSelectionRange: HTMLInputElement['setSelectionRange'] | ThrowStatement
 }
 
 export interface HTMLElementCanSetSelectionRange extends HTMLElement {
@@ -562,15 +562,18 @@ export interface HTMLElementCanSetSelectionRange extends HTMLElement {
 
 export type HTMLTextLikeElement = HTMLTextAreaElement | HTMLTextLikeInputElement | HTMLContentEditableElement
 
-const isTextLike = function ($el): $el is JQuery<HTMLTextLikeElement> {
+const isTextLike = function(el: HTMLElement): el is HTMLTextLikeElement {
+  const $el = $jquery.wrap(el)
   const sel = (selector) => {
     return isSelector($el, selector)
   }
   const type = (type) => {
-    return isType($el, type)
+    if (isInput(el)) {
+      isType(el, type)
+    }
   }
 
-  const isContentEditableElement = isContentEditable($el.get(0))
+  const isContentEditableElement = isContentEditable(el)
 
   return _.some([
     isContentEditableElement,
@@ -642,7 +645,7 @@ const isScrollable = ($el) => {
   return false
 }
 
-const getFromDocCoords = (x:number, y:number, win:Window) => {
+const getFromDocCoords = (x: number, y: number, win: Window) => {
   return {
     x: +win.scrollX + x,
     y: +win.scrollY + y,
@@ -654,7 +657,7 @@ const isDescendent = ($el1, $el2) => {
     return false
   }
 
-  return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length)
+  return !!($el1.get(0) === $el2.get(0) || $el1.has($el2).length)
 }
 
 // in order to simulate actual user behavior we need to do the following:
@@ -662,7 +665,7 @@ const isDescendent = ($el1, $el2) => {
 // 2. check to figure out the element listed at those coordinates
 // 3. if this element is ourself or our descendants, click whatever was returned
 // 4. else throw an error because something is covering us up
-const getFirstFocusableEl = ($el) => {
+const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
   if (isFocusable($el)) {
     return $el
   }
@@ -760,7 +763,6 @@ const getElements = ($el) => {
   }
 
   return els
-
 }
 
 const getContainsSelector = (text, filter = '') => {
@@ -769,7 +771,7 @@ const getContainsSelector = (text, filter = '') => {
   return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
 }
 
-const priorityElement = 'input[type=\'submit\'], button, a, label'
+const priorityElement = "input[type='submit'], button, a, label"
 
 const getFirstDeepestElement = (elements, index = 0) => {
   // iterate through all of the elements in pairs
@@ -803,7 +805,6 @@ const getFirstDeepestElement = (elements, index = 0) => {
   }
 
   return $current
-
 }
 
 // short form css-inlines the element
@@ -823,9 +824,15 @@ const stringify = (el, form = 'long') => {
   const $el = $jquery.wrap(el)
 
   const long = () => {
-    const str = $el.clone().empty().prop('outerHTML')
+    const str = $el
+      .clone()
+      .empty()
+      .prop('outerHTML')
     // @ts-ignore
-    const text = _.chain($el.text()).clean().truncate({ length: 10 }).value()
+    const text = _.chain($el.text())
+      .clean()
+      .truncate({ length: 10 })
+      .value()
     const children = $el.children().length
 
     if (children) {
@@ -873,76 +880,39 @@ const stringify = (el, form = 'long') => {
 
 export {
   isElement,
-
   isSelector,
-
   isScrollOrAuto,
-
   isFocusable,
-
   isAttached,
-
   isDetached,
-
   isAttachedEl,
-
   isDetachedEl,
-
   isAncestor,
-
   isScrollable,
-
   isTextLike,
-
-  isTextEditableEl,
-
   isDescendent,
-
   isContentEditable,
-
   isSame,
-
   isBody,
-
   isInput,
-
   isTextarea,
-
   isType,
-
   isFocused,
-
   isNeedSingleValueChangeInputElement,
-
   canSetSelectionRangeElement,
-
   stringify,
-
   getNativeProp,
-
   setNativeProp,
-
   callNativeMethod,
-
   tryCallNativeMethod,
-
   getElements,
-
   getFromDocCoords,
-
   getFirstFocusableEl,
-
   getFocusedByDocument,
-
   getContainsSelector,
-
   getFirstDeepestElement,
-
   getFirstCommonAncestor,
-
   getFirstFixedOrStickyPositionParent,
-
   getFirstStickyPositionParent,
-
   getFirstScrollableParent,
 }

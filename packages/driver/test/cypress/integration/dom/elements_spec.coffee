@@ -85,9 +85,3 @@ describe "src/dom/elements", ->
 
       expect(Cypress.dom.isType($el, 'number')).to.be.true
       expect(Cypress.dom.isType($el, 'text')).to.be.false
-
-    it "when type is an array", ->
-      $el = $('input[type="number"]')
-
-      expect(Cypress.dom.isType($el, ['number', 'text', 'email'])).to.be.true
-      expect(Cypress.dom.isType($el, ['text', 'email'])).to.be.false
