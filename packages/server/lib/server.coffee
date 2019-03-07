@@ -268,7 +268,7 @@ class Server
 
         resolve(address.port)
 
-      @_server.listen(0, '127.0.0.1', listener)
+      @_server.listen(port || 0, '127.0.0.1', listener)
 
   _getRemoteState: ->
     # {
