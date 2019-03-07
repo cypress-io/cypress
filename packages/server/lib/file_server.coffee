@@ -41,14 +41,9 @@ module.exports = {
       allowDestroy(srv)
 
       srv.listen 0, '127.0.0.1', ->
-        port = srv.address().port
-
-        ## also listen on ipv6 lo if available
-        srv.listen port, '::1', ->
-
         resolve({
           port: ->
-            port
+            srv.address().port
 
           address: ->
             "http://localhost:" + @port()

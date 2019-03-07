@@ -257,9 +257,6 @@ class Server
       listener = =>
         address = @_server.address()
 
-        ## also listen on ipv6 lo if available
-        @_server.listen address.port, '::1', ->
-
         @isListening = true
 
         debug("Server listening on ", address)

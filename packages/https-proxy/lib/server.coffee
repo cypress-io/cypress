@@ -168,9 +168,6 @@ class Server
         ## store the port of our current sniServer
         @_sniPort = @_sniServer.address().port
 
-        ## also listen on ipv6 lo if available
-        @_sniServer.listen @_sniPort, '::1', ->
-
         log("Created SNI HTTPS Proxy on port %s", @_sniPort)
 
         resolve()
