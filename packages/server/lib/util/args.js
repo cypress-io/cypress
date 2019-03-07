@@ -228,6 +228,11 @@ module.exports = {
     if (process.env.HTTP_PROXY) {
       options.proxyServer = process.env.HTTP_PROXY
       options.proxyBypassList = process.env.NO_PROXY
+      if (!process.env.HTTPS_PROXY) {
+        // request library will use HTTP_PROXY as a fallback for HTTPS urls, but
+        // proxy-from-env will not, so let's just force it to fall back like this
+        process.env.HTTPS_PROXY = process.env.HTTP_PROXY
+      }
     }
 
     if (ro = options.reporterOptions) {
