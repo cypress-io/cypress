@@ -99,4 +99,3 @@ interface WindowActions {
   (action: 'window:deviceorientation', fn: (event: Event) => void): void
   (action: 'window:deviceorientationabsolute', fn: (event: Event) => void): void
 }
-  

@@ -15,7 +15,7 @@ ipcMain.on('window:events', (_e, events) => {
 interface WindowActions {
 ${eventsString}
 }
-  `
+`
 
   try {
     fs.outputFileSync(filePath, contents)
