@@ -2,7 +2,6 @@ $dom = require("../dom")
 $utils = require("../cypress/utils")
 
 crossOriginScriptRe = /^script error/i
-describeCallbackRe = /context\.describe\.context\.context/i
 
 create = (state, config, log) ->
   commandErr = (err) ->
@@ -50,10 +49,7 @@ create = (state, config, log) ->
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
 
-    if describeCallbackRe.test(err.stack)
-      err = $utils.appendErrMsg(err, $utils.errMessageByPath("uncaught.no_suite_callback"))
-    else
-      err = $utils.appendErrMsg(err, $utils.errMessageByPath(suffixMsg))
+    err = $utils.appendErrMsg(err, $utils.errMessageByPath(suffixMsg))
 
     err.onFail = ->
       if l = current and current.getLastLog()

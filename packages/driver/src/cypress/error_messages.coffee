@@ -793,11 +793,6 @@ module.exports = {
     wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
 
   uncaught:
-    no_suite_callback: """
-    Cypress detected a suite, such as a 'describe' or 'context' block, without a callback function.
-
-    Provide a callback function or intentionally skip the suite or this test to run.
-    """
     cross_origin_script: """
       Script error.
 
