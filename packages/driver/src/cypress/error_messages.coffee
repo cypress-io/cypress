@@ -837,6 +837,9 @@ module.exports = {
       When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
     """
 
+    suite_without_callback: (suiteTitle) ->
+      return "Suite '#{suiteTitle}' was defined but no callback was supplied. Supply a callback or explicitly skip the suite."
+
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
     dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 3000px."

@@ -37,3 +37,10 @@ describe "e2e uncaught errors", ->
       snapshot: true
       expectedExitCode: 4
     })
+
+  it "failing6", ->
+    e2e.exec(@, {
+      spec: "uncaught_missing_suite_callback.js"
+      snapshot: true
+      expectedExitCode: 1
+    })
