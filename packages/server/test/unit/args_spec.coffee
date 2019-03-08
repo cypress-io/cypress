@@ -295,9 +295,7 @@ describe "lib/util/args", ->
 
   context "with proxy", ->
     beforeEach ->
-      @beforeHttpProxy = process.env.HTTP_PROXY
-      @beforeHttpsProxy = process.env.HTTPS_PROXY
-      @beforeNoProxy = process.env.NO_PROXY
+      @beforeEnv = Object.assign({}, process.env)
 
     it "sets options from environment", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
@@ -324,6 +322,4 @@ describe "lib/util/args", ->
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
     afterEach ->
-      process.env.HTTP_PROXY = @beforeHttpProxy
-      process.env.HTTPS_PROXY = @beforeHttpsProxy
-      process.env.NO_PROXY = @beforeNoProxy
+      Object.assign(process.env, @beforeEnv)
