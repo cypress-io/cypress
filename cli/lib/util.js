@@ -89,6 +89,10 @@ const util = {
     }
   },
 
+  _getWindowsProxy () {
+    return getWindowsProxy()
+  },
+
   loadSystemProxySettings () {
     // load user's OS-specific proxy settings in to environment vars
     if (!_.isUndefined(process.env.HTTP_PROXY)) {
@@ -97,7 +101,7 @@ const util = {
     }
 
     if (os.platform() === 'win32') {
-      const proxy = getWindowsProxy()
+      const proxy = this._getWindowsProxy()
 
       if (proxy) {
         // environment variables are the only way to make request lib use NO_PROXY
