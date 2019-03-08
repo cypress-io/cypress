@@ -18,6 +18,10 @@
         display: none;
       }
     }
+
+    &:last-child > .collapsible:before {
+      display: none;
+    }
   }
 
   .attempt-name {
