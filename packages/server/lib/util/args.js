@@ -181,6 +181,8 @@ module.exports = {
       alias,
     })
 
+    const launchedFromCli = !!options.cwd
+
     const whitelisted = _.pick(argv, whitelist)
 
     options = _
@@ -221,8 +223,12 @@ module.exports = {
     }
 
     // if launched as desktop application with no proxy, try to read system proxy
-    if (!options.cwd && !process.env.HTTP_PROXY) {
-      options.proxySource = proxy.loadSystemProxySettings()
+    if (!launchedFromCli && !process.env.HTTP_PROXY) {
+      const proxySource = proxy.loadSystemProxySettings()
+
+      if (proxySource) {
+        options.proxySource = proxySource
+      }
     }
 
     if (process.env.HTTP_PROXY) {

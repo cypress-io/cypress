@@ -2,7 +2,9 @@ require("../spec_helper")
 
 _        = require("lodash")
 path     = require("path")
+os       = require("os")
 argsUtil = require("#{root}lib/util/args")
+proxyUtil = require("#{root}lib/util/proxy")
 
 cwd = process.cwd()
 
@@ -40,7 +42,6 @@ describe "lib/util/args", ->
 
   context "--spec", ->
     it "converts to array", ->
-
 
   context "--port", ->
     it "converts to Number", ->
@@ -291,3 +292,38 @@ describe "lib/util/args", ->
         execPath: "e"
         updating: true
       })
+
+  context "with proxy", ->
+    beforeEach ->
+      @beforeHttpProxy = process.env.HTTP_PROXY
+      @beforeHttpsProxy = process.env.HTTPS_PROXY
+      @beforeNoProxy = process.env.NO_PROXY
+
+    it "sets options from environment", ->
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
+      process.env.NO_PROXY = "a,b,c"
+      options = @setup()
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.eq "a,b,c"
+      expect(process.env.HTTPS_PROXY).to.eq process.env.HTTP_PROXY
+
+    it "loads from Windows registry if not defined", ->
+      process.env.HTTP_PROXY = undefined
+      sinon.stub(proxyUtil, "_getWindowsProxy").returns({
+        httpProxy: "http://quux.quuz",
+        noProxy: "d,e,f"
+      })
+      sinon.stub(os, "platform").returns("win32")
+      options = @setup()
+      expect(options.proxySource).to.eq "win32"
+      expect(options.proxyServer).to.eq "http://quux.quuz"
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyServer).to.eq process.env.HTTPS_PROXY
+      expect(options.proxyBypassList).to.eq "d,e,f"
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    afterEach ->
+      process.env.HTTP_PROXY = @beforeHttpProxy
+      process.env.HTTPS_PROXY = @beforeHttpsProxy
+      process.env.NO_PROXY = @beforeNoProxy
