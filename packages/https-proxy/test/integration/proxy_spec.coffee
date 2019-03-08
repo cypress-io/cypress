@@ -142,7 +142,7 @@ describe "Proxy", ->
     beforeEach ->
       @oldEnv = Object.assign({}, process.env)
       process.env.NO_PROXY = ""
-      process.env.HTTP_PROXY = "http://localhost:9001"
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://localhost:9001"
 
       @upstream = new DebugProxy()
 

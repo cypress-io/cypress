@@ -296,6 +296,7 @@ describe "lib/util/args", ->
   context "with proxy", ->
     beforeEach ->
       @beforeEnv = Object.assign({}, process.env)
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.NO_PROXY = undefined
 
     it "sets options from environment", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
@@ -307,7 +308,6 @@ describe "lib/util/args", ->
       expect(process.env.HTTPS_PROXY).to.eq process.env.HTTP_PROXY
 
     it "loads from Windows registry if not defined", ->
-      process.env.HTTP_PROXY = undefined
       sinon.stub(proxyUtil, "_getWindowsProxy").returns({
         httpProxy: "http://quux.quuz",
         noProxy: "d,e,f"

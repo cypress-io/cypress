@@ -136,7 +136,7 @@ describe('lib/exec/spawn', function () {
     context('proxy', function () {
       beforeEach(function () {
         this.oldEnv = Object.assign({}, process.env)
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.NO_PROXY = ''
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.NO_PROXY = undefined
       })
 
       it('loads proxy settings from Windows registry', function () {
