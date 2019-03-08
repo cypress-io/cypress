@@ -332,7 +332,8 @@ describe "lib/socket", ->
 
       it "errors when fixtures fails", (done) ->
         cb = (resp) ->
-          expect(resp.error.message).to.include "No fixture exists at:"
+          expect(resp.error.message).to.include "A fixture file could not be found"
+          expect(resp.error.message).to.include "does-not-exist.txt"
           done()
 
         @client.emit("backend:request", "get:fixture", "does-not-exist.txt", {}, cb)
