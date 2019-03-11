@@ -641,12 +641,12 @@ create = (specWindow, mocha, Cypress, cy) ->
 
     missingCB = ""
 
-    ## TODO: clean this up
     getMissingCallback = (suite) ->
       return suite.suites.forEach((suite) ->
         if suite.suites.length > 0
           getMissingCallback(suite)
-        if suite.suites.length is 0 and suite.tests.length is 0
+        else if suite.tests.length is 0
+          ## Set the missing suite title if the suite has no tests or suites
           missingCB = suite.title
       )
 
@@ -669,7 +669,6 @@ create = (specWindow, mocha, Cypress, cy) ->
     if missingCB and suiteMissingCallbackRe.test(err)
       message = $utils.errMessageByPath('uncaught.suite_without_callback', missingCB)
       err = $utils.appendErrMsg(err, message)
-      debugger
     else
       ## else  do the same thing as mocha here
       err = $utils.appendErrMsg(err, append())
