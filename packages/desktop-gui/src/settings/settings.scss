@@ -212,19 +212,16 @@
   .proxy-table {
     width: 100%;
 
-    td:first-child {
-      width: 120px;
+    th:first-child {
+      width: 150px;
     }
 
     .no-bypass {
       opacity: .8;
     }
 
-    td {
+    td, th {
       padding: 3px;
-      border-top: 1px solid #ddd !important;
-      border-bottom: 1px solid #ddd;
-      border-collapse: collapse;
     }
   }
 }
