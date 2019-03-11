@@ -24,7 +24,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.2.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.3.4",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.31.3",
     "@cypress/react-tooltip": "0.4.0",
@@ -46,10 +46,10 @@
     "moment": "2.24.0",
     "prop-types": "15.7.2",
     "rc-collapse": "1.11.1",
-    "react": "16.8.2",
+    "react": "16.8.3",
     "rebuild-node-sass": "1.1.0",
     "react-bootstrap-modal": "4.2.0",
-    "react-dom": "16.8.2",
+    "react-dom": "16.8.3",
     "react-loader": "2.4.5",
     "zunder": "6.3.2"
   }
