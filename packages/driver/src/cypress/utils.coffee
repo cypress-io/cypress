@@ -12,6 +12,10 @@ tagClosed   = /\[\/([a-z]+)\]/g
 quotesRe    = /('|")/g
 twoOrMoreNewLinesRe = /\n{2,}/
 
+mdReplacements = [
+  ['`', '\\`']
+]
+
 defaultOptions = {
   delay: 10
   force: false
@@ -272,7 +276,19 @@ module.exports = {
       return text
 
     ## escape markdown syntax supported by reporter
-    text.replace(/`/g, "\\`")
+    mdReplacements.forEach (replacement) ->
+      re = new RegExp(replacement[0], "g")
+      text = text.replace(re, replacement[1])
+
+    return text
+
+  unescapeErrorMarkdown: (text) ->
+    ## escape markdown syntax supported by reporter
+    mdReplacements.forEach (replacement) ->
+      re = new RegExp("\\#{replacement[1]}", "g")
+      text = text.replace(re, replacement[0])
+
+    return text
 
   normalizeNumber: (num) ->
     parsed = Number(num)
