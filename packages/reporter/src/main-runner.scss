@@ -1,6 +1,7 @@
 // this file is imported by the runner's main.scss
 // if you update this file, also update main.scss
 @import 'lib/variables';
+@import 'lib/mixins';
 @import 'lib/base';
 @import 'lib/tooltip';
 @import './!(lib)*/**/*';

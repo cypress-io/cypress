@@ -2,9 +2,6 @@ import _ from 'lodash'
 import { action, observable } from 'mobx'
 
 import appState from '../lib/app-state'
-import Agent from '../agents/agent-model'
-import Command from '../commands/command-model'
-import Route from '../routes/route-model'
 import scroller from '../lib/scroller'
 import Suite from './suite-model'
 import Test from '../test/test-model'
@@ -23,7 +20,6 @@ class RunnablesStore {
   @observable runnables = []
 
   _tests = {}
-  _logs = {}
   _runnablesQueue = []
 
   attemptingShowSnapshot = defaults.attemptingShowSnapshot
@@ -77,10 +73,6 @@ class RunnablesStore {
     this._runnablesQueue.push(test)
     this._tests[test.id] = test
 
-    _.each(props.agents, this.addLog.bind(this))
-    _.each(props.commands, this.addLog.bind(this))
-    _.each(props.routes, this.addLog.bind(this))
-
     return test
   }
 
@@ -123,19 +115,20 @@ class RunnablesStore {
 
   updateTest (props, cb) {
     this._withTest(props.id, (test) => {
-      return test.update(props, cb)
+      test.update(props, cb)
     })
   }
 
   runnableStarted ({ id }) {
+    // TODO: receive attempt and pass it into the test
     this._withTest(id, (test) => {
-      return test.start()
+      test.start()
     })
   }
 
   runnableFinished (props) {
     this._withTest(props.id, (test) => {
-      return test.finish(props)
+      test.finish(props)
     })
   }
 
@@ -144,37 +137,9 @@ class RunnablesStore {
   }
 
   addLog (log) {
-    switch (log.instrument) {
-      case 'command': {
-        const command = new Command(log)
-
-        this._logs[log.id] = command
-        this._withTest(log.testId, (test) => {
-          return test.addCommand(command, log.hookName)
-        })
-        break
-      }
-      case 'agent': {
-        const agent = new Agent(log)
-
-        this._logs[log.id] = agent
-        this._withTest(log.testId, (test) => {
-          return test.addAgent(agent)
-        })
-        break
-      }
-      case 'route': {
-        const route = new Route(log)
-
-        this._logs[log.id] = route
-        this._withTest(log.testId, (test) => {
-          return test.addRoute(route)
-        })
-        break
-      }
-      default:
-        throw new Error(`Attempted to add log for unknown instrument: ${log.instrument}`)
-    }
+    this._withTest(log.testId, (test) => {
+      test.addLog(log)
+    })
   }
 
   _withTest (id, cb) {
@@ -185,12 +150,10 @@ class RunnablesStore {
     if (test) cb(test)
   }
 
-  updateLog (log) {
-    const found = this._logs[log.id]
-
-    if (found) {
-      found.update(log)
-    }
+  updateLog (props) {
+    this._withTest(props.testId, (test) => {
+      test.updateLog(props)
+    })
   }
 
   reset () {
@@ -199,7 +162,6 @@ class RunnablesStore {
     })
     this.runnables = []
     this._tests = {}
-    this._logs = {}
     this._runnablesQueue = []
   }
 }

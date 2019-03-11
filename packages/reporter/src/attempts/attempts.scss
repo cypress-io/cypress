@@ -1,4 +1,14 @@
 .reporter {
+  .attempts {
+    .attempt-item > .collapsible > .collapsible-header {
+      display: none;
+    }
+
+    &.has-multiple-attempts .attempt-item > .collapsible > .collapsible-header {
+      display: block;
+    }
+  }
+
   .attempt-item {
     margin-bottom: 7px;
 
@@ -22,6 +32,25 @@
     &:last-child > .collapsible:before {
       display: none;
     }
+  }
+
+  .attempt-state-active {
+    @include runnable-state-active;
+  }
+  .attempt-state-processing {
+    @include runnable-state-processing;
+  }
+  .attempt-state-skipped {
+    @include runnable-state-skipped;
+  }
+  .attempt-state-failed {
+    @include runnable-state-failed;
+  }
+  .attempt-state-passed {
+    @include runnable-state-passed;
+  }
+  .attempt-state-pending {
+    @include runnable-state-pending;
   }
 
   .attempt-name {
@@ -48,9 +77,11 @@
     }
 
     .attempt-tag {
+      align-items: center;
       border: 1px solid #d5d5d5;
       border-radius: 7px;
       box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.20);
+      display: flex;
       font-size: 11px;
       margin-right: 20px;
       padding: 2px 5px;
@@ -67,13 +98,32 @@
       display: none;
     }
 
-    .attempt-status-indicator {
-      margin-left: 3px;
+    .open-close-indicator {
+      display: flex;
+      flex-direction: column;
 
       i {
-        color: $fail;
-        font-size: 13px;
+        margin-right: 5px;
+
+        &.fa-angle-down {
+          margin-top: -4px;
+        }
       }
+
+      &.is-open {
+        i.fa-angle-down {
+          margin-top: 0;
+        }
+
+        i.fa-angle-up {
+          order: 1;
+          margin-top: -4px;
+        }
+      }
+    }
+
+    .attempt-state {
+      margin-left: 3px;
     }
   }
 }

@@ -1,0 +1,41 @@
+@mixin runnable-state-active {
+  .runnable-state {
+    @extend .#{$fa-css-prefix}-refresh;
+    @extend .#{$fa-css-prefix}-spin;
+  }
+}
+
+@mixin runnable-state-processing {
+  .runnable-state {
+    @extend .#{$fa-css-prefix}-square-o;
+    color: #888;
+  }
+}
+
+@mixin runnable-state-skipped {
+  .runnable-state {
+    @extend .#{$fa-css-prefix}-ban;
+    color: #888;
+  }
+}
+
+@mixin runnable-state-failed {
+  .runnable-state {
+    @extend .#{$fa-css-prefix}-times;
+    color: $fail;
+  }
+}
+
+@mixin runnable-state-passed {
+  .runnable-state {
+    @extend .#{$fa-css-prefix}-check;
+    color: $pass;
+  }
+}
+
+@mixin runnable-state-pending {
+  .runnable-state {
+    @extend .#{$fa-css-prefix}-circle-o-notch;
+    color: lighten($pending, 20%);
+  }
+}

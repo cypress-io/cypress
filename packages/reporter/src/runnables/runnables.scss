@@ -59,14 +59,7 @@
 
     }
 
-    &.runnable-active {
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-refresh;
-        @extend .#{$fa-css-prefix}-spin;
-      }
-    }
-
-    .runnable-state {
+    > .runnable-wrapper > .runnable-content-region > .runnable-state {
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
@@ -80,11 +73,12 @@
       color: #bbbcbd;
     }
 
-    &.runnable-processing > .runnable-wrapper {
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-square-o;
-        color: #888;
-      }
+    &.runnable-active .runnable-content-region {
+      @include runnable-state-active;
+    }
+
+    &.runnable-processing > .runnable-wrapper .runnable-content-region {
+      @include runnable-state-processing;
     }
 
     &.test.runnable-failed > .runnable-wrapper {
@@ -105,11 +99,12 @@
       border-left: 10px solid $pass;
     }
 
-    &.runnable-skipped > .runnable-wrapper {
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-ban;
-        color: #888;
-      }
+    &.test.runnable-retried > .runnable-wrapper {
+      border-left: 10px solid $retried;
+    }
+
+    &.runnable-skipped > .runnable-wrapper .runnable-content-region {
+      @include runnable-state-skipped;
 
       .runnable-title {
         color: #aaa;
@@ -134,11 +129,8 @@
       }
     }
 
-    &.test.runnable-failed {
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-times;
-        color: $fail;
-      }
+    &.test.runnable-failed .runnable-content-region {
+      @include runnable-state-failed;
     }
 
     &.suite > div > .runnable-wrapper {
@@ -149,11 +141,8 @@
       }
     }
 
-    &.runnable-passed > .runnable-wrapper {
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-check;
-        color: $pass;
-      }
+    &.runnable-passed > .runnable-wrapper .runnable-content-region {
+      @include runnable-state-passed;
     }
 
     &.runnable-pending > .runnable-wrapper {
@@ -161,9 +150,8 @@
         color: lighten($pending, 25%);
       }
 
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-circle-o-notch;
-        color: lighten($pending, 20%);
+      .runnable-content-region {
+        @include runnable-state-pending;
       }
 
       .runnable-commands-region {

@@ -83,23 +83,12 @@ class Test extends Component {
     // performance optimization - don't render contents if not open
     if (!this._shouldBeOpen()) return null
 
-    const { model } = this.props
-
-    const attempts = [
-      {
-      },
-      {
-      },
-    ]
-
     return (
       <div
         className='runnable-instruments collapsible-content'
-        onClick={(e) => {
-          e.stopPropagation()
-        }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <Attempts model={model} attempts={attempts} />
+        <Attempts attempts={this.props.model.attempts} test={this.props.model} />
       </div>
     )
   }
@@ -109,11 +98,13 @@ class Test extends Component {
     // explicity chosen to open or close the test
     if (this.isOpen !== null) return this.isOpen
 
+    const { model, runnablesStore } = this.props
+
     // otherwise, look at reasons to auto-open the test
-    return this.props.model.state === 'failed'
-           || this.props.model.isOpen
-           || this.props.model.isLongRunning
-           || this.props.runnablesStore.hasSingleTest
+    return model.state === 'failed'
+           || model.isOpen
+           || model.isLongRunning
+           || runnablesStore.hasSingleTest
   }
 
   @action _toggleOpen = () => {

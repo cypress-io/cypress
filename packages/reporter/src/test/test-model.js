@@ -1,28 +1,32 @@
 import _ from 'lodash'
 import { action, autorun, computed, observable, observe } from 'mobx'
 
+import Attempt from '../attempts/attempt-model'
 import Err from '../lib/err-model'
-import Hook from '../hooks/hook-model'
 import Runnable from '../runnables/runnable-model'
 
 export default class Test extends Runnable {
-  @observable agents = []
-  @observable commands = []
-  @observable err = new Err({})
-  @observable hooks = []
-  // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
+  // @observable agents = [] // x
+  @observable attempts = []
+  // @observable commands = [] // x
+  // @observable err = new Err({}) // x
+  // @observable hooks = [] // x
   @observable isActive = null
   @observable isLongRunning = false
   @observable isOpen = false
-  @observable routes = []
+  // @observable routes = [] // x
   @observable _state = null
+
+  _attempts = []
   type = 'test'
 
   constructor (props, level) {
     super(props, level)
 
-    this._state = props.state
-    this.err.update(props.err)
+    // this._state = props.state
+    // this.err.update(props.err)
+
+    _.each(props.attempts, this._addAttempt)
 
     autorun(() => {
       // if at any point, a command goes long running, set isLongRunning
@@ -40,28 +44,45 @@ export default class Test extends Runnable {
   }
 
   @computed get _hasLongRunningCommand () {
-    return _.some(this.commands, (command) => {
-      return command.isLongRunning
+    return _.some(this.attempts, (attempt) => {
+      return attempt.isLongRunning
     })
   }
 
   @computed get state () {
-    return this._state || (this.isActive ? 'active' : 'processing')
+    return this._lastAttempt ? this._lastAttempt.state : 'active'
   }
 
-  addAgent (agent) {
-    this.agents.push(agent)
+  @computed get err () {
+    return this._lastAttempt ? this._lastAttempt.err : new Err({})
   }
 
-  addRoute (route) {
-    this.routes.push(route)
+  @computed get _lastAttempt () {
+    return _.last(this.attempts)
   }
 
-  addCommand (command, hookName) {
-    const hook = this._findOrCreateHook(hookName)
+  @computed get hasMultipleAttempts () {
+    return this.attempts.length > 1
+  }
 
-    this.commands.push(command)
-    hook.addCommand(command)
+  @computed get hasRetried () {
+    return this.state === 'passed' && this.hasMultipleAttempts
+  }
+
+  isLastAttempt (attemptModel) {
+    return this._lastAttempt === attemptModel
+  }
+
+  addLog = (props) => {
+    this._withAttempt(props.testId, props.testAttempt, (attempt) => {
+      attempt.addLog(props)
+    })
+  }
+
+  updateLog (props) {
+    this._withAttempt(props.testId, props.testAttempt, (attempt) => {
+      attempt.updateLog(props)
+    })
   }
 
   start () {
@@ -121,6 +142,7 @@ export default class Test extends Runnable {
     this.isActive = false
   }
 
+  // TODO: update to find in attempt
   commandMatchingErr () {
     return _(this.hooks)
     .map((hook) => {
@@ -130,15 +152,16 @@ export default class Test extends Runnable {
     .last()
   }
 
-  _findOrCreateHook (name) {
-    const hook = _.find(this.hooks, { name })
+  _addAttempt = (props) => {
+    const attempt = new Attempt(props)
 
-    if (hook) return hook
+    this._attempts[attempt.id] = attempt
+    this.attempts.push(attempt)
+  }
 
-    const newHook = new Hook({ name })
+  _withAttempt (attemptId, cb) {
+    const attempt = this._attempts[attemptId]
 
-    this.hooks.push(newHook)
-
-    return newHook
+    if (attempt) cb(attempt)
   }
 }
