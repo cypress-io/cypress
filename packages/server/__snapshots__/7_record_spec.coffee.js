@@ -592,11 +592,13 @@ https://on.cypress.io/recording-project-runs
 `
 
 exports['e2e record api interaction errors recordKey and projectId errors and exits on 401 1'] = `
-Your Record Key f858a...ee7e1 is not valid with this project: pid123
+We failed trying to authenticate this project: pid123
+
+Your Record Key is invalid: f858a...ee7e1
 
 It may have been recently revoked by you or another user.
 
-Please log into the Dashboard to see the valid record keys.
+Please log into the Dashboard to see the updated token.
 
 https://on.cypress.io/dashboard/projects/pid123
 

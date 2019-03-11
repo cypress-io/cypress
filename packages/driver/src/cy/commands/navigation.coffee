@@ -28,11 +28,6 @@ reset = (test = {}) ->
 
   id = test.id
 
-VALID_VISIT_METHODS = ['GET', 'POST']
-
-isValidVisitMethod = (method) ->
-  _.includes(VALID_VISIT_METHODS, method)
-
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
     onFail: log
@@ -265,7 +260,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "auth", "failOnStatusCode", "method", "body", "headers")
+      _.pick(options, "failOnStatusCode", "auth")
     )
     .then (resp = {}) ->
       switch
@@ -461,45 +456,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
-      if options.url and url
-        $utils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
-
-      if _.isObject(url) and _.isEqual(options, {})
-        ## options specified as only argument
-        options = url
-        url = options.url
-
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
-        method: 'GET'
-        body: null
-        headers: {}
         log: true
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
       })
 
-      if not isValidVisitMethod(options.method)
-        $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
-
-      if not _.isObject(options.headers)
-        $utils.throwErrByPath("visit.invalid_headers")
-
       consoleProps = {}
 
       if options.log
-        message = url
-
-        if options.method != 'GET'
-          message = "#{options.method} #{message}"
-
         options._log = Cypress.log({
-          message: message
           consoleProps: -> consoleProps
         })
 
@@ -626,13 +598,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if url isnt originalUrl
               consoleProps["Original Url"] = originalUrl
 
-          if options.log
-            message = options._log.get('message')
+          if options.log and redirects and redirects.length
+            indicateRedirects = ->
+              [originalUrl].concat(redirects).join(" -> ")
 
-            if redirects and redirects.length
-              message = [message].concat(redirects).join(" -> ")
-
-            options._log.set({message: message})
+            options._log.set({message: indicateRedirects()})
 
           consoleProps["Resolved Url"]  = url
           consoleProps["Redirects"]     = redirects

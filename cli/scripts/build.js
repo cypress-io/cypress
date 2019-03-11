@@ -25,8 +25,6 @@ function preparePackageForNpmRelease (json) {
   // to prepare it for releasing to npm
   delete json.devDependencies
   delete json['private']
-  // no need to include "nyc" code coverage settings
-  delete json.nyc
 
   _.extend(json, {
     version,

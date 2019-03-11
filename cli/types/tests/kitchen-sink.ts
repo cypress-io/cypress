@@ -11,12 +11,9 @@ cy.wrap('foo').then(subject => {
   subject // $ExpectType string
 })
 
-const result = Cypress.minimatch('/users/1/comments', '/users/*/comments', {
+Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
 })
-result // $ExpectType boolean
-
-Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boolean
 
 // check if cy.server() yields default server options
 cy.server().should((server) => {

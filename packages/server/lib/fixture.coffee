@@ -1,30 +1,13 @@
 _         = require("lodash")
 path      = require("path")
 check     = require("syntax-error")
-debug     = require("debug")("cypress:server:fixture")
 coffee    = require("../../../packages/coffee")
 Promise   = require("bluebird")
 jsonlint  = require("jsonlint")
 cwd       = require("./cwd")
-errors    = require("./errors")
 fs        = require("./util/fs")
-glob      = require("./util/glob")
 
-extensions = [
-  ".json",
-  ".js",
-  ".coffee",
-  ".html",
-  ".txt",
-  ".csv",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".tif",
-  ".tiff",
-  ".zip"
-]
+extensions = ".json .js .coffee .html .txt .csv .png .jpg .jpeg .gif .tif .tiff .zip".split(" ")
 
 queue = {}
 
@@ -40,38 +23,35 @@ module.exports = {
     p       = path.join(fixturesFolder, filePath)
     fixture = path.basename(p)
 
-    ## if the file exists, go ahead and parse it
-    ## otherwise, glob for potential extensions
-    @fileExists(p)
-    .then ->
-      debug("fixture exact name exists", p)
+    ## if we have an extension go
+    ## ahead and read in the file
+    if ext = path.extname(p)
+      @parseFile(p, fixture, ext, options)
+    else
+      ## change this to first glob for
+      ## the files, and if nothing is found
+      ## throw a better error message
+      tryParsingFile = (index) =>
+        ext = extensions[index]
 
-      ext = path.extname(fixture)
-      @parseFile(p, fixture, options)
-    .catch (e) ->
-      if e.code != "ENOENT"
-        throw e
+        if not ext
+          throw new Error("No fixture file found with an acceptable extension. Searched in: #{p}")
 
-      pattern = "#{p}{#{extensions.join(",")}}"
+        @fileExists(p + ext)
+        .catch ->
+          tryParsingFile(index + 1)
+        .then ->
+          @parseFile(p + ext, fixture, ext, options)
 
-      glob(pattern, { nosort: true }).bind(@)
-      .then (matches) ->
-        if matches.length == 0
-          relativePath = path.relative('.', p)
-          errors.throw("FIXTURE_NOT_FOUND", relativePath, extensions)
-
-        debug("fixture matches found, using the first", matches)
-
-        ext = path.extname(matches[0])
-        @parseFile(p + ext, fixture, options)
+      Promise.resolve tryParsingFile(0)
 
   fileExists: (p) ->
     fs.statAsync(p).bind(@)
 
-  parseFile: (p, fixture, options) ->
+  parseFile: (p, fixture, ext, options) ->
     if queue[p]
       Promise.delay(1).then =>
-        @parseFile(p, fixture, options)
+        @parseFile(p, fixture, ext)
     else
       queue[p] = true
 
@@ -79,8 +59,10 @@ module.exports = {
         delete queue[p]
 
       @fileExists(p)
+      .catch (err) ->
+        ## TODO: move this to lib/errors
+        throw new Error("No fixture exists at: #{p}")
       .then ->
-        ext = path.extname(p)
         @parseFileByExtension(p, fixture, ext, options)
       .then (ret) ->
         cleanup()
@@ -92,6 +74,8 @@ module.exports = {
         throw err
 
   parseFileByExtension: (p, fixture, ext, options = {}) ->
+    ext ?= path.extname(fixture)
+
     switch ext
       when ".json"   then @parseJson(p, fixture)
       when ".js"     then @parseJs(p, fixture)
