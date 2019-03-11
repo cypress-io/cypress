@@ -13,6 +13,12 @@ class AppStore {
   @observable proxyBypassList
   @observable proxySource
 
+  constructor () {
+    if (window.Cypress) {
+      window.AppStore = this // for testing
+    }
+  }
+
   @computed get displayVersion () {
     return this.isDev ? `${this.version} (dev)` : this.version
   }
