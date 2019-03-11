@@ -25,7 +25,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.2.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.3.4",
     "@cypress/react-tooltip": "0.4.0",
     "bin-up": "1.1.0",
     "chai": "3.5.0",
