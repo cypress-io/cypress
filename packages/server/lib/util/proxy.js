@@ -7,7 +7,7 @@ module.exports = {
   },
 
   loadSystemProxySettings () {
-    if (process.env.HTTP_PROXY) {
+    if (process.env.HTTP_PROXY !== undefined) {
       return
     }
 
