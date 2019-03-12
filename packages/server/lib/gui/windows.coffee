@@ -283,12 +283,9 @@ module.exports = {
     Promise
     .resolve(options.url)
     .then (url) ->
-      # if width and height
-      #   ## width and height are truthy when
-      #   ## transparent: true is sent
-      #   win.webContents.once "dom-ready", ->
-      #     win.setSize(width, height)
-      #     win.show()
+      if options.type is "GITHUB_LOGIN"
+        ## remove the GitHub warning banner about an outdated browser
+        win.webContents.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
 
       ## navigate the window here!
       win.loadURL(url)
