@@ -77,8 +77,7 @@ describe "lib/gui/windows", ->
 
     it "updates the user agent for GITHUB_LOGIN", ->
       options = {
-        type: "GITHUB_LOGIN",
-        url: "about:blank"
+        type: "GITHUB_LOGIN"
       }
 
       sinon.stub(user, "getLoginUrl").resolves("about:blank")
