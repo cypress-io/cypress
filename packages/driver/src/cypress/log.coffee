@@ -158,7 +158,7 @@ defaults = (state, config, obj) ->
     consoleProps: -> {}
   })
 
-Log = (state, config, obj) ->
+Log = (cy, state, config, obj) ->
   obj = defaults(state, config, obj)
 
   ## private attributes of each log
@@ -456,7 +456,7 @@ create = (Cypress, cy, state, config) ->
   logFn = (obj = {}) ->
     attributes = {}
 
-    log = Log(state, config, obj)
+    log = Log(cy, state, config, obj)
 
     ## add event emitter interface
     $Events.extend(log)

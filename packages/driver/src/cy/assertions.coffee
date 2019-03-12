@@ -56,7 +56,7 @@ parseValueActualAndExpected = (value, actual, expected) ->
 
   obj
 
-create = (state, queue, retryFn) ->
+create = (Cypress, state, queue, retryFn) ->
   getUpcomingAssertions = ->
     current = state("current")
     index   = state("index") + 1

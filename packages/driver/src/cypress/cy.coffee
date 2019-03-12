@@ -75,7 +75,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   timeouts = $Timeouts.create(state)
   stability = $Stability.create(Cypress, state)
   retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
-  assertions = $Assertions.create(state, queue, retries.retry)
+  assertions = $Assertions.create(Cypress, state, queue, retries.retry)
 
   jquery = $jQuery.create(state)
   location = $Location.create(state)
@@ -85,7 +85,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   { expect } = $Chai.create(specWindow, assertions.assert)
 
   xhrs = $Xhrs.create(state)
-  aliases = $Aliases.create(state)
+  aliases = $Aliases.create(jquery.getRemotejQueryInstance, state)
 
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, expect)
