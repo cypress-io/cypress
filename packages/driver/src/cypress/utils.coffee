@@ -283,7 +283,6 @@ module.exports = {
     return text
 
   unescapeErrorMarkdown: (text) ->
-    ## escape markdown syntax supported by reporter
     mdReplacements.forEach (replacement) ->
       re = new RegExp("\\#{replacement[1]}", "g")
       text = text.replace(re, replacement[0])
