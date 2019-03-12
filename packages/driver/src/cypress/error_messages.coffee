@@ -25,7 +25,7 @@ formatProp = (memo, field) ->
   memo
 
 cmd = (command, args = "") ->
-  "cy.#{command}(#{args})"
+  "`cy.#{command}(#{args})`"
 
 getRedirects = (obj, phrase) ->
   redirects = obj.redirects ? []
