@@ -32,7 +32,7 @@ validateAlias = (alias) ->
   if alias in blacklist
     $utils.throwErrByPath "as.reserved_word", { args: { alias } }
 
-create = (state) ->
+create = (getRemotejQueryInstance, state) ->
   addAlias = (ctx, aliasObj) ->
     { alias, subject } = aliasObj
 
@@ -40,7 +40,7 @@ create = (state) ->
     aliases[alias] = aliasObj
     state("aliases", aliases)
 
-    remoteSubject = cy.getRemotejQueryInstance(subject)
+    remoteSubject = getRemotejQueryInstance(subject)
 
     ## assign the subject to our runnable ctx
     ctx[alias] = remoteSubject ? subject
