@@ -100,7 +100,7 @@
     "snap-shot-it": "5.0.1"
   },
   "optionalDependencies": {
-    "@cypress/get-windows-proxy": "1.4.0"
+    "@cypress/get-windows-proxy": "1.4.4"
   },
   "files": [
     "bin",

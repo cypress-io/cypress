@@ -1,5 +1,5 @@
 const os = require('os')
-const getWindowsProxy = require('get-windows-proxy')
+const getWindowsProxy = require('@cypress/get-windows-proxy')
 
 module.exports = {
   _getWindowsProxy () {

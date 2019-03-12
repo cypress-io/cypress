@@ -194,6 +194,6 @@
     "winston": "0.9.0"
   },
   "optionalDependencies": {
-    "@cypress/get-windows-proxy": "1.4.0"
+    "@cypress/get-windows-proxy": "1.4.4"
   }
 }
