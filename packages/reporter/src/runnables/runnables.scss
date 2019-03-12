@@ -43,6 +43,11 @@
         text-decoration: underline;
       }
 
+      code {
+        font-family: $monospace;
+        font-size: 90%;
+      }
+
       &:empty {
         display: none;
       }
