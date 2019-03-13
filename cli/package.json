@@ -39,6 +39,7 @@
   },
   "types": "types",
   "dependencies": {
+    "@cypress/get-windows-proxy": "1.5.0",
     "@cypress/listr-verbose-renderer": "0.4.1",
     "@cypress/xvfb": "1.2.4",
     "bluebird": "3.5.0",
@@ -98,9 +99,6 @@
     "shelljs": "0.7.8",
     "sinon": "7.2.2",
     "snap-shot-it": "5.0.1"
-  },
-  "optionalDependencies": {
-    "@cypress/get-windows-proxy": "1.4.4"
   },
   "files": [
     "bin",
