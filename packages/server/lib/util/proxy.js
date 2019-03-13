@@ -6,8 +6,23 @@ module.exports = {
     return getWindowsProxy()
   },
 
+  _normalizeEnvironmentProxy () {
+    if (!process.env.HTTPS_PROXY) {
+      // request library will use HTTP_PROXY as a fallback for HTTPS urls, but
+      // proxy-from-env will not, so let's just force it to fall back like this
+      process.env.HTTPS_PROXY = process.env.HTTP_PROXY
+    }
+
+    if (!process.env.NO_PROXY) {
+      // don't proxy localhost, to match Chrome's default behavior and user expectation
+      process.env.NO_PROXY = 'localhost'
+    }
+  },
+
   loadSystemProxySettings () {
     if (process.env.HTTP_PROXY !== undefined) {
+      this._normalizeEnvironmentProxy()
+
       return
     }
 
@@ -18,6 +33,8 @@ module.exports = {
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = windowsProxy.httpProxy
         process.env.NO_PROXY = process.env.NO_PROXY || windowsProxy.noProxy
       }
+
+      this._normalizeEnvironmentProxy()
 
       return 'win32'
     }

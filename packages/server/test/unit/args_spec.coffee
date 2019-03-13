@@ -296,7 +296,9 @@ describe "lib/util/args", ->
   context "with proxy", ->
     beforeEach ->
       @beforeEnv = Object.assign({}, process.env)
-      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.NO_PROXY = undefined
+      delete process.env.HTTP_PROXY
+      delete process.env.HTTPS_PROXY
+      delete process.env.NO_PROXY
 
     it "sets options from environment", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
@@ -304,6 +306,7 @@ describe "lib/util/args", ->
       options = @setup()
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyServer).to.eq "http://foo-bar.baz:123"
       expect(options.proxyBypassList).to.eq "a,b,c"
       expect(process.env.HTTPS_PROXY).to.eq process.env.HTTP_PROXY
 
@@ -319,6 +322,14 @@ describe "lib/util/args", ->
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyServer).to.eq process.env.HTTPS_PROXY
       expect(options.proxyBypassList).to.eq "d,e,f"
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    it "sets a default NO_PROXY", ->
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
+      options = @setup()
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.eq "localhost"
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
     afterEach ->
