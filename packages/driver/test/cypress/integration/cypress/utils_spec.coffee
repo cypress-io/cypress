@@ -64,12 +64,6 @@ describe "driver/src/cypress/utils", ->
       text = 3
       expect($utils.escapeErrorMarkdown(text)).to.equal(3)
 
-    it "does not escape in text terminal mode", ->
-      Cypress.config("isInteractive", false)
-
-      md = "`foo`"
-      expect($utils.escapeErrorMarkdown(md)).to.equal("`foo`")
-
     it "escapes backticks", ->
       md = "`foo`"
       expect($utils.escapeErrorMarkdown(md)).to.equal("\\`foo\\`")
