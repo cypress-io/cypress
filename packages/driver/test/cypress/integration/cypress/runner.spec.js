@@ -22,7 +22,7 @@ describe('src/cypress/runner', () => {
     .then((autWindow) => {
       delete top.Cypress
 
-      this.Cypress = Cypress.$Cypress.create({})
+      this.Cypress = Cypress.$Cypress.create(Cypress.config())
       this.Cypress.onSpecWindow(autWindow)
       this.Cypress.initialize($('.aut-iframe', top.document))
 
@@ -70,7 +70,7 @@ describe('src/cypress/runner', () => {
         },
       })
       .then((ret) => {
-        assert(ret === 0, `${ret} tests have failed, but should not have`)
+        assert(ret === 1, `${ret} tests have failed, but should have failed once`)
       })
     })
   })
