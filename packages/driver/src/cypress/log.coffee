@@ -405,7 +405,7 @@ Log = (state, config, obj) ->
         ## and finally add error if one exists
         if err = _this.get("error")
           _.defaults(consoleObj, {
-            Error: $utils.unescapeErrorMarkdown(_this.getError(err))
+            Error: _this.getError(err)
           })
 
         ## add note if no snapshot exists on command instruments

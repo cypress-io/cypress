@@ -14,7 +14,7 @@ HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
 TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
 TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
-ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
+ERROR_PROPS      = "message mdMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
 RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings".split(" ")
 
@@ -599,10 +599,6 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
           hookName
         })
       )
-
-    ## escape markdown for the reporter
-    if err.name.match(/AssertionError/)
-      err.message = $utils.escapeErrorMarkdown(err.message)
 
     ## always set runnable err so we can tap into
     ## taking a screenshot on error
