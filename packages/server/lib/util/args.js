@@ -181,8 +181,6 @@ module.exports = {
       alias,
     })
 
-    const launchedFromCli = !!options.cwd
-
     const whitelisted = _.pick(argv, whitelist)
 
     options = _
@@ -222,8 +220,7 @@ module.exports = {
       options.env = sanitizeAndConvertNestedArgs(envs)
     }
 
-    // if launched as desktop application with no proxy, try to read system proxy
-    if (!launchedFromCli && !process.env.HTTP_PROXY) {
+    if (!process.env.HTTP_PROXY) {
       const proxySource = proxy.loadSystemProxySettings()
 
       if (proxySource) {
