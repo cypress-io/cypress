@@ -10,9 +10,9 @@ export default class Err {
   }
 
   @computed get displayMessage () {
-    if (!this.name && !this.message) return ''
+    if (!this.name && !this.mdMessage) return ''
 
-    return `${this.name}: ${this.message}`
+    return `${this.name}: ${this.mdMessage}`
   }
 
   @computed get isCommandErr () {
@@ -24,6 +24,7 @@ export default class Err {
 
     this.name = props.name
     this.message = props.message
+    this.mdMessage = props.mdMessage || props.message
     this.stack = props.stack
   }
 }
