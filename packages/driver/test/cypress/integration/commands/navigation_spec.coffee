@@ -303,21 +303,21 @@ describe "src/cy/commands/navigation", ->
       _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
         it "throws on: '#{val}'", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq("cy.go() accepts only a string or number argument")
+            expect(err.message).to.eq("`cy.go()` accepts only a string or number argument")
             done()
 
           cy.go(val)
 
       it "throws on invalid string", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.go() accepts either 'forward' or 'back'. You passed: 'foo'")
+          expect(err.message).to.eq("`cy.go()` accepts either 'forward' or 'back'. You passed: 'foo'")
           done()
 
         cy.go("foo")
 
       it "throws on zero", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.go() cannot accept '0'. The number must be greater or less than '0'.")
+          expect(err.message).to.eq("`cy.go()` cannot accept '0'. The number must be greater or less than '0'.")
           done()
 
         cy.go(0)
