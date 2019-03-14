@@ -11,7 +11,11 @@ const getQueueNames = () => {
 const createHooks = (win, hooks = []) => {
   _.each(hooks, (hook) => {
     if (_.isObject(hook)) {
-      const { type, fail } = hook
+      const { type, fail, fn } = hook
+
+      if (fn) {
+        return win[type](new Function(fn.toString()))
+      }
 
       if (fail) {
         return win[type](() => {
@@ -29,7 +33,11 @@ const createHooks = (win, hooks = []) => {
 const createTests = (win, tests = []) => {
   _.each(tests, (test) => {
     if (_.isObject(test)) {
-      const { name, pending, fail } = test
+      const { name, pending, fail, fn } = test
+
+      if (fn) {
+        return win.it(name, new Function(fn.toString()))
+      }
 
       if (pending) {
         return win.it(name)
