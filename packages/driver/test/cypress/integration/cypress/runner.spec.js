@@ -48,24 +48,20 @@ describe('src/cypress/runner', () => {
   let allStubs
 
   beforeEach(function () {
-    const btn = $('<span><button>COPY</button></span>', window.top.document)
-    const container = $('.toggle-auto-scrolling.auto-scrolling-enabled', window.top.document).closest('.controls')
+    // const btn = $('<span><button>COPY</button></span>', window.top.document)
+    // const container = $('.toggle-auto-scrolling.auto-scrolling-enabled', window.top.document).closest('.controls')
 
-    btn.on('click', () => {
-      copyToClipboard(JSON.stringify(lastActual, null, '\t'))
-    })
+    // btn.on('click', () => {
+    //   copyToClipboard(JSON.stringify(lastActual, null, '\t'))
+    // })
 
-    container.append(btn)
+    // container.append(btn)
     window.cy = backupCy
     window.Cypress = backupCypress
-    backupCypress.mocha.override()
-    cy.state('returnedCustomPromise', false)
 
     cy
     .visit('/fixtures/generic.html')
     .then((autWindow) => {
-      // delete top.Cypress
-
       this.Cypress = Cypress.$Cypress.create(Cypress.config())
       this.Cypress.onSpecWindow(autWindow)
       this.Cypress.initialize($('.aut-iframe', top.document))
@@ -73,20 +69,16 @@ describe('src/cypress/runner', () => {
       window.cy = backupCy
       window.Cypress = backupCypress
 
-      allStubs = cy.stub().log(false)
-
-      cy.stub(this.Cypress, 'emit').callsFake(allStubs)
-      cy.stub(this.Cypress, 'emitMap').callsFake(allStubs)
-      cy.stub(this.Cypress, 'emitThen').callsFake((...args) => {
-        allStubs(...args)
-
-        return Promise.resolve()
-      })
-
-      backupCypress.mocha.override()
-
       this.runMochaTests = (obj) => {
-        this.Cypress.mocha.override()
+        allStubs = cy.stub().log(false)
+
+        cy.stub(this.Cypress, 'emit').callsFake(allStubs)
+        cy.stub(this.Cypress, 'emitMap').callsFake(allStubs)
+        cy.stub(this.Cypress, 'emitThen').callsFake((...args) => {
+          allStubs(...args)
+
+          return Promise.resolve()
+        })
 
         helpers.generateMochaTestsForWin(autWindow, obj)
 
@@ -154,7 +146,6 @@ describe('src/cypress/runner', () => {
       })
       .then(shouldHavePassed())
       .then(() => {
-
         assertMatch(formatEvents(allStubs), [
           ['run:start'],
           [
@@ -632,6 +623,7 @@ describe('src/cypress/runner', () => {
       })
 
     })
+
     describe('test failures w/ hooks', () => {
 
       it('fail with [before]', function () {
@@ -783,15 +775,15 @@ const assertMatch = (act, exp, message) => {
   assert(true, `expected ${message || 'var'} to ${res.message}`)
 }
 
-function copyToClipboard (text) {
+// function copyToClipboard (text) {
 
-  let aux = document.createElement('input')
+//   let aux = document.createElement('input')
 
-  aux.setAttribute('value', text)
-  document.body.appendChild(aux)
-  aux.select()
-  document.execCommand('copy')
-  document.body.removeChild(aux)
+//   aux.setAttribute('value', text)
+//   document.body.appendChild(aux)
+//   aux.select()
+//   document.execCommand('copy')
+//   document.body.removeChild(aux)
 
-}
+// }
 
