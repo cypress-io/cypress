@@ -1108,7 +1108,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
       if (isAfterAllHook) {
         if (test.state !== 'failed') {
-          test.err = null
+          delete test.err
           test.state = 'passed'
         }
       }
