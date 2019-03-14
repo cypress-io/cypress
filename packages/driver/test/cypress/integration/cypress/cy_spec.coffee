@@ -210,27 +210,27 @@ describe "driver/src/cypress/cy", ->
           $(@).remove()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include("cy.parent() failed because this element is detached from the DOM.")
+          expect(err.message).to.include("`cy.parent()` failed because this element is detached from the DOM.")
           expect(err.message).to.include('<button id="button">button</button>')
-          expect(err.message).to.include("> cy.click()")
+          expect(err.message).to.include("> `cy.click()`")
           done()
 
         cy.get("button:first").click().parent()
 
       it "fails when previous subject isnt window", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("cy.winOnly() failed because it requires the subject be a global 'window' object.")
+          expect(err.message).to.include("`cy.winOnly()` failed because it requires the subject be a global 'window' object.")
           expect(err.message).to.include("{foo: bar}")
-          expect(err.message).to.include("> cy.wrap()")
+          expect(err.message).to.include("> `cy.wrap()`")
           done()
 
         cy.wrap({foo: 'bar'}).winOnly()
 
       it "fails when previous subject isnt document", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("cy.docOnly() failed because it requires the subject be a global 'document' object.")
+          expect(err.message).to.include("`cy.docOnly()` failed because it requires the subject be a global 'document' object.")
           expect(err.message).to.include("[1, 2, 3]")
-          expect(err.message).to.include("> cy.wrap()")
+          expect(err.message).to.include("> `cy.wrap()`")
           done()
 
         cy.wrap([1,2,3]).docOnly()
@@ -240,9 +240,9 @@ describe "driver/src/cypress/cy", ->
 
         cy.on "fail", (err) ->
           expect(firstPassed).to.be.true
-          expect(err.message).to.include("cy.elWinOnly() failed because it requires a DOM element.")
+          expect(err.message).to.include("`cy.elWinOnly()` failed because it requires a DOM element.")
           expect(err.message).to.include("string")
-          expect(err.message).to.include("> cy.wrap()")
+          expect(err.message).to.include("> `cy.wrap()`")
           expect(err.message).to.include("All 2 subject validations failed")
           done()
 

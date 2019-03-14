@@ -602,10 +602,10 @@ describe "src/cy/commands/actions/trigger", ->
 
       it "throws when eventName is not a string", ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 15 elements."
+          expect(err.message).to.eq "`cy.trigger()` can only be called on a single element. Your subject contained 15 elements."
           done()
 
-        cy.get("button:first").trigger("cy.trigger() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
+        cy.get("button:first").trigger("`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
 
       it "throws when not a dom subject", (done) ->
         cy.on "fail", -> done()
@@ -616,7 +616,7 @@ describe "src/cy/commands/actions/trigger", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained #{num} elements."
+          expect(err.message).to.eq "`cy.trigger()` can only be called on a single element. Your subject contained #{num} elements."
           done()
 
         cy.get("button").trigger("mouseover")
@@ -631,7 +631,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         cy.on "fail", (err) ->
           expect(mouseover).to.eq 1
-          expect(err.message).to.include "cy.trigger() failed because this element"
+          expect(err.message).to.include "`cy.trigger()` failed because this element"
           done()
 
         cy.get(":checkbox:first").trigger("mouseover").trigger("mouseover")
@@ -654,7 +654,7 @@ describe "src/cy/commands/actions/trigger", ->
 
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.trigger() failed because this element is not visible"
+          expect(err.message).to.include "`cy.trigger()` failed because this element is not visible"
           done()
 
         cy.get("button:first").trigger("mouseover")
@@ -665,7 +665,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.on "fail", (err) =>
           ## get + click logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.trigger() failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.trigger()` failed because this element is disabled:\n")
           done()
 
         cy.get("#button").trigger("mouseover")
@@ -689,7 +689,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         cy.on "fail", (err) ->
           expect(clicks).to.eq(0)
-          expect(err.message).to.include("cy.trigger() could not be issued because this element is currently animating:\n")
+          expect(err.message).to.include("`cy.trigger()` could not be issued because this element is currently animating:\n")
           done()
 
         cy.get("button:first").trigger("tap")

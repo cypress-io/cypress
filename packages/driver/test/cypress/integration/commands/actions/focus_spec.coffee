@@ -257,14 +257,14 @@ describe "src/cy/commands/actions/focus", ->
 
         cy.on "fail", (err) ->
           expect(focused).to.eq 1
-          expect(err.message).to.include "cy.focus() failed because this element"
+          expect(err.message).to.include "`cy.focus()` failed because this element"
           done()
 
         cy.get("input:first").focus().focus()
 
       it "throws when not a[href],link[href],button,input,select,textarea,[tabindex]", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.focus() can only be called on a valid focusable element. Your subject is a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "`cy.focus()` can only be called on a valid focusable element. Your subject is a: <form id=\"by-id\">...</form>"
           done()
 
         cy.get("form").focus()
@@ -277,7 +277,7 @@ describe "src/cy/commands/actions/focus", ->
           .focus()
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.focus() can only be called on a single element. Your subject contained #{@num} elements."
+          expect(err.message).to.include "`cy.focus()` can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "logs once when not dom subject", (done) ->
@@ -318,7 +318,7 @@ describe "src/cy/commands/actions/focus", ->
           $(@).remove()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.blur() failed because this element"
+          expect(err.message).to.include "`cy.blur()` failed because this element"
           done()
 
         ## we remove the first element and then
@@ -611,7 +611,7 @@ describe "src/cy/commands/actions/focus", ->
 
         cy.on "fail", (err) ->
           expect(blurred).to.eq 1
-          expect(err.message).to.include "cy.blur() failed because this element"
+          expect(err.message).to.include "`cy.blur()` failed because this element"
           done()
 
         cy.get("input:first").focus().blur().focus().blur()
@@ -620,7 +620,7 @@ describe "src/cy/commands/actions/focus", ->
         num = cy.$$("textarea,:text").length
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.blur() can only be called on a single element. Your subject contained #{num} elements."
+          expect(err.message).to.include "`cy.blur()` can only be called on a single element. Your subject contained #{num} elements."
           done()
 
         cy
@@ -628,14 +628,14 @@ describe "src/cy/commands/actions/focus", ->
 
       it "throws when there isnt an activeElement", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.blur() can only be called when there is a currently focused element."
+          expect(err.message).to.include "`cy.blur()` can only be called when there is a currently focused element."
           done()
 
         cy.get("form:first").blur()
 
       it "throws when blur is called on a non-active element", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
+          expect(err.message).to.include "`cy.blur()` can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
           done()
 
         cy

@@ -41,7 +41,7 @@ describe "src/cy/commands/connectors", ->
 
         it "throws when subject isn't array-like", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.spread() requires the existing subject be array-like."
+            expect(err.message).to.eq "`cy.spread()` requires the existing subject be array-like."
             done()
 
           cy.noop({}).spread ->
@@ -55,7 +55,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             expect(logs.length).to.eq(1)
             expect(logs[0].get("error")).to.eq(err)
-            expect(err.message).to.include "cy.spread() timed out after waiting '20ms'."
+            expect(err.message).to.include "`cy.spread()` timed out after waiting '20ms'."
             done()
 
           cy.noop([1,2,3]).spread {timeout: 20}, ->
@@ -184,7 +184,7 @@ describe "src/cy/commands/connectors", ->
 
             expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
-            expect(err.message).to.include "cy.then() timed out after waiting '150ms'."
+            expect(err.message).to.include "`cy.then()` timed out after waiting '150ms'."
             done()
 
           cy.then {timeout: 150}, ->
@@ -196,7 +196,7 @@ describe "src/cy/commands/connectors", ->
 
             expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
-            expect(err.message).to.include "cy.then() failed because you are mixing up async and sync code."
+            expect(err.message).to.include "`cy.then()` failed because you are mixing up async and sync code."
             done()
 
           cy.then ->
@@ -383,7 +383,7 @@ describe "src/cy/commands/connectors", ->
             }
 
             cy.on "fail", (err) ->
-              expect(err.message).to.include("Cannot call cy.invoke() because 'foo' is not a function. You probably want to use cy.its('foo')")
+              expect(err.message).to.include("Cannot call `cy.invoke()` because 'foo' is not a function. You probably want to use `cy.its('foo')`")
               done()
 
             cy.wrap(obj).invoke("foo")
@@ -396,7 +396,7 @@ describe "src/cy/commands/connectors", ->
             }
 
             cy.on "fail", (err) ->
-              expect(err.message).to.include("Cannot call cy.invoke() because 'foo.bar' is not a function. You probably want to use cy.its('foo.bar')")
+              expect(err.message).to.include("Cannot call `cy.invoke()` because 'foo.bar' is not a function. You probably want to use `cy.its('foo.bar')`")
               done()
 
             cy.wrap(obj).invoke("foo.bar")
@@ -518,7 +518,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.invoke() errored because the property: 'foo' does not exist on your subject."
+            expect(err.message).to.include "`cy.invoke()` errored because the property: 'foo' does not exist on your subject."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -536,7 +536,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
+            expect(err.message).to.eq "`cy.invoke()` only accepts a string as the first argument."
             expect(lastLog.get("error")).to.eq err
             done()
 
@@ -554,7 +554,7 @@ describe "src/cy/commands/connectors", ->
 
         it "ensures subject", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.its() errored because your subject is currently: 'undefined'"
+            expect(err.message).to.include "`cy.its()` errored because your subject is currently: 'undefined'"
             done()
 
           cy.noop(undefined).its("attr")
@@ -563,7 +563,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command: "its"
-              Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject."
+              Error: "CypressError: Timed out retrying: `cy.its()` errored because the property: 'baz' does not exist on your subject."
               Subject: {foo: "bar"}
             }
             done()
@@ -756,7 +756,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.its() errored because the property: 'foo' does not exist on your subject."
+            expect(err.message).to.include "`cy.its()` errored because the property: 'foo' does not exist on your subject."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -766,7 +766,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.its() errored because the property: 'baz' does not exist on your subject."
+            expect(err.message).to.include "`cy.its()` errored because the property: 'baz' does not exist on your subject."
             expect(lastLog.get("error").message).to.include(err.message)
             expect(lastLog.get("error").message).to.include(err.message)
             done()
@@ -782,7 +782,7 @@ describe "src/cy/commands/connectors", ->
         [null, undefined].forEach (val) ->
           it "throws on reduced #{val} subject", (done) ->
             cy.on "fail", (err) ->
-              expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot access any properties such as 'toString' on a '#{val}' value.")
+              expect(err.message).to.include("`cy.its()` errored because the property: 'foo' returned a '#{val}' value. You cannot access any properties such as 'toString' on a '#{val}' value.")
               done()
 
             cy.wrap({foo: val}).its("foo.toString")
@@ -791,7 +791,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.its() only accepts a single argument."
+            expect(err.message).to.include "`cy.its()` only accepts a single argument."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -805,7 +805,7 @@ describe "src/cy/commands/connectors", ->
           ## null subjects immediately throw
           # it "throws on initial #{val} subject", ->
           #   cy.on "fail", (err) ->
-          #     expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot call any properties such as 'toString' on a '#{val}' value.")
+          #     expect(err.message).to.include("`cy.its()` errored because the property: 'foo' returned a '#{val}' value. You cannot call any properties such as 'toString' on a '#{val}' value.")
           #     done()
 
           #   cy.wrap(val).its("toString")
@@ -933,7 +933,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("cy.each() timed out after waiting '50ms'.\n\nYour callback function returned a promise which never resolved.")
+            expect(err.message).to.include("`cy.each()` timed out after waiting '50ms'.\n\nYour callback function returned a promise which never resolved.")
             done()
 
           cy.get("ul").each ($ul) ->
@@ -948,7 +948,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("cy.each() must be passed a callback function.")
+            expect(err.message).to.include("`cy.each()` must be passed a callback function.")
             done()
 
           cy.get("ul").each({})
@@ -957,7 +957,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '100'")
+            expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: '100'")
             done()
 
           cy.wrap(100).each ->
@@ -966,7 +966,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '{}'")
+            expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: '{}'")
             done()
 
           cy.wrap({}).each ->

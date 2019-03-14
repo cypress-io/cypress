@@ -82,7 +82,7 @@ describe "src/cy/commands/traversals", ->
             cy.$$("#list").remove()
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.#{name}() failed because this element"
+            expect(err.message).to.include "`cy.#{name}()` failed because this element"
             done()
 
           cy.get("#list")[name](arg)

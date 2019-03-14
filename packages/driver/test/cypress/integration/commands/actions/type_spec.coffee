@@ -2663,7 +2663,7 @@ describe "src/cy/commands/actions/type", ->
 
         cy.on "fail", (err) ->
           expect(typed).to.eq 1
-          expect(err.message).to.include "cy.type() failed because this element"
+          expect(err.message).to.include "`cy.type()` failed because this element"
           done()
 
         cy.get("input:first").type("a").type("b")
@@ -2672,7 +2672,7 @@ describe "src/cy/commands/actions/type", ->
         cy.get("form").type("foo")
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.type() failed because it requires a valid typeable element."
+          expect(err.message).to.include "`cy.type()` failed because it requires a valid typeable element."
           expect(err.message).to.include "The element typed into was:"
           expect(err.message).to.include "<form id=\"by-id\">...</form>"
           expect(err.message).to.include "Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements."
@@ -2685,7 +2685,7 @@ describe "src/cy/commands/actions/type", ->
           .type("foo")
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.type() can only be called on a single element. Your subject contained #{@num} elements."
+          expect(err.message).to.include "`cy.type()` can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "throws when the subject isnt visible", (done) ->
@@ -2696,7 +2696,7 @@ describe "src/cy/commands/actions/type", ->
 
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.type() failed because this element is not visible"
+          expect(err.message).to.include "`cy.type()` failed because this element is not visible"
           done()
 
         cy.get("input:text:first").type("foo")
@@ -2707,7 +2707,7 @@ describe "src/cy/commands/actions/type", ->
         cy.on "fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.type() failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.type()` failed because this element is disabled:\n")
           done()
 
         cy.get("input:text:first").type("foo")
@@ -2742,7 +2742,7 @@ describe "src/cy/commands/actions/type", ->
 
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.include "cy.type() failed because this element"
+          expect(err.message).to.include "`cy.type()` failed because this element"
           expect(err.message).to.include "is being covered by another element"
           done()
 
@@ -2762,7 +2762,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws when attemping to type tab", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq 2
-          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command cy.tab(), which is not ready yet, but when it is done that's what you'll use."
+          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command `cy.tab()`, which is not ready yet, but when it is done that's what you'll use."
           done()
 
         cy.get(":text:first").type("foo{tab}")
@@ -2770,7 +2770,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws on an empty string", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq 2
-          expect(err.message).to.eq "cy.type() cannot accept an empty String. You need to actually type something."
+          expect(err.message).to.eq "`cy.type()` cannot accept an empty String. You need to actually type something."
           done()
 
         cy.get(":text:first").type("")
@@ -2795,7 +2795,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq 2
-            expect(err.message).to.eq "cy.type() can only accept a String or Number. You passed in: '#{val}'"
+            expect(err.message).to.eq "`cy.type()` can only accept a String or Number. You passed in: '#{val}'"
             done()
 
           cy.get(":text:first").type(val)
@@ -2813,7 +2813,7 @@ describe "src/cy/commands/actions/type", ->
 
         cy.on "fail", (err) ->
           expect(keydowns).to.eq(0)
-          expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n")
+          expect(err.message).to.include("`cy.type()` could not be issued because this element is currently animating:\n")
           done()
 
         cy.get(":text:first").type("foo")
@@ -2843,7 +2843,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is not a string", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989")
+            expect(err.message).to.eq("Typing into a date input with `cy.type()` requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989")
             done()
 
           cy.get("#date-without-value").type(1989)
@@ -2851,7 +2851,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid format", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989")
+            expect(err.message).to.eq("Typing into a date input with `cy.type()` requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989")
             done()
 
           cy.get("#date-without-value").type("01-01-1989")
@@ -2859,7 +2859,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid date", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31")
+            expect(err.message).to.eq("Typing into a date input with `cy.type()` requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31")
             done()
 
           cy.get("#date-without-value").type("1989-04-31")
@@ -2868,7 +2868,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is not a string", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 6")
+            expect(err.message).to.eq("Typing into a month input with `cy.type()` requires a valid month with the format 'yyyy-MM'. You passed: 6")
             done()
 
           cy.get("#month-without-value").type(6)
@@ -2876,7 +2876,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid format", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 01/2000")
+            expect(err.message).to.eq("Typing into a month input with `cy.type()` requires a valid month with the format 'yyyy-MM'. You passed: 01/2000")
             done()
 
           cy.get("#month-without-value").type("01/2000")
@@ -2884,7 +2884,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid month", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 1989-13")
+            expect(err.message).to.eq("Typing into a month input with `cy.type()` requires a valid month with the format 'yyyy-MM'. You passed: 1989-13")
             done()
 
           cy.get("#month-without-value").type("1989-13")
@@ -2906,7 +2906,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is not a string", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23")
+            expect(err.message).to.eq("Typing into a week input with `cy.type()` requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23")
             done()
 
           cy.get("#week-without-value").type(23)
@@ -2914,7 +2914,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid format", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
+            expect(err.message).to.eq("Typing into a week input with `cy.type()` requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
             done()
 
           cy.get("#week-without-value").type("2005/W18")
@@ -2922,7 +2922,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid week", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60")
+            expect(err.message).to.eq("Typing into a week input with `cy.type()` requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60")
             done()
 
           cy.get("#week-without-value").type("1995-W60")
@@ -2931,7 +2931,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is not a string", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999")
+            expect(err.message).to.equal("Typing into a time input with `cy.type()` requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999")
             done()
 
           cy.get("#time-without-value").type(9999)
@@ -2939,7 +2939,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid format (1:30)", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30")
+            expect(err.message).to.equal("Typing into a time input with `cy.type()` requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30")
             done()
 
           cy.get("#time-without-value").type("1:30")
@@ -2947,7 +2947,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid format (01:30pm)", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm")
+            expect(err.message).to.equal("Typing into a time input with `cy.type()` requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm")
             done()
 
           cy.get("#time-without-value").type("01:30pm")
@@ -2955,7 +2955,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid format (01:30:30.3333)", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333")
+            expect(err.message).to.equal("Typing into a time input with `cy.type()` requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333")
             done()
 
           cy.get("#time-without-value").type("01:30:30.3333")
@@ -2963,7 +2963,7 @@ describe "src/cy/commands/actions/type", ->
         it "throws when chars is invalid time", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60")
+            expect(err.message).to.equal("Typing into a time input with `cy.type()` requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60")
             done()
 
           cy.get("#time-without-value").type("01:60")
@@ -3114,7 +3114,7 @@ describe "src/cy/commands/actions/type", ->
 
         cy.on "fail", (err) ->
           expect(cleared).to.eq 1
-          expect(err.message).to.include "cy.clear() failed because this element"
+          expect(err.message).to.include "`cy.clear()` failed because this element"
           done()
 
         cy.get("input:first").clear().clear()
@@ -3125,7 +3125,7 @@ describe "src/cy/commands/actions/type", ->
 
           expect(@logs.length).to.eq(3)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "`cy.clear()` failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<form id=\"checkboxes\">...</form>"
           expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
@@ -3135,7 +3135,7 @@ describe "src/cy/commands/actions/type", ->
 
       it "throws if any subject isnt a :text", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "`cy.clear()` failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<div id=\"dom\">...</div>"
           expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
@@ -3145,7 +3145,7 @@ describe "src/cy/commands/actions/type", ->
 
       it "throws on an input radio", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "`cy.clear()` failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<input type=\"radio\" name=\"gender\" value=\"male\">"
           expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
@@ -3155,7 +3155,7 @@ describe "src/cy/commands/actions/type", ->
 
       it "throws on an input checkbox", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "`cy.clear()` failed because it requires a valid clearable element."
           expect(err.message).to.include "The element cleared was:"
           expect(err.message).to.include "<input type=\"checkbox\" name=\"colors\" value=\"blue\">"
           expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
@@ -3167,7 +3167,7 @@ describe "src/cy/commands/actions/type", ->
         input = cy.$$("input:text:first").show().hide()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because this element is not visible"
+          expect(err.message).to.include "`cy.clear()` failed because this element is not visible"
           done()
 
         cy.get("input:text:first").clear()
@@ -3178,7 +3178,7 @@ describe "src/cy/commands/actions/type", ->
         cy.on "fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.clear() failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.clear()` failed because this element is disabled:\n")
           done()
 
         cy.get("input:text:first").clear()
@@ -3211,7 +3211,7 @@ describe "src/cy/commands/actions/type", ->
 
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.include "cy.clear() failed because this element"
+          expect(err.message).to.include "`cy.clear()` failed because this element"
           expect(err.message).to.include "is being covered by another element"
           done()
 

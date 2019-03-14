@@ -83,7 +83,7 @@ describe "src/cy/commands/fixtures", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq("cy.fixture() is not valid because you have configured 'fixturesFolder' to false.")
+          expect(lastLog.get("error").message).to.eq("`cy.fixture()` is not valid because you have configured 'fixturesFolder' to false.")
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("name")).to.eq "fixture"
           done()
@@ -133,7 +133,7 @@ describe "src/cy/commands/fixtures", ->
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("name")).to.eq "fixture"
           expect(lastLog.get("message")).to.eq "foo, {timeout: 50}"
-          expect(err.message).to.eq("cy.fixture() timed out waiting '50ms' to receive a fixture. No fixture was ever sent by the server.")
+          expect(err.message).to.eq("`cy.fixture()` timed out waiting '50ms' to receive a fixture. No fixture was ever sent by the server.")
           done()
 
         cy.fixture("foo", {timeout: 50})

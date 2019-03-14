@@ -877,14 +877,14 @@ describe "src/cy/commands/xhr", ->
         _.each ["asdf", 123, null, undefined], (arg) ->
           it "throws on bad argument: #{arg}", (done) ->
             cy.on "fail", (err) ->
-              expect(err.message).to.include "cy.server() accepts only an object literal as its argument"
+              expect(err.message).to.include "`cy.server()` accepts only an object literal as its argument"
               done()
 
             cy.server(arg)
 
       it "after turning off server it throws attempting to route", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.route() cannot be invoked before starting the cy.server()")
+          expect(err.message).to.eq("`cy.route()` cannot be invoked before starting the `cy.server()`")
           done()
 
         cy
@@ -1406,14 +1406,14 @@ describe "src/cy/commands/xhr", ->
         cy.state("serverIsStubbed", false)
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() cannot be invoked before starting the cy.server()"
+          expect(err.message).to.include "`cy.route()` cannot be invoked before starting the `cy.server()`"
           done()
 
         cy.route()
 
       it "url must be a string or regexp", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was called with an invalid url. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid url. Url must be either a string or regular expression."
           done()
 
         cy.route({
@@ -1422,7 +1422,7 @@ describe "src/cy/commands/xhr", ->
 
       it "url must be a string or regexp when a function", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was called with an invalid url. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid url. Url must be either a string or regular expression."
           done()
 
         getUrl = ->
@@ -1444,14 +1444,14 @@ describe "src/cy/commands/xhr", ->
 
       it "url must be one of get, put, post, delete, patch, head, options", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was called with an invalid method: 'POSTS'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+          expect(err.message).to.include "`cy.route()` was called with an invalid method: 'POSTS'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
           done()
 
         cy.route("posts", "/foo", {})
 
       it "requires a url when given a response", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
+          expect(err.message).to.include "`cy.route()` must be called with a url. It can be a string or regular expression."
           done()
 
         cy.route({})
@@ -1459,21 +1459,21 @@ describe "src/cy/commands/xhr", ->
       _.each [null, undefined], (val) ->
         it "throws if response options was explicitly set to #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            expect(err.message).to.include "`cy.route()` cannot accept an undefined or null response. It must be set to something, even an empty string will work."
             done()
 
           cy.route({url: /foo/, response: val})
 
         it "throws if response argument was explicitly set to #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            expect(err.message).to.include "`cy.route()` cannot accept an undefined or null response. It must be set to something, even an empty string will work."
             done()
 
           cy.route(/foo/, val)
 
       it "requires arguments", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was not provided any arguments. You must provide valid arguments."
+          expect(err.message).to.include "`cy.route()` was not provided any arguments. You must provide valid arguments."
           done()
 
         cy.route()
@@ -1556,7 +1556,7 @@ describe "src/cy/commands/xhr", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.eq "cy.route() could not find a registered alias for: '@bar'.\nAvailable aliases are: 'foo'."
+          expect(err.message).to.eq "`cy.route()` could not find a registered alias for: '@bar'.\nAvailable aliases are: 'foo'."
           expect(lastLog.get("name")).to.eq "route"
           expect(lastLog.get("error")).to.eq err
           expect(lastLog.get("message")).to.eq "/foo/, @bar"
@@ -1873,7 +1873,7 @@ describe "src/cy/commands/xhr", ->
           expect(log.get("state")).to.eq("failed")
           expect(xhr.aborted).to.be.true
 
-    ## https://github.com/cypress-io/cypress/issues/3008      
+    ## https://github.com/cypress-io/cypress/issues/3008
     it "aborts xhrs even when responseType  not '' or 'text'", ->
       log = null
 
@@ -1881,7 +1881,7 @@ describe "src/cy/commands/xhr", ->
         if attrs.name is "xhr"
           if not log
             log = l
-      
+
       cy
       .window()
       .then (win) ->
@@ -2022,7 +2022,7 @@ describe "src/cy/commands/xhr", ->
 
       it "errors without a server", (done) ->
         cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the cy.server()"
+          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the `cy.server()`"
           done()
 
         cy.respond()
