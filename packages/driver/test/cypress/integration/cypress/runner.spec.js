@@ -28,7 +28,6 @@ describe('src/cypress/runner', () => {
     })
 
     container.append(btn)
-    cy.visit('/fixtures/generic.html')
   })
 
   beforeEach(function () {
