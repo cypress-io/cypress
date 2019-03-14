@@ -1,20 +1,9 @@
-/* eslint object-property-newline: [
-  "error",
-  {
-    "allowAllPropertiesOnSameLine": true
-  }
-],
-object-curly-newline: ["error", { "multiline": true }],
-array-bracket-newline: ["error", { "multiline": true }],
-array-element-newline: ["error", { "multiline": true, "minItems": 4 }],
-object-curly-spacing: ["off"],
-key-spacing :["error", { "mode": "strict" }]
- */
+
 const { $, _ } = Cypress
 const helpers = require('../../support/helpers')
 const sinon = require('sinon')
 const { match } = sinon
-const m = match
+// const m = match
 const jestDiff = require('jest-diff')
 
 const backupCy = window.cy
@@ -47,7 +36,7 @@ describe('src/cypress/runner', () => {
 	 */
   let allStubs
 
-  beforeEach(function () {
+  before(() => {
     const btn = $('<span><button>COPY</button></span>', window.top.document)
     const container = $('.toggle-auto-scrolling.auto-scrolling-enabled', window.top.document).closest('.controls')
 
@@ -56,53 +45,55 @@ describe('src/cypress/runner', () => {
     })
 
     container.append(btn)
+    cy.visit('/fixtures/generic.html')
+  })
+
+  beforeEach(function () {
     window.cy = backupCy
     window.Cypress = backupCypress
     backupCypress.mocha.override()
     cy.state('returnedCustomPromise', false)
 
-    cy
-    .visit('/fixtures/generic.html')
-    .then((autWindow) => {
-      // delete top.Cypress
+    const autWindow = cy.state('window')
+    // delete top.Cypress
 
-      this.Cypress = Cypress.$Cypress.create(Cypress.config())
-      this.Cypress.onSpecWindow(autWindow)
-      this.Cypress.initialize($('.aut-iframe', top.document))
+    this.Cypress = Cypress.$Cypress.create(Cypress.config())
+    this.Cypress.onSpecWindow(autWindow)
+    this.Cypress.initialize($('.aut-iframe', top.document))
 
-      window.cy = backupCy
-      window.Cypress = backupCypress
+    window.cy = backupCy
+    window.Cypress = backupCypress
 
-      allStubs = cy.stub().log(false)
+    allStubs = cy.stub().log(false)
 
-      cy.stub(this.Cypress, 'emit').callsFake(allStubs)
-      cy.stub(this.Cypress, 'emitMap').callsFake(allStubs)
-      cy.stub(this.Cypress, 'emitThen').callsFake((...args) => {
-        allStubs(...args)
+    cy.stub(this.Cypress, 'emit').callsFake(allStubs)
+    cy.stub(this.Cypress, 'emitMap').callsFake(allStubs)
+    cy.stub(this.Cypress, 'emitThen').callsFake((...args) => {
+      allStubs(...args)
 
-        return Promise.resolve()
-      })
-
-      backupCypress.mocha.override()
-
-      this.runMochaTests = (obj) => {
-        this.Cypress.mocha.override()
-
-        helpers.generateMochaTestsForWin(autWindow, obj)
-
-        this.Cypress.normalizeAll()
-
-        return new Cypress.Promise((resolve) => {
-          return this.Cypress.run(resolve)
-        })
-      }
+      return Promise.resolve()
     })
+
+    backupCypress.mocha.override()
+
+    this.runMochaTests = (obj) => {
+      this.Cypress.mocha.override()
+
+      helpers.generateMochaTestsForWin(autWindow, obj)
+
+      this.Cypress.normalizeAll()
+
+      return new Cypress.Promise((resolve) => {
+        return this.Cypress.run(resolve)
+      })
+    }
+
   })
 
   describe('isolated runner', function () {
     // it('empty', () => {})
 
-    it.only('simple 1', function () {
+    it('simple 1', function () {
       return this.runMochaTests({ suites: { 'suite 1': { tests: [{ name: 'test 1' }] } } })
       .then(shouldHavePassed())
       .then(() => {
@@ -657,8 +648,14 @@ describe('src/cypress/runner', () => {
             ['run:start'],
             ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
             ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'state': 'passed'		}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': '"before all" hook',			'hookName': 'before all',			'hookId': 'h1'		}],
+            ['fail',		{}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
+            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
+            ['test:before:run',		{			'id': 'r4',			'title': 'test 2'		}],
+            ['test:before:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+            ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+            ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'state': 'passed'		}],
             ['run:end'],
           ])
         })
@@ -694,7 +691,6 @@ describe('src/cypress/runner', () => {
       })
     })
   })
-
 })
 
 const cleanse = (obj = {}, keys) => {
