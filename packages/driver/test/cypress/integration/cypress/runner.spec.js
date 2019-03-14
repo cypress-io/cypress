@@ -712,7 +712,7 @@ describe('src/cypress/runner', () => {
     })
 
     describe('mocha grep', () => {
-      it('fail with .only', function () {
+      it.skip('fail with .only', function () {
 
         return this.runMochaTests({
           suites: {
@@ -762,7 +762,7 @@ describe('src/cypress/runner', () => {
     })
 
     describe('retries', () => {
-      it('simple retry', function () {
+      it.skip('simple retry', function () {
         this.Cypress.env('RETRIES', 1)
 
         return this.runMochaTests({
@@ -810,7 +810,12 @@ const cleanse = (obj = {}, keys) => {
 }
 
 const formatEvents = (stub) => {
-  return stub.args.map((args) => {
+  return _.flatMap(stub.args, ((args) => {
+
+    if (args[0] === 'mocha') {
+      return []
+    }
+
     if (_.isObject(args[1])) {
       args[1] = _.omit(args[1], [
         'body',
@@ -830,8 +835,8 @@ const formatEvents = (stub) => {
       ret = ret.concat([args[1]])
     }
 
-    return ret
-  })
+    return [ret]
+  }))
 }
 
 const shouldHaveFailed = (exp) => {
