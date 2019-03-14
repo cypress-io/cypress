@@ -23,7 +23,7 @@ exports['e2e commands outside of test fails 1'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught CypressError: Cannot call "cy.viewport()" outside a running test.
+     Uncaught CypressError: Cannot call "`cy.viewport()`" outside a running test.
 
 This usually happens when you accidentally write commands outside an it(...) test.
 

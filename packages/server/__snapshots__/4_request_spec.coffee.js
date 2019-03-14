@@ -226,7 +226,7 @@ exports['e2e requests fails on status code 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     CypressError: cy.request() failed on:
+     CypressError: `cy.request()` failed on:
 
 http://localhost:2294/statusCode?code=503
 
