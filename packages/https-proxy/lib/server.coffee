@@ -27,6 +27,10 @@ class Server
     @_onError = null
 
   connect: (req, socket, head, options = {}) ->
+    ## don't buffer writes - thanks a lot, Nagle
+    ## https://github.com/cypress-io/cypress/issues/3192
+    socket.setNoDelay(true)
+
     if not head or head.length is 0
       debug("Writing socket connection headers for URL:", req.url)
 
@@ -100,6 +104,7 @@ class Server
     args = _.compact([port, hostname, onConnect])
 
     conn = net.connect.apply(net, args)
+    conn.setNoDelay(true)
 
     conn.on "error", (err) =>
       if @_onError
