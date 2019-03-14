@@ -1,20 +1,9 @@
-/* eslint object-property-newline: [
-  "error",
-  {
-    "allowAllPropertiesOnSameLine": true
-  }
-],
-object-curly-newline: ["error", { "multiline": true }],
-array-bracket-newline: ["error", { "multiline": true }],
-array-element-newline: ["error", { "multiline": true, "minItems": 4 }],
-object-curly-spacing: ["off"],
-key-spacing :["error", { "mode": "strict" }]
- */
+
 const { $, _ } = Cypress
 const helpers = require('../../support/helpers')
 const sinon = require('sinon')
 const { match } = sinon
-const m = match
+// const m = match
 const jestDiff = require('jest-diff')
 
 const backupCy = window.cy
@@ -22,40 +11,27 @@ const backupCypress = window.Cypress
 
 backupCy.__original__ = true
 
-const assert = (expr, message) => {
-  if (!expr) {
-    message = `Assertion Failed: ${message}`
-    Cypress.log({
-      message,
-      state: 'failed',
-      name: 'assert',
-    })
-    throw new Error(message)
-  }
-
-  Cypress.log({
-    message,
-    name: 'assert',
-    state: 'passed',
-  })
-}
 let lastActual = 'none'
 
 describe('src/cypress/runner', () => {
   /**
-	 * @type {sinon.SinonStub}
+   * @type {sinon.SinonStub}
 	 */
   let allStubs
 
+  before(() => {
+    const btn = $('<span><button>COPY</button></span>', window.top.document)
+    const container = $('.toggle-auto-scrolling.auto-scrolling-enabled', window.top.document).closest('.controls')
+
+    btn.on('click', () => {
+      copyToClipboard(JSON.stringify(lastActual, null, '\t'))
+    })
+
+    container.append(btn)
+    cy.visit('/fixtures/generic.html')
+  })
+
   beforeEach(function () {
-    // const btn = $('<span><button>COPY</button></span>', window.top.document)
-    // const container = $('.toggle-auto-scrolling.auto-scrolling-enabled', window.top.document).closest('.controls')
-
-    // btn.on('click', () => {
-    //   copyToClipboard(JSON.stringify(lastActual, null, '\t'))
-    // })
-
-    // container.append(btn)
     window.cy = backupCy
     window.Cypress = backupCypress
 
@@ -66,10 +42,11 @@ describe('src/cypress/runner', () => {
       this.Cypress.onSpecWindow(autWindow)
       this.Cypress.initialize($('.aut-iframe', top.document))
 
-      window.cy = backupCy
-      window.Cypress = backupCypress
-
       this.runMochaTests = (obj) => {
+        helpers.generateMochaTestsForWin(autWindow, obj)
+
+        this.Cypress.normalizeAll()
+
         allStubs = cy.stub().log(false)
 
         cy.stub(this.Cypress, 'emit').callsFake(allStubs)
@@ -80,12 +57,11 @@ describe('src/cypress/runner', () => {
           return Promise.resolve()
         })
 
-        helpers.generateMochaTestsForWin(autWindow, obj)
-
-        this.Cypress.normalizeAll()
-
         return new Cypress.Promise((resolve) => {
           return this.Cypress.run(resolve)
+        })
+        .tap(() => {
+          this.Cypress.env('RETRIES', 0)
         })
       }
     })
@@ -94,7 +70,7 @@ describe('src/cypress/runner', () => {
   describe('isolated runner', function () {
     // it('empty', () => {})
 
-    it.only('simple 1', function () {
+    it('simple 1', function () {
       return this.runMochaTests({ suites: { 'suite 1': { tests: [{ name: 'test 1' }] } } })
       .then(shouldHavePassed())
       .then(() => {
@@ -430,6 +406,39 @@ describe('src/cypress/runner', () => {
         ])
       })
     })
+
+    it('fail pass', function () {
+      return this.runMochaTests({
+        suites: {
+          'suite 1': {
+            tests: [
+              {
+                name: 'test 1',
+                fail: true,
+              },
+              { name: 'test 2' },
+            ],
+          },
+        },
+      })
+      .then(shouldHaveFailed(1))
+      .then(() => {
+
+        assertMatch(formatEvents(allStubs), [
+          ['run:start'],
+          ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
+          ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+          ['fail',		{}],
+          ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
+          ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
+          ['test:before:run',		{			'id': 'r4',			'title': 'test 2'		}],
+          ['test:before:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+          ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+          ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'state': 'passed'		}],
+          ['run:end'],
+        ])
+      })
+    })
     it('no tests', function () {
       return this.runMochaTests({})
       .then(shouldHaveFailed(0))
@@ -649,14 +658,21 @@ describe('src/cypress/runner', () => {
             ['run:start'],
             ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
             ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'state': 'passed'		}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': '"before all" hook',			'hookName': 'before all',			'hookId': 'h1'		}],
+            ['fail',		{}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
+            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
+            ['test:before:run',		{			'id': 'r4',			'title': 'test 2'		}],
+            ['test:before:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+            ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+            ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'state': 'passed'		}],
             ['run:end'],
           ])
         })
       })
 
       it('fail with [after]', function () {
+
         return this.runMochaTests({
           suites: {
             'suite 1': {
@@ -685,8 +701,89 @@ describe('src/cypress/runner', () => {
         })
       })
     })
-  })
 
+    describe('mocha grep', () => {
+      it.skip('fail with .only', function () {
+
+        return this.runMochaTests({
+          suites: {
+            'suite 1': {
+              tests: [{ name: 'a test', fail: true }, { name: 'test 1', fail: true, only: true }, 'test 2'],
+            },
+          },
+        })
+        .then(shouldHaveFailed(1))
+        .then(() => {
+
+          assertMatch(formatEvents(allStubs), [
+            ['run:start'],
+            [
+              'test:before:run',
+              {
+                'id': 'r3',
+                'title': 'test 1',
+              },
+            ], [
+              'test:before:run:async',
+              {
+                'id': 'r3', 'title': 'test 1',
+              },
+            ], [
+              'fail',
+              {},
+            ], [
+              'runnable:after:run:async',
+              {
+                'id': 'r3',
+                'title': 'test 1',
+                'err': '[Object]',
+              },
+            ], [
+              'test:after:run',
+              {
+                'id': 'r3',
+                'title': 'test 1',
+                'err': '[Object]',
+                'state': 'failed',
+              },
+            ], ['run:end'],
+          ])
+        })
+      })
+    })
+
+    describe('retries', () => {
+      it.skip('simple retry', function () {
+        this.Cypress.env('RETRIES', 1)
+
+        return this.runMochaTests({
+          suites: {
+            'suite 1': {
+              tests: [{ name: 'test 1', fail: 1 }],
+              // tests: [{ name: 'test 1', fail: true }, 'test 2'],
+            },
+          },
+        })
+        .then(shouldHaveFailed(0))
+        .then(() => {
+
+          assertMatch(formatEvents(allStubs), [
+            ['run:start'],
+            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['fail',		{}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
+            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
+            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'state': 'passed'		}],
+            ['run:end'],
+          ])
+        })
+      })
+    })
+  })
 })
 
 const cleanse = (obj = {}, keys) => {
@@ -704,7 +801,12 @@ const cleanse = (obj = {}, keys) => {
 }
 
 const formatEvents = (stub) => {
-  return stub.args.map((args) => {
+  return _.flatMap(stub.args, ((args) => {
+
+    if (args[0] === 'mocha') {
+      return []
+    }
+
     if (_.isObject(args[1])) {
       args[1] = _.omit(args[1], [
         'body',
@@ -724,8 +826,8 @@ const formatEvents = (stub) => {
       ret = ret.concat([args[1]])
     }
 
-    return ret
-  })
+    return [ret]
+  }))
 }
 
 const shouldHaveFailed = (exp) => {
@@ -765,7 +867,9 @@ const assertMatch = (act, exp, message) => {
     // console.log(jestDiff(exp, act))
     if (_.isObject(act)) {
       lastActual = act
-      assert(false, `expected object ${res.message}: ${jestDiff(exp, act)}`)
+      const diffString = jestDiff(exp, act).replace(/Array \[/g, '[').replace(/Object \{/g, '{')
+
+      assert(false, `expected object ${res.message}: ${diffString}`)
     }
 
     assert(false, `expected ${res.message}, but was ${act}`)
@@ -775,15 +879,33 @@ const assertMatch = (act, exp, message) => {
   assert(true, `expected ${message || 'var'} to ${res.message}`)
 }
 
-// function copyToClipboard (text) {
+function copyToClipboard (text) {
+  let aux = document.createElement('input')
 
-//   let aux = document.createElement('input')
+  aux.setAttribute('value', text)
+  document.body.appendChild(aux)
+  aux.select()
+  document.execCommand('copy')
+  document.body.removeChild(aux)
 
-//   aux.setAttribute('value', text)
-//   document.body.appendChild(aux)
-//   aux.select()
-//   document.execCommand('copy')
-//   document.body.removeChild(aux)
+}
 
-// }
+const assert = (expr, message) => {
+  if (!expr) {
+    message = `Assertion Failed: ${message}`
+    Cypress.log({
+      message,
+      state: 'failed',
+      name: 'assert',
+    })
+    throw new Error(message)
+  }
 
+  // eslint-disable-next-line no-console
+  console.log(`%cassert:%c${message}`, 'color:green', '')
+  window.Cypress.log({
+    message,
+    name: 'assert',
+    state: 'passed',
+  })
+}
