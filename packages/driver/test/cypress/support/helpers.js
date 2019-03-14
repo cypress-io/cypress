@@ -10,16 +10,23 @@ const getQueueNames = () => {
 
 const createHooks = (win, hooks = []) => {
   _.each(hooks, (hook) => {
+
     if (_.isObject(hook)) {
-      const { type, fail, fn } = hook
+      let { type, fail, fn } = hook
 
       if (fn) {
         return win[type](new Function(fn.toString()))
       }
 
       if (fail) {
+
         return win[type](() => {
+          if (_.isNumber(fail) && fail--) {
+            return
+          }
+
           throw new Error(`hook failed: ${type}`)
+
         })
       }
 
@@ -32,27 +39,38 @@ const createHooks = (win, hooks = []) => {
 
 const createTests = (win, tests = []) => {
   _.each(tests, (test) => {
-    if (_.isObject(test)) {
-      const { name, pending, fail, fn } = test
-
-      if (fn) {
-        return win.it(name, new Function(fn.toString()))
-      }
-
-      if (pending) {
-        return win.it(name)
-      }
-
-      if (fail) {
-        return win.it(name, () => {
-          throw new Error(`test failed: ${name}`)
-        })
-      }
-
-      return win.it(name, () => {})
+    if (_.isString(test)) {
+      test = { name: test }
     }
 
-    win.it(test, () => {})
+    let { name, pending, fail, fn, only } = test
+
+    let it = win.it
+
+    if (only) {
+      it = it['only']
+    }
+
+    if (fn) {
+      return it(name, new Function(fn.toString()))
+    }
+
+    if (pending) {
+      return it(name)
+    }
+
+    if (fail) {
+      return it(name, () => {
+        if (_.isNumber(fail) && fail-- === 0) {
+          return
+        }
+
+        throw new Error(`test failed: ${name}`)
+      })
+    }
+
+    return it(name, () => {})
+
   })
 }
 

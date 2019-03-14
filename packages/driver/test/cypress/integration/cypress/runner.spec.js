@@ -11,28 +11,11 @@ const backupCypress = window.Cypress
 
 backupCy.__original__ = true
 
-const assert = (expr, message) => {
-  if (!expr) {
-    message = `Assertion Failed: ${message}`
-    Cypress.log({
-      message,
-      state: 'failed',
-      name: 'assert',
-    })
-    throw new Error(message)
-  }
-
-  Cypress.log({
-    message,
-    name: 'assert',
-    state: 'passed',
-  })
-}
 let lastActual = 'none'
 
 describe('src/cypress/runner', () => {
   /**
-	 * @type {sinon.SinonStub}
+   * @type {sinon.SinonStub}
 	 */
   let allStubs
 
@@ -85,6 +68,9 @@ describe('src/cypress/runner', () => {
 
       return new Cypress.Promise((resolve) => {
         return this.Cypress.run(resolve)
+      })
+      .tap(() => {
+        this.Cypress.env('RETRIES', 0)
       })
     }
 
@@ -430,6 +416,39 @@ describe('src/cypress/runner', () => {
         ])
       })
     })
+
+    it('fail pass', function () {
+      return this.runMochaTests({
+        suites: {
+          'suite 1': {
+            tests: [
+              {
+                name: 'test 1',
+                fail: true,
+              },
+              { name: 'test 2' },
+            ],
+          },
+        },
+      })
+      .then(shouldHaveFailed(1))
+      .then(() => {
+
+        assertMatch(formatEvents(allStubs), [
+          ['run:start'],
+          ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
+          ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+          ['fail',		{}],
+          ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
+          ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
+          ['test:before:run',		{			'id': 'r4',			'title': 'test 2'		}],
+          ['test:before:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+          ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
+          ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'state': 'passed'		}],
+          ['run:end'],
+        ])
+      })
+    })
     it('no tests', function () {
       return this.runMochaTests({})
       .then(shouldHaveFailed(0))
@@ -662,6 +681,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('fail with [after]', function () {
+
         return this.runMochaTests({
           suites: {
             'suite 1': {
@@ -685,6 +705,88 @@ describe('src/cypress/runner', () => {
             ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
             ['runnable:after:run:async',		{			'id': 'r4',			'title': '"after all" hook',			'hookName': 'after all',			'hookId': 'h1'		}],
             ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'state': 'passed'		}],
+            ['run:end'],
+          ])
+        })
+      })
+    })
+
+    describe('mocha grep', () => {
+      it('fail with .only', function () {
+
+        return this.runMochaTests({
+          suites: {
+            'suite 1': {
+              tests: [{ name: 'a test', fail: true }, { name: 'test 1', fail: true, only: true }, 'test 2'],
+            },
+          },
+        })
+        .then(shouldHaveFailed(1))
+        .then(() => {
+
+          assertMatch(formatEvents(allStubs), [
+            ['run:start'],
+            [
+              'test:before:run',
+              {
+                'id': 'r3',
+                'title': 'test 1',
+              },
+            ], [
+              'test:before:run:async',
+              {
+                'id': 'r3', 'title': 'test 1',
+              },
+            ], [
+              'fail',
+              {},
+            ], [
+              'runnable:after:run:async',
+              {
+                'id': 'r3',
+                'title': 'test 1',
+                'err': '[Object]',
+              },
+            ], [
+              'test:after:run',
+              {
+                'id': 'r3',
+                'title': 'test 1',
+                'err': '[Object]',
+                'state': 'failed',
+              },
+            ], ['run:end'],
+          ])
+        })
+      })
+    })
+
+    describe('retries', () => {
+      it('simple retry', function () {
+        this.Cypress.env('RETRIES', 1)
+
+        return this.runMochaTests({
+          suites: {
+            'suite 1': {
+              tests: [{ name: 'test 1', fail: 1 }],
+              // tests: [{ name: 'test 1', fail: true }, 'test 2'],
+            },
+          },
+        })
+        .then(shouldHaveFailed(0))
+        .then(() => {
+
+          assertMatch(formatEvents(allStubs), [
+            ['run:start'],
+            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['fail',		{}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
+            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
+            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
+            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'state': 'passed'		}],
             ['run:end'],
           ])
         })
@@ -769,7 +871,9 @@ const assertMatch = (act, exp, message) => {
     // console.log(jestDiff(exp, act))
     if (_.isObject(act)) {
       lastActual = act
-      assert(false, `expected object ${res.message}: ${jestDiff(exp, act)}`)
+      const diffString = jestDiff(exp, act).replace(/Array \[/g, '[').replace(/Object \{/g, '{')
+
+      assert(false, `expected object ${res.message}: ${diffString}`)
     }
 
     assert(false, `expected ${res.message}, but was ${act}`)
@@ -791,3 +895,22 @@ function copyToClipboard (text) {
 
 }
 
+const assert = (expr, message) => {
+  if (!expr) {
+    message = `Assertion Failed: ${message}`
+    Cypress.log({
+      message,
+      state: 'failed',
+      name: 'assert',
+    })
+    throw new Error(message)
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`%cassert:%c${message}`, 'color:green', '')
+  window.Cypress.log({
+    message,
+    name: 'assert',
+    state: 'passed',
+  })
+}
