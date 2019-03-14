@@ -201,10 +201,6 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   send = (event, props, resolve) ->
     Cypress.action("cy:#{event}", props, resolve)
 
-  sendAsync = (event, props) ->
-    new Promise (resolve) ->
-      send(event, props, resolve)
-
   getOptions = (isOpen) ->
     {
       id: runnable.id
@@ -220,7 +216,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     if disableTimersAndAnimations
       cy.pauseTimers(true)
 
-    sendAsync("before:screenshot", getOptions(true))
+    send("before:screenshot", getOptions(true))
 
   after = ->
     send("after:screenshot", getOptions(false))
