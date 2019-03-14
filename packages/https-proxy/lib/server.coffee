@@ -125,15 +125,17 @@ class Server
         socket.resume()
         return socket.destroy()
 
+      upstreamSock.setNoDelay(true)
       upstreamSock.pipe(socket)
       socket.pipe(upstreamSock)
       socket.emit("data", head)
 
       socket.resume()
 
-    agent = new HttpsAgent(upstreamProxy)
+    if !@httpsAgent
+      @httpsAgent = new HttpsAgent(upstreamProxy)
 
-    agent.callback req, {
+    @httpsAgent.callback req, {
       port: toPort
       host: toHostname
     }, onUpstreamSock.bind(@)
