@@ -72,6 +72,9 @@ niv.install("react-dom@15.6.1")
     res.setHeader('Content-Type', 'text/html; charset=utf-8,text/html')
     res.end("<html><head><title>Test</title></head><body><center>Hello</center></body></html>")
 
+  app.all '/dump-method', (req, res) ->
+    res.send("<html><body>request method: #{req.method}</body></html>")
+
   app.post '/post-only', (req, res) ->
     res.send("<html><body>it worked!<br>request body:<br>#{JSON.stringify(req.body)}</body></html>")
 

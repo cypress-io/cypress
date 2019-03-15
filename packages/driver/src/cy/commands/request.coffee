@@ -4,8 +4,6 @@ Promise = require("bluebird")
 $utils = require("../../cypress/utils")
 $Location = require("../../cypress/location")
 
-validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
-
 isOptional = (memo, val, key) ->
   if _.isNull(val)
     memo.push(key)
@@ -28,9 +26,6 @@ REQUEST_DEFAULTS = {
 REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
-
-argIsHttpMethod = (str) ->
-  _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
 
 isValidJsonObj = (body) ->
   _.isObject(body) and not _.isFunction(body)
@@ -60,7 +55,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when args.length is 2
           ## if our first arg is a valid
           ## HTTP method then set method + url
-          if argIsHttpMethod(args[0])
+          if $utils.isValidHttpMethod(args[0])
             o.method = args[0]
             o.url    = args[1]
           else
@@ -92,7 +87,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.has(options, "followRedirects")
         options.followRedirect = options.followRedirects
 
-      if not validHttpMethodsRe.test(options.method)
+      if not $utils.isValidHttpMethod(options.method)
         $utils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
