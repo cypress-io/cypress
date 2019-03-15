@@ -137,6 +137,16 @@ describe "src/cy/commands/misc", ->
           expect(Array.isArray(arr)).to.be.true
           expect(arr[0]).to.eq(doc)
 
+    ## https://github.com/cypress-io/cypress/issues/2927
+    it "can properly handle objects with 'jquery' functions as properties", ->
+      ## the root issue here has to do with the fact that window.jquery points
+      ## to the jquery constructor, but not an actual jquery instance and
+      ## we need to account for that...
+      cy.window().then (win) ->
+        win.jquery = ->
+
+        return win
+
     describe "errors", ->
       it "throws when wrapping an array of windows", (done) ->
         cy.on "fail", (err) =>

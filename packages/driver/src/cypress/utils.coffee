@@ -40,10 +40,7 @@ module.exports = {
     item = [].concat(val)[0]
 
     if $jquery.isJquery(item)
-      ## Need check to support jQuery legacy versions
-      ## https://github.com/cypress-io/cypress/issues/2927
-      if item.first
-        return item.first()
+      return item.first()
 
     return item
 
