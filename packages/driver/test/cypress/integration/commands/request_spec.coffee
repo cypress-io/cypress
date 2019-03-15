@@ -153,7 +153,7 @@ describe "src/cy/commands/request", ->
               timeout: RESPONSE_TIMEOUT
             })
 
-        it "uses wwww urls", ->
+        it "uses www urls", ->
           cy.request("www.foo.com").then ->
             @expectOptionsToBe({
               url: "http://www.foo.com/"
@@ -350,6 +350,14 @@ describe "src/cy/commands/request", ->
         .then (resp) ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(401)
+
+    describe "method", ->
+      it "can use M-SEARCH method", ->
+        cy.request({
+          url: 'http://localhost:3500/dump-method',
+          method: 'm-Search'
+        }).then (res) =>
+          expect(res.body).to.contain('M-SEARCH')
 
     describe "subjects", ->
       it "resolves with response obj", ->
@@ -661,7 +669,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS")
+          expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser.")
           done()
 
         cy.request({
