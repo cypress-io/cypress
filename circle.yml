@@ -352,9 +352,9 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  "driver-integration-tests-3x":
+  "driver-integration-tests-5x":
     <<: *defaults
-    parallelism: 3
+    parallelism: 5
     steps:
       - attach_workspace:
           at: ~/
@@ -369,7 +369,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
+            npm run cypress:run -- --record --parallel --group 5x-driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -733,7 +733,7 @@ linux-workflow: &linux-workflow
     - server-e2e-tests-8:
         requires:
           - build
-    - driver-integration-tests-3x:
+    - driver-integration-tests-5x:
         requires:
           - build
     - desktop-gui-integration-tests-2x:
