@@ -255,20 +255,17 @@ class Server
   _listen: (port, onError) ->
     new Promise (resolve) =>
       listener = =>
-        port = @_server.address().port
+        address = @_server.address()
 
         @isListening = true
 
-        debug("Server listening on port %s", port)
+        debug("Server listening on ", address)
 
         @_server.removeListener "error", onError
 
-        resolve(port)
+        resolve(address.port)
 
-      ## nuke port from our args if its falsy
-      args = _.compact([port, listener])
-
-      @_server.listen.apply(@_server, args)
+      @_server.listen(port || 0, '127.0.0.1', listener)
 
   _getRemoteState: ->
     # {
