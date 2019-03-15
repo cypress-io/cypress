@@ -1,14 +1,16 @@
 {
   // settings for linting TypeScript files in this folder
   // using https://github.com/Microsoft/dtslint
-
   // to force full checking you may need to reinstall dtsint with `npm i dtslint`
   // and then run `npm run dtslint`. This will force installing different versions
   // of TypeScript (2.0, 2.1, 2.2, ... next) and will run lint check against every version.
   "extends": "dtslint/dtslint.json",
   // disable some rules that we do not need
   "rules": {
-    "semicolon": [true, "never"],
+    "semicolon": [
+      true,
+      "never"
+    ],
     "no-namespace": false,
     "newline-per-chained-call": false,
     "max-line-length": false,
@@ -18,6 +20,22 @@
     "only-arrow-functions": false,
     "no-unnecessary-generics": false,
     "export-just-namespace": false,
-    "file-name-casing": false
+    "file-name-casing": false,
+    "jsdoc-format": false
+  },
+  "linterOptions": {
+    "exclude": [
+      // Lodash types and other external types are 3rd party and don't follow our rules
+      "./blob-util/*",
+      "./bluebird/*",
+      "./chai/*",
+      "./chai-jquery/*",
+      "./jquery/*",
+      "./lodash/**/*",
+      "./mocha/*",
+      "./minimatch/*",
+      "./sinon/**/*",
+      "./sinon-chai/*"
+    ]
   }
 }

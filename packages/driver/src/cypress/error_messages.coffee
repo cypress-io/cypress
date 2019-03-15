@@ -519,7 +519,7 @@ module.exports = {
     auth_invalid: "#{cmd('request')} must be passed an object literal for the 'auth' option."
     gzip_invalid: "#{cmd('request')} requires the 'gzip' option to be a boolean."
     headers_invalid: "#{cmd('request')} requires the 'headers' option to be an object literal."
-    invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
     form_invalid: """
     #{cmd('request')} requires the 'form' option to be a boolean.
 
@@ -616,7 +616,7 @@ module.exports = {
   route:
     failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
     invalid_arguments: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
-    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
     response_invalid: "#{cmd('route')} cannot accept an undefined or null response. It must be set to something, even an empty string will work."
     url_invalid: "#{cmd('route')} was called with an invalid url. Url must be either a string or regular expression."
     url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
@@ -845,7 +845,15 @@ module.exports = {
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
   visit:
-    invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
+    invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
+    invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
+    invalid_headers: "#{cmd('visit')} requires the 'headers' option to be an object."
+    no_duplicate_url: """
+      #{cmd('visit')} must be called with only one URL. You specified two URLs:
+
+      URL from the `options` object: {{optionsUrl}}
+      URL from the `url` parameter: {{url}}
+    """
     cannot_visit_2nd_domain: """
       #{cmd('visit')} failed because you are attempting to visit a second unique domain.
 

@@ -49,24 +49,34 @@ formStatePath = require("#{root}lib/util/saved_state").formStatePath
 TYPICAL_BROWSERS = [
   {
     name: 'chrome',
+    family: 'chrome',
     displayName: 'Chrome',
     version: '60.0.3112.101',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     majorVersion: '60'
   }, {
     name: 'chromium',
+    family: 'chrome',
     displayName: 'Chromium',
     version: '49.0.2609.0',
     path: '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
     majorVersion: '49'
   }, {
     name: 'canary',
+    family: 'chrome',
     displayName: 'Canary',
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     majorVersion: '62'
   }
 ]
+
+ELECTRON_BROWSER = {
+  name: "electron"
+  family: "electron"
+  displayName: "Electron"
+  path: ""
+}
 
 previousCwd = process.cwd()
 
@@ -256,7 +266,7 @@ describe "lib/cypress", ->
     it "runs project headlessly and exits with exit code 0", ->
       cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron")
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
@@ -304,7 +314,7 @@ describe "lib/cypress", ->
         "--spec=#{relativePath}/tests/test2.coffee"
       ])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
           url: "http://localhost:8888/__/#/tests/integration/test2.coffee"
         })
         @expectExitWith(0)
@@ -312,13 +322,13 @@ describe "lib/cypress", ->
     it "runs project by specific spec with default configuration", ->
       cypress.start(["--run-project=#{@idsPath}", "--spec=#{@idsPath}/cypress/integration/bar.js", "--config", "port=2020"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:2020/__/#/tests/integration/bar.js"})
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:2020/__/#/tests/integration/bar.js"})
         @expectExitWith(0)
 
     it "runs project by specific absolute spec and exits with status 0", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
     it "scaffolds out integration and example specs if they do not exist when not runMode", ->
@@ -421,7 +431,7 @@ describe "lib/cypress", ->
     it "runs project headlessly and displays gui", ->
       cypress.start(["--run-project=#{@todosPath}", "--headed"])
       .then =>
-        expect(browsers.open).to.be.calledWithMatch("electron", {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
           proxyServer: "http://localhost:8888"
           show: true
         })
@@ -501,14 +511,14 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@idsPath}"])
       .then =>
-        @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
+        @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your `supportFile` is set to `/does/not/exist`,")
 
     it "logs error when browser cannot be found", ->
       browsers.open.restore()
 
       cypress.start(["--run-project=#{@idsPath}", "--browser=foo"])
       .then =>
-        @expectExitWithErr("BROWSER_NOT_FOUND")
+        @expectExitWithErr("BROWSER_NOT_FOUND_BY_NAME")
 
         ## get all the error args
         argsSet = errors.log.args
@@ -781,7 +791,7 @@ describe "lib/cypress", ->
           .then =>
             args = browserUtils.launch.firstCall.args
 
-            expect(args[0]).to.eq("chrome")
+            expect(args[0]).to.eq(_.find(TYPICAL_BROWSERS, { name: "chrome" }))
 
             browserArgs = args[2]
 
@@ -1072,7 +1082,7 @@ describe "lib/cypress", ->
         osVersion: "v1"
       })
 
-      sinon.stub(browsers, "ensureAndGetByName").returns({
+      sinon.stub(browsers, "ensureAndGetByNameOrPath").returns({
         version: "59.1.2.3"
         displayName: "Electron"
       })

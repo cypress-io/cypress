@@ -65,7 +65,7 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-cli-deps
+          key: v7-{{ arch }}-{{ .Branch }}-cli-deps
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-root-deps
       - restore_cache:
@@ -85,11 +85,11 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-reporter
+          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-runner
+          key: v8-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-server
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
@@ -117,7 +117,7 @@ jobs:
 
       # save each node_modules folder per package
       - save_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v7-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
           paths:
             - cli/node_modules
       - save_cache:
@@ -159,15 +159,15 @@ jobs:
           paths:
             - packages/launcher/node_modules
       - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
             - packages/reporter/node_modules
       - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:
@@ -212,6 +212,8 @@ jobs:
       - run: npm run test-mocha
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
+      # make sure packages with TypeScript can be transpiled to JS
+      - run: npm run all build-js
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
@@ -225,6 +227,22 @@ jobs:
       - run: npm run all test -- --package static
       - store_test_results:
           path: /tmp/cypress
+
+  lint-typescript:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: ls -la types
+          working_directory: cli
+      - run:
+          command: ls -la chai
+          working_directory: cli/types
+      - run:
+          command: npm run dtslint
+          working_directory: cli
 
   "server-unit-tests":
     <<: *defaults
@@ -334,9 +352,9 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  "driver-integration-tests-3x":
+  "driver-integration-tests-4x":
     <<: *defaults
-    parallelism: 3
+    parallelism: 5
     steps:
       - attach_workspace:
           at: ~/
@@ -351,7 +369,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
+            npm run cypress:run -- --record --parallel --group 4x-driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -518,6 +536,9 @@ jobs:
           working_directory: cli
           command: npm run build
       - run:
+          command: ls -la types
+          working_directory: cli/build
+      - run:
           name: list NPM package contents
           working_directory: cli/build
           command: npm run size
@@ -675,6 +696,9 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
+    - lint-typescript:
+        requires:
+          - build
     # unit, integration and e2e tests
     - unit-tests:
         requires:
@@ -709,7 +733,7 @@ linux-workflow: &linux-workflow
     - server-e2e-tests-8:
         requires:
           - build
-    - driver-integration-tests-3x:
+    - driver-integration-tests-4x:
         requires:
           - build
     - desktop-gui-integration-tests-2x:

@@ -1,18 +1,11 @@
 import { log } from '../log'
-import { FoundBrowser, Browser, NotInstalledError } from '../types'
+import { FoundBrowser, Browser } from '../types'
+import { notInstalledErr } from '../errors'
 import * as execa from 'execa'
 import { normalize, join } from 'path'
 import { trim, tap } from 'ramda'
 import { pathExists } from 'fs-extra'
 import { homedir } from 'os'
-
-const notInstalledErr = (name: string) => {
-  const err: NotInstalledError = new Error(
-    `Browser not installed: ${name}`
-  ) as NotInstalledError
-  err.notInstalled = true
-  return err
-}
 
 function formFullAppPath(name: string) {
   const prefix = 'C:/Program Files (x86)/Google/Chrome/Application'
@@ -53,10 +46,7 @@ const formPaths: WindowsBrowserPaths = {
   chromium: formChromiumAppPath
 }
 
-function getWindowsBrowser(
-  name: string,
-  binary: string
-): Promise<FoundBrowser> {
+function getWindowsBrowser(name: string): Promise<FoundBrowser> {
   const getVersion = (stdout: string): string => {
     // result from wmic datafile
     // "Version=61.0.3163.100"
@@ -66,35 +56,22 @@ function getWindowsBrowser(
       return m[1]
     }
     log('Could not extract version from %s using regex %s', stdout, wmicVersion)
-    throw notInstalledErr(binary)
+    throw notInstalledErr(name)
   }
 
   const formFullAppPathFn: any = formPaths[name] || formFullAppPath
   const exePath = formFullAppPathFn(name)
   log('exe path %s', exePath)
 
-  const doubleEscape = (s: string) => s.replace(/\\/g, '\\\\')
-
   return pathExists(exePath)
     .then(exists => {
       log('found %s ?', exePath, exists)
+
       if (!exists) {
         throw notInstalledErr(`Browser ${name} file not found at ${exePath}`)
       }
-      // on Windows using "--version" seems to always start the full
-      // browser, no matter what one does.
-      // @ts-ignore
-      const args: [string] = [
-        'datafile',
-        'where',
-        `name="${doubleEscape(exePath)}"`,
-        'get',
-        'Version',
-        '/value'
-      ]
-      return execa('wmic', args)
-        .then(result => result.stdout)
-        .then(trim)
+
+      return getVersionString(exePath)
         .then(tap(log))
         .then(getVersion)
         .then((version: string) => {
@@ -103,7 +80,7 @@ function getWindowsBrowser(
             name,
             version,
             path: exePath
-          }
+          } as FoundBrowser
         })
     })
     .catch(() => {
@@ -111,6 +88,26 @@ function getWindowsBrowser(
     })
 }
 
-export function detectBrowserWindows(browser: Browser) {
-  return getWindowsBrowser(browser.name, browser.binary)
+export function getVersionString(path: string) {
+  const doubleEscape = (s: string) => s.replace(/\\/g, '\\\\')
+
+  // on Windows using "--version" seems to always start the full
+  // browser, no matter what one does.
+
+  const args = [
+    'datafile',
+    'where',
+    `name="${doubleEscape(path)}"`,
+    'get',
+    'Version',
+    '/value'
+  ]
+
+  return execa('wmic', args)
+    .then(result => result.stdout)
+    .then(trim)
+}
+
+export function detect(browser: Browser) {
+  return getWindowsBrowser(browser.name)
 }
