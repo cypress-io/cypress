@@ -91,6 +91,7 @@ context('Network Requests', () => {
     // https://on.cypress.io/route
 
     let message = 'whoa, this comment does not exist'
+
     cy.server()
 
     // Listen to GET to comments/1
