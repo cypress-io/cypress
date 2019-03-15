@@ -27,6 +27,9 @@ REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
+hasContentTypeFormUrlEncoded = (headers) ->
+  'content-type' == _.toLower(_.findKey(options.headers, (v) -> v == 'application/x-www-form-urlencoded'))
+
 isValidJsonObj = (body) ->
   _.isObject(body) and not _.isFunction(body)
 
@@ -115,7 +118,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## if a user has `x-www-form-urlencoded` content-type set with an object body, they meant to do this
       ## https://github.com/cypress-io/cypress/issues/2923
-      if _.isObject(options.body) and not options.json and 'content-type' == _.toLower(_.findKey(options.headers, (v) -> v == 'application/x-www-form-urlencoded'))
+      if _.isObject(options.body) and not options.json and hasContentTypeFormUrlEncoded(options.headers)
         options.form = true
 
       ## only set json to true if form isnt true
