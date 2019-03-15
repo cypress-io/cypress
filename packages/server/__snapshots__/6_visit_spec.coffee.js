@@ -103,7 +103,7 @@ exports['e2e visit low response timeout fails when network connection immediatel
   1 failing
 
   1) when network connection cannot be established fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: 'cy.visit()' failed trying to load:
 
 http://localhost:16795/
 
@@ -211,7 +211,7 @@ exports['e2e visit low response timeout fails when server responds with 500 1'] 
   1 failing
 
   1) when server response is 500 fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: 'cy.visit()' failed trying to load:
 
 http://localhost:3434/fail
 
@@ -307,7 +307,7 @@ exports['e2e visit low response timeout fails when file server responds with 404
   1 failing
 
   1) when file server response is 404 fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: 'cy.visit()' failed trying to load:
 
 /static/does-not-exist.html
 
@@ -403,7 +403,7 @@ exports['e2e visit low response timeout fails when content type isnt html 1'] = 
   1 failing
 
   1) when content type is plain/text fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: 'cy.visit()' failed trying to load:
 
 /static/hello.txt
 
@@ -413,9 +413,9 @@ The content-type of the response we received from this local file was:
 
 This was considered a failure because responses must have content-type: 'text/html'
 
-However, you can likely use cy.request() instead of cy.visit().
+However, you can likely use 'cy.request()' instead of 'cy.visit()'.
 
-cy.request() will automatically get and set cookies and enable you to parse responses.
+'cy.request()' will automatically get and set cookies and enable you to parse responses.
       at stack trace line
       at stack trace line
       at stack trace line

@@ -59,7 +59,7 @@ https://on.cypress.io/returning-value-and-commands-in-test
 
 The custom command was:
 
-  > cy.foo()
+  > 'cy.foo()'
 
 The return value was:
 
