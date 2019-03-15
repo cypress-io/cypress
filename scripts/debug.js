@@ -17,8 +17,10 @@ if (!pkgScript) {
 }
 
 const [cmd, ...args] = pkgScript.split(' ')
+const userArgs = process.argv.slice(3)
 
 args.unshift(`--inspect-brk=${INSPECT_PORT}`)
+args.push(...userArgs)
 
 const log = (k, v) => {
   // eslint-disable-next-line

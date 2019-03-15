@@ -30,34 +30,49 @@ kill = (unbind) ->
 cleanup = ->
   instance = null
 
-getBrowser = (name) ->
-  switch name
-    ## normalize all the chrome* browsers
-    when "chrome", "chromium", "canary"
-      require("./chrome")
+getBrowserLauncherByFamily = (family) ->
+  switch family
     when "electron"
       require("./electron")
+    when "chrome"
+      require("./chrome")
 
-find = (browser, browsers = []) ->
-  _.find(browsers, { name: browser })
+isValidPathToBrowser = (str) ->
+  path.basename(str) isnt str
 
-ensureAndGetByName = (name) ->
-  utils.getBrowsers()
+ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
+  utils.getBrowsers(nameOrPath)
   .then (browsers = []) ->
-    find(name, browsers) or throwBrowserNotFound(name, browsers)
+    ## try to find the browser by name with the highest version property
+    sortedBrowsers = _.sortBy(browsers, ['version'])
+    if browser = _.findLast(sortedBrowsers, { name: nameOrPath })
+      ## short circuit if found
+      if returnAll
+        return browsers
+      return browser
 
-throwBrowserNotFound = (browser, browsers = []) ->
+    ## did the user give a bad name, or is this actually a path?
+    if isValidPathToBrowser(nameOrPath)
+      ## looks like a path - try to resolve it to a FoundBrowser
+      return utils.getBrowserByPath(nameOrPath)
+      .then (browser) ->
+        if returnAll
+          return [browser].concat(browsers)
+        return browser
+      .catch (err) ->
+        errors.throw("BROWSER_NOT_FOUND_BY_PATH", nameOrPath, err.message)
+
+    ## not a path, not found by name
+    throwBrowserNotFound(nameOrPath, browsers)
+
+throwBrowserNotFound = (browserName, browsers = []) ->
   names = _.map(browsers, "name").join(", ")
-  errors.throw("BROWSER_NOT_FOUND", browser, names)
+  errors.throw("BROWSER_NOT_FOUND_BY_NAME", browserName, names)
 
 process.once "exit", kill
 
 module.exports = {
-  find
-
-  ensureAndGetByName
-
-  throwBrowserNotFound
+  ensureAndGetByNameOrPath
 
   removeOldProfiles: utils.removeOldProfiles
 
@@ -67,7 +82,12 @@ module.exports = {
 
   close: kill
 
-  open: (name, options = {}, automation) ->
+  getAllBrowsersWith: (nameOrPath) ->
+    if nameOrPath
+      return ensureAndGetByNameOrPath(nameOrPath, true)
+    utils.getBrowsers()
+
+  open: (browser, options = {}, automation) ->
     kill(true)
     .then ->
       _.defaults(options, {
@@ -75,15 +95,15 @@ module.exports = {
         onBrowserClose: ->
       })
 
-      if not browser = getBrowser(name)
-        return throwBrowserNotFound(name, options.browsers)
+      if not browserLauncher = getBrowserLauncherByFamily(browser.family)
+        return throwBrowserNotFound(browser, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
-      debug("opening browser %s", name)
+      debug("opening browser %o", browser)
 
-      browser.open(name, url, options, automation)
+      browserLauncher.open(browser, url, options, automation)
       .then (i) ->
         debug("browser opened")
         ## TODO: bind to process.exit here

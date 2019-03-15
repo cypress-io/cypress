@@ -255,20 +255,17 @@ class Server
   _listen: (port, onError) ->
     new Promise (resolve) =>
       listener = =>
-        port = @_server.address().port
+        address = @_server.address()
 
         @isListening = true
 
-        debug("Server listening on port %s", port)
+        debug("Server listening on ", address)
 
         @_server.removeListener "error", onError
 
-        resolve(port)
+        resolve(address.port)
 
-      ## nuke port from our args if its falsy
-      args = _.compact([port, listener])
-
-      @_server.listen.apply(@_server, args)
+      @_server.listen(port || 0, '127.0.0.1', listener)
 
   _getRemoteState: ->
     # {
@@ -458,15 +455,19 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
-        request.sendStream(headers, automationRequest, {
+        # if they're POSTing an object, querystringify their POST body
+        if options.method == 'POST' and _.isObject(options.body)
+          options.form = options.body
+          delete options.body
+
+        _.assign(options, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
-          auth: options.auth
           gzip: false
           url: urlFile ? urlStr
-          headers: {
+          headers: _.assign({
             accept: "text/html,*/*"
-          }
+          }, options.headers)
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
@@ -479,6 +480,10 @@ class Server
 
             return true
         })
+
+        debug('sending request with options %o', options)
+
+        request.sendStream(headers, automationRequest, options)
         .then(handleReqStream)
         .catch(error)
 

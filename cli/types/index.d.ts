@@ -7,19 +7,20 @@
 // TypeScript Version: 2.8
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference path="./blob-util.d.ts" />
-/// <reference path="./bluebird.d.ts" />
-/// <reference path="./minimatch.d.ts" />
-/// <reference path="./moment.d.ts" />
+/// <reference path="./cy-blob-util.d.ts" />
+/// <reference path="./cy-bluebird.d.ts" />
+/// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
+/// <reference path="./cy-chai.d.ts" />
+/// <reference path="./lodash/index.d.ts" />
+/// <reference path="./sinon/index.d.ts" />
+/// <reference path="./sinon-chai/index.d.ts" />
+/// <reference path="./mocha/index.d.ts" />
+/// <reference path="./jquery/index.d.ts" />
+/// <reference path="./chai-jquery/index.d.ts" />
 
-/// <reference types="chai" />
-/// <reference types="chai-jquery" />
-/// <reference types="jquery" />
-/// <reference types="lodash" />
-/// <reference types="mocha" />
+// "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
-/// <reference types="sinon" />
-/// <reference types="sinon-chai" />
 
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
@@ -93,7 +94,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: Mimimatch.MimimatchStatic
+    minimatch: typeof Minimatch.minimatch
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
@@ -1588,9 +1589,14 @@ declare namespace Cypress {
      * @example
      *    cy.visit('http://localhost:3000')
      *    cy.visit('/somewhere') // opens ${baseUrl}/somewhere
+     *    cy.visit({
+     *      url: 'http://google.com',
+     *      method: 'POST'
+     *    })
      *
      */
     visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
+    visit(options: Partial<VisitOptions> & { url: string }): Chainable<Window>
 
     /**
      * Wait for a number of milliseconds.
@@ -2210,7 +2216,7 @@ declare namespace Cypress {
      *
      * @default true
      */
-    cancable: boolean
+    cancelable: boolean
   }
 
   // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
@@ -3852,7 +3858,7 @@ declare namespace Cypress {
     })
     ```
      */
-    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
@@ -3869,7 +3875,7 @@ declare namespace Cypress {
     ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
+    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -4081,7 +4087,7 @@ declare namespace Cypress {
   }
 
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
-  type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
+  type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 }
 
