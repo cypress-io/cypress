@@ -28,7 +28,7 @@ REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
 hasContentTypeFormUrlEncoded = (headers) ->
-  'content-type' == _.toLower(_.findKey(options.headers, (v) -> v == 'application/x-www-form-urlencoded'))
+  'content-type' == _.toLower(_.findKey(headers, (v) -> v == 'application/x-www-form-urlencoded'))
 
 isValidJsonObj = (body) ->
   _.isObject(body) and not _.isFunction(body)
