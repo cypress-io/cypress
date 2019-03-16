@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 _             = require("lodash")
+os            = require("os")
 http          = require("http")
 express       = require("express")
 Promise       = require("bluebird")
@@ -29,6 +30,7 @@ describe "lib/server", ->
       @config = cfg
       @server = Server()
 
+      @oldFileServer = @server._fileServer
       @server._fileServer = @fileServer
 
   afterEach ->
@@ -113,6 +115,36 @@ describe "lib/server", ->
       @server.createServer(@app, {port: @port})
       .spread (port) =>
         expect(port).to.eq(@port)
+
+    it "all servers listen only on localhost and no other interface", ->
+      fileServer.create.restore()
+      @server._fileServer = @oldFileServer
+
+      interfaces = _.flatten(_.values(os.networkInterfaces()))
+      nonLoopback = interfaces.find (iface) =>
+        iface.family == "IPv4" && iface.address != "127.0.0.1"
+
+      ## verify that we can connect to `port` over loopback
+      ## and not over another configured IPv4 address
+      tryOnlyLoopbackConnect = (port) =>
+        Promise.all([
+          connect.byPortAndAddress(port, "127.0.0.1")
+          connect.byPortAndAddress(port, nonLoopback)
+          .then ->
+            throw new Error("Shouldn't be able to connect on #{nonLoopback.address}:#{port}")
+          .catch { errno: "ECONNREFUSED" }, ->
+        ])
+
+      @server.createServer(@app, {})
+      .spread (port) =>
+        Promise.map(
+          [
+            port
+            @server._fileServer.port()
+            @server._httpsProxy._sniPort
+          ],
+          tryOnlyLoopbackConnect
+        )
 
     it "resolves with warning if cannot connect to baseUrl", ->
       sinon.stub(connect, "ensureUrl").rejects()

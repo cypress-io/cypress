@@ -164,7 +164,7 @@ class Server
 
       @_sniServer.on "upgrade", @_onUpgrade.bind(@, options.onUpgrade)
       @_sniServer.on "request", @_onRequest.bind(@, options.onRequest)
-      @_sniServer.listen =>
+      @_sniServer.listen 0, '127.0.0.1', =>
         ## store the port of our current sniServer
         @_sniPort = @_sniServer.address().port
 
