@@ -1,5 +1,6 @@
 $ = require("jquery")
 _ = require("lodash")
+methods = require("methods")
 moment = require("moment")
 Promise = require("bluebird")
 
@@ -290,6 +291,9 @@ module.exports = {
     cmd.get("name") is "then" and
       args.length is 3 and
         _.every(args, _.isFunction)
+
+  isValidHttpMethod: (str) ->
+    _.isString(str) and _.includes(methods, str.toLowerCase())
 
   addTwentyYears: ->
     moment().add(20, "years").unix()
