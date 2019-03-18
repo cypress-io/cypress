@@ -157,22 +157,22 @@ describe "Specs List", ->
       context "collapsing specs", ->
         it "sets folder collapsed when clicked", ->
           cy.get(".folder:first").should("have.class", "folder-expanded")
-          cy.get(".folder .folder-display-name:first").click()
+          cy.get(".folder .folder-name:first").click()
           cy.get(".folder:first").should("have.class", "folder-collapsed")
 
         it "hides children when folder clicked", ->
           cy.get(".file").should("have.length", 7)
-          cy.get(".folder .folder-display-name:first").click()
+          cy.get(".folder .folder-name:first").click()
           cy.get(".file").should("have.length", 2)
 
         it "sets folder expanded when clicked twice", ->
-          cy.get(".folder .folder-display-name:first").click()
+          cy.get(".folder .folder-name:first").click()
           cy.get(".folder:first").should("have.class", "folder-collapsed")
-          cy.get(".folder .folder-display-name:first").click()
+          cy.get(".folder .folder-name:first").click()
           cy.get(".folder:first").should("have.class", "folder-expanded")
 
         it "hides children for every folder collapsed", ->
-          lastExpandedFolderSelector = ".folder-expanded:last > div > div > .folder-display-name:last"
+          lastExpandedFolderSelector = ".folder-expanded:last > div > div > .folder-name:last"
 
           cy.get(".file").should("have.length", 7)
 

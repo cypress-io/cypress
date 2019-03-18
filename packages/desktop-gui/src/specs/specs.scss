@@ -112,6 +112,18 @@ $max-nesting-level: 14;
   }
 
   .file, .folder {
+    .file-name,
+    .folder-name {
+      display: flex;
+      align-items: center;
+
+      i {
+        font-size: 13px;
+        margin-right: 5px;
+        flex-shrink: 0;
+      }
+    }
+
     @for $i from 0 through $max-nesting-level {
       &.level-#{$i} {
         .file-name,
@@ -128,21 +140,6 @@ $max-nesting-level: 14;
     font-size: 15px;
     color: #636363;
     font-family: $font-sans;
-
-    i {
-      font-size: 13px;
-      margin-right: 5px;
-    }
-
-    i.folder-collapse-icon {
-      display: inline-block;
-      margin-right: 4px;
-    }
-
-    .folder-display-name {
-      display: inline-block;
-      margin-right: 5px;
-    }
 
     &.level-0 {
       >div>.folder-name {
@@ -161,10 +158,6 @@ $max-nesting-level: 14;
           margin-right: 5px;
         }
 
-        i.folder-collapse-icon {
-          display: inline-block;
-        }
-
         &:after {
           content: "tests"
         }
@@ -179,11 +172,6 @@ $max-nesting-level: 14;
     font-family: $font-sans;
     color: #637eb9;
     font-size: 15px;
-
-    i {
-      font-size: 13px;
-      margin-right: 6px;
-    }
 
     &.active {
       pointer-events: none;
