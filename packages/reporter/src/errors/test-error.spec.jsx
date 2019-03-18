@@ -30,31 +30,11 @@ describe('<TestError />', () => {
       const component = shallow(<TestError model={model({ err: { displayMessage: 'some error' } })} events={events} />)
       const e = {
         stopPropagation: sinon.spy(),
-        target: {
-          tagName: 'PRE',
-        },
       }
 
       component.find('FlashOnClick').simulate('click', e)
       expect(events.emit).to.have.been.calledWith('show:error', 't1')
       expect(e.stopPropagation).to.have.been.called
-    })
-
-    it('emits external:open event when link is clicked', () => {
-      const events = eventsStub()
-      const component = shallow(<TestError model={model({ err: { displayMessage: 'some error' } })} events={events} />)
-      const e = {
-        stopPropagation: sinon.spy(),
-        preventDefault: sinon.spy(),
-        target: {
-          tagName: 'A',
-          href: 'http://example.com',
-        },
-      }
-
-      component.find('FlashOnClick').simulate('click', e)
-      expect(events.emit).to.have.been.calledWith('external:open', 'http://example.com')
-      expect(e.preventDefault).to.have.been.called
     })
   })
 })
