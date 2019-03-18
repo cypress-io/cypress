@@ -35,7 +35,7 @@ exports['e2e stdout displays errors from failures 1'] = `
       at stack trace line
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
-     CypressError: 'cy.visit()' failed trying to load:
+     CypressError: cy.visit() failed trying to load:
 
 /does-not-exist.html
 
@@ -64,7 +64,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
       at stack trace line
 
   3) stdout_failing_spec passing hook is failing:
-     CypressError: 'cy.visit()' failed trying to load:
+     CypressError: cy.visit() failed trying to load:
 
 /does-not-exist.html
 

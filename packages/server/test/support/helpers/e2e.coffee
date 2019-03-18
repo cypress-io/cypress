@@ -75,7 +75,6 @@ normalizeStdout = (str) ->
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
   .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
-  .replace(/`/g, "'") ## replace backticks with single quote
   .split("\n")
     .map(replaceStackTraceLines)
     .join("\n")
