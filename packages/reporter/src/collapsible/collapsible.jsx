@@ -40,7 +40,10 @@ class Collapsible extends Component {
     const isOpen = !this.state.isOpen
 
     this.setState({ isOpen })
-    this.props.onToggle(isOpen)
+
+    if (this.props.onToggle) {
+      this.props.onToggle(isOpen)
+    }
   }
 }
 

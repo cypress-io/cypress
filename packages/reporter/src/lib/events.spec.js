@@ -152,9 +152,14 @@ describe('events', () => {
       expect(runnablesStore.runnableFinished).to.have.been.calledWith('the runnable')
     })
 
-    it('increments the stats count on test:after:run', () => {
-      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
+    it('increments the stats count on test:after:run if final: true', () => {
+      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed', final: true })
       expect(statsStore.incrementCount).to.have.been.calledWith('passed')
+    })
+
+    it('does not implement the stats count on test:after:run if not final: true', () => {
+      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
+      expect(statsStore.incrementCount).not.to.have.been.called
     })
 
     it('pauses the appState with next command name on paused', () => {

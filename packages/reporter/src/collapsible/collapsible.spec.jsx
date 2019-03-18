@@ -1,5 +1,6 @@
 import React from 'react'
 import { shallow } from 'enzyme'
+import sinon from 'sinon'
 
 import Collapsible from './collapsible'
 
@@ -59,5 +60,15 @@ describe('<Collapsible />', () => {
     component.find('.collapsible-header').simulate('click')
     component.find('.collapsible-header').simulate('click')
     expect(component).not.to.have.className('is-open')
+  })
+
+  it('calls onToggle when toggled', () => {
+    const onToggle = sinon.spy()
+    const component = shallow(<Collapsible onToggle={onToggle} />)
+
+    component.find('.collapsible-header').simulate('click')
+    expect(onToggle).to.have.been.calledWith(true)
+    component.find('.collapsible-header').simulate('click')
+    expect(onToggle).to.have.been.calledWith(false)
   })
 })
