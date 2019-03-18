@@ -172,7 +172,7 @@ describe "Specs List", ->
           cy.get(".folder:first").should("have.class", "folder-expanded")
 
         it "hides children for every folder collapsed", ->
-          lastExpandedFolderSelector = ".folder-expanded:last > div > div > .folder-name:last"
+          lastExpandedFolderSelector = ".folder-expanded:last > div > .folder-name:last"
 
           cy.get(".file").should("have.length", 7)
 

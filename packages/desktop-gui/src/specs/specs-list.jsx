@@ -132,7 +132,7 @@ class SpecsList extends Component {
           <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
             <i className={`folder-collapse-icon fa fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
             <i className={`fa fa-fw ${isExpanded ? 'fa-folder-open-o' : 'fa-folder-o'}`}></i>
-            {spec.displayName}
+            {nestingLevel === 0 ? `${spec.displayName} tests` : spec.displayName}
           </div>
           {
             isExpanded ?
