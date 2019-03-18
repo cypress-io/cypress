@@ -40,6 +40,14 @@ describe "lib/util/args", ->
 
   context "--spec", ->
     it "converts to array", ->
+      options = @setup("--run-project", "foo", "--spec", "cypress/integration/a.js,cypress/integration/b.js,cypress/integration/c.js")
+      expect(options.spec[0]).to.eq("#{cwd}/cypress/integration/a.js")
+      expect(options.spec[1]).to.eq("#{cwd}/cypress/integration/b.js")
+      expect(options.spec[2]).to.eq("#{cwd}/cypress/integration/c.js")
+
+    it "discards wrapping single quotes", ->
+      options = @setup("--run-project", "foo", "--spec", "'cypress/integration/foo_spec.js'")
+      expect(options.spec[0]).to.eq("#{cwd}/cypress/integration/foo_spec.js")
 
 
   context "--port", ->

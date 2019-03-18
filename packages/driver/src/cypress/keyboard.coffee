@@ -20,6 +20,8 @@ keyStandardMap = {
   "{leftarrow}": "ArrowLeft",
   "{rightarrow}": "ArrowRight",
   "{uparrow}": "ArrowUp",
+  "{home}": "Home",
+  "{end}": "End",
   "{alt}": "Alt",
   "{ctrl}": "Control",
   "{meta}": "Meta",
@@ -211,6 +213,32 @@ $Keyboard = {
       options.setKey    = "{downarrow}"
       @ensureKey el, null, options, ->
         $selection.moveCursorDown(el)
+
+    ## charCode = 36
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{home}": (el, options) ->
+      options.charCode  = 36
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{home}"
+      @ensureKey el, null, options, ->
+        $selection.moveCursorToLineStart(el)
+
+    ## charCode = 35
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{end}": (el, options) ->
+      options.charCode  = 35
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{end}"
+      @ensureKey el, null, options, ->
+        $selection.moveCursorToLineEnd(el)
   }
 
   modifierChars: {
