@@ -141,14 +141,14 @@ describe "Specs List", ->
 
       context "displays list of specs", ->
         it "lists main folders of specs", ->
-          cy.contains(".folder", "integration")
-          cy.contains(".folder", "unit")
+          cy.contains(".folder.level-0", "integration")
+          cy.contains(".folder.level-0", "unit")
 
         it "lists nested folders", ->
-          cy.get(".folder .folder").contains("accounts")
+          cy.get(".folder.level-0 .folder.level-1").contains("accounts")
 
         it "lists test specs", ->
-          cy.get(".file a").contains("app_spec.coffee")
+          cy.get(".folder.level-0 .file.level-1 a").contains("app_spec.coffee")
 
         it "lists folder with '.'", ->
           cy.get(".file").should("have.length", 7)
