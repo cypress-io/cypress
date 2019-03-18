@@ -166,19 +166,6 @@ Cypress.Commands.overwrite('get', (originalFn, selector, options) => {
   }
 })
 
-const moduleNames = [
-  {
-    name: 'react',
-    type: 'file',
-    location: 'node_modules/react/umd/react.development.js'
-  },
-  {
-    name: 'react-dom',
-    type: 'file',
-    location: 'node_modules/react-dom/umd/react-dom.development.js'
-  }
-]
-
 /*
 Before All
 - Load and cache UMD modules specified in fixtures/modules.json
@@ -187,6 +174,21 @@ Before All
   Format: [{name, type, location}, ...]
 */
 before(() => {
+  const settings = Cypress.env('cypress-react-unit-test') || {}
+
+  const moduleNames = [
+    {
+      name: 'react',
+      type: 'file',
+      location: settings.react || 'node_modules/react/umd/react.development.js'
+    },
+    {
+      name: 'react-dom',
+      type: 'file',
+      location: settings['react-dom'] || 'node_modules/react-dom/umd/react-dom.development.js'
+    }
+  ]
+
   Cypress.modules = []
   cy.log('Initializing UMD module cache').then(() => {
     for (const module of moduleNames) {

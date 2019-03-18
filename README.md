@@ -63,6 +63,21 @@ describe('HelloState component', () => {
 
 ![Unit testing React components](images/demo.png)
 
+## Configuration
+
+If your React and React DOM libraries are installed in non-standard paths (think monorepo scenario), you can tell this plugin where to find them. In `cypress.json` specify paths like this:
+
+```json
+{
+  "env": {
+    "cypress-react-unit-test": {
+      "react": "node_modules/react/umd/react.development.js",
+      "react-dom": "node_modules/react-dom/umd/react-dom.development.js"
+    }
+  }
+}
+```
+
 ## Transpilation
 
 How can we use features that require transpilation? Using [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor#readme). You can use [cypress/plugins/index.js](cypress/plugins/index.js) to configure any transpilation plugins you need.
