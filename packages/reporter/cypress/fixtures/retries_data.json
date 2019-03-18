@@ -1,0 +1,283 @@
+{
+  "base": {
+    "id": "r1",
+    "title": "",
+    "root": true,
+    "suites": [{
+      "id": "r2",
+      "title": "suite 1",
+      "suites": [],
+      "tests": []
+    }],
+    "tests": []
+  },
+  "singleTestSingleAttempt": [
+    {
+      "id": "r3",
+      "title": "no retries",
+      "attempts": [
+        {
+          "attempt": 1,
+          "testId": "r3",
+          "state": "passed",
+          "commands": [
+            {
+              "hookName": "test",
+              "id": "c1",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "singleTestFailedAttempt": [
+    {
+      "id": "r3",
+      "title": "no retries",
+      "attempts": [
+        {
+          "attempt": 1,
+          "testId": "r3",
+          "state": "failed",
+          "err": {
+            "name": "CommandError",
+            "message": "failed to visit",
+            "stack": "failed to visit\n\ncould not visit http://localhost:3000"
+          },
+          "commands": [
+            {
+              "hookName": "test",
+              "id": "c1",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "failed",
+              "testId": "r3",
+              "type": "parent"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "singleTestThreeAttempts": [
+    {
+      "id": "r3",
+      "title": "passed with retries",
+      "attempts": [
+        {
+          "attempt": 1,
+          "testId": "r3",
+          "state": "failed",
+          "err": {
+            "name": "CommandError",
+            "message": "failed to visit",
+            "stack": "failed to visit\n\ncould not visit http://localhost:3000"
+          },
+          "agents": [
+            {
+              "callCount": 0,
+              "functionName": "btoa",
+              "hookName": "before each",
+              "id": "a1",
+              "instrument": "agent",
+              "name": "spy-1",
+              "testId": "r3",
+              "type": "spy-1"
+            }
+          ],
+          "commands": [
+            {
+              "hookName": "before each",
+              "id": "c1",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c2",
+              "instrument": "command",
+              "message": ".foo",
+              "name": "get",
+              "state": "failed",
+              "testId": "r3",
+              "type": "parent"
+            }
+          ],
+          "routes": [
+            {
+              "hookName": "before each",
+              "id": "ro1",
+              "instrument": "route",
+              "method": "GET",
+              "name": "route",
+              "testId": "r3",
+              "url": "/foo"
+            }
+          ]
+        },
+        {
+          "attempt": 2,
+          "testId": "r3",
+          "state": "failed",
+          "err": {
+            "name": "AssertionError",
+            "message": "expected <.foo> to have text foo, but it was bar",
+            "stack": "expected <.foo> to have text foo, but it was bar"
+          },
+          "agents": [
+            {
+              "callCount": 0,
+              "functionName": "btoa",
+              "hookName": "before each",
+              "id": "a2",
+              "instrument": "agent",
+              "name": "spy-1",
+              "testId": "r3",
+              "type": "spy-1"
+            }
+          ],
+          "commands": [
+            {
+              "hookName": "before each",
+              "id": "c3",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c4",
+              "instrument": "command",
+              "message": ".foo",
+              "name": "get",
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c5",
+              "instrument": "command",
+              "message": "expected **<.foo>** to have text **foo**, but it was **bar**",
+              "name": "assert",
+              "numElements": 1,
+              "renderProps": {},
+              "state": "failed",
+              "testId": "r3",
+              "type": "child",
+              "err": {
+                "name": "AssertionError",
+                "message": "expected <.foo> to have text foo, but it was bar",
+                "stack": "expected <.foo> to have text foo, but it was bar"
+              }
+            }
+          ],
+          "routes": [
+            {
+              "hookName": "before each",
+              "id": "ro2",
+              "instrument": "route",
+              "method": "GET",
+              "name": "route",
+              "testId": "r3",
+              "url": "/foo"
+            }
+          ]
+        },
+        {
+          "attempt": 3,
+          "testId": "r3",
+          "state": "passed",
+          "agents": [
+            {
+              "callCount": 0,
+              "functionName": "btoa",
+              "hookName": "before each",
+              "id": "a3",
+              "instrument": "agent",
+              "name": "spy-1",
+              "testId": "r3",
+              "type": "spy-1"
+            }
+          ],
+          "commands": [
+            {
+              "hookName": "before each",
+              "id": "c6",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c7",
+              "instrument": "command",
+              "message": ".foo",
+              "name": "get",
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c8",
+              "instrument": "command",
+              "message": "expect **<.foo>** to have text **foo**",
+              "name": "assert",
+              "numElements": 1,
+              "renderProps": {},
+              "state": "passed",
+              "testId": "r3",
+              "type": "child"
+            }
+          ],
+          "routes": [
+            {
+              "hookName": "before each",
+              "id": "ro3",
+              "instrument": "route",
+              "method": "GET",
+              "name": "route",
+              "testId": "r3",
+              "url": "/foo"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "attempt": {
+    "attempt": 2,
+    "title": "no retries",
+    "id": "r3",
+    "state": "passed"
+  },
+  "command": {
+    "testAttempt": 2,
+    "hookName": "test",
+    "id": "c2",
+    "instrument": "command",
+    "message": "http://localhost:3000",
+    "name": "visit",
+    "state": "passed",
+    "testId": "r3",
+    "type": "parent"
+  }
+}

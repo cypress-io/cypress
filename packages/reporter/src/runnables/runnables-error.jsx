@@ -4,8 +4,8 @@ import React from 'react'
 
 const md = new Markdown({ html: true })
 
-const AnError = observer(({ error }) => (
-  <div className='error'>
+const RunnablesError = observer(({ error }) => (
+  <div className='runnables-error'>
     <h2>
       <i className='fa fa-warning'></i> {error.title}
       {error.link &&
@@ -19,4 +19,4 @@ const AnError = observer(({ error }) => (
   </div>
 ))
 
-export default AnError
+export default RunnablesError

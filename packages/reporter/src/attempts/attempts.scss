@@ -5,7 +5,7 @@
     }
 
     &.has-multiple-attempts .attempt-item > .collapsible > .collapsible-header {
-      display: block;
+      display: flex;
     }
   }
 
@@ -40,17 +40,11 @@
   .attempt-state-processing {
     @include runnable-state-processing;
   }
-  .attempt-state-skipped {
-    @include runnable-state-skipped;
-  }
   .attempt-state-failed {
     @include runnable-state-failed;
   }
   .attempt-state-passed {
     @include runnable-state-passed;
-  }
-  .attempt-state-pending {
-    @include runnable-state-pending;
   }
 
   .attempt-name {
@@ -125,5 +119,11 @@
     .attempt-state {
       margin-left: 3px;
     }
+  }
+
+  .attempt-error-region {
+    border-left: 1px solid #dcdcdc;
+    margin-left: 5px;
+    padding: 2px 0 2px 10px;
   }
 }

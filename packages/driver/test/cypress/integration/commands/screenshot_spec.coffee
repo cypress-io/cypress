@@ -42,7 +42,7 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
+        expect(Cypress.action).not.to.be.calledWith("test:set:state")
         expect(Cypress.automation).not.to.be.called
 
     it "is noop when no test.err", ->
@@ -56,7 +56,7 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
+        expect(Cypress.action).not.to.be.calledWith("test:set:state")
         expect(Cypress.automation).not.to.be.called
 
     it "is noop when screenshotOnRunFailure is false", ->
@@ -75,7 +75,7 @@ describe "src/cy/commands/screenshot", ->
 
       Cypress.action("runner:runnable:after:run:async", test, runnable)
       .then ->
-        expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
+        expect(Cypress.action).not.to.be.calledWith("test:set:state")
         expect(Cypress.automation).not.to.be.called
 
     it "sends before/after events", ->

@@ -1,14 +1,12 @@
 import cs from 'classnames'
-import { action, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
-import appState from '../lib/app-state'
 import events from '../lib/events'
 import { indent } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
-import scroller from '../lib/scroller'
 
 import Attempts from '../attempts/attempts'
 import FlashOnClick from '../lib/flash-on-click'
@@ -16,35 +14,24 @@ import FlashOnClick from '../lib/flash-on-click'
 @observer
 class Test extends Component {
   static defaultProps = {
-    appState,
     events,
     runnablesStore,
-    scroller,
   }
 
   @observable isOpen = null
 
-  componentDidMount () {
-    this._scrollIntoView()
-  }
+  @computed get _shouldBeOpen () {
+    // if this.isOpen is non-null, prefer that since the user has
+    // explicity chosen to open or close the test
+    if (this.isOpen !== null) return this.isOpen
 
-  componentDidUpdate () {
-    this._scrollIntoView()
+    const { model, runnablesStore } = this.props
 
-    const cb = this.props.model.callbackAfterUpdate
-
-    if (cb) {
-      cb()
-    }
-  }
-
-  _scrollIntoView () {
-    const { appState, model, scroller } = this.props
-    const { isActive, shouldRender } = model
-
-    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
-      scroller.scrollIntoView(this.refs.container)
-    }
+    // otherwise, look at reasons to auto-open the test
+    return model.state === 'failed'
+           || model.isOpen
+           || model.isLongRunning
+           || runnablesStore.hasSingleTest
   }
 
   render () {
@@ -54,8 +41,7 @@ class Test extends Component {
 
     return (
       <div
-        ref='container'
-        className={cs('runnable-wrapper', { 'is-open': this._shouldBeOpen() })}
+        className={cs('runnable-wrapper', { 'is-open': this._shouldBeOpen })}
         onClick={this._toggleOpen}
         style={{ paddingLeft: indent(model.level) }}
       >
@@ -81,35 +67,21 @@ class Test extends Component {
 
   _contents () {
     // performance optimization - don't render contents if not open
-    if (!this._shouldBeOpen()) return null
+    if (!this._shouldBeOpen) return null
 
     return (
       <div
         className='runnable-instruments collapsible-content'
         onClick={(e) => e.stopPropagation()}
       >
-        <Attempts attempts={this.props.model.attempts} test={this.props.model} />
+        <Attempts test={this.props.model} />
       </div>
     )
   }
 
-  _shouldBeOpen () {
-    // if this.isOpen is non-null, prefer that since the user has
-    // explicity chosen to open or close the test
-    if (this.isOpen !== null) return this.isOpen
-
-    const { model, runnablesStore } = this.props
-
-    // otherwise, look at reasons to auto-open the test
-    return model.state === 'failed'
-           || model.isOpen
-           || model.isLongRunning
-           || runnablesStore.hasSingleTest
-  }
-
   @action _toggleOpen = () => {
     if (this.isOpen === null) {
-      this.isOpen = !this._shouldBeOpen()
+      this.isOpen = !this._shouldBeOpen
     } else {
       this.isOpen = !this.isOpen
     }

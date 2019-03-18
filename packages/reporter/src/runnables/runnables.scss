@@ -25,7 +25,8 @@
     line-height: 18px;
     padding-left: 0;
 
-    pre {
+    .test-error,
+    .attempt-error {
       background-color: darken($yellow-lightest, 5%);
       border-left: 5px solid $fail;
       clear: both;

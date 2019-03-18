@@ -4,7 +4,7 @@ import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Runnables, { RunnablesList } from './runnables'
-import AnError from '../errors/an-error'
+import RunnablesError from './runnables-error'
 
 const appStateStub = (props) => {
   return _.extend({
@@ -37,7 +37,7 @@ describe('<Runnables />', () => {
     expect(component.find(RunnablesList)).to.exist
   })
 
-  it('renders <AnError /> when there are no runnables', () => {
+  it('renders <RunnablesError /> when there are no runnables', () => {
     const component = shallow(
       <Runnables
         runnablesStore={runnablesStoreStub()}
@@ -46,8 +46,8 @@ describe('<Runnables />', () => {
       />
     )
 
-    expect(component.find(AnError)).to.exist
-    expect(component.find(AnError).prop('error')).to.eql({
+    expect(component.find(RunnablesError)).to.exist
+    expect(component.find(RunnablesError).prop('error')).to.eql({
       title: 'No tests found in your file:',
       link: 'https://on.cypress.io/no-tests-found-in-your-file',
       callout: '/path/to/foo_spec.js',

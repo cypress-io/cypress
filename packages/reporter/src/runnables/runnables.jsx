@@ -3,7 +3,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import AnError from '../errors/an-error'
+import RunnablesError from './runnables-error'
 import Runnable from './runnable-and-suite'
 
 const noTestsError = (specPath) => ({
@@ -30,7 +30,7 @@ function content ({ isReady, runnables }, specPath, error) {
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
+  return error ? <RunnablesError error={error} /> : <RunnablesList runnables={runnables} />
 }
 
 @observer

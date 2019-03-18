@@ -113,16 +113,15 @@ class RunnablesStore {
     this._initialScrollTop = initialScrollTop
   }
 
-  updateTest (props, cb) {
-    this._withTest(props.id, (test) => {
-      test.update(props, cb)
+  setIsOpen ({ id, isOpen }, cb) {
+    this._withTest(id, (test) => {
+      test.setIsOpen(isOpen, cb)
     })
   }
 
-  runnableStarted ({ id }) {
-    // TODO: receive attempt and pass it into the test
-    this._withTest(id, (test) => {
-      test.start()
+  runnableStarted (props) {
+    this._withTest(props.id, (test) => {
+      test.start(props)
     })
   }
 

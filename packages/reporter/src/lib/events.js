@@ -47,17 +47,20 @@ export default {
       }
     }))
 
-    runner.on('test:before:run:async', action('test:before:run:async', (runnable) => {
+    runner.on('test:before:run:async', (runnable) => {
       runnablesStore.runnableStarted(runnable)
-    }))
+    })
 
-    runner.on('test:after:run', action('test:after:run', (runnable) => {
+    runner.on('test:after:run', (runnable) => {
       runnablesStore.runnableFinished(runnable)
-      statsStore.incrementCount(runnable.state)
-    }))
 
-    runner.on('test:set:state', action('test:set:state', (runnable, cb) => {
-      runnablesStore.updateTest(runnable, cb)
+      if (runnable.final) {
+        statsStore.incrementCount(runnable.state)
+      }
+    })
+
+    runner.on('test:set:state', action('test:set:state', (props, cb) => {
+      runnablesStore.setIsOpen(props, cb)
     }))
 
     runner.on('paused', action('paused', (nextCommandName) => {
@@ -104,18 +107,25 @@ export default {
       runner.emit('runner:console:log', commandId)
     })
 
-    localBus.on('show:error', (testId) => {
+    localBus.on('show:error', (testId, attemptId) => {
       const test = runnablesStore.testById(testId)
+      let model = test
 
-      if (test.err.isCommandErr) {
-        const command = test.commandMatchingErr()
+      if (attemptId) {
+        model = test.getAttemptById(attemptId)
+      }
+
+      if (model.err.isCommandErr) {
+        const command = model.commandMatchingErr()
 
         if (!command) return
 
         runner.emit('runner:console:log', command.id)
-      } else {
-        runner.emit('runner:console:error', testId)
+
+        return
       }
+
+      runner.emit('runner:console:error', testId)
     })
 
     localBus.on('show:snapshot', (commandId) => {

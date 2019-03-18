@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 
 import Agent from '../agents/agent-model'
 import Command from '../commands/command-model'
@@ -13,17 +13,18 @@ export default class Attempt {
   @observable commands = []
   @observable err = new Err({})
   @observable hooks = []
-  // @observable isActive = null
-  // @observable isLongRunning = false
-  // @observable isOpen = false
+  @observable isActive = null
+  @observable isOpen = false
   @observable routes = []
-  // @observable _state = null
+  @observable _state = null
 
   _logs = {}
 
   constructor (props) {
+    this.testId = props.testId
+    this.id = props.attempt
     this._state = props.state
-    // this.err.update(props.err)
+    this.err.update(props.err)
 
     _.each(props.agents, this.addLog)
     _.each(props.commands, this.addLog)
@@ -35,6 +36,10 @@ export default class Attempt {
   }
 
   @computed get isLongRunning () {
+    return this.isActive && this._hasLongRunningCommand
+  }
+
+  @computed get _hasLongRunningCommand () {
     return _.some(this.commands, (command) => {
       return command.isLongRunning
     })
@@ -64,6 +69,67 @@ export default class Attempt {
     }
   }
 
+  updateLog (props) {
+    const log = this._logs[props.id]
+
+    if (log) {
+      log.update(props)
+    }
+  }
+
+  commandMatchingErr () {
+    return _(this.hooks)
+    .map((hook) => {
+      return hook.commandMatchingErr(this.err)
+    })
+    .compact()
+    .last()
+  }
+
+  @action start () {
+    this.isActive = true
+  }
+
+  @action update ({ state, err, hookName }) {
+    this._state = state
+    this.err.update(err)
+
+    if (hookName) {
+      const hook = _.find(this.hooks, { name: hookName })
+
+      if (hook) {
+        hook.failed = true
+      }
+    }
+  }
+
+  @action setIsOpen (isOpen, cb) {
+    // if isOpen is not changing at all, callback immediately
+    // because there won't be a re-render to trigger it
+    if (this.isOpen === isOpen) {
+      cb()
+
+      return
+    }
+
+    // changing isOpen will trigger a re-render and the callback will
+    // be called by attempts.jsx Attempt#componentDidUpdate
+    this._callbackAfterUpdate = cb
+    this.isOpen = isOpen
+  }
+
+  callbackAfterUpdate () {
+    if (this._callbackAfterUpdate) {
+      this._callbackAfterUpdate()
+      this._callbackAfterUpdate = null
+    }
+  }
+
+  @action finish (props) {
+    this.update(props)
+    this.isActive = false
+  }
+
   _addAgent (props) {
     const agent = new Agent(props)
 
@@ -85,23 +151,6 @@ export default class Attempt {
     this._logs[props.id] = command
     this.commands.push(command)
     hook.addCommand(command)
-  }
-
-  updateLog (props) {
-    const log = this._logs[props.id]
-
-    if (log) {
-      log.update(props)
-    }
-  }
-
-  commandMatchingErr () {
-    return _(this.hooks)
-    .map((hook) => {
-      return hook.commandMatchingErr(this.err)
-    })
-    .compact()
-    .last()
   }
 
   _findOrCreateHook (name) {
