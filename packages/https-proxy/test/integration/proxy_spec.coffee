@@ -144,9 +144,10 @@ describe "Proxy", ->
       process.env.NO_PROXY = ""
       process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://localhost:9001"
 
-      @upstream = new DebugProxy()
+      @upstream = new DebugProxy({
+        keepRequests: true
+      })
 
-      @sandbox.spy(@upstream, "proxySslConnectionToDomain")
       @upstream.start(9001)
 
     it "passes a request to an https server through the upstream", ->
@@ -155,7 +156,29 @@ describe "Proxy", ->
         url: "https://localhost:8444/"
         proxy: "http://localhost:3333"
       }).then (res) =>
-        expect(@upstream.proxySslConnectionToDomain).to.have.been.calledWith("localhost", 8444)
+        expect(@upstream.getRequests()[0]).to.include({
+          url: 'localhost:8444'
+          https: true
+        })
+        expect(res).to.contain("https server")
+
+    it "uses HTTP basic auth when provided", ->
+      @upstream.setAuth({
+        username: 'foo'
+        password: 'bar'
+      })
+
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://foo:bar@localhost:9001"
+
+      request({
+        strictSSL: false
+        url: "https://localhost:8444/"
+        proxy: "http://localhost:3333"
+      }).then (res) =>
+        expect(@upstream.getRequests()[0]).to.include({
+          url: 'localhost:8444'
+          https: true
+        })
         expect(res).to.contain("https server")
 
     afterEach ->
