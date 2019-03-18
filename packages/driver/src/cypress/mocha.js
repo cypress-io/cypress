@@ -128,8 +128,8 @@ const patchTestClone = () => {
 //# changing the logic for determing whether this is a valid err
 const patchRunnerFail = () => {
   return Runner.prototype.fail = function (runnable, err) {
-  //# if this isnt a correct error object then just bail
-  //# and call the original function
+    //# if this isnt a correct error object then just bail
+    //# and call the original function
     if (Object.prototype.toString.call(err) !== '[object Error]') {
       return runnerFail.call(this, runnable, err)
     }
@@ -224,6 +224,10 @@ const create = function (specWindow, Cypress, reporter) {
 
   return {
     _mocha,
+
+    override () {
+      return override(Cypress)
+    },
 
     createRootTest (title, fn) {
       const r = new Test(title, fn)
