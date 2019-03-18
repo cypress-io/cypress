@@ -184,7 +184,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if the property does not EXIST on the subject
         ## then throw a specific error message
         try
-          fail(prop) if prop not of getValue(memo, prop)
+          memo[prop]
         catch e
           ## if the value is null or undefined then it does
           ## not have properties which causes us to throw

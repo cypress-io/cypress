@@ -518,7 +518,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.invoke() errored because the property: 'foo' does not exist on your subject."
+            expect(err.message).to.eq "Timed out retrying: Cannot call cy.invoke() because 'foo' is not a function. You probably want to use cy.its('foo')."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -563,12 +563,11 @@ describe "src/cy/commands/connectors", ->
           cy.on "test:fail", (err) =>
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command: "its"
-              Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject."
+              Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'fizz' returned a 'undefined' value. You cannot access any properties such as 'buzz' on a 'undefined' value."
               Subject: {foo: "bar"}
             }
             done()
-
-          cy.noop({foo: "bar"}).its("baz")
+          cy.noop({foo: "bar"}).its("fizz.buzz")
 
     context "#its", ->
       beforeEach ->
@@ -752,21 +751,40 @@ describe "src/cy/commands/connectors", ->
 
           cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
 
-        it "throws when property does not exist on the subject", (done) ->
-          cy.on "test:fail", (err) =>
-            lastLog = @lastLog
-
-            expect(err.message).to.include "cy.its() errored because the property: 'foo' does not exist on your subject."
-            expect(lastLog.get("error").message).to.include(err.message)
-            done()
-
+        it "does not throw when property does not exist on the subject", ->
           cy.noop({}).its("foo")
+
+        it "retries when yielded undefined value", ->
+          obj = {foo:''}
+
+          cy.stub(obj, 'foo').get(
+            cy.stub()
+              .onCall(0).returns(undefined)
+              .onCall(1).returns(undefined)
+              .onCall(2).returns(true)
+          )
+          cy.wrap(obj).its('foo').should('eq', true)
+
+        it "can handle getter that throws", (done) ->
+          spy = cy.spy((err)=>
+            # throw new Error('sdf')
+            # expect(false).to.eq(true)
+            expect(err.message).to.eq('Timed out retrying: some getter error')
+            done()
+            ).as('onFail')
+          cy.on 'fail', spy
+          obj = {}
+          Object.defineProperty obj, 'foo', {get: -> throw new Error('some getter error')}
+
+          cy.wrap(obj).its('foo')
+
+
 
         it "throws when reduced property does not exist on the subject", (done) ->
           cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.its() errored because the property: 'baz' does not exist on your subject."
+            expect(err.message).to.include   "Timed out retrying: cy.its() errored because the property: 'baz' returned a 'undefined' value. You cannot access any properties such as 'fizz' on a 'undefined' value."
             expect(lastLog.get("error").message).to.include(err.message)
             expect(lastLog.get("error").message).to.include(err.message)
             done()
@@ -777,7 +795,7 @@ describe "src/cy/commands/connectors", ->
             }
           }
 
-          cy.noop(obj).its("foo.bar.baz")
+          cy.noop(obj).its("foo.bar.baz.fizz")
 
         [null, undefined].forEach (val) ->
           it "throws on reduced #{val} subject", (done) ->
