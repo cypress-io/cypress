@@ -22,7 +22,7 @@ const cwd = require('../cwd')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
-const everythingAfterFirstEqualRe = /=(.+)/
+const everythingAfterFirstEqualRe = /=(.*)/
 
 const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk'.split(' ')
 
@@ -143,9 +143,8 @@ const sanitizeAndConvertNestedArgs = function (str) {
   .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
   .replace(nestedArraysInSquareBracketsRe, commasToPipes)
   .split(',')
-  .map((pair) => {
-    return pair.split(everythingAfterFirstEqualRe)
-  }).fromPairs()
+  .map((pair) => pair.split(everythingAfterFirstEqualRe))
+  .fromPairs()
   .mapValues(JSONOrCoerce)
   .value()
 }
