@@ -766,19 +766,15 @@ describe "src/cy/commands/connectors", ->
           cy.wrap(obj).its('foo').should('eq', true)
 
         it "can handle getter that throws", (done) ->
-          spy = cy.spy((err)=>
-            # throw new Error('sdf')
-            # expect(false).to.eq(true)
-            expect(err.message).to.eq('Timed out retrying: some getter error')
+          spy = cy.spy((err) =>
+            expect(err.message).to.eq("Timed out retrying: some getter error")
             done()
-            ).as('onFail')
-          cy.on 'fail', spy
+          ).as("onFail")
+          cy.on("test:fail", spy)
           obj = {}
-          Object.defineProperty obj, 'foo', {get: -> throw new Error('some getter error')}
+          Object.defineProperty(obj, "foo", {get: -> throw new Error("some getter error")})
 
           cy.wrap(obj).its('foo')
-
-
 
         it "throws when reduced property does not exist on the subject", (done) ->
           cy.on "test:fail", (err) =>
