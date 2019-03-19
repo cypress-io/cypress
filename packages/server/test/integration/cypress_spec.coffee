@@ -870,6 +870,21 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
+      it "parses environment variables with empty values", ->
+        cypress.start([
+          "--run-project=#{@todosPath}",
+          "--video=false"
+          "--env=FOO=,BAR=,BAZ=ipsum"
+        ])
+        .then =>
+          expect(openProject.getProject().cfg.env).to.deep.eq({
+            FOO: ''
+            BAR: ''
+            BAZ: 'ipsum'
+          })
+
+          @expectExitWith(0)
+
   ## most record mode logic is covered in e2e tests.
   ## we only need to cover the edge cases / warnings
   context "--record or --ci", ->
