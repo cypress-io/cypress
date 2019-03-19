@@ -110,6 +110,7 @@ class Server
       if @_onError
         @_onError(err, socket, head, port)
 
+  # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
   _makeUpstreamProxyConnection: (upstreamProxy, req, socket, head, toPort, toHostname) ->
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
@@ -132,10 +133,9 @@ class Server
 
       socket.resume()
 
-    if !@httpsAgent
-      @httpsAgent = new HttpsAgent(upstreamProxy)
+    httpsAgent = new HttpsAgent(upstreamProxy)
 
-    @httpsAgent.callback req, {
+    httpsAgent.callback req, {
       port: toPort
       host: toHostname
     }, onUpstreamSock.bind(@)
