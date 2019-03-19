@@ -58,8 +58,8 @@ context('lib/tasks/verify', () => {
     sinon.stub(_, 'random').returns('222')
 
     util.exec
-      .withArgs(executablePath, ['--smoke-test', '--ping=222'])
-      .resolves(spawnedProcess)
+    .withArgs(executablePath, ['--smoke-test', '--ping=222'])
+    .resolves(spawnedProcess)
   })
 
   afterEach(() => {
@@ -70,18 +70,18 @@ context('lib/tasks/verify', () => {
     mockfs({})
 
     return verify
-      .start()
-      .then(() => {
-        throw new Error('should have caught error')
-      })
-      .catch(err => {
-        logger.error(err)
+    .start()
+    .then(() => {
+      throw new Error('should have caught error')
+    })
+    .catch((err) => {
+      logger.error(err)
 
-        snapshot(
-          'no version of Cypress installed',
-          normalize(stdout.toString())
-        )
-      })
+      snapshot(
+        'no version of Cypress installed',
+        normalize(stdout.toString())
+      )
+    })
   })
 
   it('is noop when binary is already verified', () => {
@@ -109,29 +109,29 @@ context('lib/tasks/verify', () => {
     })
 
     return verify
-      .start()
-      .then(() => {
-        throw new Error('should have caught error')
-      })
-      .catch(() => {
-        return snapshot(
-          'warning installed version does not match verified version',
-          normalize(stdout.toString())
-        )
-      })
+    .start()
+    .then(() => {
+      throw new Error('should have caught error')
+    })
+    .catch(() => {
+      return snapshot(
+        'warning installed version does not match verified version',
+        normalize(stdout.toString())
+      )
+    })
   })
 
   it('logs error and exits when executable cannot be found', () => {
     return verify
-      .start()
-      .then(() => {
-        throw new Error('should have caught error')
-      })
-      .catch(err => {
-        logger.error(err)
+    .start()
+    .then(() => {
+      throw new Error('should have caught error')
+    })
+    .catch((err) => {
+      logger.error(err)
 
-        snapshot('executable cannot be found', normalize(stdout.toString()))
-      })
+      snapshot('executable cannot be found', normalize(stdout.toString()))
+    })
   })
 
   describe('with force: true', () => {
@@ -152,33 +152,33 @@ context('lib/tasks/verify', () => {
     it('clears verified version from state if verification fails', () => {
       util.exec.restore()
       sinon
-        .stub(util, 'exec')
-        .withArgs(executablePath)
-        .rejects({
-          code: 1,
-          stderr: 'an error about dependencies',
-        })
+      .stub(util, 'exec')
+      .withArgs(executablePath)
+      .rejects({
+        code: 1,
+        stderr: 'an error about dependencies',
+      })
 
       return verify
-        .start({ force: true })
-        .then(() => {
-          throw new Error('Should have thrown')
-        })
-        .catch(err => {
-          logger.error(err)
-        })
-        .then(() => {
-          return fs.pathExistsAsync(binaryStatePath)
-        })
-        .then(exists => {
-          return expect(exists).to.eq(false)
-        })
-        .then(() => {
-          return snapshot(
-            'fails verifying Cypress',
-            normalize(slice(stdout.toString()))
-          )
-        })
+      .start({ force: true })
+      .then(() => {
+        throw new Error('Should have thrown')
+      })
+      .catch((err) => {
+        logger.error(err)
+      })
+      .then(() => {
+        return fs.pathExistsAsync(binaryStatePath)
+      })
+      .then((exists) => {
+        return expect(exists).to.eq(false)
+      })
+      .then(() => {
+        return snapshot(
+          'fails verifying Cypress',
+          normalize(slice(stdout.toString()))
+        )
+      })
     })
   })
 
@@ -217,16 +217,16 @@ context('lib/tasks/verify', () => {
     })
 
     return verify
-      .start()
-      .then(() => {
-        throw new Error('Should have thrown')
-      })
-      .catch(err => {
-        stdout = Stdout.capture()
-        logger.error(err)
+    .start()
+    .then(() => {
+      throw new Error('Should have thrown')
+    })
+    .catch((err) => {
+      stdout = Stdout.capture()
+      logger.error(err)
 
-        return snapshot('no Cypress executable', normalize(stdout.toString()))
-      })
+      return snapshot('no Cypress executable', normalize(stdout.toString()))
+    })
   })
 
   it('logs an error if Cypress executable does not have permissions', () => {
@@ -238,19 +238,19 @@ context('lib/tasks/verify', () => {
     })
 
     return verify
-      .start()
-      .then(() => {
-        throw new Error('Should have thrown')
-      })
-      .catch(err => {
-        stdout = Stdout.capture()
-        logger.error(err)
+    .start()
+    .then(() => {
+      throw new Error('Should have thrown')
+    })
+    .catch((err) => {
+      stdout = Stdout.capture()
+      logger.error(err)
 
-        return snapshot(
-          'Cypress non-executable permissions',
-          normalize(stdout.toString())
-        )
-      })
+      return snapshot(
+        'Cypress non-executable permissions',
+        normalize(stdout.toString())
+      )
+    })
   })
 
   it('logs and runs when current version has not been verified', () => {
@@ -308,12 +308,12 @@ context('lib/tasks/verify', () => {
     })
 
     return verify
-      .start({
-        welcomeMessage: false,
-      })
-      .then(() => {
-        return snapshot('no welcome message', normalize(stdout.toString()))
-      })
+    .start({
+      welcomeMessage: false,
+    })
+    .then(() => {
+      return snapshot('no welcome message', normalize(stdout.toString()))
+    })
   })
 
   it('logs error when fails smoke test unexpectedly without stderr', () => {
@@ -331,16 +331,16 @@ context('lib/tasks/verify', () => {
     })
 
     return verify
-      .start()
-      .then(() => {
-        throw new Error('Should have thrown')
-      })
-      .catch(err => {
-        stdout = Stdout.capture()
-        logger.error(err)
+    .start()
+    .then(() => {
+      throw new Error('Should have thrown')
+    })
+    .catch((err) => {
+      stdout = Stdout.capture()
+      logger.error(err)
 
-        return snapshot('fails with no stderr', normalize(stdout.toString()))
-      })
+      return snapshot('fails with no stderr', normalize(stdout.toString()))
+    })
   })
 
   describe('on linux', () => {
@@ -371,7 +371,7 @@ context('lib/tasks/verify', () => {
       err.stack = 'xvfb? no dice'
       xvfb.start.rejects(err)
 
-      return verify.start().catch(err => {
+      return verify.start().catch((err) => {
         expect(xvfb.stop).to.be.calledOnce
 
         logger.error(err)
@@ -401,14 +401,14 @@ context('lib/tasks/verify', () => {
       mockfs({})
 
       return verify
-        .start()
-        .then(() => {
-          throw new Error('Should have thrown')
-        })
-        .catch(err => {
-          logger.error(err)
-          snapshot('error binary not found in ci', normalize(stdout.toString()))
-        })
+      .start()
+      .then(() => {
+        throw new Error('Should have thrown')
+      })
+      .catch((err) => {
+        logger.error(err)
+        snapshot('error binary not found in ci', normalize(stdout.toString()))
+      })
     })
   })
 
@@ -425,45 +425,45 @@ context('lib/tasks/verify', () => {
         customDir: '/real/custom',
       })
       util.exec
-        .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222'])
-        .resolves(spawnedProcess)
+      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222'])
+      .resolves(spawnedProcess)
 
       return verify.start().then(() => {
         expect(util.exec.firstCall.args[0]).to.equal(realEnvBinaryPath)
         snapshot('valid CYPRESS_RUN_BINARY', normalize(stdout.toString()))
       })
     })
-    ;['darwin', 'linux', 'win32'].forEach(platform => {
+    ;['darwin', 'linux', 'win32'].forEach((platform) => {
       return it('can log error to user', () => {
         process.env.CYPRESS_RUN_BINARY = '/custom/'
         os.platform.returns(platform)
 
         return verify
-          .start()
-          .then(() => {
-            throw new Error('Should have thrown')
-          })
-          .catch(err => {
-            logger.error(err)
-            snapshot(
-              `${platform}: error when invalid CYPRESS_RUN_BINARY`,
-              normalize(stdout.toString())
-            )
-          })
+        .start()
+        .then(() => {
+          throw new Error('Should have thrown')
+        })
+        .catch((err) => {
+          logger.error(err)
+          snapshot(
+            `${platform}: error when invalid CYPRESS_RUN_BINARY`,
+            normalize(stdout.toString())
+          )
+        })
       })
     })
   })
 })
 
-function createfs({ alreadyVerified, executable, packageVersion, customDir }) {
+function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
   let mockFiles = {
     [customDir ? customDir : '/cache/Cypress/1.2.3/Cypress.app']: {
       'binary_state.json': `{"verified": ${alreadyVerified}}`,
       Contents: {
         MacOS: executable
           ? {
-              Cypress: executable,
-            }
+            Cypress: executable,
+          }
           : {},
         Resources: {
           app: {
@@ -484,12 +484,12 @@ function createfs({ alreadyVerified, executable, packageVersion, customDir }) {
   return mockfs(mockFiles)
 }
 
-function slice(str) {
+function slice (str) {
   // strip answer and split by new lines
   str = str.split('\n')
 
   // find the line about verifying cypress can run
-  const index = _.findIndex(str, line => {
+  const index = _.findIndex(str, (line) => {
     return line.includes('Verifying Cypress can run')
   })
 
