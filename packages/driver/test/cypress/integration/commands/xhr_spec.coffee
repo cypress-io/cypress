@@ -1315,6 +1315,18 @@ describe "src/cy/commands/xhr", ->
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseBody).to.eq "foo bar baz"
 
+    it "can stub requests with uncommon HTTP methods", ->
+      cy
+        .route("PROPFIND", "/foo", "foo bar baz").as("getFoo")
+        .window().then (win) ->
+          win.$.ajax({
+            url: "/foo"
+            method: "PROPFIND"
+          })
+          null
+        .wait("@getFoo").then (xhr) ->
+          expect(xhr.responseBody).to.eq "foo bar baz"
+
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
@@ -1442,9 +1454,10 @@ describe "src/cy/commands/xhr", ->
 
         cy.route(getUrl)
 
-      it "url must be one of get, put, post, delete, patch, head, options", (done) ->
+      it "fails when method is invalid", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.route()` was called with an invalid method: 'POSTS'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+          expect(err.message).to.include "`cy.route()` was called with an invalid method: 'POSTS'."
+
           done()
 
         cy.route("posts", "/foo", {})
