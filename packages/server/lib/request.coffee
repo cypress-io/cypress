@@ -6,6 +6,7 @@ tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
+agent      = require("./util/agent")
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
 
@@ -132,9 +133,7 @@ createCookieString = (c) ->
 module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
-    ## re-use all HTTP/HTTPS connections if possible
-    ## https://github.com/cypress-io/cypress/issues/3192
-    forever: true
+    proxy: null # upstream proxying is handled by lib/util/agent
   }
 
   r  = r.defaults(defaults)
@@ -157,6 +156,11 @@ module.exports = (options = {}) ->
           }
         else
           opts = strOrOpts
+
+      if opts.url.slice(0,6) == 'https:'
+        opts.agent = agent.https
+      else
+        opts.agent = agent.http
 
       if promise
         rp(opts)
