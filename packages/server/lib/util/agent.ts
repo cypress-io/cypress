@@ -19,6 +19,29 @@ function createProxySock (proxy) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
+class CombinedAgent {
+  httpAgent: HttpAgent
+  httpsAgent: HttpsAgent
+
+  constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
+    this.httpAgent = new HttpAgent(httpOpts)
+    this.httpsAgent = new HttpsAgent(httpsOpts)
+  }
+
+  // called by Node.js whenever a new request is made internally
+  addRequest(req, options) {
+    if (options.uri.protocol === 'https:') {
+      return this.httpsAgent.addRequest(req, options)
+    }
+
+    if (options.uri.protocol === 'http:') {
+      return this.httpAgent.addRequest(req, options)
+    }
+
+    throw new Error(`Unsupported protocol for CombinedAgent: ${options.uri.protocol}`)
+  }
+}
+
 class HttpAgent extends http.Agent {
   httpsAgent: https.Agent
 
@@ -40,7 +63,6 @@ class HttpAgent extends http.Agent {
       }
     }
 
-    // @ts-ignore
     super.createSocket(req, options, cb)
   }
 
@@ -62,11 +84,9 @@ class HttpAgent extends http.Agent {
       // gonna have to use the https module instead
       req.agent = this.httpsAgent
 
-      // @ts-ignore
       return this.httpsAgent.addRequest(req, options)
     }
 
-    // @ts-ignore
     super.createSocket(req, options, cb)
   }
 }
@@ -135,9 +155,4 @@ class HttpsAgent extends https.Agent {
   }
 }
 
-module.exports = {
-  HttpAgent,
-  HttpsAgent,
-  http: new HttpAgent(),
-  https: new HttpsAgent(),
-}
+module.exports = new CombinedAgent()

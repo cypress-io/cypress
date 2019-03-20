@@ -133,6 +133,7 @@ createCookieString = (c) ->
 module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
+    agent: agent
     proxy: null # upstream proxying is handled by lib/util/agent
   }
 
@@ -156,11 +157,6 @@ module.exports = (options = {}) ->
           }
         else
           opts = strOrOpts
-
-      if opts.url.slice(0,6) == 'https:'
-        opts.agent = agent.https
-      else
-        opts.agent = agent.http
 
       if promise
         rp(opts)
