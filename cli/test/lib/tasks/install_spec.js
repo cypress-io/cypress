@@ -79,6 +79,7 @@ describe('/lib/tasks/install', function () {
 
       it('warns when specifying cypress version in env', function () {
         const version = '0.12.1'
+
         process.env.CYPRESS_INSTALL_BINARY = version
 
         return install.start()
@@ -100,10 +101,12 @@ describe('/lib/tasks/install', function () {
 
       it('can install local binary zip file without download', function () {
         const version = '/tmp/local/file.zip'
+
         process.env.CYPRESS_INSTALL_BINARY = version
         sinon.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
 
         const installDir = state.getVersionDir()
+
         return install.start()
         .then(() => {
           expect(unzip.start).to.be.calledWithMatch({
@@ -115,12 +118,14 @@ describe('/lib/tasks/install', function () {
 
       it('can install local binary zip file from relative path', function () {
         const version = './cypress-resources/file.zip'
+
         mockfs({
           [version]: 'asdf',
         })
         process.env.CYPRESS_INSTALL_BINARY = version
 
         const installDir = state.getVersionDir()
+
         return install.start()
         .then(() => {
           expect(download.start).not.to.be.called
@@ -159,6 +164,7 @@ describe('/lib/tasks/install', function () {
 
         it('logs when already installed when run from postInstall', function () {
           util.isPostInstall.returns(true)
+
           return install.start()
           .then(() => {
             snapshot(
@@ -316,6 +322,7 @@ describe('/lib/tasks/install', function () {
           sinon.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
 
           const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
+
           err.code = 'EACCES'
           fs.ensureDirAsync.rejects(err)
 
@@ -339,6 +346,7 @@ describe('/lib/tasks/install', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
           process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
+
           return install.start()
           .then(() => {
             expect(download.start).to.not.be.called
@@ -348,6 +356,7 @@ describe('/lib/tasks/install', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
           process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
+
           return install.start()
           .then(() => {
             expect(download.start).to.not.be.called
@@ -360,6 +369,7 @@ describe('/lib/tasks/install', function () {
           util.pkgVersion.returns('1.2.3')
 
           process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
+
           return install.start()
           .then(() => {
             expect(unzip.start).to.not.be.called
@@ -371,6 +381,7 @@ describe('/lib/tasks/install', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
           process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
+
           return install.start()
           .then(() => {
             expect(unzip.start).to.not.be.called
@@ -400,6 +411,7 @@ describe('/lib/tasks/install', function () {
 
     it('is silent when log level is silent', function () {
       process.env.npm_config_loglevel = 'silent'
+
       return install.start()
       .then(() => {
         return snapshot(
