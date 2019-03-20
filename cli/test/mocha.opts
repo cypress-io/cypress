@@ -1,4 +1,4 @@
-test/**/cli_spec.js
+test/**/util_spec.js
 --timeout 10000
 --reporter spec
 --recursive
