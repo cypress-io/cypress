@@ -16,4 +16,18 @@ declare module 'http' {
     addRequest(req: ClientRequest, options: any): void
     createSocket(req: ClientRequest, options: any, cb: (err?: Error, sock: Socket) => void): void
   }
+
+  interface ClientRequest {
+    _header: Map<string, string>
+    _implicitHeader: () => void
+    output: string[]
+  }
+}
+
+declare interface Object {
+  assign(...obj: any[]): any
+}
+
+declare interface SymbolConstructor {
+  for(str: string): unique Symbol
 }
