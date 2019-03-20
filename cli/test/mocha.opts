@@ -1,4 +1,4 @@
-test/**/download_spec.js
+test/**/install_spec.js
 --timeout 10000
 --reporter spec
 --recursive
