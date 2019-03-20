@@ -84,11 +84,14 @@ module.exports = {
     err2.name = obj.name
     err2.stack = obj.stack
 
-    for own prop, val of obj
-      if not err2[prop]
-        err2[prop] = val
+    return @copyProperties(obj, err2)
 
-    return err2
+  copyProperties: (originalObj, newObj) ->
+    for own prop, val of originalObj
+      if not newObj[prop]
+        newObj[prop] = val
+
+    return newObj
 
   throwErr: (err, options = {}) ->
     if _.isString(err)
@@ -111,7 +114,7 @@ module.exports = {
 
   throwErrByPath: (errPath, options = {}) ->
     err = try
-      @errMessageByPath errPath, options.args
+      @errByPath errPath, options.args
     catch e
       err = @internalErr e
 
@@ -123,15 +126,17 @@ module.exports = {
     err
 
   cypressErr: (err) ->
-    err = new Error(err)
-    err.name = "CypressError"
-    err
+    if _.isString(err)
+      err = new Error(err)
+      err.name = "CypressError"
+      err
 
-  errMessageByPath: (errPath, args) ->
-    if not errMessage = @getObjValueByPath($errorMessages, errPath)
-      throw new Error "Error message path '#{errPath}' does not exist"
+    newErr = new Error(err.message)
+    newErr.name = "CypressError"
+    @copyProperties(err, newErr)
 
-    getMsg = ->
+  formatErrorMessage: (errMessage, args) ->
+    getMessage = ->
       if _.isFunction(errMessage)
         errMessage(args)
       else
@@ -142,11 +147,38 @@ module.exports = {
     ## normalize two or more new lines
     ## into only exactly two new lines
     _
-    .chain(getMsg())
+    .chain(getMessage())
     .split(twoOrMoreNewLinesRe)
     .compact()
     .join('\n\n')
     .value()
+
+  getErrorValue: (errPath) ->
+    if not err = @getObjValueByPath($errorMessages, errPath)
+      throw new Error "Error path '#{errPath}' does not exist"
+
+    return err
+
+  errByPath: (errPath, args) ->
+    err = @getErrorValue(errPath)
+
+    if _.isString(err) or _.isFunction(err)
+      message = @formatErrorMessage(err, args)
+      return @cypressErr(message)
+
+    if !err.message
+      throw new Error "Error message path '#{errPath}' does not have a message field"
+    return @cypressErr(err)
+
+  errMessageByPath: (errPath, args) ->
+    errMessage = @getErrorValue(errPath)
+
+    if _.isObject(errMessage) and not _.isFunction(errMessage)
+      if !errMessage.message?
+        throw new Error "Error message path '#{errPath}' does not have a message field"
+      errMessage = errMessage.message
+
+    @formatErrorMessage(errMessage, args)
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'

@@ -59,7 +59,8 @@ module.exports = {
     not_registered_without_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nYou have not aliased anything yet."
 
   as:
-    empty_string: "#{cmd('as')} cannot be passed an empty string."
+    empty_string:
+      message: "#{cmd('as')} cannot be passed an empty string."
     invalid_type: "#{cmd('as')} can only accept a string."
     invalid_first_token: "'{{alias}}' cannot be named starting with the '@' symbol. Try renaming the alias to '{{suggestedName}}', or something else that does not start with the '@' symbol."
     reserved_word: "#{cmd('as')} cannot be aliased as: '{{alias}}'. This word is reserved."
