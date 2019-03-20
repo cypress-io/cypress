@@ -13,6 +13,7 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
+agent        = require("./util/agent")
 cors         = require("./util/cors")
 uri          = require("./util/uri")
 origin       = require("./util/origin")
@@ -596,6 +597,7 @@ class Server
           port: port
           protocol: protocol
         }
+        agent: agent
       }, onProxyErr)
     else
       ## we can't do anything with this socket

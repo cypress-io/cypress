@@ -3,6 +3,7 @@ const dns = require('dns')
 const url = require('url')
 const rp = require('request-promise')
 const Promise = require('bluebird')
+const agent = require('./agent')
 
 module.exports = {
   byPortAndAddress (port, address) {
@@ -49,7 +50,11 @@ module.exports = {
 
     if (process.env.HTTP_PROXY) {
       // cannot make arbitrary connections behind a proxy, attempt HTTP/HTTPS
-      return rp(urlStr)
+      return rp({
+        url: urlStr,
+        agent,
+        proxy: null,
+      })
       .catch({ name: 'StatusCodeError' }, () => {}) // we just care if it can connect, not if it's a valid resource
     }
 

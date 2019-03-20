@@ -1,22 +1,49 @@
 import * as http from 'http'
-import * as https from 'https'
+import * as https from 'http'
 import * as net from 'net'
 import * as tls from 'tls'
 import * as url from 'url'
 import { getProxyForUrl } from 'proxy-from-env'
 
-function createProxySock (proxy) {
+const outHeadersKey = Symbol.for('outHeadersKey')
+
+function createProxySock (proxy: url.Url) {
   if (proxy.protocol === 'http:') {
-    return net.connect(proxy.port || 80, proxy.hostname)
+    return net.connect(Number(proxy.port) || 80, proxy.hostname)
   }
 
   if (proxy.protocol === 'https:') {
     // if the upstream is https, we need to wrap the socket with tls
-    return tls.connect(proxy.port || 443, proxy.hostname)
+    return tls.connect(Number(proxy.port) || 443, proxy.hostname)
   }
 
   // socksv5, etc...
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
+}
+
+// bypasses the "request already sent?" check
+// https://github.com/nodejs/node/blob/v8.x/lib/_http_outgoing.js#L497
+function setHeaderInternal (req: http.ClientRequest, name: string, value: string) {
+  if (!req[outHeadersKey]) {
+    req[outHeadersKey] = {}
+  }
+
+  req[outHeadersKey][name.toLowerCase()] = [name, value]
+}
+
+// some data is already queued, regenerate it
+// https://github.com/TooTallNate/node-http-proxy-agent/blob/b7b7cc793c3226aa83f820ce5c277e81862d32eb/index.js#L93
+function regenerateQueuedRequestBuffer (req: http.ClientRequest) {
+  if (req._header) {
+    req._header = null;
+    req._implicitHeader();
+    if (req.output && req.output.length > 0) {
+      // the _header has already been queued to be written to the socket
+      var first = req.output[0];
+      var endOfHeaders = first.indexOf('\r\n\r\n') + 4;
+      req.output[0] = req._header + first.substring(endOfHeaders);
+    }
+  }
 }
 
 class CombinedAgent {
@@ -71,12 +98,14 @@ class HttpAgent extends http.Agent {
 
     // set req.path to the full path so the proxy can resolve it
     req.path = options.href
-    req.setHeader('host', `${options.host}:${options.port}`)
-    if (proxy.auth) {
-      req.setHeader('proxy-authorization', `basic ${Buffer.from(proxy.auth).toString('base64')}`)
-    }
 
-    options.port = proxy.port
+    setHeaderInternal(req, 'host', `${options.host}:${options.port}`)
+    if (proxy.auth) {
+      setHeaderInternal(req, 'proxy-authorization', `basic ${Buffer.from(proxy.auth).toString('base64')}`)
+    }
+    regenerateQueuedRequestBuffer(req)
+
+    options.port = proxy.port || 80
     options.host = proxy.hostname
     delete options.path // so the underlying net.connect doesn't default to IPC
 
@@ -156,3 +185,5 @@ class HttpsAgent extends https.Agent {
 }
 
 module.exports = new CombinedAgent()
+
+module.exports.CombinedAgent = CombinedAgent
