@@ -6,7 +6,7 @@ tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
-agent      = require("./util/agent")
+agent      = require("./util/agent.ts")
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
 

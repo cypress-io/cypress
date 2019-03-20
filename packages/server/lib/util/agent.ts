@@ -1,13 +1,28 @@
-const http = require('http')
-const https = require('https')
-const net = require('net')
-const tls = require('tls')
-const url = require('url')
+import * as http from 'http'
+import * as https from 'https'
+import * as net from 'net'
+import * as tls from 'tls'
+import * as url from 'url'
+import { getProxyForUrl } from 'proxy-from-env'
 
-const getProxyForUrl = require('proxy-from-env').getProxyForUrl
+function createProxySock (proxy) {
+  if (proxy.protocol === 'http:') {
+    return net.connect(proxy.port || 80, proxy.hostname)
+  }
+
+  if (proxy.protocol === 'https:') {
+    // if the upstream is https, we need to wrap the socket with tls
+    return tls.connect(proxy.port || 443, proxy.hostname)
+  }
+
+  // socksv5, etc...
+  throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
+}
 
 class HttpAgent extends http.Agent {
-  constructor (opts = {}) {
+  httpsAgent: https.Agent
+
+  constructor (opts: http.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
     // we will need this if they wish to make http requests over an https proxy
@@ -25,7 +40,8 @@ class HttpAgent extends http.Agent {
       }
     }
 
-    super.createSocket.call(this, req, options, cb)
+    // @ts-ignore
+    super.createSocket(req, options, cb)
   }
 
   _createProxiedSocket (req, options, cb) {
@@ -46,15 +62,17 @@ class HttpAgent extends http.Agent {
       // gonna have to use the https module instead
       req.agent = this.httpsAgent
 
+      // @ts-ignore
       return this.httpsAgent.addRequest(req, options)
     }
 
-    super.createSocket.call(this, req, options, cb)
+    // @ts-ignore
+    super.createSocket(req, options, cb)
   }
 }
 
 class HttpsAgent extends https.Agent {
-  constructor (opts = {}) {
+  constructor (opts: https.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
   }
@@ -70,28 +88,15 @@ class HttpsAgent extends https.Agent {
       }
     }
 
-    cb(null, super.createConnection.call(this, options))
-  }
-
-  static _createProxySock (proxy) {
-    if (proxy.protocol === 'http:') {
-      return net.connect(proxy.port || 80, proxy.hostname)
-    }
-
-    if (proxy.protocol === 'https:') {
-      // if the upstream is https, we need to wrap the socket with tls
-      return tls.connect(proxy.port || 443, proxy.hostname)
-    }
-
-    // socksv5, etc...
-    throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
+    // @ts-ignore
+    cb(null, super.createConnection(options))
   }
 
   // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
   _createProxiedConnection (options, cb) {
     const proxy = url.parse(options.proxy)
 
-    const proxySocket = HttpsAgent._createProxySock(proxy)
+    const proxySocket = createProxySock(proxy)
 
     const onError = (err) => {
       proxySocket.destroy()
@@ -112,7 +117,9 @@ class HttpsAgent extends https.Agent {
 
       // https.Agent will reuse this socket now that we've set it
       options.socket = proxySocket
-      cb(null, super.createConnection.call(this, options))
+
+      // @ts-ignore
+      cb(null, super.createConnection(options))
     })
 
     let connectReq = `CONNECT ${options.uri.hostname}:${options.uri.port} HTTP/1.1\r\n`
