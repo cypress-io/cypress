@@ -15,7 +15,6 @@ const normalize = require('../../support/normalize')
 const version = '1.2.3'
 const installDir = path.join(os.tmpdir(), 'Cypress', version)
 
-
 describe('lib/tasks/unzip', function () {
   require('mocha-banner').register()
   beforeEach(function () {
@@ -60,6 +59,7 @@ describe('lib/tasks/unzip', function () {
     })
     .then(() => {
       expect(onProgress).to.be.called
+
       return fs.statAsync(installDir)
     })
   })

@@ -1,4 +1,4 @@
-test/**/unzip_spec.js
+test/**/verify_spec.js
 --timeout 10000
 --reporter spec
 --recursive
