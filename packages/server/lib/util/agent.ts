@@ -136,6 +136,8 @@ class HttpsAgent extends https.Agent {
 }
 
 module.exports = {
+  HttpAgent,
+  HttpsAgent,
   http: new HttpAgent(),
   https: new HttpsAgent(),
 }
