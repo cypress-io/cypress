@@ -84,6 +84,7 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
 
 

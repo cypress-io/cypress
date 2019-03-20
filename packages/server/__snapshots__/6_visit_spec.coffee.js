@@ -141,6 +141,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
 
 
@@ -223,6 +224,7 @@ The response we received from your web server was:
 This was considered a failure because the status code was not '2xx'.
 
 If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -335,6 +337,7 @@ The internal Cypress web server responded with:
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
 
 
@@ -419,6 +422,7 @@ This was considered a failure because responses must have content-type: 'text/ht
 However, you can likely use cy.request() instead of cy.visit().
 
 cy.request() will automatically get and set cookies and enable you to parse responses.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

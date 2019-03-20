@@ -109,6 +109,7 @@ https://on.cypress.io/api/task
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
   2)  includes stack trace in error:
      CypressError: cy.task('errors') failed with the following error:
@@ -132,6 +133,7 @@ https://on.cypress.io/api/task
     at stack trace line
     at stack trace line
 
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
