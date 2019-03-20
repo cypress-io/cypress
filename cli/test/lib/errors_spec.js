@@ -21,7 +21,12 @@ describe('errors', function () {
 
   context('.errors.formErrorText', function () {
     it('returns fully formed text message', () => {
-      return snapshot(formErrorText(missingXvfb))
+      expect(missingXvfb).to.be.an('object')
+      return formErrorText(missingXvfb)
+      .then(text => {
+        expect(text).to.be.a('string')
+        snapshot(text)
+      })
     })
   })
 })
