@@ -45,7 +45,7 @@ describe('lib/tasks/unzip', function () {
     .catch((err) => {
       logger.error(err)
 
-      snapshot('unzip error', normalize(ctx.stdout.toString()))
+      snapshot('unzip error 1', normalize(ctx.stdout.toString()))
     })
   })
 
