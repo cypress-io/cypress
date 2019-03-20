@@ -21,7 +21,7 @@ describe('cli', () => {
     os.platform.returns('darwin')
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
-    this.exec = (args) => {
+    this.exec = args => {
       return cli.init(`node test ${args}`.split(' '))
     }
   })
@@ -29,14 +29,14 @@ describe('cli', () => {
   context('unknown option', () => {
     // note it shows help for that specific command
     it('shows help', () => {
-      return execa('bin/cypress', ['open', '--foo']).then((result) => {
-        snapshot('shows help for open --foo', result)
+      return execa('bin/cypress', ['open', '--foo']).then(result => {
+        snapshot('shows help for open --foo 1', result)
       })
     })
 
     it('shows help for run command', () => {
-      return execa('bin/cypress', ['run', '--foo']).then((result) => {
-        snapshot('shows help for run --foo', result)
+      return execa('bin/cypress', ['run', '--foo']).then(result => {
+        snapshot('shows help for run --foo 1', result)
       })
     })
 
@@ -79,57 +79,60 @@ describe('cli', () => {
     beforeEach(() => {
       sinon.stub(state, 'getBinaryDir').returns(binaryDir)
     })
-    it('reports package version', (done) => {
+    it('reports package version', done => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').withArgs(binaryDir).resolves('X.Y.Z')
+      sinon
+        .stub(state, 'getBinaryPkgVersionAsync')
+        .withArgs(binaryDir)
+        .resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {
-        snapshot('cli version and binary version', logger.print())
+        snapshot('cli version and binary version 1', logger.print())
         done()
       })
     })
 
-    it('reports package and binary message', (done) => {
+    it('reports package and binary message', done => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
       sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {
-        snapshot('cli version and binary version', logger.print())
+        snapshot('cli version and binary version 2', logger.print())
         done()
       })
     })
 
-    it('handles non-existent binary version', (done) => {
+    it('handles non-existent binary version', done => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
       sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('version')
       process.exit.callsFake(() => {
-        snapshot('cli version no binary version', logger.print())
+        snapshot('cli version no binary version 1', logger.print())
         done()
       })
     })
 
-    it('handles non-existent binary --version', (done) => {
+    it('handles non-existent binary --version', done => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
       sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('--version')
       process.exit.callsFake(() => {
-        snapshot('cli --version no binary version', logger.print())
+        snapshot('cli --version no binary version 1', logger.print())
         done()
       })
     })
 
-    it('handles non-existent binary -v', (done) => {
+    it('handles non-existent binary -v', done => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
       sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
 
       this.exec('-v')
       process.exit.callsFake(() => {
-        snapshot('cli -v no binary version', logger.print())
+        snapshot('cli -v no binary version 1', logger.print())
         done()
       })
     })
@@ -141,23 +144,23 @@ describe('cli', () => {
       sinon.stub(util, 'exit').withArgs(0)
     })
 
-    it('calls run.start with options + exits with code', (done) => {
+    it('calls run.start with options + exits with code', done => {
       run.start.resolves(10)
       this.exec('run')
 
-      util.exit.callsFake((code) => {
+      util.exit.callsFake(code => {
         expect(code).to.eq(10)
         done()
       })
     })
 
-    it('run.start with options + catches errors', (done) => {
+    it('run.start with options + catches errors', done => {
       const err = new Error('foo')
 
       run.start.rejects(err)
       this.exec('run')
 
-      util.logErrorExit1.callsFake((e) => {
+      util.logErrorExit1.callsFake(e => {
         expect(e).to.eq(err)
         done()
       })
@@ -170,7 +173,9 @@ describe('cli', () => {
 
     it('calls run with spec', () => {
       this.exec('run --spec cypress/integration/foo_spec.js')
-      expect(run.start).to.be.calledWith({ spec: 'cypress/integration/foo_spec.js' })
+      expect(run.start).to.be.calledWith({
+        spec: 'cypress/integration/foo_spec.js'
+      })
     })
 
     it('calls run with port with -p arg', () => {
@@ -180,12 +185,16 @@ describe('cli', () => {
 
     it('calls run with env variables', () => {
       this.exec('run --env foo=bar,host=http://localhost:8888')
-      expect(run.start).to.be.calledWith({ env: 'foo=bar,host=http://localhost:8888' })
+      expect(run.start).to.be.calledWith({
+        env: 'foo=bar,host=http://localhost:8888'
+      })
     })
 
     it('calls run with config', () => {
       this.exec('run --config watchForFileChanges=false,baseUrl=localhost')
-      expect(run.start).to.be.calledWith({ config: 'watchForFileChanges=false,baseUrl=localhost' })
+      expect(run.start).to.be.calledWith({
+        config: 'watchForFileChanges=false,baseUrl=localhost'
+      })
     })
 
     it('calls run with key', () => {
@@ -245,7 +254,7 @@ describe('cli', () => {
       expect(run.start).to.be.calledWithMatch({ spec: 'foo,bar,baz' })
     })
 
-    it('warns with space-separated --specs', (done) => {
+    it('warns with space-separated --specs', done => {
       sinon.spy(logger, 'warn')
       this.exec('run --spec a b c d e f g --dev')
       snapshot(logger.warn.getCall(0).args[0])
@@ -280,13 +289,13 @@ describe('cli', () => {
       expect(open.start).to.be.calledWith({ port: '7878', global: true })
     })
 
-    it('calls open.start + catches errors', (done) => {
+    it('calls open.start + catches errors', done => {
       const err = new Error('foo')
 
       open.start.rejects(err)
       this.exec('open --port 7878')
 
-      util.logErrorExit1.callsFake((e) => {
+      util.logErrorExit1.callsFake(e => {
         expect(e).to.eq(err)
         done()
       })
@@ -305,32 +314,34 @@ describe('cli', () => {
     expect(install.start).to.be.calledWith({ force: true })
   })
 
-  it('install calls install.start + catches errors', (done) => {
+  it('install calls install.start + catches errors', done => {
     const err = new Error('foo')
 
     sinon.stub(install, 'start').rejects(err)
     this.exec('install')
 
-    util.logErrorExit1.callsFake((e) => {
+    util.logErrorExit1.callsFake(e => {
       expect(e).to.eq(err)
       done()
     })
   })
   context('cypress verify', () => {
-
     it('verify calls verify.start with force: true', () => {
       sinon.stub(verify, 'start').resolves()
       this.exec('verify')
-      expect(verify.start).to.be.calledWith({ force: true, welcomeMessage: false })
+      expect(verify.start).to.be.calledWith({
+        force: true,
+        welcomeMessage: false
+      })
     })
 
-    it('verify calls verify.start + catches errors', (done) => {
+    it('verify calls verify.start + catches errors', done => {
       const err = new Error('foo')
 
       sinon.stub(verify, 'start').rejects(err)
       this.exec('verify')
 
-      util.logErrorExit1.callsFake((e) => {
+      util.logErrorExit1.callsFake(e => {
         expect(e).to.eq(err)
         done()
       })
