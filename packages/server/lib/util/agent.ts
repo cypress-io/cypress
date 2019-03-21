@@ -5,14 +5,14 @@ import * as tls from 'tls'
 import * as url from 'url'
 import { getProxyForUrl } from 'proxy-from-env'
 
-function createProxySock (proxy) {
+function createProxySock (proxy: url.Url) {
   if (proxy.protocol === 'http:') {
-    return net.connect(proxy.port || 80, proxy.hostname)
+    return net.connect(Number(proxy.port || 80), proxy.hostname)
   }
 
   if (proxy.protocol === 'https:') {
     // if the upstream is https, we need to wrap the socket with tls
-    return tls.connect(proxy.port || 443, proxy.hostname)
+    return tls.connect(Number(proxy.port || 443), proxy.hostname)
   }
 
   // socksv5, etc...
@@ -29,7 +29,7 @@ class CombinedAgent {
   }
 
   // called by Node.js whenever a new request is made internally
-  addRequest(req, options) {
+  addRequest(req: http.ClientRequest, options: any) {
     if (options.uri.protocol === 'https:') {
       return this.httpsAgent.addRequest(req, options)
     }
@@ -156,3 +156,5 @@ class HttpsAgent extends https.Agent {
 }
 
 module.exports = new CombinedAgent()
+
+module.exports.CombinedAgent = CombinedAgent

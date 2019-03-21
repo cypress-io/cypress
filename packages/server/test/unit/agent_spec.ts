@@ -8,7 +8,7 @@ import * as Promise from 'bluebird'
 import * as request from 'request-promise'
 import DebuggingProxy = require('debugging-proxy')
 // @ts-ignore
-import Ca = require('../../../https-proxy/lib/ca')
+import CA = require('../../../https-proxy/lib/ca')
 import { expect } from 'chai'
 import { CombinedAgent } from '../../lib/util/agent'
 
@@ -19,7 +19,7 @@ const HTTPS_PORT = 31217
 describe('lib/util/agent', function() {
   before(function() {
     // generate some localhost certs for testing https servers
-    return Ca.create(fs.mkdtempSync(path.join(os.tmpdir(), 'cy-test-')))
+    return CA.create(fs.mkdtempSync(path.join(os.tmpdir(), 'cy-test-')))
     .then(ca => ca.generateServerCertificateKeys('localhost'))
     .spread((cert, key) => {
       this.https = {
@@ -32,6 +32,10 @@ describe('lib/util/agent', function() {
 
       app.get('/get', (req, res) => {
         res.send('It worked!')
+      })
+
+      app.get('/reset', (req, res) => {
+        req.destroy()
       })
 
       this.httpServer = http.createServer(app)
@@ -56,7 +60,7 @@ describe('lib/util/agent', function() {
     },
     {
       name: 'With an HTTP upstream',
-      proxyUrl: `http://localhost:8118`,
+      proxyUrl: `http://localhost:${PROXY_PORT}`,
     },
     {
       name: 'With an HTTPS upstream',
@@ -74,7 +78,7 @@ describe('lib/util/agent', function() {
       httpsProxy: true,
       proxyAuth: true
     }
-  ].slice(1,2).map((testCase) => {
+  ].slice().map((testCase) => {
     context(testCase.name, function() {
       beforeEach(function() {
         this.oldEnv = Object.assign({}, process.env)
@@ -147,9 +151,8 @@ describe('lib/util/agent', function() {
             return
           }
           expect(this.debugProxy.requests[0]).to.include({
-            ssl: true,
-            hostname: 'localhost',
-            port: HTTPS_PORT
+            https: true,
+            url: `localhost:${HTTPS_PORT}`
           })
         })
       })

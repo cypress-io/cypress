@@ -1,7 +1,5 @@
-// missing type definitions for 3rd party libraries
+// missing type definitions for libraries
 // https://glebbahmutov.com/blog/trying-typescript/#manual-types-for-3rd-party-libraries
-
-// for execa module use @types/execa
 
 declare module 'plist' {
   interface Plist {
@@ -11,14 +9,20 @@ declare module 'plist' {
   export = plist
 }
 
+declare module 'proxy-from-env' {
+  const getProxyForUrl: (url: string) => string
+}
+
 declare module 'http' {
-  interface Agent {
+  import { Socket } from 'net'
+
+  export interface Agent {
     addRequest(req: ClientRequest, options: any): void
-    createSocket(req: ClientRequest, options: any, cb: (err?: Error, sock: Socket) => void): void
+    createSocket(req: ClientRequest, options: any, cb: (err: Error | undefined, sock: Socket) => void): void
   }
 
-  interface ClientRequest {
-    _header: Map<string, string>
+  export interface ClientRequest {
+    _header: { [key: string]:string }
     _implicitHeader: () => void
     output: string[]
   }
@@ -29,5 +33,5 @@ declare interface Object {
 }
 
 declare interface SymbolConstructor {
-  for(str: string): unique Symbol
+  for(str: string): SymbolConstructor
 }
