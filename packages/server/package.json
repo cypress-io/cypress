@@ -118,7 +118,7 @@
     "cookie": "0.3.1",
     "cookie-parser": "1.4.4",
     "data-uri-to-buffer": "0.0.4",
-    "debug": "2.6.9",
+    "debug": "4.1.1",
     "dependency-tree": "6.5.0",
     "electron-context-menu": "0.11.0",
     "electron-positioner": "3.0.1",
