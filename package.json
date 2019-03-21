@@ -106,7 +106,7 @@
     "human-interval": "0.1.6",
     "husky": "0.14.3",
     "inquirer": "3.3.0",
-    "js-codemod": "cpojer/js-codemod#29dafed",
+    "js-codemod": "cpojer/js-codemod#0677c0b",
     "jscodemods": "cypress-io/jscodemods#01b546e",
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
