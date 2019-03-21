@@ -29,7 +29,7 @@ declare const assert: Chai.AssertStatic
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
-  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "PATCH"
+  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD" | "TRACE" | "COPY" | "LOCK" | "MKCOL" | "MOVE" | "PURGE" | "PROPFIND" | "PROPPATCH" | "UNLOCK" | "REPORT" | "MKACTIVITY" | "CHECKOUT" | "MERGE" | "M-SEARCH" | "NOTIFY" | "SUBSCRIBE" | "UNSUBSCRIBE" | "SEARCH" | "CONNECT"
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
