@@ -134,6 +134,9 @@ class Server
       socket.pipe(upstreamSock)
       socket.emit("data", head)
 
+      socket.on "close", =>
+        upstreamSock.destroy()
+
       socket.resume()
 
     httpsAgent = new HttpsAgent(upstreamProxy)
