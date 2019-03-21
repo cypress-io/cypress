@@ -25,28 +25,61 @@
     line-height: 18px;
     padding-left: 0;
 
-    pre {
-      background-color: darken($yellow-lightest, 5%);
-      border-left: 5px solid $fail;
-      clear: both;
-      color: $fail;
-      margin-bottom: 0;
-      margin-top: 2px;
-      padding-bottom: 2px;
+    .runnable-err-wrapper {
+      margin: 5px 0 5px 5px;
       padding-left: 10px;
-      padding-top: 2px;
+      border-left: 1px dotted #DDD;
+    }
+
+    .runnable-err {
+      border-left: 2px solid $fail;
+      background-color: $err-background;
+      clear: both;
+      color: $err-text;
+      margin-bottom: 0;
+      margin-top: 5px;
       white-space: pre-wrap;
       word-break: break-word;
       user-select: initial;
+    }
 
-      &:empty {
+    .runnable-err-header {
+      background-color: $err-header-background;
+      padding: 5px 10px;
+      font-weight: bold;
+
+      i {
+        margin-right: 5px;
+      }
+    }
+
+    .runnable-err-message {
+      padding: 10px;
+      font-family: $monospace;
+    }
+
+    .runnable-err-stack-expander {
+      padding: 10px;
+      text-decoration: underline;
+
+      .collapsible-indicator {
+        color: #eb535e !important;
+      }
+
+      .collapsible-more {
         display: none;
       }
+    }
 
-      &:hover {
-        cursor: pointer;
-        background-color: darken($yellow-lightest, 15%);
-      }
+    .runnable-err-stack-trace {
+      padding: 5px 10px 10px 15px;
+      font-family: $monospace;
+    }
+
+    pre {
+      background-color: #fff;
+      border: 1px solid #ffe4e7;
+      margin: 10px;
     }
 
     &.hover {
