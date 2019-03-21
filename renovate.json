@@ -23,7 +23,7 @@
   "commitMessage": "{{semanticPrefix}}Update {{depName}} to {{newVersion}} 🌟",
   "prTitle": "{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}} 🌟",
   "prHourlyLimit": 1,
-  "prConcurrentLimit": 30,
+  "prConcurrentLimit": 1,
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
