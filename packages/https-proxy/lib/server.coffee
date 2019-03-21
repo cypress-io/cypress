@@ -106,6 +106,9 @@ class Server
     conn = net.connect.apply(net, args)
     conn.setNoDelay(true)
 
+    socket.on "close", =>
+      conn.destroy()
+
     conn.on "error", (err) =>
       if @_onError
         @_onError(err, socket, head, port)
