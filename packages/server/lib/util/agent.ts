@@ -19,7 +19,7 @@ function createProxySock (proxy: url.Url) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
-class CombinedAgent {
+export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
 

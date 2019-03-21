@@ -6,11 +6,12 @@ import * as path from 'path'
 import * as express from 'express'
 import * as Promise from 'bluebird'
 import * as request from 'request-promise'
-import DebuggingProxy = require('debugging-proxy')
 // @ts-ignore
 import CA = require('../../../https-proxy/lib/ca')
-import { expect } from 'chai'
 import { CombinedAgent } from '../../lib/util/agent'
+import DebuggingProxy = require('debugging-proxy')
+import { expect } from 'chai'
+import * as Io from '@packages/socket'
 
 const PROXY_PORT = 31215
 const HTTP_PORT = 31216
@@ -34,13 +35,24 @@ describe('lib/util/agent', function() {
         res.send('It worked!')
       })
 
-      app.get('/reset', (req, res) => {
-        req.destroy()
+      app.get('/emptyResponse', (req, res) => {
+        // ERR_EMPTY_RESPONSE in Chrome
+        setTimeout(() => res.connection.destroy(), 100)
       })
 
       this.httpServer = http.createServer(app)
+      this.wsServer = Io.server(this.httpServer)
 
       this.httpsServer = https.createServer(this.https, app)
+      this.wssServer = Io.server(this.httpsServer)
+
+      ;[this.wsServer, this.wssServer].map(ws => {
+        ws.on('connection', function(socket) {
+          debugger
+          socket.emit('It worked!')
+          socket.close()
+        })
+      })
 
       return Promise.all([
         new Promise((resolve) => this.httpServer.listen(HTTP_PORT, resolve)),
@@ -157,8 +169,17 @@ describe('lib/util/agent', function() {
         })
       })
 
-      it('websocket connections can be established and used', function() {
-
+      it('HTTP websocket connections can be established and used', function() {
+        return new Promise((resolve) => {
+          debugger
+          Io.client(`http://localhost:${HTTP_PORT}`, {
+            agent: this.agent
+          }).on('connect', (msg) => {
+            debugger
+            expect(msg).to.eq('It worked!')
+            resolve()
+          })
+        })
       })
     })
   })
