@@ -80,7 +80,7 @@
     "@types/lodash": "4.14.122",
     "@types/minimatch": "3.0.3",
     "@types/mocha": "2.2.44",
-    "@types/sinon": "7.0.0",
+    "@types/sinon": "7.0.10",
     "@types/sinon-chai": "3.2.2",
     "babel-cli": "6.26.0",
     "babel-preset-es2015": "6.24.1",
@@ -96,7 +96,7 @@
     "nyc": "13.3.0",
     "proxyquire": "2.0.1",
     "shelljs": "0.7.8",
-    "sinon": "7.2.2",
+    "sinon": "7.3.0",
     "snap-shot-it": "5.0.1"
   },
   "files": [
