@@ -57,7 +57,7 @@
     "is-ci": "1.2.1",
     "is-installed-globally": "0.1.0",
     "lazy-ass": "1.6.0",
-    "listr": "0.12.0",
+    "listr": "0.14.3",
     "lodash": "4.17.11",
     "log-symbols": "2.2.0",
     "minimist": "1.2.0",
