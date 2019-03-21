@@ -30,7 +30,7 @@
     "@types/debug": "0.0.31",
     "@types/execa": "0.7.2",
     "@types/fs-extra": "3.0.0",
-    "@types/lodash": "4.14.122",
+    "@types/lodash": "4.14.123",
     "@types/mocha": "2.2.48",
     "@types/node": "7.10.3",
     "@types/ramda": "0.25.47",
