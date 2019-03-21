@@ -36,7 +36,7 @@
     "debug": "2.6.9",
     "fs-extra": "0.30.0",
     "lodash": "4.17.11",
-    "node-forge": "0.6.49",
+    "node-forge": "0.8.2",
     "semaphore": "1.1.0",
     "server-destroy-vvo": "1.0.1",
     "ssl-root-cas": "1.3.1"
