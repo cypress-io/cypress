@@ -26,7 +26,7 @@
   ],
   "devDependencies": {
     "@types/bluebird": "3.5.21",
-    "@types/chai": "3.5.2",
+    "@types/chai": "4.1.7",
     "@types/debug": "0.0.31",
     "@types/execa": "0.7.2",
     "@types/fs-extra": "3.0.0",
@@ -35,7 +35,7 @@
     "@types/node": "7.10.3",
     "@types/ramda": "0.25.47",
     "bin-up": "1.1.0",
-    "chai": "3.5.0",
+    "chai": "4.2.0",
     "prettier": "1.16.4",
     "shelljs": "0.7.8",
     "sinon": "2.4.1",
