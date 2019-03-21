@@ -34,7 +34,7 @@
     "gulp-clean": "0.4.0",
     "gulp-gh-pages-will": "0.5.5",
     "gulp-rev-all": "0.8.24",
-    "mocha": "2.5.3",
+    "mocha": "5.2.0",
     "run-sequence": "1.2.2",
     "shelljs": "0.7.8"
   }

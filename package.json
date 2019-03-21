@@ -114,7 +114,7 @@
     "lint-staged": "4.3.0",
     "lodash": "4.17.11",
     "make-empty-github-commit": "1.2.0",
-    "mocha": "3.5.3",
+    "mocha": "5.2.0",
     "mocha-banner": "1.1.2",
     "mocha-junit-reporter": "1.18.0",
     "mocha-multi-reporters": "1.1.7",

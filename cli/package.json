@@ -79,7 +79,7 @@
     "@types/jquery": "3.3.6",
     "@types/lodash": "4.14.122",
     "@types/minimatch": "3.0.3",
-    "@types/mocha": "2.2.44",
+    "@types/mocha": "5.2.6",
     "@types/sinon": "7.0.0",
     "@types/sinon-chai": "3.2.2",
     "babel-cli": "6.26.0",
