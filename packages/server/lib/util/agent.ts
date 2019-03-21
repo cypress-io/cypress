@@ -19,6 +19,17 @@ function createProxySock (proxy: url.Url) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
+function regenerateRequestHead(req) {
+  req._header = null;
+  req._implicitHeader();
+  if (req.output && req.output.length > 0) {
+    // the _header has already been queued to be written to the socket
+    var first = req.output[0];
+    var endOfHeaders = first.indexOf('\r\n\r\n') + 4;
+    req.output[0] = req._header + first.substring(endOfHeaders);
+  }
+}
+
 export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
@@ -86,10 +97,18 @@ class HttpAgent extends http.Agent {
 
     // set req.path to the full path so the proxy can resolve it
     req.path = options.href
+
+    delete req._header // so we can set headers again
+
     req.setHeader('host', `${options.host}:${options.port}`)
     if (proxy.auth) {
       req.setHeader('proxy-authorization', `basic ${Buffer.from(proxy.auth).toString('base64')}`)
     }
+
+    // node has queued an HTTP message to be sent already, so we need to regenerate the
+    // queued message with the new path and headers
+    // https://github.com/TooTallNate/node-http-proxy-agent/blob/master/index.js#L93
+    regenerateRequestHead(req)
 
     options.port = proxy.port
     options.host = proxy.hostname
@@ -127,8 +146,9 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
   _createProxiedConnection (options, cb) {
+    // heavily inspired by
+    // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     const proxy = url.parse(options.proxy)
 
     const proxySocket = createProxySock(proxy)
