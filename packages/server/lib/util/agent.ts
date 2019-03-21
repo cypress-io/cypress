@@ -30,15 +30,14 @@ export class CombinedAgent {
 
   // called by Node.js whenever a new request is made internally
   addRequest(req: http.ClientRequest, options: any) {
-    if (options.uri.protocol === 'https:') {
+    // WSS connections will not have an href, but you can tell protocol from the defaultAgent
+    const isHttps = (options._defaultAgent && options._defaultAgent.protocol === 'https:')
+                    || (options.href  && options.href.slice(0,6) === 'https')
+    if (isHttps) {
       return this.httpsAgent.addRequest(req, options)
     }
 
-    if (options.uri.protocol === 'http:') {
-      return this.httpAgent.addRequest(req, options)
-    }
-
-    throw new Error(`Unsupported protocol for CombinedAgent: ${options.uri.protocol}`)
+    return this.httpAgent.addRequest(req, options)
   }
 }
 

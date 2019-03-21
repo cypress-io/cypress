@@ -48,9 +48,7 @@ describe('lib/util/agent', function() {
 
       ;[this.wsServer, this.wssServer].map(ws => {
         ws.on('connection', function(socket) {
-          debugger
-          socket.emit('It worked!')
-          socket.close()
+          socket.send('It worked!')
         })
       })
 
@@ -171,11 +169,20 @@ describe('lib/util/agent', function() {
 
       it('HTTP websocket connections can be established and used', function() {
         return new Promise((resolve) => {
-          debugger
           Io.client(`http://localhost:${HTTP_PORT}`, {
             agent: this.agent
-          }).on('connect', (msg) => {
-            debugger
+          }).on('message', (msg) => {
+            expect(msg).to.eq('It worked!')
+            resolve()
+          })
+        })
+      })
+
+      it('HTTPS websocket connections can be established and used', function() {
+        return new Promise((resolve) => {
+          Io.client(`https://localhost:${HTTPS_PORT}`, {
+            agent: this.agent
+          }).on('message', (msg) => {
             expect(msg).to.eq('It worked!')
             resolve()
           })
