@@ -75,9 +75,20 @@ describe "events", ->
           cy.get("#resize").click()
 
     context "with cy.off", ->
-      it "unbinds the listener", ->
+      it "unbinds the listener if listener passed", ->
         onResize = (event) ->
           throw new Error("window:resize should not be called because it was unregistered with cy.off")
+        cy.on("window:resize", onResize)
+        cy.off("window:resize", onResize)
+
+        cy.visit("/fixtures/page-events.html")
+        cy.get("#resize").click()
+        cy.wait(500) ## give it time to ensure onResize handler isn't called
+
+      it "unbinds all listeners if no listener passed", ->
+        onResize = (event) ->
+          throw new Error("window:resize should not be called because it was unregistered with cy.off")
+        cy.on("window:resize", onResize)
         cy.on("window:resize", onResize)
         cy.off("window:resize")
 
@@ -132,9 +143,20 @@ describe "events", ->
           cy.get("#resize").click()
 
     context "with Cypress.off", ->
-      it "unbinds the listener", ->
+      it "unbinds the listener if listener passed", ->
         onResize = (event) ->
           throw new Error("window:resize should not be called because it was unregistered with cy.off")
+        Cypress.on("window:resize", onResize)
+        Cypress.off("window:resize", onResize)
+
+        cy.visit("/fixtures/page-events.html")
+        cy.get("#resize").click()
+        cy.wait(500) ## give it time to ensure onResize handler isn't called
+
+      it "unbinds all listeners if no listener passed", ->
+        onResize = (event) ->
+          throw new Error("window:resize should not be called because it was unregistered with cy.off")
+        Cypress.on("window:resize", onResize)
         Cypress.on("window:resize", onResize)
         Cypress.off("window:resize")
 

@@ -122,16 +122,23 @@ module.exports = {
       ## any calls to Cypress.on("window:*") after page:start need to be
       ## bound now. otherwise they'll be bound when page:start is fired
       if pageStarted and pageWindow
-        pageWindow.addEventListener(eventName, (args...) ->
-          console.log("#{eventName} fired", args)
-          listener(args...)
-        )
+        pageWindow.addEventListener(eventName, listener)
 
     offWindowEvent = (eventName, listener) ->
+      toRemove = []
+
       windowEvents = windowEvents.filter (eventProps) ->
-        eventProps.eventName is eventName and eventProps.listener is listener
+        shouldRemove = eventProps.eventName is eventName and
+          (if listener then (eventProps.listener is listener) else true)
+
+        if shouldRemove
+          toRemove.push(eventProps)
+
+        return !shouldRemove
+
       if pageStarted and pageWindow
-        pageWindow.removeEventListener(eventName, listener)
+        toRemove.forEach (eventProps) ->
+          pageWindow.removeEventListener(eventProps.eventName, eventProps.listener)
 
     wrapEmitterMethods = (methods, handler) ->
       _.each methods, (method) ->
@@ -152,6 +159,7 @@ module.exports = {
 
     Cypress.on "page:end", ->
       pageStarted = false
+      pageWindow = null
 
     Cypress.on "test:end", ->
       if unbindOnTestEnd
@@ -159,9 +167,7 @@ module.exports = {
           if pageWindow
             pageWindow.removeEventListener(eventName, listener)
 
-      windowEvents = []
-      pageStarted = false
-      pageWindow = null
+        windowEvents = []
 
   throwOnRenamedEvent: (eventEmitter, name) ->
     renamedEvents = {

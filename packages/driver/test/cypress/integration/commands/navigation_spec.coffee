@@ -195,10 +195,7 @@ describe "src/cy/commands/navigation", ->
       it "logs before + after", ->
         beforeunload = false
 
-        console.log("---->")
-
         cy.on "window:beforeunload", =>
-          console.log("beforeunload")
           lastLog = @lastLog
 
           beforeunload = true
@@ -206,11 +203,8 @@ describe "src/cy/commands/navigation", ->
           expect(lastLog.get("snapshots")[0].name).to.eq("before")
           expect(lastLog.get("snapshots")[0].body).to.be.an("object")
 
-        console.log("reload")
         cy.reload().then ->
           lastLog = @lastLog
-
-          console.log("<----")
 
           expect(beforeunload).to.be.true
           expect(lastLog.get("snapshots").length).to.eq(2)
@@ -920,7 +914,7 @@ describe "src/cy/commands/navigation", ->
       it "sets error command state", (done) ->
         cy.stub(Cypress, "backend")
         .withArgs("resolve:url")
-        .rejects(new Error)
+        .rejects(new Error("resolve:url error"))
 
         cy.on "test:fail", (err) =>
           lastLog = @lastLog
@@ -934,7 +928,7 @@ describe "src/cy/commands/navigation", ->
       it "logs once on error", (done) ->
         cy.stub(Cypress, "backend")
         .withArgs("resolve:url")
-        .rejects(new Error)
+        .rejects(new Error("resolve:url error"))
 
         cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
