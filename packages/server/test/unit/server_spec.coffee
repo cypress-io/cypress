@@ -265,7 +265,7 @@ describe "lib/server", ->
 
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
 
-      expect(@proxy.ws).to.be.calledWith(req, @socket, @head, {
+      expect(@proxy.ws).to.be.calledWithMatch(req, @socket, @head, {
         secure: false
         target: {
           host: "www.google.com"
