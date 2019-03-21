@@ -32,7 +32,23 @@ export class CombinedAgent {
   addRequest(req: http.ClientRequest, options: any) {
     // WSS connections will not have an href, but you can tell protocol from the defaultAgent
     const isHttps = (options._defaultAgent && options._defaultAgent.protocol === 'https:')
-                    || (options.href  && options.href.slice(0,6) === 'https')
+                    || (options.href && options.href.slice(0,6) === 'https')
+
+    if (!options.href) {
+      // options.path can contain query parameters, which url.format will not-so-kindly urlencode for us...
+      // so just append it to the resultant URL string
+      options.href = url.format({
+        protocol: isHttps ? 'https:' : 'http:',
+        slashes: true,
+        hostname: options.host,
+        port: options.port,
+      }) + options.path
+
+      if (!options.uri) {
+        options.uri = url.parse(options.href)
+      }
+    }
+
     if (isHttps) {
       return this.httpsAgent.addRequest(req, options)
     }
@@ -141,9 +157,11 @@ class HttpsAgent extends https.Agent {
       cb(null, super.createConnection(options))
     })
 
-    let connectReq = `CONNECT ${options.uri.hostname}:${options.uri.port} HTTP/1.1\r\n`
+    const port = options.uri.port || 443
 
-    connectReq += `Host: ${options.uri.hostname}:${options.uri.port}\r\n`
+    let connectReq = `CONNECT ${options.uri.hostname}:${port} HTTP/1.1\r\n`
+
+    connectReq += `Host: ${options.uri.hostname}:${port}\r\n`
 
     if (proxy.auth) {
       connectReq += `Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}\r\n`

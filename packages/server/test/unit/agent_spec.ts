@@ -13,9 +13,9 @@ import DebuggingProxy = require('debugging-proxy')
 import { expect } from 'chai'
 import * as Io from '@packages/socket'
 
-const PROXY_PORT = 31215
-const HTTP_PORT = 31216
-const HTTPS_PORT = 31217
+const PROXY_PORT = 31000
+const HTTP_PORT = 31080
+const HTTPS_PORT = 31443
 
 describe('lib/util/agent', function() {
   before(function() {
@@ -143,12 +143,11 @@ describe('lib/util/agent', function() {
           url: `http://localhost:${HTTP_PORT}/get`,
         }).then(body => {
           expect(body).to.eq('It worked!')
-          if (!this.debugProxy) {
-            return
+          if (this.debugProxy) {
+            expect(this.debugProxy.requests[0]).to.include({
+              url: `http://localhost:${HTTP_PORT}/get`
+            })
           }
-          expect(this.debugProxy.requests[0]).to.include({
-            url: `http://localhost:${HTTP_PORT}/get`
-          })
         })
       })
 
@@ -157,22 +156,25 @@ describe('lib/util/agent', function() {
           url: `https://localhost:${HTTPS_PORT}/get`
         }).then(body => {
           expect(body).to.eq('It worked!')
-          if (!this.debugProxy) {
-            return
+          if (this.debugProxy) {
+            expect(this.debugProxy.requests[0]).to.include({
+              https: true,
+              url: `localhost:${HTTPS_PORT}`
+            })
           }
-          expect(this.debugProxy.requests[0]).to.include({
-            https: true,
-            url: `localhost:${HTTPS_PORT}`
-          })
         })
       })
 
       it('HTTP websocket connections can be established and used', function() {
         return new Promise((resolve) => {
           Io.client(`http://localhost:${HTTP_PORT}`, {
-            agent: this.agent
+            agent: this.agent,
           }).on('message', (msg) => {
             expect(msg).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[1].ws).to.be.true
+              expect(this.debugProxy.requests[1].url).to.include('http://localhost:31080')
+            }
             resolve()
           })
         })
@@ -184,6 +186,11 @@ describe('lib/util/agent', function() {
             agent: this.agent
           }).on('message', (msg) => {
             expect(msg).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                url: 'localhost:31443'
+              })
+            }
             resolve()
           })
         })
@@ -191,51 +198,63 @@ describe('lib/util/agent', function() {
     })
   })
 
-  // ;[
-  //   {
-  //     name: 'With an unreachable HTTP upstream',
-  //     proxyUrl: 'http://192.0.2.1:11111'
-  //   },
-  //   {
-  //     name: 'With an unreachable HTTPS upstream',
-  //     proxyUrl: 'https://192.0.2.1:11111'
-  //   }
-  // ].map(testCase => {
-  //   context(testCase.name, function() {
-  //     beforeEach(function() {
-  //       this.oldEnv = Object.assign({}, process.env)
-  //       process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
-  //       process.env.NO_PROXY = ''
+  ;[
+    {
+      name: 'With an unreachable HTTP upstream',
+      proxyUrl: 'http://192.0.2.1:11111'
+    },
+    {
+      name: 'With an unreachable HTTPS upstream',
+      proxyUrl: 'https://192.0.2.1:11111'
+    }
+  ].slice().map(testCase => {
+    context(testCase.name, function() {
+      beforeEach(function() {
+        this.oldEnv = Object.assign({}, process.env)
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
+        process.env.NO_PROXY = ''
 
-  //       this.agent = new CombinedAgent()
+        this.agent = new CombinedAgent()
 
-  //       this.request = request.defaults({
-  //         proxy: null,
-  //         agent: this.agent
-  //       })
-  //     })
+        this.request = request.defaults({
+          proxy: null,
+          agent: this.agent
+        })
+      })
 
-  //     afterEach(function() {
-  //       Object.assign(process.env, this.oldEnv)
-  //     })
+      afterEach(function() {
+        Object.assign(process.env, this.oldEnv)
+      })
 
-  //     it('fails gracefully on HTTP request', function() {
-  //       return this.request({
-  //         url: 'http://example.com',
-  //         timeout: 200
-  //       }).catch((err) => {
-  //         expect(err.message).to.include('ETIMEDOUT')
-  //       })
-  //     })
+      it('fails gracefully on HTTP request', function() {
+        return this.request({
+          url: `http://localhost:${HTTP_PORT}`,
+          timeout: 50
+        }).catch((err) => {
+          expect(err.message).to.include('ETIMEDOUT')
+        })
+      })
 
-  //     it('fails gracefully on HTTPS request', function() {
-  //       return this.request({
-  //         url: 'https://example.com',
-  //         timeout: 1000
-  //       }).catch((err) => {
-  //         expect(err.message).to.include('ETIMEDOUT')
-  //       })
-  //     })
-  //   })
-  // })
+      // request library timeouts don't work on HTTPS requests
+      it.skip('fails gracefully on HTTPS request', function() {
+        return new Promise((resolve) => {
+          // @ts-ignore
+          const req = https.request({
+            port: HTTPS_PORT,
+            agent: this.agent,
+            timeout: 50
+          })
+
+          req.on('error', (err) => {
+            expect(err.message).to.include('ETIMEDOUT')
+            resolve()
+          })
+
+          req.flushHeaders()
+          req.end() //send
+        })
+      })
+    })
+  })
 })
