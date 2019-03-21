@@ -58,7 +58,7 @@
     "babel-plugin-add-module-exports": "1.0.0",
     "babelify": "10.0.0",
     "bin-up": "1.1.0",
-    "body-parser": "1.12.4",
+    "body-parser": "1.18.3",
     "chai-uuid": "1.0.6",
     "chokidar-cli": "1.2.1",
     "codecov": "1.0.1",
