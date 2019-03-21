@@ -15,6 +15,6 @@
     "typescript": "2.9.2"
   },
   "dependencies": {
-    "debug": "2.6.9"
+    "debug": "4.1.1"
   }
 }

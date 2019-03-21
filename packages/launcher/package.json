@@ -27,7 +27,7 @@
   "devDependencies": {
     "@types/bluebird": "3.5.21",
     "@types/chai": "3.5.2",
-    "@types/debug": "0.0.31",
+    "@types/debug": "4.1.2",
     "@types/execa": "0.7.2",
     "@types/fs-extra": "3.0.0",
     "@types/lodash": "4.14.122",
@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "debug": "2.6.9",
+    "debug": "4.1.1",
     "execa": "0.6.3",
     "fs-extra": "3.0.1",
     "lodash": "4.17.11",
