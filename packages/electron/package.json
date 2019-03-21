@@ -32,7 +32,7 @@
     "bluebird": "3.5.3",
     "debug": "3.2.6",
     "electron-packager": "9.1.0",
-    "fs-extra": "0.30.0",
+    "fs-extra": "5.0.0",
     "lodash": "4.17.11",
     "minimist": "1.2.0"
   }
