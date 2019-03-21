@@ -164,7 +164,7 @@
     "parse-domain": "2.1.7",
     "pluralize": "3.1.0",
     "pumpify": "1.5.1",
-    "ramda": "0.24.1",
+    "ramda": "0.26.1",
     "randomstring": "1.1.5",
     "replacestream": "4.0.3",
     "request": "2.88.0",

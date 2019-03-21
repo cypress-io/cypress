@@ -62,7 +62,7 @@
     "log-symbols": "2.2.0",
     "minimist": "1.2.0",
     "moment": "2.24.0",
-    "ramda": "0.24.1",
+    "ramda": "0.26.1",
     "request": "2.88.0",
     "request-progress": "0.4.0",
     "supports-color": "5.5.0",

@@ -33,7 +33,7 @@
     "@types/lodash": "4.14.122",
     "@types/mocha": "2.2.48",
     "@types/node": "7.10.3",
-    "@types/ramda": "0.25.47",
+    "@types/ramda": "0.26.3",
     "bin-up": "1.1.0",
     "chai": "3.5.0",
     "prettier": "1.16.4",
@@ -52,6 +52,6 @@
     "lodash": "4.17.11",
     "plist": "2.1.0",
     "pluralize": "7.0.0",
-    "ramda": "0.24.1"
+    "ramda": "0.26.1"
   }
 }
