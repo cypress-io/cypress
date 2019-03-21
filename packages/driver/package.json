@@ -29,7 +29,7 @@
     "body-parser": "1.18.3",
     "bootstrap": "4.3.1",
     "bytes": "3.1.0",
-    "chai": "3.5.0",
+    "chai": "4.2.0",
     "chai-as-promised": "6.0.0",
     "chokidar-cli": "1.2.1",
     "clone": "2.1.2",

@@ -30,7 +30,7 @@
     "@cypress/icons": "0.7.0",
     "bin-up": "1.1.0",
     "browserify": "13.3.0",
-    "chai": "3.5.0",
+    "chai": "4.2.0",
     "coffeeify": "2.1.0",
     "cross-env": "5.2.0",
     "eol": "0.9.1",
