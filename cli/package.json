@@ -47,7 +47,7 @@
     "check-more-types": "2.24.0",
     "commander": "2.15.1",
     "common-tags": "1.8.0",
-    "debug": "3.1.0",
+    "debug": "4.1.1",
     "execa": "0.10.0",
     "executable": "4.1.1",
     "extract-zip": "1.6.7",

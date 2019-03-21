@@ -35,7 +35,7 @@
     "clone": "2.1.2",
     "compression": "1.7.3",
     "cors": "2.8.5",
-    "debug": "2.6.9",
+    "debug": "4.1.1",
     "errorhandler": "1.5.0",
     "eventemitter2": "4.1.2",
     "express": "4.16.4",
