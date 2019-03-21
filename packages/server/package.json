@@ -124,7 +124,7 @@
     "electron-positioner": "3.0.1",
     "errorhandler": "1.5.0",
     "evil-dns": "0.2.0",
-    "execa": "0.8.0",
+    "execa": "0.11.0",
     "express": "4.16.4",
     "express-handlebars": "3.0.0",
     "find-process": "1.2.1",

@@ -91,7 +91,7 @@
     "eslint-plugin-cypress-dev": "1.1.2",
     "eslint-plugin-mocha": "4.12.1",
     "eslint-plugin-react": "7.12.4",
-    "execa": "0.8.0",
+    "execa": "0.11.0",
     "execa-wrap": "1.4.0",
     "filesize": "3.6.1",
     "find-package-json": "1.2.0",

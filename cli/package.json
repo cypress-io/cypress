@@ -48,7 +48,7 @@
     "commander": "2.15.1",
     "common-tags": "1.8.0",
     "debug": "3.1.0",
-    "execa": "0.10.0",
+    "execa": "0.11.0",
     "executable": "4.1.1",
     "extract-zip": "1.6.7",
     "fs-extra": "4.0.1",
