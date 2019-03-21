@@ -89,7 +89,7 @@
     "chai-string": "1.4.0",
     "clear-module": "2.1.0",
     "dependency-check": "2.10.1",
-    "dtslint": "0.5.1",
+    "dtslint": "0.5.5",
     "execa-wrap": "1.4.0",
     "mock-fs": "4.8.0",
     "nock": "9.6.1",
