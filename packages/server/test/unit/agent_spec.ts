@@ -3,14 +3,14 @@ import * as https from 'https'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+import DebuggingProxy = require('debugging-proxy')
+import { expect } from 'chai'
 import * as express from 'express'
 import * as Promise from 'bluebird'
 import * as request from 'request-promise'
 // @ts-ignore
 import CA = require('../../../https-proxy/lib/ca')
 import { CombinedAgent } from '../../lib/util/agent'
-import DebuggingProxy = require('debugging-proxy')
-import { expect } from 'chai'
 import * as Io from '@packages/socket'
 
 const PROXY_PORT = 31000
@@ -35,7 +35,7 @@ describe('lib/util/agent', function() {
         res.send('It worked!')
       })
 
-      app.get('/emptyResponse', (req, res) => {
+      app.get('/empty-response', (req, res) => {
         // ERR_EMPTY_RESPONSE in Chrome
         setTimeout(() => res.connection.destroy(), 100)
       })
@@ -165,15 +165,29 @@ describe('lib/util/agent', function() {
         })
       })
 
+      it.skip('HTTP empty responses can be loaded', function() {
+        return this.request({
+          url: `http://localhost:${HTTP_PORT}/empty-response`,
+        }).then(body => {
+          expect(body).to.eq('')
+          if (this.debugProxy) {
+            expect(this.debugProxy.requests[0]).to.include({
+              url: `http://localhost:${HTTP_PORT}/empty-response`
+            })
+          }
+        })
+      })
+
       it('HTTP websocket connections can be established and used', function() {
         return new Promise((resolve) => {
           Io.client(`http://localhost:${HTTP_PORT}`, {
             agent: this.agent,
+            transports: ['websocket']
           }).on('message', (msg) => {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
-              expect(this.debugProxy.requests[1].ws).to.be.true
-              expect(this.debugProxy.requests[1].url).to.include('http://localhost:31080')
+              expect(this.debugProxy.requests[0].ws).to.be.true
+              expect(this.debugProxy.requests[0].url).to.include('http://localhost:31080')
             }
             resolve()
           })
@@ -183,7 +197,8 @@ describe('lib/util/agent', function() {
       it('HTTPS websocket connections can be established and used', function() {
         return new Promise((resolve) => {
           Io.client(`https://localhost:${HTTPS_PORT}`, {
-            agent: this.agent
+            agent: this.agent,
+            transports: ['websocket']
           }).on('message', (msg) => {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
