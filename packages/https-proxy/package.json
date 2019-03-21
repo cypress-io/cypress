@@ -22,7 +22,7 @@
     "bin-up": "1.1.0",
     "chai": "3.5.0",
     "cross-env": "5.2.0",
-    "http-mitm-proxy": "0.5.3",
+    "http-mitm-proxy": "0.7.0",
     "request": "2.88.0",
     "request-promise": "4.2.4",
     "sinon": "1.17.7",
