@@ -126,7 +126,7 @@
     "pretty-ms": "4.0.0",
     "print-arch": "1.0.0",
     "ramda": "0.24.1",
-    "shelljs": "0.7.8",
+    "shelljs": "0.8.3",
     "snap-shot-it": "5.0.1",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",

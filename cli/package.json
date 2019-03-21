@@ -95,7 +95,7 @@
     "nock": "9.6.1",
     "nyc": "13.3.0",
     "proxyquire": "2.0.1",
-    "shelljs": "0.7.8",
+    "shelljs": "0.8.3",
     "sinon": "7.2.2",
     "snap-shot-it": "5.0.1"
   },

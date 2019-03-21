@@ -37,7 +37,7 @@
     "bin-up": "1.1.0",
     "chai": "3.5.0",
     "prettier": "1.16.4",
-    "shelljs": "0.7.8",
+    "shelljs": "0.8.3",
     "sinon": "2.4.1",
     "sinon-chai": "3.3.0",
     "tslint": "5.12.1",
