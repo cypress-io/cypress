@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "bin-up": "1.1.0",
-    "chai": "3.5.0",
+    "chai": "4.2.0",
     "cross-env": "5.2.0"
   }
 }
