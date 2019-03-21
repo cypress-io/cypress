@@ -61,7 +61,7 @@
     "body-parser": "1.12.4",
     "chai-uuid": "1.0.6",
     "chokidar-cli": "1.2.1",
-    "codecov": "1.0.1",
+    "codecov": "2.3.1",
     "coffee-coverage": "1.0.1",
     "cors": "2.8.5",
     "coveralls": "2.13.3",
