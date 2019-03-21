@@ -24,7 +24,7 @@
     "lib"
   ],
   "devDependencies": {
-    "chai": "3.5.0",
+    "chai": "4.2.0",
     "mocha": "3.5.3"
   },
   "dependencies": {
