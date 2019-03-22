@@ -68,9 +68,9 @@ const runSmokeTest = (binaryDir) => {
     function smokeTestExec () {
       let child = util.exec(cypressExecPath, args)
 
-      child.stderr.on('data', function (data) {
-        process.stderr.write(String(data))
-      })
+      if (child.stderr) {
+        child.stderr.pipe(process.stderr)
+      }
 
       return child
     }
