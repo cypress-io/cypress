@@ -65,7 +65,17 @@ const runSmokeTest = (binaryDir) => {
 
     debug('smoke test command:', smokeTestCommand)
 
-    return Promise.resolve(util.exec(cypressExecPath, args, { stdio: ['pipe', 'pipe', process.stderr] }))
+    function smokeTestExec() {
+      var child = util.exec(cypressExecPath, args);
+
+      child.stderr.on('data', function(data) {
+        process.stderr.write(String(data));
+      });
+
+      return child;
+    }
+
+    return Promise.resolve(smokeTestExec())
     .catch(onSmokeTestError)
     .then((result) => {
       const smokeTestReturned = result.stdout
