@@ -115,7 +115,7 @@ class HttpAgent extends http.Agent {
     delete options.path // so the underlying net.connect doesn't default to IPC
 
     if (proxy.protocol === 'https:') {
-      // gonna have to use the https module instead
+      // gonna have to use the https module to reach the proxy, even though this is an http req
       req.agent = this.httpsAgent
 
       return this.httpsAgent.addRequest(req, options)

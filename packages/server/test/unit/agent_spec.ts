@@ -165,16 +165,26 @@ describe('lib/util/agent', function() {
         })
       })
 
-      it.skip('HTTP empty responses can be loaded', function() {
+      it('HTTP errors are catchable', function() {
         return this.request({
           url: `http://localhost:${HTTP_PORT}/empty-response`,
-        }).then(body => {
-          expect(body).to.eq('')
+        }).catch(err => {
           if (this.debugProxy) {
             expect(this.debugProxy.requests[0]).to.include({
               url: `http://localhost:${HTTP_PORT}/empty-response`
             })
+            expect(err.statusCode).to.eq(502)
+          } else {
+            expect(err.message).to.eq('Error: socket hang up')
           }
+        })
+      })
+
+      it('HTTPS errors are catchable', function() {
+        return this.request({
+          url: `https://localhost:${HTTPS_PORT}/empty-response`,
+        }).catch(err => {
+          expect(err.message).to.eq('Error: socket hang up')
         })
       })
 
