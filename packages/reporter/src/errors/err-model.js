@@ -3,7 +3,11 @@ import { computed, observable } from 'mobx'
 export default class Err {
   @observable name = ''
   @observable message = ''
+  @observable mdMessage = ''
   @observable stack = ''
+  @observable docsUrl = ''
+  @observable templateType = ''
+  @observable codeFrames = []
 
   constructor (props) {
     this.update(props)
@@ -24,6 +28,10 @@ export default class Err {
 
     this.name = props.name
     this.message = props.message
+    this.mdMessage = props.mdMessage
     this.stack = props.stack
+    this.docsUrl = props.docsUrl
+    this.templateType = props.templateType
+    this.codeFrames = props.codeFrames
   }
 }

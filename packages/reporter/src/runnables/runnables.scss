@@ -48,13 +48,36 @@
     }
 
     .runnable-err-header {
+      display: flex;
+      justify-content: space-between;
       background-color: $err-header-background;
       padding: 5px 10px;
       font-weight: bold;
+      .runnbale-err-name {
+        i {
+          font-size: 10px;
+          margin-right: 10px;
+        }
+      }
+    }
+
+
+    .runnable-err-docs-url {
+      a {
+        color: $err-text;
+      }
 
       i {
-        margin-right: 5px;
+        position: relative;
+        top: 1px;
+        font-size: 10px;
+        margin-left: 5px;
       }
+    }
+
+    .runnable-err-code-frame-file-path {
+      color: $link-text;
+      text-decoration: underline;
     }
 
     .runnable-err-message {
@@ -63,7 +86,7 @@
     }
 
     .runnable-err-stack-expander {
-      padding: 10px;
+      padding: 0 10px 0 5px;
       text-decoration: underline;
 
       .collapsible-indicator {
@@ -76,7 +99,7 @@
     }
 
     .runnable-err-stack-trace {
-      padding: 5px 10px 10px 15px;
+      padding: 10px;
       font-family: $monospace;
     }
 
@@ -93,7 +116,6 @@
       > .runnable-wrapper .runnable-controls i.fa-repeat {
         visibility: visible !important;
       }
-
     }
 
     &.runnable-active {

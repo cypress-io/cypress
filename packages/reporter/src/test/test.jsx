@@ -3,7 +3,6 @@ import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
-import Collapsible from '../collapsible/collapsible'
 
 import appState from '../lib/app-state'
 import events from '../lib/events'
@@ -81,35 +80,6 @@ class Test extends Component {
         </div>
         {this._contents()}
         <TestError events={events} model={model} />
-        {
-          model.err.displayMessage ?
-            <div className='runnable-err-wrapper'>
-              <div className='runnable-err'>
-                <div className='runnable-err-header'>
-                  <i className='fa fa-exclamation-circle'></i>
-                  {model.err.name}
-                </div>
-                <div className='runnable-err-message'>{model.err.message}</div>
-                { model.err.stack ?
-                  <Collapsible
-                    header='See full stack trace'
-                    headerClass='runnable-err-stack-expander'
-                    contentClass='runnable-err-stack-trace'
-                  >
-                    {model.err.stack}
-                  </Collapsible> :
-                  null
-                }
-                <FlashOnClick
-                  message='Printed output to your console'
-                  onClick={this._onErrorClick}
-                >
-                  <pre className='test-error'>{model.err.stack}</pre>
-                </FlashOnClick>
-              </div>
-            </div> :
-            null
-        }
       </div>
     )
   }
