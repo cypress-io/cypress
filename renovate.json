@@ -18,6 +18,7 @@
     },
     {
       "packageNames": [
+        "bin-up",
         "check-dependencies",
         "check-more-types",
         "commit-message-install",
@@ -27,10 +28,12 @@
         "make-empty-github-commit",
         "mocha-banner",
         "prefixed-list",
+        "rebuild-node-sass",
         "snap-shot-it",
-        "terminal-banner"
+        "terminal-banner",
+        "zunder"
       ],
-      "groupName": "Gleb's NPM packages",
+      "groupName": "team NPM packages",
       "schedule": "after 2am and before 4am"
     },
     {
@@ -41,6 +44,11 @@
       "packagePatterns": "^@types",
       "groupName": "@types",
       "schedule": "before 3am on Monday"
+    },
+    {
+      "packagePatterns": "^sinon",
+      "groupName": "sinon",
+      "schedule": "before 3am on Sunday"
     },
     {
       "packagePatterns": "^gulp",
