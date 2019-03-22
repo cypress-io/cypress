@@ -189,7 +189,7 @@ describe "Settings", ->
 
       it "opens help link on click", ->
         cy.get(".settings-proxy .learn-more").click().then ->
-          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/guides/proxy")
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/proxy-configuration")
 
       it "with Windows proxy settings indicates proxy and the source", ->
         cy.setAppStore({

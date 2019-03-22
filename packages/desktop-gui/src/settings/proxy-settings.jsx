@@ -18,7 +18,7 @@ const getProxySourceName = (proxySource) => {
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/guides/proxy')
+  ipc.externalOpen('https://on.cypress.io/proxy-configuration')
 }
 
 const renderLearnMore = () => {
