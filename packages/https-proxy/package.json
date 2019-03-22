@@ -11,6 +11,7 @@
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
     "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-debug": "cross-env NODE_ENV=test bin-up mocha --inspect-brk --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch",
     "https": "node https.js"

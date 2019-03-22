@@ -100,10 +100,7 @@ class Server
 
       socket.resume()
 
-    ## compact out hostname when undefined
-    args = _.compact([port, hostname, onConnect])
-
-    conn = net.connect.apply(net, args)
+    conn = new net.Socket()
     conn.setNoDelay(true)
 
     socket.on "close", =>
@@ -112,6 +109,10 @@ class Server
     conn.on "error", (err) =>
       if @_onError
         @_onError(err, socket, head, port)
+
+    ## compact out hostname when undefined
+    args = _.compact([port, hostname, onConnect])
+    conn.connect.apply(conn, args)
 
   # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
   _makeUpstreamProxyConnection: (upstreamProxy, req, socket, head, toPort, toHostname) ->
