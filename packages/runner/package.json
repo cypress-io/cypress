@@ -45,6 +45,6 @@
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
-    "zunder": "6.3.2"
+    "zunder": "6.4.1"
   }
 }
