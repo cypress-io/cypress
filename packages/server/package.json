@@ -80,7 +80,7 @@
     "obfuscator": "0.5.4",
     "plist": "1.2.0",
     "proxyquire": "1.8.0",
-    "react": "15.6.2",
+    "react": "16.8.4",
     "repl.history": "0.1.4",
     "run-sequence": "1.2.2",
     "snap-shot-it": "6.3.0",
