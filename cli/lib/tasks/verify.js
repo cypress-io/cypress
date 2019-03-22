@@ -65,14 +65,14 @@ const runSmokeTest = (binaryDir) => {
 
     debug('smoke test command:', smokeTestCommand)
 
-    function smokeTestExec() {
-      var child = util.exec(cypressExecPath, args);
+    function smokeTestExec () {
+      let child = util.exec(cypressExecPath, args)
 
-      child.stderr.on('data', function(data) {
-        process.stderr.write(String(data));
-      });
+      child.stderr.on('data', function (data) {
+        process.stderr.write(String(data))
+      })
 
-      return child;
+      return child
     }
 
     return Promise.resolve(smokeTestExec())
