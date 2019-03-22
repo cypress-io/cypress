@@ -14,7 +14,7 @@ import scroller from '../lib/scroller'
 import Hooks from '../hooks/hooks'
 import Agents from '../agents/agents'
 import Routes from '../routes/routes'
-import FlashOnClick from '../lib/flash-on-click'
+import TestError from '../errors/test-error'
 
 const NoCommands = observer(() => (
   <ul className='hooks-container'>
@@ -59,7 +59,7 @@ class Test extends Component {
   }
 
   render () {
-    const { model } = this.props
+    const { events, model } = this.props
 
     if (!model.shouldRender) return null
 
@@ -80,6 +80,7 @@ class Test extends Component {
           </div>
         </div>
         {this._contents()}
+        <TestError events={events} model={model} />
         {
           model.err.displayMessage ?
             <div className='runnable-err-wrapper'>
@@ -155,10 +156,6 @@ class Test extends Component {
     }
   }
 
-  _onErrorClick = (e) => {
-    e.stopPropagation()
-    this.props.events.emit('show:error', this.props.model.id)
-  }
 }
 
 export { NoCommands }

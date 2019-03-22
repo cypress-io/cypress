@@ -78,7 +78,7 @@ context('lib/tasks/verify', () => {
       logger.error(err)
 
       snapshot(
-        'no version of Cypress installed',
+        'no version of Cypress installed 1',
         normalize(stdout.toString())
       )
     })
@@ -115,7 +115,7 @@ context('lib/tasks/verify', () => {
     })
     .catch(() => {
       return snapshot(
-        'warning installed version does not match verified version',
+        'warning installed version does not match verified version 1',
         normalize(stdout.toString())
       )
     })
@@ -130,7 +130,7 @@ context('lib/tasks/verify', () => {
     .catch((err) => {
       logger.error(err)
 
-      snapshot('executable cannot be found', normalize(stdout.toString()))
+      snapshot('executable cannot be found 1', normalize(stdout.toString()))
     })
   })
 
@@ -145,7 +145,7 @@ context('lib/tasks/verify', () => {
 
     it('shows full path to executable when verifying', () => {
       return verify.start({ force: true }).then(() => {
-        snapshot('verification with executable', normalize(stdout.toString()))
+        snapshot('verification with executable 1', normalize(stdout.toString()))
       })
     })
 
@@ -175,7 +175,7 @@ context('lib/tasks/verify', () => {
       })
       .then(() => {
         return snapshot(
-          'fails verifying Cypress',
+          'fails verifying Cypress 1',
           normalize(slice(stdout.toString()))
         )
       })
@@ -204,7 +204,7 @@ context('lib/tasks/verify', () => {
 
     it('finds ping value in the verbose output', () => {
       return verify.start().then(() => {
-        snapshot('verbose stdout output', normalize(stdout.toString()))
+        snapshot('verbose stdout output 1', normalize(stdout.toString()))
       })
     })
   })
@@ -225,7 +225,7 @@ context('lib/tasks/verify', () => {
       stdout = Stdout.capture()
       logger.error(err)
 
-      return snapshot('no Cypress executable', normalize(stdout.toString()))
+      return snapshot('no Cypress executable 1', normalize(stdout.toString()))
     })
   })
 
@@ -247,7 +247,7 @@ context('lib/tasks/verify', () => {
       logger.error(err)
 
       return snapshot(
-        'Cypress non-executable permissions',
+        'Cypress non-executable permissions 1',
         normalize(stdout.toString())
       )
     })
@@ -262,7 +262,7 @@ context('lib/tasks/verify', () => {
 
     return verify.start().then(() => {
       return snapshot(
-        'current version has not been verified',
+        'current version has not been verified 1',
         normalize(stdout.toString())
       )
     })
@@ -277,7 +277,7 @@ context('lib/tasks/verify', () => {
 
     return verify.start().then(() => {
       return snapshot(
-        'different version installed',
+        'different version installed 1',
         normalize(stdout.toString())
       )
     })
@@ -294,7 +294,7 @@ context('lib/tasks/verify', () => {
 
     return verify.start().then(() => {
       return snapshot(
-        'silent verify',
+        'silent verify 1',
         normalize(`[no output]${stdout.toString()}`)
       )
     })
@@ -312,7 +312,7 @@ context('lib/tasks/verify', () => {
       welcomeMessage: false,
     })
     .then(() => {
-      return snapshot('no welcome message', normalize(stdout.toString()))
+      return snapshot('no welcome message 1', normalize(stdout.toString()))
     })
   })
 
@@ -339,7 +339,7 @@ context('lib/tasks/verify', () => {
       stdout = Stdout.capture()
       logger.error(err)
 
-      return snapshot('fails with no stderr', normalize(stdout.toString()))
+      return snapshot('fails with no stderr 1', normalize(stdout.toString()))
     })
   })
 
@@ -376,7 +376,7 @@ context('lib/tasks/verify', () => {
 
         logger.error(err)
 
-        snapshot('xvfb fails', normalize(slice(stdout.toString())))
+        snapshot('xvfb fails 1', normalize(slice(stdout.toString())))
       })
     })
   })
@@ -393,7 +393,7 @@ context('lib/tasks/verify', () => {
 
     it('uses verbose renderer', () => {
       return verify.start().then(() => {
-        snapshot('verifying in ci', normalize(stdout.toString()))
+        snapshot('verifying in ci 1', normalize(stdout.toString()))
       })
     })
 
@@ -407,7 +407,7 @@ context('lib/tasks/verify', () => {
       })
       .catch((err) => {
         logger.error(err)
-        snapshot('error binary not found in ci', normalize(stdout.toString()))
+        snapshot('error binary not found in ci 1', normalize(stdout.toString()))
       })
     })
   })
@@ -430,7 +430,7 @@ context('lib/tasks/verify', () => {
 
       return verify.start().then(() => {
         expect(util.exec.firstCall.args[0]).to.equal(realEnvBinaryPath)
-        snapshot('valid CYPRESS_RUN_BINARY', normalize(stdout.toString()))
+        snapshot('valid CYPRESS_RUN_BINARY 1', normalize(stdout.toString()))
       })
     })
     ;['darwin', 'linux', 'win32'].forEach((platform) => {
@@ -446,7 +446,7 @@ context('lib/tasks/verify', () => {
         .catch((err) => {
           logger.error(err)
           snapshot(
-            `${platform}: error when invalid CYPRESS_RUN_BINARY`,
+            `${platform}: error when invalid CYPRESS_RUN_BINARY 1`,
             normalize(stdout.toString())
           )
         })

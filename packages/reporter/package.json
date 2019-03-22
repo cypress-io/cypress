@@ -19,7 +19,9 @@
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
     "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
+    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*",
+    "cypress:open": "node ../../scripts/cypress open --project .",
+    "cypress:run": "node ../../scripts/cypress run --project ."
   },
   "files": [
     "dist"
@@ -46,6 +48,6 @@
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
-    "zunder": "6.3.2"
+    "zunder": "6.4.1"
   }
 }

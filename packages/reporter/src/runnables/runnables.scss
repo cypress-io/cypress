@@ -25,6 +25,10 @@
     line-height: 18px;
     padding-left: 0;
 
+    a {
+      text-decoration: underline;
+    }
+
     .runnable-err-wrapper {
       margin: 5px 0 5px 5px;
       padding-left: 10px;
