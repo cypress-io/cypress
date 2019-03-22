@@ -78,13 +78,16 @@ describe "src/cy/commands/navigation", ->
 
     it "fires stability:changed and window events events", ->
       onStabilityChanged = cy.stub()
+      onBeforeUnload = cy.stub()
       onPageEnd = cy.stub()
 
       cy.on("stability:changed", onStabilityChanged)
+      cy.on("window:beforeunload", onBeforeUnload)
       cy.on("page:end", onPageEnd)
 
       cy.reload().then ->
         expect(onStabilityChanged.secondCall).to.be.calledWith(true, "load")
+        expect(onBeforeUnload).to.be.calledOnce
         expect(onPageEnd).to.be.calledOnce
 
     it "removes listeners", ->
