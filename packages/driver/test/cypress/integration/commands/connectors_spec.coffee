@@ -518,7 +518,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.eq "Timed out retrying: Cannot call `cy.invoke()` because 'foo' is not a function. You probably want to use cy.its('foo')."
+            expect(err.message).to.eq "Timed out retrying: Cannot call `cy.invoke()` because 'foo' is not a function. You probably want to use `cy.its('foo')`."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
