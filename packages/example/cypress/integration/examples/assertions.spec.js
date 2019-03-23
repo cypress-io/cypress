@@ -53,6 +53,7 @@ context('Assertions', () => {
       // We can use Chai's BDD style assertions
       expect(true).to.be.true
       const o = { foo: 'bar' }
+
       expect(o).to.equal(o)
       expect(o).to.deep.equal({ foo: 'bar' })
       // matching text using regular expression
@@ -150,6 +151,7 @@ context('Assertions', () => {
         .should(($div) => {
           // we can massage text before comparing
           const secondText = normalizeText($div.text())
+
           expect(secondText, 'second text').to.equal(text)
         })
     })
@@ -159,6 +161,7 @@ context('Assertions', () => {
         name: 'Joe',
         age: 20,
       }
+
       assert.isObject(person, 'value is object')
     })
   })

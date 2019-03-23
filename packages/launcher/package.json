@@ -18,6 +18,7 @@
     "lint-js": "bin-up eslint --fix *.js",
     "lint-ts": "tslint --project . --fix --format stylish lib/*.ts lib/**/*.ts",
     "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts",
+    "build": "tsc",
     "build-js": "tsc",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
@@ -30,7 +31,7 @@
     "@types/debug": "0.0.31",
     "@types/execa": "0.7.2",
     "@types/fs-extra": "3.0.0",
-    "@types/lodash": "4.14.121",
+    "@types/lodash": "4.14.122",
     "@types/mocha": "2.2.48",
     "@types/node": "7.10.3",
     "@types/ramda": "0.25.47",

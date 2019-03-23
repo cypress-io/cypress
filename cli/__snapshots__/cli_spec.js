@@ -11,6 +11,7 @@ exports['shows help for open --foo 1'] = `
   -------
   error: unknown option: --foo
 
+
   Usage: open [options]
 
   Opens Cypress in the interactive GUI.
@@ -47,11 +48,13 @@ exports['shows help for run --foo 1'] = `
   -------
   error: unknown option: --foo
 
+
   Usage: run [options]
 
   Runs Cypress tests from the CLI without the GUI
 
   Options:
+
     --record [bool]                            records the run. sends test results, screenshots and videos to your Cypress Dashboard.
     --headed                                   displays the Electron browser instead of running headlessly
     -k, --key <record-key>                     your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
@@ -92,10 +95,12 @@ exports['cli help command shows help 1'] = `
   Usage: cypress [options] [command]
 
   Options:
+
     -v, --version      prints Cypress version
     -h, --help         output usage information
 
   Commands:
+
     help               Shows CLI help and exits
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
@@ -125,10 +130,12 @@ exports['cli help command shows help for -h 1'] = `
   Usage: cypress [options] [command]
 
   Options:
+
     -v, --version      prints Cypress version
     -h, --help         output usage information
 
   Commands:
+
     help               Shows CLI help and exits
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
@@ -158,10 +165,12 @@ exports['cli help command shows help for --help 1'] = `
   Usage: cypress [options] [command]
 
   Options:
+
     -v, --version      prints Cypress version
     -h, --help         output usage information
 
   Commands:
+
     help               Shows CLI help and exits
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
@@ -189,20 +198,23 @@ exports['cli unknown command shows usage and exits 1'] = `
   stdout:
   -------
   Unknown command "foo"
-  Usage: cypress [options] [command]
 
-  Options:
-    -v, --version      prints Cypress version
-    -h, --help         output usage information
+    Usage: cypress [options] [command]
 
-  Commands:
-    help               Shows CLI help and exits
-    version            prints Cypress version
-    run [options]      Runs Cypress tests from the CLI without the GUI
-    open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's version
-    verify             Verifies that Cypress is installed correctly and executable
-    cache [options]    Manages the Cypress binary cache
+    Options:
+
+      -v, --version      prints Cypress version
+      -h, --help         output usage information
+
+    Commands:
+
+      help               Shows CLI help and exits
+      version            prints Cypress version
+      run [options]      Runs Cypress tests from the CLI without the GUI
+      open [options]     Opens Cypress in the interactive GUI.
+      install [options]  Installs the Cypress executable matching this package's version
+      verify             Verifies that Cypress is installed correctly and executable
+      cache [options]    Manages the Cypress binary cache
   -------
   stderr:
   -------
@@ -249,11 +261,13 @@ exports['cli unknown option shows help for cache command - unknown option --foo 
   -------
   error: unknown option: --foo
 
+
   Usage: cache [command]
 
   Manages the Cypress binary cache
 
   Options:
+
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
@@ -279,11 +293,13 @@ exports['cli unknown option shows help for cache command - unknown sub-command f
   -------
   error: unknown command: cache foo
 
+
   Usage: cache [command]
 
   Manages the Cypress binary cache
 
   Options:
+
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
@@ -312,6 +328,7 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
   Manages the Cypress binary cache
 
   Options:
+
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
@@ -322,4 +339,19 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
   
   -------
   
+`
+
+exports['cli cypress run warns with space-separated --specs 1'] = `
+[33m⚠[39m Warning: It looks like you're passing --spec a space-separated list of files:
+
+"a b c d e f g"
+
+This will work, but it's not recommended.
+
+The most common cause of this warning is using an unescaped glob pattern. If you are
+trying to pass a glob pattern, escape it using quotes:
+  cypress run --spec "**/*.spec.js"
+
+If you are trying to pass multiple spec filenames, separate them by commas instead:
+  cypress run --spec spec1,spec2,spec3
 `

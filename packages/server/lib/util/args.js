@@ -13,7 +13,7 @@ const config = require('../config')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
-const everythingAfterFirstEqualRe = /=(.+)/
+const everythingAfterFirstEqualRe = /=(.*)/
 
 const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk configFile'.split(' ')
 
@@ -134,9 +134,8 @@ const sanitizeAndConvertNestedArgs = function (str) {
   .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
   .replace(nestedArraysInSquareBracketsRe, commasToPipes)
   .split(',')
-  .map((pair) => {
-    return pair.split(everythingAfterFirstEqualRe)
-  }).fromPairs()
+  .map((pair) => pair.split(everythingAfterFirstEqualRe))
+  .fromPairs()
   .mapValues(JSONOrCoerce)
   .value()
 }
@@ -202,6 +201,12 @@ module.exports = {
     if (spec = options.spec) {
       const resolvePath = (p) => {
         return path.resolve(options.cwd, p)
+      }
+
+      // clean up single quotes wrapping the spec for Windows users
+      // https://github.com/cypress-io/cypress/issues/2298
+      if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
+        spec = spec.substring(1, spec.length - 1)
       }
 
       options.spec = strToArray(spec).map(resolvePath)
