@@ -17,6 +17,7 @@ exports['shows help for open --foo 1'] = `
   Opens Cypress in the interactive GUI.
 
   Options:
+
     -p, --port <port>                runs Cypress on a specific port. overrides any value in cypress.json.
     -e, --env <env>                  sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     -c, --config <config>            sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
