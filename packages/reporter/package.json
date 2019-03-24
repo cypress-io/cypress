@@ -33,7 +33,7 @@
     "chai": "3.5.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
-    "css-element-queries": "0.4.0",
+    "css-element-queries": "1.1.1",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.11.2",
     "font-awesome": "4.7.0",
@@ -48,6 +48,6 @@
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
-    "zunder": "6.3.2"
+    "zunder": "6.4.1"
   }
 }
