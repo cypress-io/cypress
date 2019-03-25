@@ -25,9 +25,6 @@ function createProxySock (proxy: url.Url) {
 }
 
 function regenerateRequestHead(req) {
-  if (!req._header) {
-    return
-  }
   req._header = null;
   req._implicitHeader();
   if (req.output && req.output.length > 0) {
