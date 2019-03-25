@@ -3,7 +3,12 @@ import * as https from 'https'
 import * as net from 'net'
 import * as tls from 'tls'
 import * as url from 'url'
+import * as debugModule from 'debug'
 import { getProxyForUrl } from 'proxy-from-env'
+import * as Promise from 'bluebird'
+import * as connect from './connect'
+
+const debug = debugModule('cypress:server:agent')
 
 function createProxySock (proxy: url.Url) {
   if (proxy.protocol === 'http:') {
@@ -36,6 +41,7 @@ function regenerateRequestHead(req) {
 export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
+  familyCache = {}
 
   constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
     this.httpAgent = new HttpAgent(httpOpts)
@@ -63,11 +69,47 @@ export class CombinedAgent {
       }
     }
 
-    if (isHttps) {
-      return this.httpsAgent.addRequest(req, options)
+    debug(`addRequest called for ${options.href}`)
+
+    this._getFirstWorkingFamily(options)
+    .then(family => {
+      options.family = family
+
+      if (isHttps) {
+        return this.httpsAgent.addRequest(req, options)
+      }
+
+      this.httpAgent.addRequest(req, options)
+    })
+  }
+
+  _getFirstWorkingFamily({ port, host }) {
+    // this is a workaround for localhost (and potentially others) having invalid
+    // A records but valid AAAA records. here, we just cache the family of the first
+    // returned A/AAAA record for a host that we can establish a connection to.
+    // https://github.com/cypress-io/cypress/issues/112
+
+    const isIP = net.isIP(host)
+    if (isIP) {
+      // isIP conveniently returns the family of the address
+      return Promise.resolve(isIP)
     }
 
-    return this.httpAgent.addRequest(req, options)
+    if (process.env.HTTP_PROXY) {
+      // can't make direct connections through the proxy, this won't work
+      return Promise.resolve()
+    }
+
+    if (this.familyCache[host]) {
+      return Promise.resolve(this.familyCache[host])
+    }
+
+    return connect.getAddress(port, host)
+    .then(firstWorkingAddress => {
+      this.familyCache[host] = firstWorkingAddress.family
+      return firstWorkingAddress.family
+    })
+    .catchReturn()
   }
 }
 
@@ -96,6 +138,8 @@ class HttpAgent extends http.Agent {
   }
 
   _createProxiedSocket (req, options, cb) {
+    debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
+
     const proxy = url.parse(options.proxy)
 
     // set req.path to the full path so the proxy can resolve it
@@ -152,6 +196,8 @@ class HttpsAgent extends https.Agent {
   _createProxiedConnection (options, cb) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
+    debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
+
     const proxy = url.parse(options.proxy)
 
     const proxySocket = createProxySock(proxy)
@@ -163,6 +209,8 @@ class HttpsAgent extends https.Agent {
 
     proxySocket.once('error', onError)
     proxySocket.once('data', (data) => {
+      debug(`Proxy socket for ${options.href} established`)
+
       proxySocket.removeListener('error', onError)
       // read status code from proxy's response
       const matches = data.toString().match(/^HTTP\/1.1 (\d*)/)
