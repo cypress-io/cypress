@@ -82,25 +82,18 @@ NetProfiler.prototype.install = function () {
   const net = this.net
   const self = this
 
-  function netConnectApply (target, thisArg, args) {
+  function netSocketPrototypeConnectApply (target, thisArg, args) {
     const client = target.bind(thisArg)(...args)
 
-    let port
-    let host
+    let options = self.net._normalizeArgs(args)[0]
 
-    if (parseInt(args[0]).toString() === args[0].toString()) {
-      port = args[0]
-      if (typeof args[1] === 'string') {
-        host = args[1]
-      }
-    } else if (typeof args[0] === 'object') {
-      port = args[0].port
-      host = args[0].host
+    if (Array.isArray(options)) {
+      options = options[0]
     }
 
-    host = host || 'localhost'
+    options.host = options.host || 'localhost'
 
-    const connection = new Connection(host, port)
+    const connection = new Connection(options.host, options.port)
 
     client.on('close', () => {
       self.removeActiveConnection(connection)
@@ -139,25 +132,23 @@ NetProfiler.prototype.install = function () {
     return listener
   }
 
-  this.proxies['net.connect'] = Proxy.revocable(net.connect, {
-    apply: netConnectApply,
+  this.proxies['net.Socket.prototype.connect'] = Proxy.revocable(net.Socket.prototype.connect, {
+    apply: netSocketPrototypeConnectApply,
   })
 
   this.proxies['net.Server.prototype.listen'] = Proxy.revocable(net.Server.prototype.listen, {
     apply: netServerPrototypeListenApply,
   })
 
-  net.connect =
-  net.createConnection = this.proxies['net.connect'].proxy
+  net.Socket.prototype.connect = this.proxies['net.Socket.prototype.connect'].proxy
   net.Server.prototype.listen = this.proxies['net.Server.prototype.listen'].proxy
 }
 
 NetProfiler.prototype.uninstall = function () {
   const net = this.net
 
-  net.connect =
-  net.createConnection = this.proxies['net.connect'].proxy['[[Target]]']
-  net.Server = this.proxies['net.Server'].proxy['[[Target]]']
+  net.Socket.prototype.connect = this.proxies['net.Socket.prototype.connect'].proxy['[[Target]]']
+  net.Server.prototype.listen = this.proxies['net.Server.prototype.listen'].proxy['[[Target]]']
 
   this.proxies.forEach((proxy) => {
     proxy.revoke()
