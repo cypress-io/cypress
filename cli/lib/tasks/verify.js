@@ -66,7 +66,7 @@ const runSmokeTest = (binaryDir) => {
     debug('smoke test command:', smokeTestCommand)
 
     function smokeTestExec () {
-      let child = util.exec(cypressExecPath, args)
+      const child = util.exec(cypressExecPath, args)
 
       if (child.stderr) {
         child.stderr.pipe(process.stderr)
