@@ -134,7 +134,12 @@ module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
     agent: agent
-    proxy: null # upstream proxying is handled by lib/util/agent
+    ## send keep-alive with requests since Chrome won't send it in proxy mode
+    ## https://github.com/cypress-io/cypress/pull/3531#issuecomment-476269041
+    headers: {
+      "Connection": "keep-alive"
+    }
+    proxy: null ## upstream proxying is handled by CombinedAgent
   }
 
   r  = r.defaults(defaults)
