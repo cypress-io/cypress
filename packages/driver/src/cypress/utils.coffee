@@ -62,6 +62,10 @@ module.exports = {
     ## not be evaluated later
     stack = err.stack
 
+    if _.isObject(message)
+      err = @copyProperties(message, err)
+      message = message.message
+
     ## preserve message
     ## and toString
     msg = err.message

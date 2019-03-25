@@ -58,3 +58,19 @@ describe "driver/src/cypress/utils", ->
       expect(err2.message).to.eq("\n\nbar")
 
       expect(err2.stack).to.eq("Error: \n\nbar\n" + stack)
+
+    it "handles error messages as objects", ->
+      err = new Error("foo")
+
+      obj = {
+        message: "bar",
+        docs: "baz"
+      }
+
+      stack = err.stack.split("\n").slice(1).join("\n")
+
+      err2 = $utils.appendErrMsg(err, obj)
+      expect(err2.message).to.eq("foo\n\nbar")
+      expect(err2.docs).to.eq("baz")
+
+      expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
