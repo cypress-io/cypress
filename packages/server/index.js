@@ -7,7 +7,7 @@ if (process.versions.electron) {
   require('./timers/parent').fix()
 }
 
-if (process.env.CY_NET_PROFILE) {
+if (process.env.CY_NET_PROFILE && process.env.CYPRESS_ENV) {
   const netProfiler = require('./lib/util/net_profiler')()
 
   process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
