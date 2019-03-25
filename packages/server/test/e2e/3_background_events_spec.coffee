@@ -24,7 +24,6 @@ describe "e2e background events", ->
 
   it "fails", ->
     e2e.exec(@, {
-      spec: "app_spec.coffee"
       project: backgroundAsyncError
       snapshot: true
       expectedExitCode: 1

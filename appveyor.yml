@@ -62,7 +62,6 @@ test_script:
   - echo Commit message
   - echo %APPVEYOR_REPO_COMMIT_MESSAGE%
   - echo body of commit message, if any
-  - echo %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%
   - 7z
   - cd packages/launcher && node index.js && cd ../..
   # make sure mocha runs

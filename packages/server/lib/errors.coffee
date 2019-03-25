@@ -427,13 +427,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_RECORD_KEY_NOT_VALID"
       """
-      We failed trying to authenticate this project: #{chalk.blue(arg2)}
-
-      Your Record Key is invalid: #{chalk.yellow(arg1)}
+      Your Record Key #{chalk.yellow(arg1)} is not valid with this project: #{chalk.blue(arg2)}
 
       It may have been recently revoked by you or another user.
 
-      Please log into the Dashboard to see the updated token.
+      Please log into the Dashboard to see the valid record keys.
 
       https://on.cypress.io/dashboard/projects/#{arg2}
       """
@@ -759,6 +757,19 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
 
       #{arg1.link}
+      """
+    when "FIXTURE_NOT_FOUND"
+      """
+      A fixture file could not be found at any of the following paths:
+
+       > #{arg1}
+       > #{arg1}{{extension}}
+
+      Cypress looked for these file extensions at the provided path:
+
+       > #{arg2.join(', ')}
+
+      Provide a path to an existing fixture file.
       """
 
 get = (type, arg1, arg2) ->

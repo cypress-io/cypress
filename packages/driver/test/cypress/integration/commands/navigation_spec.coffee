@@ -906,6 +906,27 @@ describe "src/cy/commands/navigation", ->
               "Note": "Because this visit was to the same hash, the page did not reload and the onStart and onReady callbacks did not fire."
           })
 
+      it "logs options if they are supplied", ->
+        cy.visit({
+          url: "http://localhost:3500/fixtures/generic.html"
+          headers: {
+            "foo": "bar"
+          },
+          notReal: "baz"
+        })
+        .then ->
+          expect(@lastLog.invoke("consoleProps")["Options"]).to.deep.eq({
+            url: "http://localhost:3500/fixtures/generic.html"
+            headers: {
+              "foo": "bar"
+            }
+          })
+
+      it "does not log options if they are not supplied", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        .then ->
+          expect(@lastLog.invoke("consoleProps")["Options"]).to.be.undefined
+
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)

@@ -310,16 +310,16 @@ describe "lib/scaffold", ->
         @cfg.backgroundFile = path.join(@cfg.projectRoot, "cypress/background/index.js")
 
     it "returns tree-like structure of scaffolded", ->
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)
 
     it "leaves out fixtures if configured to false", ->
       @cfg.fixturesFolder = false
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)
 
     it "leaves out support if configured to false", ->
       @cfg.supportFile = false
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)
 
     it "leaves out background if configured to false", ->
       @cfg.backgroundFile = false
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)

@@ -139,6 +139,10 @@ const eventManager = {
       this.saveState(state)
     })
 
+    reporterBus.on('external:open', (url) => {
+      channel.emit('external:open', url)
+    })
+
     const $window = $(window)
 
     $window.on('hashchange', rerun)

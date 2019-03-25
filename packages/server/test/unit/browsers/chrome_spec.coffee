@@ -6,6 +6,7 @@ extension = require("@packages/extension")
 background = require("#{root}../lib/background")
 utils = require("#{root}../lib/browsers/utils")
 chrome = require("#{root}../lib/browsers/chrome")
+fs = require("#{root}../lib/util/fs")
 
 describe "lib/browsers/chrome", ->
   context "#open", ->
@@ -78,6 +79,24 @@ describe "lib/browsers/chrome", ->
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
+
+    it "cleans up an unclean browser profile exit status", ->
+      sinon.stub(fs, "readJson").withArgs("/profile/dir/Default/Preferences").resolves({
+        profile: {
+          exit_type: "Abnormal"
+          exited_cleanly: false
+        }
+      })
+      sinon.stub(fs, "writeJson")
+
+      chrome.open("chrome", "http://", {}, {})
+      .then ->
+        expect(fs.writeJson).to.be.calledWith("/profile/dir/Default/Preferences", {
+          profile: {
+            exit_type: "Normal"
+            exited_cleanly: true
+          }
+        })
 
   context "#_getArgs", ->
     it "disables gpu when linux", ->

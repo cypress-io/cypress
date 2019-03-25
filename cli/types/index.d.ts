@@ -7,19 +7,20 @@
 // TypeScript Version: 2.8
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference path="./blob-util.d.ts" />
-/// <reference path="./bluebird.d.ts" />
-/// <reference path="./minimatch.d.ts" />
-/// <reference path="./moment.d.ts" />
+/// <reference path="./cy-blob-util.d.ts" />
+/// <reference path="./cy-bluebird.d.ts" />
+/// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
+/// <reference path="./cy-chai.d.ts" />
+/// <reference path="./lodash/index.d.ts" />
+/// <reference path="./sinon/index.d.ts" />
+/// <reference path="./sinon-chai/index.d.ts" />
+/// <reference path="./mocha/index.d.ts" />
+/// <reference path="./jquery/index.d.ts" />
+/// <reference path="./chai-jquery/index.d.ts" />
 
-/// <reference types="chai" />
-/// <reference types="chai-jquery" />
-/// <reference types="jquery" />
-/// <reference types="lodash" />
-/// <reference types="mocha" />
+// "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
-/// <reference types="sinon" />
-/// <reference types="sinon-chai" />
 
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
@@ -93,7 +94,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: Mimimatch.MimimatchStatic
+    minimatch: typeof Minimatch.minimatch
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
@@ -2681,7 +2682,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'match', value: RegExp): Chainable<Subject>
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target has a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example
@@ -3181,7 +3182,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'not.match', value: RegExp): Chainable<Subject>
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target does not have a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example

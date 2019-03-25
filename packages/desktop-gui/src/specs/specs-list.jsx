@@ -75,13 +75,13 @@ class SpecsList extends Component {
 
     return (
       <ul className='outer-files-container list-as-table'>
-        {_.map(specsStore.specs, (spec) => this._specItem(spec))}
+        {_.map(specsStore.specs, (spec) => this._specItem(spec, 0))}
       </ul>
     )
   }
 
-  _specItem (spec) {
-    return spec.hasChildren ? this._folderContent(spec) : this._specContent(spec)
+  _specItem (spec, nestingLevel) {
+    return spec.hasChildren ? this._folderContent(spec, nestingLevel) : this._specContent(spec, nestingLevel)
   }
 
   _allSpecsIcon (allSpecsChosen) {
@@ -124,22 +124,22 @@ class SpecsList extends Component {
     specsStore.setExpandSpecFolder(specFolderPath)
   }
 
-  _folderContent (spec) {
+  _folderContent (spec, nestingLevel) {
     const isExpanded = spec.isExpanded
 
     return (
-      <li key={spec.path} className={`folder  ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
+      <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
-          <div onClick={this._selectSpecFolder.bind(this, spec)}>
+          <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
             <i className={`folder-collapse-icon fa fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
             <i className={`fa fa-fw ${isExpanded ? 'fa-folder-open-o' : 'fa-folder-o'}`}></i>
-            <div className='folder-display-name'>{spec.displayName}{' '}</div>
+            {nestingLevel === 0 ? `${spec.displayName} tests` : spec.displayName}
           </div>
           {
             isExpanded ?
               <div>
                 <ul className='list-as-table'>
-                  {_.map(spec.children, (spec) => this._specItem(spec))}
+                  {_.map(spec.children, (spec) => this._specItem(spec, nestingLevel + 1))}
                 </ul>
               </div> :
               null
@@ -149,12 +149,12 @@ class SpecsList extends Component {
     )
   }
 
-  _specContent (spec) {
+  _specContent (spec, nestingLevel) {
     return (
-      <li key={spec.path} className='file'>
+      <li key={spec.path} className={`file level-${nestingLevel}`}>
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
           <div>
-            <div>
+            <div className="file-name">
               <i className={`fa fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
               {spec.displayName}
             </div>

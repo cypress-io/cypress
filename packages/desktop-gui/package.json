@@ -24,7 +24,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.2.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.0",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.31.3",
     "@cypress/react-tooltip": "0.4.0",
@@ -42,7 +42,7 @@
     "md5": "2.2.1",
     "mobx": "5.9.0",
     "mobx-react": "5.4.3",
-    "mobx-react-devtools": "6.0.3",
+    "mobx-react-devtools": "6.1.1",
     "moment": "2.24.0",
     "prop-types": "15.7.2",
     "rc-collapse": "1.11.1",
@@ -50,6 +50,6 @@
     "rebuild-node-sass": "1.1.0",
     "react-bootstrap-modal": "4.2.0",
     "react-dom": "16.8.3",
-    "zunder": "6.3.2"
+    "zunder": "6.4.1"
   }
 }

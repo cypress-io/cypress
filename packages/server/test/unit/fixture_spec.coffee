@@ -32,7 +32,7 @@ describe "lib/fixture", ->
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) =>
-        expect(err.message).to.include "No fixture exists at:"
+        expect(err.message).to.include "A fixture file could not be found"
         expect(err.message).to.include p
 
   context "unicode escape syntax", ->
@@ -315,7 +315,8 @@ describe "lib/fixture", ->
         throw new Error("should have failed but did not")
       .catch (err) =>
         p = @fixturesFolder + "/does-not-exist"
-        expect(err.message).to.eq "No fixture file found with an acceptable extension. Searched in: #{p}"
+        expect(err.message).to.include "A fixture file could not be found"
+        expect(err.message).to.include "/does-not-exist"
 
   context "new lines", ->
     it "does not remove trailing new lines on .txt", ->
