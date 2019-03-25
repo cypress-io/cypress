@@ -3,6 +3,7 @@ _ = require("lodash")
 methods = require("methods")
 moment = require("moment")
 Promise = require("bluebird")
+codeFrameColumns = require("@babel/code-frame").codeFrameColumns
 
 $jquery = require("../dom/jquery")
 $Location = require("./location")
@@ -183,6 +184,20 @@ module.exports = {
       errMessage = errMessage.message
 
     @formatErrorMessage(errMessage, args)
+
+  getCodeFrame: (source, path, lineNumber, columnNumber) ->
+    location = { start: { line: lineNumber, column: columnNumber } }
+    options = {
+      highlightCode: true,
+      forceColor: true
+    }
+
+    return {
+      frame: codeFrameColumns(source, location, options),
+      path: path,
+      lineNumber: lineNumber,
+      columnNumber: columnNumber
+    }
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'
