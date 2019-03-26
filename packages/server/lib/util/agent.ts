@@ -182,7 +182,7 @@ class HttpsAgent extends https.Agent {
       if (proxy) {
         options.proxy = proxy
 
-        return this._createProxiedConnection(options, cb)
+        return this.createProxiedConnection(options, cb)
       }
     }
 
@@ -190,12 +190,14 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  _createProxiedConnection (options, cb) {
+  createProxiedConnection (options, cb) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
 
     const proxy = url.parse(options.proxy)
+    const port = options.uri.port || 443
+    const hostname = options.uri.hostname
 
     const proxySocket = createProxySock(proxy)
 
@@ -204,32 +206,44 @@ class HttpsAgent extends https.Agent {
       cb(err)
     }
 
-    proxySocket.once('error', onError)
-    proxySocket.once('data', (data) => {
+    let buffer = ''
+
+    const onData = (data) => {
       debug(`Proxy socket for ${options.href} established`)
+
+      buffer += data.toString()
+
+      if (buffer.indexOf('\r\n\r\n') === -1) {
+        // haven't received end of headers yet, keep buffering
+        proxySocket.once('data', onData)
+        return
+      }
 
       proxySocket.removeListener('error', onError)
       // read status code from proxy's response
-      const matches = data.toString().match(/^HTTP\/1.1 (\d*)/)
+      const matches = buffer.match(/^HTTP\/1.1 (\d*)/)
 
       if (matches[1] !== '200') {
-        proxySocket.destroy()
-
-        return cb(new Error(`Error establishing proxy connection: ${matches[0]}`))
+        return onError(new Error(`Error establishing proxy connection: ${matches[0]}`))
       }
 
-      // https.Agent will reuse this socket now that we've set it
-      options.socket = proxySocket
+      if (options._agentKey) {
+        // https.Agent will upgrade and reuse this socket now
+        options.socket = proxySocket
+        options.servername = hostname
+        // @ts-ignore
+        return cb(null, super.createConnection(options))
+      }
 
-      // @ts-ignore
-      cb(null, super.createConnection(options))
-    })
+      cb(null, proxySocket)
+    }
 
-    const port = options.uri.port || 443
+    proxySocket.once('error', onError)
+    proxySocket.once('data', onData)
 
-    let connectReq = `CONNECT ${options.uri.hostname}:${port} HTTP/1.1\r\n`
+    let connectReq = `CONNECT ${hostname}:${port} HTTP/1.1\r\n`
 
-    connectReq += `Host: ${options.uri.hostname}:${port}\r\n`
+    connectReq += `Host: ${hostname}:${port}\r\n`
 
     if (proxy.auth) {
       connectReq += `Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}\r\n`

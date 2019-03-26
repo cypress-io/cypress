@@ -1,15 +1,15 @@
 _            = require("lodash")
-fs           = require("fs-extra")
-net          = require("net")
-url          = require("url")
-getProxyForUrl = require("proxy-from-env").getProxyForUrl
-https        = require("https")
-HttpsAgent   = require("https-proxy-agent")
-Promise      = require("bluebird")
-semaphore    = require("semaphore")
+agent        = require("../../server/lib/util/agent")
 allowDestroy = require("server-destroy-vvo")
 debug        = require("debug")("cypress:https-proxy")
+fs           = require("fs-extra")
+getProxyForUrl = require("proxy-from-env").getProxyForUrl
+https        = require("https")
+net          = require("net")
 parse        = require("./util/parse")
+Promise      = require("bluebird")
+semaphore    = require("semaphore")
+url          = require("url")
 
 fs = Promise.promisifyAll(fs)
 
@@ -87,7 +87,7 @@ class Server
     { port, hostname } = url.parse("http://#{req.url}")
 
     if upstreamProxy = @_upstreamProxyForHostPort(hostname, port)
-      return @_makeUpstreamProxyConnection(upstreamProxy, req, socket, head, port, hostname)
+      return @_makeUpstreamProxyConnection(upstreamProxy, socket, head, port, hostname)
 
     debug("Making direct connection to #{hostname}:#{port}")
     @_makeConnection(socket, head, port, hostname)
@@ -115,7 +115,7 @@ class Server
     conn.connect.apply(conn, args)
 
   # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
-  _makeUpstreamProxyConnection: (upstreamProxy, req, socket, head, toPort, toHostname) ->
+  _makeUpstreamProxyConnection: (upstreamProxy, socket, head, toPort, toHostname) ->
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
     onUpstreamSock = (err, upstreamSock) ->
@@ -140,11 +140,13 @@ class Server
 
       socket.resume()
 
-    httpsAgent = new HttpsAgent(upstreamProxy)
-
-    httpsAgent.callback req, {
-      port: toPort
-      host: toHostname
+    agent.httpsAgent.createProxiedConnection {
+      proxy: upstreamProxy
+      href: "https://#{toHostname}:#{toPort}"
+      uri: {
+        port: toPort
+        hostname: toHostname
+      }
     }, onUpstreamSock.bind(@)
 
   _onServerConnectData: (req, socket, head) ->
