@@ -6,13 +6,9 @@ import * as url from 'url'
 import * as debugModule from 'debug'
 import { getProxyForUrl } from 'proxy-from-env'
 import * as Promise from 'bluebird'
-import { getAddress } from './connect'
+import * as connect from './connect'
 
 const debug = debugModule('cypress:server:agent')
-
-interface RequestOptionsWithProxy extends http.RequestOptions {
-  proxy: string
-}
 
 function createProxySock (proxy: url.Url) {
   if (proxy.protocol === 'http:') {
@@ -28,21 +24,21 @@ function createProxySock (proxy: url.Url) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
-function regenerateRequestHead(req: http.ClientRequest) {
-  delete req._header
-  req._implicitHeader()
+function regenerateRequestHead(req) {
+  req._header = null;
+  req._implicitHeader();
   if (req.output && req.output.length > 0) {
     // the _header has already been queued to be written to the socket
-    var first = req.output[0]
-    var endOfHeaders = first.indexOf('\r\n\r\n') + 4
-    req.output[0] = req._header + first.substring(endOfHeaders)
+    var first = req.output[0];
+    var endOfHeaders = first.indexOf('\r\n\r\n') + 4;
+    req.output[0] = req._header + first.substring(endOfHeaders);
   }
 }
 
 export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
-  familyCache: { [host: string] : 4 | 6 } = {}
+  familyCache = {}
 
   constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
     this.httpAgent = new HttpAgent(httpOpts)
@@ -73,7 +69,7 @@ export class CombinedAgent {
     debug(`addRequest called for ${options.href}`)
 
     this._getFirstWorkingFamily(options)
-    .then((family: Optional<Number>) => {
+    .then(family => {
       options.family = family
 
       if (isHttps) {
@@ -84,7 +80,7 @@ export class CombinedAgent {
     })
   }
 
-  _getFirstWorkingFamily({ port, host }: http.RequestOptions) {
+  _getFirstWorkingFamily({ port, host }) {
     // this is a workaround for localhost (and potentially others) having invalid
     // A records but valid AAAA records. here, we just cache the family of the first
     // returned A/AAAA record for a host that we can establish a connection to.
@@ -105,8 +101,8 @@ export class CombinedAgent {
       return Promise.resolve(this.familyCache[host])
     }
 
-    return getAddress(port, host)
-    .then((firstWorkingAddress: net.Address) => {
+    return connect.getAddress(port, host)
+    .then(firstWorkingAddress => {
       this.familyCache[host] = firstWorkingAddress.family
       return firstWorkingAddress.family
     })
@@ -124,21 +120,21 @@ class HttpAgent extends http.Agent {
     this.httpsAgent = new https.Agent({ keepAlive: true })
   }
 
-  createSocket (req: http.ClientRequest, options: http.RequestOptions, cb: http.SocketCallback) {
+  createSocket (req, options, cb) {
     if (process.env.HTTP_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
       if (proxy) {
         options.proxy = proxy
 
-        return this._createProxiedSocket(req, <RequestOptionsWithProxy>options, cb)
+        return this._createProxiedSocket(req, options, cb)
       }
     }
 
     super.createSocket(req, options, cb)
   }
 
-  _createProxiedSocket (req: http.ClientRequest, options: RequestOptionsWithProxy, cb: http.SocketCallback) {
+  _createProxiedSocket (req, options, cb) {
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
 
     const proxy = url.parse(options.proxy)
@@ -158,8 +154,8 @@ class HttpAgent extends http.Agent {
     // https://github.com/TooTallNate/node-http-proxy-agent/blob/master/index.js#L93
     regenerateRequestHead(req)
 
-    options.port = Number(proxy.port || 80)
-    options.host = proxy.hostname || 'localhost'
+    options.port = proxy.port
+    options.host = proxy.hostname
     delete options.path // so the underlying net.connect doesn't default to IPC
 
     if (proxy.protocol === 'https:') {
@@ -179,14 +175,14 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  createConnection (options: http.RequestOptions, cb: http.SocketCallback) {
+  createConnection (options, cb) {
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
-      if (typeof proxy === "string") {
-        options.proxy = <string>proxy
+      if (proxy) {
+        options.proxy = proxy
 
-        return this.createProxiedConnection(<RequestOptionsWithProxy>options, cb)
+        return this.createProxiedConnection(options, cb)
       }
     }
 
@@ -194,7 +190,7 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  createProxiedConnection (options: RequestOptionsWithProxy, cb: http.SocketCallback) {
+  createProxiedConnection (options, cb) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
@@ -205,14 +201,14 @@ class HttpsAgent extends https.Agent {
 
     const proxySocket = createProxySock(proxy)
 
-    const onError = (err: Error) => {
+    const onError = (err) => {
       proxySocket.destroy()
-      cb(err, undefined)
+      cb(err)
     }
 
     let buffer = ''
 
-    const onData = (data: Buffer) => {
+    const onData = (data) => {
       debug(`Proxy socket for ${options.href} established`)
 
       buffer += data.toString()
@@ -227,18 +223,19 @@ class HttpsAgent extends https.Agent {
       // read status code from proxy's response
       const matches = buffer.match(/^HTTP\/1.1 (\d*)/)
 
-      if (!matches || matches[1] !== '200') {
-        return onError(new Error(`Error establishing proxy connection: ${matches ? matches[0] : buffer}`))
+      if (matches[1] !== '200') {
+        return onError(new Error(`Error establishing proxy connection: ${matches[0]}`))
       }
 
       if (options._agentKey) {
         // https.Agent will upgrade and reuse this socket now
         options.socket = proxySocket
         options.servername = hostname
-        return cb(undefined, super.createConnection(options, undefined))
+        // @ts-ignore
+        return cb(null, super.createConnection(options))
       }
 
-      cb(undefined, proxySocket)
+      cb(null, proxySocket)
     }
 
     proxySocket.once('error', onError)
