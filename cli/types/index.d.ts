@@ -4112,3 +4112,6 @@ Cypress._ // => Lodash _
 ```
  */
 declare const Cypress: Cypress.Cypress
+
+// load ambient declaration for "cypress" NPM module
+// import './cypress-npm-api'
