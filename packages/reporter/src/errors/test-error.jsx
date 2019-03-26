@@ -39,14 +39,10 @@ function TestError (props) {
           </Collapsible> :
           null
         }
-        <FlashOnClick
-          message='Printed output to your console'
-          onClick={_onErrorClick}
-        >
+
           <pre className='test-error'>
             <div className='runnable-err-code-frame-file-path'>users-flow/users-login.spec.js:26:17</div>
           </pre>
-        </FlashOnClick>
       </div>
     </div>
   )

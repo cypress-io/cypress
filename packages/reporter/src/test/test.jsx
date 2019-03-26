@@ -79,7 +79,6 @@ class Test extends Component {
           </div>
         </div>
         {this._contents()}
-        <TestError events={events} model={model} />
       </div>
     )
   }
@@ -102,6 +101,7 @@ class Test extends Component {
         <div className='runnable-commands-region'>
           {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
         </div>
+        <TestError events={events} model={model} />
       </div>
     )
   }
