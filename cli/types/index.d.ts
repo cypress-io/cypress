@@ -22,6 +22,10 @@
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
+// load ambient declaration for "cypress" NPM module
+// hmm, how to load it better?
+/// <reference path="./cypress-npm-api.d.ts" />
+
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
@@ -4112,6 +4116,3 @@ Cypress._ // => Lodash _
 ```
  */
 declare const Cypress: Cypress.Cypress
-
-// load ambient declaration for "cypress" NPM module
-// import './cypress-npm-api'
