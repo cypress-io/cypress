@@ -52,3 +52,90 @@
     }
   }
 }
+
+.runnable-err-wrapper {
+  margin: 5px 0 5px 5px;
+  padding-left: 10px;
+  border-left: 1px dotted #DDD;
+}
+
+.runnable-err { 
+  border-left: 2px solid $fail;
+  background-color: $err-background;
+  clear: both;
+  color: $err-text;
+  margin-bottom: 0;
+  margin-top: 5px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: initial;
+  overflow: auto;
+}
+
+.runnable-err-header {
+  display: flex;
+  justify-content: space-between;
+  background-color: $err-header-background;
+  padding: 5px 10px;
+  font-weight: bold;
+  .runnbale-err-name {
+    i {
+      font-size: 10px;
+      margin-right: 10px;
+    }
+  }
+}
+
+
+.runnable-err-docs-url {
+  a {
+    color: $err-text;
+  }
+
+  i {
+    position: relative;
+    top: 1px;
+    font-size: 10px;
+    margin-left: 5px;
+  }
+}
+
+.runnable-err-code-frame-file-path {
+  color: $link-text;
+  text-decoration: underline;
+}
+
+.runnable-err-message {
+  padding: 10px;
+  font-family: $monospace;
+}
+
+.runnable-err-stack-expander {
+  padding: 0 10px 0 5px;
+  text-decoration: underline;
+
+  .collapsible-indicator {
+    color: #eb535e !important;
+  }
+
+  .collapsible-more {
+    display: none;
+  }
+}
+
+.runnable-err-stack-trace {
+  padding: 10px;
+  font-family: $monospace;
+}
+
+.test-error-code-frame {
+  background-color: #fff;
+  border: 1px solid #ffe4e7;
+  margin: 10px;
+  padding: 10px;
+
+  pre {
+    background-color: #fff;
+    border: 0; 
+  }
+}

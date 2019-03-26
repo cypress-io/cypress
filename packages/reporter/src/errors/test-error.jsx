@@ -2,6 +2,8 @@ import React from 'react'
 import FlashOnClick from '../lib/flash-on-click'
 import Collapsible from '../collapsible/collapsible'
 
+import ErrorCodeFrame from '../errors/error-code-frame'
+
 function TestError (props) {
   function _onErrorClick (e) {
     e.stopPropagation()
@@ -39,10 +41,7 @@ function TestError (props) {
           </Collapsible> :
           null
         }
-
-          <pre className='test-error'>
-            <div className='runnable-err-code-frame-file-path'>users-flow/users-login.spec.js:26:17</div>
-          </pre>
+        <ErrorCodeFrame />
       </div>
     </div>
   )

@@ -42,6 +42,7 @@
     "markdown-it": "6.1.1",
     "mobx": "3.6.2",
     "mobx-react": "4.4.3",
+    "prismjs": "1.16.0",
     "prop-types": "15.7.2",
     "react": "16.8.3",
     "react-dom": "16.8.3",
