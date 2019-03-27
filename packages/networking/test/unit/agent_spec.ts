@@ -23,7 +23,7 @@ describe('lib/agent', function() {
     sinon.restore()
   })
 
-  context('can make requests', function() {
+  context('CombinedAgent', function() {
     before(function() {
       this.servers = new Servers()
       return this.servers.start(HTTP_PORT, HTTPS_PORT)
