@@ -27,7 +27,6 @@ declare module 'http' {
     _header: { [key: string]:string }
     _implicitHeader: () => void
     output: string[]
-    path: string
     agent: Agent
   }
 
