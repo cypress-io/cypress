@@ -1,51 +1,10 @@
+@import "../../node_modules/prismjs/themes/prism";
+@import "../../node_modules/prismjs/plugins/line-highlight/prism-line-highlight";
+@import "../../node_modules/prismjs/plugins/line-numbers/prism-line-numbers";
+
 code[class*="language-"],
 pre[class*="language-"] {
 	color: #70787a;
-	background: none;
-	text-shadow: 0 1px white;
-	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-	font-size: 1em;
-	text-align: left;
-	white-space: pre;
-	word-spacing: normal;
-	word-break: normal;
-	word-wrap: normal;
-	line-height: 1.5;
-
-	-moz-tab-size: 4;
-	-o-tab-size: 4;
-	tab-size: 4;
-
-	-webkit-hyphens: none;
-	-moz-hyphens: none;
-	-ms-hyphens: none;
-	hyphens: none;
-}
-
-pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
-code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
-	text-shadow: none;
-	background: #b3d4fc;
-}
-
-pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
-code[class*="language-"]::selection, code[class*="language-"] ::selection {
-	text-shadow: none;
-	background: #b3d4fc;
-}
-
-@media print {
-	code[class*="language-"],
-	pre[class*="language-"] {
-		text-shadow: none;
-	}
-}
-
-/* Code blocks */
-pre[class*="language-"] {
-	padding: 1em;
-	margin: .5em 0;
-	overflow: auto;
 }
 
 :not(pre) > code[class*="language-"],
@@ -53,26 +12,15 @@ pre[class*="language-"] {
 	background: #fff;
 }
 
-/* Inline code */
-:not(pre) > code[class*="language-"] {
-	padding: .1em;
-	border-radius: .3em;
-	white-space: normal;
-}
-
-.token.comment,
-.token.prolog,
-.token.doctype,
-.token.cdata {
-	color: slategray;
-}
+// .token.comment,
+// .token.prolog,
+// .token.doctype,
+// .token.cdata {
+// 	color: slategray;
+// }
 
 .token.punctuation {
-	color: #999;
-}
-
-.namespace {
-	opacity: .7;
+	color: #70787a;
 }
 
 .token.property,
@@ -98,36 +46,17 @@ pre[class*="language-"] {
 .token.entity,
 .token.url,
 .language-css .token.string,
-.style .token.string {
-	color: #e08a45;
-	background: hsla(0, 0%, 100%, .5);
-}
-
-.token.atrule,
-.token.attr-value,
-.token.keyword {
-	color: #3e76ad;
-}
-
-.token.function,
-.token.class-name {
-	color: #3e76ad;
-}
-
+.style .token.string,
 .token.regex,
 .token.important,
 .token.variable {
 	color: #e08a45;
 }
 
-.token.important,
-.token.bold {
-	font-weight: bold;
-}
-.token.italic {
-	font-style: italic;
-}
-
-.token.entity {
-	cursor: help;
+.token.atrule,
+.token.attr-value,
+.token.keyword,
+.token.function,
+.token.class-name {
+	color: #3e76ad;
 }

@@ -24,6 +24,13 @@ module.exports = function setZunderConfig (zunder) {
     },
   ])
 
+  browserifyOptions.transform[0][1].plugins.push(['prismjs', {
+    'languages': ['javascript'],
+    'plugins': ['line-numbers', 'line-highlight'],
+    'theme': 'default',
+    'css': false,
+  }])
+
   zunder.setConfig({
     cacheBust: false,
     browserifyOptions,
