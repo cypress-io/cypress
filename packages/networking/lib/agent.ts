@@ -264,4 +264,6 @@ class HttpsAgent extends https.Agent {
   }
 }
 
-export default new CombinedAgent()
+module.exports = new CombinedAgent()
+
+module.exports.CombinedAgent = CombinedAgent

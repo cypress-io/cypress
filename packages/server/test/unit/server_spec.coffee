@@ -5,13 +5,14 @@ os            = require("os")
 http          = require("http")
 express       = require("express")
 Promise       = require("bluebird")
+connect       = require("@packages/networking").connect
 routes        = require("#{root}lib/routes")
 config        = require("#{root}lib/config")
 logger        = require("#{root}lib/logger")
 Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
 fileServer    = require("#{root}lib/file_server")
-connect       = require("#{root}lib/util/connect")
+ensureUrl     = require("#{root}lib/util/ensure-url")
 buffers       = require("#{root}lib/util/buffers")
 
 morganFn = ->
@@ -147,7 +148,7 @@ describe "lib/server", ->
         )
 
     it "resolves with warning if cannot connect to baseUrl", ->
-      sinon.stub(connect, "ensureUrl").rejects()
+      sinon.stub(ensureUrl, "ensureUrl").rejects()
       @server.createServer(@app, {port: @port, baseUrl: "http://localhost:#{@port}"})
       .spread (port, warning) =>
         expect(warning.type).to.eq("CANNOT_CONNECT_BASE_URL_WARNING")
