@@ -13,11 +13,11 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-agent        = require("@packages/agent")
+agent        = require("@packages/networking").agent
 cors         = require("./util/cors")
 uri          = require("./util/uri")
 origin       = require("./util/origin")
-connect      = require("./util/connect")
+ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 blacklist    = require("./util/blacklist")
@@ -233,7 +233,7 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
-            connect.ensureUrl(baseUrl)
+            ensureUrl(baseUrl)
             .return(null)
             .catch (err) =>
               if config.isTextTerminal

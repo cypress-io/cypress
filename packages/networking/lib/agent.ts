@@ -7,9 +7,9 @@ import * as _ from 'lodash'
 import * as debugModule from 'debug'
 import { getProxyForUrl } from 'proxy-from-env'
 import * as Promise from 'bluebird'
-import { getAddress } from '../../server/lib/util/connect'
+import { getAddress } from './connect'
 
-const debug = debugModule('cypress:agent')
+const debug = debugModule('cypress:networking:agent')
 
 interface RequestOptionsWithProxy extends http.RequestOptions {
   proxy: string
@@ -32,7 +32,7 @@ function createProxySock (proxy: url.Url) {
 function isRequestHttps(options: http.RequestOptions) {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
   return (options._defaultAgent && options._defaultAgent.protocol === 'https:')
-                    || (options.href && options.href.slice(0,6) === 'https')
+          || (options.href && options.href.slice(0,6) === 'https')
 }
 
 function regenerateRequestHead(req: http.ClientRequest) {
@@ -54,6 +54,7 @@ export class CombinedAgent {
   constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
     this.httpAgent = new HttpAgent(httpOpts)
     this.httpsAgent = new HttpsAgent(httpsOpts)
+    this._getFirstWorkingFamily = Promise.method(this._getFirstWorkingFamily)
   }
 
   // called by Node.js whenever a new request is made internally
@@ -98,16 +99,16 @@ export class CombinedAgent {
     const isIP = net.isIP(host)
     if (isIP) {
       // isIP conveniently returns the family of the address
-      return Promise.resolve(isIP)
+      return isIP
     }
 
     if (process.env.HTTP_PROXY) {
       // can't make direct connections through the proxy, this won't work
-      return Promise.resolve()
+      return
     }
 
     if (this.familyCache[host]) {
-      return Promise.resolve(this.familyCache[host])
+      return this.familyCache[host]
     }
 
     return getAddress(port, host)

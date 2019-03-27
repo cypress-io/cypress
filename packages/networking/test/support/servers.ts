@@ -8,8 +8,33 @@ import * as Promise from 'bluebird'
 import { CA } from '@packages/https-proxy'
 import * as Io from '@packages/socket'
 
+interface AsyncServer {
+  listenAsync: (port) => Promise<void>
+  destroyAsync: () => Promise<void>
+}
+
+function addDestroy(server: http.Server | https.Server) {
+  let connections = []
+
+  server.on('connection', function(conn) {
+    connections.push(conn)
+
+    conn.on('close', () => {
+      connections = connections.filter(connection => connection !== conn)
+    })
+  })
+
+  // @ts-ignore Property 'destroy' does not exist on type 'Server'.
+  server.destroy = function(cb) {
+    server.close(cb)
+    connections.map(connection => connection.destroy())
+  }
+
+  return server
+}
+
 function createExpressApp() {
-  const app = express()
+  const app: express.Application = express()
 
   app.get('/get', (req, res) => {
     res.send('It worked!')
@@ -34,30 +59,36 @@ function onWsConnection(socket) {
 
 export class Servers {
   https: { cert: string, key: string }
-  httpServer: http.Server
-  httpsServer: https.Server
+  httpServer: http.Server & AsyncServer
+  httpsServer: https.Server & AsyncServer
   wsServer: any
   wssServer: any
 
   start(httpPort: number, httpsPort: number) {
     return Promise.join(
       createExpressApp(),
-      getLocalhostCertKeys,
+      getLocalhostCertKeys(),
     )
     .spread((app: Express.Application, [cert, key]: string[]) => {
-      this.httpServer = http.createServer(app)
+      this.httpServer = Promise.promisifyAll(
+        addDestroy(http.createServer(app))
+      ) as http.Server & AsyncServer
       this.wsServer = Io.server(this.httpServer)
 
-      this.httpsServer = https.createServer({ cert, key }, <http.RequestListener>app)
+      this.https = { cert, key }
+      this.httpsServer = Promise.promisifyAll(
+        addDestroy(https.createServer(this.https, <http.RequestListener>app))
+      ) as https.Server & AsyncServer
       this.wssServer = Io.server(this.httpsServer)
 
       ;[this.wsServer, this.wssServer].map(ws => {
         ws.on('connection', onWsConnection)
       })
 
+      // @ts-skip
       return Promise.join(
-        new Promise((resolve) => this.httpServer.listen(httpPort, resolve)),
-        new Promise((resolve) => this.httpsServer.listen(httpsPort, resolve))
+        this.httpServer.listenAsync(httpPort),
+        this.httpsServer.listenAsync(httpsPort)
       )
       .return()
     })
@@ -65,8 +96,8 @@ export class Servers {
 
   stop() {
     return Promise.join(
-      new Promise((resolve) => this.httpServer.close(resolve)),
-      new Promise((resolve) => this.httpsServer.close(resolve))
+      this.httpServer.destroyAsync(),
+      this.httpsServer.destroyAsync()
     )
   }
 }

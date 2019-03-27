@@ -2,9 +2,9 @@ import DebuggingProxy = require('debugging-proxy')
 import { expect } from 'chai'
 import * as Promise from 'bluebird'
 import * as request from 'request-promise'
-import { CombinedAgent } from '..'
+import { agent } from '../..'
 import * as Io from '@packages/socket'
-import { Servers } from './support/servers'
+import { Servers } from '../support/servers'
 
 const PROXY_PORT = 31000
 const HTTP_PORT = 31080
@@ -55,7 +55,7 @@ describe('lib/agent', function() {
           process.env.NO_PROXY = ''
         }
 
-        this.agent = new CombinedAgent()
+        this.agent = new agent.CombinedAgent()
 
         this.request = request.defaults({
           proxy: null,
@@ -71,7 +71,7 @@ describe('lib/agent', function() {
           }
 
           if (testCase.httpsProxy) {
-            options.https = this.https
+            options.https = this.servers.https
           }
 
           if (testCase.proxyAuth) {
