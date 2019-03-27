@@ -20,6 +20,7 @@ declare module 'http' {
     addRequest(req: ClientRequest, options: RequestOptions): void
     createSocket(req: ClientRequest, options: RequestOptions, cb: SocketCallback): void
     createConnection(options: RequestOptions, cb: Optional<SocketCallback>): void
+    protocol: 'http:' | 'https:' | string
   }
 
   interface ClientRequest {
@@ -32,6 +33,8 @@ declare module 'http' {
 
   interface RequestOptions {
     _agentKey: Optional<symbol>
+    _defaultAgent: Optional<Agent>
+    family: Optional<number>
     host: string
     href: string
     path: Optional<string>

@@ -3,6 +3,7 @@ import * as https from 'https'
 import * as net from 'net'
 import * as tls from 'tls'
 import * as url from 'url'
+import * as _ from 'lodash'
 import * as debugModule from 'debug'
 import { getProxyForUrl } from 'proxy-from-env'
 import * as Promise from 'bluebird'
@@ -28,6 +29,12 @@ function createProxySock (proxy: url.Url) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
+function isRequestHttps(options: http.RequestOptions) {
+  // WSS connections will not have an href, but you can tell protocol from the defaultAgent
+  return (options._defaultAgent && options._defaultAgent.protocol === 'https:')
+                    || (options.href && options.href.slice(0,6) === 'https')
+}
+
 function regenerateRequestHead(req: http.ClientRequest) {
   delete req._header
   req._implicitHeader()
@@ -50,10 +57,8 @@ export class CombinedAgent {
   }
 
   // called by Node.js whenever a new request is made internally
-  addRequest(req: http.ClientRequest, options: any) {
-    // WSS connections will not have an href, but you can tell protocol from the defaultAgent
-    const isHttps = (options._defaultAgent && options._defaultAgent.protocol === 'https:')
-                    || (options.href && options.href.slice(0,6) === 'https')
+  addRequest(req: http.ClientRequest, options: http.RequestOptions) {
+    const isHttps = isRequestHttps(options)
 
     if (!options.href) {
       // options.path can contain query parameters, which url.format will not-so-kindly urlencode for us...
@@ -73,7 +78,7 @@ export class CombinedAgent {
     debug(`addRequest called for ${options.href}`)
 
     this._getFirstWorkingFamily(options)
-    .then((family: Optional<Number>) => {
+    .then((family: Optional<number>) => {
       options.family = family
 
       if (isHttps) {
@@ -217,7 +222,7 @@ class HttpsAgent extends https.Agent {
 
       buffer += data.toString()
 
-      if (buffer.indexOf('\r\n\r\n') === -1) {
+      if (!_.includes(buffer, '\r\n\r\n')) {
         // haven't received end of headers yet, keep buffering
         proxySocket.once('data', onData)
         return

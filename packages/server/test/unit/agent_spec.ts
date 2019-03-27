@@ -60,8 +60,10 @@ describe('lib/util/agent', function() {
   })
 
   after(function() {
-    this.httpsServer.close()
-    this.httpServer.close()
+    Promise.join(
+      this.httpsServer.close(),
+      this.httpServer.close()
+    )
   })
 
   ;[
