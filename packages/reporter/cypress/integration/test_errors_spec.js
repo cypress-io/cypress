@@ -7,6 +7,12 @@ describe('test errors', function () {
     // SET ERROR INFO
     this.setError = function (err) {
       this.runnablesErr.suites[0].tests[0].err = err
+
+      cy.get('.reporter').then(() => {
+        this.runner.emit('runnables:ready', this.runnablesErr)
+
+        this.runner.emit('reporter:start', {})
+      })
     }
 
     this.runner = new EventEmitter()
@@ -17,12 +23,6 @@ describe('test errors', function () {
         specPath: '/foo/bar',
       })
     })
-
-    cy.get('.reporter').then(() => {
-      this.runner.emit('runnables:ready', this.runnablesErr)
-
-      this.runner.emit('reporter:start', {})
-    })
   })
 
   describe('command error', function () {
@@ -31,6 +31,14 @@ describe('test errors', function () {
         name: 'CommandError',
         message: 'failed to visit',
         stack: 'failed to visit\n\ncould not visit http: //localhost:3000',
+        codeFrames: [
+          {
+            path: 'users.spec.js',
+            line: 5,
+            column: 6,
+            src: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\').then(() => { })',
+          },
+        ],
       }
 
       this.setError(this.commandErr)

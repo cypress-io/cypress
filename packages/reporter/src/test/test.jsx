@@ -125,7 +125,6 @@ class Test extends Component {
       this.isOpen = !this.isOpen
     }
   }
-
 }
 
 export { NoCommands }

@@ -3,8 +3,8 @@ import { computed, observable } from 'mobx'
 export default class Err {
   @observable name = ''
   @observable message = ''
-  @observable mdMessage = ''
   @observable stack = ''
+  @observable mdMessage = ''
   @observable docsUrl = ''
   @observable templateType = ''
   @observable codeFrames = []

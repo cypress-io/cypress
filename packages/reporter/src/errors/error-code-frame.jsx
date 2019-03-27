@@ -11,12 +11,9 @@ class ErrorCodeFrame extends Component {
   render () {
     return (
       <div className='test-error-code-frame'>
-        <div className='runnable-err-code-frame-file-path'>users-flow/users-login.spec.js:26:17</div>
-        <pre ref='codeFrame' data-line='2' className='line-numbers'>
-          <code className='language-javascript'>cy.get('.as-table')
-    .find('tbody>tr').eq(12)
-    .find('td').first()
-    .find('button').as('firstBtn').then(() => {})</code>
+        <div className='runnable-err-code-frame-file-path'>{this.props.path}:{this.props.line}:{this.props.column}</div>
+        <pre ref='codeFrame' data-line={this.props.line} className='line-numbers'>
+          <code className='language-javascript'>{this.props.src}</code>
         </pre>
       </div>
     )

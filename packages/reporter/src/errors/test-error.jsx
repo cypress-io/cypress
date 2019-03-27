@@ -1,50 +1,52 @@
-import React from 'react'
-import FlashOnClick from '../lib/flash-on-click'
+import _ from 'lodash'
+import React, { Component } from 'react'
+import { observer } from 'mobx-react'
 import Collapsible from '../collapsible/collapsible'
 
 import ErrorCodeFrame from '../errors/error-code-frame'
 
-function TestError (props) {
-  function _onErrorClick (e) {
-    e.stopPropagation()
+@observer
+class TestError extends Component {
+  render () {
+    const { err } = this.props.model
 
-    props.events.emit('show:error', props.model.id)
-  }
+    if (!err.displayMessage) return null
 
-  const { err } = props.model
+    return (
 
-  if (!err.displayMessage) return null
-
-  return (
-    <div className='runnable-err-wrapper'>
-      <div className='runnable-err'>
-        <div className='runnable-err-header'>
-          <div className='runnbale-err-name'>
-            <i className='fa fa-exclamation-circle'></i>
-            {err.name}
-          </div>
-          <div className='runnable-err-docs-url'>
-            <a href='https://on.cypress.io/type' target='_blank'>
+      <div className='runnable-err-wrapper'>
+        <div className='runnable-err'>
+          <div className='runnable-err-header'>
+            <div className='runnbale-err-name'>
+              <i className='fa fa-exclamation-circle'></i>
+              {err.name}
+            </div>
+            <div className='runnable-err-docs-url'>
+              <a href='https://on.cypress.io/type' target='_blank'>
               Learn more
-            </a>
-            <i className='fa fa-external-link'></i>
+              </a>
+              <i className='fa fa-external-link'></i>
+            </div>
           </div>
+          <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: err.message }}></div>
+          {err.stack ?
+            <Collapsible
+              header='See full stack trace'
+              headerClass='runnable-err-stack-expander'
+              contentClass='runnable-err-stack-trace'
+            >
+              {err.stack}
+            </Collapsible> :
+            null
+          }
+          {_.map(err.codeFrames, (codeFrame) => (
+            <ErrorCodeFrame {...codeFrame} />
+          ))}
         </div>
-        <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: err.message }}></div>
-        {err.stack ?
-          <Collapsible
-            header='See full stack trace'
-            headerClass='runnable-err-stack-expander'
-            contentClass='runnable-err-stack-trace'
-          >
-            {err.stack}
-          </Collapsible> :
-          null
-        }
-        <ErrorCodeFrame />
       </div>
-    </div>
-  )
+    )
+  }
 }
 
 export default TestError
+
