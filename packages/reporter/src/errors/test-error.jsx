@@ -21,12 +21,14 @@ class TestError extends Component {
               <i className='fa fa-exclamation-circle'></i>
               {err.name}
             </div>
-            <div className='runnable-err-docs-url'>
-              <a href='https://on.cypress.io/type' target='_blank'>
-              Learn more
-              </a>
-              <i className='fa fa-external-link'></i>
-            </div>
+            {
+              err.docsUrl ?
+                <div className='runnable-err-docs-url'>
+                  <a href={err.docsUrl} target='_blank'>Learn more</a>
+                  <i className='fa fa-external-link'></i>
+                </div> :
+                null
+            }
           </div>
           <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: err.message }}></div>
           {err.stack ?

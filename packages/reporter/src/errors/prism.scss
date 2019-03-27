@@ -5,6 +5,7 @@
 code[class*="language-"],
 pre[class*="language-"] {
 	color: #70787a;
+	margin: 0; 
 }
 
 :not(pre) > code[class*="language-"],
@@ -59,4 +60,16 @@ pre[class*="language-"] {
 .token.function,
 .token.class-name {
 	color: #3e76ad;
+}
+
+.line-numbers .line-numbers-rows {
+	border-right: 0;
+}
+
+.line-numbers-rows > span:before {
+	color: #c4c8cb;
+}
+
+.line-highlight {
+	background: linear-gradient(to right, hsla(24, 20%, 50%,.1) 100%, hsla(24, 20%, 50%,0));
 }

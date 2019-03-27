@@ -88,7 +88,8 @@
 
 
 .runnable-err-docs-url {
-  a {
+  a, a:hover, a:focus {
+    cursor: pointer;
     color: $err-text;
   }
 
@@ -132,10 +133,13 @@
   background-color: #fff;
   border: 1px solid #ffe4e7;
   margin: 10px;
-  padding: 10px;
 
   pre {
     background-color: #fff;
     border: 0; 
   }
+}
+
+.runnable-err-code-frame-file-path {
+  padding: 3px 10px 0;
 }

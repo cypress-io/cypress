@@ -29,14 +29,16 @@ describe('test errors', function () {
     beforeEach(function () {
       this.commandErr = {
         name: 'CommandError',
-        message: 'failed to visit',
+        message: 'cy.check() can only be called on :checkbox and :radio. Your subject contains a: <form id=\"by-id\">...</form>',
+        mdMessage: '`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`',
         stack: 'failed to visit\n\ncould not visit http: //localhost:3000',
+        docsUrl: 'https://on.cypress.io/type',
         codeFrames: [
           {
             path: 'users.spec.js',
             line: 5,
             column: 6,
-            src: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\').then(() => { })',
+            src: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\')\n.then(() => { })',
           },
         ],
       }
