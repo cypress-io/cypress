@@ -5,3 +5,7 @@ cypress.open // $ExpectType (options: Partial<CypressOpenOptions>) => Promise<vo
 cypress.run({}).then(results => {
   results // $ExpectType CypressRunResult
 })
+cypress.run().then(results => {
+  results // $ExpectType CypressRunResult
+})
+cypress.open() // $ExpectType Promise<void>

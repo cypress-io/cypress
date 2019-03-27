@@ -51,11 +51,29 @@ declare module 'cypress' {
   }
 
   interface CypressNpmApi {
-    run(options: Partial<CypressRunOptions>): Promise<CypressRunResult>,
-    open(options: Partial<CypressOpenOptions>): Promise<void>
+    /**
+     * Execute a headless Cypress test run.
+     * @see https://on.cypress.io/module-api#cypress-run
+     * @example
+     ```
+     const cypress = require('cypress')
+     // runs all spec files matching a wildcard
+     cypress.run({
+       spec: 'cypress/integration/admin*-spec.js'
+     }).then(results => {
+       // inspect results object
+     })
+     ```
+     */
+    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult>,
+    /**
+     * Opens Cypress GUI. Resolves with void when the
+     * GUI is closed.
+     * @see https://on.cypress.io/module-api#cypress-open
+     */
+    open(options?: Partial<CypressOpenOptions>): Promise<void>
   }
 
   const cypress: CypressNpmApi
-  // export = cypress
   export default cypress
 }
