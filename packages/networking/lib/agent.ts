@@ -15,7 +15,21 @@ interface RequestOptionsWithProxy extends http.RequestOptions {
   proxy: string
 }
 
-function createProxySock (proxy: url.Url) {
+export function _buildConnectReqHead(hostname: string, port: string, proxy: url.Url) {
+  let connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
+
+  connectReq.push(`Host: ${hostname}:${port}`)
+
+  if (proxy.auth) {
+    connectReq.push(`Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}`)
+  }
+
+  connectReq.push('','')
+
+  return connectReq.join('\r\n')
+}
+
+export function _createProxySock (proxy: url.Url) {
   if (proxy.protocol === 'http:') {
     return net.connect(Number(proxy.port || 80), proxy.hostname)
   }
@@ -29,13 +43,19 @@ function createProxySock (proxy: url.Url) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
-function isRequestHttps(options: http.RequestOptions) {
+export function _isRequestHttps(options: http.RequestOptions) {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
   return (options._defaultAgent && options._defaultAgent.protocol === 'https:')
           || (options.href && options.href.slice(0,6) === 'https')
 }
 
-function regenerateRequestHead(req: http.ClientRequest) {
+export function _isResponseStatusCode200(head: string) {
+  // read status code from proxy's response
+  const matches = head.match(/^HTTP\/1.[01] (\d*)/)
+  return _.get(matches, 1) === '200'
+}
+
+export function _regenerateRequestHead(req: http.ClientRequest) {
   delete req._header
   req._implicitHeader()
   if (req.output && req.output.length > 0) {
@@ -59,7 +79,7 @@ export class CombinedAgent {
 
   // called by Node.js whenever a new request is made internally
   addRequest(req: http.ClientRequest, options: http.RequestOptions) {
-    const isHttps = isRequestHttps(options)
+    const isHttps = _isRequestHttps(options)
 
     if (!options.href) {
       // options.path can contain query parameters, which url.format will not-so-kindly urlencode for us...
@@ -163,7 +183,7 @@ class HttpAgent extends http.Agent {
     // node has queued an HTTP message to be sent already, so we need to regenerate the
     // queued message with the new path and headers
     // https://github.com/TooTallNate/node-http-proxy-agent/blob/master/index.js#L93
-    regenerateRequestHead(req)
+    _regenerateRequestHead(req)
 
     options.port = Number(proxy.port || 80)
     options.host = proxy.hostname || 'localhost'
@@ -207,10 +227,10 @@ class HttpsAgent extends https.Agent {
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
 
     const proxy = url.parse(options.proxy)
-    const port = options.uri.port || 443
-    const hostname = options.uri.hostname
+    const port = options.uri.port || '443'
+    const hostname = options.uri.hostname || 'localhost'
 
-    const proxySocket = createProxySock(proxy)
+    const proxySocket = _createProxySock(proxy)
 
     const onError = (err: Error) => {
       proxySocket.destroy()
@@ -231,11 +251,9 @@ class HttpsAgent extends https.Agent {
       }
 
       proxySocket.removeListener('error', onError)
-      // read status code from proxy's response
-      const matches = buffer.match(/^HTTP\/1.1 (\d*)/)
 
-      if (!matches || matches[1] !== '200') {
-        return onError(new Error(`Error establishing proxy connection: ${matches ? matches[0] : buffer}`))
+      if (!_isResponseStatusCode200(buffer)) {
+        return onError(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`))
       }
 
       if (options._agentKey) {
@@ -251,19 +269,11 @@ class HttpsAgent extends https.Agent {
     proxySocket.once('error', onError)
     proxySocket.once('data', onData)
 
-    let connectReq = `CONNECT ${hostname}:${port} HTTP/1.1\r\n`
+    const connectReq = _buildConnectReqHead(hostname, port, proxy)
 
-    connectReq += `Host: ${hostname}:${port}\r\n`
-
-    if (proxy.auth) {
-      connectReq += `Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}\r\n`
-    }
-
-    connectReq += '\r\n'
     proxySocket.write(connectReq)
   }
 }
 
-module.exports = new CombinedAgent()
-
-module.exports.CombinedAgent = CombinedAgent
+// @ts-ignore
+module.exports = Object.assign(new CombinedAgent(), module.exports)
