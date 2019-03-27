@@ -8,8 +8,7 @@ import { expect } from 'chai'
 import * as express from 'express'
 import * as Promise from 'bluebird'
 import * as request from 'request-promise'
-// @ts-ignore
-import CA = require('../../../https-proxy/lib/ca')
+import { CA } from '@packages/https-proxy'
 import { CombinedAgent } from '../../lib/util/agent'
 import * as Io from '@packages/socket'
 
