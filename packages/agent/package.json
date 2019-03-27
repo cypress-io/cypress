@@ -1,0 +1,21 @@
+{
+  "name": "@packages/agent",
+  "version": "0.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "debugging-proxy": "1.6.0"
+  },
+  "dependencies": {
+    "proxy-from-env": "1.0.0"
+  }
+}

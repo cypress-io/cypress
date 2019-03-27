@@ -1,68 +1,23 @@
-import * as http from 'http'
-import * as https from 'https'
-import * as fs from 'fs'
-import * as os from 'os'
-import * as path from 'path'
 import DebuggingProxy = require('debugging-proxy')
 import { expect } from 'chai'
-import * as express from 'express'
 import * as Promise from 'bluebird'
 import * as request from 'request-promise'
-import { CA } from '@packages/https-proxy'
-import { CombinedAgent } from '../../lib/util/agent'
+import { CombinedAgent } from '..'
 import * as Io from '@packages/socket'
+import { Servers } from './support/servers'
 
 const PROXY_PORT = 31000
 const HTTP_PORT = 31080
 const HTTPS_PORT = 31443
 
-describe('lib/util/agent', function() {
+describe('lib/agent', function() {
   before(function() {
-    // generate some localhost certs for testing https servers
-    return CA.create(fs.mkdtempSync(path.join(os.tmpdir(), 'cy-test-')))
-    .then(ca => ca.generateServerCertificateKeys('localhost'))
-    .spread((cert, key) => {
-      this.https = {
-        cert, key
-      }
-    })
-    .then(() => {
-      // set up an http and an https server to reach
-      const app = express()
-
-      app.get('/get', (req, res) => {
-        res.send('It worked!')
-      })
-
-      app.get('/empty-response', (req, res) => {
-        // ERR_EMPTY_RESPONSE in Chrome
-        setTimeout(() => res.connection.destroy(), 100)
-      })
-
-      this.httpServer = http.createServer(app)
-      this.wsServer = Io.server(this.httpServer)
-
-      this.httpsServer = https.createServer(this.https, app)
-      this.wssServer = Io.server(this.httpsServer)
-
-      ;[this.wsServer, this.wssServer].map(ws => {
-        ws.on('connection', function(socket) {
-          socket.send('It worked!')
-        })
-      })
-
-      return Promise.all([
-        new Promise((resolve) => this.httpServer.listen(HTTP_PORT, resolve)),
-        new Promise((resolve) => this.httpsServer.listen(HTTPS_PORT, resolve))
-      ])
-    })
+    this.servers = new Servers()
+    return this.servers.start(HTTP_PORT, HTTPS_PORT)
   })
 
   after(function() {
-    Promise.join(
-      this.httpsServer.close(),
-      this.httpServer.close()
-    )
+    return this.servers.stop()
   })
 
   ;[

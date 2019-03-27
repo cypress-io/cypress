@@ -1,5 +1,5 @@
 _            = require("lodash")
-agent        = require("../../server/lib/util/agent")
+agent        = require("@packages/agent")
 allowDestroy = require("server-destroy-vvo")
 debug        = require("debug")("cypress:https-proxy")
 fs           = require("fs-extra")

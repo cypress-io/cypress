@@ -7,9 +7,9 @@ import * as _ from 'lodash'
 import * as debugModule from 'debug'
 import { getProxyForUrl } from 'proxy-from-env'
 import * as Promise from 'bluebird'
-import { getAddress } from './connect'
+import { getAddress } from '../../server/lib/util/connect'
 
-const debug = debugModule('cypress:server:agent')
+const debug = debugModule('cypress:agent')
 
 interface RequestOptionsWithProxy extends http.RequestOptions {
   proxy: string
@@ -263,6 +263,4 @@ class HttpsAgent extends https.Agent {
   }
 }
 
-module.exports = new CombinedAgent()
-
-module.exports.CombinedAgent = CombinedAgent
+export default new CombinedAgent()
