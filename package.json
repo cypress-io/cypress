@@ -74,7 +74,7 @@
     "@types/fs-extra": "3.0.0",
     "@types/lodash": "4.14.122",
     "@types/mocha": "2.2.48",
-    "@types/node": "7.10.3",
+    "@types/node": "^11.12.0",
     "@types/ramda": "0.25.47",
     "@types/request-promise": "4.1.42",
     "ansi-styles": "3.2.1",

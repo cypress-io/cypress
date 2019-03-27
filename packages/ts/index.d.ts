@@ -31,13 +31,10 @@ declare module 'http' {
     agent: Agent
   }
 
-  interface RequestOptions {
+  interface RequestOptions extends ClientRequestArgs {
     _agentKey: Optional<symbol>
-    _defaultAgent: Optional<Agent>
-    family: Optional<number>
     host: string
     href: string
-    path: Optional<string>
     port: number
     proxy: Optional<string>
     servername: Optional<string>
