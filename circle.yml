@@ -264,6 +264,15 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
+  "server-performance-tests":
+      <<: *defaults
+      steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run all test-performance -- --package server
+          working_directory: packages/server
+
   "server-e2e-tests-1":
     <<: *defaults
     steps:

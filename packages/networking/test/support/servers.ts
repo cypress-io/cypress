@@ -50,7 +50,7 @@ function createExpressApp() {
 }
 
 function getLocalhostCertKeys() {
-  return CA.create(fs.mkdtempSync(path.join(os.tmpdir(), 'cy-test-')))
+  return CA.create()
   .then(ca => ca.generateServerCertificateKeys('localhost'))
 }
 

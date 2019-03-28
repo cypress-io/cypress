@@ -1,5 +1,6 @@
 _       = require("lodash")
 fs      = require("fs-extra")
+os      = require("os")
 path    = require("path")
 Forge   = require("node-forge")
 Promise = require("bluebird")
@@ -216,6 +217,9 @@ class CA
 
   @create = (caFolder) ->
     ca = new CA
+
+    if not caFolder
+      caFolder = path.join(os.tmpdir(), 'cy-ca')
 
     ca.baseCAFolder = caFolder
     ca.certsFolder  = path.join(ca.baseCAFolder, "certs")
