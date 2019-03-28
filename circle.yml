@@ -718,6 +718,9 @@ linux-workflow: &linux-workflow
     - server-integration-tests:
         requires:
           - build
+    - server-performance-tests:
+        requires:
+          - build
     - server-e2e-tests-1:
         requires:
           - build
