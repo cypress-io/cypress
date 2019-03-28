@@ -36,6 +36,7 @@ if intervals = process.env.API_RETRY_INTERVALS
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
     agent: agent
+    proxy: null
     gzip: true
   })
 

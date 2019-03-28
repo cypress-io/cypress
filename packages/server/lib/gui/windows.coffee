@@ -34,7 +34,7 @@ firstOrNull = (cookies) ->
 
 setWindowProxy = (win) ->
   if not process.env.HTTP_PROXY
-    return Promise.resolve()
+    return
 
   return new Promise (resolve) ->
     win.webContents.session.setProxy({
@@ -290,10 +290,10 @@ module.exports = {
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
-    Promise.all([
-      Promise.resolve(options.url),
+    Promise.join(
+      options.url,
       setWindowProxy(win)
-    ])
+    )
     .spread (url) ->
       if options.type is "GITHUB_LOGIN"
         ## remove the GitHub warning banner about an outdated browser
