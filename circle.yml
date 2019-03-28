@@ -269,9 +269,7 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - run:
-          command: npm run all test-performance -- --package server
-          working_directory: packages/server
+      - run: npm run all test-performance -- --package server
 
   "server-e2e-tests-1":
     <<: *defaults
