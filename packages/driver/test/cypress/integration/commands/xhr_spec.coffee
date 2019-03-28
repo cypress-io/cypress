@@ -1425,7 +1425,7 @@ describe "src/cy/commands/xhr", ->
 
       it "url must be a string or regexp", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.route()` was called with an invalid url. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. Url must be either a string or regular expression."
           done()
 
         cy.route({
@@ -1434,7 +1434,7 @@ describe "src/cy/commands/xhr", ->
 
       it "url must be a string or regexp when a function", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.route()` was called with an invalid url. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. Url must be either a string or regular expression."
           done()
 
         getUrl = ->
@@ -1456,7 +1456,7 @@ describe "src/cy/commands/xhr", ->
 
       it "fails when method is invalid", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.route()` was called with an invalid method: 'POSTS'."
+          expect(err.message).to.include "`cy.route()` was called with an invalid method: `POSTS`."
 
           done()
 
@@ -1464,7 +1464,7 @@ describe "src/cy/commands/xhr", ->
 
       it "requires a url when given a response", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.route()` must be called with a url. It can be a string or regular expression."
+          expect(err.message).to.include "`cy.route()` must be called with a `url`. It can be a string or regular expression."
           done()
 
         cy.route({})
@@ -1472,14 +1472,14 @@ describe "src/cy/commands/xhr", ->
       _.each [null, undefined], (val) ->
         it "throws if response options was explicitly set to #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "`cy.route()` cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            expect(err.message).to.include "`cy.route()` cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
             done()
 
           cy.route({url: /foo/, response: val})
 
         it "throws if response argument was explicitly set to #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "`cy.route()` cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            expect(err.message).to.include "`cy.route()` cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
             done()
 
           cy.route(/foo/, val)

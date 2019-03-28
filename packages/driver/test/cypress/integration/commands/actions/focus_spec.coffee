@@ -264,7 +264,7 @@ describe "src/cy/commands/actions/focus", ->
 
       it "throws when not a[href],link[href],button,input,select,textarea,[tabindex]", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.focus()` can only be called on a valid focusable element. Your subject is a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "`cy.focus()` can only be called on a valid focusable element. Your subject is a: `<form id=\"by-id\">...</form>`"
           done()
 
         cy.get("form").focus()
@@ -635,7 +635,7 @@ describe "src/cy/commands/actions/focus", ->
 
       it "throws when blur is called on a non-active element", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.blur()` can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
+          expect(err.message).to.include "`cy.blur()` can only be called on the focused element. Currently the focused element is a: `<input id=\"input\">`"
           done()
 
         cy

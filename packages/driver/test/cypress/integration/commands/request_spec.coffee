@@ -598,7 +598,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` requires a url. You did not provide a url.")
+          expect(err.message).to.eq("`cy.request()` requires a `url`. You did not provide a `url`.")
           done()
 
         cy.request()
@@ -613,7 +613,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` must be provided a fully qualified url - one that begins with 'http'. By default `cy.request()` will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present.")
+          expect(err.message).to.eq("`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window's origin or the `baseUrl` in `cypress.json`. Neither of those values were present.")
           done()
 
         cy.request("/foo/bar")
@@ -625,7 +625,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` requires the url to be a string.")
+          expect(err.message).to.eq("`cy.request()` requires the `url` to be a string.")
           done()
 
         cy.request({
@@ -639,7 +639,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` must be passed an object literal for the 'auth' option.")
+          expect(err.message).to.eq("`cy.request()` must be passed an object literal for the `auth` option.")
           done()
 
         cy.request({
@@ -654,7 +654,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` requires the 'headers' option to be an object literal.")
+          expect(err.message).to.eq("`cy.request()` requires the `headers` option to be an object literal.")
           done()
 
         cy.request({
@@ -669,7 +669,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` was called with an invalid method: 'FOO'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser.")
+          expect(err.message).to.eq("`cy.request()` was called with an invalid method: `FOO`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser.")
           done()
 
         cy.request({
@@ -684,7 +684,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` requires the 'gzip' option to be a boolean.")
+          expect(err.message).to.eq("`cy.request()` requires the `gzip` option to be a boolean.")
           done()
 
         cy.request({
@@ -699,7 +699,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.request()` requires the 'form' option to be a boolean.\n\nIf you're trying to send a x-www-form-urlencoded request then pass either a string or object literal to the 'body' property.")
+          expect(err.message).to.eq("`cy.request()` requires the `form` option to be a boolean.\n\nIf you're trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.")
           done()
 
         cy.request({
@@ -742,9 +742,9 @@ describe "src/cy/commands/request", ->
 
               > 500: Server Error
 
-            This was considered a failure because the status code was not '2xx' or '3xx'.
+            This was considered a failure because the status code was not `2xx` or `3xx`.
 
-            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+            If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
 
             -----------------------------------------------------------
 
@@ -812,9 +812,9 @@ describe "src/cy/commands/request", ->
 
               > 500: Server Error
 
-            This was considered a failure because the status code was not '2xx' or '3xx'.
+            This was considered a failure because the status code was not `2xx` or `3xx`.
 
-            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+            If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
 
             -----------------------------------------------------------
 
@@ -920,7 +920,7 @@ describe "src/cy/commands/request", ->
             expect(lastLog.get("error")).to.eq(err)
             expect(lastLog.get("state")).to.eq("failed")
             expect(err.message).to.eq("""
-              `cy.request()` timed out waiting 50ms for a response from your server.
+              `cy.request()` timed out waiting `50ms` for a response from your server.
 
               The request we sent was:
 

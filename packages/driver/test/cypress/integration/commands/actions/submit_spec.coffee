@@ -189,7 +189,7 @@ describe "src/cy/commands/actions/submit", ->
 
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "`cy.submit()` can only be called on a <form>. Your subject contains a: <input id=\"input\">"
+          expect(err.message).to.include "`cy.submit()` can only be called on a `<form>`. Your subject contains a: `<input id=\"input\">`"
           done()
 
         cy.get("input").submit()
@@ -216,7 +216,7 @@ describe "src/cy/commands/actions/submit", ->
         expect(forms.length).to.be.gt(1)
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "`cy.submit()` can only be called on a single form. Your subject contained #{forms.length} form elements."
+          expect(err.message).to.include "`cy.submit()` can only be called on a single `form`. Your subject contained #{forms.length} form elements."
           done()
 
         cy.get("form").submit()

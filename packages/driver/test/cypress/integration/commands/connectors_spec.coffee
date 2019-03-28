@@ -55,7 +55,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             expect(logs.length).to.eq(1)
             expect(logs[0].get("error")).to.eq(err)
-            expect(err.message).to.include "`cy.spread()` timed out after waiting '20ms'."
+            expect(err.message).to.include "`cy.spread()` timed out after waiting `20ms`."
             done()
 
           cy.noop([1,2,3]).spread {timeout: 20}, ->
@@ -184,7 +184,7 @@ describe "src/cy/commands/connectors", ->
 
             expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
-            expect(err.message).to.include "`cy.then()` timed out after waiting '150ms'."
+            expect(err.message).to.include "`cy.then()` timed out after waiting `150ms`."
             done()
 
           cy.then {timeout: 150}, ->
@@ -383,7 +383,7 @@ describe "src/cy/commands/connectors", ->
             }
 
             cy.on "fail", (err) ->
-              expect(err.message).to.include("Cannot call `cy.invoke()` because 'foo' is not a function. You probably want to use `cy.its('foo')`")
+              expect(err.message).to.include("Cannot call `cy.invoke()` because `foo` is not a function. You probably want to use `cy.its('foo')`")
               done()
 
             cy.wrap(obj).invoke("foo")
@@ -396,7 +396,7 @@ describe "src/cy/commands/connectors", ->
             }
 
             cy.on "fail", (err) ->
-              expect(err.message).to.include("Cannot call `cy.invoke()` because 'foo.bar' is not a function. You probably want to use `cy.its('foo.bar')`")
+              expect(err.message).to.include("Cannot call `cy.invoke()` because `foo.bar` is not a function. You probably want to use `cy.its('foo.bar')`")
               done()
 
             cy.wrap(obj).invoke("foo.bar")
@@ -518,7 +518,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.eq "Timed out retrying: Cannot call `cy.invoke()` because 'foo' is not a function. You probably want to use `cy.its('foo')`."
+            expect(err.message).to.eq "Timed out retrying: Cannot call `cy.invoke()` because `foo` is not a function. You probably want to use `cy.its('foo')`."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -554,7 +554,7 @@ describe "src/cy/commands/connectors", ->
 
         it "ensures subject", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "`cy.its()` errored because your subject is currently: 'undefined'"
+            expect(err.message).to.include "`cy.its()` errored because your subject is currently: `undefined`"
             done()
 
           cy.noop(undefined).its("attr")
@@ -563,7 +563,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command: "its"
-              Error: "CypressError: Timed out retrying: `cy.its()` errored because the property: 'fizz' returned a 'undefined' value. You cannot access any properties such as 'buzz' on a 'undefined' value."
+              Error: "CypressError: Timed out retrying: `cy.its()` errored because the property: `fizz` returned a `undefined`` value. You cannot access any properties such as 'buzz' on a 'undefined' value."
               Subject: {foo: "bar"}
             }
             done()
@@ -784,7 +784,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include   "Timed out retrying: `cy.its()` errored because the property: 'baz' returned a 'undefined' value. You cannot access any properties such as 'fizz' on a 'undefined' value."
+            expect(err.message).to.include   "Timed out retrying: `cy.its()` errored because the property: `baz` returned a `undefined` value. You cannot access any properties such as `fizz` on a `undefined` value."
             expect(lastLog.get("error").message).to.include(err.message)
             expect(lastLog.get("error").message).to.include(err.message)
             done()
@@ -800,7 +800,7 @@ describe "src/cy/commands/connectors", ->
         [null, undefined].forEach (val) ->
           it "throws on reduced #{val} subject", (done) ->
             cy.on "fail", (err) ->
-              expect(err.message).to.include("`cy.its()` errored because the property: 'foo' returned a '#{val}' value. You cannot access any properties such as 'toString' on a '#{val}' value.")
+              expect(err.message).to.include("`cy.its()` errored because the property: `foo` returned a `#{val}` value. You cannot access any properties such as `toString` on a `#{val}` value.")
               done()
 
             cy.wrap({foo: val}).its("foo.toString")
@@ -975,7 +975,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: '100'")
+            expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: `100`")
             done()
 
           cy.wrap(100).each ->
@@ -984,7 +984,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: '{}'")
+            expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: `{}`")
             done()
 
           cy.wrap({}).each ->

@@ -108,7 +108,7 @@ describe "src/cy/commands/task", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ''.")
+          expect(err.message).to.eq("`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ``.")
           done()
 
         cy.task()
@@ -120,7 +120,7 @@ describe "src/cy/commands/task", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.task()` must be passed a non-empty string as its 1st argument. You passed: '3'.")
+          expect(err.message).to.eq("`cy.task()` must be passed a non-empty string as its 1st argument. You passed: `3`.")
           done()
 
         cy.task(3)
@@ -132,7 +132,7 @@ describe "src/cy/commands/task", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ''.")
+          expect(err.message).to.eq("`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ``.")
           done()
 
         cy.task('')
@@ -175,7 +175,7 @@ describe "src/cy/commands/task", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.task('foo')` timed out after waiting 50ms.")
+          expect(err.message).to.eq("`cy.task('foo')` timed out after waiting `50ms`.")
           done()
 
         cy.task("foo", null, { timeout: 50 })
@@ -200,14 +200,14 @@ describe "src/cy/commands/task", ->
         Cypress.backend.rejects(err)
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include("`cy.task('wait')` timed out after waiting 100ms.")
+          expect(err.message).to.include("`cy.task('wait')` timed out after waiting `100ms`.")
           done()
 
         cy.task("wait", null, { timeout: 100 })
 
       it "can really time out", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("`cy.task('wait')` timed out after waiting 100ms.")
+          expect(err.message).to.include("`cy.task('wait')` timed out after waiting `100ms`.")
           done()
 
         cy.task("wait", null, { timeout: 100 })

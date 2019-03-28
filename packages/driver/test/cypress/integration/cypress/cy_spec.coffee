@@ -219,7 +219,7 @@ describe "driver/src/cypress/cy", ->
 
       it "fails when previous subject isnt window", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("`cy.winOnly()` failed because it requires the subject be a global 'window' object.")
+          expect(err.message).to.include("`cy.winOnly()` failed because it requires the subject be a global `window` object.")
           expect(err.message).to.include("{foo: bar}")
           expect(err.message).to.include("> `cy.wrap()`")
           done()
@@ -228,7 +228,7 @@ describe "driver/src/cypress/cy", ->
 
       it "fails when previous subject isnt document", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("`cy.docOnly()` failed because it requires the subject be a global 'document' object.")
+          expect(err.message).to.include("`cy.docOnly()` failed because it requires the subject be a global `document` object.")
           expect(err.message).to.include("[1, 2, 3]")
           expect(err.message).to.include("> `cy.wrap()`")
           done()
@@ -327,7 +327,7 @@ describe "driver/src/cypress/cy", ->
       fn = ->
         Cypress.Commands.overwrite "foo", ->
 
-      expect(fn).to.throw("Cannot overwite command for: 'foo'. An existing command does not exist by that name.")
+      expect(fn).to.throw("Cannot overwite command for: `foo`. An existing command does not exist by that name.")
 
     it "updates state('current') with modified args", ->
       cy.get("form").eq(0).submit().then =>

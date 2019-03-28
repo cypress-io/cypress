@@ -665,7 +665,7 @@ describe "src/cy/commands/actions/trigger", ->
         cy.on "fail", (err) =>
           ## get + click logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("`cy.trigger()` failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.trigger()` failed because this element is `disabled`:\n")
           done()
 
         cy.get("#button").trigger("mouseover")
@@ -673,7 +673,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "throws when provided invalid position", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
+          expect(err.message).to.eq "Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()
 
         cy.get("button:first").trigger("mouseover", "foo")

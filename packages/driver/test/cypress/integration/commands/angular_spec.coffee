@@ -28,7 +28,7 @@ describe "src/cy/commands/angular", ->
           delete cy.state("window").angular
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use `cy.ng()` methods without angular."
+            expect(err.message).to.include "Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular."
             done()
 
           cy.ng("binding", "phone")
@@ -132,7 +132,7 @@ describe "src/cy/commands/angular", ->
           delete cy.state("window").angular
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use `cy.ng()` methods without angular."
+            expect(err.message).to.include "Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular."
             done()
 
           cy.ng("repeater", "phone in phones")
@@ -245,7 +245,7 @@ describe "src/cy/commands/angular", ->
           delete cy.state("window").angular
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use `cy.ng()` methods without angular."
+            expect(err.message).to.include "Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular."
             done()
 
           cy.ng("model", "query")

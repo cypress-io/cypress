@@ -170,7 +170,7 @@ describe "src/cy/commands/exec", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("`cy.exec('ls')` timed out after waiting 50ms.")
+          expect(err.message).to.eq("`cy.exec('ls')` timed out after waiting `50ms`.")
           done()
 
         cy.exec("ls", { timeout: 50 })
@@ -195,7 +195,7 @@ describe "src/cy/commands/exec", ->
         Cypress.backend.rejects(err)
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include("`cy.exec('sleep 2')` timed out after waiting 100ms.")
+          expect(err.message).to.include("`cy.exec('sleep 2')` timed out after waiting `100ms`.")
           done()
 
         cy.exec("sleep 2", {
@@ -204,7 +204,7 @@ describe "src/cy/commands/exec", ->
 
       it "can really time out", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("`cy.exec('sleep 2')` timed out after waiting 100ms.")
+          expect(err.message).to.include("`cy.exec('sleep 2')` timed out after waiting `100ms`.")
           done()
 
         cy.exec("sleep 2", {
@@ -216,7 +216,7 @@ describe "src/cy/commands/exec", ->
           Cypress.backend.resolves({ code: 1 })
 
           cy.on "fail", (err) ->
-            expect(err.message).to.contain("`cy.exec('ls')` failed because the command exited with a non-zero code.\n\nPass {failOnNonZeroExit: false} to ignore exit code failures.")
+            expect(err.message).to.contain("`cy.exec('ls')` failed because the command exited with a non-zero code.\n\nPass `{failOnNonZeroExit: false}` to ignore exit code failures.")
             expect(err.message).to.contain("Code: 1")
             done()
 

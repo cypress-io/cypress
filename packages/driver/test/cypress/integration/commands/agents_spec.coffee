@@ -253,7 +253,7 @@ describe "src/cy/commands/agents", ->
 
         _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
           it "throws on a blacklisted word: #{blacklist}", ->
-            expect(=> cy.stub().as(blacklist)).to.throw("`cy.as()` cannot be aliased as: '#{blacklist}'. This word is reserved.")
+            expect(=> cy.stub().as(blacklist)).to.throw("`cy.as()` cannot be aliased as: `#{blacklist}`. This word is reserved.")
 
     describe "logging", ->
       beforeEach ->

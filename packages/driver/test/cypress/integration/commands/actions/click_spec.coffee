@@ -1109,7 +1109,7 @@ describe "src/cy/commands/actions/click", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "`cy.click()` can only be called on a single element. Your subject contained 15 elements. Pass { multiple: true } if you want to serially click each element."
+          expect(err.message).to.eq "`cy.click()` can only be called on a single element. Your subject contained 15 elements. Pass `{ multiple: true }` if you want to serially click each element."
           done()
 
         cy.get("button").click()
@@ -1160,7 +1160,7 @@ describe "src/cy/commands/actions/click", ->
         cy.on "fail", (err) =>
           ## get + click logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("`cy.click()` failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.click()` failed because this element is `disabled`:\n")
           done()
 
         cy.get("#button").click()
@@ -1277,7 +1277,7 @@ describe "src/cy/commands/actions/click", ->
       it "throws when attempting to click a <select> element", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.eq "`cy.click()` cannot be called on a <select> element. Use `cy.select()` command instead to change the value."
+          expect(err.message).to.eq "`cy.click()` cannot be called on a `<select>` element. Use `cy.select()` command instead to change the value."
           done()
 
         cy.get("select:first").click()
