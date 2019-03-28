@@ -52,10 +52,10 @@ describe('test errors', function () {
 
     it('renders and escapes backticks', () => {
       cy.get('.runnable-err-message')
-        .should('contain', '`bar`')
-        .and('contain', '**baz**')
-        .contains('code', 'foo')
-        .and('not.contain', '`foo`')
+      .should('contain', '`bar`')
+      .and('contain', '**baz**')
+      .contains('code', 'foo')
+      .and('not.contain', '`foo`')
     })
   })
 })
