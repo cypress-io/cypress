@@ -24,7 +24,6 @@
     "chai": "3.5.0",
     "cross-env": "5.2.0",
     "debugging-proxy": "1.6.0",
-    "https-proxy-agent": "1.0.0",
     "request": "2.88.0",
     "request-promise": "4.2.4",
     "sinon": "1.17.7",
