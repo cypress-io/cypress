@@ -8,9 +8,10 @@ import * as Promise from 'bluebird'
 import { CA } from '@packages/https-proxy'
 import * as Io from '@packages/socket'
 
-interface AsyncServer {
-  listenAsync: (port) => Promise<void>
+export interface AsyncServer {
+  closeAsync: () => Promise<void>
   destroyAsync: () => Promise<void>
+  listenAsync: (port) => Promise<void>
 }
 
 function addDestroy(server: http.Server | https.Server) {

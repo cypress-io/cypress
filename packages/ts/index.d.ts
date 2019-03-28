@@ -42,6 +42,12 @@ declare module 'http' {
   }
 }
 
+declare module 'https' {
+  interface Agent {
+    _sessionCache: { [_agentKey: string]: Buffer }
+  }
+}
+
 declare module 'net' {
   interface Address {
     address: string

@@ -45,8 +45,10 @@ export function _createProxySock (proxy: url.Url) {
 
 export function _isRequestHttps(options: http.RequestOptions) {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
-  return (options._defaultAgent && options._defaultAgent.protocol === 'https:')
+  return Boolean(
+          (options._defaultAgent && options._defaultAgent.protocol === 'https:')
           || (options.href && options.href.slice(0,6) === 'https')
+         )
 }
 
 export function _isResponseStatusCode200(head: string) {
@@ -232,6 +234,10 @@ class HttpsAgent extends https.Agent {
 
     const proxySocket = _createProxySock(proxy)
 
+    const onClose = () => {
+      onError(new Error("Connection closed while sending request to upstream proxy"))
+    }
+
     const onError = (err: Error) => {
       proxySocket.destroy()
       cb(err, undefined)
@@ -251,6 +257,7 @@ class HttpsAgent extends https.Agent {
       }
 
       proxySocket.removeListener('error', onError)
+      proxySocket.removeListener('close', onClose)
 
       if (!_isResponseStatusCode200(buffer)) {
         return onError(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`))
@@ -267,6 +274,7 @@ class HttpsAgent extends https.Agent {
     }
 
     proxySocket.once('error', onError)
+    proxySocket.once('close', onClose)
     proxySocket.once('data', onData)
 
     const connectReq = _buildConnectReqHead(hostname, port, proxy)
