@@ -86,7 +86,6 @@
   }
 }
 
-
 .runnable-err-docs-url {
   a, a:hover, a:focus {
     cursor: pointer;
@@ -109,6 +108,13 @@
 .runnable-err-message {
   padding: 10px;
   font-family: $monospace;
+  color: $err-text;
+
+  code {
+    background-color: $err-code-background;
+    border-radius: 5px;
+    padding: 2px 5px;
+  }
 }
 
 .runnable-err-stack-expander {

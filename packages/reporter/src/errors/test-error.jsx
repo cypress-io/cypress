@@ -39,7 +39,7 @@ class TestError extends Component {
                 null
             }
           </div>
-          <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></div>
+          <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: formattedMessage(err.mdMessage | err.message) }}></div>
           {err.stack ?
             <Collapsible
               header='See full stack trace'

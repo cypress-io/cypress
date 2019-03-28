@@ -25,45 +25,6 @@
     line-height: 18px;
     padding-left: 0;
 
-    pre {
-      background-color: darken($yellow-lightest, 5%);
-      border-left: 5px solid $fail;
-      clear: both;
-      color: $fail;
-      margin-bottom: 0;
-      margin-top: 2px;
-      padding-bottom: 2px;
-      padding-left: 10px;
-      padding-top: 2px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      user-select: initial;
-
-      a {
-        text-decoration: underline;
-      }
-
-      code {
-        font-family: $monospace;
-        font-size: 90%;
-      }
-
-      &:empty {
-        display: none;
-      }
-
-      &:hover {
-        cursor: pointer;
-        background-color: darken($yellow-lightest, 15%);
-      }
-    }
-
-    // pre {
-    //   background-color: #fff;
-    //   border: 1px solid #ffe4e7;
-    //   margin: 10px;
-    // }
-
     &.hover {
       background-color: #f7f8f9;
       cursor: pointer;

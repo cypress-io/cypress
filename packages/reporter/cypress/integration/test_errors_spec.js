@@ -29,7 +29,7 @@ describe('test errors', function () {
     beforeEach(function () {
       this.commandErr = {
         name: 'CommandError',
-        message: 'cy.check() can only be called on :checkbox and :radio. Your subject contains a: <form id=\"by-id\">...</form>',
+        message: '`foo` \\`bar\\` **baz**',
         mdMessage: '`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`',
         stack: 'failed to visit\n\ncould not visit http: //localhost:3000',
         docsUrl: 'https://on.cypress.io/type',
@@ -50,8 +50,12 @@ describe('test errors', function () {
       cy.get('.runnbale-err-name').should('contain', this.commandErr.name)
     })
 
-    it('shows err msg', function () {
-      cy.get('.runnable-err-message').should('contain', this.commandErr.message)
+    it('renders and escapes backticks', () => {
+      cy.get('.runnable-err-message')
+        .should('contain', '`bar`')
+        .and('contain', '**baz**')
+        .contains('code', 'foo')
+        .and('not.contain', '`foo`')
     })
   })
 })
