@@ -346,7 +346,7 @@ describe "src/cy/commands/assertions", ->
           ## when we check for the element to be detached
           ## it never actually runs the assertion
           expect(names).to.deep.eq(["get", "click"])
-          expect(err.message).to.include "cy.should() failed because this element is detached"
+          expect(err.message).to.include "`cy.should()` failed because this element is detached"
           done()
 
         cy.get("button:first").click().should("have.class", "foo").then ->
@@ -365,7 +365,7 @@ describe "src/cy/commands/assertions", ->
 
           ## should is present here due to the retry
           expect(names).to.deep.eq(["get", "click", "assert"])
-          expect(err.message).to.include "cy.should() failed because this element is detached"
+          expect(err.message).to.include "`cy.should()` failed because this element is detached"
           done()
 
         cy.get("button:first").click().should("have.class", "foo").then ->

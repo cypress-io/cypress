@@ -1462,19 +1462,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1484,7 +1484,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1504,7 +1504,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
 
     /**
      * Type into a DOM element.

@@ -13,6 +13,10 @@ tagClosed   = /\[\/([a-z]+)\]/g
 quotesRe    = /('|")/g
 twoOrMoreNewLinesRe = /\n{2,}/
 
+mdReplacements = [
+  ['`', '\\`']
+]
+
 defaultOptions = {
   delay: 10
   force: false
@@ -110,8 +114,12 @@ module.exports = {
     throw err
 
   throwErrByPath: (errPath, options = {}) ->
-    err = try
-      @errMessageByPath errPath, options.args
+    args = _.extend(options.args, {includeMdMessage: true})
+
+    try
+      msg = @errMessageByPath errPath, args
+      err = @cypressErr msg.message
+      err.mdMessage = msg.mdMessage
     catch e
       err = @internalErr e
 
@@ -127,11 +135,21 @@ module.exports = {
     err.name = "CypressError"
     err
 
-  errMessageByPath: (errPath, args) ->
+  normalizeMessage: (message) ->
+    ## normalize two or more new lines
+    ## into only exactly two new lines
+    _
+    .chain(message)
+    .split(twoOrMoreNewLinesRe)
+    .compact()
+    .join('\n\n')
+    .value()
+
+  errMessageByPath: (errPath, options) ->
     if not errMessage = @getObjValueByPath($errorMessages, errPath)
       throw new Error "Error message path '#{errPath}' does not exist"
 
-    getMsg = ->
+    getMsg = (args) ->
       if _.isFunction(errMessage)
         errMessage(args)
       else
@@ -139,14 +157,24 @@ module.exports = {
           message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
         , errMessage
 
-    ## normalize two or more new lines
-    ## into only exactly two new lines
-    _
-    .chain(getMsg())
-    .split(twoOrMoreNewLinesRe)
-    .compact()
-    .join('\n\n')
-    .value()
+    ## Return obj with message and message with escaped markdown
+    if options?.includeMdMessage
+      args = _.clone(options)
+      delete args.includeMd
+
+      escapeErrorMarkdown = @escapeErrorMarkdown
+      escapedArgs = {}
+
+      Object.keys(args).forEach((key) ->
+        escapedArgs[key] = escapeErrorMarkdown(args[key])
+      )
+
+      return {
+        message: @normalizeMessage(getMsg(args)),
+        mdMessage: @normalizeMessage(getMsg(escapedArgs))
+      }
+
+    return @normalizeMessage(getMsg(options))
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'
@@ -264,6 +292,17 @@ module.exports = {
     ## convert to str and escape any single
     ## or double quotes
     ("" + text).replace(quotesRe, "\\$1")
+
+  escapeErrorMarkdown: (text) ->
+    if !_.isString(text)
+      return text
+
+    ## escape markdown syntax supported by reporter
+    mdReplacements.forEach (replacement) ->
+      re = new RegExp(replacement[0], "g")
+      text = text.replace(re, replacement[1])
+
+    return text
 
   normalizeNumber: (num) ->
     parsed = Number(num)

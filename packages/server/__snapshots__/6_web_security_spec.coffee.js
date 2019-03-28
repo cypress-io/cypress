@@ -56,7 +56,6 @@ https://on.cypress.io/cross-origin-violation
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
   2) web security fails when submitted a form and being redirected to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
@@ -88,7 +87,6 @@ https://on.cypress.io/cross-origin-violation
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
   3) web security fails when using a javascript redirect to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
@@ -114,7 +112,6 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

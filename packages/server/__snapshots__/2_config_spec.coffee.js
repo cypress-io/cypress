@@ -104,7 +104,6 @@ exports['e2e config fails 1'] = `
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 

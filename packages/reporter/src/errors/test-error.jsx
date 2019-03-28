@@ -2,12 +2,21 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Collapsible from '../collapsible/collapsible'
+import Markdown from 'markdown-it'
 
 import ErrorCodeFrame from '../errors/error-code-frame'
 
 @observer
 class TestError extends Component {
   render () {
+    const md = new Markdown('zero')
+
+    md.enable(['backticks', 'escape'])
+
+    const formattedMessage = (message) => {
+      return message ? md.renderInline(message) : ''
+    }
+
     const { err } = this.props.model
 
     if (!err.displayMessage) return null
@@ -30,7 +39,7 @@ class TestError extends Component {
                 null
             }
           </div>
-          <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: err.message }}></div>
+          <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></div>
           {err.stack ?
             <Collapsible
               header='See full stack trace'

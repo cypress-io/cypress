@@ -59,7 +59,7 @@ https://on.cypress.io/returning-value-and-commands-in-test
 
 The custom command was:
 
-  > cy.foo()
+  > \`cy.foo()\`
 
 The return value was:
 
@@ -72,7 +72,6 @@ For convenience, you can also simply omit any return value or return 'undefined'
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
 
 https://on.cypress.io/returning-value-and-commands-in-custom-command
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
