@@ -132,6 +132,7 @@ let defaultArgs = [
 defaultArgs = defaultArgs.concat([
   '--headless',
   '--disable-background-networking',
+  '--no-sandbox', // allows us to run as root, for CI
 ])
 
 const getExpectedRunTime = (testCase) => {
