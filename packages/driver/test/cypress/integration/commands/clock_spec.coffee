@@ -281,7 +281,7 @@ describe "src/cy/commands/clock", ->
 
       it "throws if ms is not undefined or a number", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.equal("clock.tick()/`cy.tick()` only accept a number as their argument. You passed: `\"100\"`")
+          expect(err.message).to.equal("`clock.tick()`/`cy.tick()` only accepts a number as their argument. You passed: `\"100\"`")
           done()
 
         cy.clock().tick("100")

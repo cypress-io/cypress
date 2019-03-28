@@ -71,7 +71,7 @@ module.exports = {
     wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: `{{node}}`"
 
   chai:
-    length_invalid_argument: "You must provide a valid number to a length assertion. You passed: `{{length}}`"
+    length_invalid_argument: "You must provide a valid number to a `length` assertion. You passed: `{{length}}`"
     match_invalid_argument: "'match' requires its argument be a `RegExp`. You passed: `{{regExp}}`"
     invalid_jquery_obj: (obj) ->
       """
@@ -98,7 +98,7 @@ module.exports = {
     """
 
   check_uncheck:
-    invalid_element: "#{cmd('{{cmd}}')} can only be called on `:checkbox{{phrase}}`. Your subject {{word}} a: `{{node}}`"
+    invalid_element: "#{cmd('{{cmd}}')} can only be called on `:checkbox`{{phrase}}. Your subject {{word}} a: `{{node}}`"
 
   clear:
     invalid_element: """
@@ -124,7 +124,7 @@ module.exports = {
   clock:
     already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
     invalid_1st_arg: "#{cmd('clock')} only accepts a number or an `options` object for its first argument. You passed: `{{arg}}`"
-    invalid_2nd_arg: "#{cmd('clock')} only accepts an array of function names or an `options` object for its second argument. You passed: {{arg}}"
+    invalid_2nd_arg: "#{cmd('clock')} only accepts an array of function names or an `options` object for its second argument. You passed: `{{arg}}`"
 
   contains:
     empty_string: "#{cmd('contains')} cannot be passed an empty string."
@@ -348,7 +348,7 @@ module.exports = {
 
         The return value was:
 
-          > `#{ret}`
+          > #{ret}
 
         Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
@@ -412,7 +412,7 @@ module.exports = {
 
       https://on.cypress.io/command-queue-ended-early
     """
-    invalid_command: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: `{{cmds}}`.\n"
+    invalid_command: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n"
     invalid_overwrite: "Cannot overwite command for: `{{name}}`. An existing command does not exist by that name."
     invoking_child_without_parent: (obj) ->
       """
@@ -634,12 +634,12 @@ module.exports = {
     animation_failed: "#{cmd('scrollTo')} failed."
 
   screenshot:
-    invalid_arg: "#{cmd('{{cmd}}')}#{cmd('{{cmd}}')} must be called with an object. You passed: `{{arg}}`"
-    invalid_capture: "#{cmd('{{cmd}}')} `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `{{arg}}`"
-    invalid_boolean: "#{cmd('{{cmd}}')} `{{option}}` option must be a boolean. You passed: `{{arg}}`"
-    invalid_blackout: "#{cmd('{{cmd}}')} `blackout` option must be an array of strings. You passed: `{{arg}}`"
-    invalid_clip: "#{cmd('{{cmd}}')} `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
-    invalid_callback: "#{cmd('{{cmd}}')} `{{callback}}` option must be a function. You passed: `{{arg}}`"
+    invalid_arg: "`{{cmd}}` must be called with an object. You passed: `{{arg}}`"
+    invalid_capture: "`{{cmd}}` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `{{arg}}`"
+    invalid_boolean: "`{{cmd}}` `{{option}}` option must be a boolean. You passed: `{{arg}}`"
+    invalid_blackout: "`{{cmd}}` `blackout` option must be an array of strings. You passed: `{{arg}}`"
+    invalid_clip: "`{{cmd}}` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
+    invalid_callback: "`{{cmd}}` `{{callback}}` option must be a function. You passed: `{{arg}}`"
     multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting `{{timeout}}ms` to complete."
 
@@ -772,7 +772,7 @@ module.exports = {
 
   type:
     empty_string: "#{cmd('type')} cannot accept an empty string. You need to actually type something."
-    invalid: "Special character sequence: `{{chars}}` is not recognized. Available sequences are: `{{allChars}}`"
+    invalid: "Special character sequence: `{{chars}}` is not recognized. Available sequences are: {{allChars}}"
     invalid_date: "Typing into a `date` input with #{cmd('type')} requires a valid date with the format `yyyy-MM-dd`. You passed: `{{chars}}`"
     invalid_month: "Typing into a `month` input with #{cmd('type')} requires a valid month with the format `yyyy-MM`. You passed: `{{chars}}`"
     invalid_week: "Typing into a `week` input with #{cmd('type')} requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `{{chars}}`"
@@ -847,7 +847,7 @@ module.exports = {
     invalid_method: "#{cmd('visit')} was called with an invalid method: `{{method}}`. Method can only be `GET` or `POST`."
     invalid_headers: "#{cmd('visit')} requires the `headers` option to be an object."
     no_duplicate_url: """
-      #{cmd('visit')} must be called with only one url. You specified two urls:
+      #{cmd('visit')} must be called with only one `url`. You specified two urls:
 
       `url` from the `options` object: {{optionsUrl}}
       `url` from the `url` parameter: {{url}}

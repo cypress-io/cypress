@@ -1231,11 +1231,11 @@ describe "src/cy/commands/navigation", ->
           expect(err.message).to.include("""
             `cy.visit()` failed trying to load:
 
-            `/bar`
+            /bar
 
             We failed looking for this file at the path:
 
-            `/path/to/bar/`
+            /path/to/bar/
 
             The internal Cypress web server responded with:
 
@@ -1411,9 +1411,9 @@ describe "src/cy/commands/navigation", ->
 
             https://google.com/foo
 
-            The content-type of the response we received from this local file was:
+            The `content-type` of the response we received from this local file was:
 
-              > `application/json`
+              > application/json
 
             This was considered a failure because responses must have `content-type: 'text/html'`
 

@@ -563,7 +563,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command: "its"
-              Error: "CypressError: Timed out retrying: `cy.its()` errored because the property: `fizz` returned a `undefined`` value. You cannot access any properties such as 'buzz' on a 'undefined' value."
+              Error: "CypressError: Timed out retrying: `cy.its()` errored because the property: `fizz` returned a `undefined` value. You cannot access any properties such as 'buzz' on a `undefined` value."
               Subject: {foo: "bar"}
             }
             done()
@@ -951,7 +951,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("`cy.each()` timed out after waiting '50ms'.\n\nYour callback function returned a promise which never resolved.")
+            expect(err.message).to.include("`cy.each()` timed out after waiting `50ms`.\n\nYour callback function returned a promise which never resolved.")
             done()
 
           cy.get("ul").each ($ul) ->

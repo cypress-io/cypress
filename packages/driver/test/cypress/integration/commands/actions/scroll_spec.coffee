@@ -371,7 +371,7 @@ describe "src/cy/commands/actions/scroll", ->
 
         it "throws if unrecognized position", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "Invalid position argument: \'botom\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
+            expect(err.message).to.include "Invalid position argument: `botom`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
             done()
 
           cy.get("#scroll-to-both").scrollTo("botom")

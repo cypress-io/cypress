@@ -664,7 +664,7 @@ describe "src/cy/commands/window", ->
 
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(1)
-            expect(err.message).to.eq "`cy.viewport()` can only accept a string preset or a `width` and `` as numbers."
+            expect(err.message).to.eq "`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers."
             done()
 
           cy.viewport(val)

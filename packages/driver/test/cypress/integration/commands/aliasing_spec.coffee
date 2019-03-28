@@ -125,7 +125,7 @@ describe "src/cy/commands/aliasing", ->
 
       it "throws on alias starting with @ char", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "'@myAlias' cannot be named starting with the `@` symbol. Try renaming the alias to `myAlias`, or something else that does not start with the `@` symbol."
+          expect(err.message).to.eq "`@myAlias` cannot be named starting with the `@` symbol. Try renaming the alias to `myAlias`, or something else that does not start with the `@` symbol."
           done()
 
         cy.get("div:first").as("@myAlias")

@@ -57,7 +57,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     if not isAcceptableElement($el)
       node   = $dom.stringify($el)
       word   = $utils.plural(options.$el, "contains", "is")
-      phrase = if type is "check" then " and :radio" else ""
+      phrase = if type is "check" then " and `:radio`" else ""
       $utils.throwErrByPath "check_uncheck.invalid_element", {
         onFail: options._log
         args: { node, word, phrase, cmd: type }

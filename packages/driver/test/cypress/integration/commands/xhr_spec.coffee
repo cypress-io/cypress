@@ -1425,7 +1425,7 @@ describe "src/cy/commands/xhr", ->
 
       it "url must be a string or regexp", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. `url` must be either a string or regular expression."
           done()
 
         cy.route({
@@ -1434,7 +1434,7 @@ describe "src/cy/commands/xhr", ->
 
       it "url must be a string or regexp when a function", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. `url` must be either a string or regular expression."
           done()
 
         getUrl = ->
@@ -1569,7 +1569,7 @@ describe "src/cy/commands/xhr", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.eq "`cy.route()` could not find a registered alias for: '@bar'.\nAvailable aliases are: 'foo'."
+          expect(err.message).to.eq "`cy.route()` could not find a registered alias for: `@bar`.\nAvailable aliases are: `foo`."
           expect(lastLog.get("name")).to.eq "route"
           expect(lastLog.get("error")).to.eq err
           expect(lastLog.get("message")).to.eq "/foo/, @bar"

@@ -2870,7 +2870,7 @@ describe "src/cy/commands/actions/type", ->
       it "throws on an empty string", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq 2
-          expect(err.message).to.eq "`cy.type()` cannot accept an empty String. You need to actually type something."
+          expect(err.message).to.eq "`cy.type()` cannot accept an empty string. You need to actually type something."
           done()
 
         cy.get(":text:first").type("")

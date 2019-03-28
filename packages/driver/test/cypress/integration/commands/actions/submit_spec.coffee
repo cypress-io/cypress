@@ -216,7 +216,7 @@ describe "src/cy/commands/actions/submit", ->
         expect(forms.length).to.be.gt(1)
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "`cy.submit()` can only be called on a single `form`. Your subject contained #{forms.length} form elements."
+          expect(err.message).to.include "`cy.submit()` can only be called on a single `form`. Your subject contained #{forms.length} `form` elements."
           done()
 
         cy.get("form").submit()
