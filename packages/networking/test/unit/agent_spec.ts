@@ -9,7 +9,14 @@ import * as Promise from 'bluebird'
 import * as request from 'request-promise'
 import * as sinon from 'sinon'
 import * as sinonChai from 'sinon-chai'
-import { agent } from '../..'
+import {
+  CombinedAgent,
+  _buildConnectReqHead,
+  _createProxySock,
+  isRequestHttps,
+  isResponseStatusCode200,
+  _regenerateRequestHead
+} from '../../lib/agent'
 import * as Io from '@packages/socket'
 import { Servers, AsyncServer } from '../support/servers'
 
@@ -73,7 +80,7 @@ describe('lib/agent', function() {
             process.env.NO_PROXY = ''
           }
 
-          this.agent = new agent.CombinedAgent()
+          this.agent = new CombinedAgent()
 
           this.request = request.defaults({
             proxy: null,
@@ -204,7 +211,7 @@ describe('lib/agent', function() {
 
     context('HttpsAgent', function() {
       it("#createProxiedConnection calls to super for caching, TLS-ifying", function() {
-        const combinedAgent = new agent.CombinedAgent()
+        const combinedAgent = new CombinedAgent()
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
         const proxy = new DebuggingProxy()
@@ -233,7 +240,7 @@ describe('lib/agent', function() {
       })
 
       it("#createProxiedConnection throws when connection is accepted then closed", function() {
-        const combinedAgent = new agent.CombinedAgent()
+        const combinedAgent = new CombinedAgent()
 
         const proxy = Promise.promisifyAll(
           net.createServer((socket) => {
@@ -266,9 +273,9 @@ describe('lib/agent', function() {
     })
   })
 
-  context("#_buildConnectReqHead", function() {
+  context("._buildConnectReqHead", function() {
     it('builds the correct request', function() {
-      const head = agent._buildConnectReqHead('foo.bar', '1234', {})
+      const head = _buildConnectReqHead('foo.bar', '1234', {})
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
         'Host: foo.bar:1234',
@@ -277,7 +284,7 @@ describe('lib/agent', function() {
     })
 
     it('can do Proxy-Authorization', function() {
-      const head = agent._buildConnectReqHead('foo.bar', '1234', {
+      const head = _buildConnectReqHead('foo.bar', '1234', {
         auth: 'baz:quux'
       })
       expect(head).to.eq([
@@ -289,25 +296,25 @@ describe('lib/agent', function() {
     })
   })
 
-  context("#_createProxySock", function() {
+  context("._createProxySock", function() {
     it("creates a `net` socket for an http url", function() {
       sinon.stub(net, 'connect')
       const proxy = url.parse('http://foo.bar:1234')
-      agent._createProxySock(proxy)
+      _createProxySock(proxy)
       expect(net.connect).to.be.calledWith(1234, 'foo.bar')
     })
 
     it("creates a `tls` socket for an https url", function() {
       sinon.stub(tls, 'connect')
       const proxy = url.parse('https://foo.bar:1234')
-      agent._createProxySock(proxy)
+      _createProxySock(proxy)
       expect(tls.connect).to.be.calledWith(1234, 'foo.bar')
     })
 
     it("throws on unsupported proxy protocol", function() {
       const proxy = url.parse('socksv5://foo.bar:1234')
       try {
-        agent._createProxySock(proxy)
+        _createProxySock(proxy)
         throw new Error("Shouldn't be reached")
       } catch (e) {
         expect(e.message).to.eq("Unsupported proxy protocol: socksv5:")
@@ -315,7 +322,7 @@ describe('lib/agent', function() {
     })
   })
 
-  context("#_isRequestHttps", function() {
+  context(".isRequestHttps", function() {
     [
       {
         protocol: 'http',
@@ -340,7 +347,7 @@ describe('lib/agent', function() {
         })
         .catch((e) => {
           const requestOptions = spy.getCall(0).args[1]
-          expect(agent._isRequestHttps(requestOptions)).to.equal(testCase.expect)
+          expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
         })
       })
 
@@ -358,25 +365,25 @@ describe('lib/agent', function() {
         })
         .then(() => {
           const requestOptions = spy.getCall(0).args[1]
-          expect(agent._isRequestHttps(requestOptions)).to.equal(testCase.expect)
+          expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
         })
       })
     })
   })
 
-  context("#_isResponseStatusCode200", function() {
+  context(".isResponseStatusCode200", function() {
     it("matches a 200 OK response correctly", function() {
-      const result = agent._isResponseStatusCode200("HTTP/1.1 200 Connection established")
+      const result = isResponseStatusCode200("HTTP/1.1 200 Connection established")
       expect(result).to.be.true
     })
 
     it("matches a 500 error response correctly", function() {
-      const result = agent._isResponseStatusCode200("HTTP/1.1 500 Internal Server Error")
+      const result = isResponseStatusCode200("HTTP/1.1 500 Internal Server Error")
       expect(result).to.be.false
     })
   })
 
-  context("#_regenerateRequestHead", function() {
+  context("._regenerateRequestHead", function() {
     it("regenerates changed request head", () => {
       const spy = sinon.spy(http.globalAgent, 'createSocket')
       return request({
@@ -399,7 +406,7 @@ describe('lib/agent', function() {
         req.path = 'http://quuz.quux.invalid/abc?def=123'
         req.setHeader('Host', 'foo.fleem.invalid')
         req.setHeader('bing', 'bang')
-        agent._regenerateRequestHead(req)
+        _regenerateRequestHead(req)
         expect(req._header).to.equal([
           'GET http://quuz.quux.invalid/abc?def=123 HTTP/1.1',
           'Host: foo.fleem.invalid',

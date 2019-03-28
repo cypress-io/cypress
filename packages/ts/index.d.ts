@@ -40,6 +40,8 @@ declare module 'http' {
     socket: Optional<Socket>
     uri: Url
   }
+
+  export const CRLF: string
 }
 
 declare module 'https' {

@@ -10,13 +10,14 @@ import * as Promise from 'bluebird'
 import { getAddress } from './connect'
 
 const debug = debugModule('cypress:networking:agent')
+const CRLF = '\r\n'
 
 interface RequestOptionsWithProxy extends http.RequestOptions {
   proxy: string
 }
 
 export function _buildConnectReqHead(hostname: string, port: string, proxy: url.Url) {
-  let connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
+  const connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
 
   connectReq.push(`Host: ${hostname}:${port}`)
 
@@ -24,9 +25,7 @@ export function _buildConnectReqHead(hostname: string, port: string, proxy: url.
     connectReq.push(`Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}`)
   }
 
-  connectReq.push('','')
-
-  return connectReq.join('\r\n')
+  return connectReq.join(CRLF) + _.repeat(CRLF, 2)
 }
 
 export function _createProxySock (proxy: url.Url) {
@@ -43,15 +42,12 @@ export function _createProxySock (proxy: url.Url) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
-export function _isRequestHttps(options: http.RequestOptions) {
+export function isRequestHttps(options: http.RequestOptions) {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
-  return Boolean(
-          (options._defaultAgent && options._defaultAgent.protocol === 'https:')
-          || (options.href && options.href.slice(0,6) === 'https')
-         )
+  return _.get(options, '_defaultAgent.protocol') === 'https:' || (options.href || '').slice(0, 6) === 'https'
 }
 
-export function _isResponseStatusCode200(head: string) {
+export function isResponseStatusCode200(head: string) {
   // read status code from proxy's response
   const matches = head.match(/^HTTP\/1.[01] (\d*)/)
   return _.get(matches, 1) === '200'
@@ -63,7 +59,7 @@ export function _regenerateRequestHead(req: http.ClientRequest) {
   if (req.output && req.output.length > 0) {
     // the _header has already been queued to be written to the socket
     var first = req.output[0]
-    var endOfHeaders = first.indexOf('\r\n\r\n') + 4
+    var endOfHeaders = first.indexOf(_.repeat(CRLF, 2)) + 4
     req.output[0] = req._header + first.substring(endOfHeaders)
   }
 }
@@ -81,7 +77,7 @@ export class CombinedAgent {
 
   // called by Node.js whenever a new request is made internally
   addRequest(req: http.ClientRequest, options: http.RequestOptions) {
-    const isHttps = _isRequestHttps(options)
+    const isHttps = isRequestHttps(options)
 
     if (!options.href) {
       // options.path can contain query parameters, which url.format will not-so-kindly urlencode for us...
@@ -250,7 +246,7 @@ class HttpsAgent extends https.Agent {
 
       buffer += data.toString()
 
-      if (!_.includes(buffer, '\r\n\r\n')) {
+      if (!_.includes(buffer, _.repeat(CRLF, 2))) {
         // haven't received end of headers yet, keep buffering
         proxySocket.once('data', onData)
         return
@@ -259,7 +255,7 @@ class HttpsAgent extends https.Agent {
       proxySocket.removeListener('error', onError)
       proxySocket.removeListener('close', onClose)
 
-      if (!_isResponseStatusCode200(buffer)) {
+      if (!isResponseStatusCode200(buffer)) {
         return onError(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`))
       }
 
@@ -283,5 +279,6 @@ class HttpsAgent extends https.Agent {
   }
 }
 
-// @ts-ignore
-module.exports = Object.assign(new CombinedAgent(), module.exports)
+const agent = new CombinedAgent()
+
+export default agent

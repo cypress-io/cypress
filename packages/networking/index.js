@@ -5,6 +5,6 @@ if (process.env.CYPRESS_ENV !== 'production') {
 }
 
 module.exports = {
-  agent: require('./lib/agent'),
+  agent: require('./lib/agent').default,
   connect: require('./lib/connect'),
 }
