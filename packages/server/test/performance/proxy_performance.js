@@ -2,7 +2,8 @@ const cp = require('child_process')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
-const { it, after, expect, before, beforeEach, describe } = require('mocha')
+const { it, after, before, beforeEach, describe } = require('mocha')
+const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
@@ -323,6 +324,8 @@ describe('Proxy Performance', () => {
             const runTime = Number(testCase['Total'].replace('ms', ''))
 
             expect(runTime).to.be.lessThan(getExpectedRunTime(testCase))
+
+            return Promise.resolve()
           })
         })
       }
