@@ -15,6 +15,7 @@ process.env.CYPRESS_ENV = 'development'
 const CA = require('@packages/https-proxy').CA
 const Config = require('../../lib/config')
 const Server = require('../../lib/server')
+const { _getArgs } = require('../../lib/browsers/chrome')
 
 const CHROME_PATH = 'google-chrome'
 const URL_UNDER_TEST = 'https://flotwig.github.io/cypress-fetch-page/index1000.html'
@@ -86,48 +87,7 @@ const TEST_CASES = [
   },
 ]
 
-// from browsers/chrome.coffee
-let defaultArgs = [
-  '--test-type',
-  '--ignore-certificate-errors',
-  '--start-maximized',
-  '--silent-debugger-extension-api',
-  '--no-default-browser-check',
-  '--no-first-run',
-  '--noerrdialogs',
-  '--enable-fixed-layout',
-  '--disable-popup-blocking',
-  '--disable-password-generation',
-  '--disable-save-password-bubble',
-  '--disable-single-click-autofill',
-  '--disable-prompt-on-repos',
-  '--disable-background-timer-throttling',
-  '--disable-renderer-backgrounding',
-  '--disable-renderer-throttling',
-  '--disable-restore-session-state',
-  '--disable-translate',
-  '--disable-new-profile-management',
-  '--disable-new-avatar-menu',
-  '--allow-insecure-localhost',
-  '--reduce-security-for-testing',
-  '--enable-automation',
-  '--disable-infobars',
-  '--disable-device-discovery-notifications',
-  '--autoplay-policy=no-user-gesture-required',
-  '--disable-site-isolation-trials',
-  '--metrics-recording-only',
-  '--disable-prompt-on-repost',
-  '--disable-hang-monitor',
-  '--disable-sync',
-  '--disable-web-resources',
-  '--safebrowsing-disable-auto-update',
-  '--safebrowsing-disable-download-protection',
-  '--disable-client-side-phishing-detection',
-  '--disable-component-update',
-  '--disable-default-apps',
-  '--use-fake-ui-for-media-stream',
-  '--use-fake-device-for-media-stream',
-]
+let defaultArgs = _getArgs()
 
 // additionally...
 defaultArgs = defaultArgs.concat([
