@@ -11,6 +11,7 @@ import { getAddress } from './connect'
 
 const debug = debugModule('cypress:networking:agent')
 const CRLF = '\r\n'
+const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
 interface RequestOptionsWithProxy extends http.RequestOptions {
   proxy: string
@@ -49,7 +50,7 @@ export function isRequestHttps(options: http.RequestOptions) {
 
 export function isResponseStatusCode200(head: string) {
   // read status code from proxy's response
-  const matches = head.match(/^HTTP\/1.[01] (\d*)/)
+  const matches = head.match(statusCodeRe)
   return _.get(matches, 1) === '200'
 }
 
@@ -58,8 +59,8 @@ export function _regenerateRequestHead(req: http.ClientRequest) {
   req._implicitHeader()
   if (req.output && req.output.length > 0) {
     // the _header has already been queued to be written to the socket
-    var first = req.output[0]
-    var endOfHeaders = first.indexOf(_.repeat(CRLF, 2)) + 4
+    const first = req.output[0]
+    const endOfHeaders = first.indexOf(_.repeat(CRLF, 2)) + 4
     req.output[0] = req._header + first.substring(endOfHeaders)
   }
 }
