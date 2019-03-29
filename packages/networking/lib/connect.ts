@@ -5,13 +5,19 @@ import * as Promise from 'bluebird'
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
   return new Promise((resolve, reject) => {
-    const client = net.connect(port, address.address, () => {
-      client.removeListener('error', reject)
+    const onConnect = () => {
       client.end()
       resolve(address)
-    })
+    }
 
-    client.on('error', reject)
+    const onError = () => {
+      client.removeListener('error', onError)
+      reject()
+    }
+
+    const client = net.connect(port, address.address, onConnect)
+
+    client.on('error', onError)
   })
 }
 
