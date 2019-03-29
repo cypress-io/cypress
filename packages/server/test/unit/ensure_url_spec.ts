@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-import { connect, agent } from '@packages/networking'
+import { connect, agent } from '@packages/network'
 import { isListening } from '../../lib/util/ensure-url'
 
 describe('lib/util/ensure-url', function() {

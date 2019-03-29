@@ -3,7 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 os       = require("os")
 nmi      = require("node-machine-id")
-agent    = require("@packages/networking").agent
+agent    = require("@packages/network").agent
 pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 browsers = require("#{root}lib/browsers")

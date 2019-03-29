@@ -1,6 +1,6 @@
 import * as url from 'url'
 import * as rp from 'request-promise'
-import { agent, connect } from '@packages/networking'
+import { agent, connect } from '@packages/network'
 
 export function isListening (urlStr: string) {
   // takes a urlStr and verifies the hostname + port is listening

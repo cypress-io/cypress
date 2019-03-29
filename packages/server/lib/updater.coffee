@@ -5,7 +5,7 @@ semver         = require("semver")
 request        = require("request")
 NwUpdater      = require("node-webkit-updater")
 pkg            = require("@packages/root")
-agent          = require("@packages/networking").agent
+agent          = require("@packages/network").agent
 cwd            = require("./cwd")
 konfig         = require("./konfig")
 

@@ -1,5 +1,5 @@
 _            = require("lodash")
-agent        = require("@packages/networking").agent
+agent        = require("@packages/network").agent
 allowDestroy = require("server-destroy-vvo")
 debug        = require("debug")("cypress:https-proxy")
 fs           = require("fs-extra")

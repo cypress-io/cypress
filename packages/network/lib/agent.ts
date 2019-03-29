@@ -9,7 +9,7 @@ import { getProxyForUrl } from 'proxy-from-env'
 import * as Promise from 'bluebird'
 import { getAddress } from './connect'
 
-const debug = debugModule('cypress:networking:agent')
+const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
