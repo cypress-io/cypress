@@ -313,33 +313,33 @@ const getReasonIsHidden = function ($el) {
   //# returns the reason in human terms why an element is considered not visible
   switch (false) {
     case !elHasDisplayNone($el):
-      return `This element '${node}' is not visible because it has CSS property: 'display: none'`
+      return `This element \`${node}\` is not visible because it has CSS property: \`display: none\``
 
     case !($parent = parentHasDisplayNone($el.parent())):
       parentNode = $elements.stringify($parent, 'short')
 
-      return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'display: none'`
+      return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`display: none\``
 
     case !($parent = parentHasVisibilityNone($el.parent())):
       parentNode = $elements.stringify($parent, 'short')
 
-      return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'visibility: hidden'`
+      return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`visibility: hidden\``
 
     case !elHasVisibilityHidden($el):
-      return `This element '${node}' is not visible because it has CSS property: 'visibility: hidden'`
+      return `This element \`${node}\` is not visible because it has CSS property: \`visibility: hidden\``
 
     case !elHasNoOffsetWidthOrHeight($el):
       width = elOffsetWidth($el)
       height = elOffsetHeight($el)
 
-      return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
+      return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
 
     case !($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())):
       parentNode = $elements.stringify($parent, 'short')
       width = elOffsetWidth($parent)
       height = elOffsetHeight($parent)
 
-      return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'overflow: hidden' and an effective width and height of: '${width} x ${height}' pixels.`
+      return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
 
     default:
       //# nested else --___________--
@@ -349,18 +349,18 @@ const getReasonIsHidden = function ($el) {
           const covered = $elements.stringify(elAtCenterPoint($el))
 
           return `\
-This element '${node}' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
+This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and its being covered by another element:
 
-${covered}\
+\`${covered}\`\
 `
         }
       } else {
         if (elIsOutOfBoundsOfAncestorsOverflow($el)) {
-          return `This element '${node}' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'`
+          return `This element \`${node}\` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \`hidden\`, \`scroll\` or \`auto\``
         }
       }
 
-      return `Cypress could not determine why this element '${node}' is not visible.`
+      return `Cypress could not determine why this element \`${node}\` is not visible.`
   }
 }
 

@@ -1249,7 +1249,7 @@ describe "src/cy/commands/actions/click", ->
           expect(lastLog.get("snapshots")[1].name).to.eq("after")
           expect(err.message).to.include "`cy.click()` failed because this element is not visible:"
           expect(err.message).to.include ">button ...</button>"
-          expect(err.message).to.include "'<button#button-covered-in-span>' is not visible because it has CSS property: 'position: fixed' and its being covered"
+          expect(err.message).to.include "`<button#button-covered-in-span>` is not visible because it has CSS property: `position: fixed` and its being covered"
           expect(err.message).to.include ">span on...</span>"
 
           console = lastLog.invoke("consoleProps")

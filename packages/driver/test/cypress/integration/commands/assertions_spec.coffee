@@ -1173,7 +1173,7 @@ describe "src/cy/commands/assertions", ->
             """
             expected '<div>' to be 'visible'
 
-            This element '<div>' is not visible because it has CSS property: 'display: none'
+            This element `<div>` is not visible because it has CSS property: `display: none`
             """
           )
 
