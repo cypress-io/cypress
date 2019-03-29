@@ -10,14 +10,9 @@ export function byPortAndAddress (port: number, address: net.Address) {
       resolve(address)
     }
 
-    const onError = (err) => {
-      client.removeListener('error', onError)
-      reject(err)
-    }
-
     const client = net.connect(port, address.address, onConnect)
 
-    client.on('error', onError)
+    client.on('error', reject)
   })
 }
 
