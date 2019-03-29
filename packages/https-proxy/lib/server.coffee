@@ -103,9 +103,6 @@ class Server
     conn = new net.Socket()
     conn.setNoDelay(true)
 
-    socket.on "close", =>
-      conn.destroy()
-
     conn.on "error", (err) =>
       if @_onError
         @_onError(err, socket, head, port)
@@ -134,9 +131,6 @@ class Server
       upstreamSock.pipe(socket)
       socket.pipe(upstreamSock)
       socket.emit("data", head)
-
-      socket.on "close", =>
-        upstreamSock.destroy()
 
       socket.resume()
 

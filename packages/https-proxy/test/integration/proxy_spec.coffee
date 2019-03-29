@@ -2,7 +2,9 @@ require("../spec_helper")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+_           = require("lodash")
 DebugProxy  = require("debugging-proxy")
+net         = require("net")
 path        = require("path")
 Promise     = require("bluebird")
 proxy       = require("../helpers/proxy")
@@ -88,6 +90,25 @@ describe "Proxy", ->
     })
     .then (html) ->
       expect(html).to.include("https server")
+
+  it "closes outgoing connections when client disconnects", ->
+    @sandbox.spy(net.Socket.prototype, 'connect')
+
+    request({
+      strictSSL: false
+      url: "https://localhost:8444/replace"
+      proxy: "http://localhost:3333"
+      resolveWithFullResponse: true
+    })
+    .then (res) =>
+      ## ensure client has disconnected
+      expect(res.socket.destroyed).to.be.true
+      ## ensure the outgoing socket created for this connection was destroyed
+      socket = net.Socket.prototype.connect.getCalls()
+      .find (call) =>
+        _.isEqual(call.args.slice(0,2), ["8444", "localhost"])
+      .thisValue
+      expect(socket.destroyed).to.be.true
 
   it "can boot the httpServer", ->
     request({
@@ -180,6 +201,34 @@ describe "Proxy", ->
           https: true
         })
         expect(res).to.contain("https server")
+
+    it "closes outgoing connections when client disconnects", ->
+      @sandbox.spy(net.Socket.prototype, 'connect')
+
+      request({
+        strictSSL: false
+        url: "https://localhost:8444/replace"
+        proxy: "http://localhost:3333"
+        resolveWithFullResponse: true
+        forever: false
+      })
+      .then (res) =>
+        ## ensure client has disconnected
+        expect(res.socket.destroyed).to.be.true
+
+        ## ensure the outgoing socket created for this connection was destroyed
+        socket = net.Socket.prototype.connect.getCalls()
+        .find (call) =>
+          _.isEqual(call.args[0][0], {
+            host: 'localhost'
+            port: 9001
+          })
+        .thisValue
+
+        new Promise (resolve) ->
+          socket.on 'close', =>
+            expect(socket.destroyed).to.be.true
+            resolve()
 
     afterEach ->
       @upstream.stop()
