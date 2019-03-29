@@ -869,6 +869,21 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
+      it "parses environment variables with empty values", ->
+        cypress.start([
+          "--run-project=#{@todosPath}",
+          "--video=false"
+          "--env=FOO=,BAR=,BAZ=ipsum"
+        ])
+        .then =>
+          expect(openProject.getProject().cfg.env).to.deep.eq({
+            FOO: ''
+            BAR: ''
+            BAZ: 'ipsum'
+          })
+
+          @expectExitWith(0)
+
   ## most record mode logic is covered in e2e tests.
   ## we only need to cover the edge cases / warnings
   context "--record or --ci", ->
@@ -975,7 +990,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
-        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-group")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-group 1")
 
     it "errors and exits when using --parallel but ciBuildId could not be generated", ->
       sinon.stub(ciProvider, "provider").returns(null)
@@ -988,7 +1003,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
-        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel 1")
 
     it "errors and exits when using --parallel and --group but ciBuildId could not be generated", ->
       sinon.stub(ciProvider, "provider").returns(null)
@@ -1002,7 +1017,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
-        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel-group")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel-group 1")
 
     it "errors and exits when using --ci-build-id with no group or parallelization", ->
       cypress.start([
@@ -1013,7 +1028,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INCORRECT_CI_BUILD_ID_USAGE")
-        snapshotConsoleLogs("INCORRECT_CI_BUILD_ID_USAGE")
+        snapshotConsoleLogs("INCORRECT_CI_BUILD_ID_USAGE 1")
 
     it "errors and exits when using --ci-build-id without recording", ->
       cypress.start([
@@ -1022,7 +1037,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1")
 
     it "errors and exits when using --group without recording", ->
       cypress.start([
@@ -1031,7 +1046,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group 1")
 
     it "errors and exits when using --parallel without recording", ->
       cypress.start([
@@ -1040,7 +1055,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel 1")
 
     it "errors and exits when using --group and --parallel without recording", ->
       cypress.start([
@@ -1050,7 +1065,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group-parallel")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1")
 
     it "errors and exits when group name is not unique and explicitly passed ciBuildId", ->
       err = new Error()
@@ -1073,7 +1088,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
-        snapshotConsoleLogs("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
+        snapshotConsoleLogs("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1")
 
     it "errors and exits when parallel group params are different", ->
       sinon.stub(system, "info").returns({
@@ -1107,7 +1122,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
-        snapshotConsoleLogs("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1")
 
     it "errors and exits when parallel is not allowed", ->
       err = new Error()
@@ -1131,7 +1146,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_PARALLEL_DISALLOWED")
-        snapshotConsoleLogs("DASHBOARD_PARALLEL_DISALLOWED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_DISALLOWED 1")
 
     it "errors and exits when parallel is required", ->
       err = new Error()
@@ -1155,7 +1170,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_PARALLEL_REQUIRED")
-        snapshotConsoleLogs("DASHBOARD_PARALLEL_REQUIRED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_REQUIRED 1")
 
     it "errors and exits when run is already complete", ->
       err = new Error()
@@ -1178,7 +1193,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_ALREADY_COMPLETE")
-        snapshotConsoleLogs("DASHBOARD_ALREADY_COMPLETE")
+        snapshotConsoleLogs("DASHBOARD_ALREADY_COMPLETE 1")
 
     it "errors and exits when run is stale", ->
       err = new Error()
@@ -1202,7 +1217,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_STALE_RUN")
-        snapshotConsoleLogs("DASHBOARD_STALE_RUN")
+        snapshotConsoleLogs("DASHBOARD_STALE_RUN 1")
 
   context "--return-pkg", ->
     beforeEach ->
