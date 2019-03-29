@@ -99,7 +99,8 @@ defaultArgs = defaultArgs.concat([
 const getMaxExpectedRunTime = (testCase) => {
   // cy interceptor doesn't do http2, it'll always be slower
   if (testCase.disableHttp2 || (testCase.cyProxy && testCase.cyIntercept)) {
-    return 6000
+    // circle has faster Internet than the Cypress offices :(
+    return process.env.CI ? 3000 : 6000
   }
 
   return 1000
