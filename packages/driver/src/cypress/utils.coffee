@@ -3,6 +3,7 @@ _ = require("lodash")
 methods = require("methods")
 moment = require("moment")
 Promise = require("bluebird")
+codeFrameColumns = require("@babel/code-frame").codeFrameColumns
 
 $jquery = require("../dom/jquery")
 $Location = require("./location")
@@ -66,6 +67,10 @@ module.exports = {
     ## not be evaluated later
     stack = err.stack
 
+    if _.isObject(message)
+      err = @copyProperties(message, err)
+      message = message.message
+
     ## preserve message
     ## and toString
     msg = err.message
@@ -88,11 +93,14 @@ module.exports = {
     err2.name = obj.name
     err2.stack = obj.stack
 
-    for own prop, val of obj
-      if not err2[prop]
-        err2[prop] = val
+    return @copyProperties(obj, err2)
 
-    return err2
+  copyProperties: (originalObj, newObj) ->
+    for own prop, val of originalObj
+      if not newObj[prop]
+        newObj[prop] = val
+
+    return newObj
 
   throwErr: (err, options = {}) ->
     if _.isString(err)
@@ -131,9 +139,10 @@ module.exports = {
     err
 
   cypressErr: (err) ->
-    err = new Error(err)
-    err.name = "CypressError"
-    err
+    if _.isString(err)
+      err = new Error(err)
+      err.name = "CypressError"
+      err
 
   normalizeMessage: (message) ->
     ## normalize two or more new lines
@@ -175,6 +184,47 @@ module.exports = {
       }
 
     return @normalizeMessage(getMsg(options))
+
+  getErrorValue: (errPath) ->
+    if not err = @getObjValueByPath($errorMessages, errPath)
+      throw new Error "Error path '#{errPath}' does not exist"
+
+    return err
+
+  errByPath: (errPath, args) ->
+    err = @getErrorValue(errPath)
+
+    if _.isString(err) or _.isFunction(err)
+      message = @formatErrorMessage(err, args)
+      return @cypressErr(message)
+
+    if !err.message
+      throw new Error "Error message path '#{errPath}' does not have a message field"
+    return @cypressErr(err)
+
+  errMessageByPath: (errPath, args) ->
+    errMessage = @getErrorValue(errPath)
+
+    if _.isObject(errMessage) and not _.isFunction(errMessage)
+      if !errMessage.message?
+        throw new Error "Error message path '#{errPath}' does not have a message field"
+      errMessage = errMessage.message
+
+    @formatErrorMessage(errMessage, args)
+
+  getCodeFrame: (source, path, lineNumber, columnNumber) ->
+    location = { start: { line: lineNumber, column: columnNumber } }
+    options = {
+      highlightCode: true,
+      forceColor: true
+    }
+
+    return {
+      frame: codeFrameColumns(source, location, options),
+      path: path,
+      lineNumber: lineNumber,
+      columnNumber: columnNumber
+    }
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'

@@ -56,6 +56,8 @@ Because this error occurred during a 'before each' hook we are skipping the rema
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
+      at stack trace line
 
   2) s3a "before all" hook for "t8a":
      Error: s3a before hook failed

@@ -59,7 +59,8 @@ module.exports = {
     not_registered_without_available: "#{cmd('{{cmd}}')} could not find a registered alias for: `@{{displayName}}`.\nYou have not aliased anything yet."
 
   as:
-    empty_string: "#{cmd('as')} cannot be passed an empty string."
+    empty_string:
+      message: "#{cmd('as')} cannot be passed an empty string."
     invalid_type: "#{cmd('as')} can only accept a string."
     invalid_first_token: "`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol."
     reserved_word: "#{cmd('as')} cannot be aliased as: `{{alias}}`. This word is reserved."
@@ -819,15 +820,15 @@ module.exports = {
 
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
-    fromApp: """
+    fromApp:
+      message: """
       This error originated from your application code, not from Cypress.
 
       When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
       This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
-
-      https://on.cypress.io/uncaught-exception-from-application
-    """
+    """,
+      docs: "https://on.cypress.io/uncaught-exception-from-application"
 
     fromSpec: """
       This error originated from your test code, not from Cypress.

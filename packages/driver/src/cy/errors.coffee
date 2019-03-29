@@ -49,7 +49,7 @@ create = (state, config, log) ->
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
 
-    err = $utils.appendErrMsg(err, $utils.errMessageByPath(suffixMsg))
+    err = $utils.appendErrMsg(err, $utils.errByPath(suffixMsg))
 
     err.onFail = ->
       if l = current and current.getLastLog()

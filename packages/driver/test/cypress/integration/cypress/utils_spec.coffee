@@ -59,6 +59,22 @@ describe "driver/src/cypress/utils", ->
 
       expect(err2.stack).to.eq("Error: \n\nbar\n" + stack)
 
+    it "handles error messages as objects", ->
+      err = new Error("foo")
+
+      obj = {
+        message: "bar",
+        docs: "baz"
+      }
+
+      stack = err.stack.split("\n").slice(1).join("\n")
+
+      err2 = $utils.appendErrMsg(err, obj)
+      expect(err2.message).to.eq("foo\n\nbar")
+      expect(err2.docs).to.eq("baz")
+
+      expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
+
   context ".escapeErrorMarkdown", ->
     it "accepts non-strings", ->
       text = 3
@@ -67,3 +83,48 @@ describe "driver/src/cypress/utils", ->
     it "escapes backticks", ->
       md = "`foo`"
       expect($utils.escapeErrorMarkdown(md)).to.equal("\\`foo\\`")
+
+  context ".getCodeFrame", ->
+    it "returns a code frame with syntax highlighting", ->
+      path = "foo/bar/baz"
+      line = 5
+      column = 6
+      src = """
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script type="text/javascript">
+            foo.bar()
+          </script>
+        </body>
+        </html>
+      """
+
+      { frame, path, lineNumber, columnNumber } = $utils.getCodeFrame(src, path, line, column)
+
+      expect(frame).to.contain("foo")
+      expect(frame).to.contain("bar()")
+      expect(frame).to.contain("[0m")
+      expect(path).to.eq("foo/bar/baz")
+      expect(lineNumber).to.eq(5)
+      expect(columnNumber).to.eq(6)
+
+    ## TODO determine if we want more failure cases covered
+    it "fails gracefully", ->
+      path = "foo/bar/baz"
+      line = 100
+      column = 6
+      src = """
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script type="text/javascript">
+            foo.bar()
+          </script>
+        </body>
+        </html>
+      """
+
+      { frame } = $utils.getCodeFrame(src, path, line, column)
+
+      expect(frame).to.eq("")
