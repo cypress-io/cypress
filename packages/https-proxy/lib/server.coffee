@@ -96,7 +96,7 @@ class Server
     onConnect = ->
       socket.pipe(conn)
       conn.pipe(socket)
-      socket.emit("data", head)
+      conn.write(head)
 
       socket.resume()
 
@@ -130,7 +130,7 @@ class Server
       upstreamSock.setNoDelay(true)
       upstreamSock.pipe(socket)
       socket.pipe(upstreamSock)
-      socket.emit("data", head)
+      upstreamSock.write(head)
 
       socket.resume()
 
