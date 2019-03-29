@@ -2,8 +2,8 @@ import * as url from 'url'
 import * as rp from 'request-promise'
 import { agent, connect } from '@packages/networking'
 
-export function ensureUrl (urlStr: string) {
-  // takes a urlStr and verifies the hostname + port
+export function isListening (urlStr: string) {
+  // takes a urlStr and verifies the hostname + port is listening
   let { hostname, protocol, port } = url.parse(urlStr)
 
   if (port == null) {

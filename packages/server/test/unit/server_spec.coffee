@@ -148,7 +148,7 @@ describe "lib/server", ->
         )
 
     it "resolves with warning if cannot connect to baseUrl", ->
-      sinon.stub(ensureUrl, "ensureUrl").rejects()
+      sinon.stub(ensureUrl, "isListening").rejects()
       @server.createServer(@app, {port: @port, baseUrl: "http://localhost:#{@port}"})
       .spread (port, warning) =>
         expect(warning.type).to.eq("CANNOT_CONNECT_BASE_URL_WARNING")

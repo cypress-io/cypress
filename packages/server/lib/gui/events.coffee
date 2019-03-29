@@ -271,7 +271,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "ping:api:server"
       apiUrl = konfig("api_url")
-      ensureUrl.ensureUrl(apiUrl)
+      ensureUrl.isListening(apiUrl)
       .then(send)
       .catch (err) ->
         ## if it's an aggegrate error, just send the first one

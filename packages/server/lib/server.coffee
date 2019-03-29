@@ -233,7 +233,7 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
-            ensureUrl.ensureUrl(baseUrl)
+            ensureUrl.isListening(baseUrl)
             .return(null)
             .catch (err) =>
               if config.isTextTerminal
