@@ -136,7 +136,7 @@ defaultArgs = defaultArgs.concat([
   '--no-sandbox', // allows us to run as root, for CI
 ])
 
-const getExpectedRunTime = (testCase) => {
+const getMaxExpectedRunTime = (testCase) => {
   // cy interceptor doesn't do http2, it'll always be slower
   if (testCase.disableHttp2 || (testCase.cyProxy && testCase.cyIntercept)) {
     return 6000
@@ -225,11 +225,10 @@ describe('Proxy Performance', () => {
 
     t.addRows(TEST_CASES)
     t.printTable()
-    process.exit(0)
   })
 
   TEST_CASES.map((testCase) => {
-    it(`${testCase.name} loads 1000 images in less than ${getExpectedRunTime(testCase)}ms`, function () {
+    it(`${testCase.name} loads 1000 images in less than ${getMaxExpectedRunTime(testCase)}ms`, function () {
       debug('Current test: ', testCase.name)
 
       // configure command line args
@@ -339,9 +338,7 @@ describe('Proxy Performance', () => {
 
             const runTime = Number(testCase['Total'].replace('ms', ''))
 
-            expect(runTime).to.be.lessThan(getExpectedRunTime(testCase))
-
-            return Promise.resolve()
+            expect(runTime).to.be.lessThan(getMaxExpectedRunTime(testCase))
           })
         })
       }
