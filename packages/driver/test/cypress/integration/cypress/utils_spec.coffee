@@ -64,14 +64,14 @@ describe "driver/src/cypress/utils", ->
 
       obj = {
         message: "bar",
-        docs: "baz"
+        docsUrl: "baz"
       }
 
       stack = err.stack.split("\n").slice(1).join("\n")
 
       err2 = $utils.appendErrMsg(err, obj)
       expect(err2.message).to.eq("foo\n\nbar")
-      expect(err2.docs).to.eq("baz")
+      expect(err2.docsUrl).to.eq("baz")
 
       expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
 

@@ -828,7 +828,7 @@ module.exports = {
 
       This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
     """,
-      docs: "https://on.cypress.io/uncaught-exception-from-application"
+      docsUrl: "https://on.cypress.io/uncaught-exception-from-application"
 
     fromSpec: """
       This error originated from your test code, not from Cypress.
