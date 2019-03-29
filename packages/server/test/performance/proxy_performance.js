@@ -286,6 +286,22 @@ describe('Proxy Performance', () => {
             URL_UNDER_TEST,
           ], {
             port: cdpPort,
+            // disable SSL verification on older Chrome versions, copied from the HAR CLI
+            // https://github.com/cyrus-and/chrome-har-capturer/blob/587550508bddc23b7f4b4328c158322be4749298/bin/cli.js#L60
+            preHook: (_, cdp) => {
+              const { Security } = cdp
+
+              return Security.enable().then(() => {
+                return Security.setOverrideCertificateErrors({ override: true })
+              })
+              .then(() => {
+                return Security.certificateError(({ eventId }) => {
+                  debug('EVENT ID', eventId)
+
+                  return Security.handleCertificateError({ eventId, action: 'continue' })
+                })
+              })
+            },
             // wait til all data is done before finishing
             // https://github.com/cyrus-and/chrome-har-capturer/issues/59
             postHook: (_, cdp) => {
