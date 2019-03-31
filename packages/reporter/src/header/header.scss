@@ -87,6 +87,18 @@
       }
     }
 
+    /* Used to provide additional context for screen readers */
+    .visually-hidden { 
+      border: 0;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+
     .duration {
       border-left: 1px solid #ddd;
       border-right: 1px solid #ddd;
