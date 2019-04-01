@@ -2,6 +2,7 @@ const cp = require('child_process')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const _ = require('lodash')
 const { it, after, before, beforeEach, describe } = require('mocha')
 const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
@@ -18,7 +19,10 @@ const Server = require('../../lib/server')
 const { _getArgs } = require('../../lib/browsers/chrome')
 
 const CHROME_PATH = 'google-chrome'
-const URL_UNDER_TEST = 'https://flotwig.github.io/cypress-fetch-page/index1000.html'
+const URLS_UNDER_TEST = [
+  'https://test-page-speed.cypress.io/index1000.html',
+  'http://test-page-speed.cypress.io/index1000.html',
+]
 
 const start = (new Date()) / 1000
 
@@ -179,132 +183,138 @@ describe('Proxy Performance', () => {
     })
   })
 
-  after(() => {
-    debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
-    // console.table has forsaken us :(
-    const t = new Table()
+  URLS_UNDER_TEST.map((urlUnderTest) => {
+    const testCases = _.cloneDeep(TEST_CASES)
 
-    t.addRows(TEST_CASES)
-    t.printTable()
-  })
+    describe(urlUnderTest, function () {
+      testCases.map((testCase) => {
+        it(`${testCase.name} loads 1000 images in less than ${getMaxExpectedRunTime(testCase)}ms`, function () {
+          debug('Current test: ', testCase.name)
 
-  TEST_CASES.map((testCase) => {
-    it(`${testCase.name} loads 1000 images in less than ${getMaxExpectedRunTime(testCase)}ms`, function () {
-      debug('Current test: ', testCase.name)
+          // configure command line args
+          const cdpPort = CDP_PORT + Math.round(Math.random() * 10000)
 
-      // configure command line args
-      const cdpPort = CDP_PORT + Math.round(Math.random() * 10000)
+          let args = defaultArgs.concat([
+            `--remote-debugging-port=${cdpPort}`,
+            `--user-data-dir=${fs.mkdtempSync(path.join(os.tmpdir(), 'cy-perf-'))}`,
+          ])
 
-      let args = defaultArgs.concat([
-        `--remote-debugging-port=${cdpPort}`,
-        `--user-data-dir=${fs.mkdtempSync(path.join(os.tmpdir(), 'cy-perf-'))}`,
-      ])
+          if (testCase.disableHttp2) {
+            args.push('--disable-http2')
+          }
 
-      if (testCase.disableHttp2) {
-        args.push('--disable-http2')
-      }
+          if (testCase.cyProxy) {
+            args.push(`--proxy-server=http://localhost:${CY_PROXY_PORT}`)
+          }
 
-      if (testCase.cyProxy) {
-        args.push(`--proxy-server=http://localhost:${CY_PROXY_PORT}`)
-      }
+          if (testCase.upstreamProxy && !testCase.cyProxy) {
+            args.push(`--proxy-server=http://localhost:${PROXY_PORT}`)
+          } else if (testCase.httpsUpstreamProxy && !testCase.cyProxy) {
+            args.push(`--proxy-server=https://localhost:${HTTPS_PROXY_PORT}`)
+          }
 
-      if (testCase.upstreamProxy && !testCase.cyProxy) {
-        args.push(`--proxy-server=http://localhost:${PROXY_PORT}`)
-      } else if (testCase.httpsUpstreamProxy && !testCase.cyProxy) {
-        args.push(`--proxy-server=https://localhost:${HTTPS_PROXY_PORT}`)
-      }
+          if (testCase.upstreamProxy && testCase.cyProxy) {
+            process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://localhost:${PROXY_PORT}`
+          } else if (testCase.httpsUpstreamProxy && testCase.cyProxy) {
+            process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `https://localhost:${HTTPS_PROXY_PORT}`
+          } else {
+            delete process.env.HTTPS_PROXY
+            delete process.env.HTTP_PROXY
+          }
 
-      if (testCase.upstreamProxy && testCase.cyProxy) {
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://localhost:${PROXY_PORT}`
-      } else if (testCase.httpsUpstreamProxy && testCase.cyProxy) {
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `https://localhost:${HTTPS_PROXY_PORT}`
-      } else {
-        delete process.env.HTTPS_PROXY
-        delete process.env.HTTP_PROXY
-      }
+          if (testCase.cyIntercept) {
+            cyServer._onDomainSet(urlUnderTest)
+          } else {
+            cyServer._onDomainSet('<root>')
+          }
 
-      if (testCase.cyIntercept) {
-        cyServer._onDomainSet(URL_UNDER_TEST)
-      } else {
-        cyServer._onDomainSet('<root>')
-      }
+          let cmd = CHROME_PATH
 
-      let cmd = CHROME_PATH
+          debug('Launching Chrome: ', cmd, args.join(' '))
 
-      debug('Launching Chrome: ', cmd, args.join(' '))
+          const proc = cp.spawn(cmd, args, {
+            stdio: 'ignore',
+          })
 
-      const proc = cp.spawn(cmd, args, {
-        stdio: 'ignore',
+          const runHar = () => {
+            // wait for Chrome to open, then start capturing
+            return Promise.delay(500).then(() => {
+              debug('Trying to connect to Chrome...')
+
+              const harCapturer = HarCapturer.run([
+                urlUnderTest,
+              ], {
+                port: cdpPort,
+                // disable SSL verification on older Chrome versions, copied from the HAR CLI
+                // https://github.com/cyrus-and/chrome-har-capturer/blob/587550508bddc23b7f4b4328c158322be4749298/bin/cli.js#L60
+                preHook: (_, cdp) => {
+                  const { Security } = cdp
+
+                  return Security.enable().then(() => {
+                    return Security.setOverrideCertificateErrors({ override: true })
+                  })
+                  .then(() => {
+                    return Security.certificateError(({ eventId }) => {
+                      debug('EVENT ID', eventId)
+
+                      return Security.handleCertificateError({ eventId, action: 'continue' })
+                    })
+                  })
+                },
+                // wait til all data is done before finishing
+                // https://github.com/cyrus-and/chrome-har-capturer/issues/59
+                postHook: (_, cdp) => {
+                  let timeout
+
+                  return new Promise((resolve) => {
+                    cdp.on('event', (message) => {
+                      if (message.method === 'Network.dataReceived') {
+                        // reset timer
+                        clearTimeout(timeout)
+                        timeout = setTimeout(resolve, 1000)
+                      }
+                    })
+                  })
+                },
+              })
+
+              return new Promise((resolve, reject) => {
+                harCapturer.on('fail', (_, err) => {
+                  return reject(err)
+                })
+
+                harCapturer.on('har', resolve)
+              })
+              .catch((err) => {
+                // sometimes chrome takes surprisingly long, just reconn
+                debug('Chrome connection failed: ', err)
+
+                return runHar()
+              })
+              .then((har) => {
+                proc.kill(9)
+                debug('Received HAR from Chrome')
+                getResultsFromHar(har, testCase)
+
+                const runTime = Number(testCase['Total'].replace('ms', ''))
+
+                expect(runTime).to.be.lessThan(getMaxExpectedRunTime(testCase))
+              })
+            })
+          }
+
+          return runHar()
+        })
       })
 
-      const runHar = () => {
-        // wait for Chrome to open, then start capturing
-        return Promise.delay(500).then(() => {
-          debug('Trying to connect to Chrome...')
+      after(() => {
+        debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
+        // console.table has forsaken us :(
+        const t = new Table()
 
-          const harCapturer = HarCapturer.run([
-            URL_UNDER_TEST,
-          ], {
-            port: cdpPort,
-            // disable SSL verification on older Chrome versions, copied from the HAR CLI
-            // https://github.com/cyrus-and/chrome-har-capturer/blob/587550508bddc23b7f4b4328c158322be4749298/bin/cli.js#L60
-            preHook: (_, cdp) => {
-              const { Security } = cdp
-
-              return Security.enable().then(() => {
-                return Security.setOverrideCertificateErrors({ override: true })
-              })
-              .then(() => {
-                return Security.certificateError(({ eventId }) => {
-                  debug('EVENT ID', eventId)
-
-                  return Security.handleCertificateError({ eventId, action: 'continue' })
-                })
-              })
-            },
-            // wait til all data is done before finishing
-            // https://github.com/cyrus-and/chrome-har-capturer/issues/59
-            postHook: (_, cdp) => {
-              let timeout
-
-              return new Promise((resolve) => {
-                cdp.on('event', (message) => {
-                  if (message.method === 'Network.dataReceived') {
-                    // reset timer
-                    clearTimeout(timeout)
-                    timeout = setTimeout(resolve, 1000)
-                  }
-                })
-              })
-            },
-          })
-
-          return new Promise((resolve, reject) => {
-            harCapturer.on('fail', (_, err) => {
-              return reject(err)
-            })
-
-            harCapturer.on('har', resolve)
-          })
-          .catch((err) => {
-            // sometimes chrome takes surprisingly long, just reconn
-            debug('Chrome connection failed: ', err)
-
-            return runHar()
-          })
-          .then((har) => {
-            proc.kill(9)
-            debug('Received HAR from Chrome')
-            getResultsFromHar(har, testCase)
-
-            const runTime = Number(testCase['Total'].replace('ms', ''))
-
-            expect(runTime).to.be.lessThan(getMaxExpectedRunTime(testCase))
-          })
-        })
-      }
-
-      return runHar()
+        t.addRows(testCases)
+        t.printTable()
+      })
     })
   })
 })
