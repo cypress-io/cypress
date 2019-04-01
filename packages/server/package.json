@@ -68,7 +68,7 @@
     "console-table-printer": "1.0.0-beta12",
     "cors": "2.8.5",
     "coveralls": "2.13.3",
-    "debugging-proxy": "1.6.0",
+    "@cypress/debugging-proxy": "1.6.0",
     "electron-osx-sign": "0.4.11",
     "eol": "0.9.1",
     "eventsource": "1.0.7",

@@ -4,7 +4,7 @@ import * as net from 'net'
 import * as tls from 'tls'
 import * as url from 'url'
 import * as chai from 'chai'
-import DebuggingProxy = require('debugging-proxy')
+import DebuggingProxy = require('@cypress/debugging-proxy')
 import * as Promise from 'bluebird'
 import * as request from 'request-promise'
 import * as sinon from 'sinon'
