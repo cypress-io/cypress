@@ -14,6 +14,7 @@ import Hooks from '../hooks/hooks'
 import Agents from '../agents/agents'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
+import { onEnterOrSpace } from '../../dist-test/lib/util'
 
 const NoCommands = observer(() => (
   <ul className='hooks-container'>
@@ -70,8 +71,17 @@ class Test extends Component {
         style={{ paddingLeft: indent(model.level) }}
       >
         <div className='runnable-content-region'>
-          <i className='runnable-state fa'></i>
-          <span className='runnable-title'>{model.title}</span>
+          <i aria-hidden="true" className='runnable-state fa'></i>
+          <span
+            aria-expanded={this._shouldBeOpen() === true}
+            className='runnable-title'
+            onKeyPress={onEnterOrSpace(this._toggleOpen)}
+            role='button'
+            tabIndex='0'
+          >
+            {model.title}
+            <span className="visually-hidden">{model.state}</span>
+          </span>
           <div className='runnable-controls'>
             <Tooltip placement='top' title='One or more commands failed'>
               <i className='fa fa-warning'></i>
