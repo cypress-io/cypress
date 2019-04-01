@@ -1413,7 +1413,7 @@ describe "src/cy/commands/navigation", ->
 
             The `content-type` of the response we received from this local file was:
 
-              > application/json
+              > `application/json`
 
             This was considered a failure because responses must have `content-type: 'text/html'`
 
