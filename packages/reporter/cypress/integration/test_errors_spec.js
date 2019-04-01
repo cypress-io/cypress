@@ -38,6 +38,7 @@ describe('test errors', function () {
             path: 'users.spec.js',
             line: 5,
             column: 6,
+            language: 'javascript',
             src: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\')\n.then(() => { })',
           },
         ],

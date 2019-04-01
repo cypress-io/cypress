@@ -3,6 +3,7 @@ _ = require("lodash")
 methods = require("methods")
 moment = require("moment")
 Promise = require("bluebird")
+codeFrameColumns = require("@babel/code-frame").codeFrameColumns
 
 $jquery = require("../dom/jquery")
 $Location = require("./location")
@@ -58,13 +59,24 @@ module.exports = {
     keys = _.keys(casesObj)
     throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
 
-  appendErrMsg: (err, message) ->
+  ## TODO: rename this method because 
+  ## it does more than append now
+  appendErrMsg: (err, messageOrObj) ->
     ## preserve stack
     ## this is the critical part
     ## because the browser has a cached
     ## dynamic stack getter that will
     ## not be evaluated later
     stack = err.stack
+
+    message = messageOrObj
+
+    ## if our message is an obj w/ multiple props...
+    if _.isObject(messageOrObj)
+      ## then extract the actual 'message' (the string)
+      ## and merge the other props into the existing err
+      _.extend(err, _.omit(messageOrObj, 'message'))
+      message = messageOrObj.message
 
     ## preserve message
     ## and toString
@@ -117,6 +129,7 @@ module.exports = {
     args = _.extend(options.args, {includeMdMessage: true})
 
     try
+      ## TODO: errByPath?
       msg = @errMessageByPath errPath, args
       err = @cypressErr msg.message
       err.mdMessage = msg.mdMessage
@@ -145,17 +158,20 @@ module.exports = {
     .join('\n\n')
     .value()
 
-  errMessageByPath: (errPath, options) ->
-    if not errMessage = @getObjValueByPath($errorMessages, errPath)
-      throw new Error "Error message path '#{errPath}' does not exist"
-
+  formatErrMessage: (errMessage, options) -> 
     getMsg = (args) ->
       if _.isFunction(errMessage)
-        errMessage(args)
-      else
-        _.reduce args, (message, argValue, argKey) ->
-          message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
-        , errMessage
+        return errMessage(args)
+
+      if _.isObject(errMessage)
+        errMessage = errMessage.message
+
+        if not errMessage
+          throw new Error "Error message path: '#{errPath}' does not have a 'message' property"
+        
+      _.reduce args, (message, argValue, argKey) ->
+        message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
+      , errMessage
 
     ## Return obj with message and message with escaped markdown
     if options?.includeMdMessage
@@ -175,6 +191,45 @@ module.exports = {
       }
 
     return @normalizeMessage(getMsg(options))
+
+  errObjByPath: (errPath, options) ->
+    if not errObjOrStr = @getObjValueByPath($errorMessages, errPath)
+      throw new Error "Error message path: '#{errPath}' does not exist"
+    
+    errObj = errObjOrStr
+    
+    if _.isString(errObjOrStr)
+      ## normalize into an object if 
+      ## given a string
+      errObj = {
+        message: errObjOrStr
+      }
+    
+    errObj.message = @formatErrMessage(errObj.message, options)
+    
+    return errObj
+
+  errMessageByPath: (errPath, options) ->
+    if not errMessage = @getObjValueByPath($errorMessages, errPath)
+      throw new Error "Error message path: '#{errPath}' does not exist"
+
+    @formatErrMessage(errMessage, options)
+
+  ## TODO: This isn't in use for the reporter, 
+  ## but we may want this for stdout in run mode
+  getCodeFrame: (source, path, lineNumber, columnNumber) ->
+    location = { start: { line: lineNumber, column: columnNumber } }
+    options = {
+      highlightCode: true,
+      forceColor: true
+    }
+
+    return {
+      frame: codeFrameColumns(source, location, options),
+      path: path,
+      lineNumber: lineNumber,
+      columnNumber: columnNumber
+    }
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'

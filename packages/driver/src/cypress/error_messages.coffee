@@ -72,7 +72,7 @@ module.exports = {
 
   chai:
     length_invalid_argument: "You must provide a valid number to a `length` assertion. You passed: `{{length}}`"
-    match_invalid_argument: "'match' requires its argument be a `RegExp`. You passed: `{{regExp}}`"
+    match_invalid_argument: "`match` requires its argument be a `RegExp`. You passed: `{{regExp}}`"
     invalid_jquery_obj: (obj) ->
       """
         You attempted to make a chai-jQuery assertion on an object that is neither a DOM object or a jQuery object.
@@ -819,15 +819,15 @@ module.exports = {
 
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
-    fromApp: """
-      This error originated from your application code, not from Cypress.
+    fromApp: 
+      message: """
+        This error originated from your application code, not from Cypress.
 
-      When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+        When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-      This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
-
-      https://on.cypress.io/uncaught-exception-from-application
-    """
+        This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
+      """
+      docsUrl: "https://on.cypress.io/uncaught-exception-from-application"
 
     fromSpec: """
       This error originated from your test code, not from Cypress.
