@@ -378,7 +378,7 @@ describe "src/cy/commands/assertions", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(3)
-          expect(err.message).to.eq "You must provide a valid number to a length assertion. You passed: `foo`"
+          expect(err.message).to.eq "You must provide a valid number to a `length` assertion. You passed: `foo`"
           expect(lastLog.get("name")).to.eq("should")
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
