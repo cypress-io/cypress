@@ -102,12 +102,12 @@ describe "src/cypress/screenshot", ->
       it "throws if screenshotOnRunFailure is not a boolean", ->
         expect =>
           Screenshot.defaults({ screenshotOnRunFailure: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() `screenshotOnRunFailure` option must be a boolean. You passed: `foo`")
+        .to.throw("`Cypress.Screenshot.defaults()` `screenshotOnRunFailure` option must be a boolean. You passed: `foo`")
 
       it "throws if blackout is not an array", ->
         expect =>
           Screenshot.defaults({ blackout: "foo" })
-        .to.throw("Cypress.Screenshot.defaults() `blackout` option must be an array of strings. You passed: `foo`")
+        .to.throw("`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `foo`")
 
       it "throws if blackout is not an array of strings", ->
         expect =>
@@ -122,12 +122,12 @@ describe "src/cypress/screenshot", ->
       it "throws if clip is lacking proper keys", ->
         expect =>
           Screenshot.defaults({ clip: { x: 5 } })
-        .to.throw("Cypress.Screenshot.defaults() `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`")
+        .to.throw("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`")
 
       it "throws if clip has extraneous keys", ->
         expect =>
           Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
-        .to.throw("Cypress.Screenshot.defaults() `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`")
+        .to.throw("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`")
 
       it "throws if clip has non-number values", ->
         expect =>
