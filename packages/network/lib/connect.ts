@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
-import * as dns from 'dns'
-import * as net from 'net'
+import dns from 'dns'
+import net from 'net'
 
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
