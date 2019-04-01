@@ -1,7 +1,7 @@
 import * as linuxHelper from '../../../lib/linux'
 import { log } from '../../log'
 import { detect, detectByPath } from '../../../lib/detect'
-import execa = require('execa')
+import execa from 'execa'
 import sinon from 'sinon'
 
 const goalBrowsers = [

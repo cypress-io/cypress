@@ -8,7 +8,7 @@ import {
   isResponseStatusCode200,
   _regenerateRequestHead
 } from '../../lib/agent'
-import DebuggingProxy = require('debugging-proxy')
+import DebuggingProxy from 'debugging-proxy'
 import http from 'http'
 import https from 'https'
 import Io from '@packages/socket'
