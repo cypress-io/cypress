@@ -18,8 +18,8 @@
     "lint-js": "bin-up eslint --fix *.js",
     "lint-ts": "tslint --project . --fix --format stylish lib/*.ts lib/**/*.ts",
     "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts",
-    "build": "tsc",
-    "build-js": "tsc",
+    "build": "bin-up tsc --project .",
+    "build-js": "bin-up tsc --project .",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
   "files": [
@@ -33,8 +33,7 @@
     "sinon": "2.4.1",
     "sinon-chai": "3.3.0",
     "tslint": "5.12.1",
-    "tslint-config-standard": "7.1.0",
-    "typescript": "2.9.2"
+    "tslint-config-standard": "7.1.0"
   },
   "dependencies": {
     "bluebird": "3.5.3",
