@@ -7,7 +7,12 @@ import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import { log } from './log'
-import { Browser, FoundBrowser, NotDetectedAtPathError, NotInstalledError } from './types'
+import {
+  Browser,
+  FoundBrowser,
+  NotDetectedAtPathError,
+  NotInstalledError
+} from './types'
 import * as windowsHelper from './windows'
 
 const setMajorVersion = (browser: FoundBrowser) => {

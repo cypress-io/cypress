@@ -1,4 +1,4 @@
-import execa from 'execa'
+import execa = require('execa')
 import { pathExists } from 'fs-extra'
 import { homedir } from 'os'
 import { join, normalize } from 'path'
