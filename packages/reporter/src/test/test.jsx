@@ -6,7 +6,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
 import events from '../lib/events'
-import { indent } from '../lib/util'
+import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
 import scroller from '../lib/scroller'
 
@@ -14,7 +14,6 @@ import Hooks from '../hooks/hooks'
 import Agents from '../agents/agents'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
-import { onEnterOrSpace } from '../../dist-test/lib/util'
 
 const NoCommands = observer(() => (
   <ul className='hooks-container'>
