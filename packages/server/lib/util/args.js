@@ -143,7 +143,9 @@ const sanitizeAndConvertNestedArgs = function (str) {
   .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
   .replace(nestedArraysInSquareBracketsRe, commasToPipes)
   .split(',')
-  .map((pair) => pair.split(everythingAfterFirstEqualRe))
+  .map((pair) => {
+    return pair.split(everythingAfterFirstEqualRe)
+  })
   .fromPairs()
   .mapValues(JSONOrCoerce)
   .value()

@@ -4,6 +4,9 @@
   "private": true,
   "main": "index.js",
   "types": "../ts/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "pretest": "npm run check-deps-pre && npm run lint",
     "test": "npm run unit",
@@ -22,9 +25,6 @@
     "build-js": "bin-up tsc --project .",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
   },
-  "files": [
-    "lib"
-  ],
   "devDependencies": {
     "bin-up": "1.1.0",
     "chai": "3.5.0",
