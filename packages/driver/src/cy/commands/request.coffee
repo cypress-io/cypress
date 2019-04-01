@@ -27,14 +27,23 @@ REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
-hasContentTypeFormUrlEncoded = (headers) ->
-  'content-type' == _.toLower(_.findKey(headers, (v) -> v == 'application/x-www-form-urlencoded'))
+hasFormUrlEncodedContentTypeHeader = (headers) ->
+  header = _.findKey(headers, _.matches("application/x-www-form-urlencoded"))
+
+  header and _.toLower(header) is "content-type"
 
 isValidJsonObj = (body) ->
   _.isObject(body) and not _.isFunction(body)
 
 whichAreOptional = (val, key) ->
   val is null and key in OPTIONAL_OPTS
+
+needsFormSpecified = (options = {}) ->
+  { body, json, headers } = options
+
+  ## json isn't true, and we have an object body and the user
+  ## specified that the content-type header is x-www-form-urlencoded
+  json isnt true and _.isObject(body) and hasFormUrlEncodedContentTypeHeader(headers)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   # Cypress.extend
@@ -116,9 +125,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not $Location.isFullyQualifiedUrl(options.url)
         $utils.throwErrByPath("request.url_invalid")
 
-      ## if a user has `x-www-form-urlencoded` content-type set with an object body, they meant to do this
+      ## if a user has `x-www-form-urlencoded` content-type set
+      ## with an object body, they meant to add 'form: true'
+      ## so we are nice and do it for them :)
       ## https://github.com/cypress-io/cypress/issues/2923
-      if _.isObject(options.body) and not options.json and hasContentTypeFormUrlEncoded(options.headers)
+      if needsFormSpecified(options)
         options.form = true
 
       ## only set json to true if form isnt true

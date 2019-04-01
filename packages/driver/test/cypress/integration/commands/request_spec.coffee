@@ -324,7 +324,8 @@ describe "src/cy/commands/request", ->
           cy.request({
             url: "http://localhost:8888"
             headers: {
-              "Content-Type": "application/x-www-form-urlencoded"
+              "a": "b"
+              "Content-type": "application/x-www-form-urlencoded"
             }
             body: { foo: "bar" }
           }).then ->
@@ -335,7 +336,8 @@ describe "src/cy/commands/request", ->
               form: true
               followRedirect: true
               headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "a": "b"
+                "Content-type": "application/x-www-form-urlencoded"
               }
               body: { foo: "bar" }
               timeout: RESPONSE_TIMEOUT
