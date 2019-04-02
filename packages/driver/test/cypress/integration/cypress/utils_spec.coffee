@@ -19,6 +19,30 @@ describe "driver/src/cypress/utils", ->
       for key, val of obj
         expect(err[key], "key: #{key}").to.eq(obj[key])
 
+  context ".throwErrByPath", ->
+    it "throws err", ->
+      fn = ->
+        $utils.throwErrByPath('dom.animating', { args: {
+          cmd: 'click',
+          node: '<span></span>'
+        }})
+
+      expect(fn).to.throw()
+
+  context ".errObjByPath", ->
+    it "returns obj when err is object", ->
+      msg = $utils.errMessageByPath('uncaught.fromApp')
+      expect(msg).to.be.an.object
+
+    it "returns obj when err is string", ->
+      msg = $utils.errMessageByPath('chai.match_invalid_argument', {
+        regExp: 'foo'
+      })
+
+      expect(msg).to.be.an.object
+
+    it "returns obj when err is function"
+
   context ".errMessageByPath", ->
     it "returns the message when err is object", ->
       msg = $utils.errMessageByPath('uncaught.fromApp')
@@ -32,6 +56,16 @@ describe "driver/src/cypress/utils", ->
       expect(msg).to.eq("`match` requires its argument be a `RegExp`. You passed: `foo`")
 
     it "returns the message when err is function"
+
+  context ".formatErrMessage", ->
+    it "returns obj with mdMessage when includeMdMessage", ->
+        err = $utils.formatErrMessage("`foo`\n\nbar", {includeMdMessage: true})
+        expect(err.message).to.eq("`foo`\n\nbar")
+        expect(err.mdMessage).to.eq("`foo`\n\nbar")
+
+    it "returns string msg when no includeMdMessage", ->
+      err = $utils.formatErrMessage("`foo`\n\nbar")
+      expect(err).to.eq("`foo`\n\nbar")
 
   context ".appendErrMsg", ->
     it "appends error message", ->
