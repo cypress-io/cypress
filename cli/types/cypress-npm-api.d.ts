@@ -197,7 +197,7 @@ declare module 'cypress' {
      * The distance in pixels an element must exceed over
      * time to be considered animating.
      */
-    animationDistanceThreshold: number,
+    animationDistanceThreshold: number
     /**
      * Whether to wait for elements to finish animating before executing commands.
      */
@@ -207,46 +207,151 @@ declare module 'cypress' {
   /**
    * All options that one can pass to "cypress.run"
    * @see https://on.cypress.io/module-api#cypress-run
+   * @example
+    ```
+    const cypress = require('cypress')
+    cypress.run({
+      reporter: 'junit',
+      browser: 'chrome',
+      config: {
+        baseUrl: 'http://localhost:8080',
+        chromeWebSecurity: false,
+      },
+      env: {
+        foo: 'bar',
+        baz: 'quux',
+      }
+    })
+    ```
    */
   interface CypressRunOptions {
+    /**
+     * Specify different browser to run tests in, either by name or by filesystem path
+    */
     browser: string
+    /**
+     * Specify a unique identifier for a run to enable grouping or parallelization
+     */
     ciBuildId: string
+    /**
+     * Specify configuration
+     */
     config: Partial<CypressConfiguration>
+    /**
+     * Specify environment variables
+     */
     env: object
+    /**
+     * Group recorded tests together under a single run name
+     */
     group: string
+    /**
+     * Display the Electron browser instead of running headlessly
+     */
     headed: boolean
+    /**
+     * Specify your secret record key
+     */
     key: string
+    /**
+     * Keep Cypress open after all tests run
+     */
     noExit: boolean
+    /**
+     * Run recorded specs in parallel across multiple machines
+     */
     parallel: boolean
+    /**
+     * Override default port
+     */
     port: number
+    /**
+     * Path to a specific project
+     */
     project: string
+    /**
+     * Whether to record the test run
+     */
     record: boolean
+    /**
+     * Specify a mocha reporter
+     */
     reporter: string
+    /**
+     * Specify mocha reporter options
+     */
     reporterOptions: any
+    /**
+     * Specify the specs to run
+     */
     spec: string
   }
 
   /**
    * All options that one can pass to "cypress.open"
    * @see https://on.cypress.io/module-api#cypress-open
+   * @example
+    ```
+    const cypress = require('cypress')
+    cypress.open({
+      env: {
+        username: 'Joe Doe',
+        email: 'joe@acme.co'
+      },
+      project: '~/demos/my-project'
+    })
+    ```
    */
   interface CypressOpenOptions {
+    /**
+     * Specify a filesystem path to a custom browser
+     */
     browser: string
+    /**
+     * Specify configuration
+     */
     config: Partial<CypressConfiguration>
+    /**
+     * Open Cypress in detached mode
+     */
     detached: boolean
+    /**
+     * Specify environment variables
+     */
     env: object
+    /**
+     * Run in global mode
+     */
     global: boolean
+    /**
+     * Override default port
+     */
     port: number
+    /**
+     * Path to a specific project
+     */
     project: string
   }
 
   type dateTimeISO = string
 
+  /**
+   * Results returned by the test run.
+   */
   interface CypressRunResult {
     startedTestsAt: dateTimeISO
     endedTestsAt: dateTimeISO
   }
 
+  /**
+   * Cypress NPM module interface.
+   * @see https://on.cypress.io/module-api
+   * @example
+    ```
+    const cypress = require('cypress')
+    cypress.run().then(results => ...)
+    ```
+  */
   interface CypressNpmApi {
     /**
      * Execute a headless Cypress test run.
@@ -271,6 +376,7 @@ declare module 'cypress' {
     open(options?: Partial<CypressOpenOptions>): Promise<void>
   }
 
+  // export Cypress NPM module interface
   const cypress: CypressNpmApi
   export default cypress
 }
