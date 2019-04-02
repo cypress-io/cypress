@@ -14,6 +14,7 @@ describe('HelloX component', () => {
     cy.mount(<HelloX name='🌎' />)
     cy.contains('Hello 🌎!')
     cy.percySnapshot()
+    cy.wait(1000)
   })
 })
 
