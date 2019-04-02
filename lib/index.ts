@@ -31,10 +31,16 @@ Cypress.Commands.add('injectReactDOM', () => {
     // otherwise the component will NOT be able to dispatch any events
     // when it runs the second time
     // https://github.com/bahmutov/cypress-react-unit-test/issues/3
-    var html = `<body>
-          <div id="cypress-jsdom"></div>
-          ${scripts}
-        </body>`
+
+    var html = `
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body>
+      <div id="cypress-jsdom"></div>
+      ${scripts}
+    </body>`
+
     const document = cy.state('document')
     document.write(html)
     document.close()
