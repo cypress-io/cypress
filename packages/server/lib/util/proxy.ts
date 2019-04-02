@@ -2,6 +2,15 @@ import os from 'os'
 import getWindowsProxy from '@cypress/get-windows-proxy'
 
 export = {
+  _copyLowercaseEnvToUppercase: function(name: string) {
+    // uppercase environment variables are used throughout Cypress and dependencies
+    // but users sometimes supply these vars as lowercase
+    const lowerEnv = process.env[name.toLowerCase()]
+    if (lowerEnv) {
+      process.env[name.toUpperCase()] = lowerEnv
+    }
+  },
+
   _getWindowsProxy: function () {
     return getWindowsProxy()
   },
@@ -21,6 +30,8 @@ export = {
 
   // @ts-ignore: Not all code paths return a value
   loadSystemProxySettings: function () {
+    ['NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY'].forEach(this._copyLowercaseEnvToUppercase)
+
     if (process.env.HTTP_PROXY !== undefined) {
       this._normalizeEnvironmentProxy()
 

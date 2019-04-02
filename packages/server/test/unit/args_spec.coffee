@@ -307,6 +307,10 @@ describe "lib/util/args", ->
       delete process.env.HTTP_PROXY
       delete process.env.HTTPS_PROXY
       delete process.env.NO_PROXY
+      delete process.env.http_proxy
+      delete process.env.https_proxy
+      delete process.env.no_proxy
+
 
     it "sets options from environment", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
@@ -335,6 +339,16 @@ describe "lib/util/args", ->
     it "sets a default NO_PROXY", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
       options = @setup()
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.eq "localhost"
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    it "copies lowercase proxy vars to uppercase", ->
+      process.env.http_proxy = "http://foo-bar.baz:123"
+      expect(process.env.HTTP_PROXY).to.be.undefined
+      options = @setup()
+      expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyBypassList).to.eq "localhost"
