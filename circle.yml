@@ -849,6 +849,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - fix-typescript-binary-building
         requires:
           - Mac build
 

@@ -1,13 +1,13 @@
-import * as http from 'http'
-import * as https from 'https'
-import * as net from 'net'
-import * as tls from 'tls'
-import * as url from 'url'
-import * as _ from 'lodash'
-import * as debugModule from 'debug'
-import { getProxyForUrl } from 'proxy-from-env'
-import * as Promise from 'bluebird'
+import _ from 'lodash'
+import Bluebird from 'bluebird'
+import debugModule from 'debug'
 import { getAddress } from './connect'
+import { getProxyForUrl } from 'proxy-from-env'
+import http from 'http'
+import https from 'https'
+import net from 'net'
+import tls from 'tls'
+import url from 'url'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -73,7 +73,7 @@ export class CombinedAgent {
   constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
     this.httpAgent = new HttpAgent(httpOpts)
     this.httpsAgent = new HttpsAgent(httpsOpts)
-    this._getFirstWorkingFamily = Promise.method(this._getFirstWorkingFamily)
+    this._getFirstWorkingFamily = Bluebird.method(this._getFirstWorkingFamily)
   }
 
   // called by Node.js whenever a new request is made internally

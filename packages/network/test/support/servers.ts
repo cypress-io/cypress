@@ -1,12 +1,9 @@
-import * as http from 'http'
-import * as https from 'https'
-import * as fs from 'fs'
-import * as os from 'os'
-import * as path from 'path'
-import * as express from 'express'
-import * as Promise from 'bluebird'
+import express from 'express'
 import { CA } from '@packages/https-proxy'
-import * as Io from '@packages/socket'
+import http from 'http'
+import https from 'https'
+import Io from '@packages/socket'
+import Promise from 'bluebird'
 
 export interface AsyncServer {
   closeAsync: () => Promise<void>
