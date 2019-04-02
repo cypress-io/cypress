@@ -54,7 +54,10 @@ module.exports = {
 
       pattern = "#{p}{#{extensions.join(",")}}"
 
-      glob(pattern, { nosort: true }).bind(@)
+      glob(pattern, {
+        nosort: true
+        nodir: true
+      }).bind(@)
       .then (matches) ->
         if matches.length == 0
           relativePath = path.relative('.', p)
@@ -67,6 +70,13 @@ module.exports = {
 
   fileExists: (p) ->
     fs.statAsync(p).bind(@)
+    .then (stat) ->
+      ## check for files, not directories
+      ## https://github.com/cypress-io/cypress/issues/3739
+      if stat.isDirectory()
+        err = new Error()
+        err.code = "ENOENT"
+        throw err
 
   parseFile: (p, fixture, options) ->
     if queue[p]

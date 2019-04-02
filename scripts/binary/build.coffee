@@ -166,7 +166,7 @@ buildCypressApp = (platform, version, options = {}) ->
     ## remove the .ts files in our packages
     log("#removeTypeScript")
     del([
-      ## include coffee files of packages
+      ## include ts files of packages
       distDir("**", "*.ts")
 
       ## except those in node_modules
