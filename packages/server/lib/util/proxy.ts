@@ -1,5 +1,5 @@
-import * as os from 'os'
-import getWindowsProxy = require('@cypress/get-windows-proxy')
+import os from 'os'
+import getWindowsProxy from '@cypress/get-windows-proxy'
 
 export = {
   _getWindowsProxy: function () {

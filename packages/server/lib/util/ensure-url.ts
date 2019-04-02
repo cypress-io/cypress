@@ -1,5 +1,5 @@
+import rp from 'request-promise'
 import * as url from 'url'
-import * as rp from 'request-promise'
 import { agent, connect } from '@packages/network'
 
 export function isListening (urlStr: string) {
@@ -14,6 +14,7 @@ export function isListening (urlStr: string) {
     // cannot make arbitrary connections behind a proxy, attempt HTTP/HTTPS
     return rp({
       url: urlStr,
+      // @ts-ignore
       agent,
       proxy: null,
     })

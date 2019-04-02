@@ -7,7 +7,15 @@
     "lib"
   ],
   "scripts": {
+    "build": "bin-up tsc --project .",
+    "build-js": "bin-up tsc --project .",
     "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+  },
+  "dependencies": {
+    "bluebird": "3.5.3",
+    "debug": "4.1.1",
+    "lodash": "4.17.11",
+    "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
     "bin-up": "1.1.0",
@@ -17,8 +25,5 @@
     "request-promise": "4.2.4",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0"
-  },
-  "dependencies": {
-    "proxy-from-env": "1.0.0"
   }
 }

@@ -11,6 +11,7 @@
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
+    "build-js": "tsc",
     "test": "node ./test/scripts/run.js",
     "test-watch": "./test/support/watch test",
     "test-unit": "node ./test/scripts/run.js test/unit",
@@ -101,7 +102,7 @@
   "dependencies": {
     "@cypress/browserify-preprocessor": "1.1.2",
     "@cypress/commit-info": "2.1.2",
-    "@cypress/get-windows-proxy": "1.5.1",
+    "@cypress/get-windows-proxy": "1.5.3",
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@ffmpeg-installer/ffmpeg": "1.0.17",

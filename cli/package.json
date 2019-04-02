@@ -39,7 +39,7 @@
   },
   "types": "types",
   "dependencies": {
-    "@cypress/get-windows-proxy": "1.5.1",
+    "@cypress/get-windows-proxy": "1.5.3",
     "@cypress/listr-verbose-renderer": "0.4.1",
     "@cypress/xvfb": "1.2.4",
     "bluebird": "3.5.0",
