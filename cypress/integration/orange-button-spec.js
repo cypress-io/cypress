@@ -29,5 +29,6 @@ describe('Button', () => {
       .should('have.class', 'orange')
       .find('button')
       .should('have.css', 'background-color', 'rgb(245, 146, 62)')
+    cy.percySnapshot()
   })
 })

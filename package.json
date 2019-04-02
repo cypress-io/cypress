@@ -6,6 +6,7 @@
   "module": "lib",
   "scripts": {
     "test": "cypress run",
+    "percy:test": "percy exec -- cypress run",
     "build": "webpack -d",
     "cy:open": "cypress open",
     "transpile": "tsc",
@@ -34,6 +35,7 @@
     "@babel/preset-env": "7.4.2",
     "@babel/preset-react": "7.0.0",
     "@cypress/webpack-preprocessor": "1.1.3",
+    "@percy/cypress": "https://github.com/bahmutov/percy-cypress/releases/download/fix-webpack/percy-cypress-1.0.5.tgz",
     "@types/node": "9.6.47",
     "axios": "0.18.0",
     "babel-loader": "8.0.5",
