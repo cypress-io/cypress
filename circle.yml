@@ -220,6 +220,7 @@ jobs:
       - run: npm run all test -- --package extension
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
+      - run: npm run all test -- --package network
       # how to pass Mocha reporter through zunder?
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
@@ -261,6 +262,15 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: npm run all test-integration -- --package server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-performance-tests":
+      <<: *defaults
+      steps:
+      - attach_workspace:
+          at: ~/
+      - run: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
 
@@ -709,6 +719,9 @@ linux-workflow: &linux-workflow
     - server-integration-tests:
         requires:
           - build
+    - server-performance-tests:
+        requires:
+          - build
     - server-e2e-tests-1:
         requires:
           - build
@@ -836,6 +849,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - fix-typescript-binary-building
         requires:
           - Mac build
 

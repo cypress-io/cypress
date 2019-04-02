@@ -245,6 +245,7 @@ The request we sent was:
 Method: GET
 URL: http://localhost:2294/statusCode?code=503
 Headers: {
+  "Connection": "keep-alive",
   "user-agent": "foo",
   "accept": "*/*",
   "accept-encoding": "gzip, deflate"
@@ -261,7 +262,7 @@ Headers: {
   "content-length": "19",
   "etag": "W/13-52060a5f",
   "date": "Fri, 18 Aug 2017    XX:XX GMT",
-  "connection": "close"
+  "connection": "keep-alive"
 }
 Body: Service Unavailable
 

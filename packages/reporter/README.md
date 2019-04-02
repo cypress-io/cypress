@@ -62,8 +62,23 @@ npm run watch
 
 ## Testing
 
+### Cypress
+
+Run Cypress tests found in `cypress/integration`. 
+
+```bash
+npm run cypress:open
+```
+
+You'll want to run `npm run watch` in the `packages/reporter` to iterate on the reporter under test while testing.
+
+You'll want to run `npm run watch` in the `packages/runner` to get changes to the main Cypress reporter while testing.
+
+### Enzyme
+
 Run enzyme component tests found in `*.spec` files in `src`:
 
 ```bash
 npm test
 ```
+
