@@ -259,7 +259,7 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 let cyServer
 
 describe('Proxy Performance', function () {
-  this.timeout(120 * 1000)
+  this.timeout(240 * 1000)
 
   beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
@@ -305,12 +305,12 @@ describe('Proxy Performance', function () {
       })
 
       testCases.slice(1).map((testCase) => {
-        it(`${testCase.name} loads 1000 images in less than 1.5x the speed of regular Chrome`, function () {
+        it(`${testCase.name} loads 1000 images in less than 4x the speed of regular Chrome`, function () {
           debug('Current test: ', testCase.name)
 
           return runBrowserTest(urlUnderTest, testCase)
           .then((runtime) => {
-            expect(runtime).to.be.lessThan(baseline * 1.5)
+            expect(runtime).to.be.lessThan(baseline * 4)
           })
         })
       })
