@@ -85,6 +85,8 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network
+      - restore_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-runner
@@ -158,6 +160,10 @@ jobs:
           key: v5-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
           paths:
             - packages/launcher/node_modules
+      - save_cache:
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
+          paths:
+            - packages/network/node_modules
       - save_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
