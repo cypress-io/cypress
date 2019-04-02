@@ -10,9 +10,10 @@ describe('HelloX component', () => {
     cy.contains('Hello SuperMan!')
   })
 
-  it.only('renders Unicode', () => {
+  it('renders Unicode', () => {
     cy.mount(<HelloX name='🌎' />)
     cy.contains('Hello 🌎!')
+    cy.percySnapshot()
   })
 })
 

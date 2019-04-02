@@ -1,5 +1,11 @@
 const webpack = require('@cypress/webpack-preprocessor')
 const webpackOptions = {
+  // https://webpack.js.org/configuration/node/
+  // avoid winston logger problem
+  // https://github.com/percy/percy-cypress/issues/58
+  node: {
+    fs: 'empty'
+  },
   module: {
     rules: [
       {

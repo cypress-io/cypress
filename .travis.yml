@@ -13,7 +13,7 @@ node_js:
 script:
   - npm run lint
   - npm run transpile
-  - npm test -- --record
+  - npm run percy:test -- --record
 after_success:
   - npm run semantic-release
 branches:
