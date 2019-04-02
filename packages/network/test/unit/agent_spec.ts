@@ -1,14 +1,5 @@
-import * as http from 'http'
-import * as https from 'https'
-import * as net from 'net'
-import * as tls from 'tls'
-import * as url from 'url'
-import * as chai from 'chai'
-import DebuggingProxy = require('debugging-proxy')
-import * as Promise from 'bluebird'
-import * as request from 'request-promise'
-import * as sinon from 'sinon'
-import * as sinonChai from 'sinon-chai'
+import Bluebird from 'bluebird'
+import chai from 'chai'
 import {
   CombinedAgent,
   _buildConnectReqHead,
@@ -17,8 +8,17 @@ import {
   isResponseStatusCode200,
   _regenerateRequestHead
 } from '../../lib/agent'
-import * as Io from '@packages/socket'
+import DebuggingProxy from 'debugging-proxy'
+import http from 'http'
+import https from 'https'
+import Io from '@packages/socket'
+import net from 'net'
+import request from 'request-promise'
 import { Servers, AsyncServer } from '../support/servers'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
+import tls from 'tls'
+import url from 'url'
 
 const expect = chai.expect
 chai.use(sinonChai)
@@ -175,7 +175,7 @@ describe('lib/agent', function() {
         })
 
         it('HTTP websocket connections can be established and used', function() {
-          return new Promise((resolve) => {
+          return new Bluebird((resolve) => {
             Io.client(`http://localhost:${HTTP_PORT}`, {
               agent: this.agent,
               transports: ['websocket']
@@ -191,7 +191,7 @@ describe('lib/agent', function() {
         })
 
         it('HTTPS websocket connections can be established and used', function() {
-          return new Promise((resolve) => {
+          return new Bluebird((resolve) => {
             Io.client(`https://localhost:${HTTPS_PORT}`, {
               agent: this.agent,
               transports: ['websocket']
@@ -242,7 +242,7 @@ describe('lib/agent', function() {
       it("#createProxiedConnection throws when connection is accepted then closed", function() {
         const combinedAgent = new CombinedAgent()
 
-        const proxy = Promise.promisifyAll(
+        const proxy = Bluebird.promisifyAll(
           net.createServer((socket) => {
             socket.end()
           })
@@ -354,7 +354,7 @@ describe('lib/agent', function() {
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
 
-        return new Promise((resolve, reject) => {
+        return new Bluebird((resolve, reject) => {
           Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
             agent: <any>testCase.agent,
             transports: ['websocket'],

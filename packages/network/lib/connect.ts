@@ -1,10 +1,10 @@
-import * as net from 'net'
-import * as dns from 'dns'
-import * as Promise from 'bluebird'
+import Bluebird from 'bluebird'
+import dns from 'dns'
+import net from 'net'
 
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
-  return new Promise((resolve, reject) => {
+  return new Bluebird((resolve, reject) => {
     const onConnect = () => {
       client.end()
       resolve(address)
@@ -21,7 +21,7 @@ export function getAddress (port: number, hostname: string) {
 
   // promisify at the very last second which enables us to
   // modify dns lookup function (via hosts overrides)
-  const lookupAsync = Promise.promisify(dns.lookup, { context: dns })
+  const lookupAsync = Bluebird.promisify(dns.lookup, { context: dns })
 
   // this does not go out to the network to figure
   // out the addresess. in fact it respects the /etc/hosts file
