@@ -770,7 +770,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/hash
      */
-    hash(options?: Partial<Loggable>): Chainable<string>
+    hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Invoke a function on the previously yielded subject.

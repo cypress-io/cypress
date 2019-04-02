@@ -65,7 +65,7 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v7-{{ arch }}-{{ .Branch }}-cli-deps
+          key: v8-{{ arch }}-{{ .Branch }}-cli-deps
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-root-deps
       - restore_cache:
@@ -85,11 +85,13 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network
+      - restore_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-server
+          key: v7-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
@@ -117,7 +119,7 @@ jobs:
 
       # save each node_modules folder per package
       - save_cache:
-          key: v7-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
           paths:
             - cli/node_modules
       - save_cache:
@@ -159,6 +161,10 @@ jobs:
           paths:
             - packages/launcher/node_modules
       - save_cache:
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
+          paths:
+            - packages/network/node_modules
+      - save_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
             - packages/reporter/node_modules
@@ -167,7 +173,7 @@ jobs:
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v7-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:
@@ -220,6 +226,7 @@ jobs:
       - run: npm run all test -- --package extension
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
+      - run: npm run all test -- --package network
       # how to pass Mocha reporter through zunder?
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
@@ -261,6 +268,15 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: npm run all test-integration -- --package server
+      - store_test_results:
+          path: /tmp/cypress
+
+  "server-performance-tests":
+      <<: *defaults
+      steps:
+      - attach_workspace:
+          at: ~/
+      - run: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
 
@@ -709,6 +725,9 @@ linux-workflow: &linux-workflow
     - server-integration-tests:
         requires:
           - build
+    - server-performance-tests:
+        requires:
+          - build
     - server-e2e-tests-1:
         requires:
           - build
@@ -737,6 +756,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - desktop-gui-integration-tests-2x:
+        requires:
+          - build
+    - reporter-integration-tests:
         requires:
           - build
     - run-launcher:
@@ -836,6 +858,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - fix-typescript-binary-building
         requires:
           - Mac build
 
