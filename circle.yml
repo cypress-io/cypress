@@ -758,6 +758,9 @@ linux-workflow: &linux-workflow
     - desktop-gui-integration-tests-2x:
         requires:
           - build
+    - reporter-integration-tests:
+        requires:
+          - build
     - run-launcher:
         requires:
           - build
