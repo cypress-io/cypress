@@ -5,6 +5,7 @@ path     = require("path")
 os       = require("os")
 argsUtil = require("#{root}lib/util/args")
 proxyUtil = require("#{root}lib/util/proxy")
+getWindowsProxyUtil = require("#{root}lib/util/get-windows-proxy")
 
 cwd = process.cwd()
 
@@ -323,7 +324,7 @@ describe "lib/util/args", ->
       expect(process.env.HTTPS_PROXY).to.eq process.env.HTTP_PROXY
 
     it "loads from Windows registry if not defined", ->
-      sinon.stub(proxyUtil, "_getWindowsProxy").returns({
+      sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns({
         httpProxy: "http://quux.quuz",
         noProxy: "d,e,f"
       })
