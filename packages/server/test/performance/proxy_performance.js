@@ -10,6 +10,7 @@ const DebuggingProxy = require('@cypress/debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
 const Promise = require('bluebird')
 const Table = require('console-table-printer').Table
+const sanitizeFilename = require('sanitize-filename')
 
 process.env.CYPRESS_ENV = 'development'
 
@@ -256,7 +257,7 @@ const runBrowserTest = (urlUnderTest, testCase) => {
           if (artifacts) {
             return fse.ensureDir(artifacts)
             .then(() => {
-              return fse.writeJson(testCase.name, har)
+              return fse.writeJson(sanitizeFilename(testCase.name), har)
             })
           }
         })
