@@ -131,14 +131,14 @@ buildCypressApp = (platform, version, options = {}) ->
         # keep everything except win32-ia32, win32-x64, and ffmpeg
         ffmpegInstallerPath = path.join(serverFolder, "node_modules", "@ffmpeg-installer")
         fs.readdir(ffmpegInstallerPath)
-        .then(entities) ->
+        .then (entities) ->
           keepFolders = [
             'win32-ia32',
             'win32-x64',
             'ffmpeg'
           ]
           console.log("removing unnecessary dependencies from @ffmpeg-installer")
-          Promise.map entities, entity ->
+          Promise.map entities, (entity) ->
             if not _.includes(keepFolders, entity)
               console.log("removing #{entity} from @ffmpeg-installer")
               fs.unlinkAsync(path.join(ffmpegInstallerPath, entity))
