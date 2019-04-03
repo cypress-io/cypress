@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
@@ -23,7 +23,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not file or not _.isString(file)
-        $utils.throwErrByPath("files.invalid_argument", {
+        $errUtils.throwErrByPath("files.invalid_argument", {
           onFail: options._log,
           args: { cmd: "readFile", file }
         })
@@ -37,7 +37,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               filePath: err.filePath
             }
           else
-            $utils.throwErrByPath("files.unexpected_error", {
+            $errUtils.throwErrByPath("files.unexpected_error", {
               onFail: options._log,
               args: { cmd: "readFile", action: "read", file, filePath: err.filePath, error: err.message }
             })
@@ -52,12 +52,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
               if contents?
                 ## file exists but it shouldn't
-                err.displayMessage = $utils.errMessageByPath("files.existent", {
+                err.displayMessage = $errUtils.errMsgByPath("files.existent", {
                   file, filePath
                 })
               else
                 ## file doesn't exist but it should
-                err.displayMessage = $utils.errMessageByPath("files.nonexistent", {
+                err.displayMessage = $errUtils.errMsgByPath("files.nonexistent", {
                   file, filePath
                 })
             onRetry: verifyAssertions
@@ -82,13 +82,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not fileName or not _.isString(fileName)
-        $utils.throwErrByPath("files.invalid_argument", {
+        $errUtils.throwErrByPath("files.invalid_argument", {
           onFail: options._log,
           args: { cmd: "writeFile", file: fileName }
         })
 
       if not (_.isString(contents) or _.isObject(contents))
-        $utils.throwErrByPath("files.invalid_contents", {
+        $errUtils.throwErrByPath("files.invalid_contents", {
           onFail: options._log,
           args: { contents: contents }
         })
@@ -105,12 +105,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           return objContents
         return contents
       .catch Promise.TimeoutError, (err) ->
-        $utils.throwErrByPath "files.timed_out", {
+        $errUtils.throwErrByPath "files.timed_out", {
           onFail: options._log
           args: { cmd: "writeFile", file: fileName, timeout: options.timeout }
         }
       .catch (err) ->
-        $utils.throwErrByPath("files.unexpected_error", {
+        $errUtils.throwErrByPath("files.unexpected_error", {
           onFail: options._log
           args: { cmd: "writeFile", action: "write", file: fileName, filePath: err.filePath, error: err.message }
         })

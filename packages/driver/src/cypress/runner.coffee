@@ -5,6 +5,7 @@ Pending = require("mocha/lib/pending")
 
 $Log = require("./log")
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 
 defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
@@ -592,9 +593,9 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
       ## append a friendly message to the error indicating
       ## we're skipping the remaining tests in this suite
-      err = $utils.appendErrMsg(
+      err = $errUtils.appendErrMsg(
         err,
-        $utils.errMessageByPath("uncaught.error_in_hook", {
+        $errUtils.errMsgByPath("uncaught.error_in_hook", {
           parentTitle,
           hookName
         })
@@ -652,7 +653,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       .join("\n\n")
 
     ## else  do the same thing as mocha here
-    err = $utils.appendErrMsg(err, append())
+    err = $errUtils.appendErrMsg(err, append())
 
     throwErr = ->
       throw err

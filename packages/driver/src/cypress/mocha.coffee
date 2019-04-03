@@ -1,5 +1,6 @@
 _ = require("lodash")
-$utils = require("./utils")
+
+$errUtils = require("./error_utils")
 
 ## in the browser mocha is coming back
 ## as window
@@ -27,7 +28,7 @@ ui = (specWindow, _mocha) ->
     @_ui = Mocha.interfaces[name]
 
     if not @_ui
-      $utils.throwErrByPath("mocha.invalid_interface", { args: { name } })
+      $errUtils.throwErrByPath("mocha.invalid_interface", { args: { name } })
 
     @_ui = @_ui(@suite)
 
@@ -146,7 +147,7 @@ patchRunnableResetTimeout = ->
         "mocha.timed_out"
 
     @timer = setTimeout ->
-      errMessage = $utils.errMessageByPath(getErrPath(), { ms })
+      errMessage = $errUtils.errMsgByPath(getErrPath(), { ms })
       runnable.callback new Error(errMessage)
       runnable.timedOut = true
     , ms

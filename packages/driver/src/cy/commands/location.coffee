@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 $Location = require("../../cypress/location")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -55,7 +55,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## use existential here because we only want to throw
           ## on null or undefined values (and not empty strings)
           location[key] ?
-            $utils.throwErrByPath("location.invalid_key", { args: { key } })
+            $errUtils.throwErrByPath("location.invalid_key", { args: { key } })
         else
           location
 

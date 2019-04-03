@@ -1,5 +1,6 @@
 _ = require("lodash")
-$utils = require("./utils")
+
+$errUtils = require("./error_utils")
 
 builtInCommands = [
   require("../cy/commands/actions/check")
@@ -64,7 +65,7 @@ create = (Cypress, cy, state, config, log) ->
     original = commandBackups[name] or commands[name]
 
     if not original
-      $utils.throwErrByPath("miscellaneous.invalid_overwrite", {
+      $errUtils.throwErrByPath("miscellaneous.invalid_overwrite", {
         args: {
           name: name
         }

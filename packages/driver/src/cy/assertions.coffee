@@ -2,7 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $dom = require("../dom")
-$utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 ## TODO
 ## bTagOpen + bTagClosed
@@ -316,7 +316,7 @@ create = (state, queue, retryFn) ->
 
         ## and then push our command into this err
         try
-          $utils.throwErr(err, { onFail: options._log })
+          $errUtils.throwErr(err, { onFail: options._log })
         catch e
           err = e
 

@@ -7,6 +7,7 @@ sinonChai = require("@cypress/sinon-chai")
 
 $dom = require("../dom")
 $utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 $chaiJquery = require("../cypress/chai_jquery")
 
 ## all words between single quotes which are at
@@ -39,8 +40,8 @@ chai.use (chai, u) ->
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid: (method, obj) ->
-      err = $utils.cypressErr(
-        $utils.errMessageByPath(
+      err = $errUtils.cypressErr(
+        $errUtils.errMsgByPath(
           "chai.invalid_jquery_obj", {
             assertion: method
             subject: $utils.stringifyActual(obj)
@@ -130,7 +131,7 @@ chai.use (chai, u) ->
         if _.isRegExp(regExp) or $dom.isDom(@_obj)
           _super.apply(@, arguments)
         else
-          err = $utils.cypressErr($utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
+          err = $errUtils.cypressErr($errUtils.errMsgByPath("chai.match_invalid_argument", { regExp }))
           err.retry = false
           throw err
 
@@ -207,7 +208,7 @@ chai.use (chai, u) ->
               e1.displayMessage = getLongLengthMessage(obj.length, length)
               throw e1
 
-            e2 = $utils.cypressErr($utils.errMessageByPath("chai.length_invalid_argument", { length }))
+            e2 = $errUtils.cypressErr($errUtils.errMsgByPath("chai.length_invalid_argument", { length }))
             e2.retry = false
             throw e2
 

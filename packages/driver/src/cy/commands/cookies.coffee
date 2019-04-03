@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../dom")
 $utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 $Location = require("../../cypress/location")
 
 COOKIE_PROPS = "name value path secure httpOnly expiry domain".split(" ")
@@ -38,7 +39,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     automate = ->
       Cypress.automation(event, mergeDefaults(obj))
       .catch (err) ->
-        $utils.throwErr(err, { onFail: log })
+        $errUtils.throwErr(err, { onFail: log })
 
     if not timeout
       automate()
@@ -50,7 +51,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       automate()
       .timeout(timeout)
       .catch Promise.TimeoutError, (err) ->
-        $utils.throwErrByPath "cookies.timed_out", {
+        $errUtils.throwErrByPath "cookies.timed_out", {
           onFail: log
           args: {
             cmd:     getCommandFromEvent(event)
@@ -100,7 +101,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not _.isString(name)
-        $utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
+        $errUtils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
 
       automateCookies("get:cookie", {name: name}, options._log, options.timeout)
       .then (resp) ->
@@ -162,7 +163,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not _.isString(name) or not _.isString(value)
-        $utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
+        $errUtils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
 
       automateCookies("set:cookie", cookie, options._log, options.timeout)
       .then (resp) ->
@@ -194,7 +195,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not _.isString(name)
-        $utils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
+        $errUtils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
 
       ## TODO: prevent clearing a cypress namespace
       automateCookies("clear:cookie", {name: name}, options._log, options.timeout)

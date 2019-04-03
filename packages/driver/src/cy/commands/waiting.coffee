@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 getNumRequests = (state, alias) =>
   requests = state("aliasRequests") ? {}
@@ -14,11 +14,11 @@ getNumRequests = (state, alias) =>
   [index, _.ordinalize(requests[alias])]
 
 throwErr = (arg) ->
-  $utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
+  $errUtils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   waitFunction = ->
-    $utils.throwErrByPath("wait.fn_deprecated")
+    $errUtils.throwErrByPath("wait.fn_deprecated")
 
   waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta
@@ -52,7 +52,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## return our xhr object
       return Promise.resolve(xhr) if xhr
 
-      options.error = $utils.errMessageByPath "wait.timed_out", {
+      options.error = $errUtils.errMsgByPath "wait.timed_out", {
         timeout: options.timeout
         alias
         num
@@ -92,7 +92,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         log.set "referencesAlias", aliases
 
       if command.get("name") isnt "route"
-        $utils.throwErrByPath("wait.invalid_alias", {
+        $errUtils.throwErrByPath("wait.invalid_alias", {
           onFail: options._log
           args: { alias }
         })
@@ -151,7 +151,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## to wait on multiple aliases and forget to make this
       ## an array
       if _.isString(options)
-        $utils.throwErrByPath("wait.invalid_arguments")
+        $errUtils.throwErrByPath("wait.invalid_arguments")
 
       _.defaults options, {log: true}
 

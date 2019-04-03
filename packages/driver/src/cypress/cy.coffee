@@ -5,6 +5,7 @@ Promise = require("bluebird")
 $dom = require("../dom")
 $selection = require("../dom/selection")
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
 $jQuery = require("../cy/jquery")
@@ -62,7 +63,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   warnMixingPromisesAndCommands = ->
     title = state("runnable").fullTitle()
 
-    msg = $utils.errMessageByPath("miscellaneous.mixing_promises_and_commands", title)
+    msg = $errUtils.errMsgByPath("miscellaneous.mixing_promises_and_commands", title)
 
     $utils.warning(msg)
 
@@ -259,7 +260,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         when isCy(ret)
           null
         when enqueuedCmd and isPromiseLike(ret)
-          $utils.throwErrByPath(
+          $errUtils.throwErrByPath(
             "miscellaneous.command_returned_promise_and_commands", {
               args: {
                 current: command.get("name")
@@ -278,7 +279,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## if we got a return value and we enqueued
           ## a new command and we didn't return cy
           ## or an undefined value then throw
-          $utils.throwErrByPath(
+          $errUtils.throwErrByPath(
             "miscellaneous.returned_value_and_commands_from_custom_command", {
               args: {
                 current: command.get("name")
@@ -467,7 +468,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## since we're invoking this improperly
       if prevSubject and ("optional" not in [].concat(prevSubject))
         stringifiedArg = $utils.stringifyActual(args[0])
-        $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
+        $errUtils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
           args: {
             cmd:  name
             args: if _.isString(args[0]) then "\"#{stringifiedArg}\"" else stringifiedArg
@@ -791,7 +792,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
           ## if this is a custom promise
           if isPromiseLike(ret) and noArgsAreAFunction(current.get("args"))
-            $utils.throwErrByPath(
+            $errUtils.throwErrByPath(
               "miscellaneous.command_returned_promise_and_commands", {
                 args: {
                   current: current.get("name")
@@ -1024,7 +1025,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             else
               $utils.stringify(ret)
 
-            $utils.throwErrByPath("miscellaneous.returned_value_and_commands", {
+            $errUtils.throwErrByPath("miscellaneous.returned_value_and_commands", {
               args: ret
             })
 
@@ -1072,7 +1073,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   _.each privateProps, (obj, key) =>
     Object.defineProperty(cy, key, {
       get: ->
-        $utils.throwErrByPath("miscellaneous.private_property", {
+        $errUtils.throwErrByPath("miscellaneous.private_property", {
           args: obj
         })
     })

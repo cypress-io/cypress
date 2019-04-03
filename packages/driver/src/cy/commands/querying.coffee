@@ -3,7 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../dom")
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 $expr = $.expr[":"]
 
@@ -282,8 +282,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults options, {log: true}
 
-      $utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
-      $utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
+      $errUtils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
+      $errUtils.throwErrByPath "contains.empty_string" if _.isBlank(text)
 
       getPhrase = (type, negated) ->
         switch
@@ -369,7 +369,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               switch err.type
                 when "length"
                   if err.expected > 1
-                    $utils.throwErrByPath "contains.length_option", { onFail: options._log }
+                    $errUtils.throwErrByPath "contains.length_option", { onFail: options._log }
                 when "existence"
                   err.displayMessage = getErr(err)
           })
@@ -398,7 +398,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           message: ""
         })
 
-      $utils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
+      $errUtils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll

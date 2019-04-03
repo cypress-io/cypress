@@ -1,6 +1,7 @@
 _ = require("lodash")
 
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 
 reset = -> {
   capture: "fullPage"
@@ -22,7 +23,7 @@ validateAndSetBoolean = (props, values, cmd, log, option) ->
     return
 
   if not _.isBoolean(value)
-    $utils.throwErrByPath("screenshot.invalid_boolean", {
+    $errUtils.throwErrByPath("screenshot.invalid_boolean", {
       log: log
       args: {
         cmd: cmd
@@ -39,7 +40,7 @@ validateAndSetCallback = (props, values, cmd, log, option) ->
     return
 
   if not _.isFunction(value)
-    $utils.throwErrByPath("screenshot.invalid_callback", {
+    $errUtils.throwErrByPath("screenshot.invalid_callback", {
       log: log
       args: {
         cmd: cmd
@@ -54,14 +55,14 @@ validate = (props, cmd, log) ->
   values = {}
 
   if not _.isPlainObject(props)
-    $utils.throwErrByPath("screenshot.invalid_arg", {
+    $errUtils.throwErrByPath("screenshot.invalid_arg", {
       log: log
       args: { cmd: cmd, arg: $utils.stringify(props) }
     })
 
   if capture = props.capture
     if not (capture in validCaptures)
-      $utils.throwErrByPath("screenshot.invalid_capture", {
+      $errUtils.throwErrByPath("screenshot.invalid_capture", {
         log: log
         args: { cmd: cmd, arg: $utils.stringify(capture) }
       })
@@ -74,7 +75,7 @@ validate = (props, cmd, log) ->
 
   if blackout = props.blackout
     if not _.isArray(blackout) or _.some(blackout, (selector) -> not _.isString(selector))
-      $utils.throwErrByPath("screenshot.invalid_blackout", {
+      $errUtils.throwErrByPath("screenshot.invalid_blackout", {
         log: log
         args: { cmd: cmd, arg: $utils.stringify(blackout) }
       })
@@ -87,7 +88,7 @@ validate = (props, cmd, log) ->
       _.some(clip, (value) -> not _.isNumber(value)) or
       _.sortBy(_.keys(clip)).join(",") isnt "height,width,x,y"
     )
-      $utils.throwErrByPath("screenshot.invalid_clip", {
+      $errUtils.throwErrByPath("screenshot.invalid_clip", {
         log: log
         args: { cmd: cmd, arg: $utils.stringify(clip) }
       })

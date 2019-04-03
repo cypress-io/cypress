@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-$utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 validAliasApiRe = /^(\d+|all)$/
 
@@ -31,7 +31,7 @@ create = (state) ->
           return xhrNotWaitedOnByIndex(state, str, index, "requests")
         else
           if prop isnt "response"
-            $utils.throwErrByPath "wait.alias_invalid", {
+            $errUtils.throwErrByPath "wait.alias_invalid", {
               args: { prop, str }
             }
 
@@ -41,12 +41,12 @@ create = (state) ->
       [alias, prop] = alias.split(".")
 
       if prop and not validAliasApiRe.test(prop)
-        $utils.throwErrByPath "get.alias_invalid", {
+        $errUtils.throwErrByPath "get.alias_invalid", {
           args: { prop }
         }
 
       if prop is "0"
-        $utils.throwErrByPath "get.alias_zero", {
+        $errUtils.throwErrByPath "get.alias_zero", {
           args: { alias }
         }
 

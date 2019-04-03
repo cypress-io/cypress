@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-$utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 aliasRe = /^@.+/
 aliasDisplayRe = /^([@]+)/
@@ -16,10 +16,10 @@ getXhrTypeByAlias = (alias) ->
 
 validateAlias = (alias) ->
   if not _.isString(alias)
-    $utils.throwErrByPath "as.invalid_type"
+    $errUtils.throwErrByPath "as.invalid_type"
 
   if aliasDisplayRe.test(alias)
-    $utils.throwErrByPath "as.invalid_first_token", {
+    $errUtils.throwErrByPath "as.invalid_first_token", {
       args: {
         alias,
         suggestedName: alias.replace(aliasDisplayRe, '')
@@ -27,10 +27,10 @@ validateAlias = (alias) ->
     }
 
   if _.isBlank(alias)
-    $utils.throwErrByPath "as.empty_string"
+    $errUtils.throwErrByPath "as.empty_string"
 
   if alias in blacklist
-    $utils.throwErrByPath "as.reserved_word", { args: { alias } }
+    $errUtils.throwErrByPath "as.reserved_word", { args: { alias } }
 
 create = (state) ->
   addAlias = (ctx, aliasObj) ->
@@ -75,7 +75,7 @@ create = (state) ->
     ## format, but its word is found in the availableAliases
     if (not aliasRe.test(name)) and (name in availableAliases)
       displayName = aliasDisplayName(name)
-      $utils.throwErrByPath "alias.invalid", {
+      $errUtils.throwErrByPath "alias.invalid", {
         onFail: log
         args: { name, displayName }
       }
@@ -88,7 +88,7 @@ create = (state) ->
     else
       "alias.not_registered_without_available"
 
-    $utils.throwErrByPath errPath, {
+    $errUtils.throwErrByPath errPath, {
       onFail: log
       args: { cmd, displayName, availableAliases: availableAliases.join(", ") }
     }

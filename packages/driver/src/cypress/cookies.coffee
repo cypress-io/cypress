@@ -1,7 +1,7 @@
 _ = require("lodash")
 Cookies = require("js-cookie")
 
-$Utils = require("./utils")
+$errUtils = require("./error_utils")
 
 reHttp = /^http/
 
@@ -108,7 +108,7 @@ $Cookies = (namespace, domain) ->
 
   _.each ["get", "set", "remove", "getAllCookies", "clearCookies"], (method) ->
     API[method] = ->
-      $Utils.throwErrByPath("cookies.removed_method", {
+      $errUtils.throwErrByPath("cookies.removed_method", {
         args: { method }
       })
 

@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 $actionability = require("../../actionability")
 
 dispatch = (target, eventName, options) ->
@@ -48,13 +49,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options._log.snapshot("before", {next: "after"})
 
       if not _.isString(eventName)
-        $utils.throwErrByPath("trigger.invalid_argument", {
+        $errUtils.throwErrByPath("trigger.invalid_argument", {
           onFail: options._log
           args: { eventName }
         })
 
       if options.$el.length > 1
-        $utils.throwErrByPath("trigger.multiple_elements", {
+        $errUtils.throwErrByPath("trigger.multiple_elements", {
           onFail: options._log
           args: { num: options.$el.length }
         })

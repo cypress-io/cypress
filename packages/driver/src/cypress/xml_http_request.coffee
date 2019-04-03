@@ -1,4 +1,5 @@
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 
 isCypressHeaderRe = /^X-Cypress-/i
 
@@ -21,7 +22,7 @@ class XMLHttpRequest
     @response      = null
 
   _getXhr: ->
-    @xhr ? $utils.throwErrByPath("xhr.missing")
+    @xhr ? $errUtils.throwErrByPath("xhr.missing")
 
   _setDuration: (timeStart) ->
     @duration = (new Date) - timeStart

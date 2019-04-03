@@ -1,4 +1,4 @@
-$utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 create = (state) ->
   return {
@@ -6,7 +6,7 @@ create = (state) ->
       runnable = state("runnable")
 
       if not runnable
-        $utils.throwErrByPath("miscellaneous.outside_test")
+        $errUtils.throwErrByPath("miscellaneous.outside_test")
 
       if ms
         ## if delta is true then we add (or subtract) from the
@@ -21,7 +21,7 @@ create = (state) ->
       runnable = state("runnable")
 
       if not runnable
-        $utils.throwErrByPath("miscellaneous.outside_test")
+        $errUtils.throwErrByPath("miscellaneous.outside_test")
 
       runnable.clearTimeout()
 

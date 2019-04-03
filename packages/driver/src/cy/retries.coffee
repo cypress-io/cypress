@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
@@ -57,7 +57,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
             else
               err
 
-        $utils.throwErrByPath "miscellaneous.retry_timed_out", {
+        $errUtils.throwErrByPath "miscellaneous.retry_timed_out", {
           onFail: (options.onFail or log)
           args: { error: getErrMessage(options.error) }
         }
