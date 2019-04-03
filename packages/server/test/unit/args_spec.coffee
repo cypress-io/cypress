@@ -5,6 +5,7 @@ path     = require("path")
 os       = require("os")
 argsUtil = require("#{root}lib/util/args")
 proxyUtil = require("#{root}lib/util/proxy")
+getWindowsProxyUtil = require("#{root}lib/util/get-windows-proxy")
 
 cwd = process.cwd()
 
@@ -307,6 +308,10 @@ describe "lib/util/args", ->
       delete process.env.HTTP_PROXY
       delete process.env.HTTPS_PROXY
       delete process.env.NO_PROXY
+      delete process.env.http_proxy
+      delete process.env.https_proxy
+      delete process.env.no_proxy
+
 
     it "sets options from environment", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
@@ -319,7 +324,7 @@ describe "lib/util/args", ->
       expect(process.env.HTTPS_PROXY).to.eq process.env.HTTP_PROXY
 
     it "loads from Windows registry if not defined", ->
-      sinon.stub(proxyUtil, "_getWindowsProxy").returns({
+      sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns({
         httpProxy: "http://quux.quuz",
         noProxy: "d,e,f"
       })
@@ -338,6 +343,23 @@ describe "lib/util/args", ->
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyBypassList).to.eq "localhost"
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    it "copies lowercase proxy vars to uppercase", ->
+      process.env.http_proxy = "http://foo-bar.baz:123"
+      process.env.https_proxy = "https://foo-bar.baz:123"
+      process.env.no_proxy = "http://no-proxy.holla"
+      expect(process.env.HTTP_PROXY).to.be.undefined
+      expect(process.env.HTTPS_PROXY).to.be.undefined
+      expect(process.env.NO_PROXY).to.be.undefined
+
+      options = @setup()
+
+      expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
+      expect(process.env.HTTPS_PROXY).to.eq "https://foo-bar.baz:123"
+      expect(process.env.NO_PROXY).to.eq "http://no-proxy.holla"
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
     afterEach ->
