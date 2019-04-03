@@ -1,5 +1,5 @@
 $errUtils = require("../../../../src/cypress/error_utils.js")
-$errorMessages = Cypress.errorMessages
+$errorMessages = require("../../../../src/cypress/error_messages")
 
 describe "driver/src/cypress/error_utils", ->
   context ".appendErrMsg", ->
@@ -58,7 +58,7 @@ describe "driver/src/cypress/error_utils", ->
       expect(err2.docsUrl).to.eq("baz")
       expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
 
-  context ".cloneErr", ->
+  context ".makeErrFromObj", ->
     it "copies properties, message, stack", ->
       obj = {
         stack: "stack"
@@ -67,7 +67,7 @@ describe "driver/src/cypress/error_utils", ->
         code: 123
       }
 
-      err = $errUtils.cloneErr(obj)
+      err = $errUtils.makeErrFromObj(obj)
 
       expect(err).to.be.instanceof(window.Error)
 
@@ -85,7 +85,9 @@ describe "driver/src/cypress/error_utils", ->
   context ".throwErrByPath", ->
     beforeEach ->
       $errorMessages.__test_errors = {
-        simple: "This is a simple error message"
+        simple: 
+          message: "This is a simple error message"
+          docsUrl: "https://on.link.io"
         with_args: "The has args like '{{foo}}' and {{bar}}"
         with_multi_args: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
       }
@@ -101,7 +103,7 @@ describe "driver/src/cypress/error_utils", ->
         try
           $errUtils.throwErrByPath("not.there")
         catch e
-          expect(e.message).to.include "Error message path 'not.there' does not exist"
+          expect(e.message).to.include "Error message path: 'not.there' does not exist"
 
     describe "when error message path exists", ->
       it "has an err.name of CypressError", ->
@@ -110,27 +112,27 @@ describe "driver/src/cypress/error_utils", ->
         catch e
           expect(e.name).to.eq "CypressError"
 
-      it "has the right message", ->
+      it "has the right message and docs url", ->
         try
           $errUtils.throwErrByPath("__test_errors.simple")
         catch e
           expect(e.message).to.include "This is a simple error message"
+          expect(e.docsUrl).to.include "https://on.link.io"
 
     describe "when args are provided for the error", ->
       it "uses them in the error message", ->
         try
           $errUtils.throwErrByPath("__test_errors.with_args", {
-            args: { foo: "foo", bar: ["bar", "qux"]  }
+            foo: "foo", bar: ["bar", "qux"] 
           })
         catch e
           expect(e.message).to.include "The has args like 'foo' and bar,qux"
 
     describe "when args are provided for the error and some are used multiple times in message", ->
-
       it "uses them in the error message", ->
         try
           $errUtils.throwErrByPath("__test_errors.with_multi_args", {
-            args: { foo: "foo", bar: ["bar", "qux"]  }
+            foo: "foo", bar: ["bar", "qux"] 
           })
         catch e
           expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
@@ -145,50 +147,91 @@ describe "driver/src/cypress/error_utils", ->
 
     describe "when onFail is provided as a command", ->
       it "attaches the handler to the error", ->
-        command = { error: @sandbox.spy() }
+        command = { error: cy.spy() }
         try
           $errUtils.throwErrByPath("window.iframe_undefined", { onFail: command })
         catch e
           e.onFail("the error")
           expect(command.error).to.be.calledWith("the error")
 
-  context ".formatErrMsg", ->
-    it "returns obj with mdMessage when includeMdMessage", ->
-        err = $errUtils.formatErrMsg("`foo`\n\nbar", {includeMdMessage: true})
-        expect(err.message).to.eq("`foo`\n\nbar")
-        expect(err.mdMessage).to.eq("`foo`\n\nbar")
-
-    it "returns string msg when no includeMdMessage", ->
-      err = $errUtils.formatErrMsg("`foo`\n\nbar")
-      expect(err).to.eq("`foo`\n\nbar")
+  context ".formatErrMsg"
 
   context ".errObjByPath", ->
+    beforeEach -> 
+      @errMsgs = {
+        command: {
+          obj: 
+            message: '{{cmd}} simple error message'
+            docsurl: 'https://on.cypress.io'
+          str: '{{cmd}} simple error message'
+          fn: (obj) ->
+            """
+            #{obj.cmd} simple error message
+            """
+        }
+      }
+
     it "returns obj when err is object", ->
-      msg = $errUtils.errMsgByPath('uncaught.fromApp')
-      expect(msg).to.be.an.object
+      obj = $errUtils.errObjByPath(@errMsgs, 'command.obj', {
+        cmd: 'click'
+      })
+      expect(obj).to.deep.eq({
+        message: 'click simple error message'
+        docsurl: 'https://on.cypress.io'
+      })
 
     it "returns obj when err is string", ->
-      msg = $errUtils.errMsgByPath('chai.match_invalid_argument', {
-        regExp: 'foo'
+      obj = $errUtils.errObjByPath(@errMsgs, 'command.str', {
+        cmd: 'click'
       })
 
-      expect(msg).to.be.an.object
+      expect(obj).to.deep.eq({
+        message: 'click simple error message'
+      })
 
-    it "returns obj when err is function"
+    it "returns obj when err is function", ->
+      obj = $errUtils.errObjByPath(@errMsgs, 'command.fn', {
+        cmd: 'click'
+      })
 
-  context ".errMsgByPath", ->
+      expect(obj).to.deep.eq({
+        message: 'click simple error message'
+      })
+
+  context ".getErrMsgWithObjByPath", ->
+    beforeEach -> 
+      @errMsgs = {
+        command: {
+          obj: 
+            message: '{{cmd}} simple error message'
+            docsurl: ''
+          str: '{{cmd}} simple error message'
+          fn: (obj) ->
+            """
+            #{obj.cmd} simple error message
+            """
+        }
+      }
+
     it "returns the message when err is object", ->
-      msg = $errUtils.errMsgByPath('uncaught.fromApp')
-      expect(msg).to.include("This error originated from your application code, not from Cypress.")
+      msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.obj', {
+        cmd: 'click'
+      })
+      expect(msg).to.eq("click simple error message")
 
     it "returns the message when err is string", ->
-      msg = $errUtils.errMsgByPath('chai.match_invalid_argument', {
-        regExp: 'foo'
+      msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.str', {
+        cmd: 'click'
       })
 
-      expect(msg).to.eq("`match` requires its argument be a `RegExp`. You passed: `foo`")
+      expect(msg).to.eq("click simple error message")
 
-    it "returns the message when err is function"
+    it "returns the message when err is function", ->
+      msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.str', {
+        cmd: 'click'
+      })
+
+      expect(msg).to.eq("click simple error message")
 
   context ".getCodeFrame", ->
     it "returns a code frame with syntax highlighting", ->

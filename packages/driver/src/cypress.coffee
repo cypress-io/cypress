@@ -408,7 +408,7 @@ class $Cypress
           ## attaching long stace traces
           ## which otherwise make this err
           ## unusably long
-          err = $errUtils.cloneErr(e)
+          err = $errUtils.makeErrFromObj(e)
           err.__stackCleaned__ = true
           err.backend = true
           reject(err)
@@ -422,7 +422,7 @@ class $Cypress
     new Promise (resolve, reject) =>
       fn = (reply) ->
         if e = reply.error
-          err = $errUtils.cloneErr(e)
+          err = $errUtils.makeErrFromObj(e)
           err.automation = true
           reject(err)
         else
