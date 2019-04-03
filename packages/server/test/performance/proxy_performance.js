@@ -1,5 +1,5 @@
 const cp = require('child_process')
-const fs = require('fs')
+const fse = require('fs-extra')
 const os = require('os')
 const path = require('path')
 const _ = require('lodash')
@@ -20,7 +20,9 @@ const { _getArgs } = require('../../lib/browsers/chrome')
 
 const CHROME_PATH = 'google-chrome'
 const URLS_UNDER_TEST = [
-  'https://test-page-speed.cypress.io/index1000.html',
+  // TODO: disabling for now because the https tests are
+  // running too fast
+  // 'https://test-page-speed.cypress.io/index1000.html',
   'http://test-page-speed.cypress.io/index1000.html',
 ]
 
@@ -146,7 +148,7 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
   let args = defaultArgs.concat([
     `--remote-debugging-port=${cdpPort}`,
-    `--user-data-dir=${fs.mkdtempSync(path.join(os.tmpdir(), 'cy-perf-'))}`,
+    `--user-data-dir=${fse.mkdtempSync(path.join(os.tmpdir(), 'cy-perf-'))}`,
   ])
 
   if (testCase.disableHttp2) {
@@ -248,7 +250,19 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
         const runtime = Number(testCase['Total'].replace('ms', ''))
 
-        return runtime
+        const storeHar = Promise.method(() => {
+          const artifacts = process.env.CIRCLE_ARTIFACTS
+
+          if (artifacts) {
+            return fse.ensureDir(artifacts)
+            .then(() => {
+              return fse.writeJson(testCase.name, har)
+            })
+          }
+        })
+
+        return storeHar()
+        .return(runtime)
       })
     })
   }
@@ -282,6 +296,10 @@ describe('Proxy Performance', function () {
           projectRoot: '/tmp/a',
         }).then((config) => {
           config.port = CY_PROXY_PORT
+
+          // turn off morgan
+          config.morgan = false
+
           cyServer = Server()
 
           return cyServer.open(config)
@@ -300,6 +318,8 @@ describe('Proxy Performance', function () {
         // run baseline test
         return runBrowserTest(urlUnderTest, testCases[0])
         .then((runtime) => {
+          debug('baseline runtime total is: ', runtime)
+
           baseline = runtime
         })
       })
