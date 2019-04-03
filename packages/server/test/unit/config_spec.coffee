@@ -851,6 +851,7 @@ describe "lib/config", ->
       cfg = {
         foo: "bar"
         baz: "quux"
+        quux: "foo"
         lol: 1234
         env: {
           a: "a"
@@ -859,6 +860,7 @@ describe "lib/config", ->
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "quux", from: "cli" }
+          quux: { value: "foo", from: "default" }
           lol: { value: 1234,  from: "env" }
           env: {
             a: { value: "a", from: "config" }
@@ -869,6 +871,7 @@ describe "lib/config", ->
 
       overrides = {
         baz: "baz"
+        quux: ["bar", "quux"]
         env: {
           b: "bb"
           c: "c"
@@ -879,6 +882,7 @@ describe "lib/config", ->
         foo: "bar"
         baz: "baz"
         lol: 1234
+        quux: ["bar", "quux"]
         env: {
           a: "a"
           b: "bb"
@@ -887,6 +891,7 @@ describe "lib/config", ->
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "baz", from: "plugin" }
+          quux: { value: ["bar", "quux"], from: "plugin" }
           lol: { value: 1234,  from: "env" }
           env: {
             a: { value: "a", from: "config" }

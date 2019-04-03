@@ -288,7 +288,7 @@ module.exports = {
 
     setResolvedOn = (resolvedObj, obj) ->
       _.each obj, (val, key) ->
-        if _.isObject(val)
+        if _.isObject(val) && !_.isArray(val)
           ## recurse setting overrides
           ## inside of this nested objected
           setResolvedOn(resolvedObj[key], val)
