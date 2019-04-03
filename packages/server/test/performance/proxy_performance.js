@@ -195,7 +195,11 @@ const runBrowserTest = (urlUnderTest, testCase) => {
     if (artifacts) {
       return fse.ensureDir(artifacts)
       .then(() => {
-        return fse.writeJson(sanitizeFilename(name), har)
+        const pathToFile = path.join(artifacts, sanitizeFilename(`${name}.har`))
+
+        debug('saving har to path:', pathToFile)
+
+        return fse.writeJson(pathToFile, har)
       })
     }
   })
