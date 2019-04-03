@@ -41,6 +41,7 @@ configKeys = toWords """
   port                            supportFolder
   reporter                        videosFolder
   reporterOptions
+  ignoreTestFiles
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
   blacklistHosts                  pageLoadTimeout
