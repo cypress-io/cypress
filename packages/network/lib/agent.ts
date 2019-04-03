@@ -1,13 +1,12 @@
-import _ from 'lodash'
-import Bluebird from 'bluebird'
 import debugModule from 'debug'
-import { getAddress } from './connect'
-import { getProxyForUrl } from 'proxy-from-env'
 import http from 'http'
 import https from 'https'
+import _ from 'lodash'
 import net from 'net'
+import { getProxyForUrl } from 'proxy-from-env'
 import tls from 'tls'
 import url from 'url'
+import { getAddress } from './connect'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -17,7 +16,11 @@ interface RequestOptionsWithProxy extends http.RequestOptions {
   proxy: string
 }
 
-export function _buildConnectReqHead(hostname: string, port: string, proxy: url.Url) {
+type FamilyCache = {
+  [host: string] : 4 | 6
+}
+
+export function buildConnectReqHead(hostname: string, port: string, proxy: url.Url) {
   const connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
 
   connectReq.push(`Host: ${hostname}:${port}`)
@@ -29,7 +32,7 @@ export function _buildConnectReqHead(hostname: string, port: string, proxy: url.
   return connectReq.join(CRLF) + _.repeat(CRLF, 2)
 }
 
-export function _createProxySock (proxy: url.Url) {
+export const createProxySock = (proxy: url.Url) => {
   if (proxy.protocol === 'http:') {
     return net.connect(Number(proxy.port || 80), proxy.hostname)
   }
@@ -43,18 +46,18 @@ export function _createProxySock (proxy: url.Url) {
   throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
 }
 
-export function isRequestHttps(options: http.RequestOptions) {
+export const isRequestHttps = (options: http.RequestOptions) => {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
   return _.get(options, '_defaultAgent.protocol') === 'https:' || (options.href || '').slice(0, 6) === 'https'
 }
 
-export function isResponseStatusCode200(head: string) {
+export const isResponseStatusCode200 = (head: string) => {
   // read status code from proxy's response
   const matches = head.match(statusCodeRe)
   return _.get(matches, 1) === '200'
 }
 
-export function _regenerateRequestHead(req: http.ClientRequest) {
+export const regenerateRequestHead = (req: http.ClientRequest) => {
   delete req._header
   req._implicitHeader()
   if (req.output && req.output.length > 0) {
@@ -65,15 +68,76 @@ export function _regenerateRequestHead(req: http.ClientRequest) {
   }
 }
 
+const getFirstWorkingFamily = (
+  { port, host }: http.RequestOptions,
+  familyCache: FamilyCache,
+  cb: Function
+) => {
+  // this is a workaround for localhost (and potentially others) having invalid
+  // A records but valid AAAA records. here, we just cache the family of the first
+  // returned A/AAAA record for a host that we can establish a connection to.
+  // https://github.com/cypress-io/cypress/issues/112
+
+  const isIP = net.isIP(host)
+  if (isIP) {
+    // isIP conveniently returns the family of the address
+    return cb(isIP)
+  }
+
+  if (process.env.HTTP_PROXY) {
+    // can't make direct connections through the proxy, this won't work
+    return cb()
+  }
+
+  if (familyCache[host]) {
+    return cb(familyCache[host])
+  }
+
+  return getAddress(port, host)
+  .then((firstWorkingAddress: net.Address) => {
+    familyCache[host] = firstWorkingAddress.family
+    return cb(firstWorkingAddress.family)
+  })
+  .catch(() => {
+    return cb()
+  })
+}
+
+const addRequest = http.Agent.prototype.addRequest
+
+http.Agent.prototype.addRequest = function (req, options) {
+  // get all the TCP handles for the free sockets
+  const hasNullHandle = _
+  .chain(this.freeSockets)
+  .values()
+  .flatten()
+  .find((socket) => {
+    return !socket._handle
+  })
+  .value()
+
+  // if any of our freeSockets have a null handle
+  // then immediately return on nextTick to prevent
+  // a node 8.2.1 bug where socket._handle is null
+  // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
+  // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
+  if (hasNullHandle) {
+    return process.nextTick(() => {
+      this.addRequest(req, options)
+    })
+  }
+
+  return addRequest.call(this, req, options)
+}
+
 export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
-  familyCache: { [host: string] : 4 | 6 } = {}
+  familyCache: FamilyCache = {}
 
   constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
     this.httpAgent = new HttpAgent(httpOpts)
     this.httpsAgent = new HttpsAgent(httpsOpts)
-    this._getFirstWorkingFamily = Bluebird.method(this._getFirstWorkingFamily)
   }
 
   // called by Node.js whenever a new request is made internally
@@ -97,8 +161,7 @@ export class CombinedAgent {
 
     debug(`addRequest called for ${options.href}`)
 
-    this._getFirstWorkingFamily(options)
-    .then((family: number) => {
+    return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
       options.family = family
 
       if (isHttps) {
@@ -107,35 +170,6 @@ export class CombinedAgent {
 
       this.httpAgent.addRequest(req, options)
     })
-  }
-
-  _getFirstWorkingFamily({ port, host }: http.RequestOptions) {
-    // this is a workaround for localhost (and potentially others) having invalid
-    // A records but valid AAAA records. here, we just cache the family of the first
-    // returned A/AAAA record for a host that we can establish a connection to.
-    // https://github.com/cypress-io/cypress/issues/112
-
-    const isIP = net.isIP(host)
-    if (isIP) {
-      // isIP conveniently returns the family of the address
-      return isIP
-    }
-
-    if (process.env.HTTP_PROXY) {
-      // can't make direct connections through the proxy, this won't work
-      return
-    }
-
-    if (this.familyCache[host]) {
-      return this.familyCache[host]
-    }
-
-    return getAddress(port, host)
-    .then((firstWorkingAddress: net.Address) => {
-      this.familyCache[host] = firstWorkingAddress.family
-      return firstWorkingAddress.family
-    })
-    .catchReturn()
   }
 }
 
@@ -182,7 +216,7 @@ class HttpAgent extends http.Agent {
     // node has queued an HTTP message to be sent already, so we need to regenerate the
     // queued message with the new path and headers
     // https://github.com/TooTallNate/node-http-proxy-agent/blob/master/index.js#L93
-    _regenerateRequestHead(req)
+    regenerateRequestHead(req)
 
     options.port = Number(proxy.port || 80)
     options.host = proxy.hostname || 'localhost'
@@ -229,7 +263,7 @@ class HttpsAgent extends https.Agent {
     const port = options.uri.port || '443'
     const hostname = options.uri.hostname || 'localhost'
 
-    const proxySocket = _createProxySock(proxy)
+    const proxySocket = createProxySock(proxy)
 
     const onClose = () => {
       onError(new Error("Connection closed while sending request to upstream proxy"))
@@ -274,7 +308,7 @@ class HttpsAgent extends https.Agent {
     proxySocket.once('close', onClose)
     proxySocket.once('data', onData)
 
-    const connectReq = _buildConnectReqHead(hostname, port, proxy)
+    const connectReq = buildConnectReqHead(hostname, port, proxy)
 
     proxySocket.write(connectReq)
   }

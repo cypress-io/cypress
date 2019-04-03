@@ -21,6 +21,9 @@ declare module 'http' {
     createSocket(req: ClientRequest, options: RequestOptions, cb: SocketCallback): void
     createConnection(options: RequestOptions, cb: Optional<SocketCallback>): void
     protocol: 'http:' | 'https:' | string
+    freeSockets: {
+      [key: string]: Socket[]
+    }
   }
 
   interface ClientRequest {
@@ -51,10 +54,18 @@ declare module 'https' {
 }
 
 declare module 'net' {
+  type family = 4 | 6
+  type TCPSocket = {}
+
   interface Address {
     address: string
-    family: 4 | 6
+    family: family
   }
+
+  interface Socket {
+    _handle: TCPSocket | null
+  }
+
 }
 
 declare interface Object {
@@ -62,7 +73,6 @@ declare interface Object {
 }
 
 declare type Optional<T> = T | void
-
 
 declare module 'plist' {
   interface Plist {
