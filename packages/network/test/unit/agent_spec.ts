@@ -1,24 +1,20 @@
 import Bluebird from 'bluebird'
 import chai from 'chai'
-import {
-  CombinedAgent,
-  _buildConnectReqHead,
-  _createProxySock,
-  isRequestHttps,
-  isResponseStatusCode200,
-  _regenerateRequestHead
-} from '../../lib/agent'
-import DebuggingProxy from '@cypress/debugging-proxy'
 import http from 'http'
 import https from 'https'
-import Io from '@packages/socket'
 import net from 'net'
 import request from 'request-promise'
-import { Servers, AsyncServer } from '../support/servers'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import tls from 'tls'
 import url from 'url'
+import DebuggingProxy from '@cypress/debugging-proxy'
+import Io from '@packages/socket'
+import {
+    buildConnectReqHead, createProxySock, isRequestHttps, isResponseStatusCode200,
+    regenerateRequestHead, CombinedAgent
+} from '../../lib/agent'
+import { AsyncServer, Servers } from '../support/servers'
 
 const expect = chai.expect
 chai.use(sinonChai)
@@ -273,9 +269,9 @@ describe('lib/agent', function() {
     })
   })
 
-  context("._buildConnectReqHead", function() {
+  context(".buildConnectReqHead", function() {
     it('builds the correct request', function() {
-      const head = _buildConnectReqHead('foo.bar', '1234', {})
+      const head = buildConnectReqHead('foo.bar', '1234', {})
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
         'Host: foo.bar:1234',
@@ -284,7 +280,7 @@ describe('lib/agent', function() {
     })
 
     it('can do Proxy-Authorization', function() {
-      const head = _buildConnectReqHead('foo.bar', '1234', {
+      const head = buildConnectReqHead('foo.bar', '1234', {
         auth: 'baz:quux'
       })
       expect(head).to.eq([
@@ -296,25 +292,25 @@ describe('lib/agent', function() {
     })
   })
 
-  context("._createProxySock", function() {
+  context(".createProxySock", function() {
     it("creates a `net` socket for an http url", function() {
       sinon.stub(net, 'connect')
       const proxy = url.parse('http://foo.bar:1234')
-      _createProxySock(proxy)
+      createProxySock(proxy)
       expect(net.connect).to.be.calledWith(1234, 'foo.bar')
     })
 
     it("creates a `tls` socket for an https url", function() {
       sinon.stub(tls, 'connect')
       const proxy = url.parse('https://foo.bar:1234')
-      _createProxySock(proxy)
+      createProxySock(proxy)
       expect(tls.connect).to.be.calledWith(1234, 'foo.bar')
     })
 
     it("throws on unsupported proxy protocol", function() {
       const proxy = url.parse('socksv5://foo.bar:1234')
       try {
-        _createProxySock(proxy)
+        createProxySock(proxy)
         throw new Error("Shouldn't be reached")
       } catch (e) {
         expect(e.message).to.eq("Unsupported proxy protocol: socksv5:")
@@ -383,7 +379,7 @@ describe('lib/agent', function() {
     })
   })
 
-  context("._regenerateRequestHead", function() {
+  context(".regenerateRequestHead", function() {
     it("regenerates changed request head", () => {
       const spy = sinon.spy(http.globalAgent, 'createSocket')
       return request({
@@ -406,7 +402,7 @@ describe('lib/agent', function() {
         req.path = 'http://quuz.quux.invalid/abc?def=123'
         req.setHeader('Host', 'foo.fleem.invalid')
         req.setHeader('bing', 'bang')
-        _regenerateRequestHead(req)
+        regenerateRequestHead(req)
         expect(req._header).to.equal([
           'GET http://quuz.quux.invalid/abc?def=123 HTTP/1.1',
           'Host: foo.fleem.invalid',
