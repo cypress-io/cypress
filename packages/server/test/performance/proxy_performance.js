@@ -276,6 +276,9 @@ describe('Proxy Performance', function () {
   this.timeout(240 * 1000)
 
   beforeEach(function () {
+    this.timeout(240 * 1000)
+    this.currentTest.timeout(240 * 1000)
+
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   })
 
