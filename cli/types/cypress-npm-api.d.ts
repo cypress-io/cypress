@@ -500,5 +500,5 @@ declare module 'cypress' {
 
   // export Cypress NPM module interface
   const cypress: CypressNpmApi
-  export default cypress
+  export = cypress
 }
