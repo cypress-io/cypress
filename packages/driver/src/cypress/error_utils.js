@@ -53,13 +53,11 @@ module.exports = {
     err2.name = obj.name
     err2.stack = obj.stack
 
-    for (let prop of Object.keys(obj || {})) {
-      const val = obj[prop]
-
+    _.each(obj, (val, prop) => {
       if (!err2[prop]) {
         err2[prop] = val
       }
-    }
+    })
 
     return err2
   },
@@ -196,14 +194,14 @@ module.exports = {
     return errObj
   },
 
-  errMsgByPath (errPath, options) {
+  errMsgByPath (errPath, args) {
     let errMessage
 
     if (!(errMessage = this.getObjValueByPath($errorMessages, errPath))) {
       throw new Error(`Error message path: '${errPath}' does not exist`)
     }
 
-    return this.formatErrMsg(errMessage, options)
+    return this.formatErrMsg(errMessage, args)
   },
 
   //# TODO: This isn't in use for the reporter,

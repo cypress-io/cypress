@@ -1,4 +1,5 @@
 $errUtils = require("../../../../src/cypress/error_utils.js")
+$errorMessages = Cypress.errorMessages
 
 describe "driver/src/cypress/error_utils", ->
   context ".appendErrMsg", ->
@@ -58,7 +59,7 @@ describe "driver/src/cypress/error_utils", ->
       expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
 
   context ".cloneErr", ->
-    it "copies properies, message, stack", ->
+    it "copies properties, message, stack", ->
       obj = {
         stack: "stack"
         message: "message"
@@ -68,30 +69,88 @@ describe "driver/src/cypress/error_utils", ->
 
       err = $errUtils.cloneErr(obj)
 
-      expect(err).to.be.instanceof(top.Error)
+      expect(err).to.be.instanceof(window.Error)
 
       for key, val of obj
         expect(err[key], "key: #{key}").to.eq(obj[key])
 
   context ".throwErr", ->
-    it "throws err", ->
-      fn = ->
-        $errUtils.throwErrByPath('dom.animating', { args: {
-          cmd: 'click',
-          node: '<span></span>'
-        }})
-
-      expect(fn).to.throw()
+    it "throws the error as sent", ->
+      try
+        $errUtils.throwErr("Something unexpected")
+      catch e
+        expect(e.message).to.include "Something unexpected"
+        expect(e.name).to.eq "CypressError"
 
   context ".throwErrByPath", ->
-    it "throws err", ->
-      fn = ->
-        $errUtils.throwErrByPath('dom.animating', { args: {
-          cmd: 'click',
-          node: '<span></span>'
-        }})
+    beforeEach ->
+      $errorMessages.__test_errors = {
+        simple: "This is a simple error message"
+        with_args: "The has args like '{{foo}}' and {{bar}}"
+        with_multi_args: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
+      }
 
-      expect(fn).to.throw()
+    describe "when error message path does not exist", ->
+      it "has an err.name of InternalError", ->
+        try
+          $errUtils.throwErrByPath("not.there")
+        catch e
+          expect(e.name).to.eq "InternalError"
+
+      it "has the right message", ->
+        try
+          $errUtils.throwErrByPath("not.there")
+        catch e
+          expect(e.message).to.include "Error message path 'not.there' does not exist"
+
+    describe "when error message path exists", ->
+      it "has an err.name of CypressError", ->
+        try
+          $errUtils.throwErrByPath("__test_errors.simple")
+        catch e
+          expect(e.name).to.eq "CypressError"
+
+      it "has the right message", ->
+        try
+          $errUtils.throwErrByPath("__test_errors.simple")
+        catch e
+          expect(e.message).to.include "This is a simple error message"
+
+    describe "when args are provided for the error", ->
+      it "uses them in the error message", ->
+        try
+          $errUtils.throwErrByPath("__test_errors.with_args", {
+            args: { foo: "foo", bar: ["bar", "qux"]  }
+          })
+        catch e
+          expect(e.message).to.include "The has args like 'foo' and bar,qux"
+
+    describe "when args are provided for the error and some are used multiple times in message", ->
+
+      it "uses them in the error message", ->
+        try
+          $errUtils.throwErrByPath("__test_errors.with_multi_args", {
+            args: { foo: "foo", bar: ["bar", "qux"]  }
+          })
+        catch e
+          expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
+
+    describe "when onFail is provided as a function", ->
+      it "attaches the function to the error", ->
+        onFail = ->
+        try
+          $errUtils.throwErrByPath("window.iframe_undefined", { onFail })
+        catch e
+          expect(e.onFail).to.equal onFail
+
+    describe "when onFail is provided as a command", ->
+      it "attaches the handler to the error", ->
+        command = { error: @sandbox.spy() }
+        try
+          $errUtils.throwErrByPath("window.iframe_undefined", { onFail: command })
+        catch e
+          e.onFail("the error")
+          expect(command.error).to.be.calledWith("the error")
 
   context ".formatErrMsg", ->
     it "returns obj with mdMessage when includeMdMessage", ->
@@ -184,3 +243,39 @@ describe "driver/src/cypress/error_utils", ->
     it "escapes backticks", ->
       md = "`foo`"
       expect($errUtils.escapeErrMarkdown(md)).to.equal("\\`foo\\`")
+
+  context ".getObjValueByPath", ->
+    beforeEach ->
+      @obj =
+        foo: "foo"
+        bar:
+          baz:
+            qux: "qux"
+
+    it "throws if object not provided as first argument", ->
+      fn = ->
+        $errUtils.getObjValueByPath("foo")
+      
+      expect(fn).to.throw "The first parameter to utils.getObjValueByPath() must be an object"
+
+    it "throws if path not provided as second argument", ->
+      fn = =>
+        $errUtils.getObjValueByPath(@obj)
+      
+      expect(fn).to.throw "The second parameter to utils.getObjValueByPath() must be a string"
+
+    it "returns value for shallow path", ->
+      objVal = $errUtils.getObjValueByPath @obj, "foo"
+      expect(objVal).to.equal "foo"
+
+    it "returns value for deeper path", ->
+      objVal = $errUtils.getObjValueByPath @obj, "bar.baz.qux"
+      expect(objVal).to.equal "qux"
+
+    it "returns undefined for non-existent shallow path", ->
+      objVal = $errUtils.getObjValueByPath @obj, "nope"
+      expect(objVal).to.be.undefined
+
+    it "returns undefined for non-existent deeper path", ->
+      objVal = $errUtils.getObjValueByPath @obj, "bar.baz.nope"
+      expect(objVal).to.be.undefined
