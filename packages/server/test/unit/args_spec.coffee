@@ -347,12 +347,19 @@ describe "lib/util/args", ->
 
     it "copies lowercase proxy vars to uppercase", ->
       process.env.http_proxy = "http://foo-bar.baz:123"
+      process.env.https_proxy = "https://foo-bar.baz:123"
+      process.env.no_proxy = "http://no-proxy.holla"
       expect(process.env.HTTP_PROXY).to.be.undefined
+      expect(process.env.HTTPS_PROXY).to.be.undefined
+      expect(process.env.NO_PROXY).to.be.undefined
+
       options = @setup()
+
       expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
+      expect(process.env.HTTPS_PROXY).to.eq "https://foo-bar.baz:123"
+      expect(process.env.NO_PROXY).to.eq "http://no-proxy.holla"
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq "localhost"
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
     afterEach ->
