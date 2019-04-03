@@ -130,7 +130,7 @@ buildCypressApp = (platform, version, options = {}) ->
       .then ->
         # keep everything except win32-ia32, win32-x64, and ffmpeg
         ffmpegInstallerPath = path.join(serverFolder, "node_modules", "@ffmpeg-installer")
-        fs.readdir(path.join)
+        fs.readdir(ffmpegInstallerPath)
         .then(entities) ->
           keepFolders = [
             'win32-ia32',
