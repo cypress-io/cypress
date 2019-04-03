@@ -117,6 +117,8 @@ const getResultsFromHar = (har, testCase) => {
   let mins = {}
   let maxes = {}
 
+  const keys = ['receive', 'wait', 'send']
+
   const aggTimings = entries.reduce((prev, cur) => {
     cur = cur.timings
     Object.keys(cur).forEach((timingKey) => {
@@ -135,12 +137,10 @@ const getResultsFromHar = (har, testCase) => {
     return prev
   }, {})
 
-  Object.keys(aggTimings).forEach((timingKey) => {
-    if (!['receive', 'wait', 'send'].find((x) => {
-      return x === timingKey
-    })) return
-
-    testCase[`Avg ${timingKey}`] = `${Math.round(aggTimings[timingKey] / entries.length)}ms`
+  _.forEach(aggTimings, (value, timingKey) => {
+    if (_.includes(keys, timingKey)) {
+      testCase[`Avg ${timingKey}`] = `${Math.round(value / entries.length)}ms`
+    }
   })
 }
 
@@ -187,6 +187,17 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
   const proc = cp.spawn(cmd, args, {
     stdio: 'ignore',
+  })
+
+  const storeHar = Promise.method((name, har) => {
+    const artifacts = process.env.CIRCLE_ARTIFACTS
+
+    if (artifacts) {
+      return fse.ensureDir(artifacts)
+      .then(() => {
+        return fse.writeJson(sanitizeFilename(name), har)
+      })
+    }
   })
 
   const runHar = () => {
@@ -238,12 +249,6 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
         harCapturer.on('har', resolve)
       })
-      .catch((err) => {
-        // sometimes chrome takes surprisingly long, just reconn
-        debug('Chrome connection failed: ', err)
-
-        return runHar()
-      })
       .then((har) => {
         proc.kill(9)
         debug('Received HAR from Chrome')
@@ -251,19 +256,14 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
         const runtime = Number(testCase['Total'].replace('ms', ''))
 
-        const storeHar = Promise.method(() => {
-          const artifacts = process.env.CIRCLE_ARTIFACTS
-
-          if (artifacts) {
-            return fse.ensureDir(artifacts)
-            .then(() => {
-              return fse.writeJson(sanitizeFilename(testCase.name), har)
-            })
-          }
-        })
-
-        return storeHar()
+        return storeHar(testCase.name, har)
         .return(runtime)
+      })
+      .catch({ code: 'ECONNREFUSED' }, (err) => {
+        // sometimes chrome takes surprisingly long, just reconn
+        debug('Chrome connection failed: ', err)
+
+        return runHar()
       })
     })
   }
