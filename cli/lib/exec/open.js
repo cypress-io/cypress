@@ -19,6 +19,10 @@ module.exports = {
       args.push('--config', options.config)
     }
 
+    if (options.browser) {
+      args.push('--browser', options.browser)
+    }
+
     if (options.port) {
       args.push('--port', options.port)
     }

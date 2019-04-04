@@ -82,14 +82,21 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
-    when "BROWSER_NOT_FOUND"
+    when "BROWSER_NOT_FOUND_BY_NAME"
       """
-      Can't run because you've entered an invalid browser.
+      Can't run because you've entered an invalid browser name.
 
       Browser: '#{arg1}' was not found on your system.
 
       Available browsers found are: #{arg2}
       """
+    when "BROWSER_NOT_FOUND_BY_PATH"
+      msg = """
+      We could not identify a known browser at the path you provided: `#{arg1}`
+
+      The output from the command we ran was:
+      """
+      return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
       Warning: Cypress can only record videos when running headlessly.
@@ -420,13 +427,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_RECORD_KEY_NOT_VALID"
       """
-      We failed trying to authenticate this project: #{chalk.blue(arg2)}
-
-      Your Record Key is invalid: #{chalk.yellow(arg1)}
+      Your Record Key #{chalk.yellow(arg1)} is not valid with this project: #{chalk.blue(arg2)}
 
       It may have been recently revoked by you or another user.
 
-      Please log into the Dashboard to see the updated token.
+      Please log into the Dashboard to see the valid record keys.
 
       https://on.cypress.io/dashboard/projects/#{arg2}
       """
@@ -713,6 +718,19 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
 
       #{arg1.link}
+      """
+    when "FIXTURE_NOT_FOUND"
+      """
+      A fixture file could not be found at any of the following paths:
+
+       > #{arg1}
+       > #{arg1}{{extension}}
+
+      Cypress looked for these file extensions at the provided path:
+
+       > #{arg2.join(', ')}
+
+      Provide a path to an existing fixture file.
       """
 
 get = (type, arg1, arg2) ->

@@ -158,22 +158,32 @@ export default class Project {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
       })
-      // if they already have a browser chosen
-      // that's been saved in localStorage, then select that
+      // use a custom browser if one is supplied. or, if they already have
+      // a browser chosen that's been saved in localStorage, then select that
       // otherwise just do the default.
-      if (localStorage.getItem('chosenBrowser')) {
-        this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
-      } else {
-        this.setChosenBrowser(this.defaultBrowser)
+      const customBrowser = _.find(this.browsers, { custom: true })
+
+      if (customBrowser) {
+        return this.setChosenBrowser(customBrowser, { save: false })
       }
+
+      if (localStorage.getItem('chosenBrowser')) {
+        return this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
+      }
+
+      return this.setChosenBrowser(this.defaultBrowser)
     }
   }
 
-  @action setChosenBrowser (browser) {
+  @action setChosenBrowser (browser, { save } = {}) {
     _.each(this.browsers, (browser) => {
       browser.isChosen = false
     })
-    localStorage.setItem('chosenBrowser', browser.name)
+
+    if (save !== false) {
+      localStorage.setItem('chosenBrowser', browser.name)
+    }
+
     browser.isChosen = true
   }
 

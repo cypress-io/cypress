@@ -1,10 +1,12 @@
 _ = Cypress._
 Promise = Cypress.Promise
+RESPONSE_TIMEOUT = 22222
 
 describe "src/cy/commands/request", ->
   context "#request", ->
     beforeEach ->
       cy.stub(Cypress, "backend").callThrough()
+      Cypress.config("responseTimeout", RESPONSE_TIMEOUT)
 
     describe "argument signature", ->
       beforeEach ->
@@ -27,6 +29,7 @@ describe "src/cy/commands/request", ->
             method: "GET"
             gzip: true
             followRedirect: true
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -48,6 +51,17 @@ describe "src/cy/commands/request", ->
             headers: {
               "x-token": "abc123"
             }
+            timeout: RESPONSE_TIMEOUT
+          })
+
+      it "accepts object with url + timeout", ->
+        cy.request({url: "http://localhost:8000/foo", timeout: 23456}).then ->
+          @expectOptionsToBe({
+            url: "http://localhost:8000/foo"
+            method: "GET"
+            gzip: true
+            followRedirect: true
+            timeout: 23456
           })
 
       it "accepts string url", ->
@@ -57,6 +71,7 @@ describe "src/cy/commands/request", ->
             method: "GET"
             gzip: true
             followRedirect: true
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url", ->
@@ -66,6 +81,7 @@ describe "src/cy/commands/request", ->
             method: "DELETE"
             gzip: true
             followRedirect: true
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url + body", ->
@@ -77,6 +93,7 @@ describe "src/cy/commands/request", ->
             json: true
             gzip: true
             followRedirect: true
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + body", ->
@@ -88,6 +105,7 @@ describe "src/cy/commands/request", ->
             json: true
             gzip: true
             followRedirect: true
+            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + string body", ->
@@ -98,6 +116,7 @@ describe "src/cy/commands/request", ->
             body: "foo"
             gzip: true
             followRedirect: true
+            timeout: RESPONSE_TIMEOUT
           })
 
       context "method normalization", ->
@@ -108,6 +127,7 @@ describe "src/cy/commands/request", ->
               method: "POST"
               gzip: true
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "url normalization", ->
@@ -120,6 +140,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "uses localhost urls", ->
@@ -129,15 +150,17 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
-        it "uses wwww urls", ->
+        it "uses www urls", ->
           cy.request("www.foo.com").then ->
             @expectOptionsToBe({
               url: "http://www.foo.com/"
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl when origin is empty", ->
@@ -150,6 +173,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl over current origin", ->
@@ -162,6 +186,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "gzip", ->
@@ -175,6 +200,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: false
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "auth", ->
@@ -195,6 +221,7 @@ describe "src/cy/commands/request", ->
                 user: "brian"
                 pass: "password"
               }
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "followRedirect", ->
@@ -206,6 +233,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: true
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "can be set to false", ->
@@ -219,6 +247,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: false
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "normalizes followRedirects -> followRedirect", ->
@@ -232,6 +261,7 @@ describe "src/cy/commands/request", ->
               method: "GET"
               gzip: true
               followRedirect: false
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "qs", ->
@@ -249,6 +279,7 @@ describe "src/cy/commands/request", ->
               gzip: true
               followRedirect: true
               qs: {foo: "bar"}
+              timeout: RESPONSE_TIMEOUT
             })
 
       context "form", ->
@@ -268,6 +299,7 @@ describe "src/cy/commands/request", ->
               form: true
               followRedirect: true
               body: {foo: "bar"}
+              timeout: RESPONSE_TIMEOUT
             })
 
         it "accepts a string for body", ->
@@ -284,6 +316,31 @@ describe "src/cy/commands/request", ->
               form: true
               followRedirect: true
               body: "foo=bar&baz=quux"
+              timeout: RESPONSE_TIMEOUT
+            })
+
+        ## https://github.com/cypress-io/cypress/issues/2923
+        it "application/x-www-form-urlencoded w/ an object body uses form: true", ->
+          cy.request({
+            url: "http://localhost:8888"
+            headers: {
+              "a": "b"
+              "Content-type": "application/x-www-form-urlencoded"
+            }
+            body: { foo: "bar" }
+          }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
+              form: true
+              followRedirect: true
+              headers: {
+                "a": "b"
+                "Content-type": "application/x-www-form-urlencoded"
+              }
+              body: { foo: "bar" }
+              timeout: RESPONSE_TIMEOUT
             })
 
     describe "failOnStatus", ->
@@ -317,6 +374,14 @@ describe "src/cy/commands/request", ->
         .then (resp) ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(401)
+
+    describe "method", ->
+      it "can use M-SEARCH method", ->
+        cy.request({
+          url: 'http://localhost:3500/dump-method',
+          method: 'm-Search'
+        }).then (res) =>
+          expect(res.body).to.contain('M-SEARCH')
 
     describe "subjects", ->
       it "resolves with response obj", ->
@@ -628,7 +693,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS")
+          expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser.")
           done()
 
         cy.request({

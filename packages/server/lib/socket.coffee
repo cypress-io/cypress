@@ -1,6 +1,5 @@
 _             = require("lodash")
 path          = require("path")
-uuid          = require("node-uuid")
 debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
@@ -337,6 +336,9 @@ class Socket
         options.onReloadConfiguration()
 
         cb() if cb
+
+      socket.on "external:open", (url) ->
+        require("electron").shell.openExternal(url)
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

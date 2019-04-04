@@ -148,9 +148,13 @@ export default {
       })
     })
 
-    localBus.on('reload:configuration', action('reload:configuration', () => {
+    localBus.on('reload:configuration', () => {
       runner.emit('reload:configuration')
-    }))
+    })
+
+    localBus.on('external:open', (url) => {
+      runner.emit('external:open', url)
+    })
   },
 
   emit (event, ...args) {

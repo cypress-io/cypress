@@ -15,7 +15,7 @@ The server is the heart of the Cypress application. All of this code represents 
 
 The [driver](../driver) and the server are the two most complex packages of Cypress.
 
-## Install
+## Installing
 
 The server's dependencies can be installed with:
 
@@ -24,7 +24,7 @@ cd packages/server
 npm install
 ```
 
-## Development
+## Developing
 
 To run Cypress:
 
@@ -71,3 +71,5 @@ To run an individual e2e test:
 ## runs tests that match "base_url"
 npm run test-e2e -- --spec base_url
 ```
+
+To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use

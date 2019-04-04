@@ -66,7 +66,7 @@ class Project extends Component {
       case C.PROJECT_RUNS:
         return <RunsList project={this.props.project} />
       case C.PROJECT_SETTINGS:
-        return <Settings project={this.props.project} />
+        return <Settings project={this.props.project} app={this.props.app}/>
       default:
         return <SpecsList project={this.props.project} />
     }
