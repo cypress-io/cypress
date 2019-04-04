@@ -95,7 +95,7 @@ const util = {
 
   loadSystemProxySettings () {
     // load user's OS-specific proxy settings in to environment vars
-    if (!_.isUndefined(process.env.HTTP_PROXY)) {
+    if (!_.isUndefined(process.env.HTTP_PROXY) || !_.isUndefined(process.env.http_proxy)) {
       // user has set proxy explicitly in environment vars, don't mess with it
       return
     }

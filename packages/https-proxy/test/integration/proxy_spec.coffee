@@ -3,7 +3,7 @@ require("../spec_helper")
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 _           = require("lodash")
-DebugProxy  = require("debugging-proxy")
+DebugProxy  = require("@cypress/debugging-proxy")
 net         = require("net")
 path        = require("path")
 Promise     = require("bluebird")

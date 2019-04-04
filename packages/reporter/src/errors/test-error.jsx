@@ -15,7 +15,7 @@ function TestError (props) {
       message='Printed output to your console'
       onClick={_onErrorClick}
     >
-      <pre className='test-error' dangerouslySetInnerHTML={{ __html: displayMessage }}></pre>
+      <pre className='test-error'>{displayMessage}</pre>
     </FlashOnClick>
   )
 }
