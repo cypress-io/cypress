@@ -258,7 +258,7 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
         const runtime = Number(testCase['Total'].replace('ms', ''))
 
-        return storeHar(testCase.name, har)
+        return storeHar(`${urlUnderTest} - ${testCase.name}`, har)
         .return(runtime)
       })
       .catch({ code: 'ECONNREFUSED' }, (err) => {
