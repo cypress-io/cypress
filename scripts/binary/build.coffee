@@ -23,6 +23,7 @@ check = require("check-more-types")
 meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
+windows = require("./util/windows")
 xvfb = require("../../cli/lib/exec/xvfb")
 linkPackages = require('../link-packages')
 
@@ -140,8 +141,9 @@ buildCypressApp = (platform, version, options = {}) ->
           console.log("removing unnecessary dependencies from @ffmpeg-installer")
           Promise.map entities, (entity) ->
             if not _.includes(keepFolders, entity)
-              console.log("removing #{entity} from @ffmpeg-installer")
-              fs.unlinkAsync(path.join(ffmpegInstallerPath, entity))
+              folderPath = path.join(ffmpegInstallerPath, entity)
+              console.log("removing #{folderPath} from @ffmpeg-installer")
+              windows.forceDelete(folderPath)
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")
