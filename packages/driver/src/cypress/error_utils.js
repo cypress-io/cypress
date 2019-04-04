@@ -117,8 +117,8 @@ const cypressErr = (err) => {
 }
 
 const normalizeMsgNewLines = (message) => {
-  //# normalize two or more new lines
-  //# into only exactly two new lines
+  //# normalize more than 2 new lines
+  //# into only exactly 2 new lines
   return _
   .chain(message)
   .split(twoOrMoreNewLinesRe)

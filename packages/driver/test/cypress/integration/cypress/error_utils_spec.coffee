@@ -85,11 +85,38 @@ describe "driver/src/cypress/error_utils", ->
   context ".throwErrByPath", ->
     beforeEach ->
       $errorMessages.__test_errors = {
-        simple: 
+        obj: 
           message: "This is a simple error message"
           docsUrl: "https://on.link.io"
-        with_args: "The has args like '{{foo}}' and {{bar}}"
-        with_multi_args: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
+        obj_with_args: 
+          message: "This has args like '{{foo}}' and {{bar}}"
+          docsUrl: "https://on.link.io"
+        obj_with_multi_args: 
+          message: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
+          docsUrl: "https://on.link.io"
+        obj_with_markdown: 
+          message: "This has markdown like `{{foo}}`, *{{bar}}*, **{{foo}}**, and _{{bar}}_"
+          docsUrl: "https://on.link.io"
+        str: "This is a simple error message"
+        str_with_args: "This has args like '{{foo}}' and {{bar}}"
+        str_with_multi_args: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
+        str_with_markdown: "This has markdown like `{{foo}}`, *{{bar}}*, **{{foo}}**, and _{{bar}}_"
+        fn: () ->
+          """
+          This is a simple error message
+          """
+        fn_with_args: (obj) ->
+          """
+          This has args like '#{obj.foo}' and #{obj.bar}
+          """
+        fn_with_multi_args: (obj) ->
+          """
+          This has args like '#{obj.foo}' and #{obj.bar}, and '#{obj.foo}' is used twice
+          """
+        fn_with_markdown: (obj) ->
+          """
+          This has markdown like `#{obj.foo}`, *#{obj.bar}*, **#{obj.foo}**, and _#{obj.bar}_
+          """
       }
 
     describe "when error message path does not exist", ->
@@ -106,42 +133,139 @@ describe "driver/src/cypress/error_utils", ->
           expect(e.message).to.include "Error message path: 'not.there' does not exist"
 
     describe "when error message path exists", ->
-      it "has an err.name of CypressError", ->
-        try
-          $errUtils.throwErrByPath("__test_errors.simple")
-        catch e
-          expect(e.name).to.eq "CypressError"
+      context "error is object", ->
+        describe "when no args are provided for the error", ->
+          it "has an err.name of CypressError", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.obj")
+            catch e
+              expect(e.name).to.eq "CypressError"
 
-      it "has the right message and docs url", ->
-        try
-          $errUtils.throwErrByPath("__test_errors.simple")
-        catch e
-          expect(e.message).to.include "This is a simple error message"
-          expect(e.docsUrl).to.include "https://on.link.io"
+          it "has the right message and docs url", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.obj")
+            catch e
+              expect(e.message).to.include "This is a simple error message"
+              expect(e.docsUrl).to.include "https://on.link.io"
+        
+        describe "when args are provided for the error", ->
+          it "uses them in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.obj_with_args", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has args like 'foo' and bar,qux"
+              expect(e.docsUrl).to.include "https://on.link.io"
 
-    describe "when args are provided for the error", ->
-      it "uses them in the error message", ->
-        try
-          $errUtils.throwErrByPath("__test_errors.with_args", {
-            foo: "foo", bar: ["bar", "qux"] 
-          })
-        catch e
-          expect(e.message).to.include "The has args like 'foo' and bar,qux"
+        describe "when args are provided for the error and some are used multiple times in message", ->
+          it "uses them in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.obj_with_multi_args", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
+              expect(e.docsUrl).to.include "https://on.link.io"
+        
+        describe "when markdown and args", ->
+          it "formats markdown in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.obj_with_markdown", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
+              expect(e.docsUrl).to.include "https://on.link.io"
 
-    describe "when args are provided for the error and some are used multiple times in message", ->
-      it "uses them in the error message", ->
-        try
-          $errUtils.throwErrByPath("__test_errors.with_multi_args", {
-            foo: "foo", bar: ["bar", "qux"] 
-          })
-        catch e
-          expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
+      context "error is string", ->
+        describe "when no args are provided for the error", ->
+          it "has an err.name of CypressError", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.str")
+            catch e
+              expect(e.name).to.eq "CypressError"
 
+          it "has the right message and docs url", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.str")
+            catch e
+              expect(e.message).to.include "This is a simple error message"
+              expect(e.docsUrl).to.be.undefined
+        
+        describe "when args are provided for the error", ->
+          it "uses them in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.str_with_args", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has args like 'foo' and bar,qux"
+
+        describe "when args are provided for the error and some are used multiple times in message", ->
+          it "uses them in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.str_with_multi_args", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
+        
+        describe "when markdown and args", ->
+          it "formats markdown in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.str_with_markdown", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
+      
+      context "error is function", ->
+        describe "when no args are provided for the error", ->
+          it "has an err.name of CypressError", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.fn")
+            catch e
+              expect(e.name).to.eq "CypressError"
+
+          it "has the right message and docs url", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.fn")
+            catch e
+              expect(e.message).to.include "This is a simple error message"
+        
+        describe "when args are provided for the error", ->
+          it "uses them in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.fn_with_args", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has args like 'foo' and bar,qux"
+
+        describe "when args are provided for the error and some are used multiple times in message", ->
+          it "uses them in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.fn_with_multi_args", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
+        
+        describe "when markdown and args", ->
+          it "formats markdown in the error message", ->
+            try
+              $errUtils.throwErrByPath("__test_errors.fn_with_markdown", {
+                foo: "foo", bar: ["bar", "qux"] 
+              })
+            catch e
+              expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
+      
     describe "when onFail is provided as a function", ->
       it "attaches the function to the error", ->
         onFail = ->
         try
-          $errUtils.throwErrByPath("window.iframe_undefined", { onFail })
+          $errUtils.throwErrByPath("__test_errors.obj", { onFail })
         catch e
           expect(e.onFail).to.equal onFail
 
@@ -149,12 +273,16 @@ describe "driver/src/cypress/error_utils", ->
       it "attaches the handler to the error", ->
         command = { error: cy.spy() }
         try
-          $errUtils.throwErrByPath("window.iframe_undefined", { onFail: command })
+          $errUtils.throwErrByPath("__test_errors.obj", { onFail: command })
         catch e
           e.onFail("the error")
           expect(command.error).to.be.calledWith("the error")
 
-  context ".formatErrMsg"
+  context ".normalizeMsgNewLines", ->
+    it "removes newlines in excess of 2 newlines", ->
+      normalizedMsg = $errUtils.normalizeMsgNewLines("one new line\ntwo new lines\n\nthree new lines\n\n\nend")
+
+      expect(normalizedMsg).to.eq("one new line\ntwo new lines\n\nthree new lines\n\nend")
 
   context ".errObjByPath", ->
     beforeEach -> 
