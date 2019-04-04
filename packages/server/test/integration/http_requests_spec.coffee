@@ -3252,7 +3252,8 @@ describe "Routes", ->
 
         expect(res.body).to.eq("OK")
 
-    it "does not fail on a big cookie", ->
+    it.only "does not fail on a big cookie", ->
+      @timeout(30000)
       nock(@server._remoteOrigin)
       .post("/login")
       .reply(200)
