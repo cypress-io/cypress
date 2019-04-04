@@ -142,8 +142,8 @@ buildCypressApp = (platform, version, options = {}) ->
           Promise.map entities, (entity) ->
             if not _.includes(keepFolders, entity)
               folderPath = path.join(ffmpegInstallerPath, entity)
-              console.log("removing #{folderPath} from @ffmpeg-installer")
-              windows.forceDelete(folderPath)
+              console.log("deleting #{folderPath}")
+              windows.forceDeleteDir(folderPath)
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")

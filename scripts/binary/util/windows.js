@@ -3,12 +3,12 @@ const Bluebird = require('bluebird')
 
 const exec = Bluebird.promisify(cp.exec)
 
-const forceDelete = function (path) {
+const forceDeleteDir = function (path) {
   // fs.unlinkAsync is unreliable on Windows, throws EPERM errors
-  // when trying to delete npm install'd files
-  return exec(`del /F /Q ${path}`)
+  // when trying to delete npm install'd folders
+  return exec(`rmdir /S /Q ${path}`)
 }
 
 module.exports = {
-  forceDelete,
+  forceDeleteDir,
 }
