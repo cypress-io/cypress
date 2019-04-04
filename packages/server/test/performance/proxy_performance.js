@@ -21,9 +21,7 @@ const { _getArgs } = require('../../lib/browsers/chrome')
 
 const CHROME_PATH = 'google-chrome'
 const URLS_UNDER_TEST = [
-  // TODO: disabling for now because the https tests are
-  // running too fast
-  // 'https://test-page-speed.cypress.io/index1000.html',
+  'https://test-page-speed.cypress.io/index1000.html',
   'http://test-page-speed.cypress.io/index1000.html',
 ]
 
