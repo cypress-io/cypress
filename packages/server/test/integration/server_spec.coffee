@@ -547,7 +547,6 @@ describe "Server", ->
         @server._onResolveUrl("http://localhost:64646", {}, @automationRequest)
         .catch (err) ->
           expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:64646")
-          expect(err.stack).to.include("._errnoException")
           expect(err.port).to.eq(64646)
           expect(err.code).to.eq("ECONNREFUSED")
 
