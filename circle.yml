@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:chrome64
+      - image: cypress/browsers:node8.15.1-chrome73
     environment:
       PLATFORM: linux
 
@@ -272,18 +272,15 @@ jobs:
           path: /tmp/cypress
 
   "server-performance-tests":
-    <<: *defaults
-    docker:
-      image: # needs an updated Chrome image for certain flags to work
-        - cypress/browsers:node8.15.1-chrome73
-    steps:
-    - attach_workspace:
-        at: ~/
-    - run: DEBUG=test:proxy-performance npm run all test-performance -- --package server
-    - store_test_results:
-        path: /tmp/cypress
-    - store_artifacts:
-        path: /tmp/artifacts
+      <<: *defaults
+      steps:
+      - attach_workspace:
+          at: ~/
+      - run: DEBUG=test:proxy-performance npm run all test-performance -- --package server
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "server-e2e-tests-1":
     <<: *defaults
