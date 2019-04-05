@@ -92,7 +92,9 @@ const mapTasks = (cmd, packages) => {
 
   let runCommand
 
-  switch (cmd) {
+  const command = cmd.split(' ', 2)[0]
+
+  switch (command) {
     case 'install':
     case 'i':
     case 'test':
