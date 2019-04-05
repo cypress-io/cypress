@@ -180,7 +180,8 @@ deploy = {
       upload.toS3({
         zipFile: options.zip,
         version: options.version,
-        platform: options.platform
+        platform: options.platform,
+        arch: options.arch
       })
 
   # purge all platforms of a desktop app for specific version

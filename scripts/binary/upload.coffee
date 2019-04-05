@@ -31,9 +31,9 @@ module.exports = {
 
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/osx64/
-  getUploadDirName: ({version, platform}) ->
+  getUploadDirName: ({version, platform, arch}) ->
     aws = @getAwsObj()
-    osName = uploadUtils.getUploadNameByOs(platform)
+    osName = uploadUtils.getUploadNameByOs(platform, arch)
     dirName = [aws.folder, version, osName, null].join("/")
     console.log("target directory %s", dirName)
     dirName
@@ -57,7 +57,8 @@ module.exports = {
         ## start adding the new ones
         ## using node's platform
         darwin: getUrl("osx64")
-        win32: getUrl("win64")
+        win32: getUrl("win32")
+        win64: getUrl("win64")
         linux: getUrl("linux64")
       }
     }
@@ -92,7 +93,7 @@ module.exports = {
     .finally ->
       fs.removeAsync(manifest)
 
-  toS3: ({zipFile, version, platform}) ->
+  toS3: ({zipFile, version, platform, arch}) ->
     console.log("#uploadToS3 ⏳")
     la(check.unemptyString(version), "expected version string", version)
     la(check.unemptyString(zipFile), "expected zip filename", zipFile)
@@ -115,7 +116,7 @@ module.exports = {
         .pipe rename (p) =>
           # rename to standard filename zipName
           p.basename = path.basename(zipName, p.extname)
-          p.dirname = @getUploadDirName({version, platform})
+          p.dirname = @getUploadDirName({version, platform, arch})
           p
         .pipe debug()
         .pipe publisher.publish(headers)

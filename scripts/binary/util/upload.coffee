@@ -116,13 +116,20 @@ purgeDesktopAppAllPlatforms = (version, zipName) ->
   Promise.mapSeries platforms, (platform) ->
     purgeDesktopAppFromCache({version, platform, zipName})
 
-getUploadNameByOs = (osName = os.platform()) ->
+getUploadNameByOs = (osName = os.platform(), platformArch = os.arch()) ->
   uploadNames = {
-    darwin: "osx64"
-    linux:  "linux64"
-    win32:  "win64"
+    darwin: {
+      "x64": "osx64"
+    },
+    linux: {
+      "x64": "linux64"
+    },
+    win32: {
+      "x64": "win64",
+      "ia32": "win32"
+    }
   }
-  name = uploadNames[osName]
+  name = _.get(uploadNames[osName], platformArch)
   if not name
     throw new Error("Cannot find upload name for OS #{osName}")
   name
