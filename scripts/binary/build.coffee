@@ -23,7 +23,6 @@ check = require("check-more-types")
 meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
-windows = require("./util/windows")
 xvfb = require("../../cli/lib/exec/xvfb")
 linkPackages = require('../link-packages')
 
@@ -118,32 +117,6 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#npmInstallPackages")
 
     packages.npmInstallAll(distDir("packages", "*"))
-    .then ->
-      if os.platform() != "win32"
-        return
-      # on windows include both versions of FFMPEG
-      console.log("installing FFMPEG win32-x64")
-      serverFolder = distDir("packages", "server")
-      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-x64")
-      .then ->
-        console.log("installing FFMPEG win32-ia32")
-        packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-ia32")
-      .then ->
-        # keep everything except win32-ia32, win32-x64, and ffmpeg
-        ffmpegInstallerPath = path.join(serverFolder, "node_modules", "@ffmpeg-installer")
-        fs.readdir(ffmpegInstallerPath)
-        .then (entities) ->
-          keepFolders = [
-            'win32-ia32',
-            # 'win32-x64',
-            'ffmpeg'
-          ]
-          console.log("removing unnecessary dependencies from @ffmpeg-installer")
-          Promise.map entities, (entity) ->
-            if not _.includes(keepFolders, entity)
-              folderPath = path.join(ffmpegInstallerPath, entity)
-              console.log("deleting #{folderPath}")
-              windows.forceDeleteDir(folderPath)
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")
