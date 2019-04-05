@@ -95,10 +95,12 @@ forceNpmInstall = (packagePath, packageToInstall, options = {}) ->
   console.log("in %s", packagePath)
   la(check.unemptyString(packageToInstall), "missing package to install")
 
+  args = ["install", "--force", packageToInstall]
+
   if options.arch
     args.push("--target_arch=#{options.arch}")
 
-  npmRun(["install", "--force", packageToInstall], packagePath)
+  npmRun(args, packagePath)
 
 removeDevDependencies = (packageFolder) ->
   packagePath = pathToPackageJson(packageFolder)
@@ -138,7 +140,7 @@ npmInstallAll = (pathToPackages, options = {}) ->
     if options.arch
       args.push("--target_arch=#{options.arch}")
 
-    npmInstall = _.partial(npmRun, )
+    npmInstall = _.partial(npmRun, args)
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
       Promise
