@@ -208,6 +208,7 @@ buildCypressApp = (platform, version, options = {}) ->
       dir
       dist
       platform
+      arch: options.arch
       appVersion: version
     })
 
