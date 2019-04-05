@@ -23,6 +23,7 @@ check = require("check-more-types")
 meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
+windows = require("./util/windows")
 xvfb = require("../../cli/lib/exec/xvfb")
 linkPackages = require('../link-packages')
 
@@ -127,7 +128,6 @@ buildCypressApp = (platform, version, options = {}) ->
       return
     ## we're compiling for a different arch than the current one, force install correct package
     ffmpegSlug = "#{os.platform()}-#{options.arch}"
-    console.log("force installing @ffmpeg-installer/#{ffmpegSlug}")
     serverFolder = distDir("packages", "server")
     packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/#{ffmpegSlug}")
     .then ->
