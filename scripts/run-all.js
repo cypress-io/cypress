@@ -189,6 +189,10 @@ module.exports = (cmd, options) => {
     return checkDirsLength(dirs, errMessage)
   })
   .then((dirs) => {
+    if (options.args) {
+      cmd += ` ${options.args}`
+    }
+
     return mapTasks(cmd, dirs)
   })
   .then((tasks) => {

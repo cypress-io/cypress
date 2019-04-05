@@ -45,14 +45,7 @@ console.log('building version', version)
 
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 
-const platformMap = {
-  'x64': 'x64',
-  'x32': 'ia32',
-}
-
-// appveyor sets `Platform`, not `platform` or `PLATFORM`...
-// https://github.com/appveyor/ci/issues/1278
-const arch = platformMap[process.env.Platform] || process.arch
+const arch = process.env.TARGET_ARCH || process.arch
 
 shell.echo(`Building for win32 ${arch}...`)
 
