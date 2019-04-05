@@ -24,6 +24,12 @@ environment:
   CF_TOKEN:
     secure: d8SQfJ2r6qrKDjYWoFg3AzgY7aL6hTuE5OIlRr0TXkcXkZzdmYCujfzIYcCQfpZg
 
+  matrix:
+    - platform: x86
+      TARGET_PLATFORM: ia32
+    - platform: x64
+      TARGET_PLATFORM: x64
+
 platform:
   - x64
   - x32
@@ -45,7 +51,7 @@ install:
   - node --version
   - npm --version
   - print-env APPVEYOR
-  - print-env PLATFORM
+  - print-env TARGET_PLATFORM
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only

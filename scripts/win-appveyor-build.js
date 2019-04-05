@@ -45,12 +45,7 @@ console.log('building version', version)
 
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 
-const platformMap = {
-  'x64': 'x64',
-  'x32': 'ia32',
-}
-
-const arch = platformMap[process.env.PLATFORM] || process.arch
+const arch = process.env.TARGET_PLATFORM || process.arch
 
 shell.echo(`Building for win32 ${arch}...`)
 
