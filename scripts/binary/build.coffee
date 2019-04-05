@@ -117,7 +117,7 @@ buildCypressApp = (platform, version, options = {}) ->
   npmInstallPackages = ->
     log("#npmInstallPackages")
 
-    packages.npmInstallAll(distDir("packages", "*"))
+    packages.npmInstallAll(distDir("packages", "*"), options)
     .then ->
       if !options.arch or os.arch() == options.arch
         ## @ffmpeg-installer will automatically install the correct package, no need to worry
@@ -129,7 +129,7 @@ buildCypressApp = (platform, version, options = {}) ->
       ## we're compiling for a different arch than the current one, force install correct package
       ffmpegSlug = "#{os.platform()}-#{options.arch}"
       serverFolder = distDir("packages", "server")
-      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/#{ffmpegSlug}")
+      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/#{ffmpegSlug}", options)
       .then ->
         ffmpegInstallerPath = path.join(serverFolder, "node_modules", "@ffmpeg-installer")
         fs.readdir(ffmpegInstallerPath)

@@ -45,6 +45,7 @@ install:
   - node --version
   - npm --version
   - print-env APPVEYOR
+  - print-env PLATFORM
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only

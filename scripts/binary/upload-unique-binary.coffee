@@ -61,7 +61,7 @@ uploadFile = (options) ->
 
 uploadUniqueBinary = (args = []) ->
   options = minimist(args, {
-    string: ["version", "file", "hash", "platform"],
+    string: ["version", "file", "hash", "platform", "arch"],
     alias: {
       version: "v",
       file: "f",
@@ -85,7 +85,7 @@ uploadUniqueBinary = (args = []) ->
   la(fs.existsSync(options.file), "cannot find file", options.file)
 
   if not options.platform
-    options.platform = uploadUtils.getUploadNameByOs()
+    options.platform = uploadUtils.getUploadNameByOs(os.platform(), options.arch || os.arch())
 
   uploadFile(options)
   .then () ->
