@@ -203,15 +203,4 @@ describe('lib/tasks/download', function () {
       return snapshot('download status errors 1', normalize(ctx.stdout.toString()))
     })
   })
-
-  it('calls loadSystemProxySettings before downloading', function () {
-    sinon.stub(fs, 'ensureDirAsync').rejects({ type: 'FAKE_ERR' })
-    sinon.spy(util, 'loadSystemProxySettings')
-
-    return download.start(this.options)
-    .catch(() => {})
-    .finally(() => {
-      expect(util.loadSystemProxySettings).to.be.calledOnce
-    })
-  })
 })
