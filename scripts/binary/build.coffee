@@ -135,7 +135,7 @@ buildCypressApp = (platform, version, options = {}) ->
         .then (entities) ->
           keepFolders = [
             'win32-ia32',
-            'win32-x64',
+            # 'win32-x64',
             'ffmpeg'
           ]
           console.log("removing unnecessary dependencies from @ffmpeg-installer")
