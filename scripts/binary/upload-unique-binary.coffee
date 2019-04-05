@@ -85,7 +85,7 @@ uploadUniqueBinary = (args = []) ->
   la(fs.existsSync(options.file), "cannot find file", options.file)
 
   if not options.platform
-    options.platform = uploadUtils.getUploadNameByOs(os.platform(), options.arch || os.arch())
+    options.platform = uploadUtils.getUploadNameByOs(process.platform, options.arch || process.arch)
 
   uploadFile(options)
   .then () ->
