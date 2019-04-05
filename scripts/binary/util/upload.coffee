@@ -1,3 +1,4 @@
+_ = require("lodash")
 path = require("path")
 awspublish = require('gulp-awspublish')
 human = require("human-interval")
