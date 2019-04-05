@@ -24,8 +24,9 @@ environment:
   CF_TOKEN:
     secure: d8SQfJ2r6qrKDjYWoFg3AzgY7aL6hTuE5OIlRr0TXkcXkZzdmYCujfzIYcCQfpZg
 
-platform: # win-appveyor-build.js cross-compiles for x32, so just need x64
+platform:
   - x64
+  - x32
 
 # https://www.appveyor.com/docs/build-cache/
 # hmm, seems there is NPM on windows problem

@@ -45,32 +45,35 @@ console.log('building version', version)
 
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 
-const buildArches = ['x64', 'ia32']
+const platformMap = {
+  'x64': 'x64',
+  'x32': 'ia32',
+}
 
-buildArches.map((arch) => {
-  shell.echo(`Building for win32 ${arch}...`)
+const arch = platformMap[process.env.PLATFORM] || process.arch
 
-  shell.cat('npm-package-url.json')
-  shell.exec(`npm run binary-build -- --platform windows --version ${version} --arch ${arch}`)
+shell.echo(`Building for win32 ${arch}...`)
 
-  // make sure we are not including dev dependencies accidentally
-  // TODO how to get the server package folder?
-  const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
+shell.cat('npm-package-url.json')
+shell.exec(`npm run binary-build -- --platform windows --version ${version} --arch ${arch}`)
 
-  shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
-  shell.exec('npm ls --prod --depth 0 || true', { cwd: serverPackageFolder })
-  const result = shell.exec('npm ls --dev --depth 0 || true', { cwd: serverPackageFolder })
+// make sure we are not including dev dependencies accidentally
+// TODO how to get the server package folder?
+const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
 
-  if (result.stdout.includes('nodemon')) {
-    console.error('Hmm, server package includes dev dependency "coveralls"')
-    console.error('which means somehow we are including dev dependencies in the output bundle')
-    console.error('see https://github.com/cypress-io/cypress/issues/2896')
-    process.exit(1)
-  }
+shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
+shell.exec('npm ls --prod --depth 0 || true', { cwd: serverPackageFolder })
+const result = shell.exec('npm ls --dev --depth 0 || true', { cwd: serverPackageFolder })
 
-  shell.exec('npm run binary-zip')
-  shell.ls('-l', '*.zip')
-  shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version} --arch ${arch}`)
-  shell.cat('binary-url.json')
-  shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')
-})
+if (result.stdout.includes('nodemon')) {
+  console.error('Hmm, server package includes dev dependency "coveralls"')
+  console.error('which means somehow we are including dev dependencies in the output bundle')
+  console.error('see https://github.com/cypress-io/cypress/issues/2896')
+  process.exit(1)
+}
+
+shell.exec('npm run binary-zip')
+shell.ls('-l', '*.zip')
+shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version} --arch ${arch}`)
+shell.cat('binary-url.json')
+shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')
