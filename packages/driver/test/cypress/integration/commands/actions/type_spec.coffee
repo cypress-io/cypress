@@ -1778,26 +1778,26 @@ describe "src/cy/commands/actions/type", ->
             expect(e.key).to.eq "PageDown"
             done()
 
-          cy.get(":text:first").invoke("val", "ab").type("{pageup}")
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}")
 
         it "does not fire textInput event", (done) ->
           cy.$$(":text:first").on "textInput", (e) ->
             done("textInput should not have fired")
 
-          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
 
         it "does not fire input event", (done) ->
           cy.$$(":text:first").on "input", (e) ->
             done("input should not have fired")
 
-          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
 
         it "can prevent default pagedown movement", (done) ->
           cy.$$(":text:first").on "keydown", (e) ->
             if e.keyCode is 34
               e.preventDefault()
 
-          cy.get(":text:first").invoke("val", "foo").type("d{pageup}").then ($input) ->
+          cy.get(":text:first").invoke("val", "foo").type("d{pagedown}").then ($input) ->
             expect($input).to.have.value("food")
             done()
 
