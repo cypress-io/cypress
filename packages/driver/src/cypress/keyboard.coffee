@@ -114,6 +114,7 @@ $Keyboard = {
       options.charCode  = 45
       options.keypress  = false
       options.textInput = false
+      options.input     = false
       options.setKey    = "{insert}"
       @ensureKey el, null, options
 
@@ -269,7 +270,7 @@ $Keyboard = {
       @ensureKey el, null, options
 
 
-    ## charCode = 33
+    ## charCode = 34
     ## no keyPress
     ## no textInput
     ## no input

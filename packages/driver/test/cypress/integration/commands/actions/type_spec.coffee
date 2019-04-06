@@ -1758,7 +1758,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
 
-        it "can prevent default insert movement", (done) ->
+        it "can prevent default pageup movement", (done) ->
           cy.$$(":text:first").on "keydown", (e) ->
             if e.keyCode is 33
               e.preventDefault()
@@ -1792,7 +1792,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
 
-        it "can prevent default insert movement", (done) ->
+        it "can prevent default pagedown movement", (done) ->
           cy.$$(":text:first").on "keydown", (e) ->
             if e.keyCode is 34
               e.preventDefault()
