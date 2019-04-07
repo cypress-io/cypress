@@ -85,7 +85,7 @@ uploadUniqueBinary = (args = []) ->
 
   platform = options.platform ? process.platform
 
-  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
+  platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   uploadFile(options)
   .then () ->
