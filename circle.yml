@@ -852,6 +852,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - issue-716-ffmpeg-packaging
         requires:
           - Mac build
 
@@ -863,7 +864,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - fix-typescript-binary-building
+              - issue-716-ffmpeg-packaging
         requires:
           - Mac build
 
@@ -885,6 +886,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - issue-716-ffmpeg-packaging
         requires:
           - Mac NPM package
           - Mac binary
