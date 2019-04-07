@@ -48,10 +48,10 @@ shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filenam
 
 const arch = os.arch()
 
-shell.echo(`Building for win32 ${arch}...`)
+shell.echo(`Building for win32 [${arch}]...`)
 
 shell.cat('npm-package-url.json')
-shell.exec(`npm run binary-build -- --platform windows --version ${version} --arch ${arch}`)
+shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
 
 // make sure we are not including dev dependencies accidentally
 // TODO how to get the server package folder?
@@ -70,6 +70,6 @@ if (result.stdout.includes('nodemon')) {
 
 shell.exec('npm run binary-zip')
 shell.ls('-l', '*.zip')
-shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version} --arch ${arch}`)
+shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
 shell.cat('binary-url.json')
 shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')

@@ -101,7 +101,7 @@ purgeDesktopAppFromCache = ({version, platform, zipName}) ->
   la(check.extension("zip", zipName),
     "zip filename should end with .zip", zipName)
 
-  osName = getUploadNameByOs(platform)
+  osName = getUploadNameByOsAndArch(platform)
   la(check.unemptyString(osName), "missing osName", osName)
   url = getDestktopUrl(version, osName, zipName)
   purgeCache(url)
@@ -117,7 +117,10 @@ purgeDesktopAppAllPlatforms = (version, zipName) ->
   Promise.mapSeries platforms, (platform) ->
     purgeDesktopAppFromCache({version, platform, zipName})
 
-getUploadNameByOs = (osName = os.platform(), platformArch = os.arch()) ->
+getUploadNameByOsAndArch = (platform) ->
+  ## just hard code for now...
+  arch = os.arch()
+
   uploadNames = {
     darwin: {
       "x64": "osx64"
@@ -130,9 +133,9 @@ getUploadNameByOs = (osName = os.platform(), platformArch = os.arch()) ->
       "ia32": "win32"
     }
   }
-  name = _.get(uploadNames[osName], platformArch)
+  name = _.get(uploadNames[platform], arch)
   if not name
-    throw new Error("Cannot find upload name for OS #{osName}")
+    throw new Error("Cannot find upload name for OS: '#{platform}' with arch: '#{arch}'")
   name
 
 saveUrl = (filename) -> (url) ->
@@ -149,7 +152,7 @@ module.exports = {
   purgeCache,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
-  getUploadNameByOs,
+  getUploadNameByOsAndArch,
   saveUrl,
   formHashFromEnvironment
 }

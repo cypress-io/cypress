@@ -118,32 +118,6 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#npmInstallPackages")
 
     packages.npmInstallAll(distDir("packages", "*"), options)
-    .then ->
-      if !options.arch or os.arch() == options.arch
-        ## @ffmpeg-installer will automatically install the correct package, no need to worry
-        if options.arch
-          console.log("supplied arch `#{options.arch}` is the same as os.arch `#{os.arch()}`, not force-installing ffmpeg")
-        else
-          console.log("no arch supplied, not force-installing ffmpeg")
-        return
-      ## we're compiling for a different arch than the current one, force install correct package
-      ffmpegSlug = "#{os.platform()}-#{options.arch}"
-      serverFolder = distDir("packages", "server")
-      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/#{ffmpegSlug}", options)
-      .then ->
-        ffmpegInstallerPath = path.join(serverFolder, "node_modules", "@ffmpeg-installer")
-        fs.readdir(ffmpegInstallerPath)
-        .then (entities) ->
-          keepFolders = [
-            ffmpegSlug,
-            'ffmpeg'
-          ]
-          console.log("removing unnecessary copies of ffmpeg")
-          Promise.map entities, (entity) ->
-            if not _.includes(keepFolders, entity)
-              folderPath = path.join(ffmpegInstallerPath, entity)
-              console.log("deleting #{folderPath}")
-              windows.forceDeleteDir(folderPath)
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")
@@ -235,7 +209,6 @@ buildCypressApp = (platform, version, options = {}) ->
       dir
       dist
       platform
-      arch: options.arch
       appVersion: version
     })
 

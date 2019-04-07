@@ -90,14 +90,11 @@ copyAllToDist = (distDir) ->
   .then ->
     console.log("Finished Copying", new Date() - started)
 
-forceNpmInstall = (packagePath, packageToInstall, options = {}) ->
+forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
   console.log("in %s", packagePath)
   la(check.unemptyString(packageToInstall), "missing package to install")
-
-  args = ["install", "--force", packageToInstall]
-
-  npmRun(args, packagePath)
+  npmRun(["install", "--force", packageToInstall], packagePath)
 
 removeDevDependencies = (packageFolder) ->
   packagePath = pathToPackageJson(packageFolder)
@@ -121,7 +118,7 @@ retryGlobbing = (pathToPackages, delay = 1000) ->
 
 # installs all packages given a wildcard
 # pathToPackages would be something like "C:\projects\cypress\dist\win32\packages\*"
-npmInstallAll = (pathToPackages, options = {}) ->
+npmInstallAll = (pathToPackages) ->
   console.log("npmInstallAll packages in #{pathToPackages}")
 
   started = new Date()
@@ -132,9 +129,8 @@ npmInstallAll = (pathToPackages, options = {}) ->
 
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
-    args = ["install", "--only=production", "--quiet"]
+    npmInstall = _.partial(npmRun, ["install", "--only=production", "--quiet"])
 
-    npmInstall = _.partial(npmRun, args)
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
       Promise

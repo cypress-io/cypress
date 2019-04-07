@@ -31,10 +31,10 @@ module.exports = {
 
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/osx64/
-  getUploadDirName: ({version, platform, arch}) ->
+  getUploadDirName: ({version, platform}) ->
     aws = @getAwsObj()
-    osName = uploadUtils.getUploadNameByOs(platform, arch)
-    dirName = [aws.folder, version, osName, null].join("/")
+    platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
+    dirName = [aws.folder, version, platformArch, null].join("/")
     console.log("target directory %s", dirName)
     dirName
 
@@ -93,8 +93,9 @@ module.exports = {
     .finally ->
       fs.removeAsync(manifest)
 
-  toS3: ({zipFile, version, platform, arch}) ->
+  toS3: ({zipFile, version, platform}) ->
     console.log("#uploadToS3 ⏳")
+
     la(check.unemptyString(version), "expected version string", version)
     la(check.unemptyString(zipFile), "expected zip filename", zipFile)
     la(check.extension("zip", zipFile),
@@ -102,6 +103,7 @@ module.exports = {
     la(meta.isValidPlatform(platform), "invalid platform", platform)
 
     console.log("zip filename #{zipFile}")
+
     if !fs.existsSync(zipFile)
       throw new Error("Cannot find zip file #{zipFile}")
 
@@ -116,7 +118,7 @@ module.exports = {
         .pipe rename (p) =>
           # rename to standard filename zipName
           p.basename = path.basename(zipName, p.extname)
-          p.dirname = @getUploadDirName({version, platform, arch})
+          p.dirname = @getUploadDirName({version, platform})
           p
         .pipe debug()
         .pipe publisher.publish(headers)
