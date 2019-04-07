@@ -23,12 +23,14 @@ const isRightBranch = () => {
   return branch === 'develop' || branch === 'issue-716-ffmpeg-packaging'
 }
 
-const isPullRequest = () => {
-  return process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME !== 'cypress-io/cypress'
+const isForkedPullRequest = () => {
+  const repoName = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME
+
+  return repoName && repoName !== 'cypress-io/cypress'
 }
 
 const shouldBuildBinary = () => {
-  return isRightBranch() && !isPullRequest()
+  return isRightBranch() && !isForkedPullRequest()
 }
 
 if (!shouldBuildBinary()) {
