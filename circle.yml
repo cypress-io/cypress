@@ -773,6 +773,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-716-ffmpeg-packaging
         requires:
           - build
     - test-kitchensink-against-staging:
@@ -787,6 +788,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-716-ffmpeg-packaging
         requires:
           - build
     - build-binary:
@@ -794,6 +796,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-716-ffmpeg-packaging
         requires:
           - build
     - test-next-version:
