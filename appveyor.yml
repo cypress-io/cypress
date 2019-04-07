@@ -38,10 +38,10 @@ platform:
 
 # Install scripts. (runs after repo cloning)
 install:
+  - ps: Install-Product node $env:nodejs_version $env:platform
   - npm install -g @bahmutov/print-env
   - npm run check-node-version
   - .\scripts\win-env-vars.bat
-  - ps: Install-Product node $env:nodejs_version $env:NODE_PLATFORM
   # Output useful info for debugging.
   - node --version
   - npm --version
