@@ -23,7 +23,6 @@ check = require("check-more-types")
 meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
-windows = require("./util/windows")
 xvfb = require("../../cli/lib/exec/xvfb")
 linkPackages = require('../link-packages')
 
