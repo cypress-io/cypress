@@ -85,7 +85,7 @@ uploadUniqueBinary = (args = []) ->
 
   platform = options.platform ? process.platform
 
-  platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
+  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   uploadFile(options)
   .then () ->
@@ -93,7 +93,7 @@ uploadUniqueBinary = (args = []) ->
       version: options.version,
       hash: options.hash,
       filename: uploadFileName
-      platformArch: platformArch
+      platform: platformArch
     })
     console.log("Binary can be downloaded using URL")
     console.log(cdnUrl)
