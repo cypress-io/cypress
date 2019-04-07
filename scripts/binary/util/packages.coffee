@@ -97,9 +97,6 @@ forceNpmInstall = (packagePath, packageToInstall, options = {}) ->
 
   args = ["install", "--force", packageToInstall]
 
-  if options.arch
-    args.push("--target_arch=#{options.arch}")
-
   npmRun(args, packagePath)
 
 removeDevDependencies = (packageFolder) ->
@@ -136,9 +133,6 @@ npmInstallAll = (pathToPackages, options = {}) ->
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
     args = ["install", "--only=production", "--quiet"]
-
-    if options.arch
-      args.push("--target_arch=#{options.arch}")
 
     npmInstall = _.partial(npmRun, args)
     npmInstall(pkg, {NODE_ENV: "production"})

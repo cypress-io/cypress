@@ -41,23 +41,22 @@ install:
   - ps: Install-Product node $env:nodejs_version $env:platform
   - npm install -g @bahmutov/print-env
   - npm run check-node-version
-  - .\scripts\win-env-vars.bat
   # Output useful info for debugging.
   - node --version
+  - node --print process.arch
   - npm --version
   - print-env APPVEYOR
   - print-env Platform
-  - print-env TARGET_ARCH
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only
-  - npm install --ignore-scripts --target_arch=%TARGET_ARCH%
+  - npm install --ignore-scripts
   - .\node_modules\.bin\print-arch
   # because we skipped scripts, we need to do
   # everything from "postinstall" script as commands
   - npm run link
   # install every package one by one
-  - npm run all install -- --serial --args="--target-arch=%TARGET_ARCH%" || npm run all install -- --serial --args="--target-arch=%TARGET_ARCH%"
+  - npm run all install -- --serial || npm run all install -- --serial
   # - npm prune
   # - npm run all prune -- --serial
   - npm run all build -- --serial

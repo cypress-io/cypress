@@ -6,6 +6,7 @@
 // but only on the right branch
 
 const shell = require('shelljs')
+const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 
@@ -45,7 +46,7 @@ console.log('building version', version)
 
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 
-const arch = process.env.TARGET_ARCH || process.arch
+const arch = os.arch()
 
 shell.echo(`Building for win32 ${arch}...`)
 
