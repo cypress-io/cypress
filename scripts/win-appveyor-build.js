@@ -9,7 +9,7 @@ const shell = require('shelljs')
 const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const assert = require('assert')
+// const assert = require('assert')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -71,21 +71,21 @@ if (result.stdout.includes('nodemon')) {
   process.exit(1)
 }
 
-const pathToExe = 'C:/projects/cypress/build/win32/Cypress/Cypress.exe'
+// const pathToExe = 'C:/projects/cypress/build/win32/Cypress/Cypress.exe'
 
-// verify that Cypress.exe is either 32bit or 64bit based on node's arch
-const dumpbin = shell.exec(`dumpbin /headers ${pathToExe}`)
+// // verify that Cypress.exe is either 32bit or 64bit based on node's arch
+// const dumpbin = shell.exec(`dumpbin /headers ${pathToExe}`)
 
-// eslint-disable-next-line default-case
-switch (arch) {
-  case 'ia32':
-    assert.ok(dumpbin.stdout.includes('machine (x86)'))
-    break
+// // eslint-disable-next-line default-case
+// switch (arch) {
+//   case 'ia32':
+//     assert.ok(dumpbin.stdout.includes('machine (x86)'))
+//     break
 
-  case 'x64':
-    assert.ok(dumpbin.stdout.includes('machine (x64)'))
-    break
-}
+//   case 'x64':
+//     assert.ok(dumpbin.stdout.includes('machine (x64)'))
+//     break
+// }
 
 shell.exec('npm run binary-zip')
 shell.ls('-l', '*.zip')
