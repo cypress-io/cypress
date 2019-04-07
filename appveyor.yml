@@ -55,6 +55,11 @@ install:
   # because we skipped scripts, we need to do
   # everything from "postinstall" script as commands
   - npm run link
+  # install every package one by one
+  - npm run all install -- --serial || npm run all install -- --serial
+  # - npm prune
+  # - npm run all prune -- --serial
+  - npm run all build -- --serial
 
 # Post-install test scripts.
 test_script:
@@ -65,6 +70,7 @@ test_script:
   - echo %APPVEYOR_REPO_COMMIT_MESSAGE%
   - echo body of commit message, if any
   - 7z
+  - cd packages/launcher && node index.js && cd ../..
   # make sure mocha runs
   - npm run test-mocha
   # make sure our snapshots are compared correctly
