@@ -75,7 +75,8 @@ test_script:
   - cd cli
   - npm install
   - npm run build
-  - cd build && npm pack && cd ../..
+  - cd build && npm pack
+  - cd ../..
 
   - node ./scripts/win-appveyor-build.js
 
