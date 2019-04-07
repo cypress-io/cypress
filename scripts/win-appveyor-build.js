@@ -9,6 +9,7 @@ const shell = require('shelljs')
 const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
+const assert = require('assert')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -23,7 +24,7 @@ const isRightBranch = () => {
 }
 
 const isPullRequest = () => {
-  return Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
+  return process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME !== 'cypress-io/cypress'
 }
 
 const shouldBuildBinary = () => {
