@@ -78,10 +78,8 @@ test_script:
   # the other larger tests
   - echo Building Windows NPM package %NEXT_DEV_VERSION%
   - npm --no-git-tag-version version %NEXT_DEV_VERSION%
-  - cd cli
-  - npm run build
-  - cd build
-  - npm pack
+  - cd cli && npm run build
+  - cd build && npm pack
   - cd ../..
 
   - node ./scripts/win-appveyor-build.js
