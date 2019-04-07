@@ -93,7 +93,7 @@ uploadUniqueBinary = (args = []) ->
       version: options.version,
       hash: options.hash,
       filename: uploadFileName
-      platform: platformArch
+      platformArch: platformArch
     })
     console.log("Binary can be downloaded using URL")
     console.log(cdnUrl)
