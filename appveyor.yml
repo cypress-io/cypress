@@ -26,7 +26,7 @@ environment:
 
 platform:
   - x64
-  - x86
+  - ia32
 
 # https://www.appveyor.com/docs/build-cache/
 # hmm, seems there is NPM on windows problem
