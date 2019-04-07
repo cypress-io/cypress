@@ -48,7 +48,7 @@ install:
   - print-env APPVEYOR
   - print-env Platform
   - print-env TARGET_ARCH
-  - node -e 'console.log(process.arch, require('os').arch())'
+  - node -e 'console.log(process.arch, require("os").arch())'
   - node -e 'console.log(process.env.TARGET_ARCH, process.env.Platform)'
   # clean cache to prevent install permission issues
   - npm cache clean --force
