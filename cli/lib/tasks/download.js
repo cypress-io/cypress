@@ -16,9 +16,9 @@ const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
 
-const getArch = () => {
+const getRealOsArch = () => {
   // os.arch() returns the arch for which this node was compiled
-  // we want the operating system's arch, x64 or ia32
+  // we want the operating system's arch instead: x64 or x86
 
   const osArch = arch()
 
@@ -47,7 +47,7 @@ const getBaseUrl = () => {
 const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
-  const arch = getArch()
+  const arch = getRealOsArch()
 
   return `${endpoint}?platform=${platform}&arch=${arch}`
 }

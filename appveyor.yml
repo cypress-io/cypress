@@ -40,13 +40,13 @@ platform:
 install:
   - ps: Install-Product node $env:nodejs_version $env:platform
   - npm install -g @bahmutov/print-env
-  - npm run check-node-version
   # Output useful info for debugging.
   - node --version
   - node --print process.arch
   - npm --version
-  - print-env APPVEYOR
   - print-env Platform
+  - npm run check-node-version
+  - print-env APPVEYOR
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only
