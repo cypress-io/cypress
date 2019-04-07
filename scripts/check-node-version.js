@@ -1,5 +1,4 @@
 const os = require('os')
-const arch = require('arch')
 const assert = require('assert')
 
 // TODO make this check a 3rd party little tool
@@ -24,7 +23,7 @@ if (isMac() && process.env.CIRCLECI) {
 // if we're windows + in appveyor...
 if (isWindows() && process.env.APPVEYOR) {
   // check to ensure that the cpuArch + nodeArch are in sync
-  const cpuArch = arch()
+  const cpuArch = process.env.Platform
   const nodeArch = os.arch()
 
   const getErrMsg = (expectedArch) => {

@@ -79,7 +79,6 @@
     "@types/request-promise": "4.1.42",
     "@types/sinon-chai": "3.2.2",
     "ansi-styles": "3.2.1",
-    "arch": "2.1.1",
     "ascii-table": "0.0.9",
     "babel-eslint": "10.0.1",
     "bluebird": "3.5.3",
