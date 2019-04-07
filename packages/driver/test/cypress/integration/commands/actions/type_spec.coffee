@@ -2880,6 +2880,11 @@ describe "src/cy/commands/actions/type", ->
           .get(":text:first").type(" ")
           .should("have.value", " ")
 
+      it "allows typing special characters", ->
+        cy
+            .get(":text:first").type("{esc}")
+            .should("have.value", "")
+            
       _.each ["toString", "toLocaleString", "hasOwnProperty", "valueOf"
          "undefined", "null", "true", "false", "True", "False"], (val) =>
        it "allows typing reserved Javscript word (#{val})", ->
