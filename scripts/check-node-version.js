@@ -1,7 +1,7 @@
 // TODO make this check a 3rd party little tool
 
 /* eslint-disable no-console */
-console.log(process.arch, require('os').arch())
+console.log(process.version, process.arch, require('os').arch())
 console.log(process.env.TARGET_ARCH, process.env.Platform)
 
 // on CircleCI Mac machine, we need to use on of the laer executors
