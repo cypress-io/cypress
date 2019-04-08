@@ -129,7 +129,7 @@ const normalizeMsgNewLines = (message) => {
 
 const formatErrMsg = (errMessage, options) => {
   const getMsg = function (options) {
-    const args = options.args
+    const args = {} || options.args
 
     if (_.isFunction(errMessage)) {
       return errMessage(args)
