@@ -150,8 +150,6 @@ const start = ({ version, downloadDestination, progress }) => {
     } }
   }
 
-  util.loadSystemProxySettings()
-
   const url = getUrl(version)
 
   progress.throttle = 100

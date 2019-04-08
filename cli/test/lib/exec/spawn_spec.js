@@ -133,41 +133,6 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    context('proxy', function () {
-      beforeEach(function () {
-        this.oldEnv = Object.assign({}, process.env)
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.NO_PROXY = undefined
-      })
-
-      it('loads proxy settings from Windows registry', function () {
-        this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-        os.platform.returns('win32')
-        sinon.stub(util, '_getWindowsProxy').returns({
-          httpProxy: 'http://foo-bar.baz',
-          noProxy: 'a,b,c',
-        })
-
-        return spawn.start([], {})
-        .then(() => {
-          return expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
-            '--cwd',
-            cwd,
-            '--proxy-source="win32"',
-          ], {
-            env: {
-              'HTTP_PROXY': 'http://foo-bar.baz',
-              'HTTPS_PROXY': 'http://foo-bar.baz',
-              'NO_PROXY': 'a,b,c',
-            },
-          })
-        })
-      })
-
-      afterEach(function () {
-        Object.assign(process.env, this.oldEnv)
-      })
-    })
-
     it('unrefs if options.detached is true', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
