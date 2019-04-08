@@ -3,12 +3,13 @@ branches:
     - master
     - develop
     - /win*/
+    - issue-716-ffmpeg-packaging
 
 # testing
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
   # use latest version of Node 8 with NPM 6
-  nodejs_version: "8"
+  nodejs_version: "8.2.1"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
@@ -23,6 +24,10 @@ environment:
     secure: +kZOcImCZVZJv/e/hQc3gvJ6xXSH88qg46cMwKn8mRo=
   CF_TOKEN:
     secure: d8SQfJ2r6qrKDjYWoFg3AzgY7aL6hTuE5OIlRr0TXkcXkZzdmYCujfzIYcCQfpZg
+
+platform:
+  - x64
+  - x86
 
 # https://www.appveyor.com/docs/build-cache/
 # hmm, seems there is NPM on windows problem
@@ -41,7 +46,10 @@ install:
   - npm install -g @bahmutov/print-env
   # Output useful info for debugging.
   - node --version
+  - node --print process.arch
   - npm --version
+  - print-env Platform
+  - npm run check-node-version
   - print-env APPVEYOR
   # clean cache to prevent install permission issues
   - npm cache clean --force
@@ -75,6 +83,7 @@ test_script:
   - echo Building Windows NPM package %NEXT_DEV_VERSION%
   - npm --no-git-tag-version version %NEXT_DEV_VERSION%
   - cd cli
+  - npm install
   - npm run build
   - cd build
   - npm pack
