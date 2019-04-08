@@ -35,6 +35,8 @@ environment:
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
+  # checks if secure variable CF_TOKEN is present
+  - node -e 'console.log(typeof process.env.CF_TOKEN)
   - npm run check-node-version
   - npm install -g @bahmutov/print-env
   # Output useful info for debugging.
