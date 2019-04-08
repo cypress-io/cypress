@@ -277,12 +277,13 @@ module.exports = {
     invalid_number: "#{cmd('go')} cannot accept `0`. The number must be greater or less than `0`."
 
   hover:
-    not_implemented: """
-      #{cmd('hover')} is not currently implemented.\n
-      However it is usually easy to workaround.\n
-      Read the following document for a detailed explanation.\n
-      https://on.cypress.io/hover
-    """
+    not_implemented: 
+      message: """
+        #{cmd('hover')} is not currently implemented.\n
+        However it is usually easy to workaround.\n
+        Read the following document for a detailed explanation.\n
+      """
+      docsUrl: "https://on.cypress.io/hover"
 
   invoke:
     invalid_type: "Cannot call #{cmd('invoke')} because `{{prop}}` is not a function. You probably want to use #{cmd('its', '\'{{prop}}\'')}."
