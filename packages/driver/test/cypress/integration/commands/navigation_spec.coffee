@@ -1625,6 +1625,7 @@ describe "src/cy/commands/navigation", ->
 
           expect(@logs.length).to.eq(2)
           expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cross-origin-violation")
           expect(lastLog.get("name")).to.eq("page load")
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("error")).to.eq(err)

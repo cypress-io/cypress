@@ -147,18 +147,19 @@ module.exports = {
     timed_out: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
 
   dom:
-    animating: """
-      #{cmd('{{cmd}}')} could not be issued because this element is currently animating:
+    animating: 
+      message: """
+        #{cmd('{{cmd}}')} could not be issued because this element is currently animating:
 
-      `{{node}}`
+        `{{node}}`
 
-      You can fix this problem by:
-        - Passing `{force: true}` which disables all error checking
-        - Passing `{waitForAnimations: false}` which disables waiting on animations
-        - Passing `{animationDistanceThreshold: 20}` which decreases the sensitivity
+        You can fix this problem by:
+          - Passing `{force: true}` which disables all error checking
+          - Passing `{waitForAnimations: false}` which disables waiting on animations
+          - Passing `{animationDistanceThreshold: 20}` which decreases the sensitivity
 
-      https://on.cypress.io/element-is-animating
-    """
+        https://on.cypress.io/element-is-animating
+      """
     animation_check_failed: "Not enough coord points provided to calculate distance."
     center_hidden: """
       #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:
@@ -472,29 +473,28 @@ module.exports = {
     timed_out: "Cypress command timeout of `{{ms}}ms` exceeded."
 
   navigation:
-    cross_origin: """
-      Cypress detected a cross origin error happened on page load:
+    cross_origin: 
+      message: """
+        Cypress detected a cross origin error happened on page load:
 
-        > {{message}}
+          > {{message}}
 
-      Before the page load, you were bound to the origin policy:
-        > {{originPolicy}}
+        Before the page load, you were bound to the origin policy:
+          > {{originPolicy}}
 
-      A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+        A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
-      This typically happens in one of three ways:
+        This typically happens in one of three ways:
 
-      1. You clicked an `<a>` that routed you outside of your application
-      2. You submitted a `form` and your server redirected you outside of your application
-      3. You used a JavaScript redirect to a page outside of your application
+        1. You clicked an `<a>` that routed you outside of your application
+        2. You submitted a `form` and your server redirected you outside of your application
+        3. You used a JavaScript redirect to a page outside of your application
 
-      Cypress does not allow you to change superdomains within a single test.
+        Cypress does not allow you to change superdomains within a single test.
 
-      You may need to restructure some of your test code to avoid this problem.
-
-      https://on.cypress.io/cross-origin-violation
-
-    """
+        You may need to restructure some of your test code to avoid this problem.
+      """
+      docsUrl: "https://on.cypress.io/cross-origin-violation"
     timed_out: """
       Timed out after waiting `{{ms}}ms` for your remote page to load.
 
