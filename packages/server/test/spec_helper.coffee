@@ -91,4 +91,6 @@ afterEach ->
   nock.cleanAll()
   nock.enableNetConnect()
 
-  process.env = _.clone(env)
+  ## if we set process.env = env, process.env loses the "special" getters and setters
+  ## just assign the enumerable props of env back to process.env instead
+  Object.assign(process.env, env)
