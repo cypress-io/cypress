@@ -188,6 +188,18 @@ const getErrMsgWithObjByPath = (errLookupObj, errPath, args) => {
   return errObj.message
 }
 
+const getErrMessage = (err) => {
+  if (err && err.displayMessage) {
+    return err.displayMessage
+  }
+
+  if (err && err.message) {
+    return err.message
+  }
+
+  return err
+}
+
 //# TODO: This isn't in use for the reporter,
 //# but we may want this for stdout in run mode
 const getCodeFrame = (source, path, lineNumber, columnNumber) => {
@@ -251,6 +263,7 @@ module.exports = {
   formatErrMsg,
   errObjByPath,
   getErrMsgWithObjByPath,
+  getErrMessage,
   errMsgByPath,
   getCodeFrame,
   escapeErrMarkdown,

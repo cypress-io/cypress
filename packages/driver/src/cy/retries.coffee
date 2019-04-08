@@ -48,18 +48,9 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
         if assertions = options.assertions
           finishAssertions(assertions)
 
-        getErrMessage = (err) ->
-          switch
-            when err and err.displayMessage
-              err.displayMessage
-            when err and err.message
-              err.message
-            else
-              err
-
         $errUtils.throwErrByPath "miscellaneous.retry_timed_out", {
           onFail: (options.onFail or log)
-          args: { error: getErrMessage(options.error) }
+          args: { error: $errUtils.getErrMessage(options.error) }
         }
 
       runnableHasChanged = ->
