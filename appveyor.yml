@@ -4,6 +4,7 @@ branches:
     - develop
     - /win*/
 
+# testing
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
   # use latest version of Node 8 with NPM 6
