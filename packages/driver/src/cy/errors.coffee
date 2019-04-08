@@ -1,6 +1,7 @@
 $dom = require("../dom")
 $utils = require("../cypress/utils")
 $errUtils = require("../cypress/error_utils")
+$errorMessages = require('../cypress/error_messages')
 
 crossOriginScriptRe = /^script error/i
 
@@ -50,7 +51,7 @@ create = (state, config, log) ->
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
 
-    err = $errUtils.appendErrMsg(err, $errUtils.errObjByPath(suffixMsg))
+    err = $errUtils.appendErrMsg(err, $errUtils.errObjByPath($errorMessages, suffixMsg))
 
     err.onFail = ->
       if l = current and current.getLastLog()
