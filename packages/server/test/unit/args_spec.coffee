@@ -335,6 +335,20 @@ describe "lib/util/args", ->
       expect(options.proxyBypassList).to.eq "d,e,f"
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
+    ['', 'false', '0'].forEach (override) ->
+      it "doesn't load from Windows registry if HTTP_PROXY overridden with string '#{override}'", ->
+        sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns()
+        sinon.stub(os, "platform").returns("win32")
+        process.env.HTTP_PROXY = override
+        options = @setup()
+        expect(getWindowsProxyUtil.getWindowsProxy).to.not.beCalled
+        expect(options.proxySource).to.be.undefined
+        expect(options.proxyServer).to.be.undefined
+        expect(options.proxyBypassList).to.be.undefined
+        expect(process.env.HTTP_PROXY).to.be.undefined
+        expect(process.env.HTTPS_PROXY).to.be.undefined
+        expect(process.env.NO_PROXY).to.eq "localhost"
+
     it "doesn't mess with env vars if Windows registry doesn't have proxy", ->
       sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns()
       sinon.stub(os, "platform").returns("win32")
