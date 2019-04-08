@@ -152,7 +152,9 @@ describe "driver/src/cypress/error_utils", ->
           it "uses them in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.obj_with_args", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has args like 'foo' and bar,qux"
@@ -162,7 +164,9 @@ describe "driver/src/cypress/error_utils", ->
           it "uses them in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.obj_with_multi_args", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
@@ -172,7 +176,9 @@ describe "driver/src/cypress/error_utils", ->
           it "formats markdown in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.obj_with_markdown", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
@@ -197,7 +203,9 @@ describe "driver/src/cypress/error_utils", ->
           it "uses them in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.str_with_args", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has args like 'foo' and bar,qux"
@@ -206,7 +214,9 @@ describe "driver/src/cypress/error_utils", ->
           it "uses them in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.str_with_multi_args", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
@@ -215,7 +225,9 @@ describe "driver/src/cypress/error_utils", ->
           it "formats markdown in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.str_with_markdown", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
@@ -238,7 +250,9 @@ describe "driver/src/cypress/error_utils", ->
           it "uses them in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.fn_with_args", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has args like 'foo' and bar,qux"
@@ -247,7 +261,9 @@ describe "driver/src/cypress/error_utils", ->
           it "uses them in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.fn_with_multi_args", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
@@ -256,7 +272,9 @@ describe "driver/src/cypress/error_utils", ->
           it "formats markdown in the error message", ->
             try
               $errUtils.throwErrByPath("__test_errors.fn_with_markdown", {
-                foo: "foo", bar: ["bar", "qux"] 
+                args: {
+                  foo: "foo", bar: ["bar", "qux"] 
+                }
               })
             catch e
               expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
@@ -301,7 +319,9 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns obj when err is object", ->
       obj = $errUtils.errObjByPath(@errMsgs, 'command.obj', {
-        cmd: 'click'
+        args: {
+          cmd: 'click'
+        }
       })
       expect(obj).to.deep.eq({
         message: 'click simple error message'
@@ -310,7 +330,9 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns obj when err is string", ->
       obj = $errUtils.errObjByPath(@errMsgs, 'command.str', {
-        cmd: 'click'
+        args: {
+          cmd: 'click'
+        }
       })
 
       expect(obj).to.deep.eq({
@@ -319,7 +341,9 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns obj when err is function", ->
       obj = $errUtils.errObjByPath(@errMsgs, 'command.fn', {
-        cmd: 'click'
+        args: {
+          cmd: 'click'
+        }
       })
 
       expect(obj).to.deep.eq({
@@ -343,20 +367,26 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns the message when err is object", ->
       msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.obj', {
-        cmd: 'click'
+        args: {
+          cmd: 'click'
+        }
       })
       expect(msg).to.eq("click simple error message")
 
     it "returns the message when err is string", ->
       msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.str', {
-        cmd: 'click'
+        args: {
+          cmd: 'click'
+        }
       })
 
       expect(msg).to.eq("click simple error message")
 
     it "returns the message when err is function", ->
       msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.str', {
-        cmd: 'click'
+        args: {
+          cmd: 'click'
+        }
       })
 
       expect(msg).to.eq("click simple error message")
