@@ -91,7 +91,6 @@ describe "src/cy/commands/navigation", ->
         expect(stub2).to.be.calledOnce
         expect(stub3).to.be.calledOnce
 
-    # Array(100).fill().map -> 
     it "removes listeners", ->
       win = cy.state("window")
 
@@ -100,14 +99,6 @@ describe "src/cy/commands/navigation", ->
       cy.reload().then ->
         expect(rel).to.be.calledWith("beforeunload")
         expect(rel).to.be.calledWith("unload")
-
-          
-        # cy.reload().then ->
-        #   cy.wrap(null).should ->
-        #     expect(rel).to.be.calledWith("beforeunload")
-        #     expect(rel).to.be.calledWith("unload")
-
-        
 
     describe "errors", ->
       beforeEach ->
@@ -158,7 +149,6 @@ describe "src/cy/commands/navigation", ->
             expect(win.foo).to.be.undefined
 
       it "throws when reload times out", (done) ->
-        console.time('foo')
         locReload = cy.spy(Cypress.utils, "locReload")
 
         cy
@@ -176,8 +166,6 @@ describe "src/cy/commands/navigation", ->
 
             cy.on "fail", (err) ->
               expected = true
-
-              console.timeEnd('foo')
 
               expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
 
@@ -244,14 +232,14 @@ describe "src/cy/commands/navigation", ->
       $(doc.body).empty().html(@body)
 
     ## TODO: fix this
-    # it.skip "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
-    #   timeout = cy.spy Promise.prototype, "timeout"
-    #   Cypress.config("pageLoadTimeout", 4567)
+    it.skip "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
+      timeout = cy.spy Promise.prototype, "timeout"
+      Cypress.config("pageLoadTimeout", 4567)
 
-    #   cy
-    #     .visit("/fixtures/jquery.html")
-    #     .go("back").then ->
-    #       expect(timeout).to.be.calledWith(4567, "go")
+      cy
+        .visit("/fixtures/jquery.html")
+        .go("back").then ->
+          expect(timeout).to.be.calledWith(4567, "go")
 
     it "removes listeners", ->
       cy
