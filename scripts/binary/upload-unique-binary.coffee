@@ -32,9 +32,9 @@ getCDN = ({version, hash, filename, platform}) ->
 getUploadDirName = (options) ->
   la(check.unemptyString(options.version), 'missing version', options)
   la(check.unemptyString(options.hash), 'missing hash', options)
-  la(check.unemptyString(options.platform), 'missing platform', options)
+  la(check.unemptyString(options.platformArch), 'missing platformArch', options)
 
-  dir = [rootFolder, folder, options.version, options.platform, options.hash, null].join("/")
+  dir = [rootFolder, folder, options.version, options.platformArch, options.hash, null].join("/")
   dir
 
 uploadFile = (options) ->
@@ -42,7 +42,6 @@ uploadFile = (options) ->
     publisher = uploadUtils.getPublisher()
 
     headers = {}
-    # TODO: should cache it!
     headers["Cache-Control"] = "no-cache"
 
     gulp.src(options.file)
@@ -84,8 +83,9 @@ uploadUniqueBinary = (args = []) ->
 
   la(fs.existsSync(options.file), "cannot find file", options.file)
 
-  if not options.platform
-    options.platform = uploadUtils.getUploadNameByOs()
+  platform = options.platform ? process.platform
+
+  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   uploadFile(options)
   .then () ->
@@ -93,7 +93,7 @@ uploadUniqueBinary = (args = []) ->
       version: options.version,
       hash: options.hash,
       filename: uploadFileName
-      platform: options.platform
+      platform: options.platformArch
     })
     console.log("Binary can be downloaded using URL")
     console.log(cdnUrl)
