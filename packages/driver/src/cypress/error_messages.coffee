@@ -815,11 +815,12 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/uncaught-exception-from-application"
 
-    fromSpec: """
-      This error originated from your test code, not from Cypress.
+    fromSpec: 
+      message: """
+        This error originated from your test code, not from Cypress.
 
-      When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-    """
+        When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+      """
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a `width` and `height` as numbers."
