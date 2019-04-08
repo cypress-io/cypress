@@ -12,7 +12,7 @@ const copyLowercaseEnvToUppercase = (name: string) => {
 }
 
 const normalizeEnvironmentProxy = () => {
-  if (!process.env.HTTPS_PROXY && typeof process.env.HTTP_PROXY !== 'undefined') {
+  if (!process.env.HTTPS_PROXY && process.env.HTTP_PROXY) {
     // request library will use HTTP_PROXY as a fallback for HTTPS urls, but
     // proxy-from-env will not, so let's just force it to fall back like this
     process.env.HTTPS_PROXY = process.env.HTTP_PROXY
