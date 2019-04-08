@@ -40,6 +40,8 @@ platform:
 install:
   - ps: Install-Product node $env:nodejs_version $env:platform
   - npm install -g @bahmutov/print-env
+  # checks if secure variable CF_TOKEN is present
+  - node -e "console.log(typeof process.env.CF_TOKEN)"
   # Output useful info for debugging.
   - node --version
   - node --print process.arch
