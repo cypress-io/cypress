@@ -38,6 +38,7 @@ hasOnly = false
 
     backup.apply(@, arguments)
 
+originalEnv = process.env
 env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
@@ -78,6 +79,8 @@ before ->
   appData.ensure()
 
 beforeEach ->
+  @originalEnv = originalEnv
+
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 
@@ -91,6 +94,4 @@ afterEach ->
   nock.cleanAll()
   nock.enableNetConnect()
 
-  ## if we set process.env = env, process.env loses the "special" getters and setters
-  ## just assign the enumerable props of env back to process.env instead
-  Object.assign(process.env, env)
+  process.env = _.clone(env)

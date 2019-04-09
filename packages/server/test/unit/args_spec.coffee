@@ -304,6 +304,7 @@ describe "lib/util/args", ->
 
   context "with proxy", ->
     beforeEach ->
+      process.env = @originalEnv
       delete process.env.HTTP_PROXY
       delete process.env.HTTPS_PROXY
       delete process.env.NO_PROXY
