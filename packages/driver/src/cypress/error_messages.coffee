@@ -420,17 +420,17 @@ module.exports = {
       """
     no_cy: "`Cypress.cy` is `undefined`. You may be trying to query outside of a running test. Cannot call `Cypress.$()`"
     no_runner: "Cannot call `Cypress#run` without a runner instance."
-    outside_test: """
-      Cypress cannot execute commands outside a running test.
+    outside_test: 
+      message: """
+        Cypress cannot execute commands outside a running test.
 
-      This usually happens when you accidentally write commands outside an `'it(...)'` test.
+        This usually happens when you accidentally write commands outside an `'it(...)'` test.
 
-      If that is the case, just move these commands inside an `it(...)` test.
+        If that is the case, just move these commands inside an `it(...)` test.
 
-      Check your test file for errors.
-
-      https://on.cypress.io/cannot-execute-commands-outside-test
-    """
+        Check your test file for errors.
+      """
+      docsUrl: "https://on.cypress.io/cannot-execute-commands-outside-test"
     outside_test_with_cmd: """
       Cannot call #{cmd('{{cmd}}')} outside a running test.
 
