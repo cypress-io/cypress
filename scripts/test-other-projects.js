@@ -1,5 +1,3 @@
-require('@packages/coffee/register')
-
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const { getNameAndBinary, getJustVersion } = require('./utils')
@@ -94,12 +92,13 @@ const env = {
 // so that other projects can report their test success as GitHub commit status check
 let status = null
 const commit = commitInfo && commitInfo.sha
+
 if (commit && is.commitId(commit)) {
   // commit is full 40 character hex string
   status = {
     owner: 'cypress-io',
     repo: 'cypress',
-    sha: commit
+    sha: commit,
   }
 }
 
@@ -110,7 +109,7 @@ const commitMessageInstructions = getInstallJson({
   arch,
   branch: shortNpmVersion, // use as version as branch name on test projects
   commit,
-  status
+  status,
 })
 const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
 const footer = 'Use tool `commit-message-install` to install from above block'
