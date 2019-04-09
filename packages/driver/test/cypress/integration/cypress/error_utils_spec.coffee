@@ -307,8 +307,8 @@ describe "driver/src/cypress/error_utils", ->
       @errMsgs = {
         command: {
           obj: 
-            message: '{{cmd}} simple error message'
-            docsurl: 'https://on.cypress.io'
+            message: '`{{cmd}}` simple error message'
+            docsUrl: 'https://on.cypress.io'
           str: '{{cmd}} simple error message'
           fn: (obj) ->
             """
@@ -322,8 +322,9 @@ describe "driver/src/cypress/error_utils", ->
         cmd: 'click'
       })
       expect(obj).to.deep.eq({
-        message: 'click simple error message'
-        docsurl: 'https://on.cypress.io'
+        message: '`click` simple error message'
+        mdMessage: '`click` simple error message'
+        docsUrl: 'https://on.cypress.io'
       })
 
     it "returns obj when err is string", ->
@@ -332,7 +333,8 @@ describe "driver/src/cypress/error_utils", ->
       })
 
       expect(obj).to.deep.eq({
-        message: 'click simple error message'
+        message: '`click` simple error message'
+        mdMessage: '`click` simple error message'
       })
 
     it "returns obj when err is function", ->
@@ -341,7 +343,8 @@ describe "driver/src/cypress/error_utils", ->
       })
 
       expect(obj).to.deep.eq({
-        message: 'click simple error message'
+        message: '`click` simple error message'
+        mdMessage: '`click` simple error message'
       })
 
   context ".getErrMsgWithObjByPath", ->

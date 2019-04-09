@@ -1302,6 +1302,7 @@ describe "src/cy/commands/actions/click", ->
         cy.on "fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("`cy.click()` could not be issued because this element is currently animating:\n")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/element-is-animating")
           done()
 
         cy.get("button:first").click()

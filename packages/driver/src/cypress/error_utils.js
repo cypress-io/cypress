@@ -8,9 +8,7 @@ const mdReplacements = [
   ['`', '\\`'],
 ]
 
-//# TODO: rename this method because
-//# it does more than append now
-const appendErrMsg = (err, messageOrObj) => {
+const modifyErrMsg = (err, messageOrObj, cb) => {
   //# preserve stack
   //# this is the critical part
   //# because the browser has a cached
@@ -33,17 +31,23 @@ const appendErrMsg = (err, messageOrObj) => {
   let msg = err.message
   const str = err.toString()
 
-  //# append message
-  msg += `\n\n${message}`
+  // modify message
+  msg = cb(msg, message)
 
-  //# set message
+  // set message
   err.message = msg
 
-  //# reset stack by replacing the original first line
-  //# with the new one
+  // reset stack by replacing the original first line
+  // with the new one
   err.stack = stack.replace(str, err.toString())
 
   return err
+}
+
+const appendErrMsg = (err, messageOrObj) => {
+  return modifyErrMsg(err, messageOrObj, (msg1, msg2) => {
+    return `${msg1}\n\n${msg2}`
+  })
 }
 
 const makeErrFromObj = (obj) => {
@@ -92,7 +96,7 @@ const throwErrByPath = (errPath, options = {}) => {
   let err
 
   try {
-    const obj = errObjByPath($errorMessages, errPath, args, { includeMdMessage: true })
+    const obj = errObjByPath($errorMessages, errPath, args)
 
     err = cypressErr(obj.message)
     _.defaults(err, obj)
@@ -150,7 +154,7 @@ const formatErrMsg = (errMessage, args) => {
   return normalizeMsgNewLines(getMsg(args))
 }
 
-const errObjByPath = (errLookupObj, errPath, args, { includeMdMessage } = {}) => {
+const errObjByPath = (errLookupObj, errPath, args) => {
   const errObjStrOrFn = getObjValueByPath(errLookupObj, errPath)
 
   if (!errObjStrOrFn) {
@@ -167,12 +171,10 @@ const errObjByPath = (errLookupObj, errPath, args, { includeMdMessage } = {}) =>
     }
   }
 
-  if (includeMdMessage) {
-    // Return obj with message and message with escaped markdown
-    const escapedArgs = _.mapValues(args, escapeErrMarkdown)
+  // Return obj with message and message with escaped markdown
+  const escapedArgs = _.mapValues(args, escapeErrMarkdown)
 
-    errObj.mdMessage = formatErrMsg(errObj.message, escapedArgs)
-  }
+  errObj.mdMessage = formatErrMsg(errObj.message, escapedArgs)
 
   errObj.message = formatErrMsg(errObj.message, args)
 
@@ -254,6 +256,7 @@ const getObjValueByPath = (obj, keyPath) => {
 }
 
 module.exports = {
+  modifyErrMsg,
   appendErrMsg,
   makeErrFromObj,
   throwErr,

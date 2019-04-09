@@ -157,9 +157,8 @@ module.exports = {
           - Passing `{force: true}` which disables all error checking
           - Passing `{waitForAnimations: false}` which disables waiting on animations
           - Passing `{animationDistanceThreshold: 20}` which decreases the sensitivity
-
-        https://on.cypress.io/element-is-animating
       """
+      docsUrl: "https://on.cypress.io/element-is-animating"
     animation_check_failed: "Not enough coord points provided to calculate distance."
     center_hidden: """
       #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:
@@ -451,7 +450,7 @@ module.exports = {
 
       Please go through the public function: #{cmd('state', "...")}
       """
-    retry_timed_out: "Timed out retrying: {{error}}"
+    retry_timed_out: "Timed out retrying: "
 
   mocha:
     async_timed_out: "Timed out after `{{ms}}ms`. The `done()` callback was never invoked!"

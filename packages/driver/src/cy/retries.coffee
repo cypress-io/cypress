@@ -47,11 +47,19 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
 
         if assertions = options.assertions
           finishAssertions(assertions)
+        
+        { error, onFail } = options
 
-        $errUtils.throwErrByPath "miscellaneous.retry_timed_out", {
-          onFail: (options.onFail or log)
-          args: { error: $errUtils.getErrMessage(options.error) }
-        }
+        prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out")
+
+        retryErr = $errUtils.modifyErrMsg(error, prependMsg, (msg1, msg2) ->
+          return "#{msg2}#{msg1}"
+        )
+
+        $errUtils.throwErr(retryErr, {
+          onFail: onFail or log
+        })
+          
 
       runnableHasChanged = ->
         ## if we've changed runnables don't retry!
