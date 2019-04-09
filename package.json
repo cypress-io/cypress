@@ -47,7 +47,7 @@
     "semantic-action": "1.1.6",
     "standard": "12.0.1",
     "style-loader": "0.23.1",
-    "typescript": "3.4.2",
+    "typescript": "3.4.3",
     "webpack": "4.29.6"
   },
   "standard": {
