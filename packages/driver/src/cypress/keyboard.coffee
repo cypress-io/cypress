@@ -109,7 +109,7 @@ $Keyboard = {
     ## charCode = 45
     ## no keyPress
     ## no textInput
-    ## yes input (if value is actually changed)
+    ## no input
     "{insert}": (el, options) ->
       options.charCode  = 45
       options.keypress  = false
