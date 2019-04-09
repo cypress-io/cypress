@@ -586,7 +586,7 @@ jobs:
             - npm-package-url.json
             - cypress.tgz
 
-  "test-next-version":
+  "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -801,7 +801,7 @@ linux-workflow: &linux-workflow
               - add-arch-to-commit-message-install
         requires:
           - build
-    - test-next-version:
+    - test-binary-and-npm-against-other-projects:
         filters:
           branches:
             only:
