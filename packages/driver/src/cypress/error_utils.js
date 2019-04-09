@@ -87,7 +87,8 @@ const throwErr = (err, options = {}) => {
   throw err
 }
 
-const throwErrByPath = (errPath, args = {}) => {
+const throwErrByPath = (errPath, options = {}) => {
+  const { args } = options
   let err
 
   try {
@@ -99,7 +100,7 @@ const throwErrByPath = (errPath, args = {}) => {
     err = internalErr(e)
   }
 
-  return throwErr(err, args)
+  return throwErr(err, options)
 }
 
 const internalErr = (err) => {
@@ -127,10 +128,8 @@ const normalizeMsgNewLines = (message) => {
   .value()
 }
 
-const formatErrMsg = (errMessage, options) => {
-  const getMsg = function (options) {
-    const args = {} || options.args
-
+const formatErrMsg = (errMessage, args) => {
+  const getMsg = function (args = {}) {
     if (_.isFunction(errMessage)) {
       return errMessage(args)
     }
@@ -148,7 +147,7 @@ const formatErrMsg = (errMessage, options) => {
     }, errMessage)
   }
 
-  return normalizeMsgNewLines(getMsg(options))
+  return normalizeMsgNewLines(getMsg(args))
 }
 
 const errObjByPath = (errLookupObj, errPath, args, { includeMdMessage } = {}) => {
@@ -262,7 +261,6 @@ module.exports = {
   internalErr,
   cypressErr,
   normalizeMsgNewLines,
-  formatErrMsg,
   errObjByPath,
   getErrMsgWithObjByPath,
   getErrMessage,

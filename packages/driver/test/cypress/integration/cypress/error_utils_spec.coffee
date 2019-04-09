@@ -319,9 +319,7 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns obj when err is object", ->
       obj = $errUtils.errObjByPath(@errMsgs, 'command.obj', {
-        args: {
-          cmd: 'click'
-        }
+        cmd: 'click'
       })
       expect(obj).to.deep.eq({
         message: 'click simple error message'
@@ -330,9 +328,7 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns obj when err is string", ->
       obj = $errUtils.errObjByPath(@errMsgs, 'command.str', {
-        args: {
-          cmd: 'click'
-        }
+        cmd: 'click'
       })
 
       expect(obj).to.deep.eq({
@@ -341,9 +337,7 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns obj when err is function", ->
       obj = $errUtils.errObjByPath(@errMsgs, 'command.fn', {
-        args: {
-          cmd: 'click'
-        }
+        cmd: 'click'
       })
 
       expect(obj).to.deep.eq({
@@ -367,26 +361,20 @@ describe "driver/src/cypress/error_utils", ->
 
     it "returns the message when err is object", ->
       msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.obj', {
-        args: {
-          cmd: 'click'
-        }
+        cmd: 'click'
       })
       expect(msg).to.eq("click simple error message")
 
     it "returns the message when err is string", ->
       msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.str', {
-        args: {
-          cmd: 'click'
-        }
+        cmd: 'click'
       })
 
       expect(msg).to.eq("click simple error message")
 
     it "returns the message when err is function", ->
       msg = $errUtils.getErrMsgWithObjByPath(@errMsgs, 'command.str', {
-        args: {
-          cmd: 'click'
-        }
+        cmd: 'click'
       })
 
       expect(msg).to.eq("click simple error message")
