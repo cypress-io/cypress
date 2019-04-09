@@ -1,3 +1,5 @@
+require('@packages/coffee/register')
+
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const { getNameAndBinary, getJustVersion } = require('./utils')
