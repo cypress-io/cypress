@@ -213,6 +213,7 @@ describe "driver/src/cypress/cy", ->
           expect(err.message).to.include("`cy.parent()` failed because this element is detached from the DOM.")
           expect(err.message).to.include('<button id="button">button</button>')
           expect(err.message).to.include("> `cy.click()`")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/element-has-detached-from-dom")
           done()
 
         cy.get("button:first").click().parent()

@@ -163,12 +163,16 @@ const errObjByPath = (errLookupObj, errPath, args) => {
 
   let errObj = errObjStrOrFn
 
-  if (_.isString(errObjStrOrFn) || _.isFunction(errObjStrOrFn)) {
-    //# normalize into an object if
-    //# given a string
+  if (_.isString(errObjStrOrFn)) {
+    // normalize into object if given string
     errObj = {
       message: errObjStrOrFn,
     }
+  }
+
+  if (_.isFunction(errObjStrOrFn)) {
+    //# normalize into object if given function
+    errObj = errObjStrOrFn(args)
   }
 
   // Return obj with message and message with escaped markdown

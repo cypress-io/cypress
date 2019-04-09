@@ -667,28 +667,28 @@ module.exports = {
 
       Cypress only considers the `window`, `document`, or any `element` to be valid DOM objects.
       """
-    not_attached: (obj) ->
-      """
-      #{cmd(obj.name)} failed because this element is detached from the DOM.
+    not_attached: (obj) -> {
+      message: """
+        #{cmd(obj.name)} failed because this element is detached from the DOM.
 
-      `#{obj.subject}`
+        `#{obj.subject}`
 
-      Cypress requires elements be attached in the DOM to interact with them.
+        Cypress requires elements be attached in the DOM to interact with them.
 
-      The previous command that ran was:
+        The previous command that ran was:
 
-        > #{cmd(obj.previous)}
+          > #{cmd(obj.previous)}
 
-      This DOM element likely became detached somewhere between the previous and current command.
+        This DOM element likely became detached somewhere between the previous and current command.
 
-      Common situations why this happens:
-        - Your JS framework re-rendered asynchronously
-        - Your app code reacted to an event firing and removed the element
+        Common situations why this happens:
+          - Your JS framework re-rendered asynchronously
+          - Your app code reacted to an event firing and removed the element
 
-      You typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.
-
-      https://on.cypress.io/element-has-detached-from-dom
-      """
+        You typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.
+        """
+      docsUrl: "https://on.cypress.io/element-has-detached-from-dom"
+    }
     not_window_or_document: (obj) ->
       """
       #{cmd(obj.name)} failed because it requires the subject be a global `#{obj.type}` object.
