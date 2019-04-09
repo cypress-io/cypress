@@ -259,7 +259,7 @@ describe "Runs List", ->
       it "clicking 'Log In with GitHub' opens login", ->
         cy.contains("button", "Log In with GitHub").click().then ->
           expect(@ipc.windowOpen).to.be.called
-          expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+          expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("DASHBOARD_LOGIN")
 
   describe "polling runs", ->
     beforeEach ->
@@ -482,7 +482,7 @@ describe "Runs List", ->
               it "clicking 'Log In with GitHub' opens login", ->
                 cy.contains("button", "Log In with GitHub").click().then ->
                   expect(@ipc.windowOpen).to.be.called
-                  expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+                  expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("DASHBOARD_LOGIN")
 
     describe "timed out error", ->
       beforeEach ->

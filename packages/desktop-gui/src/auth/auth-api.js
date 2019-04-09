@@ -22,7 +22,7 @@ class AuthApi {
   }
 
   login () {
-    return ipc.beginAuth({ provider: 'github' })
+    return ipc.beginAuth()
     .then((code) => {
       return ipc.logIn(code)
     })

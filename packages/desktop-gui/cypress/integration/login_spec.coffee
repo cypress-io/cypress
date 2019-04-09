@@ -62,7 +62,7 @@ describe "Login", ->
               height: 635
               preload: false
               title: "Login"
-              type: "GITHUB_LOGIN"
+              type: "DASHBOARD_LOGIN"
             })
 
       it "disables login button", ->
