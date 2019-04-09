@@ -39,25 +39,30 @@ create = (state, config, log) ->
       msg = $errUtils.errMsgByPath("uncaught.cross_origin_script")
 
     createErrFromMsg = ->
-      new Error $errUtils.errMsgByPath("uncaught.error", { msg, source, lineno })
+      new Error $errUtils.errObjByPath($errorMessages, "uncaught.error", { msg, source, lineno })
 
     ## if we have the 5th argument it means we're in a super
     ## modern browser making this super simple to work with.
     err ?= createErrFromMsg()
 
-    err.name = "Uncaught " + err.name
-
-    suffixMsg = switch type
+    uncaughtErrLookup = switch type
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
 
-    err = $errUtils.appendErrMsg(err, $errUtils.errObjByPath($errorMessages, suffixMsg))
+    uncaughtErr = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
+    
+    uncaughtErr.name = "Uncaught " + err.name
+    uncaughtErr.stack = err.stack
 
-    err.onFail = ->
+    uncaughtErr = $errUtils.modifyErrMsg(uncaughtErr, err, (msg1, msg2) ->
+      return "#{msg2}\n\n#{msg1}"
+    )
+
+    uncaughtErr.onFail = ->
       if l = current and current.getLastLog()
-        l.error(err)
+        l.error(uncaughtErr)
 
-    return err
+    return uncaughtErr
 
   commandRunningFailed = (err) ->
     ## allow for our own custom onFail function
