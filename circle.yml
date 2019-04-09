@@ -586,7 +586,7 @@ jobs:
             - npm-package-url.json
             - cypress.tgz
 
-  "test-next-version":
+  "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -620,7 +620,7 @@ jobs:
               --binary /tmp/urls/binary-url.json \
               --provider circle
 
-  "test-next-version-locally":
+  "test-npm-module-and-verify-binary":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -789,6 +789,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-716-ffmpeg-packaging
+              - add-arch-to-commit-message-install
         requires:
           - build
     - build-binary:
@@ -797,17 +798,19 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-716-ffmpeg-packaging
+              - add-arch-to-commit-message-install
         requires:
           - build
-    - test-next-version:
+    - test-binary-and-npm-against-other-projects:
         filters:
           branches:
             only:
               - develop
+              - add-arch-to-commit-message-install
         requires:
           - build-npm-package
           - build-binary
-    - test-next-version-locally:
+    - test-npm-module-and-verify-binary:
         filters:
           branches:
             only:
