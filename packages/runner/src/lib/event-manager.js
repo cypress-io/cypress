@@ -28,6 +28,12 @@ const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
+if (window.Cypress) {
+  window.channel = channel
+  window.reporterBus = reporterBus
+  window.localBus = localBus
+}
+
 let Cypress
 
 const eventManager = {
@@ -69,10 +75,10 @@ const eventManager = {
       channel.on(event, rerun)
     })
 
-    reporterBus.on('runner:console:error', (testId) => {
+    reporterBus.on('runner:console:error', (testId, attemptIndex) => {
       if (!Cypress) return
 
-      const err = Cypress.getErrorByTestId(testId)
+      const err = Cypress.getErrorByTestId(testId, attemptIndex)
 
       if (err) {
         logger.clearLog()
@@ -183,7 +189,7 @@ const eventManager = {
 
   initialize ($autIframe, config) {
     Cypress.initialize($autIframe)
-
+    Cypress._channel = channel
     // get the current runnable in case we reran mid-test due to a visit
     // to a new domain
     channel.emit('get:existing:run:state', (state = {}) => {

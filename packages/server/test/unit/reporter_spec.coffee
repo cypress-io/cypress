@@ -132,3 +132,7 @@ describe "lib/reporter", ->
       expect(@emit).to.be.calledWith("suite")
       expect(@emit.getCall(0).args[1].state).to.eq("passed")
       expect(@emit.getCall(0).args[1].tests.length).to.equal(2)
+
+    it.only "sends the retry event", ->
+      @reporter.emit('retry', 'foo', 'bar')
+      expect(@emit).to.be.calledWithMatch('retry', 'foo', 'bar')

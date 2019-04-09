@@ -49,6 +49,7 @@ class StatsStore {
     this._currentTime = Date.now()
   }
 
+  @action
   incrementCount (type) {
     const countKey = `num${_.capitalize(type)}`
 

@@ -14,7 +14,7 @@ groupsOrTableRe = /^(groups|table)$/
 parentOrChildRe = /parent|child/
 ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
-DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
+DISPLAY_PROPS   = "id testCurrentRetry alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
 BLACKLIST_PROPS = "snapshots".split(" ")
 
 delay = null
@@ -78,9 +78,10 @@ countLogsByTests = (tests = {}) ->
 
   _
   .chain(tests)
-  .map (test, key) ->
-    [].concat(test.agents, test.routes, test.commands)
-  .flatten()
+  .flatMap (test) ->
+    [test, test.prevAttempts]
+  .flatMap (tests) ->
+    [].concat(tests.agents, tests.routes, tests.commands)
   .compact()
   .union([{id: 0}])
   .map("id")
@@ -141,6 +142,13 @@ defaults = (state, config, obj) ->
     if _.isFunction(obj.type)
       obj.type = obj.type(current, state("subject"))
 
+  getTestFromRunnable = (r) =>
+    return r.ctx.currentTest || r
+
+  getTestAttemptFromRunnable = (runnable) =>
+    t = getTestFromRunnable(runnable)
+    t._currentRetry || 0
+
   _.defaults(obj, {
     id:               (counter += 1)
     state:            "pending"
@@ -148,6 +156,7 @@ defaults = (state, config, obj) ->
     url:              state("url")
     hookName:         state("hookName")
     testId:           state("runnable").id
+    testCurrentRetry: getTestAttemptFromRunnable(state("runnable"))
     viewportWidth:    state("viewportWidth")
     viewportHeight:   state("viewportHeight")
     referencesAlias:  undefined

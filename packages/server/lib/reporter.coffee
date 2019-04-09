@@ -60,6 +60,9 @@ createRunnable = (obj, parent) ->
   runnable.duration = obj.duration
   runnable.state    = obj.state ? "skipped" ## skipped by default
   runnable.body     ?= body
+  runnable._retries = obj._retries
+  ## shouldn't need to set _currentRetry, but we'll do it anyways
+  runnable._currentRetry = obj._currentRetry
 
   runnable.parent = parent if parent
 
@@ -69,10 +72,25 @@ mergeRunnable = (eventName) ->
   return (testProps, runnables) ->
     runnable = runnables[testProps.id]
 
+    if (eventName is 'test:before:run')
+      if (testProps._currentRetry > runnable._currentRetry)
+        debug('test retried:', testProps.title)
+        prevAttempts = runnable.prevAttempts || []
+        ## we don't want to mutate the previous attempt
+        prevAttempt = _.clone(runnable)
+        ## add prevAttempt array to newly created runnable
+        testProps.prevAttempts = prevAttempts.concat([prevAttempt])
+
+      if (testProps._currentRetry < runnable._currentRetry)
+        runnable = runnable.prevAttempts[testProps._currentRetry]
+
+
     _.extend(runnable, testProps)
 
 safelyMergeRunnable = (hookProps, runnables) ->
   { hookId, title, hookName, body, type } = hookProps
+
+  debug('safelyMergeRunnable')
 
   if not runnable = runnables[hookId]
     runnables[hookId] = {
@@ -112,19 +130,54 @@ setDate = (obj, runnables, stats) ->
 
   return null
 
+normalizeTest = (test = {}) ->
+    get = (prop) ->
+      _.get(test, prop, null)
+
+    ## use this or null
+    if wcs = get("wallClockStartedAt")
+      ## convert to actual date object
+      wcs = new Date(wcs)
+
+    ## wallClockDuration:
+    ## this is the 'real' duration of wall clock time that the
+    ## user 'felt' when the test run. it includes everything
+    ## from hooks, to the test itself, to lifecycle, and event
+    ## async browser compute time. this number is likely higher
+    ## than summing the durations of the timings.
+    ##
+    {
+      testId:         get("id")
+      title:          getParentTitle(test)
+      state:          get("state")
+      body:           get("body")
+      stack:          get("err.stack")
+      error:          get("err.message")
+      timings:        get("timings")
+      failedFromHookId: get("failedFromHookId")
+      wallClockStartedAt: wcs
+      wallClockDuration: get("wallClockDuration")
+      videoTimestamp: null ## always start this as null
+      prevAttempts: get("prevAttempts")?.map(normalizeTest)
+    }
+
 events = {
   "start":     setDate
   "end":       setDate
   "suite":     mergeRunnable("suite")
   "suite end": mergeRunnable("suite end")
   "test":      mergeRunnable("test")
+  ## we don't need to use this event, but we'll pass it along to reporters
+  ## retry event only fired in mocha 6+
+  # "retry":     true
   "test end":  mergeRunnable("test end")
   "hook":      safelyMergeRunnable
   "hook end":  safelyMergeRunnable
-  "pass":      mergeRunnable("pass")
+  # "pass":      mergeRunnable("pass")
   "pending":   mergeRunnable("pending")
   "fail":      mergeErr
   "test:after:run": mergeRunnable("test:after:run") ## our own custom event
+  "test:before:run": mergeRunnable("test:before:run") ## our own custom event
 }
 
 reporters = {
@@ -176,14 +229,21 @@ class Reporter
     return runnable
 
   emit: (event, args...) ->
-    if args = @parseArgs(event, args)
-      @runner?.emit.apply(@runner, args)
+    
+    if pArgs = @parseArgs(event, args)
+      if event is 'test:after:run'
+        debugger
+        if args[0].final || args[0].state is 'passed'
+          @runner?.emit.apply(@runner, ['pass', pArgs[1]])
+      ret = @runner?.emit.apply(@runner, pArgs)
+      debug('emit', event, pArgs)
+      ret
 
   parseArgs: (event, args) ->
+    debug("got mocha event '%s' with args: %o", event, args)
     ## make sure this event is in our events hash
     if e = events[event]
       if _.isFunction(e)
-        debug("got mocha event '%s' with args: %o", event, args)
         ## transform the arguments if
         ## there is an event.fn callback
         args = e.apply(@, args.concat(@runnables, @stats))
@@ -198,35 +258,7 @@ class Reporter
       body:   hook.body
     }
 
-  normalizeTest: (test = {}) ->
-    get = (prop) ->
-      _.get(test, prop, null)
-
-    ## use this or null
-    if wcs = get("wallClockStartedAt")
-      ## convert to actual date object
-      wcs = new Date(wcs)
-
-    ## wallClockDuration:
-    ## this is the 'real' duration of wall clock time that the
-    ## user 'felt' when the test run. it includes everything
-    ## from hooks, to the test itself, to lifecycle, and event
-    ## async browser compute time. this number is likely higher
-    ## than summing the durations of the timings.
-    ##
-    {
-      testId:         get("id")
-      title:          getParentTitle(test)
-      state:          get("state")
-      body:           get("body")
-      stack:          get("err.stack")
-      error:          get("err.message")
-      timings:        get("timings")
-      failedFromHookId: get("failedFromHookId")
-      wallClockStartedAt: wcs
-      wallClockDuration: get("wallClockDuration")
-      videoTimestamp: null ## always start this as null
-    }
+  normalizeTest
 
   end: ->
     if @reporter.done
@@ -243,7 +275,8 @@ class Reporter
     tests = _
     .chain(@runnables)
     .filter({type: "test"})
-    .map(@normalizeTest)
+    .map(normalizeTest)
+    # .each(console.log)
     .value()
 
     hooks = _

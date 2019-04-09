@@ -17,6 +17,7 @@ describe('retries', function () {
     cy.route('/foo')
 
     cy.visit('cypress/support/index.html').then((win) => {
+
       cy.spy(win, 'btoa')
 
       win.render({
@@ -96,7 +97,7 @@ describe('retries', function () {
   })
 
   it('test has failed state when last attempt has failed', function () {
-    this.data.singleTestThreeAttempts[0].attempts[2].state = 'failed'
+    this.data.singleTestThreeAttempts[0].state = 'failed'
     this.start(this.data.singleTestThreeAttempts)
     this.finish()
 
@@ -231,7 +232,7 @@ describe('retries', function () {
   })
 
   it('shows error on test when all retries have failed', function () {
-    const lastAttempt = this.data.singleTestThreeAttempts[0].attempts[2]
+    const lastAttempt = this.data.singleTestThreeAttempts[0]
 
     lastAttempt.state = 'failed'
     lastAttempt.err = {
@@ -269,18 +270,16 @@ describe('retries', function () {
       tests.unshift({
         id: `r${i + 5}`,
         title: 'test',
-        attempts: [
-          { state: 'passed' },
-        ],
+        state: 'passed',
       })
     })
 
     this.start(tests)
     this.data.attempt.state = 'active'
-    this.data.attempt.attempt = 3
+    this.data.attempt.attemptIndex = 2
     this.addAttempt(this.data.attempt)
     this.data.command.state = null
-    this.data.command.testAttempt = 3
+    this.data.command.testAttemptIndex = 2
     addLog(this.runner, this.data.command)
     this.data.command.state = 'pending'
     updateLog(this.runner, this.data.command)

@@ -11,7 +11,7 @@ describe('Test model', () => {
     })
 
     it('is the last attempt\'s state when there are attempts', () => {
-      const test = new Test({ attempts: [{ attempt: 1, state: 'passed' }] })
+      const test = new Test({ attempts: [{ attemptIndex: 1, state: 'passed' }] })
 
       expect(test.state).to.equal('passed')
     })
@@ -37,9 +37,9 @@ describe('Test model', () => {
 
   context('#addLog', () => {
     it('adds the log to the attempt', () => {
-      const test = new Test({ attempts: [{ attempt: 1 }] })
-      const props = { testAttempt: 1 }
-      const attempt = test.getAttemptById(1)
+      const test = new Test({ attemptIndex: 0 })
+      const props = { attemptIndex: 0 }
+      const attempt = test.getAttemptByIndex(0)
 
       sinon.stub(attempt, 'addLog')
       test.addLog(props)
@@ -49,25 +49,25 @@ describe('Test model', () => {
 
   context('#start', () => {
     it('starts the appropriate attempt if it exists', () => {
-      const test = new Test({ attempts: [{ attempt: 1 }, { attempt: 2 }] })
+      const test = new Test({ attempts: [{ attemptIndex: 1 }, { attempt: 2 }] })
 
       test.start({ attempt: 2 })
-      expect(test.getAttemptById(2).isActive).to.be.true
+      expect(test.getAttemptByIndex(2).isActive).to.be.true
     })
 
     it('creates and starts a new attempt if it does not exist', () => {
       const test = new Test({})
 
-      test.start({ attempt: 1 })
-      expect(test.getAttemptById(1).isActive).to.be.true
+      test.start({ attemptIndex: 1 })
+      expect(test.getAttemptByIndex(1).isActive).to.be.true
     })
   })
 
   context('#finish', () => {
     it('finishes the attempt', () => {
-      const test = new Test({ attempts: [{ attempt: 1 }] })
-      const attempt = test.getAttemptById(1)
-      const props = { attempt: 1 }
+      const test = new Test({ attempts: [{ attemptIndex: 1 }] })
+      const attempt = test.getAttemptByIndex(1)
+      const props = { attemptIndex: 1 }
 
       sinon.stub(attempt, 'finish')
 
@@ -78,8 +78,8 @@ describe('Test model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns command of the last attempt matching the error', () => {
-      const test = new Test({ attempts: [{ attempt: 1 }] })
-      const attempt = test.getAttemptById(1)
+      const test = new Test({ attempts: [{ attemptIndex: 1 }] })
+      const attempt = test.getAttemptByIndex(1)
       const command = {}
 
       sinon.stub(attempt, 'commandMatchingErr').returns(command)

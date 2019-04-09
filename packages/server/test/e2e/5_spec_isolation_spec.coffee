@@ -226,3 +226,71 @@ describe "e2e spec_isolation", ->
         expectRunsToHaveCorrectStats(json.runs)
 
         snapshot(json)
+
+
+  it.only "failing with retries", ->
+    e2e.exec(@, {
+      spec: specs
+      outputPath: outputPath
+      snapshot: false
+      expectedExitCode: 5
+      config: {retries: 1}
+      browser: 'chrome'
+      exit: false
+    })
+    .then ->
+      ## now what we want to do is read in the outputPath
+      ## and snapshot it so its what we expect after normalizing it
+      fs.readJsonAsync(outputPath)
+      .then (json) ->
+        ## ensure that config has been set
+        expect(json.config).to.be.an('object')
+        expect(json.config.projectName).to.eq("e2e")
+        expect(json.config.projectRoot).to.eq(e2ePath)
+
+        ## but zero out config because it's too volatile
+        json.config = {}
+
+        expect(json.browserPath).to.be.a('string')
+        expect(json.browserName).to.be.a('string')
+        expect(json.browserVersion).to.be.a('string')
+        expect(json.osName).to.be.a('string')
+        expect(json.osVersion).to.be.a('string')
+        expect(json.cypressVersion).to.be.a('string')
+
+        _.extend(json, {
+          browserPath: 'path/to/browser'
+          browserName: 'FooBrowser'
+          browserVersion: '88'
+          osName: 'FooOS'
+          osVersion: '1234'
+          cypressVersion: '9.9.9'
+        })
+
+        ## ensure the totals are accurate
+        expect(json.totalTests).to.eq(
+          _.sum([
+            json.totalFailed,
+            json.totalPassed,
+            json.totalPending,
+            json.totalSkipped
+          ])
+        )
+
+        expectStartToBeBeforeEnd(json, "startedTestsAt", "endedTestsAt")
+
+        ## ensure totalDuration matches all of the stats durations
+        expectDurationWithin(
+          json,
+          "totalDuration",
+          _.sumBy(json.runs, "stats.wallClockDuration"),
+          _.sumBy(json.runs, "stats.wallClockDuration"),
+          5555
+        )
+
+        ## should be 4 total runs
+        expect(json.runs).to.have.length(4)
+
+        expectRunsToHaveCorrectStats(json.runs)
+
+        snapshot(json)

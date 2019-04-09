@@ -40,7 +40,7 @@ configKeys = toWords """
   numTestsKeptInMemory            supportFile
   port                            supportFolder
   reporter                        videosFolder
-  reporterOptions
+  reporterOptions                 retries
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
   blacklistHosts                  pageLoadTimeout
@@ -81,6 +81,7 @@ defaults = {
   defaultCommandTimeout:         4000
   requestTimeout:                5000
   responseTimeout:               30000
+  retries:                       0
   pageLoadTimeout:               60000
   execTimeout:                   60000
   taskTimeout:                   60000
@@ -130,6 +131,7 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
+  retries: v.isNumber
   testFiles: v.isString
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber

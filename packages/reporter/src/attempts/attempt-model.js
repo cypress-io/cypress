@@ -21,8 +21,8 @@ export default class Attempt {
   _logs = {}
 
   constructor (props) {
-    this.testId = props.testId
-    this.id = props.attempt
+    this.testId = props.id
+    this.id = props._currentRetry
     this._state = props.state
     this.err.update(props.err)
 

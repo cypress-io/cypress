@@ -42,6 +42,8 @@ niv.install("react-dom@15.6.1")
     .then ->
       res.send "<html><body>timeout</body></html>"
 
+  app.use "/isolated-runner", express.static(path.join(__dirname, '../../../runner/dist'))
+
   app.get "/node_modules/*", (req, res) ->
     res.sendFile(path.join("node_modules", req.params[0]), {
       root: path.join(__dirname, "../..")

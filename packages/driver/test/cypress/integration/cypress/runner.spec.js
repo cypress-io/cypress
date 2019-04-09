@@ -1,726 +1,1104 @@
+/* eslint prefer-rest-params: "off", no-console: "off", arrow-body-style: "off"*/
 
-const { $, _ } = Cypress
+const { _ } = Cypress
 const helpers = require('../../support/helpers')
+
+const matchDeep = require('../../plugins/snapshot/command')
+
+const snapshots = require('./eventSnapshots').EventSnapshots
+
 const sinon = require('sinon')
-const { match } = sinon
-// const m = match
-const jestDiff = require('jest-diff')
+
+matchDeep.registerInCypress()
+/**
+ * @type {sinon.SinonMatch}
+ */
+const match = Cypress.sinon.match
+
+// const { defer } = helpers
 
 const backupCy = window.cy
 const backupCypress = window.Cypress
 
 backupCy.__original__ = true
 
-const assert = (expr, message) => {
-  if (!expr) {
-    message = `Assertion Failed: ${message}`
-    Cypress.log({
-      message,
-      state: 'failed',
-      name: 'assert',
-    })
-    throw new Error(message)
+/**
+   * @type {sinon.SinonStub}
+   */
+let allStubs
+/**
+   * @type {sinon.SinonStub}
+   */
+let mochaStubs
+/**
+   * @type {sinon.SinonStub}
+   */
+let setRunnablesStub
+
+const stringifyShort = (obj) => {
+  if (_.isArray(obj)) {
+    return `[Array ${obj.length}]`
   }
 
-  Cypress.log({
-    message,
-    name: 'assert',
-    state: 'passed',
+  if (_.isObject(obj)) {
+    return `{Object ${Object.keys(obj).length}}`
+  }
+
+  return obj
+}
+
+const simpleSingleTest = {
+  suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
+}
+
+const threeTestsWithHooks = {
+  suites: { 'suite 1': { hooks: ['before', 'beforeEach', 'afterEach', 'after'], tests: ['test 1', 'test 2', 'test 3'] } },
+}
+
+const threeTestsWithRetry = {
+  suites: {
+    'suite 1': {
+      hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+      tests: [
+        'test 1',
+        { name: 'test 2', fail: 2 },
+        'test 3',
+      ],
+    },
+  },
+}
+
+const enableStubSnapshots = false
+// const enableStubSnapshots = true
+
+const eventCleanseMap = {
+  snapshots: stringifyShort,
+  parent: stringifyShort,
+  tests: stringifyShort,
+  commands: stringifyShort,
+  err: stringifyShort,
+  body: '[body]',
+  wallClockStartedAt: match.date,
+  lifecycle: match.number,
+  fnDuration: match.number,
+  duration: match.number,
+  afterFnDuration: match.number,
+  wallClockDuration: match.number,
+  stack: match.string,
+  message: '[error message]',
+  // consoleProps: stringifyShort
+
+}
+
+const mochaEventCleanseMap = {
+  ...eventCleanseMap,
+  start: match.date,
+  end: match.date,
+}
+
+const setRunnablesCleanseMap = { ...eventCleanseMap, tests: _.identity }
+
+let autCypress
+
+const createCypress = (mochaTests, opts = {}) => {
+
+  _.defaults(opts, {
+    state: {},
+    config: {},
+  })
+
+  return cy.visit('/fixtures/isolated-runner.html#/tests/integration/cypress/empty_spec.js')
+  .then({ timeout: 60000 }, (win) => {
+    win.channel.destroy()
+
+    allStubs = cy.stub().snapshot(enableStubSnapshots)
+    mochaStubs = cy.stub().snapshot(enableStubSnapshots)
+    setRunnablesStub = cy.stub().snapshot(enableStubSnapshots)
+
+    return new Promise((resolve) => {
+      const runCypress = () => {
+        autCypress.run.restore()
+
+        const emit = autCypress.emit
+        const emitMap = autCypress.emitMap
+        const emitThen = autCypress.emitThen
+
+        cy.stub(autCypress, 'emit').snapshot(enableStubSnapshots).log(false)
+        .callsFake(function () {
+
+          const noLog = _.includes([
+            'navigation:changed',
+            'stability:changed',
+            'window:load',
+            'url:changed',
+            'log:added',
+            'page:loading',
+            'window:unload',
+            'newListener',
+          ], arguments[0])
+          const noCall = _.includes(['window:before:unload', 'before:screenshot', 'mocha'], arguments[0])
+          const isMocha = _.includes(['mocha'], arguments[0])
+
+          isMocha && mochaStubs.apply(this, arguments)
+
+          noLog || allStubs.apply(this, ['emit'].concat([].slice.call(arguments)))
+
+          // if (noCall) debugger
+
+          return noCall || emit.apply(this, arguments)
+        })
+
+        cy.stub(autCypress, 'emitMap').snapshot(enableStubSnapshots).log(false)
+        .callsFake(function () {
+          allStubs.apply(this, ['emitMap'].concat([].slice.call(arguments)))
+
+          return emitMap.apply(this, arguments)
+        })
+
+        cy.stub(autCypress, 'emitThen').snapshot(enableStubSnapshots).log(false)
+        .callsFake(function () {
+          const noCall = ['runnable:after:run:async'].includes(arguments[0])
+
+          allStubs.apply(this, ['emitThen'].concat([].slice.call(arguments)))
+
+          if (noCall) {
+            return Promise.resolve()
+          }
+
+          return emitThen.apply(this, arguments)
+        })
+
+        spyOn(autCypress.mocha.getRunner(), 'fail', (...args) => {
+          Cypress.log({
+            name: 'Runner Fail',
+            message: `${args[1]}`,
+            state: 'failed',
+            consoleProps: () => ({
+              Error: args[1],
+            }),
+          })
+        })
+
+        cy.spy(cy.state('window').console, 'log').as('console_log')
+        cy.spy(cy.state('window').console, 'error').as('console_error')
+
+        autCypress.run(resolve)
+
+      }
+
+      cy.spy(win.reporterBus, 'emit').snapshot(enableStubSnapshots).as('reporterBus')
+      cy.spy(win.localBus, 'emit').snapshot(enableStubSnapshots).as('localBus')
+
+      cy.stub(win.channel, 'emit').snapshot(enableStubSnapshots)
+      .withArgs('watch:test:file')
+      .callsFake(() => {
+        autCypress = win.Cypress
+
+        cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).callsFake((specWindow) => {
+          autCypress.onSpecWindow.restore()
+
+          autCypress.onSpecWindow(specWindow)
+
+          helpers.generateMochaTestsForWin(specWindow, mochaTests)
+
+          specWindow.before = () => {}
+          specWindow.beforeEach = () => {}
+          specWindow.afterEach = () => {}
+          specWindow.after = () => {}
+          specWindow.describe = () => {}
+        })
+
+        cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).callsFake(runCypress)
+      })
+      .withArgs('is:automation:client:connected')
+      .yieldsAsync(true)
+
+      .withArgs('get:existing:run:state')
+      .callsFake((evt, cb) => {
+        cb(opts.state)
+      })
+
+      .withArgs('backend:request', 'resolve:url')
+      .yieldsAsync({ response: {
+        isOkStatusCode: true,
+        isHtml: true,
+        url: 'http://localhost:3500/fixtures/generic.html',
+      } })
+
+      .withArgs('set:runnables')
+      .callsFake((...args) => {
+        setRunnablesStub(...args)
+        _.last(args)()
+      })
+
+      // .withArgs('preserve:run:state')
+      // .callsFake()
+
+      .withArgs('automation:request')
+      .yieldsAsync({ response: {} })
+
+      const c = _.extend({}, Cypress.config(), { isTextTerminal: true }, opts.config)
+
+      c.state = {}
+      // c.state = opts.state
+
+      cy.stub(win.channel, 'on').snapshot(enableStubSnapshots)
+
+      win.Runner.start(win.document.getElementById('app'), c)
+    })
   })
 }
-let lastActual = 'none'
 
 describe('src/cypress/runner', () => {
-  /**
-	 * @type {sinon.SinonStub}
-	 */
-  let allStubs
 
-  before(() => {
-    const btn = $('<span><button>COPY</button></span>', window.top.document)
-    const container = $('.toggle-auto-scrolling.auto-scrolling-enabled', window.top.document).closest('.controls')
+  describe('isolated test runner', () => {
 
-    btn.on('click', () => {
-      copyToClipboard(JSON.stringify(lastActual, null, '\t'))
+    beforeEach(async () => {
+      window.cy = backupCy
+      window.Cypress = backupCypress
+
+      // await new Cypress.Promise((res) => {
+      // cy.wait(1000)
+      // cy.visit('http://localhost:3939').then(res)
+      // })
     })
 
-    container.append(btn)
-    cy.visit('/fixtures/generic.html')
-  })
-
-  beforeEach(function () {
-    window.cy = backupCy
-    window.Cypress = backupCypress
-    backupCypress.mocha.override()
-    cy.state('returnedCustomPromise', false)
-
-    const autWindow = cy.state('window')
-    // delete top.Cypress
-
-    this.Cypress = Cypress.$Cypress.create(Cypress.config())
-    this.Cypress.onSpecWindow(autWindow)
-    this.Cypress.initialize($('.aut-iframe', top.document))
-
-    window.cy = backupCy
-    window.Cypress = backupCypress
-
-    allStubs = cy.stub().log(false)
-
-    cy.stub(this.Cypress, 'emit').callsFake(allStubs)
-    cy.stub(this.Cypress, 'emitMap').callsFake(allStubs)
-    cy.stub(this.Cypress, 'emitThen').callsFake((...args) => {
-      allStubs(...args)
-
-      return Promise.resolve()
-    })
-
-    backupCypress.mocha.override()
-
-    this.runMochaTests = (obj) => {
-      this.Cypress.mocha.override()
-
-      helpers.generateMochaTestsForWin(autWindow, obj)
-
-      this.Cypress.normalizeAll()
-
-      return new Cypress.Promise((resolve) => {
-        return this.Cypress.run(resolve)
-      })
-    }
-
-  })
-
-  describe('isolated runner', function () {
-    // it('empty', () => {})
-
-    it('simple 1', function () {
-      return this.runMochaTests({ suites: { 'suite 1': { tests: [{ name: 'test 1' }] } } })
-      .then(shouldHavePassed())
-      .then(() => {
-        assertMatch(formatEvents(allStubs), [
-          ['run:start'],
-          [
-            'test:before:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-              'state': 'passed',
-            },
-          ],
-          ['run:end'],
-        ])
-      })
-    })
-
-    it('simple 2', function () {
-      return this.runMochaTests({
-        suites: {
-          'suite 1': { tests: [{ name: 'test 1' }] },
-          'suite 2': {
-            hooks: ['before'],
-            tests: ['test 1'],
-          },
-        },
-      })
-      .then(shouldHavePassed())
-      .then(() => {
-
-        assertMatch(formatEvents(allStubs), [
-          ['run:start'],
-          [
-            'test:before:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-              'state': 'passed',
-            },
-          ],
-          [
-            'test:before:run',
-            {
-              'id': 'r5',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r5',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r5',
-              'title': '"before all" hook',
-              'hookName': 'before all',
-              'hookId': 'h1',
-            },
-          ],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r5',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r5',
-              'title': 'test 1',
-              'state': 'passed',
-            },
-          ],
-          ['run:end'],
-        ])
-
-      })
-    })
-    it('simple fail', function () {
-      return this.runMochaTests({
-        suites: {
-          'suite 1': {
-            tests: [
-              {
-                name: 'test 1',
-                fail: true,
-              },
-            ],
-          },
-        },
-      })
-      .then(shouldHaveFailed(1))
-      .then(() => {
-
-        assertMatch(formatEvents(allStubs), [
-          ['run:start'],
-          [
-            'test:before:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          ['fail', {}],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-              'err': '[Object]',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-              'err': '[Object]',
-              'state': 'failed',
-            },
-          ],
-          ['run:end'],
-        ])
-
-      })
-    })
-
-    it('pass fail pass fail', function () {
-      return this.runMochaTests({
-        suites: {
-          'suite 1': {
-            tests: [
-              'test 1',
-              {
-                name: 'test 2',
-                fail: true,
-              },
-            ],
-          },
-          'suite 2': {
-            tests: [
-              'test 1',
-              {
-                name: 'test 2',
-                fail: true,
-              },
-            ],
-          },
-        },
-      })
-      .then(shouldHaveFailed(2))
-      .then(() => {
-
-        assertMatch(formatEvents(allStubs), [
-          ['run:start'],
-          [
-            'test:before:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r3',
-              'title': 'test 1',
-              'state': 'passed',
-            },
-          ],
-          [
-            'test:before:run',
-            {
-              'id': 'r4',
-              'title': 'test 2',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r4',
-              'title': 'test 2',
-            },
-          ],
-          ['fail',		{}],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r4',
-              'title': 'test 2',
-              'err': '[Object]',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r4',
-              'title': 'test 2',
-              'err': '[Object]',
-              'state': 'failed',
-            },
-          ],
-          [
-            'test:before:run',
-            {
-              'id': 'r6',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r6',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r6',
-              'title': 'test 1',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r6',
-              'title': 'test 1',
-              'state': 'passed',
-            },
-          ],
-          [
-            'test:before:run',
-            {
-              'id': 'r7',
-              'title': 'test 2',
-            },
-          ],
-          [
-            'test:before:run:async',
-            {
-              'id': 'r7',
-              'title': 'test 2',
-            },
-          ],
-          ['fail', {}],
-          [
-            'runnable:after:run:async',
-            {
-              'id': 'r7',
-              'title': 'test 2',
-              'err': '[Object]',
-            },
-          ],
-          [
-            'test:after:run',
-            {
-              'id': 'r7',
-              'title': 'test 2',
-              'err': '[Object]',
-              'state': 'failed',
-            },
-          ],
-          ['run:end'],
-        ])
-      })
-    })
-    it('no tests', function () {
-      return this.runMochaTests({})
-      .then(shouldHaveFailed(0))
-      .then(() => {
-        assertMatch(formatEvents(allStubs), [['run:start'], ['run:end']])
-      })
-    })
-    it('simple fail, catch cy.on(fail)', function () {
-      return this.runMochaTests({
-        suites: {
-          'suite 1': {
-            tests: [
-              {
-                name: 'test 1',
-                fn: () => {
-                  cy.on('fail', () => {
-                    return false
-                  })
-                  throw new Error('error in test')
-                },
-
-              },
-            ],
-          },
-        },
-      })
-      .then(shouldHaveFailed(0))
-      .then(() => {
-
-        assertMatch(formatEvents(allStubs), [
-          ['run:start'],
-          ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-          ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-          ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-          ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'state': 'passed'		}],
-          ['run:end'],
-        ])
-      })
-    })
-
-    describe('hook failures', () => {
-      it('fail in [before]', function () {
-        return this.runMochaTests({
-          suites: {
-            'suite 1': {
-              hooks: [
-                {
-                  type: 'before',
-                  fail: true,
-                },
-              ],
-              tests: [{ name: 'test 1' }],
-            },
-          },
+    describe('test events', function () {
+      it('empty', () => {
+        createCypress({
+          suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
         })
-        .then(shouldHaveFailed(1))
+
+      })
+
+      it('simple 1', () => {
+        createCypress(simpleSingleTest)
+        // .call('run')
+        .then(shouldHaveTestResults(1, 0))
         .then(() => {
 
-          assertMatch(formatEvents(allStubs), [
-            ['run:start'],
-            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['fail',		{}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': '"before all" hook',			'hookName': 'before all',			'hookId': 'h1',			'err': '[Object]'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'hookName': 'before all',			'err': '[Object]',			'state': 'failed',			'failedFromHookId': 'h1'		}],
-            ['run:end'],
-          ])
-        })
-      })
+          cy.contains('header .passed', '1')
 
-      it('fail in [beforeEach]', function () {
-        return this.runMochaTests({
-          suites: {
-            'suite 1': {
-              hooks: [
-                {
-                  type: 'beforeEach',
-                  fail: true,
-                },
-              ],
-              tests: [{ name: 'test 1' }],
-            },
-          },
         })
-        .then(shouldHaveFailed(1))
         .then(() => {
 
-          assertMatch(formatEvents(allStubs), [
-            ['run:start'],
-            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:before:run:async',		{ 'id': 'r3',			'title': 'test 1'		}],
-            ['fail',		{}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': '"before each" hook',			'hookName': 'before each',			'hookId': 'h1',			'err': '[Object]'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'hookName': 'before each',			'err': '[Object]',			'state': 'failed',			'failedFromHookId': 'h1'		}],
-            ['run:end'],
-          ])
+          // console.log(_.cloneDeep(formatEvents(allStubs)))
+
+          // expect(formatEvents(allStubs)).to.matchDeep(eventCleanseMap)
+          expect(formatEvents(allStubs)).to.matchSnapshot({ ...eventCleanseMap, wallClockStartedAt: match.date })
         })
       })
 
-      it('fail in [afterEach]', function () {
-        return this.runMochaTests({
+      it('simple 3 tests', function () {
+        createCypress({
           suites: {
-            'suite 1': {
-              hooks: [
-                {
-                  type: 'afterEach',
-                  fail: true,
-                },
-              ],
-              tests: [{ name: 'test 1' }],
-            },
+            'suite 1': { tests: ['test 1', 'test 2', 'test 3'] },
           },
         })
-        .then(shouldHaveFailed(1))
+        .then(shouldHaveTestResults(3, 0))
         .then(() => {
-
-          assertMatch(formatEvents(allStubs), [
-            ['run:start'],
-            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['fail',		{}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': '"after each" hook',			'hookName': 'after each',			'hookId': 'h1',			'err': '[Object]'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'hookName': 'after each',			'err': '[Object]',			'state': 'failed',			'failedFromHookId': 'h1'		}],
-            ['run:end'],
-          ])
-        })
-      })
-      it('fail in [after]', function () {
-        return this.runMochaTests({
-          suites: {
-            'suite 1': {
-              hooks: [
-                {
-                  type: 'after',
-                  fail: true,
-                },
-              ],
-              tests: [{ name: 'test 1' }],
-            },
-          },
-        })
-        .then(shouldHaveFailed(1))
-        .then(() => {
-
-          assertMatch(formatEvents(allStubs), [
-            ['run:start'],
-            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['fail',		{}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': '"after all" hook',			'hookName': 'after all',			'hookId': 'h1',			'err': '[Object]'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'hookName': 'after all',			'err': '[Object]',			'state': 'failed',			'failedFromHookId': 'h1'		}],
-            ['run:end'],
-          ])
+          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
         })
       })
 
-      it('fail in [after], skip remaining tests', function () {
-        return this.runMochaTests({
+      it('simple fail', function () {
+        createCypress({
           suites: {
             'suite 1': {
-              hooks: [
-                {
-                  type: 'after',
-                  fail: true,
-                },
-              ],
-              tests: ['test 1', 'test 2'],
-            },
-          },
-        })
-        .then(shouldHaveFailed(1))
-        .then(() => {
-
-          assertMatch(formatEvents(allStubs), [
-            ['run:start'],
-            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'state': 'passed'		}],
-            ['test:before:run',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['test:before:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['fail',		{}],
-            ['runnable:after:run:async',		{			'id': 'r4',			'title': '"after all" hook',			'hookName': 'after all',			'hookId': 'h1',			'err': '[Object]'		}],
-            ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'hookName': 'after all',			'err': '[Object]',			'state': 'failed',			'failedFromHookId': 'h1'		}],
-            ['run:end'],
-          ])
-        })
-      })
-
-    })
-    describe('test failures w/ hooks', () => {
-
-      it('fail with [before]', function () {
-        return this.runMochaTests({
-          suites: {
-            'suite 1': {
-              hooks: ['before'],
               tests: [
                 {
                   name: 'test 1',
                   fail: true,
+                },
+              ],
+            },
+          },
+        })
+        .then(shouldHaveTestResults(0, 1))
+        .then(() => {
+          cy.contains('header .failed', '1')
+        })
+        .then(() => {
+          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+        })
+      })
 
+      it('pass fail pass fail', () => {
+        createCypress({
+          suites: {
+            'suite 1': {
+              tests: [
+                'test 1',
+                {
+                  name: 'test 2',
+                  fail: true,
+                },
+              ],
+            },
+            'suite 2': {
+              tests: [
+                'test 1',
+                {
+                  name: 'test 2',
+                  fail: true,
+                },
+              ],
+            },
+          },
+        })
+        .then(shouldHaveTestResults(2, 2))
+        .then(() => {
+
+          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+        })
+      })
+
+      it('fail pass', function () {
+        createCypress({
+          suites: {
+            'suite 1': {
+              tests: [
+                {
+                  name: 'test 1',
+                  fail: true,
                 },
                 { name: 'test 2' },
               ],
             },
           },
         })
-        .then(shouldHaveFailed(1))
+        .then(shouldHaveTestResults(1, 1))
         .then(() => {
-
-          assertMatch(formatEvents(allStubs), [
-            ['run:start'],
-            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': '"before all" hook',			'hookName': 'before all',			'hookId': 'h1'		}],
-            ['fail',		{}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
-            ['test:before:run',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['test:before:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'state': 'passed'		}],
-            ['run:end'],
-          ])
+          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
         })
       })
 
-      it('fail with [after]', function () {
-        return this.runMochaTests({
+      it('no tests', function () {
+        createCypress({})
+        .then(shouldHaveTestResults(0, 0))
+        .then(() => {
+          expect(formatEvents(allStubs)).to.matchSnapshot()
+        })
+        cy.contains('No tests found in your file').should('be.visible')
+        cy.get('.error-message p').invoke('text').should('eq', 'We could not detect any tests in the above file. Write some tests and re-run.')
+      })
+
+      it('simple fail, catch cy.on(fail)', () => {
+        createCypress({
           suites: {
             'suite 1': {
-              hooks: [{ type: 'after' }],
-              tests: [{ name: 'test 1', fail: true }, 'test 2'],
+              tests: [
+                {
+                  name: 'test 1',
+                  fn: () => {
+                    console.log('test ran')
+                    cy.on('fail', () => {
+                      console.log('on:fail')
+
+                      return false
+                    })
+                    console.log('added handler')
+                    expect(false).ok
+                    throw new Error('error in test')
+                  },
+                  eval: true,
+                },
+              ],
             },
           },
         })
-        .then(shouldHaveFailed(1))
+        .then(shouldHaveTestResults(1, 0))
         .then(() => {
+          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+        })
+      })
 
-          assertMatch(formatEvents(allStubs), [
-            ['run:start'],
-            ['test:before:run',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['test:before:run:async',		{			'id': 'r3',			'title': 'test 1'		}],
-            ['fail',		{}],
-            ['runnable:after:run:async',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]'		}],
-            ['test:after:run',		{			'id': 'r3',			'title': 'test 1',			'err': '[Object]',			'state': 'failed'		}],
-            ['test:before:run',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['test:before:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['runnable:after:run:async',		{			'id': 'r4',			'title': 'test 2'		}],
-            ['runnable:after:run:async',		{			'id': 'r4',			'title': '"after all" hook',			'hookName': 'after all',			'hookId': 'h1'		}],
-            ['test:after:run',		{			'id': 'r4',			'title': 'test 2',			'state': 'passed'		}],
-            ['run:end'],
-          ])
+      describe('hook failures', () => {
+        it('fail in [before]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  {
+                    type: 'before',
+                    fail: true,
+                  },
+                ],
+                tests: [{ name: 'test 1' }],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_BEFORE.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_BEFORE.mocha)
+          })
+        })
+
+        it('fail in [beforeEach]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  {
+                    type: 'beforeEach',
+                    fail: true,
+                  },
+                ],
+                tests: [{ name: 'test 1' }],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_BEFOREEACH.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_BEFOREEACH.mocha)
+          })
+        })
+
+        it('fail in [afterEach]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  {
+                    type: 'afterEach',
+                    fail: true,
+                  },
+                ],
+                tests: [{ name: 'test 1' }],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_AFTEREACH.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_AFTEREACH.mocha)
+          })
+        })
+
+        it('fail in [after]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  {
+                    type: 'after',
+                    fail: true,
+                  },
+                ],
+                tests: ['test 1', 'test 2'],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(1, 1))
+          .then(() => {
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_AFTER.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_AFTER.mocha)
+          })
+        })
+      })
+
+      describe('test failures w/ hooks', () => {
+        it('fail with [before]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: ['before'],
+                tests: [
+                  {
+                    name: 'test 1',
+                    fail: true,
+                  },
+                  { name: 'test 2' },
+                ],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(1, 1))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+          })
+        })
+
+        it('fail with [after]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [{ type: 'after' }],
+                tests: [{ name: 'test 1', fail: true }, 'test 2'],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(1, 1))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+          })
+        })
+
+        it('fail with all hooks', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+                tests: [{ name: 'test 1', fail: true }],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+          })
+        })
+      })
+
+      describe('mocha grep', () => {
+        it('fail with [only]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+                tests: [
+                  { name: 'test 1', fail: true },
+                  { name: 'test 2', fail: true, only: true },
+                  { name: 'test 3', fail: true },
+                ],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_WITH_ONLY.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_WITH_ONLY.mocha)
+          })
+        })
+        it('pass with [only]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+                tests: [
+                  { name: 'test 1' },
+                  { name: 'test 2', only: true },
+                  { name: 'test 3' },
+                ],
+              },
+            },
+          })
+          .then(shouldHaveTestResults(1, 0))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.PASS_WITH_ONLY.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.PASS_WITH_ONLY.mocha)
+          })
+        })
+      })
+
+      describe('retries', () => {
+
+        it('can set retry config', () => {
+          createCypress({}, { config: { retries: 1 } })
+          .then(() => {
+            expect(autCypress.config()).to.has.property('retries', 1)
+          })
+        })
+
+        describe('retry ui', () => {
+          beforeEach(() => {
+            createCypress({
+              suites: {
+                'suite 1': {
+                  tests: [
+                    { name: 'test 1', fail: 1 },
+                    { name: 'test 2', fail: 2 },
+                    { name: 'test 3', fail: 1 },
+                  ],
+                  // tests: [{ name: 'test 1', fail: true }, 'test 2'],
+                },
+              },
+            }, { config: { retries: 1, isTextTerminal: false } })
+            .then(shouldHaveTestResults(2, 1))
+          })
+
+          it('empty', () => {})
+
+          it('can toggle failed attempt', () => {
+            cy.contains('.runnable-wrapper', 'test 3').click().within(() => {
+              cy.contains('AssertionError').should('not.be.visible')
+              cy.contains('Attempt 1').click()
+              cy.contains('AssertionError').should('be.visible')
+              cy.contains('Attempt 1').click()
+              cy.contains('AssertionError').should('not.be.visible')
+            })
+          })
+
+          it('can view error for failed attempt', () => {
+            cy.contains('Attempt 1')
+            .click()
+            .closest('.attempt-item')
+            .contains('AssertionError')
+            .click()
+            cy.get('@console_log').should('be.calledWithMatch', 'Command')
+
+          })
+        })
+
+        it('test retry with hooks', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+                tests: [
+                  { name: 'test 1', fail: 1 },
+                  // { name: 'test 1', fail: false },
+                  // { name: 'test 1', fail: true }, 'test 1',
+                  // 'test 1', 'test 2',
+                ],
+              },
+            },
+          }, { config: { retries: 1 } })
+          .then(shouldHaveTestResults(1, 0))
+          .then(() => {
+
+            expect(formatEvents(allStubs)).matchSnapshot(eventCleanseMap)
+
+            cy.contains('test')
+            cy.contains('after all')
+          })
+
+        })
+
+        it('test retry with [only]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+                tests: [
+                  { name: 'test 1' },
+                  { name: 'test 2', fail: 1, only: true },
+                  { name: 'test 3' },
+                  // { name: 'test 1', fail: true }, 'test 1',
+                  // 'test 1', 'test 2',
+                ],
+              },
+            },
+          }, { config: { retries: 1 } })
+          .then(shouldHaveTestResults(1, 0))
+          .then(() => {
+
+            expect(formatEvents(allStubs)).matchSnapshot(eventCleanseMap)
+          })
+        })
+
+        it('test retry with many hooks', () => {
+
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  'before',
+                  'beforeEach',
+                  'afterEach',
+                  'after',
+                ],
+                tests: [
+                  { name: 'test 1' }, //fn: test1.stub },
+                  { name: 'test 2', fail: 1 },
+                  { name: 'test 3' },
+                // 'test 1', 'test 2',
+                ],
+              },
+            },
+          }, { config: { retries: 1 } })
+          .then(shouldHaveTestResults(3, 0))
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+          })
+
+        })
+
+        it('retries from [beforeEach]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  'before',
+                  'beforeEach',
+                  { type: 'beforeEach', fail: 1 },
+                  'beforeEach',
+                  'afterEach',
+                  'after',
+                ],
+                tests: [{ name: 'test 1' }],
+              },
+            },
+          }, { config: { retries: 1 } })
+          .then(shouldHaveTestResults(1, 0))
+          .then(() => {
+            cy.contains('Attempt 1').click()
+            cy.contains('AssertionError').click()
+            cy.get('@reporterBus').its('lastCall.args').should('contain', 'runner:console:log')
+          })
+          .then(() => {
+
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.RETRY_PASS_IN_BEFOREEACH.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.RETRY_PASS_IN_BEFOREEACH.mocha)
+          })
+
+        })
+        it.only('can retry from [afterEach]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  'before',
+                  'beforeEach',
+                  'beforeEach',
+                  { type: 'afterEach', fail: 1 },
+                  'afterEach',
+                  'after',
+                ],
+                tests: [{ name: 'test 1' }, 'test 2', 'test 3'],
+              },
+              'suite 2': {
+                hooks: [{ type: 'afterEach', fail: 2 }],
+                tests: ['test 1'],
+              },
+              'suite 3': {
+                tests: ['test 1'],
+              },
+            },
+          }, { config: { retries: 2 } })
+          .then(shouldHaveTestResults(5, 0))
+          .then(() => {
+            cy.contains('test 1').click()
+            cy.contains('Attempt 1').click()
+            cy.contains('AssertionError').click()
+            cy.get('@reporterBus').its('lastCall.args').should('contain', 'runner:console:log')
+          })
+          .then(() => {
+
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.RETRY_PASS_IN_AFTEREACH.setRunnables)
+            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.RETRY_PASS_IN_AFTEREACH.mocha)
+          })
+
+        })
+        it('cant retry from [before]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  { type: 'before', fail: 1 },
+                  'beforeEach',
+                  'beforeEach',
+                  'afterEach',
+                  'afterEach',
+                  'after',
+                ],
+                tests: [{ name: 'test 1' }],
+              },
+            },
+          }, { config: { retries: 1, isTextTerminal: false } })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            // cy.contains('Attempt 1').click()
+            cy.contains('AssertionError').click()
+            cy.get('@console_log').its('lastCall').should('be.calledWithMatch', 'Error')
+          })
+          .then(() => {
+            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+          })
+
+        })
+
+      })
+
+    })
+    describe('save/reload state', () => {
+
+      describe('serialize / load from state', () => {
+        const serializeState = () => {
+          return getRunState(autCypress)
+        }
+
+        const loadStateFromSnapshot = (cypressConfig, name) => {
+          cy.task('getSnapshot', {
+            file: Cypress.spec.name,
+            exactSpecName: name,
+          })
+          .then((state) => {
+            cypressConfig[1].state = state
+          })
+        }
+
+        describe('hooks', () => {
+          let realState
+          const stub1 = sinon.stub()
+          const stub2 = sinon.stub()
+          const stub3 = sinon.stub().callsFake(() => realState = serializeState())
+          let cypressConfig = [
+            {
+              suites: {
+                'suite 1': {
+                  hooks: [
+                    'before',
+                    'beforeEach',
+                    'afterEach',
+                    'after',
+                  ],
+                  tests: [{ name: 'test 1', fn: stub1 }],
+                },
+                'suite 2': {
+                  tests: [
+                    { name: 'test 1', fn: stub2 },
+                    { name: 'test 2', fn: stub3 },
+                    'test 3',
+                  ],
+                },
+              },
+            }, { config: { retries: 1 } },
+          ]
+
+          it('serialize state', () => {
+            createCypress(...cypressConfig)
+            .then(shouldHaveTestResults(4, 0))
+            .then(() => {
+              expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - hooks')
+            })
+          })
+
+          it('load state', () => {
+
+            loadStateFromSnapshot(cypressConfig, 'serialize state - hooks')
+
+            createCypress(...cypressConfig)
+            .then(shouldHaveTestResults(4, 0))
+            .then(() => {
+              expect(stub1).to.calledOnce
+              expect(stub2).to.calledOnce
+              expect(stub3).to.calledTwice
+            })
+          })
+        })
+
+        describe('retries', () => {
+          let realState
+
+          let runCount = 0
+          const failThenSerialize = () => {
+            if (!runCount++) {
+              assert(false, 'stub 3 fail')
+            }
+
+            assert(true, 'stub 3 pass')
+
+            return realState = serializeState()
+          }
+
+          let runCount2 = 0
+          const failOnce = () => {
+            if (!runCount2++) {
+              assert(false, 'stub 2 fail')
+            }
+
+            assert(true, 'stub 2 pass')
+          }
+
+          const stub1 = sinon.stub()
+          const stub2 = sinon.stub().callsFake(failOnce)
+          const stub3 = sinon.stub().callsFake(failThenSerialize)
+
+          let cypressConfig = [
+            {
+              suites: {
+                'suite 1': {
+                  hooks: [
+                    'before',
+                    'beforeEach',
+                    'afterEach',
+                    'after',
+                  ],
+                  tests: [{ name: 'test 1', fn: stub1 }],
+                },
+                'suite 2': {
+                  tests: [
+                    { name: 'test 1', fn: stub2 },
+                    { name: 'test 2', fn: stub3 },
+                    'test 3',
+                  ],
+                },
+              },
+            }, { config: { retries: 1 } },
+          ]
+
+          it('serialize state', () => {
+            createCypress(...cypressConfig)
+            .then(shouldHaveTestResults(4, 0))
+            .then(() => {
+              expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - retries')
+            })
+          })
+          it('load state', () => {
+            loadStateFromSnapshot(cypressConfig, 'serialize state - retries')
+            createCypress(...cypressConfig)
+            .then(shouldHaveTestResults(4, 0))
+            .then(() => {
+              expect(stub1).to.calledOnce
+              expect(stub2).to.calledTwice
+              expect(stub3).calledThrice
+            })
+          })
+        })
+      })
+    })
+
+    describe('other specs', () => {
+      it('simple failing hook spec', () => {
+        const mochaTests = {
+          suites: {
+            'simple failing hook spec': {
+              suites: {
+                'beforeEach hooks': {
+                  hooks: [{ type: 'beforeEach', fail: true }],
+                  tests: ['never gets here'],
+                },
+                'pending': {
+                  tests: [{ name: 'is pending', pending: true }],
+                },
+                'afterEach hooks': {
+                  hooks: [{ type: 'afterEach', fail: true }],
+                  tests: ['fails this', 'does not run this'],
+                },
+                'after hooks': {
+                  hooks: [{ type: 'after', fail: true }]
+                  , tests: ['runs this', 'fails on this'],
+                },
+              },
+            },
+
+          },
+        }
+
+        createCypress(mochaTests)
+        .then(shouldHaveTestResults(1, 3))
+        .then(() => {
+          cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
+          cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
+          cy.contains('.attempt-error', 'AssertionError: beforeEach').scrollIntoView().should('be.visible')
+
+          cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
+
+          cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
+          cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
+          cy.contains('.attempt-error', 'AssertionError: afterEach').should('be.visible')
+
+          cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
+
+          cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
+
+          cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
+          cy.contains('.command', 'after').should('have.class', 'command-state-failed')
+          cy.contains('.attempt-error', 'AssertionError: after').should('be.visible')
+        })
+      })
+    })
+    describe('mocha events', () => {
+
+      it('simple single test', () => {
+
+        createCypress(simpleSingleTest, { config: {
+          isTextTerminal: true,
+        } })
+        .then(() => {
+          expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, 'simpleSingleTest')
+        })
+      })
+      it('simple three tests', () => {
+        createCypress(threeTestsWithHooks, { config: {
+          isTextTerminal: true,
+        } })
+        .then(() => {
+          expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.THREE_TESTS_WITH_HOOKS.setRunnables)
+          expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.THREE_TESTS_WITH_HOOKS.mocha)
+        })
+      })
+      it('three tests with retry', () => {
+        createCypress(threeTestsWithRetry, { config: {
+          isTextTerminal: true,
+          retries: 2,
+        } })
+        .then(() => {
+          expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.THREE_TESTS_WITH_RETRY.setRunnables)
+          expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.THREE_TESTS_WITH_RETRY.mocha)
         })
       })
     })
   })
 })
 
-const cleanse = (obj = {}, keys) => {
-  return _.mapValues(obj, (value, key) => {
-    if (keys[key] !== undefined) {
-      return keys[key]
-    }
+const getRunState = (Cypress) => {
 
-    if (_.includes(keys, key)) {
-      return `[${Object.prototype.toString.call(value).split(' ')[1]}`
-    }
+  // cypress normally accesses `id` via a closure
+  const currentRunnable = Cypress.cy.state('runnable')
+  // const currentTest = currentRunnable && getTestFromRunnable(currentRunnable)
+  // const currentId = currentTest && currentTest.id
 
-    return value
-  })
+  const currentId = currentRunnable && currentRunnable.id
+
+  const s = {
+    currentId,
+    tests: Cypress.getTestsState(),
+    startTime: Cypress.getStartTime(),
+    emissions: Cypress.getEmissions(),
+  }
+
+  s.passed = Cypress.countByTestState(s.tests, 'passed')
+  s.failed = Cypress.countByTestState(s.tests, 'failed')
+  s.pending = Cypress.countByTestState(s.tests, 'pending')
+  s.numLogs = Cypress.Log.countLogsByTests(s.tests)
+
+  return _.cloneDeep(s)
+}
+
+const cleanseRunStateMap = {
+  wallClockStartedAt: new Date(0),
+  wallClockDuration: 1,
+  fnDuration: 1,
+  afterFnDuration: 1,
+  lifecycle: 1,
+  // 'body': '[test body]',
+  duration: 1,
+  // timings: stringifyShort,
+  // commands: stringifyShort,
+  startTime: new Date(0),
+  'err.stack': '[err stack]',
+  // snapshots: JSON.stringify,
 }
 
 const formatEvents = (stub) => {
-  return stub.args.map((args) => {
-    if (_.isObject(args[1])) {
-      args[1] = _.omit(args[1], [
-        'body',
-        'timings',
-        'type',
-        'wallClockStartedAt',
-        'duration',
-        'wallClockDuration',
-      ])
-      args[1] = cleanse(args[1], ['err'])
-
+  return _.flatMap(stub.args, (args) => {
+    args = args.slice(1)
+    if (['mocha', 'automation:request', 'log:changed'].includes(args[0])) {
+      return []
     }
+
+    // if (_.isObject(args[1])) {
+    //   args[1] = _.omit(_.toPlainObject(args[1]), [
+    //     'body',
+    //     'timings',
+    //     'type',
+    //     'wallClockStartedAt',
+    //     'duration',
+    //     'wallClockDuration',
+    //   ])
+    //   args[1] = cleanse(args[1], ['err'])
+    // }
 
     let ret = [args[0]]
 
@@ -728,66 +1106,28 @@ const formatEvents = (stub) => {
       ret = ret.concat([args[1]])
     }
 
-    return ret
+    return [ret]
   })
 }
 
-const shouldHaveFailed = (exp) => {
-
-  if (exp === undefined) {
-    exp = match.number.and(match.truthy)
-  }
-
-  return (act) => {
-    assertMatch(act, exp, 'tests failed')
-  }
+const shouldHaveTestResults = (passed, failed) => (exitCode) => {
+  expect(exitCode, 'resolve with failure count').eq(exitCode)
+  passed = passed || '--'
+  failed = failed || '--'
+  cy.get('header .passed').should('have.text', `${passed}`)
+  cy.get('header .failed').should('have.text', `${failed}`)
 }
 
-const shouldHavePassed = () => {
-  return shouldHaveFailed(0)
-}
+const spyOn = (obj, prop, fn) => {
+  const _fn = obj[prop]
 
-const isMatch = (exp, act) => {
+  obj[prop] = function () {
 
-  // @ts-ignore
-  if (match.isMatcher(exp)) {
-    return {
-      match: exp.test(act),
-      message: exp.message,
-    }
-  }
+    fn.apply(this, arguments)
 
-  return isMatch(match(exp), act)
-}
+    const ret = _fn.apply(this, arguments)
 
-const assertMatch = (act, exp, message) => {
-  const res = isMatch(exp, act)
-
-  if (!res.match) {
-    // eslint-disable-next-line
-		console.log(exp, act)
-    // console.log(jestDiff(exp, act))
-    if (_.isObject(act)) {
-      lastActual = act
-      assert(false, `expected object ${res.message}: ${jestDiff(exp, act)}`)
-    }
-
-    assert(false, `expected ${res.message}, but was ${act}`)
+    return ret
 
   }
-
-  assert(true, `expected ${message || 'var'} to ${res.message}`)
 }
-
-function copyToClipboard (text) {
-
-  let aux = document.createElement('input')
-
-  aux.setAttribute('value', text)
-  document.body.appendChild(aux)
-  aux.select()
-  document.execCommand('copy')
-  document.body.removeChild(aux)
-
-}
-

@@ -16,7 +16,9 @@ export default class Test extends Runnable {
   constructor (props, level) {
     super(props, level)
 
-    _.each(props.attempts, this._addAttempt)
+    _.each(props.prevAttempts, this._addAttempt)
+
+    this._addAttempt(props)
   }
 
   @computed get isLongRunning () {
@@ -54,19 +56,19 @@ export default class Test extends Runnable {
   }
 
   addLog = (props) => {
-    this._withAttempt(props.testAttempt, (attempt) => {
+    this._withAttempt(props.testCurrentRetry, (attempt) => {
       attempt.addLog(props)
     })
   }
 
   updateLog (props) {
-    this._withAttempt(props.testAttempt, (attempt) => {
+    this._withAttempt(props.testCurrentRetry, (attempt) => {
       attempt.updateLog(props)
     })
   }
 
-  start (props) {
-    let attempt = this.getAttemptById(props.attempt)
+  @action start (props) {
+    let attempt = this.getAttemptByIndex(props._currentRetry)
 
     if (!attempt) {
       attempt = this._addAttempt(props)
@@ -86,9 +88,9 @@ export default class Test extends Runnable {
   }
 
   @action finish (props) {
-    this._isFinished = !!props.final
+    this._isFinished = props._currentRetry >= props._retries
 
-    this._withAttempt(props.attempt, (attempt) => {
+    this._withAttempt(props._currentRetry, (attempt) => {
       attempt.finish(props)
     })
   }
@@ -97,8 +99,8 @@ export default class Test extends Runnable {
     this.isLongRunning = isLongRunning
   }
 
-  getAttemptById (attemptId) {
-    return this._attempts[attemptId]
+  getAttemptByIndex (attemptIndex) {
+    return this._attempts[attemptIndex]
   }
 
   commandMatchingErr () {
@@ -114,8 +116,8 @@ export default class Test extends Runnable {
     return attempt
   }
 
-  _withAttempt (attemptId, cb) {
-    const attempt = this.getAttemptById(attemptId)
+  _withAttempt (attemptIndex, cb) {
+    const attempt = this.getAttemptByIndex(attemptIndex)
 
     if (attempt) cb(attempt)
   }

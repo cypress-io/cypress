@@ -11,7 +11,7 @@ import specsStore, { allSpecsSpec } from './specs-store'
 
 @observer
 class SpecsList extends Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.filterRef = React.createRef()
   }

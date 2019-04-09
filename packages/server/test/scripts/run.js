@@ -45,7 +45,7 @@ const commandAndArguments = {
   args: [],
 }
 
-if (isWindows()) {
+if (true || isWindows()) {
   commandAndArguments.command = 'mocha'
   commandAndArguments.args = [run]
 } else {

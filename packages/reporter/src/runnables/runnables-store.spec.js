@@ -25,8 +25,8 @@ const createSuite = (id, tests, suites) => {
 const createAgent = (id, testId) => {
   return { id, testId, instrument: 'agent' }
 }
-const createCommand = (id, testId, testAttempt = 1) => {
-  return { id, testId, testAttempt, instrument: 'command' }
+const createCommand = (id, testId, testAttemptIndex = 0) => {
+  return { id, testId, testAttemptIndex, instrument: 'command' }
 }
 const createRoute = (id, testId) => {
   return { id, testId, instrument: 'route' }
@@ -36,9 +36,7 @@ const createRootRunnable = () => {
   return {
     tests: [createTest(1)],
     suites: [
-      createSuite(1, [createTest(2), createTest(3)], [
-        createSuite(3, [createTest(4)], []), createSuite(4, [createTest(5)], []),
-      ]),
+      createSuite(1, [createTest(2), createTest(3)], [createSuite(3, [createTest(4)], []), createSuite(4, [createTest(5)], [])]),
       createSuite(2, [createTest(6)], []),
     ],
   }
@@ -194,7 +192,7 @@ describe('runnables store', () => {
     it('updates the log', () => {
       instance.setRunnables({ tests: [createTest(1)] })
       instance.addLog(createCommand(1, 1))
-      instance.updateLog({ id: 1, testId: 1, testAttempt: 1, name: 'new name' })
+      instance.updateLog({ id: 1, testId: 1, testAttemptIndex: 1, name: 'new name' })
       expect(instance.testById(1).attempts[0].commands[0].name).to.equal('new name')
     })
   })

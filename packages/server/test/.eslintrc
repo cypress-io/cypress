@@ -1,0 +1,14 @@
+{
+  "globals": {
+    "lib": true,
+    "sinon": true
+  },
+  "extends": [
+    "plugin:cypress-dev/tests"
+	],
+	"rules": {
+    "prefer-rest-params": "off",
+    "arrow-body-style": "off"
+  },
+  "parserOptions": {"sourceType": "module"}
+}

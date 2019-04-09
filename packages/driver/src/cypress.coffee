@@ -166,7 +166,7 @@ class $Cypress
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
     @log = $Log.create(@, @cy, @state, @config)
-    @mocha = $Mocha.create(specWindow, @)
+    @mocha = $Mocha.create(specWindow)
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
@@ -211,11 +211,6 @@ class $Cypress
         if @config("isTextTerminal")
           @emit("mocha", "end", args[0])
 
-      when "runner:set:runnable"
-        ## when there is a hook / test (runnable) that
-        ## is about to be invoked
-        @cy.setRunnable(args...)
-
       when "runner:suite:start"
         ## mocha runner started processing a suite
         if @config("isTextTerminal")
@@ -246,9 +241,21 @@ class $Cypress
           @emit("mocha", "test end", args...)
 
       when "runner:pass"
+        ## mocha fires this too early. We don't consider a test passed
+        ## until all after hooks are done
+        # return
+        # attempt = args[0]._currentRetry
+        # debugger
         ## mocha runner calculated a pass
         if @config("isTextTerminal")
           @emit("mocha", "pass", args...)
+
+      ## retry event only fired in mocha version 6+
+      ## https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
+      # when "runner:retry"
+      #   ## mocha runner calculated a pass
+      #   if @config("isTextTerminal")
+      #     @emit("mocha", "retry", args...)
 
       when "runner:pending"
         ## mocha runner calculated a pending test
@@ -260,14 +267,15 @@ class $Cypress
         if @config("isTextTerminal")
           @emit("mocha", "fail", args...)
 
-      when "mocha:runnable:run"
-        @runner.onRunnableRun(args...)
-
       when "runner:test:before:run"
         ## get back to a clean slate
         @cy.reset()
 
         @emit("test:before:run", args...)
+
+        if @config("isTextTerminal")
+          ## needed for handling test retries
+          @emit("mocha", "test:before:run", args[0])
 
       when "runner:test:before:run:async"
         ## TODO: handle timeouts here? or in the runner?
@@ -286,6 +294,7 @@ class $Cypress
         if @config("isTextTerminal")
           ## needed for calculating wallClockDuration
           ## and the timings of after + afterEach hooks
+          # @emit("mocha", "pass", args[0])
           @emit("mocha", "test:after:run", args[0])
 
       when "cy:before:all:screenshots"

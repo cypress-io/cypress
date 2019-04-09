@@ -72,6 +72,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   queue = $CommandQueue.create()
 
+  Chainer = $Chainer.create()
   timeouts = $Timeouts.create(state)
   stability = $Stability.create(Cypress, state)
   retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -93,7 +94,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   snapshots = $Snapshots.create($$, state)
 
   isCy = (val) ->
-    (val is cy) or $utils.isInstanceOf(val, $Chainer)
+    (val is cy) or $utils.isInstanceOf(val, Chainer)
 
   runnableCtx = (name) ->
     ensures.ensureRunnable(name)
@@ -746,7 +747,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     addChainer: (name, fn) ->
       ## add this function to our chainer class
-      $Chainer.add(name, fn)
+      Chainer.add(name, fn)
 
     addCommand: ({name, fn, type, prevSubject}) ->
       ## TODO: prob don't need this anymore
@@ -776,7 +777,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         ## this is the first call on cypress
         ## so create a new chainer instance
-        chain = $Chainer.create(name, args)
+        chain = Chainer.create(name, args)
 
         ## store the chain so we can access it later
         state("chain", chain)

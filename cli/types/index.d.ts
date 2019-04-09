@@ -4029,7 +4029,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any[]
+    message: any[] | string
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }
