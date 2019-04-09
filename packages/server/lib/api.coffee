@@ -79,7 +79,7 @@ machineId = ->
 
 ## retry on timeouts, 5xx errors, or any error without a status code
 isRetriableError = (err) ->
-  (err instanceof Promise.TimeoutError) or 
+  (err instanceof Promise.TimeoutError) or
   (500 <= err.statusCode < 600) or
   not err.statusCode?
 
@@ -316,8 +316,11 @@ module.exports = {
     rp.get({
       url: routes.auth(),
       json: true
+      headers: {
+        "x-route-version": "2"
+      }
     })
-    .get("url")
+    .its('dashboardAuthUrl')
     .catch(tagError)
 
   _projectToken: (method, projectId, authToken) ->

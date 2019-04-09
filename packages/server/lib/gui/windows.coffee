@@ -15,7 +15,7 @@ recentlyCreatedWindow = false
 
 getUrl = (type) ->
   switch type
-    when "GITHUB_LOGIN"
+    when "DASHBOARD_LOGIN"
       user.getLoginUrl()
     when "INDEX"
       cyDesktop.getPathToIndex()
@@ -253,7 +253,7 @@ module.exports = {
     if win = getByType(options.type)
       win.show()
 
-      if options.type is "GITHUB_LOGIN"
+      if options.type is "DASHBOARD_LOGIN"
         err = new Error
         err.alreadyOpen = true
         return Promise.reject(err)
@@ -309,7 +309,7 @@ module.exports = {
       ## reset this back to false
       recentlyCreatedWindow = false
 
-      if options.type is "GITHUB_LOGIN"
+      if options.type is "DASHBOARD_LOGIN"
         authWithElectron(win)
       else
         return win

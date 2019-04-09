@@ -71,9 +71,9 @@ describe "lib/gui/windows", ->
 
         expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
 
-    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
+    it "resolves with code on DASHBOARD_LOGIN for will-navigate", ->
       options = {
-        type: "GITHUB_LOGIN"
+        type: "DASHBOARD_LOGIN"
       }
 
       url = "https://github.com/login"
@@ -86,12 +86,12 @@ describe "lib/gui/windows", ->
       Windows.open("/path/to/project", options)
       .then (code) =>
         expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
+        expect(options.type).eq("DASHBOARD_LOGIN")
         expect(@win.loadURL).to.be.calledWith(url)
 
-    it "resolves with code on GITHUB_LOGIN for did-get-redirect-request", ->
+    it "resolves with code on DASHBOARD_LOGIN for did-get-redirect-request", ->
       options = {
-        type: "GITHUB_LOGIN"
+        type: "DASHBOARD_LOGIN"
       }
 
       url = "https://github.com/login"
@@ -104,7 +104,7 @@ describe "lib/gui/windows", ->
       Windows.open("/path/to/project", options)
       .then (code) =>
         expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
+        expect(options.type).eq("DASHBOARD_LOGIN")
         expect(@win.loadURL).to.be.calledWith(url)
 
   context ".create", ->
