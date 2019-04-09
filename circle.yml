@@ -620,7 +620,7 @@ jobs:
               --binary /tmp/urls/binary-url.json \
               --provider circle
 
-  "test-next-version-locally":
+  "test-npm-module-and-verify-binary":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -810,7 +810,7 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
           - build-binary
-    - test-next-version-locally:
+    - test-npm-module-and-verify-binary:
         filters:
           branches:
             only:
