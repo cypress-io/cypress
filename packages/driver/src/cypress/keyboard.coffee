@@ -542,7 +542,7 @@ $Keyboard = {
     @simulateKey(el, "keyup", key, options)
 
   isSpecialChar: (chars) ->
-    !!@specialChars[chars]
+    chars in _.keys(@specialChars)
 
   handleSpecialChars: (el, chars, options) ->
     options.key = chars
@@ -556,7 +556,7 @@ $Keyboard = {
   }
 
   isModifier: (chars) ->
-    !!@modifierChars[chars]
+    chars in _.keys(@modifierChars)
 
   handleModifier: (el, chars, options) ->
     modifier = @modifierChars[chars]
