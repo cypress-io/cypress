@@ -773,7 +773,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-716-ffmpeg-packaging
         requires:
           - build
     - test-kitchensink-against-staging:
@@ -788,8 +787,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-716-ffmpeg-packaging
-              - add-arch-to-commit-message-install
         requires:
           - build
     - build-binary:
@@ -797,8 +794,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-716-ffmpeg-packaging
-              - add-arch-to-commit-message-install
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -806,7 +801,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - add-arch-to-commit-message-install
         requires:
           - build-npm-package
           - build-binary
@@ -855,7 +849,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - issue-716-ffmpeg-packaging
         requires:
           - Mac build
 
@@ -867,7 +860,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - issue-716-ffmpeg-packaging
         requires:
           - Mac build
 
@@ -889,7 +881,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - issue-716-ffmpeg-packaging
         requires:
           - Mac NPM package
           - Mac binary
