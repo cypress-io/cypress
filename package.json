@@ -90,7 +90,7 @@
     "check-more-types": "2.24.0",
     "cloudflare-cli": "3.2.1",
     "coffeelint": "1.16.2",
-    "commit-message-install": "2.2.0",
+    "@cypress/commit-message-install": "2.3.0",
     "common-tags": "1.8.0",
     "console.table": "0.10.0",
     "debug": "3.1.0",
