@@ -157,7 +157,7 @@ describe('events', () => {
       expect(statsStore.incrementCount).to.have.been.calledWith('passed')
     })
 
-    it('does not implement the stats count on test:after:run if not final: true', () => {
+    it('does not increment the stats count on test:after:run if not final: true', () => {
       runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
       expect(statsStore.incrementCount).not.to.have.been.called
     })

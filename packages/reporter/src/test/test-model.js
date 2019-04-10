@@ -28,7 +28,7 @@ export default class Test extends Runnable {
   }
 
   @computed get state () {
-    return this._lastAttempt ? this._lastAttempt.state : 'active'
+    return this._lastAttempt ? this._lastAttempt.state : 'processing'
   }
 
   @computed get err () {

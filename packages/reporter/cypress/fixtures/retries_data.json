@@ -54,7 +54,7 @@
           "name": "visit",
           "state": "failed",
           "testId": "r3",
-          "test_currentRetry": 0,
+          "testCurrentRetry": 0,
           "type": "parent"
         }
       ],
@@ -260,7 +260,7 @@
     "state": "passed"
   },
   "command": {
-    "test_currentRetry": 1,
+    "testCurrentRetry": 1,
     "hookName": "test",
     "id": "c2",
     "instrument": "command",

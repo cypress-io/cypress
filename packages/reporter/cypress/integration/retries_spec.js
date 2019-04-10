@@ -279,7 +279,7 @@ describe('retries', function () {
     this.data.attempt.attemptIndex = 2
     this.addAttempt(this.data.attempt)
     this.data.command.state = null
-    this.data.command.testAttemptIndex = 2
+    this.data.command.testCurrentRetry = 2
     addLog(this.runner, this.data.command)
     this.data.command.state = 'pending'
     updateLog(this.runner, this.data.command)

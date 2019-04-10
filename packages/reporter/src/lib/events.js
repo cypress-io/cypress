@@ -54,9 +54,8 @@ export default {
     runner.on('test:after:run', (runnable) => {
       runnablesStore.runnableFinished(runnable)
       runnablesStore.testById(runnable.id)
-      const isFinal = runnable.final
 
-      if (isFinal || runnable.state === 'passed') {
+      if (runnable.final) {
         statsStore.incrementCount(runnable.state)
       }
     })

@@ -17,7 +17,7 @@ const scrollerStub = () => {
 }
 
 const createTest = (id) => {
-  return { id, title: `test ${id}`, attempts: [{ attempt: 1 }] }
+  return { id, title: `test ${id}`, _currentRetry: 0 }
 }
 const createSuite = (id, tests, suites) => {
   return { id, title: `suite ${id}`, tests, suites }
@@ -25,8 +25,8 @@ const createSuite = (id, tests, suites) => {
 const createAgent = (id, testId) => {
   return { id, testId, instrument: 'agent' }
 }
-const createCommand = (id, testId, testAttemptIndex = 0) => {
-  return { id, testId, testAttemptIndex, instrument: 'command' }
+const createCommand = (id, testId, testCurrentRetry = 0) => {
+  return { id, testId, testCurrentRetry, instrument: 'command' }
 }
 const createRoute = (id, testId) => {
   return { id, testId, instrument: 'route' }
@@ -78,9 +78,9 @@ describe('runnables store', () => {
     it('adds logs to tests when specified', () => {
       const rootRunnable = createRootRunnable()
 
-      rootRunnable.tests[0].attempts[0].agents = [createAgent(1, 1), createAgent(2, 1), createAgent(3, 1)]
-      rootRunnable.tests[0].attempts[0].commands = [createCommand(1, 1)]
-      rootRunnable.tests[0].attempts[0].routes = [createRoute(1, 1), createRoute(2, 1)]
+      rootRunnable.tests[0].agents = [createAgent(1, 1), createAgent(2, 1), createAgent(3, 1)]
+      rootRunnable.tests[0].commands = [createCommand(1, 1)]
+      rootRunnable.tests[0].routes = [createRoute(1, 1), createRoute(2, 1)]
       instance.setRunnables(rootRunnable)
       expect(instance.runnables[0].attempts[0].agents.length).to.equal(3)
       expect(instance.runnables[0].attempts[0].commands.length).to.equal(1)
@@ -192,7 +192,7 @@ describe('runnables store', () => {
     it('updates the log', () => {
       instance.setRunnables({ tests: [createTest(1)] })
       instance.addLog(createCommand(1, 1))
-      instance.updateLog({ id: 1, testId: 1, testAttemptIndex: 1, name: 'new name' })
+      instance.updateLog({ id: 1, testId: 1, testCurrentRetry: 0, name: 'new name' })
       expect(instance.testById(1).attempts[0].commands[0].name).to.equal('new name')
     })
   })
