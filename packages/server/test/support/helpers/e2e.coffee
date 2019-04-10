@@ -322,7 +322,7 @@ module.exports = {
           if browser and not customBrowserPath
             expect(_.capitalize(browser)).to.eq(browserName)
 
-          expect(parseFloat(version)).to.be.a.number
+          expect(parseFloat(version)).to.be.a('number')
 
           ## if we are in headed mode or in a browser other
           ## than electron
