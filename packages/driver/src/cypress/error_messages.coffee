@@ -838,21 +838,21 @@ module.exports = {
       `url` from the `options` object: {{optionsUrl}}
       `url` from the `url` parameter: {{url}}
     """
-    cannot_visit_2nd_domain: """
-      #{cmd('visit')} failed because you are attempting to visit a second unique domain.
+    cannot_visit_2nd_domain: 
+      message: """
+        #{cmd('visit')} failed because you are attempting to visit a second unique domain.
 
-      You may only visit a single unique domain per test.
+        You may only visit a single unique domain per test.
 
-      Different subdomains are okay, but unique domains are not.
+        Different subdomains are okay, but unique domains are not.
 
-      The previous domain you visited was: `{{previousDomain}}`
+        The previous domain you visited was: `{{previousDomain}}`
 
-      You're attempting to visit this new domain: `{{attemptedDomain}}`
+        You're attempting to visit this new domain: `{{attemptedDomain}}`
 
-      You may need to restructure some of your code to prevent this from happening.
-
-      https://on.cypress.io/cannot-visit-second-unique-domain
-    """
+        You may need to restructure some of your code to prevent this from happening.
+      """
+      docsUrl: "https://on.cypress.io/cannot-visit-second-unique-domain"
     loading_network_failed: """
       #{cmd('visit')} failed trying to load:
 

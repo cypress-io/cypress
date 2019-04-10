@@ -1035,6 +1035,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a second unique domain.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-second-unique-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1048,6 +1049,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a second unique domain.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-second-unique-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1061,6 +1063,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a second unique domain.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-second-unique-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1096,6 +1099,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a second unique domain.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-second-unique-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
