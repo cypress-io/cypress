@@ -13,6 +13,7 @@ charsBetweenCurlyBracesRe = /({.+?})/
 keyStandardMap = {
   # Cypress keyboard key : Standard value
   "{backspace}": "Backspace",
+  "{insert}": "Insert",
   "{del}": "Delete",
   "{downarrow}": "ArrowDown",
   "{enter}": "Enter",
@@ -25,7 +26,9 @@ keyStandardMap = {
   "{alt}": "Alt",
   "{ctrl}": "Control",
   "{meta}": "Meta",
-  "{shift}": "Shift"
+  "{shift}": "Shift",
+  "{pageup}": "PageUp",
+  "{pagedown}": "PageDown"
 }
 
 $Keyboard = {
@@ -102,6 +105,19 @@ $Keyboard = {
         options.input = true
 
         return
+
+    ## charCode = 45
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{insert}": (el, options) ->
+      options.charCode  = 45
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{insert}"
+      @ensureKey el, null, options
+
 
     ## charCode = 8
     ## no keyPress
@@ -239,6 +255,32 @@ $Keyboard = {
       options.setKey    = "{end}"
       @ensureKey el, null, options, ->
         $selection.moveCursorToLineEnd(el)
+
+
+    ## charCode = 33
+    ## no keyPress
+    ## no textInput
+    ## no input
+   "{pageup}": (el, options) ->
+      options.charCode  = 33
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{pageup}"
+      @ensureKey el, null, options
+
+
+    ## charCode = 34
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{pagedown}": (el, options) ->
+      options.charCode  = 34
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{pagedown}"
+      @ensureKey el, null, options
   }
 
   modifierChars: {
