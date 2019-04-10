@@ -360,6 +360,10 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
+const testCanRetry = (test) => {
+  return test._currentRetry < test._retries
+}
+
 const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, setTest, getTests) {
   //# bail if our _runner doesnt have a hook.
   //# useful in tests
@@ -385,27 +389,29 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
       fn = function (...args) {
 
         if (hookName === 'afterEach') {
-          const willRetry = test.state === 'failed' && test._currentRetry < test._retries
 
-          if (!willRetry && test === _.last(test.parent.tests) || test === _.last(allTests)) {
+          const testWillRetry = test.state === 'failed' && testCanRetry(test)
+          const siblings = getAllSiblingTests(test.parent, getTestById)
+          const afterAllWillFire = (test === _.last(siblings) || test === _.last(allTests)) && !testWillRetry
+
+          // we now know if another hook is coming after this one.
+          // don't call testAfterRun if another hook is coming
+          if (afterAllWillFire) {
             return originalFn.apply(this, args)
           }
         }
 
-        // if (hookName === 'afterEach' && test._currentRetry < test._retries) {
-        //   if (test.parent.testsQueue.length === 0 && test.state === 'passed') {
-        //     return originalFn.apply(this, args)
-        //   }
-        // }
-        // if (test.state === 'failed') debugger
-
         setTest(null)
+
+        if (test.state === 'passed') {
+          test.final = true
+        }
 
         testAfterRun(test, Cypress)
 
         //# and now invoke next(err)
 
-        return originalFn.apply(this, args)
+        return originalFn(...args)
       }
     }
 
@@ -414,33 +420,16 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
 
         const t = getTest()
 
-        if (t) {
+        const tests = getAllSiblingTests(t.parent, getTestById)
 
-          // debugger
+        //# find all of the grep'd tests which share
+        //# the same parent suite as our current test
+        // const tests = getAllSiblingTests(t_1.parent, getTestById)
 
-          // if (t.title === 'test 3') {
-          //   if ((window.temp = window.temp + 1 || 1) >= 2) debugger
-          // }
-
-          // const t_1 = getTestById(t.id)//getFirstAttemptFromTest(t)
-
-          // if (t.id === 'r7') debugger
-
-          const canRetry = t._currentRetry < t._retries
-
-          //# find all of the grep'd tests which share
-          //# the same parent suite as our current test
-          // const tests = getAllSiblingTests(t_1.parent, getTestById)
-          const testsQueue = t.parent.testsQueue
-
-          //# make sure this test isnt the last test overall but also
-          //# isnt the last test in our grep'd parent suite's tests array
-
-          if (t.id === 'r7' && this.suite.root === true) debugger
-
-          if (this.suite.root && canRetry || ((t !== _.last(allTests) && (!_.isEmpty(testsQueue))))) {
-            changeFnToRunAfterHooks('afterEach')
-          }
+        //# make sure this test isnt the last test overall but also
+        //# isnt the last test in our grep'd parent suite's tests array
+        if (this.suite.root && ((t !== _.last(allTests)) && (t !== _.last(tests)) || testCanRetry(t))) {
+          changeFnToRunAfterHooks('afterEach')
         }
 
         break
@@ -453,15 +442,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         const t = getTest()
 
         if (t) {
-
-          // get test attempt #1
-
-          // const t = getTestById(t.id) //getFirstAttemptFromTest(t)
-
-          // const siblings = getAllSiblingTests(t_1.parent, getTestById)
-          const testsQueue = t.parent.testsQueue
-
-          const isLastTestInSuite = _.isEmpty(testsQueue)
+          const siblings = getAllSiblingTests(t.parent, getTestById)
 
           //# 1. if we're the very last test in the entire allTests
           //#    we wait until the root suite fires
@@ -472,10 +453,10 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
           //#    the last test that will run
           if (
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
-              (isRootSuite(this.suite.parent) && isLastTestInSuite) ||
-              (!isLastSuite(this.suite, allTests) && isLastTestInSuite)
+              (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
+              (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
-            changeFnToRunAfterHooks()
+            changeFnToRunAfterHooks('afterAll')
           }
         }
 
@@ -580,8 +561,6 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
     }
 
     const i = initialTests[runnable.id]
-
-    console.log('RI:', runnable.id)
 
     let prevAttempts
 
@@ -1280,10 +1259,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
     const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
 
     const fail = function () {
-      // if (!next) {
-      //   return test._next(err)
-      // }
-
       return next(err)
     }
     const noFail = function () {
@@ -1306,6 +1281,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
         test.fn = function () {
           throw err
         }
+
+        setHookFailureProps(test, r, err)
 
         return noFail()
       }

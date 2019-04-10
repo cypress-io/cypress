@@ -135,7 +135,6 @@ const overrideRunnableRun = (runnable, onRunnableRun) => {
     // call the original onRunnableRun function
     // with the original runnable.run function,
     // the runnable itself, and the args
-    // debugger
 
     return onRunnableRun(runnableRun, runnable, args)
   }
@@ -193,11 +192,11 @@ const overrideRunnerRunTests = (runner) => {
 
     const _slice = suite.tests.slice
 
-    suite.tests.slice = function () {
+    suite.tests.slice = function (...args) {
 
       this.slice = _slice
 
-      const ret = _slice.apply(this, arguments)
+      const ret = _slice.apply(this, args)
 
       suite.testsQueue = ret
 

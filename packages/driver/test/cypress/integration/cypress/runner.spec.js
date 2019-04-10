@@ -47,6 +47,11 @@ const stringifyShort = (obj) => {
   return obj
 }
 
+const snapshotEvents = (name) => {
+  expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, name.setRunnables)
+  expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, name.mocha)
+}
+
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
 }
@@ -142,8 +147,6 @@ const createCypress = (mochaTests, opts = {}) => {
           isMocha && mochaStubs.apply(this, arguments)
 
           noLog || allStubs.apply(this, ['emit'].concat([].slice.call(arguments)))
-
-          // if (noCall) debugger
 
           return noCall || emit.apply(this, arguments)
         })
@@ -301,6 +304,22 @@ describe('src/cypress/runner', () => {
         })
       })
 
+      it('ends test before nested suite', function () {
+        createCypress({
+          suites: {
+            'suite 1': { tests: ['test 1', 'test 2'],
+              suites: {
+                'suite 1-1': {
+                  tests: ['test 1'],
+                },
+              } },
+          },
+        }, { config: { retries: 1 } })
+        .then(shouldHaveTestResults(3, 0))
+        .then(() => {
+        })
+      })
+
       it('simple fail', function () {
         createCypress({
           suites: {
@@ -431,8 +450,7 @@ describe('src/cypress/runner', () => {
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_BEFORE.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_BEFORE.mocha)
+            snapshotEvents(snapshots.FAIL_IN_BEFORE)
           })
         })
 
@@ -453,8 +471,7 @@ describe('src/cypress/runner', () => {
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_BEFOREEACH.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_BEFOREEACH.mocha)
+            snapshotEvents(snapshots.FAIL_IN_BEFOREEACH)
           })
         })
 
@@ -475,8 +492,7 @@ describe('src/cypress/runner', () => {
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_AFTEREACH.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_AFTEREACH.mocha)
+            snapshotEvents(snapshots.FAIL_IN_AFTEREACH)
           })
         })
 
@@ -496,8 +512,7 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(1, 1))
           .then(() => {
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_IN_AFTER.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_IN_AFTER.mocha)
+            snapshotEvents(snapshots.FAIL_IN_AFTER)
           })
         })
       })
@@ -572,8 +587,7 @@ describe('src/cypress/runner', () => {
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.FAIL_WITH_ONLY.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.FAIL_WITH_ONLY.mocha)
+            snapshotEvents(snapshots.FAIL_WITH_ONLY)
           })
         })
         it('pass with [only]', () => {
@@ -592,8 +606,7 @@ describe('src/cypress/runner', () => {
           .then(shouldHaveTestResults(1, 0))
           .then(() => {
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.PASS_WITH_ONLY.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.PASS_WITH_ONLY.mocha)
+            snapshotEvents(snapshots.PASS_WITH_ONLY)
           })
         })
       })
@@ -721,7 +734,7 @@ describe('src/cypress/runner', () => {
 
         })
 
-        it('retries from [beforeEach]', () => {
+        it('can retry from [beforeEach]', () => {
           createCypress({
             suites: {
               'suite 1': {
@@ -746,12 +759,11 @@ describe('src/cypress/runner', () => {
           .then(() => {
 
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.RETRY_PASS_IN_BEFOREEACH.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.RETRY_PASS_IN_BEFOREEACH.mocha)
+            snapshotEvents(snapshots.RETRY_PASS_IN_BEFOREEACH)
           })
 
         })
-        it.only('can retry from [afterEach]', () => {
+        it('can retry from [afterEach]', () => {
           createCypress({
             suites: {
               'suite 1': {
@@ -784,11 +796,11 @@ describe('src/cypress/runner', () => {
           .then(() => {
 
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-            expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.RETRY_PASS_IN_AFTEREACH.setRunnables)
-            expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.RETRY_PASS_IN_AFTEREACH.mocha)
+            snapshotEvents(snapshots.RETRY_PASS_IN_AFTEREACH)
           })
 
         })
+
         it('cant retry from [before]', () => {
           createCypress({
             suites: {
@@ -808,6 +820,7 @@ describe('src/cypress/runner', () => {
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             // cy.contains('Attempt 1').click()
+            cy.contains('Although you have test retries')
             cy.contains('AssertionError').click()
             cy.get('@console_log').its('lastCall').should('be.calledWithMatch', 'Error')
           })
@@ -815,6 +828,30 @@ describe('src/cypress/runner', () => {
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
           })
 
+        })
+
+        it('cant retry from [after]', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                hooks: [
+                  'before',
+                  'beforeEach',
+                  'beforeEach',
+                  'afterEach',
+                  'afterEach',
+                  { type: 'after', fail: 1 },
+                ],
+                tests: [{ name: 'test 1' }],
+              },
+            },
+          }, { config: { retries: 1, isTextTerminal: false } })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            cy.contains('Although you have test retries')
+            cy.contains('AssertionError').click()
+            cy.get('@console_log').its('lastCall').should('be.calledWithMatch', 'Error')
+          })
         })
 
       })
@@ -1016,7 +1053,7 @@ describe('src/cypress/runner', () => {
           isTextTerminal: true,
         } })
         .then(() => {
-          expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, 'simpleSingleTest')
+          snapshotEvents(snapshots.SIMPLE_SINGLE_TEST)
         })
       })
       it('simple three tests', () => {
@@ -1024,8 +1061,7 @@ describe('src/cypress/runner', () => {
           isTextTerminal: true,
         } })
         .then(() => {
-          expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.THREE_TESTS_WITH_HOOKS.setRunnables)
-          expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.THREE_TESTS_WITH_HOOKS.mocha)
+          snapshotEvents(snapshots.THREE_TESTS_WITH_HOOKS)
         })
       })
       it('three tests with retry', () => {
@@ -1034,8 +1070,7 @@ describe('src/cypress/runner', () => {
           retries: 2,
         } })
         .then(() => {
-          expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, snapshots.THREE_TESTS_WITH_RETRY.setRunnables)
-          expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, snapshots.THREE_TESTS_WITH_RETRY.mocha)
+          snapshotEvents(snapshots.THREE_TESTS_WITH_RETRY)
         })
       })
     })

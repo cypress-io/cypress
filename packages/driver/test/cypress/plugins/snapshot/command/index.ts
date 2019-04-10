@@ -116,7 +116,7 @@ const registerInCypress = () => {
 
   before(() => {
 
-    const btn = addButton('toggle-snapshot-update', 'fa-camera', () => {
+    const btn = addButton('toggle-snapshot-update', '', () => {
       const prev = Cypress.env('SNAPSHOT_UPDATE')
 
       Cypress.env('SNAPSHOT_UPDATE', !prev)
@@ -288,9 +288,6 @@ function printVar(variable) {
       return `[${getType(variable)}]`
 
     case 'String':
-      if (!variable) {
-        return JSON.stringify(variable)
-      }
       return `${variable}`
 
     // return JSON.stringify(variable)
@@ -385,6 +382,7 @@ const withMatchers = (matchers:object, match:sinon.SinonMatch, onlyExpected: boo
       }
 
     }
+    return no_replacement
   }
 
   const testValue = (matcher, value) => {
@@ -403,6 +401,8 @@ const withMatchers = (matchers:object, match:sinon.SinonMatch, onlyExpected: boo
 
     return false
   }
+
+  const no_replacement = {}
 
   const diff = (exp, act, path = ['^'], optsArg?:object) => {
     const opts = _.defaults(optsArg, {
@@ -435,7 +435,7 @@ const withMatchers = (matchers:object, match:sinon.SinonMatch, onlyExpected: boo
 
     // console.log(path)
 
-    if (replacement) {
+    if (replacement !== no_replacement) {
       if (match.isMatcher(replacement)) {
         if (testValue(replacement, act)) {
           act = matcherStringToObj(replacement.message).toJSON()
@@ -531,7 +531,8 @@ const withMatchers = (matchers:object, match:sinon.SinonMatch, onlyExpected: boo
       keys.sort()
       for (let i = 0; i < keys.length; i++) {
         key = keys[i]
-        if (_.hasIn(act, key)) {
+        const isUndef = exp[key] === undefined
+        if (_.hasIn(act, key) || isUndef) {
           itemDiff = diff(exp[key], act[key], path.concat([key]))
           act[key] = itemDiff.act
           if (itemDiff.changed) {
@@ -554,11 +555,11 @@ const withMatchers = (matchers:object, match:sinon.SinonMatch, onlyExpected: boo
           const key = addedKeys[i]
           const val = act[key]
 
-          if (val === undefined) continue
 
           const addDiff = diff(val, val, path.concat([key]))
 
           act[key] = addDiff.act
+          if (act[key] === undefined) continue
           subOutput += keyAdded(key, act[key])
           changed = true
         }
@@ -605,7 +606,7 @@ const withMatchers = (matchers:object, match:sinon.SinonMatch, onlyExpected: boo
       exp = printVar(exp)
       act = printVar(act)
       if (exp !== act) {
-        text = options.wrap('modified', `${exp} ➡️ ${act}`)
+        text = options.wrap('modified', `${exp} ➡️  ${act}`)
         changed = true
       }
     }

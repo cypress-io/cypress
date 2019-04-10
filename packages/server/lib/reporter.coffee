@@ -76,8 +76,13 @@ mergeRunnable = (eventName) ->
       if (testProps._currentRetry > runnable._currentRetry)
         debug('test retried:', testProps.title)
         prevAttempts = runnable.prevAttempts || []
+        delete runnable.prevAttempts
         ## we don't want to mutate the previous attempt
-        prevAttempt = _.clone(runnable)
+        prevAttempt = _.cloneDeep(runnable)
+        delete runnable.failedFromHookId
+        delete runnable.err
+        delete runnable.hookName
+        # delete runnable.err
         ## add prevAttempt array to newly created runnable
         testProps.prevAttempts = prevAttempts.concat([prevAttempt])
 
@@ -107,7 +112,6 @@ mergeErr = (runnable, runnables, stats) ->
   ## this will always be a test because
   ## we reset hook id's to match tests
   test = runnables[runnable.id]
-  test.err = runnable.err
   test.state = "failed"
   test.duration ?= test.duration
 
@@ -158,8 +162,16 @@ normalizeTest = (test = {}) ->
       wallClockStartedAt: wcs
       wallClockDuration: get("wallClockDuration")
       videoTimestamp: null ## always start this as null
-      prevAttempts: get("prevAttempts")?.map(normalizeTest)
+      prevAttempts: get("prevAttempts")?.map(normalizePrevAttemptTest)
     }
+
+normalizePrevAttemptTest = (test = {}) ->
+  _.omit normalizeTest(test), [
+    "testId"
+    "title"
+    "body"
+    "prevAttempts"
+  ]
 
 events = {
   "start":     setDate
@@ -229,10 +241,10 @@ class Reporter
     return runnable
 
   emit: (event, args...) ->
-    
     if pArgs = @parseArgs(event, args)
+      ## we block mocha's emitted 'pass' event becuase it doesn't wait for hooks
+      ## so we need to send it once we know a test has passed
       if event is 'test:after:run'
-        debugger
         if args[0].final || args[0].state is 'passed'
           @runner?.emit.apply(@runner, ['pass', pArgs[1]])
       ret = @runner?.emit.apply(@runner, pArgs)

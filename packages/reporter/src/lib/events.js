@@ -56,9 +56,6 @@ export default {
       runnablesStore.testById(runnable.id)
       const isFinal = runnable.final
 
-      // debugger
-      if (runnable.id === 'r7') debugger
-
       if (isFinal || runnable.state === 'passed') {
         statsStore.incrementCount(runnable.state)
       }

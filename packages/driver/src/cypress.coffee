@@ -241,14 +241,12 @@ class $Cypress
           @emit("mocha", "test end", args...)
 
       when "runner:pass"
+        return
         ## mocha fires this too early. We don't consider a test passed
         ## until all after hooks are done
-        # return
-        # attempt = args[0]._currentRetry
-        # debugger
         ## mocha runner calculated a pass
-        if @config("isTextTerminal")
-          @emit("mocha", "pass", args...)
+        # if @config("isTextTerminal")
+        #   @emit("mocha", "pass", args...)
 
       ## retry event only fired in mocha version 6+
       ## https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
