@@ -20,6 +20,8 @@ THIRTY_SECONDS = humanInterval("30 seconds")
 SIXTY_SECONDS = humanInterval("60 seconds")
 TWO_MINUTES = humanInterval("2 minutes")
 
+RESPONSE_CACHE = {}
+
 DELAYS = [
   THIRTY_SECONDS
   SIXTY_SECONDS
@@ -34,10 +36,15 @@ if intervals = process.env.API_RETRY_INTERVALS
   .value()
 
 rp = request.defaults (params = {}, callback) ->
+  if params.cacheable and RESPONSE_CACHE[params.url]
+    debug("resolving with cached response for ", params.url)
+    return Promise.resolve(RESPONSE_CACHE[params.url])
+
   _.defaults(params, {
     agent: agent
     proxy: null
     gzip: true
+    cacheable: false
   })
 
   headers = params.headers ?= {}
@@ -59,6 +66,10 @@ rp = request.defaults (params = {}, callback) ->
   request[method](params, callback)
   .promise()
   .tap (resp) ->
+    if params.cacheable
+      debug("caching response for ", params.url)
+      RESPONSE_CACHE[params.url] = resp
+
     debug("response %o", resp)
 
 formatResponseBody = (err) ->
@@ -91,6 +102,42 @@ module.exports = {
 
   ping: ->
     rp.get(routes.ping())
+    .catch(tagError)
+
+  getMe: (authToken) ->
+    rp.get({
+      url: routes.me()
+      json: true
+      auth: {
+        bearer: authToken
+      }
+    })
+
+  getTokenFromCode: (code, redirectUri) ->
+    @getAuthUrls()
+    .get('tokenEndpointUrl')
+    .then (tokenEndpointUrl) ->
+      rp.post({
+        url: tokenEndpointUrl
+        json: true
+        body: {
+          code
+          redirect_uri: redirectUri
+        }
+      })
+    .catch(tagError)
+
+  getTokenFromRefresh: (refreshToken) ->
+    @getAuthUrls()
+    .get('refreshEndpointUrl')
+    .then (refreshEndpointUrl) ->
+      rp.post({
+        url: refreshEndpointUrl
+        json: true
+        body: {
+          refresh_token: refreshToken
+        }
+      })
     .catch(tagError)
 
   getOrgs: (authToken) ->
@@ -238,31 +285,6 @@ module.exports = {
     .timeout(timeout)
     .catch(tagError)
 
-  createSignin: (code) ->
-    machineId()
-    .then (id) ->
-      h = {
-        "x-route-version": "3"
-        "x-accept-terms": "true"
-      }
-
-      if id
-        h["x-machine-id"] = id
-
-      rp.post({
-        url: routes.signin({code: code})
-        json: true
-        headers: h
-      })
-      .catch errors.StatusCodeError, (err) ->
-        ## reset message to error which is a pure body
-        ## representation of what was sent back from
-        ## the API
-        err.message = err.error
-
-        throw err
-      .catch(tagError)
-
   createSignout: (authToken) ->
     rp.post({
       url: routes.signout()
@@ -315,15 +337,15 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
-  getLoginUrl: ->
+  getAuthUrls: ->
     rp.get({
       url: routes.auth(),
       json: true
+      cacheable: true
       headers: {
         "x-route-version": "2"
       }
     })
-    .get('dashboardAuthUrl')
     .catch(tagError)
 
   _projectToken: (method, projectId, authToken) ->

@@ -23,9 +23,6 @@ class AuthApi {
 
   login () {
     return ipc.beginAuth()
-    .then((code) => {
-      return ipc.logIn(code)
-    })
     .then((user) => {
       authStore.setUser(user)
 

@@ -1,3 +1,4 @@
+debug   = require("debug")("cypress:server:user")
 api     = require("./api")
 cache   = require("./cache")
 errors  = require("./errors")
@@ -10,13 +11,28 @@ module.exports = {
     cache.setUser(user)
 
   getLoginUrl: ->
-    api.getLoginUrl()
+    api.getAuthUrls()
+    .get('dashboardAuthUrl')
 
-  logIn: (code) ->
-    api.createSignin(code)
-    .then (user) =>
-      @set(user)
-      .return(user)
+  logInFromCode: (code, redirectUri) ->
+    debug("requesting token from code %s and redirect_uri %s", code, redirectUri)
+    api.getTokenFromCode(code, redirectUri)
+    .then (res) =>
+      debug("received token %o for code, requesting /me", res)
+      api.getMe(res.access_token)
+      .then (meRes) =>
+        debug("received /me %o", meRes)
+        user = {
+          authToken: res.access_token
+          refreshToken: res.refresh_token
+          name: meRes.name
+          email: meRes.email
+        }
+        @set(user)
+        .return(user)
+    .catch (err) =>
+      debug("error logging in from code: ", err.message)
+      throw err
 
   logOut: ->
     @get().then (user) ->

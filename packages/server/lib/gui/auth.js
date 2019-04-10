@@ -13,9 +13,10 @@ const openExternalAsync = Promise.promisify(shell.openExternal)
 
 let app
 let authCallback
+let authState
 let server
 
-const getAllowedOrigin = () => {
+const getDashboardOrigin = () => {
   return konfig('dashboard_url')
 }
 
@@ -24,8 +25,8 @@ const getDashboardAuthUrl = () => {
   .then((url) => {
     const { port } = server.address()
 
-    app.state = random.id(32)
-    const authUrl = `${url}?port=${port}&state=${app.state}`
+    authState = random.id(32)
+    const authUrl = `${url}?port=${port}&state=${authState}`
 
     return authUrl
   })
@@ -66,7 +67,7 @@ const launchServer = () => {
     app.use(bodyParser.json())
 
     app.use('/auth', (req, res, next) => {
-      res.header('Access-Control-Allow-Origin', getAllowedOrigin())
+      res.header('Access-Control-Allow-Origin', getDashboardOrigin())
       res.header('Access-Control-Allow-Headers', '*')
       res.header('Access-Control-Allow-Methods', 'POST')
       next()
@@ -75,14 +76,18 @@ const launchServer = () => {
     app.post('/auth', (req, res) => {
       debug('Received POST to /auth with body %o', req.body)
 
-      if (req.body.accessToken && authCallback) {
-        res.json({ success: true }).end()
-        authCallback(req.body)
-
-        return
+      if (req.body.code && req.body.state === authState) {
+        return user.logInFromCode(req.body.code, getDashboardOrigin())
+        .then((user) => {
+          authCallback(user)
+          res.json({ success: true })
+        })
+        .catch(() => {
+          res.json({ success: false })
+        })
       }
 
-      res.json({ success: false }).end()
+      res.json({ success: false })
     })
 
     return new Promise((resolve) => {
@@ -97,6 +102,8 @@ const stopServer = () => {
   debug('Closing auth server')
   server.close()
   app = undefined
+  authState = undefined
+  authCallback = undefined
   server = undefined
 }
 
