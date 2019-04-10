@@ -7,7 +7,7 @@ const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
 const minimist = require('minimist')
-const { getInstallJson } = require('commit-message-install')
+const { getInstallJson } = require('@cypress/commit-message-install')
 
 /* eslint-disable no-console */
 
@@ -16,11 +16,13 @@ const { npm, binary } = getNameAndBinary(process.argv)
 la(is.unemptyString(npm), 'missing npm url')
 la(is.unemptyString(binary), 'missing binary url')
 const platform = os.platform()
+const arch = os.arch()
 
 console.log('bumping versions for other projects')
-console.log('npm:', npm)
-console.log('binary:', binary)
-console.log('platform:', platform)
+console.log(' npm:', npm)
+console.log(' binary:', binary)
+console.log(' platform:', platform)
+console.log(' arch:', arch)
 
 const cliOptions = minimist(process.argv, {
   string: 'provider',
@@ -82,20 +84,37 @@ if (commitInfo) {
   subject += ` ${commitInfo.short}`
 }
 
-// instructions for installing this binary
-// using https://github.com/bahmutov/commit-message-install
+// instructions for installing this binary,
+// see "@cypress/commit-message-install"
 const env = {
   CYPRESS_INSTALL_BINARY: binary,
 }
-const commitMessageInstructions = getInstallJson(
-  npm,
+
+// also pass "status" object that points back at this repo and this commit
+// so that other projects can report their test success as GitHub commit status check
+let status = null
+const commit = commitInfo && commitInfo.sha
+
+if (commit && is.commitId(commit)) {
+  // commit is full 40 character hex string
+  status = {
+    owner: 'cypress-io',
+    repo: 'cypress',
+    sha: commit,
+  }
+}
+
+const commitMessageInstructions = getInstallJson({
+  packages: npm,
   env,
   platform,
-  shortNpmVersion, // use as version as branch name on test projects
-  commitInfo && commitInfo.sha
-)
+  arch,
+  branch: shortNpmVersion, // use as version as branch name on test projects
+  commit,
+  status,
+})
 const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
-const footer = 'Use tool `commit-message-install` to install from above block'
+const footer = 'Use tool `@cypress/commit-message-install` to install from above block'
 let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
 
 if (process.env.CIRCLE_BUILD_URL) {

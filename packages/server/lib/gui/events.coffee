@@ -14,7 +14,7 @@ errors      = require("../errors")
 Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
-connect     = require("../util/connect")
+ensureUrl   = require("../util/ensure-url")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
 
@@ -277,7 +277,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "ping:api:server"
       apiUrl = konfig("api_url")
-      connect.ensureUrl(apiUrl)
+      ensureUrl.isListening(apiUrl)
       .then(send)
       .catch (err) ->
         ## if it's an aggegrate error, just send the first one

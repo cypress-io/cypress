@@ -6,6 +6,7 @@ request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 humanInterval = require("human-interval")
+agent      = require("@packages/network").agent
 pkg        = require("@packages/root")
 routes     = require("./util/routes")
 system     = require("./util/system")
@@ -34,6 +35,8 @@ if intervals = process.env.API_RETRY_INTERVALS
 
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
+    agent: agent
+    proxy: null
     gzip: true
   })
 
