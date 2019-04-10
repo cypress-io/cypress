@@ -745,6 +745,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       cy[name] = ->
         fn.apply(runnableCtx(name), arguments)
 
+    getChainer: () ->
+      return Chainer
+
     addChainer: (name, fn) ->
       ## add this function to our chainer class
       Chainer.add(name, fn)

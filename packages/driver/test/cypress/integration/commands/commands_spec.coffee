@@ -67,7 +67,8 @@ describe "src/cy/commands/commands", ->
   context "errors", ->
     it "throws when cannot find command by name", (done) ->
       cy.on "fail", (err) ->
-        cmds = _.keys(Cypress.Chainer.prototype)
+        cmds = _.keys(cy.getChainer().prototype)
+        expect(cmds).to.include.members('get should click type visit'.split(' '))
         expect(cmds.length).to.be.gt(1)
         expect(err.message).to.eq("Could not find a command for: 'fooDoesNotExist'.\n\nAvailable commands are: #{cmds.join(", ")}.\n")
 

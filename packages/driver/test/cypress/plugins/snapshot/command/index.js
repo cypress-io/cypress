@@ -80,11 +80,13 @@ const registerInCypress = () => {
 
     })
     .then((act) => {
-      cy.task('saveSnapshot', {
-        file,
-        what: act,
-        exactSpecName,
-      }, { log: false })
+      if (Cypress.env('SNAPSHOT_UPDATE')) {
+        cy.task('saveSnapshot', {
+          file,
+          what: act,
+          exactSpecName,
+        }, { log: false })
+      }
 
     })
   }

@@ -161,7 +161,8 @@ describe "src/cy/commands/task", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("cy.task('bar') failed with the following error:\n\nThe task 'bar' was not handled in the plugins file. The following tasks are registered: return:arg, wait, create:long:file\n\nFix this in your plugins file here:\n#{Cypress.config('pluginsFile')}\n\nhttps://on.cypress.io/api/task")
+          expect(err.message).to.contain("cy.task('bar') failed with the following error:\n\nThe task 'bar' was not handled in the plugins file. The following tasks are registered:")
+          expect(err.message).to.contain("#{Cypress.config('pluginsFile')}\n\nhttps://on.cypress.io/api/task")
           done()
 
         cy.task("bar")
