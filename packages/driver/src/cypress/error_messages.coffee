@@ -814,7 +814,7 @@ module.exports = {
       else
         msg += "all of the remaining tests."
 
-      if obj.hookName is 'after all' or obj.hookName is 'before all' and obj._retries isnt -1
+      if (obj.hookName is 'after all' or obj.hookName is 'before all') and obj.retries > 0
         msg += "\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks"
 
       msg

@@ -840,6 +840,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       const parentTitle = runnable.parent.title
 
       hookName = getHookName(runnable)
+      const test = getTestFromHook(runnable)
 
       //# append a friendly message to the error indicating
       //# we're skipping the remaining tests in this suite
@@ -848,6 +849,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
         $utils.errMessageByPath('uncaught.error_in_hook', {
           parentTitle,
           hookName,
+          retries: test._retries,
         })
       )
     }

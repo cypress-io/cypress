@@ -2,7 +2,7 @@ let _ = require('lodash')
 const Debug = require('debug')
 const chalk = require('chalk')
 const stripAnsi = require('strip-ansi')
-
+const { stripIndent } = require('common-tags')
 let sinon = require('sinon')
 
 const debug = Debug('plugin:snapshot')
@@ -26,15 +26,19 @@ const registerInCypress = () => {
     const testName = Cypress.mocha.getRunner().test.fullTitle()
     const file = Cypress.spec.name
 
-    snapshotIndex[testName] = (snapshotIndex[testName] || 0) + 1
+    snapshotIndex[testName] = (snapshotIndex[testName] || 1)
     const exactSpecName = snapshotName || `${testName} #${snapshotIndex[testName]}`
 
-    cy.task('getSnapshot', {
-      file,
-      exactSpecName,
-    }, { log: false }).then((exp) => {
+    return cy.now('task',
+      'getSnapshot', {
+        file,
+        exactSpecName,
+      }, { log: false })
+    .then((exp) => {
       try {
         const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
+
+        snapshotIndex[testName] = snapshotIndex[testName] + 1
 
         Cypress.log({
           name: 'assert',
@@ -48,6 +52,8 @@ const registerInCypress = () => {
         })
       } catch (e) {
         if (Cypress.env('SNAPSHOT_UPDATE') && e.act) {
+          snapshotIndex[testName] = snapshotIndex[testName] + 1
+
           Cypress.log({
             name: 'assert',
             message: `snapshot updated: **${exactSpecName}**`,
@@ -60,7 +66,11 @@ const registerInCypress = () => {
             },
           })
 
-          return e.act
+          return cy.now('task', 'saveSnapshot', {
+            file,
+            what: e.act,
+            exactSpecName,
+          }, { log: false })
         }
 
         Cypress.log({
@@ -77,18 +87,8 @@ const registerInCypress = () => {
 
         throw e
       }
-
     })
-    .then((act) => {
-      if (Cypress.env('SNAPSHOT_UPDATE')) {
-        cy.task('saveSnapshot', {
-          file,
-          what: act,
-          exactSpecName,
-        }, { log: false })
-      }
 
-    })
   }
 
   chai.Assertion.addMethod('matchDeep', matchDeepCypress)
@@ -202,7 +202,17 @@ const matchDeep = function (matchers, exp, optsArg) {
     let e = _.extend(new Error(), { act: diffStr.act })
 
     // e.act[1][1].somefoo = undefined
+
     e.message = isAnsi ? `\n${diffStr.text}` : stripAnsi(diffStr.text)
+
+    if (_.isString(act)) {
+      e.message = `\n${stripIndent`
+        SnapshotError: Failed to match snapshot
+        Expected:\n---\n${printVar(act)}\n---
+        Actual:\n---\n${printVar(exp)}\n---
+        `}`
+    }
+
     throw e
   }
 

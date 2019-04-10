@@ -426,6 +426,9 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
+            cy.get('.test-error:visible').invoke('text').should('matchSnapshot')
+          })
+          .then(() => {
             expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.FAIL_IN_BEFORE)
           })
@@ -488,6 +491,9 @@ describe('src/cypress/runner', () => {
             },
           })
           .then(shouldHaveTestResults(1, 1))
+          .then(() => {
+            cy.get('.test-error:visible').invoke('text').should('matchSnapshot')
+          })
           .then(() => {
             snapshotEvents(snapshots.FAIL_IN_AFTER)
           })
@@ -1140,3 +1146,4 @@ const spyOn = (obj, prop, fn) => {
 
   }
 }
+

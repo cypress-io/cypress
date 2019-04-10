@@ -6155,6 +6155,12 @@ exports['src/cypress/runner isolated test runner test events hook failures fail 
   ]
 ]
 
+exports['src/cypress/runner isolated test runner test events hook failures fail in [after] #1'] = `
+AssertionError: after
+
+Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'suite 1'
+`
+
 exports['src/cypress/runner isolated test runner test events hook failures fail in [beforeEach] #1'] = [
   [
     "run:start"
@@ -6243,7 +6249,13 @@ exports['src/cypress/runner isolated test runner test events hook failures fail 
   ]
 ]
 
-exports['src/cypress/runner isolated test runner test events hook failures fail in [before] #1'] = [
+exports['src/cypress/runner isolated test runner test events hook failures fail in [before] #1'] = `
+AssertionError: before
+
+Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'suite 1'
+`
+
+exports['src/cypress/runner isolated test runner test events hook failures fail in [before] #2'] = [
   [
     "run:start"
   ],
