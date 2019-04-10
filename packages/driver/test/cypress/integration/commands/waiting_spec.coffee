@@ -789,10 +789,9 @@ describe "src/cy/commands/waiting", ->
           cy.on "command:retry", ->
             numRetries += 1
 
-          cy
-            .server()
-            .route(/foo/, {}).as("getFoo")
-            .noop({}).wait("@getFoo")
+          cy.server()
+          cy.route(/foo/, {}).as("getFoo")
+          cy.noop({}).wait("@getFoo")
 
         it "only logs once", (done) ->
           cy.on "fail", (err) =>

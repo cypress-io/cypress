@@ -2,61 +2,38 @@ $errUtils = require("../../../../src/cypress/error_utils.js")
 $errorMessages = require("../../../../src/cypress/error_messages")
 
 describe "driver/src/cypress/error_utils", ->
-  context ".appendErrMsg", ->
-    it "appends error message", ->
-      err = new Error("foo")
-
-      expect(err.message).to.eq("foo")
-      expect(err.name).to.eq("Error")
-
-      stack = err.stack.split("\n").slice(1).join("\n")
-
-      err2 = $errUtils.appendErrMsg(err, "bar")
-      expect(err2.message).to.eq("foo\n\nbar")
-
-      expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
-
-    it "handles error messages matching first stack", ->
-      err = new Error("r")
-
-      expect(err.message).to.eq("r")
-      expect(err.name).to.eq("Error")
-
-      stack = err.stack.split("\n").slice(1).join("\n")
-
-      err2 = $errUtils.appendErrMsg(err, "bar")
-      expect(err2.message).to.eq("r\n\nbar")
-
-      expect(err2.stack).to.eq("Error: r\n\nbar\n" + stack)
-
-    it "handles empty error messages", ->
-      err = new Error()
-
-      expect(err.message).to.eq("")
-      expect(err.name).to.eq("Error")
-
-      stack = err.stack.split("\n").slice(1).join("\n")
-
-      err2 = $errUtils.appendErrMsg(err, "bar")
-      expect(err2.message).to.eq("\n\nbar")
-
-      expect(err2.stack).to.eq("Error: \n\nbar\n" + stack)
-    
-    it "handles error messages as objects", ->
-      err = new Error("foo")
-
-      obj = {
-        message: "bar",
-        docsUrl: "baz"
+  context ".modifyErrMsg", ->
+    it "modifies errs that are objects", ->
+      errObj1 = {
+        name: 'FooError',
+        message: 'simple foo message'
       }
 
-      stack = err.stack.split("\n").slice(1).join("\n")
+      errObj2 = {
+        name: 'BarError',
+        message: 'simple bar message'
+      }
 
-      err2 = $errUtils.appendErrMsg(err, obj)
+      appendMsg1 = $errUtils.modifyErrMsg(errObj1, errObj2, (msg1, msg2) ->
+        return "#{msg2} #{msg1}"
+      )
 
-      expect(err2.message).to.eq("foo\n\nbar")
-      expect(err2.docsUrl).to.eq("baz")
-      expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
+      expect(appendMsg1.name).to.eq("FooError")
+      expect(appendMsg1.message).to.eq("simple bar message simple foo message")
+
+    it "modifies errs that are strings", ->
+      errStr1 = 'simple foo message'
+      errStr2 = 'simple bar message'
+
+      appendMsg1 = $errUtils.modifyErrMsg(errStr1, errStr2, (msg1, msg2) ->
+        return "#{msg2} #{msg1}"
+      )
+
+      expect(appendMsg1).to.eq("simple bar message simple foo message")
+
+    it.skip "modifies errs that are functions that return objs", ->
+
+    it.skip "modifies errs that are functions that return strings", ->
 
   context ".makeErrFromObj", ->
     it "copies properties, message, stack", ->
@@ -372,10 +349,10 @@ describe "driver/src/cypress/error_utils", ->
           obj: 
             message: '`{{cmd}}` simple error message'
             docsUrl: 'https://on.cypress.io'
-          str: '{{cmd}} simple error message'
+          str: '`{{cmd}}` simple error message'
           fn: (obj) ->
             """
-            #{obj.cmd} simple error message
+            `#{obj.cmd}` simple error message
             """
         }
       }

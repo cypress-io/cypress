@@ -9,37 +9,39 @@ const mdReplacements = [
 ]
 
 const modifyErrMsg = (err, messageOrObj, cb) => {
-  //# preserve stack
-  //# this is the critical part
-  //# because the browser has a cached
-  //# dynamic stack getter that will
-  //# not be evaluated later
+  // preserve stack
+  // this is the critical part
+  // because the browser has a cached
+  // dynamic stack getter that will
+  // not be evaluated later
   const { stack } = err
 
   let message = messageOrObj
 
-  //# if our message is an obj w/ multiple props...
+  // if our message is an obj w/ multiple props...
   if (_.isObject(messageOrObj)) {
-    //# then extract the actual 'message' (the string)
-    //# and merge the other props into the existing err
-    _.extend(err, _.omit(messageOrObj, 'message'));
+    // then extract the actual 'message' (the string)
+    // and merge the other props into the existing err
+    _.defaults(err, _.omit(messageOrObj, 'message'));
     ({ message } = messageOrObj)
   }
 
-  //# preserve message
-  //# and toString
-  let msg = err.message
-  const str = err.toString()
+  // if our original err is an object
+  if (_.isObject(err)) {
+    // modify message
+    err.message = cb(err.message, message)
 
-  // modify message
-  msg = cb(msg, message)
+    if (stack) {
+      // reset stack by replacing the original
+      // first line with the new one
+      err.stack = stack.replace(err.message, err.toString())
+    }
+  }
 
-  // set message
-  err.message = msg
-
-  // reset stack by replacing the original
-  // first line with the new one
-  err.stack = stack.replace(str, err.toString())
+  // if our original err is a string
+  if (_.isString(err)) {
+    err = cb(err, message)
+  }
 
   return err
 }
@@ -72,7 +74,7 @@ const throwErr = (err, options = {}) => {
 
   let { onFail } = options
 
-  //# assume onFail is a command if
+  // assume onFail is a command if
   //# onFail is present and isnt a function
   if (onFail && !_.isFunction(onFail)) {
     const command = onFail
@@ -161,7 +163,9 @@ const errObjByPath = (errLookupObj, errPath, args) => {
   if (_.isFunction(errObjStrOrFn)) {
     // if function returns string
     if (_.isString(errObjStrOrFn(args))) {
-      errObj.message = errObjStrOrFn(args)
+      errObj = {
+        message: errObjStrOrFn(args),
+      }
     }
 
     if (_.isObject(errObjStrOrFn(args))) {
