@@ -2,10 +2,9 @@ const _ = require('lodash')
 const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
-const { Snapshot } = require('./snapshot')
+const { getSnapshot, saveSnapshot } = require('./snapshot')
 
 module.exports = (on) => {
-  const { getSnapshot, saveSnapshot } = new Snapshot(on)
 
   on('task', {
     'return:arg' (arg) {

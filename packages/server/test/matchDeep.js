@@ -1,5 +1,5 @@
 const { matchDeep } = require('../../driver/test/cypress/plugins/snapshot/command')
-const { Snapshot } = require('../../driver/test/cypress/plugins/snapshot')
+const { getSnapshot, saveSnapshot } = require('../../driver/test/cypress/plugins/snapshot')
 const chai = require('chai')
 const _ = require('lodash')
 const sinon = require('sinon')
@@ -10,8 +10,6 @@ const sinon = require('sinon')
 let currentTest
 
 const registerInMocha = () => {
-
-  const { getSnapshot, saveSnapshot } = new Snapshot()
 
   let snapshotIndex = {}
 
