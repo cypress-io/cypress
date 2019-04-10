@@ -120,19 +120,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       }
     .finally(cleanup)
 
-  invokeFn = (subject, fn, args...) ->
+  invokeFn = (subject, str, args...) ->
     options = {}
 
     getMessage = ->
       if name is "invoke"
-        ".#{fn}(" + $utils.stringify(args) + ")"
+        ".#{str}(" + $utils.stringify(args) + ")"
       else
-        ".#{fn}"
+        ".#{str}"
 
     ## name could be invoke or its!
     name = state("current").get("name")
 
     message = getMessage()
+
+    exitedEarlyErr = null
 
     options._log = Cypress.log
       message: message
@@ -140,7 +142,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       consoleProps: ->
         Subject: subject
 
-    if not _.isString(fn)
+    if not _.isString(str)
       $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
         onFail: options._log
         args: { cmd: name }
@@ -152,59 +154,97 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         args: { cmd: name }
       })
 
-    fail = (prop) ->
-      $utils.throwErrByPath("invoke_its.invalid_property", {
-        onFail: options._log
-        args: { prop, cmd: name }
-      })
+    ## TODO: use the new error utils that are part of
+    ## the error message enhancements PR
+    propertyNotOnSubjectErr = (prop) ->
+      $utils.cypressErr(
+        $utils.errMessageByPath("invoke_its.nonexistent_prop", {
+          prop,
+          cmd: name
+        })
+      )
 
-    failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) ->
-      $utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
-        args: { previousProp, currentProp, value, cmd: name }
-      })
+    propertyValueNullOrUndefinedErr = (prop, value) ->
+      $utils.cypressErr(
+        $utils.errMessageByPath("invoke_its.null_or_undefined_prop_value", {
+          prop,
+          value,
+          cmd: name
+        })
+      )
 
-    failOnCurrentNullOrUndefinedValue = (prop, value) ->
-      $utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
-        args: { prop, value, cmd: name }
-      })
+    subjectNullOrUndefinedErr = (prop, value) ->
+      $utils.cypressErr(
+        $utils.errMessageByPath("invoke_its.subject_null_or_undefined", {
+          prop,
+          value,
+          cmd: name
+        })
+      )
 
-    getReducedProp = (str, subject) ->
-      getValue = (memo, prop) ->
-        switch
-          when _.isString(memo)
-            new String(memo)
-          when _.isNumber(memo)
-            new Number(memo)
-          else
-            memo
+    propertyNotOnPreviousNullOrUndefinedValueErr = (prop, value, previousProp) ->
+      $utils.cypressErr(
+        $utils.errMessageByPath("invoke_its.previous_prop_null_or_undefined", {
+          prop,
+          value,
+          previousProp,
+          cmd: name
+        })
+      )
 
-      _.reduce str.split("."), (memo, prop, index, array) ->
+    primitiveToObject = (memo) ->
+      switch
+        when _.isString(memo)
+          new String(memo)
+        when _.isNumber(memo)
+          new Number(memo)
+        else
+          memo
 
-        ## if the property does not EXIST on the subject
-        ## then throw a specific error message
-        try
-          memo[prop]
-        catch e
-          ## if the value is null or undefined then it does
-          ## not have properties which causes us to throw
-          ## an even more particular error
-          if _.isNull(memo) or _.isUndefined(memo)
-            if index > 0
-              failOnPreviousNullOrUndefinedValue(array[index - 1], prop, memo)
-            else
-              failOnCurrentNullOrUndefinedValue(prop, memo)
-          else
-            throw e
-        return memo[prop]
+    traverseObjectAtPath = (acc, pathsArray, index = 0) ->
+      ## traverse at this depth
+      prop = pathsArray[index]
+      previousProp = pathsArray[index - 1]
+      valIsNullOrUndefined = _.isNull(acc) or _.isUndefined(acc)
 
-      , subject
+      if prop and valIsNullOrUndefined
+        if index is 0
+          exitedEarlyErr = subjectNullOrUndefinedErr(prop, acc)
+        else
+          exitedEarlyErr = propertyNotOnPreviousNullOrUndefinedValueErr(prop, acc, previousProp)
+
+        return acc
+
+      ## if we have no more properties to traverse
+      ## then return the final traversed accumulator here
+      if not prop
+        if valIsNullOrUndefined
+          exitedEarlyErr = propertyValueNullOrUndefinedErr(previousProp, acc)
+
+        return acc
+
+      ## attempt to lookup this property on the acc
+      ## if our property does not exist then allow
+      ## undefined to pass through but set the exitedEarlyErr
+      ## since if we don't have any assertions we want to
+      ## provide a very specific error message and not the
+      ## generic existence one
+      if (prop not of primitiveToObject(acc))
+        exitedEarlyErr = propertyNotOnSubjectErr(prop)
+
+        return undefined
+
+      ## if we succeeded then continue to traverse
+      return traverseObjectAtPath(acc[prop], pathsArray, index + 1)
 
     getValue = ->
+      exitedEarlyErr = null
+
       remoteSubject = cy.getRemotejQueryInstance(subject)
 
       actualSubject = remoteSubject or subject
 
-      prop = getReducedProp(fn, actualSubject)
+      prop = traverseObjectAtPath(actualSubject, str.split("."))
 
       invoke = ->
         switch name
@@ -256,9 +296,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         cy.retry(retryValue, options)
 
     do resolveValue = ->
-      Promise.try(retryValue).then (value) ->
+      Promise
+      .try(retryValue)
+      .then (value) ->
         cy.verifyUpcomingAssertions(value, options, {
+          ensureExistenceFor: "subject"
           onRetry: resolveValue
+          onFail: (err, isDefaultAssertionErr, assertionLogs) ->
+            ## if we failed our upcoming assertions and also
+            ## exited early out of getting the value of our
+            ## subject then reset the error to this one
+            if exitedEarlyErr
+              return options.error = exitedEarlyErr
         })
 
   Commands.addAll({ prevSubject: true }, {

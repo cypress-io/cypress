@@ -569,7 +569,7 @@ describe "src/cy/commands/connectors", ->
             done()
           cy.noop({foo: "bar"}).its("fizz.buzz")
 
-    context "#its", ->
+    context.only "#its", ->
       beforeEach ->
         @remoteWindow = cy.state("window")
 
@@ -612,10 +612,6 @@ describe "src/cy/commands/connectors", ->
 
         cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
 
-      it "returns undefined", ->
-        cy.noop({foo: undefined}).its("foo").then (val) ->
-          expect(val).to.be.undefined
-
       it "returns property", ->
         cy.noop({baz: "baz"}).its("baz").then (num) ->
           expect(num).to.eq "baz"
@@ -638,6 +634,89 @@ describe "src/cy/commands/connectors", ->
         toFixed = top.Number.prototype.toFixed
 
         cy.wrap(num).its("toFixed").should("eq", toFixed)
+
+      it "retries by default until property exists without an assertion", ->
+        obj = {}
+
+        cy.on "command:retry", _.after 3, ->
+          obj.foo = "bar"
+
+        cy.wrap(obj).its("foo").then (val) ->
+          expect(val).to.eq("bar")
+
+      it "retries until property is not undefined without an assertion", ->
+        obj = {
+          foo: undefined
+        }
+
+        cy.on "command:retry", _.after 3, ->
+          obj.foo = "bar"
+
+        cy.wrap(obj).its("foo").then (val) ->
+          expect(val).to.eq("bar")
+
+      it "retries until property is not null without an assertion", ->
+        obj = {
+          foo: null
+        }
+
+        cy.on "command:retry", _.after 3, ->
+          obj.foo = "bar"
+
+        cy.wrap(obj).its("foo").then (val) ->
+          expect(val).to.eq("bar")
+
+      it "retries when yielded undefined value and using assertion", ->
+        obj = { foo: '' }
+
+        cy.stub(obj, 'foo').get(
+          cy.stub()
+            .onCall(0).returns(undefined)
+            .onCall(1).returns(undefined)
+            .onCall(2).returns(true)
+        )
+        cy.wrap(obj).its('foo').should('eq', true)
+
+      it "passes when property does not exist on the subject with assertions", ->
+        cy.wrap({}).its("foo").should("not.exist")
+        cy.wrap({}).its("foo").should("be.undefined")
+        cy.wrap({}).its("foo").should("not.be.ok")
+
+        ## TODO: should these really pass here?
+        ## isn't this the same situation as: cy.should('not.have.class', '...')
+        ##
+        ## when we use the 'eq' and 'not.eq' chainer aren't we effectively
+        ## saying that it must *have* a value as opposed to the property not
+        ## existing at all?
+        ##
+        ## does a tree falling in the forest really make a sound?
+        cy.wrap({}).its("foo").should("eq", undefined)
+        cy.wrap({}).its("foo").should("not.eq", "bar")
+
+      it "passes when nested property does not exist on the subject with assertions", ->
+        obj = {
+          foo: {}
+        }
+
+        cy.wrap(obj).its("foo").should("not.have.property", "bar")
+        cy.wrap(obj).its("foo.bar").should("not.exist")
+        cy.wrap(obj).its("foo.bar.baz").should("not.exist")
+
+      it "passes when property value is null with assertions", ->
+        obj = {
+          foo: null
+        }
+
+        cy.wrap(obj).its("foo").should("be.null")
+        cy.wrap(obj).its("foo").should("eq", null)
+
+      it "passes when property value is undefined with assertions", ->
+        obj = {
+          foo: undefined
+        }
+
+        cy.wrap(obj).its("foo").should("be.undefined")
+        cy.wrap(obj).its("foo").should("eq", undefined)
 
       describe ".log", ->
         beforeEach ->
@@ -733,6 +812,96 @@ describe "src/cy/commands/connectors", ->
 
           cy.its("wat")
 
+        it "throws when property does not exist", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
+
+            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'foo' does not exist on your subject."
+
+            expect(err.message).to.include "By default, Cypress automatically retries and waits for properties to exist on your subject."
+
+            expect(err.message).to.include "If you would like to test that this property should not exist on your subject, then add an assertion such as:"
+
+            expect(err.message).to.include "cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')"
+
+            expect(lastLog.get("error").message).to.include(err.message)
+
+            done()
+
+          cy.wrap({}).its("foo")
+
+        it "throws when property is undefined", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
+
+            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'foo' returned a 'undefined' value."
+
+            expect(err.message).to.include "By default, Cypress automatically retries and waits until values are no longer 'null' or 'undefined'."
+
+            expect(err.message).to.include "If you would like to test that this property should be 'undefined', then add an assertion such as:"
+
+            expect(err.message).to.include "cy.wrap({ foo: undefined }).its('foo').should('be.undefined')"
+
+            expect(lastLog.get("error").message).to.include(err.message)
+
+            done()
+
+          cy.wrap({ foo: undefined }).its("foo")
+
+        it "throws when property is null", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
+
+            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'foo' returned a 'null' value."
+
+            expect(err.message).to.include "By default, Cypress automatically retries and waits until values are no longer 'null' or 'undefined'."
+
+            expect(err.message).to.include "If you would like to test that this property should be 'null', then add an assertion such as:"
+
+            expect(err.message).to.include "cy.wrap({ foo: null }).its('foo').should('be.null')"
+
+            expect(lastLog.get("error").message).to.include(err.message)
+
+            done()
+
+          cy.wrap({ foo: null }).its("foo")
+
+        it "throws the exitedEarlyErr as precedence when property does not exist even if the additional assertions fail", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
+
+            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'b' does not exist on your subject."
+
+            expect(err.message).to.include "By default, Cypress automatically retries and waits for properties to exist on your subject."
+
+            expect(err.message).to.include "If you would like to test that this property should not exist on your subject, then add an assertion such as:"
+
+            expect(err.message).to.include "cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')"
+
+            expect(lastLog.get("error").message).to.include(err.message)
+
+            done()
+
+          cy.wrap({ a: "a" }).its("b").should("be.true")
+
+        it "throws the exitedEarlyErr as precedence when property value is undefined even if the additional assertions fail", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
+
+            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'a' returned a 'undefined' value."
+
+            expect(err.message).to.include "By default, Cypress automatically retries and waits until values are no longer 'null' or 'undefined'."
+
+            expect(err.message).to.include "If you would like to test that this property should be 'undefined', then add an assertion such as:"
+
+            expect(err.message).to.include "cy.wrap({ foo: undefined }).its('foo').should('be.undefined')"
+
+            expect(lastLog.get("error").message).to.include(err.message)
+
+            done()
+
+          cy.wrap({ a: undefined }).its("a").should("be.true")
+
         it "does not display parenthesis on command", (done) ->
           obj = {
             foo: {
@@ -751,40 +920,27 @@ describe "src/cy/commands/connectors", ->
 
           cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
 
-        it "does not throw when property does not exist on the subject", ->
-          cy.noop({}).its("foo")
-
-        it "retries when yielded undefined value", ->
-          obj = {foo:''}
-
-          cy.stub(obj, 'foo').get(
-            cy.stub()
-              .onCall(0).returns(undefined)
-              .onCall(1).returns(undefined)
-              .onCall(2).returns(true)
-          )
-          cy.wrap(obj).its('foo').should('eq', true)
-
         it "can handle getter that throws", (done) ->
           spy = cy.spy((err)=>
-            # throw new Error('sdf')
-            # expect(false).to.eq(true)
             expect(err.message).to.eq('Timed out retrying: some getter error')
             done()
-            ).as('onFail')
+          ).as('onFail')
+
           cy.on 'fail', spy
+
           obj = {}
-          Object.defineProperty obj, 'foo', {get: -> throw new Error('some getter error')}
+
+          Object.defineProperty obj, 'foo', {
+            get: -> throw new Error('some getter error')
+          }
 
           cy.wrap(obj).its('foo')
-
-
 
         it "throws when reduced property does not exist on the subject", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include   "Timed out retrying: cy.its() errored because the property: 'baz' returned a 'undefined' value. You cannot access any properties such as 'fizz' on a 'undefined' value."
+            expect(err.message).to.include("Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject.")
             expect(lastLog.get("error").message).to.include(err.message)
             expect(lastLog.get("error").message).to.include(err.message)
             done()
@@ -798,12 +954,31 @@ describe "src/cy/commands/connectors", ->
           cy.noop(obj).its("foo.bar.baz.fizz")
 
         [null, undefined].forEach (val) ->
-          it "throws on reduced #{val} subject", (done) ->
+          it "throws on traversed '#{val}' subject", (done) ->
             cy.on "fail", (err) ->
-              expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot access any properties such as 'toString' on a '#{val}' value.")
+              expect(err.message).to.include("cy.its() errored because the property: 'a' returned a '#{val}' value. The property: 'b' does not exist on a '#{val}' value.")
+
+              expect(err.message).to.include("By default, Cypress automatically retries and waits until values are no longer 'null' or 'undefined'.")
+
+              expect(err.message).to.include("If you would like to test that this property should not exist, then add an assertion such as:")
+
+              expect(err.message).to.include("cy.wrap({ foo: #{val} }).its('foo.baz').should('not.exist')")
+
               done()
 
-            cy.wrap({foo: val}).its("foo.toString")
+            cy.wrap({ a: val }).its("a.b.c")
+
+          it "throws on initial '#{val}' subject", (done) ->
+            cy.on "fail", (err) ->
+              expect(err.message).to.include("cy.its() errored because your subject is currently: '#{val}'. You cannot call any properties such as 'foo' on a '#{val}' value.")
+
+              expect(err.message).to.include("If you would like to test that this subject is '#{val}' then add an assertion such as:")
+
+              expect(err.message).to.include("cy.wrap(#{val}).should('be.#{val}')")
+
+              done()
+
+            cy.wrap(val).its("foo")
 
         it "throws two args were passed as subject", (done) ->
           cy.on "fail", (err) =>
