@@ -91,8 +91,6 @@ const eventCleanseMap = {
   wallClockDuration: match.number,
   stack: match.string,
   message: '[error message]',
-  // consoleProps: stringifyShort
-
 }
 
 const mochaEventCleanseMap = {
@@ -259,35 +257,14 @@ describe('src/cypress/runner', () => {
     beforeEach(async () => {
       window.cy = backupCy
       window.Cypress = backupCypress
-
-      // await new Cypress.Promise((res) => {
-      // cy.wait(1000)
-      // cy.visit('http://localhost:3939').then(res)
-      // })
     })
 
     describe('test events', function () {
-      it('empty', () => {
-        createCypress({
-          suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
-        })
 
-      })
-
-      it('simple 1', () => {
+      it('simple 1 test', () => {
         createCypress(simpleSingleTest)
-        // .call('run')
         .then(shouldHaveTestResults(1, 0))
         .then(() => {
-
-          cy.contains('header .passed', '1')
-
-        })
-        .then(() => {
-
-          // console.log(_.cloneDeep(formatEvents(allStubs)))
-
-          // expect(formatEvents(allStubs)).to.matchDeep(eventCleanseMap)
           expect(formatEvents(allStubs)).to.matchSnapshot({ ...eventCleanseMap, wallClockStartedAt: match.date })
         })
       })
@@ -301,22 +278,6 @@ describe('src/cypress/runner', () => {
         .then(shouldHaveTestResults(3, 0))
         .then(() => {
           expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-        })
-      })
-
-      it('ends test before nested suite', function () {
-        createCypress({
-          suites: {
-            'suite 1': { tests: ['test 1', 'test 2'],
-              suites: {
-                'suite 1-1': {
-                  tests: ['test 1'],
-                },
-              } },
-          },
-        }, { config: { retries: 1 } })
-        .then(shouldHaveTestResults(3, 0))
-        .then(() => {
         })
       })
 
@@ -400,6 +361,22 @@ describe('src/cypress/runner', () => {
         })
         cy.contains('No tests found in your file').should('be.visible')
         cy.get('.error-message p').invoke('text').should('eq', 'We could not detect any tests in the above file. Write some tests and re-run.')
+      })
+
+      it('ends test before nested suite', function () {
+        createCypress({
+          suites: {
+            'suite 1': { tests: ['test 1', 'test 2'],
+              suites: {
+                'suite 1-1': {
+                  tests: ['test 1'],
+                },
+              } },
+          },
+        }, { config: { retries: 1 } })
+        .then(shouldHaveTestResults(3, 0))
+        .then(() => {
+        })
       })
 
       it('simple fail, catch cy.on(fail)', () => {
@@ -630,7 +607,6 @@ describe('src/cypress/runner', () => {
                     { name: 'test 2', fail: 2 },
                     { name: 'test 3', fail: 1 },
                   ],
-                  // tests: [{ name: 'test 1', fail: true }, 'test 2'],
                 },
               },
             }, { config: { retries: 1, isTextTerminal: false } })
@@ -665,12 +641,7 @@ describe('src/cypress/runner', () => {
             suites: {
               'suite 1': {
                 hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-                tests: [
-                  { name: 'test 1', fail: 1 },
-                  // { name: 'test 1', fail: false },
-                  // { name: 'test 1', fail: true }, 'test 1',
-                  // 'test 1', 'test 2',
-                ],
+                tests: [{ name: 'test 1', fail: 1 }],
               },
             },
           }, { config: { retries: 1 } })
@@ -694,8 +665,6 @@ describe('src/cypress/runner', () => {
                   { name: 'test 1' },
                   { name: 'test 2', fail: 1, only: true },
                   { name: 'test 3' },
-                  // { name: 'test 1', fail: true }, 'test 1',
-                  // 'test 1', 'test 2',
                 ],
               },
             },
@@ -719,10 +688,9 @@ describe('src/cypress/runner', () => {
                   'after',
                 ],
                 tests: [
-                  { name: 'test 1' }, //fn: test1.stub },
+                  { name: 'test 1' },
                   { name: 'test 2', fail: 1 },
                   { name: 'test 3' },
-                // 'test 1', 'test 2',
                 ],
               },
             },
@@ -1107,13 +1075,9 @@ const cleanseRunStateMap = {
   fnDuration: 1,
   afterFnDuration: 1,
   lifecycle: 1,
-  // 'body': '[test body]',
   duration: 1,
-  // timings: stringifyShort,
-  // commands: stringifyShort,
   startTime: new Date(0),
   'err.stack': '[err stack]',
-  // snapshots: JSON.stringify,
 }
 
 const formatEvents = (stub) => {
@@ -1122,18 +1086,6 @@ const formatEvents = (stub) => {
     if (['mocha', 'automation:request', 'log:changed'].includes(args[0])) {
       return []
     }
-
-    // if (_.isObject(args[1])) {
-    //   args[1] = _.omit(_.toPlainObject(args[1]), [
-    //     'body',
-    //     'timings',
-    //     'type',
-    //     'wallClockStartedAt',
-    //     'duration',
-    //     'wallClockDuration',
-    //   ])
-    //   args[1] = cleanse(args[1], ['err'])
-    // }
 
     let ret = [args[0]]
 

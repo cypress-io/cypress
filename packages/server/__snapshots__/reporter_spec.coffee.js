@@ -37,8 +37,7 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
       "failedFromHookId": null,
       "wallClockStartedAt": null,
       "wallClockDuration": null,
-      "videoTimestamp": null,
-      "attemptIndex": 0
+      "videoTimestamp": null
     },
     {
       "testId": "r5",
@@ -55,8 +54,7 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
       "failedFromHookId": null,
       "wallClockStartedAt": null,
       "wallClockDuration": null,
-      "videoTimestamp": null,
-      "attemptIndex": 0
+      "videoTimestamp": null
     }
   ]
 }

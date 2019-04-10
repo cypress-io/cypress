@@ -11,10 +11,12 @@ let currentTest
 
 const registerInMocha = () => {
 
-  const { getSnapshot, saveSnapshot, snapshotRestore } = new Snapshot()
+  const { getSnapshot, saveSnapshot } = new Snapshot()
+
+  let snapshotIndex = {}
 
   global.beforeEach(function () {
-    snapshotRestore()
+    snapshotIndex = {}
     if (this.currentTest) {
       currentTest = this.currentTest
     }
@@ -22,13 +24,14 @@ const registerInMocha = () => {
 
   const matchSnapshot = function (m, snapshotName) {
     const ctx = this
-    const specName = currentTest.fullTitle()
+    const testName = currentTest.fullTitle()
     const file = currentTest.file
-    const exactSpecName = snapshotName
+
+    snapshotIndex[testName] = (snapshotIndex[testName] || 0) + 1
+    const exactSpecName = snapshotName || `${testName} #${snapshotIndex[testName]}`
 
     const exp = getSnapshot({
       file,
-      specName,
       exactSpecName,
     })
 
@@ -39,7 +42,6 @@ const registerInMocha = () => {
         if (process.env['SNAPSHOT_UPDATE']) {
           saveSnapshot({
             file,
-            specName,
             exactSpecName,
             what: e.act,
           })

@@ -272,8 +272,6 @@ class Project extends EE
         ## reporter instance
         return if not reporter
 
-        console.log(reporter)
-
         reporter.emit(event, runnable)
 
         if event is "end"

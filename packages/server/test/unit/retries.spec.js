@@ -10,9 +10,6 @@ const { registerInMocha, parseSnapshot, stringifyShort } = require('../matchDeep
 
 registerInMocha()
 
-// Debug.enable('spec:retries:console*')
-// Debug.enable('plugin:snapshot')
-
 const { match } = sinon
 
 const events = require('../../../driver/test/__snapshots__/runner.spec.js.snapshot')

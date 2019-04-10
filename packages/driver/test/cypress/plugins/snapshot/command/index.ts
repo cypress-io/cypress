@@ -483,47 +483,7 @@ const withMatchers = (matchers:object, match:sinon.SinonMatch, onlyExpected: boo
       act = act.toJSON()
     }
 
-    if (false && Array.isArray(exp) && Array.isArray(act)) {
-      act = [...act]
-      let i = 0
-
-      for (i = 0; i < exp.length; i++) {
-        if (i < act.length) {
-          debug(stripIndent`
-          recurse:
-            exp[${path.join('.')}.${i}]: ${stringifyShort(exp[i])}
-            act[${path.join('.')}.${i}]: ${stringifyShort(act[i])}
-          `)
-          itemDiff = diff(exp[i], act[i], path.concat([i]))
-          act[i] = itemDiff.act
-          if (itemDiff.changed) {
-            console.log('changed....', itemDiff.text)
-            subOutput += keyChanged(i, itemDiff.text)
-            console.log(subOutput)
-            changed = true
-        }
-        } else {
-          subOutput += keyRemoved(i, exp[i])
-          changed = true
-        }
-      }
-      if (act.length > exp.length && !onlyExpected) {
-        for (; i < act.length; i++) {
-          const val = act[i]
-          const addDiff = diff(val, val, path.concat([i]))
-
-          act[i] = addDiff.act
-          // subOutput += keyAdded(key, act[key])
-
-          subOutput += keyAdded(i, act[i])
-        }
-        changed = true
-      }
-
-      if (changed) {
-        text = `[${options.newLineChar}${subOutput}]`
-      }
-    } else if (isObject(exp) && isObject(act) && !match.isMatcher(exp)) {
+    if (isObject(exp) && isObject(act) && !match.isMatcher(exp)) {
       keys = _.keysIn(exp)
       let actObj = { ...act }
       let key

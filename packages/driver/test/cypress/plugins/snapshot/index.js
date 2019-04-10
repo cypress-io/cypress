@@ -24,10 +24,6 @@ let Snapshot = /** @class */ (function () {
   function Snapshot (on) {
     this.on = on
     this.snapshotIndex = {}
-    this.snapshotRestore = function () {
-      return null
-    }
-    // export function
     this.getSnapshot = function (opts) {
       let result = null
 
@@ -54,9 +50,7 @@ let Snapshot = /** @class */ (function () {
       return result
     }
     this.saveSnapshot = function (opts) {
-      opts = _.defaults(opts, {
-        // exactSpecName: `${opts.specName} #${this.snapshotIndex[opts.specName]}`,
-      })
+      opts = _.defaults(opts, {})
 
       return snapshotCore.core(__assign({}, opts, { opts: {
         update: true,

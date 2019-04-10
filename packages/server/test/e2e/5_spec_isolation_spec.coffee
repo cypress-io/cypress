@@ -228,7 +228,7 @@ describe "e2e spec_isolation", ->
         snapshot(json)
 
 
-  it "failing with retries", ->
+  it "failing with retries enabled", ->
     e2e.exec(@, {
       spec: specs
       outputPath: outputPath

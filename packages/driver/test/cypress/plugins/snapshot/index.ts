@@ -8,11 +8,6 @@ export class Snapshot {
 
 	constructor(private on: Function) {}
 
-	snapshotRestore = () => {
-		return null
-	}
-
-	// export function
 	getSnapshot = (opts: {
 		what: any,
 		file: string,
@@ -51,7 +46,6 @@ export class Snapshot {
 
 	saveSnapshot = (opts) => {
 		opts = _.defaults(opts, {
-			// exactSpecName: `${opts.specName} #${this.snapshotIndex[opts.specName]}`,
 		})
 		return snapshotCore.core({
 			...opts,

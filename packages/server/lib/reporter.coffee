@@ -112,6 +112,7 @@ mergeErr = (runnable, runnables, stats) ->
   ## this will always be a test because
   ## we reset hook id's to match tests
   test = runnables[runnable.id]
+  test.err = runnable.err
   test.state = "failed"
   test.duration ?= test.duration
 
@@ -185,6 +186,8 @@ events = {
   "test end":  mergeRunnable("test end")
   "hook":      safelyMergeRunnable
   "hook end":  safelyMergeRunnable
+  ## we won't get a 'pass' event from the driver
+  ## since mocha emits 'pass' before hooks have run
   # "pass":      mergeRunnable("pass")
   "pending":   mergeRunnable("pending")
   "fail":      mergeErr
@@ -242,18 +245,17 @@ class Reporter
 
   emit: (event, args...) ->
     if pArgs = @parseArgs(event, args)
-      ## we block mocha's emitted 'pass' event becuase it doesn't wait for hooks
-      ## so we need to send it once we know a test has passed
+      ## send the mocha 'pass' event at the end of the test
       if event is 'test:after:run'
-        if args[0].final || args[0].state is 'passed'
+        if args[0].state is 'passed'
           @runner?.emit.apply(@runner, ['pass', pArgs[1]])
       ret = @runner?.emit.apply(@runner, pArgs)
       debug('emit', event, pArgs)
       ret
 
   parseArgs: (event, args) ->
-    debug("got mocha event '%s' with args: %o", event, args)
     ## make sure this event is in our events hash
+    debug("got mocha event '%s' with args: %o", event, args)
     if e = events[event]
       if _.isFunction(e)
         ## transform the arguments if
@@ -288,7 +290,6 @@ class Reporter
     .chain(@runnables)
     .filter({type: "test"})
     .map(normalizeTest)
-    # .each(console.log)
     .value()
 
     hooks = _

@@ -658,13 +658,6 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
   return obj
 }
 
-// const afterEachFailed = function (Cypress, test, err) {
-//   test.state = 'failed'
-//   test.err = wrapErr(err)
-
-//   return Cypress.action('runner:test:end', wrap(test))
-// }
-
 const setHookFailureProps = (test, hook, err) => {
   const hookName = getHookName(hook)
 
@@ -975,7 +968,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     //# extract out the next(fn) which mocha uses to
     //# move to the next runnable - this will be our async seam
-    // const _next = args[0]
     const _next = args[0]
 
     if (isAfterAllHook) {
@@ -1200,7 +1192,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   const onRunnable = (r) => {
     // set defualt retries at onRunnable time instead of onRunnableRun
-    // maybe move this to onRunnableRun.
     if (r._retries === -1) {
       r._retries = getDefaultRetries(Cypress)
     }
@@ -1294,8 +1285,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
         const newTest = test.clone()
 
         newTest._currentRetry = test._currentRetry + 1
-        newTest.foo = true
-        // newTest._next = test._next
 
         replaceRunnable(newTest, test.id)
 
@@ -1425,16 +1414,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
           const test = serializeTest(testRunnable)
 
           test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
-          // const attempts = getAllAttemptsFromTest(test)
-          // const wrappedAttemps = _.map(attempts, wrapAll)
-
-          // _.each(RUNNABLE_LOGS, (type) => {
-          //   const logs = test[type]
-
-          //   if (logs) {
-          //     test[type] = _.map(logs, $Log.toSerializedJSON)
-          //   }
-          // })
 
           tests[test.id] = test
         }

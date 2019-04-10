@@ -1,13 +1,4 @@
 'use strict'
-let __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
-  if (Object.defineProperty) {
-    Object.defineProperty(cooked, 'raw', { value: raw })
-  } else {
-    cooked.raw = raw
-  }
-
-  return cooked
-}
 var __assign = (this && this.__assign) || function () {
   __assign = Object.assign || function (t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -33,7 +24,6 @@ let _ = require('lodash')
 let debug_1 = require('debug')
 let chalk_1 = require('chalk')
 let stripAnsi = require('strip-ansi')
-let common_tags_1 = require('common-tags')
 let sinon_1 = require('sinon')
 let debug = debug_1['default']('plugin:snapshot')
 // window.localStorage.debug = 'spec* plugin:snapshot'
@@ -441,42 +431,7 @@ var withMatchers = function (matchers, match, onlyExpected) {
       act = act.toJSON()
     }
 
-    if (false && Array.isArray(exp) && Array.isArray(act)) {
-      act = act.slice()
-      var i = 0
-
-      for (i = 0; i < exp.length; i++) {
-        if (i < act.length) {
-          debug(common_tags_1.stripIndent(templateObject_1 || (templateObject_1 = __makeTemplateObject(['\n          recurse:\n            exp[', '.', ']: ', '\n            act[', '.', ']: ', '\n          '], ['\n          recurse:\n            exp[', '.', ']: ', '\n            act[', '.', ']: ', '\n          '])), path.join('.'), i, stringifyShort(exp[i]), path.join('.'), i, stringifyShort(act[i])))
-          itemDiff = diff(exp[i], act[i], path.concat([i]))
-          act[i] = itemDiff.act
-          if (itemDiff.changed) {
-            console.log('changed....', itemDiff.text)
-            subOutput += keyChanged(i, itemDiff.text)
-            console.log(subOutput)
-            changed = true
-          }
-        } else {
-          subOutput += keyRemoved(i, exp[i])
-          changed = true
-        }
-      }
-      if (act.length > exp.length && !onlyExpected) {
-        for (; i < act.length; i++) {
-          var val = act[i]
-          var addDiff = diff(val, val, path.concat([i]))
-
-          act[i] = addDiff.act
-          // subOutput += keyAdded(key, act[key])
-          subOutput += keyAdded(i, act[i])
-        }
-        changed = true
-      }
-
-      if (changed) {
-        text = `[${options.newLineChar}${subOutput}]`
-      }
-    } else if (isObject(exp) && isObject(act) && !match.isMatcher(exp)) {
+    if (isObject(exp) && isObject(act) && !match.isMatcher(exp)) {
       keys = _.keysIn(exp)
       let actObj = __assign({}, act)
       let key = void 0
@@ -505,7 +460,7 @@ var withMatchers = function (matchers, match, onlyExpected) {
       if (!opts.onlyExpected) {
         for (var i = 0; i < addedKeys.length; i++) {
           let key_1 = addedKeys[i]
-          var val = act[key_1]
+          let val = act[key_1]
           var addDiff = diff(val, val, path.concat([key_1]))
 
           act[key_1] = addDiff.act
@@ -586,4 +541,3 @@ var stringifyShort = function (obj) {
 
   return obj
 }
-let templateObject_1

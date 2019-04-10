@@ -808,7 +808,6 @@ module.exports = {
       results.totalPending = reduceRuns(runs, "stats.pending")
       results.totalFailed = reduceRuns(runs, "stats.failures")
       results.totalSkipped = reduceRuns(runs, "stats.skipped")
-      # results.totalRetried = reduceRuns(runs, "stats.retried")
       results.runs = runs
 
       debug("final results of all runs: %o", results)
