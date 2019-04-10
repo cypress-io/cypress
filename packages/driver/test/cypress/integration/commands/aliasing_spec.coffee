@@ -51,6 +51,11 @@ describe "src/cy/commands/aliasing", ->
 
       cy.get("@obj").should("deep.eq", { foo: "bar" })
 
+    it "allows dot in alias names", ->
+      cy.get("body").as("body.foo").then ->
+        expect(cy.get('@body.foo')).to.be.defined
+        expect(cy.state("aliases")['body.foo']).to.be.defined
+
     context "DOM subjects", ->
       it "assigns the remote jquery instance", ->
         obj = {}

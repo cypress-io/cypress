@@ -47,7 +47,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getFocused = ->
         focused = cy.getFocused()
         log(focused)
-        
+
         return focused
 
       do resolveFocused = (failedByNonAssertion = false) ->
@@ -126,9 +126,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set(obj)
 
-      ## we always want to strip everything after the first '.'
-      ## since we support alias propertys like '1' or 'all'
-      if aliasObj = cy.getAlias(selector.split(".")[0])
+      if aliasObj = cy.getAlias(selector)
         {subject, alias, command} = aliasObj
 
         return do resolveAlias = ->
