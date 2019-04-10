@@ -28,7 +28,7 @@ export default class Test extends Runnable {
   }
 
   @computed get state () {
-    return this._lastAttempt ? this._lastAttempt.state : 'processing'
+    return this._lastAttempt ? this._lastAttempt.state : 'active'
   }
 
   @computed get err () {
@@ -82,7 +82,10 @@ export default class Test extends Runnable {
   setIsOpen (isOpen, cb) {
     this.isOpen = isOpen
 
-    if (!this.attempts.length) return cb()
+    const isAlreadyOpen = !this.attempts.length
+      || ((this.attempts.length === 1 || this._lastAttempt.isLongRunning) === isOpen)
+
+    if (isAlreadyOpen) return cb()
 
     this._lastAttempt.setIsOpen(isOpen, cb)
   }

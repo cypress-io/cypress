@@ -186,9 +186,7 @@ events = {
   "test end":  mergeRunnable("test end")
   "hook":      safelyMergeRunnable
   "hook end":  safelyMergeRunnable
-  ## we won't get a 'pass' event from the driver
-  ## since mocha emits 'pass' before hooks have run
-  # "pass":      mergeRunnable("pass")
+  "pass":      mergeRunnable("pass")
   "pending":   mergeRunnable("pending")
   "fail":      mergeErr
   "test:after:run": mergeRunnable("test:after:run") ## our own custom event
@@ -246,9 +244,6 @@ class Reporter
   emit: (event, args...) ->
     if pArgs = @parseArgs(event, args)
       ## send the mocha 'pass' event at the end of the test
-      if event is 'test:after:run'
-        if args[0].state is 'passed'
-          @runner?.emit.apply(@runner, ['pass', pArgs[1]])
       ret = @runner?.emit.apply(@runner, pArgs)
       debug('emit', event, pArgs)
       ret

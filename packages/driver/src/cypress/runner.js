@@ -404,6 +404,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         setTest(null)
 
         if (test.state === 'passed') {
+          Cypress.action('runner:pass', wrap(test))
           test.final = true
         }
 
@@ -794,9 +795,9 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
   //   return Cypress.action('runner:retry', wrap(test), test.err)
   // })
 
-  _runner.on('pass', (test) => {
-    return Cypress.action('runner:pass', wrap(test))
-  })
+  // _runner.on('pass', (test) => {
+  //   return Cypress.action('runner:pass', wrap(test))
+  // })
 
   //# if a test is pending mocha will only
   //# emit the pending event instead of the test
