@@ -37,8 +37,8 @@ const modifyErrMsg = (err, messageOrObj, cb) => {
   // set message
   err.message = msg
 
-  // reset stack by replacing the original first line
-  // with the new one
+  // reset stack by replacing the original
+  // first line with the new one
   err.stack = stack.replace(str, err.toString())
 
   return err
@@ -134,18 +134,6 @@ const normalizeMsgNewLines = (message) => {
 
 const formatErrMsg = (errMessage, args) => {
   const getMsg = function (args = {}) {
-    if (_.isFunction(errMessage)) {
-      return errMessage(args)
-    }
-
-    if (_.isObject(errMessage)) {
-      errMessage = errMessage.message
-
-      if (!errMessage) {
-        throw new Error(`Error message path: '${errMessage}' does not have a 'message' property`)
-      }
-    }
-
     return _.reduce(args, (message, argValue, argKey) => {
       return message.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
     }, errMessage)
@@ -171,15 +159,21 @@ const errObjByPath = (errLookupObj, errPath, args) => {
   }
 
   if (_.isFunction(errObjStrOrFn)) {
-    //# normalize into object if given function
-    errObj = errObjStrOrFn(args)
+    // if function returns string
+    if (_.isString(errObjStrOrFn(args))) {
+      errObj.message = errObjStrOrFn(args)
+    }
+
+    if (_.isObject(errObjStrOrFn(args))) {
+      // if function returns obj already
+      errObj = errObjStrOrFn(args)
+    }
   }
 
   // Return obj with message and message with escaped markdown
   const escapedArgs = _.mapValues(args, escapeErrMarkdown)
 
   errObj.mdMessage = formatErrMsg(errObj.message, escapedArgs)
-
   errObj.message = formatErrMsg(errObj.message, args)
 
   return errObj
