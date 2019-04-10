@@ -171,7 +171,7 @@ const matchDeep = function (matchers, exp, optsArg) {
     message: 'to match',
     Cypress: false,
     diff: true,
-    onlyExpected: false,
+    expectedOnly: false,
     sinon: null,
   })
 
@@ -192,7 +192,7 @@ const matchDeep = function (matchers, exp, optsArg) {
     return [key.split('.'), val]
   })
 
-  const diffStr = withMatchers(m, match, opts.onlyExpected)(exp, act)
+  const diffStr = withMatchers(m, match, opts.expectedOnly)(exp, act)
 
   // console.log(diffStr.act)
   if (diffStr.changed) {
@@ -334,7 +334,7 @@ function setReplacement (act, val, path) {
   return val
 }
 
-const withMatchers = (matchers, match, onlyExpected = false) => {
+const withMatchers = (matchers, match, expectedOnly = false) => {
 
   const getReplacementFor = (path = [], m) => {
 
@@ -387,7 +387,7 @@ const withMatchers = (matchers, match, onlyExpected = false) => {
 
   const diff = (exp, act, path = ['^'], optsArg) => {
     const opts = _.defaults(optsArg, {
-      onlyExpected,
+      expectedOnly,
     })
 
     if (path.length > 15) {
@@ -478,7 +478,7 @@ const withMatchers = (matchers, match, onlyExpected = false) => {
 
       let addedKeys = _.keysIn(actObj)
 
-      if (!opts.onlyExpected) {
+      if (!opts.expectedOnly) {
 
         for (let i = 0; i < addedKeys.length; i++) {
           const key = addedKeys[i]
@@ -518,7 +518,7 @@ const withMatchers = (matchers, match, onlyExpected = false) => {
       }
     } else if (isObject(act)) {
       debug('only act is obj')
-      const addDiff = diff({}, act, path, { onlyExpected: false })
+      const addDiff = diff({}, act, path, { expectedOnly: false })
 
       return _.extend({},
         addDiff, {

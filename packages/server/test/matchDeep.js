@@ -58,7 +58,7 @@ const registerInMocha = () => {
     let act
 
     try {
-      ret = matchDeep.apply(this, [args[0], args[1], { chai, setGlobalSnapshot: _.noop, sinon, onlyExpected: true }])
+      ret = matchDeep.apply(this, [args[0], args[1], { chai, setGlobalSnapshot: _.noop, sinon, expectedOnly: true }])
       act = ret.act
     } catch (e) {
       if (e.act) {
