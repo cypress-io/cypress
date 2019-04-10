@@ -29,11 +29,12 @@ export default class Header extends Component {
             wrapperClassName='selector-playground-toggle-tooltip-wrapper'
           >
             <button
+              aria-label='Open Selector Playground'
               className='selector-playground-toggle'
               onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning}
             >
-              <i className='fa fa-crosshairs' />
+              <i aria-hidden="true" className='fa fa-crosshairs' />
             </button>
           </Tooltip>
           <div

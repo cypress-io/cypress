@@ -1,13 +1,11 @@
 // Shim definition to export a namespace. Cypress is actually a global module
 // so import/export isn't allowed there. We import here and define a global module
 // so that Cypress can get and use the Blob type
+import BluebirdStatic = require('./bluebird')
 
-// tslint:disable-next-line:no-implicit-dependencies
-import * as blobUtil from 'blob-util'
+export = Bluebird
+export as namespace Bluebird
 
-export = BlobUtil
-export as namespace BlobUtil
-
-declare namespace BlobUtil {
-  type BlobUtilStatic = typeof blobUtil
+declare namespace Bluebird {
+  type BluebirdStatic = typeof BluebirdStatic
 }

@@ -13,7 +13,8 @@ errors      = require("../errors")
 Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
-connect     = require("../util/connect")
+ensureUrl   = require("../util/ensure-url")
+browsers    = require("../browsers")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
@@ -199,13 +200,17 @@ handleEvent = (options, bus, event, id, type, arg) ->
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
-      openProject.create(arg, options, {
-        onFocusTests: onFocusTests
-        onSpecChanged: onSpecChanged
-        onSettingsChanged: onSettingsChanged
-        onError: onError
-        onWarning: onWarning
-      })
+      browsers.getAllBrowsersWith(options.browser)
+      .then (browsers = []) ->
+        options.config = _.assign(options.config, { browsers })
+      .then ->
+        openProject.create(arg, options, {
+          onFocusTests: onFocusTests
+          onSpecChanged: onSpecChanged
+          onSettingsChanged: onSettingsChanged
+          onError: onError
+          onWarning: onWarning
+        })
       .call("getConfig")
       .then(send)
       .catch(sendErr)
@@ -266,7 +271,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "ping:api:server"
       apiUrl = konfig("api_url")
-      connect.ensureUrl(apiUrl)
+      ensureUrl.isListening(apiUrl)
       .then(send)
       .catch (err) ->
         ## if it's an aggegrate error, just send the first one

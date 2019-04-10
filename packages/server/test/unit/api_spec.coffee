@@ -3,6 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 os       = require("os")
 nmi      = require("node-machine-id")
+agent    = require("@packages/network").agent
 pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 browsers = require("#{root}lib/browsers")
@@ -14,6 +15,39 @@ makeError = (details = {}) ->
 describe "lib/api", ->
   beforeEach ->
     sinon.stub(os, "platform").returns("linux")
+
+  context ".rp", ->
+    beforeEach ->
+      sinon.spy(agent, 'addRequest')
+      nock.enableNetConnect() ## nock will prevent requests from reaching the agent
+
+    it "makes calls using the correct agent", ->
+      api.ping()
+      .thenThrow()
+      .catch =>
+        expect(agent.addRequest).to.be.calledOnce
+        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+          href: 'http://localhost:1234/ping'
+        })
+
+    context "with a proxy defined", ->
+      beforeEach ->
+        @oldEnv = Object.assign({}, process.env)
+
+      it "makes calls using the correct agent", ->
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://foo.invalid:1234'
+        process.env.NO_PROXY = ''
+
+        api.ping()
+        .thenThrow()
+        .catch =>
+          expect(agent.addRequest).to.be.calledOnce
+          expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+            href: 'http://localhost:1234/ping'
+          })
+
+      afterEach ->
+        process.env = @oldEnv
 
   context ".getOrgs", ->
     it "GET /orgs + returns orgs", ->
