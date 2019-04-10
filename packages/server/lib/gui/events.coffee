@@ -113,7 +113,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "begin:auth"
-      auth.start(options)
+      auth.start()
       .then(send)
       .catch(sendErr)
 

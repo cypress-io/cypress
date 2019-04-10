@@ -15,8 +15,6 @@ recentlyCreatedWindow = false
 
 getUrl = (type) ->
   switch type
-    when "DASHBOARD_LOGIN"
-      user.getLoginUrl()
     when "INDEX"
       cyDesktop.getPathToIndex()
     else
@@ -31,30 +29,6 @@ getCookieUrl = (props) ->
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
-
-authWithElectron = (win) ->
-  urlChanged = (url, resolve) ->
-    parsed = uri.parse(url, true)
-
-    if code = parsed.query.code
-      ## there is a bug with electron
-      ## crashing when attemping to
-      ## destroy this window synchronously
-      _.defer -> win.destroy()
-
-      resolve(code)
-
-  new Promise (resolve, reject) ->
-    win.once "closed", ->
-      err = new Error("Window closed by user")
-      err.windowClosed = true
-      reject(err)
-
-    win.webContents.on "will-navigate", (e, url) ->
-      urlChanged(url, resolve)
-
-    win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
-      urlChanged(newUrl, resolve)
 
 setWindowProxy = (win) ->
   if not process.env.HTTP_PROXY
@@ -258,6 +232,10 @@ module.exports = {
     win
 
   open: (projectRoot, options = {}) ->
+    if _.isObject(projectRoot) and not options
+      options = projectRoot
+      projectRoot = undefined
+
     ## if we already have a window open based
     ## on that type then just show + focus it!
     if win = getByType(options.type)
@@ -276,18 +254,11 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      url:    getUrl(options.type)
+      url:    options.url || getUrl(options.type)
       webPreferences: {
         preload: cwd("lib", "ipc", "ipc.js")
       }
     })
-
-    # if args.transparent and args.show
-    #   {width, height} = args
-
-    #   args.show = false
-    #   args.width = 0
-    #   args.height = 0
 
     win = @create(projectRoot, options)
 
@@ -310,7 +281,7 @@ module.exports = {
     .spread (url) ->
       if options.type is "DASHBOARD_LOGIN"
         ## remove the GitHub warning banner about an outdated browser
-        ## TODO: remove this once we have upgraded Electron or added native browser auth
+        ## TODO: remove this once we have upgraded Electron
         newUserAgent = win.webContents.getUserAgent()
         .replace(/Chrome\/\d+\.\d+\.\d+\.\d+/, 'Chrome/72.0.3626.121')
         .replace(/Electron\/\d+\.\d+\.\d+/, 'Electron/4.0.5')
@@ -322,11 +293,7 @@ module.exports = {
 
       ## reset this back to false
       recentlyCreatedWindow = false
-
-      if options.type is "DASHBOARD_LOGIN"
-        authWithElectron(win)
-      else
-        return win
+    .thenReturn(win)
 
   trackState: (projectRoot, isTextTerminal, win, keys) ->
     isDestroyed = ->

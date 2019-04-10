@@ -323,7 +323,7 @@ module.exports = {
         "x-route-version": "2"
       }
     })
-    .its('dashboardAuthUrl')
+    .get('dashboardAuthUrl')
     .catch(tagError)
 
   _projectToken: (method, projectId, authToken) ->
