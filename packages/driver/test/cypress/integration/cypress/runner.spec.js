@@ -1012,6 +1012,28 @@ describe('src/cypress/runner', () => {
           cy.contains('.attempt-error', 'AssertionError: after').should('be.visible')
         })
       })
+
+      it('async timeout spec', () => {
+        createCypress({
+          suites: {
+            'async': {
+              tests: [
+                { name: 'bar fails',
+                // eslint-disable-next-line
+                fn (done) {
+                    this.timeout(100)
+                    cy.on('fail', function () {})
+                    // eslint-disable-next-line
+                    foo.bar()
+                  },
+                  eval: true,
+                },
+              ],
+            },
+          },
+        })
+        .then(shouldHaveTestResults(0, 1))
+      })
     })
     describe('mocha events', () => {
 

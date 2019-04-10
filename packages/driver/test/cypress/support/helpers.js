@@ -72,7 +72,12 @@ const createTests = (win, tests = []) => {
       if (test.eval) {
         const fnStr = fn.toString()
 
-        fn = () => win.eval(`(${fnStr})()`)
+        const newFn = function () {
+          return win.eval(`(${fnStr})`).call(this)
+        }
+
+        Object.defineProperty(newFn, 'length', { value: fn.length })
+        fn = newFn
       }
 
       return it(name, fn)
