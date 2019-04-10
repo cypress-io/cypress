@@ -128,7 +128,7 @@ $Keyboard = {
 
         return
 
-  
+
     ## charCode = 27
     ## no keyPress
     ## no textInput
@@ -483,7 +483,7 @@ $Keyboard = {
 
           if $elements.isInput(el) or $elements.isTextarea(el)
             ml = el.maxLength
-  
+
           ## maxlength is -1 by default when omitted
           ## but could also be null or undefined :-/
           ## only cafe if we are trying to type a key
@@ -500,7 +500,7 @@ $Keyboard = {
     @simulateKey(el, "keyup", key, options)
 
   isSpecialChar: (chars) ->
-    !!@specialChars[chars]
+    chars in _.keys(@specialChars)
 
   handleSpecialChars: (el, chars, options) ->
     options.key = chars
@@ -514,7 +514,7 @@ $Keyboard = {
   }
 
   isModifier: (chars) ->
-    !!@modifierChars[chars]
+    chars in _.keys(@modifierChars)
 
   handleModifier: (el, chars, options) ->
     modifier = @modifierChars[chars]

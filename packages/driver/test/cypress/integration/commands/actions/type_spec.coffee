@@ -2880,6 +2880,31 @@ describe "src/cy/commands/actions/type", ->
           .get(":text:first").type(" ")
           .should("have.value", " ")
 
+      it "allows typing special characters", ->
+        cy
+            .get(":text:first").type("{esc}")
+            .should("have.value", "")
+            
+      _.each ["toString", "toLocaleString", "hasOwnProperty", "valueOf"
+         "undefined", "null", "true", "false", "True", "False"], (val) =>
+       it "allows typing reserved Javscript word (#{val})", ->
+         cy
+           .get(":text:first").type(val)
+           .should("have.value", val)
+
+      _.each ["Ω≈ç√∫˜µ≤≥÷", "2.2250738585072011e-308", "田中さんにあげて下さい",
+         "<foo val=`bar' />", "⁰⁴⁵₀₁₂", "🐵 🙈 🙉 🙊",
+         "<script>alert(123)</script>", "$USER"], (val) =>
+       it "allows typing some naughtly strings (#{val})", ->
+         cy
+           .get(":text:first").type(val)
+           .should("have.value", val)
+
+      it "allows typing special characters", ->
+        cy
+            .get(":text:first").type("{esc}")
+            .should("have.value", "")
+
       it "can type into input with invalid type attribute", ->
         cy.get(':text:first')
           .invoke('attr', 'type', 'asdf')
