@@ -9,7 +9,6 @@ import { indent } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
 
 import Attempts from '../attempts/attempts'
-import FlashOnClick from '../lib/flash-on-click'
 
 @observer
 class Test extends Component {
