@@ -677,6 +677,17 @@ describe "src/cy/commands/connectors", ->
         )
         cy.wrap(obj).its('foo').should('eq', true)
 
+      it "retries until property does NOT exist with an assertion", ->
+        obj = {
+          foo: ""
+        }
+
+        cy.on "command:retry", _.after 3, ->
+          delete obj.foo
+
+        cy.wrap(obj).its("foo").should("not.exist").then (val) ->
+          expect(val).to.be.undefined
+
       it "passes when property does not exist on the subject with assertions", ->
         cy.wrap({}).its("foo").should("not.exist")
         cy.wrap({}).its("foo").should("be.undefined")
@@ -994,14 +1005,24 @@ describe "src/cy/commands/connectors", ->
 
           cy.wrap(fn).its("bar", "baz").should("eq", "baz")
 
-          ## TODO: currently this doesn't work because
-          ## null subjects immediately throw
-          # it "throws on initial #{val} subject", ->
-          #   cy.on "fail", (err) ->
-          #     expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot call any properties such as 'toString' on a '#{val}' value.")
-          #     done()
+        it "resets traversalErr and throws the right assertion", (done) ->
+          cy.timeout(200)
 
-          #   cy.wrap(val).its("toString")
+          obj = {}
+
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
+
+            expect(err.message).to.include("Timed out retrying: expected 'bar' to equal 'baz'")
+            expect(lastLog.get("error").message).to.include(err.message)
+            done()
+
+          cy.on "command:retry", _.after 3, =>
+            obj.foo = {
+              bar: "bar"
+            }
+
+          cy.noop(obj).its("foo.bar").should("eq", "baz")
 
   describe "without jquery", ->
     before ->

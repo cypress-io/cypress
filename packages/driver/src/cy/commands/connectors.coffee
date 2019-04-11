@@ -18,6 +18,15 @@ returnFalseIfThenable = (key, args...) ->
     args[0]()
     return false
 
+primitiveToObject = (memo) ->
+  switch
+    when _.isString(memo)
+      new String(memo)
+    when _.isNumber(memo)
+      new Number(memo)
+    else
+      memo
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   ## thens can return more "thenables" which are not resolved
   ## until they're 'really' resolved, so naturally this API
@@ -191,15 +200,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cmd: name
         })
       )
-
-    primitiveToObject = (memo) ->
-      switch
-        when _.isString(memo)
-          new String(memo)
-        when _.isNumber(memo)
-          new Number(memo)
-        else
-          memo
 
     traverseObjectAtPath = (acc, pathsArray, index = 0) ->
       ## traverse at this depth
