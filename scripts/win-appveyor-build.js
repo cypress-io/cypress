@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 /* eslint-disable no-console */
+// @ts-check
 
 // builds Windows binary on AppVeyor CI
 // but only on the right branch
@@ -87,8 +88,21 @@ if (result.stdout.includes('nodemon')) {
 //     break
 // }
 
-shell.exec('npm run binary-zip')
-shell.ls('-l', '*.zip')
-shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
-shell.cat('binary-url.json')
-shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')
+/**
+ * Returns true if we are building a pull request
+ */
+const isPullRequest = () => {
+  return Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
+}
+
+if (isPullRequest()) {
+  console.log('This is a pull request, skipping uploading binary')
+} else {
+  console.log('Zipping and upload binary')
+
+  shell.exec('npm run binary-zip')
+  shell.ls('-l', '*.zip')
+  shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
+  shell.cat('binary-url.json')
+  shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')
+}
