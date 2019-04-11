@@ -50,7 +50,7 @@ describe "src/cy/commands/connectors", ->
           logs = []
 
           cy.on "log:added", (attrs, log) =>
-            logs.push(log)
+            logs?.push(log)
 
           cy.on "fail", (err) =>
             expect(logs.length).to.eq(1)
@@ -174,7 +174,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.on "log:added", (attrs, log) =>
             @lastLog = log
-            @logs.push(log)
+            @logs?.push(log)
 
           return null
 
@@ -255,7 +255,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.on "log:added", (attrs, log) =>
             @lastLog = log
-            @logs.push(log)
+            @logs?.push(log)
 
           return null
 
@@ -425,7 +425,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.on "log:added", (attrs, log) =>
             @lastLog = log
-            @logs.push(log)
+            @logs?.push(log)
 
           return null
 
@@ -510,7 +510,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.on "log:added", (attrs, log) =>
             @lastLog = log
-            @logs.push(log)
+            @logs?.push(log)
 
           return null
 
@@ -742,7 +742,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.on "log:added", (attrs, log) =>
             @lastLog = log
-            @logs.push(log)
+            @logs?.push(log)
 
           return null
 
@@ -800,7 +800,7 @@ describe "src/cy/commands/connectors", ->
             if attrs.name is "its"
               @lastLog = log
 
-            @logs.push(log)
+            @logs?.push(log)
 
           return null
 
@@ -1118,7 +1118,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.on "log:added", (attrs, log) =>
             @lastLog = log
-            @logs.push(log)
+            @logs?.push(log)
 
           return null
 
@@ -1136,7 +1136,7 @@ describe "src/cy/commands/connectors", ->
           logs = []
 
           cy.on "log:added", (attrs, log) ->
-            logs.push(log)
+            logs?.push(log)
 
           cy.on "fail", (err) =>
             ## get + each
