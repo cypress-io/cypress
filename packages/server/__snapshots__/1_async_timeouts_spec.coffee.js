@@ -25,7 +25,7 @@ exports['e2e async timeouts failing1 1'] = `
   1 failing
 
   1) async bar fails:
-     Error: Timed out after '100ms'. The done() callback was never invoked!
+     Error: Timed out after `100ms`. The `done()` callback was never invoked!
       at stack trace line
 
 
