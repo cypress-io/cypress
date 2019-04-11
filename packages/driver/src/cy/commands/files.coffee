@@ -52,12 +52,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
               if contents?
                 ## file exists but it shouldn't
-                err.displayMessage = $errUtils.errMsgByPath("files.existent", {
+                err.message = $errUtils.errMsgByPath("files.existent", {
                   file, filePath
                 })
               else
                 ## file doesn't exist but it should
-                err.displayMessage = $errUtils.errMsgByPath("files.nonexistent", {
+                err.message = $errUtils.errMsgByPath("files.nonexistent", {
                   file, filePath
                 })
             onRetry: verifyAssertions
