@@ -205,7 +205,7 @@ chai.use (chai, u) ->
                 else
                   "Not enough elements found. Found '#{len1}', expected '#{len2}'."
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              e1.message = getLongLengthMessage(obj.length, length)
               throw e1
 
             e2 = $errUtils.cypressErr($errUtils.errMsgByPath("chai.length_invalid_argument", { length }))
@@ -252,7 +252,7 @@ chai.use (chai, u) ->
               else
                 "Expected to find element: '#{obj.selector}', but never found it."
 
-            e1.displayMessage = getLongExistsMessage(obj)
+            e1.message = getLongExistsMessage(obj)
             throw e1
 
   createPatchedAssert = (assertFn) ->

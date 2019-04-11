@@ -36,7 +36,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         cy.verifyUpcomingAssertions(getEl($elements), options, {
           onRetry: resolveElements
           onFail: (err) ->
-            err.displayMessage = "Could not find element for binding: '#{binding}'."
+            err.message = "Could not find element for binding: '#{binding}'."
         })
 
   findByNgAttr = (name, attr, el, options) ->

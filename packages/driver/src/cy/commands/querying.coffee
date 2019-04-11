@@ -371,7 +371,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   if err.expected > 1
                     $errUtils.throwErrByPath "contains.length_option", { onFail: options._log }
                 when "existence"
-                  err.displayMessage = getErr(err)
+                  err.message = getErr(err)
           })
 
       Promise
